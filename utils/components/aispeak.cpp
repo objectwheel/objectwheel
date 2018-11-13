@@ -61,9 +61,9 @@ void AiSpeak::speak(const QString& text)
 
 	_d->reply = _d->manager->get(http);
 
-	connect(_d->reply, SIGNAL(sslErrors(QList<QSslError>)), _d->reply, SLOT(ignoreSslErrors()));
-	connect(_d->reply, SIGNAL(error(QNetworkReply::NetworkError)), this, SLOT(handleError(QNetworkReply::NetworkError)));
-	connect(_d->reply, SIGNAL(finished()), this, SLOT(handleResponse()));
+    connect(_d->reply, &QNetworkReply::sslErrors, _d->reply, qOverload<>(&QNetworkReply::ignoreSslErrors));
+    connect(_d->reply, qOverload<QNetworkReply::NetworkError>(&QNetworkReply::error), this, &AiSpeak::handleError);
+    connect(_d->reply, &QNetworkReply::finished, this, &AiSpeak::handleResponse);
 }
 
 void AiSpeak::handleResponse()

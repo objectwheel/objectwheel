@@ -187,8 +187,8 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _buttons->settings().cellWidth = TERMS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextClicked()));
-    connect(_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
+    connect(_buttons->get(Next), &QPushButton::clicked, this, &RegistrationWidget::onNextClicked);
+    connect(_buttons->get(Back), &QPushButton::clicked, this, &RegistrationWidget::back);
 
     _loadingIndicator->setStyleSheet("background: transparent;");
     _loadingIndicator->setColor(palette().text().color());

@@ -27,7 +27,7 @@ RowBar::RowBar(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_markBand);
     m_layout->addWidget(m_bracketBand);
 
-    connect(m_qmlCodeEditor, SIGNAL(updateRequest(QRect,int)), this, SLOT(update()));
+    connect(m_qmlCodeEditor, &QmlCodeEditor::updateRequest, this, qOverload<>(&RowBar::update));
     connect(CodeEditorSettings::instance(), &CodeEditorSettings::fontColorsSettingsChanged,
             this, qOverload<>(&RowBar::update));
 }

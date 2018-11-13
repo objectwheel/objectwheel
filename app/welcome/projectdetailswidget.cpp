@@ -100,8 +100,8 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->settings().cellWidth = BUTTONS_WIDTH / 3.0;
     m_buttons->triggerSettings();
 
-    connect(m_buttons->get(Save), SIGNAL(clicked(bool)), SLOT(onSaveClick()));
-    connect(m_buttons->get(Delete), SIGNAL(clicked(bool)), SLOT(onDeleteClick()));
+    connect(m_buttons->get(Save), &QPushButton::clicked, this, &ProjectDetailsWidget::onSaveClick);
+    connect(m_buttons->get(Delete), &QPushButton::clicked, this, &ProjectDetailsWidget::onDeleteClick);
     connect(m_buttons->get(Back), &QPushButton::clicked, [=] {
         if (m_toTemplates)
             emit back();

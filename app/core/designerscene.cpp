@@ -165,8 +165,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(m_currentForm);
 
-    if (m_currentForm && !selectedControls.isEmpty() &&
-            itemPressed && !Resizer::resizing()) {
+    if (m_currentForm && !selectedControls.isEmpty() && itemPressed && !Resizer::resizing()) {
         itemMoving = true;
         if (m_snapping) {
             auto controlUnderMouse = (Control*)(itemAt(event->scenePos(), QTransform()));
@@ -272,6 +271,7 @@ QPointF DesignerScene::lastMousePos() const
     return m_lastMousePos;
 }
 
+// FIXME: This function has severe performance issues.
 bool DesignerScene::stick() const
 {
     bool ret = false;
@@ -668,6 +668,7 @@ bool DesignerScene::stick() const
     return ret;
 }
 
+// FIXME: This function has severe performance issues.
 QVector<QLineF> DesignerScene::guideLines() const
 {
     QVector<QLineF> lines;

@@ -1063,6 +1063,7 @@ void PropertiesPane::discharge()
     clear();
 }
 
+// FIXME: This function has severe performance issues.
 void PropertiesPane::onSelectionChange()
 {
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;

@@ -23,7 +23,7 @@ Countdown::Countdown(QWidget *parent) : QWidget(parent)
     _settings.margins = 8;
 
     resize(SIZE);
-    connect(_timer, SIGNAL(timeout()), SLOT(decrease()));
+    connect(_timer, &QTimer::timeout, this, &Countdown::decrease);
 }
 
 Countdown::Settings& Countdown::settings()

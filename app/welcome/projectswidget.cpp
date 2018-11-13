@@ -398,16 +398,16 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->settings().cellWidth = BUTTONS_WIDTH / 4.0;
     m_buttons->triggerSettings();
 
-    connect(m_buttons->get(New), SIGNAL(clicked(bool)),
-            this, SLOT(onNewButtonClick()));
-    connect(m_buttons->get(Load), SIGNAL(clicked(bool)),
-            this, SLOT(onLoadButtonClick()));
-    connect(m_buttons->get(Import), SIGNAL(clicked(bool)),
-            this, SLOT(onImportButtonClick()));
-    connect(m_buttons->get(Export), SIGNAL(clicked(bool)),
-            this, SLOT(onExportButtonClick()));
-    connect(m_buttons_2->get(Settings), SIGNAL(clicked(bool)),
-            this, SLOT(onSettingsButtonClick()));
+    connect(m_buttons->get(New), &QPushButton::clicked,
+            this, &ProjectsWidget::onNewButtonClick);
+    connect(m_buttons->get(Load), &QPushButton::clicked,
+            this, &ProjectsWidget::onLoadButtonClick);
+    connect(m_buttons->get(Import), &QPushButton::clicked,
+            this, &ProjectsWidget::onImportButtonClick);
+    connect(m_buttons->get(Export), &QPushButton::clicked,
+            this, &ProjectsWidget::onExportButtonClick);
+    connect(m_buttons_2->get(Settings), &QPushButton::clicked,
+            this, &ProjectsWidget::onSettingsButtonClick);
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::initializationProgressChanged,
             this, &ProjectsWidget::onProgressChange);
@@ -449,6 +449,7 @@ FilterWidget* ProjectsWidget::filterWidget() const
     return m_filterWidget;
 }
 
+// FIXME: This function has severe performance issues.
 void ProjectsWidget::refreshProjectList(bool selectionPreserved)
 {
     m_listWidget->clear();

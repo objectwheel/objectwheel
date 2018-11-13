@@ -49,8 +49,8 @@ RunPaneLoadingBar::RunPaneLoadingBar(QWidget *parent) : QWidget(parent)
     m_timerFader->setInterval(60);
     m_timerEnding->setInterval(1000);
 
-    connect(m_timerEnding, SIGNAL(timeout()), SLOT(onEndingTimeout()));
-    connect(m_timerFader, SIGNAL(timeout()), SLOT(onFaderTimeout()));
+    connect(m_timerEnding, &QTimer::timeout, this, &RunPaneLoadingBar::onEndingTimeout);
+    connect(m_timerFader, &QTimer::timeout, this, &RunPaneLoadingBar::onFaderTimeout);
 }
 
 void RunPaneLoadingBar::setText(const QString& text)

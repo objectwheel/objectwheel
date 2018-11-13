@@ -218,30 +218,38 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_customizationPicture->setFixedSize(420 / devicePixelRatioF(), 420 / devicePixelRatioF());
 
     if (m_version == V2) {
-        connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
-        connect(m_primaryColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
-        connect(m_foregroundColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
-        connect(m_backgroundColorsCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
-        connect(m_themesCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
+        connect(m_accentColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::refresh, Qt::QueuedConnection);
+        connect(m_primaryColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::refresh, Qt::QueuedConnection);
+        connect(m_foregroundColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::refresh, Qt::QueuedConnection);
+        connect(m_backgroundColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::refresh, Qt::QueuedConnection);
+        connect(m_themesCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::refresh, Qt::QueuedConnection);
 
-        connect(m_accentColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
-        connect(m_primaryColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
-        connect(m_foregroundColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
-        connect(m_backgroundColorsCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
-        connect(m_themesCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
+        connect(m_accentColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::enable, Qt::QueuedConnection);
+        connect(m_primaryColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::enable, Qt::QueuedConnection);
+        connect(m_foregroundColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::enable, Qt::QueuedConnection);
+        connect(m_backgroundColorsCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::enable, Qt::QueuedConnection);
+        connect(m_themesCombo, qOverload<int>(&QComboBox::activated),
+                this, &ThemeChooserWidget::enable, Qt::QueuedConnection);
     }
 
-    connect(m_stylesCombo, SIGNAL(activated(int)), SLOT(refresh()), Qt::QueuedConnection);
-    connect(m_stylesCombo, SIGNAL(activated(int)), SLOT(enable()), Qt::QueuedConnection);
+    connect(m_stylesCombo, qOverload<int>(&QComboBox::activated),
+            this, &ThemeChooserWidget::refresh, Qt::QueuedConnection);
+    connect(m_stylesCombo, qOverload<int>(&QComboBox::activated),
+            this, &ThemeChooserWidget::enable, Qt::QueuedConnection);
 
     connect(m_accentColorButton, &QToolButton::clicked, [=] {
-        QColor
-                color = QColorDialog::getColor(
-                    Qt::white,
-                    this,
-                    "Select Color",
-                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-                    );
+        QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
+                                              QColorDialog::ShowAlphaChannel
+                                              | QColorDialog::DontUseNativeDialog);
 
         if (color.isValid()) {
             m_accentColorsCombo->setItemText(m_accentColorsCombo->count() - 1,
@@ -255,13 +263,9 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     });
 
     connect(m_foregroundColorButton, &QToolButton::clicked, [=] {
-        QColor
-                color = QColorDialog::getColor(
-                    Qt::white,
-                    this,
-                    "Select Color",
-                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-                    );
+        QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
+                                              QColorDialog::ShowAlphaChannel
+                                              | QColorDialog::DontUseNativeDialog);
 
         if (color.isValid()) {
             m_foregroundColorsCombo->setItemText(m_foregroundColorsCombo->count() - 1,
@@ -275,14 +279,9 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     });
 
     connect(m_backgroundColorButton, &QToolButton::clicked, [=] {
-        QColor
-                color = QColorDialog::getColor(
-                    Qt::white,
-                    this,
-                    "Select Color",
-                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-                    );
-
+        QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
+                                              QColorDialog::ShowAlphaChannel
+                                              | QColorDialog::DontUseNativeDialog);
         if (color.isValid()) {
             m_backgroundColorsCombo->setItemText(m_backgroundColorsCombo->count() - 1,
                                                  QString("Custom (%1)").arg(color.name()));
@@ -295,13 +294,9 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     });
 
     connect(m_primaryColorButton, &QToolButton::clicked, [=] {
-        QColor
-                color = QColorDialog::getColor(
-                    Qt::white,
-                    this,
-                    "Select Color",
-                    QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog
-                    );
+        QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
+                                              QColorDialog::ShowAlphaChannel
+                                              | QColorDialog::DontUseNativeDialog);
 
         if (color.isValid()) {
             m_primaryColorsCombo->setItemText(m_primaryColorsCombo->count() - 1,
@@ -483,9 +478,9 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         }
     });
 
-    connect(m_resetButton, SIGNAL(clicked(bool)), SLOT(discharge()));
-    connect(m_saveButton, SIGNAL(clicked(bool)), SLOT(save()));
-    connect(m_seeRunningButton, SIGNAL(clicked(bool)), SLOT(run()));
+    connect(m_resetButton, &QPushButton::clicked, this, &ThemeChooserWidget::discharge);
+    connect(m_saveButton, &QPushButton::clicked, this, &ThemeChooserWidget::save);
+    connect(m_seeRunningButton, &QPushButton::clicked, this, &ThemeChooserWidget::run);
     resize(1299, 1299);
 }
 
@@ -558,7 +553,7 @@ void ThemeChooserWidget::run()
                    QStringList() << "show" << tmpDir.path());
 
     QEventLoop loop;
-    connect(process, SIGNAL(started()), &loop, SLOT(quit()));
+    connect(process, &QProcess::started, &loop, &QEventLoop::quit);
     QTimer::singleShot(10000, &loop, &QEventLoop::quit);
     loop.exec();
 
@@ -613,7 +608,7 @@ void ThemeChooserWidget::refresh()
                   << tmpFile.fileName());
 
     QEventLoop loop;
-    connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
+    connect(&process, qOverload<int>(&QProcess::finished), &loop, &QEventLoop::quit);
     QTimer::singleShot(10000, &loop, &QEventLoop::quit);
     loop.exec();
 

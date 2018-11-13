@@ -215,8 +215,10 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     m_buttons->triggerSettings();
 
-    connect(m_buttons->get(Back), SIGNAL(clicked(bool)), SIGNAL(back()));
-    connect(m_buttons->get(Next), SIGNAL(clicked(bool)), SLOT(onNextButtonClick()));
+    connect(m_buttons->get(Back), &QPushButton::clicked,
+            this, &ProjectTemplatesWidget::back);
+    connect(m_buttons->get(Next), &QPushButton::clicked,
+            this, &ProjectTemplatesWidget::onNextButtonClick);
 }
 
 void ProjectTemplatesWidget::onNextButtonClick()

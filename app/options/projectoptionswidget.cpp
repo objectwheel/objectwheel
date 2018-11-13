@@ -24,8 +24,8 @@ ProjectOptionsWidget::ProjectOptionsWidget(QWidget *parent) : QWidget(parent)
     m_scrollArea->setWidget(m_containerWidget);
     m_scrollArea->setWidgetResizable(true);
 
-    connect(m_themeChooserWidget, SIGNAL(saved()), SIGNAL(themeChanged()));
-    connect(m_themeChooserWidget_2, SIGNAL(saved()), SIGNAL(themeChanged()));
+    connect(m_themeChooserWidget, &ThemeChooserWidget::saved, this, &ProjectOptionsWidget::themeChanged);
+    connect(m_themeChooserWidget_2, &ThemeChooserWidget::saved, this, &ProjectOptionsWidget::themeChanged);
 }
 
 QSize ProjectOptionsWidget::sizeHint() const

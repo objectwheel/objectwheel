@@ -423,8 +423,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _btnBuild.setIconSize(QSize(14,14));
     _btnBuild.setIcon(QIcon(":/images/load.png"));
     _btnBuild.setText("Build");
-    connect(&_btnBuild, SIGNAL(clicked(bool)),
-      SLOT(handleBtnBuildClicked()));
+    connect(&_btnBuild, &FlatButton::clicked, this, &AndroidWidget::handleBtnBuildClicked);
 }
 
 bool AndroidWidget::checkFields()

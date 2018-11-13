@@ -122,8 +122,8 @@ void AudioPlayer::setData(const QByteArray& data)
 
 	m_audioOutput = new QAudioOutput(m_format, this);
 	m_audioOutput->setVolume(m_volume);
-	connect(m_audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SIGNAL(stateChanged()));
-	connect(m_audioOutput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanged(QAudio::State)));
+    connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioPlayer::stateChanged);
+    connect(m_audioOutput, &QAudioOutput::stateChanged, this, &AudioPlayer::handleStateChanged);
 
 	QBuffer* buffer = new QBuffer(m_audioOutput);
 	buffer->setData(_data);

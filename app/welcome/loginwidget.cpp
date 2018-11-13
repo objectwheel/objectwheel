@@ -137,12 +137,12 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _buttons->get(Login)->setIconSize(QSize(16, 16));
     _buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Login)->setCursor(Qt::PointingHandCursor);
-    connect(_buttons->get(Register), SIGNAL(clicked(bool)),
-      this, SIGNAL(signup()));
-    connect(_buttons->get(Login), SIGNAL(clicked(bool)),
-      this, SLOT(onLoginButtonClick()));
-    connect(&_encryptionWatcher, SIGNAL(finished()),
-      this, SLOT(onSessionStart()));
+    connect(_buttons->get(Register), &QPushButton::clicked,
+      this, &LoginWidget::signup);
+    connect(_buttons->get(Login), &QPushButton::clicked,
+      this, &LoginWidget::onLoginButtonClick);
+    connect(&_encryptionWatcher, &QFutureWatcher<bool>::finished,
+      this, &LoginWidget::onSessionStart);
 
     _helpBox = new QMessageBox(this);
     _helpBox->setIcon(QMessageBox::Question);
@@ -163,7 +163,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     _helpButton->settings().iconButton = true;
     _helpButton->setIcon(QIcon(PATH_HICON));
     _helpButton->setFixedSize(20,20);
-    connect(_helpButton, SIGNAL(clicked(bool)), _helpBox, SLOT(show()));
+    connect(_helpButton, &FlatButton::clicked, _helpBox, &QMessageBox::show);
 
     _loadingIndicator->setStyleSheet("background: transparent;");
     _loadingIndicator->setColor(palette().text().color());

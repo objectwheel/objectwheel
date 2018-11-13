@@ -114,8 +114,8 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Apply), SIGNAL(clicked(bool)), SLOT(onApplyClicked()));
-    connect(_buttons->get(Cancel), SIGNAL(clicked(bool)), SLOT(onCancelClicked()));
+    connect(_buttons->get(Apply), &QPushButton::clicked, this, &ResetWidget::onApplyClicked);
+    connect(_buttons->get(Cancel), &QPushButton::clicked, this, &ResetWidget::onCancelClicked);
 
     connect(_countdown, &Countdown::finished, [=]{
         QMessageBox::warning(

@@ -111,18 +111,30 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     engine->indexWidget()->installEventFilter(this);
     engine->contentWidget()->viewport()->installEventFilter(this);
 
-    connect(m_typeCombo, SIGNAL(currentIndexChanged(int)), SLOT(onTypeChange()));
-    connect(m_indexFilterEdit, SIGNAL(textChanged(QString)), SLOT(onIndexFilterTextChange(QString)));
-    connect(m_indexFilterEdit, SIGNAL(returnPressed()), engine->indexWidget(), SLOT(activateCurrentItem()));
-    connect(engine->contentWidget(), SIGNAL(linkActivated(QUrl)), SLOT(onUrlChange(QUrl)));
-    connect(engine->indexWidget(), SIGNAL(linkActivated(QUrl,QString)), SLOT(onUrlChange(QUrl,QString)));
-    connect(engine->indexWidget(), SIGNAL(linksActivated(QMap<QString,QUrl>,QString)), SLOT(onUrlChange(QMap<QString,QUrl>,QString)));
-    connect(m_helpViewer, SIGNAL(titleChanged()), SLOT(onTitleChange()));
-    connect(m_helpViewer, SIGNAL(backwardAvailable(bool)), m_backButton, SLOT(setEnabled(bool)));
-    connect(m_helpViewer, SIGNAL(forwardAvailable(bool)), m_forthButton, SLOT(setEnabled(bool)));
-    connect(m_homeButton, SIGNAL(clicked(bool)), SLOT(onHomeButtonClick()));
-    connect(m_backButton, SIGNAL(clicked(bool)), m_helpViewer, SLOT(backward()));
-    connect(m_forthButton, SIGNAL(clicked(bool)), m_helpViewer, SLOT(forward()));
+    connect(m_typeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
+            this, &HelpWidget::onTypeChange);
+    connect(m_indexFilterEdit, &FocuslessLineEdit::textChanged,
+            this, &HelpWidget::onIndexFilterTextChange);
+    connect(m_indexFilterEdit, &FocuslessLineEdit::returnPressed,
+            engine->indexWidget(), &QHelpIndexWidget::activateCurrentItem);
+    connect(engine->contentWidget(), qOverload<const QUrl&>(&QHelpContentWidget::linkActivated),
+            this, qOverload<const QUrl&>(&HelpWidget::onUrlChange));
+    connect(engine->indexWidget(), qOverload<const QUrl&, const QString&>(&QHelpIndexWidget::linkActivated),
+            this, qOverload<const QUrl&, const QString&>(&HelpWidget::onUrlChange));
+    connect(engine->indexWidget(), qOverload<const QMap<QString, QUrl>&, const QString&>(&QHelpIndexWidget::linksActivated),
+            this, qOverload<const QMap<QString, QUrl>&, const QString&>(&HelpWidget::onUrlChange));
+    connect(m_helpViewer, &Help::Internal::TextBrowserHelpViewer::titleChanged,
+            this, &HelpWidget::onTitleChange);
+    connect(m_helpViewer, &Help::Internal::TextBrowserHelpViewer::backwardAvailable,
+            m_backButton, &QToolButton::setEnabled);
+    connect(m_helpViewer, &Help::Internal::TextBrowserHelpViewer::forwardAvailable,
+            m_forthButton, &QToolButton::setEnabled);
+    connect(m_homeButton, &QToolButton::clicked,
+            this, &HelpWidget::onHomeButtonClick);
+    connect(m_backButton, &QToolButton::clicked,
+            m_helpViewer, &Help::Internal::TextBrowserHelpViewer::backward);
+    connect(m_forthButton, &QToolButton::clicked,
+            m_helpViewer, &Help::Internal::TextBrowserHelpViewer::forward);
 
     m_copyAction->setText("Copy selected");
     m_copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);

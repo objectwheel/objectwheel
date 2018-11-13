@@ -94,19 +94,19 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
     m_menu->addSeparator();
     m_menu->addAction(m_selectAllAct);
 
-    connect(m_undoAct, SIGNAL(triggered()), SLOT(onUndoAction()));
-    connect(m_redoAct, SIGNAL(triggered()), SLOT(onRedoAction()));
-    connect(m_cutAct, SIGNAL(triggered()), SLOT(onCutAction()));
-    connect(m_copyAct, SIGNAL(triggered()), SLOT(onCopyAction()));
-    connect(m_pasteAct, SIGNAL(triggered()), SLOT(onPasteAction()));
-    connect(m_deleteAct, SIGNAL(triggered()), SLOT(onDeleteAction()));
-    connect(m_selectAllAct, SIGNAL(triggered()), SLOT(onSelectAllAction()));
-    connect(m_moveUpAct, SIGNAL(triggered()), SLOT(onMoveUpAction()));
-    connect(m_moveDownAct, SIGNAL(triggered()), SLOT(onMoveDownAction()));
-    connect(m_moveRightAct, SIGNAL(triggered()), SLOT(onMoveRightAction()));
-    connect(m_moveLeftAct, SIGNAL(triggered()), SLOT(onMoveLeftAction()));
-    connect(m_sendBackAct, SIGNAL(triggered()), SLOT(onSendBackAction()));
-    connect(m_bringFrontAct, SIGNAL(triggered()), SLOT(onBringFrontAction()));
+    connect(m_undoAct, &QAction::triggered, this, &DesignerView::onUndoAction);
+    connect(m_redoAct, &QAction::triggered, this, &DesignerView::onRedoAction);
+    connect(m_cutAct, &QAction::triggered, this, &DesignerView::onCutAction);
+    connect(m_copyAct, &QAction::triggered, this, &DesignerView::onCopyAction);
+    connect(m_pasteAct, &QAction::triggered, this, &DesignerView::onPasteAction);
+    connect(m_deleteAct, &QAction::triggered, this, &DesignerView::onDeleteAction);
+    connect(m_selectAllAct, &QAction::triggered, this, &DesignerView::onSelectAllAction);
+    connect(m_moveUpAct, &QAction::triggered, this, &DesignerView::onMoveUpAction);
+    connect(m_moveDownAct, &QAction::triggered, this, &DesignerView::onMoveDownAction);
+    connect(m_moveRightAct, &QAction::triggered, this, &DesignerView::onMoveRightAction);
+    connect(m_moveLeftAct, &QAction::triggered, this, &DesignerView::onMoveLeftAction);
+    connect(m_sendBackAct, &QAction::triggered, this, &DesignerView::onSendBackAction);
+    connect(m_bringFrontAct, &QAction::triggered, this, &DesignerView::onBringFrontAction);
 
     addAction(m_undoAct);
     addAction(m_redoAct);

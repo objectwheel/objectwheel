@@ -17,8 +17,8 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
     m_layout->addWidget(m_highDpiScalingButton);
     m_layout->addWidget(m_noScalingButton);
 
-    connect(m_highDpiScalingButton, SIGNAL(clicked(bool)), SLOT(saveTheme()));
-    connect(m_noScalingButton, SIGNAL(clicked(bool)), SLOT(saveTheme()));
+    connect(m_highDpiScalingButton, &QRadioButton::clicked, this, &ScalingWidget::saveTheme);
+    connect(m_noScalingButton, &QRadioButton::clicked, this, &ScalingWidget::saveTheme);
 }
 
 void ScalingWidget::discharge()

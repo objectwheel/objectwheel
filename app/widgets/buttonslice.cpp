@@ -42,8 +42,8 @@ void ButtonSlice::add(int id, const QColor& topColor, const QColor& bottomColor)
         "QPushButton:disabled { color:#80ffffff; }"
         "QPushButton { color: white; border: none; background: transparent; }"
     );
-    connect(element.button, SIGNAL(pressed()), SLOT(update()));
-    connect(element.button, SIGNAL(released()), SLOT(update()));
+    connect(element.button, &QPushButton::pressed, this, qOverload<>(&ButtonSlice::update));
+    connect(element.button, &QPushButton::released, this, qOverload<>(&ButtonSlice::update));
 
     _elements << element;
 

@@ -52,8 +52,8 @@ DownloadWidgetPrivate::DownloadWidgetPrivate(DownloadWidget* w)
       parent, SLOT(handleBtnOkClicked()));
     QObject::connect(progressPage, SIGNAL(btnCancelClicked()),
       parent, SLOT(handleBtnCancelClicked()));
-    QObject::connect(qApp, SIGNAL(aboutToQuit()), parent,
-      SLOT(handleBtnCancelClicked()));
+    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
+                     parent, &DownloadWidget::handleBtnCancelClicked);
 }
 
 QString DownloadWidgetPrivate::bytesString(const qint64 size, bool withExt)

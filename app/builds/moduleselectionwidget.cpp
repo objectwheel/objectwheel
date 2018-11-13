@@ -168,8 +168,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     btnNext->setIconSize(QSize(14,14));
     btnNext->setIcon(QIcon(":/images/load.png"));
     btnNext->setText("Next");
-    connect(btnNext, SIGNAL(clicked(bool)),
-      SLOT(handleBtnNextClicked()));
+    connect(btnNext, &FlatButton::clicked, this, &ModuleSelectionWidget::handleBtnNextClicked);
 
     btnBack->settings().topColor = "#38A3F6";
     btnBack->settings().bottomColor = btnBack->settings().topColor.darker(120);

@@ -22,20 +22,6 @@ class WelcomeWindow : public QWidget
     friend class WindowManager;
 
 public:
-    enum Screens {
-        Login,
-        Robot,
-        Registration,
-        Verification,
-        Forget,
-        Reset,
-        Projects,
-        ProjectTemplates,
-        ProjectDetails,
-        Succeed
-    };
-
-public:
     explicit WelcomeWindow(QWidget* parent = nullptr);
 
 protected:

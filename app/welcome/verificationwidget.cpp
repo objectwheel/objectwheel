@@ -113,9 +113,9 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 3.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Verify), SIGNAL(clicked(bool)), SLOT(onVerifyClicked()));
-    connect(_buttons->get(Resend), SIGNAL(clicked(bool)), SLOT(onResendClicked()));
-    connect(_buttons->get(Cancel), SIGNAL(clicked(bool)), SLOT(onCancelClicked()));
+    connect(_buttons->get(Verify), &QPushButton::clicked, this, &VerificationWidget::onVerifyClicked);
+    connect(_buttons->get(Resend), &QPushButton::clicked, this, &VerificationWidget::onResendClicked);
+    connect(_buttons->get(Cancel), &QPushButton::clicked, this, &VerificationWidget::onCancelClicked);
 
     connect(_countdown, &Countdown::finished, [=]{
         QMessageBox::warning(

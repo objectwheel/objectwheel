@@ -220,13 +220,13 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_hideDockWidgetTitleBarsButton->setIcon(Utils::Icons::CLOSE_SPLIT_TOP.icon());
     m_fitButton->setIcon(Utils::Icons::FITTOVIEW_TOOLBAR.icon());
 
-    connect(m_snappingButton, SIGNAL(toggled(bool)), SLOT(onSnappingButtonClick(bool)));
-    connect(m_outlineButton, SIGNAL(toggled(bool)), SLOT(onOutlineButtonClick(bool)));
-    connect(m_hideDockWidgetTitleBarsButton, SIGNAL(toggled(bool)), SIGNAL(hideDockWidgetTitleBars(bool)));
-    connect(m_zoomlLevelCombobox, SIGNAL(currentTextChanged(QString)), SLOT(onZoomLevelChange(QString)));
-    connect(m_fitButton, SIGNAL(clicked(bool)), SLOT(onFitButtonClick()));
-    connect(m_refreshButton, SIGNAL(clicked(bool)), SLOT(onRefreshButtonClick()));
-    connect(m_clearButton, SIGNAL(clicked(bool)), SLOT(onClearButtonClick()));
+    connect(m_snappingButton, &QToolButton::toggled, this, &DesignerWidget::onSnappingButtonClick);
+    connect(m_outlineButton, &QToolButton::toggled, this, &DesignerWidget::onOutlineButtonClick);
+    connect(m_hideDockWidgetTitleBarsButton, &QToolButton::toggled, this, &DesignerWidget::hideDockWidgetTitleBars);
+    connect(m_zoomlLevelCombobox, &QComboBox::currentTextChanged, this, &DesignerWidget::onZoomLevelChange);
+    connect(m_fitButton, &QToolButton::clicked, this, &DesignerWidget::onFitButtonClick);
+    connect(m_refreshButton, &QToolButton::clicked, this, &DesignerWidget::onRefreshButtonClick);
+    connect(m_clearButton, &QToolButton::clicked, this, &DesignerWidget::onClearButtonClick);
 
     TransparentStyle::attach(m_toolBar);
 

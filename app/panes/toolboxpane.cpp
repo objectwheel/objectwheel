@@ -31,7 +31,7 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
     _searchEdit->setFixedHeight(22);
     _searchEdit->setClearButtonEnabled(true);
     _searchEdit->setPlaceholderText("Filter");
-    connect(_searchEdit, SIGNAL(textChanged(QString)), SLOT(filterList(QString)));
+    connect(_searchEdit, &FocuslessLineEdit::textChanged, this, &ToolboxPane::filterList);
 
     _layout->addWidget(_searchEdit);
     _layout->addWidget(_toolboxTree);

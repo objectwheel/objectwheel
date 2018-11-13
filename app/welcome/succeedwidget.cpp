@@ -41,7 +41,8 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _movie->setFileName(PATH_GIF);
     _movie->setBackgroundColor(Qt::transparent);
     _movie->setScaledSize(SIZE_GIF * devicePixelRatioF());
-    connect(_movie, SIGNAL(frameChanged(int)), SLOT(update()));
+    connect(_movie, qOverload<int>(&QMovie::frameChanged),
+            this, qOverload<>(&SucceedWidget::update));
 
     _iconLabel->setFixedSize(SIZE_GIF);
     _iconLabel->setStyleSheet("background: transparent;");
@@ -59,7 +60,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Ok)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH;
     _buttons->triggerSettings();
-    connect(_buttons->get(Ok), SIGNAL(clicked(bool)), SIGNAL(done()));
+    connect(_buttons->get(Ok), &QPushButton::clicked, this, &SucceedWidget::done);
 }
 
 void SucceedWidget::start()

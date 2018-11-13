@@ -21,6 +21,21 @@
 #include <QLabel>
 #include <QCloseEvent>
 
+namespace {
+enum Screens {
+    Login,
+    Robot,
+    Registration,
+    Verification,
+    Forget,
+    Reset,
+    Projects,
+    ProjectTemplates,
+    ProjectDetails,
+    Succeed
+};
+}
+
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
     setWindowTitle(APP_NAME);
@@ -50,7 +65,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     m_view->show(Login);
 
     /**** ForgetWidget settings ****/
-    connect(m_forgetWidget, SIGNAL(done(QString)), m_resetWidget, SLOT(setEmail(QString)));
+    connect(m_forgetWidget, &ForgetWidget::done, m_resetWidget, &ResetWidget::setEmail);
     connect(m_forgetWidget, &ForgetWidget::back, [=]
     {
         m_view->show(Login, View::LeftToRight);
@@ -95,9 +110,12 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 
     /**** ProjectsWidget settings ****/
-    connect(m_projectsWidget, SIGNAL(done()), SIGNAL(done()));
-    connect(m_projectsWidget, SIGNAL(newProject(QString)), m_projectTemplatesWidget, SLOT(onNewProject(QString)));
-    connect(m_projectsWidget, SIGNAL(editProject(QString)), m_projectDetailsWidget, SLOT(onEditProject(QString)));
+    connect(m_projectsWidget, &ProjectsWidget::done,
+            this, &WelcomeWindow::done);
+    connect(m_projectsWidget, &ProjectsWidget::newProject,
+            m_projectTemplatesWidget, &ProjectTemplatesWidget::onNewProject);
+    connect(m_projectsWidget, &ProjectsWidget::editProject,
+            m_projectDetailsWidget, &ProjectDetailsWidget::onEditProject);
     connect(m_projectsWidget, &ProjectsWidget::newProject, [=]
     {
         m_view->show(ProjectTemplates, View::RightToLeft);
@@ -108,7 +126,8 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 
     /**** ProjectTemplatesWidget settings ****/
-    connect(m_projectTemplatesWidget, SIGNAL(newProject(QString, int)), m_projectDetailsWidget, SLOT(onNewProject(QString, int)));
+    connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::newProject,
+            m_projectDetailsWidget, &ProjectDetailsWidget::onNewProject);
     connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::back, [=]
     {
         m_projectsWidget->refreshProjectList();
@@ -131,7 +150,8 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
 
     /**** RobotWidget settings ****/
-    connect(m_robotWidget, SIGNAL(done(QString)), m_registrationWidget, SLOT(updateResponse(QString)));
+    connect(m_robotWidget, &RobotWidget::done,
+            m_registrationWidget, &RegistrationWidget::updateResponse);
     connect(m_robotWidget, &RobotWidget::back, [=]
     {
         m_view->show(Login, View::LeftToRight);
@@ -146,7 +166,8 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(Login, View::LeftToRight);
     });
-    connect(m_registrationWidget, SIGNAL(done(QString)), m_verificationWidget, SLOT(setEmail(QString)));
+    connect(m_registrationWidget, &RegistrationWidget::done,
+            m_verificationWidget, &VerificationWidget::setEmail);
     connect(m_registrationWidget, &RegistrationWidget::done, [=]
     {
         m_view->show(Verification, View::RightToLeft);

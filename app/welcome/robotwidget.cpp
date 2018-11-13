@@ -48,10 +48,10 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
 //    _recaptchaLayout->addWidget(_space, 0 , Qt::AlignCenter);
 //    _recaptchaLayout->addStretch();
 
-//    connect(_recaptchaView, SIGNAL(loadStarted()),
-//      _loadingIndicator, SLOT(start()));
-//    connect(_recaptchaView, SIGNAL(loadFinished(bool)),
-//      _loadingIndicator, SLOT(stop()));
+//    connect(_recaptchaView, signal(loadStarted()),
+//      _loadingIndicator, slot(start()));
+//    connect(_recaptchaView, signal(loadFinished(bool)),
+//      _loadingIndicator, slot(stop()));
 
 //    _webChannel->registerObject("cpp", this);
 //    _recaptchaView->page()->setWebChannel(_webChannel);
@@ -89,10 +89,10 @@ RobotWidget::RobotWidget(QWidget* parent) : QWidget(parent)
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Next), SIGNAL(clicked(bool)),
-      SLOT(onNextClicked()));
-    connect(_buttons->get(Back), SIGNAL(clicked(bool)),
-      SIGNAL(back()));
+    connect(_buttons->get(Next), &QPushButton::clicked,
+      this, &RobotWidget::onNextClicked);
+    connect(_buttons->get(Back), &QPushButton::clicked,
+      this, &RobotWidget::back);
 
     _loadingIndicator->setStyleSheet("background: transparent;");
     _loadingIndicator->setColor(palette().text().color());

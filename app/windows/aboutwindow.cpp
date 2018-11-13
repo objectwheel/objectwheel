@@ -67,7 +67,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_okButton->setText("Ok");
     m_okButton->setFixedWidth(100);
     m_okButton->setCursor(Qt::PointingHandCursor);
-    connect(m_okButton, SIGNAL(clicked(bool)), SIGNAL(done()));
+    connect(m_okButton, &QPushButton::clicked, this, &AboutWindow::done);
 
     m_legalLabel->setText(tr("<p><b>© 2015 - 2018 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
 }

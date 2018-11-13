@@ -114,8 +114,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _btnNext.setIconSize(QSize(14,14));
     _btnNext.setIcon(QIcon(":/images/load.png"));
     _btnNext.setText("Next");
-    connect(&_btnNext, SIGNAL(clicked(bool)),
-      SLOT(handleBtnNextClicked()));
+    connect(&_btnNext, &FlatButton::clicked, this, &PlatformsWidget::handleBtnNextClicked);
 
     _listWidget.setIconSize({52, 52});
     _listWidget.setMinimumWidth(400);

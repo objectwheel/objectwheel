@@ -34,8 +34,8 @@ Switch::Switch(QWidget* parent) : QAbstractButton(parent)
     _animation->setStartValue(0.1);
     _animation->start();
 
-    connect(_animation, SIGNAL(valueChanged(QVariant)), SLOT(update()));
-    connect(this, SIGNAL(toggled(bool)), SLOT(handleStateChange()));
+    connect(_animation, &QVariantAnimation::valueChanged, this, qOverload<>(&Switch::update));
+    connect(this, &Switch::toggled, this, &Switch::handleStateChange);
 }
 
 Switch::Settings& Switch::settings()

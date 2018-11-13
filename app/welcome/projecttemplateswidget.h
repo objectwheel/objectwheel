@@ -15,9 +15,11 @@ class ProjectTemplatesWidget : public QWidget
 public:
     explicit ProjectTemplatesWidget(QWidget* parent = nullptr);
 
+public slots:
+    void onNewProject(const QString& projectName);
+
 private slots:
     void onNextButtonClick();
-    void onNewProject(const QString& projectName);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;

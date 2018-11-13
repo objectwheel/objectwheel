@@ -21,7 +21,8 @@ AudioRecorder::AudioRecorder(QObject* parent)
 
 	m_audioInput = new QAudioInput(format, this);
 	m_audioInput->setBufferSize(4096);
-	connect(m_audioInput, SIGNAL(stateChanged(QAudio::State)), this, SLOT(handleStateChanges(QAudio::State)));
+    connect(m_audioInput, &QAudioInput::stateChanged,
+            this, &AudioRecorder::handleStateChanges);
 }
 
 bool AudioRecorder::recording() const
@@ -50,7 +51,7 @@ qreal AudioRecorder::level() const
 void AudioRecorder::record()
 {
 	m_audioDevice = m_audioInput->start();
-	connect(m_audioDevice, SIGNAL(readyRead()), this, SLOT(handleBuffer()));
+    connect(m_audioDevice, &QIODevice::readyRead, this, &AudioRecorder::handleBuffer);
 	emit recordingChanged();
 }
 

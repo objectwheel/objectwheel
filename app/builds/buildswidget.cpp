@@ -14,12 +14,12 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
     _platformsWidget = new PlatformsWidget;
     _downloadWidget = new DownloadWidget;
 
-    connect(_modulesWidget, SIGNAL(backClicked()), SLOT(showPlatforms()));
-    connect(_modulesWidget, SIGNAL(done()), SLOT(handleModuleSelection()));
-    connect(_androidWidget, SIGNAL(backClicked()), SLOT(showModules()));
-    connect(_platformsWidget, SIGNAL(platformSelected(OTargets::Targets)), SLOT(handlePlatformSelection(OTargets::Targets)));
-    connect(_androidWidget, SIGNAL(downloadBuild()), SLOT(handleDownload()));
-    connect(_downloadWidget, SIGNAL(done()), SLOT(handleModuleSelection()));
+    connect(_modulesWidget, &ModuleSelectionWidget::backClicked, this, &BuildsWidget::showPlatforms);
+    connect(_modulesWidget, &ModuleSelectionWidget::done, this, &BuildsWidget::handleModuleSelection);
+    connect(_androidWidget, &AndroidWidget::backClicked, this, &BuildsWidget::showModules);
+    connect(_platformsWidget, &PlatformsWidget::platformSelected, this, &BuildsWidget::handlePlatformSelection);
+    connect(_androidWidget, &AndroidWidget::downloadBuild, this, &BuildsWidget::handleDownload);
+    connect(_downloadWidget, &DownloadWidget::done, this, &BuildsWidget::handleModuleSelection);
 
     _view = new View(this);
     _view->add(Platforms, _platformsWidget);
