@@ -34,6 +34,7 @@ private slots:
 private:
     void lock();
     void unlock();
+    void updateGadgetPositions();
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event) override;

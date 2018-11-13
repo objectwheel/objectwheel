@@ -257,7 +257,6 @@ void DesignerView::onDeleteAction()
 { //FIXME: Do not delete if docs are open within QML Editor
     QList<Control*> selectedControls = scene()->selectedControls();
     selectedControls.removeAll(scene()->currentForm());
-
     ControlRemovingManager::removeControls(selectedControls);
 }
 

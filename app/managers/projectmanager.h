@@ -34,14 +34,14 @@ public:
 
     static void stop();
     static bool start(const QString& hash);
-    static void updateSize();
-    static void updateLastModification();
+    static void updateSize(const QString& hash);
+    static void updateLastModification(const QString& hash);
     static void changeName(const QString& hash, const QString& name);
     static void changeDescription(const QString& hash, const QString& desc);
     static bool importProject(const QString& filePath);
     static bool exportProject(const QString& hash, const QString& filePath);
     static bool newProject(int templateNumber, const QString& name, const QString& description,
-                           const QString& owner, const QString& crDate,const QString& size);
+                           const QString& owner, const QString& crDate);
 
 signals:
     void started();

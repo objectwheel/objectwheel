@@ -49,15 +49,13 @@ QString byteString(const qint64 size)
     return ret;
 }
 
-void setProperty( const QString& rootPath, const QString& property, const QVariant& value)
+void setProperty(const QString& rootPath, const QString& property, const QVariant& value)
 {
     auto jobj = QJsonDocument::fromJson(rdfile(rootPath +separator() + FILE_PROJECT)).object();
-
     jobj[property] = value.toJsonValue();
-    jobj[PTAG_MFDATE] = ProjectManager::currentDbTime();
-
+    if (property != PTAG_MFDATE)
+        jobj[PTAG_MFDATE] = ProjectManager::currentDbTime();
     const auto& data = QJsonDocument(jobj).toJson();
-
     wrfile(rootPath + separator() + FILE_PROJECT, data);
 }
 
@@ -170,7 +168,7 @@ QDateTime ProjectManager::fromUi(const QString& uiTime)
 }
 
 bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
-                                const QString& owner, const QString& crDate, const QString& size)
+                                const QString& owner, const QString& crDate)
 {
     const auto& udir = UserManager::dir();
 
@@ -178,12 +176,12 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
             || name.isEmpty()
             || description.isEmpty()
             || owner.isEmpty()
-            || crDate.isEmpty()
-            || size.isEmpty()) {
+            || crDate.isEmpty()) {
         return false;
     }
 
     const auto& pdir = udir + separator() + QString::number(biggestDir(udir) + 1);
+    const auto& hash = HashFactory::generate();
 
     QJsonObject jobj;
     jobj.insert(PTAG_NAME, name);
@@ -191,9 +189,8 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
     jobj.insert(PTAG_OWNER, owner);
     jobj.insert(PTAG_CRDATE, crDate);
     jobj.insert(PTAG_MFDATE, crDate);
-    jobj.insert(PTAG_SIZE, size);
     jobj.insert(PTAG_OWPRJ_SIGN, SIGN_OWPRJ);
-    jobj.insert(PTAG_HASH, HashFactory::generate());
+    jobj.insert(PTAG_HASH, hash);
 
     const auto& data = QJsonDocument(jobj).toJson();
 
@@ -205,6 +202,8 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
 
     if (!SaveManager::initProject(pdir, templateNumber))
         return false;
+
+    updateSize(hash);
 
     return true;
 }
@@ -340,18 +339,18 @@ QStringList ProjectManager::projects()
     return hashes;
 }
 
-void ProjectManager::updateSize()
+void ProjectManager::updateSize(const QString& hash)
 {
-    const auto& dir = ::dir(hash());
+    const auto& dir = ::dir(hash);
     if (dir.isEmpty())
         return;
 
     ::setProperty(dir, PTAG_SIZE, byteString(dsize(dir)));
 }
 
-void ProjectManager::updateLastModification()
+void ProjectManager::updateLastModification(const QString& hash)
 {
-    const auto& dir = ::dir(hash());
+    const auto& dir = ::dir(hash);
     if (dir.isEmpty())
         return;
 
@@ -377,6 +376,7 @@ bool ProjectManager::start(const QString& hash)
     ProjectExposingManager::exposeProject();
     ControlPreviewingManager::scheduleInit();
     DocumentManager::updateProjectInfo();
+    updateLastModification(s_currentHash);
 
     emit instance()->started();
 
@@ -386,8 +386,7 @@ bool ProjectManager::start(const QString& hash)
 void ProjectManager::stop()
 {
     ControlPreviewingManager::scheduleTerminate();
-    updateSize();
-    updateLastModification();
+    updateSize(s_currentHash);
     s_currentHash = "";
     emit instance()->stopped();
 }

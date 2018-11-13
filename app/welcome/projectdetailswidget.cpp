@@ -114,7 +114,7 @@ void ProjectDetailsWidget::onEditProject(const QString& hash)
 {
     m_toTemplates = false;
     m_hash = hash;
-    ProjectManager::updateSize();
+    ProjectManager::updateSize(m_hash);
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(hash));
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(hash));
     static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectManager::owner(hash));
@@ -140,7 +140,6 @@ void ProjectDetailsWidget::onSaveClick()
 {
     auto projectnametext = static_cast<QLineEdit*>(m_bulkEdit->get(Name))->text();
     auto descriptiontext = static_cast<QLineEdit*>(m_bulkEdit->get(Description))->text();
-    auto sizetext = static_cast<QLineEdit*>(m_bulkEdit->get(Size))->text();
     auto crdatetext = static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->text();
     auto ownertext = static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->text();
 
@@ -155,19 +154,14 @@ void ProjectDetailsWidget::onSaveClick()
             projectnametext,
             descriptiontext,
             ownertext,
-            ProjectManager::toDbTime(crdatetext),
-            sizetext
+            ProjectManager::toDbTime(crdatetext)
         )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
-
-        ProjectManager::updateSize();
     } else {
-        ProjectManager::
-        instance()->changeName(
+        ProjectManager::instance()->changeName(
             m_hash,
             projectnametext
         );
-        ProjectManager::
-        instance()->changeDescription(
+        ProjectManager::instance()->changeDescription(
             m_hash,
             descriptiontext
         );

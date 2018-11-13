@@ -435,6 +435,8 @@ void SaveManager::setProperty(Control* control, const QString& property, QString
         ParserUtils::setProperty(control->url(), property, value);
     }
 
+    ProjectManager::updateLastModification(ProjectManager::hash());
+
     instance()->propertyChanged(control, property, value);
 }
 

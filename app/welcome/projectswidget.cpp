@@ -292,6 +292,8 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     connect(m_filterWidget, &FilterWidget::filterTextChanged, this, &ProjectsWidget::onFilterTextChange);
     connect(m_filterWidget, &FilterWidget::sortCriteriaChanged, [=] {
         m_listWidget->sortItems();
+        m_listWidget->scrollToItem(m_listWidget->currentItem());
+        updateGadgetPositions();
     });
 
     QPalette p1;
@@ -354,9 +356,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         auto currentItem = m_listWidget->currentItem();
         if (currentItem) {
             m_buttons_2->show();
-            auto rect = m_listWidget->visualItemRect(currentItem);
-            m_buttons_2->move(rect.topRight().x() - m_buttons_2->width() - 5,
-                              rect.topRight().y() + (rect.height() - m_buttons_2->height()) / 2.0);
+            updateGadgetPositions();
         } else {
             m_buttons_2->hide();
         }
@@ -467,6 +467,9 @@ void ProjectsWidget::refreshProjectList()
         m_listWidget->sortItems();
         m_listWidget->setCurrentRow(0);
     }
+
+    m_listWidget->scrollToItem(m_listWidget->currentItem());
+    updateGadgetPositions();
 }
 
 void ProjectsWidget::startProject()
@@ -483,11 +486,16 @@ void ProjectsWidget::startProject()
         m_listWidget->item(i)->setData(Active, false);
 
     m_listWidget->currentItem()->setData(Active, true);
+    m_listWidget->currentItem()->setData(LastEdit, ProjectManager::currentUiTime());
 
     Delayer::delay([=] () -> bool {
         return m_progressBar->value() < m_progressBar->maximum();
     });
     Delayer::delay(200);
+
+    m_listWidget->sortItems();
+    m_listWidget->scrollToItem(m_listWidget->currentItem());
+    updateGadgetPositions();
 
     unlock();
     emit done();
@@ -511,6 +519,9 @@ void ProjectsWidget::onNewButtonClick()
     item->setData(Active, false);
     m_listWidget->addItem(item);
     m_listWidget->setCurrentItem(item);
+    m_listWidget->sortItems();
+    m_listWidget->scrollToItem(m_listWidget->currentItem());
+    updateGadgetPositions();
 
     Delayer::delay(250);
 
@@ -672,14 +683,6 @@ void ProjectsWidget::lock()
     m_listWidget->setDisabled(true);
     m_buttons_2->hide();
 
-    m_progressBar->move(
-                m_buttons_2->pos() +
-                QPoint(
-                    -WIDTH_PROGRESS + m_buttons_2->width(),
-                    m_buttons_2->height() / 2.0 - m_progressBar->height() / 2.0
-                    )
-                );
-
     m_progressBar->show();
     m_progressBar->raise();
     m_progressBar->setValue(0);
@@ -693,6 +696,19 @@ void ProjectsWidget::unlock()
     m_listWidget->setEnabled(true);
     m_buttons_2->show();
     m_progressBar->hide();
+}
+
+void ProjectsWidget::updateGadgetPositions()
+{
+    if (!m_listWidget->currentItem())
+        return;
+
+    const QRect& rect = m_listWidget->visualItemRect(m_listWidget->currentItem());
+    m_buttons_2->move(rect.topRight().x() - m_buttons_2->width() - 5,
+                      rect.topRight().y() + (rect.height() - m_buttons_2->height()) / 2.0);
+    m_progressBar->move(m_buttons_2->pos() + QPoint(-WIDTH_PROGRESS + m_buttons_2->width(),
+                                                    m_buttons_2->height() / 2.0 -
+                                                    m_progressBar->height() / 2.0));
 }
 
 #include "projectswidget.moc"
