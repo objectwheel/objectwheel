@@ -172,19 +172,16 @@ void DesignerView::onRedoAction()
 
 void DesignerView::onCutAction()
 {
-    QList<Control*> controlsForRemoval;
     QList<Control*> controls(scene()->selectedControls());
+    controls.removeOne(scene()->currentForm());
 
-    controlsForRemoval.append(scene()->currentForm());
-    for (Control* control : controls) {
-        for (Control* ctrl : controls) {
+    const QList<Control*> copy(controls);
+    for (Control* control : copy) { // WARNING
+        for (Control* ctrl : copy) {
             if (control->childControls().contains(ctrl))
-                controlsForRemoval.append(ctrl);
+                controls.removeOne(ctrl);
         }
     }
-
-    for (Control* control : controlsForRemoval)
-        controls.removeOne(control);
 
     QList<QPointer<Control>> controlPtrList;
     for (Control* control : controls)
@@ -195,19 +192,16 @@ void DesignerView::onCutAction()
 
 void DesignerView::onCopyAction()
 {
-    QList<Control*> controlsForRemoval;
     QList<Control*> controls(scene()->selectedControls());
+    controls.removeOne(scene()->currentForm());
 
-    controlsForRemoval.append(scene()->currentForm());
-    for (Control* control : controls) {
-        for (Control* ctrl : controls) {
+    const QList<Control*> copy(controls);
+    for (Control* control : copy) { // WARNING
+        for (Control* ctrl : copy) {
             if (control->childControls().contains(ctrl))
-                controlsForRemoval.append(ctrl);
+                controls.removeOne(ctrl);
         }
     }
-
-    for (Control* control : controlsForRemoval)
-        controls.removeOne(control);
 
     QList<QPointer<Control>> controlPtrList;
     for (Control* control : controls)

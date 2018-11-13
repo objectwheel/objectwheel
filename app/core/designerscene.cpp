@@ -174,14 +174,12 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
             if (!controlUnderMouse)
                 return;
 
-            for(int i = 0; i < selectedControls.size(); i++) {
-                auto control = selectedControls[i];
-                if (controlUnderMouse->parentControl() != control->parentControl() ||
-                        selectedControls.contains(control->parentControl()))
-                {
-                    selectedControls.removeOne(control);
+            const QList<Control*> copy(selectedControls);
+            for(Control* control : copy) {
+                if (controlUnderMouse->parentControl() != control->parentControl()
+                        || copy.contains(control->parentControl())) {
+                    selectedControls.removeOne(control); // WARNING
                     control->setSelected(false);
-                    i--;
                 }
             }
 
@@ -229,12 +227,10 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
             auto selectedControls = this->selectedControls();
             selectedControls.removeOne(m_currentForm);
 
-            for(int i = 0; i < selectedControls.size(); i++) {
-                auto control = selectedControls[i];
-                if (selectedControls.contains(control->parentControl())) {
-                    selectedControls.removeOne(control);
-                    i--;
-                }
+            const QList<Control*> copy(selectedControls);
+            for(Control* control : copy) {
+                if (copy.contains(control->parentControl()))
+                    selectedControls.removeOne(control); // WARNING
             }
 
             if (selectedControls.size() > 1) {
@@ -280,14 +276,12 @@ bool DesignerScene::stick() const
 {
     bool ret = false;
     auto selectedControls = this->selectedControls();
-    selectedControls.removeAll(m_currentForm);
+    selectedControls.removeOne(m_currentForm);
 
-    for(int i = 0; i < selectedControls.size(); i++) {
-        auto control = selectedControls[i];
-        if (selectedControls.contains(control->parentControl())) {
-            selectedControls.removeAll(control);
-            i--;
-        }
+    const QList<Control*> copy(selectedControls);
+    for (Control* control : copy) {
+        if (copy.contains(control->parentControl()))
+            selectedControls.removeOne(control);
     }
 
     if (selectedControls.isEmpty())
@@ -680,13 +674,10 @@ QVector<QLineF> DesignerScene::guideLines() const
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(m_currentForm);
 
-    for(int i = 0; i < selectedControls.size(); i++) {
-        auto control = selectedControls[i];
-        if (selectedControls.
-                contains(control->parentControl())) {
+    const QList<Control*> copy(selectedControls);
+    for (Control* control : copy) {
+        if (copy.contains(control->parentControl()))
             selectedControls.removeOne(control);
-            i--;
-        }
     }
 
     if (selectedControls.isEmpty())
