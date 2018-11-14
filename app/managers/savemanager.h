@@ -33,7 +33,7 @@ private:
     static void removeForm(const Form* form);
     static void setupFormGlobalConnections(Form* form);
 
-    static bool addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath = QString());
+    static bool addControl(Control* control, const Control* parentControl, const QString& formSuid, const QString& formRootPath = QString());
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const Control* control);
 

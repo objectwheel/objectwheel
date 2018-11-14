@@ -236,6 +236,8 @@ QStringList SaveUtils::childrenPaths(const QString& rootPath, QString suid)
     if (suid.isEmpty())
         suid = uid(rootPath);
 
+    Q_ASSERT(!suid.isEmpty());
+
     const QString& childrenDir = toChildrenDir(rootPath);
     for (const QString& childFolder : lsdir(childrenDir)) {
         const QString& childDir = childrenDir + separator() + childFolder;

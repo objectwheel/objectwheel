@@ -59,25 +59,22 @@ QString findByUid(const QString& uid, const QString& rootPath)
 // Returns root path (of parent) if given control has a parent control
 QString parentDir(const Control* control)
 {
-    if (control->form() ||
-            control->dir().isEmpty() ||
-            !SaveUtils::isOwctrl(control->dir()))
+    if (control->form() || control->dir().isEmpty() || !SaveUtils::isOwctrl(control->dir()))
         return QString();
 
     return SaveUtils::toParentDir(control->dir());
 }
 
-void flushSuid(const Control* control, const QString& suid)
+void flushSuid(const QString& rootPath, const QString& suid)
 {
-    auto topPath = control->dir();
-    auto fromUid = SaveUtils::suid(topPath);
+    auto fromUid = SaveUtils::suid(rootPath);
     if (!fromUid.isEmpty()) {
-        for (auto path : fps(FILE_CONTROL, topPath)) {
+        for (auto path : fps(FILE_CONTROL, rootPath)) {
             if (SaveUtils::suid(SaveUtils::toParentDir(path)) == fromUid)
                 SaveUtils::setProperty(SaveUtils::toParentDir(path), TAG_SUID, suid);
         }
     } else {
-        SaveUtils::setProperty(control->dir(), TAG_SUID, suid);
+        SaveUtils::setProperty(rootPath, TAG_SUID, suid);
     }
 }
 
@@ -202,6 +199,18 @@ void refactorId(Control* control, const QString& suid, const QString& topPath = 
     while (exists(control, suid, topPath, includeItself))
         control->setId(UtilityFunctions::increasedNumberedText(control->id(), false, true));
 }
+
+void repairIds(const QString& rootPath, const QString& formRootPath)
+{
+    const QString& formUid = SaveUtils::uid(formRootPath);
+
+
+    if (control->id().isEmpty())
+        control->setId("control");
+
+    while (exists(control, suid, topPath, includeItself))
+        control->setId(UtilityFunctions::increasedNumberedText(control->id(), false, true));
+}
 }
 
 SaveManager* SaveManager::s_instance = nullptr;
@@ -306,39 +315,61 @@ void SaveManager::setupFormGlobalConnections(Form* form)
     emit instance()->formGlobalConnectionsDone(FormJS, id);
 }
 
-bool SaveManager::addControl(Control* control, const Control* parentControl, const QString& suid, const QString& topPath)
+// NOTE: targetFormRootPath is only needed for scope resolution
+bool SaveManager::addControl(const QString& controlRootPath, const QString& targetParentControlRootPath, const QString& targetFormRootPath)
 {
-    if (control->url().isEmpty())
+    if (controlRootPath.isEmpty())
         return false;
 
-    if (parentControl->dir().isEmpty())
+    if (targetParentControlRootPath.isEmpty())
         return false;
 
-    if (!SaveUtils::isOwctrl(control->dir()) || !SaveUtils::isOwctrl(parentControl->dir()))
+    if (targetFormRootPath.isEmpty())
         return false;
 
-    refactorId(control, suid, topPath);
-    for (auto child : control->childControls())
-        refactorId(child, suid, topPath);
-
-    auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
-    auto controlDir = baseDir + separator() + QString::number(SaveUtils::biggestDir(baseDir) + 1);
-
-    if (!mkdir(controlDir))
+    if (!SaveUtils::isOwctrl(controlRootPath)) {
+        qWarning("SaveManager::addControl: Failed. Control data broken.");
         return false;
+    }
 
-    if (!cp(control->dir(), controlDir, true))
+    if (!SaveUtils::isOwctrl(targetParentControlRootPath)) {
+        qWarning("SaveManager::addControl: Failed. Parent control data broken.");
         return false;
+    }
 
-    for (auto child : control->childControls())
-        child->setUrl(child->url().replace(control->dir(), controlDir));
-    control->setUrl(SaveUtils::toUrl(controlDir));
+    if (!SaveUtils::isOwctrl(targetFormRootPath)) {
+        qWarning("SaveManager::addControl: Failed. Target (scope resolution) form data broken.");
+        return false;
+    }
+
+    if (QString::compare(SaveUtils::suid(targetParentControlRootPath),
+                         SaveUtils::uid(targetFormRootPath), Qt::CaseInsensitive) != 0) {
+        qWarning("SaveManager::addControl: Failed. Suid/uid doesn't match.");
+        return false;
+    }
+
+    const QString& targetFormUid = SaveUtils::uid(targetFormRootPath);
+    const QString& targetParentControlChildrenDir = SaveUtils::toChildrenDir(targetParentControlRootPath);
+    const QString& newControlRootPath = targetParentControlChildrenDir + separator() +
+            QString::number(SaveUtils::biggestDir(targetParentControlChildrenDir) + 1);
+
+    if (!mkdir(newControlRootPath)) {
+        qWarning("SaveManager::addControl: Failed. Cannot create the new control root path.");
+        return false;
+    }
+
+    if (!cp(controlRootPath, newControlRootPath, true)) {
+        qWarning("SaveManager::addControl: Failed. Cannot copy the control to its new root path.");
+        return false;
+    }
+
+    repairIds(newControlRootPath, targetFormRootPath);
 
     ParserUtils::setId(control->url(), control->id());
     for (auto child : control->childControls())
         ParserUtils::setId(child->url(), child->id());
 
-    flushSuid(control, suid);
+    flushSuid(control, formSuid);
     regenerateUids(control); //for all
 
     ControlPropertyManager::setId(control, control->id(), ControlPropertyManager::NoOption);
