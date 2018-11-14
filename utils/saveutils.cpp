@@ -25,6 +25,9 @@
         A form has to be master item
 */
 
+// TODO: Change QString with QLatin1String when it is possible
+// TODO: Always use case insensitive comparison when it is possible
+
 namespace {
 
 void exchangeMatchesForFile(const QString& filePath, const QString& from, const QString& to)
@@ -62,7 +65,7 @@ bool SaveUtils::isMain(const QString& rootPath)
 bool SaveUtils::isOwctrl(const QString& rootPath)
 {
     const QString& sign = property(rootPath, TAG_OWCTRL_SIGN).toString();
-    return sign == SIGN_OWCTRL && !uid(rootPath).isEmpty();
+    return sign == SIGN_OWCTRL && !uid(rootPath).isEmpty() && !suid(rootPath).isEmpty();
 }
 
 bool SaveUtils::isOwprj(const QString& projectDir)
@@ -93,20 +96,16 @@ int SaveUtils::biggestDir(const QString& basePath)
 */
 int SaveUtils::childrenCount(const QString& rootPath, QString suid)
 {
+    Q_ASSERT(!suid.isEmpty());
+    Q_ASSERT(!rootPath.isEmpty());
+
     int counter = 0;
-
-    if (rootPath.isEmpty())
-        return counter;
-
-    if (suid.isEmpty())
-        suid = uid(rootPath);
-
     const QString& childrenDir = toChildrenDir(rootPath);
-    for (const QString& childFolder : lsdir(childrenDir)) {
-        const QString& childDir = childrenDir + separator() + childFolder;
-        if (isOwctrl(childDir) && SaveUtils::suid(childDir) == suid) {
+    for (const QString& childDirName : lsdir(childrenDir)) {
+        const QString& childRootPath = childrenDir + separator() + childDirName;
+        if (isOwctrl(childRootPath) && SaveUtils::suid(childRootPath) == suid) {
             ++counter;
-            counter += childrenCount(childDir, suid);
+            counter += childrenCount(childRootPath, suid);
         }
     }
 
@@ -224,26 +223,19 @@ QStringList SaveUtils::masterPaths(const QString& topPath)
 /*
     Returns all children paths (rootPath) within given root path.
     Returns children only if they have match between their and given suid.
-    If given suid is empty then rootPath's uid is taken.
 */
-QStringList SaveUtils::childrenPaths(const QString& rootPath, QString suid)
+QStringList SaveUtils::childrenPaths(const QString& rootPath, const QString& suid)
 {
-    QStringList paths;
-
-    if (rootPath.isEmpty())
-        return paths;
-
-    if (suid.isEmpty())
-        suid = uid(rootPath);
-
     Q_ASSERT(!suid.isEmpty());
+    Q_ASSERT(!rootPath.isEmpty());
 
+    QStringList paths;
     const QString& childrenDir = toChildrenDir(rootPath);
-    for (const QString& childFolder : lsdir(childrenDir)) {
-        const QString& childDir = childrenDir + separator() + childFolder;
-        if (isOwctrl(childDir) && SaveUtils::suid(childDir) == suid) {
-            paths.append(childDir);
-            paths.append(childrenPaths(childDir, suid));
+    for (const QString& childDirName : lsdir(childrenDir)) {
+        const QString& childRootPath = childrenDir + separator() + childDirName;
+        if (isOwctrl(childRootPath) && SaveUtils::suid(childRootPath) == suid) {
+            paths.append(childRootPath);
+            paths.append(childrenPaths(childRootPath, suid));
         }
     }
 

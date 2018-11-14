@@ -109,7 +109,7 @@ QStringList formScopePaths()
 // Searches by id.
 // Searches control in form scope (in current project)
 // If current project is empty, then returns false.
-bool existsInFormScope(const Control* control, bool includeItself)
+bool existsInProjectScope(const Control* control, bool includeItself)
 {
     Q_ASSERT(control->form());
     for (auto path : formScopePaths()) {
@@ -125,10 +125,10 @@ bool existsInFormScope(const Control* control, bool includeItself)
 // Searches by id.
 // Searches control within given suid, search starts within topPath
 // Given suid has to be valid
-bool existsInParentScope(const Control* control, const QString& suid, const QString topPath, bool includeItself)
+bool existsInFormScope(const Control* control, const QString& suid, const QString topPath, bool includeItself)
 {
     if (control->form())
-        return existsInFormScope(control, includeItself);
+        return existsInProjectScope(control, includeItself);
 
     Q_ASSERT(!suid.isEmpty());
 
@@ -171,8 +171,8 @@ bool existsInParentScope(const Control* control, const QString& suid, const QStr
 bool exists(const Control* control, const QString& suid, const QString& topPath = QString(),
             bool includeItself = true)
 {
-    return control->form() ? existsInFormScope(control, includeItself) :
-                             existsInParentScope(control, suid, topPath, includeItself);
+    return control->form() ? existsInProjectScope(control, includeItself) :
+                             existsInFormScope(control, suid, topPath, includeItself);
 }
 
 // Recalculates all uids belongs to given control and its children (all).
@@ -200,16 +200,121 @@ void refactorId(Control* control, const QString& suid, const QString& topPath = 
         control->setId(UtilityFunctions::increasedNumberedText(control->id(), false, true));
 }
 
-void repairIds(const QString& rootPath, const QString& formRootPath)
+
+
+// Searches by id.
+// Searches control within given suid, search starts within topPath
+// Given suid has to be valid
+bool existsInFormScope(const Control* control, const QString& suid, const QString topPath, bool includeItself)
 {
-    const QString& formUid = SaveUtils::uid(formRootPath);
+    if (control->form())
+        return existsInProjectScope(control, includeItself);
 
+    Q_ASSERT(!suid.isEmpty());
 
-    if (control->id().isEmpty())
-        control->setId("control");
+    auto parentRootPath = findByUid(suid, topPath);
+    if (parentRootPath.isEmpty())
+        return false;
 
-    while (exists(control, suid, topPath, includeItself))
-        control->setId(UtilityFunctions::increasedNumberedText(control->id(), false, true));
+    Q_ASSERT(parentRootPath != control->dir());
+
+    if (isForm(parentRootPath)) {
+        if (existsInForms(control, includeItself))
+            return true;
+
+        for (auto path :  SaveUtils::childrenPaths(parentRootPath)) {
+            if ((includeItself || path != control->dir())
+                    && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
+                return true;
+            }
+        }
+
+        return false;
+    } else {
+        if (ParserUtils::id(SaveUtils::toUrl(parentRootPath)) == control->id())
+            return true;
+
+        for (auto path : SaveUtils::childrenPaths(parentRootPath)) {
+            if ((includeItself || path != control->dir())
+                    && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+bool existsInFormScope(const QString& rootPath, const QString formRootPath)
+{
+    Q_ASSERT(!rootPath.isEmpty());
+    Q_ASSERT(!formRootPath.isEmpty());
+    Q_ASSERT(rootPath != formRootPath);
+
+    if (isForm(parentRootPath)) {
+        if (existsInForms(control, includeItself))
+            return true;
+
+        for (auto path :  SaveUtils::childrenPaths(parentRootPath)) {
+            if ((includeItself || path != control->dir())
+                    && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
+                return true;
+            }
+        }
+
+        return false;
+    } else {
+        if (ParserUtils::id(SaveUtils::toUrl(parentRootPath)) == control->id())
+            return true;
+
+        for (auto path : SaveUtils::childrenPaths(parentRootPath)) {
+            if ((includeItself || path != control->dir())
+                    && ParserUtils::id(SaveUtils::toUrl(path)) == control->id()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+void repairSuids(const QString& rootPath, const QString& newSuid)
+{
+    const QString& sourceSuid = SaveUtils::suid(rootPath);
+    QStringList controlRootPaths;
+    controlRootPaths.append(rootPath);
+    controlRootPaths.append(SaveUtils::childrenPaths(rootPath, sourceSuid));
+
+    for (const QString& controlRootPath : controlRootPaths) {
+        if (QString::compare(SaveUtils::suid(controlRootPath), sourceSuid, Qt::CaseInsensitive) == 0)
+            SaveUtils::setProperty(controlRootPath, TAG_SUID, newSuid);
+    }
+}
+
+/*
+    Repairs all the ids (including root control).
+    Repair means:
+        * Empty ids corrected
+        * Non-unique ids made unique
+        * Id conflicts on main.qml and control meta files fixed
+          (the id of the control meta file takes precedence)
+*/
+void repairIds(const QString& rootPath)
+{
+    const QString& suid = SaveUtils::suid(rootPath);
+    QStringList controlRootPaths;
+    controlRootPaths.append(rootPath);
+    controlRootPaths.append(SaveUtils::childrenPaths(rootPath, suid));
+
+    for (const QString& controlRootPath : controlRootPaths) {
+        QString id = SaveUtils::id(controlRootPath);
+
+        if (id.isEmpty())
+            id = "control";
+
+        while (exists(control, suid, topPath, false))
+            control->setId(UtilityFunctions::increasedNumberedText(control->id(), false, true));
+    }
 }
 }
 
@@ -348,7 +453,7 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
         return false;
     }
 
-    const QString& targetFormUid = SaveUtils::uid(targetFormRootPath);
+    const QString& formUid = SaveUtils::uid(targetFormRootPath);
     const QString& targetParentControlChildrenDir = SaveUtils::toChildrenDir(targetParentControlRootPath);
     const QString& newControlRootPath = targetParentControlChildrenDir + separator() +
             QString::number(SaveUtils::biggestDir(targetParentControlChildrenDir) + 1);
@@ -363,13 +468,9 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
         return false;
     }
 
-    repairIds(newControlRootPath, targetFormRootPath);
+    repairSuids(newControlRootPath, formUid);
+    repairIds(newControlRootPath);
 
-    ParserUtils::setId(control->url(), control->id());
-    for (auto child : control->childControls())
-        ParserUtils::setId(child->url(), child->id());
-
-    flushSuid(control, formSuid);
     regenerateUids(control); //for all
 
     ControlPropertyManager::setId(control, control->id(), ControlPropertyManager::NoOption);

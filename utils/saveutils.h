@@ -52,7 +52,7 @@ public:
     static bool isOwprj(const QString& projectDir);
 
     static int biggestDir(const QString& basePath);
-    static int childrenCount(const QString& rootPath, QString suid = QString());
+    static int childrenCount(const QString& rootPath, QString suid);
 
     static QString toUrl(const QString& rootPath);
     static QString toIcon(const QString& rootPath);
@@ -67,7 +67,7 @@ public:
     static QStringList formPaths(const QString& projectDir);
     static QStringList controlPaths(const QString& topPath);
     static QStringList masterPaths(const QString& topPath);
-    static QStringList childrenPaths(const QString& rootPath, QString suid = QString());
+    static QStringList childrenPaths(const QString& rootPath, const QString& suid);
 
     static QString id(const QString& rootPath);
     static QString uid(const QString& rootPath);
