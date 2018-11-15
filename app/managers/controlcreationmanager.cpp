@@ -38,13 +38,13 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     if (SaveUtils::isMain(rootPath))
         form->setMain(true);
 
-    SaveManager::addForm(form);
+//    WARNING    SaveManager::addForm(form);
     s_designerScene->addForm(form);
 
     if (form->id() != SaveUtils::id(form->dir()))
         SaveUtils::setProperty(form->dir(), TAG_ID, form->id());
 
-    SaveManager::setupFormGlobalConnections(form);
+    //    WARNING SaveManager::setupFormGlobalConnections(form);
 
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
     // parent concept for forms in Designer; fors are directly put into DesignerScene
@@ -62,7 +62,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
                                                QString destinationSuid)
 {
     auto control = new Control(SaveUtils::toUrl(rootPath));
-//    SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
+//    WARNING    SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
 
     if (control->id() != SaveUtils::id(control->dir()))
         SaveUtils::setProperty(control->dir(), TAG_ID, control->id());
