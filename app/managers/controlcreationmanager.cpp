@@ -62,7 +62,7 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
                                                QString destinationSuid)
 {
     auto control = new Control(SaveUtils::toUrl(rootPath));
-    SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
+//    SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
 
     if (control->id() != SaveUtils::id(control->dir()))
         SaveUtils::setProperty(control->dir(), TAG_ID, control->id());

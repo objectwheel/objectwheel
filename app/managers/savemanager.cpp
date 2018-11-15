@@ -246,50 +246,45 @@ bool SaveManager::initProject(const QString& projectDirectory, int templateNumbe
     return true;
 }
 
-bool SaveManager::addForm(Form* form)
+bool SaveManager::addForm(const QString& formRootPath)
 {
-    if (form->url().isEmpty())
+    Q_ASSERT(!ProjectManager::dir().isEmpty());
+
+    if (!SaveUtils::isOwctrl(formRootPath)) {
+        qWarning("SaveManager::addControl: Failed. Form data broken.");
         return false;
+    }
 
-    if (!SaveUtils::isOwctrl(form->dir()))
+    const QString& targetOwdbDir = SaveUtils::toOwdbDir(ProjectManager::dir());
+    const QString& newFormRootPath = targetOwdbDir + separator() +
+            QString::number(SaveUtils::biggestDir(targetOwdbDir) + 1);
+
+    if (!mkdir(newFormRootPath)) {
+        qWarning("SaveManager::addControl: Failed. Cannot create the new form root path.");
         return false;
+    }
 
-    // NOTE: We don't have to worry about possible child controls since addForm is only
-    // called from FormsPane > ControlCreationManager
-    refactorId(form, QString());
-
-    auto projectDir = ProjectManager::dir();
-
-    if (projectDir.isEmpty())
+    if (!cp(formRootPath, newFormRootPath, true)) {
+        qWarning("SaveManager::addControl: Failed. Cannot copy the control to its new root path.");
         return false;
+    }
 
-    auto baseDir = projectDir + separator() + DIR_OWDB;
-    auto formDir = baseDir + separator() + QString::number(SaveUtils::biggestDir(baseDir) + 1);
+    repairIdsInProjectFormScope(newFormRootPath, targetFormRootPath);
 
-    if (!mkdir(formDir))
-        return false;
-
-    if (!cp(form->dir(), formDir, true))
-        return false;
-
-    form->setUrl(SaveUtils::toUrl(formDir));
-
-    ParserUtils::setId(form->url(), form->id());
-    regenerateUids(form);
-    ControlPropertyManager::setId(form, form->id(), ControlPropertyManager::NoOption);
+    regenerateUids(newFormRootPath);
 
     return true;
 }
 
-void SaveManager::removeForm(const Form* form)
+void SaveManager::removeForm(const QString& formRootPath)
 {
-    if (form->id().isEmpty() || form->url().isEmpty())
+    if (SaveUtils::isMain(formRootPath)
+            || !SaveUtils::isOwctrl(formRootPath)
+            || countIdInProjectForms(SaveUtils::id(formRootPath)) == 0) {
         return;
+    }
 
-    if (form->main() || !SaveUtils::isOwctrl(form->dir()) || !exists(form, QString()))
-        return;
-
-    rm(form->dir());
+    rm(formRootPath);
 }
 
 void SaveManager::setupFormGlobalConnections(Form* form)
@@ -319,18 +314,8 @@ void SaveManager::setupFormGlobalConnections(Form* form)
     emit instance()->formGlobalConnectionsDone(FormJS, id);
 }
 
-// NOTE: targetFormRootPath is only needed for scope resolution
 bool SaveManager::addControl(const QString& controlRootPath, const QString& targetParentControlRootPath, const QString& targetFormRootPath)
 {
-    if (controlRootPath.isEmpty())
-        return false;
-
-    if (targetParentControlRootPath.isEmpty())
-        return false;
-
-    if (targetFormRootPath.isEmpty())
-        return false;
-
     if (!SaveUtils::isOwctrl(controlRootPath)) {
         qWarning("SaveManager::addControl: Failed. Control data broken.");
         return false;
@@ -363,10 +348,6 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
     repairIdsInProjectFormScope(newControlRootPath, targetFormRootPath);
 
     regenerateUids(newControlRootPath); //for all
-
-    ControlPropertyManager::setId(control, control->id(), ControlPropertyManager::NoOption);
-    for (auto child : control->childControls())
-        ControlPropertyManager::setId(child, child->id(), ControlPropertyManager::NoOption);
 
     return true;
 }

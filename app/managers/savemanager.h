@@ -29,11 +29,11 @@ private:
     static void setProperty(Control* control, const QString& property, QString value, const QString& topPath = QString());
     static void removeProperty(const Control* control, const QString& property);
 
-    static bool addForm(Form* form);
-    static void removeForm(const Form* form);
+    static bool addForm(const QString& formRootPath);
+    static void removeForm(const QString& formRootPath);
     static void setupFormGlobalConnections(Form* form);
 
-    static bool addControl(Control* control, const Control* parentControl, const QString& formSuid, const QString& formRootPath = QString());
+    static bool addControl(const QString& controlRootPath, const QString& targetParentControlRootPath, const QString& targetFormRootPath);
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const Control* control);
 

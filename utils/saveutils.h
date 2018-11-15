@@ -58,6 +58,7 @@ public:
     static QString toThisDir(const QString& rootPath);
     static QString toParentDir(const QString& topPath);
     static QString toChildrenDir(const QString& rootPath);
+    static QString toOwdbDir(const QString& projectDir);
     static QString toProjectFile(const QString& projectDir);
     static QString toImportsDir(const QString& projectDir);
     static QString toGlobalDir(const QString& projectDir);

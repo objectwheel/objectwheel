@@ -45,6 +45,7 @@ bool SaveUtils::isMain(const QString& rootPath)
 
 bool SaveUtils::isOwctrl(const QString& rootPath)
 {
+    Q_ASSERT(!rootPath.isEmpty());
     const QString& sign = property(rootPath, TAG_OWCTRL_SIGN).toString();
     return sign == SIGN_OWCTRL && !uid(rootPath).isEmpty();
 }
@@ -113,6 +114,11 @@ QString SaveUtils::toParentDir(const QString& topPath)
 QString SaveUtils::toChildrenDir(const QString& rootPath)
 {
     return rootPath + separator() + DIR_CHILDREN;
+}
+
+QString SaveUtils::toOwdbDir(const QString& projectDir)
+{
+    return projectDir + separator() + DIR_OWDB;
 }
 
 QString SaveUtils::toProjectFile(const QString& projectDir)
