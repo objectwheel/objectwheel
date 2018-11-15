@@ -24,7 +24,6 @@
 
 #define TAG_ID           "id"
 #define TAG_UID          "uid"
-#define TAG_SUID         "suid"
 #define TAG_NAME         "name"
 #define TAG_CATEGORY     "category"
 #define TAG_OWDB_SIGN    "owdbsign"        // FIXME: There is no function of this
@@ -52,7 +51,7 @@ public:
     static bool isOwprj(const QString& projectDir);
 
     static int biggestDir(const QString& basePath);
-    static int childrenCount(const QString& rootPath, QString suid);
+    static int childrenCount(const QString& rootPath);
 
     static QString toUrl(const QString& rootPath);
     static QString toIcon(const QString& rootPath);
@@ -67,11 +66,10 @@ public:
     static QStringList formPaths(const QString& projectDir);
     static QStringList controlPaths(const QString& topPath);
     static QStringList masterPaths(const QString& topPath);
-    static QStringList childrenPaths(const QString& rootPath, const QString& suid);
+    static QStringList childrenPaths(const QString& rootPath);
 
     static QString id(const QString& rootPath);
     static QString uid(const QString& rootPath);
-    static QString suid(const QString& rootPath);
     static QString name(const QString& rootPath);
     static QString category(const QString& rootPath);
 

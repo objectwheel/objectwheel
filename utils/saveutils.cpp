@@ -6,25 +6,6 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-/*
-                   DATABASE INFRASTRUCTURE
-
-    POPERTIES:
-        Elements:
-            Main-form(master), Ordinary-form(master),
-            Child-item(master), Child-item(non-master)
-
-        Types:
-            Quick, Non-gui, Window
-
-    RULES:
-        Non-gui elements can not be master (or form)
-        Main form has to be window type
-        Other forms could be quick item or window type (not non-gui)
-        Children could be non-gui or quick item type (not window)
-        A form has to be master item
-*/
-
 // TODO: Change QString with QLatin1String when it is possible
 // TODO: Always use case insensitive comparison when it is possible
 
@@ -65,7 +46,7 @@ bool SaveUtils::isMain(const QString& rootPath)
 bool SaveUtils::isOwctrl(const QString& rootPath)
 {
     const QString& sign = property(rootPath, TAG_OWCTRL_SIGN).toString();
-    return sign == SIGN_OWCTRL && !uid(rootPath).isEmpty() && !suid(rootPath).isEmpty();
+    return sign == SIGN_OWCTRL && !uid(rootPath).isEmpty();
 }
 
 bool SaveUtils::isOwprj(const QString& projectDir)
@@ -91,21 +72,18 @@ int SaveUtils::biggestDir(const QString& basePath)
 
 /*
     Counts all children paths (rootPath) within given root path.
-    Returns children count only if they have match between their and given suid.
-    If given suid is empty then rootPath's uid is taken.
 */
-int SaveUtils::childrenCount(const QString& rootPath, QString suid)
+int SaveUtils::childrenCount(const QString& rootPath)
 {
-    Q_ASSERT(!suid.isEmpty());
     Q_ASSERT(!rootPath.isEmpty());
 
     int counter = 0;
     const QString& childrenDir = toChildrenDir(rootPath);
     for (const QString& childDirName : lsdir(childrenDir)) {
         const QString& childRootPath = childrenDir + separator() + childDirName;
-        if (isOwctrl(childRootPath) && SaveUtils::suid(childRootPath) == suid) {
+        if (isOwctrl(childRootPath)) {
             ++counter;
-            counter += childrenCount(childRootPath, suid);
+            counter += childrenCount(childRootPath);
         }
     }
 
@@ -194,48 +172,20 @@ QStringList SaveUtils::controlPaths(const QString& topPath)
     return paths;
 }
 
-QStringList SaveUtils::masterPaths(const QString& topPath)
-{
-    QStringList paths;
-    QStringList foundSuids;
-
-    const QStringList& ctrlPaths = controlPaths(topPath);
-    for (const QString& controlPath : ctrlPaths) {
-        const QString& controlSuid = suid(controlPath);
-        if (!controlSuid.isEmpty() && !foundSuids.contains(controlSuid))
-            foundSuids.append(controlSuid);
-    }
-
-    for (const QString& controlPath : ctrlPaths) {
-        if (foundSuids.contains(uid(controlPath)))
-            paths.append(controlPath);
-    }
-
-    std::sort(paths.begin(), paths.end(), [] (const QString& a, const QString& b)
-    { return a.size() > b.size(); });
-
-    if (paths.isEmpty() && isForm(topPath))
-        paths.append(topPath);
-
-    return paths;
-}
-
 /*
     Returns all children paths (rootPath) within given root path.
-    Returns children only if they have match between their and given suid.
 */
-QStringList SaveUtils::childrenPaths(const QString& rootPath, const QString& suid)
+QStringList SaveUtils::childrenPaths(const QString& rootPath)
 {
-    Q_ASSERT(!suid.isEmpty());
     Q_ASSERT(!rootPath.isEmpty());
 
     QStringList paths;
     const QString& childrenDir = toChildrenDir(rootPath);
     for (const QString& childDirName : lsdir(childrenDir)) {
         const QString& childRootPath = childrenDir + separator() + childDirName;
-        if (isOwctrl(childRootPath) && SaveUtils::suid(childRootPath) == suid) {
+        if (isOwctrl(childRootPath)) {
             paths.append(childRootPath);
-            paths.append(childrenPaths(childRootPath, suid));
+            paths.append(childrenPaths(childRootPath));
         }
     }
 
@@ -250,11 +200,6 @@ QString SaveUtils::id(const QString& rootPath)
 QString SaveUtils::uid(const QString& rootPath)
 {
     return property(rootPath, TAG_UID).toString();
-}
-
-QString SaveUtils::suid(const QString& rootPath)
-{
-    return property(rootPath, TAG_SUID).toString();
 }
 
 QString SaveUtils::name(const QString& rootPath)
