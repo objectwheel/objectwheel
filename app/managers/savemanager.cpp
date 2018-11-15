@@ -14,8 +14,21 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QRegularExpression>
+// WARNING: Bu dosyadaki warning leri ve yukarıdaki includeları düzelt
 
 namespace {
+
+QString detectedFormRootPath(const QString& rootPath)
+{
+    // FIXME: This might crash on Windows due to back-slash path names
+    Q_ASSERT(!ProjectManager::dir().isEmpty());
+    const QString& owdbDir = SaveUtils::toOwdbDir(ProjectManager::dir()) + separator();
+    const QString& formRootPath = QRegularExpression("^" + owdbDir + "\\d+").match(rootPath).captured();
+    Q_ASSERT(!formRootPath.isEmpty());
+    Q_ASSERT(exists(formRootPath));
+    Q_ASSERT(SaveUtils::isForm(formRootPath));
+    return formRootPath;
+}
 
 bool countIdInProjectForms(const QString& id)
 {
@@ -104,7 +117,7 @@ bool SaveManager::addForm(const QString& formRootPath)
         return false;
     }
 
-    repairIdsInProjectFormScope(newFormRootPath, formRootPath);
+    repairIds(newFormRootPath, true);
 
     SaveUtils::regenerateUids(newFormRootPath);
 
@@ -151,7 +164,7 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
     emit instance()->formGlobalConnectionsDone(FormJS, id);
 }
 
-bool SaveManager::addControl(const QString& controlRootPath, const QString& targetParentControlRootPath, const QString& targetFormRootPath)
+bool SaveManager::addControl(const QString& controlRootPath, const QString& targetParentControlRootPath)
 {
     if (!SaveUtils::isOwctrl(controlRootPath)) {
         qWarning("SaveManager::addControl: Failed. Control data broken.");
@@ -160,11 +173,6 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
 
     if (!SaveUtils::isOwctrl(targetParentControlRootPath)) {
         qWarning("SaveManager::addControl: Failed. Parent control data broken.");
-        return false;
-    }
-
-    if (!SaveUtils::isOwctrl(targetFormRootPath)) {
-        qWarning("SaveManager::addControl: Failed. Target (scope resolution) form data broken.");
         return false;
     }
 
@@ -182,7 +190,7 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
         return false;
     }
 
-    repairIdsInProjectFormScope(newControlRootPath, targetFormRootPath);
+    repairIds(newControlRootPath, true);
 
     SaveUtils::regenerateUids(newControlRootPath);
 
@@ -239,11 +247,15 @@ void SaveManager::removeControl(const QString& rootPath)
     Non-unique ids made unique
     Id conflicts on main.qml and control meta files fixed (the id of the control meta file takes precedence)
 */
-void SaveManager::repairIdsInProjectFormScope(const QString& rootPath, const QString& formRootPath)
+void SaveManager::repairIds(const QString& rootPath, bool recursive)
 {
     QStringList controlRootPaths;
     controlRootPaths.append(rootPath);
-    controlRootPaths.append(SaveUtils::childrenPaths(rootPath));
+
+    if (recursive)
+        controlRootPaths.append(SaveUtils::childrenPaths(rootPath));
+
+    const QString& formRootPath = detectedFormRootPath(rootPath);
 
     for (const QString& controlRootPath : controlRootPaths) {
         const QString& idOrig = SaveUtils::id(controlRootPath);
@@ -261,44 +273,38 @@ void SaveManager::repairIdsInProjectFormScope(const QString& rootPath, const QSt
 
 /*
     NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
-    You can not set id property of a top control if it's not exist in the project database
-    If you want to set id property of a control that is not exist in the project database,
-    then you have to provide a valid topPath
-    If topPath is empty, then top level project directory searched
-    So, suid and topPath have to be in a valid logical relationship.
-    topPath is only necessary if property is an "id" set.
 */
-void SaveManager::setProperty(Control* control, const QString& property, QString value, const QString& topPath)
+void SaveManager::setProperty(Control* control, const QString& property, const QString& value)
 {
     if (!control)
-        return;
-
-    if (control->dir().isEmpty())
         return;
 
     if (!SaveUtils::isOwctrl(control->dir()))
         return;
 
+    QString copy(value);
+
     if (property == "id") {
-        if (control->id() == value)
+        if (control->id() == copy)
             return;
 
-        /*
+        /*!
             NOTE: We don't have to call ControlPropertyManager::setId in order to emit
                   idChanged signal in ControlPropertyManager; because setProperty cannot be
                   used anywhere else except ControlPropertyManager Hence,
                   setProperty(.., "id", ...) is only called from ControlPropertyManager::setId,
                   which means idChanged signal is already emitted.
         */
-        control->setId(value);
-//        WARNING refactorId(control, SaveUtils::suid(control->dir()), topPath, false);
-        value = control->id();
-        ParserUtils::setId(control->url(), value);
+
+        ParserUtils::setId(control->url(), copy);
+        repairIds(control->dir(), false);
+        copy = SaveUtils::id(control->dir());
+        control->setId(copy);
     } else {
-        ParserUtils::setProperty(control->url(), property, value);
+        ParserUtils::setProperty(control->url(), property, copy);
     }
 
     ProjectManager::updateLastModification(ProjectManager::hash());
 
-    instance()->propertyChanged(control, property, value);
+    instance()->propertyChanged(control, property, copy);
 }
