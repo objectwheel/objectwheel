@@ -293,8 +293,7 @@ void SaveUtils::setProjectProperty(const QString& projectDir, const QString& pro
 */
 void SaveUtils::regenerateUids(const QString& topPath)
 {
-    if (topPath.isEmpty())
-        return;
+    Q_ASSERT(!topPath.isEmpty());
 
     const QStringList& controlFiles = fps(FILE_CONTROL, topPath);
     for (const QString& controlFile : controlFiles) {

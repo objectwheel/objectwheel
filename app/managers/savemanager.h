@@ -37,6 +37,9 @@ private:
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const Control* control);
 
+private:
+    void repairIdsInProjectFormScope(const QString& rootPath, const QString& formRootPath);
+
 signals:
     void formGlobalConnectionsDone(const QString& FormJS, const QString& id);
     void propertyChanged(Control* control, const QString& property, const QString& value);

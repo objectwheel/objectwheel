@@ -65,19 +65,6 @@ QString parentDir(const Control* control)
     return SaveUtils::toParentDir(control->dir());
 }
 
-void flushSuid(const QString& rootPath, const QString& suid)
-{
-    auto fromUid = SaveUtils::suid(rootPath);
-    if (!fromUid.isEmpty()) {
-        for (auto path : fps(FILE_CONTROL, rootPath)) {
-            if (SaveUtils::suid(SaveUtils::toParentDir(path)) == fromUid)
-                SaveUtils::setProperty(SaveUtils::toParentDir(path), TAG_SUID, suid);
-        }
-    } else {
-        SaveUtils::setProperty(rootPath, TAG_SUID, suid);
-    }
-}
-
 // Searches by id.
 // Searches control only in forms (in current project)
 // If current project is empty, then returns false.
@@ -177,13 +164,9 @@ bool exists(const Control* control, const QString& suid, const QString& topPath 
 
 // Recalculates all uids belongs to given control and its children (all).
 // Both database and in-memory data are updated.
-void regenerateUids(Control* control)
+void regenerateUids(const QString& rootPath)
 {
-    if (control->dir().isEmpty())
-        return;
-
-    SaveUtils::regenerateUids(control->dir());
-
+    SaveUtils::regenerateUids(rootPath);
     Control::updateUids(); // FIXME: Change with childControls()->updateUid();
 }
 
@@ -228,29 +211,9 @@ int countIdInControlChildrenScope(const QString& id, const QString rootPath)
     return counter;
 }
 
-/*
-    Repairs all the ids (including root control).
-    Repair means:
-        * Empty ids corrected
-        * Non-unique ids made unique
-        * Id conflicts on main.qml and control meta files fixed
-          (the id of the control meta file takes precedence)
-*/
-void repairIds(const QString& rootPath, const QString& formRootPath)
+inline int countIdInProjectFormScope(const QString& id, const QString formRootPath)
 {
-    QStringList controlRootPaths;
-    controlRootPaths.append(rootPath);
-    controlRootPaths.append(SaveUtils::childrenPaths(rootPath));
-
-    for (const QString& controlRootPath : controlRootPaths) {
-        QString id = SaveUtils::id(controlRootPath);
-
-        if (id.isEmpty())
-            id = "control";
-
-        while (exists(control, suid, topPath, false))
-            control->setId(UtilityFunctions::increasedNumberedText(control->id(), false, true));
-    }
+    return countIdInProjectForms(id) + countIdInControlChildrenScope(id, formRootPath);
 }
 }
 
@@ -383,13 +346,6 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
         return false;
     }
 
-    if (QString::compare(SaveUtils::suid(targetParentControlRootPath),
-                         SaveUtils::uid(targetFormRootPath), Qt::CaseInsensitive) != 0) {
-        qWarning("SaveManager::addControl: Failed. Suid/uid doesn't match.");
-        return false;
-    }
-
-    const QString& formUid = SaveUtils::uid(targetFormRootPath);
     const QString& targetParentControlChildrenDir = SaveUtils::toChildrenDir(targetParentControlRootPath);
     const QString& newControlRootPath = targetParentControlChildrenDir + separator() +
             QString::number(SaveUtils::biggestDir(targetParentControlChildrenDir) + 1);
@@ -404,10 +360,9 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
         return false;
     }
 
-    repairSuids(newControlRootPath, formUid);
-    repairIds(newControlRootPath);
+    repairIdsInProjectFormScope(newControlRootPath, targetFormRootPath);
 
-    regenerateUids(control); //for all
+    regenerateUids(newControlRootPath); //for all
 
     ControlPropertyManager::setId(control, control->id(), ControlPropertyManager::NoOption);
     for (auto child : control->childControls())
@@ -462,6 +417,31 @@ void SaveManager::removeControl(const Control* control)
         return;
 
     rm(control->dir());
+}
+
+/*!
+    Empty ids corrected
+    Non-unique ids made unique
+    Id conflicts on main.qml and control meta files fixed (the id of the control meta file takes precedence)
+*/
+void SaveManager::repairIdsInProjectFormScope(const QString& rootPath, const QString& formRootPath)
+{
+    QStringList controlRootPaths;
+    controlRootPaths.append(rootPath);
+    controlRootPaths.append(SaveUtils::childrenPaths(rootPath));
+
+    for (const QString& controlRootPath : controlRootPaths) {
+        const QString& idOrig = SaveUtils::id(controlRootPath);
+
+        QString id(idOrig);
+        if (id.isEmpty())
+            id = "control";
+
+        while (countIdInProjectFormScope(id, formRootPath) > (id == idOrig ? 1 : 0))
+            id = UtilityFunctions::increasedNumberedText(id, false, true);
+
+        ParserUtils::setId(SaveUtils::toUrl(controlRootPath), id);
+    }
 }
 
 /*
