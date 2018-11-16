@@ -311,8 +311,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &InspectorPane::onControlRemove);
-    connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
-            this, &InspectorPane::onControlCreation);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::formAboutToBeRemoved,
             this, &InspectorPane::onFormRemove);
     connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);

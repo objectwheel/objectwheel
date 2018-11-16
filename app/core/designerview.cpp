@@ -6,6 +6,9 @@
 #include <controlpropertymanager.h>
 #include <QMenu>
 
+// TODO: Improve copy-paste positioning. "Pasting into a sub control and" "positioning wherever you
+// right click".. implement those 2 features in future
+
 namespace {
 
 struct CopyPaste final
@@ -206,7 +209,6 @@ void DesignerView::onCopyAction()
     CopyPaste::setControls(controlPtrList, CopyPaste::Copy);
 }
 
-// FIXME:
 void DesignerView::onPasteAction()
 {
     if (!CopyPaste::isValid())
@@ -230,12 +232,12 @@ void DesignerView::onPasteAction()
             ControlPropertyManager::setParent(control, scene()->currentForm(),
                                               ControlPropertyManager::SaveChanges
                                               | ControlPropertyManager::UpdatePreviewer);
+        } else {
+            newControl = ControlCreationManager::createControl(scene()->currentForm(),
+                                                               control->dir(),
+                                                               control->pos() + QPointF(5, 5));
         }
-//   WARNING     Control* newControl = ControlCreationManager::createControl(control->dir(),
-//                                                                    control->pos() + QPointF(5, 5),
-//                                                                    suid, currentForm,
-//                                                                    currentForm->dir(),
-//                                                                    currentForm->uid());
+
         if (newControl)
             newControl->setSelected(true);
     }

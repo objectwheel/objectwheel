@@ -16,20 +16,18 @@ class ControlCreationManager final : public QObject
     friend class ApplicationCore; // For construction
     friend class FormsPane; // For addCreateForm
     friend class DesignerWidget; // For addCreateControl
+    friend class DesignerView; // For addCreateControl
 
 public:
     static ControlCreationManager* instance();
-
-signals:
-    void controlCreated(Control* control); // NOTE: Only used by InspectorPane, so implemention depends
 
 private:
     explicit ControlCreationManager(QObject* parent = nullptr);
     ~ControlCreationManager();
 
     static void init(DesignerScene* designerScene);
-    static Form* addCreateForm(const QString& formRootPath); // FormsPane dependency: Should be a private member
-    static Control* addCreateControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos);
+    static Form* createForm(const QString& formRootPath); // FormsPane dependency: Should be a private member
+    static Control* createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos);
 
 private:
     static ControlCreationManager* s_instance;

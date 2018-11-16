@@ -2,8 +2,6 @@
 #include <form.h>
 #include <designerscene.h>
 #include <saveutils.h>
-#include <projectmanager.h>
-#include <filemanager.h>
 #include <savemanager.h>
 #include <controlpreviewingmanager.h>
 #include <controlpropertymanager.h>
@@ -31,7 +29,7 @@ void ControlCreationManager::init(DesignerScene* designerScene)
     s_designerScene = designerScene;
 }
 
-Form* ControlCreationManager::addCreateForm(const QString& formRootPath)
+Form* ControlCreationManager::createForm(const QString& formRootPath)
 {
     const QString& newFormRootPath = SaveManager::addForm(formRootPath);
     if (newFormRootPath.isEmpty()) {
@@ -59,7 +57,7 @@ Form* ControlCreationManager::addCreateForm(const QString& formRootPath)
     return form;
 }
 
-Control* ControlCreationManager::addCreateControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
+Control* ControlCreationManager::createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
 {
     const QString& newControlRootPath = SaveManager::addControl(controlRootPath, targetParentControl->dir());
     if (newControlRootPath.isEmpty()) {
@@ -71,10 +69,6 @@ Control* ControlCreationManager::addCreateControl(Control* targetParentControl, 
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
-    emit instance()->controlCreated(control);
-    // NOTE: InspectorPane dependency: Only emit after adding into db and then reparenting it.
-    // Adding into db is needed because of id refactoring. Reparenting is needed because
-    // InspectorPane needs the parent in order to find out parent QTreeWidgetItem to put it underneath.
 
     QMap<QString, Control*> controlTree;
     controlTree.insert(control->dir(), control);
@@ -85,10 +79,8 @@ Control* ControlCreationManager::addCreateControl(Control* targetParentControl, 
         auto childControl = new Control(SaveUtils::toUrl(childPath));
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
-        emit instance()->controlCreated(childControl);
         controlTree.insert(childPath, childControl);
     }
 
     return control;
 }
-

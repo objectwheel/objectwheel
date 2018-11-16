@@ -417,7 +417,7 @@ void DesignerWidget::onInternalFileOpen(Control* control, const QString& relativ
 void DesignerWidget::onControlDrop(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
 {
     m_designerScene->clearSelection();
-    auto newControl = ControlCreationManager::addCreateControl(targetParentControl, controlRootPath, pos);
+    auto newControl = ControlCreationManager::createControl(targetParentControl, controlRootPath, pos);
     if (newControl)
         newControl->setSelected(true);
     else
