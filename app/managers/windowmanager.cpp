@@ -40,7 +40,7 @@ WindowManager::~WindowManager()
     s_welcomeWindow->deleteLater();
     s_mainWindow->deleteLater();
     s_preferencesWindow->deleteLater();
-    delete s_aboutWindow;
+    s_aboutWindow->deleteLater();
 }
 
 WelcomeWindow* WindowManager::welcomeWindow()

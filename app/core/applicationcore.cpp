@@ -106,12 +106,13 @@ ApplicationCore::ApplicationCore(QApplication* app)
 
     HelpManager::setupHelpManager();
     Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
-    QObject::connect(QApplication::instance(), &QCoreApplication::aboutToQuit,
+    QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
                      s_helpManager, &HelpManager::aboutToShutdown);
 
     s_documentManager = new DocumentManager(app);
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
+
 
     /** Ui initialization **/
     s_windowManager = new WindowManager(app);

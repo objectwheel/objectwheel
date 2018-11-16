@@ -509,7 +509,7 @@ void HelpManager::setupHelpManager()
     d->readSettings();
 
     // create the help engine
-    d->m_helpEngine = new QHelpEngine(collectionFilePath(), m_instance);
+    d->m_helpEngine = new QHelpEngine(collectionFilePath());
     d->m_helpEngine->setAutoSaveFilter(false);
     d->m_helpEngine->setupData();
 
@@ -555,7 +555,7 @@ void HelpManagerPrivate::cleanUpDocumentation()
 HelpManagerPrivate::~HelpManagerPrivate()
 {
     writeSettings();
-    delete m_helpEngine;
+    m_helpEngine->deleteLater();
     m_helpEngine = nullptr;
 }
 
