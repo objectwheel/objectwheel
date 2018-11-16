@@ -14,9 +14,9 @@ class ControlCreationManager final : public QObject
     Q_DISABLE_COPY(ControlCreationManager)
 
     friend class ApplicationCore; // For construction
-    friend class FormsPane; // For addCreateForm
-    friend class DesignerWidget; // For addCreateControl
-    friend class DesignerView; // For addCreateControl
+    friend class FormsPane; // For createForm
+    friend class DesignerWidget; // For createControl
+    friend class DesignerView; // For createControl
 
 public:
     static ControlCreationManager* instance();
