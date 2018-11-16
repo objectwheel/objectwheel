@@ -39,6 +39,7 @@ void RunManager::run()
 
 void RunManager::kill()
 {
+    s_process->terminate();
     s_process->kill();
 }
 

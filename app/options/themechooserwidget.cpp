@@ -527,7 +527,7 @@ void ThemeChooserWidget::discharge()
             m_backgroundColorsCombo->setCurrentText(toItem(m_backgroundColorsCombo, background));
     }
 
-    refresh();
+    QTimer::singleShot(2000, this, &ThemeChooserWidget::refresh);
 }
 
 void ThemeChooserWidget::run()
@@ -541,7 +541,7 @@ void ThemeChooserWidget::run()
 
     wrfile(tmpDir.filePath(FILE_PROJECT), QJsonDocument(jo).toJson());
 
-    static QProcess* process = 0;
+    static QProcess* process = nullptr;
 
     if (process && process->state() == QProcess::Running) {
         process->terminate();
@@ -586,7 +586,7 @@ void ThemeChooserWidget::enable()
 }
 
 void ThemeChooserWidget::refresh()
-{
+{    
     setDisabled(true);
     m_loadingIndicator->start();
 
