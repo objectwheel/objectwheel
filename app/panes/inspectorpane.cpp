@@ -558,6 +558,18 @@ void InspectorPane::onControlParentChange(Control* control)
     if (!isProjectStarted)
         return;
 
+    // Check if already exists, if not --reparented from another form-- add it to the list
+    bool found = false;
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (control->id() == childItem->text(0))
+                found = true;
+        }
+    }
+
+    if (!found)
+        return onControlCreation(control);
+
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (control->id() == childItem->text(0)) {

@@ -31,7 +31,7 @@ void ControlCreationManager::init(DesignerScene* designerScene)
     s_designerScene = designerScene;
 }
 
-Form* ControlCreationManager::createForm(const QString& formRootPath)
+Form* ControlCreationManager::addCreateForm(const QString& formRootPath)
 {
     const QString& newFormRootPath = SaveManager::addForm(formRootPath);
     if (newFormRootPath.isEmpty()) {
@@ -59,7 +59,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     return form;
 }
 
-Control* ControlCreationManager::createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
+Control* ControlCreationManager::addCreateControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
 {
     const QString& newControlRootPath = SaveManager::addControl(controlRootPath, targetParentControl->dir());
     if (newControlRootPath.isEmpty()) {

@@ -14,7 +14,7 @@
 
 namespace {
 
-bool countIdInProjectForms(const QString& id)
+int countIdInProjectForms(const QString& id)
 {
     Q_ASSERT(!id.isEmpty());
 
@@ -256,15 +256,15 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     repairIds(newControlRootPath, true);
 
     for (Control* child : control->childControls()) {
-        const QString& childId = ParserUtils::id(child->url());
         child->setUrl(child->url().replace(control->dir(), newControlRootPath, Qt::CaseInsensitive));
-        child->setId(childId);
+        const QString& childId = ParserUtils::id(child->url());
         Q_ASSERT(!childId.isEmpty());
+        child->setId(childId);
     }
-    const QString& controlId = ParserUtils::id(control->url());
     control->setUrl(SaveUtils::toUrl(newControlRootPath));
-    control->setId(controlId);
+    const QString& controlId = ParserUtils::id(control->url());
     Q_ASSERT(!controlId.isEmpty());
+    control->setId(controlId);
 
     return true;
 }

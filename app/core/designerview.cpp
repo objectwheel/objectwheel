@@ -214,7 +214,6 @@ void DesignerView::onPasteAction()
 
     const CopyPaste::ActionType actionType = CopyPaste::actionType();
     const QList<QPointer<Control>>& controls = CopyPaste::controls();
-    Form* currentForm = scene()->currentForm();
 
     if (actionType == CopyPaste::Cut)
         CopyPaste::invalidate();
@@ -224,22 +223,22 @@ void DesignerView::onPasteAction()
     for (const QPointer<Control>& control : controls) {
         if (control.isNull())
             continue;
+        Q_ASSERT(!control->form());
+
+        Control* newControl = nullptr;
+        if (actionType == CopyPaste::Cut) {
+            ControlPropertyManager::setParent(control, scene()->currentForm(),
+                                              ControlPropertyManager::SaveChanges
+                                              | ControlPropertyManager::UpdatePreviewer);
+        }
 //   WARNING     Control* newControl = ControlCreationManager::createControl(control->dir(),
 //                                                                    control->pos() + QPointF(5, 5),
 //                                                                    suid, currentForm,
 //                                                                    currentForm->dir(),
 //                                                                    currentForm->uid());
-//        newControl->setSelected(true);
+        if (newControl)
+            newControl->setSelected(true);
     }
-
-    QList<Control*> controlsToRemove;
-    for (const QPointer<Control>& control : controls) {
-        if (control)
-            controlsToRemove.append(control.data());
-    }
-
-    if (actionType == CopyPaste::Cut)
-        ControlRemovingManager::removeControls(controlsToRemove);
 }
 
 void DesignerView::onDeleteAction()

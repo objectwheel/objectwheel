@@ -195,12 +195,12 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
               private members and only used by FormsPane.
     */
 
-    connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refresh);
+    connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refresh); // FIXME: This function has severe performance issues.
     connect(this, &FormsPane::currentItemChanged, this, &FormsPane::onCurrentItemChange);
     connect(ProjectManager::instance(), &ProjectManager::started, this, [=] {
         Q_ASSERT(!isProjectStarted);
         isProjectStarted = true;
-        refresh();
+        refresh(); // FIXME: This function has severe performance issues.
     });
 }
 
@@ -222,17 +222,17 @@ void FormsPane::onAddButtonClick()
     if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
         return;
 
-    ControlCreationManager::createForm(tempPath);
+    ControlCreationManager::addCreateForm(tempPath);
 
     rm(tempPath);
 
-    refresh();
+    refresh(); // FIXME: This function has severe performance issues.
 }
 
 void FormsPane::onRemoveButtonClick()
 {
     ControlRemovingManager::removeForm(m_designerScene->currentForm());
-    // refreshList(); // Not needed, m_designerScene already emits currentFormChanged signal
+    // refresh(); // Not needed, m_designerScene already emits currentFormChanged signal
 }
 
 void FormsPane::onCurrentItemChange()
