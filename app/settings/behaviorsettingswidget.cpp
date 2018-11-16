@@ -1,131 +1,34 @@
 #include <behaviorsettingswidget.h>
 #include <codeeditorsettings.h>
+#include <behaviorsettings.h>
+
+#include <QVBoxLayout>
+#include <QCheckBox>
+#include <QGroupBox>
 
 BehaviorSettingsWidget::BehaviorSettingsWidget(QWidget* parent) : SettingsWidget(parent)
-  , m_fontGroup(new QGroupBox(contentWidget()))
-  , m_fontLayout(new QVBoxLayout(m_fontGroup))
-  , m_fontFamilyLabel(new QLabel(m_fontGroup))
-  , m_fontSizeLabel(new QLabel(m_fontGroup))
-  , m_fontFamilyBox(new QComboBox(m_fontGroup))
-  , m_fontSizeBox(new QComboBox(m_fontGroup))
-  , m_fontAntialiasingBox(new QCheckBox(m_fontGroup))
-  , m_fontThickBox(new QCheckBox(m_fontGroup))
-  , m_fontResetButton(new QPushButton(m_fontGroup))
-  /****/
-  , m_schemeListModel(new SchemeListModel(this))
-  , m_colorSchemeGroup(new QGroupBox(contentWidget()))
-  , m_colorSchemeLayout(new QVBoxLayout(m_colorSchemeGroup))
-  , m_colorSchemeBox(new QComboBox(m_colorSchemeGroup))
-  , m_colorSchemeCopyButton(new QPushButton(m_colorSchemeGroup))
-  , m_colorSchemeDeleteButton(new QPushButton(m_colorSchemeGroup))
-  , m_colorSchemeEdit(new TextEditor::Internal::ColorSchemeEdit(m_colorSchemeGroup))
+  , m_savingGroup(new QGroupBox(contentWidget()))
+  , m_savingLayout(new QVBoxLayout(m_savingGroup))
+  , m_autoSaveAfterRunningBox(new QCheckBox(m_savingGroup))
 {
-    contentLayout()->addWidget(m_fontGroup);
-    contentLayout()->addWidget(m_colorSchemeGroup);
+    contentLayout()->addWidget(m_savingGroup);
     contentLayout()->addStretch();
 
     /****/
 
-    auto hb1 = new QHBoxLayout;
-    hb1->setSpacing(8);
-    hb1->setContentsMargins(0, 0, 0, 0);
-    hb1->addWidget(m_fontFamilyLabel);
-    hb1->addWidget(m_fontFamilyBox);
-    hb1->addSpacing(20);
-    hb1->addWidget(m_fontSizeLabel);
-    hb1->addWidget(m_fontSizeBox);
-    hb1->addSpacing(30);
-    hb1->addWidget(m_fontResetButton);
-    hb1->addStretch();
-    auto hb2 = new QHBoxLayout;
-    hb2->setSpacing(8);
-    hb2->setContentsMargins(0, 0, 0, 0);
-    hb2->addWidget(m_fontAntialiasingBox);
-    hb2->addWidget(m_fontThickBox);
-    hb2->addStretch();
+    m_savingLayout->setSpacing(8);
+    m_savingLayout->setContentsMargins(6, 6, 6, 6);
+    m_savingLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    m_savingLayout->addWidget(m_autoSaveAfterRunningBox);
 
-    m_fontLayout->setSpacing(8);
-    m_fontLayout->setContentsMargins(6, 6, 6, 6);
-    m_fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_fontLayout->addLayout(hb1);
-    m_fontLayout->addLayout(hb2);
+    m_savingGroup->setTitle(tr("Saving"));
+    m_autoSaveAfterRunningBox->setText(tr("Auto save code changes before user runs a project"));
 
-    m_fontGroup->setTitle(tr("Font"));
-    m_fontFamilyLabel->setText(tr("Family") + ":");
-    m_fontFamilyBox->addItems(QFontDatabase().families());
-    m_fontSizeLabel->setText(tr("Size") + ":");
-    m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
-                             "18", "24", "36", "48", "64", "72", "96", "144"});
-    m_fontAntialiasingBox->setText(tr("Prefer antialiasing"));
-    m_fontThickBox->setText(tr("Prefer thicker"));
-    m_fontResetButton->setText(tr("Reset"));
+    m_autoSaveAfterRunningBox->setToolTip(tr("Enable automatic code saving right before user runs a project"));
 
-    m_fontFamilyBox->setToolTip(tr("Chage font family"));
-    m_fontSizeBox->setToolTip(tr("Chage font pixel size"));
-    m_fontAntialiasingBox->setToolTip(tr("Enable font antialiasing"));
-    m_fontThickBox->setToolTip(tr("Enable text thickness increasing"));
-    m_fontResetButton->setToolTip(tr("Reset font settings to default"));
-
-    m_fontFamilyBox->setCursor(Qt::PointingHandCursor);
-    m_fontSizeBox->setCursor(Qt::PointingHandCursor);
-    m_fontAntialiasingBox->setCursor(Qt::PointingHandCursor);
-    m_fontThickBox->setCursor(Qt::PointingHandCursor);
-    m_fontResetButton->setCursor(Qt::PointingHandCursor);
+    m_autoSaveAfterRunningBox->setCursor(Qt::PointingHandCursor);
 
     /****/
-
-    auto hb3 = new QHBoxLayout;
-    hb3->setSpacing(8);
-    hb3->setContentsMargins(0, 0, 0, 0);
-    hb3->addWidget(m_colorSchemeBox);
-    hb3->addWidget(m_colorSchemeCopyButton);
-    hb3->addWidget(m_colorSchemeDeleteButton);
-    hb3->addStretch();
-
-    m_colorSchemeLayout->setSpacing(8);
-    m_colorSchemeLayout->setContentsMargins(6, 6, 6, 6);
-    m_colorSchemeLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_colorSchemeLayout->addLayout(hb3);
-    m_colorSchemeLayout->addWidget(m_colorSchemeEdit);
-
-    m_colorSchemeGroup->setTitle(tr("Color Scheme"));
-    m_colorSchemeDeleteButton->setText(tr("Delete"));
-    m_colorSchemeCopyButton->setText(tr("Copy") + "...");
-
-    m_colorSchemeBox->setToolTip(tr("Chage code color scheme"));
-    m_colorSchemeCopyButton->setToolTip(tr("Copy and create new color scheme from current scheme"));
-    m_colorSchemeDeleteButton->setToolTip(tr("Delete current color scheme"));
-
-    m_colorSchemeBox->setCursor(Qt::PointingHandCursor);
-    m_colorSchemeCopyButton->setCursor(Qt::PointingHandCursor);
-    m_colorSchemeDeleteButton->setCursor(Qt::PointingHandCursor);
-
-    m_colorSchemeBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    m_colorSchemeEdit->setFormatDescriptions(FormatDescription::defaultFormatDescriptions());
-    m_colorSchemeBox->setModel(m_schemeListModel);
-
-    /****/
-
-    addSchemes(m_schemeListModel);
-    onFontOptionsChange();
-    onColorOptionsChange(m_colorSchemeBox->currentIndex());
-
-    connect(m_colorSchemeBox, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, &BehaviorSettingsWidget::onColorOptionsChange);
-    connect(m_fontFamilyBox, &QComboBox::currentTextChanged,
-            this, &BehaviorSettingsWidget::onFontOptionsChange);
-    connect(m_fontSizeBox, &QComboBox::currentTextChanged,
-            this, &BehaviorSettingsWidget::onFontOptionsChange);
-    connect(m_fontThickBox, &QCheckBox::toggled,
-            this, &BehaviorSettingsWidget::onFontOptionsChange);
-    connect(m_fontAntialiasingBox, &QCheckBox::toggled,
-            this, &BehaviorSettingsWidget::onFontOptionsChange);
-    connect(m_fontResetButton, &QPushButton::clicked,
-            this, &BehaviorSettingsWidget::onFontResetButtonClick);
-    connect(m_colorSchemeCopyButton, &QPushButton::clicked,
-            this, &BehaviorSettingsWidget::onColorSchemeCopyButtonClick);
-    connect(m_colorSchemeDeleteButton, &QPushButton::clicked,
-            this, &BehaviorSettingsWidget::onColorSchemeDeleteButtonClick);
 
     activate();
     reset();
@@ -138,20 +41,11 @@ void BehaviorSettingsWidget::apply()
 
     activate(false);
 
-    BehaviorSettings* settings = CodeEditorSettings::BehaviorSettings();
+    BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
     /****/
-    settings->fontFamily = m_fontFamilyBox->currentText();
-    settings->fontPixelSize = m_fontSizeBox->currentText().toInt();
-    settings->fontPreferThick = m_fontThickBox->isChecked();
-    settings->fontPreferAntialiasing = m_fontAntialiasingBox->isChecked();
-    /****/
-    Q_ASSERT(m_colorSchemeBox->currentIndex() >= 0);
-    settings->colorSchemeFileName = m_schemeListModel->colorSchemeAt(m_colorSchemeBox->currentIndex()).fileName;
-    settings->colorScheme = m_colorSchemeEdit->colorScheme();
+    settings->autoSaveBeforeRunning  = m_autoSaveAfterRunningBox->isChecked();
     /****/
     settings->write();
-
-    m_colorSchemeEdit->setOriginalColorScheme(settings->colorScheme);
 }
 
 void BehaviorSettingsWidget::reset()
@@ -161,206 +55,24 @@ void BehaviorSettingsWidget::reset()
 
     activate(false);
 
-    const BehaviorSettings* settings = CodeEditorSettings::BehaviorSettings();
+    const BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
     /****/
-    m_fontFamilyBox->setCurrentText(settings->fontFamily);
-    m_fontSizeBox->setCurrentText(QString::number(settings->fontPixelSize));
-    m_fontThickBox->setChecked(settings->fontPreferThick);
-    m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
-    /****/
-    g_disableSaving = true;
-    m_colorSchemeBox->setCurrentIndex(-1);
-    setCurrentColorScheme(settings->colorSchemeFileName);
-    g_disableSaving = false;
+    m_autoSaveAfterRunningBox->setChecked(settings->autoSaveBeforeRunning);
 }
 
 QIcon BehaviorSettingsWidget::icon() const
 {
-    return QIcon(":/images/settings/fontcolors.png");
+    return QIcon(":/images/settings/behavior.png");
 }
 
 QString BehaviorSettingsWidget::title() const
 {
-    return tr("Font") + " && " + tr("Colors");
+    return tr("Behavior");
 }
 
 bool BehaviorSettingsWidget::containsWord(const QString& word) const
 {
     return title().contains(word, Qt::CaseInsensitive)
-            || m_fontGroup->title().contains(word, Qt::CaseInsensitive)
-            || m_colorSchemeGroup->title().contains(word, Qt::CaseInsensitive)
-            || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
-            || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
-            || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
-            || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
-            || m_colorSchemeDeleteButton->text().contains(word, Qt::CaseInsensitive)
-            || m_colorSchemeCopyButton->text().contains(word, Qt::CaseInsensitive)
-            || m_colorSchemeBox->toolTip().contains(word, Qt::CaseInsensitive)
-            || m_colorSchemeCopyButton->toolTip().contains(word, Qt::CaseInsensitive)
-            || m_colorSchemeDeleteButton->toolTip().contains(word, Qt::CaseInsensitive)
-            || UtilityFunctions::comboContainsWord(m_colorSchemeBox, word)
-            || formatDescriptionsContainsWord(word);
-}
-
-void BehaviorSettingsWidget::onFontOptionsChange()
-{
-    QFont font(m_fontFamilyBox->currentText());
-    font.setStyleStrategy(m_fontAntialiasingBox->isChecked() ? QFont::PreferAntialias : QFont::NoAntialias);
-    font.setPixelSize(m_fontSizeBox->currentText().toInt());
-    font.setBold(m_fontThickBox->isChecked());
-    m_colorSchemeEdit->setBaseFont(font);
-}
-
-void BehaviorSettingsWidget::onColorOptionsChange(int index)
-{
-    static int lastIndex = -1;
-    bool readOnly = true;
-    if (index != -1) {
-        if (lastIndex >= 0) {
-            const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-            maybeSaveColorScheme(entry.fileName);
-        }
-
-        const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-        readOnly = entry.readOnly;
-        TextEditor::ColorScheme colorScheme;
-        TextEditor::ColorScheme::loadColorSchemeInto(colorScheme, entry.fileName);
-        m_colorSchemeEdit->setColorScheme(colorScheme);
-    }
-    m_colorSchemeCopyButton->setEnabled(index != -1);
-    m_colorSchemeDeleteButton->setEnabled(!readOnly);
-    m_colorSchemeEdit->setReadOnly(readOnly);
-    lastIndex = index;
-}
-
-void BehaviorSettingsWidget::onFontResetButtonClick()
-{
-    const BehaviorSettings settings;
-    m_fontFamilyBox->setCurrentText(settings.fontFamily);
-    m_fontSizeBox->setCurrentText(QString::number(settings.fontPixelSize));
-    m_fontThickBox->setChecked(settings.fontPreferThick);
-    m_fontAntialiasingBox->setChecked(settings.fontPreferAntialiasing);
-}
-
-void BehaviorSettingsWidget::onColorSchemeCopyButtonClick()
-{
-    static QInputDialog* dialog = [this] () -> QInputDialog* {
-        auto dialog = new QInputDialog(this->window());
-        dialog->setInputMode(QInputDialog::TextInput);
-        dialog->setWindowTitle(tr("Copy Color Scheme"));
-        dialog->setLabelText(tr("Color scheme name:"));
-        connect(dialog, &QInputDialog::textValueSelected,
-                this, [=] (const QString& name) {
-            int index = m_colorSchemeBox->currentIndex();
-            if (index == -1)
-                return;
-
-            const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-            QString baseFileName = QFileInfo(entry.fileName).completeBaseName();
-            baseFileName += QLatin1String("_copy%1.xml");
-            QString fileName = createColorSchemeFileName(baseFileName);
-
-            if (!fileName.isEmpty()) {
-                // Ask about saving any existing modifactions
-                maybeSaveColorScheme(entry.fileName);
-
-                TextEditor::ColorScheme scheme = m_colorSchemeEdit->colorScheme();
-                scheme.setDisplayName(name);
-                scheme.save(fileName, window());
-
-                QList<ColorSchemeEntry> colorSchemes(m_schemeListModel->colorSchemes());
-                colorSchemes.append(ColorSchemeEntry(fileName, false));
-                m_schemeListModel->setColorSchemes(colorSchemes);
-                setCurrentColorScheme(fileName);
-            }
-        });
-        return dialog;
-    }();
-    dialog->setTextValue(tr("%1 (copy)").arg(m_colorSchemeEdit->colorScheme().displayName()));
-    dialog->open();
-}
-
-void BehaviorSettingsWidget::onColorSchemeDeleteButtonClick()
-{
-    const int index = m_colorSchemeBox->currentIndex();
-    if (index == -1)
-        return;
-
-    const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-    if (entry.readOnly)
-        return;
-
-    static QMessageBox* messageBox = [this] () -> QMessageBox* {
-        auto messageBox = new QMessageBox(QMessageBox::Warning,
-                                          tr("Delete Color Scheme"),
-                                          tr("Are you sure you want to delete this color scheme permanently?"),
-                                          QMessageBox::Discard | QMessageBox::Cancel,
-                                          window());
-        // Change the text and role of the discard button
-        QPushButton* deleteButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
-        deleteButton->setText(tr("Delete"));
-        messageBox->addButton(deleteButton, QMessageBox::AcceptRole);
-        messageBox->setDefaultButton(deleteButton);
-
-        connect(deleteButton, &QAbstractButton::clicked, messageBox, &QDialog::accept);
-        connect(messageBox, &QDialog::accepted, this, [=] {
-            const int index = m_colorSchemeBox->currentIndex();
-            Q_ASSERT(index >= 0);
-
-            const ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-            Q_ASSERT(!entry.readOnly);
-
-            if (QFile::remove(entry.fileName))
-                m_schemeListModel->removeColorScheme(index);
-        });
-        return messageBox;
-    }();
-
-    messageBox->open();
-}
-
-void BehaviorSettingsWidget::maybeSaveColorScheme(const QString& fileName)
-{
-    if (g_disableSaving)
-        return;
-
-    if (fileName.isEmpty())
-        return;
-
-    if (m_colorSchemeEdit->isReadOnly())
-        return;
-
-    if (!m_colorSchemeEdit->isModified())
-        return;
-
-    static QMessageBox* messageBox = [this] () -> QMessageBox* {
-            auto messageBox = new QMessageBox(QMessageBox::Warning,
-                                              tr("Color Scheme Changed"),
-                                              tr("The color scheme \"%1\" was modified, do you want to save the changes?")
-                                              .arg(m_colorSchemeEdit->colorScheme().displayName()),
-                                              QMessageBox::Discard | QMessageBox::Save,
-                                              window());
-            // Change the text of the discard button
-            QPushButton* discardButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
-            discardButton->setText(tr("Discard"));
-            messageBox->addButton(discardButton, QMessageBox::DestructiveRole);
-            messageBox->setDefaultButton(QMessageBox::Save);
-            return messageBox;
-    }();
-
-    if (messageBox->exec() == QMessageBox::Save) {
-        const TextEditor::ColorScheme& scheme = m_colorSchemeEdit->colorScheme();
-        scheme.save(fileName, window());
-    }
-}
-
-void BehaviorSettingsWidget::setCurrentColorScheme(const QString& fileName)
-{
-    for (int i = 0; i < m_colorSchemeBox->count(); ++i) {
-        if (QFileInfo(m_schemeListModel->colorSchemeAt(i).fileName).canonicalFilePath()
-                == QFileInfo(fileName).canonicalFilePath()) {
-            m_colorSchemeBox->setCurrentIndex(i);
-            break;
-        }
-    }
+            || m_savingGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_autoSaveAfterRunningBox->text().contains(word, Qt::CaseInsensitive);
 }
