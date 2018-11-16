@@ -14,13 +14,13 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QRegularExpression>
-// WARNING: Bu dosyadaki warning leri ve yukarıdaki includeları düzelt
+//! WARNING: Bu dosyadaki warning leri ve yukarıdaki includeları düzelt
 
 namespace {
 
 QString detectedFormRootPath(const QString& rootPath)
 {
-    // FIXME: This might crash on Windows due to back-slash path names
+    //! FIXME: This might crash on Windows due to back-slash path names
     Q_ASSERT(!ProjectManager::dir().isEmpty());
     const QString& owdbDir = SaveUtils::toOwdbDir(ProjectManager::dir()) + separator();
     const QString& formRootPath = QRegularExpression("^" + owdbDir + "\\d+").match(rootPath).captured();
@@ -99,7 +99,7 @@ bool SaveManager::addForm(const QString& formRootPath)
     Q_ASSERT(!ProjectManager::dir().isEmpty());
 
     if (!SaveUtils::isOwctrl(formRootPath)) {
-        qWarning("SaveManager::addControl: Failed. Form data broken.");
+        qWarning("SaveManager::addForm: Failed. Form data broken.");
         return false;
     }
 
@@ -108,12 +108,12 @@ bool SaveManager::addForm(const QString& formRootPath)
             QString::number(SaveUtils::biggestDir(targetOwdbDir) + 1);
 
     if (!mkdir(newFormRootPath)) {
-        qWarning("SaveManager::addControl: Failed. Cannot create the new form root path.");
+        qWarning("SaveManager::addForm: Failed. Cannot create the new form root path.");
         return false;
     }
 
     if (!cp(formRootPath, newFormRootPath, true)) {
-        qWarning("SaveManager::addControl: Failed. Cannot copy the control to its new root path.");
+        qWarning("SaveManager::addForm: Failed. Cannot copy the control to its new root path.");
         return false;
     }
 
@@ -197,49 +197,53 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
     return true;
 }
 
-// You can only move controls within current suid scope of related control
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
 {
-    if (SaveUtils::toParentDir(control->dir()) == parentControl->dir())
+    if (!SaveUtils::isOwctrl(control->dir()) || !SaveUtils::isOwctrl(parentControl->dir())) {
+        qWarning("SaveManager::moveControl: Failed. One or more control broken.");
+        return false;
+    }
+
+    if (QString::compare(SaveUtils::toParentDir(control->dir()),
+                         parentControl->dir(), Qt::CaseInsensitive) == 0) {
         return true;
+    }
 
-    if (control->id().isEmpty() || control->url().isEmpty())
+    const QString& targetControlChildrenDir = SaveUtils::toChildrenDir(parentControl->dir());
+    const QString& targetControlDir = targetControlChildrenDir + separator()
+            + QString::number(SaveUtils::biggestDir(targetControlChildrenDir) + 1);
+
+    if (!mkdir(targetControlDir)) {
+        qWarning("SaveManager::moveControl: Failed. Cannot create the new control root path.");
         return false;
+    }
 
-    if (parentControl->url().isEmpty())
+    if (!cp(control->dir(), targetControlDir, true)) {
+        qWarning("SaveManager::moveControl: Failed. Cannot copy the control to its new root path.");
         return false;
-
-    if (!SaveUtils::isOwctrl(control->dir()) || !SaveUtils::isOwctrl(parentControl->dir()))
-        return false;
-
-    if (!parentControl->form())
-        return false;
-
-    auto baseDir = parentControl->dir() + separator() + DIR_CHILDREN;
-    auto controlDir = baseDir + separator() + QString::number(SaveUtils::biggestDir(baseDir) + 1);
-
-    if (!mkdir(controlDir))
-        return false;
-
-    if (!cp(control->dir(), controlDir, true))
-        return false;
+    }
 
     if (!rm(control->dir()))
         return false;
 
-    for (auto child : control->childControls())
-        child->setUrl(child->url().replace(control->dir(), controlDir));
-    control->setUrl(SaveUtils::toUrl(controlDir));
+    for (Control* child : control->childControls())
+        child->setUrl(child->url().replace(control->dir(), targetControlDir));
+    control->setUrl(SaveUtils::toUrl(targetControlDir));
 
     return true;
 }
 
 void SaveManager::removeControl(const QString& rootPath)
 {
-    if (!SaveUtils::isOwctrl(rootPath))
+    if (!SaveUtils::isOwctrl(rootPath)) {
+        qWarning("SaveManager::removeControl: Failed. Control data broken.");
         return;
+    }
 
-    rm(rootPath);
+    if (!rm(rootPath)) {
+        qWarning("SaveManager::removeControl: Removal failed.");
+        return;
+    }
 }
 
 /*!
@@ -271,7 +275,7 @@ void SaveManager::repairIds(const QString& rootPath, bool recursive)
     }
 }
 
-/*
+/*!
     NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
 */
 void SaveManager::setProperty(Control* control, const QString& property, const QString& value)

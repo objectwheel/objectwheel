@@ -295,7 +295,6 @@ void SaveUtils::setProjectProperty(const QString& projectDir, const QString& pro
 
 /*
     Recalculates all uids belongs to given control and its children (all).
-    Suids and everything that are related to given uid also updated in control files.
 */
 void SaveUtils::regenerateUids(const QString& topPath)
 {
