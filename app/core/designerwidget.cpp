@@ -414,12 +414,14 @@ void DesignerWidget::onInternalFileOpen(Control* control, const QString& relativ
     m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
 }
 
-void DesignerWidget::onControlDrop(Control* control, const QPointF& pos, const QString& url)
+void DesignerWidget::onControlDrop(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
 {
     m_designerScene->clearSelection();
-    auto newControl = ControlCreationManager::createControl(SaveUtils::toParentDir(url), pos,
-                                                            "NULL", control, m_designerScene->currentForm()->dir(), m_designerScene->currentForm()->uid());
-    newControl->setSelected(true);
+    auto newControl = ControlCreationManager::createControl(targetParentControl, controlRootPath, pos);
+    if (newControl)
+        newControl->setSelected(true);
+    else
+        QMessageBox::critical(this, tr("Oops"), tr("Operation failed, control has problems."));
 }
 
 void DesignerWidget::onControlSelectionChange(const QList<Control*>& selectedControls)

@@ -325,11 +325,14 @@ void Control::dropControl(Control* control)
 
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
+    // FIXME: Move this out of Control.cpp. Move everything unrelated with a Control
+    // to DesignerView or DesignerScene or somewhere else that is related to.
     m_dragIn = false;
     event->accept();
     WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(
-                this, event->pos(),
-                event->mimeData()->urls().first().toLocalFile());
+                this,
+                SaveUtils::toParentDir(event->mimeData()->urls().first().toLocalFile()),
+                event->pos());
     update();
 }
 

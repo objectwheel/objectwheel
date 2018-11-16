@@ -229,12 +229,12 @@ void DesignerView::onPasteAction()
     for (const QPointer<Control>& control : controls) {
         if (control.isNull())
             continue;
-        Control* newControl = ControlCreationManager::createControl(control->dir(),
-                                                                    control->pos() + QPointF(5, 5),
-                                                                    suid, currentForm,
-                                                                    currentForm->dir(),
-                                                                    currentForm->uid());
-        newControl->setSelected(true);
+//   WARNING     Control* newControl = ControlCreationManager::createControl(control->dir(),
+//                                                                    control->pos() + QPointF(5, 5),
+//                                                                    suid, currentForm,
+//                                                                    currentForm->dir(),
+//                                                                    currentForm->uid());
+//        newControl->setSelected(true);
     }
 
     QList<Control*> controlsToRemove;

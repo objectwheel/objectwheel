@@ -25,17 +25,16 @@ private:
 
     static bool initProject(const QString& projectDirectory, int templateNumber);
 
-    static void setProperty(Control* control, const QString& property, const QString& value);
-
-    static bool addForm(const QString& formRootPath);
+    static QString addForm(const QString& formRootPath);
     static void removeForm(const QString& formRootPath);
     static void setupFormGlobalConnections(const QString& formRootPath);
 
-    static bool addControl(const QString& controlRootPath, const QString& targetParentControlRootPath);
+    static QString addControl(const QString& controlRootPath, const QString& targetParentControlRootPath);
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const QString& rootPath);
 
     static void repairIds(const QString& rootPath, bool recursive);
+    static void setProperty(Control* control, const QString& property, const QString& value);
 
 signals:
     void formGlobalConnectionsDone(const QString& FormJS, const QString& id);

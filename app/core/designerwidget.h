@@ -28,7 +28,7 @@ public slots:
     void onInspectorItemDoubleClick(Control*);
     void onGlobalFileOpen(const QString& relativePath, int line, int column);
     void onInternalFileOpen(Control* control, const QString& relativePath, int line, int column);
-    void onControlDrop(Control*, const QPointF&, const QString&);
+    void onControlDrop(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos);
     void onControlSelectionChange(const QList<Control*>& selectedControls);
 
 protected:

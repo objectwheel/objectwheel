@@ -43,7 +43,7 @@ void ControlRemovingManager::removeForm(Form* form)
 
     ControlPreviewingManager::scheduleFormDeletion(form->uid());
 
-    //    WARNING SaveManager::removeForm(form);
+    SaveManager::removeForm(form->dir());
     s_designerScene->removeForm(form);
 }
 
@@ -59,7 +59,7 @@ void ControlRemovingManager::removeControl(Control* control)
 
     ControlPreviewingManager::scheduleControlDeletion(control->uid());
 
-//    WARNING SaveManager::removeControl(control);
+    SaveManager::removeControl(control->dir());
     s_designerScene->removeControl(control);
 }
 

@@ -31,23 +31,25 @@ void ControlCreationManager::init(DesignerScene* designerScene)
     s_designerScene = designerScene;
 }
 
-Form* ControlCreationManager::createForm(const QString& rootPath)
+Form* ControlCreationManager::createForm(const QString& formRootPath)
 {
-    auto form = new Form(SaveUtils::toUrl(rootPath));
+    const QString& newFormRootPath = SaveManager::addForm(formRootPath);
+    if (newFormRootPath.isEmpty()) {
+        qWarning("ControlCreationManager::createForm: Failed.");
+        return nullptr;
+    }
 
-    if (SaveUtils::isMain(rootPath))
+    auto form = new Form(SaveUtils::toUrl(newFormRootPath));
+
+    if (SaveUtils::isMain(newFormRootPath))
         form->setMain(true);
 
-//    WARNING    SaveManager::addForm(form);
     s_designerScene->addForm(form);
 
-    if (form->id() != SaveUtils::id(form->dir()))
-        SaveUtils::setProperty(form->dir(), TAG_ID, form->id());
-
-    //    WARNING SaveManager::setupFormGlobalConnections(form);
+    SaveManager::setupFormGlobalConnections(form->dir());
 
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
-    // parent concept for forms in Designer; fors are directly put into DesignerScene
+    // parent concept for forms in Designer; forms are directly put into DesignerScene
 
     ControlPreviewingManager::scheduleFormCreation(form->dir());
 
@@ -57,19 +59,18 @@ Form* ControlCreationManager::createForm(const QString& rootPath)
     return form;
 }
 
-Control* ControlCreationManager::createControl(const QString& rootPath, const QPointF& pos, QString sourceSuid,
-                                               Control* parentControl, QString destinationPath,
-                                               QString destinationSuid)
+Control* ControlCreationManager::createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
 {
-    auto control = new Control(SaveUtils::toUrl(rootPath));
-//    WARNING    SaveManager::addControl(control, parentControl, destinationSuid, destinationPath);
+    const QString& newControlRootPath = SaveManager::addControl(controlRootPath, targetParentControl->dir());
+    if (newControlRootPath.isEmpty()) {
+        qWarning("ControlCreationManager::createControl: Failed.");
+        return nullptr;
+    }
 
-    if (control->id() != SaveUtils::id(control->dir()))
-        SaveUtils::setProperty(control->dir(), TAG_ID, control->id());
-
-    ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
+    auto control = new Control(SaveUtils::toUrl(newControlRootPath));
+    ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
-    ControlPreviewingManager::scheduleControlCreation(control->dir(), parentControl->uid());
+    ControlPreviewingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
     emit instance()->controlCreated(control);
     // NOTE: InspectorPane dependency: Only emit after adding into db and then reparenting it.
     // Adding into db is needed because of id refactoring. Reparenting is needed because
@@ -77,19 +78,14 @@ Control* ControlCreationManager::createControl(const QString& rootPath, const QP
 
     QMap<QString, Control*> controlTree;
     controlTree.insert(control->dir(), control);
-
     for (const QString& childPath : SaveUtils::childrenPaths(control->dir())) {
         Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
         Q_ASSERT(parentControl);
 
         auto childControl = new Control(SaveUtils::toUrl(childPath));
-        if (childControl->id() != SaveUtils::id(childControl->dir()))
-            SaveUtils::setProperty(childControl->dir(), TAG_ID, childControl->id());
-
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         emit instance()->controlCreated(childControl);
-
         controlTree.insert(childPath, childControl);
     }
 
