@@ -200,7 +200,7 @@ bool SaveManager::addControl(const QString& controlRootPath, const QString& targ
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
 {
     if (!SaveUtils::isOwctrl(control->dir()) || !SaveUtils::isOwctrl(parentControl->dir())) {
-        qWarning("SaveManager::moveControl: Failed. One or more control broken.");
+        qWarning("SaveManager::moveControl: Failed. One or more control data broken.");
         return false;
     }
 
@@ -210,25 +210,32 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     }
 
     const QString& targetControlChildrenDir = SaveUtils::toChildrenDir(parentControl->dir());
-    const QString& targetControlDir = targetControlChildrenDir + separator()
+    const QString& newControlRootPath = targetControlChildrenDir + separator()
             + QString::number(SaveUtils::biggestDir(targetControlChildrenDir) + 1);
 
-    if (!mkdir(targetControlDir)) {
+    if (!mkdir(newControlRootPath)) {
         qWarning("SaveManager::moveControl: Failed. Cannot create the new control root path.");
         return false;
     }
 
-    if (!cp(control->dir(), targetControlDir, true)) {
+    if (!cp(control->dir(), newControlRootPath, true)) {
         qWarning("SaveManager::moveControl: Failed. Cannot copy the control to its new root path.");
         return false;
     }
 
-    if (!rm(control->dir()))
+    if (!rm(control->dir())) {
+        qWarning("SaveManager::removeControl: Removal failed.");
         return false;
+    }
 
-    for (Control* child : control->childControls())
-        child->setUrl(child->url().replace(control->dir(), targetControlDir));
-    control->setUrl(SaveUtils::toUrl(targetControlDir));
+    repairIds(newControlRootPath, true);
+
+    for (Control* child : control->childControls()) {
+        child->setUrl(child->url().replace(control->dir(), newControlRootPath, Qt::CaseInsensitive));
+        child->setId(SaveUtils::id(child->dir()));
+    }
+    control->setUrl(SaveUtils::toUrl(newControlRootPath));
+    control->setId(SaveUtils::id(control->dir()));
 
     return true;
 }
