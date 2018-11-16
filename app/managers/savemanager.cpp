@@ -8,27 +8,24 @@
 #include <utilityfunctions.h>
 #include <QRegularExpression>
 
-namespace {
+// TODO: Change QString with QLatin1String whenever it is possible
+// TODO: Always use case insensitive comparison when it is possible
+// TODO: Make a performance test over file system and Qml Parser usage, and improve them
 
-QString detectedFormRootPath(const QString& rootPath)
-{
-    //! FIXME: This might crash on Windows due to back-slash path names
-    Q_ASSERT(!ProjectManager::dir().isEmpty());
-    const QString& owdbDir = SaveUtils::toOwdbDir(ProjectManager::dir()) + separator();
-    const QString& formRootPath = QRegularExpression("^" + owdbDir + "\\d+").match(rootPath).captured();
-    Q_ASSERT(!formRootPath.isEmpty());
-    Q_ASSERT(exists(formRootPath));
-    Q_ASSERT(SaveUtils::isForm(formRootPath));
-    return formRootPath;
-}
+namespace {
 
 bool countIdInProjectForms(const QString& id)
 {
     Q_ASSERT(!id.isEmpty());
 
     int counter = 0;
-    for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
-        if (ParserUtils::id(SaveUtils::toUrl(formPath)) == id)
+    for (const QString& formRootPath : SaveUtils::formPaths(ProjectManager::dir())) {
+        const QString& formId = ParserUtils::id(SaveUtils::toUrl(formRootPath));
+        if (formId.isEmpty()) {
+            qWarning("SaveManager::countIdInProjectForms: Empty id detected! Control: %s",
+                     formRootPath.toUtf8().constData());
+        }
+        if (formId == id)
             ++counter;
     }
 
@@ -42,7 +39,12 @@ int countIdInControlChildrenScope(const QString& id, const QString rootPath)
 
     int counter = 0;
     for (const QString& controlRootPath : SaveUtils::childrenPaths(rootPath)) {
-        if (ParserUtils::id(SaveUtils::toUrl(controlRootPath)) == id)
+        const QString& controlId = ParserUtils::id(SaveUtils::toUrl(controlRootPath));
+        if (controlId.isEmpty()) {
+            qWarning("SaveManager::ccountIdInControlChildrenScope: Empty id detected! Control: %s",
+                     controlRootPath.toUtf8().constData());
+        }
+        if (controlId == id)
             ++counter;
     }
 
@@ -52,6 +54,47 @@ int countIdInControlChildrenScope(const QString& id, const QString rootPath)
 inline int countIdInProjectFormScope(const QString& id, const QString formRootPath)
 {
     return countIdInProjectForms(id) + countIdInControlChildrenScope(id, formRootPath);
+}
+
+QString detectedFormRootPath(const QString& rootPath)
+{
+    //! FIXME: This might crash on Windows due to back-slash path names
+    Q_ASSERT(!ProjectManager::dir().isEmpty());
+    const QString& owdbDir = SaveUtils::toOwdbDir(ProjectManager::dir()) + separator();
+    const QString& formRootPath = QRegularExpression("^" + owdbDir + "\\d+").match(rootPath).captured();
+    Q_ASSERT(!formRootPath.isEmpty());
+    Q_ASSERT(exists(formRootPath));
+    Q_ASSERT(SaveUtils::isForm(formRootPath));
+    return formRootPath;
+}
+
+/*!
+    Empty ids corrected
+    Non-unique ids made unique
+    Id conflicts on main.qml and control meta files fixed (the id of the control meta file takes precedence)
+*/
+void repairIds(const QString& rootPath, bool recursive)
+{
+    QStringList controlRootPaths;
+    controlRootPaths.append(rootPath);
+
+    if (recursive)
+        controlRootPaths.append(SaveUtils::childrenPaths(rootPath));
+
+    const QString& formRootPath = detectedFormRootPath(rootPath);
+
+    for (const QString& controlRootPath : controlRootPaths) {
+        const QString& idOrig = ParserUtils::id(SaveUtils::toUrl(controlRootPath));
+
+        QString id(idOrig);
+        if (id.isEmpty())
+            id = "control";
+
+        while (countIdInProjectFormScope(id, formRootPath) > (id == idOrig ? 1 : 0))
+            id = UtilityFunctions::increasedNumberedText(id, false, true);
+
+        ParserUtils::setId(SaveUtils::toUrl(controlRootPath), id);
+    }
 }
 }
 
@@ -69,35 +112,6 @@ SaveManager::~SaveManager()
 SaveManager* SaveManager::instance()
 {
     return s_instance;
-}
-
-/*!
-    Empty ids corrected
-    Non-unique ids made unique
-    Id conflicts on main.qml and control meta files fixed (the id of the control meta file takes precedence)
-*/
-void SaveManager::repairIds(const QString& rootPath, bool recursive)
-{
-    QStringList controlRootPaths;
-    controlRootPaths.append(rootPath);
-
-    if (recursive)
-        controlRootPaths.append(SaveUtils::childrenPaths(rootPath));
-
-    const QString& formRootPath = detectedFormRootPath(rootPath);
-
-    for (const QString& controlRootPath : controlRootPaths) {
-        const QString& idOrig = SaveUtils::id(controlRootPath);
-
-        QString id(idOrig);
-        if (id.isEmpty())
-            id = "control";
-
-        while (countIdInProjectFormScope(id, formRootPath) > (id == idOrig ? 1 : 0))
-            id = UtilityFunctions::increasedNumberedText(id, false, true);
-
-        ParserUtils::setId(SaveUtils::toUrl(controlRootPath), id);
-    }
 }
 
 bool SaveManager::initProject(const QString& projectDirectory, int templateNumber)
@@ -242,11 +256,15 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     repairIds(newControlRootPath, true);
 
     for (Control* child : control->childControls()) {
+        const QString& childId = ParserUtils::id(child->url());
         child->setUrl(child->url().replace(control->dir(), newControlRootPath, Qt::CaseInsensitive));
-        child->setId(SaveUtils::id(child->dir()));
+        child->setId(childId);
+        Q_ASSERT(!childId.isEmpty());
     }
+    const QString& controlId = ParserUtils::id(control->url());
     control->setUrl(SaveUtils::toUrl(newControlRootPath));
-    control->setId(SaveUtils::id(control->dir()));
+    control->setId(controlId);
+    Q_ASSERT(!controlId.isEmpty());
 
     return true;
 }
@@ -304,8 +322,9 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
 
         ParserUtils::setId(control->url(), copy);
         repairIds(control->dir(), false);
-        copy = SaveUtils::id(control->dir());
+        copy = ParserUtils::id(control->url());
         control->setId(copy);
+        Q_ASSERT(!copy.isEmpty());
     } else {
         ParserUtils::setProperty(control->url(), property, copy);
     }

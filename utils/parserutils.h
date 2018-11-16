@@ -1,42 +1,28 @@
 #ifndef PARSERUTILS_H
 #define PARSERUTILS_H
 
-#include <utils_global.h>
 #include <QString>
 
 class QTextDocument;
 
-class UTILS_EXPORT ParserUtils final
+namespace ParserUtils
 {
-    Q_DISABLE_COPY(ParserUtils)
+bool canParse(const QString& url);
+bool canParse(QTextDocument* document, const QString& url);
+bool exists(const QString& url, const QString& property);
 
-    friend class SaveManager; // For setId and setProperty
-    friend class CentralWidget; // For setProperty
-    friend class ControlSaveFilter; // For setProperty and property
+QString id(const QString& url);
+QString property(const QString& url, const QString& property);
+QString property(QTextDocument* document, const QString& url, const QString& property);
 
-public:
-    static bool canParse(const QString& url);
-    static bool canParse(QTextDocument* document, const QString& url);
-    static bool exists(const QString& url, const QString& property);
+int addMethod(QTextDocument* document, const QString& url, const QString& method);
+int methodLine(QTextDocument* document, const QString& url, const QString& methodSign);
+int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace);
+void addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection);
 
-    static QString id(const QString& url);
-    static QString property(const QString& url, const QString& property);
-    static QString property(QTextDocument* document, const QString& url, const QString& property);
-
-    static int addMethod(QTextDocument* document, const QString& url, const QString& method);
-    static int methodLine(QTextDocument* document, const QString& url, const QString& methodSign);
-    static int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace);
-    static void addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection);
-
-private:
-    static void setId(const QString& url, const QString& id);
-    static void setProperty(const QString& url, const QString& property, const QString& value);
-    static void setProperty(QTextDocument* document, const QString& url, const QString& property,
-                            const QString& value);
-
-private:
-    ParserUtils() {}
-
-};
+void setId(const QString& url, const QString& id);
+void setProperty(const QString& url, const QString& property, const QString& value);
+void setProperty(QTextDocument* document, const QString& url, const QString& property, const QString& value);
+}
 
 #endif // PARSERUTILS_H

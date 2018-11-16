@@ -302,7 +302,9 @@ void changeProperty(QTextDocument* document, const UiObjectMemberList* list, con
 }
 }
 
-bool ParserUtils::exists(const QString& url, const QString& property)
+namespace ParserUtils {
+
+bool exists(const QString& url, const QString& property)
 {
     QString source = rdfile(url);
 
@@ -346,7 +348,7 @@ bool ParserUtils::exists(const QString& url, const QString& property)
     return propertyExists(uiObjectInitializer->members, property);
 }
 
-bool ParserUtils::canParse(const QString& url)
+bool canParse(const QString& url)
 {
     const QString& source = rdfile(url);
     Dialect dialect(Dialect::Qml);
@@ -355,7 +357,7 @@ bool ParserUtils::canParse(const QString& url)
     return document->parse();
 }
 
-bool ParserUtils::canParse(QTextDocument* doc, const QString& url)
+bool canParse(QTextDocument* doc, const QString& url)
 {
     const QString& source = doc->toPlainText();
     Dialect dialect(Dialect::Qml);
@@ -364,14 +366,14 @@ bool ParserUtils::canParse(QTextDocument* doc, const QString& url)
     return document->parse();
 }
 
-QString ParserUtils::id(const QString& url)
+QString id(const QString& url)
 {
     if (canParse(url))
         return property(url, "id");
     return SaveUtils::id(SaveUtils::toParentDir(url));
 }
 
-QString ParserUtils::property(const QString& url, const QString& property)
+QString property(const QString& url, const QString& property)
 {
     QString source = rdfile(url);
 
@@ -418,7 +420,7 @@ QString ParserUtils::property(const QString& url, const QString& property)
     return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
-QString ParserUtils::property(QTextDocument* doc, const QString& url, const QString& property)
+QString property(QTextDocument* doc, const QString& url, const QString& property)
 {
     const QString& source = doc->toPlainText();
     Dialect dialect(Dialect::Qml);
@@ -464,7 +466,7 @@ QString ParserUtils::property(QTextDocument* doc, const QString& url, const QStr
     return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
-int ParserUtils::addMethod(QTextDocument* document, const QString& url, const QString& method)
+int addMethod(QTextDocument* document, const QString& url, const QString& method)
 {
     quint32 begin = 0;
     const QString& source = document->toPlainText();
@@ -504,7 +506,7 @@ int ParserUtils::addMethod(QTextDocument* document, const QString& url, const QS
     return jsElements->lastSourceLocation().startLine;
 }
 
-int ParserUtils::methodLine(QTextDocument* document, const QString& url, const QString& methodSign)
+int methodLine(QTextDocument* document, const QString& url, const QString& methodSign)
 {
     QString source = document->toPlainText();
     Dialect dialect(Dialect::JavaScript);
@@ -552,7 +554,7 @@ int ParserUtils::methodLine(QTextDocument* document, const QString& url, const Q
     return -1;
 }
 
-int ParserUtils::methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace)
+int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace)
 {
     QString source = document->toPlainText();
     Dialect dialect(Dialect::JavaScript);
@@ -598,7 +600,7 @@ int ParserUtils::methodPosition(QTextDocument* document, const QString& url, con
     return -1;
 }
 
-void ParserUtils::addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection)
+void addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection)
 {
     int i = methodPosition(document, url, loaderSign, true);
     if (i > 0) {
@@ -610,7 +612,7 @@ void ParserUtils::addConnection(QTextDocument* document, const QString& url, con
     }
 }
 
-void ParserUtils::setId(const QString& url, const QString& id)
+void setId(const QString& url, const QString& id)
 {
     if (canParse(url))
         setProperty(url, "id", id);
@@ -618,7 +620,7 @@ void ParserUtils::setId(const QString& url, const QString& id)
     SaveUtils::setProperty(SaveUtils::toParentDir(url), TAG_ID, id);
 }
 
-void ParserUtils::setProperty(const QString& url, const QString& property, const QString& value)
+void setProperty(const QString& url, const QString& property, const QString& value)
 {
     QString source = rdfile(url);
 
@@ -667,7 +669,7 @@ void ParserUtils::setProperty(const QString& url, const QString& property, const
     wrfile(url, source.toUtf8());
 }
 
-void ParserUtils::setProperty(QTextDocument* doc, const QString& url, const QString& property, const QString& value)
+void setProperty(QTextDocument* doc, const QString& url, const QString& property, const QString& value)
 {
     Dialect dialect(Dialect::Qml);
     QSharedPointer<Document> document = Document::create(url, dialect);
@@ -711,3 +713,4 @@ void ParserUtils::setProperty(QTextDocument* doc, const QString& url, const QStr
     else
         addProperty(doc, uiObjectInitializer, property, value);
 }
+} // ParserUtils

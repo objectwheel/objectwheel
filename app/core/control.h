@@ -38,13 +38,13 @@ public:
     DesignerScene* scene() const;
     Control* parentControl() const;
 
-    const QList<QQmlError>& errors() const;
-    const QList<QString>& events() const;
-    const QList<PropertyNode>& properties() const;
+    QList<QQmlError> errors() const;
+    QList<QString> events() const;
+    QList<PropertyNode> properties() const;
     QList<Control*> childControls(bool dive = true) const;
     QVariant::Type propertyType(const QString& propertyName) const;
 
-    static const QList<Control*>& controls();
+    static QList<Control*> controls();
 
 public:
     void setClip(bool clip);
@@ -55,11 +55,8 @@ public:
     void setResizing(bool resizing);
 
 public slots:
-    void updateUid();
     void hideResizers();
     void showResizers();
-
-    static void updateUids();
 
 signals:
     void resizingChanged();
@@ -71,7 +68,6 @@ private:
     void dragMoveEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
-
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
@@ -79,7 +75,7 @@ private:
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
 
-    QVariant itemChange(GraphicsItemChange change, const QVariant &value) override;
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 protected:
     void resizeEvent(QGraphicsSceneResizeEvent* event) override;
@@ -115,7 +111,6 @@ private:
 
 private:
     static QList<Control*> m_controls;
-    static const QSizeF BASE_SIZE;
 };
 
 #endif // CONTROL_H

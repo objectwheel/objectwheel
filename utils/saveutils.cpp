@@ -6,7 +6,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-// TODO: Change QString with QLatin1String when it is possible
+// TODO: Change QString with QLatin1String whenever it is possible
 // TODO: Always use case insensitive comparison when it is possible
 
 namespace {
@@ -29,39 +29,41 @@ void writeJsonObjectToFile(const QJsonObject& jsonObject, const QString& fileNam
 }
 }
 
-bool SaveUtils::isForm(const QString& rootPath)
+namespace SaveUtils {
+
+bool isForm(const QString& rootPath)
 {
     return DIR_OWDB == fname(dname(rootPath));
 }
 
-/*
+/*!
     Returns true if given path belongs to main form
     It doesn't check whether rootPath belong to a form or not.
 */
-bool SaveUtils::isMain(const QString& rootPath)
+bool isMain(const QString& rootPath)
 {
     return fname(rootPath) == DIR_MAINFORM;
 }
 
-bool SaveUtils::isOwctrl(const QString& rootPath)
+bool isOwctrl(const QString& rootPath)
 {
     Q_ASSERT(!rootPath.isEmpty());
     const QString& sign = property(rootPath, TAG_OWCTRL_SIGN).toString();
     return sign == SIGN_OWCTRL && !uid(rootPath).isEmpty();
 }
 
-bool SaveUtils::isOwprj(const QString& projectDir)
+bool isOwprj(const QString& projectDir)
 {
     const QString& sign = projectProperty(projectDir, PTAG_OWPRJ_SIGN).toString();
     return sign == SIGN_OWPRJ;
 }
 
-/*
+/*!
     Returns biggest number from integer named dirs.
     If no integer named dir exists, 0 returned.
     If no dir exists or dirs are smaller than zero, 0 returned.
 */
-int SaveUtils::biggestDir(const QString& basePath)
+int biggestDir(const QString& basePath)
 {
     int num = 0;
     for (const QString& dir : lsdir(basePath)) {
@@ -71,10 +73,10 @@ int SaveUtils::biggestDir(const QString& basePath)
     return num;
 }
 
-/*
+/*!
     Counts all children paths (rootPath) within given root path.
 */
-int SaveUtils::childrenCount(const QString& rootPath)
+int childrenCount(const QString& rootPath)
 {
     Q_ASSERT(!rootPath.isEmpty());
 
@@ -91,57 +93,57 @@ int SaveUtils::childrenCount(const QString& rootPath)
     return counter;
 }
 
-QString SaveUtils::toUrl(const QString& rootPath)
+QString toUrl(const QString& rootPath)
 {
     return rootPath + separator() + DIR_THIS + separator() + FILE_MAIN;
 }
 
-QString SaveUtils::toIcon(const QString& rootPath)
+QString toIcon(const QString& rootPath)
 {
     return rootPath + separator() + DIR_THIS + separator() + FILE_ICON;
 }
 
-QString SaveUtils::toThisDir(const QString& rootPath)
+QString toThisDir(const QString& rootPath)
 {
     return rootPath + separator() + DIR_THIS;
 }
 
-QString SaveUtils::toParentDir(const QString& topPath)
+QString toParentDir(const QString& topPath)
 {
     return dname(dname(topPath));
 }
 
-QString SaveUtils::toChildrenDir(const QString& rootPath)
+QString toChildrenDir(const QString& rootPath)
 {
     return rootPath + separator() + DIR_CHILDREN;
 }
 
-QString SaveUtils::toOwdbDir(const QString& projectDir)
+QString toOwdbDir(const QString& projectDir)
 {
     return projectDir + separator() + DIR_OWDB;
 }
 
-QString SaveUtils::toProjectFile(const QString& projectDir)
+QString toProjectFile(const QString& projectDir)
 {
     return projectDir + separator() + FILE_PROJECT;
 }
 
-QString SaveUtils::toImportsDir(const QString& projectDir)
+QString toImportsDir(const QString& projectDir)
 {
     return projectDir + separator() + DIR_OWDB + separator() + DIR_IMPORTS;
 }
 
-QString SaveUtils::toGlobalDir(const QString& projectDir)
+QString toGlobalDir(const QString& projectDir)
 {
     return toImportsDir(projectDir) + separator() + DIR_GLOBAL;
 }
 
-QString SaveUtils::toControlFile(const QString& rootPath)
+QString toControlFile(const QString& rootPath)
 {
     return rootPath + separator() + DIR_THIS + separator() + FILE_CONTROL;
 }
 
-QStringList SaveUtils::formPaths(const QString& projectDir)
+QStringList formPaths(const QString& projectDir)
 {
     QStringList paths;
 
@@ -158,11 +160,11 @@ QStringList SaveUtils::formPaths(const QString& projectDir)
     return paths;
 }
 
-/*
+/*!
     Searches for all controls paths, starting from topPath.
     Returns all control paths (rootPaths) within given topPath.
 */
-QStringList SaveUtils::controlPaths(const QString& topPath)
+QStringList controlPaths(const QString& topPath)
 {
     QStringList paths;
 
@@ -178,10 +180,10 @@ QStringList SaveUtils::controlPaths(const QString& topPath)
     return paths;
 }
 
-/*
+/*!
     Returns all children paths (rootPath) within given root path.
 */
-QStringList SaveUtils::childrenPaths(const QString& rootPath)
+QStringList childrenPaths(const QString& rootPath)
 {
     Q_ASSERT(!rootPath.isEmpty());
 
@@ -198,108 +200,105 @@ QStringList SaveUtils::childrenPaths(const QString& rootPath)
     return paths;
 }
 
-QString SaveUtils::id(const QString& rootPath)
+QString id(const QString& rootPath)
 {
     return property(rootPath, TAG_ID).toString();
 }
 
-QString SaveUtils::uid(const QString& rootPath)
+QString uid(const QString& rootPath)
 {
     return property(rootPath, TAG_UID).toString();
 }
 
-QString SaveUtils::name(const QString& rootPath)
+QString name(const QString& rootPath)
 {
     return property(rootPath, TAG_NAME).toString();
 }
 
-QString SaveUtils::category(const QString& rootPath)
+QString category(const QString& rootPath)
 {
     return property(rootPath, TAG_CATEGORY).toString();
 }
 
-QString SaveUtils::projectHash(const QString& projectDir)
+QString projectHash(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_HASH).toString();
 }
 
-QString SaveUtils::projectName(const QString& projectDir)
+QString projectName(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_NAME).toString();
 }
 
-QString SaveUtils::projectDescription(const QString& projectDir)
+QString projectDescription(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_DESCRIPTION).toString();
 }
 
-QString SaveUtils::projectOwner(const QString& projectDir)
+QString projectOwner(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_OWNER).toString();
 }
 
-QString SaveUtils::projectCrDate(const QString& projectDir)
+QString projectCrDate(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_CRDATE).toString();
 }
 
-QString SaveUtils::projectMfDate(const QString& projectDir)
+QString projectMfDate(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_MFDATE).toString();
 }
 
-QString SaveUtils::projectSize(const QString& projectDir)
+QString projectSize(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_SIZE).toString();
 }
 
-QString SaveUtils::projectScaling(const QString& projectDir)
+QString projectScaling(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_SCALING).toString();
 }
 
-QJsonValue SaveUtils::projectTheme(const QString& projectDir)
+QJsonValue projectTheme(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_THEME);
 }
 
-QJsonValue SaveUtils::property(const QString& rootPath, const QString& property)
+QJsonValue property(const QString& rootPath, const QString& property)
 {
     return rootJsonObjectForFile(toControlFile(rootPath)).value(property);
 }
 
-QJsonValue SaveUtils::projectProperty(const QString& projectDir, const QString& property)
+QJsonValue projectProperty(const QString& projectDir, const QString& property)
 {
     return rootJsonObjectForFile(toProjectFile(projectDir)).value(property);
 }
 
-void SaveUtils::setProperty(const QString& rootPath, const QString& property, const QJsonValue& value)
+void setProperty(const QString& rootPath, const QString& property, const QJsonValue& value)
 {
     Q_ASSERT(!rootPath.isEmpty() && !property.isEmpty() && isOwctrl(rootPath));
-
     const QString& controlFile = toControlFile(rootPath);
     QJsonObject rootJsonObject = rootJsonObjectForFile(controlFile);
     rootJsonObject.insert(property, value);
     writeJsonObjectToFile(rootJsonObject, controlFile);
 }
 
-void SaveUtils::setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value)
+void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value)
 {
     Q_ASSERT(!projectDir.isEmpty() && !property.isEmpty() && isOwprj(projectDir));
-
     const QString& projectFile = toProjectFile(projectDir);
     QJsonObject rootJsonObject = rootJsonObjectForFile(projectFile);
     rootJsonObject.insert(property, value);
     writeJsonObjectToFile(rootJsonObject, projectFile);
 }
 
-/*
+/*!
     Recalculates all uids belongs to given control and its children (all).
 */
-void SaveUtils::regenerateUids(const QString& topPath)
+void regenerateUids(const QString& topPath)
 {
     Q_ASSERT(!topPath.isEmpty());
-
     const QStringList& controlFiles = fps(FILE_CONTROL, topPath);
     for (const QString& controlFile : controlFiles) {
         const QString& controlDir = toParentDir(controlFile);
@@ -316,3 +315,4 @@ void SaveUtils::regenerateUids(const QString& topPath)
         }
     }
 }
+} // SaveUtils

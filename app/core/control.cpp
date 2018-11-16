@@ -24,7 +24,7 @@
 extern const char* TOOL_KEY;
 
 namespace {
-
+const QSize g_baseControlSize(40, 40);
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
 {
     QRectF geometry;
@@ -53,7 +53,6 @@ QList<Resizer*> initializeResizers(Control* control)
 }
 
 QList<Control*> Control::m_controls;
-const QSizeF Control::BASE_SIZE = {40.0, 40.0};
 Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_gui(false)
   , m_clip(false)
@@ -64,7 +63,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_resizing(false)
   , m_url(url)
   , m_uid(SaveUtils::uid(dir()))
-  , m_image(PaintUtils::renderInitialControlImage(BASE_SIZE))
+  , m_image(PaintUtils::renderInitialControlImage(g_baseControlSize))
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -77,7 +76,7 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemSendsGeometryChanges);
 
     ControlPropertyManager::setId(this, ParserUtils::id(m_url), ControlPropertyManager::NoOption);
-    ControlPropertyManager::setSize(this, BASE_SIZE, ControlPropertyManager::NoOption);
+    ControlPropertyManager::setSize(this, g_baseControlSize, ControlPropertyManager::NoOption);
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
@@ -192,17 +191,17 @@ Control* Control::parentControl() const
     return dynamic_cast<Control*>(parentItem());
 }
 
-const QList<QQmlError>& Control::errors() const
+QList<QQmlError> Control::errors() const
 {
     return m_errors;
 }
 
-const QList<QString>& Control::events() const
+QList<QString> Control::events() const
 {
     return m_events;
 }
 
-const QList<PropertyNode>& Control::properties() const
+QList<PropertyNode> Control::properties() const
 {
     return m_properties;
 }
@@ -220,7 +219,7 @@ QList<Control*> Control::childControls(bool dive) const
     return controls;
 }
 
-const QList<Control*>& Control::controls()
+QList<Control*> Control::controls()
 {
     return m_controls;
 }
@@ -268,11 +267,6 @@ void Control::setResizing(bool resizing)
     //    emit resizingChanged();
 }
 
-void Control::updateUid()
-{
-    m_uid = SaveUtils::uid(dir());
-}
-
 void Control::hideResizers()
 {
     for (auto resizer : m_resizers)
@@ -283,12 +277,6 @@ void Control::showResizers()
 {
     for (auto resizer : m_resizers)
         resizer->show();
-}
-
-void Control::updateUids()
-{
-    for (Control* control : m_controls)
-        control->updateUid();
 }
 
 QVariant::Type Control::propertyType(const QString& propertyName) const
