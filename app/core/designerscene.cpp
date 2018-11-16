@@ -177,7 +177,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
             for(Control* control : copy) {
                 if (controlUnderMouse->parentControl() != control->parentControl()
                         || copy.contains(control->parentControl())) {
-                    selectedControls.removeOne(control); // WARNING
+                    selectedControls.removeOne(control);
                     control->setSelected(false);
                 }
             }
@@ -227,9 +227,9 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
             selectedControls.removeOne(m_currentForm);
 
             const QList<Control*> copy(selectedControls);
-            for(Control* control : copy) {
-                if (copy.contains(control->parentControl()))
-                    selectedControls.removeOne(control); // WARNING
+            for (const Control* control : copy) {
+                for (Control* childControl : control->childControls())
+                    selectedControls.removeOne(childControl);
             }
 
             if (selectedControls.size() > 1) {

@@ -175,11 +175,9 @@ void DesignerView::onCutAction()
     controls.removeOne(scene()->currentForm());
 
     const QList<Control*> copy(controls);
-    for (Control* control : copy) { // WARNING
-        for (Control* ctrl : copy) {
-            if (control->childControls().contains(ctrl))
-                controls.removeOne(ctrl);
-        }
+    for (const Control* control : copy) {
+        for (Control* childControl : control->childControls())
+            controls.removeOne(childControl);
     }
 
     QList<QPointer<Control>> controlPtrList;
@@ -195,11 +193,9 @@ void DesignerView::onCopyAction()
     controls.removeOne(scene()->currentForm());
 
     const QList<Control*> copy(controls);
-    for (Control* control : copy) { // WARNING
-        for (Control* ctrl : copy) {
-            if (control->childControls().contains(ctrl))
-                controls.removeOne(ctrl);
-        }
+    for (const Control* control : copy) {
+        for (Control* childControl : control->childControls())
+            controls.removeOne(childControl);
     }
 
     QList<QPointer<Control>> controlPtrList;

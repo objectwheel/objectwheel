@@ -75,7 +75,7 @@ void ControlRemovingManager::removeControls(const QList<Control*>& controls)
     QList<Control*> finalList(controls);
     for (const Control* control : controls) {
         for (Control* childControl : control->childControls())
-            finalList.removeAll(childControl); // WARNING
+            finalList.removeOne(childControl);
     }
 
     for (Control* control : finalList)
