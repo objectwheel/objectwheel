@@ -42,9 +42,6 @@ HEADERS += \
         $$PWD/colorschemeedit.h \
         $$PWD/colorscheme.h \
         $$PWD/colorpreviewhoverhandler.h \
-        $$PWD/behaviorsettingswidget.h \
-        $$PWD/behaviorsettingspage.h \
-        $$PWD/behaviorsettings.h \
         $$PWD/autocompleter.h \
         $$PWD/basehoverhandler.h \
         $$PWD/circularclipboard.h \
@@ -76,9 +73,6 @@ SOURCES += \
         \
         $$PWD/autocompleter.cpp \
         $$PWD/basehoverhandler.cpp \
-        $$PWD/behaviorsettings.cpp \
-        $$PWD/behaviorsettingspage.cpp \
-        $$PWD/behaviorsettingswidget.cpp \
         $$PWD/colorpreviewhoverhandler.cpp \
         $$PWD/colorscheme.cpp \
         $$PWD/colorschemeedit.cpp \
@@ -104,8 +98,6 @@ SOURCES += \
         $$PWD/simplecodestylepreferenceswidget.cpp
 
 FORMS += \
-        $$PWD/behaviorsettingspage.ui \
-        $$PWD/behaviorsettingswidget.ui \
         $$PWD/colorschemeedit.ui \
         $$PWD/completionsettingspage.ui \
         $$PWD/tabsettingswidget.ui

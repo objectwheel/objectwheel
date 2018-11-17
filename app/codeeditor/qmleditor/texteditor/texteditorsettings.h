@@ -69,7 +69,7 @@ public:
 
     static const TypingSettings &typingSettings();
     static const StorageSettings &storageSettings();
-    static const BehaviorSettings &behaviorSettings();
+//    static const BehaviorSettings &behaviorSettings();
 //    static const MarginSettings &marginSettings();
 //    static const DisplaySettings &displaySettings();
     static const CompletionSettings &completionSettings();

@@ -536,7 +536,7 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     document->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
     document->setTypingSettings(settings->typingSettings());
     document->setStorageSettings(settings->storageSettings());
-    setBehaviorSettings(settings->behaviorSettings());
+    //    setBehaviorSettings(settings->behaviorSettings());
     //    setMarginSettings(settings->marginSettings());
     //    setDisplaySettings(settings->displaySettings());
     setCompletionSettings(settings->completionSettings());
@@ -548,8 +548,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
             document, &QmlCodeDocument::setTypingSettings);
     connect(settings, &TextEditorSettings::storageSettingsChanged,
             document, &QmlCodeDocument::setStorageSettings);
-    connect(settings, &TextEditorSettings::behaviorSettingsChanged,
-            this, &QmlCodeEditor::setBehaviorSettings);
+//    connect(settings, &TextEditorSettings::behaviorSettingsChanged,
+//            this, &QmlCodeEditor::setBehaviorSettings);
     //    connect(settings, &TextEditorSettings::marginSettingsChanged,
     //            this, &QmlCodeEditor::setMarginSettings);
     //    connect(settings, &TextEditorSettings::displaySettingsChanged,
@@ -743,52 +743,52 @@ Core::Id QmlCodeEditor::languageSettingsId() const
 
 void QmlCodeEditor::setMouseNavigationEnabled(bool b)
 {
-    m_behaviorSettings.m_mouseNavigation = b;
+    // WARNING m_behaviorSettings.m_mouseNavigation = b;
 }
 
 bool QmlCodeEditor::mouseNavigationEnabled() const
 {
-    return m_behaviorSettings.m_mouseNavigation;
+    // WARNING return m_behaviorSettings.m_mouseNavigation;
 }
 
 void QmlCodeEditor::setMouseHidingEnabled(bool b)
 {
-    m_behaviorSettings.m_mouseHiding = b;
+   // WARNING m_behaviorSettings.m_mouseHiding = b;
 }
 
 bool QmlCodeEditor::mouseHidingEnabled() const
 {
-    return m_behaviorSettings.m_mouseHiding;
+    // WARNING return m_behaviorSettings.m_mouseHiding;
 }
 
 void QmlCodeEditor::setScrollWheelZoomingEnabled(bool b)
 {
-    m_behaviorSettings.m_scrollWheelZooming = b;
+    // WARNING m_behaviorSettings.m_scrollWheelZooming = b;
 }
 
 bool QmlCodeEditor::scrollWheelZoomingEnabled() const
 {
-    return m_behaviorSettings.m_scrollWheelZooming;
+    // WARNING return m_behaviorSettings.m_scrollWheelZooming;
 }
 
 void QmlCodeEditor::setConstrainTooltips(bool b)
 {
-    m_behaviorSettings.m_constrainHoverTooltips = b;
+    // WARNING m_behaviorSettings.m_constrainHoverTooltips = b;
 }
 
 bool QmlCodeEditor::constrainTooltips() const
 {
-    return m_behaviorSettings.m_constrainHoverTooltips;
+    // WARNING return m_behaviorSettings.m_constrainHoverTooltips;
 }
 
 void QmlCodeEditor::setCamelCaseNavigationEnabled(bool b)
 {
-    m_behaviorSettings.m_camelCaseNavigation = b;
+    // WARNING m_behaviorSettings.m_camelCaseNavigation = b;
 }
 
 bool QmlCodeEditor::camelCaseNavigationEnabled() const
 {
-    return m_behaviorSettings.m_camelCaseNavigation;
+    // WARNING return m_behaviorSettings.m_camelCaseNavigation;
 }
 
 void QmlCodeEditor::setCursorPosition(int pos)
@@ -1320,7 +1320,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
     if (event->type() == QEvent::ToolTip) {
         if (QApplication::keyboardModifiers() & Qt::ControlModifier
                 || (!(QApplication::keyboardModifiers() & Qt::ShiftModifier)
-                    && m_behaviorSettings.m_constrainHoverTooltips)) {
+                    /*&& // WARNING m_behaviorSettings.m_constrainHoverTooltips*/)) {
             // Tooltips should be eaten when either control is pressed (so they don't get in the
             // way of code navigation) or if they are in constrained mode and shift is not pressed.
             return true;
@@ -1596,7 +1596,7 @@ void QmlCodeEditor::keyReleaseEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Control) {
         clearLink();
     } else if (e->key() == Qt::Key_Shift
-               && m_behaviorSettings.m_constrainHoverTooltips
+               // WARNING && m_behaviorSettings.m_constrainHoverTooltips
                && ToolTip::isVisible()) {
         ToolTip::hide();
     } else if (e->key() == Qt::Key_Alt
@@ -1606,16 +1606,6 @@ void QmlCodeEditor::keyReleaseEvent(QKeyEvent *e)
     }
 
     QPlainTextEdit::keyReleaseEvent(e);
-}
-
-const BehaviorSettings &QmlCodeEditor::behaviorSettings() const
-{
-    return m_behaviorSettings;
-}
-
-void QmlCodeEditor::setBehaviorSettings(const BehaviorSettings &bs)
-{
-    m_behaviorSettings = bs;
 }
 
 void QmlCodeEditor::setVisibleFoldedBlockNumber(int visibleFoldedBlockNumber)

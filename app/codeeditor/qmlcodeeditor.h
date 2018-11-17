@@ -13,7 +13,6 @@
 #include <qmljs/qmljsdocument.h>
 #include <qmljseditor/qmljsautocompleter.h>
 #include <coreplugin/id.h>
-#include <texteditor/behaviorsettings.h>
 #include <coreplugin/find/textfindconstants.h>
 
 class QLabel;
@@ -158,8 +157,6 @@ public:
     bool constrainTooltips() const;
     void setCamelCaseNavigationEnabled(bool b);
     bool camelCaseNavigationEnabled() const;
-    void setBehaviorSettings(const TextEditor::BehaviorSettings& bs);
-    const TextEditor::BehaviorSettings& behaviorSettings() const;
     bool inFindScope(int selectionStart, int selectionEnd);
     bool isValid() const;
 
@@ -298,7 +295,6 @@ private:
     QFutureWatcher<Utils::FileSearchResultList> *m_searchWatcher = nullptr;
     int m_findScopeVerticalBlockSelectionFirstColumn = -1;
     int m_findScopeVerticalBlockSelectionLastColumn = -1;
-    TextEditor::BehaviorSettings m_behaviorSettings;
     QList<QTextCursor> m_autoCompleteHighlightPos;
     QList<TextEditor::BaseHoverHandler*> m_hoverHandlers;
     HoverHandlerRunner* m_hoverHandlerRunner;

@@ -26,8 +26,8 @@
 #include "texteditorsettings.h"
 
 #include <qmlcodeeditor.h>
-#include "behaviorsettings.h"
-#include "behaviorsettingspage.h"
+//#include "behaviorsettings.h"
+//#include "behaviorsettingspage.h"
 #include "completionsettings.h"
 //#include "marginsettings.h"
 //#include "displaysettings.h"
@@ -58,7 +58,7 @@ namespace Internal {
 class TextEditorSettingsPrivate
 {
 public:
-    BehaviorSettingsPage *m_behaviorSettingsPage;
+//    BehaviorSettingsPage *m_behaviorSettingsPage;
 //    DisplaySettingsPage *m_displaySettingsPage;
 //    HighlighterSettingsPage *m_highlighterSettingsPage;
 //    SnippetsSettingsPage *m_snippetsSettingsPage;
@@ -85,11 +85,11 @@ TextEditorSettings::TextEditorSettings()
     d = new Internal::TextEditorSettingsPrivate;
 
     // Add the GUI used to configure the tab, storage and interaction settings
-    BehaviorSettingsPageParameters behaviorSettingsPageParameters;
-    behaviorSettingsPageParameters.id = Constants::TEXT_EDITOR_BEHAVIOR_SETTINGS;
-    behaviorSettingsPageParameters.displayName = tr("Behavior");
-    behaviorSettingsPageParameters.settingsPrefix = QLatin1String("text");
-    d->m_behaviorSettingsPage = new BehaviorSettingsPage(behaviorSettingsPageParameters, this);
+//    BehaviorSettingsPageParameters behaviorSettingsPageParameters;
+//    behaviorSettingsPageParameters.id = Constants::TEXT_EDITOR_BEHAVIOR_SETTINGS;
+//    behaviorSettingsPageParameters.displayName = tr("Behavior");
+//    behaviorSettingsPageParameters.settingsPrefix = QLatin1String("text");
+//    d->m_behaviorSettingsPage = new BehaviorSettingsPage(behaviorSettingsPageParameters, this);
 
 //    DisplaySettingsPageParameters displaySettingsPageParameters;
 //    displaySettingsPageParameters.id = Constants::TEXT_EDITOR_DISPLAY_SETTINGS;
@@ -103,12 +103,12 @@ TextEditorSettings::TextEditorSettings()
 //        new SnippetsSettingsPage(Constants::TEXT_EDITOR_SNIPPETS_SETTINGS, this);
     d->m_completionSettingsPage = new CompletionSettingsPage(this);
 
-    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::typingSettingsChanged,
-            this, &TextEditorSettings::typingSettingsChanged);
-    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::storageSettingsChanged,
-            this, &TextEditorSettings::storageSettingsChanged);
-    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::behaviorSettingsChanged,
-            this, &TextEditorSettings::behaviorSettingsChanged);
+//    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::typingSettingsChanged,
+//            this, &TextEditorSettings::typingSettingsChanged);
+//    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::storageSettingsChanged,
+//            this, &TextEditorSettings::storageSettingsChanged);
+//    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::behaviorSettingsChanged,
+//            this, &TextEditorSettings::behaviorSettingsChanged);
 //    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::extraEncodingSettingsChanged,
 //            this, &TextEditorSettings::extraEncodingSettingsChanged);
 //    connect(d->m_displaySettingsPage, &DisplaySettingsPage::marginSettingsChanged,
@@ -135,18 +135,18 @@ TextEditorSettings *TextEditorSettings::instance()
 
 const TypingSettings &TextEditorSettings::typingSettings()
 {
-    return d->m_behaviorSettingsPage->typingSettings();
+    // WARNING return d->m_behaviorSettingsPage->typingSettings();
 }
 
 const StorageSettings &TextEditorSettings::storageSettings()
 {
-    return d->m_behaviorSettingsPage->storageSettings();
+    // WARNING return d->m_behaviorSettingsPage->storageSettings();
 }
 
-const BehaviorSettings &TextEditorSettings::behaviorSettings()
-{
-    return d->m_behaviorSettingsPage->behaviorSettings();
-}
+//const BehaviorSettings &TextEditorSettings::behaviorSettings()
+//{
+//    return d->m_behaviorSettingsPage->behaviorSettings();
+//}
 
 //const MarginSettings &TextEditorSettings::marginSettings()
 //{
@@ -200,7 +200,7 @@ const CompletionSettings &TextEditorSettings::completionSettings()
 
 ICodeStylePreferences *TextEditorSettings::codeStyle()
 {
-    return d->m_behaviorSettingsPage->codeStyle();
+    // WARNING return d->m_behaviorSettingsPage->codeStyle();
 }
 
 ICodeStylePreferences *TextEditorSettings::codeStyle(Core::Id languageId)
