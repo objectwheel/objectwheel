@@ -85,5 +85,6 @@
         <file>images/settings/interface.png</file>
         <file>images/settings/codeeditor.png</file>
         <file>images/settings/fontcolors.png</file>
+        <file>images/settings/behavior.png</file>
     </qresource>
 </RCC>

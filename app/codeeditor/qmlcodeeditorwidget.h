@@ -64,7 +64,9 @@ public:
 
 public slots:
     void discharge();
-    void save();
+    void saveAll();
+    void saveOpen();
+    void save(Document* document);
     void close();
     void setFileExplorerVisible(bool visible);
 

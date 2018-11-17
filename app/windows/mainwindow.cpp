@@ -25,6 +25,8 @@
 #include <preferenceswindow.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
+#include <codeeditorsettings.h>
+#include <behaviorsettings.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -333,6 +335,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(m_runPane, &RunPane::runButtonClicked,
             this, [=] {
+        BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
+        if (settings->autoSaveBeforeRunning)
+            WindowManager::mainWindow()->centralWidget()->qmlCodeEditorWidget()->saveAll();
         m_centralWidget->consolePane()->fade();
         if (!m_centralWidget->consolePane()->toPlainText().isEmpty())
             m_centralWidget->consolePane()->press("\n");

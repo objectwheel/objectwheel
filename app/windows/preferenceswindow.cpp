@@ -48,6 +48,9 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_listWidget, 1, 0, 1, 1);
     m_layout->addWidget(m_dialogButtonBox, 2, 0, 1, 2);
 
+    QPalette p(palette());
+    p.setColor(QPalette::Highlight, "#444444");
+    m_listWidget->setPalette(p);
     m_listWidget->setFixedWidth(150);
     m_listWidget->setIconSize({24, 24});
     m_listWidget->setDragEnabled(false);

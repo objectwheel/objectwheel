@@ -6,6 +6,7 @@
 #include <QTabWidget>
 #include <QVBoxLayout>
 #include <QWindow>
+#include <QTabBar>
 
 SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
   , m_tabWidget(new QTabWidget(this))
@@ -16,6 +17,8 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_titleLabel);
     layout->addWidget(m_tabWidget);
+
+    m_tabWidget->tabBar()->setCursor(Qt::PointingHandCursor);
 
     UtilityFunctions::adjustFontPixelSize(m_titleLabel, 1);
     UtilityFunctions::adjustFontWeight(m_titleLabel, QFont::DemiBold);

@@ -149,7 +149,7 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
     setAcceptDrops(true);
 
     connect(toolBar(), &QmlCodeEditorToolBar::saved,
-            this, &QmlCodeEditorWidget::save);
+            this, &QmlCodeEditorWidget::saveOpen);
     connect(toolBar(), &QmlCodeEditorToolBar::closed,
             this, &QmlCodeEditorWidget::close);
     connect(toolBar(), &QmlCodeEditorToolBar::showed,
@@ -308,33 +308,49 @@ void QmlCodeEditorWidget::onPinActivation(bool pinned)
     }
 }
 
-void QmlCodeEditorWidget::save()
+void QmlCodeEditorWidget::saveOpen()
 {
     if (!m_openDocument)
         return;
-
     Q_ASSERT(m_openDocument->document->isModified());
+    save(m_openDocument);
+}
+
+void QmlCodeEditorWidget::saveAll()
+{
+    for (GlobalDocument* document : m_globalDocuments)
+        save(document);
+    for (InternalDocument* document : m_internalDocuments)
+        save(document);
+    for (ExternalDocument* document : m_externalDocuments)
+        save(document);
+}
+
+void QmlCodeEditorWidget::save(QmlCodeEditorWidget::Document* document)
+{
+    if (!document->document->isModified())
+        return;
 
     QString path;
-    if (m_openDocument->scope == QmlCodeEditorToolBar::Global)
-        path = fullPath(globalDir(), global(m_openDocument)->relativePath);
-    else if (m_openDocument->scope == QmlCodeEditorToolBar::Internal)
-        path = fullPath(internalDir(m_openDocument), internal(m_openDocument)->relativePath);
+    if (document->scope == QmlCodeEditorToolBar::Global)
+        path = fullPath(globalDir(), global(document)->relativePath);
+    else if (document->scope == QmlCodeEditorToolBar::Internal)
+        path = fullPath(internalDir(document), internal(document)->relativePath);
     else
-        path = external(m_openDocument)->fullPath;
+        path = external(document)->fullPath;
 
     Q_ASSERT(!path.isEmpty());
 
     for (SaveFilter* saveFilter : m_saveFilters)
-        saveFilter->beforeSave(m_openDocument);
+        saveFilter->beforeSave(document);
 
-    if (warnIfFileWriteFails(path, m_openDocument->document->toPlainText()))
+    if (warnIfFileWriteFails(path, document->document->toPlainText()))
         return;
 
-    m_openDocument->document->setModified(false);
+    document->document->setModified(false);
 
     for (SaveFilter* saveFilter : m_saveFilters)
-        saveFilter->afterSave(m_openDocument);
+        saveFilter->afterSave(document);
 }
 
 void QmlCodeEditorWidget::close()
@@ -344,7 +360,7 @@ void QmlCodeEditorWidget::close()
 
     switch (warnIfModifiedContent(m_openDocument)) {
     case QMessageBox::Save:
-        save();
+        saveOpen();
         break;
     case QMessageBox::Discard:
         break;
