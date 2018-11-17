@@ -147,16 +147,6 @@ public:
     void setCodeStyle(TextEditor::ICodeStylePreferences* preferences);
     void setLanguageSettingsId(Core::Id settingsId);
     Core::Id languageSettingsId() const;
-    void setMouseNavigationEnabled(bool b);
-    bool mouseNavigationEnabled() const;
-    void setMouseHidingEnabled(bool b);
-    bool mouseHidingEnabled() const;
-    void setScrollWheelZoomingEnabled(bool b);
-    bool scrollWheelZoomingEnabled() const;
-    void setConstrainTooltips(bool b);
-    bool constrainTooltips() const;
-    void setCamelCaseNavigationEnabled(bool b);
-    bool camelCaseNavigationEnabled() const;
     bool inFindScope(int selectionStart, int selectionEnd);
     bool isValid() const;
 

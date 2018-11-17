@@ -534,8 +534,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
 
     // Apply current settings
     document->setTabSettings(settings->codeStyle()->tabSettings()); // also set through code style ???
-    document->setTypingSettings(settings->typingSettings());
-    document->setStorageSettings(settings->storageSettings());
+    document->setTypingSettings(TypingSettings()); // FIXME
+    document->setStorageSettings(StorageSettings()); // FIXME
     //    setBehaviorSettings(settings->behaviorSettings());
     //    setMarginSettings(settings->marginSettings());
     //    setDisplaySettings(settings->displaySettings());
@@ -739,56 +739,6 @@ void QmlCodeEditor::setLanguageSettingsId(Core::Id settingsId)
 Core::Id QmlCodeEditor::languageSettingsId() const
 {
     return m_tabSettingsId;
-}
-
-void QmlCodeEditor::setMouseNavigationEnabled(bool b)
-{
-    // WARNING m_behaviorSettings.m_mouseNavigation = b;
-}
-
-bool QmlCodeEditor::mouseNavigationEnabled() const
-{
-    // WARNING return m_behaviorSettings.m_mouseNavigation;
-}
-
-void QmlCodeEditor::setMouseHidingEnabled(bool b)
-{
-   // WARNING m_behaviorSettings.m_mouseHiding = b;
-}
-
-bool QmlCodeEditor::mouseHidingEnabled() const
-{
-    // WARNING return m_behaviorSettings.m_mouseHiding;
-}
-
-void QmlCodeEditor::setScrollWheelZoomingEnabled(bool b)
-{
-    // WARNING m_behaviorSettings.m_scrollWheelZooming = b;
-}
-
-bool QmlCodeEditor::scrollWheelZoomingEnabled() const
-{
-    // WARNING return m_behaviorSettings.m_scrollWheelZooming;
-}
-
-void QmlCodeEditor::setConstrainTooltips(bool b)
-{
-    // WARNING m_behaviorSettings.m_constrainHoverTooltips = b;
-}
-
-bool QmlCodeEditor::constrainTooltips() const
-{
-    // WARNING return m_behaviorSettings.m_constrainHoverTooltips;
-}
-
-void QmlCodeEditor::setCamelCaseNavigationEnabled(bool b)
-{
-    // WARNING m_behaviorSettings.m_camelCaseNavigation = b;
-}
-
-bool QmlCodeEditor::camelCaseNavigationEnabled() const
-{
-    // WARNING return m_behaviorSettings.m_camelCaseNavigation;
 }
 
 void QmlCodeEditor::setCursorPosition(int pos)
@@ -1320,7 +1270,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
     if (event->type() == QEvent::ToolTip) {
         if (QApplication::keyboardModifiers() & Qt::ControlModifier
                 || (!(QApplication::keyboardModifiers() & Qt::ShiftModifier)
-                    /*&& // WARNING m_behaviorSettings.m_constrainHoverTooltips*/)) {
+                    && false /* FIXME: m_behaviorSettings.m_constrainHoverTooltips*/)) {
             // Tooltips should be eaten when either control is pressed (so they don't get in the
             // way of code navigation) or if they are in constrained mode and shift is not pressed.
             return true;
@@ -1596,7 +1546,7 @@ void QmlCodeEditor::keyReleaseEvent(QKeyEvent *e)
     if (e->key() == Qt::Key_Control) {
         clearLink();
     } else if (e->key() == Qt::Key_Shift
-               // WARNING && m_behaviorSettings.m_constrainHoverTooltips
+               && false // FIXME: m_behaviorSettings.m_constrainHoverTooltips
                && ToolTip::isVisible()) {
         ToolTip::hide();
     } else if (e->key() == Qt::Key_Alt
@@ -2701,8 +2651,8 @@ void QmlCodeEditor::clearLink()
 
 void QmlCodeEditor::requestUpdateLink(QMouseEvent *e, bool immediate)
 {
-    if (!mouseNavigationEnabled())
-        return;
+//    if (!mouseNavigationEnabled())
+//        return;
     if (e->modifiers() & Qt::ControlModifier) {
         // Link emulation behaviour for 'go to definition'
         const QTextCursor cursor = cursorForPosition(e->pos());

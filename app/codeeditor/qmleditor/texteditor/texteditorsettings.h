@@ -41,7 +41,7 @@ namespace TextEditor {
 class FontSettings;
 class TypingSettings;
 class StorageSettings;
-class BehaviorSettings;
+//class BehaviorSettings;
 //class MarginSettings;
 //class DisplaySettings;
 class CompletionSettings;
@@ -67,8 +67,8 @@ public:
 
     static TextEditorSettings *instance();
 
-    static const TypingSettings &typingSettings();
-    static const StorageSettings &storageSettings();
+//    static const TypingSettings &typingSettings();
+//    static const StorageSettings &storageSettings();
 //    static const BehaviorSettings &behaviorSettings();
 //    static const MarginSettings &marginSettings();
 //    static const DisplaySettings &displaySettings();
@@ -99,7 +99,7 @@ public:
 signals:
     void typingSettingsChanged(const TextEditor::TypingSettings &);
     void storageSettingsChanged(const TextEditor::StorageSettings &);
-    void behaviorSettingsChanged(const TextEditor::BehaviorSettings &);
+//    void behaviorSettingsChanged(const TextEditor::BehaviorSettings &);
 //    void marginSettingsChanged(const TextEditor::MarginSettings &);
 //    void displaySettingsChanged(const TextEditor::DisplaySettings &);
     void completionSettingsChanged(const TextEditor::CompletionSettings &);

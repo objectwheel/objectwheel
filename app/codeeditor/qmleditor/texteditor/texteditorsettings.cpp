@@ -29,6 +29,7 @@
 //#include "behaviorsettings.h"
 //#include "behaviorsettingspage.h"
 #include "completionsettings.h"
+#include "simplecodestylepreferences.h"
 //#include "marginsettings.h"
 //#include "displaysettings.h"
 //#include "displaysettingspage.h"
@@ -133,16 +134,6 @@ TextEditorSettings *TextEditorSettings::instance()
     return m_instance;
 }
 
-const TypingSettings &TextEditorSettings::typingSettings()
-{
-    // WARNING return d->m_behaviorSettingsPage->typingSettings();
-}
-
-const StorageSettings &TextEditorSettings::storageSettings()
-{
-    // WARNING return d->m_behaviorSettingsPage->storageSettings();
-}
-
 //const BehaviorSettings &TextEditorSettings::behaviorSettings()
 //{
 //    return d->m_behaviorSettingsPage->behaviorSettings();
@@ -200,7 +191,10 @@ const CompletionSettings &TextEditorSettings::completionSettings()
 
 ICodeStylePreferences *TextEditorSettings::codeStyle()
 {
-    // WARNING return d->m_behaviorSettingsPage->codeStyle();
+    static SimpleCodeStylePreferences* m_codeStyle = new SimpleCodeStylePreferences;
+    m_codeStyle->setDisplayName(tr("Global", "Settings"));
+    m_codeStyle->setId(Constants::GLOBAL_SETTINGS_ID);
+    return m_codeStyle;
 }
 
 ICodeStylePreferences *TextEditorSettings::codeStyle(Core::Id languageId)
