@@ -552,40 +552,6 @@ void Control::updatePreview(const PreviewResult& result)
             m_image = PaintUtils::renderNonGuiControlImage(SaveUtils::toIcon(dir()), size());
     }
 
-    //    if (!result.errors.isEmpty()) {
-    //        //        setRefreshingDisabled(true);
-    //        resize(QSizeF(50, 50));
-    //        //        setRefreshingDisabled(false);
-    //        setPos(pos());
-    //        //    FIXME:    ControlMonitoringManager::instance()->geometryChanged(this);
-    //        setZValue(0);
-    //    } else {
-    //        if (result.gui) {
-    //            if (!form())
-    //                //                m_clip = result.property("clip").toBool();
-
-    //                if (!m_dragging && !Resizer::resizing()/* BUG && !ControlPreviewingManager::contains(uid())*/) {
-    //                    const auto& rect = getGeometryFromProperties(result.properties);
-    //                    qreal z = getZ(result);
-    //                    resize(rect.size());
-    //                    //                    setRefreshingDisabled(true);
-    //                    if (!form())
-    //                        setPos(rect.topLeft());
-    //                    blockSignals(true);
-    //                    setZValue(z);
-    //                    blockSignals(false);
-    //                    //                    setRefreshingDisabled(false);
-    //                }
-    //        } else {
-    //            //            setRefreshingDisabled(true);
-    //            resize(QSizeF(50, 50));
-    //            //            setRefreshingDisabled(false);
-    //            setPos(pos());
-    //            //     FIXME:       ControlMonitoringManager::instance()->geometryChanged(this);
-    //            setZValue(0);
-    //        }
-    //    }
-
     for (auto resizer : m_resizers)
         resizer->setDisabled(!gui());
 

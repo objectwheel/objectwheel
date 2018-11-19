@@ -461,7 +461,6 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
             this, &QmlCodeDocument::onDocumentUpdated);
 
     // semantic info
-    m_semanticInfoUpdater = new SemanticInfoUpdater(this);
     connect(m_semanticInfoUpdater, &SemanticInfoUpdater::updated,
             this, &QmlCodeDocument::acceptNewSemanticInfo);
     m_semanticInfoUpdater->start();
