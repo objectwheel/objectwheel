@@ -1,12 +1,6 @@
 [submodule "app/aes"]
 	path = app/aes
 	url = https://github.com/omergoktas/aes
-[submodule "themer"]
-	path = themer
-	url = https://github.com/abigdreamer/themer
-[submodule "previewer"]
-	path = previewer
-	url = https://github.com/abigdreamer/previewer
 [submodule "interpreter"]
 	path = interpreter
 	url = https://github.com/abigdreamer/interpreter
