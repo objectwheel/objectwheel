@@ -1568,8 +1568,6 @@ void QmlCodeEditor::setVisibleFoldedBlockNumber(int visibleFoldedBlockNumber)
 
 void QmlCodeEditor::setExtraSelections(const QString& kind, const QList<QTextEdit::ExtraSelection> &selections)
 {
-    if (selections.isEmpty() && m_extraSelections[kind].isEmpty())
-        return;
     m_extraSelections[kind] = selections;
 
     if (kind == "CodeSemanticsSelection") {
@@ -1582,6 +1580,8 @@ void QmlCodeEditor::setExtraSelections(const QString& kind, const QList<QTextEdi
         }
         m_overlay->setVisible(!m_overlay->isEmpty());
     } else {
+        if (selections.isEmpty() && m_extraSelections[kind].isEmpty())
+            return;
         QList<QTextEdit::ExtraSelection> all;
         for (auto i = m_extraSelections.constBegin(); i != m_extraSelections.constEnd(); ++i) {
             if (i.key() == "CodeSemanticsSelection")
