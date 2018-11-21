@@ -341,7 +341,7 @@ void DesignerWidget::discharge()
 {
     m_designerScene->discharge();
     m_designerView->discharge();
-    m_signalChooserDialog->sweet();
+    m_signalChooserDialog->discharge();
     m_outlineButton->setChecked(m_designerScene->showOutlines());
     m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setChecked(m_designerScene->snapping());

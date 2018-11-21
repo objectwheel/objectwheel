@@ -21,6 +21,17 @@ data
    |
     ---- 
 
+SignalChoser'e Component.onCompleted givi, Layout gibi attached propertileri signal choser'de göster
+QmlCodeEditorWidget'e SaveAll butonu ekle
+QmlCodeEditorWidget'e Copy, Paste, Cut, Save, Run özelliklerini en kısa zamanda ekle
+HelpView'e Copy, Paste, Cut, Save, Run özelliklerini en kısa zamanda ekle
+DesignerWidget'e Copy, Paste, Cut, Save, Run özelliklerini en kısa zamanda ekle
+HelpView ve Kod Editöre search, replace, replaceAll özellikleri eklenecek (Ctrl + F direk seçecek ve search'i açacak)
+Kod Editör Tab ile auto indent yapacak
+Kod Editör'de sağ taraftaki hizalama çizgisi gösterilebilmeli
+Kod Editör'ün intellisensi EcmaScript7'yi destekleyecek şekilde güncellenecek
+Klavye ile hızlı satır taşıma, çoğaltma, ve tüm hızlı operasyonlar desteklenecek
+
 Options Bölümüne Eklenecek - Projeye Özel Ayarlar
 1. Temalar ve Tema ayrıntıları
 2. Font ve resource'lar

@@ -19,7 +19,7 @@ public:
     QString currentSignal() const;
 
 public slots:
-    void sweet();
+    void discharge();
 
 private slots:
     void filterList();

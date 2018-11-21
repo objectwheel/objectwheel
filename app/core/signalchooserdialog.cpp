@@ -38,7 +38,7 @@ QString SignalChooserDialog::currentSignal() const
     return ui->signalList->currentItem()->text();
 }
 
-void SignalChooserDialog::sweet()
+void SignalChooserDialog::discharge()
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
     ui->searchEdit->clear();
