@@ -73,7 +73,7 @@ public slots:
 private slots:
     void onNewExternalFile();
     void onOpenExternalFile();
-    void onModificationChange();
+    void onModificationChange(Document* document);
     void onPinActivation(bool pinned);
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
     void onComboActivation(QmlCodeEditorToolBar::Combo);

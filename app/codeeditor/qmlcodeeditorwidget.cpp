@@ -167,7 +167,7 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
-            this, &QmlCodeEditorWidget::onModificationChange, Qt::QueuedConnection);
+            this, [=] { onModificationChange(m_openDocument); }, Qt::QueuedConnection);
 }
 
 int QmlCodeEditorWidget::count() const
@@ -246,14 +246,12 @@ void QmlCodeEditorWidget::onOpenExternalFile()
     openExternal(fullPath);
 }
 
-void QmlCodeEditorWidget::onModificationChange()
+void QmlCodeEditorWidget::onModificationChange(Document* document)
 {
-    if (!m_openDocument)
+    if (!document)
         return;
 
-    Q_ASSERT(m_openDocument->document == m_codeEditor->codeDocument());
-
-    QmlCodeEditorToolBar::Scope scope = m_openDocument->scope;
+    QmlCodeEditorToolBar::Scope scope = document->scope;
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
@@ -261,7 +259,7 @@ void QmlCodeEditorWidget::onModificationChange()
     case QmlCodeEditorToolBar::Global:
         for (int i = 0; i < leftCombo->count(); ++i) {
             GlobalDocument* doc = leftCombo->itemData(i, DocumentRole).value<GlobalDocument*>();
-            if (doc == m_openDocument) {
+            if (doc == document) {
                 leftCombo->setItemText(i, modified(doc->document, doc->relativePath));
                 break;
             }
@@ -270,7 +268,7 @@ void QmlCodeEditorWidget::onModificationChange()
     case QmlCodeEditorToolBar::External:
         for (int i = 0; i < leftCombo->count(); ++i) {
             ExternalDocument* doc = leftCombo->itemData(i, DocumentRole).value<ExternalDocument*>();
-            if (doc == m_openDocument) {
+            if (doc == document) {
                 leftCombo->setItemText(i, modified(doc->document, fname(doc->fullPath)));
                 break;
             }
@@ -279,13 +277,13 @@ void QmlCodeEditorWidget::onModificationChange()
     case QmlCodeEditorToolBar::Internal:
         for (int i = 0; i < leftCombo->count(); ++i) {
             Control* control = leftCombo->itemData(i, ControlRole).value<Control*>();
-            if (control == internal(m_openDocument)->control) {
+            if (control == internal(document)->control) {
                 leftCombo->setItemText(i, modifiedControlId(control));
                 break;
             }
         } for (int i = 0; i < rightCombo->count(); ++i) {
             InternalDocument* doc = rightCombo->itemData(i, DocumentRole).value<InternalDocument*>();
-            if (doc == m_openDocument) {
+            if (doc == document) {
                 rightCombo->setItemText(i, modified(doc->document, doc->relativePath));
                 break;
             }
@@ -348,6 +346,8 @@ void QmlCodeEditorWidget::save(QmlCodeEditorWidget::Document* document)
         return;
 
     document->document->setModified(false);
+    if (document != m_openDocument)
+        onModificationChange(document);
 
     for (SaveFilter* saveFilter : m_saveFilters)
         saveFilter->afterSave(document);
