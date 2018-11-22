@@ -24,7 +24,27 @@
 extern const char* TOOL_KEY;
 
 namespace {
+
 const QSize g_baseControlSize(40, 40);
+
+QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties)
+{
+    QMarginsF margins;
+    for (const PropertyNode& propertyNode : properties) {
+        for (const QString& propertyName : propertyNode.properties.keys()) {
+            if (propertyName == "__ow_margins_left")
+                margins.setLeft(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "__ow_margins_top")
+                margins.setTop(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "__ow_margins_right")
+                margins.setRight(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "__ow_margins_bottom")
+                margins.setBottom(propertyNode.properties.value(propertyName).toReal());
+        }
+    }
+    return margins;
+}
+
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
 {
     QRectF geometry;
@@ -181,6 +201,11 @@ QString Control::dir() const
     return SaveUtils::toParentDir(m_url);
 }
 
+QMarginsF Control::margins() const
+{
+    return m_margins;
+}
+
 DesignerScene* Control::scene() const
 {
     return static_cast<DesignerScene*>(QGraphicsWidget::scene());
@@ -303,7 +328,7 @@ void Control::dropControl(Control* control)
                                    | ControlPropertyManager::UpdatePreviewer
                                    | ControlPropertyManager::CompressedCall);
     // NOTE: We compress setPos because there might be some other compressed setPos'es in the list
-    // We want the setPos that is happened after reparent operation to take place at the very last
+    // We want the setPos that happens after reparent operation to take place at the very last
 
     //  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
     //  WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
@@ -537,6 +562,8 @@ void Control::updatePreview(const PreviewResult& result)
     m_events = result.events;
     m_properties = result.properties;
 
+    if (result.codeChanged)
+        m_margins = getMarginsFromProperties(result.properties);
     m_cachedGeometry = getGeometryFromProperties(result.properties);
     if (!dragging() && !resizing())
         applyCachedGeometry();
@@ -567,8 +594,15 @@ void Control::applyCachedGeometry()
             ControlPropertyManager::setSize(this, m_cachedGeometry.size(),
                                             ControlPropertyManager::NoOption);
         } else {
-            ControlPropertyManager::setGeometry(this, m_cachedGeometry,
-                                                ControlPropertyManager::NoOption);
+            QRectF r(m_cachedGeometry); // WARNING: Burada mı margins hesaba katılmalı, yoksa ControlPropertyManager::setGeometry içinde mi?
+                                        // Çünkü ControlPropertyManager::setGeometry içinde hem db ye kayıt var, hemde Designer üzerindeki esas
+                                        // QGraphicsItem'e ilgili pos değerini set etmek var. İkisi farlı değerler almalı, Designer'da margins hesaba
+                                        // katılırken, db'ye direk kontrol'den gelen x,y ne ise o yazdırılmalı.
+            if (parentControl()) {
+                r.moveLeft(m_cachedGeometry.left() + parentControl()->margins().left());
+                r.moveTop(m_cachedGeometry.top() + parentControl()->margins().top());
+            }
+            ControlPropertyManager::setGeometry(this, r, ControlPropertyManager::NoOption);
         }
     }
 }

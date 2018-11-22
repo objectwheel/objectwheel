@@ -19,13 +19,21 @@ header
 
 data
    |
-    ---- 
+    ----
 
-SignalChoser'e Component.onCompleted givi, Layout gibi attached propertileri signal choser'de göster
+
+Sikik program her kontrol selectionda hayyvann gibi donuyor, düzelt bunu
+Bir itemin Designer'da ki konumu, o itemin parentine relavite olarak alınacak (propertiesdeki konumlar x, y den alınmaya devam edilecek)
+Bir eleman, parent elemanın, qquickitem kabul eden bir bir propertisine Designer üzerinden kolayca atanabilecek (header, foother gibi mesela)
+Muhammed abinin bildirdiği kod blok fold edilince, aşağıya intellisense ile bir "function" yazılınca kod editör çokmesi giderilecek, "foldlama" özelliğine genel bir bakım yapılacak
+SignalChoser'e Component.onCompleted gibi, Layout gibi attached propertileri signal choser'de göster
 QmlCodeEditorWidget'e SaveAll butonu ekle
 QmlCodeEditorWidget'e Copy, Paste, Cut, Save, Run özelliklerini en kısa zamanda ekle
+QmlCodeEditorWidget'e Toggle comment eklenecek
+QmlCodeEditorWidget'in Follow under symbol özelliği eklenecek/düzeltilecek
+Bir js düzenlenip save edilince, o js dosyasını kullanani, import eden control'ler de save edilmeli, yeniden repreview edilmeli
 HelpView'e Copy, Paste, Cut, Save, Run özelliklerini en kısa zamanda ekle
-DesignerWidget'e Copy, Paste, Cut, Save, Run özelliklerini en kısa zamanda ekle
+DesignerWidget'e Copy, Paste, Cut, Save, Save All, Run özelliklerini en kısa zamanda ekle
 HelpView ve Kod Editöre search, replace, replaceAll özellikleri eklenecek (Ctrl + F direk seçecek ve search'i açacak)
 Kod Editör Tab ile auto indent yapacak
 Kod Editör'de sağ taraftaki hizalama çizgisi gösterilebilmeli
@@ -47,7 +55,7 @@ Anchor özelliği, bir şekilde çalışmıyor.. İki eleman at, birinü yukarı
 Dosya renaming keşke uzantıyı içermese, default olarak.
 GUI objelerinin idleri intellisense tarafından tanınmıyor, ayrıca önerilerde göstermeli noktaya basınca
 Dosya sürükle bırak tanımlanırken aynı zamanda multiple eleman seçme özelliği bozulmamalı, o da olmalı
-FileExplorer'da toolbara kes butonuda eklenmeli
+FileExplorer'da toolbara kes butonuda eklenmeli ve kes yağıştır özelliği olmalı
 ControlInspectorda da, aynı fileexplorerdaki gibi multiple objeler seçilebilirken, aynı zamanda parent-child drag-drop mümkün olmalı. Bu drag sırasında hizalama çizgileri olmalı, hani şu mavi olanlardan
 Control parent child creation order çok önemli ve uygulanmalı.
 Designer çok yavaş, özellikle obje seçerken, objeler drop edilirken hizalama çizgileri belirmeli.

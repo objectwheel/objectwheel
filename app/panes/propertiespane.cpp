@@ -64,7 +64,7 @@ bool isGeometryProperty(const QString& propertyName)
 }
 
 template<typename SpinBox>
-void fixPosForForm(Control* control, const QString& propertyName, SpinBox spinBox)
+void fixPosForForm(const Control* control, const QString& propertyName, SpinBox spinBox)
 {
     if (control->form()) {
         if ((propertyName == "x" || propertyName == "y")
@@ -1077,7 +1077,14 @@ void PropertiesPane::onSelectionChange()
     Control* selectedControl = m_designerScene->selectedControls().first();
     setDisabled(selectedControl->hasErrors());
 
-    const QList<PropertyNode>& properties = selectedControl->properties();
+    QList<PropertyNode> properties = selectedControl->properties();
+    for (PropertyNode& propertyNode : properties) {
+        for (const QString& propertyName : propertyNode.properties.keys()) {
+            if (propertyName.startsWith("__"))
+                propertyNode.properties.remove(propertyName);
+        }
+    }
+
     if (properties.isEmpty())
         return;
 
@@ -1286,9 +1293,11 @@ void PropertiesPane::onPreviewChange(Control* control, bool codeChanged)
 
     if (codeChanged)
         return onSelectionChange();
+    else
+        return onGeometryChange(control);
 }
 
-void PropertiesPane::onGeometryChange(Control* control)
+void PropertiesPane::onGeometryChange(const Control* control)
 {
     if (topLevelItemCount() <= 0)
         return;
@@ -1300,7 +1309,8 @@ void PropertiesPane::onGeometryChange(Control* control)
     if (selectedControl != control)
         return;
 
-    const QRectF& geometry = control->geometry();
+    // WARNING
+    const QRectF& geometry = getGeometryFromProperties(control->properties());
 
     bool xUnknown = false, yUnknown = false;
     if (control->form()) {
@@ -1345,19 +1355,19 @@ void PropertiesPane::onGeometryChange(Control* control)
             if (childItem->text(0) == "x") {
                 childItem->setData(0, Qt::DecorationRole, xChanged);
                 if (dSpinBox) {
-                    dSpinBox->setValue(control->x());
+                    dSpinBox->setValue(geometry.x());
                     fixPosForForm(control, "x", dSpinBox);
                 } else {
-                    iSpinBox->setValue(control->x());
+                    iSpinBox->setValue(geometry.x());
                     fixPosForForm(control, "x", iSpinBox);
                 }
             } else if (childItem->text(0) == "y") {
                 childItem->setData(0, Qt::DecorationRole, yChanged);
                 if (dSpinBox) {
-                    dSpinBox->setValue(control->y());
+                    dSpinBox->setValue(geometry.y());
                     fixPosForForm(control, "y", dSpinBox);
                 } else {
-                    iSpinBox->setValue(control->y());
+                    iSpinBox->setValue(geometry.y());
                     fixPosForForm(control, "y", iSpinBox);
                 }
             } else if (childItem->text(0) == "width") {

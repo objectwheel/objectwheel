@@ -585,6 +585,7 @@ void PreviewerUtils::setInstancePropertyVariant(Previewer::ControlInstance* inst
     Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(instance->object);
 
+    QVariant adjustedValue(propertyValue);
     QQmlProperty property(instance->object, propertyName, instance->context);
 
     if (!property.isValid())
@@ -596,11 +597,11 @@ void PreviewerUtils::setInstancePropertyVariant(Previewer::ControlInstance* inst
     if (instance->window && (propertyName == "visible" || propertyName == "visibility"))
         return;
 
-    bool isWritten = property.write(propertyValue);
+    bool isWritten = property.write(adjustedValue);
 
     if (!isWritten) {
         qDebug() << "setInstancePropertyVariant: Cannot be written: "
-                 << instance->object << propertyName << propertyValue;
+                 << instance->object << propertyName << adjustedValue;
     }
 }
 
@@ -708,8 +709,29 @@ QList<PropertyNode> PreviewerUtils::properties(const Previewer::ControlInstance*
     QObject* object = instance->object;
     Q_ASSERT(object);
 
-    auto metaObject = object->metaObject();
+    QList<Enum> enums;
+    QMap<QString, QVariant> properties;
 
+    if (instance->gui && instance->codeChanged) {
+        QQuickItem* parentItem = PreviewerUtils::guiItem(object);
+        Q_ASSERT(parentItem);
+        QQmlComponent com(qmlEngine(object));
+        com.setData("import QtQuick 2.7;Item{anchors.fill:parent}", QUrl());
+        QQuickItem* item = qobject_cast<QQuickItem*>(com.create(qmlContext(object)));
+        Q_ASSERT(item);
+        QQmlProperty defaultProperty(object);
+        Q_ASSERT(defaultProperty.isValid());
+        QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+        childList.append(item);
+        const QRectF rect(item->mapToItem(parentItem, {0, 0}), item->size());
+        properties["__ow_margins_left"] = rect.left();
+        properties["__ow_margins_top"] = rect.top();
+        properties["__ow_margins_right"] = parentItem->width() - rect.right();
+        properties["__ow_margins_bottom"] = parentItem->height() - rect.bottom();
+        item->deleteLater();
+    }
+
+    auto metaObject = object->metaObject();
     while (metaObject) {
         if (metaObject->propertyOffset() - metaObject->propertyCount() == 0) {
             metaObject = metaObject->superClass();
@@ -717,10 +739,6 @@ QList<PropertyNode> PreviewerUtils::properties(const Previewer::ControlInstance*
         }
 
         QString className = cleanClassName(metaObject);
-
-        QList<Enum> enums;
-        QMap<QString, QVariant> properties;
-
         for (int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); i++) {
             const auto& property = metaObject->property(i);
 

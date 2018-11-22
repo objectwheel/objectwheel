@@ -34,6 +34,7 @@ public:
     QString uid() const;
     QString url() const;
     QString dir() const;
+    QMarginsF margins() const;
 
     DesignerScene* scene() const;
     Control* parentControl() const;
@@ -97,6 +98,7 @@ private:
     bool m_hoverOn;
     bool m_dragging;
     bool m_resizing;
+    QMarginsF m_margins;
     QRectF m_cachedGeometry;
 
     QString m_url;

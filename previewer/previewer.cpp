@@ -166,7 +166,7 @@ void Previewer::updateParent(const QString& newDir, const QString& uid, const QS
     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
     childList.append(instance->object);
 
-    if (instance->gui) { // We still reparent it anyway, may a window comes
+    if (instance->gui && instance->window) { // We still reparent it anyway, may a window comes
         QQuickItem* item = PreviewerUtils::guiItem(instance->object);
         item->setParentItem(PreviewerUtils::guiItem(parentObject));
     }
@@ -221,7 +221,7 @@ void Previewer::updateControlCode(const QString& uid)
                     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                     childList.append(childInstance->object);
 
-                    if (childInstance->gui) { // We still reparent it anyway, may a window comes
+                    if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
                         QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                         item->setParentItem(PreviewerUtils::guiItem(oldInstance->object));
                     }
@@ -234,7 +234,7 @@ void Previewer::updateControlCode(const QString& uid)
                     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                     childList.append(childInstance->object);
 
-                    if (childInstance->gui) { // We still reparent it anyway, may a window comes
+                    if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
                         QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                         item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
                     }
@@ -248,7 +248,7 @@ void Previewer::updateControlCode(const QString& uid)
                 QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                 childList.append(childInstance->object);
 
-                if (childInstance->gui) { // We still reparent it anyway, may a window comes
+                if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
                     QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                     item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
                 }
@@ -306,7 +306,7 @@ void Previewer::updateFormCode(const QString& uid)
                 QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                 childList.append(childInstance->object);
 
-                if (childInstance->gui) { // We still reparent it anyway, may a window comes
+                if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
                     QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                     item->setParentItem(PreviewerUtils::guiItem(oldFormInstance->object));
                 }
@@ -319,7 +319,7 @@ void Previewer::updateFormCode(const QString& uid)
                 QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                 childList.append(childInstance->object);
 
-                if (childInstance->gui) { // We still reparent it anyway, may a window comes
+                if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
                     QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                     item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
                 }
@@ -331,6 +331,9 @@ void Previewer::updateFormCode(const QString& uid)
         delete oldObject;
 
     PreviewerUtils::doComplete(oldFormInstance, this);
+
+    for (ControlInstance* instance : oldFormInstance->children)
+        m_dirtyInstanceSet.insert(instance);
 
     refreshBindings();
     schedulePreview(oldFormInstance);
@@ -622,11 +625,11 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
         result.gui = instance->gui;
         result.window = instance->window;
         result.codeChanged = instance->codeChanged;
+        result.properties = PreviewerUtils::properties(instance);
+        result.events = PreviewerUtils::events(instance);
         instance->codeChanged = false;
         result.errors = instance->errors;
         result.image = grabImage(instance);
-        result.events = PreviewerUtils::events(instance);
-        result.properties = PreviewerUtils::properties(instance);
         results.append(result);        
 
         if (instance->errors.isEmpty()
@@ -830,7 +833,8 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
 
         if (instance->gui) {
             QQuickItem* item = PreviewerUtils::guiItem(instance->object);
-            item->setParentItem(PreviewerUtils::guiItem(parentObject)); // We still reparent it anyway, may a window comes
+            if (instance->window)
+                item->setParentItem(PreviewerUtils::guiItem(parentObject)); // We still reparent it anyway, may a window comes
             m_designerSupport.refFromEffectItem(item);
             item->update();
         }
