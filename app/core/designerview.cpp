@@ -229,6 +229,7 @@ void DesignerView::onPasteAction()
                                               ControlPropertyManager::SaveChanges
                                               | ControlPropertyManager::UpdatePreviewer);
         } else {
+            // NOTE: Use actual Control position for scene, since createControl deals with margins
             newControl = ControlCreationManager::createControl(scene()->currentForm(),
                                                                control->dir(),
                                                                control->pos() + QPointF(5, 5));
