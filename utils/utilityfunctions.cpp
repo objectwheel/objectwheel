@@ -317,3 +317,47 @@ QString UtilityFunctions::increasedNumberedText(const QString& text, bool addSpa
     else
         return "10";
 }
+
+QRectF UtilityFunctions::getGeometryFromProperties(const QList<PropertyNode>& properties)
+{
+    QRectF geometry;
+    for (const PropertyNode& propertyNode : properties) {
+        for (const QString& propertyName : propertyNode.properties.keys()) {
+            if (propertyName == "x")
+                geometry.moveLeft(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "y")
+                geometry.moveTop(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "width")
+                geometry.setWidth(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "height")
+                geometry.setHeight(propertyNode.properties.value(propertyName).toReal());
+        }
+    }
+    return geometry;
+}
+
+QMarginsF UtilityFunctions::getMarginsFromProperties(const QList<PropertyNode>& properties)
+{
+    QMarginsF margins;
+    for (const PropertyNode& propertyNode : properties) {
+        for (const QString& propertyName : propertyNode.properties.keys()) {
+            if (propertyName == "__ow_margins_left")
+                margins.setLeft(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "__ow_margins_top")
+                margins.setTop(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "__ow_margins_right")
+                margins.setRight(propertyNode.properties.value(propertyName).toReal());
+            else if (propertyName == "__ow_margins_bottom")
+                margins.setBottom(propertyNode.properties.value(propertyName).toReal());
+        }
+    }
+    return margins;
+}
+
+void UtilityFunctions::putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins)
+{
+    properties["__ow_margins_left"] = margins.left();
+    properties["__ow_margins_top"] = margins.top();
+    properties["__ow_margins_right"] = margins.right();
+    properties["__ow_margins_bottom"] = margins.bottom();
+}

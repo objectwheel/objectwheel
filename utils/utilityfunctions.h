@@ -4,6 +4,8 @@
 #include <Qt>
 #include <QFont>
 
+#include <previewresult.h>
+
 class QTextDocument;
 class QWidget;
 class QUrl;
@@ -15,6 +17,7 @@ class QAbstractButton;
 class QAbstractItemView;
 class QQmlError;
 class QComboBox;
+class QMarginsF;
 
 namespace UtilityFunctions {
 void registerOfflineStorage();
@@ -38,6 +41,9 @@ QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view);
 QPoint centerPos(const QSize& size);
 QString increasedNumberedText(const QString& text, bool addSpace, bool trim);
 bool comboContainsWord(QComboBox* comboBox, const QString& word);
+QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties);
+QRectF getGeometryFromProperties(const QList<PropertyNode>& properties);
+void putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins);
 }
 
 #endif // UTILITYFUNCTIONS_H

@@ -12,6 +12,7 @@
 #include <controlpropertymanager.h>
 #include <paintutils.h>
 #include <parserutils.h>
+#include <utilityfunctions.h>
 
 #include <QtMath>
 #include <QCursor>
@@ -26,42 +27,6 @@ extern const char* TOOL_KEY;
 namespace {
 
 const QSize g_baseControlSize(40, 40);
-
-QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties)
-{
-    QMarginsF margins;
-    for (const PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName == "__ow_margins_left")
-                margins.setLeft(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "__ow_margins_top")
-                margins.setTop(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "__ow_margins_right")
-                margins.setRight(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "__ow_margins_bottom")
-                margins.setBottom(propertyNode.properties.value(propertyName).toReal());
-        }
-    }
-    return margins;
-}
-
-QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
-{
-    QRectF geometry;
-    for (const PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName == "x")
-                geometry.moveLeft(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "y")
-                geometry.moveTop(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "width")
-                geometry.setWidth(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "height")
-                geometry.setHeight(propertyNode.properties.value(propertyName).toReal());
-        }
-    }
-    return geometry;
-}
 
 QList<Resizer*> initializeResizers(Control* control)
 {
@@ -563,8 +528,8 @@ void Control::updatePreview(const PreviewResult& result)
     m_properties = result.properties;
 
     if (result.codeChanged)
-        m_margins = getMarginsFromProperties(result.properties);
-    m_cachedGeometry = getGeometryFromProperties(result.properties);
+        m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
+    m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
     if (!dragging() && !resizing())
         applyCachedGeometry();
 

@@ -67,7 +67,8 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
 
     auto control = new Control(SaveUtils::toUrl(newControlRootPath));
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
-    ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
+    ControlPropertyManager::setPos(control, ControlPropertyManager::posWithMargin(control, pos, false),
+                                   ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
 
     QMap<QString, Control*> controlTree;

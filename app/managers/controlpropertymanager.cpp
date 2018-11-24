@@ -7,35 +7,6 @@
 #include <QTimer>
 #include <QPointer>
 
-namespace {
-
-qreal xWithMargin(const Control* control, bool add)
-{
-    qreal leftMargin = 0;
-    if (control->parentControl())
-        leftMargin = control->parentControl()->margins().left();
-    return add ? control->x() + leftMargin : control->x() - leftMargin;
-}
-
-qreal yWithMargin(const Control* control, bool add)
-{
-    qreal topMargin = 0;
-    if (control->parentControl())
-        topMargin = control->parentControl()->margins().top();
-    return add ? control->y() + topMargin : control->y() - topMargin;
-}
-
-QPointF posWithMargin(const Control* control, bool add)
-{
-    return QPointF(xWithMargin(control, add), yWithMargin(control, add));
-}
-
-QRectF geoWithMargin(const Control* control, bool add)
-{
-    return QRectF(posWithMargin(control, add), control->size());
-}
-}
-
 ControlPropertyManager* ControlPropertyManager::s_instance = nullptr;
 QTimer* ControlPropertyManager::s_dirtyPropertyProcessingTimer = nullptr;
 QList<ControlPropertyManager::DirtyProperty> ControlPropertyManager::s_dirtyProperties;
@@ -80,10 +51,8 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
     bool isInt = control->propertyType("x") == QVariant::Int;
 
     if (!(options & DontApplyDesigner)) {
-        qreal leftMargin = 0;
-        if (control->parentControl())
-            leftMargin = control->parentControl()->margins().left();
-        control->setX(isInt ? int(leftMargin + x) : (x + leftMargin));
+        qreal newX = xWithMargin(control, x, true);
+        control->setX(isInt ? int(newX) : (newX));
     }
 
     if (options & CompressedCall) {
@@ -126,10 +95,8 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
     bool isInt = control->propertyType("y") == QVariant::Int;
 
     if (!(options & DontApplyDesigner)) {
-        qreal topMargin = 0;
-        if (control->parentControl())
-            topMargin = control->parentControl()->margins().top();
-        control->setY(isInt ? int(topMargin + y) : (y + topMargin));
+        qreal newY = yWithMargin(control, y, true);
+        control->setY(isInt ? int(newY) : (newY));
     }
 
     if (options & CompressedCall) {
@@ -288,13 +255,7 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
     bool isInt = control->propertyType("x") == QVariant::Int;
 
     if (!(options & DontApplyDesigner)) {
-        qreal topMargin = 0;
-        qreal leftMargin = 0;
-        if (control->parentControl()) {
-            topMargin = control->parentControl()->margins().top();
-            leftMargin = control->parentControl()->margins().left();
-        }
-        const QPointF newPos(pos + QPointF{leftMargin, topMargin});
+        const QPointF& newPos = posWithMargin(control, pos, true);
         control->setPos(isInt ? newPos.toPoint() : newPos);
     }
 
@@ -398,13 +359,7 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
     bool isInt = control->propertyType("x") == QVariant::Int;
 
     if (!(options & DontApplyDesigner)) {
-        qreal topMargin = 0;
-        qreal leftMargin = 0;
-        if (control->parentControl()) {
-            topMargin = control->parentControl()->margins().top();
-            leftMargin = control->parentControl()->margins().left();
-        }
-        const QRectF newGeo(geometry.adjusted(leftMargin, topMargin, leftMargin, topMargin));
+        const QRectF& newGeo = geoWithMargin(control, geometry, true);
         control->setGeometry(isInt ? newGeo.toRect() : newGeo);
     }
 
@@ -535,4 +490,30 @@ void ControlPropertyManager::setProperty(Control* control, const QString& proper
         ControlPreviewingManager::schedulePropertyUpdate(control->uid(), propertyName, propertyValue);
 
     emit instance()->propertyChanged(control, propertyName);
+}
+
+qreal ControlPropertyManager::xWithMargin(const Control* control, qreal x, bool add)
+{
+    qreal leftMargin = 0;
+    if (control->parentControl())
+        leftMargin = control->parentControl()->margins().left();
+    return add ? x + leftMargin : x - leftMargin;
+}
+
+qreal ControlPropertyManager::yWithMargin(const Control* control, qreal y, bool add)
+{
+    qreal topMargin = 0;
+    if (control->parentControl())
+        topMargin = control->parentControl()->margins().top();
+    return add ? y + topMargin : y - topMargin;
+}
+
+QPointF ControlPropertyManager::posWithMargin(const Control* control, const QPointF& pos, bool add)
+{
+    return QPointF(xWithMargin(control, pos.x(), add), yWithMargin(control, pos.y(), add));
+}
+
+QRectF ControlPropertyManager::geoWithMargin(const Control* control, const QRectF& geo, bool add)
+{
+    return QRectF(posWithMargin(control, geo.topLeft(), add), control->size());
 }

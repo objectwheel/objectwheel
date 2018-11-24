@@ -3,6 +3,7 @@
 #include <saveutils.h>
 #include <filemanager.h>
 #include <previewresult.h>
+#include <utilityfunctions.h>
 
 #include <QAnimationDriver>
 #include <QQuickWindow>
@@ -724,10 +725,9 @@ QList<PropertyNode> PreviewerUtils::properties(const Previewer::ControlInstance*
         QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
         childList.append(item);
         const QRectF rect(item->mapToItem(parentItem, {0, 0}), item->size());
-        properties["__ow_margins_left"] = rect.left();
-        properties["__ow_margins_top"] = rect.top();
-        properties["__ow_margins_right"] = parentItem->width() - rect.right();
-        properties["__ow_margins_bottom"] = parentItem->height() - rect.bottom();
+        QMarginsF margins(rect.left(), rect.top(), parentItem->width() - rect.right(),
+                          parentItem->height() - rect.bottom());
+        UtilityFunctions::putMarginsToProperties(properties, margins);
         item->deleteLater();
     }
 
