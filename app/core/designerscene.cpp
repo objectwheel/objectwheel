@@ -59,6 +59,7 @@ void DesignerScene::addForm(Form* form)
 void DesignerScene::addControl(Control* /*control*/, Control* /*parentControl*/)
 {
     // TODO
+    Q_ASSERT(0);
 }
 
 void DesignerScene::removeForm(Form* form)

@@ -286,17 +286,14 @@ void Control::dropControl(Control* control)
 {
     Q_ASSERT(!control->form());
 
-    const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdatePreviewer);
-    ControlPropertyManager::setPos(control, newPos,  ControlPropertyManager::SaveChanges
+    ControlPropertyManager::setPos(control, mapFromItem(control->parentItem(), control->pos()),
+                                   ControlPropertyManager::SaveChanges
                                    | ControlPropertyManager::UpdatePreviewer
                                    | ControlPropertyManager::CompressedCall);
     // NOTE: We compress setPos because there might be some other compressed setPos'es in the list
     // We want the setPos that happens after reparent operation to take place at the very last
-
-    //  FIXME:  ControlMonitoringManager::instance()->geometryChanged(control);
-    //  WindowManager::mainWindow()->inspectorPane()->handleControlParentChange(control);
 
     update();
 }
@@ -559,15 +556,9 @@ void Control::applyCachedGeometry()
             ControlPropertyManager::setSize(this, m_cachedGeometry.size(),
                                             ControlPropertyManager::NoOption);
         } else {
-            QRectF r(m_cachedGeometry); // WARNING: Burada mı margins hesaba katılmalı, yoksa ControlPropertyManager::setGeometry içinde mi?
-                                        // Çünkü ControlPropertyManager::setGeometry içinde hem db ye kayıt var, hemde Designer üzerindeki esas
-                                        // QGraphicsItem'e ilgili pos değerini set etmek var. İkisi farlı değerler almalı, Designer'da margins hesaba
-                                        // katılırken, db'ye direk kontrol'den gelen x,y ne ise o yazdırılmalı.
-            if (parentControl()) {
-                r.moveLeft(m_cachedGeometry.left() + parentControl()->margins().left());
-                r.moveTop(m_cachedGeometry.top() + parentControl()->margins().top());
-            }
-            ControlPropertyManager::setGeometry(this, r, ControlPropertyManager::NoOption);
+            ControlPropertyManager::setGeometry(
+                        this, ControlPropertyManager::geoWithMargin(this, m_cachedGeometry, true),
+                        ControlPropertyManager::NoOption);
         }
     }
 }

@@ -522,9 +522,9 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
             options |= ControlPropertyManager::DontApplyDesigner;
 
         if (propertyName == "x") {
-            ControlPropertyManager::setX(control, value, options);
+            ControlPropertyManager::setX(control, ControlPropertyManager::xWithMargin(control, value, true), options);
         } else if (propertyName == "y") {
-            ControlPropertyManager::setY(control, value, options);
+            ControlPropertyManager::setY(control, ControlPropertyManager::yWithMargin(control, value, true), options);
         } else if (propertyName == "z") {
             ControlPropertyManager::setZ(control, value, options);
         } else if (propertyName == "width") {

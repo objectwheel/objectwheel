@@ -27,7 +27,7 @@ private:
 
     static void init(DesignerScene* designerScene);
     static Form* createForm(const QString& formRootPath); // FormsPane dependency: Should be a private member
-    static Control* createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos);
+    static Control* createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos); // NOTE: Sets pos, based on scene coord jargon
 
 private:
     static ControlCreationManager* s_instance;

@@ -151,10 +151,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             diff_y *= 2.0;
             ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(0, -diff_y, 0, 0), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, -diff_y, 0, 0), options);
         }
         break;
 
@@ -166,10 +163,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             diff_x *= 2.0;
             ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(0, 0, diff_x, 0), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, 0, diff_x, 0), options);
         }
         break;
 
@@ -181,10 +175,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             diff_y *= 2.0;
             ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(0, 0, 0, diff_y), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, 0, 0, diff_y), options);
         }
         break;
 
@@ -196,10 +187,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             diff_x *= 2.0;
             ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(-diff_x, 0, 0, 0), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(-diff_x, 0, 0, 0), options);
         }
         break;
 
@@ -214,10 +202,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
             ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(-diff_x, -diff_y, 0, 0), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(-diff_x, -diff_y, 0, 0), options);
         }
         break;
 
@@ -232,10 +217,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
             ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(0, -diff_y, diff_x, 0), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, -diff_y, diff_x, 0), options);
         }
         break;
 
@@ -250,10 +232,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
             ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(0, 0, diff_x, diff_y), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, 0, diff_x, diff_y), options);
         }
         break;
 
@@ -268,10 +247,7 @@ void Resizer::mouseMoveEvent(QGsme* event)
             ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
             ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
         } else {
-            ControlPropertyManager::setGeometry(
-                        parent, ControlPropertyManager::geoWithMargin(
-                            parent,
-                            parent->geometry().adjusted(-diff_x, 0, 0, diff_y), false), options);
+            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(-diff_x, 0, 0, diff_y), options);
         }
         break;
     }
