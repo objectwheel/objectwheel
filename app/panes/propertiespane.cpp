@@ -174,46 +174,6 @@ QString stringify(const QString& text)
     return engine.evaluate("JSON.stringify(text)").toString();
 }
 
-QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
-{
-    QRectF geometry;
-    for (const PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName == "x")
-                geometry.moveLeft(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "y")
-                geometry.moveTop(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "width")
-                geometry.setWidth(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "height")
-                geometry.setHeight(propertyNode.properties.value(propertyName).toReal());
-        }
-    }
-    return geometry;
-}
-
-QVariant getProperty(const QString& property, const QList<PropertyNode>& properties)
-{
-    for (const PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName == property)
-                return propertyNode.properties.value(propertyName);
-        }
-    }
-    return QVariant();
-}
-
-Enum getEnum(const QString& name, const QList<PropertyNode>& properties)
-{
-    for (const PropertyNode& propertyNode : properties) {
-        for (const Enum& enumm : propertyNode.enums) {
-            if (enumm.name == name)
-                return enumm;
-        }
-    }
-    return Enum();
-}
-
 QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
 {
     QList<QTreeWidgetItem*> items;
@@ -319,7 +279,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
-        const QString& previousValue = getProperty(propertyName, control->properties()).value<QString>();
+        const QString& previousValue = UtilityFunctions::getProperty(propertyName, control->properties()).value<QString>();
 
         if (previousValue == lineEdit->text())
             return;
@@ -353,7 +313,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
                                               SaveUtils::toThisDir(control->dir()),
                                               QUrl::AssumeLocalFile);
         const QString& displayText = urlToDisplayText(url, control->dir());
-        const QUrl& previousUrl = getProperty(propertyName, control->properties()).value<QUrl>();
+        const QUrl& previousUrl = UtilityFunctions::getProperty(propertyName, control->properties()).value<QUrl>();
 
         if (url == previousUrl)
             return;
@@ -382,7 +342,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
-        const QString& previousValue = getEnum(enumm.name, control->properties()).value;
+        const QString& previousValue = UtilityFunctions::getEnum(enumm.name, control->properties()).value;
 
         if (previousValue == comboBox->currentText())
             return;
@@ -457,7 +417,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
 
     QObject::connect(toolButton, &QCheckBox::clicked, [=]
     {
-        const QColor& previousColor = getProperty(propertyName, control->properties()).value<QColor>();
+        const QColor& previousColor = UtilityFunctions::getProperty(propertyName, control->properties()).value<QColor>();
 
         QColorDialog cDialog;
         cDialog.setWindowTitle(QObject::tr("Select Color"));
@@ -571,7 +531,7 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, 
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
-        const QFont& font = getProperty("font", control->properties()).value<QFont>();
+        const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
 
         if (comboBox->currentText() == QFontInfo(font).family())
             return;
@@ -611,7 +571,7 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
         int weightValue = weightEnum.keyToValue(comboBox->currentText().toUtf8().constData());
-        const QFont& font = getProperty("font", control->properties()).value<QFont>();
+        const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
 
         if (weightValue == font.weight())
             return;
@@ -647,7 +607,7 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
         int capitalizationValue = capitalizationEnum.keyToValue(comboBox->currentText().toUtf8().constData());
-        const QFont& font = getProperty("font", control->properties()).value<QFont>();
+        const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
 
         if (capitalizationValue == font.capitalization())
             return;
@@ -679,7 +639,7 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
     QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
     {
         bool isPx = propertyName == "pixelSize" ? true : false;
-        QFont font = getProperty("font", control->properties()).value<QFont>();
+        QFont font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
 
         // NOTE: No need for previous value equality check, since this signal is only emitted
         // when the value is changed
@@ -720,7 +680,7 @@ void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
     QTreeWidget* treeWidget = classItem->treeWidget();
     Q_ASSERT(treeWidget);
 
-    const QRectF& geometry = getGeometryFromProperties(properties);
+    const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
 
     bool xUnknown = false, yUnknown = false;
     if (control->form()) {
@@ -1309,8 +1269,7 @@ void PropertiesPane::onGeometryChange(const Control* control)
     if (selectedControl != control)
         return;
 
-    // WARNING
-    const QRectF& geometry = getGeometryFromProperties(control->properties());
+    const QRectF& geometry = ControlPropertyManager::geoWithMargin(control, control->geometry(), false);
 
     bool xUnknown = false, yUnknown = false;
     if (control->form()) {

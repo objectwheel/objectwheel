@@ -41,9 +41,11 @@ QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view);
 QPoint centerPos(const QSize& size);
 QString increasedNumberedText(const QString& text, bool addSpace, bool trim);
 bool comboContainsWord(QComboBox* comboBox, const QString& word);
-QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties);
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties);
+QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties);
 void putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins);
+QVariant getProperty(const QString& property, const QList<PropertyNode>& properties);
+Enum getEnum(const QString& name, const QList<PropertyNode>& properties);
 }
 
 #endif // UTILITYFUNCTIONS_H

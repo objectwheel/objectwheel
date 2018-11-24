@@ -361,3 +361,25 @@ void UtilityFunctions::putMarginsToProperties(QMap<QString, QVariant>& propertie
     properties["__ow_margins_right"] = margins.right();
     properties["__ow_margins_bottom"] = margins.bottom();
 }
+
+QVariant UtilityFunctions::getProperty(const QString& property, const QList<PropertyNode>& properties)
+{
+    for (const PropertyNode& propertyNode : properties) {
+        for (const QString& propertyName : propertyNode.properties.keys()) {
+            if (propertyName == property)
+                return propertyNode.properties.value(propertyName);
+        }
+    }
+    return QVariant();
+}
+
+Enum UtilityFunctions::getEnum(const QString& name, const QList<PropertyNode>& properties)
+{
+    for (const PropertyNode& propertyNode : properties) {
+        for (const Enum& enumm : propertyNode.enums) {
+            if (enumm.name == name)
+                return enumm;
+        }
+    }
+    return Enum();
+}
