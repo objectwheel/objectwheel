@@ -7,6 +7,35 @@
 #include <QTimer>
 #include <QPointer>
 
+namespace {
+
+qreal xWithMargin(const Control* control, bool add)
+{
+    qreal leftMargin = 0;
+    if (control->parentControl())
+        leftMargin = control->parentControl()->margins().left();
+    return add ? control->x() + leftMargin : control->x() - leftMargin;
+}
+
+qreal yWithMargin(const Control* control, bool add)
+{
+    qreal topMargin = 0;
+    if (control->parentControl())
+        topMargin = control->parentControl()->margins().top();
+    return add ? control->y() + topMargin : control->y() - topMargin;
+}
+
+QPointF posWithMargin(const Control* control, bool add)
+{
+    return QPointF(xWithMargin(control, add), yWithMargin(control, add));
+}
+
+QRectF geoWithMargin(const Control* control, bool add)
+{
+    return QRectF(posWithMargin(control, add), control->size());
+}
+}
+
 ControlPropertyManager* ControlPropertyManager::s_instance = nullptr;
 QTimer* ControlPropertyManager::s_dirtyPropertyProcessingTimer = nullptr;
 QList<ControlPropertyManager::DirtyProperty> ControlPropertyManager::s_dirtyProperties;
@@ -50,8 +79,12 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
 
     bool isInt = control->propertyType("x") == QVariant::Int;
 
-    if (!(options & DontApplyDesigner) && (isInt ? int(control->x()) != int(x) : control->x() != x))
-        control->setX(isInt ? int(x) : x);
+    if (!(options & DontApplyDesigner)) {
+        qreal leftMargin = 0;
+        if (control->parentControl())
+            leftMargin = control->parentControl()->margins().left();
+        control->setX(isInt ? int(leftMargin + x) : (x + leftMargin));
+    }
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -92,8 +125,12 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
 
     bool isInt = control->propertyType("y") == QVariant::Int;
 
-    if (!(options & DontApplyDesigner) && (isInt ? int(control->y()) != int(y) : control->y() != y))
-        control->setY(isInt ? int(y) : y);
+    if (!(options & DontApplyDesigner)) {
+        qreal topMargin = 0;
+        if (control->parentControl())
+            topMargin = control->parentControl()->margins().top();
+        control->setY(isInt ? int(topMargin + y) : (y + topMargin));
+    }
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -132,7 +169,7 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
     if (control->hasErrors())
         return;
 
-    if (!(options & DontApplyDesigner) && control->zValue() != z)
+    if (!(options & DontApplyDesigner))
         control->setZValue(z);
 
     if (options & CompressedCall) {
@@ -166,10 +203,8 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
 
     bool isInt = control->propertyType("width") == QVariant::Int;
 
-    if (!(options & DontApplyDesigner) && (isInt ?
-            int(control->size().width()) != int(width) : control->size().width() != width)) {
+    if (!(options & DontApplyDesigner))
         control->resize(isInt ? int(width) : width, control->size().height());
-    }
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -210,10 +245,8 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
 
     bool isInt = control->propertyType("height") == QVariant::Int;
 
-    if (!(options & DontApplyDesigner) && (isInt ?
-            int(control->size().height()) != int(height) : control->size().height() != height)) {
+    if (!(options & DontApplyDesigner))
         control->resize(control->size().width(), isInt ? int(height) : height);
-    }
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -254,9 +287,15 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
 
     bool isInt = control->propertyType("x") == QVariant::Int;
 
-    if (!(options & DontApplyDesigner) && (isInt ?
-            control->pos().toPoint() != pos.toPoint() : control->pos() != pos)) {
-        control->setPos(isInt ? pos.toPoint() : pos);
+    if (!(options & DontApplyDesigner)) {
+        qreal topMargin = 0;
+        qreal leftMargin = 0;
+        if (control->parentControl()) {
+            topMargin = control->parentControl()->margins().top();
+            leftMargin = control->parentControl()->margins().left();
+        }
+        const QPointF newPos(pos + QPointF{leftMargin, topMargin});
+        control->setPos(isInt ? newPos.toPoint() : newPos);
     }
 
     if (options & CompressedCall) {
@@ -307,10 +346,8 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
 
     bool isInt = control->propertyType("width") == QVariant::Int;
 
-    if (!(options & DontApplyDesigner) && (isInt ?
-            control->size().toSize() != size.toSize() : control->size() != size)) {
+    if (!(options & DontApplyDesigner))
         control->resize(isInt ? size.toSize() : size);
-    }
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -360,9 +397,15 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
 
     bool isInt = control->propertyType("x") == QVariant::Int;
 
-    if (!(options & DontApplyDesigner) && (isInt ?
-            control->geometry().toRect() != geometry.toRect() : control->geometry() != geometry)) {
-        control->setGeometry(isInt ? geometry.toRect() : geometry);
+    if (!(options & DontApplyDesigner)) {
+        qreal topMargin = 0;
+        qreal leftMargin = 0;
+        if (control->parentControl()) {
+            topMargin = control->parentControl()->margins().top();
+            leftMargin = control->parentControl()->margins().left();
+        }
+        const QRectF newGeo(geometry.adjusted(leftMargin, topMargin, leftMargin, topMargin));
+        control->setGeometry(isInt ? newGeo.toRect() : newGeo);
     }
 
     if (options & CompressedCall) {
@@ -416,7 +459,7 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     if (!parentControl)
         return;
 
-    if (!(options & DontApplyDesigner) && control->parentItem() != parentControl)
+    if (!(options & DontApplyDesigner))
         control->setParentItem(parentControl);
 
     if (options & CompressedCall) {
