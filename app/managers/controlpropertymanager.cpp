@@ -511,5 +511,5 @@ QPointF ControlPropertyManager::posWithMargin(const Control* control, const QPoi
 
 QRectF ControlPropertyManager::geoWithMargin(const Control* control, const QRectF& geo, bool add)
 {
-    return QRectF(posWithMargin(control, geo.topLeft(), add), control->size());
+    return QRectF(posWithMargin(control, geo.topLeft(), add), geo.size());
 }

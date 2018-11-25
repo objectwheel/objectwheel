@@ -332,6 +332,10 @@ void Previewer::updateFormCode(const QString& uid)
 
     PreviewerUtils::doComplete(oldFormInstance, this);
 
+    // NOTE: We would normally wait until preview() function to detect if there are any dirts
+    // But since we have a "margin" problem, all the (first) sub-childs should be updated in the first place
+    // In order to let chilren to know if there were any "header", "footer" (therefore margin) changes.
+    m_dirtyInstanceSet.insert(oldFormInstance);
     for (ControlInstance* instance : oldFormInstance->children)
         m_dirtyInstanceSet.insert(instance);
 
@@ -580,7 +584,7 @@ void Previewer::preview(ControlInstance* formInstance, qreal progressForInstance
                 ControlInstance* ancestorInstance = findNodeInstanceForItem(item->parentItem());
                 if (ancestorInstance)
                     m_dirtyInstanceSet.insert(ancestorInstance);
-                }
+            }
             DesignerSupport::updateDirtyNode(item);
         }
     }
@@ -588,7 +592,7 @@ void Previewer::preview(ControlInstance* formInstance, qreal progressForInstance
     // qDebug() << m_dirtyInstanceSet;
 
     if (!m_dirtyInstanceSet.isEmpty()) {
-        emit previewDone(previewDirtyInstances(m_dirtyInstanceSet.toList(),
+        emit previewDone(previewDirtyInstances(m_dirtyInstanceSet,
                                                progressForInstance / m_dirtyInstanceSet.size()));
         if (m_initialized)
             scheduleRepreviewForInvisibleInstances(formInstance);
@@ -630,7 +634,7 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
         instance->codeChanged = false;
         result.errors = instance->errors;
         result.image = grabImage(instance);
-        results.append(result);        
+        results.append(result);
 
         if (instance->errors.isEmpty()
                 && instance->gui

@@ -286,10 +286,11 @@ void Control::dropControl(Control* control)
 {
     Q_ASSERT(!control->form());
 
+    // NOTE: Do not move this assignment below setParent, because parent change effects the newPos result
+    const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdatePreviewer);
-    ControlPropertyManager::setPos(control, mapFromItem(control->parentItem(), control->pos()),
-                                   ControlPropertyManager::SaveChanges
+    ControlPropertyManager::setPos(control, newPos, ControlPropertyManager::SaveChanges
                                    | ControlPropertyManager::UpdatePreviewer
                                    | ControlPropertyManager::CompressedCall);
     // NOTE: We compress setPos because there might be some other compressed setPos'es in the list
@@ -510,7 +511,6 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 }
 
-// FIXME
 void Control::updatePreview(const PreviewResult& result)
 {
     if (result.uid != uid())
@@ -527,6 +527,7 @@ void Control::updatePreview(const PreviewResult& result)
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
     m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
+
     if (!dragging() && !resizing())
         applyCachedGeometry();
 

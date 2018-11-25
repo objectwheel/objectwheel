@@ -11,6 +11,16 @@ class QQmlError;
 class QQuickWindow;
 struct PreviewResult;
 
+// Due to possible margins on an ApplicationWindow the previewing order is important
+// And a parent must be always previewed first.
+template <typename T>
+class OnlyOneInstanceList : public QList<T>
+{
+public:
+    inline void insert(const T& t) { if (!this->contains(t)) this->append(t); }
+    inline void remove(const T& t) { this->removeOne(t); }
+};
+
 class Previewer final : public QObject
 {
     Q_OBJECT
@@ -79,7 +89,7 @@ private:
     bool m_initialized;
     DesignerSupport m_designerSupport;
     QList<ControlInstance*> m_formInstances;
-    QSet<ControlInstance*> m_dirtyInstanceSet;
+    OnlyOneInstanceList<ControlInstance*> m_dirtyInstanceSet;
     QQuickView* m_view;
 };
 
