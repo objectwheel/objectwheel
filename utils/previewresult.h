@@ -23,6 +23,7 @@ struct PropertyNode {
 
 struct PreviewResult {
     bool gui;
+    bool popup;
     bool window;
     bool codeChanged;
     QString id;
@@ -85,6 +86,7 @@ inline QDataStream& operator>>(QDataStream& in, PreviewResult& result)
     in >> result.id;
     in >> result.uid;
     in >> result.image;
+    in >> result.popup;
     in >> result.window;
     in >> result.codeChanged;
     in >> result.errors;
@@ -99,6 +101,7 @@ inline QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
     out << result.id;
     out << result.uid;
     out << result.image;
+    out << result.popup;
     out << result.window;
     out << result.codeChanged;
     out << result.errors;

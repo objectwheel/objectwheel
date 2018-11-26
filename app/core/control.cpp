@@ -41,6 +41,7 @@ QList<Control*> Control::m_controls;
 Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_gui(false)
   , m_clip(false)
+  , m_popup(false)
   , m_window(false)
   , m_dragIn(false)
   , m_hoverOn(false)
@@ -92,6 +93,11 @@ bool Control::form() const
 bool Control::clip() const
 {
     return m_clip;
+}
+
+bool Control::popup() const
+{
+    return m_popup;
 }
 
 bool Control::window() const
@@ -520,6 +526,7 @@ void Control::updatePreview(const PreviewResult& result)
 
     m_errors = result.errors;
     m_gui = result.gui;
+    m_popup = result.popup;
     m_window = result.window;
     m_events = result.events;
     m_properties = result.properties;

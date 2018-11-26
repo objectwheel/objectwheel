@@ -17,6 +17,7 @@
 #include <private/qquicktextinput_p.h>
 #include <private/qquicktransition_p.h>
 #include <private/qquickdesignersupport_p.h>
+#include <private/qquickpopup_p.h>
 
 namespace {
 
@@ -39,6 +40,17 @@ void hideWindow(QObject* object)
         window->hide();
         window->setProperty("visible", false);
         window->setProperty("visibility", QWindow::Hidden);
+    }
+}
+
+void showPopup(QObject* object)
+{
+    if (!object)
+        return;
+
+    if (object->inherits("QQuickPopup")) {
+        QQuickPopup* popup = static_cast<QQuickPopup*>(object);
+        popup->setVisible(true);
     }
 }
 
@@ -508,11 +520,8 @@ void PreviewerUtils::doComplete(Previewer::ControlInstance* instance, const Prev
 
     // FIXME: How do we handle header, footer or toolbar items of an ApplicationWindow?
     if (instance->gui) {
-        auto item = qobject_cast<QQuickItem*>(instance->object);
-
-        if (!item)
-            item = qobject_cast<QQuickWindow*>(instance->object)->contentItem();
-
+        QQuickItem* item = PreviewerUtils::guiItem(instance->object);
+        Q_ASSERT(item);
         disableTextCursor(item);
         DesignerSupport::emitComponentCompleteSignalForAttachedProperty(item);
         item->update();
@@ -529,6 +538,7 @@ void PreviewerUtils::tweakObjects(QObject* object)
     for(QObject* childObject : objectList) {
         stopAnimation(childObject);
         hideWindow(childObject);
+        showPopup(childObject);
     }
 }
 
@@ -596,6 +606,9 @@ void PreviewerUtils::setInstancePropertyVariant(Previewer::ControlInstance* inst
                               DesignerSupport::ContentUpdateMask);
 
     if (instance->window && (propertyName == "visible" || propertyName == "visibility"))
+        return;
+
+    if (instance->popup && propertyName == "visible")
         return;
 
     bool isWritten = property.write(adjustedValue);
@@ -672,6 +685,8 @@ QQuickItem* PreviewerUtils::guiItem(Previewer::ControlInstance* instance)
 
     if (instance->window)
         return qobject_cast<QQuickWindow*>(instance->object)->contentItem();
+    else if (instance->popup)
+        return qobject_cast<QQuickPopup*>(instance->object)->popupItem();
     else
         return qobject_cast<QQuickItem*>(instance->object);
 }
@@ -683,6 +698,8 @@ QQuickItem* PreviewerUtils::guiItem(QObject* object)
 
     if (object->isWindowType())
         return qobject_cast<QQuickWindow*>(object)->contentItem();
+    else if (object->inherits("QQuickPopup"))
+        return qobject_cast<QQuickPopup*>(object)->popupItem();
     else
         return qobject_cast<QQuickItem*>(object);
 }
@@ -691,11 +708,8 @@ QQuickItem* PreviewerUtils::createDummyItem(QQmlEngine* engine)
 {
     QQmlComponent component(engine);
     component.setData("import QtQuick 2.9\nItem{}", QUrl());
-
     QQuickItem* item = qobject_cast<QQuickItem*>(component.create(engine->rootContext()));
-
     Q_ASSERT(item);
-
     item->setFlag(QQuickItem::ItemHasContents, true);
     return item;
 }

@@ -28,6 +28,7 @@ class Previewer final : public QObject
 public:
     struct ControlInstance {
         bool gui;
+        bool popup;
         bool window;
         bool needsRepreview = false;
         bool codeChanged = false;

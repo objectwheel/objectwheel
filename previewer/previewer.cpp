@@ -166,7 +166,7 @@ void Previewer::updateParent(const QString& newDir, const QString& uid, const QS
     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
     childList.append(instance->object);
 
-    if (instance->gui && instance->window) { // We still reparent it anyway, may a window comes
+    if (instance->window || instance->popup) { // We still reparent it anyway, may a window comes
         QQuickItem* item = PreviewerUtils::guiItem(instance->object);
         item->setParentItem(PreviewerUtils::guiItem(parentObject));
     }
@@ -199,6 +199,7 @@ void Previewer::updateControlCode(const QString& uid)
 
     ControlInstance* instance = createInstance(oldInstance->dir, oldInstance->parent);
     oldInstance->gui = instance->gui;
+    oldInstance->popup = instance->popup;
     oldInstance->window = instance->window;
     oldInstance->codeChanged = instance->codeChanged;
     oldInstance->id = instance->id;
@@ -221,7 +222,7 @@ void Previewer::updateControlCode(const QString& uid)
                     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                     childList.append(childInstance->object);
 
-                    if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
+                    if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
                         QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                         item->setParentItem(PreviewerUtils::guiItem(oldInstance->object));
                     }
@@ -234,7 +235,7 @@ void Previewer::updateControlCode(const QString& uid)
                     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                     childList.append(childInstance->object);
 
-                    if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
+                    if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
                         QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                         item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
                     }
@@ -248,7 +249,7 @@ void Previewer::updateControlCode(const QString& uid)
                 QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                 childList.append(childInstance->object);
 
-                if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
+                if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
                     QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                     item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
                 }
@@ -285,6 +286,7 @@ void Previewer::updateFormCode(const QString& uid)
 
     ControlInstance* instance = createInstance(oldFormInstance->dir, nullptr, oldFormInstance->context);
     oldFormInstance->gui = instance->gui;
+    oldFormInstance->popup = instance->popup;
     oldFormInstance->window = instance->window;
     oldFormInstance->codeChanged = instance->codeChanged;
     oldFormInstance->id = instance->id;
@@ -306,7 +308,7 @@ void Previewer::updateFormCode(const QString& uid)
                 QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                 childList.append(childInstance->object);
 
-                if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
+                if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
                     QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                     item->setParentItem(PreviewerUtils::guiItem(oldFormInstance->object));
                 }
@@ -319,7 +321,7 @@ void Previewer::updateFormCode(const QString& uid)
                 QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
                 childList.append(childInstance->object);
 
-                if (childInstance->gui && childInstance->window) { // We still reparent it anyway, may a window comes
+                if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
                     QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
                     item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
                 }
@@ -453,6 +455,8 @@ bool Previewer::hasInstanceForObject(const QObject* object) const
                 return true;
             if (instance->window && PreviewerUtils::guiItem(instance) == object)
                 return true;
+            if (instance->popup && PreviewerUtils::guiItem(instance) == object)
+                return true;
         }
     }
     return false;
@@ -478,6 +482,8 @@ Previewer::ControlInstance* Previewer::instanceForObject(const QObject* object) 
             if (instance->object == object)
                 return instance;
             if (instance->window && PreviewerUtils::guiItem(instance) == object)
+                return instance;
+            if (instance->popup && PreviewerUtils::guiItem(instance) == object)
                 return instance;
         }
     }
@@ -550,6 +556,9 @@ void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstanc
                         || ParserUtils::property(SaveUtils::toUrl(instance->dir), "visibility").contains("Hidden"))) {
                 continue;
             }
+
+            if (instance->popup && ParserUtils::property(SaveUtils::toUrl(instance->dir), "visible") == "false")
+                continue;
 
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
 
@@ -627,6 +636,7 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
         result.id = instance->id;
         result.uid = instance->uid;
         result.gui = instance->gui;
+        result.popup = instance->popup;
         result.window = instance->window;
         result.codeChanged = instance->codeChanged;
         result.properties = PreviewerUtils::properties(instance);
@@ -665,6 +675,8 @@ QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
             QQuickWindow* window = static_cast<QQuickWindow*>(instance->object);
             item = window->contentItem();
             winColor = window->color();
+        } else if (instance->popup) {
+            item = PreviewerUtils::guiItem(instance->object);
         } else {
             item = static_cast<QQuickItem*>(instance->object);
         }
@@ -672,6 +684,8 @@ QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
         if (instance->window
                 && (ParserUtils::property(SaveUtils::toUrl(instance->dir), "visible") != "true"
                     || ParserUtils::property(SaveUtils::toUrl(instance->dir), "visibility").contains("Hidden"))) {
+            return QImage();
+        } else if (instance->popup && ParserUtils::property(SaveUtils::toUrl(instance->dir), "visible") == "false") {
             return QImage();
         } else {
             if (item->isVisible())
@@ -772,6 +786,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
             delete object;
 
         instance->gui = false;
+        instance->popup = false;
         instance->window = false;
         instance->object = nullptr;
         instance->errors = component.errors();
@@ -797,8 +812,9 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     PreviewerUtils::setId(instance->context, object, QString(), instance->id);
 
     instance->object = object;
+    instance->popup = object->inherits("QQuickPopup");
     instance->window = object->isWindowType();
-    instance->gui = instance->window || object->inherits("QQuickItem");
+    instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");
 
     /*!
         FIXME: Popup (from QtQuick.Controls 2.0) is based on QtObject type, hence it is not a gui
@@ -842,7 +858,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
 
         if (instance->gui) {
             QQuickItem* item = PreviewerUtils::guiItem(instance->object);
-            if (instance->window)
+            if (instance->window || instance->popup)
                 item->setParentItem(PreviewerUtils::guiItem(parentObject)); // We still reparent it anyway, may a window comes
             m_designerSupport.refFromEffectItem(item);
             item->update();

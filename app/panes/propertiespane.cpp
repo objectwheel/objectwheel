@@ -74,6 +74,12 @@ void fixPosForForm(const Control* control, const QString& propertyName, SpinBox 
     }
 }
 
+void fixVisibleForPopup(Control* control, const QString& propertyName, QCheckBox* checkBox)
+{
+    if (control->popup() && propertyName == "visible")
+        checkBox->setChecked(ParserUtils::property(control->url(), propertyName) == "true");
+}
+
 void fixVisibleForWindow(Control* control, const QString& propertyName, QCheckBox* checkBox)
 {
     if (control->window() && propertyName == "visible")
@@ -372,6 +378,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     checkBox->setChecked(checked);
     checkBox->setFocusPolicy(Qt::ClickFocus);
     checkBox->setMinimumWidth(1);
+    fixVisibleForPopup(control, propertyName, checkBox);
     fixVisibleForWindow(control, propertyName, checkBox);
     initPalette(checkBox);
 
