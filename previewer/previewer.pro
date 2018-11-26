@@ -24,7 +24,6 @@ DEFINES += QT_QML_DEBUG_NO_WARNING
 SOURCES += $$PWD/main.cpp \
            $$PWD/previewersocket.cpp \
            $$PWD/applicationcore.cpp \
-           $$PWD/bootsettings.cpp \
            $$PWD/previewer.cpp \
            $$PWD/commanddispatcher.cpp \
            $$PWD/commandlineparser.cpp \
@@ -32,7 +31,6 @@ SOURCES += $$PWD/main.cpp \
 
 HEADERS += $$PWD/previewersocket.h \
            $$PWD/applicationcore.h \
-           $$PWD/bootsettings.h \
            $$PWD/previewer.h \
            $$PWD/commanddispatcher.h \
            $$PWD/commandlineparser.h \

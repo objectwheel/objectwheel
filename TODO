@@ -39,12 +39,27 @@ Kod Editör Tab ile auto indent yapacak
 Kod Editör'de sağ taraftaki hizalama çizgisi gösterilebilmeli
 Kod Editör'ün intellisensi EcmaScript7'yi destekleyecek şekilde güncellenecek
 Klavye ile hızlı satır taşıma, çoğaltma, ve tüm hızlı operasyonlar desteklenecek
+DesignerScene üzerinde boş bir yere tıklayınca, garanti bir şeyler repreview ediliyor, neden?
+FileExplorer'e bir "artı +" tuşu ekle, böylece kullanıcılar globalresources'a dosya yada klasör eklemek üzere bir FileDialog kullanabilmeli
+FileExplorer'de copy paste yapınca, içerden yada dışardan herneyse, "yeni bir isim vererek kaydet" seçeneği olmalı
+QmlCodeEditorWidget son açılan belge tarihini tutmmalı ileri geri butonları ile eski belgeler arasında hızlı geçiş olmalı
+Controllerin creation orderları belirlenebileceği gibi, Formların'da belirlenebilmeli
+Bir stackView yada SwipeView'in tün içeriği oracıkta, onun koyulduğu form üzerinde düzenlenebilmeli, görüntülenebilmeli. StackView'deki her bir sayfa için ayrı form oluşturup bu formlar düzenlenerek bir stackview içeriği oluşturma modeli çok yanlış. GUI Editor her bir formu ayrı bir "window" olarak kullanmayı teşvik etmeli. Bir windowun alt içeriği olarak kullanmatı değil. Aslında bir formun herhangi bir itemin alt kontenti olarak GUI Editor aracılığı ile set edilmesi iyi olabilir. Böylece o itemin içinde sadece görüntü olarak resmi dururken, esas form aılarak içeriği düzenlenebilir. Benzer bir özellik geader, footer yada menuBar gibi, bir itemin, item kabul eden diğer tüm propertyleri için de olmalı. İlgili item üzerine bu propertylere herhangi bir form, yada aynı form üzerindeki diğer bir kontrol assign edilebilmeli. Eğer assign edilen başka bir formsa, sadece resmi durur, eğer aynı form üzerindeki başka bir kontrol ise, direk reparent etmek gibi oraya koyulur ve inspector pane'de ayrı bir statü ile temsil edilirken, ilgili nesne direk assign edildiği yerden editlenebilmeli.
+Üzerinde herhangi bir anchor set edilmiş olan kontrol hareket ettirilememeli, ayrıca anchorlu/demirli olduğunu işaret eden bir bildirgeç olmalı. Ayrıca, hareket etmiş olsa dahi, qml dosyasına x, y konumları set edilememeli. Width ve height için de belki benzer şeyler düşünülebilir..
+GlobalResources'da ki bir resmi değiştirsen dahi previewer hala eskisini gösteriyor
+Eğer bir objenin üstü tamamen kapalıysa, nasıl signal chooser e erişilecek, çift de tıklanamıyor?
+form isim değişikliği kolay olmalı, bir sürü js dosyası, fonksiyon ismi, qmldir girdisi vs vs değişiyor
+Objectwheel.GlobalResources name spacesinde sıkıntı var. Geçersiz diyor, mesela Objectwheel.GlobalResources.Cursor diye bir qml tanımı yapılamıyor, böyle bir name space yok deyi
 
 Options Bölümüne Eklenecek - Projeye Özel Ayarlar
 1. Temalar ve Tema ayrıntıları
 2. Font ve resource'lar
 3. Smart scaling enabled/disabled
 4. Splash screen vs vs uygulama ikon, isim vs de eklenebilir
+5. QIcon::setThemeSearchPaths özelliği ile ikon teması "yolu" set edilebilmeli, GlobalResource içinden bir yada bir çok yol mesela.
+6. Yukarıda belirtilen yollarda bulunan index.theme dosyalarından okumak suretiyle proje içinde var olan temalar listelenmeli, kullanucu default uygulama ikon temasını seçilebilmeli
+   Alt bilgi: QIcon::setThemeName(const QString &name): The name should correspond to a directory name in the themeSearchPath() containing an index.theme file describing its contents.
+   Ekstra: Ayrıca C++ da bir QML library yazılmalı ve kullanıcı bu library aracılığıyla istediği zaman current theme'yi değiştirebiilmeli
 
 Dosyalar sürükle bırak ile FileExplorer'da klasörden klasöre taşınabilmeli
 Dosyalar tek tuş ile çoğaltılabilrmeli dosyaadi_copy.txt gibi

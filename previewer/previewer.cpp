@@ -136,7 +136,7 @@ void Previewer::updateParent(const QString& newDir, const QString& uid, const QS
     Q_ASSERT(instance);
     Q_ASSERT(parentInstance);
 
-    ControlInstance* formInstance = formInstanceFor(instance);
+    ControlInstance* formInstance = formInstanceFor(parentInstance);
     ControlInstance* previousParentInstance = instance->parent;
 
     Q_ASSERT(formInstance);
@@ -800,6 +800,11 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     instance->window = object->isWindowType();
     instance->gui = instance->window || object->inherits("QQuickItem");
 
+    /*!
+        FIXME: Popup (from QtQuick.Controls 2.0) is based on QtObject type, hence it is not a gui
+               object in theory, but it is. And if it comes, as a form, or anything that inherits
+               Popup comes (Dialog i.e.) crashes here.
+    */
     Q_ASSERT(!SaveUtils::isForm(dir) || instance->gui);
 
     if (!instance->gui)

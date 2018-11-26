@@ -1,5 +1,4 @@
 #include <applicationcore.h>
-#include <bootsettings.h>
 #include <commandlineparser.h>
 
 #include <QApplication>
@@ -10,7 +9,7 @@ int main(int argc, char* argv[])
     CommandlineParser::init(argc, argv);
 
     // Apply boot settings
-    BootSettings::apply();
+    ApplicationCore::prepare();
 
     // Initialize application
     QApplication app(argc, argv);

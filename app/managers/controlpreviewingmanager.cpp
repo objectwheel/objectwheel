@@ -171,7 +171,7 @@ void ControlPreviewingManager::onDisconnected()
     if (!ProjectManager::hash().isEmpty()) {
         QMessageBox::StandardButton answer = QMessageBox::question(
                     0, APP_NAME,
-                    tr("Connection lost to Previewing Engine. Would you like to start it over again?"),
+                    tr("Connection lost with Previewing Engine. Would you like to start it over again?"),
                     QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
         if (answer & QMessageBox::Yes)

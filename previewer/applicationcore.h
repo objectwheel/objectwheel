@@ -14,6 +14,7 @@ class ApplicationCore final : public QObject
 
 public:
     static void init(QObject* parent);
+    static void prepare();
 
 private slots:
     void startQuitCountdown(int msec);

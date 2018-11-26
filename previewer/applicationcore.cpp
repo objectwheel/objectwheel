@@ -6,6 +6,7 @@
 #include <commandlineparser.h>
 #include <commanddispatcher.h>
 #include <filemanager.h>
+#include <quicktheme.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -115,6 +116,22 @@ void ApplicationCore::init(QObject* parent)
         return;
 
     instance = new ApplicationCore(parent);
+}
+
+void ApplicationCore::prepare()
+{
+    QuickTheme::setTheme(CommandlineParser::projectDirectory());
+
+    // Boot settings
+    qputenv("QML_DISABLE_DISK_CACHE", "true");
+    qputenv("QSG_DISTANCEFIELD_ANTIALIASING", "gray");
+
+#ifdef Q_OS_MACOS // Disable focus stealing on macOS
+    qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "true");
+#endif
+
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 }
 
 void ApplicationCore::startQuitCountdown(int msec)

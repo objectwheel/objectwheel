@@ -4,6 +4,7 @@
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
+#include <controlpreviewingmanager.h>
 #include <QMenu>
 
 // TODO: Improve copy-paste positioning. "Pasting into a sub control and" "positioning wherever you
@@ -228,6 +229,7 @@ void DesignerView::onPasteAction()
             ControlPropertyManager::setParent(control, scene()->currentForm(),
                                               ControlPropertyManager::SaveChanges
                                               | ControlPropertyManager::UpdatePreviewer);
+            ControlPreviewingManager::scheduleRefresh(scene()->currentForm()->uid());
         } else {
             newControl = ControlCreationManager::createControl(scene()->currentForm(),
                                                                control->dir(),
