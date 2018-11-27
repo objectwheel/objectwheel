@@ -6,6 +6,7 @@
 #include <filemanager.h>
 #include <previewresult.h>
 #include <utilityfunctions.h>
+#include <components.h>
 
 #include <private/qqmlengine_p.h>
 
@@ -53,8 +54,6 @@ Previewer::Previewer(QObject* parent) : QObject(parent)
     m_view->engine()->setOutputWarningsToStandardError(false);
     m_view->engine()->addImportPath(SaveUtils::toImportsDir(CommandlineParser::projectDirectory()));
     m_view->engine()->addImportPath(SaveUtils::toGlobalDir(CommandlineParser::projectDirectory()));
-    UtilityFunctions::registerGlobalPath(CommandlineParser::projectDirectory());
-    UtilityFunctions::registerOfflineStorage();
 }
 
 Previewer::~Previewer()

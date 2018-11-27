@@ -1,8 +1,6 @@
 #include <utilityfunctions.h>
-#include <saveutils.h>
 #include <filemanager.h>
 #include <delayer.h>
-#include <offlinestorage.h>
 #include <utils/utilsicons.h>
 
 #include <QFileInfo>
@@ -19,33 +17,6 @@
 #include <QAbstractButton>
 #include <QComboBox>
 #include <QApplication>
-
-namespace {
-QString g_projectDirectory;
-}
-
-void UtilityFunctions::registerGlobalPath(const QString& projectDirectory)
-{
-    g_projectDirectory = projectDirectory;
-    qmlRegisterSingletonType("Objectwheel.GlobalResources", 1, 0, "GlobalResources",
-                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QJSValue {
-        Q_UNUSED(engine)
-        QJSValue globalPath = jsEngine->newObject();
-        globalPath.setProperty("path", SaveUtils::toGlobalDir(g_projectDirectory));
-        globalPath.setProperty("url", jsEngine->toScriptValue(
-                                   QUrl::fromLocalFile(SaveUtils::toGlobalDir(g_projectDirectory))));
-        return globalPath;
-    });
-}
-
-void UtilityFunctions::registerOfflineStorage()
-{
-    qmlRegisterSingletonType<OfflineStorage>("Objectwheel.OfflineStorage", 1, 0, "OfflineStorage",
-                                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
-        Q_UNUSED(jsEngine)
-        return new OfflineStorage(engine);
-    });
-}
 
 void UtilityFunctions::trimCommentsAndStrings(QTextDocument* document)
 {

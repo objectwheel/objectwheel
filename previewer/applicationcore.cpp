@@ -7,6 +7,7 @@
 #include <commanddispatcher.h>
 #include <filemanager.h>
 #include <quicktheme.h>
+#include <globalresources.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -20,6 +21,7 @@
 #include <windows.h>
 #endif
 
+GlobalResources* ApplicationCore::s_globalResources = nullptr;
 PreviewerSocket* ApplicationCore::s_previewerSocket = nullptr;
 QThread* ApplicationCore::s_socketThread = nullptr;
 CommandDispatcher* ApplicationCore::s_commandDispatcher = nullptr;
@@ -41,20 +43,17 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
 #endif
 
-    /* Load default fonts */
-    const QString fontPath = ":/fonts";
-    for (const QString& fontName : lsfile(fontPath))
-        QFontDatabase::addApplicationFont(fontPath + separator() + fontName);
-
     DesignerSupport::activateDesignerWindowManager();
     DesignerSupport::activateDesignerMode();
     PreviewerUtils::stopUnifiedTimer();
-    Components::init();
     QtWebView::initialize();
     qRegisterMetaType<PreviewerCommands>("PreviewerCommands");
 
+    s_globalResources = new GlobalResources(&CommandlineParser::projectDirectory, this);
     s_previewerSocket = new PreviewerSocket;
     s_socketThread = new QThread(this);
+
+    Components::init();
 
     s_previewerSocket->moveToThread(s_socketThread);
     s_socketThread->start();

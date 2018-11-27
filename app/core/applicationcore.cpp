@@ -25,6 +25,8 @@
 #include <filemanager.h>
 #include <splashscreen.h>
 #include <helpmanager.h>
+#include <globalresources.h>
+#include <components.h>
 
 #include <QStandardPaths>
 #include <QSettings>
@@ -40,6 +42,7 @@
 QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
+GlobalResources* ApplicationCore::s_globalResources = nullptr;
 Authenticator* ApplicationCore::s_authenticator = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
@@ -97,6 +100,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlPreviewingManager = new ControlPreviewingManager(app);
     s_saveManager = new SaveManager(app);
     s_projectManager = new ProjectManager(app);
+    s_globalResources = new GlobalResources([=] () -> QString { return ProjectManager::dir(); }, app);
     s_projectExposingManager = new ProjectExposingManager(app);
     s_controlExposingManager = new ControlCreationManager(app);
     s_controlRemovingManager = new ControlRemovingManager(app);
@@ -113,6 +117,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
 
     Authenticator::setHost(QUrl(APP_WSSSERVER));
 
+    Components::init();
 
     /** Ui initialization **/
     s_windowManager = new WindowManager(app);

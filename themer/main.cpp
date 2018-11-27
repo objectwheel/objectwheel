@@ -31,11 +31,6 @@ int main(int argc, char *argv[])
     QApplication::setApplicationVersion("1.0.0");
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
 
-    /* Load default fonts */
-    const QString fontPath = ":/fonts";
-    for (const QString& fontName : lsfile(fontPath))
-        QFontDatabase::addApplicationFont(fontPath + separator() + fontName);
-
     QQmlApplicationEngine engine;
 
     if (version > 0) {

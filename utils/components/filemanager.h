@@ -41,7 +41,6 @@ public slots:
 
 private:
     static bool copyDir(QString from, QString to, bool qrc = false);
-
 };
 
 static inline bool mkfile(const QString& name) { return FileManager().mkfile(name); }

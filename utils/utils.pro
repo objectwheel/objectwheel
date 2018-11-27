@@ -14,7 +14,6 @@ DEPENDPATH += $$PWD
 HEADERS += \
     $$PWD/delayer.h \
     $$PWD/saveutils.h \
-    $$PWD/filemanager.h \
     $$PWD/parserutils.h \
     $$PWD/qmlformatter.h \
     $$PWD/previewresult.h \
@@ -24,20 +23,17 @@ HEADERS += \
     $$PWD/previewercommands.h \
     $$PWD/paintutils.h \
     $$PWD/utilityfunctions.h \
-    $$PWD/offlinestorage.h\
     $$PWD/qtcolorbutton.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
     $$PWD/saveutils.cpp \
     $$PWD/parserutils.cpp \
-    $$PWD/filemanager.cpp \
     $$PWD/qmlformatter.cpp \
     $$PWD/hashfactory.cpp \
     $$PWD/quicktheme.cpp \
     $$PWD/paintutils.cpp \
     $$PWD/utilityfunctions.cpp \
-    $$PWD/offlinestorage.cpp \
     $$PWD/qtcolorbutton.cpp
 
 RESOURCES += \
