@@ -21,7 +21,19 @@ data
    |
     ----
 
+Weather uygulamasına kullanıcıdan konum için izin alma ekle
+tempMax, Min oklarının pozisyonlama sorunlarını gider
+Haritanın sorunlarını gider, mobil kullanıma uygun yap. (Tooltip ve diğer şeyleri de)
+Font ayarları? Thin fontlar. Değişik, canavarimsi güzel fontlar?
 
+
+Kullanıcı Qml uygulamasından, Options bölümündeki settingsleri, program çalışma esnasında, QSettings (Settings QML cersiyonu) ile okuyup yazabilmeli	
+Intellisense Ow librarylerini artık tanısın, kontrol id'lerini tanısın
+Aktif Form değiştirilince açık olan kod editördeki kodda o formun kodlarına dönsün, kafa karışıklıkları burada giderilsin
+Kontrollerin Z-order ları da adam akıllı çalışmıyor amk
+Masaüstündeki çöme raporlarını hallet
+Sikik ControlInspector yardımı ile obje reparent etme olsun
+Sikik anchor bozulmalarını düzelt artık
 Sikik program her kontrol selectionda hayyvann gibi donuyor, düzelt bunu
 Bir itemin Designer'da ki konumu, o itemin parentine relavite olarak alınacak (propertiesdeki konumlar x, y den alınmaya devam edilecek)
 Bir eleman, parent elemanın, qquickitem kabul eden bir bir propertisine Designer üzerinden kolayca atanabilecek (header, foother gibi mesela)
@@ -50,6 +62,7 @@ GlobalResources'da ki bir resmi değiştirsen dahi previewer hala eskisini göst
 Eğer bir objenin üstü tamamen kapalıysa, nasıl signal chooser e erişilecek, çift de tıklanamıyor?
 form isim değişikliği kolay olmalı, bir sürü js dosyası, fonksiyon ismi, qmldir girdisi vs vs değişiyor
 Objectwheel.GlobalResources name spacesinde sıkıntı var. Geçersiz diyor, mesela Objectwheel.GlobalResources.Cursor diye bir qml tanımı yapılamıyor, böyle bir name space yok deyi
+Highlighting, error insights hemen olaya ayıkamıyor yazmayı bırakır bırakmaz. illede bir kere daha mouse cursor tıklanacak, yer değiştirecek, bunu çöz
 
 Options Bölümüne Eklenecek - Projeye Özel Ayarlar
 1. Temalar ve Tema ayrıntıları
@@ -78,6 +91,7 @@ Designer yeniden tasarlanırken listview tarzı, sweepview tarzı içinde scroll
 ControlInspector sağ tıklama menüsü içermeli, aynı designer üzerindeki objelere sağ tıklanır gibi. Tümünü seç, yapıştır vs gibi boşluğa tıklanınca çıkması gereken, boşluğa sağ tıklama özelliği de olmalı.
 Yukarıdaki özelliğin aynısı FileExplorer'de de olmalı
 Kontrol kopyala-yapıştır özelliği olmalı
+Şu amk pane konumlarının mal bir şekilde uygulama başlayınca, kapalı gelmesi, bazen biri bazen diğeri.. bunu düzelt
 
 bir kontrolün internal kaynaklarından herhangi bir qml kullanması ile birlikte, bu alt qml de bir değişiklik olunca main.qml yeniden derlenmelidir, ancak Qt nin cache'ü buna izin vermiyor
 Aynı şekilde bir global resource değiştirilince onu import eden tüm kaynaklar ve objecler recompile edilmeli

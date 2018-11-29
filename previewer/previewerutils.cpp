@@ -516,6 +516,13 @@ void PreviewerUtils::doComplete(Previewer::ControlInstance* instance, const Prev
         return;
 
     Q_ASSERT(instance->object);
+
+    if (instance->component) {
+        instance->component->completeCreate();
+        delete instance->component;
+        instance->component = nullptr;
+    }
+
     doComponentCompleteRecursive(instance->object, previewer);
 
     // FIXME: How do we handle header, footer or toolbar items of an ApplicationWindow?

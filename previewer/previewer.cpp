@@ -87,6 +87,7 @@ void Previewer::init()
 
     emit initializationProgressChanged(progress_2);
 
+    // FIXME: Object completetion order must be parent -> to -> child
     for (ControlInstance* instance : instanceTree.values())
         PreviewerUtils::doComplete(instance, this);
 
@@ -775,12 +776,12 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     }
 
     m_view->engine()->clearComponentCache();
-    QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromLocalFile(url));
+    instance->component = new QQmlComponent(m_view->engine());
+    instance->component->loadUrl(QUrl::fromLocalFile(url));
 
-    QObject* object = component.beginCreate(instance->context);
+    QObject* object = instance->component->beginCreate(instance->context);
 
-    if (component.isError()) {
+    if (instance->component->isError()) {
         if (object)
             delete object;
 
@@ -788,7 +789,9 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
         instance->popup = false;
         instance->window = false;
         instance->object = nullptr;
-        instance->errors = component.errors();
+        instance->errors = instance->component->errors();
+        delete instance->component;
+        instance->component = nullptr;
 
         m_dirtyInstanceSet.insert(instance);
         return instance;
@@ -799,7 +802,6 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
 
     PreviewerUtils::tweakObjects(object);
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
-    component.completeCreate();
 
     if (QQmlEngine::contextForObject(object) == nullptr)
         QQmlEngine::setContextForObject(object, instance->context);

@@ -9,6 +9,7 @@
 class QQuickView;
 class QQmlError;
 class QQuickWindow;
+class QQmlComponent;
 struct PreviewResult;
 
 // Due to possible margins on an ApplicationWindow the previewing order is important
@@ -37,6 +38,7 @@ public:
         QString dir;
         QObject* object;
         QQmlContext* context;
+        QQmlComponent* component;
         QList<QQmlError> errors;
 
         ControlInstance* parent = nullptr;
