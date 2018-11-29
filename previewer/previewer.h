@@ -73,14 +73,14 @@ public slots:
 
 private:
     void refreshBindings();
-    void preview(ControlInstance* formInstance, qreal progressForInstance);
-    void schedulePreview(ControlInstance* formInstance, qreal progressForInstance = 0, int msecLater = 100);
+    void preview(ControlInstance* formInstance);
+    void schedulePreview(ControlInstance* formInstance, int msecLater = 100);
     void scheduleRepreviewForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);
 
     QImage grabImage(const ControlInstance* instance);
     QImage renderItem(QQuickItem* item, const QColor& bgColor);
 
-    QList<PreviewResult> previewDirtyInstances(const QList<ControlInstance*>& instances, qreal progressPerInstance);
+    QList<PreviewResult> previewDirtyInstances(const QList<ControlInstance*>& instances);
     Previewer::ControlInstance* createInstance(const QString& dir, ControlInstance* parentInstance,
                                                QQmlContext* oldFormContext = nullptr);
 

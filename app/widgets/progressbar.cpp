@@ -25,7 +25,7 @@ ProgressBar::ProgressBar(QWidget *parent) : QProgressBar(parent)
     m_settings.indeterminateColor = "#45ffffff";
     m_settings.borderRadius = SIZE.height() / 2.0;
 
-    setIndeterminate(true);
+    setIndeterminate(false);
 }
 
 void ProgressBar::triggerSettings()

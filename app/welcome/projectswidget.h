@@ -22,7 +22,6 @@ public slots:
     void refreshProjectList(bool selectionPreserved = false);
 
 private slots:
-    void startProject();
     void onNewButtonClick();
     void onLoadButtonClick();
     void onExportButtonClick();

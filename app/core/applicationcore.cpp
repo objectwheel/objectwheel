@@ -75,8 +75,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /* Load default fonts */
     for (const QString& fontName : lsfile(fontPath))
         QFontDatabase::addApplicationFont(fontPath + separator() + fontName);
-    for (const QString& fontName : lsfile("/Users/omergoktas/Desktop/fonts"))
-        QFontDatabase::addApplicationFont(QString("/Users/omergoktas/Desktop/fonts") + separator() + fontName);
 
     /* Prepare setting instances */
     s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);

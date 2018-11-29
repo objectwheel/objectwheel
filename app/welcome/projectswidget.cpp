@@ -488,45 +488,6 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
     }
 }
 
-void ProjectsWidget::startProject()
-{
-    if (!m_listWidget->currentItem())
-        return;
-
-    auto hash = m_listWidget->currentItem()->data(Hash).toString();
-
-    Q_ASSERT(!hash.isEmpty());
-
-    if (!ProjectManager::start(hash)) {
-        QMessageBox::critical(this, tr("Oops"), tr("Project start unsuccessful."));
-        refreshProjectList();
-        QListWidgetItem* item = itemForHash(m_listWidget, hash);
-        if (item) {
-            m_listWidget->setCurrentItem(item);
-            m_listWidget->scrollToItem(item);
-        }
-        return;
-    }
-
-    for (int i = m_listWidget->count(); i--;)
-        m_listWidget->item(i)->setData(Active, false);
-
-    m_listWidget->currentItem()->setData(Active, true);
-    m_listWidget->currentItem()->setData(LastEdit, ProjectManager::currentUiTime());
-
-    Delayer::delay([=] () -> bool {
-        return m_progressBar->value() < m_progressBar->maximum();
-    });
-    Delayer::delay(200);
-
-    m_listWidget->sortItems();
-    m_listWidget->scrollToItem(m_listWidget->currentItem());
-    updateGadgetPositions();
-
-    unlock();
-    emit done();
-}
-
 void ProjectsWidget::onNewButtonClick()
 {
     if (UserManager::dir().isEmpty()) return;
@@ -591,11 +552,39 @@ void ProjectsWidget::onLoadButtonClick()
     //                break;
     //        }
     //    }
-
     WindowManager::mainWindow()->hide();
-    QTimer::singleShot(0, this, &ProjectsWidget::startProject);
 
+    //! Start sequance
     lock();
+
+    if (!ProjectManager::start(hash)) {
+        QMessageBox::critical(this, tr("Oops"), tr("Project start unsuccessful."));
+        refreshProjectList();
+        QListWidgetItem* item = itemForHash(m_listWidget, hash);
+        if (item) {
+            m_listWidget->setCurrentItem(item);
+            m_listWidget->scrollToItem(item);
+        }
+        return;
+    }
+
+    for (int i = m_listWidget->count(); i--;)
+        m_listWidget->item(i)->setData(Active, false);
+
+    m_listWidget->currentItem()->setData(Active, true);
+    m_listWidget->currentItem()->setData(LastEdit, ProjectManager::currentUiTime());
+
+    Delayer::delay([=] () -> bool {
+        return m_progressBar->value() < m_progressBar->maximum();
+    });
+    Delayer::delay(200);
+
+    m_listWidget->sortItems();
+    m_listWidget->scrollToItem(m_listWidget->currentItem());
+    updateGadgetPositions();
+
+    unlock();
+    emit done();
 }
 
 void ProjectsWidget::onExportButtonClick()
@@ -694,10 +683,10 @@ void ProjectsWidget::lock()
     m_listWidget->setDisabled(true);
     m_buttons_2->hide();
 
+    m_progressBar->setIndeterminate(true);
     m_progressBar->show();
     m_progressBar->raise();
     m_progressBar->setValue(0);
-    m_progressBar->setIndeterminate(true);
 }
 
 void ProjectsWidget::unlock()

@@ -19,30 +19,12 @@
 #include <QApplication>
 
 namespace {
-qreal progress = 0;
-const int progress_1 = 2;
-const int progress_2 = 6;
-const int progress_3 = 10;
-const int progress_4 = 100;
-
-QHash<Previewer::ControlInstance*, qreal>
-calculateProgressesForFormInstances(const QList<Previewer::ControlInstance*>& formInstances)
-{
-    int totalInstanceCount = 0;
-
-    QHash<Previewer::ControlInstance*, qreal> progresses;
-    for (Previewer::ControlInstance* formInstance : formInstances) {
-        const int instanceCount = PreviewerUtils::countAllSubInstance(formInstance);
-        totalInstanceCount += instanceCount;
-        progresses.insert(formInstance, instanceCount);
-    }
-
-    const qreal progressPerInstance = qreal(progress_4 - progress_3) / totalInstanceCount;
-    for (Previewer::ControlInstance* formInstance : formInstances)
-        progresses.insert(formInstance, progresses.value(formInstance) * progressPerInstance);
-
-    return progresses;
-}
+qreal g_progress = 0;
+qreal g_progressPerInstance = 0;
+const int g_progress_1 = 2;
+const int g_progress_2 = 6;
+const int g_progress_3 = 10;
+const int g_progress_4 = 100;
 }
 
 Previewer::Previewer(QObject* parent) : QObject(parent)
@@ -64,7 +46,7 @@ Previewer::~Previewer()
 
 void Previewer::init()
 {
-    emit initializationProgressChanged(progress_1);
+    emit initializationProgressChanged(g_progress_1);
 
     /* Create instances, handle parent-child relationship, set ids, save form instances */
     QMap<QString, ControlInstance*> instanceTree;
@@ -85,7 +67,7 @@ void Previewer::init()
         }
     }
 
-    emit initializationProgressChanged(progress_2);
+    emit initializationProgressChanged(g_progress_2);
 
     // FIXME: Object completetion order must be parent -> to -> child
     for (ControlInstance* instance : instanceTree.values())
@@ -99,13 +81,16 @@ void Previewer::init()
     /* Refresh expressions */
     refreshBindings();
 
-    emit initializationProgressChanged(progress_3);
+    emit initializationProgressChanged(g_progress_3);
 
     /* Preview */
-    progress = progress_3;
-    const QHash<Previewer::ControlInstance*, qreal>& progresses = calculateProgressesForFormInstances(m_formInstances);
+    int totalInstanceCount = 0;
+    for (Previewer::ControlInstance* formInstance : m_formInstances)
+        totalInstanceCount += PreviewerUtils::countAllSubInstance(formInstance);
+    g_progressPerInstance = qreal(g_progress_4 - g_progress_3) / totalInstanceCount;
+    g_progress = g_progress_3;
     for (ControlInstance* formInstance : m_formInstances)
-        schedulePreview(formInstance, progresses.value(formInstance));
+        schedulePreview(formInstance);
 }
 
 void Previewer::updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
@@ -527,9 +512,9 @@ Previewer::ControlInstance* Previewer::findNodeInstanceForItem(QQuickItem* item)
     return nullptr;
 }
 
-void Previewer::schedulePreview(ControlInstance* formInstance, qreal progressForInstance, int msecLater)
+void Previewer::schedulePreview(ControlInstance* formInstance, int msecLater)
 {
-    QTimer::singleShot(msecLater, std::bind(&Previewer::preview, this, formInstance, progressForInstance));
+    QTimer::singleShot(msecLater, std::bind(&Previewer::preview, this, formInstance));
 }
 
 void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstance* formInstance, int msecLater)
@@ -566,11 +551,11 @@ void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstanc
         }
 
         refreshBindings();
-        emit previewDone(previewDirtyInstances(repreviewInstances, 0));
+        emit previewDone(previewDirtyInstances(repreviewInstances));
     });
 }
 
-void Previewer::preview(ControlInstance* formInstance, qreal progressForInstance)
+void Previewer::preview(ControlInstance* formInstance)
 {
     Q_ASSERT(formInstance);
 
@@ -598,17 +583,11 @@ void Previewer::preview(ControlInstance* formInstance, qreal progressForInstance
         }
     }
 
-    // qDebug() << m_dirtyInstanceSet;
-
     if (!m_dirtyInstanceSet.isEmpty()) {
-        emit previewDone(previewDirtyInstances(m_dirtyInstanceSet,
-                                               progressForInstance / m_dirtyInstanceSet.size()));
+        emit previewDone(previewDirtyInstances(m_dirtyInstanceSet));
         if (m_initialized)
             scheduleRepreviewForInvisibleInstances(formInstance);
         m_dirtyInstanceSet.clear();
-    } else if (!m_initialized) {
-        progress += progressForInstance;
-        emit initializationProgressChanged(progress);
     }
 
     PreviewerUtils::resetAllItems(formInstance);
@@ -617,7 +596,7 @@ void Previewer::preview(ControlInstance* formInstance, qreal progressForInstance
         static QList<ControlInstance*> initializedInstances;
         initializedInstances.append(formInstance);
         if (initializedInstances.size() == m_formInstances.size()) {
-            emit initializationProgressChanged(progress_4);
+            emit initializationProgressChanged(g_progress_4);
             m_initialized = true;
             for (ControlInstance* formInstance : m_formInstances)
                 scheduleRepreviewForInvisibleInstances(formInstance);
@@ -625,10 +604,9 @@ void Previewer::preview(ControlInstance* formInstance, qreal progressForInstance
     }
 }
 
-QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::ControlInstance*>& instances, qreal progressPerInstance)
+QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::ControlInstance*>& instances)
 {
     QList<PreviewResult> results;
-
     for (int i = 0; i < instances.size(); ++i) {
         ControlInstance* instance = instances.at(i);
         Q_ASSERT(instance);
@@ -652,8 +630,9 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
             instance->needsRepreview = PreviewerUtils::needsRepreview(result.image);
 
         if (!m_initialized) {
-            progress += progressPerInstance;
-            emit initializationProgressChanged(progress);
+            g_progress += g_progressPerInstance;
+            if (g_progress <= g_progress_4)
+                emit initializationProgressChanged(g_progress);
         }
     }
 
