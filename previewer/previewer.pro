@@ -36,6 +36,7 @@ HEADERS += $$PWD/previewersocket.h \
            $$PWD/commandlineparser.h \
            $$PWD/previewerutils.h
 
+
 ### Utils Settings
 INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/components

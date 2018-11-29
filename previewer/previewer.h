@@ -9,7 +9,6 @@
 class QQuickView;
 class QQmlError;
 class QQuickWindow;
-class QQmlComponent;
 struct PreviewResult;
 
 // Due to possible margins on an ApplicationWindow the previewing order is important
@@ -38,7 +37,6 @@ public:
         QString dir;
         QObject* object;
         QQmlContext* context;
-        QQmlComponent* component;
         QList<QQmlError> errors;
 
         ControlInstance* parent = nullptr;
@@ -72,7 +70,8 @@ public slots:
     void updateFormCode(const QString& uid);
 
 private:
-    void refreshBindings();
+    void refreshAllBindings();
+    void refreshBindings(QQmlContext* context);
     void preview(ControlInstance* formInstance);
     void schedulePreview(ControlInstance* formInstance, int msecLater = 100);
     void scheduleRepreviewForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);

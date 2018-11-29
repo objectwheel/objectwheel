@@ -79,7 +79,7 @@ void Previewer::init()
     }
 
     /* Refresh expressions */
-    refreshBindings();
+    refreshAllBindings();
 
     emit initializationProgressChanged(g_progress_3);
 
@@ -107,10 +107,12 @@ void Previewer::updateProperty(const QString& uid, const QString& propertyName, 
 
     PreviewerUtils::setInstancePropertyVariant(instance, propertyName, propertyValue);
 
-    refreshBindings();
+    refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
 
+// BUG: Inter form reparents have problems, cause context of the moved control will still remain
+// pointing to old forms context.
 void Previewer::updateParent(const QString& newDir, const QString& uid, const QString& parentUid)
 {
     Q_ASSERT_X(!SaveUtils::isForm(newDir), "parentUpdate", "You can't change parent of a form.");
@@ -156,7 +158,7 @@ void Previewer::updateParent(const QString& newDir, const QString& uid, const QS
         item->setParentItem(PreviewerUtils::guiItem(parentObject));
     }
 
-    refreshBindings();
+    refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
 
@@ -176,11 +178,11 @@ void Previewer::updateControlCode(const QString& uid)
 
     QObject* oldObject = oldInstance->object;
 
-    PreviewerUtils::setId(oldInstance->context, nullptr, oldInstance->id, QString());
-
     QQuickItem* item = PreviewerUtils::guiItem(oldObject);
     if (item)
         m_designerSupport.derefFromEffectItem(item);
+
+    PreviewerUtils::setId(oldInstance->context, nullptr, oldInstance->id, QString());
 
     ControlInstance* instance = createInstance(oldInstance->dir, oldInstance->parent);
     oldInstance->gui = instance->gui;
@@ -242,12 +244,14 @@ void Previewer::updateControlCode(const QString& uid)
         }
     }
 
+    // We delete previous instance object after we reparent all of its children into the new instance
     if (oldObject)
         delete oldObject;
 
+
     PreviewerUtils::doComplete(oldInstance, this);
 
-    refreshBindings();
+    refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
 
@@ -326,8 +330,16 @@ void Previewer::updateFormCode(const QString& uid)
     for (ControlInstance* instance : oldFormInstance->children)
         m_dirtyInstanceSet.insert(instance);
 
-    refreshBindings();
+    refreshAllBindings();
     schedulePreview(oldFormInstance);
+}
+
+void Previewer::refreshAllBindings()
+{
+    DesignerSupport::refreshExpressions(m_view->rootContext());
+    for (ControlInstance* formInstance : m_formInstances)
+        DesignerSupport::refreshExpressions(formInstance->context);
+    DesignerSupport::refreshExpressions(m_view->rootContext());
 }
 
 void Previewer::updateId(const QString& uid, const QString& newId)
@@ -350,7 +362,7 @@ void Previewer::updateId(const QString& uid, const QString& newId)
 
     instance->id = newId;
 
-    refreshBindings();
+    refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
 
@@ -368,7 +380,7 @@ void Previewer::createControl(const QString& dir, const QString& parentUid)
 
     PreviewerUtils::doComplete(instance, this);
 
-    refreshBindings();
+    refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
 
@@ -379,7 +391,7 @@ void Previewer::createForm(const QString& dir)
     m_formInstances.append(formInstance);
     PreviewerUtils::doComplete(formInstance, this);
 
-    refreshBindings();
+    refreshAllBindings();
     schedulePreview(formInstance);
 }
 
@@ -393,7 +405,7 @@ void Previewer::deleteForm(const QString& uid)
     PreviewerUtils::cleanUpFormInstances(QList<ControlInstance*>{formInstance},
                                          m_view->rootContext(), m_designerSupport);
 
-    refreshBindings();
+    refreshAllBindings();
 
     for (ControlInstance* formInstance : m_formInstances)
         schedulePreview(formInstance);
@@ -414,7 +426,7 @@ void Previewer::deleteControl(const QString& uid)
     PreviewerUtils::deleteInstancesRecursive(instance, m_designerSupport);
     instance->parent->children.removeAll(instance);
 
-    refreshBindings();
+    refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
 
@@ -427,7 +439,7 @@ void Previewer::refresh(const QString& formUid)
 
     PreviewerUtils::makeDirtyRecursive(formInstance);
 
-    refreshBindings();
+    refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
 
@@ -550,7 +562,7 @@ void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstanc
             repreviewInstances.append(instance);
         }
 
-        refreshBindings();
+        refreshBindings(formInstance->context);
         emit previewDone(previewDirtyInstances(repreviewInstances));
     });
 }
@@ -700,8 +712,9 @@ QImage Previewer::renderItem(QQuickItem* item, const QColor& bgColor)
     return renderImage;
 }
 
-void Previewer::refreshBindings()
+void Previewer::refreshBindings(QQmlContext* context)
 {
+    m_designerSupport.refreshExpressions(context);
     m_designerSupport.refreshExpressions(m_view->rootContext());
 }
 
@@ -755,12 +768,12 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     }
 
     m_view->engine()->clearComponentCache();
-    instance->component = new QQmlComponent(m_view->engine());
-    instance->component->loadUrl(QUrl::fromLocalFile(url));
+    QQmlComponent component(m_view->engine());
+    component.loadUrl(QUrl::fromLocalFile(url));
 
-    QObject* object = instance->component->beginCreate(instance->context);
+    QObject* object = component.beginCreate(instance->context);
 
-    if (instance->component->isError()) {
+    if (component.isError()) {
         if (object)
             delete object;
 
@@ -768,9 +781,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
         instance->popup = false;
         instance->window = false;
         instance->object = nullptr;
-        instance->errors = instance->component->errors();
-        delete instance->component;
-        instance->component = nullptr;
+        instance->errors = component.errors();
 
         m_dirtyInstanceSet.insert(instance);
         return instance;
@@ -780,6 +791,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
     PreviewerUtils::tweakObjects(object);
+    component.completeCreate();
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
 
     if (QQmlEngine::contextForObject(object) == nullptr)
