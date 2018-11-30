@@ -26,7 +26,7 @@ tempMax, Min oklarının pozisyonlama sorunlarını gider
 Haritanın sorunlarını gider, mobil kullanıma uygun yap. (Tooltip ve diğer şeyleri de)
 Font ayarları? Thin fontlar. Değişik, canavarimsi güzel fontlar?
 
-
+SplitView'de kod editörde yazarken, bir anda fokus dashboard'a kayıyor ve istemsizce bi sıra kod sileyim diye delete ye basınca kontrolün biri dashboard'dan siliniyor.
 Kullanıcı Qml uygulamasından, Options bölümündeki settingsleri, program çalışma esnasında, QSettings (Settings QML cersiyonu) ile okuyup yazabilmeli	
 Intellisense Ow librarylerini artık tanısın, kontrol id'lerini tanısın
 Aktif Form değiştirilince açık olan kod editördeki kodda o formun kodlarına dönsün, kafa karışıklıkları burada giderilsin
