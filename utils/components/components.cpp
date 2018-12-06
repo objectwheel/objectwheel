@@ -27,6 +27,10 @@
 #include <firebasedatabase.h>
 #endif
 
+#ifdef OW_TRANSLATION
+#include <translation.h>
+#endif
+
 namespace Components {
 
 void init()
@@ -56,6 +60,14 @@ void init()
                                              [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
         Q_UNUSED(jsEngine)
         return new FileManager(engine);
+    });
+#endif
+
+#ifdef OW_TRANSLATION
+    qmlRegisterSingletonType<Translation>("Objectwheel.Core", 1, 0, "Translation",
+                                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
+        Q_UNUSED(jsEngine)
+        return new Translation(engine);
     });
 #endif
 

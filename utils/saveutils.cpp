@@ -130,12 +130,17 @@ QString toProjectFile(const QString& projectDir)
 
 QString toImportsDir(const QString& projectDir)
 {
-    return projectDir + separator() + DIR_OWDB + separator() + DIR_IMPORTS;
+    return toOwdbDir(projectDir) + separator() + DIR_IMPORTS;
+}
+
+QString toOwDir(const QString& projectDir)
+{
+    return toImportsDir(projectDir) + separator() + DIR_OW;
 }
 
 QString toGlobalDir(const QString& projectDir)
 {
-    return toImportsDir(projectDir) + separator() + DIR_GLOBAL;
+    return toOwDir(projectDir) + separator() + DIR_GLOBAL;
 }
 
 QString toControlFile(const QString& rootPath)
@@ -150,7 +155,7 @@ QStringList formPaths(const QString& projectDir)
     if (projectDir.isEmpty())
         return paths;
 
-    const QString& dirOwdb = projectDir + separator() + DIR_OWDB;
+    const QString& dirOwdb = toOwdbDir(projectDir);
     for (const QString& formFolder : lsdir(dirOwdb)) {
         const QString& formDir = dirOwdb + separator() + formFolder;
         if (isOwctrl(formDir))

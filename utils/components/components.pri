@@ -9,7 +9,8 @@ HEADERS += $$PWD/components.h \
            $$PWD/firebasedatabase.h \
            $$PWD/filemanager.h \
            $$PWD/offlinestorage.h \
-           $$PWD/globalresources.h
+           $$PWD/globalresources.h \
+           $$PWD/translation.h
 
 SOURCES += $$PWD/components.cpp \
            $$PWD/apiai.cpp \
@@ -19,11 +20,13 @@ SOURCES += $$PWD/components.cpp \
            $$PWD/firebasedatabase.cpp \
            $$PWD/filemanager.cpp \
            $$PWD/offlinestorage.cpp \
-           $$PWD/globalresources.cpp
+           $$PWD/globalresources.cpp \
+          $$PWD/translation.cpp
 
 DEFINES += OW_APIAI \
            OW_AUDIORECORDER \
            OW_AUDIOPLAYER \
            OW_AISPEAK \
            OW_FM \
-           OW_FIREBASE_DATABASE
+           OW_FIREBASE_DATABASE \
+           OW_TRANSLATION

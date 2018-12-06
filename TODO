@@ -20,18 +20,25 @@ header
 data
    |
     ----
-
-Weather uygulamasına kullanıcıdan konum için izin alma ekle
-tempMax, Min oklarının pozisyonlama sorunlarını gider
-Haritanın sorunlarını gider, mobil kullanıma uygun yap. (Tooltip ve diğer şeyleri de)
-Font ayarları? Thin fontlar. Değişik, canavarimsi güzel fontlar?
-
+Control:visible propertysinin propertiespane'de ver previewer'deki durumunu tartış
+Control'lerin scale özelliği (belki başka özelliklerde, transform vs vs) işe yaramıyor
+Help modunda bişeyleri koylalamak üzere seçinse, ne bileyim sağ falan tıklayınca falan bir ara uygulama mal gibi dondu, bi daha açılmadı
+Ow Console bazı linkler şu kelide oluyor "GlobalResources::Application/main.qml:1:74: 74 şeklinde colum bilgisi de oluyor, ve tıklayınca ilgili sütuna gitmeli.
+QmlCodeEditor'de belgeler arasında geçiş yapınca, belgenin bir önceki açıkken ki scrollbar posizyonları kurtarılsın
+QmlCodeEditor, Alt tuşuna basılı tutup birden çok satır düzenleme özelliği ve buna benzer Qt'nin yararlı özellikleri eklenecek (snippetler vs vs)
+FileExplorer ve QmlCodeEditor'e resim dosyaları, pdf, işte ne bileyim bazı işe yarar dosya formatlarının ön izlemesini yapma yeteneği eklenecek
+hiç bir objenin visible propertysi o objeyi gerçek manada invisible yapmamalı -PropertiesPane ve Previewer'a ilgili değişiklikler yapılacak--
+qmldir dosyası binary olarak algılanıyor ve QmlCodeEditor açamıyor, bunu düzelt, bu dosyaya bir istisna yap
+Code Editor'de yazmayı bırakınca, bir önceki syntax'da hata varsa, yazmayı bitirip düzeltsen bile synta error işaretleri hala gösteriliyor, ta ki başka bir yere tıklayıncaya kadar
+EasingType, color gibi CodeEditor yardımcı araçları çalışmıyor 
+Inport/Export proje olayı donuyor ve projenin gerçekten bir ow projesi olduğunu kontrol etmeden extract ediyor
 SplitView'de kod editörde yazarken, bir anda fokus dashboard'a kayıyor ve istemsizce bi sıra kod sileyim diye delete ye basınca kontrolün biri dashboard'dan siliniyor.
 Kullanıcı Qml uygulamasından, Options bölümündeki settingsleri, program çalışma esnasında, QSettings (Settings QML cersiyonu) ile okuyup yazabilmeli	
 Intellisense Ow librarylerini artık tanısın, kontrol id'lerini tanısın
 Aktif Form değiştirilince açık olan kod editördeki kodda o formun kodlarına dönsün, kafa karışıklıkları burada giderilsin
 Kontrollerin Z-order ları da adam akıllı çalışmıyor amk
 Masaüstündeki çöme raporlarını hallet
+İlginç bir şekilde, bazen Ow penceresi focusu kaybedip, geri alınca, sol ve sağ paneller gizleniyor, ve bazen de aktif olan (dashboard da açık olan) form değişiyor
 Sikik ControlInspector yardımı ile obje reparent etme olsun
 Sikik anchor bozulmalarını düzelt artık
 Sikik program her kontrol selectionda hayyvann gibi donuyor, düzelt bunu
@@ -68,9 +75,10 @@ Options Bölümüne Eklenecek - Projeye Özel Ayarlar
 1. Temalar ve Tema ayrıntıları
 2. Font ve resource'lar
 3. Smart scaling enabled/disabled
-4. Splash screen vs vs uygulama ikon, isim vs de eklenebilir
-5. QIcon::setThemeSearchPaths özelliği ile ikon teması "yolu" set edilebilmeli, GlobalResource içinden bir yada bir çok yol mesela.
-6. Yukarıda belirtilen yollarda bulunan index.theme dosyalarından okumak suretiyle proje içinde var olan temalar listelenmeli, kullanucu default uygulama ikon temasını seçilebilmeli
+4. Dil, Dil dosyaları ve Dil ile ilgili ayarlar
+5. Splash screen vs vs uygulama ikon, isim vs de eklenebilir
+6. QIcon::setThemeSearchPaths özelliği ile ikon teması "yolu" set edilebilmeli, GlobalResource içinden bir yada bir çok yol mesela.
+7. Yukarıda belirtilen yollarda bulunan index.theme dosyalarından okumak suretiyle proje içinde var olan temalar listelenmeli, kullanucu default uygulama ikon temasını seçilebilmeli
    Alt bilgi: QIcon::setThemeName(const QString &name): The name should correspond to a directory name in the themeSearchPath() containing an index.theme file describing its contents.
    Ekstra: Ayrıca C++ da bir QML library yazılmalı ve kullanıcı bu library aracılığıyla istediği zaman current theme'yi değiştirebiilmeli
 

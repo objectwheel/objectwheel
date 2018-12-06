@@ -360,7 +360,7 @@ void TextBrowserHelpWidget::scaleDown()
 
 void TextBrowserHelpWidget::contextMenuEvent(QContextMenuEvent *event)
 {
-    QMenu menu("", nullptr);
+    QMenu menu("", this);
 
     QAction *copyAnchorAction = nullptr;
     const QUrl link(linkAt(event->pos()));

@@ -12,7 +12,8 @@
 #define DIR_MAINFORM     "1"
 #define DIR_OWDB         "owdb"
 #define DIR_IMPORTS      "imports"
-#define DIR_GLOBAL       "Objectwheel/GlobalResources"
+#define DIR_OW           "Objectwheel"
+#define DIR_GLOBAL       "GlobalResources"
 
 #define FILE_PROJECT     "project.json"
 #define FILE_OWDB        "owdb.json"       // FIXME: There is no function of this
@@ -56,6 +57,7 @@ QString toChildrenDir(const QString& rootPath);
 QString toOwdbDir(const QString& projectDir);
 QString toProjectFile(const QString& projectDir);
 QString toImportsDir(const QString& projectDir);
+QString toOwDir(const QString& projectDir);
 QString toGlobalDir(const QString& projectDir);
 QString toControlFile(const QString& rootPath);
 
