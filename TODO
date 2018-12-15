@@ -20,6 +20,8 @@ header
 data
    |
     ----
+
+QmlCodeEDitorWidget top bar'daki comboboxlar git gide dokumanlar açılıp kapandıkça genişliyor, çok fazla yer kaplıyor
 Control:visible propertysinin propertiespane'de ver previewer'deki durumunu tartış
 Control'lerin scale özelliği (belki başka özelliklerde, transform vs vs) işe yaramıyor
 Help modunda bişeyleri koylalamak üzere seçinse, ne bileyim sağ falan tıklayınca falan bir ara uygulama mal gibi dondu, bi daha açılmadı
