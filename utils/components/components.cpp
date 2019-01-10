@@ -7,6 +7,10 @@
 #include <apiai.h>
 #endif
 
+#ifdef OW_AISPEAK
+#include <aispeak.h>
+#endif
+
 #ifdef OW_AUDIORECORDER
 #include <audiorecorder.h>
 #endif
@@ -15,16 +19,12 @@
 #include <audioplayer.h>
 #endif
 
-#ifdef OW_AISPEAK
-#include <aispeak.h>
-#endif
-
-#ifdef OW_FM
-#include <filemanager.h>
-#endif
-
-#ifdef OW_FIREBASE_DATABASE
+#ifdef OW_FIREBASEDATABASE
 #include <firebasedatabase.h>
+#endif
+
+#ifdef OW_FILEMANAGER
+#include <filemanager.h>
 #endif
 
 #ifdef OW_TRANSLATION
@@ -51,12 +51,12 @@ void init()
     qmlRegisterType<AudioPlayer>("Objectwheel.Multimedia", 1, 0, "AudioPlayer");
 #endif
 
-#ifdef OW_FIREBASE_DATABASE
+#ifdef OW_FIREBASEDATABASE
     qmlRegisterType<FirebaseDatabase>("Objectwheel.Database", 1, 0, "FirebaseDatabase");
 #endif
 
-#ifdef OW_FM
-    qmlRegisterSingletonType<OfflineStorage>("Objectwheel.Core", 1, 0, "FileManager",
+#ifdef OW_FILEMANAGER
+    qmlRegisterSingletonType<FileManager>("Objectwheel.Core", 1, 0, "FileManager",
                                              [] (QQmlEngine* /*engine*/, QJSEngine* /*jsEngine*/) -> QObject* {
         return new FileManager;
     });
@@ -69,15 +69,15 @@ void init()
     });
 #endif
 
+    qmlRegisterSingletonType<OfflineStorage>("Objectwheel.Core", 1, 0, "OfflineStorage",
+                                             [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
+        return new OfflineStorage(engine);
+    });
+
     qmlRegisterSingletonType<GlobalResources>("Objectwheel.GlobalResources", 1, 0, "GlobalResources",
                                               [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
         engine->setObjectOwnership(GlobalResources::instance(), QQmlEngine::CppOwnership);
         return GlobalResources::instance();
-    });
-
-    qmlRegisterSingletonType<OfflineStorage>("Objectwheel.Core", 1, 0, "OfflineStorage",
-                                             [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
-        return new OfflineStorage(engine);
     });
 }
 }

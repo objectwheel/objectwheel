@@ -1,17 +1,11 @@
 #ifndef HASHFACTORY_H
 #define HASHFACTORY_H
 
-#include <QString>
+#include <QLatin1String>
 
-class HashFactory final
+namespace HashFactory
 {
-    Q_DISABLE_COPY(HashFactory)
-
-public:
-    static QString generate();
-
-private:
-    HashFactory() {}
-};
+QLatin1String generate();
+}
 
 #endif // HASHFACTORY_H

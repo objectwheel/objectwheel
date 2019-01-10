@@ -24,9 +24,9 @@ SOURCES += $$PWD/components.cpp \
            $$PWD/translation.cpp
 
 DEFINES += OW_APIAI \
+           OW_AISPEAK \
            OW_AUDIORECORDER \
            OW_AUDIOPLAYER \
-           OW_AISPEAK \
-           OW_FM \
-           OW_FIREBASE_DATABASE \
+           OW_FIREBASEDATABASE \
+           OW_FILEMANAGER \
            OW_TRANSLATION

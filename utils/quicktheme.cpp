@@ -2,7 +2,9 @@
 #include <saveutils.h>
 #include <QJsonObject>
 
-void QuickTheme::setTheme(const QString& projectDir, int* version)
+namespace QuickTheme {
+
+void setTheme(const QString& projectDir, int* version)
 {
     const QJsonObject& object = SaveUtils::projectTheme(projectDir).toObject();
     const QString& stylev1 = object.value("stylev1").toString();
@@ -47,4 +49,5 @@ void QuickTheme::setTheme(const QString& projectDir, int* version)
 
     if (version && (!stylev1.isEmpty() || !stylev2.isEmpty()))
         *version = stylev1.isEmpty() ? 2 : 1;
+}
 }
