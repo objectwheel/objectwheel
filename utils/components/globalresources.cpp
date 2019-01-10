@@ -2,8 +2,7 @@
 #include <saveutils.h>
 
 GlobalResources* GlobalResources::s_instance = nullptr;
-GlobalResources::GlobalResources(const std::function<QString()>& projectDirectoryFunction, QObject* parent)
-  : QObject(parent)
+GlobalResources::GlobalResources(const std::function<QString()>& projectDirectoryFunction, QObject* parent) : QObject(parent)
   , m_projectDirectoryFunction(projectDirectoryFunction)
 {
     s_instance = this;

@@ -1,7 +1,7 @@
 #include <offlinestorage.h>
 #include <QQmlEngine>
 
-OfflineStorage::OfflineStorage(QQmlEngine* engine) : QObject(engine)
+OfflineStorage::OfflineStorage(QQmlEngine* engine, QObject* parent) : QObject(parent)
   , m_engine(engine)
 {
 }

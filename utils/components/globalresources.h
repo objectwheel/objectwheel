@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QUrl>
 
-class GlobalResources : public QObject
+class GlobalResources final : public QObject
 {
     Q_OBJECT
 
@@ -19,7 +19,7 @@ public slots:
 
 private:
     explicit GlobalResources(const std::function<QString()>& projectDirectory, QObject* parent = nullptr);
-    ~GlobalResources();
+    ~GlobalResources() override;
 
 private:
     static GlobalResources* s_instance;

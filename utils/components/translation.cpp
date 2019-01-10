@@ -5,7 +5,7 @@
 #include <QCoreApplication>
 #include <QDir>
 
-Translation::Translation(QQmlEngine* engine) : QObject(engine)
+Translation::Translation(QQmlEngine* engine, QObject* parent) : QObject(parent)
   , m_engine(engine)
 {
 }

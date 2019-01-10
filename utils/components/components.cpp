@@ -57,30 +57,26 @@ void init()
 
 #ifdef OW_FM
     qmlRegisterSingletonType<OfflineStorage>("Objectwheel.Core", 1, 0, "FileManager",
-                                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
-        Q_UNUSED(jsEngine)
-        return new FileManager(engine);
+                                             [] (QQmlEngine* /*engine*/, QJSEngine* /*jsEngine*/) -> QObject* {
+        return new FileManager;
     });
 #endif
 
 #ifdef OW_TRANSLATION
     qmlRegisterSingletonType<Translation>("Objectwheel.Core", 1, 0, "Translation",
-                                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
-        Q_UNUSED(jsEngine)
+                                             [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
         return new Translation(engine);
     });
 #endif
 
     qmlRegisterSingletonType<GlobalResources>("Objectwheel.GlobalResources", 1, 0, "GlobalResources",
-                                              [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
-        Q_UNUSED(engine)
-        Q_UNUSED(jsEngine)
+                                              [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
+        engine->setObjectOwnership(GlobalResources::instance(), QQmlEngine::CppOwnership);
         return GlobalResources::instance();
     });
 
     qmlRegisterSingletonType<OfflineStorage>("Objectwheel.Core", 1, 0, "OfflineStorage",
-                                             [] (QQmlEngine* engine, QJSEngine* jsEngine) -> QObject* {
-        Q_UNUSED(jsEngine)
+                                             [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
         return new OfflineStorage(engine);
     });
 }

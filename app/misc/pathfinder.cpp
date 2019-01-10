@@ -14,13 +14,13 @@ QString PathFinder::cleansed(const QString& text, bool withUid)
 {
     QString cleansed(text);
     for (const Control* control : Control::controls()) {
-        QRegularExpression exp("file:\\/{1,2}" + SaveUtils::toThisDir(control->dir()) + separator());
+        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(control->dir()) + separator());
         const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
         if (cleansed.contains(exp))
             cleansed.replace(exp, clean);
     }
 
-    QRegularExpression exp("file:\\/{1,2}" + SaveUtils::toGlobalDir(ProjectManager::dir()) + separator());
+    QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toGlobalDir(ProjectManager::dir()) + separator());
     const QString& clean = QObject::tr("GlobalResources") + "::";
     if (cleansed.contains(exp))
         cleansed.replace(exp, clean);

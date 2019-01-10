@@ -11,7 +11,7 @@ class OfflineStorage : public QObject
     Q_PROPERTY(QString offlineStoragePath READ offlineStoragePath WRITE setOfflineStoragePath NOTIFY offlineStoragePathChanged)
 
 public:
-    OfflineStorage(QQmlEngine* engine);
+    OfflineStorage(QQmlEngine* engine, QObject* parent = nullptr);
 
     QString offlineStoragePath();
     Q_INVOKABLE QString offlineStorageDatabaseFilePath(const QString& databaseName);

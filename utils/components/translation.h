@@ -10,7 +10,7 @@ class Translation : public QObject
     Q_OBJECT
 
 public:
-    Translation(QQmlEngine* engine);
+    Translation(QQmlEngine* engine, QObject* parent = nullptr);
 
 public slots:
     void clear();

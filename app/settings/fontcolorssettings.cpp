@@ -524,7 +524,7 @@ QTextCharFormat FontColorsSettings::toTextCharFormat(TextStyle category) const
     const TextEditor::Format &f = colorScheme.formatFor(category);
     QTextCharFormat tf;
 
-    if (category == C_TEXT)
+    if (category == C_TEXT || category == C_CURRENT_LINE_NUMBER || category == C_LINE_NUMBER)
         tf.setFont(toFont());
 
     if (category == C_OCCURRENCES_UNUSED)
