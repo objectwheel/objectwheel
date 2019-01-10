@@ -21,7 +21,7 @@ SOURCES += $$PWD/components.cpp \
            $$PWD/filemanager.cpp \
            $$PWD/offlinestorage.cpp \
            $$PWD/globalresources.cpp \
-          $$PWD/translation.cpp
+           $$PWD/translation.cpp
 
 DEFINES += OW_APIAI \
            OW_AUDIORECORDER \

@@ -33,10 +33,10 @@ ApiAi::ApiAi(QObject *parent)
 	, m_language("en")
 	, m_error(false)
 {
-    connect(m_webSocket, qOverload<QAbstractSocket::SocketError>(&QWebSocket::error), this, &ApiAi::handleError);
+    connect(m_webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &ApiAi::handleError);
     connect(m_webSocket, &QWebSocket::stateChanged, this, &ApiAi::handleStateChanges);
     connect(m_webSocket, &QWebSocket::textMessageReceived, this, &ApiAi::readyResponse);
-    connect(m_webSocket, &QWebSocket::sslErrors, m_webSocket, qOverload<>(&QWebSocket::ignoreSslErrors));
+    connect(m_webSocket, &QWebSocket::sslErrors, m_webSocket, QOverload<>::of(&QWebSocket::ignoreSslErrors));
 }
 
 ApiAi::~ApiAi()

@@ -211,8 +211,8 @@ QByteArray FileManager::dlfile(const QString& url)
     request.setRawHeader("User-Agent", "Objectwheel");
     reply = manager.get(request);
 
-    connect(reply, &QNetworkReply::sslErrors, reply, qOverload<>(&QNetworkReply::ignoreSslErrors));
-    connect(reply, qOverload<QNetworkReply::NetworkError>(&QNetworkReply::error), this, [&loop] {
+    connect(reply, &QNetworkReply::sslErrors, reply, QOverload<>::of(&QNetworkReply::ignoreSslErrors));
+    connect(reply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), this, [&loop] {
         loop.quit();
     });
     connect(reply, &QNetworkReply::finished,
