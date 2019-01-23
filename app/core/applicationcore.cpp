@@ -27,6 +27,7 @@
 #include <helpmanager.h>
 #include <globalresources.h>
 #include <components.h>
+#include <devicemanager.h>
 
 #include <QStandardPaths>
 #include <QSettings>
@@ -52,6 +53,7 @@ ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
 ControlCreationManager* ApplicationCore::s_controlExposingManager = nullptr;
 ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
 ControlPropertyManager* ApplicationCore::s_controlPropertyManager = nullptr;
+DeviceManager* ApplicationCore::s_deviceManager = nullptr;
 RunManager* ApplicationCore::s_runManager = nullptr;
 HelpManager* ApplicationCore::s_helpManager = nullptr;
 DocumentManager* ApplicationCore::s_documentManager = nullptr;
@@ -103,6 +105,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlExposingManager = new ControlCreationManager(app);
     s_controlRemovingManager = new ControlRemovingManager(app);
     s_controlPropertyManager = new ControlPropertyManager(app);
+    s_deviceManager = new DeviceManager(app);
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
