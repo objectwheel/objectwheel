@@ -14,8 +14,11 @@ class DeviceManager : public QObject
 
     friend class ApplicationCore;
 
-    enum { BROADCAST_PORT = 15425 };
-    static const QByteArray WS_SERVER_NAME;
+    enum {
+        BROADCAST_PORT = 15425,
+        SERVER_PORT = 15426,
+    };
+    static const QByteArray SERVER_NAME;
     static const QByteArray BROADCAST_MESSAGE;
 
 private:
