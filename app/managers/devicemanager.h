@@ -18,14 +18,24 @@ class DeviceManager : public QObject
         BROADCAST_PORT = 15425,
         SERVER_PORT = 15426,
     };
+    static const char* const UID_PROPERTY;
     static const QByteArray SERVER_NAME;
     static const QByteArray BROADCAST_MESSAGE;
 
 private:
     explicit DeviceManager(QObject* parent = nullptr);
 
+private slots:
+    void onNewConnection();
+    void onDisconnected();
+    void onBinaryMessageReceived(const QByteArray& data);
+
 protected:
     void timerEvent(QTimerEvent* event) override;
+
+signals:
+    void connected(const QVariantMap& deviceInfo);
+    void disconnected(const QString& uid);
 
 private:
     static QBasicTimer s_broadcastTimer;

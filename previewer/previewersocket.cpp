@@ -61,7 +61,7 @@ void PreviewerSocket::send(const PreviewerCommands& command, const QByteArray& d
     QByteArray block;
     {
         QDataStream out(&block, QIODevice::WriteOnly);
-        out.setVersion(QDataStream::Qt_5_11);
+        out.setVersion(QDataStream::Qt_5_12);
         out << quint32(0);
         out << command;
         out << data;
@@ -86,7 +86,7 @@ void PreviewerSocket::sendAlive()
 void PreviewerSocket::onReadReady()
 {
     QDataStream incoming(m_socket);
-    incoming.setVersion(QDataStream::Qt_5_11);
+    incoming.setVersion(QDataStream::Qt_5_12);
 
     if (m_blockSize == 0) {
         if (m_socket->bytesAvailable() < (int)sizeof(quint32))

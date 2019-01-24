@@ -16,7 +16,7 @@ template <typename... Args>
 QByteArray pushValues(const Args&... args) {
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
-    stream.setVersion(QDataStream::Qt_5_11);
+    stream.setVersion(QDataStream::Qt_5_12);
     pushValuesHelper(stream, args...);
     return data;
 }
@@ -32,7 +32,7 @@ void pullValuesHelper(QDataStream& stream, Arg& arg, Args&... args) {
 template <typename... Args>
 void pullValues(const QByteArray& data, Args&... args) {
     QDataStream stream(data);
-    stream.setVersion(QDataStream::Qt_5_11);
+    stream.setVersion(QDataStream::Qt_5_12);
     pullValuesHelper(stream, args...);
 }
 
