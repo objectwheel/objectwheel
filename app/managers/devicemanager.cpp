@@ -54,12 +54,15 @@ void dispatch(const QByteArray& incomingData, QByteArray& data, QString& command
 const char* const DeviceManager::UID_PROPERTY = "__OW_DEVICE_UID__";
 const QByteArray DeviceManager::SERVER_NAME = "Objectwheel Device Manager";
 const QByteArray DeviceManager::BROADCAST_MESSAGE = "Objectwheel Device Discovery Broadcast";
+
+DeviceManager* DeviceManager::s_instance = nullptr;
 QBasicTimer DeviceManager::s_broadcastTimer;
 QUdpSocket* DeviceManager::s_broadcastSocket = nullptr;
 QWebSocketServer* DeviceManager::s_webSocketServer = nullptr;
 
 DeviceManager::DeviceManager(QObject* parent) : QObject(parent)
 {
+    s_instance = this;
     s_broadcastSocket = new QUdpSocket(this);
     s_webSocketServer = new QWebSocketServer(SERVER_NAME, QWebSocketServer::NonSecureMode, this);
     s_webSocketServer->listen(QHostAddress::Any, SERVER_PORT);
@@ -79,6 +82,16 @@ DeviceManager::DeviceManager(QObject* parent) : QObject(parent)
     });
     connect(s_webSocketServer, &QWebSocketServer::newConnection,
             this, &DeviceManager::onNewConnection);
+}
+
+DeviceManager::~DeviceManager()
+{
+    s_instance = nullptr;
+}
+
+DeviceManager* DeviceManager::instance()
+{
+    return s_instance;
 }
 
 void DeviceManager::timerEvent(QTimerEvent* event)

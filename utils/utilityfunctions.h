@@ -44,6 +44,10 @@ QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties);
 void putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins);
 QVariant getProperty(const QString& property, const QList<PropertyNode>& properties);
 Enum getEnum(const QString& name, const QList<PropertyNode>& properties);
+QVariantMap deviceInfo();
+QIcon deviceIcon(const QVariantMap& deviceInfo);
+QString deviceName(const QVariantMap& deviceInfo);
+QString deviceInfoToolTip(const QVariantMap& deviceInfo);
 }
 
 #endif // UTILITYFUNCTIONS_H

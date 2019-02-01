@@ -22,8 +22,12 @@ class DeviceManager : public QObject
     static const QByteArray SERVER_NAME;
     static const QByteArray BROADCAST_MESSAGE;
 
+public:
+    static DeviceManager* instance();
+
 private:
     explicit DeviceManager(QObject* parent = nullptr);
+    ~DeviceManager() override;
 
 private slots:
     void onNewConnection();
@@ -38,6 +42,7 @@ signals:
     void disconnected(const QString& uid);
 
 private:
+    static DeviceManager* s_instance;
     static QBasicTimer s_broadcastTimer;
     static QUdpSocket* s_broadcastSocket;
     static QWebSocketServer* s_webSocketServer;

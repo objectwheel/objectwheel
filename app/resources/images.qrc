@@ -86,5 +86,8 @@
         <file>images/settings/codeeditor.png</file>
         <file>images/settings/fontcolors.png</file>
         <file>images/settings/behavior.png</file>
+        <file>images/android.svg</file>
+        <file>images/ios.svg</file>
+        <file>images/ipad.svg</file>
     </qresource>
 </RCC>

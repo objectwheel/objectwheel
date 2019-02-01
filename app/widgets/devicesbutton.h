@@ -11,34 +11,34 @@ class DevicesButton : public QPushButton
 
 public:
     explicit DevicesButton(QWidget* parent = nullptr);
-    QList<QAction*> deviceActions() const;
-    void addDeviceAction(QAction* action);
-    void addDeviceActions(const QList<QAction*>& actions);
-    void insertDeviceAction(QAction* before, QAction* action);
-    void insertDeviceActions(QAction* before, const QList<QAction*>& actions);
-    void removeDeviceAction(QAction* action);
-    void setCurrentDeviceAction(QAction* action);
 
-private slots:
-    void onCurrentDeviceActionChange(QAction*);
+public slots:
+    void addDevice(const QVariantMap& deviceInfo);
+    void removeDevice(const QString& uid);
+    void setActiveDevice(const QString& uid);
 
-protected:
-    void paintEvent(QPaintEvent*) override;
+public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
+private slots:
+    void onMenuItemActivation(QAction* action);
+
+protected:
+    void paintEvent(QPaintEvent*) override;
+
 private:
     QSize recomputeSizeHint() const;
+    bool deviceExists(const QString& uid) const;
 
 signals:
-    void currentDeviceActionChanged(QAction*);
-    void currentDeviceActionTriggered(QAction*);
+    void activeDeviceChanged(const QString& uid);
+    void activeDeviceTriggered(const QString& uid);
 
 private:
     const QIcon m_devicesIcon;
     QMenu* m_menu;
     QActionGroup* m_actionGroup;
-    QAction* m_myComputerAction;
 };
 
 #endif // DEVICESBUTTON_H

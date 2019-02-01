@@ -354,3 +354,77 @@ Enum UtilityFunctions::getEnum(const QString& name, const QList<PropertyNode>& p
     }
     return Enum();
 }
+
+QVariantMap UtilityFunctions::deviceInfo()
+{
+    static const QJsonObject info = {
+        {"buildCpuArchitecture", QSysInfo::buildCpuArchitecture()},
+        {"currentCpuArchitecture", QSysInfo::currentCpuArchitecture()},
+        {"buildAbi", QSysInfo::buildAbi()},
+        {"kernelType", QSysInfo::kernelType()},
+        {"kernelVersion", QSysInfo::kernelVersion()},
+        {"productType", QSysInfo::productType()},
+        {"productVersion", QSysInfo::productVersion()},
+        {"prettyProductName", QSysInfo::prettyProductName()},
+        {"machineHostName", QSysInfo::machineHostName()},
+        {"deviceName", QObject::tr("My Computer")},
+        {"deviceUid", "000000000000"},
+        {"isEmulator", false}
+    };
+    return info.toVariantMap();
+}
+
+QIcon UtilityFunctions::deviceIcon(const QVariantMap& deviceInfo)
+{
+    const QString productType = deviceInfo.value("productType").toString();
+    const QString deviceName = deviceInfo.value("deviceName").toString();
+    if (productType == "ios") {
+        if (deviceName.contains("ipad", Qt::CaseInsensitive))
+            return QIcon(":/images/ipad.svg");
+        else
+            return QIcon(":/images/ios.svg");
+    }
+    if (productType == "android")
+        return QIcon(":/images/android.svg");
+    return QIcon(":/images/mycomputer.png");
+}
+
+QString UtilityFunctions::deviceName(const QVariantMap& deviceInfo)
+{
+    const bool isEmulator = deviceInfo.value("isEmulator").toBool();
+    const QString deviceName = deviceInfo.value("deviceName").toString();
+    if (isEmulator)
+        return deviceName + " (Emulator)";
+    return deviceName;
+}
+
+QString UtilityFunctions::deviceInfoToolTip(const QVariantMap& deviceInfo)
+{
+    return QString(
+                "<body style=\"font-size: 12px\">"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%1:</b> %2</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%3:</b> %4</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%5:</b> %6</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%7:</b> %8</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%9:</b> %10</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%11:</b> %12</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%13:</b> %14</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%15:</b> %16</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%17:</b> %18</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%19:</b> %20</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%21:</b> %22</p>"
+                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%23:</b> %24</p>"
+                "</body>")
+            .arg(QObject::tr("Device Name")).arg(deviceInfo["deviceName"].toString())
+            .arg(QObject::tr("Device Unique ID")).arg(deviceInfo["deviceUid"].toString())
+            .arg(QObject::tr("Operating System")).arg(deviceInfo["prettyProductName"].toString())
+            .arg(QObject::tr("Operating System Type")).arg(deviceInfo["productType"].toString())
+            .arg(QObject::tr("Operating System Version")).arg(deviceInfo["productVersion"].toString())
+            .arg(QObject::tr("Kernel Type")).arg(deviceInfo["kernelType"].toString())
+            .arg(QObject::tr("Kernel Version")).arg(deviceInfo["kernelVersion"].toString())
+            .arg(QObject::tr("Current Cpu Architecture")).arg(deviceInfo["currentCpuArchitecture"].toString())
+            .arg(QObject::tr("Build Cpu Architecture")).arg(deviceInfo["buildCpuArchitecture"].toString())
+            .arg(QObject::tr("Build Abi")).arg(deviceInfo["buildAbi"].toString())
+            .arg(QObject::tr("Emulator")).arg(deviceInfo["isEmulator"].toString())
+            .arg(QObject::tr("Machine Host Name")).arg(deviceInfo["machineHostName"].toString());
+}

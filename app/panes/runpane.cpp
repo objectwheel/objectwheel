@@ -10,6 +10,7 @@
 #include <utilityfunctions.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
+#include <devicemanager.h>
 
 #include <QTime>
 #include <QPainter>
@@ -52,7 +53,11 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     addWidget(m_preferencesButton);
 
     m_devicesButton->setCursor(Qt::PointingHandCursor);
-    m_devicesButton->setToolTip(tr("Select target device"));
+
+    QObject::connect(DeviceManager::instance(), &DeviceManager::connected,
+                     m_devicesButton, &DevicesButton::addDevice);
+    QObject::connect(DeviceManager::instance(), &DeviceManager::disconnected,
+                     m_devicesButton, &DevicesButton::removeDevice);
 
     TransparentStyle::attach(this);
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage

@@ -109,10 +109,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
-    QObject::connect(s_deviceManager, &DeviceManager::connected, [=] (const QVariantMap& deviceInfo) {
-        qDebug() << deviceInfo;
-    });
-
     HelpManager::setupHelpManager();
     Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
     QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,

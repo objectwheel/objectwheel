@@ -21,21 +21,6 @@
 #include <QLabel>
 #include <QCloseEvent>
 
-namespace {
-enum Screens {
-    Login,
-    Robot,
-    Registration,
-    Verification,
-    Forget,
-    Reset,
-    Projects,
-    ProjectTemplates,
-    ProjectDetails,
-    Succeed
-};
-}
-
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
     setWindowTitle(APP_NAME);

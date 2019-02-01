@@ -27,79 +27,82 @@ DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
   , m_devicesIcon(":/images/devices.png")
   , m_menu(new QMenu(this))
   , m_actionGroup(new QActionGroup(this))
-  , m_myComputerAction(new QAction(this))
 {
     QPalette p(palette());
     PaintUtils::setPanelButtonPaletteDefaults(p, GeneralSettings::interfaceSettings()->theme == "Light");
     setPalette(p);
 
     m_actionGroup->setExclusive(true);
-    m_myComputerAction->setText(tr("My Computer"));
-    m_myComputerAction->setIcon(QIcon(":/images/mycomputer.png"));
-
-    addDeviceAction(m_myComputerAction);
-    setCurrentDeviceAction(m_myComputerAction);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setMenu(m_menu);
-    connect(m_menu, &QMenu::triggered,
-            this, &DevicesButton::onCurrentDeviceActionChange);
+    connect(m_menu, &QMenu::triggered, this, &DevicesButton::onMenuItemActivation);
+
+    addDevice(UtilityFunctions::deviceInfo());
 }
 
-QList<QAction*> DevicesButton::deviceActions() const
+void DevicesButton::addDevice(const QVariantMap& deviceInfo)
 {
-    return m_actionGroup->actions();
+    if (deviceExists(deviceInfo["deviceUid"].toString()))
+        return;
+
+    auto deviceAction = new QAction(this);
+    deviceAction->setProperty("_ow_deviceInfo", deviceInfo);
+    deviceAction->setText(UtilityFunctions::deviceName(deviceInfo));
+    deviceAction->setIcon(UtilityFunctions::deviceIcon(deviceInfo));
+    deviceAction->setToolTip(UtilityFunctions::deviceInfoToolTip(deviceInfo));
+    deviceAction->setCheckable(true);
+
+    m_actionGroup->addAction(deviceAction);
+    m_menu->addAction(deviceAction);
+
+    setActiveDevice(deviceInfo["deviceUid"].toString());
 }
 
-void DevicesButton::addDeviceAction(QAction* action)
+void DevicesButton::removeDevice(const QString& uid)
 {
-    action->setCheckable(true);
-    m_actionGroup->addAction(action);
-    m_menu->addAction(action);
-}
-
-void DevicesButton::addDeviceActions(const QList<QAction*>& actions)
-{
-    for (QAction* action : actions) {
-        action->setCheckable(true);
-        m_actionGroup->addAction(action);
+    for (QAction* action : m_actionGroup->actions()) {
+        const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
+        if (deviceInfo["deviceUid"].toString() == uid) {
+            if (action->isChecked())
+                setActiveDevice("000000000000");
+            m_menu->removeAction(action);
+            m_actionGroup->removeAction(action);
+            break;
+        }
     }
-    m_menu->addActions(actions);
 }
 
-void DevicesButton::insertDeviceAction(QAction* before, QAction* action)
+void DevicesButton::setActiveDevice(const QString& uid)
 {
-    action->setCheckable(true);
-    m_actionGroup->addAction(action);
-    m_menu->insertAction(before, action);
-}
-
-void DevicesButton::insertDeviceActions(QAction* before, const QList<QAction*>& actions)
-{
-    for (QAction* action : actions) {
-        action->setCheckable(true);
-        m_actionGroup->addAction(action);
+    for (QAction* action : m_actionGroup->actions()) {
+        const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
+        if (deviceInfo["deviceUid"].toString() == uid) {
+            setIcon(action->icon());
+            setText(action->text());
+            setToolTip(action->toolTip());
+            action->setChecked(true);
+            emit activeDeviceChanged(uid);
+            break;
+        }
     }
-    m_menu->insertActions(before, actions);
 }
 
-void DevicesButton::removeDeviceAction(QAction* action)
+void DevicesButton::onMenuItemActivation(QAction* action)
 {
-    m_menu->removeAction(action);
-    m_actionGroup->removeAction(action);
+    const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
+    const QString& deviceUid = deviceInfo["deviceUid"].toString();
+    setActiveDevice(deviceUid);
+    emit activeDeviceTriggered(deviceUid);
 }
 
-void DevicesButton::setCurrentDeviceAction(QAction* action)
+bool DevicesButton::deviceExists(const QString& uid) const
 {
-    setIcon(action->icon());
-    setText(action->text());
-    action->setChecked(true);
-    emit currentDeviceActionChanged(action);
-}
-
-void DevicesButton::onCurrentDeviceActionChange(QAction* action)
-{
-    setCurrentDeviceAction(action);
-    emit currentDeviceActionTriggered(action);
+    for (const QAction* action : m_actionGroup->actions()) {
+        const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
+        if (deviceInfo["deviceUid"].toString() == uid)
+            return true;
+    }
+    return false;
 }
 
 void DevicesButton::paintEvent(QPaintEvent*)
