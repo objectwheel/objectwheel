@@ -40,13 +40,21 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 
+    int baseSize = 0;
+#if defined(Q_OS_MACOS)
+    auto spacer = new QWidget(this);
+    spacer->setFixedSize(60, 1);
+    baseSize = 67;
+    addWidget(spacer);
+#endif
+
     addWidget(m_runButton);
     addWidget(m_stopButton);
     addWidget(m_devicesButton);
     addWidget(createSpacerWidget(Qt::Horizontal));
     addWidget(m_loadingBar);
     addWidget(createSpacerWidget(Qt::Horizontal));
-    addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, 0, QSize(0, 24),
+    addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, baseSize, QSize(0, 24),
                               m_devicesButton->sizePolicy().horizontalPolicy(),
                               m_devicesButton->sizePolicy().verticalPolicy(), this));
     addWidget(m_projectsButton);
