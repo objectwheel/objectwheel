@@ -5,6 +5,6 @@
 	path = interpreter
 	url = https://github.com/abigdreamer/interpreter
 	branch = objectwheel
-[submodule "app/miniz"]
-	path = app/miniz
-	url = https://github.com/omergoktas/miniz
+[submodule "app/zipasync"]
+	path = app/zipasync
+	url = https://github.com/omergoktas/zipasync
