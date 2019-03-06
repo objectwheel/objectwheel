@@ -1,7 +1,7 @@
 #include <dirlocker.h>
 #include <filemanager.h>
 #include <aes.h>
-#include <zipper.h>
+#include <zipasync.h>
 
 #include <QByteArray>
 #include <QFile>
@@ -44,7 +44,7 @@ bool DirLocker::lock(const QString& dir, const QByteArray& key)
 	if (locked(dir)) return false;
     clearTrashes(dir);
 	QString zippedFileName = dir + separator() + ZIPPED_FILENAME;
-	Zipper::compressDir(dir, zippedFileName);
+    ZipAsync::zipSync(dir, zippedFileName);
 	auto checkData = QByteArray(CHECK_SIGN);
 	auto zippedData = rdfile(zippedFileName);
 	if (zippedData.size() < 1) return false;
@@ -59,15 +59,16 @@ bool DirLocker::lock(const QString& dir, const QByteArray& key)
 	return true;
 }
 
-bool DirLocker::unlock(const QString& dir, const QByteArray& key)
+bool DirLocker::unlock(const QString& /*dir*/, const QByteArray& /*key*/)
 {
-	if (!canUnlock(dir, key)) return false;
-	auto zipData = rdfile(dir + separator() + LOCKED_FILENAME);
-	if (zipData.isEmpty()) return false;
-	Aes::decrypt(key, zipData);
-	rm(dir + separator() + LOCKED_FILENAME), rm(dir + separator() + CHECK_FILENAME);
-	Zipper::extractZip(zipData, dir);
-    return true;
+    // FIXME:
+    //	if (!canUnlock(dir, key)) return false;
+    //	auto zipData = rdfile(dir + separator() + LOCKED_FILENAME);
+    //	if (zipData.isEmpty()) return false;
+    //	Aes::decrypt(key, zipData);
+    //	rm(dir + separator() + LOCKED_FILENAME), rm(dir + separator() + CHECK_FILENAME);
+    //	ZipAsync::unzipSync(zipData, dir); // FIXME
+    //    return true;
 }
 
 QStringList DirLocker::lockFiles()

@@ -20,6 +20,7 @@ header
 data
    |
     ----
+ZipAsync'deki senkron fonksiyonlardan, asenkron fonksiyonların kullanımına geçilsin.
 Bee projesinde, kapanırken crash oluyor. Sebebi singleton GlobalResource'un QmlEngine'den önce silinmesi
 MainWindow'un state save etme bokunu düzelt, show ve close eventlerde hiç bi bok kaydetme, daha iyi bi yol bul
 QmlCodeEditorWidget, bir kontrolün main.qml'i ilk açılınca, açıldıktan sonra bir tuşa basmadan önce, ilgili kontrolun klasöründe bulunan qml tüpleri eğer main.qml de kullanılmışsa, o tipler için error işaretleri belirmiş oluyor, ama bir tuşa basınca aynı klasördeki tipleri yakalıyor ve errorlar gidiyor

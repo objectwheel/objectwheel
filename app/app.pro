@@ -1,6 +1,6 @@
 ### App Settings
 TEMPLATE = app
-CONFIG  += c++14
+CONFIG  += c++14 strict_c++
 CONFIG  -= qtquickcompiler
 TARGET   = Objectwheel
 DEFINES += QT_DEPRECATED_WARNINGS

@@ -1,6 +1,6 @@
 ### Library Settings
 TEMPLATE = lib
-CONFIG  += plugin c++14
+CONFIG  += plugin c++14 strict_c++
 TARGET   = utils
 QT      += core-private widgets qml quick websockets multimedia concurrent
 DEFINES += UTILS_LIBRARY

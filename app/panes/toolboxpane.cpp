@@ -4,7 +4,6 @@
 #include <toolboxtree.h>
 #include <flatbutton.h>
 #include <focuslesslineedit.h>
-#include <zipper.h>
 #include <mainwindow.h>
 
 #include <QApplication>

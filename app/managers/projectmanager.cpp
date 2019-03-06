@@ -2,13 +2,13 @@
 #include <usermanager.h>
 #include <savemanager.h>
 #include <filemanager.h>
-#include <zipper.h>
 #include <hashfactory.h>
 #include <saveutils.h>
 #include <controlpreviewingmanager.h>
 #include <projectexposingmanager.h>
 #include <toolmanager.h>
 #include <documentmanager.h>
+#include <zipasync.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -259,20 +259,19 @@ bool ProjectManager::exportProject(const QString& hash, const QString& filePath)
     if (dir.isEmpty() || filePath.isEmpty())
         return false;
 
-    return Zipper::compressDir(dir, filePath);
+    return ZipAsync::zipSync(dir, filePath);
 }
 
 bool ProjectManager::importProject(const QString &filePath, QString* hash)
 {
-    const auto& data = rdfile(filePath);
     const auto& udir = UserManager::dir();
     const auto& pdir = udir + separator() +
             QString::number(biggestDir(udir) + 1);
 
-    if (data.isEmpty() || udir.isEmpty())
+    if (filePath.isEmpty() || udir.isEmpty())
         return false;
 
-    if (!mkdir(pdir) || !Zipper::extractZip(data, pdir))
+    if (!mkdir(pdir) || !ZipAsync::unzipSync(filePath, pdir))
         return false;
 
     *hash = HashFactory::generate();

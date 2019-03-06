@@ -3,7 +3,7 @@
 #include <saveutils.h>
 #include <toolboxtree.h>
 #include <filemanager.h>
-#include <zipper.h>
+#include <zipasync.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -297,7 +297,7 @@ void ToolManager::exposeTools()
                 break;
             }
 
-            if (!Zipper::extractZip(rdfile(toolPath), newToolPath)) {
+            if (!ZipAsync::unzipSync(toolPath, newToolPath)) {
                 qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x02");
                 break;
             }

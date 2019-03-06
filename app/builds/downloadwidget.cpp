@@ -7,10 +7,10 @@
 #include <saveutils.h>
 #include <projectswidget.h>
 #include <dirlocker.h>
-#include <zipper.h>
 #include <flatbutton.h>
 #include <mainwindow.h>
 #include <build.h>
+#include <zipasync.h>
 
 #include <QtWidgets>
 #include <QtQuick>
@@ -139,7 +139,7 @@ void DownloadWidget::download(OTargets::Targets target)
         !cp(pdir + separator() + FILE_PROJECT, tdir.path()))
         qFatal("Error");
 
-    Zipper::compressDir(tdir.path(), tdir2.path() + separator() + "project.zip");
+    ZipAsync::zipSync(tdir.path(), tdir2.path() + separator() + "project.zip");
     QByteArray data = rdfile(tdir2.path() + separator() + "project.zip");
 
     QByteArray boundary = "-----------------------------7d935033608e2";

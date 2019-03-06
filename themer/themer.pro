@@ -5,7 +5,7 @@ include($$PWD/resources/resources.pri)
 ### App Settings
 TEMPLATE = app
 CONFIG  -= app_bundle
-CONFIG  += console c++14
+CONFIG  += console c++14 strict_c++
 TARGET   = themer
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000

@@ -3,7 +3,7 @@
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <parserutils.h>
-#include <zipper.h>
+#include <zipasync.h>
 #include <control.h>
 #include <utilityfunctions.h>
 #include <QRegularExpression>
@@ -119,7 +119,7 @@ bool SaveManager::initProject(const QString& projectDirectory, int templateNumbe
     if (projectDirectory.isEmpty() ||
             !::exists(projectDirectory) ||
             ::exists(SaveUtils::toOwdbDir(projectDirectory)) ||
-            !Zipper::extractZip(rdfile(":/templates/template" + QString::number(templateNumber) + ".zip"),
+            !ZipAsync::unzipSync(":/templates/template" + QString::number(templateNumber) + ".zip",
                                 projectDirectory)) {
         return false;
     }
