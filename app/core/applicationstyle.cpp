@@ -279,11 +279,8 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         else
             pc = option->palette.text().color();
 
-        QFont f = widget->font();
-        f.setPixelSize(option->fontMetrics.height());
-
         painter->setPen(pc);
-        painter->setFont(f);
+        painter->setFont(QFont());
         painter->drawText(option->rect.adjusted(-2, 1, -2, 1), "\u2713", QTextOption(Qt::AlignCenter));
         painter->restore();
     } break;

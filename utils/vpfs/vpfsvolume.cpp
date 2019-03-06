@@ -58,5 +58,5 @@ char VpfsVolume::letter() const
 
 bool VpfsVolume::isValid() const
 {
-
+    return false;
 }

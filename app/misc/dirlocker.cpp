@@ -69,6 +69,7 @@ bool DirLocker::unlock(const QString& /*dir*/, const QByteArray& /*key*/)
     //	rm(dir + separator() + LOCKED_FILENAME), rm(dir + separator() + CHECK_FILENAME);
     //	ZipAsync::unzipSync(zipData, dir); // FIXME
     //    return true;
+    return false;
 }
 
 QStringList DirLocker::lockFiles()

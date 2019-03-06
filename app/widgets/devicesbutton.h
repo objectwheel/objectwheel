@@ -16,6 +16,7 @@ public slots:
     void addDevice(const QVariantMap& deviceInfo);
     void removeDevice(const QString& uid);
     void setActiveDevice(const QString& uid);
+    QString activeDevice() const;
 
 public:
     QSize minimumSizeHint() const override;

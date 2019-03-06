@@ -32,6 +32,7 @@ DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
     PaintUtils::setPanelButtonPaletteDefaults(p, GeneralSettings::interfaceSettings()->theme == "Light");
     setPalette(p);
 
+    m_menu->setToolTipsVisible(true);
     m_actionGroup->setExclusive(true);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setMenu(m_menu);
@@ -85,6 +86,15 @@ void DevicesButton::setActiveDevice(const QString& uid)
             break;
         }
     }
+}
+
+QString DevicesButton::activeDevice() const
+{
+    for (QAction* action : m_actionGroup->actions()) {
+        if (action->isChecked())
+            return action->property("_ow_deviceInfo").value<QVariantMap>().value("deviceUid").toString();
+    }
+    return QString();
 }
 
 void DevicesButton::onMenuItemActivation(QAction* action)
