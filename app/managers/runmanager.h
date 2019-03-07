@@ -13,7 +13,7 @@ class RunManager final : public QObject
 public:
     static RunManager* instance();
 
-    static void run();
+    static void run(const QString& deviceUid);
     static void kill();
     static void waitForKill(int msecs);
 

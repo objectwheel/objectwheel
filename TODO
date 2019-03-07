@@ -20,6 +20,7 @@ header
 data
    |
     ----
+AboutWindow gösterilirken (loginwidget.cpp'den) arka planda gizli olarak gösteriliyor, öne fırlamalı
 ZipAsync'deki senkron fonksiyonlardan, asenkron fonksiyonların kullanımına geçilsin.
 Bee projesinde, kapanırken crash oluyor. Sebebi singleton GlobalResource'un QmlEngine'den önce silinmesi
 MainWindow'un state save etme bokunu düzelt, show ve close eventlerde hiç bi bok kaydetme, daha iyi bi yol bul

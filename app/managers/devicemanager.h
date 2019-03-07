@@ -25,9 +25,16 @@ class DeviceManager : public QObject
 public:
     static DeviceManager* instance();
 
+    static const QList<QVariantMap>& deviceInfoList();
+    static QVariantMap deviceInfo(const QString& uid);
+    static bool deviceInfoExists(const QString& uid);
+
 private:
     explicit DeviceManager(QObject* parent = nullptr);
     ~DeviceManager() override;
+
+private:
+    static void removeDeviceInfo(const QString& uid);
 
 private slots:
     void onNewConnection();
@@ -46,6 +53,7 @@ private:
     static QBasicTimer s_broadcastTimer;
     static QUdpSocket* s_broadcastSocket;
     static QWebSocketServer* s_webSocketServer;
+    static QList<QVariantMap> s_deviceInfoList;
 };
 
 #endif // DEVICEMANAGER_H

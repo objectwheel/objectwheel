@@ -59,6 +59,7 @@ DeviceManager* DeviceManager::s_instance = nullptr;
 QBasicTimer DeviceManager::s_broadcastTimer;
 QUdpSocket* DeviceManager::s_broadcastSocket = nullptr;
 QWebSocketServer* DeviceManager::s_webSocketServer = nullptr;
+QList<QVariantMap> DeviceManager::s_deviceInfoList;
 
 DeviceManager::DeviceManager(QObject* parent) : QObject(parent)
 {
@@ -89,9 +90,42 @@ DeviceManager::~DeviceManager()
     s_instance = nullptr;
 }
 
+void DeviceManager::removeDeviceInfo(const QString& uid)
+{
+    for (const QVariantMap& info : s_deviceInfoList) {
+        if (info.value("deviceUid").toString() == uid) {
+            s_deviceInfoList.removeOne(info);
+            return;
+        }
+    }
+}
+
 DeviceManager* DeviceManager::instance()
 {
     return s_instance;
+}
+
+const QList<QVariantMap>& DeviceManager::deviceInfoList()
+{
+    return s_deviceInfoList;
+}
+
+QVariantMap DeviceManager::deviceInfo(const QString& uid)
+{
+    for (const QVariantMap& info : s_deviceInfoList) {
+        if (info.value("deviceUid").toString() == uid)
+            return info;
+    }
+    return QVariantMap();
+}
+
+bool DeviceManager::deviceInfoExists(const QString& uid)
+{
+    for (const QVariantMap& info : s_deviceInfoList) {
+        if (info.value("deviceUid").toString() == uid)
+            return true;
+    }
+    return false;
 }
 
 void DeviceManager::timerEvent(QTimerEvent* event)
@@ -118,6 +152,7 @@ void DeviceManager::onNewConnection()
 void DeviceManager::onDisconnected()
 {
     QWebSocket* client = static_cast<QWebSocket*>(sender());
+    removeDeviceInfo(client->property(UID_PROPERTY).toString());
     client->deleteLater();
     emit disconnected(client->property(UID_PROPERTY).toString());
 }
@@ -132,6 +167,7 @@ void DeviceManager::onBinaryMessageReceived(const QByteArray& incomingData)
     if (command == "DeviceInfo") {
         QVariantMap info;
         pullValues(data, info);
+        s_deviceInfoList.append(info);
         client->setProperty(UID_PROPERTY, info.value("deviceUid").toString());
         emit connected(info);
     } else {

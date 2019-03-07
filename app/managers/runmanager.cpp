@@ -30,7 +30,7 @@ RunManager* RunManager::instance()
     return s_instance;
 }
 
-void RunManager::run()
+void RunManager::run(const QString& deviceUid)
 {
     s_process->setArguments(QStringList(ProjectManager::dir()));
     s_process->setProgram(QCoreApplication::applicationDirPath() + "/interpreter");
