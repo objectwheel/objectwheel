@@ -6,7 +6,7 @@
 #include <QDataStream>
 #include <QJsonObject>
 
-// TODO: Add encryption
+// TODO: Add encryption (wss)
 
 namespace {
 

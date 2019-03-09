@@ -48,6 +48,12 @@ signals:
     void connected(const QVariantMap& deviceInfo);
     void disconnected(const QString& uid);
 
+    void readyReadStandardError();
+    void readyReadStandardOutput();
+    void finished(int exitCode, QProcess::ExitStatus exitStatus);
+    void started();
+    void aboutToQuit();
+
 private:
     static DeviceManager* s_instance;
     static QBasicTimer s_broadcastTimer;

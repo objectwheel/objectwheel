@@ -20,15 +20,6 @@
 using namespace PaintUtils;
 using namespace UtilityFunctions;
 
-namespace {
-const char* g_welcomeMessage = "<b>Ready</b>  |  Welcome to Objectwheel (Beta)";
-const char* g_userStoppedRunningMessage = "<b>Stopped</b>  |  Execution stopped at ";
-const char* g_appCrashedMessage = "<b>Crashed</b>  |  Application crashed at ";
-const char* g_finishedRunningMessage = "<b>Finished</b>  |  Application closed at ";
-const char* g_startRunningMessage = "<b>Starting</b> interpretation...";
-const char* g_runningMessage = "<b>Running</b> on ";
-}
-
 RunPane::RunPane(QWidget *parent) : QToolBar(parent)
   , m_runButton(new PushButton)
   , m_stopButton(new PushButton)
@@ -145,26 +136,6 @@ void RunPane::discharge()
     RunManager::kill();
     m_runButton->setEnabled(true);
     m_stopButton->setDisabled(true);
-}
-
-void RunPane::busy(int progress, const QString& message)
-{
-    m_loadingBar->busy(progress, ProjectManager::name() + ": " + message);
-}
-
-void RunPane::done(const QString& message)
-{
-    m_loadingBar->done(ProjectManager::name() + ": " + message);
-}
-
-void RunPane::error(const QString& message)
-{
-    m_loadingBar->error(ProjectManager::name() + ": " + message);
-}
-
-void RunPane::setMessage(const QString& message)
-{
-    m_loadingBar->setText(ProjectManager::name() + ": " + message);
 }
 
 void RunPane::onRunButtonClick()

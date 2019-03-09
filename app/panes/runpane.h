@@ -16,10 +16,6 @@ public:
 
 public slots:
     void discharge();
-    void busy(int progress, const QString& message);
-    void done(const QString& message);
-    void error(const QString& message);
-    void setMessage(const QString& message);
 
 private slots:
     void onRunButtonClick();
