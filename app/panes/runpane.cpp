@@ -109,24 +109,24 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     m_projectsButton->setIcon(iconProj);
     connect(m_projectsButton, &PushButton::clicked, this, &RunPane::projectsButtonClicked);
 
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] { setMessage(tr(g_welcomeMessage)); });
-    connect(RunManager::instance(), &RunManager::started, this,
-            [=] {
-        m_runButton->setEnabled(true);
-        done(tr(g_runningMessage) + tr("My Computer")); // TODO: Fix this "My Computer" thing
-    });
-    connect(RunManager::instance(), &RunManager::finished, this,
-            [=] (int exitCode, QProcess::ExitStatus status) {
-        if (status == QProcess::CrashExit) // Stopped by user
-            setMessage(tr(g_userStoppedRunningMessage) + QTime::currentTime().toString());
-        else if (exitCode == 0) // User just closed the app
-            setMessage(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
-        else // The app has erros thus the interpreter shut itself down
-            error(tr(g_appCrashedMessage) + QTime::currentTime().toString());
-        m_runButton->setEnabled(true);
-        m_stopButton->setDisabled(true);
-    });
+//    connect(ProjectManager::instance(), &ProjectManager::started,
+//            this, [=] { setMessage(tr(g_welcomeMessage)); });
+//    connect(RunManager::instance(), &RunManager::started, this,
+//            [=] {
+//        m_runButton->setEnabled(true);
+//        done(tr(g_runningMessage) + tr("My Computer")); // TODO: Fix this "My Computer" thing
+//    });
+//    connect(RunManager::instance(), &RunManager::finished, this,
+//            [=] (int exitCode, QProcess::ExitStatus status) {
+//        if (status == QProcess::CrashExit) // Stopped by user
+//            setMessage(tr(g_userStoppedRunningMessage) + QTime::currentTime().toString());
+//        else if (exitCode == 0) // User just closed the app
+//            setMessage(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
+//        else // The app has erros thus the interpreter shut itself down
+//            error(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+//        m_runButton->setEnabled(true);
+//        m_stopButton->setDisabled(true);
+//    });
     connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
             this, qOverload<>(&RunPane::update));
 }
@@ -143,8 +143,8 @@ void RunPane::onRunButtonClick()
     RunManager::kill();
     RunManager::waitForKill(3000);
 
-    busy(40, tr(g_startRunningMessage));
-    RunManager::run();
+//    busy(40, tr(g_startRunningMessage));
+//    RunManager::run();
 
     m_runButton->setDisabled(true);
     m_stopButton->setEnabled(true);

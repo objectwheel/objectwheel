@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QProcess>
 #include <QBasicTimer>
+#include <QDataStream>
 
 class QUdpSocket;
 class QWebSocketServer;
@@ -13,14 +14,23 @@ class DeviceManager : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(DeviceManager)
 
-    friend class ApplicationCore;
-
     enum {
         BROADCAST_PORT = 15425,
         SERVER_PORT = 15426,
     };
-    static const QByteArray UID_PROPERTY;
-    static const QByteArray SERVER_NAME;
+
+    friend class ApplicationCore;
+
+public:
+    enum DiscoveryCommands {
+        Broadcast = 0x1100,
+        Execute,
+        Terminate,
+        InfoReport,
+        StartReport,
+        OutputReport,
+        ExitReport
+    };
 
 public:
     static DeviceManager* instance();
@@ -59,5 +69,13 @@ private:
     static QWebSocketServer* s_webSocketServer;
     static QList<QVariantMap> s_deviceInfoList;
 };
+
+Q_DECLARE_METATYPE(DeviceManager::DiscoveryCommands)
+
+inline QDataStream& operator>>(QDataStream& in, DeviceManager::DiscoveryCommands& e)
+{ return in >> (int&) e; }
+
+inline QDataStream& operator<<(QDataStream& out, const DeviceManager::DiscoveryCommands& e)
+{ return out << int(e); }
 
 #endif // DEVICEMANAGER_H

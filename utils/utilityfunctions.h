@@ -85,8 +85,6 @@ QVariantMap deviceInfo();
 QIcon deviceIcon(const QVariantMap& deviceInfo);
 QString deviceName(const QVariantMap& deviceInfo);
 QString deviceInfoToolTip(const QVariantMap& deviceInfo);
-void dispatch(const QByteArray& incomingData, QByteArray& data, QString& command);
-QByteArray serialize(const QByteArray& data, const QString& command);
 
 } // UtilityFunctions
 

@@ -25,24 +25,6 @@ namespace Internal {
 void pushHelper(QDataStream&) {}
 void pullHelper(QDataStream&) {}
 
-void dispatch(const QByteArray& incomingData, QByteArray& data, QString& command)
-{
-    QDataStream incoming(incomingData);
-    incoming.setVersion(QDataStream::Qt_5_12);
-    incoming >> command;
-    incoming >> data;
-}
-
-QByteArray serialize(const QByteArray& data, const QString& command)
-{
-    QByteArray outgoingData;
-    QDataStream outgoing(&outgoingData, QIODevice::WriteOnly);
-    outgoing.setVersion(QDataStream::Qt_5_12);
-    outgoing << command;
-    outgoing << data;
-    return outgoingData;
-}
-
 } // Internal
 
 void trimCommentsAndStrings(QTextDocument* document)

@@ -4,7 +4,7 @@
 #include <QDataStream>
 
 enum PreviewerCommands {
-    ConnectionAlive,
+    ConnectionAlive = 0x1000,
     ControlCodeUpdate,
     ControlCreation,
     ControlDeletion,

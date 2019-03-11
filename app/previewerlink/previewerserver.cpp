@@ -36,7 +36,7 @@ void PreviewerServer::abort()
     m_socket.clear();
 }
 
-// Existing connections did not effected, only server deactivated
+// Existing connections aren't effected, only server deactivated
 void PreviewerServer::close()
 {
     m_server->close();
