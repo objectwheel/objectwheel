@@ -2,11 +2,10 @@
 #define COMMANDDISPATCHER_H
 
 #include <QObject>
-
 #include <previewercommands.h>
 
-class PreviewerServer;
 struct PreviewResult;
+class PreviewerServer;
 
 class CommandDispatcher : public QObject
 {
@@ -28,8 +27,10 @@ public slots:
     void scheduleFormDeletion(const QString& uid);
     void scheduleControlCodeUpdate(const QString& uid);
     void scheduleFormCodeUpdate(const QString& uid);
-
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
+
+private:
+    void sendAsync(PreviewerServer* server, PreviewerCommands command, const QByteArray& data = QByteArray());
 
 signals:
     void initializationProgressChanged(int progress);

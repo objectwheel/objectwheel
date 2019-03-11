@@ -1,4 +1,6 @@
 #include <devicemanager.h>
+#include <utilityfunctions.h>
+
 #include <QUdpSocket>
 #include <QWebSocket>
 #include <QWebSocketServer>
@@ -8,53 +10,10 @@
 
 // TODO: Add encryption (wss)
 
-namespace {
+using namespace UtilityFunctions;
 
-void pushValuesHelper(QDataStream&) {}
-
-template <typename Arg, typename... Args>
-void pushValuesHelper(QDataStream& stream, const Arg& arg, const Args&... args) {
-    stream << arg;
-    pushValuesHelper(stream, args...);
-}
-
-template <typename... Args>
-QByteArray pushValues(const Args&... args) {
-    QByteArray data;
-    QDataStream stream(&data, QIODevice::WriteOnly);
-    stream.setVersion(QDataStream::Qt_5_12);
-    pushValuesHelper(stream, args...);
-    return data;
-}
-
-void pullValuesHelper(QDataStream&) {}
-
-template <typename Arg, typename... Args>
-void pullValuesHelper(QDataStream& stream, Arg& arg, Args&... args) {
-    stream >> arg;
-    pullValuesHelper(stream, args...);
-}
-
-template <typename... Args>
-void pullValues(const QByteArray& data, Args&... args) {
-    QDataStream stream(data);
-    stream.setVersion(QDataStream::Qt_5_12);
-    pullValuesHelper(stream, args...);
-}
-
-void dispatch(const QByteArray& incomingData, QByteArray& data, QString& command)
-{
-    QDataStream incoming(incomingData);
-    incoming.setVersion(QDataStream::Qt_5_12);
-    incoming >> command;
-    incoming >> data;
-}
-}
-
-const char* const DeviceManager::UID_PROPERTY = "__OW_DEVICE_UID__";
+const QByteArray DeviceManager::UID_PROPERTY = "__OW_DEVICE_UID__";
 const QByteArray DeviceManager::SERVER_NAME = "Objectwheel Device Manager";
-const QByteArray DeviceManager::BROADCAST_MESSAGE = "Objectwheel Device Discovery Broadcast";
-
 DeviceManager* DeviceManager::s_instance = nullptr;
 QBasicTimer DeviceManager::s_broadcastTimer;
 QUdpSocket* DeviceManager::s_broadcastSocket = nullptr;
@@ -166,7 +125,7 @@ void DeviceManager::onBinaryMessageReceived(const QByteArray& incomingData)
 
     if (command == "DeviceInfo") {
         QVariantMap info;
-        pullValues(data, info);
+        pull(data, info);
         s_deviceInfoList.append(info);
         client->setProperty(UID_PROPERTY, info.value("deviceUid").toString());
         emit connected(info);

@@ -2,6 +2,7 @@
 #define DEVICEMANAGER_H
 
 #include <QObject>
+#include <QProcess>
 #include <QBasicTimer>
 
 class QUdpSocket;
@@ -18,9 +19,8 @@ class DeviceManager : public QObject
         BROADCAST_PORT = 15425,
         SERVER_PORT = 15426,
     };
-    static const char* const UID_PROPERTY;
+    static const QByteArray UID_PROPERTY;
     static const QByteArray SERVER_NAME;
-    static const QByteArray BROADCAST_MESSAGE;
 
 public:
     static DeviceManager* instance();
@@ -49,10 +49,8 @@ signals:
     void disconnected(const QString& uid);
 
     void readyReadStandardError();
-    void readyReadStandardOutput();
     void finished(int exitCode, QProcess::ExitStatus exitStatus);
     void started();
-    void aboutToQuit();
 
 private:
     static DeviceManager* s_instance;

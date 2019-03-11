@@ -2,11 +2,10 @@
 #define COMMANDDISPATCHER_H
 
 #include <QObject>
-
 #include <previewercommands.h>
 
-class PreviewerSocket;
 struct PreviewResult;
+class PreviewerSocket;
 
 class CommandDispatcher : public QObject
 {
@@ -18,8 +17,10 @@ public:
 public slots:
     void scheduleInitializationProgress(int progress);
     void schedulePreviewDone(const QList<PreviewResult>& results);
-
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
+
+private:
+    void sendAsync(PreviewerSocket* socket, PreviewerCommands command, const QByteArray& data = QByteArray());
 
 signals:
     void init();

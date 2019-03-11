@@ -20,6 +20,43 @@ class QComboBox;
 class QMarginsF;
 
 namespace UtilityFunctions {
+
+namespace Internal {
+
+void pushHelper(QDataStream&);
+void pullHelper(QDataStream&);
+
+template <typename Arg, typename... Args>
+void pushHelper(QDataStream& stream, Arg&& arg, Args&&... args)
+{
+    stream << std::forward<Arg>(arg);
+    pushHelper(stream, std::forward<Args>(args)...);
+}
+
+template <typename Arg, typename... Args>
+void pullHelper(QDataStream& stream, Arg&& arg, Args&&... args) {
+    stream >> std::forward<Arg>(arg);
+    pullHelper(stream, std::forward<Args>(args)...);
+}
+
+} // Internal
+
+template <typename... Args>
+QByteArray push(Args&&... args) {
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    stream.setVersion(QDataStream::Qt_5_12);
+    Internal::pushHelper(stream, std::forward<Args>(args)...);
+    return data;
+}
+
+template <typename... Args>
+void pull(const QByteArray& data, Args&&... args) {
+    QDataStream stream(data);
+    stream.setVersion(QDataStream::Qt_5_12);
+    Internal::pullHelper(stream, std::forward<Args>(args)...);
+}
+
 void trimCommentsAndStrings(QTextDocument* document);
 void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent);
 void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex);
@@ -48,6 +85,9 @@ QVariantMap deviceInfo();
 QIcon deviceIcon(const QVariantMap& deviceInfo);
 QString deviceName(const QVariantMap& deviceInfo);
 QString deviceInfoToolTip(const QVariantMap& deviceInfo);
-}
+void dispatch(const QByteArray& incomingData, QByteArray& data, QString& command);
+QByteArray serialize(const QByteArray& data, const QString& command);
+
+} // UtilityFunctions
 
 #endif // UTILITYFUNCTIONS_H

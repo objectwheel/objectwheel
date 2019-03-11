@@ -18,7 +18,34 @@
 #include <QComboBox>
 #include <QApplication>
 
-void UtilityFunctions::trimCommentsAndStrings(QTextDocument* document)
+namespace UtilityFunctions {
+
+namespace Internal {
+
+void pushHelper(QDataStream&) {}
+void pullHelper(QDataStream&) {}
+
+void dispatch(const QByteArray& incomingData, QByteArray& data, QString& command)
+{
+    QDataStream incoming(incomingData);
+    incoming.setVersion(QDataStream::Qt_5_12);
+    incoming >> command;
+    incoming >> data;
+}
+
+QByteArray serialize(const QByteArray& data, const QString& command)
+{
+    QByteArray outgoingData;
+    QDataStream outgoing(&outgoingData, QIODevice::WriteOnly);
+    outgoing.setVersion(QDataStream::Qt_5_12);
+    outgoing << command;
+    outgoing << data;
+    return outgoingData;
+}
+
+} // Internal
+
+void trimCommentsAndStrings(QTextDocument* document)
 {
     QRegularExpression exp("(([\"'])(?:\\\\[\\s\\S]|.)*?\\2|\\/(?![*\\/])(?:\\\\.|\\[(?:\\\\.|.)\\]|.)*?\\/)|\\/\\/.*?$|\\/\\*[\\s\\S]*?\\*\\/",
                            QRegularExpression::MultilineOption); // stackoverflow.com/q/24518020
@@ -39,14 +66,14 @@ void UtilityFunctions::trimCommentsAndStrings(QTextDocument* document)
     }
 }
 
-QWidget* UtilityFunctions::createSpacingWidget(const QSize& size)
+QWidget* createSpacingWidget(const QSize& size)
 {
     auto spacing = new QWidget;
     spacing->setFixedSize(size);
     return spacing;
 }
 
-QWidget* UtilityFunctions::createSpacerWidget(Qt::Orientation orientation)
+QWidget* createSpacerWidget(Qt::Orientation orientation)
 {
     auto spacer = new QWidget;
     spacer->setSizePolicy((orientation & Qt::Horizontal)
@@ -56,7 +83,7 @@ QWidget* UtilityFunctions::createSpacerWidget(Qt::Orientation orientation)
     return spacer;
 }
 
-QWidget* UtilityFunctions::createSeparatorWidget(Qt::Orientation orientation)
+QWidget* createSeparatorWidget(Qt::Orientation orientation)
 {
     auto separator = new QWidget;
     separator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -68,7 +95,7 @@ QWidget* UtilityFunctions::createSeparatorWidget(Qt::Orientation orientation)
     return separator;
 }
 
-void UtilityFunctions::copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent)
+void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent)
 {
     QProgressDialog progress("Copying files...", "Abort Copy", 0, urls.size(), parent);
     progress.setWindowModality(Qt::NonModal);
@@ -131,7 +158,7 @@ void UtilityFunctions::copyFiles(const QString& rootPath, const QList<QUrl>& url
     Delayer::delay(100);
 }
 
-void UtilityFunctions::expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex)
+void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex)
 {
     if (!index.isValid())
         return;
@@ -144,7 +171,7 @@ void UtilityFunctions::expandUpToRoot(QTreeView* view, const QModelIndex& index,
     expandUpToRoot(view, index.parent(), rootIndex);
 }
 
-QWindow* UtilityFunctions::window(const QWidget* widget)
+QWindow* window(const QWidget* widget)
 {
     Q_ASSERT(widget);
     QWindow* winHandle = widget->windowHandle();
@@ -155,35 +182,35 @@ QWindow* UtilityFunctions::window(const QWidget* widget)
     return winHandle;
 }
 
-void UtilityFunctions::centralizeWidget(QWidget* widget)
+void centralizeWidget(QWidget* widget)
 {
     Q_ASSERT(window(widget));
     widget->setGeometry(QStyle::alignedRect(widget->layoutDirection(), Qt::AlignCenter, widget->size(),
                                             window(widget)->screen()->availableGeometry()));
 }
 
-void UtilityFunctions::adjustFontPixelSize(QWidget* widget, int advance)
+void adjustFontPixelSize(QWidget* widget, int advance)
 {
     QFont font(widget->font());
     font.setPixelSize(font.pixelSize() + advance);
     widget->setFont(font);
 }
 
-void UtilityFunctions::adjustFontWeight(QWidget* widget, QFont::Weight weight)
+void adjustFontWeight(QWidget* widget, QFont::Weight weight)
 {
     QFont font(widget->font());
     font.setWeight(weight);
     widget->setFont(font);
 }
 
-bool UtilityFunctions::hasHover(const QWidget* widget) // FIXME: This is a workaround for QTBUG-44400
+bool hasHover(const QWidget* widget) // FIXME: This is a workaround for QTBUG-44400
 {
     return widget->isVisible()
             && widget->isEnabled()
             && widget->rect().contains(widget->mapFromGlobal(QCursor::pos()));
 }
 
-QRectF UtilityFunctions::verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left)
+QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left)
 {
     QRectF ret({0, 0}, size);
     ret.moveCenter(rect.center());
@@ -192,7 +219,7 @@ QRectF UtilityFunctions::verticalAlignedRect(const QSizeF& size, const QRectF& r
     return ret;
 }
 
-QRectF UtilityFunctions::horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top)
+QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top)
 {
     QRectF ret({0, 0}, size);
     ret.moveCenter(rect.center());
@@ -201,7 +228,7 @@ QRectF UtilityFunctions::horizontalAlignedRect(const QSizeF& size, const QRectF&
     return ret;
 }
 
-QPixmap UtilityFunctions::pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size)
+QPixmap pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size)
 {
     Q_ASSERT(window(button));
     return icon.pixmap(window(button), size.toSize(), !button->isEnabled()
@@ -209,12 +236,12 @@ QPixmap UtilityFunctions::pixmap(QAbstractButton* button, const QIcon& icon, con
                        : (button->isDown() ? QIcon::Active : QIcon::Normal));
 }
 
-QPixmap UtilityFunctions::scaled(const QPixmap& pixmap, const QSize& size)
+QPixmap scaled(const QPixmap& pixmap, const QSize& size)
 {
     return pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
-QIcon UtilityFunctions::iconForQmlError(const QQmlError& error, const QAbstractItemView* view)
+QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view)
 {
     static QIcon info, warning, critical;
     if (info.isNull()) {
@@ -241,7 +268,7 @@ QIcon UtilityFunctions::iconForQmlError(const QQmlError& error, const QAbstractI
     }
 }
 
-bool UtilityFunctions::comboContainsWord(QComboBox* comboBox, const QString& word)
+bool comboContainsWord(QComboBox* comboBox, const QString& word)
 {
     for (int i = 0; i < comboBox->count(); ++i) {
         if (comboBox->itemText(i).contains(word, Qt::CaseInsensitive))
@@ -250,13 +277,13 @@ bool UtilityFunctions::comboContainsWord(QComboBox* comboBox, const QString& wor
     return false;
 }
 
-QPoint UtilityFunctions::centerPos(const QSize& size)
+QPoint centerPos(const QSize& size)
 {
     return QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size,
                                QApplication::primaryScreen()->availableGeometry()).topLeft();
 }
 
-QString UtilityFunctions::increasedNumberedText(const QString& text, bool addSpace, bool trim)
+QString increasedNumberedText(const QString& text, bool addSpace, bool trim)
 {
     int number = 0;
     QString finalText(trim ? text.trimmed() : text);
@@ -289,7 +316,7 @@ QString UtilityFunctions::increasedNumberedText(const QString& text, bool addSpa
         return "10";
 }
 
-QRectF UtilityFunctions::getGeometryFromProperties(const QList<PropertyNode>& properties)
+QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
 {
     QRectF geometry;
     for (const PropertyNode& propertyNode : properties) {
@@ -307,7 +334,7 @@ QRectF UtilityFunctions::getGeometryFromProperties(const QList<PropertyNode>& pr
     return geometry;
 }
 
-QMarginsF UtilityFunctions::getMarginsFromProperties(const QList<PropertyNode>& properties)
+QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties)
 {
     QMarginsF margins;
     for (const PropertyNode& propertyNode : properties) {
@@ -325,7 +352,7 @@ QMarginsF UtilityFunctions::getMarginsFromProperties(const QList<PropertyNode>& 
     return margins;
 }
 
-void UtilityFunctions::putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins)
+void putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins)
 {
     properties["__ow_margins_left"] = margins.left();
     properties["__ow_margins_top"] = margins.top();
@@ -333,7 +360,7 @@ void UtilityFunctions::putMarginsToProperties(QMap<QString, QVariant>& propertie
     properties["__ow_margins_bottom"] = margins.bottom();
 }
 
-QVariant UtilityFunctions::getProperty(const QString& property, const QList<PropertyNode>& properties)
+QVariant getProperty(const QString& property, const QList<PropertyNode>& properties)
 {
     for (const PropertyNode& propertyNode : properties) {
         for (const QString& propertyName : propertyNode.properties.keys()) {
@@ -344,7 +371,7 @@ QVariant UtilityFunctions::getProperty(const QString& property, const QList<Prop
     return QVariant();
 }
 
-Enum UtilityFunctions::getEnum(const QString& name, const QList<PropertyNode>& properties)
+Enum getEnum(const QString& name, const QList<PropertyNode>& properties)
 {
     for (const PropertyNode& propertyNode : properties) {
         for (const Enum& enumm : propertyNode.enums) {
@@ -355,7 +382,7 @@ Enum UtilityFunctions::getEnum(const QString& name, const QList<PropertyNode>& p
     return Enum();
 }
 
-QVariantMap UtilityFunctions::deviceInfo()
+QVariantMap deviceInfo()
 {
     static const QJsonObject info = {
         {"buildCpuArchitecture", QSysInfo::buildCpuArchitecture()},
@@ -374,7 +401,7 @@ QVariantMap UtilityFunctions::deviceInfo()
     return info.toVariantMap();
 }
 
-QIcon UtilityFunctions::deviceIcon(const QVariantMap& deviceInfo)
+QIcon deviceIcon(const QVariantMap& deviceInfo)
 {
     const QString productType = deviceInfo.value("productType").toString();
     const QString deviceName = deviceInfo.value("deviceName").toString();
@@ -389,7 +416,7 @@ QIcon UtilityFunctions::deviceIcon(const QVariantMap& deviceInfo)
     return QIcon(":/images/mycomputer.png");
 }
 
-QString UtilityFunctions::deviceName(const QVariantMap& deviceInfo)
+QString deviceName(const QVariantMap& deviceInfo)
 {
     const bool isEmulator = deviceInfo.value("isEmulator").toBool();
     const QString deviceName = deviceInfo.value("deviceName").toString();
@@ -398,7 +425,7 @@ QString UtilityFunctions::deviceName(const QVariantMap& deviceInfo)
     return deviceName;
 }
 
-QString UtilityFunctions::deviceInfoToolTip(const QVariantMap& deviceInfo)
+QString deviceInfoToolTip(const QVariantMap& deviceInfo)
 {
     return QString(
                 "<body style=\"font-size: 12px\">"
@@ -428,3 +455,5 @@ QString UtilityFunctions::deviceInfoToolTip(const QVariantMap& deviceInfo)
             .arg(QObject::tr("Emulator")).arg(deviceInfo["isEmulator"].toString())
             .arg(QObject::tr("Machine Host Name")).arg(deviceInfo["machineHostName"].toString());
 }
+
+} // UtilityFunctions
