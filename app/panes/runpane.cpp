@@ -53,9 +53,9 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
 
     m_devicesButton->setCursor(Qt::PointingHandCursor);
 
-    QObject::connect(DeviceManager::instance(), &DeviceManager::connected,
+    QObject::connect(DeviceManager::instance(), &DeviceManager::deviceConnected,
                      m_devicesButton, &DevicesButton::addDevice);
-    QObject::connect(DeviceManager::instance(), &DeviceManager::disconnected,
+    QObject::connect(DeviceManager::instance(), &DeviceManager::deviceDisconnected,
                      m_devicesButton, &DevicesButton::removeDevice);
 
     TransparentStyle::attach(this);

@@ -65,7 +65,7 @@ public:
         InfoReport,
         StartReport,
         OutputReport,
-        ExitReport
+        FinishReport
     };
 
 public:
@@ -95,12 +95,11 @@ protected:
     void timerEvent(QTimerEvent* event) override;
 
 signals:
-    void connected(const QVariantMap& deviceInfo);
-    void disconnected(const QString& uid);
-
-    void readyReadStandardError();
-    void finished(int exitCode, QProcess::ExitStatus exitStatus);
-    void started();
+    void deviceConnected(const QVariantMap& deviceInfo);
+    void deviceDisconnected(const QString& uid);
+    void applicationStarted();
+    void applicationFinished(int exitCode);
+    void applicationReadyReadOutput(const QString& output);
 
 private:
     static DeviceManager* s_instance;

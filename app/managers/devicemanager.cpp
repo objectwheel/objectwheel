@@ -76,7 +76,7 @@ void DeviceManager::onDisconnected()
     const Device& device = Device::get(s_devices, client);
     s_devices.removeOne(device);
     client->deleteLater();
-    emit disconnected(device.uid());
+    emit deviceDisconnected(device.uid());
 }
 
 void DeviceManager::onBinaryMessageReceived(const QByteArray& incomingData)
@@ -86,15 +86,39 @@ void DeviceManager::onBinaryMessageReceived(const QByteArray& incomingData)
     DiscoveryCommands command;
     pull(incomingData, command, data);
 
-    if (command == InfoReport) {
+    switch (command) {
+    case InfoReport: {
         QVariantMap info;
         pull(data, info);
         Device device;
         device.info = info;
         device.socket = client;
         s_devices.append(device);
-        emit connected(info);
-    } else {
+        emit deviceConnected(info);
+        break;
+    }
 
+    case StartReport: {
+        emit applicationStarted();
+        break;
+    }
+
+    case OutputReport: {
+        QString output;
+        pull(data, output);
+        emit applicationReadyReadOutput(output);
+        break;
+    }
+
+    case FinishReport: {
+        int exitCode;
+        pull(data, exitCode);
+        emit applicationFinished(exitCode);
+        break;
+    }
+
+    default:
+        qWarning("DeviceManager: Unrecognized command has arrived");
+        break;
     }
 }
