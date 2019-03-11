@@ -11,69 +11,69 @@ CommandDispatcher::CommandDispatcher(PreviewerServer* server, QObject *parent) :
     connect(m_server, &PreviewerServer::dataArrived, this, &CommandDispatcher::onDataReceived);
 }
 
-void CommandDispatcher::sendAsync(PreviewerServer* server, PreviewerCommands command, const QByteArray& data)
+void CommandDispatcher::send(PreviewerServer* server, PreviewerCommands command, const QByteArray& data)
 {
     QMetaObject::invokeMethod(server, "send", Q_ARG(PreviewerCommands, command), Q_ARG(QByteArray, data));
 }
 
 void CommandDispatcher::scheduleInit()
 {
-    sendAsync(m_server, PreviewerCommands::Init);
+    send(m_server, PreviewerCommands::Init);
 }
 
 void CommandDispatcher::scheduleTerminate()
 {
-    sendAsync(m_server, PreviewerCommands::Terminate);
+    send(m_server, PreviewerCommands::Terminate);
 }
 
 void CommandDispatcher::schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
 {
-    sendAsync(m_server, PreviewerCommands::PropertyUpdate, push(uid, propertyName, propertyValue));
+    send(m_server, PreviewerCommands::PropertyUpdate, push(uid, propertyName, propertyValue));
 }
 
 void CommandDispatcher::scheduleControlCreation(const QString& dir, const QString& parentUid)
 {
-    sendAsync(m_server, PreviewerCommands::ControlCreation, push(dir, parentUid));
+    send(m_server, PreviewerCommands::ControlCreation, push(dir, parentUid));
 }
 
 void CommandDispatcher::scheduleFormCreation(const QString& dir)
 {
-    sendAsync(m_server, PreviewerCommands::FormCreation, push(dir));
+    send(m_server, PreviewerCommands::FormCreation, push(dir));
 }
 
 void CommandDispatcher::scheduleRefresh(const QString& formUid)
 {
-    sendAsync(m_server, PreviewerCommands::Refresh, push(formUid));
+    send(m_server, PreviewerCommands::Refresh, push(formUid));
 }
 
 void CommandDispatcher::scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid)
 {
-    sendAsync(m_server, PreviewerCommands::ParentUpdate, push(newDir, uid, parentUid));
+    send(m_server, PreviewerCommands::ParentUpdate, push(newDir, uid, parentUid));
 }
 
 void CommandDispatcher::scheduleIdUpdate(const QString& uid, const QString& newId)
 {
-    sendAsync(m_server, PreviewerCommands::IdUpdate, push(uid, newId));
+    send(m_server, PreviewerCommands::IdUpdate, push(uid, newId));
 }
 
 void CommandDispatcher::scheduleControlDeletion(const QString& uid)
 {
-    sendAsync(m_server, PreviewerCommands::ControlDeletion, push(uid));
+    send(m_server, PreviewerCommands::ControlDeletion, push(uid));
 }
 
 void CommandDispatcher::scheduleFormDeletion(const QString& uid)
 {
-    sendAsync(m_server, PreviewerCommands::FormDeletion, push(uid));
+    send(m_server, PreviewerCommands::FormDeletion, push(uid));
 }
 
 void CommandDispatcher::scheduleControlCodeUpdate(const QString& uid)
 {
-    sendAsync(m_server, PreviewerCommands::ControlCodeUpdate, push(uid));
+    send(m_server, PreviewerCommands::ControlCodeUpdate, push(uid));
 }
 
 void CommandDispatcher::scheduleFormCodeUpdate(const QString& uid)
 {
-    sendAsync(m_server, PreviewerCommands::FormCodeUpdate, push(uid));
+    send(m_server, PreviewerCommands::FormCodeUpdate, push(uid));
 }
 
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)

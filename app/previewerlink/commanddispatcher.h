@@ -30,7 +30,7 @@ public slots:
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 
 private:
-    void sendAsync(PreviewerServer* server, PreviewerCommands command, const QByteArray& data = QByteArray());
+    void send(PreviewerServer* server, PreviewerCommands command, const QByteArray& data = QByteArray());
 
 signals:
     void initializationProgressChanged(int progress);

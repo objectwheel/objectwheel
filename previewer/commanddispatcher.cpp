@@ -11,19 +11,19 @@ CommandDispatcher::CommandDispatcher(PreviewerSocket* socket, QObject *parent) :
     connect(m_socket, &PreviewerSocket::dataArrived, this, &CommandDispatcher::onDataReceived);
 }
 
-void CommandDispatcher::sendAsync(PreviewerSocket* socket, PreviewerCommands command, const QByteArray& data)
+void CommandDispatcher::send(PreviewerSocket* socket, PreviewerCommands command, const QByteArray& data)
 {
     QMetaObject::invokeMethod(socket, "send", Q_ARG(PreviewerCommands, command), Q_ARG(QByteArray, data));
 }
 
 void CommandDispatcher::scheduleInitializationProgress(int progress)
 {
-    sendAsync(m_socket, PreviewerCommands::InitializationProgress, push(progress));
+    send(m_socket, PreviewerCommands::InitializationProgress, push(progress));
 }
 
 void CommandDispatcher::schedulePreviewDone(const QList<PreviewResult>& results)
 {
-    sendAsync(m_socket, PreviewerCommands::PreviewDone, push(results));
+    send(m_socket, PreviewerCommands::PreviewDone, push(results));
 }
 
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)

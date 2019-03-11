@@ -20,7 +20,7 @@ public slots:
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 
 private:
-    void sendAsync(PreviewerSocket* socket, PreviewerCommands command, const QByteArray& data = QByteArray());
+    void send(PreviewerSocket* socket, PreviewerCommands command, const QByteArray& data = QByteArray());
 
 signals:
     void init();

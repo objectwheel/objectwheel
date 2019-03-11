@@ -1,15 +1,11 @@
 #include <devicemanager.h>
-#include <utilityfunctions.h>
 
 #include <QUdpSocket>
-#include <QWebSocket>
 #include <QWebSocketServer>
 #include <QTimerEvent>
 #include <QJsonObject>
 
 // TODO: Add encryption (wss)
-
-#define UID_PROPERTY "__OW_DEVICE_UID__"
 
 using namespace UtilityFunctions;
 
@@ -17,7 +13,7 @@ DeviceManager* DeviceManager::s_instance = nullptr;
 QBasicTimer DeviceManager::s_broadcastTimer;
 QUdpSocket* DeviceManager::s_broadcastSocket = nullptr;
 QWebSocketServer* DeviceManager::s_webSocketServer = nullptr;
-QList<QVariantMap> DeviceManager::s_deviceInfoList;
+QList<DeviceManager::Device> DeviceManager::s_devices;
 
 DeviceManager::DeviceManager(QObject* parent) : QObject(parent)
 {
@@ -48,42 +44,9 @@ DeviceManager::~DeviceManager()
     s_instance = nullptr;
 }
 
-void DeviceManager::removeDeviceInfo(const QString& uid)
-{
-    for (const QVariantMap& info : s_deviceInfoList) {
-        if (info.value("deviceUid").toString() == uid) {
-            s_deviceInfoList.removeOne(info);
-            return;
-        }
-    }
-}
-
 DeviceManager* DeviceManager::instance()
 {
     return s_instance;
-}
-
-const QList<QVariantMap>& DeviceManager::deviceInfoList()
-{
-    return s_deviceInfoList;
-}
-
-QVariantMap DeviceManager::deviceInfo(const QString& uid)
-{
-    for (const QVariantMap& info : s_deviceInfoList) {
-        if (info.value("deviceUid").toString() == uid)
-            return info;
-    }
-    return QVariantMap();
-}
-
-bool DeviceManager::deviceInfoExists(const QString& uid)
-{
-    for (const QVariantMap& info : s_deviceInfoList) {
-        if (info.value("deviceUid").toString() == uid)
-            return true;
-    }
-    return false;
 }
 
 void DeviceManager::timerEvent(QTimerEvent* event)
@@ -110,9 +73,10 @@ void DeviceManager::onNewConnection()
 void DeviceManager::onDisconnected()
 {
     QWebSocket* client = static_cast<QWebSocket*>(sender());
-    removeDeviceInfo(client->property(UID_PROPERTY).toString());
+    const Device& device = Device::get(s_devices, client);
+    s_devices.removeOne(device);
     client->deleteLater();
-    emit disconnected(client->property(UID_PROPERTY).toString());
+    emit disconnected(device.uid());
 }
 
 void DeviceManager::onBinaryMessageReceived(const QByteArray& incomingData)
@@ -125,8 +89,10 @@ void DeviceManager::onBinaryMessageReceived(const QByteArray& incomingData)
     if (command == InfoReport) {
         QVariantMap info;
         pull(data, info);
-        s_deviceInfoList.append(info);
-        client->setProperty(UID_PROPERTY, info.value("deviceUid").toString());
+        Device device;
+        device.info = info;
+        device.socket = client;
+        s_devices.append(device);
         emit connected(info);
     } else {
 

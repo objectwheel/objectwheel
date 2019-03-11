@@ -5,9 +5,12 @@
 #include <QProcess>
 #include <QBasicTimer>
 #include <QDataStream>
+#include <QWebSocket>
+#include <utilityfunctions.h>
 
 class QUdpSocket;
 class QWebSocketServer;
+class QWebSocket;
 
 class DeviceManager : public QObject
 {
@@ -17,6 +20,39 @@ class DeviceManager : public QObject
     enum {
         BROADCAST_PORT = 15425,
         SERVER_PORT = 15426,
+    };
+
+    struct Device
+    {
+        QVariantMap info;
+        QWebSocket* socket = nullptr;
+
+        operator bool() const
+        { return socket; }
+
+        bool operator == (const Device& other)
+        { return socket == other.socket; }
+
+        QString uid() const
+        { return info.value("deviceUid").toString(); }
+
+        static Device get(const QList<Device>& devices, const QWebSocket* socket)
+        {
+            for (const Device& device : devices) {
+                if (device.socket == socket)
+                    return device;
+            }
+            return Device();
+        }
+
+        static Device get(const QList<Device>& devices, const QString& uid)
+        {
+            for (const Device& device : devices) {
+                if (device.uid() == uid)
+                    return device;
+            }
+            return Device();
+        }
     };
 
     friend class ApplicationCore;
@@ -35,16 +71,20 @@ public:
 public:
     static DeviceManager* instance();
 
-    static const QList<QVariantMap>& deviceInfoList();
-    static QVariantMap deviceInfo(const QString& uid);
-    static bool deviceInfoExists(const QString& uid);
+    template<typename... Args>
+    static void send(const QString& uid, DiscoveryCommands command, Args&&... args)
+    {
+        using namespace UtilityFunctions;
+        if (const Device& device = Device::get(s_devices, uid)) {
+            device.socket->sendBinaryMessage(push(command, push(std::forward<Args>(args)...)));
+            return;
+        }
+        qWarning("WARNING: Cannot send any data, device is not connected, uid: %s", uid);
+    }
 
 private:
     explicit DeviceManager(QObject* parent = nullptr);
     ~DeviceManager() override;
-
-private:
-    static void removeDeviceInfo(const QString& uid);
 
 private slots:
     void onNewConnection();
@@ -67,7 +107,7 @@ private:
     static QBasicTimer s_broadcastTimer;
     static QUdpSocket* s_broadcastSocket;
     static QWebSocketServer* s_webSocketServer;
-    static QList<QVariantMap> s_deviceInfoList;
+    static QList<Device> s_devices;
 };
 
 Q_DECLARE_METATYPE(DeviceManager::DiscoveryCommands)
