@@ -36,22 +36,24 @@ class DeviceManager : public QObject
         QString uid() const
         { return info.value("deviceUid").toString(); }
 
-        static Device get(const QList<Device>& devices, const QWebSocket* socket)
+        static Device& get(QList<Device>& devices, const QWebSocket* socket)
         {
-            for (const Device& device : devices) {
+            static Device invalid;
+            for (Device& device : devices) {
                 if (device.socket == socket)
                     return device;
             }
-            return Device();
+            return invalid;
         }
 
-        static Device get(const QList<Device>& devices, const QString& uid)
+        static Device& get(QList<Device>& devices, const QString& uid)
         {
-            for (const Device& device : devices) {
+            static Device invalid;
+            for (Device& device : devices) {
                 if (device.uid() == uid)
                     return device;
             }
-            return Device();
+            return invalid;
         }
     };
 
@@ -71,6 +73,16 @@ public:
 public:
     static DeviceManager* instance();
 
+public slots:
+    void scheduleTermination(const QString& uid);
+    void scheduleExecution(const QString& uid, const QString& projectDirectory);
+
+private slots:
+    void onNewConnection();
+    void onDisconnected();
+    void onBinaryMessageReceived(const QByteArray& data);
+
+private:
     template<typename... Args>
     static void send(const QString& uid, DiscoveryCommands command, Args&&... args)
     {
@@ -79,27 +91,22 @@ public:
             device.socket->sendBinaryMessage(push(command, push(std::forward<Args>(args)...)));
             return;
         }
-        qWarning("WARNING: Cannot send any data, device is not connected, uid: %s", uid);
+        qWarning("WARNING: Cannot send any data, device is not connected, uid: %s", uid.toUtf8().constData());
     }
+
+protected:
+    void timerEvent(QTimerEvent* event) override;
 
 private:
     explicit DeviceManager(QObject* parent = nullptr);
     ~DeviceManager() override;
 
-private slots:
-    void onNewConnection();
-    void onDisconnected();
-    void onBinaryMessageReceived(const QByteArray& data);
-
-protected:
-    void timerEvent(QTimerEvent* event) override;
-
 signals:
     void deviceConnected(const QVariantMap& deviceInfo);
     void deviceDisconnected(const QString& uid);
-    void applicationStarted();
-    void applicationFinished(int exitCode);
-    void applicationReadyReadOutput(const QString& output);
+    void projectStarted();
+    void projectFinished(int exitCode);
+    void projectReadyReadOutput(const QString& output);
 
 private:
     static DeviceManager* s_instance;
