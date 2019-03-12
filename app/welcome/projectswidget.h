@@ -40,7 +40,7 @@ protected:
 
 signals:
     void done();
-    void editProject(const QString& hash);
+    void editProject(const QString& uid);
     void newProject(const QString& projectName);
 
 private:

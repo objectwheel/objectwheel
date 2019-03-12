@@ -43,15 +43,15 @@
 #define WIDTH_PROGRESS   80
 
 enum Buttons { Load, New, Import, Export, Settings };
-enum Roles { Name = Qt::UserRole + 1, LastEdit, Hash, Active };
+enum Roles { Name = Qt::UserRole + 1, LastEdit, Uid, Active };
 
 namespace {
 
-QListWidgetItem* itemForHash(const QListWidget* listWidget, const QString& hash)
+QListWidgetItem* itemForUid(const QListWidget* listWidget, const QString& uid)
 {
     for (int i = 0; i < listWidget->count(); ++i) {
         QListWidgetItem* item = listWidget->item(i);
-        if (item->data(Hash).toString() == hash)
+        if (item->data(Uid).toString() == uid)
             return item;
     }
     return nullptr;
@@ -466,13 +466,13 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
     if (projects.size() < 1)
         return;
 
-    for (auto hash : projects) {
+    for (auto uid : projects) {
         auto item = new ProjectListWidgetItem(this);
         item->setIcon(QIcon(PATH_FILEICON));
-        item->setData(Hash, hash);
-        item->setData(Name, ProjectManager::name(hash));
-        item->setData(LastEdit, ProjectManager::toUiTime(ProjectManager::mfDate(hash)));
-        item->setData(Active, hash == ProjectManager::hash());
+        item->setData(Uid, uid);
+        item->setData(Name, ProjectManager::name(uid));
+        item->setData(LastEdit, ProjectManager::toUiTime(ProjectManager::mfDate(uid)));
+        item->setData(Active, uid == ProjectManager::uid());
         m_listWidget->addItem(item);
     }
 
@@ -523,10 +523,10 @@ void ProjectsWidget::onLoadButtonClick()
         return;
     }
 
-    auto hash = m_listWidget->currentItem()->data(Hash).toString();
-    auto chash = ProjectManager::hash();
+    auto uid = m_listWidget->currentItem()->data(Uid).toString();
+    auto cuid = ProjectManager::uid();
 
-    if (!chash.isEmpty() && chash == hash) {
+    if (!cuid.isEmpty() && cuid == uid) {
         emit done();
         return;
     }
@@ -557,10 +557,10 @@ void ProjectsWidget::onLoadButtonClick()
     //! Start sequance
     lock();
 
-    if (!ProjectManager::start(hash)) {
+    if (!ProjectManager::start(uid)) {
         QMessageBox::critical(this, tr("Oops"), tr("Project start unsuccessful."));
         refreshProjectList();
-        QListWidgetItem* item = itemForHash(m_listWidget, hash);
+        QListWidgetItem* item = itemForUid(m_listWidget, uid);
         if (item) {
             m_listWidget->setCurrentItem(item);
             m_listWidget->scrollToItem(item);
@@ -594,10 +594,10 @@ void ProjectsWidget::onExportButtonClick()
         return;
     }
 
-    auto hash = m_listWidget->currentItem()->data(Hash).toString();
+    auto uid = m_listWidget->currentItem()->data(Uid).toString();
     auto pname = m_listWidget->currentItem()->data(Name).toString();
 
-    if (hash.isEmpty() || pname.isEmpty())
+    if (uid.isEmpty() || pname.isEmpty())
         return;
 
     QFileDialog dialog(this);
@@ -609,7 +609,7 @@ void ProjectsWidget::onExportButtonClick()
         if (!rm(dialog.selectedFiles().at(0) + separator() + pname + ".zip"))
             return;
 
-        if (!ProjectManager::exportProject(hash, dialog.selectedFiles().at(0) +
+        if (!ProjectManager::exportProject(uid, dialog.selectedFiles().at(0) +
                                            separator() + pname + ".zip")) {
             return;
         }
@@ -626,18 +626,18 @@ void ProjectsWidget::onImportButtonClick()
     dialog.setViewMode(QFileDialog::Detail);
 
     if (dialog.exec()) {
-        QString hash;
+        QString uid;
         for (const QString& fileName : dialog.selectedFiles()) {
-            if (!ProjectManager::importProject(fileName, &hash)) {
+            if (!ProjectManager::importProject(fileName, &uid)) {
                 QMessageBox::warning(this, tr("Operation Stopped"),
                                      tr("One or more import file is broken."));
                 return;
             }
         }
-        Q_ASSERT(!hash.isEmpty());
+        Q_ASSERT(!uid.isEmpty());
 
         refreshProjectList();
-        QListWidgetItem* item = itemForHash(m_listWidget, hash);
+        QListWidgetItem* item = itemForUid(m_listWidget, uid);
         if (item) {
             m_listWidget->setCurrentItem(item);
             m_listWidget->scrollToItem(item);
@@ -649,7 +649,7 @@ void ProjectsWidget::onImportButtonClick()
 void ProjectsWidget::onSettingsButtonClick()
 {
     if (m_listWidget->currentItem())
-        emit editProject(m_listWidget->currentItem()->data(Hash).toString());
+        emit editProject(m_listWidget->currentItem()->data(Uid).toString());
 }
 
 void ProjectsWidget::onProgressChange(int progress)

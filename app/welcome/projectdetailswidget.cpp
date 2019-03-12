@@ -110,24 +110,24 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     });
 }
 
-void ProjectDetailsWidget::onEditProject(const QString& hash)
+void ProjectDetailsWidget::onEditProject(const QString& uid)
 {
     m_toTemplates = false;
-    m_hash = hash;
-    ProjectManager::updateSize(m_hash);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectManager::owner(hash));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::toUiTime(ProjectManager::crDate(hash)));
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::toUiTime(ProjectManager::mfDate(hash)));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectManager::size(hash));
+    m_uid = uid;
+    ProjectManager::updateSize(m_uid);
+    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(uid));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(uid));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectManager::owner(uid));
+    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::toUiTime(ProjectManager::crDate(uid)));
+    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::toUiTime(ProjectManager::mfDate(uid)));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectManager::size(uid));
 }
 
 void ProjectDetailsWidget::onNewProject(const QString& projectName, int templateNumber)
 {
     m_toTemplates = true;
     m_templateNumber = templateNumber;
-    m_hash.clear();
+    m_uid.clear();
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
     static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(UserManager::user());
@@ -148,7 +148,7 @@ void ProjectDetailsWidget::onSaveClick()
         return;
     }
 
-    if (m_hash.isEmpty()) {
+    if (m_uid.isEmpty()) {
         if (!ProjectManager::newProject(
             m_templateNumber,
             projectnametext,
@@ -158,11 +158,11 @@ void ProjectDetailsWidget::onSaveClick()
         )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
     } else {
         ProjectManager::instance()->changeName(
-            m_hash,
+            m_uid,
             projectnametext
         );
         ProjectManager::instance()->changeDescription(
-            m_hash,
+            m_uid,
             descriptiontext
         );
     }
@@ -172,7 +172,7 @@ void ProjectDetailsWidget::onSaveClick()
 
 void ProjectDetailsWidget::onDeleteClick()
 {
-    if (ProjectManager::dir(m_hash).isEmpty()) {
+    if (ProjectManager::dir(m_uid).isEmpty()) {
         emit done();
         return;
     }
@@ -181,16 +181,16 @@ void ProjectDetailsWidget::onDeleteClick()
         this,
         "Confirm Deletion",
         tr("You are about to delete %1 completely. Are you sure?").
-        arg(ProjectManager::name(m_hash)),
+        arg(ProjectManager::name(m_uid)),
         QMessageBox::Yes, QMessageBox::No | QMessageBox::Default
     );
 
     if (ret == QMessageBox::Yes) {
-        const auto& chash = ProjectManager::hash();
-        if (!chash.isEmpty() && chash == m_hash)
+        const auto& cuid = ProjectManager::uid();
+        if (!cuid.isEmpty() && cuid == m_uid)
             ProjectManager::stop();
 
-        rm(ProjectManager::dir(m_hash));
+        rm(ProjectManager::dir(m_uid));
 
         emit done();
     }

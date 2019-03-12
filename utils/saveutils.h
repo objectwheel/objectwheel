@@ -23,6 +23,7 @@
 
 #define TAG_ID           "id"
 #define TAG_UID          "uid"
+#define TAG_CHECKSUM     "checksum"        // TODO: Reserved
 #define TAG_NAME         "name"
 #define TAG_CATEGORY     "category"
 #define TAG_OWDB_SIGN    "owdbsign"        // FIXME: There is no function of this
@@ -30,11 +31,12 @@
 
 #define PTAG_NAME        "name"
 #define PTAG_DESCRIPTION "description"
+#define PTAG_CHECKSUM    "checksum"        // TODO: Reserved
 #define PTAG_OWNER       "owner"
 #define PTAG_CRDATE      "crdate"
 #define PTAG_MFDATE      "mfdate"
 #define PTAG_SIZE        "size"
-#define PTAG_HASH        "hash"
+#define PTAG_UID         "uid"
 #define PTAG_THEME       "theme"
 #define PTAG_SCALING     "scaling"
 #define PTAG_OWPRJ_SIGN  "owprj"
@@ -70,7 +72,7 @@ QString uid(const QString& rootPath);
 QString name(const QString& rootPath);
 QString category(const QString& rootPath);
 
-QString projectHash(const QString& projectDir);
+QString projectUid(const QString& projectDir);
 QString projectName(const QString& projectDir);
 QString projectSize(const QString& projectDir);
 QString projectOwner(const QString& projectDir);

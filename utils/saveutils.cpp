@@ -225,9 +225,9 @@ QString category(const QString& rootPath)
     return property(rootPath, TAG_CATEGORY).toString();
 }
 
-QString projectHash(const QString& projectDir)
+QString projectUid(const QString& projectDir)
 {
-    return projectProperty(projectDir, PTAG_HASH).toString();
+    return projectProperty(projectDir, PTAG_UID).toString();
 }
 
 QString projectName(const QString& projectDir)

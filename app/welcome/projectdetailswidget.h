@@ -16,7 +16,7 @@ public:
     explicit ProjectDetailsWidget(QWidget* parent = nullptr);
 
 public slots:
-    void onEditProject(const QString& hash);
+    void onEditProject(const QString& uid);
     void onNewProject(const QString& projectName, int templateNumber);
 
 private slots:
@@ -28,7 +28,7 @@ signals:
     void done();
 
 private:
-    QString m_hash;
+    QString m_uid;
     QVBoxLayout* m_layout;
     QLabel* m_iconLabel;
     QLabel* m_settingsLabel;
