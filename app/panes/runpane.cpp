@@ -10,7 +10,6 @@
 #include <utilityfunctions.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
-#include <devicemanager.h>
 
 #include <QTime>
 #include <QPainter>
@@ -53,9 +52,9 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
 
     m_devicesButton->setCursor(Qt::PointingHandCursor);
 
-    QObject::connect(DeviceManager::instance(), &DeviceManager::deviceConnected,
+    QObject::connect(RunManager::instance(), &RunManager::deviceConnected,
                      m_devicesButton, &DevicesButton::addDevice);
-    QObject::connect(DeviceManager::instance(), &DeviceManager::deviceDisconnected,
+    QObject::connect(RunManager::instance(), &RunManager::deviceDisconnected,
                      m_devicesButton, &DevicesButton::removeDevice);
 
     TransparentStyle::attach(this);

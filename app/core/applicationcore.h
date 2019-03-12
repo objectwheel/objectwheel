@@ -21,7 +21,7 @@ class SaveManager;
 class WindowManager;
 class MenuManager;
 class HelpManager;
-class DeviceManager;
+class RunManager;
 
 class ApplicationCore final
 {
@@ -60,7 +60,6 @@ private:
     static ControlCreationManager* s_controlExposingManager;
     static ControlRemovingManager* s_controlRemovingManager;
     static ControlPropertyManager* s_controlPropertyManager;
-    static DeviceManager* s_deviceManager;
     static RunManager* s_runManager;
     static HelpManager* s_helpManager;
     static DocumentManager* s_documentManager;

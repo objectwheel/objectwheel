@@ -14,8 +14,7 @@ HEADERS += $$PWD/controlcreationmanager.h \
            $$PWD/toolmanager.h \
            $$PWD/usermanager.h \
            $$PWD/windowmanager.h \
-           $$PWD/helpmanager.h \
-    $$PWD/devicemanager.h
+           $$PWD/helpmanager.h
 
 SOURCES += $$PWD/controlcreationmanager.cpp \
            $$PWD/controlpreviewingmanager.cpp \
@@ -30,5 +29,4 @@ SOURCES += $$PWD/controlcreationmanager.cpp \
            $$PWD/toolmanager.cpp \
            $$PWD/usermanager.cpp \
            $$PWD/windowmanager.cpp \
-           $$PWD/helpmanager.cpp \
-    $$PWD/devicemanager.cpp
+           $$PWD/helpmanager.cpp
