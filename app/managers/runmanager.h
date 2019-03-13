@@ -6,7 +6,6 @@
 #include <QBasicTimer>
 #include <QDataStream>
 #include <QWebSocket>
-#include <utilityfunctions.h>
 
 class QUdpSocket;
 class QWebSocketServer;
@@ -17,6 +16,8 @@ class RunManager : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(RunManager)
 
+    friend class ApplicationCore;
+
     enum {
         BROADCAST_PORT = 15425,
         SERVER_PORT = 15426,
@@ -25,6 +26,7 @@ class RunManager : public QObject
     struct Device
     {
         QVariantMap info;
+        QProcess* process = nullptr;
         QWebSocket* socket = nullptr;
 
         operator bool() const
@@ -57,8 +59,6 @@ class RunManager : public QObject
         }
     };
 
-    friend class ApplicationCore;
-
 public:
     enum DiscoveryCommands {
         Broadcast = 0x1100,
@@ -72,10 +72,12 @@ public:
 
 public:
     static RunManager* instance();
+    static QVariantMap deviceInfo(const QString& uid);
+    static bool isLocalDevice(const QString& uid);
 
 public slots:
-    void scheduleTermination(const QString& uid);
-    void scheduleExecution(const QString& uid, const QString& projectDirectory);
+    void terminate();
+    void execute(const QString& uid, const QString& projectDirectory);
 
 private slots:
     void onNewConnection();
@@ -83,16 +85,8 @@ private slots:
     void onBinaryMessageReceived(const QByteArray& data);
 
 private:
-    template<typename... Args>
-    static void send(const QString& uid, DiscoveryCommands command, Args&&... args)
-    {
-        using namespace UtilityFunctions;
-        if (const Device& device = Device::get(s_devices, uid)) {
-            device.socket->sendBinaryMessage(push(command, push(std::forward<Args>(args)...)));
-            return;
-        }
-        qWarning("WARNING: Cannot send any data, device is not connected, uid: %s", uid.toUtf8().constData());
-    }
+    template <typename... Args>
+    static void send(const QString& uid, DiscoveryCommands command, Args&&... args);
 
 protected:
     void timerEvent(QTimerEvent* event) override;
@@ -102,7 +96,7 @@ private:
     ~RunManager() override;
 
 signals:
-    void deviceConnected(const QVariantMap& deviceInfo);
+    void deviceConnected(const QString& uid);
     void deviceDisconnected(const QString& uid);
     void projectStarted();
     void projectFinished(int exitCode);
@@ -114,6 +108,7 @@ private:
     static QUdpSocket* s_broadcastSocket;
     static QWebSocketServer* s_webSocketServer;
     static QList<Device> s_devices;
+    static QString s_recentDeviceUid;
 };
 
 Q_DECLARE_METATYPE(RunManager::DiscoveryCommands)

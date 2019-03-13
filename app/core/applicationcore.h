@@ -21,7 +21,6 @@ class SaveManager;
 class WindowManager;
 class MenuManager;
 class HelpManager;
-class RunManager;
 
 class ApplicationCore final
 {

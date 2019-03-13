@@ -364,7 +364,7 @@ Enum getEnum(const QString& name, const QList<PropertyNode>& properties)
     return Enum();
 }
 
-QVariantMap deviceInfo()
+QVariantMap localDeviceInfo()
 {
     static const QJsonObject info = {
         {"buildCpuArchitecture", QSysInfo::buildCpuArchitecture()},

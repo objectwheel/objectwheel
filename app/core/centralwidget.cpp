@@ -123,10 +123,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         m_bottomBar->consoleButton()->setChecked(false);
         m_consolePane->hide();
     });
-    connect(RunManager::instance(), &RunManager::standardErrorOutput,
+    connect(RunManager::instance(), &RunManager::projectReadyReadOutput,
             this, [=] (const QString& output) { m_consolePane->press(output, palette().linkVisited()); });
-    connect(RunManager::instance(), &RunManager::standardOutput,
-            this, [=] (const QString& output) { m_consolePane->press(output); });
 
     connect(m_bottomBar, &BottomBar::buttonActivated,
             this, [=] (QAbstractButton* button) {
