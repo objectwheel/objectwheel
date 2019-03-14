@@ -30,10 +30,10 @@ class RunManager : public QObject
         QWebSocket* socket = nullptr;
 
         operator bool() const
-        { return socket; }
+        { return !uid().isEmpty(); }
 
         bool operator == (const Device& other)
-        { return socket == other.socket; }
+        { return uid() == other.uid(); }
 
         QString uid() const
         { return info.value("deviceUid").toString(); }
