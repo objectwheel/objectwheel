@@ -6,7 +6,7 @@
 #include <QUdpSocket>
 #include <QWebSocketServer>
 #include <QTimerEvent>
-#include <QTemporaryFile>
+#include <QTemporaryDir>
 #include <QTimer>
 #include <QApplication>
 
@@ -130,15 +130,16 @@ void RunManager::execute(const QString& uid, const QString& projectDirectory)
             device.process->setProgram(QCoreApplication::applicationDirPath() + "/interpreter");
             device.process->start();
         } else {
-            QTemporaryFile cacheFile;
-            if (!cacheFile.open()) {
-                qFatal("CRITICAL: Cannot create a temporary file");
+            QTemporaryDir cacheDir;
+            if (!cacheDir.isValid()) {
+                qFatal("CRITICAL: Cannot create a temporary directory");
                 return;
             }
-            cacheFile.close();
-            ZipAsync::zipSync(projectDirectory, cacheFile.fileName());
-            if (!cacheFile.open()) {
-                qFatal("CRITICAL: Cannot create a temporary file");
+            const QString& cacheFileName = cacheDir.path() + "/project.zip";
+            ZipAsync::zipSync(projectDirectory, cacheFileName);
+            QFile cacheFile(cacheFileName);
+            if (!cacheFile.open(QFile::ReadOnly)) {
+                qFatal("CRITICAL: Cannot open a temporary file");
                 return;
             }
             const QByteArray& data = cacheFile.readAll();

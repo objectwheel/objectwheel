@@ -121,13 +121,14 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
             this, [=] {
         m_runProgressBar->setHtml(tr(g_welcomeMessage));
         m_runProgressBar->setBusy(false);
+        m_runProgressBar->setColor(m_runProgressBar->palette().buttonText().color());
     });
     connect(RunManager::instance(), &RunManager::projectStarted,
             this, [=] {
         m_runButton->setEnabled(true);
         m_runProgressBar->setHtml(tr(g_runningMessage) + tr("My Computer"));
         m_runProgressBar->setProgress(100);
-        m_runProgressBar->setColor("#00aa00");
+        m_runProgressBar->setColor("#30acff");
         m_runProgressBar->setBusy(false);
     });
     connect(RunManager::instance(), &RunManager::projectFinished, this,
@@ -137,7 +138,7 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
         else { // The app has erros thus the interpreter shut itself down
             m_runProgressBar->setHtml(tr(g_appCrashedMessage) + QTime::currentTime().toString());
             m_runProgressBar->setProgress(100);
-            m_runProgressBar->setColor("#aa0000");
+            m_runProgressBar->setColor("#e05650");
         }
         m_runProgressBar->setBusy(false);
         m_runButton->setEnabled(true);
@@ -148,7 +149,7 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
             [=] () {
         m_runProgressBar->setHtml(tr(g_appCrashedMessage) + QTime::currentTime().toString());
         m_runProgressBar->setProgress(100);
-        m_runProgressBar->setColor("#aa0000");
+        m_runProgressBar->setColor("#e05650");
         m_runButton->setEnabled(true);
         m_stopButton->setDisabled(true);
     });

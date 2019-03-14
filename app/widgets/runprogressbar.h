@@ -39,10 +39,10 @@ private:
     bool m_progressVisible;
     int m_progress;
     QColor m_color;
-    QTextDocument* m_document;
-    WaitingSpinnerWidget* m_busyIndicator;
     QVariantAnimation m_springAnimation;
     QVariantAnimation m_faderAnimation;
+    QTextDocument* m_document;
+    WaitingSpinnerWidget* m_busyIndicator;
 };
 
 #endif // RUNPROGRESSBAR_H

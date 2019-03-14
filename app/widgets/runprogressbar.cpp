@@ -54,9 +54,14 @@ int RunProgressBar::progress() const
 
 void RunProgressBar::setProgress(int progress)
 {
+    if (progress < 0 || progress > 100) {
+        qWarning("WARNING: Invalid progress range, correct usage: [0-100]");
+        return;
+    }
+
     qreal start = m_springAnimation.state() == QAbstractAnimation::Running
             ? m_springAnimation.currentValue().toReal()
-            : m_progress;
+            : (m_progress == 100 ? 0 : m_progress);
     m_springAnimation.stop();
     m_springAnimation.setStartValue(start);
     m_springAnimation.setEndValue(qreal(progress));
@@ -65,7 +70,7 @@ void RunProgressBar::setProgress(int progress)
     m_progress = progress;
     m_progressVisible = true;
 
-    if (progress > 99)
+    if (progress == 100)
         m_faderAnimation.start();
     else if (m_faderAnimation.state() == QAbstractAnimation::Running)
         m_faderAnimation.stop();
@@ -138,25 +143,27 @@ void RunProgressBar::paintEvent(QPaintEvent*)
     opt.state |= QStyle::State_Raised;
     PaintUtils::drawPanelButtonBevel(&painter, opt);
 
-    // Draw loading bar
-    QPainterPath bodyPath;
-    bodyPath.addRoundedRect(QRectF(rect()).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
-    painter.setClipPath(bodyPath);
-    painter.setOpacity(m_faderAnimation.state() == QAbstractAnimation::Running
-                       ? m_faderAnimation.currentValue().toReal()
-                       : (m_progressVisible ? 1 : 0));
-    painter.fillRect(QRectF{0.5, height() - 1 - 2.,
-                            m_springAnimation.currentValue().toReal() * (width() - 1) / 100.0, 2.}, m_color);
-    painter.setOpacity(1);
+    // Draw progress
+    if (m_progressVisible) {
+        QPainterPath bodyPath;
+        qreal faderOpacity = m_faderAnimation.currentValue().toReal();
+        qreal springProgress = m_springAnimation.currentValue().toReal() * (width() - 1.0) / 100.0;
+        bodyPath.addRoundedRect(QRectF(rect()).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
+        painter.setClipPath(bodyPath);
+        painter.setOpacity(m_faderAnimation.state() == QAbstractAnimation::Running ? faderOpacity : 1);
+        painter.fillRect(QRectF(0.5, height() - 2.5, springProgress, 1.5), m_color);
+        painter.setOpacity(1.0);
+    }
 
     // Draw text
     QTextCharFormat format;
-    format.setForeground(palette().buttonText());
     QTextCursor cursor(m_document);
+    qreal x = width() / 2.0 - m_document->size().width() / 2.0;
+    qreal y = height() / 2.0 - m_document->size().height() / 2.0;
+    format.setForeground(palette().buttonText());
     cursor.select(QTextCursor::Document);
     cursor.mergeCharFormat(format);
-    painter.translate((width() - m_document->size().width()) / 2.0,
-                      (height() - m_document->size().height()) / 2.0);
+    painter.translate(x, y);
     m_document->drawContents(&painter);
 }
 
