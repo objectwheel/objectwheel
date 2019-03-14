@@ -13,7 +13,7 @@ public:
     explicit DevicesButton(QWidget* parent = nullptr);
 
 public slots:
-    void addDevice(const QVariantMap& deviceInfo);
+    void addDevice(const QVariantMap& uid);
     void removeDevice(const QString& uid);
     void setActiveDevice(const QString& uid);
     QString activeDevice() const;

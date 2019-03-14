@@ -313,8 +313,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { m_globalResourcesPane->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
-    connect(RunManager::instance(), qOverload<int, QProcess::ExitStatus>(&RunManager::finished),
-            [=] (int exitCode, QProcess::ExitStatus) {
+    connect(RunManager::instance(), qOverload<int>(&RunManager::projectFinished),
+            [=] (int exitCode) {
         auto console = m_centralWidget->consolePane();
 
         if (exitCode == EXIT_FAILURE)
@@ -322,6 +322,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
         console->press(ProjectManager::name() + " " +
                        tr("exited with code") + QString::fromUtf8(" %1.\n").arg(exitCode),
+                       QColor("#025dbf"), QFont::DemiBold);
+    });
+    connect(RunManager::instance(), &RunManager::deviceDisconnected,
+            [=] () {
+        auto console = m_centralWidget->consolePane();
+        console->press(tr("The process was ended forcefully.") + "\n", QColor("#b34b46"), QFont::DemiBold);
+        console->press(ProjectManager::name() + " " +
+                       tr("exited with code") + QString::fromUtf8(" %1.\n").arg(-1),
                        QColor("#025dbf"), QFont::DemiBold);
     });
 

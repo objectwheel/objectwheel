@@ -1,16 +1,12 @@
 #include <pushbutton.h>
 #include <paintutils.h>
-#include <interfacesettings.h>
-#include <generalsettings.h>
 
 #include <QStylePainter>
 #include <QStyleOption>
 
 PushButton::PushButton(QWidget* parent) : QPushButton(parent)
 {
-    QPalette p(palette());
-    PaintUtils::setPanelButtonPaletteDefaults(p, GeneralSettings::interfaceSettings()->theme == "Light");
-    setPalette(p);
+    PaintUtils::setPanelButtonPaletteDefaults(this);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 }
 

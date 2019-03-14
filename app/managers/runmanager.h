@@ -76,8 +76,8 @@ public:
     static bool isLocalDevice(const QString& uid);
 
 public slots:
-    void terminate();
-    void execute(const QString& uid, const QString& projectDirectory);
+    static void terminate();
+    static void execute(const QString& uid, const QString& projectDirectory);
 
 private slots:
     void onNewConnection();

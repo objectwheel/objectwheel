@@ -1,5 +1,5 @@
 #include <runpane.h>
-#include <runpaneloadingbar.h>
+#include <runprogressbar.h>
 #include <projectmanager.h>
 #include <runmanager.h>
 #include <devicesbutton.h>
@@ -19,13 +19,22 @@
 using namespace PaintUtils;
 using namespace UtilityFunctions;
 
+namespace {
+const char* g_welcomeMessage = "<b>Ready</b>  |  Welcome to Objectwheel (Beta)";
+const char* g_userStoppedRunningMessage = "<b>Stopped</b>  |  Execution stopped at ";
+const char* g_appCrashedMessage = "<b>Crashed</b>  |  Application crashed at ";
+const char* g_finishedRunningMessage = "<b>Finished</b>  |  Application closed at ";
+const char* g_startRunningMessage = "<b>Starting</b> interpretation...";
+const char* g_runningMessage = "<b>Running</b> on ";
+}
+
 RunPane::RunPane(QWidget *parent) : QToolBar(parent)
   , m_runButton(new PushButton)
   , m_stopButton(new PushButton)
   , m_devicesButton(new DevicesButton)
   , m_preferencesButton(new PushButton)
   , m_projectsButton(new PushButton)
-  , m_loadingBar(new RunPaneLoadingBar)
+  , m_runProgressBar(new RunProgressBar)
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -42,7 +51,7 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     addWidget(m_stopButton);
     addWidget(m_devicesButton);
     addWidget(createSpacerWidget(Qt::Horizontal));
-    addWidget(m_loadingBar);
+    addWidget(m_runProgressBar);
     addWidget(createSpacerWidget(Qt::Horizontal));
     addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, baseSize, QSize(0, 24),
                               m_devicesButton->sizePolicy().horizontalPolicy(),
@@ -53,7 +62,7 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     m_devicesButton->setCursor(Qt::PointingHandCursor);
 
     QObject::connect(RunManager::instance(), &RunManager::deviceConnected,
-                     m_devicesButton, &DevicesButton::addDevice);
+                     m_devicesButton, [=] (const QString& uid) { m_devicesButton->addDevice(RunManager::deviceInfo(uid)); });
     QObject::connect(RunManager::instance(), &RunManager::deviceDisconnected,
                      m_devicesButton, &DevicesButton::removeDevice);
 
@@ -109,20 +118,37 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     connect(m_projectsButton, &PushButton::clicked, this, &RunPane::projectsButtonClicked);
 
     connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] { setMessage(tr(g_welcomeMessage)); });
-    connect(RunManager::instance(), &RunManager::started, this,
-            [=] {
-        m_runButton->setEnabled(true);
-        done(tr(g_runningMessage) + tr("My Computer")); // TODO: Fix this "My Computer" thing
+            this, [=] {
+        m_runProgressBar->setHtml(tr(g_welcomeMessage));
+        m_runProgressBar->setBusy(false);
     });
-    connect(RunManager::instance(), &RunManager::finished, this,
-            [=] (int exitCode, QProcess::ExitStatus status) {
-        if (status == QProcess::CrashExit) // Stopped by user
-            setMessage(tr(g_userStoppedRunningMessage) + QTime::currentTime().toString());
-        else if (exitCode == 0) // User just closed the app
-            setMessage(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
-        else // The app has erros thus the interpreter shut itself down
-            error(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+    connect(RunManager::instance(), &RunManager::projectStarted,
+            this, [=] {
+        m_runButton->setEnabled(true);
+        m_runProgressBar->setHtml(tr(g_runningMessage) + tr("My Computer"));
+        m_runProgressBar->setProgress(100);
+        m_runProgressBar->setColor("#00aa00");
+        m_runProgressBar->setBusy(false);
+    });
+    connect(RunManager::instance(), &RunManager::projectFinished, this,
+            [=] (int exitCode) {
+        if (exitCode == 0) // User just closed the app
+            m_runProgressBar->setHtml(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
+        else { // The app has erros thus the interpreter shut itself down
+            m_runProgressBar->setHtml(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+            m_runProgressBar->setProgress(100);
+            m_runProgressBar->setColor("#aa0000");
+        }
+        m_runProgressBar->setBusy(false);
+        m_runButton->setEnabled(true);
+        m_stopButton->setDisabled(true);
+    });
+
+    connect(RunManager::instance(), &RunManager::deviceDisconnected, this,
+            [=] () {
+        m_runProgressBar->setHtml(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+        m_runProgressBar->setProgress(100);
+        m_runProgressBar->setColor("#aa0000");
         m_runButton->setEnabled(true);
         m_stopButton->setDisabled(true);
     });
@@ -141,8 +167,10 @@ void RunPane::onRunButtonClick()
 {
     RunManager::terminate();
 
-    busy(40, tr(g_startRunningMessage));
-    RunManager::run();
+    m_runProgressBar->setBusy(true);
+    m_runProgressBar->setProgress(40);
+    m_runProgressBar->setHtml(tr(g_startRunningMessage));
+    RunManager::execute(m_devicesButton->activeDevice(), ProjectManager::dir());
 
     m_runButton->setDisabled(true);
     m_stopButton->setEnabled(true);

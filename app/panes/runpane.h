@@ -5,7 +5,7 @@
 
 class DevicesButton;
 class PushButton;
-class RunPaneLoadingBar;
+class RunProgressBar;
 
 class RunPane : public QToolBar
 {
@@ -36,7 +36,7 @@ private:
     DevicesButton* m_devicesButton;
     PushButton* m_preferencesButton;
     PushButton* m_projectsButton;
-    RunPaneLoadingBar* m_loadingBar;
+    RunProgressBar* m_runProgressBar;
 };
 
 #endif // RUNPANE_H

@@ -62,7 +62,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
 
     s_webSocketServer->listen(QHostAddress::Any, SERVER_PORT);
     s_broadcastTimer.start(2000, this);
-    QTimer::singleShot(5000, std::bind(&RunManager::deviceConnected, this, localDevice.info));
+    QTimer::singleShot(5000, [=] { deviceConnected(localDevice.uid()); });
 }
 
 RunManager::~RunManager()

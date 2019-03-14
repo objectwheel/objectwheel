@@ -2,8 +2,6 @@
 #include <paintutils.h>
 #include <utilsicons.h>
 #include <utilityfunctions.h>
-#include <generalsettings.h>
-#include <interfacesettings.h>
 
 #include <QMenu>
 #include <QPainter>
@@ -28,17 +26,13 @@ DevicesButton::DevicesButton(QWidget *parent) : QPushButton(parent)
   , m_menu(new QMenu(this))
   , m_actionGroup(new QActionGroup(this))
 {
-    QPalette p(palette());
-    PaintUtils::setPanelButtonPaletteDefaults(p, GeneralSettings::interfaceSettings()->theme == "Light");
-    setPalette(p);
+    PaintUtils::setPanelButtonPaletteDefaults(this);
 
     m_menu->setToolTipsVisible(true);
     m_actionGroup->setExclusive(true);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setMenu(m_menu);
     connect(m_menu, &QMenu::triggered, this, &DevicesButton::onMenuItemActivation);
-
-    addDevice(UtilityFunctions::deviceInfo());
 }
 
 void DevicesButton::addDevice(const QVariantMap& deviceInfo)
@@ -48,9 +42,9 @@ void DevicesButton::addDevice(const QVariantMap& deviceInfo)
 
     auto deviceAction = new QAction(this);
     deviceAction->setProperty("_ow_deviceInfo", deviceInfo);
-    deviceAction->setText(UtilityFunctions::deviceName(deviceInfo));
-    deviceAction->setIcon(UtilityFunctions::deviceIcon(deviceInfo));
-    deviceAction->setToolTip(UtilityFunctions::deviceInfoToolTip(deviceInfo));
+    deviceAction->setText(deviceName(deviceInfo));
+    deviceAction->setIcon(deviceIcon(deviceInfo));
+    deviceAction->setToolTip(deviceInfoToolTip(deviceInfo));
     deviceAction->setCheckable(true);
 
     m_actionGroup->addAction(deviceAction);
