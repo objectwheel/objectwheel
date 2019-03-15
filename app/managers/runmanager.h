@@ -41,6 +41,8 @@ class RunManager : public QObject
         static Device& get(QList<Device>& devices, const QWebSocket* socket)
         {
             static Device invalid;
+            if (!socket)
+                return invalid;
             for (Device& device : devices) {
                 if (device.socket == socket)
                     return device;
@@ -51,6 +53,8 @@ class RunManager : public QObject
         static Device& get(QList<Device>& devices, const QString& uid)
         {
             static Device invalid;
+            if (uid.isEmpty())
+                return invalid;
             for (Device& device : devices) {
                 if (device.uid() == uid)
                     return device;

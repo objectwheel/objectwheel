@@ -7,15 +7,17 @@ class RunDevicesButton final : public QPushButton
 {
     Q_OBJECT
 
+    using DeviceInfo = QVariantMap;
+
 public:
     explicit RunDevicesButton(QWidget* parent = nullptr);
 
-    QString activeDevice() const;
-    void setActiveDevice(const QString& uid);
-
     bool hasDevice(const QString& uid) const;
-    void addDevice(const QVariantMap& deviceInfo);
+    void addDevice(const DeviceInfo& deviceInfo);
     void removeDevice(const QString& uid);
+
+    QString currentDevice() const;
+    void setCurrentDevice(const QString& uid);
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;

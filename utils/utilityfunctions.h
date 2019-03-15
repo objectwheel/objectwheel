@@ -18,6 +18,7 @@ class QAbstractItemView;
 class QQmlError;
 class QComboBox;
 class QMarginsF;
+class QAction;
 
 namespace UtilityFunctions {
 
@@ -83,8 +84,11 @@ QVariant getProperty(const QString& property, const QList<PropertyNode>& propert
 Enum getEnum(const QString& name, const QList<PropertyNode>& properties);
 QVariantMap localDeviceInfo();
 QIcon deviceIcon(const QVariantMap& deviceInfo);
+QString deviceUid(const QVariantMap& deviceInfo);
 QString deviceName(const QVariantMap& deviceInfo);
 QString deviceInfoToolTip(const QVariantMap& deviceInfo);
+QString deviceUid(const QAction* action);
+void setDeviceInfo(QAction* action, const QVariantMap& deviceInfo);
 
 } // UtilityFunctions
 

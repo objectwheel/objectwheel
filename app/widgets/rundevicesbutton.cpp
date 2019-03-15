@@ -6,40 +6,38 @@
 #include <QPainter>
 #include <QStyleOption>
 
-RunDevicesButton::RunDevicesButton(QWidget *parent) : QPushButton(parent)
+RunDevicesButton::RunDevicesButton(QWidget* parent) : QPushButton(parent)
   , m_menu(new QMenu(this))
 {
-    PaintUtils::setPanelButtonPaletteDefaults(this);
-
-    m_menu->setToolTipsVisible(true);
-
-    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setMenu(m_menu);
+    setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+    PaintUtils::setPanelButtonPaletteDefaults(this);
+    m_menu->setToolTipsVisible(true);
     connect(m_menu, &QMenu::triggered, this, &RunDevicesButton::onTriggered);
 }
 
-QString RunDevicesButton::activeDevice() const
+QString RunDevicesButton::currentDevice() const
 {
-    for (QAction* action : m_menu->actions()) {
+    for (const QAction* action : m_menu->actions()) {
         if (action->isChecked())
-            return action->property("_ow_deviceInfo").value<QVariantMap>().value("deviceUid").toString();
+            return UtilityFunctions::deviceUid(action);
     }
     return QString();
 }
 
-void RunDevicesButton::setActiveDevice(const QString& uid)
+void RunDevicesButton::setCurrentDevice(const QString& uid)
 {
+    static const auto setChecked = [this] (QAction* action) {
+        for (QAction* act : m_menu->actions())
+            act->setChecked(false);
+        action->setChecked(true);
+    };
     for (QAction* action : m_menu->actions()) {
-        const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
-        if (deviceInfo["deviceUid"].toString() == uid) {
+        if (UtilityFunctions::deviceUid(action) == uid) {
             m_menu->setIcon(action->icon());
             m_menu->setTitle(action->text());
             setToolTip(action->toolTip());
-            for (QAction* action : m_menu->actions()) {
-                if (action->isChecked())
-                    action->setChecked(false);
-            }
-            action->setChecked(true);
+            setChecked(action);
             updateGeometry();
             break;
         }
@@ -49,38 +47,37 @@ void RunDevicesButton::setActiveDevice(const QString& uid)
 bool RunDevicesButton::hasDevice(const QString& uid) const
 {
     for (const QAction* action : m_menu->actions()) {
-        const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
-        if (deviceInfo["deviceUid"].toString() == uid)
+        if (UtilityFunctions::deviceUid(action) == uid)
             return true;
     }
     return false;
 }
 
-void RunDevicesButton::addDevice(const QVariantMap& deviceInfo)
+void RunDevicesButton::addDevice(const DeviceInfo& deviceInfo)
 {
-    if (hasDevice(deviceInfo["deviceUid"].toString()))
+    if (hasDevice(UtilityFunctions::deviceUid(deviceInfo)))
         return;
 
-    auto deviceAction = new QAction(this);
-    deviceAction->setProperty("_ow_deviceInfo", deviceInfo);
-    deviceAction->setText(UtilityFunctions::deviceName(deviceInfo));
-    deviceAction->setIcon(UtilityFunctions::deviceIcon(deviceInfo));
-    deviceAction->setToolTip(UtilityFunctions::deviceInfoToolTip(deviceInfo));
-    deviceAction->setCheckable(true);
+    auto action = new QAction(this);
+    action->setCheckable(true);
+    action->setText(UtilityFunctions::deviceName(deviceInfo));
+    action->setIcon(UtilityFunctions::deviceIcon(deviceInfo));
+    action->setToolTip(UtilityFunctions::deviceInfoToolTip(deviceInfo));
+    UtilityFunctions::setDeviceInfo(action, deviceInfo);
 
-    m_menu->addAction(deviceAction);
+    m_menu->addAction(action);
 
-    setActiveDevice(deviceInfo["deviceUid"].toString());
+    setCurrentDevice(UtilityFunctions::deviceUid(deviceInfo));
 }
 
 void RunDevicesButton::removeDevice(const QString& uid)
 {
     for (QAction* action : m_menu->actions()) {
-        const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
-        if (deviceInfo["deviceUid"].toString() == uid) {
+        if (UtilityFunctions::deviceUid(action) == uid) {
             if (action->isChecked())
-                setActiveDevice("000000000000");
+                setCurrentDevice(UtilityFunctions::deviceUid(UtilityFunctions::localDeviceInfo()));
             m_menu->removeAction(action);
+            action->deleteLater();
             break;
         }
     }
@@ -107,10 +104,8 @@ QSize RunDevicesButton::minimumSizeHint() const
 
 void RunDevicesButton::onTriggered(QAction* action)
 {
-    const QVariantMap& deviceInfo = action->property("_ow_deviceInfo").value<QVariantMap>();
-    const QString& deviceUid = deviceInfo["deviceUid"].toString();
-    setActiveDevice(deviceUid);
-    emit triggered(deviceUid);
+    setCurrentDevice(UtilityFunctions::deviceUid(action));
+    emit triggered(UtilityFunctions::deviceUid(action));
 }
 
 void RunDevicesButton::paintEvent(QPaintEvent*)

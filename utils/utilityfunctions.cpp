@@ -17,6 +17,7 @@
 #include <QAbstractButton>
 #include <QComboBox>
 #include <QApplication>
+#include <QAction>
 
 namespace UtilityFunctions {
 
@@ -398,6 +399,11 @@ QIcon deviceIcon(const QVariantMap& deviceInfo)
     return QIcon(":/images/mycomputer.png");
 }
 
+QString deviceUid(const QVariantMap& deviceInfo)
+{
+    return deviceInfo.value("deviceUid").toString();
+}
+
 QString deviceName(const QVariantMap& deviceInfo)
 {
     const bool isEmulator = deviceInfo.value("isEmulator").toBool();
@@ -436,6 +442,16 @@ QString deviceInfoToolTip(const QVariantMap& deviceInfo)
             .arg(QObject::tr("Build Abi")).arg(deviceInfo["buildAbi"].toString())
             .arg(QObject::tr("Emulator")).arg(deviceInfo["isEmulator"].toString())
             .arg(QObject::tr("Machine Host Name")).arg(deviceInfo["machineHostName"].toString());
+}
+
+QString deviceUid(const QAction* action)
+{
+    return action->property("__OW_DEVICE_INFO__").value<QVariantMap>().value("deviceUid").toString();
+}
+
+void setDeviceInfo(QAction* action, const QVariantMap& deviceInfo)
+{
+    action->setProperty("__OW_DEVICE_INFO__", deviceInfo);
 }
 
 } // UtilityFunctions

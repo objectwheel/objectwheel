@@ -9,6 +9,7 @@
 #include <QTemporaryDir>
 #include <QTimer>
 #include <QApplication>
+#include <QPointer>
 
 // TODO: Add encryption (wss)
 
@@ -62,7 +63,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
 
     s_webSocketServer->listen(QHostAddress::Any, SERVER_PORT);
     s_broadcastTimer.start(2000, this);
-    QTimer::singleShot(5000, [=] { deviceConnected(localDevice.uid()); });
+    QTimer::singleShot(0, [=] { deviceConnected(localDevice.uid()); });
 }
 
 RunManager::~RunManager()
@@ -167,7 +168,11 @@ void RunManager::onNewConnection()
             this, [=] (QAbstractSocket::SocketError socketError) {
         qWarning() << "RunManager: Device socket error" << socketError;
     });
-    QTimer::singleShot(2000, [=] { if (!Device::get(s_devices, client)) client->deleteLater(); });
+    QPointer<QWebSocket> ptr(client);
+    QTimer::singleShot(2000, [ptr] {
+        if (ptr && !Device::get(s_devices, ptr.data()))
+            ptr->deleteLater();
+    });
 }
 
 void RunManager::onDisconnected()

@@ -176,7 +176,7 @@ void RunPane::onRunButtonClick()
     m_runProgressBar->setBusy(true);
     m_runProgressBar->setProgress(40);
     m_runProgressBar->setHtml(tr(g_startRunningMessage));
-    RunManager::execute(m_runDevicesButton->activeDevice(), ProjectManager::dir());
+    RunManager::execute(m_runDevicesButton->currentDevice(), ProjectManager::dir());
 
     m_runButton->setDisabled(true);
     m_stopButton->setEnabled(true);
