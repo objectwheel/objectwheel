@@ -2,7 +2,7 @@
 #include <runprogressbar.h>
 #include <projectmanager.h>
 #include <runmanager.h>
-#include <devicesbutton.h>
+#include <rundevicesbutton.h>
 #include <smartspacer.h>
 #include <pushbutton.h>
 #include <paintutils.h>
@@ -31,7 +31,7 @@ const char* g_runningMessage = "<b>Running</b> on ";
 RunPane::RunPane(QWidget *parent) : QToolBar(parent)
   , m_runButton(new PushButton)
   , m_stopButton(new PushButton)
-  , m_devicesButton(new DevicesButton)
+  , m_runDevicesButton(new RunDevicesButton)
   , m_preferencesButton(new PushButton)
   , m_projectsButton(new PushButton)
   , m_runProgressBar(new RunProgressBar)
@@ -49,22 +49,27 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
 
     addWidget(m_runButton);
     addWidget(m_stopButton);
-    addWidget(m_devicesButton);
+    addWidget(m_runDevicesButton);
     addWidget(createSpacerWidget(Qt::Horizontal));
     addWidget(m_runProgressBar);
     addWidget(createSpacerWidget(Qt::Horizontal));
-    addWidget(new SmartSpacer(Qt::Horizontal, {m_devicesButton}, baseSize, QSize(0, 24),
-                              m_devicesButton->sizePolicy().horizontalPolicy(),
-                              m_devicesButton->sizePolicy().verticalPolicy(), this));
+    addWidget(new SmartSpacer(Qt::Horizontal, {m_runDevicesButton}, baseSize, QSize(0, 24),
+                              m_runDevicesButton->sizePolicy().horizontalPolicy(),
+                              m_runDevicesButton->sizePolicy().verticalPolicy(), this));
     addWidget(m_projectsButton);
     addWidget(m_preferencesButton);
 
-    m_devicesButton->setCursor(Qt::PointingHandCursor);
+    m_runDevicesButton->setText(tr("Devices"));
+    m_runDevicesButton->setIconSize({16, 16});
+    m_runDevicesButton->setIcon(QIcon(":/images/devices.png"));
+    m_runDevicesButton->setCursor(Qt::PointingHandCursor);
 
     QObject::connect(RunManager::instance(), &RunManager::deviceConnected,
-                     m_devicesButton, [=] (const QString& uid) { m_devicesButton->addDevice(RunManager::deviceInfo(uid)); });
+                     m_runDevicesButton, [=] (const QString& uid) {
+        m_runDevicesButton->addDevice(RunManager::deviceInfo(uid));
+    });
     QObject::connect(RunManager::instance(), &RunManager::deviceDisconnected,
-                     m_devicesButton, &DevicesButton::removeDevice);
+                     m_runDevicesButton, &RunDevicesButton::removeDevice);
 
     TransparentStyle::attach(this);
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
@@ -171,7 +176,7 @@ void RunPane::onRunButtonClick()
     m_runProgressBar->setBusy(true);
     m_runProgressBar->setProgress(40);
     m_runProgressBar->setHtml(tr(g_startRunningMessage));
-    RunManager::execute(m_devicesButton->activeDevice(), ProjectManager::dir());
+    RunManager::execute(m_runDevicesButton->activeDevice(), ProjectManager::dir());
 
     m_runButton->setDisabled(true);
     m_stopButton->setEnabled(true);

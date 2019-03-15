@@ -4,7 +4,6 @@ INCLUDEPATH += $$PWD
 HEADERS += $$PWD/bulkedit.h \
            $$PWD/buttonslice.h \
            $$PWD/countdown.h \
-           $$PWD/devicesbutton.h \
            $$PWD/flatbutton.h \
            $$PWD/focuslesslineedit.h \
            $$PWD/progressbar.h \
@@ -13,12 +12,12 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/switch.h \
            $$PWD/view.h \
            $$PWD/waitingspinnerwidget.h \
-           $$PWD/runprogressbar.h
+           $$PWD/runprogressbar.h \
+           $$PWD/rundevicesbutton.h
 
 SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/buttonslice.cpp \
            $$PWD/countdown.cpp \
-           $$PWD/devicesbutton.cpp \
            $$PWD/flatbutton.cpp \
            $$PWD/focuslesslineedit.cpp \
            $$PWD/progressbar.cpp \
@@ -27,4 +26,5 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/switch.cpp \
            $$PWD/view.cpp \
            $$PWD/waitingspinnerwidget.cpp \
-           $$PWD/runprogressbar.cpp
+           $$PWD/runprogressbar.cpp \
+           $$PWD/rundevicesbutton.cpp

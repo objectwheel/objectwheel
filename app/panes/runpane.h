@@ -3,7 +3,7 @@
 
 #include <QToolBar>
 
-class DevicesButton;
+class RunDevicesButton;
 class PushButton;
 class RunProgressBar;
 
@@ -33,7 +33,7 @@ signals:
 private:
     PushButton* m_runButton;
     PushButton* m_stopButton;
-    DevicesButton* m_devicesButton;
+    RunDevicesButton* m_runDevicesButton;
     PushButton* m_preferencesButton;
     PushButton* m_projectsButton;
     RunProgressBar* m_runProgressBar;
