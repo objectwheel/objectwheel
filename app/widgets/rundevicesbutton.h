@@ -7,6 +7,14 @@ class RunDevicesButton final : public QPushButton
 {
     Q_OBJECT
 
+    enum {
+        DOWN_ARROW_LENGTH = 3,
+        SPACING = 4,
+        LEFT_PADDING = 8,
+        FORWARD_ARROW_LENGTH = 9,
+        RIGHT_PADDING = LEFT_PADDING + 2
+    };
+
     using DeviceInfo = QVariantMap;
 
 public:
@@ -22,14 +30,8 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-private slots:
-    void onTriggered(QAction* action);
-
 private:
     void paintEvent(QPaintEvent*) override;
-
-signals:
-    void triggered(const QString& uid);
 
 private:
     QMenu* m_menu;

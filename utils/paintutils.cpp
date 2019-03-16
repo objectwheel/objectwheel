@@ -222,20 +222,6 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     painter->restore();
 }
 
-void PaintUtils::drawMenuDownArrow(QPainter* painter, const QPointF& offset, const QStyleOption& option)
-{
-    painter->save();
-    const QColor& color = (option.state & QStyle::State_Sunken)
-            ? option.palette.text().color().lighter(115)
-            : option.palette.text().color().lighter(160);
-    QPointF points[3] = {{0, 0}, {4.5, 0}, {2.25, 2.5}};
-    points[0] += offset; points[1] += offset; points[2] += offset;
-    painter->setPen(color);
-    painter->setBrush(color);
-    painter->drawPolygon(points, 3);
-    painter->restore();
-}
-
 /*!
     QPalette::Light     :  Button's frame rect color (not used)
     QPalette::Midlight  :  Button's glowing color (when pressed)

@@ -67,9 +67,15 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     QObject::connect(RunManager::instance(), &RunManager::deviceConnected,
                      m_runDevicesButton, [=] (const QString& uid) {
         m_runDevicesButton->addDevice(RunManager::deviceInfo(uid));
+        m_runDevicesButton->setCurrentDevice(uid);
     });
-    QObject::connect(RunManager::instance(), &RunManager::deviceDisconnected,
-                     m_runDevicesButton, &RunDevicesButton::removeDevice);
+    QObject::connect(RunManager::instance(), &RunManager::deviceDisconnected, [=] (const QString& uid) {
+        if (UtilityFunctions::deviceUid(UtilityFunctions::localDeviceInfo()) == uid)
+            return;
+        if (m_runDevicesButton->currentDevice() == uid)
+            m_runDevicesButton->setCurrentDevice(UtilityFunctions::deviceUid(UtilityFunctions::localDeviceInfo()));
+        m_runDevicesButton->removeDevice(uid);
+    });
 
     TransparentStyle::attach(this);
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage

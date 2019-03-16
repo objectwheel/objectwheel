@@ -29,7 +29,6 @@ QPixmap renderColorizedPixmap(const QPixmap& pixmap, const QColor& color, const 
 QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);
-void drawMenuDownArrow(QPainter* painter, const QPointF& offset, const QStyleOption& option);
 void setPanelButtonPaletteDefaults(QWidget* widget, bool lightTheme = true);
 }
 
