@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 
-class RunPane;
+class RunController;
 class FormsPane;
 class ToolboxPane;
 class InspectorPane;
@@ -52,7 +52,7 @@ signals:
 
 private:
     CentralWidget* m_centralWidget;
-    RunPane* m_runPane;
+    RunController* m_runController;
     FormsPane* m_formsPane;
     ToolboxPane* m_toolboxPane;
     InspectorPane* m_inspectorPane;

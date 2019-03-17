@@ -8,12 +8,9 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/focuslesslineedit.h \
            $$PWD/progressbar.h \
            $$PWD/pushbutton.h \
-           $$PWD/smartspacer.h \
            $$PWD/switch.h \
            $$PWD/view.h \
-           $$PWD/waitingspinnerwidget.h \
-           $$PWD/runprogressbar.h \
-           $$PWD/rundevicesbutton.h
+           $$PWD/waitingspinnerwidget.h
 
 SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/buttonslice.cpp \
@@ -22,9 +19,6 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/focuslesslineedit.cpp \
            $$PWD/progressbar.cpp \
            $$PWD/pushbutton.cpp \
-           $$PWD/smartspacer.cpp \
            $$PWD/switch.cpp \
            $$PWD/view.cpp \
-           $$PWD/waitingspinnerwidget.cpp \
-           $$PWD/runprogressbar.cpp \
-           $$PWD/rundevicesbutton.cpp
+           $$PWD/waitingspinnerwidget.cpp

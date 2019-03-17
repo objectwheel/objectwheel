@@ -11,7 +11,6 @@ HEADERS += $$PWD/bottombar.h \
            $$PWD/issuespane.h \
            $$PWD/pageswitcherpane.h \
            $$PWD/propertiespane.h \
-           $$PWD/runpane.h \
            $$PWD/toolboxpane.h \
            $$PWD/toolboxtree.h \
            $$PWD/pages.h
@@ -26,6 +25,5 @@ SOURCES += $$PWD/bottombar.cpp \
            $$PWD/issuespane.cpp \
            $$PWD/pageswitcherpane.cpp \
            $$PWD/propertiespane.cpp \
-           $$PWD/runpane.cpp \
            $$PWD/toolboxpane.cpp \
            $$PWD/toolboxtree.cpp

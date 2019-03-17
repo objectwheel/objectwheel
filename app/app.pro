@@ -13,6 +13,7 @@ QT += network qml quick websockets help widgets widgets-private
 ### Includes
 include($$PWD/app.pri)
 include($$PWD/aes/aes.pri)
+include($$PWD/run/run.pri)
 include($$PWD/builds/builds.pri)
 include($$PWD/codeeditor/codeeditor.pri)
 include($$PWD/core/core.pri)

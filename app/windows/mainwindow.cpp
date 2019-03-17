@@ -1,5 +1,5 @@
 #include <mainwindow.h>
-#include <runpane.h>
+#include <runcontroller.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
 #include <globalresourcespane.h>
@@ -73,7 +73,7 @@ bool inspectorDockWidgetVisible;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
-  , m_runPane(new RunPane)
+  , m_runController(new RunController)
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
@@ -92,12 +92,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Set Tool Bars **/
     /* Add Run Pane */
-    m_runPane->setObjectName("runPane");
-    m_runPane->setOrientation(Qt::Horizontal);
-    m_runPane->setFloatable(false);
-    m_runPane->setMovable(false);
-    m_runPane->setWindowTitle(tr("Run Bar"));
-    addToolBar(Qt::TopToolBarArea, m_runPane);
+    m_runController->setObjectName("runController");
+    m_runController->setOrientation(Qt::Horizontal);
+    m_runController->setFloatable(false);
+    m_runController->setMovable(false);
+    m_runController->setWindowTitle(tr("Run Bar"));
+    addToolBar(Qt::TopToolBarArea, m_runController);
 
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
@@ -333,17 +333,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
                        QColor("#025dbf"), QFont::DemiBold);
     });
 
-    connect(m_runPane, &RunPane::projectsButtonClicked,
+    connect(m_runController, &RunController::projectsButtonClicked,
             this, [=] {
         WindowManager::welcomeWindow()->show();
         WindowManager::welcomeWindow()->raise();
     });
-    connect(m_runPane, &RunPane::preferencesButtonClicked,
+    connect(m_runController, &RunController::preferencesButtonClicked,
             this, [=] {
         WindowManager::preferencesWindow()->show();
         WindowManager::preferencesWindow()->raise();
     });
-    connect(m_runPane, &RunPane::runButtonClicked,
+    connect(m_runController, &RunController::runButtonClicked,
             this, [=] {
         BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
         if (settings->autoSaveBeforeRunning)
@@ -368,7 +368,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
 void MainWindow::discharge()
 {
-    m_runPane->discharge();
+    m_runController->discharge();
     m_centralWidget->discharge();
     m_formsPane->discharge();
     m_toolboxPane->discharge();
