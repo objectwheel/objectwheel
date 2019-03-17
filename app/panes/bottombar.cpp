@@ -151,13 +151,13 @@ private:
 
         QIcon icon;
         if (!button->property("ow_flashed").toBool()) {
-            QColor on = button->palette().buttonText().color().darker(180); // pressed
-            QColor off = button->palette().buttonText().color().lighter(130); // not pressed
+            QColor up = button->palette().buttonText().color().lighter(130); // not pressed
+            QColor down = button->palette().buttonText().color().darker(180); // pressed
             Q_ASSERT(UtilityFunctions::window(button));
             icon.addPixmap(renderColorizedPixmap(button->icon().pixmap(UtilityFunctions::window(button),
-                button->iconSize()), on, button), QIcon::Normal, QIcon::On);
+                button->iconSize()), up, button), QIcon::Normal);
             icon.addPixmap(renderColorizedPixmap(button->icon().pixmap(UtilityFunctions::window(button),
-                button->iconSize()), off, button), QIcon::Normal, QIcon::Off);
+                button->iconSize()), down, button), QIcon::Active);
         } else {
             icon = renderColorizedIcon(button->icon(), button->iconSize(),
                                        button->palette().buttonText().color(), button);
@@ -199,10 +199,10 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     setPanelButtonPaletteDarkerShadows(m_showHideRightPanesButton);
 
     QIcon consoleIcon;
-    QColor on = m_consoleButton->palette().buttonText().color().darker(180); // pressed
-    QColor off = m_consoleButton->palette().buttonText().color().lighter(130); // not pressed
-    consoleIcon.addPixmap(renderColorizedPixmap(":/images/console.png", on, this), QIcon::Normal, QIcon::On);
-    consoleIcon.addPixmap(renderColorizedPixmap(":/images/console.png", off, this), QIcon::Normal, QIcon::Off);
+    QColor up = m_consoleButton->palette().buttonText().color().lighter(130); // not pressed
+    QColor down = m_consoleButton->palette().buttonText().color().darker(180); // pressed
+    consoleIcon.addPixmap(renderColorizedPixmap(":/images/console.png", up, this), QIcon::Normal);
+    consoleIcon.addPixmap(renderColorizedPixmap(":/images/console.png", down, this), QIcon::Active);
 
     m_consoleButton->setMaximumHeight(20);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
@@ -213,10 +213,10 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_consoleButton->setIcon(consoleIcon);
 
     QIcon issuesIcon;
-    on = m_issuesButton->palette().buttonText().color().darker(180); // pressed
-    off = m_issuesButton->palette().buttonText().color().lighter(130); // not pressed
-    issuesIcon.addPixmap(renderColorizedPixmap(":/images/issues.png", on, this), QIcon::Normal, QIcon::On);
-    issuesIcon.addPixmap(renderColorizedPixmap(":/images/issues.png", off, this), QIcon::Normal, QIcon::Off);
+    up = m_issuesButton->palette().buttonText().color().lighter(130); // not pressed
+    down = m_issuesButton->palette().buttonText().color().darker(180); // pressed
+    issuesIcon.addPixmap(renderColorizedPixmap(":/images/issues.png", up, this), QIcon::Normal);
+    issuesIcon.addPixmap(renderColorizedPixmap(":/images/issues.png", down, this), QIcon::Active);
 
     m_issuesButton->setMaximumHeight(20);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
@@ -230,12 +230,12 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     g_issuesFlasher = new ButtonFlasher(m_issuesButton);
 
     QIcon showHideLeftPanesIcon;
-    on = palette().buttonText().color().darker(180); // pressed
-    off = palette().buttonText().color().lighter(130); // not pressed
+    up = palette().buttonText().color().lighter(130); // not pressed
+    down = palette().buttonText().color().darker(180); // pressed
     showHideLeftPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/leftsidebaricon@2x.png",
-        on, this), QIcon::Normal, QIcon::On);
+        up, this), QIcon::Normal);
     showHideLeftPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/leftsidebaricon@2x.png",
-        off, this), QIcon::Normal, QIcon::Off);
+        down, this), QIcon::Active);
 
     m_showHideLeftPanesButton->setMaximumHeight(20);
     m_showHideLeftPanesButton->setCursor(Qt::PointingHandCursor);
@@ -245,9 +245,9 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
 
     QIcon showHideRightPanesIcon;
     showHideRightPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/rightsidebaricon@2x.png",
-        on, this), QIcon::Normal, QIcon::On);
+        up, this), QIcon::Normal);
     showHideRightPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/rightsidebaricon@2x.png",
-        off, this), QIcon::Normal, QIcon::Off);
+        down, this), QIcon::Active);
 
     m_showHideRightPanesButton->setMaximumHeight(20);
     m_showHideRightPanesButton->setCursor(Qt::PointingHandCursor);

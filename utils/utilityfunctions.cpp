@@ -368,14 +368,11 @@ Enum getEnum(const QString& name, const QList<PropertyNode>& properties)
 QVariantMap localDeviceInfo()
 {
     static const QJsonObject info = {
-        {"buildCpuArchitecture", QSysInfo::buildCpuArchitecture()},
         {"currentCpuArchitecture", QSysInfo::currentCpuArchitecture()},
-        {"buildAbi", QSysInfo::buildAbi()},
         {"kernelType", QSysInfo::kernelType()},
         {"kernelVersion", QSysInfo::kernelVersion()},
-        {"productType", QSysInfo::productType()},
-        {"productVersion", QSysInfo::productVersion()},
         {"prettyProductName", QSysInfo::prettyProductName()},
+        {"productType", QSysInfo::productType()},
         {"machineHostName", QSysInfo::machineHostName()},
         {"deviceName", QObject::tr("My Computer")},
         {"deviceUid", "000000000000"},
@@ -416,32 +413,25 @@ QString deviceName(const QVariantMap& deviceInfo)
 QString deviceInfoToolTip(const QVariantMap& deviceInfo)
 {
     return QString(
-                "<body style=\"font-size: 12px\">"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%1:</b> %2</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%3:</b> %4</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%5:</b> %6</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%7:</b> %8</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%9:</b> %10</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%11:</b> %12</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%13:</b> %14</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%15:</b> %16</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%17:</b> %18</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%19:</b> %20</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%21:</b> %22</p>"
-                "<p style=\"margin:0px;-qt-block-indent:0;text-indent:0px;\"><b>%23:</b> %24</p>"
-                "</body>")
-            .arg(QObject::tr("Device Name")).arg(deviceInfo["deviceName"].toString())
-            .arg(QObject::tr("Device Unique ID")).arg(deviceInfo["deviceUid"].toString())
-            .arg(QObject::tr("Operating System")).arg(deviceInfo["prettyProductName"].toString())
-            .arg(QObject::tr("Operating System Type")).arg(deviceInfo["productType"].toString())
-            .arg(QObject::tr("Operating System Version")).arg(deviceInfo["productVersion"].toString())
-            .arg(QObject::tr("Kernel Type")).arg(deviceInfo["kernelType"].toString())
-            .arg(QObject::tr("Kernel Version")).arg(deviceInfo["kernelVersion"].toString())
-            .arg(QObject::tr("Current Cpu Architecture")).arg(deviceInfo["currentCpuArchitecture"].toString())
-            .arg(QObject::tr("Build Cpu Architecture")).arg(deviceInfo["buildCpuArchitecture"].toString())
-            .arg(QObject::tr("Build Abi")).arg(deviceInfo["buildAbi"].toString())
-            .arg(QObject::tr("Emulator")).arg(deviceInfo["isEmulator"].toString())
-            .arg(QObject::tr("Machine Host Name")).arg(deviceInfo["machineHostName"].toString());
+    R"(
+      <html><body><table>
+        <tr><th><img src=":/images/info.png" width="16"/></th><th>Device Information</th><th></th></tr>
+        <tr><td></td><td>%1</td><td>: %2</td></tr>
+        <tr><td></td><td>%3</td><td>: %4</td></tr>
+        <tr><td></td><td>%5</td><td>: %6</td></tr>
+        <tr><td></td><td>%7</td><td>: %8</td></tr>
+        <tr><td></td><td>%9</td><td>: %10</td></tr>
+        <tr><td></td><td>%11</td><td>: %12</td></tr>
+        <tr><td></td><td>%13</td><td>: %14</td></tr>
+      </table></body></html>
+    )")
+    .arg(QObject::tr("Name")).arg(deviceInfo["deviceName"].toString())
+    .arg(QObject::tr("Host Name")).arg(deviceInfo["machineHostName"].toString())
+    .arg(QObject::tr("Unique ID")).arg(deviceInfo["deviceUid"].toString())
+    .arg(QObject::tr("Operating System")).arg(deviceInfo["prettyProductName"].toString())
+    .arg(QObject::tr("Kernel Type")).arg(deviceInfo["kernelType"].toString())
+    .arg(QObject::tr("Kernel Version")).arg(deviceInfo["kernelVersion"].toString())
+    .arg(QObject::tr("Cpu Architecture")).arg(deviceInfo["currentCpuArchitecture"].toString());
 }
 
 QString deviceUid(const QAction* action)

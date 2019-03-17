@@ -84,12 +84,12 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
         layout()->setSpacing(7);
     });
 
-    const QColor on = palette().buttonText().color().darker(180); // pressed
-    const QColor off = palette().buttonText().color().lighter(130); // not pressed
+    const QColor up = palette().buttonText().color().lighter(130); // not pressed
+    const QColor down = palette().buttonText().color().darker(180); // pressed
 
     QIcon iconRun;
-    iconRun.addPixmap(renderMaskedPixmap(":/utils/images/run_small@2x.png", on, this), QIcon::Normal, QIcon::On);
-    iconRun.addPixmap(renderMaskedPixmap(":/utils/images/run_small@2x.png", off, this), QIcon::Normal, QIcon::Off);
+    iconRun.addPixmap(renderMaskedPixmap(":/utils/images/run_small@2x.png", up, this), QIcon::Normal);
+    iconRun.addPixmap(renderMaskedPixmap(":/utils/images/run_small@2x.png", down, this), QIcon::Active);
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
     m_runButton->setFixedWidth(39);
@@ -99,8 +99,8 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     connect(m_runButton, &PushButton::clicked, this, &RunPane::onRunButtonClick);
 
     QIcon iconStop;
-    iconStop.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", on, this), QIcon::Normal, QIcon::On);
-    iconStop.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", off, this), QIcon::Normal, QIcon::Off);
+    iconStop.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", up, this), QIcon::Normal);
+    iconStop.addPixmap(renderMaskedPixmap(":/utils/images/stop_small@2x.png", down, this), QIcon::Active);
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setToolTip(tr("Stop"));
     m_stopButton->setFixedWidth(39);
@@ -109,8 +109,8 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     connect(m_stopButton, &PushButton::clicked, &RunManager::terminate);
 
     QIcon iconPref;
-    iconPref.addPixmap(renderColorizedPixmap(":/images/preferences.png", on, this), QIcon::Normal, QIcon::On);
-    iconPref.addPixmap(renderColorizedPixmap(":/images/preferences.png", off, this), QIcon::Normal, QIcon::Off);
+    iconPref.addPixmap(renderColorizedPixmap(":/images/preferences.png", up, this), QIcon::Normal);
+    iconPref.addPixmap(renderColorizedPixmap(":/images/preferences.png", down, this), QIcon::Active);
     m_preferencesButton->setCursor(Qt::PointingHandCursor);
     m_preferencesButton->setToolTip(tr("Show Preferences"));
     m_preferencesButton->setFixedWidth(39);
@@ -119,8 +119,8 @@ RunPane::RunPane(QWidget *parent) : QToolBar(parent)
     connect(m_preferencesButton, &PushButton::clicked, this, &RunPane::preferencesButtonClicked);
 
     QIcon iconProj;
-    iconProj.addPixmap(renderColorizedPixmap(":/images/projects.png", on, this), QIcon::Normal, QIcon::On);
-    iconProj.addPixmap(renderColorizedPixmap(":/images/projects.png", off, this), QIcon::Normal, QIcon::Off);
+    iconProj.addPixmap(renderColorizedPixmap(":/images/projects.png", up, this), QIcon::Normal);
+    iconProj.addPixmap(renderColorizedPixmap(":/images/projects.png", down, this), QIcon::Active);
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
     m_projectsButton->setFixedWidth(39);

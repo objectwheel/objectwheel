@@ -21,7 +21,7 @@
 #define PATH_LOGO        (":/images/logo.png")
 #define PATH_RICON       (":/images/new.png")
 #define PATH_LICON       (":/images/load.png")
-#define PATH_HICON       (":/images/info.png")
+#define PATH_HICON       (":/images/question.png")
 
 enum Fields { Email, Password };
 enum Buttons { Login, Register };

@@ -23,7 +23,11 @@ void PushButton::paintEvent(QPaintEvent*)
     // Draw the rest (FIXME: Remove this "&& opt.palette.buttonText().color() != Qt::white")
     if ((isDown() || isChecked()) && opt.palette.buttonText().color() != Qt::white)
         opt.palette.setColor(QPalette::ButtonText, opt.palette.buttonText().color().darker());
-    opt.state |= isDown() ? QStyle::State_On : QStyle::State_Off;
+
+    // qfusionstyle.cpp selects QIcon::Active icon when State_HasFocus is present
+    opt.state &= ~QStyle::State_HasFocus;
+    if (isDown() || isChecked())
+        opt.state |= QStyle::State_HasFocus;
     opt.rect = style()->subElementRect(QStyle::SE_PushButtonContents, &opt, this);
     p.drawControl(QStyle::CE_PushButtonLabel, opt);
 }

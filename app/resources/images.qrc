@@ -89,5 +89,6 @@
         <file>images/android.svg</file>
         <file>images/ios.svg</file>
         <file>images/ipad.svg</file>
+        <file>images/question.png</file>
     </qresource>
 </RCC>

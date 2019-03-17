@@ -106,8 +106,9 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     // Settings
     int left = LEFT_PADDING;
     int textWidth = fontMetrics().horizontalAdvance(text());
-    QIcon::Mode iconMode = isEnabled() ? isDown() ? QIcon::Active : QIcon::Normal : QIcon::Disabled;
-    const QColor& textColor = isDown() ? palette().buttonText().color().darker() : palette().buttonText().color();
+    bool isSunken = isDown() || (isCheckable() && isChecked());
+    QIcon::Mode iconMode = isEnabled() ? isSunken ? QIcon::Active : QIcon::Normal : QIcon::Disabled;
+    const QColor& textColor = isSunken ? palette().buttonText().color().darker() : palette().buttonText().color();
 
     QPen arrowPen(textColor);
     arrowPen.setWidthF(1.3);
@@ -117,7 +118,7 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     // Draw background
     QStyleOptionButton option;
     option.initFrom(this);
-    option.state |= isDown() ? QStyle::State_Sunken : QStyle::State_Raised;
+    option.state |= isSunken ? QStyle::State_Sunken : QStyle::State_Raised;
     PaintUtils::drawPanelButtonBevel(&painter, option);
 
     // Draw icon
@@ -148,7 +149,7 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
                      fontMetrics().elidedText(m_menu->title(), Qt::ElideRight, textWidth + 1));
 
     // Draw menu down arrow
-    if (isDown() || UtilityFunctions::hasHover(this)) {
+    if (isSunken || UtilityFunctions::hasHover(this)) {
         QPointF topLeft(width() - 2.5 * DOWN_ARROW_LENGTH, height() - 2 * DOWN_ARROW_LENGTH);
         QPointF points[] = {{0, 0}, {DOWN_ARROW_LENGTH / 2.0, DOWN_ARROW_LENGTH / 2.0}, {DOWN_ARROW_LENGTH, 0}};
         points[0] += topLeft; points[1] += topLeft; points[2] += topLeft;
