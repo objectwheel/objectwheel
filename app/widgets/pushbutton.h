@@ -3,16 +3,17 @@
 
 #include <QPushButton>
 
-class PushButton : public QPushButton
+class PushButton final : public QPushButton
 {
     Q_OBJECT
+    Q_DISABLE_COPY(PushButton)
+
 public:
     explicit PushButton(QWidget* parent = nullptr);
-
-protected:
-    void paintEvent(QPaintEvent*) override;
-    QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
+
+private:
+    void paintEvent(QPaintEvent*) override;
 };
 
 #endif // PUSHBUTTON_H

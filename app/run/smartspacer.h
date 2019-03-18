@@ -3,17 +3,16 @@
 
 #include <QWidget>
 
-class SmartSpacer : public QWidget
+class SmartSpacer final : public QWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY(SmartSpacer)
 
 public:
-    SmartSpacer(Qt::Orientation orientation, const QList<QWidget*>& watchedWidgets, int baseSize,
-                const QSize& minimumSizeHint, QSizePolicy::Policy hPolicy = QSizePolicy::Minimum,
-                QSizePolicy::Policy vPolicy = QSizePolicy::Minimum, QWidget* parent = nullptr);
+    explicit SmartSpacer(Qt::Orientation orientation, const QList<QWidget*>& watchedWidgets, int baseSize,
+                         const QSize& minimumSizeHint, QSizePolicy::Policy hPolicy = QSizePolicy::Minimum,
+                         QSizePolicy::Policy vPolicy = QSizePolicy::Minimum, QWidget* parent = nullptr);
 
-protected:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 

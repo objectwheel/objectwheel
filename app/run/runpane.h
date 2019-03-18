@@ -26,6 +26,9 @@ public:
     QSize minimumSizeHint() const override;
 
 private:
+    void paintEvent(QPaintEvent*) override;
+
+private:
     PushButton* m_runButton;
     PushButton* m_stopButton;
     PushButton* m_projectsButton;

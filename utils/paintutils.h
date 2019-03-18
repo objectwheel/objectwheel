@@ -25,6 +25,7 @@ QImage renderNonGuiControlImage(const QString& url, const QSizeF& size, const QW
 QIcon renderOverlaidIcon(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QIcon renderOverlaidIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget = nullptr);
 QIcon renderButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
+QIcon renderOverlaidButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QIcon renderMaskedButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget = nullptr);

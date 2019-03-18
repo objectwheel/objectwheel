@@ -2,12 +2,11 @@
 
 SmartSpacer::SmartSpacer(Qt::Orientation orientation, const QList<QWidget*>& watchedWidgets,
                          int baseSize, const QSize& minimumSizeHint, QSizePolicy::Policy hPolicy,
-                         QSizePolicy::Policy vPolicy, QWidget* parent)
-    : QWidget(parent)
-    , m_baseSize(baseSize)
-    , m_minimumSizeHint(minimumSizeHint)
-    , m_orientation(orientation)
-    , m_watchedWidgets(watchedWidgets)
+                         QSizePolicy::Policy vPolicy, QWidget* parent) : QWidget(parent)
+  , m_baseSize(baseSize)
+  , m_minimumSizeHint(minimumSizeHint)
+  , m_orientation(orientation)
+  , m_watchedWidgets(watchedWidgets)
 {
     setSizePolicy(hPolicy, vPolicy);
 }

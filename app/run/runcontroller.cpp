@@ -85,6 +85,15 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
         m_runPane->stopButton()->setDisabled(true);
     });
 
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    QLinearGradient gradient({0.5, 0.0}, {0.5, 1.0});
+    gradient.setCoordinateMode(QGradient::ObjectMode);
+    gradient.setColorAt(0, settings->topBarColor.lighter(110));
+    gradient.setColorAt(1, settings->topBarColor.darker(108));
+    QPalette palette(m_runPane->palette());
+    palette.setBrush(QPalette::Window, gradient);
+    m_runPane->setPalette(palette);
+
     connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged, this, [this] {
         const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
         QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});

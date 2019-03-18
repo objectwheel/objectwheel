@@ -2,6 +2,7 @@
 #include <filemanager.h>
 #include <delayer.h>
 #include <utils/utilsicons.h>
+#include <paintutils.h>
 
 #include <QFileInfo>
 #include <QMessageBox>
@@ -387,13 +388,13 @@ QIcon deviceIcon(const QVariantMap& deviceInfo)
     const QString deviceName = deviceInfo.value("deviceName").toString();
     if (productType == "ios") {
         if (deviceName.contains("ipad", Qt::CaseInsensitive))
-            return QIcon(":/images/ipad.svg");
+            return PaintUtils::renderButtonIcon(":/images/ipad.svg");
         else
-            return QIcon(":/images/ios.svg");
+            return PaintUtils::renderButtonIcon(":/images/ios.svg");
     }
     if (productType == "android")
-        return QIcon(":/images/android.svg");
-    return QIcon(":/images/mycomputer.png");
+        return PaintUtils::renderButtonIcon(":/images/android.svg");
+    return PaintUtils::renderButtonIcon(":/images/mycomputer.png");
 }
 
 QString deviceUid(const QVariantMap& deviceInfo)
