@@ -1,4 +1,5 @@
 #include <mainwindow.h>
+#include <runpane.h>
 #include <runcontroller.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
@@ -73,7 +74,8 @@ bool inspectorDockWidgetVisible;
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
-  , m_runController(new RunController)
+  , m_runPane(new RunPane(this))
+  , m_runController(new RunController(m_runPane, this))
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
@@ -92,12 +94,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Set Tool Bars **/
     /* Add Run Pane */
-    m_runController->setObjectName("runController");
-    m_runController->setOrientation(Qt::Horizontal);
-    m_runController->setFloatable(false);
-    m_runController->setMovable(false);
-    m_runController->setWindowTitle(tr("Run Bar"));
-    addToolBar(Qt::TopToolBarArea, m_runController);
+    m_runPane->setObjectName("runController");
+    m_runPane->setOrientation(Qt::Horizontal);
+    m_runPane->setFloatable(false);
+    m_runPane->setMovable(false);
+    m_runPane->setWindowTitle(tr("Run Bar"));
+    addToolBar(Qt::TopToolBarArea, m_runPane);
 
     /* Add Page Switcher Pane */
     auto pageSwitcherBar = new QToolBar;
@@ -333,17 +335,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
                        QColor("#025dbf"), QFont::DemiBold);
     });
 
-    connect(m_runController, &RunController::projectsButtonClicked,
-            this, [=] {
-        WindowManager::welcomeWindow()->show();
-        WindowManager::welcomeWindow()->raise();
-    });
-    connect(m_runController, &RunController::preferencesButtonClicked,
-            this, [=] {
-        WindowManager::preferencesWindow()->show();
-        WindowManager::preferencesWindow()->raise();
-    });
-    connect(m_runController, &RunController::runButtonClicked,
+    connect(m_runController, &RunController::ran,
             this, [=] {
         BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
         if (settings->autoSaveBeforeRunning)

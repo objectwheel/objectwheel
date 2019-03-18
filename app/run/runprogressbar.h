@@ -10,6 +10,7 @@ class WaitingSpinnerWidget;
 class RunProgressBar final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(RunProgressBar)
 
 public:
     explicit RunProgressBar(QWidget* parent = nullptr);

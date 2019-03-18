@@ -104,44 +104,72 @@ QImage PaintUtils::renderNonGuiControlImage(const QString& url, const QSizeF& si
     return dest;
 }
 
-QIcon PaintUtils::renderColorizedIcon(const QString& fileName, const QColor& color, const QWidget* widget)
+QIcon PaintUtils::renderOverlaidIcon(const QString& fileName, const QColor& color, const QWidget* widget)
 {
     QIcon icon;
-    icon.addPixmap(renderColorizedPixmap(fileName, color, widget));
+    icon.addPixmap(renderOverlaidPixmap(fileName, color, widget));
     return icon;
 }
 
-QIcon PaintUtils::renderColorizedIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget)
+QIcon PaintUtils::renderOverlaidIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget)
 {
     QIcon i;
     Q_ASSERT(UtilityFunctions::window(widget));
-    i.addPixmap(renderColorizedPixmap(icon.pixmap(UtilityFunctions::window(widget), size), color, widget));
+    i.addPixmap(renderOverlaidPixmap(icon.pixmap(UtilityFunctions::window(widget), size), color, widget));
     return i;
 }
 
-QPixmap PaintUtils::renderColorizedPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
+QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QWidget* widget)
 {
-    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
-    QImage source(fileName);
-    source.setDevicePixelRatio(dpr);
-    return renderColorizedPixmap(QPixmap::fromImage(source), color, widget);
+    QIcon icon;
+    icon.addPixmap(QPixmap(fileName), QIcon::Normal);
+    icon.addPixmap(renderOverlaidPixmap(fileName, "#20000000", widget), QIcon::Active);
+    return icon;
 }
 
-QPixmap PaintUtils::renderColorizedPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget)
+QIcon PaintUtils::renderMaskedButtonIcon(const QString& fileName, const QWidget* widget)
+{
+    QIcon icon;
+    QColor up = widget->palette().buttonText().color();
+    QColor down = widget->palette().buttonText().color().darker(150);
+    icon.addPixmap(renderMaskedPixmap(fileName, up, widget), QIcon::Normal);
+    icon.addPixmap(renderMaskedPixmap(fileName, down, widget), QIcon::Active);
+    return icon;
+}
+
+QPixmap PaintUtils::renderOverlaidPixmap(const QString& fileName, const QColor& color, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QPixmap source(fileName);
+    source.setDevicePixelRatio(dpr);
+    return renderOverlaidPixmap(source, color, widget);
+}
+
+QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
 
-    QImage source(pixmap.toImage());
-    source.setDevicePixelRatio(dpr);
+    QPixmap dest(pixmap);
+    dest.setDevicePixelRatio(dpr);
 
-    QImage dest = renderFilledImage(source.size() / dpr, color, widget);
+    QColor opaque(color);
+    opaque.setAlphaF(1);
+
+    QImage overlay = renderFilledImage(pixmap.size() / dpr, opaque, widget);
+    {
+        QPainter p(&overlay);
+        p.setRenderHint(QPainter::Antialiasing);
+        p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
+        p.drawPixmap(QRectF({}, pixmap.size() / dpr), pixmap, pixmap.rect());
+    }
+
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
-    p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-    p.drawImage(QRectF{{}, dest.size() / dpr}, source, source.rect());
+    p.setOpacity(color.alphaF());
+    p.drawImage(QRectF({}, dest.size() / dpr), overlay, overlay.rect());
     p.end();
 
-    return QPixmap::fromImage(dest);
+    return dest;
 }
 
 // For colorizing the files that are located within the "utils/images" directory

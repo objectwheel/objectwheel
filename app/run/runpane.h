@@ -3,40 +3,35 @@
 
 #include <QToolBar>
 
-class RunDevicesButton;
 class PushButton;
 class RunProgressBar;
+class RunDevicesButton;
 
-class RunPane : public QToolBar
+class RunPane final : public QToolBar
 {
     Q_OBJECT
+    Q_DISABLE_COPY(RunPane)
 
 public:
-    explicit RunPane(QWidget *parent = nullptr);
+    explicit RunPane(QWidget* parent = nullptr);
 
-public slots:
-    void discharge();
+    PushButton* runButton() const;
+    PushButton* stopButton() const;
+    PushButton* projectsButton() const;
+    PushButton* preferencesButton() const;
+    RunProgressBar* runProgressBar() const;
+    RunDevicesButton* runDevicesButton() const;
 
-private slots:
-    void onRunButtonClick();
-
-protected:
-    void paintEvent(QPaintEvent *event) override;
-    QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
-
-signals:
-    void runButtonClicked();
-    void projectsButtonClicked();
-    void preferencesButtonClicked();
+    QSize minimumSizeHint() const override;
 
 private:
     PushButton* m_runButton;
     PushButton* m_stopButton;
-    RunDevicesButton* m_runDevicesButton;
-    PushButton* m_preferencesButton;
     PushButton* m_projectsButton;
+    PushButton* m_preferencesButton;
     RunProgressBar* m_runProgressBar;
+    RunDevicesButton* m_runDevicesButton;
 };
 
 #endif // RUNPANE_H

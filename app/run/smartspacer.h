@@ -5,6 +5,9 @@
 
 class SmartSpacer : public QWidget
 {
+    Q_OBJECT
+    Q_DISABLE_COPY(SmartSpacer)
+
 public:
     SmartSpacer(Qt::Orientation orientation, const QList<QWidget*>& watchedWidgets, int baseSize,
                 const QSize& minimumSizeHint, QSizePolicy::Policy hPolicy = QSizePolicy::Minimum,

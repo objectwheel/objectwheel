@@ -22,10 +22,12 @@ QImage renderInitialControlImage(const QSizeF& size, const QWidget* widget = nul
 QImage renderInvisibleControlImage(const QSizeF& size, const QWidget* widget = nullptr);
 QImage renderErrorControlImage(const QSizeF& size, const QWidget* widget = nullptr);
 QImage renderNonGuiControlImage(const QString& url, const QSizeF& size, const QWidget* widget = nullptr);
-QIcon renderColorizedIcon(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
-QIcon renderColorizedIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget = nullptr);
-QPixmap renderColorizedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
-QPixmap renderColorizedPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget = nullptr);
+QIcon renderOverlaidIcon(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
+QIcon renderOverlaidIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget = nullptr);
+QIcon renderButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
+QIcon renderMaskedButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
+QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
+QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);

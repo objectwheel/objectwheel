@@ -129,7 +129,7 @@ public:
         m_repeat = 2 * repeat - 1;
         QAbstractButton* button = qobject_cast<QAbstractButton*>(parent());
         setPanelButtonPaletteRed(button);
-        button->setIcon(renderColorizedIcon(button->icon(), button->iconSize(),
+        button->setIcon(renderOverlaidIcon(button->icon(), button->iconSize(),
                                             button->palette().buttonText().color(), button));
         m_id = startTimer(timeout);
     }
@@ -154,12 +154,14 @@ private:
             QColor up = button->palette().buttonText().color().lighter(130); // not pressed
             QColor down = button->palette().buttonText().color().darker(180); // pressed
             Q_ASSERT(UtilityFunctions::window(button));
-            icon.addPixmap(renderColorizedPixmap(button->icon().pixmap(UtilityFunctions::window(button),
-                button->iconSize()), up, button), QIcon::Normal);
-            icon.addPixmap(renderColorizedPixmap(button->icon().pixmap(UtilityFunctions::window(button),
-                button->iconSize()), down, button), QIcon::Active);
+            icon.addPixmap(renderOverlaidPixmap(button->icon().pixmap(UtilityFunctions::window(button),
+                                                                      button->iconSize()), up, button),
+                           QIcon::Normal);
+            icon.addPixmap(renderOverlaidPixmap(button->icon().pixmap(UtilityFunctions::window(button),
+                                                                      button->iconSize()), down, button),
+                           QIcon::Active);
         } else {
-            icon = renderColorizedIcon(button->icon(), button->iconSize(),
+            icon = renderOverlaidIcon(button->icon(), button->iconSize(),
                                        button->palette().buttonText().color(), button);
         }
         button->setIcon(icon);
@@ -201,8 +203,8 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     QIcon consoleIcon;
     QColor up = m_consoleButton->palette().buttonText().color().lighter(130); // not pressed
     QColor down = m_consoleButton->palette().buttonText().color().darker(180); // pressed
-    consoleIcon.addPixmap(renderColorizedPixmap(":/images/console.png", up, this), QIcon::Normal);
-    consoleIcon.addPixmap(renderColorizedPixmap(":/images/console.png", down, this), QIcon::Active);
+    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.png", up, this), QIcon::Normal);
+    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.png", down, this), QIcon::Active);
 
     m_consoleButton->setMaximumHeight(20);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
@@ -215,8 +217,8 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     QIcon issuesIcon;
     up = m_issuesButton->palette().buttonText().color().lighter(130); // not pressed
     down = m_issuesButton->palette().buttonText().color().darker(180); // pressed
-    issuesIcon.addPixmap(renderColorizedPixmap(":/images/issues.png", up, this), QIcon::Normal);
-    issuesIcon.addPixmap(renderColorizedPixmap(":/images/issues.png", down, this), QIcon::Active);
+    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.png", up, this), QIcon::Normal);
+    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.png", down, this), QIcon::Active);
 
     m_issuesButton->setMaximumHeight(20);
     m_issuesButton->setCursor(Qt::PointingHandCursor);

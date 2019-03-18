@@ -1,18 +1,17 @@
 #ifndef RUNCONTROLLER_H
 #define RUNCONTROLLER_H
 
-#include <QToolBar>
+#include <QObject>
 
-class RunDevicesButton;
-class PushButton;
-class RunProgressBar;
+class RunPane;
 
-class RunController : public QToolBar
+class RunController final : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(RunController)
 
 public:
-    explicit RunController(QWidget *parent = nullptr);
+    explicit RunController(RunPane* m_runPane, QObject* parent = nullptr);
 
 public slots:
     void discharge();
@@ -20,23 +19,11 @@ public slots:
 private slots:
     void onRunButtonClick();
 
-protected:
-    void paintEvent(QPaintEvent *event) override;
-    QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
-
 signals:
-    void runButtonClicked();
-    void projectsButtonClicked();
-    void preferencesButtonClicked();
+    void ran();
 
 private:
-    PushButton* m_runButton;
-    PushButton* m_stopButton;
-    RunDevicesButton* m_runDevicesButton;
-    PushButton* m_preferencesButton;
-    PushButton* m_projectsButton;
-    RunProgressBar* m_runProgressBar;
+    RunPane* m_runPane;
 };
 
 #endif // RUNCONTROLLER_H
