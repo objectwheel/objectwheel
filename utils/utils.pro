@@ -42,5 +42,6 @@ RESOURCES += \
 
 ###Includes
 include($$PWD/vpfs/vpfs.pri)
+include($$PWD/platform/platform.pri)
 include($$PWD/qmlparser/qmlparser.pri)
 include($$PWD/components/components.pri)

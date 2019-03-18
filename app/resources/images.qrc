@@ -90,5 +90,7 @@
         <file>images/ios.svg</file>
         <file>images/ipad.svg</file>
         <file>images/question.png</file>
+        <file>images/macbook.svg</file>
+        <file>images/imac.svg</file>
     </qresource>
 </RCC>

@@ -3,6 +3,7 @@
 #include <delayer.h>
 #include <utils/utilsicons.h>
 #include <paintutils.h>
+#include <crossplatform.h>
 
 #include <QFileInfo>
 #include <QMessageBox>
@@ -374,8 +375,7 @@ QVariantMap localDeviceInfo()
         {"kernelVersion", QSysInfo::kernelVersion()},
         {"prettyProductName", QSysInfo::prettyProductName()},
         {"productType", QSysInfo::productType()},
-        {"machineHostName", QSysInfo::machineHostName()},
-        {"deviceName", QObject::tr("My Computer")},
+        {"deviceName", CrossPlatform::deviceName()},
         {"deviceUid", "000000000000"},
         {"isEmulator", false}
     };
@@ -386,14 +386,22 @@ QIcon deviceIcon(const QVariantMap& deviceInfo)
 {
     const QString productType = deviceInfo.value("productType").toString();
     const QString deviceName = deviceInfo.value("deviceName").toString();
+    const QString deviceUid = deviceInfo.value("deviceUid").toString();
+
+    if (deviceUid == localDeviceInfo().value("deviceUid"))
+        return PaintUtils::renderButtonIcon(":/images/mycomputer.png");
     if (productType == "ios") {
         if (deviceName.contains("ipad", Qt::CaseInsensitive))
             return PaintUtils::renderButtonIcon(":/images/ipad.svg");
-        else
-            return PaintUtils::renderButtonIcon(":/images/ios.svg");
+        return PaintUtils::renderButtonIcon(":/images/ios.svg");
     }
     if (productType == "android")
         return PaintUtils::renderButtonIcon(":/images/android.svg");
+    if (productType == "osx") {
+        if (deviceName.contains("macbook", Qt::CaseInsensitive))
+            return PaintUtils::renderButtonIcon(":/images/macbook.svg");
+        return PaintUtils::renderButtonIcon(":/images/imac.svg");
+    }
     return PaintUtils::renderButtonIcon(":/images/mycomputer.png");
 }
 
@@ -416,18 +424,17 @@ QString deviceInfoToolTip(const QVariantMap& deviceInfo)
     return QString(
     R"(
       <html><body><table>
-        <tr><th><img src=":/images/info.png" width="16"/></th><th>Device Information</th><th></th></tr>
-        <tr><td></td><td>%1</td><td>: %2</td></tr>
-        <tr><td></td><td>%3</td><td>: %4</td></tr>
-        <tr><td></td><td>%5</td><td>: %6</td></tr>
-        <tr><td></td><td>%7</td><td>: %8</td></tr>
-        <tr><td></td><td>%9</td><td>: %10</td></tr>
-        <tr><td></td><td>%11</td><td>: %12</td></tr>
-        <tr><td></td><td>%13</td><td>: %14</td></tr>
+        <tr style='white-space:pre'><th><img src=":/images/info.png" width="16"/></th><th>%1</th><th></th></tr>
+        <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
+        <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
+        <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>
+        <tr style='white-space:pre'><td></td><td>%8</td><td>: %9</td></tr>
+        <tr style='white-space:pre'><td></td><td>%10</td><td>: %11</td></tr>
+        <tr style='white-space:pre'><td></td><td>%12</td><td>: %13</td></tr>
       </table></body></html>
     )")
+    .arg(QObject::tr("Device Information"))
     .arg(QObject::tr("Name")).arg(deviceInfo["deviceName"].toString())
-    .arg(QObject::tr("Host Name")).arg(deviceInfo["machineHostName"].toString())
     .arg(QObject::tr("Unique ID")).arg(deviceInfo["deviceUid"].toString())
     .arg(QObject::tr("Operating System")).arg(deviceInfo["prettyProductName"].toString())
     .arg(QObject::tr("Kernel Type")).arg(deviceInfo["kernelType"].toString())

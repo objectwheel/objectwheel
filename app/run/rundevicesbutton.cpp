@@ -69,8 +69,6 @@ void RunDevicesButton::setCurrentDevice(const QString& uid)
             act->setChecked(false);
         action->setChecked(true);
     };
-    if (currentDevice() == uid)
-        return;
     for (QAction* action : m_menu->actions()) {
         if (UtilityFunctions::deviceUid(action) == uid) {
             m_menu->setIcon(action->icon());
@@ -78,6 +76,7 @@ void RunDevicesButton::setCurrentDevice(const QString& uid)
             setToolTip(action->toolTip());
             setChecked(action);
             updateGeometry();
+            update();
             break;
         }
     }
