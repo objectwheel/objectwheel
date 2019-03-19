@@ -2,6 +2,7 @@
 #include <zipasync.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
+#include <async.h>
 
 #include <QUdpSocket>
 #include <QWebSocketServer>
@@ -17,6 +18,7 @@ RunManager* RunManager::s_instance = nullptr;
 QBasicTimer RunManager::s_broadcastTimer;
 QUdpSocket* RunManager::s_broadcastSocket = nullptr;
 QWebSocketServer* RunManager::s_webSocketServer = nullptr;
+RunManager::UploadOperation* RunManager::s_uploadOperation = nullptr;
 QList<RunManager::Device> RunManager::s_devices;
 QString RunManager::s_recentDeviceUid;
 
@@ -68,6 +70,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
 
 RunManager::~RunManager()
 {
+    cleanUploadOperationCache();
     s_instance = nullptr;
 }
 
@@ -109,6 +112,7 @@ void RunManager::timerEvent(QTimerEvent* event)
 
 void RunManager::terminate()
 {
+    cleanUploadOperationCache();
     if (const Device& device = Device::get(s_devices, s_recentDeviceUid)) {
         if (isLocalDevice(s_recentDeviceUid)) {
             if (device.process->state() != QProcess::NotRunning) {
@@ -130,29 +134,70 @@ void RunManager::execute(const QString& uid, const QString& projectDirectory)
             device.process->setArguments(QStringList(projectDirectory));
             device.process->setProgram(QCoreApplication::applicationDirPath() + "/interpreter");
             device.process->start();
+            emit instance()->uploadProgress(100);
         } else {
-            QTemporaryDir cacheDir;
-            if (!cacheDir.isValid()) {
-                qFatal("CRITICAL: Cannot create a temporary directory");
+            s_uploadOperation = new UploadOperation;
+            if (!s_uploadOperation->cacheDir.isValid()) {
+                emit instance()->error(QT_TR_NOOP("Cannot create a temporary directory"));
+                QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                 return;
             }
-            const QString& cacheFileName = cacheDir.path() + "/project.zip";
-            ZipAsync::zipSync(projectDirectory, cacheFileName);
-            QFile cacheFile(cacheFileName);
-            if (!cacheFile.open(QFile::ReadOnly)) {
-                qFatal("CRITICAL: Cannot open a temporary file");
-                return;
-            }
-            const QByteArray& data = cacheFile.readAll();
-            cacheFile.close();
 
-            const int CHUNK_SIZE = 40960;
-            for (qint64 i = 0; i < data.size(); i += CHUNK_SIZE) {
-                bool eof = data.size() - i <= CHUNK_SIZE;
-                send(uid, Execute, eof
-                     ? SaveUtils::projectUid(projectDirectory)
-                     : QString(), i, data.mid(i, CHUNK_SIZE));
+            const QString& cacheFileName = s_uploadOperation->cacheDir.path() + "/project.zip";
+
+            s_uploadOperation->zipWatcher.setFuture(ZipAsync::zip(projectDirectory, cacheFileName));
+            if (s_uploadOperation->zipWatcher.isCanceled()) {
+                emit instance()->error(QT_TR_NOOP("Cannot create a zip archive"));
+                QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
+                return;
             }
+
+            QObject::connect(&s_uploadOperation->zipWatcher, &QFutureWatcherBase::progressValueChanged, []
+            { emit instance()->uploadProgress(s_uploadOperation->zipWatcher.progressValue() / 2); });
+
+            QObject::connect(&s_uploadOperation->zipWatcher, &QFutureWatcherBase::finished, [=]
+            {
+                if (s_uploadOperation->zipWatcher.future().resultCount() > 0) {
+                    int last = s_uploadOperation->zipWatcher.future().resultCount() - 1;
+                    auto result = s_uploadOperation->zipWatcher.resultAt(last);
+                    if (result == 0) {
+                        emit instance()->error(s_uploadOperation->zipWatcher.progressText());
+                        QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
+                    } else if (!s_uploadOperation->zipWatcher.isCanceled()) {
+                        s_uploadOperation->uploadWatcher.setFuture(Async::run([=] (QFutureInterfaceBase* futureInterface) {
+                            auto future = static_cast<QFutureInterface<void>*>(futureInterface);
+                            QFile cacheFile(cacheFileName);
+                            if (!cacheFile.open(QFile::ReadOnly)) {
+                                QMetaObject::invokeMethod(instance(), "error", Qt::AutoConnection,
+                                                          Q_ARG(QString, QT_TR_NOOP("annot open a temporary file")));
+                                QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
+                                return;
+                            }
+                            const int CHUNK_SIZE = 40960;
+                            for (qint64 i = 0; i < cacheFile.size(); i += CHUNK_SIZE) {
+                                if (future->isProgressUpdateNeeded() && future->isCanceled())
+                                    return;
+
+                                bool eof = cacheFile.size() - i <= CHUNK_SIZE;
+                                int progress = 100 * i / cacheFile.size();
+                                const QString& projectUid = eof
+                                        ? SaveUtils::projectUid(projectDirectory)
+                                        : QString();
+                                cacheFile.seek(i);
+                                const QByteArray& chunk = cacheFile.read(CHUNK_SIZE);
+                                QMetaObject::invokeMethod(instance(),
+                                [=] { send(uid, Execute, projectUid, progress, i, chunk); });
+                                QMetaObject::invokeMethod(instance(), "uploadProgress", Qt::AutoConnection,
+                                                          Q_ARG(int, 50 + progress / 2));
+                                QThread::msleep(5);
+                            }
+
+                            QMetaObject::invokeMethod(instance(), "uploadProgress", Qt::AutoConnection,
+                                                      Q_ARG(int, 100));
+                        }));
+                    }
+                }
+            });
         }
     }
 }
@@ -228,4 +273,20 @@ void RunManager::onBinaryMessageReceived(const QByteArray& incomingData)
         qWarning("RunManager: Unrecognized command has arrived");
         break;
     }
+}
+
+void RunManager::cleanUploadOperationCache()
+{
+    if (s_uploadOperation) {
+        if (!s_uploadOperation->uploadWatcher.isFinished()) {
+            s_uploadOperation->uploadWatcher.cancel();
+            s_uploadOperation->uploadWatcher.waitForFinished();
+        }
+        if (!s_uploadOperation->zipWatcher.isFinished()) {
+            s_uploadOperation->zipWatcher.cancel();
+            s_uploadOperation->zipWatcher.waitForFinished();
+        }
+        delete s_uploadOperation;
+    }
+    s_uploadOperation = nullptr;
 }

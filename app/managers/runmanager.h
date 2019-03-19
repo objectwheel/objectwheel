@@ -6,6 +6,8 @@
 #include <QBasicTimer>
 #include <QDataStream>
 #include <QWebSocket>
+#include <QFutureWatcher>
+#include <QTemporaryDir>
 
 class QUdpSocket;
 class QWebSocketServer;
@@ -63,6 +65,13 @@ class RunManager : public QObject
         }
     };
 
+    struct UploadOperation
+    {
+        QTemporaryDir cacheDir;
+        QFutureWatcher<size_t> zipWatcher;
+        QFutureWatcher<void> uploadWatcher;
+    };
+
 public:
     enum DiscoveryCommands {
         Broadcast = 0x1100,
@@ -91,6 +100,7 @@ private slots:
 private:
     template <typename... Args>
     static void send(const QString& uid, DiscoveryCommands command, Args&&... args);
+    static void cleanUploadOperationCache();
 
 protected:
     void timerEvent(QTimerEvent* event) override;
@@ -105,12 +115,15 @@ signals:
     void projectStarted();
     void projectFinished(int exitCode);
     void projectReadyReadOutput(const QString& output);
+    void error(const QString& errorString);
+    void uploadProgress(int progress);
 
 private:
     static RunManager* s_instance;
     static QBasicTimer s_broadcastTimer;
     static QUdpSocket* s_broadcastSocket;
     static QWebSocketServer* s_webSocketServer;
+    static UploadOperation* s_uploadOperation;
     static QList<Device> s_devices;
     static QString s_recentDeviceUid;
 };

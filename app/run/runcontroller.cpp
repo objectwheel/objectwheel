@@ -23,9 +23,14 @@ const char* g_runningMessage = "<b>Running</b> on ";
 
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
     , m_runPane(runPane)
-{
-    connect(m_runPane->runButton(), &PushButton::clicked, this, &RunController::onRunButtonClick);
-    connect(m_runPane->stopButton(), &PushButton::clicked, &RunManager::terminate);
+{    
+    connect(ProjectManager::instance(), &ProjectManager::started,
+            this, [=] {
+        m_runPane->runProgressBar()->setBusy(false);
+        m_runPane->runProgressBar()->setColor(QColor());
+        m_runPane->runProgressBar()->setProgress(0);
+        m_runPane->runProgressBar()->setHtml(tr(g_welcomeMessage));
+    });
     connect(m_runPane->projectsButton(), &PushButton::clicked, this, [=] {
         WindowManager::welcomeWindow()->show();
         WindowManager::welcomeWindow()->raise();
@@ -34,25 +39,66 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
         WindowManager::preferencesWindow()->show();
         WindowManager::preferencesWindow()->raise();
     });
-
-    QObject::connect(RunManager::instance(), &RunManager::deviceConnected,
-                     m_runPane->runDevicesButton(), [=] (const QString& uid) {
+    connect(m_runPane->stopButton(), &PushButton::clicked, &RunManager::terminate);
+    connect(m_runPane->runButton(), &PushButton::clicked, this, [=]{
+        m_runPane->runProgressBar()->setBusy(true);
+        m_runPane->runProgressBar()->setColor(QColor());
+        m_runPane->runProgressBar()->setProgress(1);
+        m_runPane->runProgressBar()->setHtml(tr(g_startRunningMessage));
+        m_runPane->runButton()->setDisabled(true);
+        m_runPane->stopButton()->setEnabled(true);
+        RunManager::execute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
+        emit ran();
+    });
+    QObject::connect(RunManager::instance(), &RunManager::deviceConnected, this, [=] (const QString& uid) {
         m_runPane->runDevicesButton()->addDevice(RunManager::deviceInfo(uid));
         m_runPane->runDevicesButton()->setCurrentDevice(uid);
     });
+
+    // Aktif hiç proje yüklenmemiş ağ cihazı
+    // Aktif proje yükleniyor ağ cihazı
+    // Aktif proje çalışıyor ağ cihazı
+    // Aktif proje çıkış yapmış ağ cihazı
+    //
+    // Pasif hiç proje yüklenmemiş ağ cihazı
+    // Pasif proje çıkış yapmış ağ cihazı
+    //
+    // Yerel hiç proje yüklenmemiş cihazı
+    // Yerel proje yükleniyor cihazı
+    // Yerel proje çalışıyor cihazı
+    // Yerel proje çıkış yapmış cihazı
+
     QObject::connect(RunManager::instance(), &RunManager::deviceDisconnected, [=] (const QString& uid) {
+        m_runPane->runProgressBar()->setHtml(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+        if (m_runPane->runProgressBar()->progress() > 0 && m_runPane->runProgressBar()->progress() < 100) {
+            m_runPane->runProgressBar()->setProgress(100);
+            m_runPane->runProgressBar()->setColor("#e05650");
+            m_runPane->runButton()->setEnabled(true);
+            m_runPane->stopButton()->setDisabled(true);
+        }
         if (UtilityFunctions::deviceUid(UtilityFunctions::localDeviceInfo()) == uid)
             return;
         if (m_runPane->runDevicesButton()->currentDevice() == uid)
             m_runPane->runDevicesButton()->setCurrentDevice(UtilityFunctions::deviceUid(UtilityFunctions::localDeviceInfo()));
         m_runPane->runDevicesButton()->removeDevice(uid);
     });
-
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] {
-        m_runPane->runProgressBar()->setHtml(tr(g_welcomeMessage));
+    connect(RunManager::instance(), &RunManager::error,
+            this, [=] (const QString& errorString) {
+        m_runPane->runProgressBar()->setHtml(tr(errorString.toUtf8().constData()) + QTime::currentTime().toString());
+        m_runPane->runProgressBar()->setProgress(100);
+        m_runPane->runProgressBar()->setColor("#e05650");
         m_runPane->runProgressBar()->setBusy(false);
-        m_runPane->runProgressBar()->setColor(m_runPane->runProgressBar()->palette().buttonText().color());
+        m_runPane->runButton()->setEnabled(true);
+        m_runPane->stopButton()->setDisabled(true);
+    });
+    connect(RunManager::instance(), &RunManager::uploadProgress,
+            this, [=] (int progress) {
+        m_runPane->runProgressBar()->setHtml(tr(errorString.toUtf8().constData()) + QTime::currentTime().toString());
+        m_runPane->runProgressBar()->setProgress(100);
+        m_runPane->runProgressBar()->setColor("#e05650");
+        m_runPane->runProgressBar()->setBusy(false);
+        m_runPane->runButton()->setEnabled(true);
+        m_runPane->stopButton()->setDisabled(true);
     });
     connect(RunManager::instance(), &RunManager::projectStarted,
             this, [=] {
@@ -72,15 +118,6 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
             m_runPane->runProgressBar()->setColor("#e05650");
         }
         m_runPane->runProgressBar()->setBusy(false);
-        m_runPane->runButton()->setEnabled(true);
-        m_runPane->stopButton()->setDisabled(true);
-    });
-
-    connect(RunManager::instance(), &RunManager::deviceDisconnected, this,
-            [=] () {
-        m_runPane->runProgressBar()->setHtml(tr(g_appCrashedMessage) + QTime::currentTime().toString());
-        m_runPane->runProgressBar()->setProgress(100);
-        m_runPane->runProgressBar()->setColor("#e05650");
         m_runPane->runButton()->setEnabled(true);
         m_runPane->stopButton()->setDisabled(true);
     });
@@ -115,15 +152,5 @@ void RunController::discharge()
 
 void RunController::onRunButtonClick()
 {
-    RunManager::terminate();
 
-    m_runPane->runProgressBar()->setBusy(true);
-    m_runPane->runProgressBar()->setProgress(40);
-    m_runPane->runProgressBar()->setHtml(tr(g_startRunningMessage));
-    RunManager::execute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
-
-    m_runPane->runButton()->setDisabled(true);
-    m_runPane->stopButton()->setEnabled(true);
-
-    emit ran();
 }

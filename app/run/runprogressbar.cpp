@@ -14,10 +14,10 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
   , m_document(new QTextDocument(this))
   , m_busyIndicator(new WaitingSpinnerWidget(this, false, false))
 {
+    PaintUtils::setPanelButtonPaletteDefaults(this);
+    setColor(QColor());
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
 
-    PaintUtils::setPanelButtonPaletteDefaults(this);
-    m_color = palette().buttonText().color();
     m_document->setIndentWidth(0);
     m_document->setDocumentMargin(0);
 
@@ -85,7 +85,10 @@ QColor RunProgressBar::color() const
 
 void RunProgressBar::setColor(const QColor& color)
 {
-    m_color = color;
+    if (color.isValid())
+        m_color = color;
+    else
+        m_color = palette().buttonText().color();
     update();
 }
 
