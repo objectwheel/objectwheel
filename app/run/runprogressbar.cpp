@@ -2,26 +2,30 @@
 #include <waitingspinnerwidget.h>
 #include <paintutils.h>
 
+#include <QtMath>
 #include <QPainter>
-#include <QTextCursor>
 #include <QTextDocument>
-#include <QTextCharFormat>
+#include <QTextBlock>
 #include <QStyleOption>
 
 RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
-  , m_progressVisible(true)
   , m_progress(0)
+  , m_textFormat(Qt::AutoText)
+  , m_progressVisible(true)
+  , m_widerLineWidth(0)
   , m_document(new QTextDocument(this))
   , m_busyIndicator(new WaitingSpinnerWidget(this, false, false))
 {
     PaintUtils::setPanelButtonPaletteDefaults(this);
-    setColor(QColor());
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+    setProgressColor(QColor());
+    resize(sizeHint());
 
     m_document->setIndentWidth(0);
     m_document->setDocumentMargin(0);
+    m_document->setDefaultTextOption(Qt::AlignTop | Qt::AlignLeft);
 
-    m_busyIndicator->setStyleSheet("background: transparent;");
+    m_busyIndicator->setStyleSheet("background: transparent");
     m_busyIndicator->setColor(palette().buttonText().color());
     m_busyIndicator->setRoundness(50);
     m_busyIndicator->setMinimumTrailOpacity(15);
@@ -45,6 +49,22 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
             this, qOverload<>(&RunProgressBar::update));
     connect(&m_faderAnimation, &QVariantAnimation::finished,
             this, [=] { m_progressVisible = false; });
+}
+
+bool RunProgressBar::isBusy() const
+{
+    return m_busyIndicator->isSpinning();
+}
+
+void RunProgressBar::setBusy(bool busy)
+{
+    if (m_busyIndicator->isSpinning() == busy)
+        return;
+
+    if (busy)
+        m_busyIndicator->start();
+    else
+        m_busyIndicator->stop();
 }
 
 int RunProgressBar::progress() const
@@ -78,61 +98,148 @@ void RunProgressBar::setProgress(int progress)
     update();
 }
 
-QColor RunProgressBar::color() const
+Qt::TextFormat RunProgressBar::textFormat() const
 {
-    return m_color;
+    return m_textFormat;
 }
 
-void RunProgressBar::setColor(const QColor& color)
+void RunProgressBar::setTextFormat(Qt::TextFormat format)
 {
+    if (m_textFormat == format)
+        return;
+
+    m_textFormat = format;
+
+    QString copy = m_text;
+    if (!copy.isNull()) {
+        m_text.clear();
+        setText(copy);
+    }
+}
+
+QString RunProgressBar::text() const
+{
+    return m_text;
+}
+
+void RunProgressBar::setText(const QString& text)
+{
+    if (m_text == text)
+        return;
+
+    m_text = text;
+
+    updateDocument();
+    updateLine();
+    updateGeometry();
+    update();
+}
+
+QColor RunProgressBar::progressColor() const
+{
+    return m_progressColor;
+}
+
+void RunProgressBar::setProgressColor(const QColor& color)
+{
+    if (m_progressColor == color)
+        return;
+
     if (color.isValid())
-        m_color = color;
+        m_progressColor = color;
     else
-        m_color = palette().buttonText().color();
+        m_progressColor = palette().buttonText().color();
+
     update();
 }
 
-QString RunProgressBar::toHtml(const QByteArray& encoding) const
+void RunProgressBar::updateLine()
 {
-    return m_document->toHtml(encoding);
+    m_line = QTextLine();
+    QTextBlock firstBlock = m_document->firstBlock();
+    if (firstBlock.isValid()) {
+        if (QTextLayout* layout = firstBlock.layout()) {
+            layout->beginLayout();
+            m_line = layout->createLine();
+            if (m_line.isValid()) {
+                m_line.setLineWidth(std::numeric_limits<qreal>::max());
+                m_widerLineWidth = m_line.naturalTextWidth();
+                m_line.setLineWidth(maximumTextWidth());
+                m_line.setPosition({0, 0});
+            }
+            layout->endLayout();
+        }
+    }
 }
 
-void RunProgressBar::setHtml(const QString& html)
+void RunProgressBar::updateDocument()
 {
-    m_document->setHtml(html);
-    updateGeometry();
-    update();
+    m_document->clear();
+    m_document->setDefaultFont(font());
+
+    QTextCharFormat format;
+    format.setForeground(palette().buttonText());
+
+    QTextCursor cursor(m_document);
+    cursor.select(QTextCursor::Document);
+    cursor.mergeCharFormat(format);
+    cursor.setPosition(0);
+
+    if (m_textFormat == Qt::RichText) {
+        cursor.insertHtml(m_text);
+    } else if (m_textFormat == Qt::PlainText) {
+        cursor.insertText(m_text);
+    } else if (Qt::mightBeRichText(m_text)) {
+        cursor.insertHtml(m_text);
+    } else {
+        cursor.insertText(m_text);
+    }
 }
 
-QString RunProgressBar::toPlainText() const
+int RunProgressBar::paddingWidth() const
 {
-    return m_document->toPlainText();
+    return 2 * m_busyIndicator->width() + 16;
 }
 
-void RunProgressBar::setPlainText(const QString& text)
+int RunProgressBar::maximumTextWidth() const
 {
-    m_document->setPlainText(text);
-    updateGeometry();
-    update();
+    return width() - paddingWidth();
 }
 
-bool RunProgressBar::isBusy() const
+QSize RunProgressBar::sizeHint() const
 {
-    return m_busyIndicator->isSpinning();
+    return QSize(480, 24);
 }
 
-void RunProgressBar::setBusy(bool busy)
+QSize RunProgressBar::minimumSizeHint() const
 {
-    if (busy)
-        m_busyIndicator->start();
-    else
-        m_busyIndicator->stop();
+    int computedWidth = paddingWidth();
+    if (m_line.isValid())
+        computedWidth += qCeil(m_line.naturalTextWidth());
+    return QSize(qMin(computedWidth, 480), 24);
+}
+
+void RunProgressBar::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::FontChange
+            || event->type() == QEvent::ApplicationFontChange
+            || event->type() == QEvent::PaletteChange) {
+        updateDocument();
+        updateLine();
+        updateGeometry();
+        update();
+    }
+    QWidget::changeEvent(event);
 }
 
 void RunProgressBar::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
+
     m_busyIndicator->move(4, height() / 2.0 - m_busyIndicator->height() / 2.0);
+
+    if (event->size().width() - event->oldSize().width() > 0)
+        updateLine();
 }
 
 void RunProgressBar::paintEvent(QPaintEvent*)
@@ -141,10 +248,23 @@ void RunProgressBar::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Draw background
-    QStyleOptionFrame opt;
-    opt.initFrom(this);
-    opt.state |= QStyle::State_Raised;
-    PaintUtils::drawPanelButtonBevel(&painter, opt);
+    QStyleOptionFrame option;
+    option.initFrom(this);
+    option.state |= QStyle::State_Raised;
+    PaintUtils::drawPanelButtonBevel(&painter, option);
+
+    // Draw text
+    if (m_line.isValid()) {
+        QString dots("...");
+        qreal top = height() / 2.0 - m_line.height() / 2.0;
+        qreal left = width() / 2.0 - m_line.naturalTextWidth() / 2.0;
+        m_line.draw(&painter, QPointF(left, top));
+        if (m_widerLineWidth > maximumTextWidth()) {
+            painter.drawText(QRectF(left + m_line.horizontalAdvance(), top,
+                                    fontMetrics().horizontalAdvance(dots), m_line.height()),
+                             dots, Qt::AlignVCenter | Qt::AlignLeft);
+        }
+    }
 
     // Draw progress
     if (m_progressVisible) {
@@ -154,28 +274,6 @@ void RunProgressBar::paintEvent(QPaintEvent*)
         bodyPath.addRoundedRect(QRectF(rect()).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
         painter.setClipPath(bodyPath);
         painter.setOpacity(m_faderAnimation.state() == QAbstractAnimation::Running ? faderOpacity : 1);
-        painter.fillRect(QRectF(0.5, height() - 2.5, springProgress, 1.5), m_color);
-        painter.setOpacity(1.0);
+        painter.fillRect(QRectF(0.5, height() - 2.5, springProgress, 1.5), m_progressColor);
     }
-
-    // Draw text
-    QTextCharFormat format;
-    QTextCursor cursor(m_document);
-    qreal x = width() / 2.0 - m_document->size().width() / 2.0;
-    qreal y = height() / 2.0 - m_document->size().height() / 2.0;
-    format.setForeground(palette().buttonText());
-    cursor.select(QTextCursor::Document);
-    cursor.mergeCharFormat(format);
-    painter.translate(x, y);
-    m_document->drawContents(&painter);
-}
-
-QSize RunProgressBar::sizeHint() const
-{
-    return {480, 24};
-}
-
-QSize RunProgressBar::minimumSizeHint() const
-{
-    return {qMin(int(m_document->size().width()) + 2 * m_busyIndicator->width() + 16, 480), 24};
 }

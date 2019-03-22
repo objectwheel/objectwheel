@@ -85,8 +85,10 @@ public:
 
 public:
     static RunManager* instance();
+    static QString recentDevice();
     static QVariantMap deviceInfo(const QString& uid);
     static bool isLocalDevice(const QString& uid);
+
 
 public slots:
     static void terminate();
@@ -115,8 +117,14 @@ signals:
     void projectStarted();
     void projectFinished(int exitCode);
     void projectReadyReadOutput(const QString& output);
-    void error(const QString& errorString);
+    void errorOccurred(const QString& errorString);
     void uploadProgress(int progress);
+
+    void processStarted();
+    void processReadyOutput(const QString& output);
+    void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void processErrorOccurred(QProcess::ProcessError error, const QString& errorString);
+
 
 private:
     static RunManager* s_instance;

@@ -50,18 +50,16 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
     s_devices.append(localDevice);
 
     connect(localDevice.process, &QProcess::readyReadStandardError,
-            this, [=] { emit projectReadyReadOutput(localDevice.process->readAllStandardError()); });
+            this, [=] { emit processReadyOutput(localDevice.process->readAllStandardError()); });
     connect(localDevice.process, &QProcess::readyReadStandardOutput,
-            this, [=] { emit projectReadyReadOutput(localDevice.process->readAllStandardOutput()); });
+            this, [=] { emit processReadyOutput(localDevice.process->readAllStandardOutput()); });
     connect(localDevice.process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
-            this, [=] (int exitCode, QProcess::ExitStatus exitStatus) {
-        if (exitStatus == QProcess::NormalExit)
-            emit projectFinished(exitCode);
-        else
-            emit deviceDisconnected(localDevice.uid());
-    });
-    connect(localDevice.process, &QProcess::started, this, &RunManager::projectStarted);
-    connect(qApp, &QApplication::aboutToQuit, localDevice.process, &QProcess::kill);
+            this, &RunManager::processFinished);
+    connect(localDevice.process, &QProcess::errorOccurred, this, [=] (QProcess::ProcessError error)
+    { emit processErrorOccurred(error, localDevice.process->errorString()); });
+    connect(localDevice.process, &QProcess::started, this, &RunManager::processStarted);
+
+    connect(qApp, &QApplication::aboutToQuit, this, &RunManager::terminate);
 
     s_webSocketServer->listen(QHostAddress::Any, SERVER_PORT);
     s_broadcastTimer.start(2000, this);
@@ -77,6 +75,11 @@ RunManager::~RunManager()
 RunManager* RunManager::instance()
 {
     return s_instance;
+}
+
+QString RunManager::recentDevice()
+{
+    return s_recentDeviceUid;
 }
 
 QVariantMap RunManager::deviceInfo(const QString& uid)
@@ -134,11 +137,10 @@ void RunManager::execute(const QString& uid, const QString& projectDirectory)
             device.process->setArguments(QStringList(projectDirectory));
             device.process->setProgram(QCoreApplication::applicationDirPath() + "/interpreter");
             device.process->start();
-            emit instance()->uploadProgress(100);
         } else {
             s_uploadOperation = new UploadOperation;
             if (!s_uploadOperation->cacheDir.isValid()) {
-                emit instance()->error(QT_TR_NOOP("Cannot create a temporary directory"));
+                emit instance()->errorOccurred(QT_TR_NOOP("Cannot create a temporary directory"));
                 QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                 return;
             }
@@ -147,7 +149,7 @@ void RunManager::execute(const QString& uid, const QString& projectDirectory)
 
             s_uploadOperation->zipWatcher.setFuture(ZipAsync::zip(projectDirectory, cacheFileName));
             if (s_uploadOperation->zipWatcher.isCanceled()) {
-                emit instance()->error(QT_TR_NOOP("Cannot create a zip archive"));
+                emit instance()->errorOccurred(QT_TR_NOOP("Cannot create a zip archive"));
                 QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                 return;
             }
@@ -161,14 +163,14 @@ void RunManager::execute(const QString& uid, const QString& projectDirectory)
                     int last = s_uploadOperation->zipWatcher.future().resultCount() - 1;
                     auto result = s_uploadOperation->zipWatcher.resultAt(last);
                     if (result == 0) {
-                        emit instance()->error(s_uploadOperation->zipWatcher.progressText());
+                        emit instance()->errorOccurred(s_uploadOperation->zipWatcher.progressText());
                         QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                     } else if (!s_uploadOperation->zipWatcher.isCanceled()) {
                         s_uploadOperation->uploadWatcher.setFuture(Async::run([=] (QFutureInterfaceBase* futureInterface) {
                             auto future = static_cast<QFutureInterface<void>*>(futureInterface);
                             QFile cacheFile(cacheFileName);
                             if (!cacheFile.open(QFile::ReadOnly)) {
-                                QMetaObject::invokeMethod(instance(), "error", Qt::AutoConnection,
+                                QMetaObject::invokeMethod(instance(), "errorOccurred", Qt::AutoConnection,
                                                           Q_ARG(QString, QT_TR_NOOP("annot open a temporary file")));
                                 QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                                 return;

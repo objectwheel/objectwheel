@@ -117,6 +117,28 @@ QSize RunPane::minimumSizeHint() const
     return {0, 38};
 }
 
+bool RunPane::event(QEvent* event)
+{
+    // Qt's QToolBar implementation implements a dragging feature on the tool bar
+    // when the main window has the unifiedTitleAndToolBarOnMac property enabled
+    // On the other hand, macOS already provides its own grabbing and dragging
+    // feature on the field where tool bar sits. So they interfere each other
+    // We block QToolBar getting mouse events and forward those events to QWidget
+    switch (event->type()) {
+    case QEvent::MouseButtonPress:
+        QWidget::mousePressEvent(static_cast<QMouseEvent*>(event));
+        return true;
+    case QEvent::MouseButtonRelease:
+        QWidget::mouseReleaseEvent(static_cast<QMouseEvent*>(event));
+        return true;
+    case QEvent::MouseMove:
+        QWidget::mouseMoveEvent(static_cast<QMouseEvent*>(event));
+        return true;
+    default:
+        return QToolBar::event(event);
+    }
+}
+
 void RunPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);

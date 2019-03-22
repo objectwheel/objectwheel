@@ -14,9 +14,8 @@ void removeTitleBar(QMainWindow* mainWindow)
     auto toolBar = [[NSToolbar alloc] initWithIdentifier:@"ScreenNameToolbarIdentifier"];
     toolBar.showsBaselineSeparator = false;
     [window setToolbar: toolBar];
-    [window setTitlebarAppearsTransparent: YES];
     [window setTitleVisibility: NSWindowTitleHidden];
-    [window setAppearance: [NSAppearance appearanceNamed:NSAppearanceNameAqua]];
     window.styleMask |= NSWindowStyleMaskFullSizeContentView;
 }
+
 }

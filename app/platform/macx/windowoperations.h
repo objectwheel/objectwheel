@@ -4,7 +4,9 @@
 class QMainWindow;
 
 namespace WindowOperations {
+
 void removeTitleBar(QMainWindow* mainWindow);
+
 }
 
 #endif // WINDOWOPERATIONS_H

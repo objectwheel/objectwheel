@@ -25,7 +25,7 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-private:
+    bool event(QEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
 private:
