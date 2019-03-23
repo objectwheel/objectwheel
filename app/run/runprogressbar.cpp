@@ -131,6 +131,7 @@ void RunProgressBar::setText(const QString& text)
 
     updateDocument();
     updateLine();
+    updateToolTip();
     updateGeometry();
     update();
 }
@@ -170,6 +171,14 @@ void RunProgressBar::updateLine()
             layout->endLayout();
         }
     }
+}
+
+void RunProgressBar::updateToolTip()
+{
+    if (m_widerLineWidth > maximumTextWidth())
+        setToolTip(text());
+    else
+        setToolTip({});
 }
 
 void RunProgressBar::updateDocument()
@@ -226,6 +235,7 @@ void RunProgressBar::changeEvent(QEvent* event)
             || event->type() == QEvent::PaletteChange) {
         updateDocument();
         updateLine();
+        updateToolTip();
         updateGeometry();
         update();
     }
@@ -238,8 +248,10 @@ void RunProgressBar::resizeEvent(QResizeEvent* event)
 
     m_busyIndicator->move(4, height() / 2.0 - m_busyIndicator->height() / 2.0);
 
-    if (event->size().width() - event->oldSize().width() > 0)
+    if (event->size().width() - event->oldSize().width() > 0) {
         updateLine();
+        updateToolTip();
+    }
 }
 
 void RunProgressBar::paintEvent(QPaintEvent*)

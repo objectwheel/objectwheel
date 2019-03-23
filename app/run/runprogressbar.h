@@ -33,6 +33,7 @@ public:
 
 private:
     void updateLine();
+    void updateToolTip();
     void updateDocument();
 
     int paddingWidth() const;

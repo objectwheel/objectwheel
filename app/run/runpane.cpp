@@ -3,7 +3,6 @@
 #include <rundevicesbutton.h>
 #include <runprogressbar.h>
 #include <smartspacer.h>
-#include <transparentstyle.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
 
@@ -19,6 +18,13 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
   , m_runDevicesButton(new RunDevicesButton)
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+
+    // Workaround for QToolBarLayout's obsolote serMargin function usage
+    QMetaObject::invokeMethod(this, [=] {
+        setContentsMargins(0, 0, 0, 0);
+        layout()->setContentsMargins(7, 7, 7, 7); // They must be all same
+        layout()->setSpacing(7);
+    }, Qt::QueuedConnection);
 
     m_runDevicesButton->setCursor(Qt::PointingHandCursor);
     m_runDevicesButton->setText(tr("Devices"));
@@ -48,13 +54,6 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     m_projectsButton->setFixedWidth(39);
     m_projectsButton->setIconSize({16, 16});
     m_projectsButton->setIcon(PaintUtils::renderOverlaidButtonIcon(":/images/projects.svg", this));
-
-    TransparentStyle::attach(this);
-    QMetaObject::invokeMethod(this, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
-        setContentsMargins(0, 0, 0, 0);
-        layout()->setContentsMargins(7, 7, 7, 7); // They must be all same
-        layout()->setSpacing(7);
-    }, Qt::QueuedConnection);
 
     int baseSize = 0;
 #if defined(Q_OS_MACOS)

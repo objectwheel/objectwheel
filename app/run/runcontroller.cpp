@@ -14,7 +14,7 @@
 #include <QApplication>
 
 namespace {
-const char* g_welcomeMessage = "<p style='white-space:pre'><b>Ready</b>  | asdasd h hh hhhh- asd sda akkk asdasdasdasdasdadadasdasdadsadaadak kkk sdasdasd asda</p>";
+const char* g_welcomeMessage = "<p style='white-space:pre'><b>Ready</b>  | asdasd h hh hhhh- asd sda akkk</p>";
 const char* g_userStoppedRunningMessage = "<b>Stopped</b>  |  Execution stopped at ";
 const char* g_appCrashedMessage = "<b>Crashed</b>  |  Application crashed at ";
 const char* g_finishedRunningMessage = "<b>Finished</b>  |  Application closed at ";
@@ -26,6 +26,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
   , m_runPane(runPane)
 {    
     onInterfaceSettingsChange();
+
     connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
             this, &RunController::onInterfaceSettingsChange);
     connect(ProjectManager::instance(), &ProjectManager::started, this, [=] {
