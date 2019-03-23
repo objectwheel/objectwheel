@@ -22,7 +22,6 @@ QPalette initPalette(QWidget* widget)
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : FileExplorer(parent)
 {
     setPalette(initPalette(this));
-    UtilityFunctions::adjustFontWeight(header(), QFont::Medium);
 }
 
 QSize GlobalResourcesPane::sizeHint() const

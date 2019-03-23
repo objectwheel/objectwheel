@@ -21,8 +21,8 @@ const qreal pushButtonDefaultHeight[3] = {
 QColor outlineColor(const QPalette &pal)
 {
     if (pal.window().style() == Qt::TexturePattern)
-        return QColor(0, 0, 0, 160);
-    return pal.window().color().darker(140);
+        return QColor(0, 0, 0, 125);
+    return pal.window().color().darker(125);
 }
 }
 
@@ -355,7 +355,7 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             g.setColorAt(1, option->palette.window().color());
             painter->setBrush(g);
             painter->setPen(outlineColor(option->palette));
-            painter->drawRect(QRectF(cb->rect).adjusted(0.5, 0.5, -0.5, -0.5));
+            painter->drawRect(cb->rect);
             painter->restore();
         } break;
         break;

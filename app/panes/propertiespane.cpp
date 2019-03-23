@@ -923,7 +923,6 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
 {
     initPalette(this);
 
-    UtilityFunctions::adjustFontWeight(header(), QFont::Medium);
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);

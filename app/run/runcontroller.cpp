@@ -14,7 +14,7 @@
 #include <QApplication>
 
 namespace {
-const char* g_welcomeMessage = "<p style='word-wrap: break-word;'><b>Ready</b>  | asdasd h hh hhhh- asd sda akkk asdasdasdasdasdadadasdasdadsadaadak kkk sdasdasd asda</p>";
+const char* g_welcomeMessage = "<p style='white-space:pre'><b>Ready</b>  | asdasd h hh hhhh- asd sda akkk asdasdasdasdasdadadasdasdadsadaadak kkk sdasdasd asda</p>";
 const char* g_userStoppedRunningMessage = "<b>Stopped</b>  |  Execution stopped at ";
 const char* g_appCrashedMessage = "<b>Crashed</b>  |  Application crashed at ";
 const char* g_finishedRunningMessage = "<b>Finished</b>  |  Application closed at ";
@@ -124,9 +124,9 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
         m_runPane->runProgressBar()->setBusy(false);
     });
     connect(RunManager::instance(), &RunManager::projectFinished, this, [=] (int exitCode) {
-        if (exitCode == 0) // User just closed the app
+        if (exitCode == 0) { // User just closed the app
             m_runPane->runProgressBar()->setText(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
-        else { // The app has erros thus the interpreter shut itself down
+        } else { // The app has erros thus the interpreter shut itself down
             m_runPane->runProgressBar()->setText(tr(g_appCrashedMessage) + QTime::currentTime().toString());
             m_runPane->runProgressBar()->setProgress(100);
             m_runPane->runProgressBar()->setProgressColor("#e05650");

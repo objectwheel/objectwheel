@@ -124,7 +124,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto inspectorTitleLabel = new QLabel;
     inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     inspectorTitleLabel->setText("   " + tr("Control Inspector"));
-    UtilityFunctions::adjustFontWeight(inspectorTitleLabel, QFont::Medium);
 
     auto inspectorTitlePinButton = new QToolButton;
     inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -155,7 +154,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto propertiesTitleLabel = new QLabel;
     propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     propertiesTitleLabel->setText("   " + tr("Properties"));
-    UtilityFunctions::adjustFontWeight(propertiesTitleLabel, QFont::Medium);
 
     auto propertiesTitlePinButton = new QToolButton;
     propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -186,7 +184,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto globalTitleLabel = new QLabel;
     globalTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     globalTitleLabel->setText("   " + tr("Global Resources"));
-    UtilityFunctions::adjustFontWeight(globalTitleLabel, QFont::Medium);
 
     auto globalTitlePinButton = new QToolButton;
     globalTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -219,7 +216,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto toolboxTitleLabel = new QLabel;
     toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     toolboxTitleLabel->setText("   " + tr("Toolbox"));
-    UtilityFunctions::adjustFontWeight(toolboxTitleLabel, QFont::Medium);
 
     auto toolboxTitlePinButton = new QToolButton;
     toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -251,7 +247,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto formsTitleLabel = new QLabel;
     formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     formsTitleLabel->setText("   " + tr("Form Navigator"));
-    UtilityFunctions::adjustFontWeight(formsTitleLabel, QFont::Medium);
 
     auto formsTitlePinButton = new QToolButton;
     formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));

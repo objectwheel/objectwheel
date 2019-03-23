@@ -203,29 +203,29 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     QIcon consoleIcon;
     QColor up = m_consoleButton->palette().buttonText().color().lighter(130); // not pressed
     QColor down = m_consoleButton->palette().buttonText().color().darker(180); // pressed
-    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.png", up, this), QIcon::Normal);
-    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.png", down, this), QIcon::Active);
+    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", up, this), QIcon::Normal);
+    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", down, this), QIcon::Active);
 
     m_consoleButton->setMaximumHeight(20);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
     m_consoleButton->setCheckable(true);
     m_consoleButton->setText(tr("Console Output"));
     m_consoleButton->setToolTip(tr("Activate console output"));
-    m_consoleButton->setIconSize({16, 16});
+    m_consoleButton->setIconSize({14, 14});
     m_consoleButton->setIcon(consoleIcon);
 
     QIcon issuesIcon;
     up = m_issuesButton->palette().buttonText().color().lighter(130); // not pressed
     down = m_issuesButton->palette().buttonText().color().darker(180); // pressed
-    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.png", up, this), QIcon::Normal);
-    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.png", down, this), QIcon::Active);
+    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", up, this), QIcon::Normal);
+    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", down, this), QIcon::Active);
 
     m_issuesButton->setMaximumHeight(20);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setCheckable(true);
     m_issuesButton->setText(tr("Issues") + " [0]");
     m_issuesButton->setToolTip(tr("Activate issues list"));
-    m_issuesButton->setIconSize({16, 16});
+    m_issuesButton->setIconSize({14, 14});
     m_issuesButton->setIcon(issuesIcon);
 
     g_consoleFlasher = new ButtonFlasher(m_consoleButton);
@@ -351,12 +351,12 @@ void BottomBar::paintEvent(QPaintEvent*)
     p.setRenderHint(QPainter::Antialiasing);
     p.setPen("#c4c4c4");
     p.setBrush(Qt::NoBrush);
-    p.drawLine(rect().topLeft() + QPointF(0.5, 0.5),
-               rect().topRight() + QPointF(0.5, 0.5));
-    p.drawLine(rect().topLeft() + QPointF(0.5, 0.5),
-               rect().bottomLeft() + QPointF(0.5, 0.5));
-    p.drawLine(rect().topRight() + QPointF(0.5, 0.5),
-               rect().bottomRight() + QPointF(0.5, 0.5));
+    p.drawLine(rect().topLeft() + QPointF(0.5, 0.0),
+               rect().topRight() + QPointF(0.5, 0.0));
+    p.drawLine(rect().topLeft() + QPointF(0.0, 0.5),
+               rect().bottomLeft() + QPointF(0.0, 0.5));
+    p.drawLine(rect().topRight() + QPointF(1.0, 0.5),
+               rect().bottomRight() + QPointF(1.0, 0.5));
 }
 
 QSize BottomBar::minimumSizeHint() const

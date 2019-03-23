@@ -41,13 +41,13 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     m_preferencesButton->setToolTip(tr("Show Preferences"));
     m_preferencesButton->setFixedWidth(39);
     m_preferencesButton->setIconSize({16, 16});
-    m_preferencesButton->setIcon(PaintUtils::renderOverlaidButtonIcon(":/images/preferences.png", this));
+    m_preferencesButton->setIcon(PaintUtils::renderOverlaidButtonIcon(":/images/settings.svg", this));
 
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
     m_projectsButton->setFixedWidth(39);
     m_projectsButton->setIconSize({16, 16});
-    m_projectsButton->setIcon(PaintUtils::renderOverlaidButtonIcon(":/images/projects.png", this));
+    m_projectsButton->setIcon(PaintUtils::renderOverlaidButtonIcon(":/images/projects.svg", this));
 
     TransparentStyle::attach(this);
     QMetaObject::invokeMethod(this, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage

@@ -1,13 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/delete-icon.png</file>
         <file>images/plus.png</file>
         <file>images/minus.png</file>
-        <file>images/down-arrow.png</file>
         <file>images/item.png</file>
         <file>images/logo.png</file>
         <file>images/reset.png</file>
-        <file>images/loading.png</file>
         <file>images/cancel.png</file>
         <file>images/info.png</file>
         <file>images/load.png</file>
@@ -26,26 +23,17 @@
         <file>images/construction.gif</file>
         <file>images/bouncing_arrow.png</file>
         <file>images/owicon.png</file>
-        <file>images/redo.png</file>
         <file>images/refresh.png</file>
-        <file>images/undo.png</file>
         <file>images/landscape.png</file>
         <file>images/portrait.png</file>
         <file>images/form.png</file>
-        <file>images/pin.png</file>
         <file>images/unpin.png</file>
         <file>images/delete.png</file>
         <file>images/newfile.png</file>
-        <file>images/console.png</file>
-        <file>images/issues.png</file>
-        <file>images/search.png</file>
-        <file>images/up-arrow.png</file>
         <file>images/error.png</file>
         <file>images/mform.png</file>
-        <file>images/settings.png</file>
         <file>images/android-default.png</file>
         <file>images/qt.png</file>
-        <file>images/projects.png</file>
         <file>images/register.png</file>
         <file>images/downarrow.png</file>
         <file>images/downarrow@2x.png</file>
@@ -79,7 +67,6 @@
         <file>images/splash.png</file>
         <file>images/devices.png</file>
         <file>images/mycomputer.png</file>
-        <file>images/preferences.png</file>
         <file>images/settings/general.png</file>
         <file>images/flags/en.png</file>
         <file>images/settings/interface.png</file>
@@ -92,5 +79,9 @@
         <file>images/question.png</file>
         <file>images/macbook.svg</file>
         <file>images/imac.svg</file>
+        <file>images/console.svg</file>
+        <file>images/issues.svg</file>
+        <file>images/projects.svg</file>
+        <file>images/settings.svg</file>
     </qresource>
 </RCC>
