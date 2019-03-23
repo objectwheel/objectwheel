@@ -29,31 +29,26 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     m_runDevicesButton->setCursor(Qt::PointingHandCursor);
     m_runDevicesButton->setText(tr("Devices"));
     m_runDevicesButton->setIconSize({16, 16});
-    m_runDevicesButton->setIcon(PaintUtils::renderButtonIcon(":/images/devices.png", this));
 
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
     m_runButton->setFixedWidth(39);
     m_runButton->setIconSize({16, 16});
-    m_runButton->setIcon(PaintUtils::renderMaskedButtonIcon(":/utils/images/run_small@2x.png", this));
 
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setToolTip(tr("Stop"));
     m_stopButton->setFixedWidth(39);
     m_stopButton->setIconSize({16, 16});
-    m_stopButton->setIcon(PaintUtils::renderMaskedButtonIcon(":/utils/images/stop_small@2x.png", this));
 
     m_preferencesButton->setCursor(Qt::PointingHandCursor);
     m_preferencesButton->setToolTip(tr("Show Preferences"));
     m_preferencesButton->setFixedWidth(39);
     m_preferencesButton->setIconSize({16, 16});
-    m_preferencesButton->setIcon(PaintUtils::renderOverlaidButtonIcon(":/images/settings.svg", this));
 
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
     m_projectsButton->setFixedWidth(39);
     m_projectsButton->setIconSize({16, 16});
-    m_projectsButton->setIcon(PaintUtils::renderOverlaidButtonIcon(":/images/projects.svg", this));
 
     int baseSize = 0;
 #if defined(Q_OS_MACOS)
@@ -74,6 +69,7 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
                               m_runDevicesButton->sizePolicy().verticalPolicy(), this));
     addWidget(m_projectsButton);
     addWidget(m_preferencesButton);
+    updateIcons();
 }
 
 PushButton* RunPane::runButton() const
@@ -116,6 +112,16 @@ QSize RunPane::minimumSizeHint() const
     return {0, 38};
 }
 
+void RunPane::updateIcons()
+{
+    using namespace PaintUtils;
+    m_runDevicesButton->setIcon(renderButtonIcon(":/images/devices.png", m_runDevicesButton));
+    m_runButton->setIcon(renderMaskedButtonIcon(":/utils/images/run_small@2x.png", m_runButton));
+    m_stopButton->setIcon(renderMaskedButtonIcon(":/utils/images/stop_small@2x.png", m_stopButton));
+    m_preferencesButton->setIcon(renderOverlaidButtonIcon(":/images/settings.svg", m_preferencesButton));
+    m_projectsButton->setIcon(renderOverlaidButtonIcon(":/images/projects.svg", m_projectsButton));
+}
+
 bool RunPane::event(QEvent* event)
 {
     // Qt's QToolBar implementation implements a dragging feature on the tool bar
@@ -138,8 +144,21 @@ bool RunPane::event(QEvent* event)
     }
 }
 
+void RunPane::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::ApplicationFontChange
+            || event->type() == QEvent::PaletteChange) {
+        updateIcons();
+    }
+    QWidget::changeEvent(event);
+}
+
 void RunPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.fillRect(rect(), palette().window());
+    painter.setPen("#bebebe");
+    painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5), QRectF(rect()).bottomRight() - QPointF(0, 0.5));
+    painter.setPen("#a7a7a7");
+    painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
 }

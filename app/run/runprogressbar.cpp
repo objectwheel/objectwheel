@@ -16,7 +16,6 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
   , m_document(new QTextDocument(this))
   , m_busyIndicator(new WaitingSpinnerWidget(this, false, false))
 {
-    PaintUtils::setPanelButtonPaletteDefaults(this);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setProgressColor(QColor());
     resize(sizeHint());
@@ -41,7 +40,7 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
     connect(&m_springAnimation, &QVariantAnimation::valueChanged,
             this, qOverload<>(&RunProgressBar::update));
 
-    m_faderAnimation.setDuration(3000);
+    m_faderAnimation.setDuration(4000);
     m_faderAnimation.setStartValue(1.0);
     m_faderAnimation.setEndValue(0.0);
     m_faderAnimation.setEasingCurve(QEasingCurve::InQuart);

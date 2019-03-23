@@ -125,6 +125,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     });
     connect(RunManager::instance(), &RunManager::projectReadyReadOutput,
             this, [=] (const QString& output) { m_consolePane->press(output, palette().linkVisited()); });
+    connect(RunManager::instance(), &RunManager::processReadyOutput,
+            this, [=] (const QString& output) { m_consolePane->press(output, palette().linkVisited()); });
 
     connect(m_bottomBar, &BottomBar::buttonActivated,
             this, [=] (QAbstractButton* button) {

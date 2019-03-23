@@ -25,7 +25,10 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
+private:
+    void updateIcons();
     bool event(QEvent* event) override;
+    void changeEvent(QEvent* event) override;
     void paintEvent(QPaintEvent*) override;
 
 private:

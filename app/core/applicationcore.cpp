@@ -27,6 +27,7 @@
 #include <helpmanager.h>
 #include <globalresources.h>
 #include <components.h>
+#include <paintutils.h>
 
 #include <QStandardPaths>
 #include <QSettings>
@@ -67,7 +68,11 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+
     QApplication::setPalette(palette());
+    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "PushButton");
+    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunProgressBar");
+    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunDevicesButton");
 
     const QString fontPath = ":/fonts";
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
@@ -184,14 +189,14 @@ QPalette ApplicationCore::palette()
     QPalette palette(QApplication::palette());
     QSettings settings(settingsPath, QSettings::IniFormat);
     if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light") {
-        palette.setColor(QPalette::Active, QPalette::Text, "#475059");
-        palette.setColor(QPalette::Inactive, QPalette::Text, "#475059");
+        palette.setColor(QPalette::Active, QPalette::Text, "#444444");
+        palette.setColor(QPalette::Inactive, QPalette::Text, "#444444");
         palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
-        palette.setColor(QPalette::Active, QPalette::WindowText, "#475059");
-        palette.setColor(QPalette::Inactive, QPalette::WindowText, "#475059");
+        palette.setColor(QPalette::Active, QPalette::WindowText, "#444444");
+        palette.setColor(QPalette::Inactive, QPalette::WindowText, "#444444");
         palette.setColor(QPalette::Disabled, QPalette::WindowText, "#6f7e8c");
-        palette.setColor(QPalette::Active, QPalette::ButtonText, "#475059");
-        palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#475059");
+        palette.setColor(QPalette::Active, QPalette::ButtonText, "#444444");
+        palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#444444");
         palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#6f7e8c");
         palette.setColor(QPalette::Base, "#ffffff");
         palette.setColor(QPalette::Button, "#f0f0f0");
@@ -199,7 +204,7 @@ QPalette ApplicationCore::palette()
         palette.setColor(QPalette::Highlight, "#1C77D5");
         palette.setColor(QPalette::BrightText, "#ffffff");
         palette.setColor(QPalette::HighlightedText, "#ffffff");
-        palette.setColor(QPalette::ToolTipText, "#475059");
+        palette.setColor(QPalette::ToolTipText, "#444444");
         palette.setColor(QPalette::ToolTipBase, "#f0f0f0");
         palette.setColor(QPalette::Link, "#025dbf");
         palette.setColor(QPalette::LinkVisited, "#B44B46");

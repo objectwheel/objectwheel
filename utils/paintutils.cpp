@@ -130,8 +130,8 @@ QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QWidget* widge
 QIcon PaintUtils::renderOverlaidButtonIcon(const QString& fileName, const QWidget* widget)
 {
     QIcon icon;
-    QColor up = widget->palette().buttonText().color().lighter(120);
-    QColor down = widget->palette().buttonText().color();
+    QColor up = widget->palette().buttonText().color();
+    QColor down = widget->palette().buttonText().color().darker();
     icon.addPixmap(renderOverlaidPixmap(fileName, up, widget), QIcon::Normal);
     icon.addPixmap(renderOverlaidPixmap(fileName, down, widget), QIcon::Active);
     return icon;
@@ -140,8 +140,8 @@ QIcon PaintUtils::renderOverlaidButtonIcon(const QString& fileName, const QWidge
 QIcon PaintUtils::renderMaskedButtonIcon(const QString& fileName, const QWidget* widget)
 {
     QIcon icon;
-    QColor up = widget->palette().buttonText().color().lighter(120);
-    QColor down = widget->palette().buttonText().color();
+    QColor up = widget->palette().buttonText().color();
+    QColor down = widget->palette().buttonText().color().darker();
     icon.addPixmap(renderMaskedPixmap(fileName, up, widget), QIcon::Normal);
     icon.addPixmap(renderMaskedPixmap(fileName, down, widget), QIcon::Active);
     return icon;
@@ -268,9 +268,9 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     QPalette::Dark      :  Button's base and surrounding border's color
     QPalette::Shadow    :  Button's drop shadow color
 */
-void PaintUtils::setPanelButtonPaletteDefaults(QWidget* widget, bool lightTheme)
+QPalette PaintUtils::defaultButtonPalette(bool lightTheme)
 {
-    QPalette palette(widget->palette());
+    QPalette palette(qApp->palette());
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
     shadowGrad.setCoordinateMode(QGradient::ObjectMode);
     if (lightTheme) {
@@ -331,5 +331,5 @@ void PaintUtils::setPanelButtonPaletteDefaults(QWidget* widget, bool lightTheme)
         midlightGrad.setColorAt(0.1, "#ededed");
     }
     palette.setBrush(QPalette::Midlight, midlightGrad);
-    widget->setPalette(palette);
+    return palette;
 }

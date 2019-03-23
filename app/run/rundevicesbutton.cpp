@@ -11,7 +11,7 @@ RunDevicesButton::RunDevicesButton(QWidget* parent) : QPushButton(parent)
 {
     setMenu(m_menu);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
-    PaintUtils::setPanelButtonPaletteDefaults(this);
+
     m_menu->setToolTipsVisible(true);
     connect(m_menu, &QMenu::triggered, this, [=] (QAction* action) {
         setCurrentDevice(UtilityFunctions::deviceUid(action));

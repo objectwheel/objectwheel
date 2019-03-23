@@ -31,8 +31,8 @@ QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, const
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
+QPalette defaultButtonPalette(bool lightTheme = true);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);
-void setPanelButtonPaletteDefaults(QWidget* widget, bool lightTheme = true);
 }
 
 #endif // PAINTUTILS_H

@@ -6,7 +6,6 @@
 
 PushButton::PushButton(QWidget* parent) : QPushButton(parent)
 {
-    PaintUtils::setPanelButtonPaletteDefaults(this);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 }
 

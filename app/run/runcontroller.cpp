@@ -13,16 +13,8 @@
 #include <utilityfunctions.h>
 #include <QApplication>
 
-namespace {
-const char* g_welcomeMessage = "<p style='white-space:pre'><b>Ready</b>  | asdasd h hh hhhh- asd sda akkk</p>";
-const char* g_userStoppedRunningMessage = "<b>Stopped</b>  |  Execution stopped at ";
-const char* g_appCrashedMessage = "<b>Crashed</b>  |  Application crashed at ";
-const char* g_finishedRunningMessage = "<b>Finished</b>  |  Application closed at ";
-const char* g_startRunningMessage = "<b>Starting</b> interpretation...";
-const char* g_runningMessage = "<b>Running</b> on ";
-}
-
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
+  , m_appManuallyTerminated(false)
   , m_runPane(runPane)
 {    
     onInterfaceSettingsChange();
@@ -33,7 +25,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
         m_runPane->runProgressBar()->setBusy(false);
         m_runPane->runProgressBar()->setProgress(0);
         m_runPane->runProgressBar()->setProgressColor(QColor());
-        m_runPane->runProgressBar()->setText(tr(g_welcomeMessage));
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Welcome));
     });
     connect(m_runPane->projectsButton(), &PushButton::clicked, this, [=] {
         WindowManager::welcomeWindow()->show();
@@ -53,7 +45,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
     connect(RunManager::instance(), &RunManager::processErrorOccurred,
             this, &RunController::onProcessErrorOccur);
 
-    connect(m_runPane->stopButton(), &PushButton::clicked, &RunManager::terminate);
+    connect(m_runPane->stopButton(), &PushButton::clicked, this, &RunController::onStopButtonClick);
     QObject::connect(RunManager::instance(), &RunManager::deviceConnected, this, [=] (const QString& uid) {
         m_runPane->runDevicesButton()->addDevice(RunManager::deviceInfo(uid));
         m_runPane->runDevicesButton()->setCurrentDevice(uid);
@@ -77,7 +69,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
             m_runPane->stopButton()->setEnabled(false);
 
             m_runPane->runProgressBar()->setBusy(false);
-            m_runPane->runProgressBar()->setText(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+            m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
             if (m_runPane->runProgressBar()->progress() == 100) {
                 m_runPane->runProgressBar()->setProgressColor(QColor());
                 m_runPane->runProgressBar()->setProgress(0);
@@ -92,7 +84,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
             m_runPane->stopButton()->setEnabled(false);
 
             m_runPane->runProgressBar()->setBusy(false);
-            m_runPane->runProgressBar()->setText(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+            m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
             if (m_runPane->runProgressBar()->progress() == 100) {
                 m_runPane->runProgressBar()->setProgressColor(QColor());
                 m_runPane->runProgressBar()->setProgress(0);
@@ -112,23 +104,23 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
         }
     });
     connect(RunManager::instance(), &RunManager::uploadProgress, this, [=] (int progress) {
-        m_runPane->runProgressBar()->setText(tr(g_runningMessage) + QTime::currentTime().toString());
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
         m_runPane->runProgressBar()->setProgress(100);
         m_runPane->runProgressBar()->setProgressColor("#e05650");
         m_runPane->runProgressBar()->setBusy(false);
         //        m_runPane->stopButton()->setDisabled(true);
     });
     connect(RunManager::instance(), &RunManager::projectStarted, this, [=] {
-        m_runPane->runProgressBar()->setText(tr(g_runningMessage) + tr("My Computer"));
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
         m_runPane->runProgressBar()->setProgress(100);
         m_runPane->runProgressBar()->setProgressColor("#30acff");
         m_runPane->runProgressBar()->setBusy(false);
     });
     connect(RunManager::instance(), &RunManager::projectFinished, this, [=] (int exitCode) {
         if (exitCode == 0) { // User just closed the app
-            m_runPane->runProgressBar()->setText(tr(g_finishedRunningMessage) + QTime::currentTime().toString());
+            m_runPane->runProgressBar()->setText(progressBarMessageFor(Finished));
         } else { // The app has erros thus the interpreter shut itself down
-            m_runPane->runProgressBar()->setText(tr(g_appCrashedMessage) + QTime::currentTime().toString());
+            m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
             m_runPane->runProgressBar()->setProgress(100);
             m_runPane->runProgressBar()->setProgressColor("#e05650");
         }
@@ -139,6 +131,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
 
 void RunController::discharge()
 {
+    m_appManuallyTerminated = false;
     RunManager::terminate();
     m_runPane->stopButton()->setDisabled(true);
 }
@@ -149,48 +142,106 @@ void RunController::onInterfaceSettingsChange()
     QPalette palette(m_runPane->palette());
     QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
     gradient.setCoordinateMode(QGradient::ObjectMode);
-    gradient.setColorAt(0, settings->topBarColor.lighter(110));
-    gradient.setColorAt(1, settings->topBarColor.darker(108));
+    gradient.setColorAt(0, settings->topBarColor.lighter(106));
+    gradient.setColorAt(1, settings->topBarColor.darker(107));
     palette.setBrush(QPalette::Window, gradient);
     m_runPane->setPalette(palette);
 }
 
 void RunController::onRunButtonClick()
 {
+    m_appManuallyTerminated = false;
     RunManager::execute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
     m_runPane->runProgressBar()->setBusy(true);
-    m_runPane->runProgressBar()->setProgress(0);
+    m_runPane->runProgressBar()->setProgress(40);
     m_runPane->runProgressBar()->setProgressColor(QColor());
-    m_runPane->runProgressBar()->setText(tr(g_startRunningMessage));
+    m_runPane->runProgressBar()->setText(progressBarMessageFor(Starting));
     m_runPane->stopButton()->setEnabled(true);
     emit ran();
+}
+
+void RunController::onStopButtonClick()
+{
+    m_appManuallyTerminated = true;
+    RunManager::terminate();
 }
 
 void RunController::onProcessStart()
 {
     m_runPane->runProgressBar()->setBusy(false);
     m_runPane->runProgressBar()->setProgress(100);
-    m_runPane->runProgressBar()->setProgressColor("#30acff");
-    m_runPane->runProgressBar()->setText(tr(g_runningMessage) + tr("My Computer"));
+    m_runPane->runProgressBar()->setProgressColor("#247dd6");
+    m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
 }
 
 void RunController::onProcessErrorOccur(QProcess::ProcessError error, const QString& errorString)
 {
+    m_runPane->runProgressBar()->setProgressColor("#e05650");
     if (error == QProcess::FailedToStart) {
         m_runPane->stopButton()->setEnabled(false);
         m_runPane->runProgressBar()->setBusy(false);
         m_runPane->runProgressBar()->setProgress(100);
-        m_runPane->runProgressBar()->setProgressColor("#e05650");
-        m_runPane->runProgressBar()->setText(tr(errorString.toUtf8().constData()));
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Failure, errorString));
+    } else if (m_appManuallyTerminated) {
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Stopped));
     } else {
-        m_runPane->runProgressBar()->setText(tr(errorString.toUtf8().constData()));
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
     }
 }
 
-void RunController::onProcessFinish(int /*exitCode*/, QProcess::ExitStatus exitStatus)
+QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
 {
-    if (exitStatus != QProcess::CrashExit)
-        m_runPane->runProgressBar()->setText(tr(g_finishedRunningMessage) + tr("My Computer"));
+    using namespace UtilityFunctions;
+    static const char* welcomeMessage  = QT_TR_NOOP("  :  <b>Ready</b>  |  Welcome to Objectwheel (Beta)");
+    static const char* startingMessage = QT_TR_NOOP("  :  <b>Starting</b> the application....");
+    static const char* failureMessage  = QT_TR_NOOP("  :  <b>System Failure</b>  |  ");
+    static const char* runningMessage  = QT_TR_NOOP("  :  <b>Running</b> on ");
+    static const char* crashedMessage  = QT_TR_NOOP("  :  <b>Crashed</b>  |  The application crashed at ");
+    static const char* stoppedMessage  = QT_TR_NOOP("  :  <b>Stopped</b>  |  The application terminated at ");
+    static const char* finishedMessage = QT_TR_NOOP("  :  <b>Finished</b>  |  The application exited at ");
+
+    const QString& timestamp = QTime::currentTime().toString();
+    QString message = "<p style='white-space:pre'>" + ProjectManager::name();
+
+    switch (kind) {
+    case Welcome:
+        message += tr(welcomeMessage);
+        break;
+    case Starting:
+        message += tr(startingMessage);
+        break;
+    case Failure:
+        message += tr(failureMessage) + arg + ". " + timestamp;
+        break;
+    case Running:
+        message += tr(runningMessage) + deviceName(RunManager::deviceInfo(RunManager::recentDevice()));
+        break;
+    case Crashed:
+        message += tr(crashedMessage) + timestamp;
+        break;
+    case Stopped:
+        message += tr(stoppedMessage) + timestamp;
+        break;
+    case Finished:
+        message += tr(finishedMessage) + timestamp;
+        break;
+    default:
+        break;
+    }
+
+    return message += "</p>";
+}
+
+void RunController::onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus)
+{
+    if (exitStatus != QProcess::CrashExit) {
+        if (exitCode == EXIT_FAILURE) {
+            m_runPane->runProgressBar()->setProgressColor("#e05650");
+            m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
+        } else {
+            m_runPane->runProgressBar()->setText(progressBarMessageFor(Finished));
+        }
+    }
     m_runPane->stopButton()->setEnabled(false);
 }
 
