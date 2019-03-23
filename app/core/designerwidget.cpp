@@ -353,7 +353,7 @@ QSize DesignerWidget::sizeHint() const
     return QSize(680, 680);
 }
 
-void DesignerWidget::onControlDoubleClick(Control* control)
+void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 {
     Q_ASSERT(m_designerScene->currentForm());
 
@@ -397,7 +397,7 @@ void DesignerWidget::onControlDoubleClick(Control* control)
     m_qmlCodeEditorWidget->codeEditor()->gotoLine(pos);
 }
 
-void DesignerWidget::onInspectorItemDoubleClick(Control* control)
+void DesignerWidget::onControlDoubleClick(Control* control)
 {
     m_qmlCodeEditorWidget->openInternal(control, "main.qml");
 }

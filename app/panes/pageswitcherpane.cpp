@@ -1,11 +1,11 @@
 #include <pageswitcherpane.h>
-#include <flatbutton.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <utilityfunctions.h>
 
 #include <QPainter>
 #include <QVBoxLayout>
+#include <QToolButton>
 
 namespace {
 const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1 <b>%2</b></span>";
@@ -13,12 +13,12 @@ const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1 <b>%2</b
 
 PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
-  , m_qmlCodeEditorButton(new FlatButton)
-  , m_designerButton(new FlatButton)
-  , m_projectOptionsButton(new FlatButton)
-  , m_buildsButton(new FlatButton)
-  , m_helpButton(new FlatButton)
-  , m_splitViewButton(new FlatButton)
+  , m_qmlCodeEditorButton(new QToolButton(this))
+  , m_designerButton(new QToolButton(this))
+  , m_projectOptionsButton(new QToolButton(this))
+  , m_buildsButton(new QToolButton(this))
+  , m_helpButton(new QToolButton(this))
+  , m_splitViewButton(new QToolButton(this))
 {
     setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(0);
@@ -91,47 +91,47 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     m_splitViewButton->setIcon(QIcon(":/images/split.png"));
     m_buildsButton->setIcon(QIcon(":/images/helmet.png"));
 
-    m_designerButton->settings().showShadow = false;
-    m_qmlCodeEditorButton->settings().showShadow = false;
-    m_projectOptionsButton->settings().showShadow = false;
-    m_helpButton->settings().showShadow = false;
-    m_splitViewButton->settings().showShadow = false;
-    m_buildsButton->settings().showShadow = false;
+//    m_designerButton->settings().showShadow = false;
+//    m_qmlCodeEditorButton->settings().showShadow = false;
+//    m_projectOptionsButton->settings().showShadow = false;
+//    m_helpButton->settings().showShadow = false;
+//    m_splitViewButton->settings().showShadow = false;
+//    m_buildsButton->settings().showShadow = false;
 
-    m_designerButton->settings().textUnderIcon = true;
-    m_qmlCodeEditorButton->settings().textUnderIcon = true;
-    m_projectOptionsButton->settings().textUnderIcon = true;
-    m_helpButton->settings().textUnderIcon = true;
-    m_splitViewButton->settings().textUnderIcon = true;
-    m_buildsButton->settings().textUnderIcon = true;
+//    m_designerButton->settings().textUnderIcon = true;
+//    m_qmlCodeEditorButton->settings().textUnderIcon = true;
+//    m_projectOptionsButton->settings().textUnderIcon = true;
+//    m_helpButton->settings().textUnderIcon = true;
+//    m_splitViewButton->settings().textUnderIcon = true;
+//    m_buildsButton->settings().textUnderIcon = true;
 
-    m_designerButton->settings().verticalGradient = false;
-    m_qmlCodeEditorButton->settings().verticalGradient = false;
-    m_projectOptionsButton->settings().verticalGradient = false;
-    m_helpButton->settings().verticalGradient = false;
-    m_splitViewButton->settings().verticalGradient = false;
-    m_buildsButton->settings().verticalGradient = false;
+//    m_designerButton->settings().verticalGradient = false;
+//    m_qmlCodeEditorButton->settings().verticalGradient = false;
+//    m_projectOptionsButton->settings().verticalGradient = false;
+//    m_helpButton->settings().verticalGradient = false;
+//    m_splitViewButton->settings().verticalGradient = false;
+//    m_buildsButton->settings().verticalGradient = false;
 
-    m_designerButton->settings().textMargin = 0;
-    m_qmlCodeEditorButton->settings().textMargin = 0;
-    m_projectOptionsButton->settings().textMargin = 0;
-    m_helpButton->settings().textMargin = 0;
-    m_splitViewButton->settings().textMargin = 0;
-    m_buildsButton->settings().textMargin = 0;
+//    m_designerButton->settings().textMargin = 0;
+//    m_qmlCodeEditorButton->settings().textMargin = 0;
+//    m_projectOptionsButton->settings().textMargin = 0;
+//    m_helpButton->settings().textMargin = 0;
+//    m_splitViewButton->settings().textMargin = 0;
+//    m_buildsButton->settings().textMargin = 0;
 
     updateColors();
 
-    connect(m_designerButton, &FlatButton::pressed,
+    connect(m_designerButton, &QToolButton::clicked,
             this, [=] { setCurrentPage(Page_Designer); });
-    connect(m_qmlCodeEditorButton, &FlatButton::pressed,
+    connect(m_qmlCodeEditorButton, &QToolButton::clicked,
             this, [=] { setCurrentPage(Page_QmlCodeEditor); });
-    connect(m_projectOptionsButton, &FlatButton::pressed,
+    connect(m_projectOptionsButton, &QToolButton::clicked,
             this, [=] { setCurrentPage(Page_ProjectOptions); });
-    connect(m_helpButton, &FlatButton::pressed,
+    connect(m_helpButton, &QToolButton::clicked,
             this, [=] { setCurrentPage(Page_Help); });
-    connect(m_splitViewButton, &FlatButton::pressed,
+    connect(m_splitViewButton, &QToolButton::clicked,
             this, [=] { setCurrentPage(Page_SplitView); });
-    connect(m_buildsButton, &FlatButton::pressed,
+    connect(m_buildsButton, &QToolButton::clicked,
             this, [=] { setCurrentPage(Page_Builds); });
     connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
             this, &PageSwitcherPane::updateColors);
@@ -269,29 +269,29 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
 void PageSwitcherPane::updateColors()
 {
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    const QColor& lighter = settings->leftBarColor.lighter(106);
-    const QColor& darker = settings->leftBarColor.darker(110);
+    const QColor& lighter = "#00000000";
+    const QColor& darker = "#00000000";
 
-    m_buildsButton->settings().textColor = Qt::white;
-    m_splitViewButton->settings().textColor = Qt::white;
-    m_helpButton->settings().textColor = Qt::white;
-    m_projectOptionsButton->settings().textColor = Qt::white;
-    m_qmlCodeEditorButton->settings().textColor = Qt::white;
-    m_designerButton->settings().textColor = Qt::white;
+//    m_buildsButton->settings().textColor = palette().buttonText().color();
+//    m_splitViewButton->settings().textColor = palette().buttonText().color();
+//    m_helpButton->settings().textColor = palette().buttonText().color();
+//    m_projectOptionsButton->settings().textColor = palette().buttonText().color();
+//    m_qmlCodeEditorButton->settings().textColor = palette().buttonText().color();
+//    m_designerButton->settings().textColor = palette().buttonText().color();
 
-    m_designerButton->settings().topColor = lighter;
-    m_qmlCodeEditorButton->settings().topColor = lighter;
-    m_projectOptionsButton->settings().topColor = lighter;
-    m_helpButton->settings().topColor = lighter;
-    m_splitViewButton->settings().topColor = lighter;
-    m_buildsButton->settings().topColor = lighter;
+//    m_designerButton->settings().topColor = lighter;
+//    m_qmlCodeEditorButton->settings().topColor = lighter;
+//    m_projectOptionsButton->settings().topColor = lighter;
+//    m_helpButton->settings().topColor = lighter;
+//    m_splitViewButton->settings().topColor = lighter;
+//    m_buildsButton->settings().topColor = lighter;
 
-    m_designerButton->settings().bottomColor = darker;
-    m_qmlCodeEditorButton->settings().bottomColor = darker;
-    m_projectOptionsButton->settings().bottomColor = darker;
-    m_helpButton->settings().bottomColor = darker;
-    m_splitViewButton->settings().bottomColor = darker;
-    m_buildsButton->settings().bottomColor = darker;
+//    m_designerButton->settings().bottomColor = darker;
+//    m_qmlCodeEditorButton->settings().bottomColor = darker;
+//    m_projectOptionsButton->settings().bottomColor = darker;
+//    m_helpButton->settings().bottomColor = darker;
+//    m_splitViewButton->settings().bottomColor = darker;
+//    m_buildsButton->settings().bottomColor = darker;
 
     update();
 }
@@ -305,10 +305,5 @@ void PageSwitcherPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
-
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).topLeft());
-    gradient.setColorAt(0, settings->leftBarColor.lighter(106));
-    gradient.setColorAt(1, settings->leftBarColor.darker(110));
-    painter.fillRect(rect(), gradient);
+    painter.fillRect(rect(), GeneralSettings::interfaceSettings()->leftBarColor);
 }
