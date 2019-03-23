@@ -189,49 +189,6 @@ void RunController::onProcessErrorOccur(QProcess::ProcessError error, const QStr
     }
 }
 
-QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
-{
-    using namespace UtilityFunctions;
-    static const char* welcomeMessage  = QT_TR_NOOP("  :  <b>Ready</b>  |  Welcome to Objectwheel (Beta)");
-    static const char* startingMessage = QT_TR_NOOP("  :  <b>Starting</b> the application....");
-    static const char* failureMessage  = QT_TR_NOOP("  :  <b>System Failure</b>  |  ");
-    static const char* runningMessage  = QT_TR_NOOP("  :  <b>Running</b> on ");
-    static const char* crashedMessage  = QT_TR_NOOP("  :  <b>Crashed</b>  |  The application crashed at ");
-    static const char* stoppedMessage  = QT_TR_NOOP("  :  <b>Stopped</b>  |  The application terminated at ");
-    static const char* finishedMessage = QT_TR_NOOP("  :  <b>Finished</b>  |  The application exited at ");
-
-    const QString& timestamp = QTime::currentTime().toString();
-    QString message = "<p style='white-space:pre'>" + ProjectManager::name();
-
-    switch (kind) {
-    case Welcome:
-        message += tr(welcomeMessage);
-        break;
-    case Starting:
-        message += tr(startingMessage);
-        break;
-    case Failure:
-        message += tr(failureMessage) + arg + ". " + timestamp;
-        break;
-    case Running:
-        message += tr(runningMessage) + deviceName(RunManager::deviceInfo(RunManager::recentDevice()));
-        break;
-    case Crashed:
-        message += tr(crashedMessage) + timestamp;
-        break;
-    case Stopped:
-        message += tr(stoppedMessage) + timestamp;
-        break;
-    case Finished:
-        message += tr(finishedMessage) + timestamp;
-        break;
-    default:
-        break;
-    }
-
-    return message += "</p>";
-}
-
 void RunController::onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitStatus != QProcess::CrashExit) {
@@ -245,3 +202,44 @@ void RunController::onProcessFinish(int exitCode, QProcess::ExitStatus exitStatu
     m_runPane->stopButton()->setEnabled(false);
 }
 
+QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
+{
+    using namespace UtilityFunctions;
+    static const char* welcomeMessage  = QT_TR_NOOP("<b>Ready</b>  |  Welcome to Objectwheel (Beta)");
+    static const char* startingMessage = QT_TR_NOOP("<b>Starting</b> the application....");
+    static const char* failureMessage  = QT_TR_NOOP("<b>System Failure</b>  |  ");
+    static const char* runningMessage  = QT_TR_NOOP("<b>Running</b> on ");
+    static const char* crashedMessage  = QT_TR_NOOP("<b>Crashed</b>  |  The application crashed at ");
+    static const char* stoppedMessage  = QT_TR_NOOP("<b>Stopped</b>  |  The application terminated at ");
+    static const char* finishedMessage = QT_TR_NOOP("<b>Finished</b>  |  The application exited at ");
+
+    QString message = "<p style='white-space:pre'>" + ProjectManager::name() + "  :  ";
+
+    switch (kind) {
+    case Welcome:
+        message += tr(welcomeMessage);
+        break;
+    case Starting:
+        message += tr(startingMessage);
+        break;
+    case Failure:
+        message += tr(failureMessage) + arg + ". " + QTime::currentTime().toString();
+        break;
+    case Running:
+        message += tr(runningMessage) + deviceName(RunManager::deviceInfo(RunManager::recentDevice()));
+        break;
+    case Crashed:
+        message += tr(crashedMessage) + QTime::currentTime().toString();
+        break;
+    case Stopped:
+        message += tr(stoppedMessage) + QTime::currentTime().toString();
+        break;
+    case Finished:
+        message += tr(finishedMessage) + QTime::currentTime().toString();
+        break;
+    default:
+        break;
+    }
+
+    return message += "</p>";
+}

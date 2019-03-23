@@ -33,8 +33,8 @@ private slots:
     void onRunButtonClick();
     void onStopButtonClick();
     void onProcessStart();
-    void onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus);
     void onProcessErrorOccur(QProcess::ProcessError error, const QString& errorString);
+    void onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     static QString progressBarMessageFor(MessageKind kind, const QString& arg = QString());
