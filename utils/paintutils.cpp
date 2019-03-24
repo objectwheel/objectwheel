@@ -173,6 +173,9 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
         p.drawPixmap(QRectF({}, pixmap.size() / dpr), pixmap, pixmap.rect());
     }
 
+    if (color.alphaF() == 1)
+        return QPixmap::fromImage(overlay);
+
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
     p.setOpacity(color.alphaF());
@@ -331,5 +334,11 @@ QPalette PaintUtils::defaultButtonPalette(bool lightTheme)
         midlightGrad.setColorAt(0.1, "#ededed");
     }
     palette.setBrush(QPalette::Midlight, midlightGrad);
+
+    if (lightTheme)
+        palette.setColor(QPalette::ButtonText, "#555555");
+    else
+        palette.setColor(QPalette::ButtonText, "#555555");
+
     return palette;
 }

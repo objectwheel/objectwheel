@@ -190,14 +190,14 @@ QPalette ApplicationCore::palette()
     QPalette palette(QApplication::palette());
     QSettings settings(settingsPath, QSettings::IniFormat);
     if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light") {
-        palette.setColor(QPalette::Active, QPalette::Text, "#555555");
-        palette.setColor(QPalette::Inactive, QPalette::Text, "#555555");
+        palette.setColor(QPalette::Active, QPalette::Text, "#272727");
+        palette.setColor(QPalette::Inactive, QPalette::Text, "#272727");
         palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
-        palette.setColor(QPalette::Active, QPalette::WindowText, "#555555");
-        palette.setColor(QPalette::Inactive, QPalette::WindowText, "#555555");
+        palette.setColor(QPalette::Active, QPalette::WindowText, "#272727");
+        palette.setColor(QPalette::Inactive, QPalette::WindowText, "#272727");
         palette.setColor(QPalette::Disabled, QPalette::WindowText, "#6f7e8c");
-        palette.setColor(QPalette::Active, QPalette::ButtonText, "#555555");
-        palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#555555");
+        palette.setColor(QPalette::Active, QPalette::ButtonText, "#272727");
+        palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#272727");
         palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#6f7e8c");
         palette.setColor(QPalette::Base, "#ffffff");
         palette.setColor(QPalette::Button, "#f0f0f0");
@@ -205,7 +205,7 @@ QPalette ApplicationCore::palette()
         palette.setColor(QPalette::Highlight, "#1C77D5");
         palette.setColor(QPalette::BrightText, "#ffffff");
         palette.setColor(QPalette::HighlightedText, "#ffffff");
-        palette.setColor(QPalette::ToolTipText, "#555555");
+        palette.setColor(QPalette::ToolTipText, "#272727");
         palette.setColor(QPalette::ToolTipBase, "#f0f0f0");
         palette.setColor(QPalette::Link, "#025dbf");
         palette.setColor(QPalette::LinkVisited, "#B44B46");
