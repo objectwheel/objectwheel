@@ -1,5 +1,6 @@
 #include <applicationstyle.h>
 #include <utilityfunctions.h>
+#include <utilsicons.h>
 
 #include <QStyleFactory>
 #include <QApplication>
@@ -204,6 +205,28 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
     }
 
     return ret;
+}
+
+QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
+                                         const QStyleOption* opt, const QWidget* widget) const
+{
+    QPixmap pixmap;
+
+    switch (standardPixmap) {
+    case SP_LineEditClearButton:
+        pixmap = Utils::Icons::EDIT_CLEAR.icon().pixmap(UtilityFunctions::window(widget), {64, 64});
+        break;
+    default:
+        pixmap = QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+        break;
+    }
+
+    if (widget)
+        pixmap.setDevicePixelRatio(widget->devicePixelRatioF());
+    else
+        pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
+
+    return pixmap;
 }
 
 int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* option,

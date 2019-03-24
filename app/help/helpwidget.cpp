@@ -5,6 +5,7 @@
 #include <utilityfunctions.h>
 #include <textbrowserhelpviewer.h>
 #include <helpmanager.h>
+#include <paintutils.h>
 
 #include <QHelpContentWidget>
 #include <QHelpIndexWidget>
@@ -101,6 +102,10 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_contentsLayout->setSpacing(5);
     m_contentsLayout->setContentsMargins(5, 5, 5, 5);
     m_contentsLayout->addWidget(engine->contentWidget());
+
+    m_indexFilterEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#888888", m_indexFilterEdit)),
+                                 QLineEdit::LeadingPosition);
+    m_indexFilterEdit->setPlaceholderText(tr("Search"));
     m_indexFilterEdit->setClearButtonEnabled(true);
 
     m_indexLayout->setSpacing(5);

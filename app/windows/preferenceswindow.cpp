@@ -5,6 +5,7 @@
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QListWidget>
 #include <QGridLayout>
@@ -63,9 +64,10 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
+    m_searchLineEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#888888", m_searchLineEdit)),
+                                QLineEdit::LeadingPosition);
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
-    m_searchLineEdit->setFixedHeight(22);
-    m_searchLineEdit->setPlaceholderText(tr("Filter"));
+    m_searchLineEdit->setPlaceholderText(tr("Search"));
     m_searchLineEdit->setClearButtonEnabled(true);
     connect(m_searchLineEdit, &FocuslessLineEdit::textEdited,
             this, &PreferencesWindow::search);

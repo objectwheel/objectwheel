@@ -5,6 +5,7 @@
 #include <flatbutton.h>
 #include <focuslesslineedit.h>
 #include <mainwindow.h>
+#include <paintutils.h>
 
 #include <QApplication>
 #include <QTreeWidget>
@@ -13,8 +14,8 @@
 ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
-    _searchEdit = new FocuslessLineEdit;
-    _toolboxTree = new ToolboxTree;
+    _searchEdit = new FocuslessLineEdit(this);
+    _toolboxTree = new ToolboxTree(this);
 
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
 
@@ -27,9 +28,10 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
         }
     });
 
-    _searchEdit->setFixedHeight(22);
+    _searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#888888", _searchEdit)),
+                           QLineEdit::LeadingPosition);
+    _searchEdit->setPlaceholderText(tr("Search"));
     _searchEdit->setClearButtonEnabled(true);
-    _searchEdit->setPlaceholderText("Filter");
     connect(_searchEdit, &FocuslessLineEdit::textChanged, this, &ToolboxPane::filterList);
 
     _layout->addWidget(_searchEdit);

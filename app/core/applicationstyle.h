@@ -17,6 +17,8 @@ public:
                          const QWidget* widget) const override;
     QRect subControlRect(QStyle::ComplexControl control, const QStyleOptionComplex* option,
                          QStyle::SubControl subControl, const QWidget* widget) const override;
+    QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt,
+                           const QWidget* widget) const override;
     int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget,
                   QStyleHintReturn *returnData) const override;
     int pixelMetric(PixelMetric metric, const QStyleOption *option,

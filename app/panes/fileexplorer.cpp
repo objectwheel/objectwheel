@@ -254,10 +254,12 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_searchEditCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     m_searchEditCompleter->setModel(m_searchEditCompleterModel);
     m_searchEditCompleter->popup()->setIconSize({15, 15});
-    m_searchEdit->setCompleter(m_searchEditCompleter);
-    m_searchEdit->setPlaceholderText("Filter");
+    m_searchEdit->setCompleter(m_searchEditCompleter);    
+    m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#888888", m_searchEdit)),
+                           QLineEdit::LeadingPosition);
+    m_searchEdit->setPlaceholderText(tr("Search"));
     m_searchEdit->setClearButtonEnabled(true);
-    m_searchEdit->setFixedHeight(22);
+
     connect(m_fileSystemModel, &QFileSystemModel::fileRenamed, this, [=]
     {
         m_fileSystemProxyModel->setDynamicSortFilter(false);
