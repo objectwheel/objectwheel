@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <pages.h>
 
-class QToolButton;
+class FlatButton;
 class QVBoxLayout;
 
 class PageSwitcherPane : public QWidget
@@ -39,12 +39,12 @@ signals:
 
 private:
     QVBoxLayout* m_layout;
-    QToolButton* m_qmlCodeEditorButton;
-    QToolButton* m_designerButton;
-    QToolButton* m_projectOptionsButton;
-    QToolButton* m_buildsButton;
-    QToolButton* m_helpButton;
-    QToolButton* m_splitViewButton;
+    FlatButton* m_qmlCodeEditorButton;
+    FlatButton* m_designerButton;
+    FlatButton* m_projectOptionsButton;
+    FlatButton* m_buildsButton;
+    FlatButton* m_helpButton;
+    FlatButton* m_splitViewButton;
 };
 
 #endif // PAGESWITCHERPANE_H

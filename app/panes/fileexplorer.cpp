@@ -102,20 +102,19 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     g_modeIFilterIconLabel->move(0, 3);
     m_modeComboBox->setContentsMargins(16, 0, 0, 0);
 
-//    setPalette(initPalette(this));
+    setPalette(initPalette(this));
 
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
     header()->setSectionsMovable(false);
-    header()->hide();
 
     setIconSize({15, 15});
     setDragEnabled(false);
     setSortingEnabled(true);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
-//    setItemDelegate(new FileExplorerListDelegate(this));
+    setItemDelegate(new FileExplorerListDelegate(this));
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeView::SelectRows);
     setDragDropMode(QAbstractItemView::NoDragDrop);

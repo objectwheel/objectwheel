@@ -336,9 +336,9 @@ QPalette PaintUtils::defaultButtonPalette(bool lightTheme)
     palette.setBrush(QPalette::Midlight, midlightGrad);
 
     if (lightTheme)
-        palette.setColor(QPalette::ButtonText, "#555555");
+        palette.setColor(QPalette::ButtonText, "#505050");
     else
-        palette.setColor(QPalette::ButtonText, "#555555");
+        palette.setColor(QPalette::ButtonText, "#505050");
 
     return palette;
 }

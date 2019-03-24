@@ -21,7 +21,7 @@ QPalette initPalette(QWidget* widget)
 
 GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : FileExplorer(parent)
 {
-//    setPalette(initPalette(this));
+    setPalette(initPalette(this));
 }
 
 QSize GlobalResourcesPane::sizeHint() const

@@ -2,12 +2,12 @@
 #define PAGES_H
 
 enum Pages {
-    Page_Builds,
     Page_Designer,
-    Page_SplitView,
-    Page_Help,
     Page_QmlCodeEditor,
-    Page_ProjectOptions
+    Page_SplitView,
+    Page_ProjectOptions,
+    Page_Builds,
+    Page_Help
 };
 
 #endif // PAGES_H

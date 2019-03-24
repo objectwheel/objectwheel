@@ -288,7 +288,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         break;
     case PE_PanelMenu: {
         painter->save();
-        painter->setPen(option->palette.text().color().lighter(170));
+        painter->setPen("#b0b0b0");
         painter->setBrush(option->palette.window());
         painter->setRenderHint(QPainter::Antialiasing, true);
         painter->drawRoundedRect(QRectF(option->rect).adjusted(0.5, 0.5, -0.5, -0.5), 5, 5);

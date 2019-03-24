@@ -157,8 +157,8 @@ void RunPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.fillRect(rect(), palette().window());
-    painter.setPen("#bebebe");
-    painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5), QRectF(rect()).bottomRight() - QPointF(0, 0.5));
-    painter.setPen("#a7a7a7");
-    painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
+//    painter.setPen("#bebebe");
+//    painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5), QRectF(rect()).bottomRight() - QPointF(0, 0.5));
+//    painter.setPen("#a7a7a7");
+//    painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
 }

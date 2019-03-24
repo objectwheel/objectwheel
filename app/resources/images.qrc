@@ -81,8 +81,8 @@
         <file>images/imac.svg</file>
         <file>images/console.svg</file>
         <file>images/issues.svg</file>
-        <file>images/projects.svg</file>
         <file>images/settings.svg</file>
         <file>images/search.svg</file>
+        <file>images/projects.svg</file>
     </qresource>
 </RCC>
