@@ -30,11 +30,20 @@ public slots:
 
 private slots:
     void onInterfaceSettingsChange();
+
     void onRunButtonClick();
     void onStopButtonClick();
     void onProcessStart();
     void onProcessErrorOccur(QProcess::ProcessError error, const QString& errorString);
     void onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus);
+
+    void onDeviceConnect(const QString& uid);
+    void onDeviceDisconnect(const QString& uid);
+    void onDeviceStart();
+    void onDeviceFinish(int exitCode);
+    void onDeviceErrorOccur(const QString& errorString);
+    void onDeviceUploadProgress(int progress);
+
 
 private:
     static QString progressBarMessageFor(MessageKind kind, const QString& arg = QString());

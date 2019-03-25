@@ -3,9 +3,10 @@
 
 #include <QLatin1String>
 
-namespace HashFactory
-{
-QLatin1String generate();
+namespace HashFactory {
+
+QString generate();
+
 }
 
 #endif // HASHFACTORY_H

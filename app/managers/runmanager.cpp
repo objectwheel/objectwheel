@@ -140,37 +140,33 @@ void RunManager::execute(const QString& uid, const QString& projectDirectory)
         } else {
             s_uploadOperation = new UploadOperation;
             if (!s_uploadOperation->cacheDir.isValid()) {
-                emit instance()->errorOccurred(QT_TR_NOOP("Cannot create a temporary directory"));
+                emit instance()->deviceErrorOccurred(QT_TR_NOOP("Cannot create a temporary directory"));
                 QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                 return;
             }
 
             const QString& cacheFileName = s_uploadOperation->cacheDir.path() + "/project.zip";
 
-            s_uploadOperation->zipWatcher.setFuture(ZipAsync::zip(projectDirectory, cacheFileName));
-            if (s_uploadOperation->zipWatcher.isCanceled()) {
-                emit instance()->errorOccurred(QT_TR_NOOP("Cannot create a zip archive"));
-                QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
-                return;
-            }
-
-            QObject::connect(&s_uploadOperation->zipWatcher, &QFutureWatcherBase::progressValueChanged, []
-            { emit instance()->uploadProgress(s_uploadOperation->zipWatcher.progressValue() / 2); });
+            QObject::connect(&s_uploadOperation->zipWatcher, &QFutureWatcherBase::progressValueChanged, [] (int p)
+            {
+                emit instance()->deviceUploadProgress(p / 3);
+                sendProgressReport(p);
+            });
 
             QObject::connect(&s_uploadOperation->zipWatcher, &QFutureWatcherBase::finished, [=]
             {
                 if (s_uploadOperation->zipWatcher.future().resultCount() > 0) {
                     int last = s_uploadOperation->zipWatcher.future().resultCount() - 1;
-                    auto result = s_uploadOperation->zipWatcher.resultAt(last);
+                    size_t result = s_uploadOperation->zipWatcher.resultAt(last);
                     if (result == 0) {
-                        emit instance()->errorOccurred(s_uploadOperation->zipWatcher.progressText());
+                        emit instance()->deviceErrorOccurred(s_uploadOperation->zipWatcher.progressText());
                         QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                     } else if (!s_uploadOperation->zipWatcher.isCanceled()) {
                         s_uploadOperation->uploadWatcher.setFuture(Async::run([=] (QFutureInterfaceBase* futureInterface) {
                             auto future = static_cast<QFutureInterface<void>*>(futureInterface);
                             QFile cacheFile(cacheFileName);
                             if (!cacheFile.open(QFile::ReadOnly)) {
-                                QMetaObject::invokeMethod(instance(), "errorOccurred", Qt::AutoConnection,
+                                QMetaObject::invokeMethod(instance(), "deviceErrorOccurred", Qt::AutoConnection,
                                                           Q_ARG(QString, QT_TR_NOOP("annot open a temporary file")));
                                 QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
                                 return;
@@ -187,21 +183,38 @@ void RunManager::execute(const QString& uid, const QString& projectDirectory)
                                         : QString();
                                 cacheFile.seek(i);
                                 const QByteArray& chunk = cacheFile.read(CHUNK_SIZE);
+                                QMetaObject::invokeMethod(instance(), "deviceUploadProgress", Qt::AutoConnection,
+                                                          Q_ARG(int, 33 + progress / 3));
                                 QMetaObject::invokeMethod(instance(),
                                 [=] { send(uid, Execute, projectUid, progress, i, chunk); });
-                                QMetaObject::invokeMethod(instance(), "uploadProgress", Qt::AutoConnection,
-                                                          Q_ARG(int, 50 + progress / 2));
                                 QThread::msleep(5);
                             }
-
-                            QMetaObject::invokeMethod(instance(), "uploadProgress", Qt::AutoConnection,
-                                                      Q_ARG(int, 100));
                         }));
                     }
                 }
             });
+
+            s_uploadOperation->zipWatcher.setFuture(ZipAsync::zip(projectDirectory, cacheFileName));
+
+            if (s_uploadOperation->zipWatcher.isCanceled()) {
+                emit instance()->deviceErrorOccurred(QT_TR_NOOP("Cannot create a zip archive"));
+                QMetaObject::invokeMethod(instance(), &RunManager::cleanUploadOperationCache);
+                return;
+            }
+
+            sendUploadStarted();
         }
     }
+}
+
+void RunManager::sendUploadStarted()
+{
+    send(s_recentDeviceUid, RunManager::UploadStarted);
+}
+
+void RunManager::sendProgressReport(int progress)
+{
+    send(s_recentDeviceUid, RunManager::ProgressReport, progress);
 }
 
 void RunManager::onNewConnection()
@@ -253,21 +266,35 @@ void RunManager::onBinaryMessageReceived(const QByteArray& incomingData)
     }
 
     case StartReport: {
-        emit projectStarted();
+        emit deviceStarted();
         break;
     }
 
     case OutputReport: {
         QString output;
         UtilityFunctions::pull(data, output);
-        emit projectReadyReadOutput(output);
+        emit deviceReadyOutput(output);
+        break;
+    }
+
+    case ErrorReport: {
+        QString errorString;
+        UtilityFunctions::pull(data, errorString);
+        emit deviceErrorOccurred(errorString);
         break;
     }
 
     case FinishReport: {
         int exitCode;
         UtilityFunctions::pull(data, exitCode);
-        emit projectFinished(exitCode);
+        emit deviceFinished(exitCode);
+        break;
+    }
+
+    case ProgressReport: {
+        int progress;
+        UtilityFunctions::pull(data, progress);
+        emit deviceUploadProgress(67 + progress / 3);
         break;
     }
 

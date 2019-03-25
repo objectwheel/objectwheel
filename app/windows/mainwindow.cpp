@@ -318,6 +318,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(RunManager::instance(), &RunManager::processReadyOutput, this, [=] (const QString& output)
     { m_centralWidget->consolePane()->press(output, palette().linkVisited()); });
+    connect(RunManager::instance(), &RunManager::deviceReadyOutput, this, [=] (const QString& output)
+    { m_centralWidget->consolePane()->press(output, palette().linkVisited()); });
     connect(RunManager::instance(), &RunManager::processFinished,
             [=] (int exitCode, QProcess::ExitStatus exitStatus) {
         auto console = m_centralWidget->consolePane();

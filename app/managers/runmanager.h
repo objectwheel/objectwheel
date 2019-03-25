@@ -80,7 +80,10 @@ public:
         InfoReport,
         StartReport,
         OutputReport,
-        FinishReport
+        FinishReport,
+        ProgressReport,
+        UploadStarted,
+        ErrorReport
     };
 
 public:
@@ -93,6 +96,8 @@ public:
 public slots:
     static void terminate();
     static void execute(const QString& uid, const QString& projectDirectory);
+    static void sendUploadStarted();
+    static void sendProgressReport(int progress);
 
 private slots:
     void onNewConnection();
@@ -114,17 +119,16 @@ private:
 signals:
     void deviceConnected(const QString& uid);
     void deviceDisconnected(const QString& uid);
-    void projectStarted();
-    void projectFinished(int exitCode);
-    void projectReadyReadOutput(const QString& output);
-    void errorOccurred(const QString& errorString);
-    void uploadProgress(int progress);
+    void deviceStarted();
+    void deviceReadyOutput(const QString& output);
+    void deviceFinished(int exitCode);
+    void deviceErrorOccurred(const QString& errorString);
+    void deviceUploadProgress(int progress);
 
     void processStarted();
     void processReadyOutput(const QString& output);
     void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void processErrorOccurred(QProcess::ProcessError error, const QString& errorString);
-
 
 private:
     static RunManager* s_instance;

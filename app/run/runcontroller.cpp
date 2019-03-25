@@ -38,6 +38,9 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
 
     connect(m_runPane->runButton(), &PushButton::clicked,
             this, &RunController::onRunButtonClick);
+    connect(m_runPane->stopButton(), &PushButton::clicked,
+            this, &RunController::onStopButtonClick);
+
     connect(RunManager::instance(), &RunManager::processStarted,
             this, &RunController::onProcessStart);
     connect(RunManager::instance(), &RunManager::processFinished,
@@ -45,11 +48,12 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
     connect(RunManager::instance(), &RunManager::processErrorOccurred,
             this, &RunController::onProcessErrorOccur);
 
-    connect(m_runPane->stopButton(), &PushButton::clicked, this, &RunController::onStopButtonClick);
-    QObject::connect(RunManager::instance(), &RunManager::deviceConnected, this, [=] (const QString& uid) {
-        m_runPane->runDevicesButton()->addDevice(RunManager::deviceInfo(uid));
-        m_runPane->runDevicesButton()->setCurrentDevice(uid);
-    });
+    QObject::connect(RunManager::instance(), &RunManager::deviceConnected,
+                     this, &RunController::onDeviceConnect);
+    QObject::connect(RunManager::instance(), &RunManager::deviceStarted,
+                     this, &RunController::onDeviceStart);
+    QObject::connect(RunManager::instance(), &RunManager::deviceFinished,
+                     this, &RunController::onDeviceFinish);
 
     // Aktif hiç proje yüklenmemiş ağ cihazı
     // Aktif proje yükleniyor ağ cihazı
@@ -58,11 +62,6 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
     //
     // Pasif hiç proje yüklenmemiş ağ cihazı
     // Pasif proje çıkış yapmış ağ cihazı
-    //
-    // Yerel hiç proje yüklenmemiş cihazı - tanımsız
-    // Yerel proje yükleniyor cihazı
-    // Yerel proje çalışıyor cihazı
-    // Yerel proje çıkış yapmış cihazı    - tanımsız
 
     QObject::connect(RunManager::instance(), &RunManager::deviceDisconnected, [=] (const QString& uid) {
         if (0) {
@@ -97,36 +96,11 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
             m_runPane->runDevicesButton()->removeDevice(uid);
         }
     });
-    connect(RunManager::instance(), &RunManager::errorOccurred, this, [=] (const QString& errorString) {
-        if (RunManager::isLocalDevice(RunManager::recentDevice())) {
-            m_runPane->runProgressBar()->setProgressColor("#e05650");
-            m_runPane->runProgressBar()->setText(tr(errorString.toUtf8().constData()) + QTime::currentTime().toString());
-        }
+
+    connect(RunManager::instance(), &RunManager::deviceUploadProgress, this, [=] (int progress) {
+        m_runPane->runProgressBar()->setProgress(progress * 0.99);
     });
-    connect(RunManager::instance(), &RunManager::uploadProgress, this, [=] (int progress) {
-        m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
-        m_runPane->runProgressBar()->setProgress(100);
-        m_runPane->runProgressBar()->setProgressColor("#e05650");
-        m_runPane->runProgressBar()->setBusy(false);
-        //        m_runPane->stopButton()->setDisabled(true);
-    });
-    connect(RunManager::instance(), &RunManager::projectStarted, this, [=] {
-        m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
-        m_runPane->runProgressBar()->setProgress(100);
-        m_runPane->runProgressBar()->setProgressColor("#30acff");
-        m_runPane->runProgressBar()->setBusy(false);
-    });
-    connect(RunManager::instance(), &RunManager::projectFinished, this, [=] (int exitCode) {
-        if (exitCode == 0) { // User just closed the app
-            m_runPane->runProgressBar()->setText(progressBarMessageFor(Finished));
-        } else { // The app has erros thus the interpreter shut itself down
-            m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
-            m_runPane->runProgressBar()->setProgress(100);
-            m_runPane->runProgressBar()->setProgressColor("#e05650");
-        }
-        m_runPane->runProgressBar()->setBusy(false);
-        m_runPane->stopButton()->setDisabled(true);
-    });
+
 }
 
 void RunController::discharge()
@@ -200,6 +174,50 @@ void RunController::onProcessFinish(int exitCode, QProcess::ExitStatus exitStatu
         }
     }
     m_runPane->stopButton()->setEnabled(false);
+}
+
+void RunController::onDeviceConnect(const QString& uid)
+{
+    m_runPane->runDevicesButton()->addDevice(RunManager::deviceInfo(uid));
+    m_runPane->runDevicesButton()->setCurrentDevice(uid);
+}
+
+void RunController::onDeviceDisconnect(const QString& uid)
+{
+
+}
+
+void RunController::onDeviceStart()
+{
+    m_runPane->runProgressBar()->setBusy(false);
+    m_runPane->runProgressBar()->setProgress(100);
+    m_runPane->runProgressBar()->setProgressColor("#247dd6");
+    m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
+}
+
+void RunController::onDeviceFinish(int exitCode)
+{
+    if (exitCode == EXIT_FAILURE) {
+        m_runPane->runProgressBar()->setProgressColor("#e05650");
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
+    } else {
+        m_runPane->runProgressBar()->setText(progressBarMessageFor(Finished));
+    }
+    m_runPane->stopButton()->setEnabled(false);
+}
+
+void RunController::onDeviceErrorOccur(const QString& errorString)
+{
+    m_runPane->stopButton()->setEnabled(false);
+    m_runPane->runProgressBar()->setBusy(false);
+    m_runPane->runProgressBar()->setProgress(100);
+    m_runPane->runProgressBar()->setProgressColor("#e05650");
+    m_runPane->runProgressBar()->setText(progressBarMessageFor(Failure, errorString));
+}
+
+void RunController::onDeviceUploadProgress(int progress)
+{
+
 }
 
 QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
