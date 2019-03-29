@@ -29,12 +29,6 @@ Previewer* ApplicationCore::s_previewer = nullptr;
 
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 {
-    QApplication::setOrganizationName("Objectwheel");
-    QApplication::setOrganizationDomain("objectwheel.com");
-    QApplication::setApplicationName("previewer");
-    QApplication::setApplicationVersion("1.1.0");
-    QApplication::setQuitOnLastWindowClosed(false);
-
     /* Prioritize down */
 #if defined(Q_OS_UNIX)
     nice(19);
@@ -119,6 +113,12 @@ void ApplicationCore::init(QObject* parent)
 
 void ApplicationCore::prepare()
 {
+    QApplication::setOrganizationName("Objectwheel");
+    QApplication::setOrganizationDomain("objectwheel.com");
+    QApplication::setApplicationName("previewer");
+    QApplication::setApplicationVersion("1.1.0");
+    QApplication::setQuitOnLastWindowClosed(false);
+
     QuickTheme::setTheme(CommandlineParser::projectDirectory());
 
     // Boot settings
