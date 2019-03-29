@@ -654,7 +654,7 @@ void ProjectsWidget::onSettingsButtonClick()
 
 void ProjectsWidget::onProgressChange(int progress)
 {
-    if (m_progressBar->indeterminate())
+    if (m_progressBar->isIndeterminate())
         m_progressBar->setIndeterminate(false);
     m_progressBar->setValue(progress);
 }

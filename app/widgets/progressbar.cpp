@@ -1,15 +1,13 @@
 #include <progressbar.h>
 #include <QPainter>
 
-#define SIZE QSize(0, 6)
-#define ADJUST(x) QRectF((x)).adjusted(0.5, 0, -0.5, 0)
-
 ProgressBar::ProgressBar(QWidget *parent) : QProgressBar(parent)
   , m_indeterminate(false)
 {
-    resize(SIZE);
+    resize(sizeHint());
     setTextVisible(false);
-    setFixedHeight(SIZE.height());
+    setIndeterminate(false);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
     m_indeterminateAnim.setStartValue(0.0);
     m_indeterminateAnim.setEndValue(1.0);
@@ -23,14 +21,12 @@ ProgressBar::ProgressBar(QWidget *parent) : QProgressBar(parent)
     m_settings.chunkColor = "#419BF9";
     m_settings.borderColor = "#40000000";
     m_settings.indeterminateColor = "#45ffffff";
-    m_settings.borderRadius = SIZE.height() / 2.0;
-
-    setIndeterminate(false);
+    m_settings.borderRadius = height() / 2.0;
 }
 
-void ProgressBar::triggerSettings()
+bool ProgressBar::isIndeterminate() const
 {
-    update();
+    return m_indeterminate;
 }
 
 void ProgressBar::setIndeterminate(bool indeterminate)
@@ -45,9 +41,19 @@ void ProgressBar::setIndeterminate(bool indeterminate)
     update();
 }
 
-bool ProgressBar::indeterminate() const
+QSize ProgressBar::sizeHint() const
 {
-    return m_indeterminate;
+    return {100, 7};
+}
+
+QSize ProgressBar::minimumSizeHint() const
+{
+    return {12, 7};
+}
+
+void ProgressBar::triggerSettings()
+{
+    update();
 }
 
 void ProgressBar::paintEvent(QPaintEvent*)
@@ -91,12 +97,7 @@ void ProgressBar::paintEvent(QPaintEvent*)
         painter.fillRect(rect().adjusted(0, 0, -width() + chunkWidth, 0), m_settings.chunkColor);
     }
 
-    painter.setClipping(false);
-
-    QPen p;
-    p.setWidthF(0);
-    p.setColor(m_settings.borderColor);
-    painter.setPen(p);
+    painter.setPen(m_settings.borderColor);
     painter.setBrush(Qt::NoBrush);
-    painter.drawRoundedRect(ADJUST(rect()), m_settings.borderRadius, m_settings.borderRadius);
+    painter.drawRoundedRect(QRectF(rect()), m_settings.borderRadius, m_settings.borderRadius);
 }

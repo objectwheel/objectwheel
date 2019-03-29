@@ -4,10 +4,10 @@
 #include <QProgressBar>
 #include <QVariantAnimation>
 
-class ProgressBar : public QProgressBar
+class ProgressBar final : public QProgressBar
 {
     Q_OBJECT
-    Q_PROPERTY(bool indeterminate READ indeterminate WRITE setIndeterminate)
+    Q_DISABLE_COPY(ProgressBar)
 
 public:
     struct Settings {
@@ -22,11 +22,17 @@ public:
 
 public:
     explicit ProgressBar(QWidget* parent = nullptr);
-    void triggerSettings();
-    void setIndeterminate(bool indeterminate);
-    bool indeterminate() const;
 
-protected:
+    bool isIndeterminate() const;
+    void setIndeterminate(bool indeterminate);
+
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+
+public slots:
+    void triggerSettings();
+
+private:
     void paintEvent(QPaintEvent*) override;
 
 private:

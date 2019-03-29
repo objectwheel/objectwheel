@@ -435,7 +435,7 @@ QString deviceInfoToolTip(const QVariantMap& deviceInfo)
       </table></body></html>
     )")
     .arg(QObject::tr("Device Information"))
-    .arg(QObject::tr("Name")).arg(deviceInfo["deviceName"].toString())
+    .arg(QObject::tr("Name")).arg(deviceName(deviceInfo))
     .arg(QObject::tr("Unique ID")).arg(deviceInfo["deviceUid"].toString())
     .arg(QObject::tr("Operating System")).arg(deviceInfo["prettyProductName"].toString())
     .arg(QObject::tr("Kernel Type")).arg(deviceInfo["kernelType"].toString())
