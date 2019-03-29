@@ -377,7 +377,8 @@ QVariantMap localDeviceInfo()
         {"productType", QSysInfo::productType()},
         {"deviceName", CrossPlatform::deviceName()},
         {"deviceUid", "000000000000"},
-        {"isEmulator", false}
+        {"isEmulator", false},
+        {"interpreterVersion", "1.2"}
     };
     return info.toVariantMap();
 }
