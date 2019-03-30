@@ -118,17 +118,17 @@ private:
 
 signals:
     void deviceConnected(const QString& uid);
-    void deviceDisconnected(const QString& uid);
+    void deviceDisconnected(const QVariantMap& deviceInfo);
+    void deviceUploadProgress(int progress);
     void deviceStarted();
     void deviceReadyOutput(const QString& output);
-    void deviceFinished(int exitCode);
     void deviceErrorOccurred(const QString& errorString);
-    void deviceUploadProgress(int progress);
+    void deviceFinished(int exitCode);
 
     void processStarted();
     void processReadyOutput(const QString& output);
-    void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void processErrorOccurred(QProcess::ProcessError error, const QString& errorString);
+    void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     static RunManager* s_instance;

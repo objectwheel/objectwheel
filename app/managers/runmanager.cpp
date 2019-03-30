@@ -238,11 +238,10 @@ void RunManager::onNewConnection()
 void RunManager::onDisconnected()
 {
     QWebSocket* client = static_cast<QWebSocket*>(sender());
-    if (const Device& device = Device::get(s_devices, client)) {
-        const QString& uid = device.uid();
+    if (const Device device = Device::get(s_devices, client)) {
         s_devices.removeOne(device);
         client->deleteLater();
-        emit deviceDisconnected(uid);
+        emit deviceDisconnected(device.info);
     }
 }
 

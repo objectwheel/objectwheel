@@ -16,6 +16,7 @@ class RunController final : public QObject
         Welcome,
         Starting,
         Failure,
+        Disconnected,
         Running,
         Crashed,
         Stopped,
@@ -30,19 +31,21 @@ public slots:
 
 private slots:
     void onInterfaceSettingsChange();
-
+    void onProjectsButtonClick();
+    void onPreferencesButtonClick();
     void onRunButtonClick();
     void onStopButtonClick();
+
     void onProcessStart();
     void onProcessErrorOccur(QProcess::ProcessError error, const QString& errorString);
     void onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus);
 
     void onDeviceConnect(const QString& uid);
-    void onDeviceDisconnect(const QString& uid);
-    void onDeviceStart();
-    void onDeviceFinish(int exitCode);
-    void onDeviceErrorOccur(const QString& errorString);
+    void onDeviceDisconnect(const QVariantMap& deviceInfo);
     void onDeviceUploadProgress(int progress);
+    void onDeviceStart();
+    void onDeviceErrorOccur(const QString& errorString);
+    void onDeviceFinish(int exitCode);
 
 
 private:
