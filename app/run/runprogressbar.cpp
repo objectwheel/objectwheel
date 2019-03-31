@@ -35,7 +35,7 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
     m_busyIndicator->setInnerRadius(3);
     m_busyIndicator->setLineWidth(1);
 
-    m_springAnimation.setDuration(800);
+    m_springAnimation.setDuration(500);
     m_springAnimation.setEasingCurve(QEasingCurve::OutCirc);
     connect(&m_springAnimation, &QVariantAnimation::valueChanged,
             this, qOverload<>(&RunProgressBar::update));

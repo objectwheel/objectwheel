@@ -1,17 +1,15 @@
 #ifndef RUNMANAGER_H
 #define RUNMANAGER_H
 
-#include <QObject>
 #include <QProcess>
 #include <QBasicTimer>
 #include <QDataStream>
-#include <QWebSocket>
 #include <QFutureWatcher>
 #include <QTemporaryDir>
 
 class QUdpSocket;
-class QWebSocketServer;
 class QWebSocket;
+class QWebSocketServer;
 
 class RunManager : public QObject
 {
@@ -99,6 +97,7 @@ public:
     static void sendUploadStarted();
     static void sendProgressReport(int progress);
     static void sendExecute(const QString& uid, const QString& projectDirectory);
+    static void scheduleUploadCancelation();
 
 private slots:
     void onNewConnection();
@@ -109,7 +108,6 @@ private:
     template <typename... Args>
     static void send(const QString& uid, DiscoveryCommands command, Args&&... args);
     static void upload();
-    static void scheduleUploadCancelation();
     void timerEvent(QTimerEvent* event) override;
 
 private:

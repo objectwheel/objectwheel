@@ -11,7 +11,9 @@
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <utilityfunctions.h>
+
 #include <QApplication>
+#include <QTime>
 
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
   , m_appManuallyTerminated(false)
@@ -156,7 +158,7 @@ void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
     m_runPane->runDevicesButton()->removeDevice(UtilityFunctions::deviceUid(deviceInfo));
 
     if (RunManager::recentDevice() == UtilityFunctions::deviceUid(deviceInfo)) {
-        RunManager::sendTerminate();
+        RunManager::scheduleUploadCancelation();
         if (m_runPane->runProgressBar()->progress() > 0
                 && m_runPane->runProgressBar()->progress() < 100) {
             m_runPane->runProgressBar()->setProgressColor("#e05650");
@@ -194,7 +196,6 @@ void RunController::onDeviceErrorOccur(const QString& errorString)
 
 void RunController::onDeviceFinish(int exitCode)
 {
-    RunManager::sendTerminate();
     if (exitCode == EXIT_FAILURE) {
         m_runPane->runProgressBar()->setProgressColor("#e05650");
         m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
@@ -210,14 +211,14 @@ void RunController::onDeviceFinish(int exitCode)
 QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
 {
     using namespace UtilityFunctions;
-    static const char* msgWelcome      = QT_TR_NOOP("<b>Ready</b>  |  Welcome to Objectwheel (Beta)");
-    static const char* msgStarting     = QT_TR_NOOP("<b>Starting</b> the application....");
-    static const char* msgFailure      = QT_TR_NOOP("<b>System Failure</b>  |  ");
+    static const char* msgWelcome  = QT_TR_NOOP("<b>Ready</b>  |  Welcome to Objectwheel (Beta)");
+    static const char* msgStarting = QT_TR_NOOP("<b>Starting</b> the application....");
+    static const char* msgFailure  = QT_TR_NOOP("<b>System Failure</b>  |  ");
     static const char* msgDisconnected = QT_TR_NOOP("<b>Disconnected</b>  |  Connection lost to ");
-    static const char* msgRunning      = QT_TR_NOOP("<b>Running</b> on ");
-    static const char* msgCrashed      = QT_TR_NOOP("<b>Crashed</b>  |  The application crashed at ");
-    static const char* msgStopped      = QT_TR_NOOP("<b>Stopped</b>  |  The application terminated at ");
-    static const char* msgFinished     = QT_TR_NOOP("<b>Finished</b>  |  The application exited at ");
+    static const char* msgRunning  = QT_TR_NOOP("<b>Running</b> on ");
+    static const char* msgCrashed  = QT_TR_NOOP("<b>Crashed</b>  |  The application crashed at ");
+    static const char* msgStopped  = QT_TR_NOOP("<b>Stopped</b>  |  The application terminated at ");
+    static const char* msgFinished = QT_TR_NOOP("<b>Finished</b>  |  The application exited at ");
 
     QString message = "<p style='white-space:pre'>" + ProjectManager::name() + "  :  ";
 

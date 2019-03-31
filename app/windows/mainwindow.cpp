@@ -37,6 +37,7 @@
 #include <QLayout>
 #include <QScrollBar>
 #include <QScreen>
+#include <QTime>
 
 #if defined(Q_OS_MACOS)
 #include <windowoperations.h>

@@ -2,15 +2,13 @@
 #include <zipasync.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
-#include <async.h>
 
 #include <QUdpSocket>
 #include <QWebSocketServer>
-#include <QTimerEvent>
-#include <QTemporaryDir>
 #include <QTimer>
 #include <QApplication>
 #include <QPointer>
+#include <QWebSocket>
 
 // TODO: Add encryption (wss)
 
@@ -48,6 +46,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
     localDevice.process = new QProcess(this);
     s_recentDeviceUid = localDevice.uid();
     s_devices.append(localDevice);
+    QMetaObject::invokeMethod(this, [=] { deviceConnected(localDevice.uid()); }, Qt::QueuedConnection);
 
     connect(localDevice.process, &QProcess::readyReadStandardError,
             this, [=] { emit processReadyOutput(localDevice.process->readAllStandardError()); });
@@ -81,7 +80,6 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
 
     s_webSocketServer->listen(QHostAddress::Any, SERVER_PORT);
     s_broadcastTimer.start(2000, this);
-    QTimer::singleShot(100, [=] { deviceConnected(localDevice.uid()); });
 }
 
 RunManager::~RunManager()
