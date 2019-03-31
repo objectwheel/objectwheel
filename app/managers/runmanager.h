@@ -65,11 +65,14 @@ class RunManager : public QObject
         }
     };
 
-    struct UploadOperation
+    struct UploadInfo
     {
-        QTemporaryDir cacheDir;
-        QFutureWatcher<size_t> zipWatcher;
-        QFutureWatcher<void> uploadWatcher;
+        bool canceled;
+        QString fileName;
+        QString deviceUid;
+        QString projectUid;
+        QFutureWatcher<size_t> watcher;
+        QScopedPointer<QTemporaryDir> cacheDir;
     };
 
 public:
@@ -92,12 +95,10 @@ public:
     static QVariantMap deviceInfo(const QString& uid);
     static bool isLocalDevice(const QString& uid);
 
-
-public slots:
-    static void terminate();
-    static void execute(const QString& uid, const QString& projectDirectory);
+    static void sendTerminate();
     static void sendUploadStarted();
     static void sendProgressReport(int progress);
+    static void sendExecute(const QString& uid, const QString& projectDirectory);
 
 private slots:
     void onNewConnection();
@@ -107,9 +108,8 @@ private slots:
 private:
     template <typename... Args>
     static void send(const QString& uid, DiscoveryCommands command, Args&&... args);
-    static void cleanUploadOperationCache();
-
-protected:
+    static void upload();
+    static void scheduleUploadCancelation();
     void timerEvent(QTimerEvent* event) override;
 
 private:
@@ -135,7 +135,7 @@ private:
     static QBasicTimer s_broadcastTimer;
     static QUdpSocket* s_broadcastSocket;
     static QWebSocketServer* s_webSocketServer;
-    static UploadOperation* s_uploadOperation;
+    static UploadInfo s_uploadInfo;
     static QList<Device> s_devices;
     static QString s_recentDeviceUid;
 };

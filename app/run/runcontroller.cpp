@@ -56,7 +56,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
 void RunController::discharge()
 {
     m_appManuallyTerminated = false;
-    RunManager::terminate();
+    RunManager::sendTerminate();
     m_runPane->stopButton()->setDisabled(true);
     m_runPane->runProgressBar()->setBusy(false);
     m_runPane->runProgressBar()->setProgress(0);
@@ -91,7 +91,7 @@ void RunController::onPreferencesButtonClick()
 void RunController::onRunButtonClick()
 {
     m_appManuallyTerminated = false;
-    RunManager::execute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
+    RunManager::sendExecute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
     m_runPane->runProgressBar()->setBusy(true);
     m_runPane->runProgressBar()->setProgress(1);
     m_runPane->runProgressBar()->setProgressColor(QColor());
@@ -103,7 +103,7 @@ void RunController::onRunButtonClick()
 void RunController::onStopButtonClick()
 {
     m_appManuallyTerminated = true;
-    RunManager::terminate();
+    RunManager::sendTerminate();
 }
 
 void RunController::onProcessStart()
@@ -156,7 +156,7 @@ void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
     m_runPane->runDevicesButton()->removeDevice(UtilityFunctions::deviceUid(deviceInfo));
 
     if (RunManager::recentDevice() == UtilityFunctions::deviceUid(deviceInfo)) {
-        RunManager::terminate();
+        RunManager::sendTerminate();
         if (m_runPane->runProgressBar()->progress() > 0
                 && m_runPane->runProgressBar()->progress() < 100) {
             m_runPane->runProgressBar()->setProgressColor("#e05650");
@@ -184,7 +184,7 @@ void RunController::onDeviceStart()
 
 void RunController::onDeviceErrorOccur(const QString& errorString)
 {
-    RunManager::terminate();
+    RunManager::sendTerminate();
     m_runPane->runProgressBar()->setProgressColor("#e05650");
     m_runPane->stopButton()->setEnabled(false);
     m_runPane->runProgressBar()->setBusy(false);
@@ -194,7 +194,7 @@ void RunController::onDeviceErrorOccur(const QString& errorString)
 
 void RunController::onDeviceFinish(int exitCode)
 {
-    RunManager::terminate();
+    RunManager::sendTerminate();
     if (exitCode == EXIT_FAILURE) {
         m_runPane->runProgressBar()->setProgressColor("#e05650");
         m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
@@ -232,7 +232,7 @@ QString RunController::progressBarMessageFor(MessageKind kind, const QString& ar
         message += tr(msgFailure) + arg + ". " + QTime::currentTime().toString();
         break;
     case Disconnected:
-        message += tr(msgDisconnected) + arg + " at " + QTime::currentTime().toString();
+        message += tr(msgDisconnected) + "<i>" + arg + "</i>. " + QTime::currentTime().toString();
         break;
     case Running:
         message += tr(msgRunning) + deviceName(RunManager::deviceInfo(RunManager::recentDevice()));
