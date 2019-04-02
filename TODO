@@ -1,3 +1,23 @@
+https://stackoverflow.com/questions/31498114/how-to-programmatically-prevent-linux-computer-from-sleeping-or-turning-on-scree
+https://developer.apple.com/library/archive/qa/qa1340/_index.html
+qt prevent app going sleep
+https://stackoverflow.com/questions/34179653/how-do-i-prevent-an-android-device-from-going-to-sleep-from-qt-application
+
+interpreter'ın yolladığı konsol çıktılarındaki control (dosya klasör) yolları düzeltilecek, yada göreceli yol olarak düzeltilip öyle yollanacak
+interpreter işi bitince Ow içindeki entegre interpreter'e de ayar/düzen çek
+interpreter'da multiple projeler konusunu hallet, ayrıca arayüzden de istenilen proje çalıştırılabilmeli
+zipasyn lere kadar gir, asyn'de ki template boşluklarını sil, zipasync'de ise thread pool olayını ekle, her ikisine de son rutuşları yap, interpreter dahil en son commitleri baz alacak şekilde güncelle
+interpreter'da QT_TR_NOOP kullan, context class isimlerini sil
+interpreter'de de crash durumlarında ufak toast tarzı mesajlar gösterilsin
+interpreter localhost loopback den bulunmuyor ios simulator üzerinde, bunu düzelt
+interpreter telefonu uykuya gitmesine mani olmalı ayrıca ayarlara bu özelliği değiştirme seçeneği ekle
+zipasync'de miniz versiyonunu güncelle
+miniz'e katkıda bulun ve pragma error 64bit android'ler de default olarak gözükmesin
+zipasync'de mümkünse önce rapor sonra progress gönderilsin, report.h içindeki makrolarda
+async'nin readme sindeki hataları zipasync ye bakarak düzelt
+proje import/export ları ve diğer zipasyn yerlerini de fixleyebiliriz
+
+
 ------------------------------------------
 | file               | directory         |
 |--------------------|-------------------|

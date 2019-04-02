@@ -90,6 +90,7 @@ public:
 public:
     static RunManager* instance();
     static QString recentDevice();
+    static QString recentProjectDirectory();
     static QVariantMap deviceInfo(const QString& uid);
     static bool isLocalDevice(const QString& uid);
 
@@ -98,6 +99,7 @@ public:
     static void sendProgressReport(int progress);
     static void sendExecute(const QString& uid, const QString& projectDirectory);
     static void scheduleUploadCancelation();
+
 
 private slots:
     void onNewConnection();
@@ -133,6 +135,7 @@ private:
     static UploadInfo s_uploadInfo;
     static QList<Device> s_devices;
     static QString s_recentDeviceUid;
+    static QString s_recentProjectDirectory;
 };
 
 Q_DECLARE_METATYPE(RunManager::DiscoveryCommands)

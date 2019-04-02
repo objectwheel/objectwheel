@@ -32,6 +32,7 @@ public:
 public:
     PathFinder() = delete;
     static QString cleansed(const QString& text, bool withUid = false);
+    static QString locallyCleansed(const QString& text, bool withUid = false);
     static GlobalResult findGlobal(const QString& line);
     static InternalResult findInternal(const QString& line);
 };

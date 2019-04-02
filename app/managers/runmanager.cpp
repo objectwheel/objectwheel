@@ -20,6 +20,7 @@ QWebSocketServer* RunManager::s_webSocketServer = nullptr;
 RunManager::UploadInfo RunManager::s_uploadInfo;
 QList<RunManager::Device> RunManager::s_devices;
 QString RunManager::s_recentDeviceUid;
+QString RunManager::s_recentProjectDirectory;
 
 RunManager::RunManager(QObject* parent) : QObject(parent)
 {
@@ -98,6 +99,11 @@ RunManager* RunManager::instance()
 QString RunManager::recentDevice()
 {
     return s_recentDeviceUid;
+}
+
+QString RunManager::recentProjectDirectory()
+{
+    return s_recentProjectDirectory;
 }
 
 QVariantMap RunManager::deviceInfo(const QString& uid)
@@ -185,6 +191,7 @@ void RunManager::sendExecute(const QString& uid, const QString& projectDirectory
         sendTerminate();
         s_recentDeviceUid = uid;
         if (isLocalDevice(uid)) {
+            s_recentProjectDirectory = projectDirectory;
             device.process->setArguments(QStringList(projectDirectory));
             device.process->setProgram(QCoreApplication::applicationDirPath() + "/interpreter");
             device.process->start();
@@ -244,6 +251,10 @@ void RunManager::onBinaryMessageReceived(const QByteArray& incomingData)
     }
 
     case StartReport: {
+        QString projectDirectory;
+        UtilityFunctions::pull(data, projectDirectory);
+        if (!projectDirectory.isEmpty())
+            s_recentProjectDirectory = projectDirectory;
         emit applicationStarted();
         break;
     }

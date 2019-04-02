@@ -182,8 +182,8 @@ void IssuesPane::refresh(Control* control)
         auto item = new QListWidgetItem;
         item->setData(QmlErrorIndexRole, controlErrors->errors.size() - 1);
         item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
-        item->setData(Qt::ToolTipRole, PathFinder::cleansed(error.toString()));
-        item->setData(Qt::DisplayRole, PathFinder::cleansed(error.toString()));
+        item->setData(Qt::ToolTipRole, PathFinder::locallyCleansed(error.toString()));
+        item->setData(Qt::DisplayRole, PathFinder::locallyCleansed(error.toString()));
         item->setIcon(UtilityFunctions::iconForQmlError(error, this));
         addItem(item);
     }

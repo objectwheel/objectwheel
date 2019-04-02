@@ -3,25 +3,51 @@
 #include <control.h>
 #include <filemanager.h>
 #include <projectmanager.h>
+#include <runmanager.h>
 #include <QRegularExpression>
 
 namespace {
-const char* g_globalPattern = "%1::([\\w\\\\\\/\\.\\d]+):-?(\\d+)";
-const char* g_internalPattern = "[a-z_][a-zA-Z0-9_]+::([a-f0-9]+)::([\\w\\\\\\/\\.\\d]+):-?(\\d+)";
+
+QString withBase(const QString& path, const QString& base)
+{
+    QString copy(path);
+    return copy.replace(ProjectManager::dir(), base);
+}
+
 }
 
 QString PathFinder::cleansed(const QString& text, bool withUid)
 {
     QString cleansed(text);
     for (const Control* control : Control::controls()) {
-        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(control->dir()) + separator());
         const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
+        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(
+            withBase(control->dir(), RunManager::recentProjectDirectory())) + separator());
         if (cleansed.contains(exp))
             cleansed.replace(exp, clean);
     }
 
-    QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toGlobalDir(ProjectManager::dir()) + separator());
     const QString& clean = QObject::tr("GlobalResources") + "::";
+    QRegularExpression exp("file:\\/{1,3}" +
+        SaveUtils::toGlobalDir(RunManager::recentProjectDirectory()) + separator());
+    if (cleansed.contains(exp))
+        cleansed.replace(exp, clean);
+
+    return cleansed;
+}
+
+QString PathFinder::locallyCleansed(const QString& text, bool withUid)
+{
+    QString cleansed(text);
+    for (const Control* control : Control::controls()) {
+        const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
+        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(control->dir()) + separator());
+        if (cleansed.contains(exp))
+            cleansed.replace(exp, clean);
+    }
+
+    const QString& clean = QObject::tr("GlobalResources") + "::";
+    QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toGlobalDir(ProjectManager::dir()) + separator());
     if (cleansed.contains(exp))
         cleansed.replace(exp, clean);
 
@@ -30,7 +56,7 @@ QString PathFinder::cleansed(const QString& text, bool withUid)
 
 PathFinder::GlobalResult PathFinder::findGlobal(const QString& line)
 {
-    const QRegularExpression exp(QString(g_globalPattern).arg(QObject::tr("GlobalResources")));
+    const QRegularExpression exp(QString("%1::([\\w\\\\\\/\\.\\d]+):-?(\\d+)").arg(QObject::tr("GlobalResources")));
     const QRegularExpressionMatch& match = exp.match(line);
 
     GlobalResult result;
@@ -46,7 +72,7 @@ PathFinder::GlobalResult PathFinder::findGlobal(const QString& line)
 
 PathFinder::InternalResult PathFinder::findInternal(const QString& line)
 {
-    const QRegularExpression exp(g_internalPattern);
+    const QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::([a-f0-9]+)::([\\w\\\\\\/\\.\\d]+):-?(\\d+)");
     const QRegularExpressionMatch& match = exp.match(line);
     const QString& uid = match.captured(1);
 
