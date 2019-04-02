@@ -50,19 +50,19 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
     QMetaObject::invokeMethod(this, [=] { deviceConnected(localDevice.uid()); }, Qt::QueuedConnection);
 
     connect(localDevice.process, &QProcess::readyReadStandardError,
-            this, [=] { emit processReadyOutput(localDevice.process->readAllStandardError()); });
+            this, [=] { emit applicationReadyOutput(localDevice.process->readAllStandardError()); });
     connect(localDevice.process, &QProcess::readyReadStandardOutput,
-            this, [=] { emit processReadyOutput(localDevice.process->readAllStandardOutput()); });
+            this, [=] { emit applicationReadyOutput(localDevice.process->readAllStandardOutput()); });
     connect(localDevice.process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished),
-            this, &RunManager::processFinished);
+            this, &RunManager::applicationFinished);
     connect(localDevice.process, &QProcess::errorOccurred, this, [=] (QProcess::ProcessError error)
-    { emit processErrorOccurred(error, localDevice.process->errorString()); });
-    connect(localDevice.process, &QProcess::started, this, &RunManager::processStarted);
+    { emit applicationErrorOccurred(error, localDevice.process->errorString()); });
+    connect(localDevice.process, &QProcess::started, this, &RunManager::applicationStarted);
     connect(qApp, &QApplication::aboutToQuit, this, &RunManager::sendTerminate);
 
     connect(&s_uploadInfo.watcher, &QFutureWatcherBase::progressValueChanged,
             this, [] (int progress) {
-        emit instance()->deviceUploadProgress(progress / 3);
+        emit instance()->applicationUploadProgress(progress / 3);
         sendProgressReport(progress);
     });
     connect(&s_uploadInfo.watcher, &QFutureWatcherBase::finished, this, [] {
@@ -71,7 +71,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
             size_t lastResult = s_uploadInfo.watcher.resultAt(lastIndex);
             if (lastResult == 0) { // Error occurred
                 s_uploadInfo.cacheDir.reset(nullptr);
-                emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
+                emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
                     tr(s_uploadInfo.watcher.progressText().toUtf8().data()));
             } else if (!s_uploadInfo.watcher.isCanceled()) { // Succeed
                 upload();
@@ -133,8 +133,8 @@ void RunManager::timerEvent(QTimerEvent* event)
 
         if (!s_uploadInfo.cacheDir->isValid()) {
             s_uploadInfo.cacheDir.reset(nullptr);
-            emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
-                                                 tr("Cannot create a temporary directory."));
+            emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
+                                                      tr("Cannot create a temporary directory."));
             return;
         }
 
@@ -143,8 +143,8 @@ void RunManager::timerEvent(QTimerEvent* event)
 
         if (s_uploadInfo.watcher.isCanceled()) {
             s_uploadInfo.cacheDir.reset(nullptr);
-            emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
-                                                 tr("Cannot create a zip archive."));
+            emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
+                                                      tr("Cannot create a zip archive."));
             return;
         }
 
@@ -244,21 +244,21 @@ void RunManager::onBinaryMessageReceived(const QByteArray& incomingData)
     }
 
     case StartReport: {
-        emit deviceStarted();
+        emit applicationStarted();
         break;
     }
 
     case OutputReport: {
         QString output;
         UtilityFunctions::pull(data, output);
-        emit deviceReadyOutput(output);
+        emit applicationReadyOutput(output);
         break;
     }
 
     case ErrorReport: {
         QString errorString;
         UtilityFunctions::pull(data, errorString);
-        emit deviceErrorOccurred(QProcess::FailedToStart, errorString);
+        emit applicationErrorOccurred(QProcess::FailedToStart, errorString);
         break;
     }
 
@@ -267,15 +267,15 @@ void RunManager::onBinaryMessageReceived(const QByteArray& incomingData)
         bool crashExit;
         UtilityFunctions::pull(data, exitCode, crashExit);
         if (crashExit)
-            emit deviceErrorOccurred(QProcess::Crashed, QString());
-        emit deviceFinished(exitCode, crashExit ? QProcess::CrashExit : QProcess::NormalExit);
+            emit applicationErrorOccurred(QProcess::Crashed, QString());
+        emit applicationFinished(exitCode, crashExit ? QProcess::CrashExit : QProcess::NormalExit);
         break;
     }
 
     case ProgressReport: {
         int progress;
         UtilityFunctions::pull(data, progress);
-        emit deviceUploadProgress(67 + progress / 3);
+        emit applicationUploadProgress(67 + progress / 3);
         break;
     }
 
@@ -292,14 +292,14 @@ void RunManager::upload()
         if (!file.open(QFile::ReadOnly)) {
             file.close();
             s_uploadInfo.cacheDir.reset(nullptr);
-            emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
-                                                 tr("Cannot open a temporary file."));
+            emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
+                                                      tr("Cannot open a temporary file."));
             return;
         }
         auto connection = connect(device.socket, &QWebSocket::bytesWritten, [&file] (qint64 bytes) {
             if (!s_uploadInfo.canceled) {
                 int progress = 100 * bytes / file.size();
-                emit instance()->deviceUploadProgress(33 + progress / 3);
+                emit instance()->applicationUploadProgress(33 + progress / 3);
             }
         });
         enum { FRAME_SIZE = 10485760 }; // 10MB

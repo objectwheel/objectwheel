@@ -316,12 +316,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, &MainWindow::resetSettings);
 
-
-    connect(RunManager::instance(), &RunManager::processReadyOutput, this, [=] (const QString& output)
+    connect(RunManager::instance(), &RunManager::applicationReadyOutput, this, [=] (const QString& output)
     { m_centralWidget->consolePane()->press(output, palette().linkVisited()); });
-    connect(RunManager::instance(), &RunManager::deviceReadyOutput, this, [=] (const QString& output)
-    { m_centralWidget->consolePane()->press(output, palette().linkVisited()); });
-    connect(RunManager::instance(), &RunManager::processFinished,
+    connect(RunManager::instance(), &RunManager::applicationFinished,
             [=] (int exitCode, QProcess::ExitStatus exitStatus) {
         auto console = m_centralWidget->consolePane();
         auto timestamp = QTime::currentTime().toString();
@@ -334,7 +331,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
                            QString::fromUtf8("%1.\n").arg(exitCode), QColor("#025dbf"), QFont::DemiBold);
         }
     });
-    connect(RunManager::instance(), &RunManager::processErrorOccurred,
+    connect(RunManager::instance(), &RunManager::applicationErrorOccurred,
             [=] (QProcess::ProcessError error, const QString& errorString) {
         auto console = m_centralWidget->consolePane();
         auto timestamp = QTime::currentTime().toString();

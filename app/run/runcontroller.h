@@ -1,12 +1,9 @@
 #ifndef RUNCONTROLLER_H
 #define RUNCONTROLLER_H
 
-#include <QObject>
 #include <QProcess>
 
 class RunPane;
-struct InterfaceSettings;
-
 class RunController final : public QObject
 {
     Q_OBJECT
@@ -36,13 +33,13 @@ private slots:
     void onRunButtonClick();
     void onStopButtonClick();
 
-    void onProcessStart();
-    void onProcessErrorOccur(QProcess::ProcessError error, const QString& errorString);
-    void onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus);
+    void onApplicationStart();
+    void onApplicationErrorOccur(QProcess::ProcessError error, const QString& errorString);
+    void onApplicationFinish(int exitCode, QProcess::ExitStatus exitStatus);
+    void onApplicationUploadProgress(int progress);
 
     void onDeviceConnect(const QString& uid);
     void onDeviceDisconnect(const QVariantMap& deviceInfo);
-    void onDeviceUploadProgress(int progress);
 
 private:
     static QString progressBarMessageFor(MessageKind kind, const QString& arg = QString());

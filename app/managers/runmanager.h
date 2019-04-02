@@ -11,7 +11,7 @@ class QUdpSocket;
 class QWebSocket;
 class QWebSocketServer;
 
-class RunManager : public QObject
+class RunManager final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(RunManager)
@@ -117,16 +117,12 @@ private:
 signals:
     void deviceConnected(const QString& uid);
     void deviceDisconnected(const QVariantMap& deviceInfo);
-    void deviceUploadProgress(int progress);
-    void deviceStarted();
-    void deviceReadyOutput(const QString& output);
-    void deviceErrorOccurred(QProcess::ProcessError error, const QString& errorString);
-    void deviceFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
-    void processStarted();
-    void processReadyOutput(const QString& output);
-    void processErrorOccurred(QProcess::ProcessError error, const QString& errorString);
-    void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void applicationStarted();
+    void applicationUploadProgress(int progress);
+    void applicationReadyOutput(const QString& output);
+    void applicationErrorOccurred(QProcess::ProcessError error, const QString& errorString);
+    void applicationFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
     static RunManager* s_instance;

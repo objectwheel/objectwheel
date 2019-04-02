@@ -11,8 +11,6 @@
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <utilityfunctions.h>
-
-#include <QApplication>
 #include <QTime>
 
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
@@ -35,25 +33,19 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
     connect(m_runPane->stopButton(), &PushButton::clicked,
             this, &RunController::onStopButtonClick);
 
-    connect(RunManager::instance(), &RunManager::processStarted,
-            this, &RunController::onProcessStart);
-    connect(RunManager::instance(), &RunManager::processErrorOccurred,
-            this, &RunController::onProcessErrorOccur);
-    connect(RunManager::instance(), &RunManager::processFinished,
-            this, &RunController::onProcessFinish);
+    connect(RunManager::instance(), &RunManager::applicationStarted,
+            this, &RunController::onApplicationStart);
+    connect(RunManager::instance(), &RunManager::applicationErrorOccurred,
+            this, &RunController::onApplicationErrorOccur);
+    connect(RunManager::instance(), &RunManager::applicationFinished,
+            this, &RunController::onApplicationFinish);
+    connect(RunManager::instance(), &RunManager::applicationUploadProgress,
+            this, &RunController::onApplicationUploadProgress);
 
     connect(RunManager::instance(), &RunManager::deviceConnected,
             this, &RunController::onDeviceConnect);
     connect(RunManager::instance(), &RunManager::deviceDisconnected,
             this, &RunController::onDeviceDisconnect);
-    connect(RunManager::instance(), &RunManager::deviceUploadProgress,
-            this, &RunController::onDeviceUploadProgress);
-    connect(RunManager::instance(), &RunManager::deviceStarted,
-            this, &RunController::onProcessStart);
-    connect(RunManager::instance(), &RunManager::deviceErrorOccurred,
-            this, &RunController::onProcessErrorOccur);
-    connect(RunManager::instance(), &RunManager::deviceFinished,
-            this, &RunController::onProcessFinish);
 }
 
 void RunController::discharge()
@@ -94,10 +86,12 @@ void RunController::onPreferencesButtonClick()
 
 void RunController::onRunButtonClick()
 {
-    if (m_runPane->stopButton()->isEnabled())
+    if (m_runPane->stopButton()->isEnabled()) {
         m_runScheduled = true;
-    else
+    } else {
         m_runScheduled = false;
+        QMetaObject::invokeMethod(this, &RunController::ran, Qt::QueuedConnection);
+    }
     m_appManuallyTerminated = false;
     m_runPane->runProgressBar()->setBusy(true);
     m_runPane->runProgressBar()->setProgress(1);
@@ -105,7 +99,6 @@ void RunController::onRunButtonClick()
     m_runPane->runProgressBar()->setText(progressBarMessageFor(Starting));
     m_runPane->stopButton()->setEnabled(true);
     RunManager::sendExecute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
-    emit ran();
 }
 
 void RunController::onStopButtonClick()
@@ -114,7 +107,7 @@ void RunController::onStopButtonClick()
     RunManager::sendTerminate();
 }
 
-void RunController::onProcessStart()
+void RunController::onApplicationStart()
 {
     m_runPane->runProgressBar()->setBusy(false);
     m_runPane->runProgressBar()->setProgress(100);
@@ -122,7 +115,7 @@ void RunController::onProcessStart()
     m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
 }
 
-void RunController::onProcessErrorOccur(QProcess::ProcessError error, const QString& errorString)
+void RunController::onApplicationErrorOccur(QProcess::ProcessError error, const QString& errorString)
 {
     if (error == QProcess::Crashed && m_runScheduled)
         return;
@@ -140,10 +133,11 @@ void RunController::onProcessErrorOccur(QProcess::ProcessError error, const QStr
     }
 }
 
-void RunController::onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus)
+void RunController::onApplicationFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
     if (exitStatus == QProcess::CrashExit && m_runScheduled) {
         m_runScheduled = false;
+        emit ran();
         return;
     }
     m_runScheduled = false;
@@ -156,6 +150,11 @@ void RunController::onProcessFinish(int exitCode, QProcess::ExitStatus exitStatu
         }
     }
     m_runPane->stopButton()->setEnabled(false);
+}
+
+void RunController::onApplicationUploadProgress(int progress)
+{
+    m_runPane->runProgressBar()->setProgress(progress * 0.99);
 }
 
 void RunController::onDeviceConnect(const QString& uid)
@@ -187,11 +186,6 @@ void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
                         progressBarMessageFor(Disconnected, UtilityFunctions::deviceName(deviceInfo)));
         }
     }
-}
-
-void RunController::onDeviceUploadProgress(int progress)
-{
-    m_runPane->runProgressBar()->setProgress(progress * 0.99);
 }
 
 QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
