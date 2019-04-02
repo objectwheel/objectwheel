@@ -127,6 +127,7 @@ void RunManager::timerEvent(QTimerEvent* event)
         s_broadcastSocket->writeDatagram(UtilityFunctions::push(Broadcast),
                                          QHostAddress::Broadcast, BROADCAST_PORT);
     } else if (event->timerId() == s_remoteExecutionTimer.timerId()) {
+        s_remoteExecutionTimer.stop();
         s_uploadInfo.cacheDir.reset(new QTemporaryDir);
         s_uploadInfo.canceled = false;
 
