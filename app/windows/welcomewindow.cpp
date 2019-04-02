@@ -87,6 +87,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     connect(m_loginWidget, &LoginWidget::about, [=]
     {
         WindowManager::aboutWindow()->show();
+        WindowManager::aboutWindow()->activateWindow();
     });
     connect(m_loginWidget, &LoginWidget::done, [=]
     {
