@@ -48,11 +48,11 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
     connect(RunManager::instance(), &RunManager::deviceUploadProgress,
             this, &RunController::onDeviceUploadProgress);
     connect(RunManager::instance(), &RunManager::deviceStarted,
-            this, &RunController::onDeviceStart);
+            this, &RunController::onProcessStart);
     connect(RunManager::instance(), &RunManager::deviceErrorOccurred,
-            this, &RunController::onDeviceErrorOccur);
+            this, &RunController::onProcessErrorOccur);
     connect(RunManager::instance(), &RunManager::deviceFinished,
-            this, &RunController::onDeviceFinish);
+            this, &RunController::onProcessFinish);
 }
 
 void RunController::discharge()
@@ -93,12 +93,12 @@ void RunController::onPreferencesButtonClick()
 void RunController::onRunButtonClick()
 {
     m_appManuallyTerminated = false;
-    RunManager::sendExecute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
     m_runPane->runProgressBar()->setBusy(true);
     m_runPane->runProgressBar()->setProgress(1);
     m_runPane->runProgressBar()->setProgressColor(QColor());
     m_runPane->runProgressBar()->setText(progressBarMessageFor(Starting));
     m_runPane->stopButton()->setEnabled(true);
+    RunManager::sendExecute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
     emit ran();
 }
 
@@ -153,11 +153,12 @@ void RunController::onDeviceConnect(const QString& uid)
 
 void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
 {
-    if (m_runPane->runDevicesButton()->currentDevice() == UtilityFunctions::deviceUid(deviceInfo))
+    const QString& deviceUid = UtilityFunctions::deviceUid(deviceInfo);
+    if (m_runPane->runDevicesButton()->currentDevice() == deviceUid)
         m_runPane->runDevicesButton()->setCurrentDevice(UtilityFunctions::deviceUid(UtilityFunctions::localDeviceInfo()));
-    m_runPane->runDevicesButton()->removeDevice(UtilityFunctions::deviceUid(deviceInfo));
+    m_runPane->runDevicesButton()->removeDevice(deviceUid);
 
-    if (RunManager::recentDevice() == UtilityFunctions::deviceUid(deviceInfo)) {
+    if (RunManager::recentDevice() == deviceUid) {
         RunManager::scheduleUploadCancelation();
         if (m_runPane->runProgressBar()->progress() > 0
                 && m_runPane->runProgressBar()->progress() < 100) {
@@ -165,47 +166,17 @@ void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
             m_runPane->runProgressBar()->setBusy(false);
             m_runPane->runProgressBar()->setProgress(100);
         }
-        m_runPane->stopButton()->setEnabled(false);
-        m_runPane->runProgressBar()->setText(
-            progressBarMessageFor(Disconnected,UtilityFunctions::deviceName(deviceInfo)));
+        if (m_runPane->stopButton()->isEnabled()) {
+            m_runPane->stopButton()->setEnabled(false);
+            m_runPane->runProgressBar()->setText(
+                        progressBarMessageFor(Disconnected, UtilityFunctions::deviceName(deviceInfo)));
+        }
     }
 }
 
 void RunController::onDeviceUploadProgress(int progress)
 {
     m_runPane->runProgressBar()->setProgress(progress * 0.99);
-}
-
-void RunController::onDeviceStart()
-{
-    m_runPane->runProgressBar()->setBusy(false);
-    m_runPane->runProgressBar()->setProgress(100);
-    m_runPane->runProgressBar()->setProgressColor("#247dd6");
-    m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
-}
-
-void RunController::onDeviceErrorOccur(const QString& errorString)
-{
-    RunManager::sendTerminate();
-    m_runPane->runProgressBar()->setProgressColor("#e05650");
-    m_runPane->stopButton()->setEnabled(false);
-    m_runPane->runProgressBar()->setBusy(false);
-    m_runPane->runProgressBar()->setProgress(100);
-    m_runPane->runProgressBar()->setText(progressBarMessageFor(Failure, errorString));
-}
-
-void RunController::onDeviceFinish(int exitCode)
-{
-    if (exitCode == EXIT_FAILURE) {
-        m_runPane->runProgressBar()->setProgressColor("#e05650");
-        m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
-    } else {
-        if (m_appManuallyTerminated)
-            m_runPane->runProgressBar()->setText(progressBarMessageFor(Stopped));
-        else
-            m_runPane->runProgressBar()->setText(progressBarMessageFor(Finished));
-    }
-    m_runPane->stopButton()->setEnabled(false);
 }
 
 QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)

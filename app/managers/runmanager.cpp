@@ -14,6 +14,7 @@
 
 RunManager* RunManager::s_instance = nullptr;
 QBasicTimer RunManager::s_broadcastTimer;
+QBasicTimer RunManager::s_remoteExecutionTimer;
 QUdpSocket* RunManager::s_broadcastSocket = nullptr;
 QWebSocketServer* RunManager::s_webSocketServer = nullptr;
 RunManager::UploadInfo RunManager::s_uploadInfo;
@@ -70,7 +71,8 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
             size_t lastResult = s_uploadInfo.watcher.resultAt(lastIndex);
             if (lastResult == 0) { // Error occurred
                 s_uploadInfo.cacheDir.reset(nullptr);
-                emit instance()->deviceErrorOccurred(tr(s_uploadInfo.watcher.progressText().toUtf8().data()));
+                emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
+                    tr(s_uploadInfo.watcher.progressText().toUtf8().data()));
             } else if (!s_uploadInfo.watcher.isCanceled()) { // Succeed
                 upload();
             }
@@ -124,6 +126,28 @@ void RunManager::timerEvent(QTimerEvent* event)
     if (event->timerId() == s_broadcastTimer.timerId()) {
         s_broadcastSocket->writeDatagram(UtilityFunctions::push(Broadcast),
                                          QHostAddress::Broadcast, BROADCAST_PORT);
+    } else if (event->timerId() == s_remoteExecutionTimer.timerId()) {
+        s_uploadInfo.cacheDir.reset(new QTemporaryDir);
+        s_uploadInfo.canceled = false;
+
+        if (!s_uploadInfo.cacheDir->isValid()) {
+            s_uploadInfo.cacheDir.reset(nullptr);
+            emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
+                                                 tr("Cannot create a temporary directory."));
+            return;
+        }
+
+        s_uploadInfo.fileName = s_uploadInfo.cacheDir->path() + "/project.zip";
+        s_uploadInfo.watcher.setFuture(ZipAsync::zip(s_uploadInfo.projectDir, s_uploadInfo.fileName));
+
+        if (s_uploadInfo.watcher.isCanceled()) {
+            s_uploadInfo.cacheDir.reset(nullptr);
+            emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
+                                                 tr("Cannot create a zip archive."));
+            return;
+        }
+
+        sendUploadStarted();
     } else {
         QObject::timerEvent(event);
     }
@@ -164,29 +188,9 @@ void RunManager::sendExecute(const QString& uid, const QString& projectDirectory
             device.process->setProgram(QCoreApplication::applicationDirPath() + "/interpreter");
             device.process->start();
         } else {
-            QTimer::singleShot(100, [uid, projectDirectory] { // Wait until ongoing upload cancels
-                s_uploadInfo.cacheDir.reset(new QTemporaryDir);
-                s_uploadInfo.canceled = false;
-                s_uploadInfo.deviceUid = uid;
-                s_uploadInfo.projectUid = SaveUtils::projectUid(projectDirectory);
-
-                if (!s_uploadInfo.cacheDir->isValid()) {
-                    s_uploadInfo.cacheDir.reset(nullptr);
-                    emit instance()->deviceErrorOccurred(tr("Cannot create a temporary directory."));
-                    return;
-                }
-
-                s_uploadInfo.fileName = s_uploadInfo.cacheDir->path() + "/project.zip";
-                s_uploadInfo.watcher.setFuture(ZipAsync::zip(projectDirectory, s_uploadInfo.fileName));
-
-                if (s_uploadInfo.watcher.isCanceled()) {
-                    s_uploadInfo.cacheDir.reset(nullptr);
-                    emit instance()->deviceErrorOccurred(tr("Cannot create a zip archive."));
-                    return;
-                }
-
-                sendUploadStarted();
-            });
+            s_uploadInfo.deviceUid = uid;
+            s_uploadInfo.projectDir = projectDirectory;
+            s_remoteExecutionTimer.start(100, instance()); // Wait until ongoing upload cancels
         }
     }
 }
@@ -253,14 +257,17 @@ void RunManager::onBinaryMessageReceived(const QByteArray& incomingData)
     case ErrorReport: {
         QString errorString;
         UtilityFunctions::pull(data, errorString);
-        emit deviceErrorOccurred(errorString);
+        emit deviceErrorOccurred(QProcess::FailedToStart, errorString);
         break;
     }
 
     case FinishReport: {
         int exitCode;
-        UtilityFunctions::pull(data, exitCode);
-        emit deviceFinished(exitCode);
+        bool crashExit;
+        UtilityFunctions::pull(data, exitCode, crashExit);
+        if (crashExit)
+            emit deviceErrorOccurred(QProcess::Crashed, QString());
+        emit deviceFinished(exitCode, crashExit ? QProcess::CrashExit : QProcess::NormalExit);
         break;
     }
 
@@ -279,17 +286,20 @@ void RunManager::onBinaryMessageReceived(const QByteArray& incomingData)
 
 void RunManager::upload()
 {
-    if (const Device& device = Device::get(s_devices, s_uploadInfo.deviceUid)) {
+    if (const Device device = Device::get(s_devices, s_uploadInfo.deviceUid)) {
         QFile file(s_uploadInfo.fileName);
         if (!file.open(QFile::ReadOnly)) {
             file.close();
             s_uploadInfo.cacheDir.reset(nullptr);
-            emit instance()->deviceErrorOccurred(tr("Cannot open a temporary file."));
+            emit instance()->deviceErrorOccurred(QProcess::FailedToStart,
+                                                 tr("Cannot open a temporary file."));
             return;
         }
         auto connection = connect(device.socket, &QWebSocket::bytesWritten, [&file] (qint64 bytes) {
-            int progress = 100 * bytes / file.size();
-            emit instance()->deviceUploadProgress(33 + progress / 3);
+            if (!s_uploadInfo.canceled) {
+                int progress = 100 * bytes / file.size();
+                emit instance()->deviceUploadProgress(33 + progress / 3);
+            }
         });
         enum { FRAME_SIZE = 10485760 }; // 10MB
         for (qint64 pos = 0; pos < file.size(); pos += FRAME_SIZE) {
@@ -305,7 +315,7 @@ void RunManager::upload()
 
             int progress = 100 * pos / file.size();
             bool isLastFrame = file.size() - pos <= FRAME_SIZE;
-            const QString& projectUid = isLastFrame ? s_uploadInfo.projectUid : QString();
+            const QString& projectUid = isLastFrame ? SaveUtils::projectUid(s_uploadInfo.projectDir) : QString();
 
             file.seek(pos);
             send(s_uploadInfo.deviceUid, Execute, projectUid, progress, pos, file.read(FRAME_SIZE));

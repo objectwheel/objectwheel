@@ -43,10 +43,6 @@ private slots:
     void onDeviceConnect(const QString& uid);
     void onDeviceDisconnect(const QVariantMap& deviceInfo);
     void onDeviceUploadProgress(int progress);
-    void onDeviceStart();
-    void onDeviceErrorOccur(const QString& errorString);
-    void onDeviceFinish(int exitCode);
-
 
 private:
     static QString progressBarMessageFor(MessageKind kind, const QString& arg = QString());

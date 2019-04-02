@@ -68,7 +68,7 @@ class RunManager : public QObject
         bool canceled;
         QString fileName;
         QString deviceUid;
-        QString projectUid;
+        QString projectDir;
         QFutureWatcher<size_t> watcher;
         QScopedPointer<QTemporaryDir> cacheDir;
     };
@@ -120,8 +120,8 @@ signals:
     void deviceUploadProgress(int progress);
     void deviceStarted();
     void deviceReadyOutput(const QString& output);
-    void deviceErrorOccurred(const QString& errorString);
-    void deviceFinished(int exitCode);
+    void deviceErrorOccurred(QProcess::ProcessError error, const QString& errorString);
+    void deviceFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
     void processStarted();
     void processReadyOutput(const QString& output);
@@ -131,6 +131,7 @@ signals:
 private:
     static RunManager* s_instance;
     static QBasicTimer s_broadcastTimer;
+    static QBasicTimer s_remoteExecutionTimer;
     static QUdpSocket* s_broadcastSocket;
     static QWebSocketServer* s_webSocketServer;
     static UploadInfo s_uploadInfo;
