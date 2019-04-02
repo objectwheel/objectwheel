@@ -51,6 +51,7 @@ signals:
     void ran();
 
 private:
+    bool m_runScheduled;
     bool m_appManuallyTerminated;
     RunPane* m_runPane;
 };

@@ -16,6 +16,7 @@
 #include <QTime>
 
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
+  , m_runScheduled(false)
   , m_appManuallyTerminated(false)
   , m_runPane(runPane)
 {    
@@ -57,6 +58,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
 
 void RunController::discharge()
 {
+    m_runScheduled = false;
     m_appManuallyTerminated = false;
     RunManager::sendTerminate();
     m_runPane->stopButton()->setDisabled(true);
@@ -92,6 +94,10 @@ void RunController::onPreferencesButtonClick()
 
 void RunController::onRunButtonClick()
 {
+    if (m_runPane->stopButton()->isEnabled())
+        m_runScheduled = true;
+    else
+        m_runScheduled = false;
     m_appManuallyTerminated = false;
     m_runPane->runProgressBar()->setBusy(true);
     m_runPane->runProgressBar()->setProgress(1);
@@ -118,6 +124,9 @@ void RunController::onProcessStart()
 
 void RunController::onProcessErrorOccur(QProcess::ProcessError error, const QString& errorString)
 {
+    if (error == QProcess::Crashed && m_runScheduled)
+        return;
+    m_runScheduled = false;
     m_runPane->runProgressBar()->setProgressColor("#e05650");
     if (error == QProcess::FailedToStart) {
         m_runPane->stopButton()->setEnabled(false);
@@ -133,6 +142,11 @@ void RunController::onProcessErrorOccur(QProcess::ProcessError error, const QStr
 
 void RunController::onProcessFinish(int exitCode, QProcess::ExitStatus exitStatus)
 {
+    if (exitStatus == QProcess::CrashExit && m_runScheduled) {
+        m_runScheduled = false;
+        return;
+    }
+    m_runScheduled = false;
     if (exitStatus != QProcess::CrashExit) {
         if (exitCode == EXIT_FAILURE) {
             m_runPane->runProgressBar()->setProgressColor("#e05650");
@@ -159,6 +173,7 @@ void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
     m_runPane->runDevicesButton()->removeDevice(deviceUid);
 
     if (RunManager::recentDevice() == deviceUid) {
+        m_runScheduled = false;
         RunManager::scheduleUploadCancelation();
         if (m_runPane->runProgressBar()->progress() > 0
                 && m_runPane->runProgressBar()->progress() < 100) {
@@ -184,12 +199,12 @@ QString RunController::progressBarMessageFor(MessageKind kind, const QString& ar
     using namespace UtilityFunctions;
     static const char* msgWelcome  = QT_TR_NOOP("<b>Ready</b>  |  Welcome to Objectwheel (Beta)");
     static const char* msgStarting = QT_TR_NOOP("<b>Starting</b> the application....");
-    static const char* msgFailure  = QT_TR_NOOP("<b>System Failure</b>  |  ");
-    static const char* msgDisconnected = QT_TR_NOOP("<b>Disconnected</b>  |  Connection lost to ");
-    static const char* msgRunning  = QT_TR_NOOP("<b>Running</b> on ");
-    static const char* msgCrashed  = QT_TR_NOOP("<b>Crashed</b>  |  The application crashed at ");
-    static const char* msgStopped  = QT_TR_NOOP("<b>Stopped</b>  |  The application terminated at ");
-    static const char* msgFinished = QT_TR_NOOP("<b>Finished</b>  |  The application exited at ");
+    static const char* msgFailure  = QT_TR_NOOP("<b>System Failure</b>  |  %1 at %2");
+    static const char* msgDisconnected = QT_TR_NOOP("<b>Disconnected</b>  |  Connection lost to <i>%1</i> at %2");
+    static const char* msgRunning  = QT_TR_NOOP("<b>Running</b> on %1");
+    static const char* msgCrashed  = QT_TR_NOOP("<b>Crashed</b>  |  The application crashed at %1");
+    static const char* msgStopped  = QT_TR_NOOP("<b>Stopped</b>  |  The application terminated at %1");
+    static const char* msgFinished = QT_TR_NOOP("<b>Finished</b>  |  The application exited at %1");
 
     QString message = "<p style='white-space:pre'>" + ProjectManager::name() + "  :  ";
 
@@ -201,22 +216,22 @@ QString RunController::progressBarMessageFor(MessageKind kind, const QString& ar
         message += tr(msgStarting);
         break;
     case Failure:
-        message += tr(msgFailure) + arg + ". " + QTime::currentTime().toString();
+        message += tr(msgFailure).arg(arg).arg(QTime::currentTime().toString());
         break;
     case Disconnected:
-        message += tr(msgDisconnected) + "<i>" + arg + "</i>. " + QTime::currentTime().toString();
+        message += tr(msgDisconnected).arg(arg).arg(QTime::currentTime().toString());
         break;
     case Running:
-        message += tr(msgRunning) + deviceName(RunManager::deviceInfo(RunManager::recentDevice()));
+        message += tr(msgRunning).arg(deviceName(RunManager::deviceInfo(RunManager::recentDevice())));
         break;
     case Crashed:
-        message += tr(msgCrashed) + QTime::currentTime().toString();
+        message += tr(msgCrashed).arg(QTime::currentTime().toString());
         break;
     case Stopped:
-        message += tr(msgStopped) + QTime::currentTime().toString();
+        message += tr(msgStopped).arg(QTime::currentTime().toString());
         break;
     case Finished:
-        message += tr(msgFinished) + QTime::currentTime().toString();
+        message += tr(msgFinished).arg(QTime::currentTime().toString());
         break;
     default:
         break;
