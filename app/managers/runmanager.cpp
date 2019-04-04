@@ -140,7 +140,7 @@ void RunManager::timerEvent(QTimerEvent* event)
         if (!s_uploadInfo.cacheDir->isValid()) {
             s_uploadInfo.cacheDir.reset(nullptr);
             emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
-                                                      tr("Cannot create a temporary directory."));
+                                                      tr("Cannot create a temporary directory"));
             return;
         }
 
@@ -150,7 +150,7 @@ void RunManager::timerEvent(QTimerEvent* event)
         if (s_uploadInfo.watcher.isCanceled()) {
             s_uploadInfo.cacheDir.reset(nullptr);
             emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
-                                                      tr("Cannot create a zip archive."));
+                                                      tr("Cannot create a zip archive"));
             return;
         }
 
@@ -304,21 +304,14 @@ void RunManager::upload()
             file.close();
             s_uploadInfo.cacheDir.reset(nullptr);
             emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
-                                                      tr("Cannot open a temporary file."));
+                                                      tr("Cannot open a temporary file"));
             return;
         }
-        auto connection = connect(device.socket, &QWebSocket::bytesWritten, [&file] (qint64 bytes) {
-            if (!s_uploadInfo.canceled) {
-                int progress = 100 * bytes / file.size();
-                emit instance()->applicationUploadProgress(33 + progress / 3);
-            }
-        });
         enum { FRAME_SIZE = 10485760 }; // 10MB
         for (qint64 pos = 0; pos < file.size(); pos += FRAME_SIZE) {
             do {
                 qApp->processEvents(QEventLoop::AllEvents, 20);
                 if (s_uploadInfo.canceled) {
-                    disconnect(connection);
                     file.close();
                     s_uploadInfo.cacheDir.reset(nullptr);
                     return;
@@ -331,8 +324,8 @@ void RunManager::upload()
 
             file.seek(pos);
             send(s_uploadInfo.deviceUid, Execute, projectUid, progress, pos, file.read(FRAME_SIZE));
+            emit instance()->applicationUploadProgress(33 + progress / 3);
         }
-        disconnect(connection);
         file.close();
         s_uploadInfo.cacheDir.reset(nullptr);
     }
