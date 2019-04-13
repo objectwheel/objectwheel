@@ -8,7 +8,7 @@ class ButtonSlice;
 class QVBoxLayout;
 class QListWidget;
 class ProgressBar;
-class FilterWidget;
+class SearchWidget;
 
 class ProjectsWidget : public QWidget
 {
@@ -16,7 +16,7 @@ class ProjectsWidget : public QWidget
 
 public:
     explicit ProjectsWidget(QWidget* parent = nullptr);
-    FilterWidget* filterWidget() const;
+    SearchWidget* searchWidget() const;
 
 public slots:
     void refreshProjectList(bool selectionPreserved = false);
@@ -28,7 +28,7 @@ private slots:
     void onImportButtonClick();
     void onSettingsButtonClick();
     void onProgressChange(int progress);
-    void onFilterTextChange(const QString& text);
+    void onSearchTextChange(const QString& text);
 
 private:
     void lock();
@@ -49,7 +49,7 @@ private:
     QLabel* m_welcomeLabel;
     QLabel* m_versionLabel;
     QLabel* m_projectsLabel;
-    FilterWidget* m_filterWidget;
+    SearchWidget* m_searchWidget;
     QListWidget* m_listWidget;
     ButtonSlice* m_buttons;
     ButtonSlice* m_buttons_2;

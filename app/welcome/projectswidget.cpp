@@ -58,35 +58,35 @@ QListWidgetItem* itemForUid(const QListWidget* listWidget, const QString& uid)
 }
 }
 
-class FilterWidget : public QWidget
+class SearchWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit FilterWidget(QWidget* parent = nullptr) : QWidget(parent)
+    explicit SearchWidget(QWidget* parent = nullptr) : QWidget(parent)
       , m_layout(new QHBoxLayout(this))
       , m_sortLabel(new QLabel)
       , m_sortComboBox(new QComboBox)
-      , m_filterLineEdit(new QLineEdit)
+      , m_searchLineEdit(new QLineEdit)
       , m_reverseSortCheckBox(new QCheckBox)
     {
         m_layout->setContentsMargins(2, 0, 0, 0);
         m_layout->setSpacing(0);
-        m_layout->addWidget(m_filterLineEdit);
-        m_layout->addWidget(m_sortLabel);
+        m_layout->addWidget(m_searchLineEdit);
         m_layout->addWidget(m_reverseSortCheckBox);
+        m_layout->addWidget(m_sortLabel);
         m_layout->addWidget(m_sortComboBox);
 
         TransparentStyle::attach(this);
 
-        m_sortLabel->setText("| " + tr("Sort reverse "));
+        m_sortLabel->setText(" " + tr("Reverse by") + " ");
 
-        m_filterLineEdit->setPlaceholderText(tr("Filter"));
-        m_filterLineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
-        m_filterLineEdit->setClearButtonEnabled(true);
-        m_filterLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-        m_filterLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_filterLineEdit->setToolTip(tr("Filter by name"));
+        m_searchLineEdit->setPlaceholderText(tr("Search"));
+        m_searchLineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
+        m_searchLineEdit->setClearButtonEnabled(true);
+        m_searchLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+        m_searchLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_searchLineEdit->setToolTip(tr("Search by name"));
 
         m_sortComboBox->addItem(tr("Date"));
         m_sortComboBox->addItem(tr("Name"));
@@ -95,13 +95,12 @@ public:
         m_sortComboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
         m_sortComboBox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-        m_reverseSortCheckBox->setText("by :");
-        m_reverseSortCheckBox->setToolTip(tr("Reverse order"));
+        m_reverseSortCheckBox->setToolTip(tr("Activate reverse sort"));
         m_reverseSortCheckBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
         m_reverseSortCheckBox->setCursor(Qt::PointingHandCursor);
 
-        connect(m_filterLineEdit, &QLineEdit::textChanged, this, &FilterWidget::filterTextChanged);
-        connect(m_sortComboBox, &QComboBox::currentTextChanged, this, &FilterWidget::sortCriteriaChanged);
+        connect(m_searchLineEdit, &QLineEdit::textChanged, this, &SearchWidget::searchTextChanged);
+        connect(m_sortComboBox, &QComboBox::currentTextChanged, this, &SearchWidget::sortCriteriaChanged);
         connect(m_reverseSortCheckBox, &QCheckBox::clicked, this, [=] {
             emit sortCriteriaChanged(m_sortComboBox->currentText());
         });
@@ -120,7 +119,7 @@ public:
 public slots:
     void textFocus()
     {
-        m_filterLineEdit->setFocus();
+        m_searchLineEdit->setFocus();
     }
 
 private:
@@ -138,14 +137,14 @@ private:
     }
 
 signals:
-    void filterTextChanged(const QString& text);
+    void searchTextChanged(const QString& text);
     void sortCriteriaChanged(const QString& criteria);
 
 private:
     QHBoxLayout* m_layout;
     QLabel* m_sortLabel;
     QComboBox* m_sortComboBox;
-    QLineEdit* m_filterLineEdit;
+    QLineEdit* m_searchLineEdit;
     QCheckBox* m_reverseSortCheckBox;
 };
 
@@ -224,9 +223,9 @@ public:
 
     bool operator<(const QListWidgetItem& other) const override
     {
-        const FilterWidget* filterWidget = m_projectsWidget->filterWidget();
-        const QString& criteria = filterWidget->sortingCriteria();
-        bool reverseSort = filterWidget->isReverseSort();
+        const SearchWidget* searchWidget = m_projectsWidget->searchWidget();
+        const QString& criteria = searchWidget->sortingCriteria();
+        bool reverseSort = searchWidget->isReverseSort();
 
         if (criteria == QObject::tr("Name")) {
             const QString& myName = data(Name).toString();
@@ -254,7 +253,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
   , m_welcomeLabel(new QLabel)
   , m_versionLabel(new QLabel)
   , m_projectsLabel(new QLabel)
-  , m_filterWidget(new FilterWidget)
+  , m_searchWidget(new SearchWidget)
   , m_listWidget(new QListWidget)
   , m_buttons(new ButtonSlice)
   , m_buttons_2(new ButtonSlice(m_listWidget->viewport()))
@@ -268,7 +267,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_versionLabel, 0, Qt::AlignCenter);
     m_layout->addSpacing(6);
     m_layout->addWidget(m_projectsLabel, 0, Qt::AlignCenter);
-    m_layout->addWidget(m_filterWidget, 0, Qt::AlignCenter);
+    m_layout->addWidget(m_searchWidget, 0, Qt::AlignCenter);
     m_layout->addWidget(m_listWidget, 0, Qt::AlignCenter);
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
     m_layout->addStretch();
@@ -301,9 +300,9 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     m_projectsLabel->setText(tr("Your Projects"));
 
-    m_filterWidget->setFixedWidth(SIZE_LIST.width());
-    connect(m_filterWidget, &FilterWidget::filterTextChanged, this, &ProjectsWidget::onFilterTextChange);
-    connect(m_filterWidget, &FilterWidget::sortCriteriaChanged, [=] {
+    m_searchWidget->setFixedWidth(SIZE_LIST.width());
+    connect(m_searchWidget, &SearchWidget::searchTextChanged, this, &ProjectsWidget::onSearchTextChange);
+    connect(m_searchWidget, &SearchWidget::sortCriteriaChanged, [=] {
         m_listWidget->sortItems();
         m_listWidget->scrollToItem(m_listWidget->currentItem());
         updateGadgetPositions();
@@ -438,15 +437,15 @@ bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
             }
         }
         if(event->type() == QEvent::MouseButtonPress)
-            m_filterWidget->textFocus();
+            m_searchWidget->textFocus();
     }
 
     return false;
 }
 
-FilterWidget* ProjectsWidget::filterWidget() const
+SearchWidget* ProjectsWidget::searchWidget() const
 {
-    return m_filterWidget;
+    return m_searchWidget;
 }
 
 // FIXME: This function has severe performance issues.
@@ -659,7 +658,7 @@ void ProjectsWidget::onProgressChange(int progress)
     m_progressBar->setValue(progress);
 }
 
-void ProjectsWidget::onFilterTextChange(const QString& text)
+void ProjectsWidget::onSearchTextChange(const QString& text)
 {
     QListWidgetItem* firstVisibleItem = nullptr;
     for (int i = m_listWidget->count() - 1; i >= 0; --i) {
@@ -678,7 +677,7 @@ void ProjectsWidget::onFilterTextChange(const QString& text)
 
 void ProjectsWidget::lock()
 {
-    m_filterWidget->setDisabled(true);
+    m_searchWidget->setDisabled(true);
     m_buttons->setDisabled(true);
     m_listWidget->setDisabled(true);
     m_buttons_2->hide();
@@ -691,7 +690,7 @@ void ProjectsWidget::lock()
 
 void ProjectsWidget::unlock()
 {
-    m_filterWidget->setEnabled(true);
+    m_searchWidget->setEnabled(true);
     m_buttons->setEnabled(true);
     m_listWidget->setEnabled(true);
     m_buttons_2->show();
