@@ -18,9 +18,9 @@ public:
     static bool resend(const QString& email);
     static bool verify(const QString& email, const QString& code);
     static bool reset(const QString& email, const QString& password, const QString& code);
-    static bool signup(const QString& recaptcha, const QString& first, const QString& last,
-                       const QString& email, const QString& password, const QString& country,
-                       const QString& company, const QString& title, const QString& phone);
+    static bool signup(const QString& first, const QString& last, const QString& email,
+                       const QString& password, const QString& country, const QString& company,
+                       const QString& title, const QString& phone);
 private:
     using QObject::connect;
     static QString readSync(int timeout);

@@ -202,11 +202,6 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _loadingIndicator->setLineWidth(2);
 }
 
-void RegistrationWidget::updateResponse(const QString& response)
-{
-    _response = response;
-}
-
 void RegistrationWidget::clear()
 {
     static_cast<QLineEdit*>(_bulkEdit->get(First))->setText("");
@@ -328,7 +323,6 @@ void RegistrationWidget::onNextClicked()
 
     bool succeed =
     Authenticator::signup(
-        _response,
         static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),

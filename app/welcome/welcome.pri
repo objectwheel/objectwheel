@@ -9,7 +9,6 @@ HEADERS += $$PWD/authenticator.h \
            $$PWD/projecttemplateswidget.h \
            $$PWD/registrationwidget.h \
            $$PWD/resetwidget.h \
-           $$PWD/robotwidget.h \
            $$PWD/succeedwidget.h \
            $$PWD/verificationwidget.h
 
@@ -21,6 +20,5 @@ SOURCES += $$PWD/authenticator.cpp \
            $$PWD/projecttemplateswidget.cpp \
            $$PWD/registrationwidget.cpp \
            $$PWD/resetwidget.cpp \
-           $$PWD/robotwidget.cpp \
            $$PWD/succeedwidget.cpp \
            $$PWD/verificationwidget.cpp

@@ -5,7 +5,6 @@
 
 class View;
 class LoginWidget;
-class RobotWidget;
 class ProjectsWidget;
 class ProjectTemplatesWidget;
 class ProjectDetailsWidget;
@@ -53,7 +52,6 @@ signals:
 private:
     View* m_view;
     LoginWidget* m_loginWidget;
-    RobotWidget* m_robotWidget;
     ProjectsWidget* m_projectsWidget;
     ProjectTemplatesWidget* m_projectTemplatesWidget;
     ProjectDetailsWidget* m_projectDetailsWidget;

@@ -95,16 +95,15 @@ void Authenticator::onTextMessageReceived(const QString& message)
     s_message = message;
 }
 
-bool Authenticator::signup(const QString& recaptcha, const QString& first, const QString& last,
-                           const QString& email, const QString& password, const QString& country,
-                           const QString& company, const QString& title, const QString& phone)
+bool Authenticator::signup(const QString& first, const QString& last, const QString& email,
+                           const QString& password, const QString& country, const QString& company,
+                           const QString& title, const QString& phone)
 {
     if (!connect(TIMEOUT))
         return false;
 
     instance()->sendTextMessage(
                 TYPE_SIGNUP + ENDL +
-                recaptcha + ENDL +
                 first + ENDL +
                 last + ENDL +
                 email + ENDL +

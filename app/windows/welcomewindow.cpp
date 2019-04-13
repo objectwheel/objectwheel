@@ -2,7 +2,6 @@
 #include <windowmanager.h>
 #include <view.h>
 #include <loginwidget.h>
-#include <robotwidget.h>
 #include <projectswidget.h>
 #include <projectdetailswidget.h>
 #include <registrationwidget.h>
@@ -27,7 +26,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
     m_view = new View(this);
     m_loginWidget = new LoginWidget;
-    m_robotWidget = new RobotWidget;
     m_registrationWidget = new RegistrationWidget;
     m_projectsWidget = new ProjectsWidget;
     m_projectTemplatesWidget = new ProjectTemplatesWidget;
@@ -38,7 +36,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     m_resetWidget = new ResetWidget;
 
     m_view->add(Login, m_loginWidget);
-    m_view->add(Robot, m_robotWidget);
     m_view->add(Registration, m_registrationWidget);
     m_view->add(Verification, m_verificationWidget);
     m_view->add(Projects, m_projectsWidget);
@@ -77,8 +74,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     /**** LoginWidget settings ****/
     connect(m_loginWidget, &LoginWidget::signup, [=]
     {
-        m_robotWidget->load();
-        m_view->show(Robot, View::RightToLeft);
+        m_view->show(Registration, View::RightToLeft);
     });
     connect(m_loginWidget, &LoginWidget::forget, [=]
     {
@@ -135,18 +131,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         m_view->show(Projects, View::LeftToRight);
     });
 
-    /**** RobotWidget settings ****/
-    connect(m_robotWidget, &RobotWidget::done,
-            m_registrationWidget, &RegistrationWidget::updateResponse);
-    connect(m_robotWidget, &RobotWidget::back, [=]
-    {
-        m_view->show(Login, View::LeftToRight);
-    });
-    connect(m_robotWidget, &RobotWidget::done, [=]
-    {
-        m_view->show(Registration, View::RightToLeft);
-    });
-
     /**** RegistrationWidget settings ****/
     connect(m_registrationWidget, &RegistrationWidget::back, [=]
     {
@@ -157,7 +141,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     connect(m_registrationWidget, &RegistrationWidget::done, [=]
     {
         m_view->show(Verification, View::RightToLeft);
-        m_robotWidget->discharge();
     });
 
     /**** VerificationWidget settings ****/
