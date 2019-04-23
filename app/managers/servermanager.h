@@ -23,9 +23,17 @@ public:
         SignupSuccessful,
         SignupFailure,
         ResendSignupCode,
+        ResendSignupCodeSuccessful,
+        ResendSignupCodeFailure,
         CompleteSignup,
+        CompleteSignupSuccessful,
+        CompleteSignupFailure,
         ResetPassword,
-        CompletePasswordReset
+        ResetPasswordSuccessful,
+        ResetPasswordFailure,
+        CompletePasswordReset,
+        CompletePasswordResetSuccessful,
+        CompletePasswordResetFailure
     };
 
 public:
@@ -37,6 +45,8 @@ public:
 private slots:
     void onConnect();
     void onDisconnect();
+    void onError(QAbstractSocket::SocketError);
+    void onSslErrors(const QList<QSslError>&);
     void onBinaryMessageReceive(const QByteArray& message);
 
 private:
@@ -51,7 +61,7 @@ private:
     static QBasicTimer s_connectionTimer;
 
 private:
-    ServerManager(const QUrl& host, QObject* parent = nullptr);
+    explicit ServerManager(const QUrl& host, QObject* parent = nullptr);
     ~ServerManager() override;
 };
 

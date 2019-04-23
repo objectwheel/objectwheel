@@ -2,7 +2,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <authenticator.h>
+#include <accountmanager.h>
 #include <countdown.h>
 
 #include <QVBoxLayout>
@@ -183,7 +183,7 @@ void VerificationWidget::onResendClicked()
 
     lock();
 
-    bool succeed = Authenticator::resend(email);
+    bool succeed = AccountManager::resend(email);
 
     if (succeed) {
         clear();
@@ -223,7 +223,7 @@ void VerificationWidget::onVerifyClicked()
 
     lock();
 
-    bool succeed = Authenticator::verify(email, code);
+    bool succeed = AccountManager::verify(email, code);
 
     if (succeed)
         clear();

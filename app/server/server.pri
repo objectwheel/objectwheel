@@ -1,7 +1,6 @@
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
-HEADERS += $$PWD/server.h \
-           $$PWD/authenticator.h
+HEADERS += $$PWD/accountmanager.h
 
-SOURCES += $$PWD/authenticator.cpp
+SOURCES += $$PWD/accountmanager.cpp

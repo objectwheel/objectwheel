@@ -2,7 +2,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <authenticator.h>
+#include <accountmanager.h>
 #include <countdown.h>
 
 #include <QVBoxLayout>
@@ -209,7 +209,7 @@ void ResetWidget::onApplyClicked()
 
     lock();
 
-    bool succeed = Authenticator::reset(email, password, code);
+    bool succeed = AccountManager::reset(email, password, code);
 
     if (succeed)
         clear();

@@ -7,7 +7,7 @@ class QSettings;
 class GeneralSettings;
 class CodeEditorSettings;
 class GlobalResources;
-class Authenticator;
+class AccountManager;
 class UserManager;
 class DocumentManager;
 class ProjectManager;
@@ -21,6 +21,7 @@ class SaveManager;
 class WindowManager;
 class MenuManager;
 class HelpManager;
+class ServerManager;
 
 class ApplicationCore final
 {
@@ -50,7 +51,8 @@ private:
     static GeneralSettings* s_generalSettings;
     static CodeEditorSettings* s_codeEditorSettings;
     static GlobalResources* s_globalResources;
-    static Authenticator* s_authenticator;
+    static ServerManager* s_serverManager;
+    static AccountManager* s_accountManager;
     static UserManager* s_userManager;
     static ControlPreviewingManager* s_controlPreviewingManager;
     static SaveManager* s_saveManager;

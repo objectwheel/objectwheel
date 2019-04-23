@@ -5,7 +5,7 @@
 #include <flatbutton.h>
 #include <waitingspinnerwidget.h>
 #include <global.h>
-#include <authenticator.h>
+#include <accountmanager.h>
 #include <usermanager.h>
 #include <async.h>
 #include <utilityfunctions.h>
@@ -212,7 +212,7 @@ void LoginWidget::onLoginButtonClick()
 
     lock();
 
-    const auto& plan = Authenticator::login(email, password);
+    const auto& plan = AccountManager::login(email, password);
     bool succeed = !plan.isEmpty();
 
     if (!succeed) {

@@ -2,7 +2,7 @@
 #include <buttonslice.h>
 #include <bulkedit.h>
 #include <waitingspinnerwidget.h>
-#include <authenticator.h>
+#include <accountmanager.h>
 #include <utilityfunctions.h>
 
 #include <QVBoxLayout>
@@ -131,7 +131,7 @@ void ForgetWidget::onNextClicked()
     lock();
 
     bool succeed =
-    Authenticator::forget(
+    AccountManager::forget(
         static_cast<QLineEdit*>(_bulkEdit->get(Email))->text()
     );
 

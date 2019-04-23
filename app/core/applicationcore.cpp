@@ -5,7 +5,7 @@
 #include <projectexposingmanager.h>
 #include <controlcreationmanager.h>
 #include <windowmanager.h>
-#include <authenticator.h>
+#include <accountmanager.h>
 #include <controlpreviewingmanager.h>
 #include <documentmanager.h>
 #include <mainwindow.h>
@@ -28,6 +28,7 @@
 #include <globalresources.h>
 #include <components.h>
 #include <paintutils.h>
+#include <servermanager.h>
 
 #include <QStandardPaths>
 #include <QSettings>
@@ -44,7 +45,8 @@ QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 GlobalResources* ApplicationCore::s_globalResources = nullptr;
-Authenticator* ApplicationCore::s_authenticator = nullptr;
+ServerManager* ApplicationCore::s_serverManager = nullptr;
+AccountManager* ApplicationCore::s_accountManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
 SaveManager* ApplicationCore::s_saveManager = nullptr;
@@ -99,7 +101,8 @@ ApplicationCore::ApplicationCore(QApplication* app)
     SplashScreen splashScreen;
     Q_UNUSED(splashScreen);
 
-    s_authenticator = new Authenticator(app);
+    s_serverManager = new ServerManager(QUrl(APP_WSSSERVER), app);
+    s_accountManager = new AccountManager(app);
     s_userManager = new UserManager(app);
     s_controlPreviewingManager = new ControlPreviewingManager(app);
     s_saveManager = new SaveManager(app);
@@ -118,8 +121,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
                      s_helpManager, &HelpManager::aboutToShutdown);
 
     s_documentManager = new DocumentManager(app);
-
-    Authenticator::setHost(QUrl(APP_WSSSERVER));
 
     Components::init();
 

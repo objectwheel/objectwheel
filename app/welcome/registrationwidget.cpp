@@ -4,7 +4,7 @@
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
 #include <filemanager.h>
-#include <authenticator.h>
+#include <accountmanager.h>
 #include <utilityfunctions.h>
 
 #include <QVBoxLayout>
@@ -313,7 +313,7 @@ void RegistrationWidget::onNextClicked()
     lock();
 
     bool succeed =
-    Authenticator::signup(
+    AccountManager::signup(
         static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
         static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),
