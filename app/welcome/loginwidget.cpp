@@ -7,8 +7,9 @@
 #include <global.h>
 #include <authenticator.h>
 #include <usermanager.h>
+#include <async.h>
+#include <utilityfunctions.h>
 
-#include <QtConcurrent>
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -25,16 +26,6 @@
 
 enum Fields { Email, Password };
 enum Buttons { Login, Register };
-
-//static bool checkEmail(const QString& email)
-//{
-//    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
-//}
-
-//static bool checkPassword(const QString& password)
-//{
-//    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
-//}
 
 LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 {
@@ -108,8 +99,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     static_cast<QLineEdit*>(_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
     static_cast<QLineEdit*>(_bulkEdit->get(Email))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(_bulkEdit->get(Password))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setText(tr("beta@objectwheel.com"));
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setText(tr("password"));
 
     _autologinWidget->setObjectName("autologinWidget");
     _autologinWidget->setFixedSize(AUTOLOGIN_WIDTH, AUTOLOGIN_HEIGHT);
@@ -206,39 +195,40 @@ void LoginWidget::clear()
 
 void LoginWidget::onLoginButtonClick()
 {
-//    auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
-//    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
+    auto email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+    auto password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
 
-//    if (email.isEmpty() || email.size() > 256 ||
-//        password.isEmpty() || password.size() > 256 ||
-//        !checkEmail(email) || !checkPassword(password)) {
-//        QMessageBox::warning(
-//            this,
-//            tr("Oops"),
-//            tr("Fields cannot be either empty or incorrect.")
-//        );
-//        return;
-//    }
+    if (email.isEmpty() || email.size() > 256 ||
+        password.isEmpty() || password.size() > 256 ||
+        !UtilityFunctions::isEmailFormatCorrect(email) ||
+        !UtilityFunctions::isPasswordFormatCorrect(password)) {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Fields cannot be either empty or incorrect.")
+        );
+        return;
+    }
 
-//    lock();
+    lock();
 
-//    const auto& plan = Authenticator::login(email, password);
-//    bool succeed = !plan.isEmpty();
+    const auto& plan = Authenticator::login(email, password);
+    bool succeed = !plan.isEmpty();
 
-//    if (!succeed) {
-//        QMessageBox::warning(
-//            this,
-//            tr("Oops"),
-//            tr("Login is not successful, please check the information you provided.")
-//        );
-//    }
+    if (!succeed) {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("Login is not successful, please check the information you provided.")
+        );
+    }
 
-//    unlock();
+    unlock();
 
-//    if (succeed) {
+    if (succeed) {
         QTimer::singleShot(0, this, &LoginWidget::startSession);
-//        emit busy(tr("Decryption in progress"));
-//    }
+        emit busy(tr("Decryption in progress"));
+    }
 }
 
 void LoginWidget::startSession()
@@ -247,7 +237,7 @@ void LoginWidget::startSession()
     const QString password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
 
     UserManager::newUser(email);
-    QFuture<bool> future = QtConcurrent::run(&UserManager::start, email, password);
+    QFuture<bool> future = Async::run(QThreadPool::globalInstance(), &UserManager::start, email, password);
 
     _encryptionWatcher.setFuture(future);
 }

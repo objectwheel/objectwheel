@@ -7,7 +7,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += PREVIEWER_DEBUG
 
-QT += quickwidgets concurrent quick-private qml-private
+QT += quickwidgets quick-private qml-private
 QT += network qml quick websockets help widgets widgets-private
 
 ### Includes
@@ -26,7 +26,7 @@ include($$PWD/previewerlink/previewerlink.pri)
 include($$PWD/welcome/welcome.pri)
 include($$PWD/widgets/widgets.pri)
 include($$PWD/windows/windows.pri)
+include($$PWD/server/server.pri)
 include($$PWD/settings/settings.pri)
 include($$PWD/resources/resources.pri)
 include($$PWD/platform/platform.pri)
-include($$PWD/zipasync/zipasync.pri)

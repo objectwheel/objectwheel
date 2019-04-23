@@ -35,7 +35,8 @@ void pushHelper(QDataStream& stream, Arg&& arg, Args&&... args)
 }
 
 template <typename Arg, typename... Args>
-void pullHelper(QDataStream& stream, Arg&& arg, Args&&... args) {
+void pullHelper(QDataStream& stream, Arg&& arg, Args&&... args)
+{
     stream >> std::forward<Arg>(arg);
     pullHelper(stream, std::forward<Args>(args)...);
 }
@@ -43,7 +44,8 @@ void pullHelper(QDataStream& stream, Arg&& arg, Args&&... args) {
 } // Internal
 
 template <typename... Args>
-QByteArray push(Args&&... args) {
+QByteArray push(Args&&... args)
+{
     QByteArray data;
     QDataStream stream(&data, QIODevice::WriteOnly);
     stream.setVersion(QDataStream::Qt_5_12);
@@ -52,7 +54,8 @@ QByteArray push(Args&&... args) {
 }
 
 template <typename... Args>
-void pull(const QByteArray& data, Args&&... args) {
+void pull(const QByteArray& data, Args&&... args)
+{
     QDataStream stream(data);
     stream.setVersion(QDataStream::Qt_5_12);
     Internal::pullHelper(stream, std::forward<Args>(args)...);
@@ -65,6 +68,8 @@ void centralizeWidget(QWidget* widget);
 void adjustFontWeight(QWidget* widget, QFont::Weight weight);
 void adjustFontPixelSize(QWidget* widget, int advance);
 bool hasHover(const QWidget* widget);
+bool isEmailFormatCorrect(const QString& email);
+bool isPasswordFormatCorrect(const QString& password);
 QWidget* createSpacingWidget(const QSize& size);
 QWidget* createSpacerWidget(Qt::Orientation orientation);
 QWidget* createSeparatorWidget(Qt::Orientation orientation);

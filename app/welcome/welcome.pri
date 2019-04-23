@@ -1,8 +1,7 @@
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
-HEADERS += $$PWD/authenticator.h \
-           $$PWD/forgetwidget.h \
+HEADERS += $$PWD/forgetwidget.h \
            $$PWD/loginwidget.h \
            $$PWD/projectdetailswidget.h \
            $$PWD/projectswidget.h \
@@ -12,8 +11,7 @@ HEADERS += $$PWD/authenticator.h \
            $$PWD/succeedwidget.h \
            $$PWD/verificationwidget.h
 
-SOURCES += $$PWD/authenticator.cpp \
-           $$PWD/forgetwidget.cpp \
+SOURCES += $$PWD/forgetwidget.cpp \
            $$PWD/loginwidget.cpp \
            $$PWD/projectdetailswidget.cpp \
            $$PWD/projectswidget.cpp \

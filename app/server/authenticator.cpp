@@ -50,7 +50,6 @@ bool Authenticator::connect(int timeout)
         return true;
 
     instance()->open(s_host);
-    instance()->ignoreSslErrors(); // FIXME: Remove this
 
     Delayer::delay([=] () -> bool {
         return instance()->state() == QAbstractSocket::ConnectedState;
@@ -83,10 +82,12 @@ void Authenticator::onDisconnected()
 
 void Authenticator::onError(QAbstractSocket::SocketError)
 {
+    qWarning("Authenticator Error: %s", errorString().toUtf8().data());
     s_message.clear();
 }
 void Authenticator::onSslErrors(const QList<QSslError>&)
 {
+    qWarning("Authenticator SSL Error: %s", errorString().toUtf8().data());
     s_message.clear();
 }
 

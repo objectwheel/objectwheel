@@ -5,6 +5,7 @@
 #include <waitingspinnerwidget.h>
 #include <filemanager.h>
 #include <authenticator.h>
+#include <utilityfunctions.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -40,16 +41,6 @@ static const QStringList& countries()
     }
 
     return countries;
-}
-
-static bool checkEmail(const QString& email)
-{
-    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
-}
-
-static bool checkPassword(const QString& password)
-{
-    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
 }
 
 RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
@@ -300,7 +291,7 @@ void RegistrationWidget::onNextClicked()
         return;
     }
 
-    if (!checkEmail(email)) {
+    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
         QMessageBox::warning(
             this,
             tr("Incorrect Email Address"),
@@ -309,12 +300,12 @@ void RegistrationWidget::onNextClicked()
         return;
     }
 
-    if (!checkPassword(password)) {
+    if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
         QMessageBox::warning(
             this,
             tr("Incorrect Password"),
             tr("Incorrect Password. Your password must be in between "
-               "6 and 25 characters long. Also please check it if contains invalid characters.")
+               "6 and 35 characters long. Also please check it if contains invalid characters.")
         );
         return;
     }

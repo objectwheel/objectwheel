@@ -4,6 +4,7 @@
 #include <utils/utilsicons.h>
 #include <paintutils.h>
 #include <crossplatform.h>
+#include <async.h>
 
 #include <QFileInfo>
 #include <QMessageBox>
@@ -12,7 +13,6 @@
 #include <QRegularExpression>
 #include <QTextCursor>
 #include <QProgressDialog>
-#include <QtConcurrent>
 #include <QTreeView>
 #include <QScreen>
 #include <QWindow>
@@ -20,6 +20,7 @@
 #include <QComboBox>
 #include <QApplication>
 #include <QAction>
+#include <QJsonObject>
 
 namespace UtilityFunctions {
 
@@ -134,8 +135,9 @@ void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent
             }
         }
 
-        QFuture<void> future = QtConcurrent::run(qOverload<const QString&, const QString&, bool, bool>(&cp),
-                                                 path, rootPath, false, false);
+        QFuture<void> future = Async::run(QThreadPool::globalInstance(),
+                                          qOverload<const QString&, const QString&, bool, bool>(&cp),
+                                          path, rootPath, false, false);
         Delayer::delay(std::bind(&QFuture<void>::isRunning, &future));
     }
 
@@ -193,6 +195,16 @@ bool hasHover(const QWidget* widget) // FIXME: This is a workaround for QTBUG-44
     return widget->isVisible()
             && widget->isEnabled()
             && widget->rect().contains(widget->mapFromGlobal(QCursor::pos()));
+}
+
+bool isEmailFormatCorrect(const QString& email)
+{
+    return email.contains(QRegularExpression("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
+}
+
+bool isPasswordFormatCorrect(const QString& password)
+{
+    return password.contains(QRegularExpression("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,35}$"));
 }
 
 QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left)

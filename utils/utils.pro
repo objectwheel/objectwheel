@@ -2,7 +2,7 @@
 TEMPLATE = lib
 CONFIG  += plugin c++14 strict_c++
 TARGET   = utils
-QT      += core-private widgets qml quick websockets multimedia concurrent
+QT      += core-private widgets qml quick websockets multimedia
 DEFINES += UTILS_LIBRARY
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
@@ -42,6 +42,7 @@ RESOURCES += \
 
 ###Includes
 include($$PWD/vpfs/vpfs.pri)
+include($$PWD/zipasync/zipasync.pri)
 include($$PWD/platform/platform.pri)
 include($$PWD/qmlparser/qmlparser.pri)
 include($$PWD/components/components.pri)

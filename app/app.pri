@@ -2,6 +2,8 @@ include($$PWD/version.pri)
 
 ### Utils Settings
 INCLUDEPATH += $$PWD/../utils
+INCLUDEPATH += $$PWD/../utils/zipasync
+INCLUDEPATH += $$PWD/../utils/zipasync/async
 INCLUDEPATH += $$PWD/../utils/components
 INCLUDEPATH += $$PWD/../utils/qmlparser
 INCLUDEPATH += $$PWD/../utils/qmlparser/utils
@@ -16,7 +18,7 @@ DEFINES += QT_QML_DEBUG_NO_WARNING \
            APP_NAME='"\\\"$$TARGET (Beta)\\\""' \
            APP_CORP='"\\\"Objectwheel, Inc.\\\""' \
            APP_DOMAIN='"\\\"objectwheel.com\\\""' \
-           APP_WSSSERVER='"\\\"wss://api.objectwheel.com:4443\\\""' \
+           APP_WSSSERVER='"\\\"ws://localhost:4443\\\""' \ ## wss://api.objectwheel.com
            APP_HTTPSSERVER='"\\\"http://api.objectwheel.com:8080\\\""' \
            APP_GITVER='"\\\"$$GIT_VERSION\\\""' \
            APP_GITHASH='"\\\"$$GIT_HASH\\\""' \

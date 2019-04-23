@@ -3,6 +3,7 @@
 #include <bulkedit.h>
 #include <waitingspinnerwidget.h>
 #include <authenticator.h>
+#include <utilityfunctions.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -18,11 +19,6 @@
 
 enum Fields { Email };
 enum Buttons { Next, Back };
-
-static bool checkEmail(const QString& email)
-{
-    return email.contains(QRegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$"));
-}
 
 ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
 {
@@ -123,8 +119,7 @@ void ForgetWidget::onNextClicked()
     const auto& email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
 
     if (email.isEmpty() || email.size() > 256 ||
-        !checkEmail(email)
-        ) {
+        !UtilityFunctions::isEmailFormatCorrect(email)) {
         QMessageBox::warning(
                     this,
                     tr("Oops"),
