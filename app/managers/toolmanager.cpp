@@ -83,7 +83,7 @@ void ToolManager::fillTree(ToolboxTree* tree)
 bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
 {
     if (ProjectManager::dir().isEmpty() ||
-            toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
+            toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
         return false;
 
     QList<QUrl> urls;
@@ -131,7 +131,7 @@ void ToolManager::discharge()
 bool ToolManager::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
     if (ProjectManager::dir().isEmpty() ||
-            toolPath.isEmpty() || !SaveUtils::isOwctrl(toolPath))
+            toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
         return false;
 
     if (!currentProjectHasToolsInstalled())

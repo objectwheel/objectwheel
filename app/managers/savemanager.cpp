@@ -21,7 +21,7 @@ int countIdInProjectForms(const QString& id)
 
     int counter = 0;
     for (const QString& formRootPath : SaveUtils::formPaths(ProjectManager::dir())) {
-        const QString& formId = ParserUtils::id(SaveUtils::toUrl(formRootPath));
+        const QString& formId = ParserUtils::id(SaveUtils::toMainQmlFile(formRootPath));
         if (formId.isEmpty()) {
             qWarning("SaveManager::countIdInProjectForms: Empty id detected! Control: %s",
                      formRootPath.toUtf8().constData());
@@ -40,7 +40,7 @@ int countIdInControlChildrenScope(const QString& id, const QString rootPath)
 
     int counter = 0;
     for (const QString& controlRootPath : SaveUtils::childrenPaths(rootPath)) {
-        const QString& controlId = ParserUtils::id(SaveUtils::toUrl(controlRootPath));
+        const QString& controlId = ParserUtils::id(SaveUtils::toMainQmlFile(controlRootPath));
         if (controlId.isEmpty()) {
             qWarning("SaveManager::ccountIdInControlChildrenScope: Empty id detected! Control: %s",
                      controlRootPath.toUtf8().constData());
@@ -85,7 +85,7 @@ void repairIds(const QString& rootPath, bool recursive)
     const QString& formRootPath = detectedFormRootPath(rootPath);
 
     for (const QString& controlRootPath : controlRootPaths) {
-        const QString& idOrig = ParserUtils::id(SaveUtils::toUrl(controlRootPath));
+        const QString& idOrig = ParserUtils::id(SaveUtils::toMainQmlFile(controlRootPath));
 
         QString id(idOrig);
         if (id.isEmpty())
@@ -94,7 +94,7 @@ void repairIds(const QString& rootPath, bool recursive)
         while (countIdInProjectFormScope(id, formRootPath) > (id == idOrig ? 1 : 0))
             id = UtilityFunctions::increasedNumberedText(id, false, true);
 
-        ParserUtils::setId(SaveUtils::toUrl(controlRootPath), id);
+        ParserUtils::setId(SaveUtils::toMainQmlFile(controlRootPath), id);
     }
 }
 }
@@ -132,19 +132,19 @@ bool SaveManager::initProject(const QString& projectDirectory, int templateNumbe
 
 void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
 {
-    Q_ASSERT(SaveUtils::isOwctrl(formRootPath));
+    Q_ASSERT(SaveUtils::isControlValid(formRootPath));
 
-    const QString& id = ParserUtils::id(SaveUtils::toUrl(formRootPath));
+    const QString& id = ParserUtils::id(SaveUtils::toMainQmlFile(formRootPath));
     Q_ASSERT(!id.isEmpty());
 
-    QByteArray content = rdfile(SaveUtils::toUrl(formRootPath));
+    QByteArray content = rdfile(SaveUtils::toMainQmlFile(formRootPath));
     Q_ASSERT(!content.isEmpty());
 
     QString FormJS(id + "JS");
     FormJS.replace(0, 1, FormJS[0].toUpper());
     content.replace("// GlobalConnectionHere",
                     QString::fromUtf8("Component.onCompleted: %1.%2_onCompleted()").arg(FormJS).arg(id).toUtf8());
-    wrfile(SaveUtils::toUrl(formRootPath), content);
+    wrfile(SaveUtils::toMainQmlFile(formRootPath), content);
 
     const QString& globalJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + id + ".js";
     QString js = rdfile(":/resources/other/form.js");
@@ -164,7 +164,7 @@ QString SaveManager::addForm(const QString& formRootPath)
 {
     Q_ASSERT(!ProjectManager::dir().isEmpty());
 
-    if (!SaveUtils::isOwctrl(formRootPath)) {
+    if (!SaveUtils::isControlValid(formRootPath)) {
         qWarning("SaveManager::addForm: Failed. Form data broken.");
         return {};
     }
@@ -191,12 +191,12 @@ QString SaveManager::addForm(const QString& formRootPath)
 
 QString SaveManager::addControl(const QString& controlRootPath, const QString& targetParentControlRootPath)
 {
-    if (!SaveUtils::isOwctrl(controlRootPath)) {
+    if (!SaveUtils::isControlValid(controlRootPath)) {
         qWarning("SaveManager::addControl: Failed. Control data broken.");
         return {};
     }
 
-    if (!SaveUtils::isOwctrl(targetParentControlRootPath)) {
+    if (!SaveUtils::isControlValid(targetParentControlRootPath)) {
         qWarning("SaveManager::addControl: Failed. Parent control data broken.");
         return {};
     }
@@ -223,7 +223,7 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
 
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
 {
-    if (!SaveUtils::isOwctrl(control->dir()) || !SaveUtils::isOwctrl(parentControl->dir())) {
+    if (!SaveUtils::isControlValid(control->dir()) || !SaveUtils::isControlValid(parentControl->dir())) {
         qWarning("SaveManager::moveControl: Failed. One or more control data broken.");
         return false;
     }
@@ -259,7 +259,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
         Q_ASSERT(!childId.isEmpty());
         child->setId(childId);
     }
-    control->setUrl(SaveUtils::toUrl(newControlRootPath));
+    control->setUrl(SaveUtils::toMainQmlFile(newControlRootPath));
     const QString& controlId = ParserUtils::id(control->url());
     Q_ASSERT(!controlId.isEmpty());
     control->setId(controlId);
@@ -269,7 +269,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
 
 void SaveManager::removeControl(const QString& rootPath)
 {
-    if (!SaveUtils::isOwctrl(rootPath)) {
+    if (!SaveUtils::isControlValid(rootPath)) {
         qWarning("SaveManager::removeControl: Failed. Control data broken.");
         return;
     }
@@ -282,7 +282,7 @@ void SaveManager::removeControl(const QString& rootPath)
 
 void SaveManager::removeForm(const QString& formRootPath)
 {
-    if (!SaveUtils::isOwctrl(formRootPath)) {
+    if (!SaveUtils::isControlValid(formRootPath)) {
         qWarning("SaveManager::removeForm: Failed. Either form data broken, or it is a main form.");
         return;
     }
@@ -301,7 +301,7 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
     if (!control)
         return;
 
-    if (!SaveUtils::isOwctrl(control->dir()))
+    if (!SaveUtils::isControlValid(control->dir()))
         return;
 
     QString copy(value);

@@ -99,206 +99,206 @@ void DownloadWidget::resizeEvent(QResizeEvent* event)
 
 void DownloadWidget::download(OTargets::Targets target)
 {
-    QMetaEnum metaEnum = QMetaEnum::fromType<OTargets::Targets>();
-    auto buildLabel = QString(metaEnum.valueToKey(target));
+//    QMetaEnum metaEnum = QMetaEnum::fromType<OTargets::Targets>();
+//    auto buildLabel = QString(metaEnum.valueToKey(target));
 
-    auto pdir = ProjectManager::dir();
-    if (pdir.isEmpty())
-        return;
+//    auto pdir = ProjectManager::dir();
+//    if (pdir.isEmpty())
+//        return;
 
-    QTemporaryDir tdir, tdir2;
-    if (!tdir.isValid() || !tdir2.isValid())
-        qFatal("Error");
+//    QTemporaryDir tdir, tdir2;
+//    if (!tdir.isValid() || !tdir2.isValid())
+//        qFatal("Error");
 
-    if (!cp(pdir + separator() + DIR_DESIGNS, tdir.path()) ||
-        !cp(pdir + separator() + DIR_BUILD, tdir.path()) ||
-        !cp(pdir + separator() + FILE_PROJECT, tdir.path()))
-        qFatal("Error");
+//    if (!cp(pdir + separator() + DIR_DESIGNS, tdir.path()) ||
+//        !cp(pdir + separator() + DIR_BUILD, tdir.path()) ||
+//        !cp(pdir + separator() + FILE_PROJECT, tdir.path()))
+//        qFatal("Error");
 
-    ZipAsync::zipSync(tdir.path(), tdir2.path() + separator() + "project.zip");
-    QByteArray data = rdfile(tdir2.path() + separator() + "project.zip");
+//    ZipAsync::zipSync(tdir.path(), tdir2.path() + separator() + "project.zip");
+//    QByteArray data = rdfile(tdir2.path() + separator() + "project.zip");
 
-    QByteArray boundary = "-----------------------------7d935033608e2";
-    QByteArray body = "\r\n--" + boundary + "\r\n";
-    body += "Content-Disposition: form-data; name=\"project\"; filename=\"project.zip\"\r\n";
-    body += "Content-Type: application/octet-stream\r\n\r\n";
-    body += data;
-    body += "\r\n--" + boundary + "--\r\n";
+//    QByteArray boundary = "-----------------------------7d935033608e2";
+//    QByteArray body = "\r\n--" + boundary + "\r\n";
+//    body += "Content-Disposition: form-data; name=\"project\"; filename=\"project.zip\"\r\n";
+//    body += "Content-Type: application/octet-stream\r\n\r\n";
+//    body += data;
+//    body += "\r\n--" + boundary + "--\r\n";
 
-    QString url = URL;
-    if (target == OTargets::android_armeabi_v7a ||
-        target == OTargets::android_x86)
-        url += "android";
+//    QString url = URL;
+//    if (target == OTargets::android_armeabi_v7a ||
+//        target == OTargets::android_x86)
+//        url += "android";
 
-    QNetworkRequest request(QUrl::fromUserInput(url));
-    request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
-    request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserManager::token())));
-    request.setRawHeader("x86", QByteArray().insert(0, QString("{\"value\" : %1}").arg(target == OTargets::android_x86 ? "true" : "false")));
-    request.setHeader(QNetworkRequest::ContentLengthHeader, body.size());
-    _d->reply = _d->manager->post(request, body);
+//    QNetworkRequest request(QUrl::fromUserInput(url));
+//    request.setRawHeader("Content-Type","multipart/form-data; boundary=-----------------------------7d935033608e2");
+//    request.setRawHeader("token", QByteArray().insert(0, QString("{\"value\" : \"%1\"}").arg(UserManager::token())));
+//    request.setRawHeader("x86", QByteArray().insert(0, QString("{\"value\" : %1}").arg(target == OTargets::android_x86 ? "true" : "false")));
+//    request.setHeader(QNetworkRequest::ContentLengthHeader, body.size());
+//    _d->reply = _d->manager->post(request, body);
 
-    QQmlProperty::write(_d->progressPage, "informativeText", "Establishing connection");
-    QQmlProperty::write(_d->progressPage, "mbText", "-");
-    QQmlProperty::write(_d->progressPage, "speedText", "-");
-    QQmlProperty::write(_d->progressPage, "progressbarValue", 0.0);
-    QMetaObject::invokeMethod(_d->progressPage, "startWaitEffect");
-    QMetaObject::invokeMethod(_d->progressPage, "showBtnCancel");
+//    QQmlProperty::write(_d->progressPage, "informativeText", "Establishing connection");
+//    QQmlProperty::write(_d->progressPage, "mbText", "-");
+//    QQmlProperty::write(_d->progressPage, "speedText", "-");
+//    QQmlProperty::write(_d->progressPage, "progressbarValue", 0.0);
+//    QMetaObject::invokeMethod(_d->progressPage, "startWaitEffect");
+//    QMetaObject::invokeMethod(_d->progressPage, "showBtnCancel");
 
-    connect(_d->reply, &QNetworkReply::finished, this, [=] {
-        if (!_d->reply->isOpen() || !_d->reply->isReadable() || _d->reply->error() != QNetworkReply::NoError) {
-            _d->elapsedTimer.invalidate();
-            _d->times.clear();
-            _d->bytes.clear();
-            if (_d->reply) _d->reply->deleteLater();
-            return;
-        }
+//    connect(_d->reply, &QNetworkReply::finished, this, [=] {
+//        if (!_d->reply->isOpen() || !_d->reply->isReadable() || _d->reply->error() != QNetworkReply::NoError) {
+//            _d->elapsedTimer.invalidate();
+//            _d->times.clear();
+//            _d->bytes.clear();
+//            if (_d->reply) _d->reply->deleteLater();
+//            return;
+//        }
 
-        QQmlProperty::write(_d->progressPage, "btnCancelEnabled", false);
-        auto response = _d->reply->readAll();
-        QString name = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation)[0] + separator() + buildLabel;
+//        QQmlProperty::write(_d->progressPage, "btnCancelEnabled", false);
+//        auto response = _d->reply->readAll();
+//        QString name = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation)[0] + separator() + buildLabel;
 
-        QString nname;
-        int count = 0;
-        do {
-            if (count == 0) {
-                nname = name + _d->determineBuildExtension(buildLabel);
-            } else {
-                nname = name + "_" + QString::number(count) + _d->determineBuildExtension(buildLabel);
-            }
-            count++;
-        } while (exists(nname));
+//        QString nname;
+//        int count = 0;
+//        do {
+//            if (count == 0) {
+//                nname = name + _d->determineBuildExtension(buildLabel);
+//            } else {
+//                nname = name + "_" + QString::number(count) + _d->determineBuildExtension(buildLabel);
+//            }
+//            count++;
+//        } while (exists(nname));
 
-        wrfile(nname, response);
+//        wrfile(nname, response);
 
-        QQmlProperty::write(_d->progressPage, "informativeText", "Done");
-        QMetaObject::invokeMethod(_d->progressPage, "stopWaitEffect");
-        QMetaObject::invokeMethod(_d->progressPage, "showBtnOk");
-        QQmlProperty::write(_d->progressPage, "btnCancelEnabled", true);
+//        QQmlProperty::write(_d->progressPage, "informativeText", "Done");
+//        QMetaObject::invokeMethod(_d->progressPage, "stopWaitEffect");
+//        QMetaObject::invokeMethod(_d->progressPage, "showBtnOk");
+//        QQmlProperty::write(_d->progressPage, "btnCancelEnabled", true);
 
-        _d->elapsedTimer.invalidate();
-        _d->times.clear();
-        _d->bytes.clear();
-        if (_d->reply) _d->reply->deleteLater();
-    });
-    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))
-      &QNetworkReply::downloadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal) {
-        QQmlProperty::write(_d->progressPage, "informativeText", "Downloading your build");
-        QString sentStr = _d->bytesString(bytesSent, false);
-        if (bytesTotal == -1) {
-            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
-            QQmlProperty::write(_d->progressPage, "progressbarValue", 0.6);
-            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.75);
-        } else if (bytesTotal == 0) {
-            Q_UNUSED(bytesTotal);
-        } else {
-            QString totalStr = _d->bytesString(bytesTotal, true);
-            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
-            QQmlProperty::write(_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
-            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.3 + ((qreal)bytesSent/bytesTotal) * 0.7);
-        }
+//        _d->elapsedTimer.invalidate();
+//        _d->times.clear();
+//        _d->bytes.clear();
+//        if (_d->reply) _d->reply->deleteLater();
+//    });
+//    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))
+//      &QNetworkReply::downloadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal) {
+//        QQmlProperty::write(_d->progressPage, "informativeText", "Downloading your build");
+//        QString sentStr = _d->bytesString(bytesSent, false);
+//        if (bytesTotal == -1) {
+//            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
+//            QQmlProperty::write(_d->progressPage, "progressbarValue", 0.6);
+//            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.75);
+//        } else if (bytesTotal == 0) {
+//            Q_UNUSED(bytesTotal);
+//        } else {
+//            QString totalStr = _d->bytesString(bytesTotal, true);
+//            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
+//            QQmlProperty::write(_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
+//            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.3 + ((qreal)bytesSent/bytesTotal) * 0.7);
+//        }
 
-        if (bytesSent > 0 && bytesSent != bytesTotal)  {
-            if (_d->elapsedTimer.isValid()) {
-                _d->times.append(_d->elapsedTimer.elapsed());
-            }
-            _d->bytes.append(bytesSent);
-            _d->elapsedTimer.restart();
+//        if (bytesSent > 0 && bytesSent != bytesTotal)  {
+//            if (_d->elapsedTimer.isValid()) {
+//                _d->times.append(_d->elapsedTimer.elapsed());
+//            }
+//            _d->bytes.append(bytesSent);
+//            _d->elapsedTimer.restart();
 
-            if (_d->bytes.size() > 5) {
-                _d->bytes.removeFirst();
-                _d->times.removeFirst();
-            }
+//            if (_d->bytes.size() > 5) {
+//                _d->bytes.removeFirst();
+//                _d->times.removeFirst();
+//            }
 
-            qreal collection = 0;
-            for (int i = 0; i < _d->times.size(); i++) {
-                collection += (_d->bytes[i + 1] - _d->bytes[i])/((qreal)_d->times[i]);
-            }
-            if (collection > 0) {
-                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString((collection / _d->times.size()) * 1000, true) + "/sec");
-            } else {
-                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString(bytesSent, true) + "/sec");
-            }
-        } else {
-            _d->elapsedTimer.invalidate();
-            _d->times.clear();
-            _d->bytes.clear();
-        }
-    });
-    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))
-      &QNetworkReply::uploadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal) {
-        QQmlProperty::write(_d->progressPage, "informativeText", "Uploading your project");
-        QString sentStr = _d->bytesString(bytesSent, false);
-        if (bytesTotal == -1) {
-            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
-            QQmlProperty::write(_d->progressPage, "progressbarValue", 0.6);
-            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.3);
-        } else if (bytesTotal == 0) {
-            Q_UNUSED(bytesTotal);
-        } else {
-            QString totalStr = _d->bytesString(bytesTotal, true);
-            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
-            QQmlProperty::write(_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
-            QQmlProperty::write(_d->progressPage, "progressbarValue2", (((qreal)bytesSent / bytesTotal) / 2) * 0.3);
-        }
+//            qreal collection = 0;
+//            for (int i = 0; i < _d->times.size(); i++) {
+//                collection += (_d->bytes[i + 1] - _d->bytes[i])/((qreal)_d->times[i]);
+//            }
+//            if (collection > 0) {
+//                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString((collection / _d->times.size()) * 1000, true) + "/sec");
+//            } else {
+//                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString(bytesSent, true) + "/sec");
+//            }
+//        } else {
+//            _d->elapsedTimer.invalidate();
+//            _d->times.clear();
+//            _d->bytes.clear();
+//        }
+//    });
+//    connect(_d->reply, (void (QNetworkReply::*)(qint64, qint64))
+//      &QNetworkReply::uploadProgress, this, [=](qint64 bytesSent, qint64 bytesTotal) {
+//        QQmlProperty::write(_d->progressPage, "informativeText", "Uploading your project");
+//        QString sentStr = _d->bytesString(bytesSent, false);
+//        if (bytesTotal == -1) {
+//            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/?").arg(sentStr));
+//            QQmlProperty::write(_d->progressPage, "progressbarValue", 0.6);
+//            QQmlProperty::write(_d->progressPage, "progressbarValue2", 0.3);
+//        } else if (bytesTotal == 0) {
+//            Q_UNUSED(bytesTotal);
+//        } else {
+//            QString totalStr = _d->bytesString(bytesTotal, true);
+//            QQmlProperty::write(_d->progressPage, "mbText", QString("%1/%2").arg(sentStr).arg(totalStr));
+//            QQmlProperty::write(_d->progressPage, "progressbarValue", (qreal)bytesSent/bytesTotal);
+//            QQmlProperty::write(_d->progressPage, "progressbarValue2", (((qreal)bytesSent / bytesTotal) / 2) * 0.3);
+//        }
 
-        if (bytesSent > 0 && bytesSent != bytesTotal)  {
-            if (_d->elapsedTimer.isValid()) {
-                _d->times.append(_d->elapsedTimer.elapsed());
-            }
-            _d->bytes.append(bytesSent);
-            _d->elapsedTimer.restart();
+//        if (bytesSent > 0 && bytesSent != bytesTotal)  {
+//            if (_d->elapsedTimer.isValid()) {
+//                _d->times.append(_d->elapsedTimer.elapsed());
+//            }
+//            _d->bytes.append(bytesSent);
+//            _d->elapsedTimer.restart();
 
-            if (_d->bytes.size() > 5) {
-                _d->bytes.removeFirst();
-                _d->times.removeFirst();
-            }
+//            if (_d->bytes.size() > 5) {
+//                _d->bytes.removeFirst();
+//                _d->times.removeFirst();
+//            }
 
-            qreal collection = 0;
-            for (int i = 0; i < _d->times.size(); i++) {
-                collection += (_d->bytes[i + 1] - _d->bytes[i])/((qreal)_d->times[i]);
-            }
-            if (collection > 0) {
-                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString((collection / _d->times.size()) * 1000, true) + "/sec");
-            } else {
-                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString(bytesSent, true) + "/sec");
-            }
-        } else {
-            _d->elapsedTimer.invalidate();
-            _d->times.clear();
-            _d->bytes.clear();
-        }
-        if (bytesSent == bytesTotal) {
-            QQmlProperty::write(_d->progressPage, "informativeText", "Your build getting prepared");
-            _d->elapsedTimer.invalidate();
-            _d->times.clear();
-            _d->bytes.clear();
-        }
-    });
-    connect(_d->reply, (void (QNetworkReply::*)(QList<QSslError>))
-      &QNetworkReply::sslErrors, this, [=] { _d->reply->ignoreSslErrors(); });
-    connect(_d->reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))
-      &QNetworkReply::error, this, [=](QNetworkReply::NetworkError e)
-    {
-        if (e != QNetworkReply::OperationCanceledError) {
-            QMetaEnum metaEnum = QMetaEnum::fromType<QNetworkReply::NetworkError>();
-            if (e == QNetworkReply::AuthenticationRequiredError) {
-                QMessageBox::warning(this, "Authentication Error",
-                  "Your email address or password is wrong. Please contact to support.");
-            } else if (e == QNetworkReply::ContentOperationNotPermittedError) {
-                QMessageBox::warning(this, "Access Denied",
-                  "Your account doesn't have any permission to use this feature, please upgrade your subscription plan.");
-            }  else if (e == QNetworkReply::ServiceUnavailableError ||
-                        e == QNetworkReply::UnknownServerError ||
-                        e == QNetworkReply::InternalServerError ) {
-                QMessageBox::warning(this, QString(metaEnum.valueToKey(e)),
-                  "Server error has occurred, please try again later.");
-            } else {
-                QMessageBox::warning(this, QString(metaEnum.valueToKey(e)),
-                  "Either check your internet connection or contact to support.");
-            }
-            emit done();
-        }
-    });
+//            qreal collection = 0;
+//            for (int i = 0; i < _d->times.size(); i++) {
+//                collection += (_d->bytes[i + 1] - _d->bytes[i])/((qreal)_d->times[i]);
+//            }
+//            if (collection > 0) {
+//                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString((collection / _d->times.size()) * 1000, true) + "/sec");
+//            } else {
+//                QQmlProperty::write(_d->progressPage, "speedText", _d->bytesString(bytesSent, true) + "/sec");
+//            }
+//        } else {
+//            _d->elapsedTimer.invalidate();
+//            _d->times.clear();
+//            _d->bytes.clear();
+//        }
+//        if (bytesSent == bytesTotal) {
+//            QQmlProperty::write(_d->progressPage, "informativeText", "Your build getting prepared");
+//            _d->elapsedTimer.invalidate();
+//            _d->times.clear();
+//            _d->bytes.clear();
+//        }
+//    });
+//    connect(_d->reply, (void (QNetworkReply::*)(QList<QSslError>))
+//      &QNetworkReply::sslErrors, this, [=] { _d->reply->ignoreSslErrors(); });
+//    connect(_d->reply, (void (QNetworkReply::*)(QNetworkReply::NetworkError))
+//      &QNetworkReply::error, this, [=](QNetworkReply::NetworkError e)
+//    {
+//        if (e != QNetworkReply::OperationCanceledError) {
+//            QMetaEnum metaEnum = QMetaEnum::fromType<QNetworkReply::NetworkError>();
+//            if (e == QNetworkReply::AuthenticationRequiredError) {
+//                QMessageBox::warning(this, "Authentication Error",
+//                  "Your email address or password is wrong. Please contact to support.");
+//            } else if (e == QNetworkReply::ContentOperationNotPermittedError) {
+//                QMessageBox::warning(this, "Access Denied",
+//                  "Your account doesn't have any permission to use this feature, please upgrade your subscription plan.");
+//            }  else if (e == QNetworkReply::ServiceUnavailableError ||
+//                        e == QNetworkReply::UnknownServerError ||
+//                        e == QNetworkReply::InternalServerError ) {
+//                QMessageBox::warning(this, QString(metaEnum.valueToKey(e)),
+//                  "Server error has occurred, please try again later.");
+//            } else {
+//                QMessageBox::warning(this, QString(metaEnum.valueToKey(e)),
+//                  "Either check your internet connection or contact to support.");
+//            }
+//            emit done();
+//        }
+//    });
 }
 
 void DownloadWidget::handleBtnOkClicked()

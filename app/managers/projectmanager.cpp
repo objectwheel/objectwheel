@@ -178,7 +178,7 @@ QString ProjectManager::dir(const QString& uid)
     for (const QString& projectName : lsdir(userDirectory)) {
         const QString& projectDir = userDirectory + separator() + projectName;
 
-        if (!SaveUtils::isOwprjt(projectDir))
+        if (!SaveUtils::isProjectValid(projectDir))
             continue;
 
         QString projectUid = SaveUtils::projectUid(projectDir);
@@ -237,7 +237,7 @@ QStringList ProjectManager::projects()
 
     for (const auto& dir : lsdir(udir)) {
         const auto& p = udir + separator() + dir;
-        if (SaveUtils::isOwprjt(p))
+        if (SaveUtils::isProjectValid(p))
             uids << SaveUtils::projectUid(p);
     }
 

@@ -617,7 +617,7 @@ void setId(const QString& url, const QString& id)
     if (canParse(url))
         setProperty(url, "id", id);
 
-    SaveUtils::setProperty(SaveUtils::toParentDir(url), TAG_ID, id);
+    SaveUtils::setProperty(SaveUtils::toParentDir(url), SaveUtils::ControlId, id);
 }
 
 void setProperty(const QString& url, const QString& property, const QString& value)

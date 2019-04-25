@@ -21,7 +21,7 @@ void ProjectExposingManager::init(DesignerScene* designerScene)
 void ProjectExposingManager::exposeProject()
 {
     for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
-        auto form = new Form(SaveUtils::toUrl(formPath));
+        auto form = new Form(SaveUtils::toMainQmlFile(formPath));
 
         if (form->id().isEmpty())
             ControlPropertyManager::setId(form, "form", ControlPropertyManager::SaveChanges);
@@ -38,7 +38,7 @@ void ProjectExposingManager::exposeProject()
             Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
             Q_ASSERT(parentControl);
 
-            auto control = new Control(SaveUtils::toUrl(childPath));
+            auto control = new Control(SaveUtils::toMainQmlFile(childPath));
 
             if (control->id().isEmpty())
                 ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);

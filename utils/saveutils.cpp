@@ -28,22 +28,26 @@ bool isForm(const QString& controlDir)
     return DIR_DESIGNS == fname(dname(controlDir));
 }
 
-bool isOwctrl(const QString& controlDir)
+bool isControlValid(const QString& controlDir)
 {
-    Q_ASSERT(!controlDir.isEmpty());
     const QString& sign = property(controlDir, ControlPropertiesSignature).toString();
     return sign == SIGN_OWCTRL && !uid(controlDir).isEmpty();
 }
 
-bool isOwprjt(const QString& projectDir)
+bool isProjectValid(const QString& projectDir)
 {
     const QString& sign = property(projectDir, ProjectPropertiesSignature).toString();
     return sign == SIGN_OWPRJT;
 }
 
-QString toMain(const QString& controlDir)
+QString toMainQmlFile(const QString& controlDir)
 {
     return controlDir + separator() + DIR_THIS + separator() + FILE_MAIN;
+}
+
+QString toControlMetaFile(const QString& controlDir)
+{
+    return controlDir + separator() + DIR_THIS + separator() + FILE_CONTROL;
 }
 
 QString toThisDir(const QString& controlDir)
@@ -51,24 +55,24 @@ QString toThisDir(const QString& controlDir)
     return controlDir + separator() + DIR_THIS;
 }
 
-QString toParentDir(const QString& controlDir)
-{
-    return dname(dname(controlDir));
-}
-
 QString toChildrenDir(const QString& controlDir)
 {
     return controlDir + separator() + DIR_CHILDREN;
 }
 
+QString toParentDir(const QString& controlDir)
+{
+    return dname(dname(controlDir));
+}
+
+QString toProjectMetaFile(const QString& projectDir)
+{
+    return projectDir + separator() + FILE_PROJECT;
+}
+
 QString toDesignsDir(const QString& projectDir)
 {
     return projectDir + separator() + DIR_DESIGNS;
-}
-
-QString toProjectFile(const QString& projectDir)
-{
-    return projectDir + separator() + FILE_PROJECT;
 }
 
 QString toImportsDir(const QString& projectDir)
@@ -84,11 +88,6 @@ QString toOwDir(const QString& projectDir)
 QString toGlobalDir(const QString& projectDir)
 {
     return toOwDir(projectDir) + separator() + DIR_GLOBAL;
-}
-
-QString toControlFile(const QString& controlDir)
-{
-    return controlDir + separator() + DIR_THIS + separator() + FILE_CONTROL;
 }
 
 QString id(const QString& controlDir)
@@ -159,7 +158,7 @@ QJsonValue projectTheme(const QString& projectDir)
 QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
 {
     QMap<ControlProperties, QVariant> map;
-    QDataStream in(rdfile(toControlFile(controlDir)));
+    QDataStream in(rdfile(toControlMetaFile(controlDir)));
     in >> map;
     return map;
 }
@@ -167,7 +166,7 @@ QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
 QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
 {
     QMap<ProjectProperties, QVariant> map;
-    QDataStream in(rdfile(toProjectFile(projectDir)));
+    QDataStream in(rdfile(toProjectMetaFile(projectDir)));
     in >> map;
     return map;
 }
@@ -189,7 +188,7 @@ void setProperty(const QString& controlDir, ControlProperties property, const QV
     QByteArray buffer;
     QDataStream out(&buffer, QIODevice::WriteOnly);
     out << map;
-    wrfile(toControlFile(controlDir), buffer);
+    wrfile(toControlMetaFile(controlDir), buffer);
 }
 
 void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
@@ -199,89 +198,42 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
     QByteArray buffer;
     QDataStream out(&buffer, QIODevice::WriteOnly);
     out << map;
-    wrfile(toProjectFile(projectDir), buffer);
+    wrfile(toProjectMetaFile(projectDir), buffer);
 }
 
-/*!
-    Recalculates all uids belongs to given control and its children (all).
-*/
 void regenerateUids(const QString& topPath)
 {
-    Q_ASSERT(!topPath.isEmpty());
-    const QStringList& controlFiles = fps(FILE_CONTROL, topPath);
-    for (const QString& controlFile : controlFiles) {
-        const QString& controlDir = toParentDir(controlFile);
-
-        if (!isOwctrl(controlDir))
+    for (const QString& controlFilePath : fps(FILE_CONTROL, topPath)) {
+        const QString& controlDir = toParentDir(controlFilePath);
+        if (!isControlValid(controlDir))
             continue;
-
-        const QString& controlUid = uid(controlDir);
-        const QString& newUid = HashFactory::generate();
-
-        for (const QString& controlFile : controlFiles) {
-            if (isOwctrl(toParentDir(controlFile))) {
-//                QByteArray data = rdfile(controlFile);
-//                data.replace(controlUid.toUtf8(), newUid.toUtf8());
-//                wrfile(controlFile, data);
-            }
-        }
+        setProperty(controlDir, ControlUid, HashFactory::generate());
     }
 }
 
 QStringList formPaths(const QString& projectDir)
 {
     QStringList paths;
-
-    if (projectDir.isEmpty())
-        return paths;
-
-    const QString& dirDesigns = toDesignsDir(projectDir);
-    for (const QString& formFolder : lsdir(dirDesigns)) {
-        const QString& formDir = dirDesigns + separator() + formFolder;
-        if (isOwctrl(formDir))
+    const QString& designsDir = toDesignsDir(projectDir);
+    for (const QString& formDirName : lsdir(designsDir)) {
+        const QString& formDir = designsDir + separator() + formDirName;
+        if (isControlValid(formDir))
             paths.append(formDir);
     }
-
     return paths;
 }
 
-/*!
-    Searches for all controls paths, starting from topPath.
-    Returns all control paths (rootPaths) within given topPath.
-*/
-QStringList controlPaths(const QString& topPath)
+QStringList childrenPaths(const QString& controlDir)
 {
     QStringList paths;
-
-    if (topPath.isEmpty())
-        return paths;
-
-    for (const QString& controlFilePath : fps(FILE_CONTROL, topPath)) {
-        const QString& controlDir = toParentDir(controlFilePath);
-        if (isOwctrl(controlDir))
-            paths.append(controlDir);
-    }
-
-    return paths;
-}
-
-/*!
-    Returns all children paths (rootPath) within given root path.
-*/
-QStringList childrenPaths(const QString& rootPath)
-{
-    Q_ASSERT(!rootPath.isEmpty());
-
-    QStringList paths;
-    const QString& childrenDir = toChildrenDir(rootPath);
+    const QString& childrenDir = toChildrenDir(controlDir);
     for (const QString& childDirName : lsdir(childrenDir)) {
-        const QString& childRootPath = childrenDir + separator() + childDirName;
-        if (isOwctrl(childRootPath)) {
-            paths.append(childRootPath);
-            paths.append(childrenPaths(childRootPath));
+        const QString& childControlDir = childrenDir + separator() + childDirName;
+        if (isControlValid(childControlDir)) {
+            paths.append(childControlDir);
+            paths.append(childrenPaths(childControlDir));
         }
     }
-
     return paths;
 }
 

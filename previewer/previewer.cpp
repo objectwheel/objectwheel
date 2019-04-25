@@ -549,12 +549,12 @@ void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstanc
                 continue;
 
             if (instance->window
-                    && (ParserUtils::property(SaveUtils::toUrl(instance->dir), "visible") != "true"
-                        || ParserUtils::property(SaveUtils::toUrl(instance->dir), "visibility").contains("Hidden"))) {
+                    && (ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") != "true"
+                        || ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visibility").contains("Hidden"))) {
                 continue;
             }
 
-            if (instance->popup && ParserUtils::property(SaveUtils::toUrl(instance->dir), "visible") == "false")
+            if (instance->popup && ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") == "false")
                 continue;
 
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
@@ -673,10 +673,10 @@ QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
         }
 
         if (instance->window
-                && (ParserUtils::property(SaveUtils::toUrl(instance->dir), "visible") != "true"
-                    || ParserUtils::property(SaveUtils::toUrl(instance->dir), "visibility").contains("Hidden"))) {
+                && (ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") != "true"
+                    || ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visibility").contains("Hidden"))) {
             return QImage();
-        } else if (instance->popup && ParserUtils::property(SaveUtils::toUrl(instance->dir), "visible") == "false") {
+        } else if (instance->popup && ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") == "false") {
             return QImage();
         } else {
             if (item->isVisible())
@@ -739,12 +739,12 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
                                                       ControlInstance* parentInstance,
                                                       QQmlContext* oldFormContext)
 {
-    Q_ASSERT_X(SaveUtils::isOwctrl(dir), "createInstance", "Owctrl™ structure is corrupted.");
+    Q_ASSERT_X(SaveUtils::isControlValid(dir), "createInstance", "Owctrl™ structure is corrupted.");
 
     ComponentCompleteDisabler disabler;
     Q_UNUSED(disabler)
 
-    const QString& url = SaveUtils::toUrl(dir);
+    const QString& url = SaveUtils::toMainQmlFile(dir);
 
     auto instance = new Previewer::ControlInstance;
     instance->dir = dir;

@@ -6,7 +6,7 @@
 namespace SaveUtils {
 
 enum ProjectProperties {
-    ProjectName = 0x1111,
+    ProjectName = 0x1000,
     ProjectDescription,
     ProjectChecksum,
     ProjectCreationDate,
@@ -20,7 +20,7 @@ enum ProjectProperties {
 };
 
 enum ControlProperties {
-    ControlId = 0x2222,
+    ControlId = 0x2000,
     ControlUid,
     ControlChecksum,
     ControlIcon,
@@ -31,19 +31,19 @@ enum ControlProperties {
 };
 
 bool isForm(const QString& controlDir);
-bool isOwctrl(const QString& controlDir);
-bool isOwprjt(const QString& projectDir);
+bool isControlValid(const QString& controlDir);
+bool isProjectValid(const QString& projectDir);
 
-QString toMain(const QString& controlDir);
+QString toMainQmlFile(const QString& controlDir);
+QString toControlMetaFile(const QString& controlDir);
 QString toThisDir(const QString& controlDir);
-QString toParentDir(const QString& controlDir);
 QString toChildrenDir(const QString& controlDir);
+QString toParentDir(const QString& controlDir);
+QString toProjectMetaFile(const QString& projectDir);
 QString toDesignsDir(const QString& projectDir);
-QString toProjectFile(const QString& projectDir);
 QString toImportsDir(const QString& projectDir);
 QString toOwDir(const QString& projectDir);
 QString toGlobalDir(const QString& projectDir);
-QString toControlFile(const QString& controlDir);
 
 QString id(const QString& controlDir);
 QString uid(const QString& controlDir);
@@ -71,7 +71,6 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
 
 void regenerateUids(const QString& topPath);
 QStringList formPaths(const QString& projectDir);
-QStringList controlPaths(const QString& topPath);
 QStringList childrenPaths(const QString& controlDir);
 
 } // SaveUtils
