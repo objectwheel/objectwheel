@@ -2,9 +2,8 @@
 #include <filemanager.h>
 #include <hashfactory.h>
 
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonDocument>
+#include <QDataStream>
+#include <QJsonValue>
 
 // TODO: Always use case insensitive comparison when it is possible
 
@@ -23,27 +22,6 @@
 #define FILE_MAIN        "main.qml"        // TODO: Apply everywhere
 
 namespace SaveUtils {
-
-namespace Internal {
-
-void exchangeMatchesForFile(const QString& filePath, const QString& from, const QString& to)
-{
-    QByteArray data = rdfile(filePath);
-    data.replace(from.toUtf8(), to.toUtf8());
-    wrfile(filePath, data);
-}
-
-QJsonObject rootJsonObjectForFile(const QString& fileName)
-{
-    return QJsonDocument::fromBinaryData(rdfile(fileName)).object();
-}
-
-void writeJsonObjectToFile(const QJsonObject& jsonObject, const QString& fileName)
-{
-    wrfile(fileName, QJsonDocument(jsonObject).toBinaryData());
-}
-
-} // Internal
 
 bool isForm(const QString& controlDir)
 {
@@ -68,19 +46,19 @@ QString toMain(const QString& controlDir)
     return controlDir + separator() + DIR_THIS + separator() + FILE_MAIN;
 }
 
-QString toThisDir(const QString& rootPath)
+QString toThisDir(const QString& controlDir)
 {
-    return rootPath + separator() + DIR_THIS;
+    return controlDir + separator() + DIR_THIS;
 }
 
-QString toParentDir(const QString& topPath)
+QString toParentDir(const QString& controlDir)
 {
-    return dname(dname(topPath));
+    return dname(dname(controlDir));
 }
 
-QString toChildrenDir(const QString& rootPath)
+QString toChildrenDir(const QString& controlDir)
 {
-    return rootPath + separator() + DIR_CHILDREN;
+    return controlDir + separator() + DIR_CHILDREN;
 }
 
 QString toDesignsDir(const QString& projectDir)
@@ -108,9 +86,146 @@ QString toGlobalDir(const QString& projectDir)
     return toOwDir(projectDir) + separator() + DIR_GLOBAL;
 }
 
-QString toControlFile(const QString& rootPath)
+QString toControlFile(const QString& controlDir)
 {
-    return rootPath + separator() + DIR_THIS + separator() + FILE_CONTROL;
+    return controlDir + separator() + DIR_THIS + separator() + FILE_CONTROL;
+}
+
+QString id(const QString& controlDir)
+{
+    return property(controlDir, ControlId).toString();
+}
+
+QString uid(const QString& controlDir)
+{
+    return property(controlDir, ControlUid).toString();
+}
+
+QString name(const QString& controlDir)
+{
+    return property(controlDir, ControlToolName).toString();
+}
+
+QString category(const QString& controlDir)
+{
+    return property(controlDir, ControlToolCategory).toString();
+}
+
+QByteArray icon(const QString& controlDir)
+{
+    return property(controlDir, ControlIcon).toByteArray();
+}
+
+QString projectUid(const QString& projectDir)
+{
+    return property(projectDir, ProjectUid).toString();
+}
+
+QString projectName(const QString& projectDir)
+{
+    return property(projectDir, ProjectName).toString();
+}
+
+QString projectSize(const QString& projectDir)
+{
+    return property(projectDir, ProjectSize).toString();
+}
+
+QString projectCreationDate(const QString& projectDir)
+{
+    return property(projectDir, ProjectCreationDate).toString();
+}
+
+QString projectModificationDate(const QString& projectDir)
+{
+    return property(projectDir, ProjectModificationDate).toString();
+}
+
+QString projectScaling(const QString& projectDir)
+{
+    return property(projectDir, ProjectScaling).toString();
+}
+
+QString projectDescription(const QString& projectDir)
+{
+    return property(projectDir, ProjectDescription).toString();
+}
+
+QJsonValue projectTheme(const QString& projectDir)
+{
+    return property(projectDir, ProjectTheme).toJsonValue();
+}
+
+QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
+{
+    QMap<ControlProperties, QVariant> map;
+    QDataStream in(rdfile(toControlFile(controlDir)));
+    in >> map;
+    return map;
+}
+
+QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
+{
+    QMap<ProjectProperties, QVariant> map;
+    QDataStream in(rdfile(toProjectFile(projectDir)));
+    in >> map;
+    return map;
+}
+
+QVariant property(const QString& controlDir, ControlProperties property)
+{
+    return controlMap(controlDir).value(property);
+}
+
+QVariant property(const QString& projectDir, ProjectProperties property)
+{
+    return projectMap(projectDir).value(property);
+}
+
+void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
+{
+    QMap<ControlProperties, QVariant> map(controlMap(controlDir));
+    map.insert(property, value);
+    QByteArray buffer;
+    QDataStream out(&buffer, QIODevice::WriteOnly);
+    out << map;
+    wrfile(toControlFile(controlDir), buffer);
+}
+
+void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
+{
+    QMap<ProjectProperties, QVariant> map(projectMap(projectDir));
+    map.insert(property, value);
+    QByteArray buffer;
+    QDataStream out(&buffer, QIODevice::WriteOnly);
+    out << map;
+    wrfile(toProjectFile(projectDir), buffer);
+}
+
+/*!
+    Recalculates all uids belongs to given control and its children (all).
+*/
+void regenerateUids(const QString& topPath)
+{
+    Q_ASSERT(!topPath.isEmpty());
+    const QStringList& controlFiles = fps(FILE_CONTROL, topPath);
+    for (const QString& controlFile : controlFiles) {
+        const QString& controlDir = toParentDir(controlFile);
+
+        if (!isOwctrl(controlDir))
+            continue;
+
+        const QString& controlUid = uid(controlDir);
+        const QString& newUid = HashFactory::generate();
+
+        for (const QString& controlFile : controlFiles) {
+            if (isOwctrl(toParentDir(controlFile))) {
+//                QByteArray data = rdfile(controlFile);
+//                data.replace(controlUid.toUtf8(), newUid.toUtf8());
+//                wrfile(controlFile, data);
+            }
+        }
+    }
 }
 
 QStringList formPaths(const QString& projectDir)
@@ -170,120 +285,24 @@ QStringList childrenPaths(const QString& rootPath)
     return paths;
 }
 
-QString id(const QString& rootPath)
-{
-    return property(rootPath, TAG_ID).toString();
-}
-
-QString uid(const QString& rootPath)
-{
-    return property(rootPath, TAG_UID).toString();
-}
-
-QString name(const QString& rootPath)
-{
-    return property(rootPath, TAG_NAME).toString();
-}
-
-QString category(const QString& rootPath)
-{
-    return property(rootPath, TAG_CATEGORY).toString();
-}
-
-QByteArray icon(const QString& rootPath)
-{
-    return QByteArray::fromBase64(property(rootPath, TAG_ICON).toString().toUtf8());
-}
-
-QString projectUid(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_UID).toString();
-}
-
-QString projectName(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_NAME).toString();
-}
-
-QString projectDescription(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_DESCRIPTION).toString();
-}
-
-QString projectCrDate(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_CRDATE).toString();
-}
-
-QString projectMfDate(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_MFDATE).toString();
-}
-
-QString projectSize(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_SIZE).toString();
-}
-
-QString projectScaling(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_SCALING).toString();
-}
-
-QJsonValue projectTheme(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_THEME);
-}
-
-QJsonValue property(const QString& rootPath, const QString& property)
-{
-    return Internal::rootJsonObjectForFile(toControlFile(rootPath)).value(property);
-}
-
-QJsonValue projectProperty(const QString& projectDir, const QString& property)
-{
-    return Internal::rootJsonObjectForFile(toProjectFile(projectDir)).value(property);
-}
-
-void setProperty(const QString& rootPath, const QString& property, const QJsonValue& value)
-{
-    Q_ASSERT(!rootPath.isEmpty() && !property.isEmpty() && isOwctrl(rootPath));
-    const QString& controlFile = toControlFile(rootPath);
-    QJsonObject rootJsonObject = Internal::rootJsonObjectForFile(controlFile);
-    rootJsonObject.insert(property, value);
-    Internal::writeJsonObjectToFile(rootJsonObject, controlFile);
-}
-
-void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value)
-{
-    Q_ASSERT(!projectDir.isEmpty() && !property.isEmpty() && isOwprjt(projectDir));
-    const QString& projectFile = toProjectFile(projectDir);
-    QJsonObject rootJsonObject = Internal::rootJsonObjectForFile(projectFile);
-    rootJsonObject.insert(property, value);
-    Internal::writeJsonObjectToFile(rootJsonObject, projectFile);
-}
-
-/*!
-    Recalculates all uids belongs to given control and its children (all).
-*/
-void regenerateUids(const QString& topPath)
-{
-    Q_ASSERT(!topPath.isEmpty());
-    const QStringList& controlFiles = fps(FILE_CONTROL, topPath);
-    for (const QString& controlFile : controlFiles) {
-        const QString& controlDir = toParentDir(controlFile);
-
-        if (!isOwctrl(controlDir))
-            continue;
-
-        const QString& controlUid = uid(controlDir);
-        const QString& newUid = HashFactory::generate();
-
-        for (const QString& controlFile : controlFiles) {
-            if (isOwctrl(toParentDir(controlFile)))
-                Internal::exchangeMatchesForFile(controlFile, controlUid, newUid);
-        }
-    }
-}
-
 } // SaveUtils
+
+QDataStream& operator>>(QDataStream& in, SaveUtils::ProjectProperties& e)
+{
+    return in >> (int&) e;
+}
+
+QDataStream& operator<<(QDataStream& out, SaveUtils::ProjectProperties e)
+{
+    return out << (int) e;
+}
+
+QDataStream& operator>>(QDataStream& in, SaveUtils::ControlProperties& e)
+{
+    return in >> (int&) e;
+}
+
+QDataStream& operator<<(QDataStream& out, SaveUtils::ControlProperties e)
+{
+    return out << (int) e;
+}

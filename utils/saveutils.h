@@ -1,11 +1,7 @@
 #ifndef SAVEUTILS_H
 #define SAVEUTILS_H
 
-class QByteArray;
-class QString;
-class QStringList;
-class QVariant;
-class QJsonValue;
+#include <QVariant>
 
 namespace SaveUtils {
 
@@ -58,24 +54,31 @@ QByteArray icon(const QString& controlDir);
 QString projectUid(const QString& projectDir);
 QString projectName(const QString& projectDir);
 QString projectSize(const QString& projectDir);
-QString projectCrDate(const QString& projectDir);
-QString projectMfDate(const QString& projectDir);
+QString projectCreationDate(const QString& projectDir);
+QString projectModificationDate(const QString& projectDir);
 QString projectScaling(const QString& projectDir);
 QString projectDescription(const QString& projectDir);
 QJsonValue projectTheme(const QString& projectDir);
 
+QMap<ControlProperties, QVariant> controlMap(const QString& controlDir);
+QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir);
+
 QVariant property(const QString& controlDir, ControlProperties property);
 QVariant property(const QString& projectDir, ProjectProperties property);
 
+void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
+void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
+
+void regenerateUids(const QString& topPath);
 QStringList formPaths(const QString& projectDir);
 QStringList controlPaths(const QString& topPath);
 QStringList childrenPaths(const QString& controlDir);
 
-void setProperty(const QString& controlDir,  ControlProperties property, const QVariant& value);
-void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
-
-void regenerateUids(const QString& topPath);
-
 } // SaveUtils
+
+QDataStream& operator>>(QDataStream& in, SaveUtils::ProjectProperties& e);
+QDataStream& operator<<(QDataStream& out, SaveUtils::ProjectProperties e);
+QDataStream& operator>>(QDataStream& in, SaveUtils::ControlProperties& e);
+QDataStream& operator<<(QDataStream& out, SaveUtils::ControlProperties e);
 
 #endif // SAVEUTILS_H
