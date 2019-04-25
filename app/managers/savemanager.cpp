@@ -1,5 +1,6 @@
 #include <savemanager.h>
 #include <saveutils.h>
+#include <hashfactory.h>
 #include <filemanager.h>
 #include <projectmanager.h>
 #include <parserutils.h>
@@ -169,8 +170,7 @@ QString SaveManager::addForm(const QString& formRootPath)
     }
 
     const QString& targetOwdbDir = SaveUtils::toOwdbDir(ProjectManager::dir());
-    const QString& newFormRootPath = targetOwdbDir + separator() +
-            QString::number(SaveUtils::biggestDir(targetOwdbDir) + 1);
+    const QString& newFormRootPath = targetOwdbDir + separator() + HashFactory::generate();
 
     if (!mkdir(newFormRootPath)) {
         qWarning("SaveManager::addForm: Failed. Cannot create the new form root path.");
@@ -202,8 +202,7 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
     }
 
     const QString& targetParentControlChildrenDir = SaveUtils::toChildrenDir(targetParentControlRootPath);
-    const QString& newControlRootPath = targetParentControlChildrenDir + separator() +
-            QString::number(SaveUtils::biggestDir(targetParentControlChildrenDir) + 1);
+    const QString& newControlRootPath = targetParentControlChildrenDir + separator() + HashFactory::generate();
 
     if (!mkdir(newControlRootPath)) {
         qWarning("SaveManager::addControl: Failed. Cannot create the new control root path.");
@@ -235,8 +234,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     }
 
     const QString& targetControlChildrenDir = SaveUtils::toChildrenDir(parentControl->dir());
-    const QString& newControlRootPath = targetControlChildrenDir + separator()
-            + QString::number(SaveUtils::biggestDir(targetControlChildrenDir) + 1);
+    const QString& newControlRootPath = targetControlChildrenDir + separator() + HashFactory::generate();
 
     if (!mkdir(newControlRootPath)) {
         qWarning("SaveManager::moveControl: Failed. Cannot create the new control root path.");

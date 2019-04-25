@@ -16,15 +16,6 @@
 
 namespace {
 
-int biggestDir(const QString& basePath)
-{
-    int num = 0;
-    for (auto dir : lsdir(basePath))
-        if (dir.toInt() > num)
-            num = dir.toInt();
-    return num;
-}
-
 QString byteString(const qint64 size)
 {
     QString ret;
@@ -180,7 +171,7 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
         return false;
     }
 
-    const auto& pdir = udir + separator() + QString::number(biggestDir(udir) + 1);
+    const auto& pdir = udir + separator() + HashFactory::generate();
     const auto& uid = HashFactory::generate();
 
     QJsonObject jobj;
@@ -265,8 +256,7 @@ bool ProjectManager::exportProject(const QString& uid, const QString& filePath)
 bool ProjectManager::importProject(const QString &filePath, QString* uid)
 {
     const auto& udir = UserManager::dir();
-    const auto& pdir = udir + separator() +
-            QString::number(biggestDir(udir) + 1);
+    const auto& pdir = udir + separator() + HashFactory::generate();
 
     if (filePath.isEmpty() || udir.isEmpty())
         return false;

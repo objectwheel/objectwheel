@@ -4,6 +4,7 @@
 #include <toolboxtree.h>
 #include <filemanager.h>
 #include <zipasync.h>
+#include <hashfactory.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -169,8 +170,7 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     const bool isNewTool = !toolPath.contains(toolsDir());
     QString newToolPath;
     if (isNewTool) {
-        newToolPath = toolsDir() + separator() +
-                QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
+        newToolPath = toolsDir() + separator() + HashFactory::generate();
 
         if (!mkdir(newToolPath))
             return false;
@@ -289,8 +289,7 @@ void ToolManager::exposeTools()
     } else {
         for (const QString& toolName : lsfile(TOOLS_SOURCE_DIRECTORY)) {
             const QString& toolPath = QString(TOOLS_SOURCE_DIRECTORY) + separator() + toolName;
-            const QString& newToolName = QString::number(SaveUtils::biggestDir(toolsDir()) + 1);
-            const QString& newToolPath = toolsDir() + separator() + newToolName;
+            const QString& newToolPath = toolsDir() + separator() + HashFactory::generate();
 
             if (!mkdir(newToolPath)) {
                 qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x01");

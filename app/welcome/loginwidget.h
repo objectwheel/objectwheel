@@ -37,20 +37,20 @@ signals:
     void busy(const QString& text);
 
 private:
-    QFutureWatcher<bool> _encryptionWatcher;
-    QGridLayout* _layout;
-    QLabel* _logoLabel;
-    QLabel* _loginLabel;
-    BulkEdit* _bulkEdit;
-    QWidget* _autologinWidget;
-    QHBoxLayout* _autologinLayout;
-    Switch* _autologinSwitch;
-    QLabel* _autologinLabel;
-    ButtonSlice* _buttons;
-    FlatButton* _helpButton;
-    WaitingSpinnerWidget* _loadingIndicator;
-    QLabel* _legalLabel;
-    QMessageBox* _helpBox;
+    QFutureWatcher<bool> m_encryptionWatcher;
+    QGridLayout* m_layout;
+    QLabel* m_logoLabel;
+    QLabel* m_loginLabel;
+    BulkEdit* m_bulkEdit;
+    QWidget* m_autologinWidget;
+    QHBoxLayout* m_autologinLayout;
+    Switch* m_autologinSwitch;
+    QLabel* m_autologinLabel;
+    ButtonSlice* m_buttons;
+    FlatButton* m_helpButton;
+    WaitingSpinnerWidget* m_loadingIndicator;
+    QLabel* m_legalLabel;
+    QMessageBox* m_helpBox;
 };
 
 #endif // LOGINWIDGET_H

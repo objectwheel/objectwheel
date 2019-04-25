@@ -4,6 +4,7 @@
 #include <waitingspinnerwidget.h>
 #include <accountmanager.h>
 #include <countdown.h>
+#include <utilityfunctions.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -18,11 +19,6 @@
 #define PATH_ICON        (":/images/lock.png")
 #define PATH_VICON       (":/images/ok.png")
 #define PATH_CICON       (":/images/cancel.png")
-
-static bool checkPassword(const QString& password)
-{
-    return password.contains(QRegExp("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,25}$"));
-}
 
 enum Fields { Password, ConfirmPassword, Code };
 enum Buttons { Apply, Cancel };
@@ -188,12 +184,12 @@ void ResetWidget::onApplyClicked()
         return;
     }
 
-    if (!checkPassword(password)) {
+    if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
         QMessageBox::warning(
             this,
             tr("Incorrect Password"),
             tr("Incorrect Password. Your password must be in between "
-               "6 and 25 characters long. Also please check it if contains invalid characters.")
+               "6 and 35 characters long. Also please check it if contains invalid characters.")
         );
         return;
     }

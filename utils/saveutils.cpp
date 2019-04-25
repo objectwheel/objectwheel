@@ -59,21 +59,6 @@ bool isOwprj(const QString& projectDir)
 }
 
 /*!
-    Returns biggest number from integer named dirs.
-    If no integer named dir exists, 0 returned.
-    If no dir exists or dirs are smaller than zero, 0 returned.
-*/
-int biggestDir(const QString& basePath)
-{
-    int num = 0;
-    for (const QString& dir : lsdir(basePath)) {
-        if (dir.toInt() > num)
-            num = dir.toInt();
-    }
-    return num;
-}
-
-/*!
     Counts all children paths (rootPath) within given root path.
 */
 int childrenCount(const QString& rootPath)

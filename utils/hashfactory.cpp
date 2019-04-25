@@ -11,7 +11,7 @@ QString generate()
     data.append(QString::number(QDateTime::currentMSecsSinceEpoch()));
     data.append(QString::number(QRandomGenerator::global()->generate()));
     const QByteArray& hex = QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
-    return QString(hex.left(6) + hex.right(6));
+    return hex.left(6) + hex.right(6);
 }
 
 }

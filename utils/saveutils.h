@@ -48,7 +48,6 @@ bool isMain(const QString& rootPath);
 bool isOwctrl(const QString& rootPath);
 bool isOwprj(const QString& projectDir);
 
-int biggestDir(const QString& basePath);
 int childrenCount(const QString& rootPath);
 
 QString toUrl(const QString& rootPath);
