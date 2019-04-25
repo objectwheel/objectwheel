@@ -465,4 +465,32 @@ void setDeviceInfo(QAction* action, const QVariantMap& deviceInfo)
     action->setProperty("__OW_DEVICE_INFO__", deviceInfo);
 }
 
+QString toPrettyBytesString(qint64 bytes, bool withExt)
+{
+    QString ret;
+    float kb = 1024.0f;
+    float mb = 1048576.0f;
+    float gb = 1073741824.0f;
+
+    if (bytes < kb) {
+        ret = QString::number(bytes);
+        if (withExt)
+            ret += " Bytes";
+    } else if (bytes < mb) {
+        ret = QString::number(bytes / kb, 'f', 1);
+        if (withExt)
+            ret += " Kb";
+    } else if (bytes < gb) {
+        ret = QString::number(bytes / mb, 'f', 1);
+        if (withExt)
+            ret += " Mb";
+    } else {
+        ret = QString::number(bytes / gb, 'f', 2);
+        if (withExt)
+            ret += " Gb";
+    }
+
+    return ret;
+}
+
 } // UtilityFunctions

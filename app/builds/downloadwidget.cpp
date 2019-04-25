@@ -56,30 +56,6 @@ DownloadWidgetPrivate::DownloadWidgetPrivate(DownloadWidget* w)
                      parent, &DownloadWidget::handleBtnCancelClicked);
 }
 
-QString DownloadWidgetPrivate::bytesString(const qint64 size, bool withExt)
-{
-    QString ret;
-    float kb = 1024.0f;
-    float mb = 1048576.0f;
-    float gb = 1073741824.0f;
-
-    if (size < kb) {
-        ret = QString::number(size);
-        if (withExt) ret += " Bytes";
-    } else if (size < mb) {
-        ret = QString::number(size / kb, 'f', 1);
-        if (withExt) ret += " Kb";
-    } else if (size < gb) {
-        ret = QString::number(size / mb, 'f', 1);
-        if (withExt) ret += " Mb";
-    } else {
-        ret = QString::number(size / gb, 'f', 2);
-        if (withExt) ret += " Gb";
-    }
-
-    return ret;
-}
-
 QString DownloadWidgetPrivate::determineBuildExtension(const QString label)
 {
     if (label.contains("android")) {
@@ -134,7 +110,7 @@ void DownloadWidget::download(OTargets::Targets target)
     if (!tdir.isValid() || !tdir2.isValid())
         qFatal("Error");
 
-    if (!cp(pdir + separator() + DIR_OWDB, tdir.path()) ||
+    if (!cp(pdir + separator() + DIR_DESIGNS, tdir.path()) ||
         !cp(pdir + separator() + DIR_BUILD, tdir.path()) ||
         !cp(pdir + separator() + FILE_PROJECT, tdir.path()))
         qFatal("Error");

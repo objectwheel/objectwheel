@@ -546,7 +546,7 @@ void Control::updatePreview(const PreviewResult& result)
         if (m_gui)
             m_image = PaintUtils::renderInvisibleControlImage(size());
         else
-            m_image = PaintUtils::renderNonGuiControlImage(SaveUtils::toIcon(dir()), size());
+            m_image = PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(dir())));
     }
 
     for (auto resizer : m_resizers)

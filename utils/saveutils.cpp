@@ -6,10 +6,25 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 
-// TODO: Change QString with QLatin1String whenever it is possible
 // TODO: Always use case insensitive comparison when it is possible
 
-namespace {
+#define SIGN_OWCTRL      "T3djdHJsX3YyLjA"
+#define SIGN_OWPRJT      "T3dwcmpfdjIuMA"
+
+#define DIR_THIS         "t"
+#define DIR_CHILDREN     "c"
+#define DIR_DESIGNS      "designs"
+#define DIR_IMPORTS      "imports"
+#define DIR_OW           "Objectwheel"
+#define DIR_GLOBAL       "GlobalResources"
+
+#define FILE_PROJECT     "project.meta"
+#define FILE_CONTROL     "control.meta"
+#define FILE_MAIN        "main.qml"        // TODO: Apply everywhere
+
+namespace SaveUtils {
+
+namespace Internal {
 
 void exchangeMatchesForFile(const QString& filePath, const QString& from, const QString& to)
 {
@@ -20,72 +35,37 @@ void exchangeMatchesForFile(const QString& filePath, const QString& from, const 
 
 QJsonObject rootJsonObjectForFile(const QString& fileName)
 {
-    return QJsonDocument::fromJson(rdfile(fileName)).object();
+    return QJsonDocument::fromBinaryData(rdfile(fileName)).object();
 }
 
 void writeJsonObjectToFile(const QJsonObject& jsonObject, const QString& fileName)
 {
-    wrfile(fileName, QJsonDocument(jsonObject).toJson());
-}
+    wrfile(fileName, QJsonDocument(jsonObject).toBinaryData());
 }
 
-namespace SaveUtils {
+} // Internal
 
-bool isForm(const QString& rootPath)
+bool isForm(const QString& controlDir)
 {
-    return DIR_OWDB == fname(dname(rootPath));
+    return DIR_DESIGNS == fname(dname(controlDir));
 }
 
-/*!
-    Returns true if given path belongs to main form
-    It doesn't check whether rootPath belong to a form or not.
-*/
-bool isMain(const QString& rootPath)
+bool isOwctrl(const QString& controlDir)
 {
-    return fname(rootPath) == DIR_MAINFORM;
+    Q_ASSERT(!controlDir.isEmpty());
+    const QString& sign = property(controlDir, ControlPropertiesSignature).toString();
+    return sign == SIGN_OWCTRL && !uid(controlDir).isEmpty();
 }
 
-bool isOwctrl(const QString& rootPath)
+bool isOwprjt(const QString& projectDir)
 {
-    Q_ASSERT(!rootPath.isEmpty());
-    const QString& sign = property(rootPath, TAG_OWCTRL_SIGN).toString();
-    return sign == SIGN_OWCTRL && !uid(rootPath).isEmpty();
+    const QString& sign = property(projectDir, ProjectPropertiesSignature).toString();
+    return sign == SIGN_OWPRJT;
 }
 
-bool isOwprj(const QString& projectDir)
+QString toMain(const QString& controlDir)
 {
-    const QString& sign = projectProperty(projectDir, PTAG_OWPRJ_SIGN).toString();
-    return sign == SIGN_OWPRJ;
-}
-
-/*!
-    Counts all children paths (rootPath) within given root path.
-*/
-int childrenCount(const QString& rootPath)
-{
-    Q_ASSERT(!rootPath.isEmpty());
-
-    int counter = 0;
-    const QString& childrenDir = toChildrenDir(rootPath);
-    for (const QString& childDirName : lsdir(childrenDir)) {
-        const QString& childRootPath = childrenDir + separator() + childDirName;
-        if (isOwctrl(childRootPath)) {
-            ++counter;
-            counter += childrenCount(childRootPath);
-        }
-    }
-
-    return counter;
-}
-
-QString toUrl(const QString& rootPath)
-{
-    return rootPath + separator() + DIR_THIS + separator() + FILE_MAIN;
-}
-
-QString toIcon(const QString& rootPath)
-{
-    return rootPath + separator() + DIR_THIS + separator() + FILE_ICON;
+    return controlDir + separator() + DIR_THIS + separator() + FILE_MAIN;
 }
 
 QString toThisDir(const QString& rootPath)
@@ -103,9 +83,9 @@ QString toChildrenDir(const QString& rootPath)
     return rootPath + separator() + DIR_CHILDREN;
 }
 
-QString toOwdbDir(const QString& projectDir)
+QString toDesignsDir(const QString& projectDir)
 {
-    return projectDir + separator() + DIR_OWDB;
+    return projectDir + separator() + DIR_DESIGNS;
 }
 
 QString toProjectFile(const QString& projectDir)
@@ -115,7 +95,7 @@ QString toProjectFile(const QString& projectDir)
 
 QString toImportsDir(const QString& projectDir)
 {
-    return toOwdbDir(projectDir) + separator() + DIR_IMPORTS;
+    return projectDir + separator() + DIR_IMPORTS;
 }
 
 QString toOwDir(const QString& projectDir)
@@ -140,9 +120,9 @@ QStringList formPaths(const QString& projectDir)
     if (projectDir.isEmpty())
         return paths;
 
-    const QString& dirOwdb = toOwdbDir(projectDir);
-    for (const QString& formFolder : lsdir(dirOwdb)) {
-        const QString& formDir = dirOwdb + separator() + formFolder;
+    const QString& dirDesigns = toDesignsDir(projectDir);
+    for (const QString& formFolder : lsdir(dirDesigns)) {
+        const QString& formDir = dirDesigns + separator() + formFolder;
         if (isOwctrl(formDir))
             paths.append(formDir);
     }
@@ -210,6 +190,11 @@ QString category(const QString& rootPath)
     return property(rootPath, TAG_CATEGORY).toString();
 }
 
+QByteArray icon(const QString& rootPath)
+{
+    return QByteArray::fromBase64(property(rootPath, TAG_ICON).toString().toUtf8());
+}
+
 QString projectUid(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_UID).toString();
@@ -223,11 +208,6 @@ QString projectName(const QString& projectDir)
 QString projectDescription(const QString& projectDir)
 {
     return projectProperty(projectDir, PTAG_DESCRIPTION).toString();
-}
-
-QString projectOwner(const QString& projectDir)
-{
-    return projectProperty(projectDir, PTAG_OWNER).toString();
 }
 
 QString projectCrDate(const QString& projectDir)
@@ -257,30 +237,30 @@ QJsonValue projectTheme(const QString& projectDir)
 
 QJsonValue property(const QString& rootPath, const QString& property)
 {
-    return rootJsonObjectForFile(toControlFile(rootPath)).value(property);
+    return Internal::rootJsonObjectForFile(toControlFile(rootPath)).value(property);
 }
 
 QJsonValue projectProperty(const QString& projectDir, const QString& property)
 {
-    return rootJsonObjectForFile(toProjectFile(projectDir)).value(property);
+    return Internal::rootJsonObjectForFile(toProjectFile(projectDir)).value(property);
 }
 
 void setProperty(const QString& rootPath, const QString& property, const QJsonValue& value)
 {
     Q_ASSERT(!rootPath.isEmpty() && !property.isEmpty() && isOwctrl(rootPath));
     const QString& controlFile = toControlFile(rootPath);
-    QJsonObject rootJsonObject = rootJsonObjectForFile(controlFile);
+    QJsonObject rootJsonObject = Internal::rootJsonObjectForFile(controlFile);
     rootJsonObject.insert(property, value);
-    writeJsonObjectToFile(rootJsonObject, controlFile);
+    Internal::writeJsonObjectToFile(rootJsonObject, controlFile);
 }
 
 void setProjectProperty(const QString& projectDir, const QString& property, const QJsonValue& value)
 {
-    Q_ASSERT(!projectDir.isEmpty() && !property.isEmpty() && isOwprj(projectDir));
+    Q_ASSERT(!projectDir.isEmpty() && !property.isEmpty() && isOwprjt(projectDir));
     const QString& projectFile = toProjectFile(projectDir);
-    QJsonObject rootJsonObject = rootJsonObjectForFile(projectFile);
+    QJsonObject rootJsonObject = Internal::rootJsonObjectForFile(projectFile);
     rootJsonObject.insert(property, value);
-    writeJsonObjectToFile(rootJsonObject, projectFile);
+    Internal::writeJsonObjectToFile(rootJsonObject, projectFile);
 }
 
 /*!
@@ -301,8 +281,9 @@ void regenerateUids(const QString& topPath)
 
         for (const QString& controlFile : controlFiles) {
             if (isOwctrl(toParentDir(controlFile)))
-                exchangeMatchesForFile(controlFile, controlUid, newUid);
+                Internal::exchangeMatchesForFile(controlFile, controlUid, newUid);
         }
     }
 }
+
 } // SaveUtils

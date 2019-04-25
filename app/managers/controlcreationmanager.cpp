@@ -39,9 +39,6 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
 
     auto form = new Form(SaveUtils::toUrl(newFormRootPath));
 
-    if (SaveUtils::isMain(newFormRootPath))
-        form->setMain(true);
-
     s_designerScene->addForm(form);
 
     SaveManager::setupFormGlobalConnections(form->dir());

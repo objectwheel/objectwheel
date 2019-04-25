@@ -9,116 +9,11 @@
 #include <toolmanager.h>
 #include <documentmanager.h>
 #include <zipasync.h>
+#include <utilityfunctions.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDateTime>
-
-namespace {
-
-QString byteString(const qint64 size)
-{
-    QString ret;
-    float kb = 1024.0f;
-    float mb = 1048576.0f;
-    float gb = 1073741824.0f;
-
-    if (size < kb) {
-        ret = QString::number(size);
-        ret += " Bytes";
-    } else if (size < mb) {
-        ret = QString::number(size / kb, 'f', 1);
-        ret += " KB";
-    } else if (size < gb) {
-        ret = QString::number(size / mb, 'f', 1);
-        ret += " MB";
-    } else {
-        ret = QString::number(size / gb, 'f', 2);
-        ret += " GB";
-    }
-
-    return ret;
-}
-
-void setProperty(const QString& rootPath, const QString& property, const QVariant& value)
-{
-    auto jobj = QJsonDocument::fromJson(rdfile(rootPath +separator() + FILE_PROJECT)).object();
-    jobj[property] = value.toJsonValue();
-    if (property != PTAG_MFDATE)
-        jobj[PTAG_MFDATE] = ProjectManager::currentDbTime();
-    const auto& data = QJsonDocument(jobj).toJson();
-    wrfile(rootPath + separator() + FILE_PROJECT, data);
-}
-
-bool isOwprj(const QString& rootPath)
-{
-    const auto& jobj = QJsonDocument::fromJson(
-                rdfile(
-                    rootPath +
-                    separator() +
-                    FILE_PROJECT
-                    )
-                ).object();
-
-    return (jobj.value(PTAG_OWPRJ_SIGN).toString() == SIGN_OWPRJ);
-}
-
-QString uid(const QString& rootPath)
-{
-    const auto& jobj = QJsonDocument::fromJson(
-                rdfile(
-                    rootPath +
-                    separator() +
-                    FILE_PROJECT
-                    )
-                ).object();
-
-    return jobj.value(PTAG_UID).toString();
-}
-
-QString dir(const QString& uid)
-{
-    QString pdir;
-    const auto& udir = UserManager::dir();
-
-    if (udir.isEmpty() || uid.isEmpty())
-        return pdir;
-
-    for (const auto& dir : lsdir(udir)) {
-        const auto& p = udir + separator() + dir;
-
-        if (!isOwprj(p))
-            continue;
-
-        auto h = ::uid(p);
-
-        if (uid == h) {
-            pdir = p;
-            break;
-        }
-    }
-
-    return pdir;
-}
-
-QVariant property(const QString& uid, const QString& property)
-{
-    const auto& dir = ::dir(uid);
-
-    if (dir.isEmpty())
-        return QVariant();
-
-    const auto& jobj = QJsonDocument::fromJson(
-                rdfile(
-                    dir +
-                    separator() +
-                    FILE_PROJECT
-                    )
-                ).object();
-
-    return jobj.value(property).toVariant();
-}
-}
 
 ProjectManager* ProjectManager::s_instance = nullptr;
 QString ProjectManager::s_currentUid;
@@ -180,10 +75,10 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
     jobj.insert(PTAG_OWNER, owner);
     jobj.insert(PTAG_CRDATE, crDate);
     jobj.insert(PTAG_MFDATE, crDate);
-    jobj.insert(PTAG_OWPRJ_SIGN, SIGN_OWPRJ);
+    jobj.insert(PTAG_OWPRJT_SIGN, SIGN_OWPRJT);
     jobj.insert(PTAG_UID, uid);
 
-    const auto& data = QJsonDocument(jobj).toJson();
+    const auto& data = QJsonDocument(jobj).toBinaryData();
 
     if (!mkdir(pdir))
         return false;
@@ -218,39 +113,39 @@ QStringList ProjectManager::projectNames()
         return names;
 
     for (const auto& uid : uids)
-        names << ::property(uid, PTAG_NAME).toString();
+        names << SaveUtils::projectName(dir(uid));
 
     return names;
 }
 
 void ProjectManager::changeName(const QString& uid, const QString& name)
 {
-    const auto& dir = ::dir(uid);
+    const auto& projectDir = dir(uid);
 
-    if (dir.isEmpty())
+    if (projectDir.isEmpty())
         return;
 
-    ::setProperty(dir, PTAG_NAME, name);
+    SaveUtils::setProjectProperty(projectDir, PTAG_NAME, name);
 }
 
 void ProjectManager::changeDescription(const QString& uid, const QString& desc)
 {
-    const auto& dir = ::dir(uid);
+    const auto& projectDir = dir(uid);
 
-    if (dir.isEmpty())
+    if (projectDir.isEmpty())
         return;
 
-    ::setProperty(dir, PTAG_DESCRIPTION, desc);
+    SaveUtils::setProjectProperty(projectDir, PTAG_DESCRIPTION, desc);
 }
 
 bool ProjectManager::exportProject(const QString& uid, const QString& filePath)
 {
-    const auto& dir = ::dir(uid);
+    const auto& projectDir = dir(uid);
 
-    if (dir.isEmpty() || filePath.isEmpty())
+    if (projectDir.isEmpty() || filePath.isEmpty())
         return false;
 
-    return ZipAsync::zipSync(dir, filePath);
+    return ZipAsync::zipSync(projectDir, filePath);
 }
 
 bool ProjectManager::importProject(const QString &filePath, QString* uid)
@@ -265,46 +160,66 @@ bool ProjectManager::importProject(const QString &filePath, QString* uid)
         return false;
 
     *uid = HashFactory::generate();
-    ::setProperty(pdir, PTAG_UID, *uid);
+    SaveUtils::setProjectProperty(pdir, PTAG_UID, *uid);
 
-    SaveUtils::regenerateUids(pdir + separator() + DIR_OWDB);
+    SaveUtils::regenerateUids(pdir + separator() + DIR_DESIGNS);
 
     return true;
 }
 
 QString ProjectManager::dir(const QString& uid)
 {
-    return ::dir(uid);
+    QString found;
+    const QString& userDirectory = UserManager::dir();
+
+    if (userDirectory.isEmpty() || uid.isEmpty())
+        return found;
+
+    for (const QString& projectName : lsdir(userDirectory)) {
+        const QString& projectDir = userDirectory + separator() + projectName;
+
+        if (!SaveUtils::isOwprjt(projectDir))
+            continue;
+
+        QString projectUid = SaveUtils::projectUid(projectDir);
+
+        if (uid == projectUid) {
+            found = projectDir;
+            break;
+        }
+    }
+
+    return found;
 }
 
 QString ProjectManager::name(const QString& uid)
 {
-    return ::property(uid, PTAG_NAME).toString();
+    return SaveUtils::projectName(dir(uid));
 }
 
 QString ProjectManager::description(const QString& uid)
 {
-    return ::property(uid, PTAG_DESCRIPTION).toString();
+    return SaveUtils::projectDescription(dir(uid));
 }
 
 QString ProjectManager::owner(const QString& uid)
 {
-    return ::property(uid, PTAG_OWNER).toString();
+    return SaveUtils::projectOwner(dir(uid));
 }
 
 QString ProjectManager::crDate(const QString& uid)
 {
-    return ::property(uid, PTAG_CRDATE).toString();
+    return SaveUtils::projectCrDate(dir(uid));
 }
 
 QString ProjectManager::mfDate(const QString& uid)
 {
-    return ::property(uid, PTAG_MFDATE).toString();
+    return SaveUtils::projectMfDate(dir(uid));
 }
 
 QString ProjectManager::size(const QString& uid)
 {
-    return ::property(uid, PTAG_SIZE).toString();
+    return SaveUtils::projectSize(dir(uid));
 }
 
 QString ProjectManager::uid()
@@ -322,8 +237,8 @@ QStringList ProjectManager::projects()
 
     for (const auto& dir : lsdir(udir)) {
         const auto& p = udir + separator() + dir;
-        if (isOwprj(p))
-            uids << ::uid(p);
+        if (SaveUtils::isOwprjt(p))
+            uids << SaveUtils::projectUid(p);
     }
 
     return uids;
@@ -331,20 +246,21 @@ QStringList ProjectManager::projects()
 
 void ProjectManager::updateSize(const QString& uid)
 {
-    const auto& dir = ::dir(uid);
-    if (dir.isEmpty())
+    const auto& projectDir = dir(uid);
+    if (projectDir.isEmpty())
         return;
 
-    ::setProperty(dir, PTAG_SIZE, byteString(dsize(dir)));
+    SaveUtils::setProjectProperty(projectDir, PTAG_SIZE,
+        UtilityFunctions::toPrettyBytesString(dsize(projectDir), true));
 }
 
 void ProjectManager::updateLastModification(const QString& uid)
 {
-    const auto& dir = ::dir(uid);
-    if (dir.isEmpty())
+    const auto& projectDir = dir(uid);
+    if (projectDir.isEmpty())
         return;
 
-    ::setProperty(dir, PTAG_MFDATE, ProjectManager::currentDbTime());
+    SaveUtils::setProjectProperty(projectDir, PTAG_MFDATE, ProjectManager::currentDbTime());
 }
 
 bool ProjectManager::start(const QString& uid)
@@ -352,9 +268,9 @@ bool ProjectManager::start(const QString& uid)
     if (ProjectManager::uid() == uid)
         return true;
 
-    const auto& dir = ::dir(uid);
+    const auto& projectDir = dir(uid);
 
-    if (dir.isEmpty())
+    if (projectDir.isEmpty())
         return false;
 
     if (!ProjectManager::uid().isEmpty())

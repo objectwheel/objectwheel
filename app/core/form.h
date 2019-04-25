@@ -11,11 +11,7 @@ class Form : public Control
     friend class ProjectExposingManager; // For constructor
 
 public:
-    bool main() const;
     QRectF frameGeometry() const;
-
-public:
-    void setMain(bool value);
 
 private:
     void resizeEvent(QGraphicsSceneResizeEvent* event) override;
@@ -24,9 +20,6 @@ private:
 
 private:
     explicit Form(const QString& url, Form* parent = nullptr);
-
-private:
-    bool m_main;
 };
 
 

@@ -84,24 +84,12 @@ QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QWidget* wi
     return dest;
 }
 
-QImage PaintUtils::renderNonGuiControlImage(const QString& url, const QSizeF& size, const QWidget* widget)
+QImage PaintUtils::dpiCorrectedImage(const QImage& image, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
-    QImage dest = renderTransparentImage(size, widget);
-
-    QImage source(url);
-    source.setDevicePixelRatio(dpr);
-
-    QRectF destRect{{}, size};
-    QRectF sourceRect{{}, QSizeF{24, 24}};
-    sourceRect.moveCenter(destRect.center());
-
-    QPainter p(&dest);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.drawImage(sourceRect, source, source.rect());
-    p.end();
-
-    return dest;
+    QImage copy(image);
+    copy.setDevicePixelRatio(dpr);
+    return copy;
 }
 
 QIcon PaintUtils::renderOverlaidIcon(const QString& fileName, const QColor& color, const QWidget* widget)

@@ -250,13 +250,7 @@ void FormsPane::refresh()
     if (!isProjectStarted)
         return;
 
-    QIcon formIcon, mFormIcon;
-    mFormIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/mform.png",
-                                                         palette().text().color(),
-                                                         this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/mform.png",
-                                                         palette().highlightedText().color(),
-                                                         this), QIcon::Selected);
+    QIcon formIcon;
     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                         palette().text().color(),
                                                         this), QIcon::Normal);
@@ -274,11 +268,7 @@ void FormsPane::refresh()
 
         auto item = new QTreeWidgetItem;
         item->setText(0, id);
-
-        if (SaveUtils::isMain(path))
-            item->setIcon(0, mFormIcon);
-        else
-            item->setIcon(0, formIcon);
+        item->setIcon(0, formIcon);
 
         addTopLevelItem(item);
 

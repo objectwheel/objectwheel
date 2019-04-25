@@ -4,7 +4,6 @@
 #include <QCryptographicHash>
 
 namespace HashFactory {
-
 QString generate()
 {
     QByteArray data;
@@ -13,5 +12,4 @@ QString generate()
     const QByteArray& hex = QCryptographicHash::hash(data, QCryptographicHash::Md5).toHex();
     return hex.left(6) + hex.right(6);
 }
-
-}
+} // HashFactory

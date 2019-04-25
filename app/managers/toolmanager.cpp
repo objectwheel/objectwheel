@@ -29,36 +29,6 @@
 
 namespace {
 
-static void flushChangeSet(const ToolManager::ChangeSet& changeSet)
-{
-    auto dirCtrl = changeSet.toolPath +
-            separator() + DIR_THIS;
-    auto dirIcon = dirCtrl + separator() + FILE_ICON;
-    auto propertyPath = dirCtrl + separator() + FILE_CONTROL;
-    auto propertyData = rdfile(propertyPath);
-
-    // Write properties
-    Q_ASSERT(!propertyData.isEmpty());
-    auto jobj = QJsonDocument::fromJson(propertyData).object();
-    jobj[TAG_NAME] = changeSet.name;
-    jobj[TAG_CATEGORY] = changeSet.category;
-    propertyData = QJsonDocument(jobj).toJson();
-    wrfile(propertyPath, propertyData);
-
-    // Write icon
-    const auto remoteTry = dlfile(changeSet.iconPath);
-    QPixmap pixmap;
-    pixmap.loadFromData(!remoteTry.isEmpty() ?
-                            remoteTry : dlfile(dirCtrl + separator() + changeSet.iconPath));
-    Q_ASSERT(!pixmap.isNull());
-    QByteArray bArray;
-    QBuffer buffer(&bArray);
-    buffer.open(QIODevice::WriteOnly);
-    if (!pixmap.save(&buffer, "PNG")) return;
-    buffer.close();
-    if (!wrfile(dirIcon, bArray)) return;
-}
-
 static bool currentProjectHasToolsInstalled()
 {
     if (ProjectManager::dir().isEmpty())
@@ -218,30 +188,6 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     }
 
     return true;
-}
-
-void ToolManager::changeTool(const ChangeSet& changeSet)
-{
-    for (auto tree : s_toolboxTreeList) {
-        tree->clearSelection();
-        tree->setCurrentItem(nullptr);
-        for (int i = 0; i < tree->topLevelItemCount(); i++) {
-            auto tli = tree->topLevelItem(i);
-            for (int j = 0; j < tli->childCount(); j++) {
-                auto ci = tli->child(j);
-                if (SaveUtils::toParentDir(tree->urls(ci).first().
-                                toLocalFile()) == changeSet.toolPath) {
-                    tree->removeUrls(ci);
-                    delete tli->takeChild(j);
-                    if (tli->childCount() <= 0)
-                        delete tree->takeTopLevelItem(i);
-                }
-            }
-        }
-    }
-
-    flushChangeSet(changeSet);
-    addTool(changeSet.toolPath, true);
 }
 
 void ToolManager::removeTool(const QString& toolPath)

@@ -61,8 +61,8 @@ QString detectedFormRootPath(const QString& rootPath)
 {
     //! FIXME: This might crash on Windows due to back-slash path names
     Q_ASSERT(!ProjectManager::dir().isEmpty());
-    const QString& owdbDir = SaveUtils::toOwdbDir(ProjectManager::dir()) + separator();
-    const QString& formRootPath = QRegularExpression("^" + owdbDir + "\\d+").match(rootPath).captured();
+    const QString& designsDir = SaveUtils::toDesignsDir(ProjectManager::dir()) + separator();
+    const QString& formRootPath = QRegularExpression("^" + designsDir + "\\d+").match(rootPath).captured();
     Q_ASSERT(!formRootPath.isEmpty());
     Q_ASSERT(exists(formRootPath));
     Q_ASSERT(SaveUtils::isForm(formRootPath));
@@ -119,13 +119,13 @@ bool SaveManager::initProject(const QString& projectDirectory, int templateNumbe
 {
     if (projectDirectory.isEmpty() ||
             !::exists(projectDirectory) ||
-            ::exists(SaveUtils::toOwdbDir(projectDirectory)) ||
+            ::exists(SaveUtils::toDesignsDir(projectDirectory)) ||
             !ZipAsync::unzipSync(":/templates/template" + QString::number(templateNumber) + ".zip",
                                 projectDirectory)) {
         return false;
     }
 
-    SaveUtils::regenerateUids(SaveUtils::toOwdbDir(projectDirectory));
+    SaveUtils::regenerateUids(SaveUtils::toDesignsDir(projectDirectory));
 
     return true;
 }
@@ -169,8 +169,8 @@ QString SaveManager::addForm(const QString& formRootPath)
         return {};
     }
 
-    const QString& targetOwdbDir = SaveUtils::toOwdbDir(ProjectManager::dir());
-    const QString& newFormRootPath = targetOwdbDir + separator() + HashFactory::generate();
+    const QString& targetDesignsDir = SaveUtils::toDesignsDir(ProjectManager::dir());
+    const QString& newFormRootPath = targetDesignsDir + separator() + HashFactory::generate();
 
     if (!mkdir(newFormRootPath)) {
         qWarning("SaveManager::addForm: Failed. Cannot create the new form root path.");
@@ -282,7 +282,7 @@ void SaveManager::removeControl(const QString& rootPath)
 
 void SaveManager::removeForm(const QString& formRootPath)
 {
-    if (!SaveUtils::isOwctrl(formRootPath) || SaveUtils::isMain(formRootPath)) {
+    if (!SaveUtils::isOwctrl(formRootPath)) {
         qWarning("SaveManager::removeForm: Failed. Either form data broken, or it is a main form.");
         return;
     }

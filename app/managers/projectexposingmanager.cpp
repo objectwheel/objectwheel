@@ -23,9 +23,6 @@ void ProjectExposingManager::exposeProject()
     for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
         auto form = new Form(SaveUtils::toUrl(formPath));
 
-        if (SaveUtils::isMain(formPath))
-            form->setMain(true);
-
         if (form->id().isEmpty())
             ControlPropertyManager::setId(form, "form", ControlPropertyManager::SaveChanges);
 

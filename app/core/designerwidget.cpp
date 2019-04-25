@@ -370,9 +370,7 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
             .arg(control->id())
             .arg(methodName(m_signalChooserDialog->currentSignal()));
     const QString& methodBody = QString::fromUtf8(METHOD_BODY).arg(methodSign);
-    const QString& formSign = m_designerScene->currentForm()->main()
-            ? "application"
-            : m_designerScene->currentForm()->id();
+    const QString& formSign = m_designerScene->currentForm()->id();
     const QString& formJS = formSign + ".js";
     const QString& fullPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + formJS;
 

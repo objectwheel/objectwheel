@@ -30,7 +30,7 @@ void ControlRemovingManager::init(DesignerScene* designerScene)
 
 void ControlRemovingManager::removeForm(Form* form)
 {
-    if (!form || !form->form() || form->main())
+    if (!form || !form->form())
         return;
 
     if (!s_designerScene->forms().contains(form))

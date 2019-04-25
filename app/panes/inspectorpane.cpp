@@ -163,18 +163,18 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
             item->setText(1, QObject::tr("No"));
 
         QIcon icon, itemIcon;
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(SaveUtils::toIcon(child->dir()),
-                                                        treeWidget->palette().text().color(),
-                                                        treeWidget), QIcon::Normal);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(SaveUtils::toIcon(child->dir()),
-                                                        treeWidget->palette().highlightedText().color(),
-                                                        treeWidget), QIcon::Selected);
-        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
-                                                            treeWidget->palette().text().color(),
-                                                            treeWidget), QIcon::Normal);
-        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
-                                                            treeWidget->palette().highlightedText().color(),
-                                                            treeWidget), QIcon::Selected);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(
+                           PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(child->dir()))),
+                           treeWidget->palette().text().color(), treeWidget), QIcon::Normal);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(
+                           PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(child->dir()))),
+                           treeWidget->palette().highlightedText().color(), treeWidget), QIcon::Selected);
+        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(
+                               PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(":/images/item.png"))),
+                               treeWidget->palette().text().color(), treeWidget), QIcon::Normal);
+        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(
+                               PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(":/images/item.png"))),
+                               treeWidget->palette().highlightedText().color(), treeWidget), QIcon::Selected);
 
         item->setIcon(0, icon.isNull() ? itemIcon : icon);
         parentItem->addChild(item);
@@ -449,13 +449,7 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     clear();
     m_designerScene->clearSelection();
 
-    QIcon formIcon, mFormIcon;
-    mFormIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/mform.png",
-                                                         palette().text().color(),
-                                                         this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/mform.png",
-                                                         palette().highlightedText().color(),
-                                                         this), QIcon::Selected);
+    QIcon formIcon;
     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                         palette().text().color(),
                                                         this), QIcon::Normal);
@@ -468,7 +462,7 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     formItem->setText(0, currentForm->id());
     formItem->setData(0, Qt::UserRole, currentForm->hasErrors());
     formItem->setData(1, Qt::UserRole, currentForm->hasErrors());
-    formItem->setIcon(0, SaveUtils::isMain(currentForm->dir()) ? mFormIcon : formIcon);
+    formItem->setIcon(0, formIcon);
 
     if (currentForm->gui() && !currentForm->hasErrors())
         formItem->setText(1, tr("Yes"));
@@ -604,13 +598,7 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
         return;
     }
 
-    QIcon formIcon, mFormIcon, itemIcon;
-    mFormIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/mform.png",
-                                                         palette().text().color(),
-                                                         this), QIcon::Normal);
-    mFormIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/mform.png",
-                                                         palette().highlightedText().color(),
-                                                         this), QIcon::Selected);
+    QIcon formIcon, itemIcon;
     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                         palette().text().color(),
                                                         this), QIcon::Normal);
@@ -639,7 +627,7 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     childItem->setText(1, tr("No"));
 
                 if (control->form()) {
-                    childItem->setIcon(0, SaveUtils::isMain(control->dir()) ? mFormIcon : formIcon);
+                    childItem->setIcon(0, formIcon);
                 } else {
                     QIcon icon;
                     icon.addPixmap(PaintUtils::renderOverlaidPixmap(SaveUtils::toIcon(control->dir()),
