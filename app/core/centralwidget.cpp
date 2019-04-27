@@ -15,7 +15,6 @@
 #include <controlsavefilter.h>
 #include <utilityfunctions.h>
 #include <qmlcodeeditor.h>
-#include <filemanager.h>
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <bottombar.h>
@@ -140,7 +139,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
     connect(SaveManager::instance(), &SaveManager::propertyChanged,    // Changes made out of code editor
             this, [=] (Control* control, const QString& property, const QString& value) {
-        QmlCodeEditorWidget::InternalDocument* document = qmlCodeEditorWidget()->getInternal(control, "main.qml");
+        QmlCodeEditorWidget::InternalDocument* document = qmlCodeEditorWidget()->getInternal(control, SaveUtils::mainQmlFile());
         if (document)
             ParserUtils::setProperty(document->document, control->url(), property, value);
     });

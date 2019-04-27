@@ -2,7 +2,6 @@
 #include <resizer.h>
 #include <saveutils.h>
 #include <suppressor.h>
-#include <filemanager.h>
 #include <designerscene.h>
 #include <controlpreviewingmanager.h>
 #include <windowmanager.h>

@@ -3,7 +3,6 @@
 #include <saveutils.h>
 #include <parserutils.h>
 #include <previewerutils.h>
-#include <filemanager.h>
 #include <previewresult.h>
 #include <utilityfunctions.h>
 #include <components.h>

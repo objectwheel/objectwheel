@@ -1,5 +1,4 @@
 #include <controlsavefilter.h>
-#include <filemanager.h>
 #include <saveutils.h>
 #include <parserutils.h>
 #include <control.h>
@@ -20,7 +19,7 @@ void ControlSaveFilter::beforeSave(QmlCodeEditorWidget::Document* document)
     if (document->scope != QmlCodeEditorToolBar::Internal)
         return;
 
-    if (internal(document)->relativePath != "main.qml")
+    if (internal(document)->relativePath != SaveUtils::mainQmlFile())
         return;
 
     Control* control = internal(document)->control;
@@ -41,7 +40,7 @@ void ControlSaveFilter::afterSave(QmlCodeEditorWidget::Document* document)
 
     Control* control = internal(document)->control;
 
-    if (internal(document)->relativePath == "main.qml") {
+    if (internal(document)->relativePath == SaveUtils::mainQmlFile()) {
         if (control->id() != m_id)
             ControlPropertyManager::setId(control, m_id, ControlPropertyManager::SaveChanges); // For refactorId
     }

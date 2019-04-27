@@ -11,7 +11,6 @@
 #include <qmlcodeeditorwidget.h>
 #include <parserutils.h>
 #include <projectmanager.h>
-#include <filemanager.h>
 #include <qmlcodeeditor.h>
 #include <qmlcodedocument.h>
 
@@ -397,7 +396,7 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
-    m_qmlCodeEditorWidget->openInternal(control, "main.qml");
+    m_qmlCodeEditorWidget->openInternal(control, SaveUtils::mainQmlFile());
 }
 
 void DesignerWidget::onGlobalFileOpen(const QString& relativePath, int line, int column)

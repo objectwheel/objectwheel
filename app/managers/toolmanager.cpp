@@ -2,7 +2,6 @@
 #include <projectmanager.h>
 #include <saveutils.h>
 #include <toolboxtree.h>
-#include <filemanager.h>
 #include <zipasync.h>
 #include <hashfactory.h>
 
@@ -91,7 +90,7 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
     auto category = SaveUtils::category(toolPath);
     auto name = SaveUtils::name(toolPath);
 
-    urls << QUrl::fromLocalFile(dir + "main.qml");
+    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFile());
     if (category.isEmpty())
         category = DEFAULT_CATEGORY;
     if (name.isEmpty())
@@ -158,7 +157,7 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     auto category = SaveUtils::category(newToolPath);
     auto name = SaveUtils::name(newToolPath);
 
-    urls << QUrl::fromLocalFile(dir + "main.qml");
+    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFile());
     if (category.isEmpty())
         category = DEFAULT_CATEGORY;
     if (name.isEmpty())

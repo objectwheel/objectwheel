@@ -1,5 +1,4 @@
 #include <dirlocker.h>
-#include <filemanager.h>
 #include <aes.h>
 #include <zipasync.h>
 

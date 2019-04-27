@@ -1,7 +1,6 @@
 #include <savemanager.h>
 #include <saveutils.h>
 #include <hashfactory.h>
-#include <filemanager.h>
 #include <projectmanager.h>
 #include <parserutils.h>
 #include <zipasync.h>

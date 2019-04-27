@@ -167,7 +167,6 @@ propertiespane'de yeşil indikatörlerle ilgili hatalar var, todoları bi gözde
 açık olan bir sekme, altta outputpane'de, sweep'den sonra orda takılı kalıyor ancak başka sekmeyi gösteriyor, consolebox ile dene gör, aç konsolebox'u sonra çalıştır bir app, sonra projeyi değiştir ve yine çalıştır ve gör, konsolebox'da takılı kalıyor
 kod editörün canlı hata marklama özelliği issuesbox ile eşzamanlı olarak çalışacak hataları gösterecek
 consolebox da dahil tüm output pane lerin sweep leri yeniden düzenlenecek
-filemanager.h'e relativePath ve diğer tüm muhtemel QDir, QFileInfo, QFile kullanımlarını ekle, muhtemel dediğim işte tüm objectwheel projesinin kodlarını tara bak
 Remove nested painter save/restores
 Varsayılan Quick 1 teması olarak Base seçilecek, hem themer'de hem Objectwheel/app'da
 Neden CheckBox'ın labeli design area'ya başka bir nesne bırakınca siliniyor, kayboluyor doComplete ile ilgili sorun mu var?

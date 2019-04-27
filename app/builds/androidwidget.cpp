@@ -1,6 +1,5 @@
 #include <androidwidget.h>
 #include <projectmanager.h>
-#include <filemanager.h>
 #include <build.h>
 
 AndroidWidget::AndroidWidget(QWidget *parent)

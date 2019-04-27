@@ -23,10 +23,6 @@
 #include <firebasedatabase.h>
 #endif
 
-#ifdef OW_FILEMANAGER
-#include <filemanager.h>
-#endif
-
 #ifdef OW_TRANSLATION
 #include <translation.h>
 #endif
@@ -53,13 +49,6 @@ void init()
 
 #ifdef OW_FIREBASEDATABASE
     qmlRegisterType<FirebaseDatabase>("Objectwheel.Database", 1, 0, "FirebaseDatabase");
-#endif
-
-#ifdef OW_FILEMANAGER
-    qmlRegisterSingletonType<FileManager>("Objectwheel.Core", 1, 0, "FileManager",
-                                             [] (QQmlEngine* /*engine*/, QJSEngine* /*jsEngine*/) -> QObject* {
-        return new FileManager;
-    });
 #endif
 
 #ifdef OW_TRANSLATION

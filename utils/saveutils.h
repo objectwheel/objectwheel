@@ -34,6 +34,10 @@ bool isForm(const QString& controlDir);
 bool isControlValid(const QString& controlDir);
 bool isProjectValid(const QString& projectDir);
 
+QString mainQmlFile();
+QString controlMetaFile();
+QString projectMetaFile();
+
 QString toMainQmlFile(const QString& controlDir);
 QString toControlMetaFile(const QString& controlDir);
 QString toThisDir(const QString& controlDir);

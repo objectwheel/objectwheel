@@ -1,5 +1,4 @@
 #include <moduleselectionwidget.h>
-#include <filemanager.h>
 #include <build.h>
 #include <QMap>
 

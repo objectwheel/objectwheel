@@ -1,5 +1,4 @@
 #include <qmlcodeeditorwidget.h>
-#include <filemanager.h>
 #include <qmlcodeeditor.h>
 #include <fileexplorer.h>
 #include <qmlcodedocument.h>

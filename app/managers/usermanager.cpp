@@ -1,5 +1,4 @@
 #include <usermanager.h>
-#include <filemanager.h>
 #include <dirlocker.h>
 #include <aes.h>
 #include <applicationcore.h>

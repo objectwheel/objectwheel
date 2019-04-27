@@ -20,7 +20,6 @@
 #include <fileexplorer_p.h>
 #include <focuslesslineedit.h>
 #include <utilityfunctions.h>
-#include <filemanager.h>
 #include <transparentstyle.h>
 #include <utilsicons.h>
 #include <paintutils.h>

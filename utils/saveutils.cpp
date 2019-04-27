@@ -1,5 +1,4 @@
 #include <saveutils.h>
-#include <filemanager.h>
 #include <hashfactory.h>
 
 #include <QDataStream>
@@ -16,10 +15,6 @@
 #define DIR_IMPORTS      "imports"
 #define DIR_OW           "Objectwheel"
 #define DIR_GLOBAL       "GlobalResources"
-
-#define FILE_PROJECT     "project.meta"
-#define FILE_CONTROL     "control.meta"
-#define FILE_MAIN        "main.qml"        // TODO: Apply everywhere
 
 namespace SaveUtils {
 
@@ -40,9 +35,27 @@ bool isProjectValid(const QString& projectDir)
     return sign == SIGN_OWPRJT;
 }
 
+QString mainQmlFile()
+{
+    static const QString& mainQmlFile = QStringLiteral("main.qml");
+    return mainQmlFile;
+}
+
+QString controlMetaFile()
+{
+    static const QString& controlMetaFile = QStringLiteral("control.meta");
+    return controlMetaFile;
+}
+
+QString projectMetaFile()
+{
+    static const QString& projectMetaFile = QStringLiteral("project.meta");
+    return projectMetaFile;
+}
+
 QString toMainQmlFile(const QString& controlDir)
 {
-    return controlDir + separator() + DIR_THIS + separator() + FILE_MAIN;
+    return controlDir + separator() + DIR_THIS + separator() + mainQmlFile();
 }
 
 QString toControlMetaFile(const QString& controlDir)

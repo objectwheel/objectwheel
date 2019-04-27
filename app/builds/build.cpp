@@ -1,6 +1,5 @@
 #include <build.h>
 #include <projectmanager.h>
-#include <filemanager.h>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>

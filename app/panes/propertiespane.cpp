@@ -1,6 +1,5 @@
 #include <propertiespane.h>
 #include <focuslesslineedit.h>
-#include <filemanager.h>
 #include <saveutils.h>
 #include <controlpropertymanager.h>
 #include <designerscene.h>

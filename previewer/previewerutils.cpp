@@ -1,7 +1,6 @@
 #include <previewerutils.h>
 #include <previewer.h>
 #include <saveutils.h>
-#include <filemanager.h>
 #include <previewresult.h>
 #include <utilityfunctions.h>
 

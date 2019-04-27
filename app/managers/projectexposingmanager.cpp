@@ -1,7 +1,6 @@
 #include <projectexposingmanager.h>
 #include <saveutils.h>
 #include <projectmanager.h>
-#include <filemanager.h>
 #include <control.h>
 #include <form.h>
 #include <designerscene.h>
@@ -27,7 +26,7 @@ void ProjectExposingManager::exposeProject()
             ControlPropertyManager::setId(form, "form", ControlPropertyManager::SaveChanges);
 
         if (form->id() != SaveUtils::id(form->dir()))
-            SaveUtils::setProperty(form->dir(), TAG_ID, form->id());
+            SaveUtils::setProperty(form->dir(), SaveUtils::ControlId, form->id());
 
         s_designerScene->addForm(form);
 
@@ -44,7 +43,7 @@ void ProjectExposingManager::exposeProject()
                 ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);
 
             if (control->id() != SaveUtils::id(control->dir()))
-                SaveUtils::setProperty(control->dir(), TAG_ID, control->id());
+                SaveUtils::setProperty(control->dir(), SaveUtils::ControlId, control->id());
 
             ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
             controlTree.insert(childPath, control);

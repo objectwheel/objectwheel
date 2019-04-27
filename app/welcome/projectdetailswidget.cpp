@@ -3,7 +3,6 @@
 #include <buttonslice.h>
 #include <usermanager.h>
 #include <projectmanager.h>
-#include <filemanager.h>
 
 #include <QVBoxLayout>
 #include <QLabel>

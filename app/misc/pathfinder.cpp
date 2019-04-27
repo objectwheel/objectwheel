@@ -1,7 +1,6 @@
 #include <pathfinder.h>
 #include <saveutils.h>
 #include <control.h>
-#include <filemanager.h>
 #include <projectmanager.h>
 #include <runmanager.h>
 #include <QRegularExpression>

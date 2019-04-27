@@ -2,7 +2,6 @@
 #include <delayer.h>
 #include <saveutils.h>
 #include <projectmanager.h>
-#include <filemanager.h>
 #include <waitingspinnerwidget.h>
 #include <utilityfunctions.h>
 

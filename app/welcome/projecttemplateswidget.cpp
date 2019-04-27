@@ -3,7 +3,6 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <delayer.h>
-#include <filemanager.h>
 #include <controlpreviewingmanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>

@@ -1,6 +1,5 @@
 #include <fileexplorer.h>
 #include <fileexplorer_p.h>
-#include <filemanager.h>
 #include <utilityfunctions.h>
 
 #include <QPainter>

@@ -1,5 +1,4 @@
 #include <utilityfunctions.h>
-#include <filemanager.h>
 #include <delayer.h>
 #include <utils/utilsicons.h>
 #include <paintutils.h>

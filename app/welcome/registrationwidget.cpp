@@ -3,7 +3,6 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <filemanager.h>
 #include <accountmanager.h>
 #include <utilityfunctions.h>
 

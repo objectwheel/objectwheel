@@ -6,6 +6,8 @@
 #include <qmljs/qmljspropertyreader.h>
 #include <QPlainTextEdit>
 
+// FIXME:
+
 QmlFormatter::QmlFormatter(QObject *parent) : QObject(parent)
 {
 }

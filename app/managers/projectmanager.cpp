@@ -1,7 +1,6 @@
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <savemanager.h>
-#include <filemanager.h>
 #include <hashfactory.h>
 #include <saveutils.h>
 #include <controlpreviewingmanager.h>
@@ -54,14 +53,13 @@ QDateTime ProjectManager::fromUi(const QString& uiTime)
 }
 
 bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
-                                const QString& owner, const QString& crDate)
+                                const QString& crDate)
 {
     const auto& udir = UserManager::dir();
 
     if (udir.isEmpty()
             || name.isEmpty()
             || description.isEmpty()
-            || owner.isEmpty()
             || crDate.isEmpty()) {
         return false;
     }
@@ -72,7 +70,6 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
     QJsonObject jobj;
     jobj.insert(PTAG_NAME, name);
     jobj.insert(PTAG_DESCRIPTION, description);
-    jobj.insert(PTAG_OWNER, owner);
     jobj.insert(PTAG_CRDATE, crDate);
     jobj.insert(PTAG_MFDATE, crDate);
     jobj.insert(PTAG_OWPRJT_SIGN, SIGN_OWPRJT);

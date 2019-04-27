@@ -40,8 +40,7 @@ public:
     static void changeDescription(const QString& uid, const QString& desc);
     static bool importProject(const QString& filePath, QString* uid);
     static bool exportProject(const QString& uid, const QString& filePath);
-    static bool newProject(int templateNumber, const QString& name, const QString& description,
-                           const QString& owner, const QString& crDate);
+    static bool newProject(int templateNumber, const QString& name, const QString& description, const QString& crDate);
 
 signals:
     void started();

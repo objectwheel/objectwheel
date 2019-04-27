@@ -22,7 +22,6 @@
 #include <interfacesettings.h>
 #include <codeeditorsettings.h>
 #include <applicationstyle.h>
-#include <filemanager.h>
 #include <splashscreen.h>
 #include <helpmanager.h>
 #include <globalresources.h>

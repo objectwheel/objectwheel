@@ -1,7 +1,6 @@
 #include <downloadwidget.h>
 #include <projectmanager.h>
 #include <usermanager.h>
-#include <filemanager.h>
 #include <projectmanager.h>
 #include <usermanager.h>
 #include <saveutils.h>
@@ -97,7 +96,7 @@ void DownloadWidget::resizeEvent(QResizeEvent* event)
     emit resized();
 }
 
-void DownloadWidget::download(OTargets::Targets target)
+void DownloadWidget::download(OTargets::Targets /*target*/)
 {
 //    QMetaEnum metaEnum = QMetaEnum::fromType<OTargets::Targets>();
 //    auto buildLabel = QString(metaEnum.valueToKey(target));

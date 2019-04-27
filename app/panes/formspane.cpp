@@ -3,7 +3,6 @@
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <designerscene.h>
-#include <filemanager.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
 #include <controlcreationmanager.h>

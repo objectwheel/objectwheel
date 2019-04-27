@@ -5,7 +5,6 @@
 #include <previewerutils.h>
 #include <commandlineparser.h>
 #include <commanddispatcher.h>
-#include <filemanager.h>
 #include <quicktheme.h>
 #include <globalresources.h>
 
