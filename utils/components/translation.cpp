@@ -29,7 +29,7 @@ void Translation::load(const QString& translationFilePath)
     QString filePath = translationFilePath;
     filePath.replace("file://", "");
 
-    if (!translationFilePath.isEmpty() && QFileInfo(filePath).exists()) {
+    if (!translationFilePath.isEmpty() && QFileInfo::exists(filePath)) {
         translator = new QTranslator(this);
         if (translator->load(filePath)) {
             QCoreApplication::installTranslator(translator);

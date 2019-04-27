@@ -8,6 +8,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRandomGenerator>
+#include <QFileInfo>
 
 #define AUTOLOGIN_FILENAME  "alg.lock"
 #define AUTOLOGIN_PROTECTOR "QWxsYWggaXMgZ3JlYXRlc3Qu"
@@ -50,7 +51,7 @@ UserManager* UserManager::instance()
 
 bool UserManager::exists(const QString& user)
 {
-    return ::exists(generateUserDirectory(user));
+    return QFileInfo::exists(generateUserDirectory(user));
 }
 
 bool UserManager::newUser(const QString& user)

@@ -191,7 +191,7 @@ QVariant FileSearchModel::data(const QModelIndex &index, int role) const
         QString path = QDir::toNativeSeparators(QStringListModel::data(index, Qt::EditRole).toString());
         if (path.endsWith(QDir::separator()))
             path.chop(1);
-        return fname(path);
+        return QFileInfo(path).fileName();
     }
 
     if (role == Qt::DisplayRole) {

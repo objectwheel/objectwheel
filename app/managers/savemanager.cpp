@@ -63,7 +63,7 @@ QString detectedFormRootPath(const QString& rootPath)
     const QString& designsDir = SaveUtils::toDesignsDir(ProjectManager::dir()) + '/';
     const QString& formRootPath = QRegularExpression("^" + designsDir + "\\d+").match(rootPath).captured();
     Q_ASSERT(!formRootPath.isEmpty());
-    Q_ASSERT(exists(formRootPath));
+    Q_ASSERT(QFileInfo::exists(formRootPath));
     Q_ASSERT(SaveUtils::isForm(formRootPath));
     return formRootPath;
 }
@@ -117,8 +117,8 @@ SaveManager* SaveManager::instance()
 bool SaveManager::initProject(const QString& projectDirectory, int templateNumber)
 {
     if (projectDirectory.isEmpty() ||
-            !::exists(projectDirectory) ||
-            ::exists(SaveUtils::toDesignsDir(projectDirectory)) ||
+            !QFileInfo::exists(projectDirectory) ||
+            QFileInfo::exists(SaveUtils::toDesignsDir(projectDirectory)) ||
             !ZipAsync::unzipSync(":/templates/template" + QString::number(templateNumber) + ".zip",
                                 projectDirectory)) {
         return false;
@@ -148,7 +148,7 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
     const QString& globalJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + id + ".js";
     QString js = rdfile(":/resources/other/form.js");
     js = js.arg(id);
-    if (!exists(globalJSPath)) {
+    if (!QFileInfo::exists(globalJSPath)) {
         wrfile(globalJSPath, js.toUtf8());
     } else {
         qWarning("SaveManager::setupFormGlobalConnections: Global %s file is already exists.",

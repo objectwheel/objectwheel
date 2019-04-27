@@ -307,7 +307,7 @@ void FileExplorer::setRootPath(const QString& rootPath)
     if (m_fileSystemModel->rootPath() == rootPath)
         return;
 
-    Q_ASSERT(exists(rootPath));
+    Q_ASSERT(QFileInfo::exists(rootPath));
 
     if (selectionModel()) {
         selectionModel()->clear();
@@ -423,7 +423,7 @@ void FileExplorer::onModeChange()
 
 void FileExplorer::onUpButtonClick()
 {
-    const QString& upperDir = dname(m_fileSystemModel->filePath(mt(rootIndex())));
+    const QString& upperDir = QFileInfo(m_fileSystemModel->filePath(mt(rootIndex()))).path();
     const QString& rootPath = m_fileSystemModel->rootPath();
 
     if (upperDir.size() > rootPath.size() || upperDir == rootPath)
@@ -518,7 +518,7 @@ void FileExplorer::onNewFileButtonClick()
     QString baseFileName = tr("Empty File");
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    while (exists(rootPath + '/' + baseFileName + ".txt"))
+    while (QFileInfo::exists(rootPath + '/' + baseFileName + ".txt"))
         baseFileName = UtilityFunctions::increasedNumberedText(baseFileName, true, true);
 
     QModelIndex index;
@@ -541,7 +541,7 @@ void FileExplorer::onNewFolderButtonClick()
     QString baseFolderName = tr("New Folder");
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    while (exists(rootPath + '/' + baseFolderName))
+    while (QFileInfo::exists(rootPath + '/' + baseFolderName))
         baseFolderName = UtilityFunctions::increasedNumberedText(baseFolderName, true, true);
 
     const QModelIndex& index = mf(m_fileSystemModel->mkdir(mt(rootIndex()), baseFolderName));
@@ -702,7 +702,7 @@ void FileExplorer::goToPath(const QString& path)
     if (path.isEmpty())
         return;
 
-    if (!QFileInfo(path).exists() || !QFileInfo(path).isDir())
+    if (!QFileInfo::exists(path) || !QFileInfo(path).isDir())
         return;
 
     const QString& previousPath = m_fileSystemModel->filePath(mt(rootIndex()));
@@ -736,7 +736,7 @@ void FileExplorer::goToRelativePath(const QString& relativePath)
 {
     const QString& path = m_fileSystemModel->rootPath() + '/' + relativePath;
 
-    if (!QFileInfo(path).exists() || !QFileInfo(path).isDir())
+    if (!QFileInfo::exists(path) || !QFileInfo(path).isDir())
         return;
 
     if (!QFileInfo(path).canonicalFilePath().contains(m_fileSystemModel->rootPath(), Qt::CaseInsensitive))

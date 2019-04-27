@@ -45,7 +45,7 @@
 #define external(x) static_cast<QmlCodeEditorWidget::ExternalDocument*>((x))
 #define globalDir() SaveUtils::toGlobalDir(ProjectManager::dir())
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
-#define externalDir(x) dname(external((x))->fullPath)
+#define externalDir(x) QFileInfo(external((x))->fullPath).path()
 #define fullPath(x, y) (x) + '/' + (y)
 #define modified(x, y) (x)->isModified() ? ((y) + MARK_ASTERISK) : (y)
 #define modifiedControlId(x) controlModified((x)) ? (x)->id() + MARK_ASTERISK : (x)->id()
@@ -275,7 +275,7 @@ void QmlCodeEditorWidget::onModificationChange(Document* document)
         for (int i = 0; i < leftCombo->count(); ++i) {
             ExternalDocument* doc = leftCombo->itemData(i, DocumentRole).value<ExternalDocument*>();
             if (doc == document) {
-                leftCombo->setItemText(i, modified(doc->document, fname(doc->fullPath)));
+                leftCombo->setItemText(i, modified(doc->document, QFileInfo(doc->fullPath).fileName()));
                 break;
             }
         } break;
@@ -533,7 +533,7 @@ void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
 {
     if (relativePath.isEmpty())
         return openDocument(g_lastGlobalDocument);
-    if (!exists(fullPath(globalDir(), relativePath)))
+    if (!QFileInfo::exists(fullPath(globalDir(), relativePath)))
         return (void) (qWarning() << tr("openGlobal: File not exists."));
     if (warnIfNotATextFile(fullPath(globalDir(), relativePath)))
         return;
@@ -546,7 +546,7 @@ void QmlCodeEditorWidget::openInternal(Control* control, const QString& relative
 {
     if (!control || relativePath.isEmpty())
         return openDocument(g_lastInternalDocument);
-    if (!exists(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
+    if (!QFileInfo::exists(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
         return (void) (qWarning() << tr("openInternal: File not exists."));
     if (warnIfNotATextFile(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
         return;
@@ -559,7 +559,7 @@ void QmlCodeEditorWidget::openExternal(const QString& fullPath)
 {
     if (fullPath.isEmpty())
         return openDocument(g_lastExternalDocument);
-    if (!exists(fullPath))
+    if (!QFileInfo::exists(fullPath))
         return (void) (qWarning() << tr("openExternal: File not exists."));
     if (warnIfNotATextFile(fullPath))
         return;
@@ -700,7 +700,7 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
     if (toolBar()->scope() == QmlCodeEditorToolBar::External) {
         QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
         int i = leftCombo->count();
-        leftCombo->addItem(fname(document->fullPath));
+        leftCombo->addItem(QFileInfo(document->fullPath).fileName());
         leftCombo->setItemData(i, document->fullPath, Qt::ToolTipRole);
         leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
@@ -856,7 +856,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
             leftCombo->setToolTip(tr("File name of the open document"));
             for (ExternalDocument* doc : m_externalDocuments) {
                 int i = leftCombo->count();
-                leftCombo->addItem(modified(doc->document, fname(doc->fullPath)));
+                leftCombo->addItem(modified(doc->document, QFileInfo(doc->fullPath).fileName()));
                 leftCombo->setItemData(i, doc->fullPath, Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
                 if (doc == document)

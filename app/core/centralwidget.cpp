@@ -164,7 +164,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         const QString& qmldirLine = "\n" + FormJS + " 1.0 " + id + ".js";
         const QString& qmldirPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + "qmldir";
 
-        if (!exists(qmldirPath))
+        if (!QFileInfo::exists(qmldirPath))
             qFatal("CentralWidget: qmldir file is gone.");
 
         QByteArray qmldirFile = rdfile(qmldirPath);

@@ -22,7 +22,7 @@ static void clearTrashes(const QString& dir)
 bool DirLocker::locked(const QString& dir)
 {
 	QString lockedFileName = dir + '/' + LOCKED_FILENAME;
-	if (!exists(lockedFileName)) return false;
+    if (!QFileInfo::exists(lockedFileName)) return false;
 	QFile reader(lockedFileName);
 	if (!reader.open(QFile::ReadOnly)) qFatal("DirLocker : Error occurred");
 	return Aes::encrypted(reader.read(128));
@@ -31,7 +31,7 @@ bool DirLocker::locked(const QString& dir)
 bool DirLocker::canUnlock(const QString& dir, const QByteArray& key)
 {
     QString checkFileName = dir + '/' + CHECK_FILENAME;
-    if (!locked(dir) || !exists(checkFileName)) return false;
+    if (!locked(dir) || !QFileInfo::exists(checkFileName)) return false;
 	auto checkData = rdfile(checkFileName);
 	if (!Aes::encrypted(checkData)) return false;
 	auto keyHash = QCryptographicHash::hash(key, QCryptographicHash::Md5).toHex();

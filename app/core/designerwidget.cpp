@@ -125,11 +125,11 @@ qreal findRatio(const QString& text)
 
 bool warnIfFileDoesNotExist(const QString& filePath)
 {
-    if (!exists(filePath)) {
+    if (!QFileInfo::exists(filePath)) {
         return QMessageBox::warning(
                     0,
                     QObject::tr("Oops"),
-                    QObject::tr("File %1 does not exist.").arg(fname(filePath)));
+                    QObject::tr("File %1 does not exist.").arg(QFileInfo(filePath).fileName()));
     }
     return false;
 }
