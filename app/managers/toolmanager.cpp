@@ -34,7 +34,7 @@ static bool currentProjectHasToolsInstalled()
         return false;
     if (!QDir().exists(
                 ProjectManager::dir() +
-                separator() +
+                '/' +
                 TOOLS_DESTINATION_DIRECTORY
                 ))
         return false;
@@ -49,7 +49,7 @@ QString ToolManager::toolsDir()
 {
     auto projectDir = ProjectManager::dir();
     if (projectDir.isEmpty()) return projectDir;
-    return projectDir + separator() + TOOLS_DESTINATION_DIRECTORY;
+    return projectDir + '/' + TOOLS_DESTINATION_DIRECTORY;
 }
 
 QStringList ToolManager::categories()
@@ -60,7 +60,7 @@ QStringList ToolManager::categories()
         return categories;
 
     for (auto dir : lsdir(toolsDir())) {
-        auto toolPath = toolsDir() + separator() + dir;
+        auto toolPath = toolsDir() + '/' + dir;
         auto category = SaveUtils::category(toolPath);
         if (!categories.contains(category))
             categories << category;
@@ -76,7 +76,7 @@ void ToolManager::fillTree(ToolboxTree* tree)
     tree->clear();
     tree->clearUrls();
     for (auto toolDir : lsdir(toolsDir()))
-        addToTree(toolsDir() + separator() + toolDir, tree);
+        addToTree(toolsDir() + '/' + toolDir, tree);
 }
 
 bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
@@ -86,11 +86,11 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
         return false;
 
     QList<QUrl> urls;
-    auto dir = toolPath + separator() + DIR_THIS + separator();
+    auto dir = toolPath + '/' + DIR_THIS + '/';
     auto category = SaveUtils::category(toolPath);
     auto name = SaveUtils::name(toolPath);
 
-    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFile());
+    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFileName());
     if (category.isEmpty())
         category = DEFAULT_CATEGORY;
     if (name.isEmpty())
@@ -139,7 +139,7 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     const bool isNewTool = !toolPath.contains(toolsDir());
     QString newToolPath;
     if (isNewTool) {
-        newToolPath = toolsDir() + separator() + HashFactory::generate();
+        newToolPath = toolsDir() + '/' + HashFactory::generate();
 
         if (!mkdir(newToolPath))
             return false;
@@ -153,11 +153,11 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     }
 
     QList<QUrl> urls;
-    auto dir = newToolPath + separator() + DIR_THIS + separator();
+    auto dir = newToolPath + '/' + DIR_THIS + '/';
     auto category = SaveUtils::category(newToolPath);
     auto name = SaveUtils::name(newToolPath);
 
-    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFile());
+    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFileName());
     if (category.isEmpty())
         category = DEFAULT_CATEGORY;
     if (name.isEmpty())
@@ -230,11 +230,11 @@ void ToolManager::exposeTools()
 
     if (currentProjectHasToolsInstalled()) {
         for (const QString& toolDirName : lsdir(toolsDir()))
-            addTool(toolsDir() + separator() + toolDirName, false);
+            addTool(toolsDir() + '/' + toolDirName, false);
     } else {
         for (const QString& toolName : lsfile(TOOLS_SOURCE_DIRECTORY)) {
-            const QString& toolPath = QString(TOOLS_SOURCE_DIRECTORY) + separator() + toolName;
-            const QString& newToolPath = toolsDir() + separator() + HashFactory::generate();
+            const QString& toolPath = QString(TOOLS_SOURCE_DIRECTORY) + '/' + toolName;
+            const QString& newToolPath = toolsDir() + '/' + HashFactory::generate();
 
             if (!mkdir(newToolPath)) {
                 qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x01");

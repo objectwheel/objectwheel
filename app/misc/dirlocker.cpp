@@ -14,14 +14,14 @@
 
 static void clearTrashes(const QString& dir)
 {
-	rm(dir + separator() + CHECK_FILENAME);
-	rm(dir + separator() + LOCKED_FILENAME);
-	rm(dir + separator() + ZIPPED_FILENAME);
+	rm(dir + '/' + CHECK_FILENAME);
+	rm(dir + '/' + LOCKED_FILENAME);
+	rm(dir + '/' + ZIPPED_FILENAME);
 }
 
 bool DirLocker::locked(const QString& dir)
 {
-	QString lockedFileName = dir + separator() + LOCKED_FILENAME;
+	QString lockedFileName = dir + '/' + LOCKED_FILENAME;
 	if (!exists(lockedFileName)) return false;
 	QFile reader(lockedFileName);
 	if (!reader.open(QFile::ReadOnly)) qFatal("DirLocker : Error occurred");
@@ -30,7 +30,7 @@ bool DirLocker::locked(const QString& dir)
 
 bool DirLocker::canUnlock(const QString& dir, const QByteArray& key)
 {
-    QString checkFileName = dir + separator() + CHECK_FILENAME;
+    QString checkFileName = dir + '/' + CHECK_FILENAME;
     if (!locked(dir) || !exists(checkFileName)) return false;
 	auto checkData = rdfile(checkFileName);
 	if (!Aes::encrypted(checkData)) return false;
@@ -42,17 +42,17 @@ bool DirLocker::lock(const QString& dir, const QByteArray& key)
 {
 	if (locked(dir)) return false;
     clearTrashes(dir);
-	QString zippedFileName = dir + separator() + ZIPPED_FILENAME;
+	QString zippedFileName = dir + '/' + ZIPPED_FILENAME;
     ZipAsync::zipSync(dir, zippedFileName);
 	auto checkData = QByteArray(CHECK_SIGN);
 	auto zippedData = rdfile(zippedFileName);
 	if (zippedData.size() < 1) return false;
 	auto keyHash = QCryptographicHash::hash(key, QCryptographicHash::Md5).toHex();
-	if (wrfile(dir + separator() + LOCKED_FILENAME, Aes::encrypt(key, zippedData)) < 0) return false;
-	if (wrfile(dir + separator() + CHECK_FILENAME, Aes::encrypt(keyHash, checkData)) < 0) return false;
+	if (wrfile(dir + '/' + LOCKED_FILENAME, Aes::encrypt(key, zippedData)) < 0) return false;
+	if (wrfile(dir + '/' + CHECK_FILENAME, Aes::encrypt(keyHash, checkData)) < 0) return false;
 	for (auto entry : ls(dir)) {
 		if (entry != LOCKED_FILENAME && entry != CHECK_FILENAME) {
-			rm(dir + separator() + entry);
+			rm(dir + '/' + entry);
 		}
 	}
 	return true;
@@ -62,10 +62,10 @@ bool DirLocker::unlock(const QString& /*dir*/, const QByteArray& /*key*/)
 {
     // FIXME:
     //	if (!canUnlock(dir, key)) return false;
-    //	auto zipData = rdfile(dir + separator() + LOCKED_FILENAME);
+    //	auto zipData = rdfile(dir + '/' + LOCKED_FILENAME);
     //	if (zipData.isEmpty()) return false;
     //	Aes::decrypt(key, zipData);
-    //	rm(dir + separator() + LOCKED_FILENAME), rm(dir + separator() + CHECK_FILENAME);
+    //	rm(dir + '/' + LOCKED_FILENAME), rm(dir + '/' + CHECK_FILENAME);
     //	ZipAsync::unzipSync(zipData, dir); // FIXME
     //    return true;
     return false;

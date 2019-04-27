@@ -46,7 +46,7 @@
 #define globalDir() SaveUtils::toGlobalDir(ProjectManager::dir())
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
 #define externalDir(x) dname(external((x))->fullPath)
-#define fullPath(x, y) (x) + separator() + (y)
+#define fullPath(x, y) (x) + '/' + (y)
 #define modified(x, y) (x)->isModified() ? ((y) + MARK_ASTERISK) : (y)
 #define modifiedControlId(x) controlModified((x)) ? (x)->id() + MARK_ASTERISK : (x)->id()
 extern const char* TOOL_KEY;
@@ -99,7 +99,14 @@ bool warnIfNotATextFile(const QString& filePath)
 
 bool warnIfFileWriteFails(const QString& filePath, const QString& content)
 {
-    if (!wrfile(filePath, content.toUtf8())) {
+    QFile file(filePath);
+    if (!file.open(QFile::WriteOnly)) {
+        return QMessageBox::critical(
+                    0,
+                    QObject::tr("Oops"),
+                    QObject::tr("Cannot open file. File path: %1").arg(filePath));
+    }
+    if (file.write(content.toUtf8()) < 0) {
         return QMessageBox::critical(
                     0,
                     QObject::tr("Oops"),
@@ -622,8 +629,8 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
     document->scope = QmlCodeEditorToolBar::Global;
     document->relativePath = relativePath;
     document->document = new QmlCodeDocument(m_codeEditor);
-    document->document->setFilePath(globalDir() + separator() + relativePath);
-    document->document->setPlainText(rdfile(globalDir() + separator() + relativePath));
+    document->document->setFilePath(globalDir() + '/' + relativePath);
+    document->document->setPlainText(rdfile(globalDir() + '/' + relativePath));
     document->document->setModified(false);
     document->textCursor = QTextCursor(document->document);
 

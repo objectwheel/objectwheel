@@ -139,7 +139,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
     connect(SaveManager::instance(), &SaveManager::propertyChanged,    // Changes made out of code editor
             this, [=] (Control* control, const QString& property, const QString& value) {
-        QmlCodeEditorWidget::InternalDocument* document = qmlCodeEditorWidget()->getInternal(control, SaveUtils::mainQmlFile());
+        QmlCodeEditorWidget::InternalDocument* document = qmlCodeEditorWidget()->getInternal(control, SaveUtils::mainQmlFileName());
         if (document)
             ParserUtils::setProperty(document->document, control->url(), property, value);
     });
@@ -162,7 +162,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         }
 
         const QString& qmldirLine = "\n" + FormJS + " 1.0 " + id + ".js";
-        const QString& qmldirPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + "qmldir";
+        const QString& qmldirPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + "qmldir";
 
         if (!exists(qmldirPath))
             qFatal("CentralWidget: qmldir file is gone.");

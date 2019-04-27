@@ -64,7 +64,7 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
         return false;
     }
 
-    const auto& pdir = udir + separator() + HashFactory::generate();
+    const auto& pdir = udir + '/' + HashFactory::generate();
     const auto& uid = HashFactory::generate();
 
     QJsonObject jobj;
@@ -80,7 +80,7 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
     if (!mkdir(pdir))
         return false;
 
-    if (wrfile(pdir + separator() + FILE_PROJECT, data) <= 0)
+    if (wrfile(pdir + '/' + FILE_PROJECT, data) <= 0)
         return false;
 
     if (!SaveManager::initProject(pdir, templateNumber))
@@ -148,7 +148,7 @@ bool ProjectManager::exportProject(const QString& uid, const QString& filePath)
 bool ProjectManager::importProject(const QString &filePath, QString* uid)
 {
     const auto& udir = UserManager::dir();
-    const auto& pdir = udir + separator() + HashFactory::generate();
+    const auto& pdir = udir + '/' + HashFactory::generate();
 
     if (filePath.isEmpty() || udir.isEmpty())
         return false;
@@ -159,7 +159,7 @@ bool ProjectManager::importProject(const QString &filePath, QString* uid)
     *uid = HashFactory::generate();
     SaveUtils::setProjectProperty(pdir, PTAG_UID, *uid);
 
-    SaveUtils::regenerateUids(pdir + separator() + DIR_DESIGNS);
+    SaveUtils::regenerateUids(pdir + '/' + DIR_DESIGNS);
 
     return true;
 }
@@ -173,7 +173,7 @@ QString ProjectManager::dir(const QString& uid)
         return found;
 
     for (const QString& projectName : lsdir(userDirectory)) {
-        const QString& projectDir = userDirectory + separator() + projectName;
+        const QString& projectDir = userDirectory + '/' + projectName;
 
         if (!SaveUtils::isProjectValid(projectDir))
             continue;
@@ -233,7 +233,7 @@ QStringList ProjectManager::projects()
         return uids;
 
     for (const auto& dir : lsdir(udir)) {
-        const auto& p = udir + separator() + dir;
+        const auto& p = udir + '/' + dir;
         if (SaveUtils::isProjectValid(p))
             uids << SaveUtils::projectUid(p);
     }

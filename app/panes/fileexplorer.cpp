@@ -518,14 +518,14 @@ void FileExplorer::onNewFileButtonClick()
     QString baseFileName = tr("Empty File");
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    while (exists(rootPath + separator() + baseFileName + ".txt"))
+    while (exists(rootPath + '/' + baseFileName + ".txt"))
         baseFileName = UtilityFunctions::increasedNumberedText(baseFileName, true, true);
 
     QModelIndex index;
-    const bool suceed = mkfile(rootPath + separator() + baseFileName + ".txt");
+    const bool suceed = mkfile(rootPath + '/' + baseFileName + ".txt");
 
     if (suceed)
-        index = mf(m_fileSystemModel->index(rootPath + separator() + baseFileName + ".txt"));
+        index = mf(m_fileSystemModel->index(rootPath + '/' + baseFileName + ".txt"));
 
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
@@ -541,7 +541,7 @@ void FileExplorer::onNewFolderButtonClick()
     QString baseFolderName = tr("New Folder");
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    while (exists(rootPath + separator() + baseFolderName))
+    while (exists(rootPath + '/' + baseFolderName))
         baseFolderName = UtilityFunctions::increasedNumberedText(baseFolderName, true, true);
 
     const QModelIndex& index = mf(m_fileSystemModel->mkdir(mt(rootIndex()), baseFolderName));
@@ -734,7 +734,7 @@ void FileExplorer::goToPath(const QString& path)
 
 void FileExplorer::goToRelativePath(const QString& relativePath)
 {
-    const QString& path = m_fileSystemModel->rootPath() + separator() + relativePath;
+    const QString& path = m_fileSystemModel->rootPath() + '/' + relativePath;
 
     if (!QFileInfo(path).exists() || !QFileInfo(path).isDir())
         return;

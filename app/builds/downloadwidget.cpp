@@ -109,13 +109,13 @@ void DownloadWidget::download(OTargets::Targets /*target*/)
 //    if (!tdir.isValid() || !tdir2.isValid())
 //        qFatal("Error");
 
-//    if (!cp(pdir + separator() + DIR_DESIGNS, tdir.path()) ||
-//        !cp(pdir + separator() + DIR_BUILD, tdir.path()) ||
-//        !cp(pdir + separator() + FILE_PROJECT, tdir.path()))
+//    if (!cp(pdir + '/' + DIR_DESIGNS, tdir.path()) ||
+//        !cp(pdir + '/' + DIR_BUILD, tdir.path()) ||
+//        !cp(pdir + '/' + FILE_PROJECT, tdir.path()))
 //        qFatal("Error");
 
-//    ZipAsync::zipSync(tdir.path(), tdir2.path() + separator() + "project.zip");
-//    QByteArray data = rdfile(tdir2.path() + separator() + "project.zip");
+//    ZipAsync::zipSync(tdir.path(), tdir2.path() + '/' + "project.zip");
+//    QByteArray data = rdfile(tdir2.path() + '/' + "project.zip");
 
 //    QByteArray boundary = "-----------------------------7d935033608e2";
 //    QByteArray body = "\r\n--" + boundary + "\r\n";
@@ -154,7 +154,7 @@ void DownloadWidget::download(OTargets::Targets /*target*/)
 
 //        QQmlProperty::write(_d->progressPage, "btnCancelEnabled", false);
 //        auto response = _d->reply->readAll();
-//        QString name = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation)[0] + separator() + buildLabel;
+//        QString name = QStandardPaths::standardLocations(QStandardPaths::DownloadLocation)[0] + '/' + buildLabel;
 
 //        QString nname;
 //        int count = 0;

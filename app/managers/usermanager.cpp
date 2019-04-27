@@ -59,7 +59,7 @@ bool UserManager::newUser(const QString& user)
 //	return mkdir(generateUserDirectory(user));
     //FIXME:
     if (exists(user)) return false; //Bad code
-    return mkfile(generateUserDirectory(user) + separator() + "bad.dat");
+    return mkfile(generateUserDirectory(user) + '/' + "bad.dat");
 }
 
 QString UserManager::dir(const QString& user)
@@ -152,7 +152,7 @@ bool UserManager::start(const QString& user, const QString& password)
 
             if (breakit) continue;
 
-            rm(dir(user) + separator() + entry);
+            rm(dir(user) + '/' + entry);
         }
 
         if (!DirLocker::unlock(dir(user), keyHash)) {

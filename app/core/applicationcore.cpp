@@ -80,8 +80,8 @@ ApplicationCore::ApplicationCore(QApplication* app)
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
 
     /* Load default fonts */
-    for (const QString& fontName : lsfile(fontPath))
-        QFontDatabase::addApplicationFont(fontPath + separator() + fontName);
+    for (const QString& fontName : QDir(fontPath).entryList(QDir::Files))
+        QFontDatabase::addApplicationFont(fontPath + '/' + fontName);
 
     /* Prepare setting instances */
     s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);

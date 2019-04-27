@@ -1,8 +1,11 @@
 #include <saveutils.h>
 #include <hashfactory.h>
+#include <filesystemutils.h>
 
 #include <QDataStream>
 #include <QJsonValue>
+#include <QFileInfo>
+#include <QDir>
 
 // TODO: Always use case insensitive comparison when it is possible
 
@@ -20,7 +23,9 @@ namespace SaveUtils {
 
 bool isForm(const QString& controlDir)
 {
-    return DIR_DESIGNS == fname(dname(controlDir));
+    QDir dir(controlDir);
+    dir.cdUp();
+    return DIR_DESIGNS == dir.dirName();
 }
 
 bool isControlValid(const QString& controlDir)
@@ -35,19 +40,19 @@ bool isProjectValid(const QString& projectDir)
     return sign == SIGN_OWPRJT;
 }
 
-QString mainQmlFile()
+QString mainQmlFileName()
 {
     static const QString& mainQmlFile = QStringLiteral("main.qml");
     return mainQmlFile;
 }
 
-QString controlMetaFile()
+QString controlMetaFileName()
 {
     static const QString& controlMetaFile = QStringLiteral("control.meta");
     return controlMetaFile;
 }
 
-QString projectMetaFile()
+QString projectMetaFileName()
 {
     static const QString& projectMetaFile = QStringLiteral("project.meta");
     return projectMetaFile;
@@ -55,52 +60,55 @@ QString projectMetaFile()
 
 QString toMainQmlFile(const QString& controlDir)
 {
-    return controlDir + separator() + DIR_THIS + separator() + mainQmlFile();
+    return controlDir + '/' + DIR_THIS + '/' + mainQmlFileName();
 }
 
 QString toControlMetaFile(const QString& controlDir)
 {
-    return controlDir + separator() + DIR_THIS + separator() + FILE_CONTROL;
+    return controlDir + '/' + DIR_THIS + '/' + controlMetaFileName();
 }
 
 QString toThisDir(const QString& controlDir)
 {
-    return controlDir + separator() + DIR_THIS;
+    return controlDir + '/' + DIR_THIS;
 }
 
 QString toChildrenDir(const QString& controlDir)
 {
-    return controlDir + separator() + DIR_CHILDREN;
+    return controlDir + '/' + DIR_CHILDREN;
 }
 
 QString toParentDir(const QString& controlDir)
 {
-    return dname(dname(controlDir));
+    QDir dir(controlDir);
+    dir.cdUp();
+    dir.cdUp();
+    return dir.path();
 }
 
 QString toProjectMetaFile(const QString& projectDir)
 {
-    return projectDir + separator() + FILE_PROJECT;
+    return projectDir + '/' + projectMetaFileName();
 }
 
 QString toDesignsDir(const QString& projectDir)
 {
-    return projectDir + separator() + DIR_DESIGNS;
+    return projectDir + '/' + DIR_DESIGNS;
 }
 
 QString toImportsDir(const QString& projectDir)
 {
-    return projectDir + separator() + DIR_IMPORTS;
+    return projectDir + '/' + DIR_IMPORTS;
 }
 
 QString toOwDir(const QString& projectDir)
 {
-    return toImportsDir(projectDir) + separator() + DIR_OW;
+    return toImportsDir(projectDir) + '/' + DIR_OW;
 }
 
 QString toGlobalDir(const QString& projectDir)
 {
-    return toOwDir(projectDir) + separator() + DIR_GLOBAL;
+    return toOwDir(projectDir) + '/' + DIR_GLOBAL;
 }
 
 QString id(const QString& controlDir)
@@ -171,7 +179,12 @@ QJsonValue projectTheme(const QString& projectDir)
 QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
 {
     QMap<ControlProperties, QVariant> map;
-    QDataStream in(rdfile(toControlMetaFile(controlDir)));
+    QFile file(toControlMetaFile(controlDir));
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("SaveUtils: Cannot open control meta file");
+        return map;
+    }
+    QDataStream in(&file);
     in >> map;
     return map;
 }
@@ -179,7 +192,12 @@ QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
 QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
 {
     QMap<ProjectProperties, QVariant> map;
-    QDataStream in(rdfile(toProjectMetaFile(projectDir)));
+    QFile file(toProjectMetaFile(projectDir));
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("SaveUtils: Cannot open project meta file");
+        return map;
+    }
+    QDataStream in(&file);
     in >> map;
     return map;
 }
@@ -198,25 +216,31 @@ void setProperty(const QString& controlDir, ControlProperties property, const QV
 {
     QMap<ControlProperties, QVariant> map(controlMap(controlDir));
     map.insert(property, value);
-    QByteArray buffer;
-    QDataStream out(&buffer, QIODevice::WriteOnly);
+    QFile file(toControlMetaFile(controlDir));
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning("SaveUtils: Cannot open control meta file");
+        return;
+    }
+    QDataStream out(&file);
     out << map;
-    wrfile(toControlMetaFile(controlDir), buffer);
 }
 
 void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
 {
     QMap<ProjectProperties, QVariant> map(projectMap(projectDir));
     map.insert(property, value);
-    QByteArray buffer;
-    QDataStream out(&buffer, QIODevice::WriteOnly);
+    QFile file(toProjectMetaFile(projectDir));
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning("SaveUtils: Cannot open project meta file");
+        return;
+    }
+    QDataStream out(&file);
     out << map;
-    wrfile(toProjectMetaFile(projectDir), buffer);
 }
 
 void regenerateUids(const QString& topPath)
 {
-    for (const QString& controlFilePath : fps(FILE_CONTROL, topPath)) {
+    for (const QString& controlFilePath : FileSystemUtils::searchFiles(controlMetaFileName(), topPath)) {
         const QString& controlDir = toParentDir(controlFilePath);
         if (!isControlValid(controlDir))
             continue;
@@ -228,8 +252,8 @@ QStringList formPaths(const QString& projectDir)
 {
     QStringList paths;
     const QString& designsDir = toDesignsDir(projectDir);
-    for (const QString& formDirName : lsdir(designsDir)) {
-        const QString& formDir = designsDir + separator() + formDirName;
+    for (const QString& formDirName : QDir(designsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& formDir = designsDir + '/' + formDirName;
         if (isControlValid(formDir))
             paths.append(formDir);
     }
@@ -240,8 +264,8 @@ QStringList childrenPaths(const QString& controlDir)
 {
     QStringList paths;
     const QString& childrenDir = toChildrenDir(controlDir);
-    for (const QString& childDirName : lsdir(childrenDir)) {
-        const QString& childControlDir = childrenDir + separator() + childDirName;
+    for (const QString& childDirName : QDir(childrenDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& childControlDir = childrenDir + '/' + childDirName;
         if (isControlValid(childControlDir)) {
             paths.append(childControlDir);
             paths.append(childrenPaths(childControlDir));

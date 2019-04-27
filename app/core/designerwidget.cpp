@@ -371,7 +371,7 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
     const QString& methodBody = QString::fromUtf8(METHOD_BODY).arg(methodSign);
     const QString& formSign = m_designerScene->currentForm()->id();
     const QString& formJS = formSign + ".js";
-    const QString& fullPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + formJS;
+    const QString& fullPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + formJS;
 
     if (warnIfFileDoesNotExist(fullPath))
         return;
@@ -396,7 +396,7 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
-    m_qmlCodeEditorWidget->openInternal(control, SaveUtils::mainQmlFile());
+    m_qmlCodeEditorWidget->openInternal(control, SaveUtils::mainQmlFileName());
 }
 
 void DesignerWidget::onGlobalFileOpen(const QString& relativePath, int line, int column)

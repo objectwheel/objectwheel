@@ -212,8 +212,8 @@ void FormsPane::discharge()
 
 void FormsPane::onAddButtonClick()
 {
-    auto tempPath = QStandardPaths::standardLocations(QStandardPaths::TempLocation)[0];
-    tempPath = tempPath + separator() + APP_NAME;
+    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
+    tempPath = tempPath + '/' + APP_NAME;
 
     rm(tempPath);
 

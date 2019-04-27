@@ -167,7 +167,7 @@ QString urlToDisplayText(const QUrl& url, const QString& controlDir)
     QString displayText = url.toDisplayString();
     if (url.isLocalFile()) {
         displayText = url.toLocalFile().remove(
-                    SaveUtils::toThisDir(controlDir) + separator());
+                    SaveUtils::toThisDir(controlDir) + '/');
     }
     return displayText;
 }

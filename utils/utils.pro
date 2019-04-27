@@ -23,7 +23,8 @@ HEADERS += \
     $$PWD/previewercommands.h \
     $$PWD/paintutils.h \
     $$PWD/utilityfunctions.h \
-    $$PWD/qtcolorbutton.h
+    $$PWD/qtcolorbutton.h \
+    filesystemutils.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -34,7 +35,8 @@ SOURCES += \
     $$PWD/quicktheme.cpp \
     $$PWD/paintutils.cpp \
     $$PWD/utilityfunctions.cpp \
-    $$PWD/qtcolorbutton.cpp
+    $$PWD/qtcolorbutton.cpp \
+    filesystemutils.cpp
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \

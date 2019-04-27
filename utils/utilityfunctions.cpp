@@ -4,6 +4,7 @@
 #include <paintutils.h>
 #include <crossplatform.h>
 #include <async.h>
+#include <filesystemutils.h>
 
 #include <QFileInfo>
 #include <QMessageBox>
@@ -20,6 +21,7 @@
 #include <QApplication>
 #include <QAction>
 #include <QJsonObject>
+#include <QDir>
 
 namespace UtilityFunctions {
 
@@ -107,10 +109,10 @@ void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent
             continue;
 
         const QString& path = QFileInfo(url.toLocalFile()).canonicalFilePath();
-        const QString& fileName = fname(path);
-        const QString& destPath = rootPath + separator() + fileName;
+        const QString& fileName = QFileInfo(path).fileName();
+        const QString& destPath = rootPath + '/' + fileName;
 
-        if (exists(destPath)) {
+        if (QFileInfo::exists(destPath)) {
             if (askForOverwrite) {
                 int ret = QMessageBox::question(
                             parent,
@@ -120,22 +122,31 @@ void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent
                             QMessageBox::Yes | QMessageBox::No | QMessageBox::YesToAll| QMessageBox::Abort,
                             QMessageBox::No);
                 if (ret == QMessageBox::Yes) {
-                    rm(destPath);
+                    if (QFileInfo(destPath).isDir())
+                        QDir(destPath).removeRecursively();
+                    else
+                        QFile::remove(destPath);
                 } else if (ret == QMessageBox::No) {
                     continue;
                 } else if (ret == QMessageBox::YesToAll) {
                     askForOverwrite = false;
-                    rm(destPath);
+                    if (QFileInfo(destPath).isDir())
+                        QDir(destPath).removeRecursively();
+                    else
+                        QFile::remove(destPath);
                 } else {
                     break;
                 }
             } else {
-                rm(destPath);
+                if (QFileInfo(destPath).isDir())
+                    QDir(destPath).removeRecursively();
+                else
+                    QFile::remove(destPath);
             }
         }
 
         QFuture<void> future = Async::run(QThreadPool::globalInstance(),
-                                          qOverload<const QString&, const QString&, bool, bool>(&cp),
+                                          &FileSystemUtils::copy,
                                           path, rootPath, false, false);
         Delayer::delay(std::bind(&QFuture<void>::isRunning, &future));
     }

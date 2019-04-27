@@ -604,11 +604,11 @@ void ProjectsWidget::onExportButtonClick()
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
 
     if (dialog.exec()) {
-        if (!rm(dialog.selectedFiles().at(0) + separator() + pname + ".zip"))
+        if (!rm(dialog.selectedFiles().at(0) + '/' + pname + ".zip"))
             return;
 
         if (!ProjectManager::exportProject(uid, dialog.selectedFiles().at(0) +
-                                           separator() + pname + ".zip")) {
+                                           '/' + pname + ".zip")) {
             return;
         }
 

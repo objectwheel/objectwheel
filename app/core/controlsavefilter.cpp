@@ -8,7 +8,7 @@
 
 #define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
 #define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
-#define fullPath(x) internalDir((x)) + separator() + internal((x))->relativePath
+#define fullPath(x) internalDir((x)) + '/' + internal((x))->relativePath
 
 ControlSaveFilter::ControlSaveFilter(QObject* parent) : QObject(parent)
 {
@@ -19,7 +19,7 @@ void ControlSaveFilter::beforeSave(QmlCodeEditorWidget::Document* document)
     if (document->scope != QmlCodeEditorToolBar::Internal)
         return;
 
-    if (internal(document)->relativePath != SaveUtils::mainQmlFile())
+    if (internal(document)->relativePath != SaveUtils::mainQmlFileName())
         return;
 
     Control* control = internal(document)->control;
@@ -40,7 +40,7 @@ void ControlSaveFilter::afterSave(QmlCodeEditorWidget::Document* document)
 
     Control* control = internal(document)->control;
 
-    if (internal(document)->relativePath == SaveUtils::mainQmlFile()) {
+    if (internal(document)->relativePath == SaveUtils::mainQmlFileName()) {
         if (control->id() != m_id)
             ControlPropertyManager::setId(control, m_id, ControlPropertyManager::SaveChanges); // For refactorId
     }

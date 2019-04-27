@@ -60,7 +60,7 @@ QString detectedFormRootPath(const QString& rootPath)
 {
     //! FIXME: This might crash on Windows due to back-slash path names
     Q_ASSERT(!ProjectManager::dir().isEmpty());
-    const QString& designsDir = SaveUtils::toDesignsDir(ProjectManager::dir()) + separator();
+    const QString& designsDir = SaveUtils::toDesignsDir(ProjectManager::dir()) + '/';
     const QString& formRootPath = QRegularExpression("^" + designsDir + "\\d+").match(rootPath).captured();
     Q_ASSERT(!formRootPath.isEmpty());
     Q_ASSERT(exists(formRootPath));
@@ -145,7 +145,7 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
                     QString::fromUtf8("Component.onCompleted: %1.%2_onCompleted()").arg(FormJS).arg(id).toUtf8());
     wrfile(SaveUtils::toMainQmlFile(formRootPath), content);
 
-    const QString& globalJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + separator() + id + ".js";
+    const QString& globalJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + id + ".js";
     QString js = rdfile(":/resources/other/form.js");
     js = js.arg(id);
     if (!exists(globalJSPath)) {
@@ -169,7 +169,7 @@ QString SaveManager::addForm(const QString& formRootPath)
     }
 
     const QString& targetDesignsDir = SaveUtils::toDesignsDir(ProjectManager::dir());
-    const QString& newFormRootPath = targetDesignsDir + separator() + HashFactory::generate();
+    const QString& newFormRootPath = targetDesignsDir + '/' + HashFactory::generate();
 
     if (!mkdir(newFormRootPath)) {
         qWarning("SaveManager::addForm: Failed. Cannot create the new form root path.");
@@ -201,7 +201,7 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
     }
 
     const QString& targetParentControlChildrenDir = SaveUtils::toChildrenDir(targetParentControlRootPath);
-    const QString& newControlRootPath = targetParentControlChildrenDir + separator() + HashFactory::generate();
+    const QString& newControlRootPath = targetParentControlChildrenDir + '/' + HashFactory::generate();
 
     if (!mkdir(newControlRootPath)) {
         qWarning("SaveManager::addControl: Failed. Cannot create the new control root path.");
@@ -233,7 +233,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     }
 
     const QString& targetControlChildrenDir = SaveUtils::toChildrenDir(parentControl->dir());
-    const QString& newControlRootPath = targetControlChildrenDir + separator() + HashFactory::generate();
+    const QString& newControlRootPath = targetControlChildrenDir + '/' + HashFactory::generate();
 
     if (!mkdir(newControlRootPath)) {
         qWarning("SaveManager::moveControl: Failed. Cannot create the new control root path.");

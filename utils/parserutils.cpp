@@ -305,11 +305,16 @@ namespace ParserUtils {
 
 bool exists(const QString& url, const QString& property)
 {
-    QString source = rdfile(url);
+    QFile file(url);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("ParserUtils: Cannot open file");
+        return false;
+    }
 
     Dialect dialect(Dialect::Qml);
     QSharedPointer<Document> document = Document::create(url, dialect);
-    document->setSource(source);
+    document->setSource(file.readAll());
+    file.close();
 
     if (!document->parse()) {
         qWarning() << "Property couldn't set. Unable to parse qml file.";
@@ -349,10 +354,15 @@ bool exists(const QString& url, const QString& property)
 
 bool canParse(const QString& url)
 {
-    const QString& source = rdfile(url);
+    QFile file(url);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("ParserUtils: Cannot open file");
+        return false;
+    }
     Dialect dialect(Dialect::Qml);
     QSharedPointer<Document> document = Document::create(url, dialect);
-    document->setSource(source);
+    document->setSource(file.readAll());
+    file.close();
     return document->parse();
 }
 
@@ -374,11 +384,17 @@ QString id(const QString& url)
 
 QString property(const QString& url, const QString& property)
 {
-    QString source = rdfile(url);
-
+    QFile file(url);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("ParserUtils: Cannot open file");
+        return {};
+    }
+    const QString& source = file.readAll();
+    file.close();
     Dialect dialect(Dialect::Qml);
     QSharedPointer<Document> document = Document::create(url, dialect);
     document->setSource(source);
+    file.close();
 
     if (!document->parse()) {
         qWarning() << "Property couldn't read. Unable to parse qml file.";
@@ -621,7 +637,12 @@ void setId(const QString& url, const QString& id)
 
 void setProperty(const QString& url, const QString& property, const QString& value)
 {
-    QString source = rdfile(url);
+    QFile file(url);
+    if (!file.open(QFile::ReadWrite)) {
+        qWarning("ParserUtils: Cannot open file");
+        return;
+    }
+    QString source = file.readAll();
 
     Dialect dialect(Dialect::Qml);
     QSharedPointer<Document> document = Document::create(url, dialect);
@@ -665,7 +686,9 @@ void setProperty(const QString& url, const QString& property, const QString& val
     else
         addProperty(source, uiObjectInitializer, property, value);
 
-    wrfile(url, source.toUtf8());
+    file.resize(0);
+    file.write(source.toUtf8());
+    file.close();
 }
 
 void setProperty(QTextDocument* doc, const QString& url, const QString& property, const QString& value)
