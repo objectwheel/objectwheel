@@ -14,7 +14,6 @@ windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug
 
 ### Defines
 DEFINES += QT_QML_DEBUG_NO_WARNING \
-           OBJECTWHEEL_IDE \
            APP_VER='"\\\"$$VERSION\\\""' \
            APP_NAME='"\\\"$$TARGET (Beta)\\\""' \
            APP_CORP='"\\\"Objectwheel, Inc.\\\""' \

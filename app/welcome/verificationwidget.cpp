@@ -183,28 +183,28 @@ void VerificationWidget::onResendClicked()
 
     lock();
 
-    bool succeed = AccountManager::resend(email);
+//    bool succeed = AccountManager::resend(email);
 
-    if (succeed) {
-        clear();
-        _countdown->start();
+//    if (succeed) {
+//        clear();
+//        _countdown->start();
 
-        QMessageBox::information(
-            this,
-            tr("Resend succeed"),
-            tr("New verification code has been sent.")
-        );
-    } else {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Server rejected your request. You might exceed "
-               "the verification trial limit. Try again later.")
-        );
-    }
+//        QMessageBox::information(
+//            this,
+//            tr("Resend succeed"),
+//            tr("New verification code has been sent.")
+//        );
+//    } else {
+//        QMessageBox::warning(
+//            this,
+//            tr("Oops"),
+//            tr("Server rejected your request. You might exceed "
+//               "the verification trial limit. Try again later.")
+//        );
+//    }
 
-    resent = true;
-    unlock();
+//    resent = true;
+//    unlock();
 }
 
 void VerificationWidget::onVerifyClicked()
@@ -223,21 +223,21 @@ void VerificationWidget::onVerifyClicked()
 
     lock();
 
-    bool succeed = AccountManager::verify(email, code);
+//    bool succeed = AccountManager::verify(email, code);
 
-    if (succeed)
-        clear();
-    else {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Server rejected your code. Or, you might exceed "
-               "the verification trial limit. Try again later.")
-        );
-    }
+//    if (succeed)
+//        clear();
+//    else {
+//        QMessageBox::warning(
+//            this,
+//            tr("Oops"),
+//            tr("Server rejected your code. Or, you might exceed "
+//               "the verification trial limit. Try again later.")
+//        );
+//    }
 
-    unlock();
+//    unlock();
 
-    if (succeed)
-        emit done();
+//    if (succeed)
+//        emit done();
 }

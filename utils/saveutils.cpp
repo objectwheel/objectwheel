@@ -9,15 +9,15 @@
 
 // TODO: Always use case insensitive comparison when it is possible
 
-#define SIGN_OWCTRL      "b3djdHJs"
-#define SIGN_OWPRJT      "b3dwcmp0"
-
-#define DIR_THIS         "t"
-#define DIR_CHILDREN     "c"
-#define DIR_DESIGNS      "designs"
-#define DIR_IMPORTS      "imports"
-#define DIR_OW           "Objectwheel"
-#define DIR_GLOBAL       "GlobalResources"
+#define VERSION      "2.9"
+#define SIGN_OWCTRL  "b3djdHJs"
+#define SIGN_OWPRJT  "b3dwcmp0"
+#define DIR_THIS     "t"
+#define DIR_CHILDREN "c"
+#define DIR_DESIGNS  "designs"
+#define DIR_IMPORTS  "imports"
+#define DIR_OW       "Objectwheel"
+#define DIR_GLOBAL   "GlobalResources"
 
 namespace SaveUtils {
 
@@ -238,13 +238,12 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
     out << map;
 }
 
-#if defined(OBJECTWHEEL_IDE)
 void makeControlMetaFile(const QString& controlDir)
 {
     if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
         QMap<ControlProperties, QVariant> map;
-        map.insert(ControlPropertiesVersion, QString(APP_VER));
-        map.insert(ControlPropertiesSignature, QString(SIGN_OWCTRL));
+        map.insert(ControlPropertiesVersion, QStringLiteral(VERSION));
+        map.insert(ControlPropertiesSignature, QStringLiteral(SIGN_OWCTRL));
         QFile file(toControlMetaFile(controlDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open control meta file");
@@ -259,8 +258,8 @@ void makeProjectMetaFile(const QString& projectDir)
 {
     if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
         QMap<ProjectProperties, QVariant> map;
-        map.insert(ProjectPropertiesVersion, QString(APP_VER));
-        map.insert(ProjectPropertiesSignature, QString(SIGN_OWPRJT));
+        map.insert(ProjectPropertiesVersion, QStringLiteral(VERSION));
+        map.insert(ProjectPropertiesSignature, QStringLiteral(SIGN_OWPRJT));
         QFile file(toProjectMetaFile(projectDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open project meta file");
@@ -270,7 +269,6 @@ void makeProjectMetaFile(const QString& projectDir)
         out << map;
     }
 }
-#endif
 
 void regenerateUids(const QString& topPath)
 {

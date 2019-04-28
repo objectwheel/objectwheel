@@ -205,21 +205,21 @@ void ResetWidget::onApplyClicked()
 
     lock();
 
-    bool succeed = AccountManager::reset(email, password, code);
+//    bool succeed = AccountManager::reset(email, password, code);
 
-    if (succeed)
-        clear();
-    else {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Server rejected your code. You might mistyped "
-               "the reset code. Try again.")
-        );
-    }
+//    if (succeed)
+//        clear();
+//    else {
+//        QMessageBox::warning(
+//            this,
+//            tr("Oops"),
+//            tr("Server rejected your code. You might mistyped "
+//               "the reset code. Try again.")
+//        );
+//    }
 
-    unlock();
+//    unlock();
 
-    if (succeed)
-        emit done();
+//    if (succeed)
+//        emit done();
 }

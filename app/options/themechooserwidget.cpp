@@ -535,10 +535,8 @@ void ThemeChooserWidget::run()
     m_loadingIndicator->start();
 
     QTemporaryDir tmpDir;
-    QJsonObject jo;
-    jo.insert(PTAG_THEME, toJson());
-
-    wrfile(tmpDir.filePath(FILE_PROJECT), QJsonDocument(jo).toJson());
+    SaveUtils::makeProjectMetaFile(tmpDir.path());
+    SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     static QProcess* process = nullptr;
 
@@ -573,7 +571,7 @@ void ThemeChooserWidget::save()
     for (const auto& key : newObject.keys())
         object[key] = newObject[key];
 
-    SaveUtils::setProperty(ProjectManager::dir(), PTAG_THEME, object);
+    SaveUtils::setProperty(ProjectManager::dir(), SaveUtils::ProjectTheme, object);
 
     emit saved();
 }
@@ -594,10 +592,8 @@ void ThemeChooserWidget::refresh()
     tmpFile.close();
 
     QTemporaryDir tmpDir;
-    QJsonObject jo;
-    jo.insert(PTAG_THEME, toJson());
-
-    wrfile(tmpDir.filePath(FILE_PROJECT), QJsonDocument(jo).toJson());
+    SaveUtils::makeProjectMetaFile(tmpDir.path());
+    SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     QProcess process;
     process.start(qApp->applicationDirPath() + "/themer",

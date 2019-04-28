@@ -4,6 +4,7 @@
 #include <QWebSocket>
 #include <QBasicTimer>
 #include <QDataStream>
+#include <utilityfunctions.h>
 
 class ServerManager final : public QWebSocket
 {
@@ -40,7 +41,15 @@ public:
     static ServerManager* instance();
 
     template<typename... Args>
-    static void send(ServerCommands command, Args&&... args);
+    static void send(ServerCommands command, Args&&... args)
+    {
+        using namespace UtilityFunctions;
+        if (instance()->state() != QAbstractSocket::ConnectedState) {
+            qWarning() << "ServerManager::send: Unable to send the data, server is not connected.";
+            return;
+        }
+        instance()->sendBinaryMessage(push(command, push(std::forward<Args>(args)...)));
+    }
 
 private slots:
     void onConnect();

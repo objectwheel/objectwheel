@@ -1,5 +1,4 @@
 #include <servermanager.h>
-#include <utilityfunctions.h>
 #include <QTimerEvent>
 
 ServerManager* ServerManager::s_instance = nullptr;
@@ -28,17 +27,6 @@ ServerManager::ServerManager(const QUrl& host, QObject* parent) : QWebSocket(QSt
 ServerManager::~ServerManager()
 {
     s_instance = nullptr;
-}
-
-template<typename... Args>
-void ServerManager::send(ServerManager::ServerCommands command, Args&&... args)
-{
-    using namespace UtilityFunctions;
-    if (instance()->state() != QAbstractSocket::ConnectedState) {
-        qWarning() << "ServerManager::send: Unable to send the data, server is not connected.";
-        return;
-    }
-    instance()->sendBinaryMessage(push(command, push(std::forward<Args>(args)...)));
 }
 
 void ServerManager::onBinaryMessageReceive(const QByteArray& message)

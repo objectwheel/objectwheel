@@ -212,23 +212,23 @@ void LoginWidget::onLoginButtonClick()
 
     lock();
 
-    const auto& plan = AccountManager::login(email, password);
-    bool succeed = !plan.isEmpty();
+//    const auto& plan = AccountManager::login(email, password);
+//    bool succeed = !plan.isEmpty();
 
-    if (!succeed) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Login is not successful, please check the information you provided.")
-        );
-    }
+//    if (!succeed) {
+//        QMessageBox::warning(
+//            this,
+//            tr("Oops"),
+//            tr("Login is not successful, please check the information you provided.")
+//        );
+//    }
 
-    unlock();
+//    unlock();
 
-    if (succeed) {
-        QTimer::singleShot(0, this, &LoginWidget::startSession);
-        emit busy(tr("Decryption in progress"));
-    }
+//    if (succeed) {
+//        QTimer::singleShot(0, this, &LoginWidget::startSession);
+//        emit busy(tr("Decryption in progress"));
+//    }
 }
 
 void LoginWidget::startSession()

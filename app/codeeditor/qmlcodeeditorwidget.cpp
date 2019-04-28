@@ -631,7 +631,7 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly)) {
         qWarning("QmlCodeEditorWidget: Cannot open global file");
-        return nullptr;
+        return nullptr; // TODO: Guard against nullptr for those who uses this function
     }
 
     GlobalDocument* document = new GlobalDocument;
@@ -642,6 +642,7 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
     document->document->setPlainText(file.readAll());
     document->document->setModified(false);
     document->textCursor = QTextCursor(document->document);
+    file.close();
 
     m_globalDocuments.append(document);
 
@@ -661,15 +662,24 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
 QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control* control,
                                                                         const QString& relativePath)
 {
+    const QString& filePath = fullPath(SaveUtils::toThisDir(control->dir()), relativePath);
+
+    QFile file(filePath);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("QmlCodeEditorWidget: Cannot open internal file");
+        return nullptr; // TODO: Guard against nullptr for those who uses this function
+    }
+
     InternalDocument* document = new InternalDocument;
     document->scope = QmlCodeEditorToolBar::Internal;
     document->control = control;
     document->relativePath = relativePath;
     document->document = new QmlCodeDocument(m_codeEditor);
-    document->document->setFilePath(fullPath(SaveUtils::toThisDir(control->dir()), relativePath));
-    document->document->setPlainText(rdfile(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)));
+    document->document->setFilePath(filePath);
+    document->document->setPlainText(file.readAll());
     document->document->setModified(false);
     document->textCursor = QTextCursor(document->document);
+    file.close();
 
     m_internalDocuments.append(document);
 
@@ -695,14 +705,21 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control*
 
 QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QString& fullPath)
 {
+    QFile file(fullPath);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("QmlCodeEditorWidget: Cannot open external file");
+        return nullptr; // TODO: Guard against nullptr for those who uses this function
+    }
+
     ExternalDocument* document = new ExternalDocument;
     document->scope = QmlCodeEditorToolBar::External;
     document->fullPath = fullPath;
     document->document = new QmlCodeDocument(m_codeEditor);
     document->document->setFilePath(fullPath);
-    document->document->setPlainText(rdfile(fullPath));
+    document->document->setPlainText(file.readAll());
     document->document->setModified(false);
     document->textCursor = QTextCursor(document->document);
+    file.close();
 
     m_externalDocuments.append(document);
 

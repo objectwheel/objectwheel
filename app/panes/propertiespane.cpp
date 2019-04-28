@@ -352,12 +352,18 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
         if (previousValue == comboBox->currentText())
             return;
 
+        QFile file(control->url());
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning("createEnumHandlerWidget: Cannot open control main qml file");
+            return;
+        }
+
         QString fixedScope = enumm.scope;
         if (control->window() && fixedScope == "Window") {
-            const QByteArray& qml = rdfile(control->url());
-            if (!qml.contains("import QtQuick.Window"))
+            if (!file.readAll().contains("import QtQuick.Window"))
                 fixedScope = "ApplicationWindow";
         }
+        file.close();
 
         ControlPropertyManager::setProperty(control,
                                             enumm.name, fixedScope + "." + comboBox->currentText(),

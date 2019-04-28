@@ -584,10 +584,10 @@ void FileExplorer::onDownloadButtonClick()
     QTemporaryDir tmp;
     Q_ASSERT_X(tmp.isValid(), "FileExplorer", "Cannot create a temporary dir.");
 
-    if (!wrfile(tmp.filePath(fileName), dlfile(url))) {
-        qWarning() << tr("File downlod failed.");
-        return;
-    }
+//    if (!wrfile(tmp.filePath(fileName), dlfile(url))) {
+//        qWarning() << tr("File downlod failed.");
+//        return;
+//    }
 
     UtilityFunctions::copyFiles(rootPath, QList<QUrl>() << QUrl::fromLocalFile(tmp.filePath(fileName)), this);
 }
@@ -771,7 +771,7 @@ void FileExplorer::filterList()
     if (m_mode == Viewer)
         UtilityFunctions::expandUpToRoot(this, searchedIndex, rootIndex());
     else
-        goToPath(dname(path));
+        goToPath(QFileInfo(path).path());
     selectionModel()->select(searchedIndex, QItemSelectionModel::ClearAndSelect);
     scrollTo(searchedIndex, PositionAtCenter);
 }

@@ -130,22 +130,22 @@ void ForgetWidget::onNextClicked()
 
     lock();
 
-    bool succeed =
-    AccountManager::forget(
-        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text()
-    );
+//    bool succeed =
+//    AccountManager::forget(
+//        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text()
+//    );
 
-    if (succeed)
-        clear();
-    else
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Information"),
-            tr("Server rejected your request. Possibly incorrect email address.")
-        );
+//    if (succeed)
+//        clear();
+//    else
+//        QMessageBox::warning(
+//            this,
+//            tr("Incorrect Information"),
+//            tr("Server rejected your request. Possibly incorrect email address.")
+//        );
 
-    unlock();
+//    unlock();
 
-    if (succeed)
-        emit done(email);
+//    if (succeed)
+//        emit done(email);
 }

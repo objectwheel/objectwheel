@@ -71,14 +71,14 @@ QString UserManager::dir(const QString& user)
     return generateUserDirectory(user);
 }
 
-void UserManager::setAutoLogin(const QString& password)
+void UserManager::setAutoLogin(const QString& /*password*/)
 {
     if (s_user.isEmpty() || dir().isEmpty()) return;
     QString json = "{ \"e\" : \"%1\", \"p\" : \"%2\" }";
     auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
     auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
-    wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME,
-        Aes::encrypt(sstep, QByteArray().insert(0, json.arg(s_user, password))));
+//  FIXME  wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME,
+//        Aes::encrypt(sstep, QByteArray().insert(0, json.arg(s_user, password))));
 }
 
 const QString& UserManager::user()
@@ -98,27 +98,28 @@ const QByteArray& UserManager::key()
 
 void UserManager::clearAutoLogin()
 {
-    QByteArray shredder;
-    for (int i = 1048576; i--;) { shredder.append(QRandomGenerator::global()->generate() % 250); }
-    wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME, shredder);
-    QFile::remove(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-    FileSystemUtils::makeFile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
+//  FIXME  QByteArray shredder;
+//    for (int i = 1048576; i--;) { shredder.append(QRandomGenerator::global()->generate() % 250); }
+//    wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME, shredder);
+//    QFile::remove(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
+//    FileSystemUtils::makeFile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
 }
 
 bool UserManager::hasAutoLogin()
 {
-    auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-    return !algdata.isEmpty();
+//  FIXME  auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
+    return false /*!algdata.isEmpty()*/;
 }
 
 bool UserManager::tryAutoLogin()
 {
-    if (!hasAutoLogin()) return false;
-    auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
-    auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
-    auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-    auto jobj = QJsonDocument::fromJson(Aes::decrypt(sstep, algdata)).object();
-    return start(jobj["e"].toString(), jobj["p"].toString());
+//  FIXME  if (!hasAutoLogin()) return false;
+//    auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
+//    auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
+//    auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
+//    auto jobj = QJsonDocument::fromJson(Aes::decrypt(sstep, algdata)).object();
+//    return start(jobj["e"].toString(), jobj["p"].toString());
+    return false;
 }
 
 bool UserManager::start(const QString& user, const QString& password)

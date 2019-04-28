@@ -31,10 +31,14 @@ static const QStringList& countries()
     static QStringList countries;
 
     if (countries.isEmpty()) {
-        const auto& data = rdfile(PATH_COUNTRIES);
+        QFile file(PATH_COUNTRIES);
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning("countries: Cannot read file");
+            return countries;
+        }
 
         QString country;
-        QTextStream in(data);
+        QTextStream in(&file);
         while (in.readLineInto(&country))
             countries << country.split("   ").first();
     }
@@ -311,31 +315,31 @@ void RegistrationWidget::onNextClicked()
 
     lock();
 
-    bool succeed =
-    AccountManager::signup(
-        static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
-        static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
-        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),
-        static_cast<QLineEdit*>(_bulkEdit->get(Password))->text(),
-        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() != "Please select..." ?
-        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() : "",
-        static_cast<QLineEdit*>(_bulkEdit->get(Company))->text(),
-        static_cast<QLineEdit*>(_bulkEdit->get(Title))->text(),
-        static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text()
-    );
+//    bool succeed =
+//    AccountManager::signup(
+//        static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
+//        static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
+//        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),
+//        static_cast<QLineEdit*>(_bulkEdit->get(Password))->text(),
+//        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() != "Please select..." ?
+//        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() : "",
+//        static_cast<QLineEdit*>(_bulkEdit->get(Company))->text(),
+//        static_cast<QLineEdit*>(_bulkEdit->get(Title))->text(),
+//        static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text()
+//    );
 
-    if (succeed)
-        clear();
-    else
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Information"),
-            tr("Server rejected your request. Please review the information you entered. "
-               "And make sure you are not trying to sign up more than once.")
-        );
+//    if (succeed)
+//        clear();
+//    else
+//        QMessageBox::warning(
+//            this,
+//            tr("Incorrect Information"),
+//            tr("Server rejected your request. Please review the information you entered. "
+//               "And make sure you are not trying to sign up more than once.")
+//        );
 
-    unlock();
+//    unlock();
 
-    if (succeed)
-        emit done(email);
+//    if (succeed)
+//        emit done(email);
 }

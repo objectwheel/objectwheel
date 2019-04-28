@@ -18,7 +18,7 @@
 #define PATH_CICON       (":/images/unload.png")
 #define PATH_DICON       (":/images/cancel.png")
 
-enum Fields { Name, Description, Owner, CreationDate, ModificationDate, Size };
+enum Fields { Name, Description, CreationDate, ModificationDate, Size };
 enum Buttons { Back, Save, Delete };
 
 ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
@@ -60,7 +60,6 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
 
     m_bulkEdit->add(Name, tr("Project Name"));
     m_bulkEdit->add(Description, tr("Description"));
-    m_bulkEdit->add(Owner, tr("Owner"));
     m_bulkEdit->add(CreationDate, tr("Creation"));
     m_bulkEdit->add(ModificationDate, tr("Last Edit"));
     m_bulkEdit->add(Size, tr("Size"));
@@ -68,16 +67,13 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
 
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setReadOnly(true);
     static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setReadOnly(true);
     static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setReadOnly(true);
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setReadOnly(true);
 
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setStyleSheet("color: #50000000; border: none; background: transparent;");
     static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setStyleSheet("color: #50000000; border: none; background: transparent;");
     static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setStyleSheet("color: #50000000; border: none; background: transparent;");
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setStyleSheet("color: #50000000; border: none; background: transparent;");
@@ -117,7 +113,6 @@ void ProjectDetailsWidget::onEditProject(const QString& uid)
     ProjectManager::updateSize(m_uid);
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(uid));
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(uid));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(ProjectManager::owner(uid));
     static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::toUiTime(ProjectManager::crDate(uid)));
     static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::toUiTime(ProjectManager::mfDate(uid)));
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectManager::size(uid));
@@ -130,7 +125,6 @@ void ProjectDetailsWidget::onNewProject(const QString& projectName, int template
     m_uid.clear();
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->setText(UserManager::user());
     static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::currentUiTime());
     static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::currentUiTime());
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(tr("0 bytes"));
@@ -141,7 +135,6 @@ void ProjectDetailsWidget::onSaveClick()
     auto projectnametext = static_cast<QLineEdit*>(m_bulkEdit->get(Name))->text();
     auto descriptiontext = static_cast<QLineEdit*>(m_bulkEdit->get(Description))->text();
     auto crdatetext = static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->text();
-    auto ownertext = static_cast<QLineEdit*>(m_bulkEdit->get(Owner))->text();
 
     if (projectnametext.isEmpty()) {
         QMessageBox::warning(this, tr("Oops"), tr("Project name cannot be empty."));
@@ -153,7 +146,6 @@ void ProjectDetailsWidget::onSaveClick()
             m_templateNumber,
             projectnametext,
             descriptiontext,
-            ownertext,
             ProjectManager::toDbTime(crdatetext)
         )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
     } else {
