@@ -23,6 +23,9 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
 
 void ScalingWidget::discharge()
 {
+    if (ProjectManager::uid().isEmpty())
+        return;
+
     auto scaling = SaveUtils::projectScaling(ProjectManager::dir());
 
     if (scaling == "noScaling")

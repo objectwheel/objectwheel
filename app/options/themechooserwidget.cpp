@@ -495,6 +495,9 @@ void ThemeChooserWidget::discharge()
     m_saveButton->setDisabled(true);
     m_resetButton->setDisabled(true);
 
+    if (ProjectManager::uid().isEmpty())
+        return;
+
     const auto& object = SaveUtils::projectTheme(ProjectManager::dir()).toObject();
 
     if (m_version == V1) {

@@ -1,7 +1,6 @@
 /*
     TODO List
     Drag drop from the file explorer to desktop
-    Show real progress dialog when download action is in progress
     Show a right click menu on selected entries when user right clicks on them to show available
     - file operation options like copy, paste, delete etc.)
     Navigating on search results of the search auto completer popup should be possible via
@@ -95,7 +94,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_renameButton(new QToolButton)
   , m_newFileButton(new QToolButton)
   , m_newFolderButton(new QToolButton)
-  , m_downloadFileButton(new QToolButton)
 {
     g_modeIFilterIconLabel = new QLabel(m_modeComboBox);
     g_modeIFilterIconLabel->setFixedSize(16, 16);
@@ -150,7 +148,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_renameButton->setCursor(Qt::PointingHandCursor);
     m_newFileButton->setCursor(Qt::PointingHandCursor);
     m_newFolderButton->setCursor(Qt::PointingHandCursor);
-    m_downloadFileButton->setCursor(Qt::PointingHandCursor);
     m_modeComboBox->setCursor(Qt::PointingHandCursor);
 
     m_upButton->setToolTip(tr("Go to the upper directory"));
@@ -163,7 +160,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_renameButton->setToolTip(tr("Rename selected file/folder"));
     m_newFileButton->setToolTip(tr("Create an empty new file within the current directory"));
     m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
-    m_downloadFileButton->setToolTip(tr("Download a file from an url into the current directory"));
     m_modeComboBox->setToolTip(tr("Change view mode"));
     m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
 
@@ -177,7 +173,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_renameButton->setIcon(Icons::RENAME.icon());
     m_newFileButton->setIcon(Icons::FILENEW.icon());
     m_newFolderButton->setIcon(Icons::FOLDERNEW.icon());
-    m_downloadFileButton->setIcon(Icons::DOWNLOAD.icon());
 
     connect(m_upButton, &QToolButton::clicked,
             this, &FileExplorer::onUpButtonClick);
@@ -199,8 +194,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
             this, &FileExplorer::onNewFileButtonClick);
     connect(m_newFolderButton, &QToolButton::clicked,
             this, &FileExplorer::onNewFolderButtonClick);
-    connect(m_downloadFileButton, &QToolButton::clicked,
-            this, &FileExplorer::onDownloadButtonClick);
     connect(m_modeComboBox, qOverload<const QString&>(&QComboBox::activated),
             this, &FileExplorer::onModeChange);
 
@@ -217,7 +210,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_renameButton->setFixedHeight(20);
     m_newFileButton->setFixedHeight(20);
     m_newFolderButton->setFixedHeight(20);
-    m_downloadFileButton->setFixedHeight(20);
     m_modeComboBox->setFixedHeight(20);
 
     m_pathIndicator->setFixedHeight(17);
@@ -239,7 +231,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addWidget(m_newFileButton);
     m_toolBar->addWidget(m_newFolderButton);
-    m_toolBar->addWidget(m_downloadFileButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
 
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
@@ -553,43 +544,6 @@ void FileExplorer::onNewFolderButtonClick()
     } else {
         qWarning() << "FileExplorer:" << tr("Folder creation failed");
     }
-}
-
-void FileExplorer::onDownloadButtonClick()
-{
-    const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
-
-    if (rootPath.isEmpty())
-        return;
-
-    bool dialogOkButtonClicked;
-    const QString& url = QInputDialog::getText(this, tr("Download a file"), tr("Url:"),
-                                               QLineEdit::Normal, QString(), &dialogOkButtonClicked);
-
-    if (!dialogOkButtonClicked)
-        return;
-
-    if (url.isEmpty())
-        return;
-
-    const QString& fileName = QInputDialog::getText(this, tr("Download a file"), tr("File name:"),
-                                                    QLineEdit::Normal, QString(), &dialogOkButtonClicked);
-
-    if (!dialogOkButtonClicked)
-        return;
-
-    if (fileName.isEmpty())
-        return;
-
-    QTemporaryDir tmp;
-    Q_ASSERT_X(tmp.isValid(), "FileExplorer", "Cannot create a temporary dir.");
-
-//    if (!wrfile(tmp.filePath(fileName), dlfile(url))) {
-//        qWarning() << tr("File downlod failed.");
-//        return;
-//    }
-
-    UtilityFunctions::copyFiles(rootPath, QList<QUrl>() << QUrl::fromLocalFile(tmp.filePath(fileName)), this);
 }
 
 void FileExplorer::onFileSelectionChange()

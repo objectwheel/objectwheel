@@ -8,7 +8,7 @@ namespace SaveUtils {
 enum ProjectProperties {
     ProjectName = 0x1000,
     ProjectDescription,
-    ProjectChecksum,
+    ProjectChecksum, // Reserved
     ProjectCreationDate,
     ProjectModificationDate,
     ProjectSize,
@@ -22,7 +22,7 @@ enum ProjectProperties {
 enum ControlProperties {
     ControlId = 0x2000,
     ControlUid,
-    ControlChecksum,
+    ControlChecksum, // Reserved
     ControlIcon,
     ControlToolName,
     ControlToolCategory,

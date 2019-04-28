@@ -200,6 +200,9 @@ QString RunController::progressBarMessageFor(MessageKind kind, const QString& ar
     static const char* msgStopped  = QT_TR_NOOP("<b>Stopped</b>  |  The application terminated at %1");
     static const char* msgFinished = QT_TR_NOOP("<b>Finished</b>  |  The application exited at %1");
 
+    if (ProjectManager::uid().isEmpty())
+        return {};
+
     QString message = "<p style='white-space:pre'>" + ProjectManager::name() + "  :  ";
 
     switch (kind) {

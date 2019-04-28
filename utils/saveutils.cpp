@@ -1,15 +1,12 @@
 #include <saveutils.h>
-#include <hashfactory.h>
 #include <filesystemutils.h>
+#include <hashfactory.h>
 
 #include <QDataStream>
-#include <QJsonValue>
-#include <QFileInfo>
 #include <QDir>
+#include <QJsonValue>
 
-// TODO: Always use case insensitive comparison when it is possible
-
-#define VERSION      "2.9"
+#define VERSION      2.9
 #define SIGN_OWCTRL  "b3djdHJs"
 #define SIGN_OWPRJT  "b3dwcmp0"
 #define DIR_THIS     "t"
@@ -25,19 +22,19 @@ bool isForm(const QString& controlDir)
 {
     QDir dir(controlDir);
     dir.cdUp();
-    return DIR_DESIGNS == dir.dirName();
+    return QStringLiteral(DIR_DESIGNS) == dir.dirName();
 }
 
 bool isControlValid(const QString& controlDir)
 {
     const QString& sign = property(controlDir, ControlPropertiesSignature).toString();
-    return sign == SIGN_OWCTRL && !uid(controlDir).isEmpty();
+    return sign == QStringLiteral(SIGN_OWCTRL) && !uid(controlDir).isEmpty();
 }
 
 bool isProjectValid(const QString& projectDir)
 {
     const QString& sign = property(projectDir, ProjectPropertiesSignature).toString();
-    return sign == SIGN_OWPRJT;
+    return sign == QStringLiteral(SIGN_OWPRJT);
 }
 
 QString mainQmlFileName()
@@ -60,22 +57,22 @@ QString projectMetaFileName()
 
 QString toMainQmlFile(const QString& controlDir)
 {
-    return controlDir + '/' + DIR_THIS + '/' + mainQmlFileName();
+    return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + mainQmlFileName();
 }
 
 QString toControlMetaFile(const QString& controlDir)
 {
-    return controlDir + '/' + DIR_THIS + '/' + controlMetaFileName();
+    return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + controlMetaFileName();
 }
 
 QString toThisDir(const QString& controlDir)
 {
-    return controlDir + '/' + DIR_THIS;
+    return controlDir + '/' + QStringLiteral(DIR_THIS);
 }
 
 QString toChildrenDir(const QString& controlDir)
 {
-    return controlDir + '/' + DIR_CHILDREN;
+    return controlDir + '/' + QStringLiteral(DIR_CHILDREN);
 }
 
 QString toParentDir(const QString& controlDir)
@@ -93,22 +90,22 @@ QString toProjectMetaFile(const QString& projectDir)
 
 QString toDesignsDir(const QString& projectDir)
 {
-    return projectDir + '/' + DIR_DESIGNS;
+    return projectDir + '/' + QStringLiteral(DIR_DESIGNS);
 }
 
 QString toImportsDir(const QString& projectDir)
 {
-    return projectDir + '/' + DIR_IMPORTS;
+    return projectDir + '/' + QStringLiteral(DIR_IMPORTS);
 }
 
 QString toOwDir(const QString& projectDir)
 {
-    return toImportsDir(projectDir) + '/' + DIR_OW;
+    return toImportsDir(projectDir) + '/' + QStringLiteral(DIR_OW);
 }
 
 QString toGlobalDir(const QString& projectDir)
 {
-    return toOwDir(projectDir) + '/' + DIR_GLOBAL;
+    return toOwDir(projectDir) + '/' + QStringLiteral(DIR_GLOBAL);
 }
 
 QString id(const QString& controlDir)
@@ -242,7 +239,7 @@ void makeControlMetaFile(const QString& controlDir)
 {
     if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
         QMap<ControlProperties, QVariant> map;
-        map.insert(ControlPropertiesVersion, QStringLiteral(VERSION));
+        map.insert(ControlPropertiesVersion, qreal(VERSION));
         map.insert(ControlPropertiesSignature, QStringLiteral(SIGN_OWCTRL));
         QFile file(toControlMetaFile(controlDir));
         if (!file.open(QFile::WriteOnly)) {
@@ -258,7 +255,7 @@ void makeProjectMetaFile(const QString& projectDir)
 {
     if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
         QMap<ProjectProperties, QVariant> map;
-        map.insert(ProjectPropertiesVersion, QStringLiteral(VERSION));
+        map.insert(ProjectPropertiesVersion, qreal(VERSION));
         map.insert(ProjectPropertiesSignature, QStringLiteral(SIGN_OWPRJT));
         QFile file(toProjectMetaFile(projectDir));
         if (!file.open(QFile::WriteOnly)) {

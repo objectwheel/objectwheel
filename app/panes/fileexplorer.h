@@ -43,7 +43,6 @@ private slots:
     void onNewFileButtonClick();
     void onRenameButtonClick();
     void onNewFolderButtonClick();
-    void onDownloadButtonClick();
     void onFileSelectionChange();
     void onItemDoubleClick(const QModelIndex& index);
 
@@ -89,7 +88,6 @@ private:
     QToolButton* m_renameButton;
     QToolButton* m_newFileButton;
     QToolButton* m_newFolderButton;
-    QToolButton* m_downloadFileButton;
     enum Modes { Viewer, Explorer} m_mode;
 };
 
