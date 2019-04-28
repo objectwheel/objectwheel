@@ -9,6 +9,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QDir>
 
 #define BUTTONS_WIDTH    (338)
 #define SIZE_ICON        (QSize(48, 48))
@@ -189,7 +190,7 @@ void ProjectDetailsWidget::onDeleteClick()
         if (!cuid.isEmpty() && cuid == m_uid)
             ProjectManager::stop();
 
-        rm(ProjectManager::dir(m_uid));
+        QDir(ProjectManager::dir(m_uid)).removeRecursively();
 
         emit done();
     }

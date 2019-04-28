@@ -14,9 +14,9 @@
 
 static void clearTrashes(const QString& dir)
 {
-	rm(dir + '/' + CHECK_FILENAME);
-	rm(dir + '/' + LOCKED_FILENAME);
-	rm(dir + '/' + ZIPPED_FILENAME);
+    QFile::remove(dir + '/' + CHECK_FILENAME);
+    QFile::remove(dir + '/' + LOCKED_FILENAME);
+    QFile::remove(dir + '/' + ZIPPED_FILENAME);
 }
 
 bool DirLocker::locked(const QString& dir)
@@ -28,34 +28,39 @@ bool DirLocker::locked(const QString& dir)
 	return Aes::encrypted(reader.read(128));
 }
 
-bool DirLocker::canUnlock(const QString& dir, const QByteArray& key)
+bool DirLocker::canUnlock(const QString& /*dir*/, const QByteArray& /*key*/)
 {
-    QString checkFileName = dir + '/' + CHECK_FILENAME;
-    if (!locked(dir) || !QFileInfo::exists(checkFileName)) return false;
-	auto checkData = rdfile(checkFileName);
-	if (!Aes::encrypted(checkData)) return false;
-	auto keyHash = QCryptographicHash::hash(key, QCryptographicHash::Md5).toHex();
-	return (Aes::decrypt(keyHash, checkData) == QString(CHECK_SIGN));
+//   FIXME QString checkFileName = dir + '/' + CHECK_FILENAME;
+//    if (!locked(dir) || !QFileInfo::exists(checkFileName)) return false;
+//	auto checkData = rdfile(checkFileName);
+//	if (!Aes::encrypted(checkData)) return false;
+//	auto keyHash = QCryptographicHash::hash(key, QCryptographicHash::Md5).toHex();
+//	return (Aes::decrypt(keyHash, checkData) == QString(CHECK_SIGN));
+    return false;
 }
 
 bool DirLocker::lock(const QString& dir, const QByteArray& key)
 {
-	if (locked(dir)) return false;
-    clearTrashes(dir);
-	QString zippedFileName = dir + '/' + ZIPPED_FILENAME;
-    ZipAsync::zipSync(dir, zippedFileName);
-	auto checkData = QByteArray(CHECK_SIGN);
-	auto zippedData = rdfile(zippedFileName);
-	if (zippedData.size() < 1) return false;
-	auto keyHash = QCryptographicHash::hash(key, QCryptographicHash::Md5).toHex();
-	if (wrfile(dir + '/' + LOCKED_FILENAME, Aes::encrypt(key, zippedData)) < 0) return false;
-	if (wrfile(dir + '/' + CHECK_FILENAME, Aes::encrypt(keyHash, checkData)) < 0) return false;
-	for (auto entry : ls(dir)) {
-		if (entry != LOCKED_FILENAME && entry != CHECK_FILENAME) {
-			rm(dir + '/' + entry);
-		}
-	}
-	return true;
+// FIXME   if (locked(dir)) return false;
+//    clearTrashes(dir);
+//    QString zippedFileName = dir + '/' + ZIPPED_FILENAME;
+//    ZipAsync::zipSync(dir, zippedFileName);
+//    auto checkData = QByteArray(CHECK_SIGN);
+//    auto zippedData = rdfile(zippedFileName);
+//    if (zippedData.size() < 1) return false;
+//    auto keyHash = QCryptographicHash::hash(key, QCryptographicHash::Md5).toHex();
+//    if (wrfile(dir + '/' + LOCKED_FILENAME, Aes::encrypt(key, zippedData)) < 0) return false;
+//    if (wrfile(dir + '/' + CHECK_FILENAME, Aes::encrypt(keyHash, checkData)) < 0) return false;
+//    for (auto entry : QDir(dir).entryList(QDir::AllEntries | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot)) {
+//        if (entry != LOCKED_FILENAME && entry != CHECK_FILENAME) {
+//            const QString& dest = dir + '/' + entry;
+//            if (QFileInfo(dest).isDir())
+//                return QDir(dest).removeRecursively();
+//            else
+//                return QFile::remove(dest);
+//        }
+//    }
+    return true;
 }
 
 bool DirLocker::unlock(const QString& /*dir*/, const QByteArray& /*key*/)

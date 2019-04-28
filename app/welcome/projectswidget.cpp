@@ -604,7 +604,7 @@ void ProjectsWidget::onExportButtonClick()
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
 
     if (dialog.exec()) {
-        if (!rm(dialog.selectedFiles().at(0) + '/' + pname + ".zip"))
+        if (!QFile::remove(dialog.selectedFiles().at(0) + '/' + pname + ".zip"))
             return;
 
         if (!ProjectManager::exportProject(uid, dialog.selectedFiles().at(0) +
@@ -612,7 +612,9 @@ void ProjectsWidget::onExportButtonClick()
             return;
         }
 
-        QMessageBox::information(this, tr("Finished"), tr("Project export has successfully finished."));
+        QMessageBox::information(this,
+                                 tr("Finished"),
+                                 tr("Project export has successfully finished."));
     }
 }
 

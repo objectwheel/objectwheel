@@ -6,6 +6,7 @@
 #include <projectmanager.h>
 #include <control.h>
 #include <utilityfunctions.h>
+#include <filesystemutils.h>
 
 #include <QTimer>
 #include <QApplication>
@@ -232,7 +233,7 @@ void QmlCodeEditorWidget::onNewExternalFile()
     if (fullPath.isEmpty())
         return;
 
-    if (!mkfile(fullPath))
+    if (!FileSystemUtils::makeFile(fullPath))
         return;
 
     openExternal(fullPath);
@@ -625,12 +626,20 @@ QmlCodeEditorWidget::ExternalDocument*QmlCodeEditorWidget::getExternal(const QSt
 
 QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QString& relativePath)
 {
+    const QString& filePath = globalDir() + '/' + relativePath;
+
+    QFile file(filePath);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("QmlCodeEditorWidget: Cannot open global file");
+        return nullptr;
+    }
+
     GlobalDocument* document = new GlobalDocument;
     document->scope = QmlCodeEditorToolBar::Global;
     document->relativePath = relativePath;
     document->document = new QmlCodeDocument(m_codeEditor);
-    document->document->setFilePath(globalDir() + '/' + relativePath);
-    document->document->setPlainText(rdfile(globalDir() + '/' + relativePath));
+    document->document->setFilePath(filePath);
+    document->document->setPlainText(file.readAll());
     document->document->setModified(false);
     document->textCursor = QTextCursor(document->document);
 

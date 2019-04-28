@@ -4,6 +4,7 @@
 #include <toolboxtree.h>
 #include <zipasync.h>
 #include <hashfactory.h>
+#include <filesystemutils.h>
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -59,7 +60,7 @@ QStringList ToolManager::categories()
     if (!currentProjectHasToolsInstalled())
         return categories;
 
-    for (auto dir : lsdir(toolsDir())) {
+    for (auto dir : QDir(toolsDir()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         auto toolPath = toolsDir() + '/' + dir;
         auto category = SaveUtils::category(toolPath);
         if (!categories.contains(category))
@@ -75,7 +76,7 @@ void ToolManager::fillTree(ToolboxTree* tree)
 
     tree->clear();
     tree->clearUrls();
-    for (auto toolDir : lsdir(toolsDir()))
+    for (auto toolDir : QDir(toolsDir()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
         addToTree(toolsDir() + '/' + toolDir, tree);
 }
 
@@ -86,7 +87,7 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
         return false;
 
     QList<QUrl> urls;
-    auto dir = toolPath + '/' + DIR_THIS + '/';
+    auto dir = SaveUtils::toThisDir(toolPath) + '/';
     auto category = SaveUtils::category(toolPath);
     auto name = SaveUtils::name(toolPath);
 
@@ -141,10 +142,10 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     if (isNewTool) {
         newToolPath = toolsDir() + '/' + HashFactory::generate();
 
-        if (!mkdir(newToolPath))
+        if (!QDir(newToolPath).mkpath("."))
             return false;
 
-        if (!cp(toolPath, newToolPath, true, qrc))
+        if (!FileSystemUtils::copy(toolPath, newToolPath, true, qrc))
             return false;
 
         SaveUtils::regenerateUids(newToolPath);
@@ -153,7 +154,7 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     }
 
     QList<QUrl> urls;
-    auto dir = newToolPath + '/' + DIR_THIS + '/';
+    auto dir = SaveUtils::toThisDir(newToolPath) + '/';
     auto category = SaveUtils::category(newToolPath);
     auto name = SaveUtils::name(newToolPath);
 
@@ -204,7 +205,7 @@ void ToolManager::removeTool(const QString& toolPath)
                     delete tli->takeChild(j);
                     if (tli->childCount() <= 0)
                         delete tree->takeTopLevelItem(i);
-                    rm(toolPath);
+                    QDir(toolPath).removeRecursively();
                     emit tree->itemSelectionChanged();
                 }
             }
@@ -229,14 +230,14 @@ void ToolManager::exposeTools()
     }
 
     if (currentProjectHasToolsInstalled()) {
-        for (const QString& toolDirName : lsdir(toolsDir()))
+        for (const QString& toolDirName : QDir(toolsDir()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
             addTool(toolsDir() + '/' + toolDirName, false);
     } else {
-        for (const QString& toolName : lsfile(TOOLS_SOURCE_DIRECTORY)) {
+        for (const QString& toolName : QDir(TOOLS_SOURCE_DIRECTORY).entryList(QDir::Files)) {
             const QString& toolPath = QString(TOOLS_SOURCE_DIRECTORY) + '/' + toolName;
             const QString& newToolPath = toolsDir() + '/' + HashFactory::generate();
 
-            if (!mkdir(newToolPath)) {
+            if (!QDir(newToolPath).mkpath(".")) {
                 qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x01");
                 break;
             }
@@ -273,7 +274,7 @@ void ToolManager::resetTools()
         emit tree->itemSelectionChanged();
     }
 
-    rm(toolsDir());
+    QDir(toolsDir()).removeRecursively();
     exposeTools();
 }
 

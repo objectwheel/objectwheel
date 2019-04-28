@@ -109,9 +109,9 @@ void DownloadWidget::download(OTargets::Targets /*target*/)
 //    if (!tdir.isValid() || !tdir2.isValid())
 //        qFatal("Error");
 
-//    if (!cp(pdir + '/' + DIR_DESIGNS, tdir.path()) ||
-//        !cp(pdir + '/' + DIR_BUILD, tdir.path()) ||
-//        !cp(pdir + '/' + FILE_PROJECT, tdir.path()))
+//    if (!FileSystemUtils::copy(pdir + '/' + DIR_DESIGNS, tdir.path()) ||
+//        !FileSystemUtils::copy(pdir + '/' + DIR_BUILD, tdir.path()) ||
+//        !FileSystemUtils::copy(pdir + '/' + FILE_PROJECT, tdir.path()))
 //        qFatal("Error");
 
 //    ZipAsync::zipSync(tdir.path(), tdir2.path() + '/' + "project.zip");

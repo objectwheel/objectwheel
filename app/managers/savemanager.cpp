@@ -6,6 +6,7 @@
 #include <zipasync.h>
 #include <control.h>
 #include <utilityfunctions.h>
+#include <filesystemutils.h>
 #include <QRegularExpression>
 
 // TODO: Change QString with QLatin1String whenever it is possible
@@ -133,23 +134,44 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
 {
     Q_ASSERT(SaveUtils::isControlValid(formRootPath));
 
-    const QString& id = ParserUtils::id(SaveUtils::toMainQmlFile(formRootPath));
+    const QString& mainQmlFilePath = SaveUtils::toMainQmlFile(formRootPath);
+    const QString& id = ParserUtils::id(mainQmlFilePath);
     Q_ASSERT(!id.isEmpty());
 
-    QByteArray content = rdfile(SaveUtils::toMainQmlFile(formRootPath));
+    QFile file(mainQmlFilePath);
+    if (!file.open(QFile::ReadWrite)) {
+        qWarning("SaveManager: Cannot open form main qml file");
+        return;
+    }
+
+    QByteArray content = file.readAll();
     Q_ASSERT(!content.isEmpty());
 
     QString FormJS(id + "JS");
     FormJS.replace(0, 1, FormJS[0].toUpper());
     content.replace("// GlobalConnectionHere",
                     QString::fromUtf8("Component.onCompleted: %1.%2_onCompleted()").arg(FormJS).arg(id).toUtf8());
-    wrfile(SaveUtils::toMainQmlFile(formRootPath), content);
+    file.resize(0);
+    file.write(content);
+    file.close();
 
     const QString& globalJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + id + ".js";
-    QString js = rdfile(":/resources/other/form.js");
+    file.setFileName(":/resources/other/form.js");
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("SaveManager: Cannot open :/resources/other/form.js");
+        return;
+    }
+    QString js = file.readAll();
+    file.close();
     js = js.arg(id);
     if (!QFileInfo::exists(globalJSPath)) {
-        wrfile(globalJSPath, js.toUtf8());
+        file.setFileName(globalJSPath);
+        if (!file.open(QFile::WriteOnly)) {
+            qWarning("SaveManager: Cannot open globalJSPath");
+            return;
+        }
+        file.write(js.toUtf8());
+        file.close();
     } else {
         qWarning("SaveManager::setupFormGlobalConnections: Global %s file is already exists.",
                  (id + ".js").toUtf8().constData());
@@ -171,12 +193,12 @@ QString SaveManager::addForm(const QString& formRootPath)
     const QString& targetDesignsDir = SaveUtils::toDesignsDir(ProjectManager::dir());
     const QString& newFormRootPath = targetDesignsDir + '/' + HashFactory::generate();
 
-    if (!mkdir(newFormRootPath)) {
+    if (!QDir(newFormRootPath).mkpath(".")) {
         qWarning("SaveManager::addForm: Failed. Cannot create the new form root path.");
         return {};
     }
 
-    if (!cp(formRootPath, newFormRootPath, true)) {
+    if (!FileSystemUtils::copy(formRootPath, newFormRootPath, true)) {
         qWarning("SaveManager::addForm: Failed. Cannot copy the control to its new root path.");
         return {};
     }
@@ -203,12 +225,12 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
     const QString& targetParentControlChildrenDir = SaveUtils::toChildrenDir(targetParentControlRootPath);
     const QString& newControlRootPath = targetParentControlChildrenDir + '/' + HashFactory::generate();
 
-    if (!mkdir(newControlRootPath)) {
+    if (!QDir(newControlRootPath).mkpath(".")) {
         qWarning("SaveManager::addControl: Failed. Cannot create the new control root path.");
         return {};
     }
 
-    if (!cp(controlRootPath, newControlRootPath, true)) {
+    if (!FileSystemUtils::copy(controlRootPath, newControlRootPath, true)) {
         qWarning("SaveManager::addControl: Failed. Cannot copy the control to its new root path.");
         return {};
     }
@@ -235,17 +257,17 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     const QString& targetControlChildrenDir = SaveUtils::toChildrenDir(parentControl->dir());
     const QString& newControlRootPath = targetControlChildrenDir + '/' + HashFactory::generate();
 
-    if (!mkdir(newControlRootPath)) {
+    if (!QDir(newControlRootPath).mkpath(".")) {
         qWarning("SaveManager::moveControl: Failed. Cannot create the new control root path.");
         return false;
     }
 
-    if (!cp(control->dir(), newControlRootPath, true)) {
+    if (!FileSystemUtils::copy(control->dir(), newControlRootPath, true)) {
         qWarning("SaveManager::moveControl: Failed. Cannot copy the control to its new root path.");
         return false;
     }
 
-    if (!rm(control->dir())) {
+    if (!QDir(control->dir()).removeRecursively()) {
         qWarning("SaveManager::removeControl: Removal failed.");
         return false;
     }
@@ -273,7 +295,7 @@ void SaveManager::removeControl(const QString& rootPath)
         return;
     }
 
-    if (!rm(rootPath)) {
+    if (!QDir(rootPath).removeRecursively()) {
         qWarning("SaveManager::removeControl: Removal failed.");
         return;
     }
@@ -286,7 +308,7 @@ void SaveManager::removeForm(const QString& formRootPath)
         return;
     }
 
-    if (!rm(formRootPath)) {
+    if (!QDir(formRootPath).removeRecursively()) {
         qWarning("SaveManager::removeForm: Removal failed.");
         return;
     }

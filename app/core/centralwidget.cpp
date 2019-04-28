@@ -167,9 +167,12 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         if (!QFileInfo::exists(qmldirPath))
             qFatal("CentralWidget: qmldir file is gone.");
 
-        QByteArray qmldirFile = rdfile(qmldirPath);
-        qmldirFile.append(qmldirLine);
-        wrfile(qmldirPath, qmldirFile);
+        QFile file(qmldirPath);
+        if (!file.open(QFile::WriteOnly | QFile::Append)) {
+            qWarning("CentralWidget: Cannot open qmldir file");
+            return;
+        }
+        file.write(qmldirLine.toUtf8());
     });
 
     //   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,

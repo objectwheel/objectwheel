@@ -27,7 +27,6 @@ public:
     static QString dir(const QString& = instance()->uid());
     static QString name(const QString& = instance()->uid());
     static QString description(const QString& = instance()->uid());
-    static QString owner(const QString& = instance()->uid());
     static QString crDate(const QString& = instance()->uid());
     static QString mfDate(const QString& = instance()->uid());
     static QString size(const QString& = instance()->uid());

@@ -23,6 +23,7 @@
 #include <transparentstyle.h>
 #include <utilsicons.h>
 #include <paintutils.h>
+#include <filesystemutils.h>
 
 #include <QComboBox>
 #include <QHeaderView>
@@ -522,7 +523,7 @@ void FileExplorer::onNewFileButtonClick()
         baseFileName = UtilityFunctions::increasedNumberedText(baseFileName, true, true);
 
     QModelIndex index;
-    const bool suceed = mkfile(rootPath + '/' + baseFileName + ".txt");
+    const bool suceed = FileSystemUtils::makeFile(rootPath + '/' + baseFileName + ".txt");
 
     if (suceed)
         index = mf(m_fileSystemModel->index(rootPath + '/' + baseFileName + ".txt"));

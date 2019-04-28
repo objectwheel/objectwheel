@@ -7,11 +7,13 @@
 #include <utilityfunctions.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
+#include <filesystemutils.h>
 
 #include <QStandardPaths>
 #include <QPainter>
 #include <QStyledItemDelegate>
 #include <QHeaderView>
+#include <QDir>
 
 namespace {
 bool isProjectStarted = false;
@@ -215,14 +217,14 @@ void FormsPane::onAddButtonClick()
     QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
     tempPath = tempPath + '/' + APP_NAME;
 
-    rm(tempPath);
+    QDir(tempPath).removeRecursively();
 
-    if (!mkdir(tempPath) || !cp(":/resources/qmls/form", tempPath, true, true))
+    if (!QDir(tempPath).mkpath(".") || !FileSystemUtils::copy(":/resources/qmls/form", tempPath, true, true))
         return;
 
     ControlCreationManager::createForm(tempPath);
 
-    rm(tempPath);
+    QDir(tempPath).removeRecursively();
 
     refresh(); // FIXME: This function has severe performance issues.
 }

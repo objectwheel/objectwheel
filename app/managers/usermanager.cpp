@@ -2,7 +2,9 @@
 #include <dirlocker.h>
 #include <aes.h>
 #include <applicationcore.h>
+#include <filesystemutils.h>
 
+#include <QDir>
 #include <QCryptographicHash>
 #include <QByteArray>
 #include <QJsonDocument>
@@ -60,7 +62,7 @@ bool UserManager::newUser(const QString& user)
 //	return mkdir(generateUserDirectory(user));
     //FIXME:
     if (exists(user)) return false; //Bad code
-    return mkfile(generateUserDirectory(user) + '/' + "bad.dat");
+    return FileSystemUtils::makeFile(generateUserDirectory(user) + '/' + "bad.dat");
 }
 
 QString UserManager::dir(const QString& user)
@@ -99,8 +101,8 @@ void UserManager::clearAutoLogin()
     QByteArray shredder;
     for (int i = 1048576; i--;) { shredder.append(QRandomGenerator::global()->generate() % 250); }
     wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME, shredder);
-    rm(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-    mkfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
+    QFile::remove(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
+    FileSystemUtils::makeFile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
 }
 
 bool UserManager::hasAutoLogin()
@@ -139,30 +141,34 @@ bool UserManager::start(const QString& user, const QString& password)
     s_key = keyHash;
     s_token = generateToken(user, password);
 
-    if (DirLocker::canUnlock(dir(user), keyHash)) {
-        /* Clear all previous trash project folders if locked versions already exists */
-        auto dirlockersFiles = DirLocker::lockFiles();
-        for (auto entry : ls(dir(user))) {
-            /* Check if necessary files */
-            bool breakit = false;
-            for (auto dlentry : dirlockersFiles) {
-                if (entry == dlentry) {
-                    breakit = true;
-                }
-            }
+//    if (DirLocker::canUnlock(dir(user), keyHash)) {
+//        /* Clear all previous trash project folders if locked versions already exists */
+//        auto dirlockersFiles = DirLocker::lockFiles();
+//        for (const QString& entry : QDir(dir(user)).entryList(QDir::AllEntries | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot)) {
+//            /* Check if necessary files */
+//            bool breakit = false;
+//            for (auto dlentry : dirlockersFiles) {
+//                if (entry == dlentry) {
+//                    breakit = true;
+//                }
+//            }
 
-            if (breakit) continue;
+//            if (breakit) continue;
 
-            rm(dir(user) + '/' + entry);
-        }
+//            const QString& dest = dir(user) + '/' + entry;
+//            if (QFileInfo(dest).isDir())
+//                return QDir(dest).removeRecursively();
+//            else
+//                return QFile::remove(dest);
+//        }
 
-        if (!DirLocker::unlock(dir(user), keyHash)) {
-            s_user = "";
-            s_key = "";
-            s_token = "";
-			return false;
-		}
-	}
+//        if (!DirLocker::unlock(dir(user), keyHash)) {
+//            s_user = "";
+//            s_key = "";
+//            s_token = "";
+//			return false;
+//		}
+//	}
 
     emit instance()->started();
 
@@ -176,10 +182,10 @@ void UserManager::stop()
 
     emit instance()->aboutToStop();
 
-    if (exists(s_user) && !DirLocker::locked(dir())) {
-        if (!DirLocker::lock(dir(), s_key))
-            qFatal("ProjectManager : Error occurred");
-    }
+//    if (exists(s_user) && !DirLocker::locked(dir())) {
+//        if (!DirLocker::lock(dir(), s_key))
+//            qFatal("ProjectManager : Error occurred");
+//    }
 
     s_user = "";
     s_key = "";

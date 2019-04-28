@@ -9,8 +9,8 @@
 
 // TODO: Always use case insensitive comparison when it is possible
 
-#define SIGN_OWCTRL      "T3djdHJsX3YyLjA"
-#define SIGN_OWPRJT      "T3dwcmpfdjIuMA"
+#define SIGN_OWCTRL      "b3djdHJs"
+#define SIGN_OWPRJT      "b3dwcmp0"
 
 #define DIR_THIS         "t"
 #define DIR_CHILDREN     "c"
@@ -237,6 +237,40 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
     QDataStream out(&file);
     out << map;
 }
+
+#if defined(OBJECTWHEEL_IDE)
+void makeControlMetaFile(const QString& controlDir)
+{
+    if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
+        QMap<ControlProperties, QVariant> map;
+        map.insert(ControlPropertiesVersion, QString(APP_VER));
+        map.insert(ControlPropertiesSignature, QString(SIGN_OWCTRL));
+        QFile file(toControlMetaFile(controlDir));
+        if (!file.open(QFile::WriteOnly)) {
+            qWarning("SaveUtils: Cannot open control meta file");
+            return;
+        }
+        QDataStream out(&file);
+        out << map;
+    }
+}
+
+void makeProjectMetaFile(const QString& projectDir)
+{
+    if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
+        QMap<ProjectProperties, QVariant> map;
+        map.insert(ProjectPropertiesVersion, QString(APP_VER));
+        map.insert(ProjectPropertiesSignature, QString(SIGN_OWPRJT));
+        QFile file(toProjectMetaFile(projectDir));
+        if (!file.open(QFile::WriteOnly)) {
+            qWarning("SaveUtils: Cannot open project meta file");
+            return;
+        }
+        QDataStream out(&file);
+        out << map;
+    }
+}
+#endif
 
 void regenerateUids(const QString& topPath)
 {

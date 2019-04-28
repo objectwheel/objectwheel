@@ -9,6 +9,7 @@
 #include <documentmanager.h>
 #include <zipasync.h>
 #include <utilityfunctions.h>
+#include <filesystemutils.h>
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -64,24 +65,18 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
         return false;
     }
 
-    const auto& pdir = udir + '/' + HashFactory::generate();
-    const auto& uid = HashFactory::generate();
+    const QString& pdir = udir + '/' + HashFactory::generate();
+    const QString& uid = HashFactory::generate();
 
-    QJsonObject jobj;
-    jobj.insert(PTAG_NAME, name);
-    jobj.insert(PTAG_DESCRIPTION, description);
-    jobj.insert(PTAG_CRDATE, crDate);
-    jobj.insert(PTAG_MFDATE, crDate);
-    jobj.insert(PTAG_OWPRJT_SIGN, SIGN_OWPRJT);
-    jobj.insert(PTAG_UID, uid);
-
-    const auto& data = QJsonDocument(jobj).toBinaryData();
-
-    if (!mkdir(pdir))
+    if (!QDir(pdir).mkpath("."))
         return false;
 
-    if (wrfile(pdir + '/' + FILE_PROJECT, data) <= 0)
-        return false;
+    SaveUtils::makeProjectMetaFile(pdir);
+    SaveUtils::setProperty(pdir, SaveUtils::ProjectName, name);
+    SaveUtils::setProperty(pdir, SaveUtils::ProjectDescription, description);
+    SaveUtils::setProperty(pdir, SaveUtils::ProjectCreationDate, crDate);
+    SaveUtils::setProperty(pdir, SaveUtils::ProjectModificationDate, crDate);
+    SaveUtils::setProperty(pdir, SaveUtils::ProjectUid, uid);
 
     if (!SaveManager::initProject(pdir, templateNumber))
         return false;
@@ -122,7 +117,7 @@ void ProjectManager::changeName(const QString& uid, const QString& name)
     if (projectDir.isEmpty())
         return;
 
-    SaveUtils::setProjectProperty(projectDir, PTAG_NAME, name);
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectName, name);
 }
 
 void ProjectManager::changeDescription(const QString& uid, const QString& desc)
@@ -132,7 +127,7 @@ void ProjectManager::changeDescription(const QString& uid, const QString& desc)
     if (projectDir.isEmpty())
         return;
 
-    SaveUtils::setProjectProperty(projectDir, PTAG_DESCRIPTION, desc);
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectDescription, desc);
 }
 
 bool ProjectManager::exportProject(const QString& uid, const QString& filePath)
@@ -153,13 +148,13 @@ bool ProjectManager::importProject(const QString &filePath, QString* uid)
     if (filePath.isEmpty() || udir.isEmpty())
         return false;
 
-    if (!mkdir(pdir) || !ZipAsync::unzipSync(filePath, pdir))
+    if (!QDir(pdir).mkpath(".") || !ZipAsync::unzipSync(filePath, pdir))
         return false;
 
     *uid = HashFactory::generate();
-    SaveUtils::setProjectProperty(pdir, PTAG_UID, *uid);
 
-    SaveUtils::regenerateUids(pdir + '/' + DIR_DESIGNS);
+    SaveUtils::setProperty(pdir, SaveUtils::ProjectUid, *uid);
+    SaveUtils::regenerateUids(SaveUtils::toDesignsDir(pdir));
 
     return true;
 }
@@ -172,7 +167,7 @@ QString ProjectManager::dir(const QString& uid)
     if (userDirectory.isEmpty() || uid.isEmpty())
         return found;
 
-    for (const QString& projectName : lsdir(userDirectory)) {
+    for (const QString& projectName : QDir(userDirectory).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& projectDir = userDirectory + '/' + projectName;
 
         if (!SaveUtils::isProjectValid(projectDir))
@@ -199,19 +194,14 @@ QString ProjectManager::description(const QString& uid)
     return SaveUtils::projectDescription(dir(uid));
 }
 
-QString ProjectManager::owner(const QString& uid)
-{
-    return SaveUtils::projectOwner(dir(uid));
-}
-
 QString ProjectManager::crDate(const QString& uid)
 {
-    return SaveUtils::projectCrDate(dir(uid));
+    return SaveUtils::projectCreationDate(dir(uid));
 }
 
 QString ProjectManager::mfDate(const QString& uid)
 {
-    return SaveUtils::projectMfDate(dir(uid));
+    return SaveUtils::projectModificationDate(dir(uid));
 }
 
 QString ProjectManager::size(const QString& uid)
@@ -232,7 +222,7 @@ QStringList ProjectManager::projects()
     if (udir.isEmpty())
         return uids;
 
-    for (const auto& dir : lsdir(udir)) {
+    for (const auto& dir : QDir(udir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const auto& p = udir + '/' + dir;
         if (SaveUtils::isProjectValid(p))
             uids << SaveUtils::projectUid(p);
@@ -247,8 +237,9 @@ void ProjectManager::updateSize(const QString& uid)
     if (projectDir.isEmpty())
         return;
 
-    SaveUtils::setProjectProperty(projectDir, PTAG_SIZE,
-        UtilityFunctions::toPrettyBytesString(dsize(projectDir), true));
+
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectSize,
+        UtilityFunctions::toPrettyBytesString(FileSystemUtils::directorySize(projectDir), true));
 }
 
 void ProjectManager::updateLastModification(const QString& uid)
@@ -257,7 +248,7 @@ void ProjectManager::updateLastModification(const QString& uid)
     if (projectDir.isEmpty())
         return;
 
-    SaveUtils::setProjectProperty(projectDir, PTAG_MFDATE, ProjectManager::currentDbTime());
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectModificationDate, ProjectManager::currentDbTime());
 }
 
 bool ProjectManager::start(const QString& uid)

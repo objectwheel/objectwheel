@@ -28,15 +28,15 @@ bool copyDir(QString fromDir, QString toDir, bool fixPermissions)
 
 } // Internal
 
-QStringList searchFiles(const QString& filename, const QString& dir)
+QStringList searchFiles(const QString& filename, const QString& dirPath)
 {
     QStringList found;
-    for (const QString& fileName : QDir(dir).entryList(QDir::Files)) {
+    for (const QString& fileName : QDir(dirPath).entryList(QDir::Files)) {
         if (fileName == filename)
-            found << dir + '/' + fileName;
+            found << dirPath + '/' + fileName;
     }
-    for (const QString& dirName : QDir(dir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
-        found << searchFiles(filename, dir + '/' + dirName);
+    for (const QString& dirName : QDir(dirPath).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
+        found << searchFiles(filename, dirPath + '/' + dirName);
     return found;
 }
 
@@ -65,6 +65,36 @@ bool copy(const QString& fromPath, const QString& toDir, bool content, bool fixP
             QFile::setPermissions(dest, QFile::WriteUser | QFile::ReadUser);
         return true;
     }
+}
+
+bool makeFile(const QString& filePath)
+{
+    QFileInfo info(filePath);
+    if (info.fileName().isEmpty())
+        return false;
+    if (info.exists(filePath))
+        return true;
+    if (!info.dir().mkpath("."))
+        return false;
+    QFile file(filePath);
+    if (!file.open(QFile::WriteOnly))
+        return false;
+    return true;
+}
+
+qint64 directorySize(const QString& dirPath)
+{
+    qint64 size = 0;
+    for (const QString& fileName : QDir(dirPath).entryList(QDir::Files | QDir::System | QDir::Hidden
+                                                           | QDir::NoSymLinks)) {
+        size += QFileInfo(dirPath + '/' + fileName).size();
+    }
+    for (const QString& dirName : QDir(dirPath).entryList(QDir::AllDirs | QDir::System
+                                                          | QDir::Hidden | QDir::NoSymLinks
+                                                          | QDir::NoDotAndDotDot)) {
+        size += directorySize(dirPath + '/' + dirName);
+    }
+    return size;
 }
 
 } // FileSystemUtils

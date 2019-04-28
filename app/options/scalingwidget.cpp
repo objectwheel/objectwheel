@@ -40,5 +40,5 @@ void ScalingWidget::saveTheme()
     else
         scaling = "noScaling";
 
-    SaveUtils::setProjectProperty(ProjectManager::dir(), PTAG_SCALING, scaling);
+    SaveUtils::setProperty(ProjectManager::dir(), PTAG_SCALING, scaling);
 }

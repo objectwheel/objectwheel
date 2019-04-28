@@ -573,7 +573,7 @@ void ThemeChooserWidget::save()
     for (const auto& key : newObject.keys())
         object[key] = newObject[key];
 
-    SaveUtils::setProjectProperty(ProjectManager::dir(), PTAG_THEME, object);
+    SaveUtils::setProperty(ProjectManager::dir(), PTAG_THEME, object);
 
     emit saved();
 }

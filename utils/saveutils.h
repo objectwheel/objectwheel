@@ -73,6 +73,11 @@ QVariant property(const QString& projectDir, ProjectProperties property);
 void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
 void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
 
+#if defined(OBJECTWHEEL_IDE)
+void makeControlMetaFile(const QString& controlDir);
+void makeProjectMetaFile(const QString& projectDir);
+#endif
+
 void regenerateUids(const QString& topPath);
 QStringList formPaths(const QString& projectDir);
 QStringList childrenPaths(const QString& controlDir);
