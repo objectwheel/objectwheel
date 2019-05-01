@@ -394,7 +394,6 @@ QString property(const QString& url, const QString& property)
     Dialect dialect(Dialect::Qml);
     QSharedPointer<Document> document = Document::create(url, dialect);
     document->setSource(source);
-    file.close();
 
     if (!document->parse()) {
         qWarning() << "Property couldn't read. Unable to parse qml file.";

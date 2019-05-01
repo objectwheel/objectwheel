@@ -313,22 +313,22 @@ QStringList childrenPaths(const QString& controlDir)
 
 } // SaveUtils
 
-QDataStream& operator>>(QDataStream& in, SaveUtils::ProjectProperties& e)
+QDataStream& operator>> (QDataStream& in, SaveUtils::ProjectProperties& e)
 {
     return in >> (int&) e;
 }
 
-QDataStream& operator<<(QDataStream& out, SaveUtils::ProjectProperties e)
+QDataStream& operator<< (QDataStream& out, SaveUtils::ProjectProperties e)
 {
     return out << (int) e;
 }
 
-QDataStream& operator>>(QDataStream& in, SaveUtils::ControlProperties& e)
+QDataStream& operator>> (QDataStream& in, SaveUtils::ControlProperties& e)
 {
     return in >> (int&) e;
 }
 
-QDataStream& operator<<(QDataStream& out, SaveUtils::ControlProperties e)
+QDataStream& operator<< (QDataStream& out, SaveUtils::ControlProperties e)
 {
     return out << (int) e;
 }

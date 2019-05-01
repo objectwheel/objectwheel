@@ -34,7 +34,7 @@ struct PreviewResult {
     QList<PropertyNode> properties;
 };
 
-inline QDataStream& operator>>(QDataStream& in, QQmlError& error)
+inline QDataStream& operator>> (QDataStream& in, QQmlError& error)
 {
     QUrl u;
     QString d;
@@ -54,7 +54,7 @@ inline QDataStream& operator>>(QDataStream& in, QQmlError& error)
     return in;
 }
 
-inline QDataStream& operator<<(QDataStream& out, const QQmlError& error)
+inline QDataStream& operator<< (QDataStream& out, const QQmlError& error)
 {
     out << error.column();
     out << error.description();
@@ -64,7 +64,7 @@ inline QDataStream& operator<<(QDataStream& out, const QQmlError& error)
     return out;
 }
 
-inline QDataStream& operator>>(QDataStream& in, PropertyNode& node)
+inline QDataStream& operator>> (QDataStream& in, PropertyNode& node)
 {
     in >> node.cleanClassName;
     in >> node.properties;
@@ -72,7 +72,7 @@ inline QDataStream& operator>>(QDataStream& in, PropertyNode& node)
     return in;
 }
 
-inline QDataStream& operator<<(QDataStream& out, const PropertyNode& node)
+inline QDataStream& operator<< (QDataStream& out, const PropertyNode& node)
 {
     out << node.cleanClassName;
     out << node.properties;
@@ -80,7 +80,7 @@ inline QDataStream& operator<<(QDataStream& out, const PropertyNode& node)
     return out;
 }
 
-inline QDataStream& operator>>(QDataStream& in, PreviewResult& result)
+inline QDataStream& operator>> (QDataStream& in, PreviewResult& result)
 {
     in >> result.gui;
     in >> result.id;
@@ -95,7 +95,7 @@ inline QDataStream& operator>>(QDataStream& in, PreviewResult& result)
     return in;
 }
 
-inline QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
+inline QDataStream& operator<< (QDataStream& out, const PreviewResult& result)
 {
     out << result.gui;
     out << result.id;
@@ -110,7 +110,7 @@ inline QDataStream& operator<<(QDataStream& out, const PreviewResult& result)
     return out;
 }
 
-inline QDataStream& operator>>(QDataStream& in, Enum& e)
+inline QDataStream& operator>> (QDataStream& in, Enum& e)
 {
     in >> e.name;
     in >> e.scope;
@@ -119,7 +119,7 @@ inline QDataStream& operator>>(QDataStream& in, Enum& e)
     return in;
 }
 
-inline QDataStream& operator<<(QDataStream& out, const Enum& e)
+inline QDataStream& operator<< (QDataStream& out, const Enum& e)
 {
     out << e.name;
     out << e.scope;

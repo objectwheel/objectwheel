@@ -339,3 +339,13 @@ void RunManager::scheduleUploadCancelation()
         s_uploadInfo.watcher.waitForFinished();
     }
 }
+
+QDataStream& operator>> (QDataStream& in, RunManager::DiscoveryCommands& e)
+{
+    return in >> (int&) e;
+}
+
+QDataStream& operator<< (QDataStream& out, RunManager::DiscoveryCommands e)
+{
+    return out << (int) e;
+}

@@ -20,12 +20,15 @@ enum PreviewerCommands {
     Refresh,
     Terminate
 };
-Q_DECLARE_METATYPE(PreviewerCommands)
 
-inline QDataStream& operator>>(QDataStream& in, PreviewerCommands& e)
-{ return in >> (int&) e; }
+inline QDataStream& operator>> (QDataStream& in, PreviewerCommands& e)
+{
+    return in >> (int&) e;
+}
 
-inline QDataStream& operator<<(QDataStream& out, const PreviewerCommands& e)
-{ return out << int(e); }
+inline QDataStream& operator<< (QDataStream& out, PreviewerCommands e)
+{
+    return out << (int) e;
+}
 
 #endif // PREVIEWERCOMMANDS_H

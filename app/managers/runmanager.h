@@ -138,12 +138,7 @@ private:
     static QString s_recentProjectDirectory;
 };
 
-Q_DECLARE_METATYPE(RunManager::DiscoveryCommands)
-
-inline QDataStream& operator>>(QDataStream& in, RunManager::DiscoveryCommands& e)
-{ return in >> (int&) e; }
-
-inline QDataStream& operator<<(QDataStream& out, const RunManager::DiscoveryCommands& e)
-{ return out << int(e); }
+QDataStream& operator>> (QDataStream& in, RunManager::DiscoveryCommands& e);
+QDataStream& operator<< (QDataStream& out, RunManager::DiscoveryCommands e);
 
 #endif // RUNMANAGER_H

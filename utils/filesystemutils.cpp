@@ -28,18 +28,6 @@ bool copyDir(QString fromDir, QString toDir, bool fixPermissions)
 
 } // Internal
 
-QStringList searchFiles(const QString& filename, const QString& dirPath)
-{
-    QStringList found;
-    for (const QString& fileName : QDir(dirPath).entryList(QDir::Files)) {
-        if (fileName == filename)
-            found << dirPath + '/' + fileName;
-    }
-    for (const QString& dirName : QDir(dirPath).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
-        found << searchFiles(filename, dirPath + '/' + dirName);
-    return found;
-}
-
 bool copy(const QString& fromPath, const QString& toDir, bool content, bool fixPermissions)
 {
     if (fromPath == toDir)
@@ -72,7 +60,7 @@ bool makeFile(const QString& filePath)
     QFileInfo info(filePath);
     if (info.fileName().isEmpty())
         return false;
-    if (info.exists(filePath))
+    if (info.exists())
         return true;
     if (!info.dir().mkpath("."))
         return false;
@@ -95,6 +83,18 @@ qint64 directorySize(const QString& dirPath)
         size += directorySize(dirPath + '/' + dirName);
     }
     return size;
+}
+
+QStringList searchFiles(const QString& filename, const QString& dirPath)
+{
+    QStringList found;
+    for (const QString& fileName : QDir(dirPath).entryList(QDir::Files)) {
+        if (fileName == filename)
+            found << dirPath + '/' + fileName;
+    }
+    for (const QString& dirName : QDir(dirPath).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
+        found << searchFiles(filename, dirPath + '/' + dirName);
+    return found;
 }
 
 } // FileSystemUtils

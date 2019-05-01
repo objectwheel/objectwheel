@@ -74,12 +74,7 @@ private:
     ~ServerManager() override;
 };
 
-Q_DECLARE_METATYPE(ServerManager::ServerCommands)
-
-inline QDataStream& operator>>(QDataStream& in, ServerManager::ServerCommands& e)
-{ return in >> (int&) e; }
-
-inline QDataStream& operator<<(QDataStream& out, const ServerManager::ServerCommands& e)
-{ return out << int(e); }
+QDataStream& operator>> (QDataStream& in, ServerManager::ServerCommands& e);
+QDataStream& operator<< (QDataStream& out, ServerManager::ServerCommands e);
 
 #endif // SERVERMANAGER_H
