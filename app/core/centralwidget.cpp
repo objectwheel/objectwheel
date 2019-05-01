@@ -141,7 +141,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             this, [=] (Control* control, const QString& property, const QString& value) {
         QmlCodeEditorWidget::InternalDocument* document = qmlCodeEditorWidget()->getInternal(control, SaveUtils::mainQmlFileName());
         if (document)
-            ParserUtils::setProperty(document->document, control->url(), property, value);
+            ParserUtils::setProperty(document->document, SaveUtils::toMainQmlFile(control->dir()), property, value);
     });
     connect(SaveManager::instance(), &SaveManager::formGlobalConnectionsDone,
             this, [=] (const QString& FormJS, const QString& id) {

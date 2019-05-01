@@ -14,7 +14,7 @@ enum ProjectProperties {
     ProjectSize,
     ProjectUid,
     ProjectTheme,
-    ProjectScaling,
+    ProjectHdpiScaling,
     ProjectPropertiesVersion,
     ProjectPropertiesSignature
 };
@@ -55,13 +55,13 @@ QString name(const QString& controlDir);
 QString category(const QString& controlDir);
 QByteArray icon(const QString& controlDir);
 
+bool projectHdpiScaling(const QString& projectDir);
+qint64 projectSize(const QString& projectDir);
 QString projectUid(const QString& projectDir);
 QString projectName(const QString& projectDir);
-QString projectSize(const QString& projectDir);
-QString projectCreationDate(const QString& projectDir);
-QString projectModificationDate(const QString& projectDir);
-QString projectScaling(const QString& projectDir);
 QString projectDescription(const QString& projectDir);
+QDateTime projectCreationDate(const QString& projectDir);
+QDateTime projectModificationDate(const QString& projectDir);
 QJsonValue projectTheme(const QString& projectDir);
 
 QMap<ControlProperties, QVariant> controlMap(const QString& controlDir);

@@ -26,12 +26,10 @@ void ScalingWidget::discharge()
     if (ProjectManager::uid().isEmpty())
         return;
 
-    auto scaling = SaveUtils::projectScaling(ProjectManager::dir());
-
-    if (scaling == "noScaling")
-        m_noScalingButton->setChecked(true);
-    else
+    if (SaveUtils::projectHdpiScaling(ProjectManager::dir()))
         m_highDpiScalingButton->setChecked(true);
+    else
+        m_noScalingButton->setChecked(true);
 }
 
 void ScalingWidget::saveTheme()
@@ -43,5 +41,5 @@ void ScalingWidget::saveTheme()
     else
         scaling = "noScaling";
 
-    SaveUtils::setProperty(ProjectManager::dir(), SaveUtils::ProjectScaling, scaling);
+    SaveUtils::setProperty(ProjectManager::dir(), SaveUtils::ProjectHdpiScaling, scaling);
 }

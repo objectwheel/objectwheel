@@ -8,7 +8,6 @@
 #include <toolmanager.h>
 #include <documentmanager.h>
 #include <zipasync.h>
-#include <utilityfunctions.h>
 #include <filesystemutils.h>
 
 #include <QJsonDocument>
@@ -23,45 +22,15 @@ ProjectManager* ProjectManager::instance()
     return s_instance;
 }
 
-QString ProjectManager::currentDbTime()
-{
-    return QDateTime::currentDateTime().toString(Qt::ISODate);
-}
-
-QString ProjectManager::currentUiTime()
-{
-    return QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate);
-}
-
-QString ProjectManager::toDbTime(const QString& uiTime)
-{
-    return QDateTime::fromString(uiTime, Qt::SystemLocaleLongDate).toString(Qt::ISODate);
-}
-
-QString ProjectManager::toUiTime(const QString& dbTime)
-{
-    return QDateTime::fromString(dbTime, Qt::ISODate).toString(Qt::SystemLocaleLongDate);
-}
-
-QDateTime ProjectManager::fromDb(const QString& dbTime)
-{
-    return QDateTime::fromString(dbTime, Qt::ISODate);
-}
-
-QDateTime ProjectManager::fromUi(const QString& uiTime)
-{
-    return QDateTime::fromString(uiTime, Qt::SystemLocaleLongDate);
-}
-
 bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
-                                const QString& crDate)
+                                const QDateTime& crDate)
 {
     const auto& udir = UserManager::dir();
 
     if (udir.isEmpty()
             || name.isEmpty()
             || description.isEmpty()
-            || crDate.isEmpty()) {
+            || !crDate.isValid()) {
         return false;
     }
 
@@ -75,7 +44,6 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
     SaveUtils::setProperty(pdir, SaveUtils::ProjectName, name);
     SaveUtils::setProperty(pdir, SaveUtils::ProjectDescription, description);
     SaveUtils::setProperty(pdir, SaveUtils::ProjectCreationDate, crDate);
-    SaveUtils::setProperty(pdir, SaveUtils::ProjectModificationDate, crDate);
     SaveUtils::setProperty(pdir, SaveUtils::ProjectUid, uid);
 
     if (!SaveManager::initProject(pdir, templateNumber))
@@ -161,27 +129,26 @@ bool ProjectManager::importProject(const QString &filePath, QString* uid)
 
 QString ProjectManager::dir(const QString& uid)
 {
-    QString found;
-    const QString& userDirectory = UserManager::dir();
-
-    if (userDirectory.isEmpty() || uid.isEmpty())
-        return found;
-
-    for (const QString& projectName : QDir(userDirectory).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-        const QString& projectDir = userDirectory + '/' + projectName;
-
-        if (!SaveUtils::isProjectValid(projectDir))
-            continue;
-
-        QString projectUid = SaveUtils::projectUid(projectDir);
-
-        if (uid == projectUid) {
-            found = projectDir;
-            break;
-        }
+    if (uid.isEmpty()) {
+        qWarning("ProjectManager: Caution, empty uid.");
+        return QStringLiteral("");
     }
 
-    return found;
+    const QString& userDirectory = UserManager::dir();
+
+    if (userDirectory.isEmpty()) {
+        qWarning("ProjectManager: Caution, empty user dir.");
+        return QStringLiteral("");
+    }
+
+    for (const QString& projectDirName
+         : QDir(userDirectory).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& projectDir = userDirectory + '/' + projectDirName;
+        if (SaveUtils::isProjectValid(projectDir) && SaveUtils::projectUid(projectDir) == uid)
+            return projectDir;
+    }
+
+    return QStringLiteral("");
 }
 
 QString ProjectManager::name(const QString& uid)
@@ -194,17 +161,17 @@ QString ProjectManager::description(const QString& uid)
     return SaveUtils::projectDescription(dir(uid));
 }
 
-QString ProjectManager::crDate(const QString& uid)
+QDateTime ProjectManager::crDate(const QString& uid)
 {
     return SaveUtils::projectCreationDate(dir(uid));
 }
 
-QString ProjectManager::mfDate(const QString& uid)
+QDateTime ProjectManager::mfDate(const QString& uid)
 {
     return SaveUtils::projectModificationDate(dir(uid));
 }
 
-QString ProjectManager::size(const QString& uid)
+qint64 ProjectManager::size(const QString& uid)
 {
     return SaveUtils::projectSize(dir(uid));
 }
@@ -231,15 +198,14 @@ QStringList ProjectManager::projects()
     return uids;
 }
 
-void ProjectManager::updateSize(const QString& uid)
+void ProjectManager::updateSize(const QString& uid) // WARNING: Severe performance issues
 {
     const auto& projectDir = dir(uid);
     if (projectDir.isEmpty())
         return;
 
-
     SaveUtils::setProperty(projectDir, SaveUtils::ProjectSize,
-        UtilityFunctions::toPrettyBytesString(FileSystemUtils::directorySize(projectDir), true));
+                           FileSystemUtils::directorySize(projectDir));
 }
 
 void ProjectManager::updateLastModification(const QString& uid)
@@ -248,7 +214,7 @@ void ProjectManager::updateLastModification(const QString& uid)
     if (projectDir.isEmpty())
         return;
 
-    SaveUtils::setProperty(projectDir, SaveUtils::ProjectModificationDate, ProjectManager::currentDbTime());
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectModificationDate, 0);
 }
 
 bool ProjectManager::start(const QString& uid)

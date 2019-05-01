@@ -233,8 +233,8 @@ public:
             return reverseSort ? !result : result;
         }
         if (criteria == QObject::tr("Date")) {
-            const QDateTime& myDate = ProjectManager::fromUi(data(LastEdit).toString());
-            const QDateTime& othersDate = ProjectManager::fromUi(other.data(LastEdit).toString());
+            const QDateTime& myDate = QDateTime::fromString(data(LastEdit).toString(), Qt::SystemLocaleLongDate);
+            const QDateTime& othersDate = QDateTime::fromString(other.data(LastEdit).toString(), Qt::SystemLocaleLongDate);
             bool result = myDate > othersDate;
             return reverseSort ? !result : result;
         }
@@ -469,7 +469,7 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
         item->setIcon(QIcon(PATH_FILEICON));
         item->setData(Uid, uid);
         item->setData(Name, ProjectManager::name(uid));
-        item->setData(LastEdit, ProjectManager::toUiTime(ProjectManager::mfDate(uid)));
+        item->setData(LastEdit, ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
         item->setData(Active, uid == ProjectManager::uid());
         m_listWidget->addItem(item);
     }
@@ -500,7 +500,7 @@ void ProjectsWidget::onNewButtonClick()
     auto item = new ProjectListWidgetItem(this);
     item->setIcon(QIcon(PATH_FILEICON));
     item->setData(Name, projectName);
-    item->setData(LastEdit, ProjectManager::currentUiTime());
+    item->setData(LastEdit, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
     item->setData(Active, false);
     m_listWidget->addItem(item);
     m_listWidget->sortItems();
@@ -570,7 +570,7 @@ void ProjectsWidget::onLoadButtonClick()
         m_listWidget->item(i)->setData(Active, false);
 
     m_listWidget->currentItem()->setData(Active, true);
-    m_listWidget->currentItem()->setData(LastEdit, ProjectManager::currentUiTime());
+    m_listWidget->currentItem()->setData(LastEdit, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
 
     Delayer::delay([=] () -> bool {
         return m_progressBar->value() < m_progressBar->maximum();

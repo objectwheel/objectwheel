@@ -4,7 +4,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 
-Form::Form(const QString& url, Form* parent) : Control(url, parent)
+Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
     setFlag(ItemIsMovable, false);
 }

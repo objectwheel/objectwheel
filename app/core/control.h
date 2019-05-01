@@ -10,6 +10,7 @@ class DesignerScene;
 class Control : public QGraphicsWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(Control)
 
     friend class ControlCreationManager; // For constructor
     friend class ProjectExposingManager; // For constructor
@@ -33,7 +34,6 @@ public:
 
     QString id() const;
     QString uid() const;
-    QString url() const;
     QString dir() const;
     QMarginsF margins() const;
 
@@ -51,7 +51,7 @@ public:
 public:
     void setClip(bool clip);
     void setId(const QString& id);
-    void setUrl(const QString& url);
+    void setDir(const QString& dir);
     void setDragIn(bool dragIn);
     void setDragging(bool dragging);
     void setResizing(bool resizing);
@@ -84,7 +84,7 @@ protected:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR) override;
 
 protected:
-    explicit Control(const QString& url, Control* parent = nullptr);
+    explicit Control(const QString& dir, Control* parent = nullptr);
     ~Control() override;
 
 private slots:
@@ -103,7 +103,7 @@ private:
     QMarginsF m_margins;
     QRectF m_cachedGeometry;
 
-    QString m_url;
+    QString m_dir;
     QString m_uid;
     QString m_id;
     QImage m_image;

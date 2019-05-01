@@ -81,7 +81,7 @@ QPixmap scaled(const QPixmap& pixmap, const QSize& size);
 QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view);
 QPoint centerPos(const QSize& size);
 QString increasedNumberedText(const QString& text, bool addSpace, bool trim);
-QString toPrettyBytesString(qint64 bytes, bool withExt);
+QString toPrettyBytesString(qint64 bytes);
 bool comboContainsWord(QComboBox* comboBox, const QString& word);
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties);
 QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties);

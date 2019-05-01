@@ -12,14 +12,6 @@ class ProjectManager final : public QObject
 
 public:
     static ProjectManager* instance();
-
-    static QString currentDbTime();
-    static QString currentUiTime();
-    static QString toDbTime(const QString& uiTime);
-    static QString toUiTime(const QString& dbTime);
-    static QDateTime fromDb(const QString& dbTime);
-    static QDateTime fromUi(const QString& uiTime);
-
     static QStringList projects();
     static QStringList projectNames();
 
@@ -27,9 +19,9 @@ public:
     static QString dir(const QString& = instance()->uid());
     static QString name(const QString& = instance()->uid());
     static QString description(const QString& = instance()->uid());
-    static QString crDate(const QString& = instance()->uid());
-    static QString mfDate(const QString& = instance()->uid());
-    static QString size(const QString& = instance()->uid());
+    static QDateTime crDate(const QString& = instance()->uid());
+    static QDateTime mfDate(const QString& = instance()->uid());
+    static qint64 size(const QString& = instance()->uid());
 
     static void stop();
     static bool start(const QString& uid);
@@ -39,7 +31,8 @@ public:
     static void changeDescription(const QString& uid, const QString& desc);
     static bool importProject(const QString& filePath, QString* uid);
     static bool exportProject(const QString& uid, const QString& filePath);
-    static bool newProject(int templateNumber, const QString& name, const QString& description, const QString& crDate);
+    static bool newProject(int templateNumber, const QString& name, const QString& description,
+                           const QDateTime& crDate);
 
 signals:
     void started();

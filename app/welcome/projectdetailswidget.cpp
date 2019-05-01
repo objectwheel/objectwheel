@@ -3,6 +3,7 @@
 #include <buttonslice.h>
 #include <usermanager.h>
 #include <projectmanager.h>
+#include <utilityfunctions.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -10,6 +11,7 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QDir>
+#include <QDateTime>
 
 #define BUTTONS_WIDTH    (338)
 #define SIZE_ICON        (QSize(48, 48))
@@ -113,9 +115,9 @@ void ProjectDetailsWidget::onEditProject(const QString& uid)
     ProjectManager::updateSize(m_uid);
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(uid));
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(uid));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::toUiTime(ProjectManager::crDate(uid)));
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::toUiTime(ProjectManager::mfDate(uid)));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(ProjectManager::size(uid));
+    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::crDate(uid).toString(Qt::SystemLocaleLongDate));
+    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
+    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(UtilityFunctions::toPrettyBytesString(ProjectManager::size(uid)));
 }
 
 void ProjectDetailsWidget::onNewProject(const QString& projectName, int templateNumber)
@@ -125,8 +127,8 @@ void ProjectDetailsWidget::onNewProject(const QString& projectName, int template
     m_uid.clear();
     static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
     static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::currentUiTime());
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::currentUiTime());
+    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
+    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
     static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(tr("0 bytes"));
 }
 
@@ -146,7 +148,7 @@ void ProjectDetailsWidget::onSaveClick()
             m_templateNumber,
             projectnametext,
             descriptiontext,
-            ProjectManager::toDbTime(crdatetext)
+            QDateTime::fromString(crdatetext, Qt::SystemLocaleLongDate)
         )) qFatal("ProjectDetailsWidget::onSaveClick() : Fatal Error. 0x01");
     } else {
         ProjectManager::instance()->changeName(

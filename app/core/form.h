@@ -3,9 +3,10 @@
 
 #include <control.h>
 
-class Form : public Control
+class Form final : public Control
 {
     Q_OBJECT
+    Q_DISABLE_COPY(Form)
 
     friend class ControlCreationManager; // For constructor
     friend class ProjectExposingManager; // For constructor
@@ -19,7 +20,7 @@ private:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
 private:
-    explicit Form(const QString& url, Form* parent = nullptr);
+    explicit Form(const QString& dir, Form* parent = nullptr);
 };
 
 

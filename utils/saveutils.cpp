@@ -3,6 +3,7 @@
 #include <hashfactory.h>
 
 #include <QDataStream>
+#include <QDateTime>
 #include <QDir>
 #include <QJsonValue>
 
@@ -133,44 +134,44 @@ QByteArray icon(const QString& controlDir)
     return property(controlDir, ControlIcon).toByteArray();
 }
 
+bool projectHdpiScaling(const QString& projectDir)
+{
+    return property(projectDir, ProjectHdpiScaling).value<bool>();
+}
+
+qint64 projectSize(const QString& projectDir)
+{
+    return property(projectDir, ProjectSize).value<qint64>();
+}
+
 QString projectUid(const QString& projectDir)
 {
-    return property(projectDir, ProjectUid).toString();
+    return property(projectDir, ProjectUid).value<QString>();
 }
 
 QString projectName(const QString& projectDir)
 {
-    return property(projectDir, ProjectName).toString();
-}
-
-QString projectSize(const QString& projectDir)
-{
-    return property(projectDir, ProjectSize).toString();
-}
-
-QString projectCreationDate(const QString& projectDir)
-{
-    return property(projectDir, ProjectCreationDate).toString();
-}
-
-QString projectModificationDate(const QString& projectDir)
-{
-    return property(projectDir, ProjectModificationDate).toString();
-}
-
-QString projectScaling(const QString& projectDir)
-{
-    return property(projectDir, ProjectScaling).toString();
+    return property(projectDir, ProjectName).value<QString>();
 }
 
 QString projectDescription(const QString& projectDir)
 {
-    return property(projectDir, ProjectDescription).toString();
+    return property(projectDir, ProjectDescription).value<QString>();
+}
+
+QDateTime projectCreationDate(const QString& projectDir)
+{
+    return property(projectDir, ProjectCreationDate).value<QDateTime>();
+}
+
+QDateTime projectModificationDate(const QString& projectDir)
+{
+    return property(projectDir, ProjectModificationDate).value<QDateTime>();
 }
 
 QJsonValue projectTheme(const QString& projectDir)
 {
-    return property(projectDir, ProjectTheme).toJsonValue();
+    return property(projectDir, ProjectTheme).value<QJsonValue>();
 }
 
 QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
@@ -182,6 +183,7 @@ QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
         return map;
     }
     QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_12);
     in >> map;
     return map;
 }
@@ -195,6 +197,7 @@ QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
         return map;
     }
     QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_12);
     in >> map;
     return map;
 }
@@ -219,6 +222,7 @@ void setProperty(const QString& controlDir, ControlProperties property, const QV
         return;
     }
     QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_12);
     out << map;
 }
 
@@ -226,12 +230,14 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
 {
     QMap<ProjectProperties, QVariant> map(projectMap(projectDir));
     map.insert(property, value);
+    map.insert(ProjectModificationDate, QDateTime::currentDateTime());
     QFile file(toProjectMetaFile(projectDir));
     if (!file.open(QFile::WriteOnly)) {
         qWarning("SaveUtils: Cannot open project meta file");
         return;
     }
     QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_12);
     out << map;
 }
 
@@ -247,6 +253,7 @@ void makeControlMetaFile(const QString& controlDir)
             return;
         }
         QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_12);
         out << map;
     }
 }
@@ -263,6 +270,7 @@ void makeProjectMetaFile(const QString& projectDir)
             return;
         }
         QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_12);
         out << map;
     }
 }

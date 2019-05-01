@@ -140,7 +140,7 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
 
     QFile file(mainQmlFilePath);
     if (!file.open(QFile::ReadWrite)) {
-        qWarning("SaveManager: Cannot open form main qml file");
+        qWarning("SaveManager: Cannot open main qml file");
         return;
     }
 
@@ -244,6 +244,12 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
 
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
 {
+    if (control == parentControl)
+        return false;
+
+    if (QString::compare(control->dir(), parentControl->dir(), Qt::CaseInsensitive) == 0)
+        return false;
+
     if (!SaveUtils::isControlValid(control->dir()) || !SaveUtils::isControlValid(parentControl->dir())) {
         qWarning("SaveManager::moveControl: Failed. One or more control data broken.");
         return false;
@@ -255,7 +261,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     }
 
     const QString& targetControlChildrenDir = SaveUtils::toChildrenDir(parentControl->dir());
-    const QString& newControlRootPath = targetControlChildrenDir + '/' + HashFactory::generate();
+    const QString& newControlRootPath = targetControlChildrenDir + '/' + QDir(control->dir()).dirName();
 
     if (!QDir(newControlRootPath).mkpath(".")) {
         qWarning("SaveManager::moveControl: Failed. Cannot create the new control root path.");
@@ -275,13 +281,13 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     repairIds(newControlRootPath, true);
 
     for (Control* child : control->childControls()) {
-        child->setUrl(child->url().replace(control->dir(), newControlRootPath, Qt::CaseInsensitive));
-        const QString& childId = ParserUtils::id(child->url());
+        child->setDir(child->dir().replace(control->dir(), newControlRootPath, Qt::CaseInsensitive));
+        const QString& childId = ParserUtils::id(SaveUtils::toMainQmlFile(control->dir()));
         Q_ASSERT(!childId.isEmpty());
         child->setId(childId);
     }
-    control->setUrl(SaveUtils::toMainQmlFile(newControlRootPath));
-    const QString& controlId = ParserUtils::id(control->url());
+    control->setDir(newControlRootPath);
+    const QString& controlId = ParserUtils::id(SaveUtils::toMainQmlFile(control->dir()));
     Q_ASSERT(!controlId.isEmpty());
     control->setId(controlId);
 
@@ -339,13 +345,13 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
                   which means idChanged signal is already emitted.
         */
 
-        ParserUtils::setId(control->url(), copy);
+        ParserUtils::setId(SaveUtils::toMainQmlFile(control->dir()), copy);
         repairIds(control->dir(), false);
-        copy = ParserUtils::id(control->url());
+        copy = ParserUtils::id(SaveUtils::toMainQmlFile(control->dir()));
         control->setId(copy);
         Q_ASSERT(!copy.isEmpty());
     } else {
-        ParserUtils::setProperty(control->url(), property, copy);
+        ParserUtils::setProperty(SaveUtils::toMainQmlFile(control->dir()), property, copy);
     }
 
     ProjectManager::updateLastModification(ProjectManager::uid());

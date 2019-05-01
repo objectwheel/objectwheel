@@ -37,7 +37,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
         return nullptr;
     }
 
-    auto form = new Form(SaveUtils::toMainQmlFile(newFormRootPath));
+    auto form = new Form(newFormRootPath);
 
     s_designerScene->addForm(form);
 
@@ -62,7 +62,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
         return nullptr;
     }
 
-    auto control = new Control(SaveUtils::toMainQmlFile(newControlRootPath));
+    auto control = new Control(newControlRootPath);
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
@@ -73,7 +73,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
         Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
         Q_ASSERT(parentControl);
 
-        auto childControl = new Control(SaveUtils::toMainQmlFile(childPath));
+        auto childControl = new Control(childPath);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         controlTree.insert(childPath, childControl);

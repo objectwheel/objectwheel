@@ -37,7 +37,7 @@ QList<Resizer*> initializeResizers(Control* control)
 }
 
 QList<Control*> Control::m_controls;
-Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
+Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_gui(false)
   , m_clip(false)
   , m_popup(false)
@@ -46,8 +46,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
   , m_hoverOn(false)
   , m_dragging(false)
   , m_resizing(false)
-  , m_url(url)
-  , m_uid(SaveUtils::uid(dir()))
+  , m_dir(dir)
+  , m_uid(SaveUtils::uid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage(g_baseControlSize))
   , m_resizers(initializeResizers(this))
 {
@@ -60,7 +60,8 @@ Control::Control(const QString& url, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    ControlPropertyManager::setId(this, ParserUtils::id(m_url), ControlPropertyManager::NoOption);
+    ControlPropertyManager::setId(this, ParserUtils::id(SaveUtils::toMainQmlFile(m_dir)),
+                                  ControlPropertyManager::NoOption);
     ControlPropertyManager::setSize(this, g_baseControlSize, ControlPropertyManager::NoOption);
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
@@ -151,11 +152,6 @@ int Control::lowerZValue() const
     return z;
 }
 
-QString Control::url() const
-{
-    return m_url;
-}
-
 QString Control::id() const
 {
     return m_id;
@@ -168,7 +164,7 @@ QString Control::uid() const
 
 QString Control::dir() const
 {
-    return SaveUtils::toParentDir(m_url);
+    return m_dir;
 }
 
 QMarginsF Control::margins() const
@@ -230,9 +226,9 @@ void Control::setId(const QString& id)
     setToolTip(id);
 }
 
-void Control::setUrl(const QString& url)
+void Control::setDir(const QString& dir)
 {
-    m_url = url;
+    m_dir = dir;
 }
 
 void Control::setDragIn(bool dragIn)
@@ -545,7 +541,7 @@ void Control::updatePreview(const PreviewResult& result)
         if (m_gui)
             m_image = PaintUtils::renderInvisibleControlImage(size());
         else
-            m_image = PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(dir())));
+            m_image = PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(m_dir)));
     }
 
     for (auto resizer : m_resizers)
