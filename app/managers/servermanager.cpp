@@ -20,8 +20,6 @@ ServerManager::ServerManager(const QUrl& host, QObject* parent) : QWebSocket(QSt
             this, &ServerManager::onSslErrors);
     connect(this, &ServerManager::binaryMessageReceived,
             this, &ServerManager::onBinaryMessageReceive);
-
-    s_connectionTimer.start(CONNECTION_TIMEOUT, Qt::VeryCoarseTimer, this);
 }
 
 ServerManager::~ServerManager()
@@ -40,6 +38,22 @@ void ServerManager::onBinaryMessageReceive(const QByteArray& message)
 ServerManager* ServerManager::instance()
 {
     return s_instance;
+}
+
+void ServerManager::start()
+{
+    s_connectionTimer.start(CONNECTION_TIMEOUT, Qt::VeryCoarseTimer, instance());
+}
+
+void ServerManager::stop()
+{
+    instance()->close();
+    s_connectionTimer.stop();
+}
+
+bool ServerManager::isConnected()
+{
+    return instance()->state() == QAbstractSocket::ConnectedState;
 }
 
 void ServerManager::onConnect()

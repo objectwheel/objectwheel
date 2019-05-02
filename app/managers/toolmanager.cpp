@@ -31,7 +31,7 @@ namespace {
 
 static bool currentProjectHasToolsInstalled()
 {
-    if (ProjectManager::dir().isEmpty())
+    if (ProjectManager::uid().isEmpty())
         return false;
     if (!QDir().exists(
                 ProjectManager::dir() +
@@ -82,7 +82,7 @@ void ToolManager::fillTree(ToolboxTree* tree)
 
 bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
 {
-    if (ProjectManager::dir().isEmpty() ||
+    if (ProjectManager::uid().isEmpty() ||
             toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
         return false;
 
@@ -130,7 +130,7 @@ void ToolManager::discharge()
 
 bool ToolManager::addTool(const QString& toolPath, const bool select, const bool qrc)
 {
-    if (ProjectManager::dir().isEmpty() ||
+    if (ProjectManager::uid().isEmpty() ||
             toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
         return false;
 
@@ -221,7 +221,7 @@ void ToolManager::addToolboxTree(ToolboxTree* toolboxTree)
 
 void ToolManager::exposeTools()
 {
-    if (ProjectManager::dir().isEmpty())
+    if (ProjectManager::uid().isEmpty())
         return;
 
     for (ToolboxTree* tree : s_toolboxTreeList) {

@@ -51,7 +51,7 @@ ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
 SaveManager* ApplicationCore::s_saveManager = nullptr;
 ProjectManager* ApplicationCore::s_projectManager = nullptr;
 ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
-ControlCreationManager* ApplicationCore::s_controlExposingManager = nullptr;
+ControlCreationManager* ApplicationCore::s_controlCreationManager = nullptr;
 ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
 ControlPropertyManager* ApplicationCore::s_controlPropertyManager = nullptr;
 RunManager* ApplicationCore::s_runManager = nullptr;
@@ -108,13 +108,17 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_projectManager = new ProjectManager(app);
     s_globalResources = new GlobalResources([=] () -> QString { return ProjectManager::dir(); }, app);
     s_projectExposingManager = new ProjectExposingManager(app);
-    s_controlExposingManager = new ControlCreationManager(app);
+    s_controlCreationManager = new ControlCreationManager(app);
     s_controlRemovingManager = new ControlRemovingManager(app);
     s_controlPropertyManager = new ControlPropertyManager(app);
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
-    HelpManager::setupHelpManager();
+    QObject::connect(s_serverManager, &ServerManager::dataArrived,
+                     s_accountManager, &AccountManager::onDataArrival);
+    s_serverManager->start();
+
+    s_helpManager->setupHelpManager();
     Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
     QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
                      s_helpManager, &HelpManager::aboutToShutdown);
@@ -126,23 +130,20 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /** Ui initialization **/
     s_windowManager = new WindowManager(app);
     s_menuManager = new MenuManager(app);
-
-    QObject::connect(UserManager::instance(), &UserManager::started,
+    QObject::connect(s_userManager, &UserManager::started,
                      &ApplicationCore::onUserSessionStart);
-    QObject::connect(UserManager::instance(), &UserManager::aboutToStop,
+    QObject::connect(s_userManager, &UserManager::aboutToStop,
                      &ApplicationCore::onUserSessionStop);
-    QObject::connect(ProjectManager::instance(), &ProjectManager::started,
+    QObject::connect(s_projectManager, &ProjectManager::started,
                      &ApplicationCore::onProjectStart);
-    QObject::connect(ProjectManager::instance(), &ProjectManager::stopped,
+    QObject::connect(s_projectManager, &ProjectManager::stopped,
                      &ApplicationCore::onProjectStop);
 
-    DesignerScene* scene = WindowManager::mainWindow()->centralWidget()->designerWidget()->designerScene();
-    ProjectExposingManager::init(scene);
-    ControlCreationManager::init(scene);
-    ControlRemovingManager::init(scene);
-
-    // Show welcome window
-    WindowManager::welcomeWindow()->show();
+    DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerWidget()->designerScene();
+    s_projectExposingManager->init(scene);
+    s_controlCreationManager->init(scene);
+    s_controlRemovingManager->init(scene);
+    s_windowManager->welcomeWindow()->show();
 }
 
 bool ApplicationCore::locked()

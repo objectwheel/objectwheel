@@ -39,6 +39,9 @@ public:
 
 public:
     static ServerManager* instance();
+    static void start();
+    static void stop();
+    static bool isConnected();
 
     template<typename... Args>
     static void send(ServerCommands command, Args&&... args)

@@ -2,6 +2,7 @@
 #define ACCOUNTMANAGER_H
 
 #include <QObject>
+#include <servermanager.h>
 
 class AccountManager final : public QObject
 {
@@ -22,6 +23,9 @@ public:
     static void resetPassword(const QString& email);
     static void completePasswordReset(const QString& email, const QString& password,
                                       const QString& code);
+
+private slots:
+    void onDataArrival(ServerManager::ServerCommands command, const QByteArray& data);
 
 signals:
     void loginSuccessful(const QString& plan);

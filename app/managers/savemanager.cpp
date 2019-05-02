@@ -60,7 +60,7 @@ inline int countIdInProjectFormScope(const QString& id, const QString formRootPa
 QString detectedFormRootPath(const QString& rootPath)
 {
     //! FIXME: This might crash on Windows due to back-slash path names
-    Q_ASSERT(!ProjectManager::dir().isEmpty());
+    Q_ASSERT(!ProjectManager::uid().isEmpty());
     const QString& designsDir = SaveUtils::toDesignsDir(ProjectManager::dir()) + '/';
     const QString& formRootPath = QRegularExpression("^" + designsDir + "\\d+").match(rootPath).captured();
     Q_ASSERT(!formRootPath.isEmpty());
@@ -183,7 +183,7 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
 
 QString SaveManager::addForm(const QString& formRootPath)
 {
-    Q_ASSERT(!ProjectManager::dir().isEmpty());
+    Q_ASSERT(!ProjectManager::uid().isEmpty());
 
     if (!SaveUtils::isControlValid(formRootPath)) {
         qWarning("SaveManager::addForm: Failed. Form data broken.");

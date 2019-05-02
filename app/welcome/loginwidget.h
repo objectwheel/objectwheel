@@ -28,6 +28,8 @@ private slots:
     void startSession();
     void onSessionStart();
     void onLoginButtonClick();
+    void onLoginSuccessful(const QString& plan);
+    void onLoginFailure();
 
 signals:
     void done();

@@ -9,6 +9,7 @@
 #include <usermanager.h>
 #include <async.h>
 #include <utilityfunctions.h>
+#include <servermanager.h>
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -167,6 +168,11 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     m_legalLabel->setText(QString("<p><b>© 2015 - 2019 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
     m_legalLabel->setAlignment(Qt::AlignHCenter);
+
+    connect(AccountManager::instance(), &AccountManager::loginSuccessful,
+            this, &LoginWidget::onLoginSuccessful);
+    connect(AccountManager::instance(), &AccountManager::loginFailure,
+            this, &LoginWidget::onLoginFailure);
 }
 
 void LoginWidget::lock()
@@ -210,25 +216,31 @@ void LoginWidget::onLoginButtonClick()
         return;
     }
 
+    if (!ServerManager::isConnected()) {
+        QMessageBox::warning(
+            this,
+            tr("Oops"),
+            tr("No connection to the server, please try again later.")
+        );
+        return;
+    }
+
     lock();
 
-//    const auto& plan = AccountManager::login(email, password);
-//    bool succeed = !plan.isEmpty();
+    AccountManager::login(email, password);
+}
 
-//    if (!succeed) {
-//        QMessageBox::warning(
-//            this,
-//            tr("Oops"),
-//            tr("Login is not successful, please check the information you provided.")
-//        );
-//    }
+void LoginWidget::onLoginSuccessful(const QString& /*plan*/)
+{
+    unlock();
+    QTimer::singleShot(0, this, &LoginWidget::startSession);
+    emit busy(tr("Decryption in progress"));
+}
 
-//    unlock();
-
-//    if (succeed) {
-//        QTimer::singleShot(0, this, &LoginWidget::startSession);
-//        emit busy(tr("Decryption in progress"));
-//    }
+void LoginWidget::onLoginFailure()
+{
+    unlock();
+    QMessageBox::warning(this, tr("Oops"), tr("Cannot log in, please check the information you provided."));
 }
 
 void LoginWidget::startSession()

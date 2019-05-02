@@ -58,7 +58,7 @@ private:
     static SaveManager* s_saveManager;
     static ProjectManager* s_projectManager;
     static ProjectExposingManager* s_projectExposingManager;
-    static ControlCreationManager* s_controlExposingManager;
+    static ControlCreationManager* s_controlCreationManager;
     static ControlRemovingManager* s_controlRemovingManager;
     static ControlPropertyManager* s_controlPropertyManager;
     static RunManager* s_runManager;
