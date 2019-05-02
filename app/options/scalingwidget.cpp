@@ -34,12 +34,5 @@ void ScalingWidget::discharge()
 
 void ScalingWidget::saveTheme()
 {
-    QString scaling;
-
-    if (m_highDpiScalingButton->isChecked())
-        scaling = "highDpiScaling";
-    else
-        scaling = "noScaling";
-
-    SaveUtils::setProperty(ProjectManager::dir(), SaveUtils::ProjectHdpiScaling, scaling);
+    SaveUtils::setProperty(ProjectManager::dir(), SaveUtils::ProjectHdpiScaling, m_highDpiScalingButton->isChecked());
 }
