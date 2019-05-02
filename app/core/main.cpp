@@ -1,18 +1,8 @@
 #include <applicationcore.h>
-#include <QtWidgets>
-#include <hashfactory.h>
-// 32
+#include <QApplication>
+
 int main(int argc, char* argv[])
 {
-    QString e = "/Users/omergoktas/Desktop/İş/serverstuff/build/objectwheel-interpreter/components/";
-    QElapsedTimer t; t.start();
-
-    for (int i = 0; i < 10000; ++i)
-        QDir(e).dirName();
-
-    qDebug() <<QDir(e).dirName();
-    return 0;
-
     // Prepare application core
     ApplicationCore::prepare(argv[0]);
 

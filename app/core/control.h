@@ -106,7 +106,7 @@ private:
     QString m_dir;
     QString m_uid;
     QString m_id;
-    QImage m_image;
+    QPixmap m_pixmap;
 
     QList<QQmlError> m_errors;
     QList<Resizer*> m_resizers;

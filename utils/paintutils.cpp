@@ -1,6 +1,7 @@
 #include <paintutils.h>
 #include <utilityfunctions.h>
 
+#include <QByteArray>
 #include <QPainter>
 #include <QImage>
 #include <QBitmap>
@@ -84,12 +85,24 @@ QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QWidget* wi
     return dest;
 }
 
-QImage PaintUtils::dpiCorrectedImage(const QImage& image, const QWidget* widget)
+QImage PaintUtils::renderNonGuiControlImage(const QByteArray& data, const QSizeF& size, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
-    QImage copy(image);
-    copy.setDevicePixelRatio(dpr);
-    return copy;
+    QImage dest = renderTransparentImage(size, widget);
+
+    QImage source(QImage::fromData(data));
+    source.setDevicePixelRatio(dpr);
+
+    QRectF destRect{{}, size};
+    QRectF sourceRect{{}, QSizeF{24, 24}};
+    sourceRect.moveCenter(destRect.center());
+
+    QPainter p(&dest);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.drawImage(sourceRect, source, source.rect());
+    p.end();
+
+    return dest;
 }
 
 QIcon PaintUtils::renderOverlaidIcon(const QString& fileName, const QColor& color, const QWidget* widget)
@@ -171,6 +184,14 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     p.end();
 
     return dest;
+}
+
+QPixmap PaintUtils::renderOverlaidPixmapFromData(const QByteArray& data, const QColor& color, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QPixmap source = QPixmap::fromImage(QImage::fromData(data));
+    source.setDevicePixelRatio(dpr);
+    return renderOverlaidPixmap(source, color, widget);
 }
 
 // For colorizing the files that are located within the "utils/images" directory

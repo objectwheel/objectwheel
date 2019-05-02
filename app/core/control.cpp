@@ -48,7 +48,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_resizing(false)
   , m_dir(dir)
   , m_uid(SaveUtils::uid(m_dir))
-  , m_image(PaintUtils::renderInitialControlImage(g_baseControlSize))
+  , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(g_baseControlSize)))
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -456,7 +456,7 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (m_image.isNull())
+    if (m_pixmap.isNull())
         return;
 
     if (parentControl() && parentControl()->clip() && !m_dragging) {
@@ -471,7 +471,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawImage(rect(), m_image, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
+    painter->drawPixmap(rect(), m_pixmap, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
@@ -481,12 +481,12 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         if (scene()->showOutlines()) {
             painter->fillRect(rect(), gradient);
         } else {
-            QImage highlight(m_image);
+            QPixmap highlight(m_pixmap);
             QPainter p(&highlight);
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-            p.fillRect(m_image.rect(), gradient);
+            p.fillRect(m_pixmap.rect(), gradient);
             p.end();
-            painter->drawImage(rect(), highlight, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
+            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
         }
     }
 
@@ -533,15 +533,14 @@ void Control::updatePreview(const PreviewResult& result)
     if (!dragging() && !resizing())
         applyCachedGeometry();
 
-    m_image = hasErrors()
-            ? PaintUtils::renderErrorControlImage(size())
-            : result.image;
+    m_pixmap = QPixmap::fromImage(hasErrors() ? PaintUtils::renderErrorControlImage(size())
+                                              : result.image);
 
-    if (m_image.isNull()) {
+    if (m_pixmap.isNull()) {
         if (m_gui)
-            m_image = PaintUtils::renderInvisibleControlImage(size());
+            m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size()));
         else
-            m_image = PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(m_dir)));
+            m_pixmap = QPixmap::fromImage(PaintUtils::renderNonGuiControlImage(SaveUtils::icon(m_dir), size()));
     }
 
     for (auto resizer : m_resizers)

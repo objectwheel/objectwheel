@@ -162,18 +162,18 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
             item->setText(1, QObject::tr("No"));
 
         QIcon icon, itemIcon;
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(
-                           QPixmap::fromImage(PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(child->dir())))),
-                           treeWidget->palette().text().color(), treeWidget), QIcon::Normal);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(
-                           QPixmap::fromImage(PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(child->dir())))),
-                           treeWidget->palette().highlightedText().color(), treeWidget), QIcon::Selected);
-        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(
-                              QPixmap::fromImage(PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(":/images/item.png")))),
-                               treeWidget->palette().text().color(), treeWidget), QIcon::Normal);
-        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(
-                               QPixmap::fromImage(PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(":/images/item.png")))),
-                               treeWidget->palette().highlightedText().color(), treeWidget), QIcon::Selected);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(child->dir()),
+                                                        treeWidget->palette().text().color(),
+                                                        treeWidget), QIcon::Normal);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(child->dir()),
+                                                        treeWidget->palette().highlightedText().color(),
+                                                        treeWidget), QIcon::Selected);
+        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
+                                                            treeWidget->palette().text().color(),
+                                                            treeWidget), QIcon::Normal);
+        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
+                                                            treeWidget->palette().highlightedText().color(),
+                                                            treeWidget), QIcon::Selected);
 
         item->setIcon(0, icon.isNull() ? itemIcon : icon);
         parentItem->addChild(item);
@@ -629,13 +629,12 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     childItem->setIcon(0, formIcon);
                 } else {
                     QIcon icon;
-                    icon.addPixmap(PaintUtils::renderOverlaidPixmap(
-                        QPixmap::fromImage(PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(control->dir())))),
-                                palette().text().color(), this), QIcon::Normal);
-                    icon.addPixmap(PaintUtils::renderOverlaidPixmap(
-                        QPixmap::fromImage(PaintUtils::dpiCorrectedImage(QImage::fromData(SaveUtils::icon(control->dir())))),
-                                       palette().highlightedText().color(), this), QIcon::Selected);
-
+                    icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(control->dir()),
+                                                                            palette().text().color(),
+                                                                            this), QIcon::Normal);
+                    icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(control->dir()),
+                                                                            palette().highlightedText().color(),
+                                                                            this), QIcon::Selected);
                     childItem->setIcon(0, icon.isNull() ? itemIcon : icon);
                 }
                 return;
