@@ -22,6 +22,8 @@ private slots:
     void lock();
     void unlock();
     void onNextClicked();
+    void onResetPasswordSuccessful();
+    void onResetPasswordFailure();
 
 signals:
     void back();

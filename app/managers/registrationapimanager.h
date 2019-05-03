@@ -1,13 +1,13 @@
-#ifndef ACCOUNTMANAGER_H
-#define ACCOUNTMANAGER_H
+#ifndef REGISTRATIONAPIMANAGER_H
+#define REGISTRATIONAPIMANAGER_H
 
 #include <QObject>
 #include <servermanager.h>
 
-class AccountManager final : public QObject
+class RegistrationApiManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(AccountManager)
+    Q_DISABLE_COPY(RegistrationApiManager)
 
     friend class ApplicationCore;
 
@@ -19,7 +19,7 @@ public:
     };
 
 public:
-    static AccountManager* instance();
+    static RegistrationApiManager* instance();
 
     static void login(const QString& email, const QString& password);
     static void signup(const QString& first, const QString& last, const QString& email,
@@ -49,11 +49,11 @@ signals:
     void completePasswordResetFailure();
 
 private:
-    explicit AccountManager(QObject* parent = nullptr);
-    ~AccountManager() override;
+    explicit RegistrationApiManager(QObject* parent = nullptr);
+    ~RegistrationApiManager() override;
 
 private:
-    static AccountManager* s_instance;
+    static RegistrationApiManager* s_instance;
 };
 
-#endif // ACCOUNTMANAGER_H
+#endif // REGISTRATIONAPIMANAGER_H

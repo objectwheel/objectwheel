@@ -481,11 +481,11 @@ void FileExplorer::onPasteButtonClick()
 
 void FileExplorer::onDeleteButtonClick()
 {
-    int result = QMessageBox::warning(this,
-                                      tr("Files about to be deleted"),
-                                      tr("Do you want to delete selected files? "
-                                         "Changes made in Code Editor also will be discarded."),
-                                      QMessageBox::Yes | QMessageBox::No);
+    int result = UtilityFunctions::showMessage(this, tr("Files about to be deleted"),
+                                               tr("Do you want to delete the selected files? "
+                                                  "Changes made in Code Editor will also be discarded."),
+                                               QMessageBox::Warning,
+                                               QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
     if (result == QMessageBox::Yes) {
         QSet<QString> deletedFiles;

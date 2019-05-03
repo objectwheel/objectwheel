@@ -7,7 +7,6 @@
 #include <filesystemutils.h>
 
 #include <QFileInfo>
-#include <QMessageBox>
 #include <QQmlEngine>
 #include <QTextDocument>
 #include <QRegularExpression>
@@ -114,11 +113,11 @@ void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent
 
         if (QFileInfo::exists(destPath)) {
             if (askForOverwrite) {
-                int ret = QMessageBox::question(
-                            parent,
-                            QObject::tr("File or folder exists"),
+                int ret = UtilityFunctions::showMessage(
+                            parent, QObject::tr("File or folder exists"),
                             QObject::tr("File or folder exists. "
                                         "Would you like to overwrite following file/folder: ") + fileName,
+                            QMessageBox::Question,
                             QMessageBox::Yes | QMessageBox::No | QMessageBox::YesToAll| QMessageBox::Abort,
                             QMessageBox::No);
                 if (ret == QMessageBox::Yes) {
@@ -323,6 +322,29 @@ QString increasedNumberedText(const QString& text, bool addSpace, bool trim)
         return "10";
 }
 
+QString toPrettyBytesString(qint64 bytes)
+{
+    #define KB 1024.0
+    #define MB 1048576.0
+    #define GB 1073741824.0
+
+    QString ret;
+    if (bytes < KB) {
+        ret = QString::number(bytes);
+        ret += QStringLiteral(" Bytes");
+    } else if (bytes < MB) {
+        ret = QString::number(bytes / KB, 'f', 1);
+        ret += QStringLiteral(" Kb");
+    } else if (bytes < GB) {
+        ret = QString::number(bytes / MB, 'f', 1);
+        ret += QStringLiteral(" Mb");
+    } else {
+        ret = QString::number(bytes / GB, 'f', 2);
+        ret += QStringLiteral(" Gb");
+    }
+    return ret;
+}
+
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
 {
     QRectF geometry;
@@ -475,27 +497,27 @@ void setDeviceInfo(QAction* action, const QVariantMap& deviceInfo)
     action->setProperty("__OW_DEVICE_INFO__", deviceInfo);
 }
 
-QString toPrettyBytesString(qint64 bytes)
+QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, const QString& text,
+                                        QMessageBox::Icon icon, QMessageBox::StandardButtons buttons,
+                                        QMessageBox::StandardButton defaultButton, bool modal)
 {
-    #define KB 1024.0
-    #define MB 1048576.0
-    #define GB 1073741824.0
-
-    QString ret;
-    if (bytes < KB) {
-        ret = QString::number(bytes);
-        ret += QStringLiteral(" Bytes");
-    } else if (bytes < MB) {
-        ret = QString::number(bytes / KB, 'f', 1);
-        ret += QStringLiteral(" Kb");
-    } else if (bytes < GB) {
-        ret = QString::number(bytes / MB, 'f', 1);
-        ret += QStringLiteral(" Mb");
-    } else {
-        ret = QString::number(bytes / GB, 'f', 2);
-        ret += QStringLiteral(" Gb");
+    QMessageBox dialog(parent);
+    dialog.setIcon(icon);
+    dialog.setModal(modal);
+    dialog.setStandardButtons(buttons);
+    dialog.setDefaultButton(defaultButton);
+#if !defined(Q_OS_MACOS)
+    dialog.QWidget::setWindowTitle(title);
+    dialog.setText(text);
+#else    
+    dialog.setText(title);
+    dialog.setInformativeText(text);
+    if (auto label = dialog.findChild<QWidget*>(QStringLiteral("qt_msgbox_label"))) {
+        int MIN_WIDTH = qMax(label->fontMetrics().horizontalAdvance(title), 260);
+        label->setStyleSheet(QStringLiteral("QLabel { min-width: %1px; }").arg(MIN_WIDTH));
     }
-    return ret;
+#endif
+    return static_cast<QMessageBox::StandardButton>(dialog.exec());
 }
 
 } // UtilityFunctions

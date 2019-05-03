@@ -139,7 +139,7 @@ void ProjectDetailsWidget::onSaveClick()
     auto crdatetext = m_bulkEdit->get<QLineEdit*>(CreationDate)->text();
 
     if (projectnametext.isEmpty()) {
-        QMessageBox::warning(this, tr("Oops"), tr("Project name cannot be empty."));
+        UtilityFunctions::showMessage(this, tr("Oops"), tr("The project name cannot be empty."));
         return;
     }
 
@@ -171,13 +171,10 @@ void ProjectDetailsWidget::onDeleteClick()
         return;
     }
 
-    auto ret = QMessageBox::question(
-        this,
-        "Confirm Deletion",
-        tr("You are about to delete %1 completely. Are you sure?").
-        arg(ProjectManager::name(m_uid)),
-        QMessageBox::Yes, QMessageBox::No | QMessageBox::Default
-    );
+    int ret = UtilityFunctions::showMessage(this, tr("Confirm deletion"),
+                                            tr("You are about to delete %1 completely. Are you sure?").
+                                            arg(ProjectManager::name(m_uid)), QMessageBox::Question,
+                                            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
     if (ret == QMessageBox::Yes) {
         const auto& cuid = ProjectManager::uid();

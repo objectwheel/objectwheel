@@ -1,6 +1,7 @@
 #include <androidwidget.h>
 #include <projectmanager.h>
 #include <build.h>
+#include <utilityfunctions.h>
 
 AndroidWidget::AndroidWidget(QWidget *parent)
     : QWidget(parent)
@@ -102,8 +103,10 @@ AndroidWidget::AndroidWidget(QWidget *parent)
             _picIcon.setPixmap(icon);
             _txtIconPath.setText(fileName);
         } else if (!fileName.isEmpty()){
-            QMessageBox::warning(this, "Invalid",
-            "Image file is not valid. It must be atleast 256 x 256 and width must be equal to height.");
+            UtilityFunctions::showMessage(
+                        this, tr("Invalid"),
+                        tr("Image file is not valid. It must be atleast "
+                           "256 x 256 and width must be equal to height."));
         }
     });
 
@@ -462,7 +465,7 @@ bool AndroidWidget::checkFields()
     }
 
     if (!errorMessage.isEmpty())
-        QMessageBox::warning(this, "Warning", errorMessage);
+        UtilityFunctions::showMessage(this, tr("Warning"), errorMessage);
 
     return errorMessage.isEmpty();
 }

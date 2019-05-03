@@ -126,9 +126,8 @@ qreal findRatio(const QString& text)
 bool warnIfFileDoesNotExist(const QString& filePath)
 {
     if (!QFileInfo::exists(filePath)) {
-        return QMessageBox::warning(
-                    0,
-                    QObject::tr("Oops"),
+        return UtilityFunctions::showMessage(
+                    nullptr, QObject::tr("Oops"),
                     QObject::tr("File %1 does not exist.").arg(QFileInfo(filePath).fileName()));
     }
     return false;
@@ -317,13 +316,13 @@ void DesignerWidget::onClearButtonClick()
     if (!m_designerScene->currentForm())
         return;
 
-    QMessageBox msgBox;
-    msgBox.setText("<b>This will remove current scene's content.</b>");
-    msgBox.setInformativeText("Do you want to continue?");
-    msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-    msgBox.setDefaultButton(QMessageBox::No);
-    msgBox.setIcon(QMessageBox::Question);
-    const int ret = msgBox.exec();
+    int ret = UtilityFunctions::showMessage(
+                this, tr("This will remove the current scene's content"),
+                tr("Do you want to continue?"),
+                QMessageBox::Question,
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+
     switch (ret) {
     case QMessageBox::Yes: { // FIXME
         //            m_designerScene->removeChildControlsOnly(m_designerScene->currentForm());
@@ -356,8 +355,12 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 {
     Q_ASSERT(m_designerScene->currentForm());
 
-    if (control->hasErrors())
-        return (void) QMessageBox::warning(this, tr("Oops"), tr("Control has errors, fix them first."));
+    if (control->hasErrors()) {
+        UtilityFunctions::showMessage(
+                    this, tr("Oops"),
+                    tr("Control has got errors, solve these problems first."));
+        return;
+    }
 
     m_signalChooserDialog->setSignalList(control->events());
 
@@ -416,10 +419,13 @@ void DesignerWidget::onControlDrop(Control* targetParentControl, const QString& 
     m_designerScene->clearSelection();
     // NOTE: Use actual Control position for scene, since createControl deals with margins
     auto newControl = ControlCreationManager::createControl(targetParentControl, controlRootPath, pos);
-    if (newControl)
+    if (newControl) {
         newControl->setSelected(true);
-    else
-        QMessageBox::critical(this, tr("Oops"), tr("Operation failed, control has problems."));
+    } else {
+        UtilityFunctions::showMessage(this, tr("Oops"),
+                                      tr("Operation failed, control has got problems."),
+                                      QMessageBox::Critical);
+    }
 }
 
 void DesignerWidget::onControlSelectionChange(const QList<Control*>& selectedControls)

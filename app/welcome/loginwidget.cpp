@@ -168,9 +168,9 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_legalLabel->setText(QString("<p><b>© 2015 - 2019 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
     m_legalLabel->setAlignment(Qt::AlignHCenter);
 
-    connect(AccountManager::instance(), &AccountManager::loginSuccessful,
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginSuccessful,
             this, &LoginWidget::onLoginSuccessful);
-    connect(AccountManager::instance(), &AccountManager::loginFailure,
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginFailure,
             this, &LoginWidget::onLoginFailure);
 }
 
@@ -207,29 +207,24 @@ void LoginWidget::onLoginButtonClick()
         password.isEmpty() || password.size() > 256 ||
         !UtilityFunctions::isEmailFormatCorrect(email) ||
         !UtilityFunctions::isPasswordFormatCorrect(password)) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Fields cannot be either empty or incorrect.")
-        );
+        UtilityFunctions::showMessage(this, tr("Incorrect information"),
+                                      tr("The information you provided is incorrect."));
         return;
     }
 
     if (!ServerManager::isConnected()) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("No connection to the server, please try again later.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("No connection"),
+                    tr("Unable to connect to the server, please try again later."));
         return;
     }
 
     lock();
 
-    AccountManager::login(email, password);
+    RegistrationApiManager::login(email, password);
 }
 
-void LoginWidget::onLoginSuccessful(const AccountManager::Plans& /*plan*/)
+void LoginWidget::onLoginSuccessful(const RegistrationApiManager::Plans& /*plan*/)
 {
     unlock();
     QTimer::singleShot(0, this, &LoginWidget::startSession);
@@ -239,7 +234,9 @@ void LoginWidget::onLoginSuccessful(const AccountManager::Plans& /*plan*/)
 void LoginWidget::onLoginFailure()
 {
     unlock();
-    QMessageBox::warning(this, tr("Oops"), tr("Cannot log in, please check the information you provided."));
+    UtilityFunctions::showMessage(
+                this, tr("Unable to login"),
+                tr("Incorrect information, please checkout the information you entered."));
 }
 
 void LoginWidget::startSession()

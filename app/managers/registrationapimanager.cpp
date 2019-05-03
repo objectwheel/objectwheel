@@ -1,27 +1,27 @@
-#include <accountmanager.h>
+#include <registrationapimanager.h>
 
-AccountManager* AccountManager::s_instance = nullptr;
-AccountManager::AccountManager(QObject* parent) : QObject(parent)
+RegistrationApiManager* RegistrationApiManager::s_instance = nullptr;
+RegistrationApiManager::RegistrationApiManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
 }
 
-AccountManager::~AccountManager()
+RegistrationApiManager::~RegistrationApiManager()
 {
     s_instance = nullptr;
 }
 
-AccountManager* AccountManager::instance()
+RegistrationApiManager* RegistrationApiManager::instance()
 {
     return s_instance;
 }
 
-void AccountManager::login(const QString& email, const QString& password)
+void RegistrationApiManager::login(const QString& email, const QString& password)
 {
     ServerManager::send(ServerManager::Login, email, password);
 }
 
-void AccountManager::signup(const QString& first, const QString& last, const QString& email,
+void RegistrationApiManager::signup(const QString& first, const QString& last, const QString& email,
                             const QString& password, const QString& country, const QString& company,
                             const QString& title, const QString& phone)
 {
@@ -29,28 +29,28 @@ void AccountManager::signup(const QString& first, const QString& last, const QSt
                         password, country, company, title, phone);
 }
 
-void AccountManager::resendSignupCode(const QString& email)
+void RegistrationApiManager::resendSignupCode(const QString& email)
 {
     ServerManager::send(ServerManager::ResendSignupCode, email);
 }
 
-void AccountManager::completeSignup(const QString& email, const QString& code)
+void RegistrationApiManager::completeSignup(const QString& email, const QString& code)
 {
     ServerManager::send(ServerManager::CompleteSignup, email, code);
 }
 
-void AccountManager::resetPassword(const QString& email)
+void RegistrationApiManager::resetPassword(const QString& email)
 {
     ServerManager::send(ServerManager::ResetPassword, email);
 }
 
-void AccountManager::completePasswordReset(const QString& email, const QString& password,
+void RegistrationApiManager::completePasswordReset(const QString& email, const QString& password,
                                            const QString& code)
 {
     ServerManager::send(ServerManager::CompletePasswordReset, email, password, code);
 }
 
-void AccountManager::onDataArrival(ServerManager::ServerCommands command, const QByteArray& data)
+void RegistrationApiManager::onDataArrival(ServerManager::ServerCommands command, const QByteArray& data)
 {
     switch (command) {
     case ServerManager::LoginSuccessful: {
@@ -94,7 +94,7 @@ void AccountManager::onDataArrival(ServerManager::ServerCommands command, const 
         emit completePasswordResetFailure();
         break;
     default:
-        qWarning("AccountManager: Unrecognized api response");
+        qWarning("RegistrationApiManager: Unrecognized api response");
         break;
     }
 }

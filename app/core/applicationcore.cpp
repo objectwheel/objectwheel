@@ -5,7 +5,7 @@
 #include <projectexposingmanager.h>
 #include <controlcreationmanager.h>
 #include <windowmanager.h>
-#include <accountmanager.h>
+#include <registrationapimanager.h>
 #include <controlpreviewingmanager.h>
 #include <documentmanager.h>
 #include <mainwindow.h>
@@ -45,7 +45,7 @@ GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 GlobalResources* ApplicationCore::s_globalResources = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
-AccountManager* ApplicationCore::s_accountManager = nullptr;
+RegistrationApiManager* ApplicationCore::s_accountManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
 SaveManager* ApplicationCore::s_saveManager = nullptr;
@@ -101,7 +101,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     Q_UNUSED(splashScreen);
 
     s_serverManager = new ServerManager(QUrl(APP_WSSSERVER), app);
-    s_accountManager = new AccountManager(app);
+    s_accountManager = new RegistrationApiManager(app);
     s_userManager = new UserManager(app);
     s_controlPreviewingManager = new ControlPreviewingManager(app);
     s_saveManager = new SaveManager(app);
@@ -115,7 +115,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_helpManager = new HelpManager(app);
 
     QObject::connect(s_serverManager, &ServerManager::dataArrived,
-                     s_accountManager, &AccountManager::onDataArrival);
+                     s_accountManager, &RegistrationApiManager::onDataArrival);
     s_serverManager->start();
 
     s_helpManager->setupHelpManager();
@@ -153,9 +153,9 @@ bool ApplicationCore::locked()
         sharedMemory->attach();
         sharedMemory->detach();
         if(!sharedMemory->create(1)) {
-            QMessageBox::warning(nullptr,
-                                 QObject::tr("Quitting"),
-                                 QObject::tr("Another instance is already running."));
+            UtilityFunctions::showMessage(nullptr,
+                                          QObject::tr("Quitting"),
+                                          QObject::tr("Another instance is already running."));
             return true;
         }
     }

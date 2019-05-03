@@ -3,7 +3,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <accountmanager.h>
+#include <registrationapimanager.h>
 #include <utilityfunctions.h>
 
 #include <QVBoxLayout>
@@ -250,11 +250,10 @@ void RegistrationWidget::onNextClicked()
     const auto& country = _bulkEdit->get<QComboBox*>(Country)->currentText();
 
     if (!_termsSwitch->isChecked()) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Please accept the terms and conditions first.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Oops"),
+                    tr("Please accept the terms and conditions first in "
+                       "order to continue the registration process."));
         return;
     }
 
@@ -267,56 +266,46 @@ void RegistrationWidget::onNextClicked()
         country.size() > 256 || company.size() > 256 ||
         title.size() > 256 || phone.size() > 256
     ) {
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Information"),
-            tr("Please make sure you have filled all the required fields "
-               "with correct information. Fields can not exceed 256 characters.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect information"),
+                    tr("Please make sure you have filled all the required fields "
+                       "with necessary information. Fields cannot exceed 256 characters long."));
         return;
     }
 
     if (email != cemail) {
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Email Addresses"),
-            tr("Email addresses do not match.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect email addresses"),
+                    tr("Email addresses you entered do not match."));
         return;
     }
 
     if (password != cpassword) {
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Passwords"),
-            tr("Passwords do not match.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect passwords"),
+                    tr("Passwords you entered do not match."));
         return;
     }
 
     if (!UtilityFunctions::isEmailFormatCorrect(email)) {
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Email Address"),
-            tr("Incorrect Email Address. Please check your email address.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect email address"),
+                    tr("Broken email address, please checkout the email address you entered."));
         return;
     }
 
     if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Password"),
-            tr("Incorrect Password. Your password must be in between "
-               "6 and 35 characters long. Also please check it if contains invalid characters.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect password"),
+                    tr("Incorrect password, your password must be in between "
+                       "6 and 35 characters long. Also please checkout if it contains invalid characters."));
         return;
     }
 
     lock();
 
 //    bool succeed =
-//    AccountManager::signup(
+//    RegistrationApiManager::signup(
 //        _bulkEdit->get<QLineEdit*>(First)->text(),
 //        _bulkEdit->get<QLineEdit*>(Last)->text(),
 //        _bulkEdit->get<QLineEdit*>(Email)->text(),

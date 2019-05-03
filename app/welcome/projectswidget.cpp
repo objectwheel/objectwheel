@@ -517,7 +517,7 @@ void ProjectsWidget::onNewButtonClick()
 void ProjectsWidget::onLoadButtonClick()
 {
     if (!m_listWidget->currentItem() || m_listWidget->currentItem()->isHidden()) {
-        QMessageBox::warning(this, tr("Oops"), tr("Select a project first."));
+        UtilityFunctions::showMessage(this, tr("Oops"), tr("Select a project first."));
         return;
     }
 
@@ -556,7 +556,8 @@ void ProjectsWidget::onLoadButtonClick()
     lock();
 
     if (!ProjectManager::start(uid)) {
-        QMessageBox::critical(this, tr("Oops"), tr("Project start unsuccessful."));
+        UtilityFunctions::showMessage(this, tr("Oops"), tr("Project start unsuccessful."),
+                                      QMessageBox::Critical);
         refreshProjectList();
         QListWidgetItem* item = itemForUid(m_listWidget, uid);
         if (item) {
@@ -588,7 +589,7 @@ void ProjectsWidget::onLoadButtonClick()
 void ProjectsWidget::onExportButtonClick()
 {
     if (!m_listWidget->currentItem()) {
-        QMessageBox::warning(this, tr("Oops"), tr("Select the project first."));
+        UtilityFunctions::showMessage(this, tr("Oops"), tr("Select the project first."));
         return;
     }
 
@@ -612,9 +613,9 @@ void ProjectsWidget::onExportButtonClick()
             return;
         }
 
-        QMessageBox::information(this,
-                                 tr("Finished"),
-                                 tr("Project export has successfully finished."));
+        UtilityFunctions::showMessage(this, tr("Done"),
+                                      tr("Project export has successfully finished."),
+                                      QMessageBox::Information);
     }
 }
 
@@ -629,8 +630,8 @@ void ProjectsWidget::onImportButtonClick()
         QString uid;
         for (const QString& fileName : dialog.selectedFiles()) {
             if (!ProjectManager::importProject(fileName, &uid)) {
-                QMessageBox::warning(this, tr("Operation Stopped"),
-                                     tr("One or more import file is broken."));
+                UtilityFunctions::showMessage(this, tr("Operation stopped"),
+                                              tr("One or more import files broken."));
                 return;
             }
         }
@@ -642,7 +643,9 @@ void ProjectsWidget::onImportButtonClick()
             m_listWidget->setCurrentItem(item);
             m_listWidget->scrollToItem(item);
         }
-        QMessageBox::information(this, tr("Finished"), tr("Tool import has successfully finished."));
+        UtilityFunctions::showMessage(this, tr("Done"),
+                                      tr("Project import has successfully finished."),
+                                      QMessageBox::Information);
     }
 }
 

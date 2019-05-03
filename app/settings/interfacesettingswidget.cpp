@@ -244,55 +244,71 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
         if (g_fontMessageShowed)
             return;
         g_fontMessageShowed = true;
-        QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Be aware that the font settings will take effect after application restart."));
+        UtilityFunctions::showMessage(
+                    this, tr("Restart required"),
+                    tr("Be aware that the font settings will take effect after application restart."),
+                    QMessageBox::Information);
     });
     connect(m_fontThickBox, &QCheckBox::clicked, this, [=] {
         if (g_fontMessageShowed)
             return;
         g_fontMessageShowed = true;
-        QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Be aware that the font settings will take effect after application restart."));
+        UtilityFunctions::showMessage(
+                    this, tr("Restart required"),
+                    tr("Be aware that the font settings will take effect after application restart."),
+                    QMessageBox::Information);
     });
     connect(m_fontSizeBox, qOverload<int>(&QComboBox::activated), this, [=] {
         if (g_fontMessageShowed)
             return;
         g_fontMessageShowed = true;
-        QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Be aware that the font settings will take effect after application restart."));
+        UtilityFunctions::showMessage(
+                    this, tr("Restart required"),
+                    tr("Be aware that the font settings will take effect after application restart."),
+                    QMessageBox::Information);
     });
     connect(m_fontFamilyBox, qOverload<int>(&QComboBox::activated), this, [=] {
         if (g_fontMessageShowed)
             return;
         g_fontMessageShowed = true;
-        QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Be aware that the font settings will take effect after application restart."));
+        UtilityFunctions::showMessage(
+                    this, tr("Restart required"),
+                    tr("Be aware that the font settings will take effect after application restart."),
+                    QMessageBox::Information);
     });
     connect(m_hdpiCheckBox, &QCheckBox::clicked, this, [=] {
         if (g_hdpiMessageShowed)
             return;
         g_hdpiMessageShowed = true;
-        QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Be aware that the high DPI settings will take effect after application restart."));
+        UtilityFunctions::showMessage(
+                    this, tr("Restart required"),
+                    tr("Be aware that the high DPI settings will take effect after application restart."),
+                    QMessageBox::Information);
     });
     connect(m_languageBox, qOverload<int>(&QComboBox::activated), this, [=] {
         if (g_languageMessageShowed)
             return;
         g_languageMessageShowed = true;
-        QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Be aware that the language change will take effect after application restart."));
+        UtilityFunctions::showMessage(
+                    this, tr("Restart required"),
+                    tr("Be aware that the language change will take effect after application restart."),
+                    QMessageBox::Information);
     });
     connect(m_themeBox, qOverload<int>(&QComboBox::activated), this, [=] {
         if (g_themeMessageShowed)
             return;
         g_themeMessageShowed = true;
-        QMessageBox::information(this, tr("Restart Required"),
-                                 tr("Be aware that the theme change will take effect after application restart."));
+        UtilityFunctions::showMessage(
+                    this, tr("Restart required"),
+                    tr("Be aware that the theme change will take effect after application restart."),
+                    QMessageBox::Information);
     });
     connect(m_designerStateResetButton, &QCheckBox::clicked, this, [=] {
-        int ret = QMessageBox::question(this, tr("Are you sure?"),
-                              tr("This will reset tool bars, dock widgets, pane postions and other designer "
-                                 "states to default. Are you sure to proceed?"));
+        int ret = UtilityFunctions::showMessage(
+                    this, tr("Are you sure?"),
+                    tr("This will reset tool bars, dock widgets, pane postions and other designer "
+                       "states to defaults. Are you sure to proceed?"),
+                    QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         if (ret == QMessageBox::Yes)
             emit GeneralSettings::instance()->designerStateReset();
     });

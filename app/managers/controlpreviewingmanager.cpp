@@ -4,6 +4,7 @@
 #include <commanddispatcher.h>
 #include <hashfactory.h>
 #include <previewresult.h>
+#include <utilityfunctions.h>
 
 #include <QThread>
 #include <QProcess>
@@ -169,12 +170,12 @@ void ControlPreviewingManager::onConnected()
 void ControlPreviewingManager::onDisconnected()
 {
     if (!ProjectManager::uid().isEmpty()) {
-        QMessageBox::StandardButton answer = QMessageBox::question(
-                    0, APP_NAME,
-                    tr("Connection lost with Previewing Engine. Would you like to start it over again?"),
+        QMessageBox::StandardButton result = UtilityFunctions::showMessage(
+                    nullptr, tr("Previewing Engine Crashed"),
+                    tr("Would you like to start it over again?"),
+                    QMessageBox::Question,
                     QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-
-        if (answer & QMessageBox::Yes)
+        if (result & QMessageBox::Yes)
             scheduleInit();
     }
 }

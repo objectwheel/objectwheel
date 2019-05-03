@@ -75,12 +75,13 @@ int warnIfModifiedContent(const QmlCodeEditorWidget::Document* document)
 {
     const QmlCodeDocument* qmlDoc = document->document;
     if (qmlDoc->isModified()) {
-        return QMessageBox::warning(
-                    0,
-                    QObject::tr("Unsaved Content"),
-                    QObject::tr("The document contains unsaved content. "
-                                "What would you like to do with the document?"),
-                    QMessageBox::Discard | QMessageBox::Save | QMessageBox::Cancel, QMessageBox::Cancel);
+        return UtilityFunctions::showMessage(nullptr,
+                                             QObject::tr("Unsaved content"),
+                                             QObject::tr("The document contains unsaved content. "
+                                                         "What would you like to do with the document?"),
+                                             QMessageBox::Warning,
+                                             QMessageBox::Discard | QMessageBox::Save | QMessageBox::Cancel,
+                                             QMessageBox::Cancel);
     }
     return QMessageBox::Discard;
 }
@@ -90,10 +91,9 @@ bool warnIfNotATextFile(const QString& filePath)
     QMimeDatabase mimeDatabase;
     const QMimeType mimeType = mimeDatabase.mimeTypeForFile(filePath);
     if (!mimeType.isValid() || !mimeType.inherits("text/plain")) {
-        return QMessageBox::warning(
-                    0,
-                    QObject::tr("Oops"),
-                    QObject::tr("Qml Code Editor cannot open non-text files."));
+        return UtilityFunctions::showMessage(
+                    nullptr, QObject::tr("Oops"),
+                    QObject::tr("Qml Code Editor cannot display binary content."));
     }
     return false;
 }
@@ -102,16 +102,14 @@ bool warnIfFileWriteFails(const QString& filePath, const QString& content)
 {
     QFile file(filePath);
     if (!file.open(QFile::WriteOnly)) {
-        return QMessageBox::critical(
-                    0,
-                    QObject::tr("Oops"),
-                    QObject::tr("Cannot open file. File path: %1").arg(filePath));
+        return UtilityFunctions::showMessage(
+                    nullptr, QObject::tr("Oops"),
+                    QObject::tr("Cannot open file. File path: %1").arg(filePath), QMessageBox::Critical);
     }
     if (file.write(content.toUtf8()) < 0) {
-        return QMessageBox::critical(
-                    0,
-                    QObject::tr("Oops"),
-                    QObject::tr("File write failed. File path: %1").arg(filePath));
+        return UtilityFunctions::showMessage(
+                    nullptr, QObject::tr("Oops"),
+                    QObject::tr("File write failed. File path: %1").arg(filePath), QMessageBox::Critical);
     }
     return false;
 }

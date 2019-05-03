@@ -2,7 +2,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <accountmanager.h>
+#include <registrationapimanager.h>
 #include <countdown.h>
 #include <utilityfunctions.h>
 
@@ -114,11 +114,9 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     connect(_buttons->get(Cancel), &QPushButton::clicked, this, &ResetWidget::onCancelClicked);
 
     connect(_countdown, &Countdown::finished, [=]{
-        QMessageBox::warning(
-            this,
-            tr("Expired"),
-            tr("Your reset code has been expired. Try again later.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Expired"),
+                    tr("Your reset code has been expired, please try again later."));
     });
 
     _loadingIndicator->setStyleSheet("background: transparent;");
@@ -176,36 +174,30 @@ void ResetWidget::onApplyClicked()
     const auto& cpassword = _bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
 
     if (password != cpassword) {
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Passwords"),
-            tr("Passwords do not match.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect passwords"),
+                    tr("Passwords you entered do not match."));
         return;
     }
 
     if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
-        QMessageBox::warning(
-            this,
-            tr("Incorrect Password"),
-            tr("Incorrect Password. Your password must be in between "
-               "6 and 35 characters long. Also please check it if contains invalid characters.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect password"),
+                    tr("Broken password, your password must be in between "
+                       "6 and 35 characters long. Also please checkout if it contains invalid characters."));
         return;
     }
 
-    if (code.isEmpty() || code.size() != 6) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Reset code is incorrect.")
-        );
+    if (code.isEmpty() || code.size() != 6) {        
+        UtilityFunctions::showMessage(
+                    this, tr("Incorrect code"),
+                    tr("Reset code you entered is incorrect."));
         return;
     }
 
     lock();
 
-//    bool succeed = AccountManager::reset(email, password, code);
+//    bool succeed = RegistrationApiManager::reset(email, password, code);
 
 //    if (succeed)
 //        clear();

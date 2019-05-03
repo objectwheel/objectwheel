@@ -2,7 +2,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
-#include <accountmanager.h>
+#include <registrationapimanager.h>
 #include <countdown.h>
 
 #include <QVBoxLayout>
@@ -116,11 +116,9 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     connect(_buttons->get(Cancel), &QPushButton::clicked, this, &VerificationWidget::onCancelClicked);
 
     connect(_countdown, &Countdown::finished, [=]{
-        QMessageBox::warning(
-            this,
-            tr("Expired"),
-            tr("Your verification code has been expired. Try resending it.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Expired"),
+                    tr("Your verification code has been expired, please try again later."));
     });
 
     _loadingIndicator->setStyleSheet("background: transparent;");
@@ -181,7 +179,7 @@ void VerificationWidget::onResendClicked()
 
     lock();
 
-//    bool succeed = AccountManager::resend(email);
+//    bool succeed = RegistrationApiManager::resend(email);
 
 //    if (succeed) {
 //        clear();
@@ -211,17 +209,14 @@ void VerificationWidget::onVerifyClicked()
     auto code = _bulkEdit->get<QLineEdit*>(Code)->text();
 
     if (code.isEmpty() || code.size() != 6) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Verification code is incorrect.")
-        );
+        UtilityFunctions::showMessage(this, tr("Incorrect information"),
+                                      tr("Verification code is incorrect."));
         return;
     }
 
     lock();
 
-//    bool succeed = AccountManager::verify(email, code);
+//    bool succeed = RegistrationApiManager::verify(email, code);
 
 //    if (succeed)
 //        clear();

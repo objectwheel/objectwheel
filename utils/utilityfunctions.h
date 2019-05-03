@@ -3,6 +3,7 @@
 
 #include <Qt>
 #include <QFont>
+#include <QMessageBox>
 
 #include <serializeenum.h>
 #include <previewresult.h>
@@ -96,7 +97,11 @@ QString deviceName(const QVariantMap& deviceInfo);
 QString deviceInfoToolTip(const QVariantMap& deviceInfo);
 QString deviceUid(const QAction* action);
 void setDeviceInfo(QAction* action, const QVariantMap& deviceInfo);
-
+QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, const QString& text,
+                                        QMessageBox::Icon icon = QMessageBox::Warning,
+                                        QMessageBox::StandardButtons buttons = QMessageBox::Ok,
+                                        QMessageBox::StandardButton defaultButton = QMessageBox::Ok,
+                                        bool modal = true);
 } // UtilityFunctions
 
 #endif // UTILITYFUNCTIONS_H

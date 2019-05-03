@@ -223,11 +223,9 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
 void ProjectTemplatesWidget::onNextButtonClick()
 {
     if (!m_listWidget->currentItem()) {
-        QMessageBox::warning(
-            this,
-            tr("Oops"),
-            tr("Select a template first.")
-        );
+        UtilityFunctions::showMessage(
+                    this, tr("Oops"),
+                    tr("Please select a template project first before moving forward."));
         return;
     }
 
