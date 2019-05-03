@@ -5,8 +5,19 @@
 
 namespace SaveUtils {
 
+enum ControlProperties {
+    ControlId = 0x1000,
+    ControlUid,
+    ControlChecksum, // Reserved
+    ControlIcon,
+    ControlToolName,
+    ControlToolCategory,
+    ControlPropertiesVersion,
+    ControlPropertiesSignature
+};
+
 enum ProjectProperties {
-    ProjectName = 0x1000,
+    ProjectName = 0x2000,
     ProjectDescription,
     ProjectChecksum, // Reserved
     ProjectCreationDate,
@@ -19,31 +30,40 @@ enum ProjectProperties {
     ProjectPropertiesSignature
 };
 
-enum ControlProperties {
-    ControlId = 0x2000,
-    ControlUid,
-    ControlChecksum, // Reserved
-    ControlIcon,
-    ControlToolName,
-    ControlToolCategory,
-    ControlPropertiesVersion,
-    ControlPropertiesSignature
+enum UserProperties {
+    UserEmail = 0x3000,
+    UserPassword,
+    UserFileKey,
+    UserFirst,
+    UserLast,
+    UserCountry,
+    UserCompany,
+    UserTitle,
+    UserPhone,
+    UserIcon,
+    UserPlan,
+    UserChecksum, // Reserved
+    UserPropertiesVersion,
+    UserPropertiesSignature
 };
 
 bool isForm(const QString& controlDir);
 bool isControlValid(const QString& controlDir);
 bool isProjectValid(const QString& projectDir);
+bool isUserValid(const QString& userDir);
 
-QString mainQmlFileName();
 QString controlMetaFileName();
 QString projectMetaFileName();
+QString userMetaFileName();
+QString mainQmlFileName();
 
-QString toMainQmlFile(const QString& controlDir);
 QString toControlMetaFile(const QString& controlDir);
+QString toProjectMetaFile(const QString& projectDir);
+QString toUserMetaFile(const QString& userDir);
+QString toMainQmlFile(const QString& controlDir);
 QString toThisDir(const QString& controlDir);
 QString toChildrenDir(const QString& controlDir);
 QString toParentDir(const QString& controlDir);
-QString toProjectMetaFile(const QString& projectDir);
 QString toDesignsDir(const QString& projectDir);
 QString toImportsDir(const QString& projectDir);
 QString toOwDir(const QString& projectDir);
@@ -66,15 +86,19 @@ QJsonValue projectTheme(const QString& projectDir);
 
 QMap<ControlProperties, QVariant> controlMap(const QString& controlDir);
 QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir);
+QMap<UserProperties, QVariant> userMap(const QString& userDir);
 
 QVariant property(const QString& controlDir, ControlProperties property);
 QVariant property(const QString& projectDir, ProjectProperties property);
+QVariant property(const QString& userDir, UserProperties property);
 
 void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
 void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
+void setProperty(const QString& userDir, UserProperties property, const QVariant& value);
 
 void makeControlMetaFile(const QString& controlDir);
 void makeProjectMetaFile(const QString& projectDir);
+void makeUserMetaFile(const QString& userDir);
 
 void regenerateUids(const QString& topPath);
 QStringList formPaths(const QString& projectDir);

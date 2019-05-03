@@ -78,6 +78,8 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
             this, &ForgetWidget::onResetPasswordSuccessful);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::resetPasswordFailure,
             this, &ForgetWidget::onResetPasswordFailure);
+    connect(ServerManager::instance(), &ServerManager::disconnected,
+            this, &ForgetWidget::unlock);
 
     m_loadingIndicator->setStyleSheet("background: transparent;");
     m_loadingIndicator->setColor(palette().text().color());
@@ -125,7 +127,7 @@ void ForgetWidget::onNextClicked()
     if (!ServerManager::isConnected()) {
         UtilityFunctions::showMessage(
                     this, tr("No connection"),
-                    tr("Unable to connect to the server, please try again later."));
+                    tr("Unable to connect to the server, please checkout your internet connection."));
         return;
     }
 

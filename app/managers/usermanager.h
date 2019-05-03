@@ -14,13 +14,11 @@ public:
     static UserManager* instance();
 
     static bool exists(const QString& user);
-    static bool newUser(const QString& user);
     static void setAutoLogin(const QString& password);
 
     static QString dir(const QString& = user());
 
     static const QString& user();
-    static const QString& token();
     static const QByteArray& key();
 
     static void stop();
@@ -40,7 +38,6 @@ private:
 private:
     static UserManager* s_instance;
     static QString s_user;
-    static QString s_token;
     static QByteArray s_key;
 };
 

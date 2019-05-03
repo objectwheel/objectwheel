@@ -10,6 +10,7 @@
 #define VERSION      2.9
 #define SIGN_OWCTRL  "b3djdHJs"
 #define SIGN_OWPRJT  "b3dwcmp0"
+#define SIGN_OWUSER  "b3d1c2Vy"
 #define DIR_THIS     "t"
 #define DIR_CHILDREN "c"
 #define DIR_DESIGNS  "designs"
@@ -38,10 +39,10 @@ bool isProjectValid(const QString& projectDir)
     return sign == QStringLiteral(SIGN_OWPRJT);
 }
 
-QString mainQmlFileName()
+bool isUserValid(const QString& userDir)
 {
-    static const QString& mainQmlFile = QStringLiteral("main.qml");
-    return mainQmlFile;
+    const QString& sign = property(userDir, UserPropertiesSignature).toString();
+    return sign == QStringLiteral(SIGN_OWUSER);
 }
 
 QString controlMetaFileName()
@@ -56,14 +57,36 @@ QString projectMetaFileName()
     return projectMetaFile;
 }
 
-QString toMainQmlFile(const QString& controlDir)
+QString userMetaFileName()
 {
-    return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + mainQmlFileName();
+    static const QString& userMetaFile = QStringLiteral("user.meta");
+    return userMetaFile;
+}
+
+QString mainQmlFileName()
+{
+    static const QString& mainQmlFile = QStringLiteral("main.qml");
+    return mainQmlFile;
 }
 
 QString toControlMetaFile(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + controlMetaFileName();
+}
+
+QString toProjectMetaFile(const QString& projectDir)
+{
+    return projectDir + '/' + projectMetaFileName();
+}
+
+QString toUserMetaFile(const QString& userDir)
+{
+    return userDir + '/' + userMetaFileName();
+}
+
+QString toMainQmlFile(const QString& controlDir)
+{
+    return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + mainQmlFileName();
 }
 
 QString toThisDir(const QString& controlDir)
@@ -82,11 +105,6 @@ QString toParentDir(const QString& controlDir)
     dir.cdUp();
     dir.cdUp();
     return dir.path();
-}
-
-QString toProjectMetaFile(const QString& projectDir)
-{
-    return projectDir + '/' + projectMetaFileName();
 }
 
 QString toDesignsDir(const QString& projectDir)
@@ -202,6 +220,20 @@ QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
     return map;
 }
 
+QMap<UserProperties, QVariant> userMap(const QString& userDir)
+{
+    QMap<UserProperties, QVariant> map;
+    QFile file(toUserMetaFile(userDir));
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("SaveUtils: Cannot open user meta file");
+        return map;
+    }
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_12);
+    in >> map;
+    return map;
+}
+
 QVariant property(const QString& controlDir, ControlProperties property)
 {
     return controlMap(controlDir).value(property);
@@ -210,6 +242,11 @@ QVariant property(const QString& controlDir, ControlProperties property)
 QVariant property(const QString& projectDir, ProjectProperties property)
 {
     return projectMap(projectDir).value(property);
+}
+
+QVariant property(const QString& userDir, UserProperties property)
+{
+    return userMap(userDir).value(property);
 }
 
 void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
@@ -234,6 +271,20 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
     QFile file(toProjectMetaFile(projectDir));
     if (!file.open(QFile::WriteOnly)) {
         qWarning("SaveUtils: Cannot open project meta file");
+        return;
+    }
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_12);
+    out << map;
+}
+
+void setProperty(const QString& userDir, UserProperties property, const QVariant& value)
+{
+    QMap<UserProperties, QVariant> map(userMap(userDir));
+    map.insert(property, value);
+    QFile file(toUserMetaFile(userDir));
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning("SaveUtils: Cannot open user meta file");
         return;
     }
     QDataStream out(&file);
@@ -267,6 +318,23 @@ void makeProjectMetaFile(const QString& projectDir)
         QFile file(toProjectMetaFile(projectDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open project meta file");
+            return;
+        }
+        QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_12);
+        out << map;
+    }
+}
+
+void makeUserMetaFile(const QString& userDir)
+{
+    if (!QFileInfo::exists(toUserMetaFile(userDir))) {
+        QMap<UserProperties, QVariant> map;
+        map.insert(UserPropertiesVersion, qreal(VERSION));
+        map.insert(UserPropertiesSignature, QStringLiteral(SIGN_OWUSER));
+        QFile file(toUserMetaFile(userDir));
+        if (!file.open(QFile::WriteOnly)) {
+            qWarning("SaveUtils: Cannot open user meta file");
             return;
         }
         QDataStream out(&file);

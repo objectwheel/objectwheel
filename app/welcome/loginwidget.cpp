@@ -172,6 +172,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
             this, &LoginWidget::onLoginSuccessful);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginFailure,
             this, &LoginWidget::onLoginFailure);
+    connect(ServerManager::instance(), &ServerManager::disconnected,
+            this, &LoginWidget::unlock);
 }
 
 void LoginWidget::lock()
@@ -215,7 +217,7 @@ void LoginWidget::onLoginButtonClick()
     if (!ServerManager::isConnected()) {
         UtilityFunctions::showMessage(
                     this, tr("No connection"),
-                    tr("Unable to connect to the server, please try again later."));
+                    tr("Unable to connect to the server, please checkout your internet connection."));
         return;
     }
 

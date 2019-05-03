@@ -33,7 +33,6 @@ static QString generateToken(const QString& user, const QString& password)
 
 UserManager* UserManager::s_instance = nullptr;
 QString UserManager::s_user;
-QString UserManager::s_token;
 QByteArray UserManager::s_key;
 
 UserManager::UserManager(QObject* parent) : QObject(parent)
@@ -56,15 +55,6 @@ bool UserManager::exists(const QString& user)
     return QFileInfo::exists(generateUserDirectory(user));
 }
 
-bool UserManager::newUser(const QString& user)
-{
-//	if (exists(user)) return false; //True code
-//	return mkdir(generateUserDirectory(user));
-    //FIXME:
-    if (exists(user)) return false; //Bad code
-    return FileSystemUtils::makeFile(generateUserDirectory(user) + '/' + "bad.dat");
-}
-
 QString UserManager::dir(const QString& user)
 {
     if (!exists(user)) return QString();
@@ -84,11 +74,6 @@ void UserManager::setAutoLogin(const QString& /*password*/)
 const QString& UserManager::user()
 {
     return s_user;
-}
-
-const QString& UserManager::token()
-{
-    return s_token;
 }
 
 const QByteArray& UserManager::key()
@@ -140,7 +125,6 @@ bool UserManager::start(const QString& user, const QString& password)
     keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
     s_user = user;
     s_key = keyHash;
-    s_token = generateToken(user, password);
 
 //    if (DirLocker::canUnlock(dir(user), keyHash)) {
 //        /* Clear all previous trash project folders if locked versions already exists */
@@ -166,7 +150,6 @@ bool UserManager::start(const QString& user, const QString& password)
 //        if (!DirLocker::unlock(dir(user), keyHash)) {
 //            s_user = "";
 //            s_key = "";
-//            s_token = "";
 //			return false;
 //		}
 //	}
@@ -190,5 +173,4 @@ void UserManager::stop()
 
     s_user = "";
     s_key = "";
-    s_token = "";
 }
