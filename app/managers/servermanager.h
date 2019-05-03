@@ -77,7 +77,4 @@ private:
     ~ServerManager() override;
 };
 
-QDataStream& operator>> (QDataStream& in, ServerManager::ServerCommands& e);
-QDataStream& operator<< (QDataStream& out, ServerManager::ServerCommands e);
-
 #endif // SERVERMANAGER_H

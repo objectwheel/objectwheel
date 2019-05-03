@@ -5,7 +5,6 @@
 #include <flatbutton.h>
 #include <waitingspinnerwidget.h>
 #include <global.h>
-#include <accountmanager.h>
 #include <usermanager.h>
 #include <async.h>
 #include <utilityfunctions.h>
@@ -230,7 +229,7 @@ void LoginWidget::onLoginButtonClick()
     AccountManager::login(email, password);
 }
 
-void LoginWidget::onLoginSuccessful(const QString& /*plan*/)
+void LoginWidget::onLoginSuccessful(const AccountManager::Plans& /*plan*/)
 {
     unlock();
     QTimer::singleShot(0, this, &LoginWidget::startSession);
@@ -253,7 +252,6 @@ void LoginWidget::startSession()
 
     m_encryptionWatcher.setFuture(future);
 }
-
 
 void LoginWidget::onSessionStart()
 {

@@ -1,7 +1,7 @@
 #include <previewerserver.h>
+#include <serializeenum.h>
 
 #include <QTimer>
-#include <QDataStream>
 #include <QLocalServer>
 
 PreviewerServer::PreviewerServer(QObject* parent)

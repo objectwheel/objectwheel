@@ -82,9 +82,4 @@ QStringList childrenPaths(const QString& controlDir);
 
 } // SaveUtils
 
-QDataStream& operator>> (QDataStream& in, SaveUtils::ProjectProperties& e);
-QDataStream& operator<< (QDataStream& out, SaveUtils::ProjectProperties e);
-QDataStream& operator>> (QDataStream& in, SaveUtils::ControlProperties& e);
-QDataStream& operator<< (QDataStream& out, SaveUtils::ControlProperties e);
-
 #endif // SAVEUTILS_H

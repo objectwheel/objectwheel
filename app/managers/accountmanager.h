@@ -12,7 +12,15 @@ class AccountManager final : public QObject
     friend class ApplicationCore;
 
 public:
+    enum Plans {
+        Free,
+        Pro = 0x23b,
+        Enterprise = 0x5ad
+    };
+
+public:
     static AccountManager* instance();
+    static Plans plan();
 
     static void login(const QString& email, const QString& password);
     static void signup(const QString& first, const QString& last, const QString& email,
@@ -28,7 +36,7 @@ private slots:
     void onDataArrival(ServerManager::ServerCommands command, const QByteArray& data);
 
 signals:
-    void loginSuccessful(const QString& plan);
+    void loginSuccessful(const Plans& plan);
     void loginFailure();
     void signupSuccessful();
     void signupFailure();
@@ -47,6 +55,7 @@ private:
 
 private:
     static AccountManager* s_instance;
+    static Plans s_plan;
 };
 
 #endif // ACCOUNTMANAGER_H

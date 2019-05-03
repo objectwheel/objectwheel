@@ -86,13 +86,3 @@ void ServerManager::timerEvent(QTimerEvent* event)
         QWebSocket::timerEvent(event);
     }
 }
-
-QDataStream& operator>>(QDataStream& in, ServerManager::ServerCommands& e)
-{
-    return in >> (int&) e;
-}
-
-QDataStream& operator<<(QDataStream& out, ServerManager::ServerCommands e)
-{
-    return out << (int) e;
-}

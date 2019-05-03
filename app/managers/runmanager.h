@@ -138,7 +138,4 @@ private:
     static QString s_recentProjectDirectory;
 };
 
-QDataStream& operator>> (QDataStream& in, RunManager::DiscoveryCommands& e);
-QDataStream& operator<< (QDataStream& out, RunManager::DiscoveryCommands e);
-
 #endif // RUNMANAGER_H

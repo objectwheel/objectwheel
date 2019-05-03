@@ -4,6 +4,7 @@
 #include <Qt>
 #include <QFont>
 
+#include <serializeenum.h>
 #include <previewresult.h>
 
 class QTextDocument;

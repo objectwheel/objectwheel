@@ -24,7 +24,8 @@ HEADERS += \
     $$PWD/paintutils.h \
     $$PWD/utilityfunctions.h \
     $$PWD/qtcolorbutton.h \
-    $$PWD/filesystemutils.h
+    $$PWD/filesystemutils.h \
+    $$PWD/serializeenum.h
 
 SOURCES += \
     $$PWD/delayer.cpp \

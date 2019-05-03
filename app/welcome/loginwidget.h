@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QFutureWatcher>
+#include <accountmanager.h>
 
 class QLabel;
 class Switch;
@@ -28,7 +29,7 @@ private slots:
     void startSession();
     void onSessionStart();
     void onLoginButtonClick();
-    void onLoginSuccessful(const QString& plan);
+    void onLoginSuccessful(const AccountManager::Plans& plan);
     void onLoginFailure();
 
 signals:

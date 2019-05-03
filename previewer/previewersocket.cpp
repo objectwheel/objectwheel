@@ -1,7 +1,7 @@
 #include <previewersocket.h>
+#include <serializeenum.h>
 
 #include <QTimer>
-#include <QDataStream>
 
 PreviewerSocket::PreviewerSocket(QObject* parent) : QObject(parent)
   , m_blockSize(0)

@@ -1,8 +1,8 @@
 #include <saveutils.h>
 #include <filesystemutils.h>
 #include <hashfactory.h>
+#include <serializeenum.h>
 
-#include <QDataStream>
 #include <QDateTime>
 #include <QDir>
 #include <QJsonValue>
@@ -312,23 +312,3 @@ QStringList childrenPaths(const QString& controlDir)
 }
 
 } // SaveUtils
-
-QDataStream& operator>> (QDataStream& in, SaveUtils::ProjectProperties& e)
-{
-    return in >> (int&) e;
-}
-
-QDataStream& operator<< (QDataStream& out, SaveUtils::ProjectProperties e)
-{
-    return out << (int) e;
-}
-
-QDataStream& operator>> (QDataStream& in, SaveUtils::ControlProperties& e)
-{
-    return in >> (int&) e;
-}
-
-QDataStream& operator<< (QDataStream& out, SaveUtils::ControlProperties e)
-{
-    return out << (int) e;
-}
