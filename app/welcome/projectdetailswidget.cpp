@@ -67,18 +67,18 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_bulkEdit->add(Size, tr("Size"));
     m_bulkEdit->setFixedWidth(BUTTONS_WIDTH);
 
-    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setReadOnly(true);
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setReadOnly(true);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setReadOnly(true);
+    m_bulkEdit->get<QLineEdit*>(Name)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Description)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(CreationDate)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(ModificationDate)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Size)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(CreationDate)->setReadOnly(true);
+    m_bulkEdit->get<QLineEdit*>(ModificationDate)->setReadOnly(true);
+    m_bulkEdit->get<QLineEdit*>(Size)->setReadOnly(true);
 
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setStyleSheet("color: #50000000; border: none; background: transparent;");
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setStyleSheet("color: #50000000; border: none; background: transparent;");
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setStyleSheet("color: #50000000; border: none; background: transparent;");
+    m_bulkEdit->get<QLineEdit*>(CreationDate)->setStyleSheet("color: #50000000; border: none; background: transparent;");
+    m_bulkEdit->get<QLineEdit*>(ModificationDate)->setStyleSheet("color: #50000000; border: none; background: transparent;");
+    m_bulkEdit->get<QLineEdit*>(Size)->setStyleSheet("color: #50000000; border: none; background: transparent;");
 
     m_buttons->add(Back, "#5BC5F8", "#2592F9");
     m_buttons->add(Delete, "#CC5D67", "#B2525A");
@@ -113,11 +113,11 @@ void ProjectDetailsWidget::onEditProject(const QString& uid)
     m_toTemplates = false;
     m_uid = uid;
     ProjectManager::updateSize(m_uid);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(ProjectManager::name(uid));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(ProjectManager::description(uid));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(ProjectManager::crDate(uid).toString(Qt::SystemLocaleLongDate));
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(UtilityFunctions::toPrettyBytesString(ProjectManager::size(uid)));
+    m_bulkEdit->get<QLineEdit*>(Name)->setText(ProjectManager::name(uid));
+    m_bulkEdit->get<QLineEdit*>(Description)->setText(ProjectManager::description(uid));
+    m_bulkEdit->get<QLineEdit*>(CreationDate)->setText(ProjectManager::crDate(uid).toString(Qt::SystemLocaleLongDate));
+    m_bulkEdit->get<QLineEdit*>(ModificationDate)->setText(ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
+    m_bulkEdit->get<QLineEdit*>(Size)->setText(UtilityFunctions::toPrettyBytesString(ProjectManager::size(uid)));
 }
 
 void ProjectDetailsWidget::onNewProject(const QString& projectName, int templateNumber)
@@ -125,18 +125,18 @@ void ProjectDetailsWidget::onNewProject(const QString& projectName, int template
     m_toTemplates = true;
     m_templateNumber = templateNumber;
     m_uid.clear();
-    static_cast<QLineEdit*>(m_bulkEdit->get(Name))->setText(projectName);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Description))->setText(tr("Simple project description."));
-    static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->setText(QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
-    static_cast<QLineEdit*>(m_bulkEdit->get(ModificationDate))->setText(QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Size))->setText(tr("0 bytes"));
+    m_bulkEdit->get<QLineEdit*>(Name)->setText(projectName);
+    m_bulkEdit->get<QLineEdit*>(Description)->setText(tr("Simple project description."));
+    m_bulkEdit->get<QLineEdit*>(CreationDate)->setText(QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
+    m_bulkEdit->get<QLineEdit*>(ModificationDate)->setText(QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
+    m_bulkEdit->get<QLineEdit*>(Size)->setText(tr("0 bytes"));
 }
 
 void ProjectDetailsWidget::onSaveClick()
 {
-    auto projectnametext = static_cast<QLineEdit*>(m_bulkEdit->get(Name))->text();
-    auto descriptiontext = static_cast<QLineEdit*>(m_bulkEdit->get(Description))->text();
-    auto crdatetext = static_cast<QLineEdit*>(m_bulkEdit->get(CreationDate))->text();
+    auto projectnametext = m_bulkEdit->get<QLineEdit*>(Name)->text();
+    auto descriptiontext = m_bulkEdit->get<QLineEdit*>(Description)->text();
+    auto crdatetext = m_bulkEdit->get<QLineEdit*>(CreationDate)->text();
 
     if (projectnametext.isEmpty()) {
         QMessageBox::warning(this, tr("Oops"), tr("Project name cannot be empty."));

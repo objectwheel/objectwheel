@@ -9,9 +9,10 @@ class ButtonSlice;
 class BulkEdit;
 class WaitingSpinnerWidget;
 
-class ForgetWidget : public QWidget
+class ForgetWidget final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ForgetWidget)
 
 public:
     explicit ForgetWidget(QWidget* parent = nullptr);
@@ -27,12 +28,12 @@ signals:
     void done(const QString& email);
 
 private:
-    QVBoxLayout* _layout;
-    QLabel* _iconLabel;
-    QLabel* _forgotLabel;
-    ButtonSlice* _buttons;
-    BulkEdit* _bulkEdit;
-    WaitingSpinnerWidget* _loadingIndicator;
+    QVBoxLayout* m_layout;
+    QLabel* m_iconLabel;
+    QLabel* m_forgotLabel;
+    ButtonSlice* m_buttons;
+    BulkEdit* m_bulkEdit;
+    WaitingSpinnerWidget* m_loadingIndicator;
 };
 
 #endif // FORGETWIDGET_H

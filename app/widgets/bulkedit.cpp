@@ -44,14 +44,6 @@ void BulkEdit::add(int id, const QString& label, QWidget* widget)
     setFixedHeight(_settings.cellHeight * _elements.size());
 }
 
-QWidget* BulkEdit::get(int id)
-{
-    for (const auto& e : _elements)
-        if (e.id == id)
-            return e.edit;
-    return nullptr;
-}
-
 BulkEdit::Settings& BulkEdit::settings()
 {
     return _settings;

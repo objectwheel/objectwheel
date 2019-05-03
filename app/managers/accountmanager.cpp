@@ -1,8 +1,6 @@
 #include <accountmanager.h>
 
 AccountManager* AccountManager::s_instance = nullptr;
-AccountManager::Plans AccountManager::s_plan = AccountManager::Free;
-
 AccountManager::AccountManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
@@ -16,11 +14,6 @@ AccountManager::~AccountManager()
 AccountManager* AccountManager::instance()
 {
     return s_instance;
-}
-
-AccountManager::Plans AccountManager::plan()
-{
-    return s_plan;
 }
 
 void AccountManager::login(const QString& email, const QString& password)
@@ -60,12 +53,13 @@ void AccountManager::completePasswordReset(const QString& email, const QString& 
 void AccountManager::onDataArrival(ServerManager::ServerCommands command, const QByteArray& data)
 {
     switch (command) {
-    case ServerManager::LoginSuccessful:
-        UtilityFunctions::pull(data, s_plan);
-        if (s_plan != Pro && s_plan != Enterprise)
-            s_plan = Free;
-        emit loginSuccessful(s_plan);
-        break;
+    case ServerManager::LoginSuccessful: {
+        Plans plan;
+        UtilityFunctions::pull(data, plan);
+        if (plan != Pro && plan != Enterprise)
+            plan = Free;
+        emit loginSuccessful(plan);
+    } break;
     case ServerManager::LoginFailure:
         emit loginFailure();
         break;

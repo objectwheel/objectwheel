@@ -90,12 +90,12 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _bulkEdit->add(Code, tr("Reset Code"));
     _bulkEdit->setFixedWidth(BUTTONS_WIDTH);
 
-    static_cast<QLineEdit*>(_bulkEdit->get(Code))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Code))->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->setEchoMode(QLineEdit::Password);
+    _bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Code)->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
+    _bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
+    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setEchoMode(QLineEdit::Password);
 
     _buttons->add(Cancel, "#CC5D67", "#B2525A");
     _buttons->add(Apply, "#86CC63", "#75B257");
@@ -143,9 +143,9 @@ void ResetWidget::setEmail(const QString& email)
 void ResetWidget::clear()
 {
     _countdown->stop();
-    static_cast<QLineEdit*>(_bulkEdit->get(Code))->clear();
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->clear();
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->clear();
+    _bulkEdit->get<QLineEdit*>(Code)->clear();
+    _bulkEdit->get<QLineEdit*>(Password)->clear();
+    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->clear();
 }
 
 void ResetWidget::lock()
@@ -171,9 +171,9 @@ void ResetWidget::onCancelClicked()
 void ResetWidget::onApplyClicked()
 {
     auto email = _emailLabel->text().split("\n").at(2);
-    const auto& code = static_cast<QLineEdit*>(_bulkEdit->get(Code))->text();
-    const auto& password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
-    const auto& cpassword = static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->text();
+    const auto& code = _bulkEdit->get<QLineEdit*>(Code)->text();
+    const auto& password = _bulkEdit->get<QLineEdit*>(Password)->text();
+    const auto& cpassword = _bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
 
     if (password != cpassword) {
         QMessageBox::warning(

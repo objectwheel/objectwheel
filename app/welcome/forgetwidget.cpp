@@ -21,32 +21,31 @@ enum Fields { Email };
 enum Buttons { Next, Back };
 
 ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
+  , m_layout(new QVBoxLayout(this))
+  , m_iconLabel(new QLabel)
+  , m_forgotLabel(new QLabel)
+  , m_buttons(new ButtonSlice)
+  , m_bulkEdit(new BulkEdit)
+  , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
 {
-    _layout = new QVBoxLayout(this);
-    _iconLabel = new QLabel;
-    _forgotLabel = new QLabel;
-    _bulkEdit = new BulkEdit;
-    _buttons = new ButtonSlice;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false);
-
-    _layout->setSpacing(6);
-    _layout->addStretch();
-    _layout->addWidget(_iconLabel, 0 , Qt::AlignCenter);
-    _layout->addSpacing(10);
-    _layout->addWidget(_forgotLabel, 0 , Qt::AlignCenter);
-    _layout->addSpacing(50);
-    _layout->addWidget(_bulkEdit, 0 , Qt::AlignCenter);
-    _layout->addSpacing(10);
-    _layout->addWidget(_buttons, 0 , Qt::AlignCenter);
-    _layout->addStretch();
-    _layout->addWidget(_loadingIndicator, 0 , Qt::AlignCenter);
-    _layout->addStretch();
+    m_layout->setSpacing(6);
+    m_layout->addStretch();
+    m_layout->addWidget(m_iconLabel, 0 , Qt::AlignCenter);
+    m_layout->addSpacing(10);
+    m_layout->addWidget(m_forgotLabel, 0 , Qt::AlignCenter);
+    m_layout->addSpacing(50);
+    m_layout->addWidget(m_bulkEdit, 0 , Qt::AlignCenter);
+    m_layout->addSpacing(10);
+    m_layout->addWidget(m_buttons, 0 , Qt::AlignCenter);
+    m_layout->addStretch();
+    m_layout->addWidget(m_loadingIndicator, 0 , Qt::AlignCenter);
+    m_layout->addStretch();
 
     QPixmap p(PATH_ICON);
     p.setDevicePixelRatio(devicePixelRatioF());
 
-    _iconLabel->setFixedSize(SIZE_ICON);
-    _iconLabel->setPixmap(
+    m_iconLabel->setFixedSize(SIZE_ICON);
+    m_iconLabel->setPixmap(
         p.scaled(
             SIZE_ICON * devicePixelRatioF(),
             Qt::IgnoreAspectRatio,
@@ -58,65 +57,64 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
 
-    _forgotLabel->setFont(f);
-    _forgotLabel->setText(tr("Password Reset"));
+    m_forgotLabel->setFont(f);
+    m_forgotLabel->setText(tr("Password Reset"));
 
-    _bulkEdit->add(Email, tr("Email Address"));
-    _bulkEdit->setFixedWidth(BUTTONS_WIDTH);
+    m_bulkEdit->add(Email, tr("Email Address"));
+    m_bulkEdit->setFixedWidth(BUTTONS_WIDTH);
 
-    static_cast<QLineEdit*>(_bulkEdit->get(Email))
-      ->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Email)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    _buttons->add(Back, "#5BC5F8", "#2592F9");
-    _buttons->add(Next, "#8BBB56", "#6EA045");
-    _buttons->get(Next)->setText(tr("Next"));
-    _buttons->get(Back)->setText(tr("Back"));
-    _buttons->get(Next)->setIcon(QIcon(PATH_NICON));
-    _buttons->get(Back)->setIcon(QIcon(PATH_CICON));
-    _buttons->get(Next)->setIconSize(QSize(16, 16));
-    _buttons->get(Back)->setIconSize(QSize(16, 16));
-    _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
-    _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
-    _buttons->triggerSettings();
+    m_buttons->add(Back, "#5BC5F8", "#2592F9");
+    m_buttons->add(Next, "#8BBB56", "#6EA045");
+    m_buttons->get(Next)->setText(tr("Next"));
+    m_buttons->get(Back)->setText(tr("Back"));
+    m_buttons->get(Next)->setIcon(QIcon(PATH_NICON));
+    m_buttons->get(Back)->setIcon(QIcon(PATH_CICON));
+    m_buttons->get(Next)->setIconSize(QSize(16, 16));
+    m_buttons->get(Back)->setIconSize(QSize(16, 16));
+    m_buttons->get(Next)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
+    m_buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
+    m_buttons->triggerSettings();
 
-    connect(_buttons->get(Back), &QPushButton::clicked, this, &ForgetWidget::back);
-    connect(_buttons->get(Next), &QPushButton::clicked, this, &ForgetWidget::onNextClicked);
+    connect(m_buttons->get(Back), &QPushButton::clicked, this, &ForgetWidget::back);
+    connect(m_buttons->get(Next), &QPushButton::clicked, this, &ForgetWidget::onNextClicked);
 
-    _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor(palette().text().color());
-    _loadingIndicator->setRoundness(50);
-    _loadingIndicator->setMinimumTrailOpacity(5);
-    _loadingIndicator->setTrailFadePercentage(100);
-    _loadingIndicator->setRevolutionsPerSecond(2);
-    _loadingIndicator->setNumberOfLines(12);
-    _loadingIndicator->setLineLength(5);
-    _loadingIndicator->setInnerRadius(4);
-    _loadingIndicator->setLineWidth(2);
+    m_loadingIndicator->setStyleSheet("background: transparent;");
+    m_loadingIndicator->setColor(palette().text().color());
+    m_loadingIndicator->setRoundness(50);
+    m_loadingIndicator->setMinimumTrailOpacity(5);
+    m_loadingIndicator->setTrailFadePercentage(100);
+    m_loadingIndicator->setRevolutionsPerSecond(2);
+    m_loadingIndicator->setNumberOfLines(12);
+    m_loadingIndicator->setLineLength(5);
+    m_loadingIndicator->setInnerRadius(4);
+    m_loadingIndicator->setLineWidth(2);
 }
 
 void ForgetWidget::clear()
 {
-    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setText("");
+    m_bulkEdit->get<QLineEdit*>(Email)->setText("");
 }
 
 void ForgetWidget::lock()
 {
-    _bulkEdit->setDisabled(true);
-    _buttons->setDisabled(true);
-    _loadingIndicator->start();
+    m_bulkEdit->setDisabled(true);
+    m_buttons->setDisabled(true);
+    m_loadingIndicator->start();
 }
 
 void ForgetWidget::unlock()
 {
-    _bulkEdit->setEnabled(true);
-    _buttons->setEnabled(true);
-    _loadingIndicator->stop();
+    m_bulkEdit->setEnabled(true);
+    m_buttons->setEnabled(true);
+    m_loadingIndicator->stop();
 }
 
 void ForgetWidget::onNextClicked()
 {
-    const auto& email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
+    const auto& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
 
     if (email.isEmpty() || email.size() > 256 ||
         !UtilityFunctions::isEmailFormatCorrect(email)) {
@@ -132,7 +130,7 @@ void ForgetWidget::onNextClicked()
 
 //    bool succeed =
 //    AccountManager::forget(
-//        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text()
+//        m_bulkEdit->get<QLineEdit*>(Email))->text()
 //    );
 
 //    if (succeed)

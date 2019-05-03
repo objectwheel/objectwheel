@@ -20,7 +20,6 @@ public:
 
 public:
     static AccountManager* instance();
-    static Plans plan();
 
     static void login(const QString& email, const QString& password);
     static void signup(const QString& first, const QString& last, const QString& email,
@@ -55,7 +54,6 @@ private:
 
 private:
     static AccountManager* s_instance;
-    static Plans s_plan;
 };
 
 #endif // ACCOUNTMANAGER_H

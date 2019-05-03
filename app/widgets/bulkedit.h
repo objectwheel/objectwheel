@@ -34,8 +34,16 @@ public:
 public:
     explicit BulkEdit(QWidget* parent = nullptr);
     void add(int id, const QString& label, QWidget* widget = new QLineEdit);
-    QWidget* get(int id);
     Settings& settings();
+
+    template <typename WidgetPtr> WidgetPtr get(int id)
+    {
+        for (const LineElement& element : _elements) {
+            if (element.id == id)
+                return static_cast<WidgetPtr>(element.edit);
+        }
+        return nullptr;
+    }
 
 public slots:
     void triggerSettings();

@@ -110,19 +110,19 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _bulkEdit->add(Phone, tr("Phone"));
     _bulkEdit->setFixedWidth(TERMS_WIDTH);
 
-    static_cast<QLineEdit*>(_bulkEdit->get(First))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Last))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmEmail))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Company))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Title))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Phone))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->setEchoMode(QLineEdit::Password);
+    _bulkEdit->get<QLineEdit*>(First)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Last)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Email)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(ConfirmEmail)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Company)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Title)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Phone)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
+    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setEchoMode(QLineEdit::Password);
 
-    auto cbox = static_cast<QComboBox*>(_bulkEdit->get(Country));
+    auto cbox = _bulkEdit->get<QComboBox*>(Country);
     cbox->setEditable(true);
     cbox->lineEdit()->setReadOnly(true);
     cbox->lineEdit()->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -198,16 +198,16 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
 
 void RegistrationWidget::clear()
 {
-    static_cast<QLineEdit*>(_bulkEdit->get(First))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(Last))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(Email))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmEmail))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(Password))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(Company))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(Title))->setText("");
-    static_cast<QLineEdit*>(_bulkEdit->get(Phone))->setText("");
-    static_cast<QComboBox*>(_bulkEdit->get(Country))->setCurrentIndex(0);
+    _bulkEdit->get<QLineEdit*>(First)->setText("");
+    _bulkEdit->get<QLineEdit*>(Last)->setText("");
+    _bulkEdit->get<QLineEdit*>(Email)->setText("");
+    _bulkEdit->get<QLineEdit*>(ConfirmEmail)->setText("");
+    _bulkEdit->get<QLineEdit*>(Password)->setText("");
+    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setText("");
+    _bulkEdit->get<QLineEdit*>(Company)->setText("");
+    _bulkEdit->get<QLineEdit*>(Title)->setText("");
+    _bulkEdit->get<QLineEdit*>(Phone)->setText("");
+    _bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
     _termsSwitch->setChecked(false);
     _buttons->setFocus();
 }
@@ -238,16 +238,16 @@ void RegistrationWidget::unlock()
 
 void RegistrationWidget::onNextClicked()
 {
-    const auto& first = static_cast<QLineEdit*>(_bulkEdit->get(First))->text();
-    const auto& last = static_cast<QLineEdit*>(_bulkEdit->get(Last))->text();
-    const auto& email = static_cast<QLineEdit*>(_bulkEdit->get(Email))->text();
-    const auto& cemail = static_cast<QLineEdit*>(_bulkEdit->get(ConfirmEmail))->text();
-    const auto& password = static_cast<QLineEdit*>(_bulkEdit->get(Password))->text();
-    const auto& cpassword = static_cast<QLineEdit*>(_bulkEdit->get(ConfirmPassword))->text();
-    const auto& company = static_cast<QLineEdit*>(_bulkEdit->get(Company))->text();
-    const auto& title = static_cast<QLineEdit*>(_bulkEdit->get(Title))->text();
-    const auto& phone = static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text();
-    const auto& country = static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText();
+    const auto& first = _bulkEdit->get<QLineEdit*>(First)->text();
+    const auto& last = _bulkEdit->get<QLineEdit*>(Last)->text();
+    const auto& email = _bulkEdit->get<QLineEdit*>(Email)->text();
+    const auto& cemail = _bulkEdit->get<QLineEdit*>(ConfirmEmail)->text();
+    const auto& password = _bulkEdit->get<QLineEdit*>(Password)->text();
+    const auto& cpassword = _bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
+    const auto& company = _bulkEdit->get<QLineEdit*>(Company)->text();
+    const auto& title = _bulkEdit->get<QLineEdit*>(Title)->text();
+    const auto& phone = _bulkEdit->get<QLineEdit*>(Phone)->text();
+    const auto& country = _bulkEdit->get<QComboBox*>(Country)->currentText();
 
     if (!_termsSwitch->isChecked()) {
         QMessageBox::warning(
@@ -317,15 +317,15 @@ void RegistrationWidget::onNextClicked()
 
 //    bool succeed =
 //    AccountManager::signup(
-//        static_cast<QLineEdit*>(_bulkEdit->get(First))->text(),
-//        static_cast<QLineEdit*>(_bulkEdit->get(Last))->text(),
-//        static_cast<QLineEdit*>(_bulkEdit->get(Email))->text(),
-//        static_cast<QLineEdit*>(_bulkEdit->get(Password))->text(),
-//        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() != "Please select..." ?
-//        static_cast<QComboBox*>(_bulkEdit->get(Country))->currentText() : "",
-//        static_cast<QLineEdit*>(_bulkEdit->get(Company))->text(),
-//        static_cast<QLineEdit*>(_bulkEdit->get(Title))->text(),
-//        static_cast<QLineEdit*>(_bulkEdit->get(Phone))->text()
+//        _bulkEdit->get<QLineEdit*>(First)->text(),
+//        _bulkEdit->get<QLineEdit*>(Last)->text(),
+//        _bulkEdit->get<QLineEdit*>(Email)->text(),
+//        _bulkEdit->get<QLineEdit*>(Password)->text(),
+//        static_cast<QComboBox*>(_bulkEdit->get(Country)->currentText() != "Please select..." ?
+//        static_cast<QComboBox*>(_bulkEdit->get(Country)->currentText() : "",
+//        _bulkEdit->get<QLineEdit*>(Company)->text(),
+//        _bulkEdit->get<QLineEdit*>(Title)->text(),
+//        _bulkEdit->get<QLineEdit*>(Phone)->text()
 //    );
 
 //    if (succeed)

@@ -96,9 +96,9 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     m_bulkEdit->add(Email, tr("Email"));
     m_bulkEdit->add(Password, tr("Password"));
-    static_cast<QLineEdit*>(m_bulkEdit->get(Password))->setEchoMode(QLineEdit::Password);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Email))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(m_bulkEdit->get(Password))->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
+    m_bulkEdit->get<QLineEdit*>(Email)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
     m_autologinWidget->setObjectName("autologinWidget");
     m_autologinWidget->setFixedSize(AUTOLOGIN_WIDTH, AUTOLOGIN_HEIGHT);
@@ -194,14 +194,14 @@ void LoginWidget::unlock()
 
 void LoginWidget::clear()
 {
-    static_cast<QLineEdit*>(m_bulkEdit->get(Email))->clear();
-    static_cast<QLineEdit*>(m_bulkEdit->get(Password))->clear();
+    m_bulkEdit->get<QLineEdit*>(Email)->clear();
+    m_bulkEdit->get<QLineEdit*>(Password)->clear();
 }
 
 void LoginWidget::onLoginButtonClick()
 {
-    auto email = static_cast<QLineEdit*>(m_bulkEdit->get(Email))->text();
-    auto password = static_cast<QLineEdit*>(m_bulkEdit->get(Password))->text();
+    auto email = m_bulkEdit->get<QLineEdit*>(Email)->text();
+    auto password = m_bulkEdit->get<QLineEdit*>(Password)->text();
 
     if (email.isEmpty() || email.size() > 256 ||
         password.isEmpty() || password.size() > 256 ||
@@ -244,8 +244,8 @@ void LoginWidget::onLoginFailure()
 
 void LoginWidget::startSession()
 {
-    const QString email = static_cast<QLineEdit*>(m_bulkEdit->get(Email))->text();
-    const QString password = static_cast<QLineEdit*>(m_bulkEdit->get(Password))->text();
+    const QString email = m_bulkEdit->get<QLineEdit*>(Email)->text();
+    const QString password = m_bulkEdit->get<QLineEdit*>(Password)->text();
 
     UserManager::newUser(email);
     QFuture<bool> future = Async::run(QThreadPool::globalInstance(), &UserManager::start, email, password);
@@ -255,7 +255,7 @@ void LoginWidget::startSession()
 
 void LoginWidget::onSessionStart()
 {
-    auto password = static_cast<QLineEdit*>(m_bulkEdit->get(Password))->text();
+    auto password = m_bulkEdit->get<QLineEdit*>(Password)->text();
 
     if (m_encryptionWatcher.result()) {
         if (m_autologinSwitch->isChecked())

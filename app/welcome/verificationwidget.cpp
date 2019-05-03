@@ -90,10 +90,8 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _bulkEdit->add(Code, tr("Enter Verification Code"));
     _bulkEdit->setFixedWidth(BUTTONS_WIDTH);
 
-    static_cast<QLineEdit*>(_bulkEdit->get(Code))
-      ->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    static_cast<QLineEdit*>(_bulkEdit->get(Code))
-      ->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
+    _bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    _bulkEdit->get<QLineEdit*>(Code)->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
 
     _buttons->add(Cancel, "#CC5D67", "#B2525A");
     _buttons->add(Resend, "#5BC5F8", "#2592F9");
@@ -149,7 +147,7 @@ void VerificationWidget::setEmail(const QString& email)
 void VerificationWidget::clear()
 {
     _countdown->stop();
-    static_cast<QLineEdit*>(_bulkEdit->get(Code))->clear();
+    _bulkEdit->get<QLineEdit*>(Code)->clear();
 }
 
 void VerificationWidget::lock()
@@ -210,7 +208,7 @@ void VerificationWidget::onResendClicked()
 void VerificationWidget::onVerifyClicked()
 {
     auto email = _emailLabel->text().split("\n").at(2);
-    auto code = static_cast<QLineEdit*>(_bulkEdit->get(Code))->text();
+    auto code = _bulkEdit->get<QLineEdit*>(Code)->text();
 
     if (code.isEmpty() || code.size() != 6) {
         QMessageBox::warning(
