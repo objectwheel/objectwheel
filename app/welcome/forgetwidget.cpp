@@ -116,7 +116,7 @@ void ForgetWidget::onNextClicked()
 {
     const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
 
-    if (email.isEmpty() || email.size() > 256 ||
+    if (email.isEmpty() || email.size() > 255 ||
         !UtilityFunctions::isEmailFormatCorrect(email)) {
         UtilityFunctions::showMessage(
                     this, tr("Incorrect information"),

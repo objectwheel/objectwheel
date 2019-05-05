@@ -257,19 +257,19 @@ void RegistrationWidget::onNextClicked()
         return;
     }
 
-    if (first.isEmpty() || first.size() > 256 ||
-        last.isEmpty() || last.size() > 256 ||
-        email.isEmpty() || email.size() > 256 ||
-        cemail.isEmpty() || cemail.size() > 256 ||
-        password.isEmpty() || password.size() > 256 ||
-        cpassword.isEmpty() || cpassword.size() > 256 ||
-        country.size() > 256 || company.size() > 256 ||
-        title.size() > 256 || phone.size() > 256
+    if (first.isEmpty() || first.size() > 255 ||
+        last.isEmpty() || last.size() > 255 ||
+        email.isEmpty() || email.size() > 255 ||
+        cemail.isEmpty() || cemail.size() > 255 ||
+        password.isEmpty() || password.size() > 255 ||
+        cpassword.isEmpty() || cpassword.size() > 255 ||
+        country.size() > 255 || company.size() > 255 ||
+        title.size() > 255 || phone.size() > 255
     ) {
         UtilityFunctions::showMessage(
                     this, tr("Incorrect information"),
                     tr("Please make sure you have filled all the required fields "
-                       "with necessary information. Fields cannot exceed 256 characters long."));
+                       "with necessary information. Fields cannot exceed 255 characters long."));
         return;
     }
 

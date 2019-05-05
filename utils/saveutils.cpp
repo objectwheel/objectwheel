@@ -29,19 +29,19 @@ bool isForm(const QString& controlDir)
 
 bool isControlValid(const QString& controlDir)
 {
-    const QString& sign = property(controlDir, ControlPropertiesSignature).toString();
+    const QString& sign = property(controlDir, ControlSignature).toString();
     return sign == QStringLiteral(SIGN_OWCTRL) && !uid(controlDir).isEmpty();
 }
 
 bool isProjectValid(const QString& projectDir)
 {
-    const QString& sign = property(projectDir, ProjectPropertiesSignature).toString();
+    const QString& sign = property(projectDir, ProjectSignature).toString();
     return sign == QStringLiteral(SIGN_OWPRJT);
 }
 
 bool isUserValid(const QString& userDir)
 {
-    const QString& sign = property(userDir, UserPropertiesSignature).toString();
+    const QString& sign = property(userDir, UserSignature).toString();
     return sign == QStringLiteral(SIGN_OWUSER);
 }
 
@@ -296,8 +296,8 @@ void makeControlMetaFile(const QString& controlDir)
 {
     if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
         QMap<ControlProperties, QVariant> map;
-        map.insert(ControlPropertiesVersion, qreal(VERSION));
-        map.insert(ControlPropertiesSignature, QStringLiteral(SIGN_OWCTRL));
+        map.insert(ControlVersion, qreal(VERSION));
+        map.insert(ControlSignature, QStringLiteral(SIGN_OWCTRL));
         QFile file(toControlMetaFile(controlDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open control meta file");
@@ -313,8 +313,8 @@ void makeProjectMetaFile(const QString& projectDir)
 {
     if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
         QMap<ProjectProperties, QVariant> map;
-        map.insert(ProjectPropertiesVersion, qreal(VERSION));
-        map.insert(ProjectPropertiesSignature, QStringLiteral(SIGN_OWPRJT));
+        map.insert(ProjectVersion, qreal(VERSION));
+        map.insert(ProjectSignature, QStringLiteral(SIGN_OWPRJT));
         QFile file(toProjectMetaFile(projectDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open project meta file");
@@ -330,8 +330,8 @@ void makeUserMetaFile(const QString& userDir)
 {
     if (!QFileInfo::exists(toUserMetaFile(userDir))) {
         QMap<UserProperties, QVariant> map;
-        map.insert(UserPropertiesVersion, qreal(VERSION));
-        map.insert(UserPropertiesSignature, QStringLiteral(SIGN_OWUSER));
+        map.insert(UserVersion, qreal(VERSION));
+        map.insert(UserSignature, QStringLiteral(SIGN_OWUSER));
         QFile file(toUserMetaFile(userDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open user meta file");

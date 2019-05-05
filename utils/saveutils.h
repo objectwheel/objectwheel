@@ -8,32 +8,29 @@ namespace SaveUtils {
 enum ControlProperties {
     ControlId = 0x1000,
     ControlUid,
-    ControlChecksum, // Reserved
     ControlIcon,
     ControlToolName,
     ControlToolCategory,
-    ControlPropertiesVersion,
-    ControlPropertiesSignature
+    ControlVersion,
+    ControlSignature
 };
 
 enum ProjectProperties {
     ProjectName = 0x2000,
     ProjectDescription,
-    ProjectChecksum, // Reserved
     ProjectCreationDate,
     ProjectModificationDate,
     ProjectSize,
     ProjectUid,
     ProjectTheme,
     ProjectHdpiScaling,
-    ProjectPropertiesVersion,
-    ProjectPropertiesSignature
+    ProjectVersion,
+    ProjectSignature
 };
 
 enum UserProperties {
     UserEmail = 0x3000,
-    UserPassword,
-    UserFileKey,
+    UserPassword, // Empty unless auto login enabled
     UserFirst,
     UserLast,
     UserCountry,
@@ -42,9 +39,9 @@ enum UserProperties {
     UserPhone,
     UserIcon,
     UserPlan,
-    UserChecksum, // Reserved
-    UserPropertiesVersion,
-    UserPropertiesSignature
+    UserRegistrationDate,
+    UserVersion,
+    UserSignature
 };
 
 bool isForm(const QString& controlDir);

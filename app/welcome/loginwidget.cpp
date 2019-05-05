@@ -205,8 +205,8 @@ void LoginWidget::onLoginButtonClick()
     auto email = m_bulkEdit->get<QLineEdit*>(Email)->text();
     auto password = m_bulkEdit->get<QLineEdit*>(Password)->text();
 
-    if (email.isEmpty() || email.size() > 256 ||
-        password.isEmpty() || password.size() > 256 ||
+    if (email.isEmpty() || email.size() > 255 ||
+        password.isEmpty() || password.size() > 255 ||
         !UtilityFunctions::isEmailFormatCorrect(email) ||
         !UtilityFunctions::isPasswordFormatCorrect(password)) {
         UtilityFunctions::showMessage(this, tr("Incorrect information"),

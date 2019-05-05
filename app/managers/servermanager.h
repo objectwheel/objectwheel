@@ -34,7 +34,12 @@ public:
         ResetPasswordFailure,
         CompletePasswordReset,
         CompletePasswordResetSuccessful,
-        CompletePasswordResetFailure
+        CompletePasswordResetFailure,
+        UpdateUserIcon,
+        UpdateUserIconSuccessful,
+        UpdateUserIconFailure,
+        RequestUserIcon,
+        ResponseUserIcon
     };
 
 public:
