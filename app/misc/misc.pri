@@ -1,14 +1,12 @@
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
-HEADERS += $$PWD/dirlocker.h \
-           $$PWD/pathfinder.h \
+HEADERS += $$PWD/pathfinder.h \
            $$PWD/suppressor.h \
            $$PWD/transparentstyle.h \
            $$PWD/splashscreen.h
 
-SOURCES += $$PWD/dirlocker.cpp \
-           $$PWD/pathfinder.cpp \
+SOURCES += $$PWD/pathfinder.cpp \
            $$PWD/suppressor.cpp \
            $$PWD/transparentstyle.cpp \
            $$PWD/splashscreen.cpp

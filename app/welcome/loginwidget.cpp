@@ -246,10 +246,10 @@ void LoginWidget::startSession()
     const QString email = m_bulkEdit->get<QLineEdit*>(Email)->text();
     const QString password = m_bulkEdit->get<QLineEdit*>(Password)->text();
 
-    UserManager::newUser(email);
-    QFuture<bool> future = Async::run(QThreadPool::globalInstance(), &UserManager::start, email, password);
+//  FIXME  UserManager::newUser(email);
+//    QFuture<bool> future = Async::run(QThreadPool::globalInstance(), &UserManager::start, email, password);
 
-    m_encryptionWatcher.setFuture(future);
+//    m_encryptionWatcher.setFuture(future);
 }
 
 void LoginWidget::onSessionStart()

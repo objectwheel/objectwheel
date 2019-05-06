@@ -21,11 +21,11 @@ public:
     static const QString& user();
     static const QByteArray& key();
 
-    static void stop();
+    static void logout();
     static bool hasAutoLogin();
     static bool tryAutoLogin();
     static void clearAutoLogin();
-    static bool start(const QString& user, const QString& password);
+    static bool login(const QString& user, const QString& password);
 
 signals:
     void started();

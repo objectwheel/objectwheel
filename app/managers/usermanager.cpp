@@ -1,6 +1,4 @@
 #include <usermanager.h>
-#include <dirlocker.h>
-#include <aes.h>
 #include <applicationcore.h>
 #include <filesystemutils.h>
 
@@ -11,9 +9,6 @@
 #include <QJsonObject>
 #include <QRandomGenerator>
 #include <QFileInfo>
-
-#define AUTOLOGIN_FILENAME  "alg.lock"
-#define AUTOLOGIN_PROTECTOR "QWxsYWggaXMgZ3JlYXRlc3Qu"
 
 namespace {
 
@@ -63,10 +58,10 @@ QString UserManager::dir(const QString& user)
 
 void UserManager::setAutoLogin(const QString& /*password*/)
 {
-    if (s_user.isEmpty() || dir().isEmpty()) return;
-    QString json = "{ \"e\" : \"%1\", \"p\" : \"%2\" }";
-    auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
-    auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
+//    if (s_user.isEmpty() || dir().isEmpty()) return;
+//    QString json = "{ \"e\" : \"%1\", \"p\" : \"%2\" }";
+//    auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
+//    auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
 //  FIXME  wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME,
 //        Aes::encrypt(sstep, QByteArray().insert(0, json.arg(s_user, password))));
 }
@@ -107,7 +102,7 @@ bool UserManager::tryAutoLogin()
     return false;
 }
 
-bool UserManager::start(const QString& user, const QString& password)
+bool UserManager::login(const QString& user, const QString& password)
 {
     if (s_user == user) {
 		return true;
@@ -118,7 +113,7 @@ bool UserManager::start(const QString& user, const QString& password)
 	}
 
     if (!s_user.isEmpty()) {
-        stop();
+        logout();
 	}
 
     auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha3_512);
@@ -159,7 +154,7 @@ bool UserManager::start(const QString& user, const QString& password)
     return true;
 }
 
-void UserManager::stop()
+void UserManager::logout()
 {
     if (s_user.isEmpty())
 		return;
