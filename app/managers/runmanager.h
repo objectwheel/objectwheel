@@ -74,7 +74,7 @@ class RunManager final : public QObject
     };
 
 public:
-    enum DiscoveryCommands {
+    enum DiscoveryCommands : quint32 {
         Broadcast = 0x1100,
         Execute,
         Terminate,

@@ -16,12 +16,12 @@ public:
     static QStringList projectNames();
 
     static QString uid();
-    static QString dir(const QString& = instance()->uid());
-    static QString name(const QString& = instance()->uid());
-    static QString description(const QString& = instance()->uid());
-    static QDateTime crDate(const QString& = instance()->uid());
-    static QDateTime mfDate(const QString& = instance()->uid());
-    static qint64 size(const QString& = instance()->uid());
+    static QString dir(const QString& = uid());
+    static QString name(const QString& = uid());
+    static QString description(const QString& = uid());
+    static QDateTime crDate(const QString& = uid());
+    static QDateTime mfDate(const QString& = uid());
+    static qint64 size(const QString& = uid());
 
     static void stop();
     static bool start(const QString& uid);
@@ -44,7 +44,7 @@ private:
 
 private:
     static ProjectManager* s_instance;
-    static QString s_currentUid;
+    static QString s_uid;
 };
 
 #endif // PROJECTMANAGER_H

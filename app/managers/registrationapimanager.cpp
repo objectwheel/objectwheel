@@ -54,10 +54,10 @@ void RegistrationApiManager::onDataArrival(ServerManager::ServerCommands command
 {
     switch (command) {
     case ServerManager::LoginSuccessful: {
-        Plans plan;
+        UserManager::Plans plan;
         UtilityFunctions::pull(data, plan);
-        if (plan != Pro && plan != Enterprise)
-            plan = Free;
+        if (plan != UserManager::Pro && plan != UserManager::Enterprise)
+            plan = UserManager::Free;
         emit loginSuccessful(plan);
     } break;
     case ServerManager::LoginFailure:

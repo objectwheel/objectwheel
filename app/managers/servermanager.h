@@ -16,7 +16,7 @@ class ServerManager final : public QWebSocket
     enum { CONNECTION_TIMEOUT = 2000 };
 
 public:
-    enum ServerCommands {
+    enum ServerCommands : quint32 {
         Login = 0x2023,
         LoginSuccessful,
         LoginFailure,

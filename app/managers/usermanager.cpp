@@ -10,25 +10,9 @@
 #include <QRandomGenerator>
 #include <QFileInfo>
 
-namespace {
-
-static QString generateUserDirectory(const QString& user)
-{
-    return ApplicationCore::userResourcePath() + "/data/" +
-            QCryptographicHash::hash(QByteArray().insert(0, user), QCryptographicHash::Md5).toHex();
-}
-
-static QString generateToken(const QString& user, const QString& password)
-{
-    QString hash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha512).toHex();
-    auto json = QByteArray().insert(0, QString("{ \"email\" : \"%1\", \"hash\" : \"%2\" }").arg(user).arg(hash));
-    return json.toBase64();
-}
-}
-
 UserManager* UserManager::s_instance = nullptr;
 QString UserManager::s_user;
-QByteArray UserManager::s_key;
+QByteArray UserManager::s_password;
 
 UserManager::UserManager(QObject* parent) : QObject(parent)
 {
@@ -47,13 +31,13 @@ UserManager* UserManager::instance()
 
 bool UserManager::exists(const QString& user)
 {
-    return QFileInfo::exists(generateUserDirectory(user));
+//    return QFileInfo::exists(generateUserDirectory(user));
 }
 
 QString UserManager::dir(const QString& user)
 {
-    if (!exists(user)) return QString();
-    return generateUserDirectory(user);
+//    if (!exists(user)) return QString();
+//    return generateUserDirectory(user);
 }
 
 void UserManager::setAutoLogin(const QString& /*password*/)
@@ -73,7 +57,7 @@ const QString& UserManager::user()
 
 const QByteArray& UserManager::key()
 {
-    return s_key;
+    return s_password;
 }
 
 void UserManager::clearAutoLogin()
@@ -102,13 +86,13 @@ bool UserManager::tryAutoLogin()
     return false;
 }
 
-bool UserManager::login(const QString& user, const QString& password)
+bool UserManager::login(const QString& email, const QString& password)
 {
-    if (s_user == user) {
+    if (s_user == email) {
 		return true;
 	}
 
-    if (!exists(user)) {
+    if (!exists(email)) {
 		return false;
 	}
 
@@ -118,8 +102,8 @@ bool UserManager::login(const QString& user, const QString& password)
 
     auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha3_512);
     keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
-    s_user = user;
-    s_key = keyHash;
+    s_user = email;
+    s_password = keyHash;
 
 //    if (DirLocker::canUnlock(dir(user), keyHash)) {
 //        /* Clear all previous trash project folders if locked versions already exists */
@@ -144,7 +128,7 @@ bool UserManager::login(const QString& user, const QString& password)
 
 //        if (!DirLocker::unlock(dir(user), keyHash)) {
 //            s_user = "";
-//            s_key = "";
+//            s_password = "";
 //			return false;
 //		}
 //	}
@@ -162,10 +146,10 @@ void UserManager::logout()
     emit instance()->aboutToStop();
 
 //    if (exists(s_user) && !DirLocker::locked(dir())) {
-//        if (!DirLocker::lock(dir(), s_key))
+//        if (!DirLocker::lock(dir(), s_password))
 //            qFatal("ProjectManager : Error occurred");
 //    }
 
     s_user = "";
-    s_key = "";
+    s_password = "";
 }

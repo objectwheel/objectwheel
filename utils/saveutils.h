@@ -5,7 +5,7 @@
 
 namespace SaveUtils {
 
-enum ControlProperties {
+enum ControlProperties : quint32 {
     ControlId = 0x1000,
     ControlUid,
     ControlIcon,
@@ -15,7 +15,7 @@ enum ControlProperties {
     ControlSignature
 };
 
-enum ProjectProperties {
+enum ProjectProperties : quint32 {
     ProjectName = 0x2000,
     ProjectDescription,
     ProjectCreationDate,
@@ -28,9 +28,8 @@ enum ProjectProperties {
     ProjectSignature
 };
 
-enum UserProperties {
+enum UserProperties : quint32 {
     UserEmail = 0x3000,
-    UserPassword, // Empty unless auto login enabled
     UserFirst,
     UserLast,
     UserCountry,
@@ -40,6 +39,8 @@ enum UserProperties {
     UserIcon,
     UserPlan,
     UserRegistrationDate,
+    UserLastOnlineDate,
+    UserHash,
     UserVersion,
     UserSignature
 };
@@ -80,6 +81,19 @@ QString projectDescription(const QString& projectDir);
 QDateTime projectCreationDate(const QString& projectDir);
 QDateTime projectModificationDate(const QString& projectDir);
 QJsonValue projectTheme(const QString& projectDir);
+
+quint32 userPlan(const QString& userDir);
+QString userEmail(const QString& userDir);
+QString userFirst(const QString& userDir);
+QString userLast(const QString& userDir);
+QString userCountry(const QString& userDir);
+QString userCompany(const QString& userDir);
+QString userTitle(const QString& userDir);
+QString userPhone(const QString& userDir);
+QByteArray userHash(const QString& userDir);
+QByteArray userIcon(const QString& userDir);
+QDateTime userLastOnlineDate(const QString& userDir);
+QDateTime userRegistrationDate(const QString& userDir);
 
 QMap<ControlProperties, QVariant> controlMap(const QString& controlDir);
 QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir);

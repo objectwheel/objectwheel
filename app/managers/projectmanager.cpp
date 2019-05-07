@@ -15,7 +15,7 @@
 #include <QDateTime>
 
 ProjectManager* ProjectManager::s_instance = nullptr;
-QString ProjectManager::s_currentUid;
+QString ProjectManager::s_uid;
 
 ProjectManager* ProjectManager::instance()
 {
@@ -178,7 +178,7 @@ qint64 ProjectManager::size(const QString& uid)
 
 QString ProjectManager::uid()
 {
-    return s_currentUid;
+    return s_uid;
 }
 
 QStringList ProjectManager::projects()
@@ -230,13 +230,13 @@ bool ProjectManager::start(const QString& uid)
     if (!ProjectManager::uid().isEmpty())
         stop();
 
-    s_currentUid = uid;
+    s_uid = uid;
 
     ToolManager::exposeTools();
     ProjectExposingManager::exposeProject();
     ControlPreviewingManager::scheduleInit();
     DocumentManager::updateProjectInfo();
-    updateLastModification(s_currentUid);
+    updateLastModification(s_uid);
 
     emit instance()->started();
 
@@ -246,7 +246,7 @@ bool ProjectManager::start(const QString& uid)
 void ProjectManager::stop()
 {
     ControlPreviewingManager::scheduleTerminate();
-    updateSize(s_currentUid);
-    s_currentUid = "";
+    updateSize(s_uid);
+    s_uid = "";
     emit instance()->stopped();
 }

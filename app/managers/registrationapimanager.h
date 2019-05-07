@@ -1,8 +1,8 @@
 #ifndef REGISTRATIONAPIMANAGER_H
 #define REGISTRATIONAPIMANAGER_H
 
-#include <QObject>
 #include <servermanager.h>
+#include <usermanager.h>
 
 class RegistrationApiManager final : public QObject
 {
@@ -10,13 +10,6 @@ class RegistrationApiManager final : public QObject
     Q_DISABLE_COPY(RegistrationApiManager)
 
     friend class ApplicationCore;
-
-public:
-    enum Plans {
-        Free,
-        Pro = 0x23b,
-        Enterprise = 0x5ad
-    };
 
 public:
     static RegistrationApiManager* instance();
@@ -35,7 +28,7 @@ private slots:
     void onDataArrival(ServerManager::ServerCommands command, const QByteArray& data);
 
 signals:
-    void loginSuccessful(const Plans& plan);
+    void loginSuccessful(UserManager::Plans plan);
     void loginFailure();
     void signupSuccessful();
     void signupFailure();

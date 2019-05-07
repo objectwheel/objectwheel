@@ -1,7 +1,9 @@
 #ifndef PREVIEWERCOMMANDS_H
 #define PREVIEWERCOMMANDS_H
 
-enum PreviewerCommands {
+#include <QtGlobal>
+
+enum PreviewerCommands : quint32 {
     ConnectionAlive = 0x1000,
     ControlCodeUpdate,
     ControlCreation,

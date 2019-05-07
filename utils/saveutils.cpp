@@ -192,6 +192,66 @@ QJsonValue projectTheme(const QString& projectDir)
     return property(projectDir, ProjectTheme).value<QJsonValue>();
 }
 
+quint32 userPlan(const QString& userDir)
+{
+    return property(userDir, UserPlan).value<quint32>();
+}
+
+QString userEmail(const QString& userDir)
+{
+    return property(userDir, UserEmail).value<QString>();
+}
+
+QString userFirst(const QString& userDir)
+{
+    return property(userDir, UserFirst).value<QString>();
+}
+
+QString userLast(const QString& userDir)
+{
+    return property(userDir, UserLast).value<QString>();
+}
+
+QString userCountry(const QString& userDir)
+{
+    return property(userDir, UserCountry).value<QString>();
+}
+
+QString userCompany(const QString& userDir)
+{
+    return property(userDir, UserCompany).value<QString>();
+}
+
+QString userTitle(const QString& userDir)
+{
+    return property(userDir, UserTitle).value<QString>();
+}
+
+QString userPhone(const QString& userDir)
+{
+    return property(userDir, UserPhone).value<QString>();
+}
+
+QByteArray userHash(const QString& userDir)
+{
+    return property(userDir, UserHash).value<QByteArray>();
+}
+
+QByteArray userIcon(const QString& userDir)
+{
+    return property(userDir, UserIcon).value<QByteArray>();
+}
+
+QDateTime userLastOnlineDate(const QString& userDir)
+{
+    return property(userDir, UserLastOnlineDate).value<QDateTime>();
+}
+
+QDateTime userRegistrationDate(const QString& userDir)
+{
+    return property(userDir, UserRegistrationDate).value<QDateTime>();
+}
+
 QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
 {
     QMap<ControlProperties, QVariant> map;
@@ -345,7 +405,8 @@ void makeUserMetaFile(const QString& userDir)
 
 void regenerateUids(const QString& topPath)
 {
-    for (const QString& controlFilePath : FileSystemUtils::searchFiles(controlMetaFileName(), topPath)) {
+    for (const QString& controlFilePath
+         : FileSystemUtils::searchFiles(controlMetaFileName(), topPath)) {
         const QString& controlDir = toParentDir(controlFilePath);
         if (!isControlValid(controlDir))
             continue;
@@ -357,7 +418,8 @@ QStringList formPaths(const QString& projectDir)
 {
     QStringList paths;
     const QString& designsDir = toDesignsDir(projectDir);
-    for (const QString& formDirName : QDir(designsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+    for (const QString& formDirName
+         : QDir(designsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& formDir = designsDir + '/' + formDirName;
         if (isControlValid(formDir))
             paths.append(formDir);
@@ -369,7 +431,8 @@ QStringList childrenPaths(const QString& controlDir)
 {
     QStringList paths;
     const QString& childrenDir = toChildrenDir(controlDir);
-    for (const QString& childDirName : QDir(childrenDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+    for (const QString& childDirName
+         : QDir(childrenDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& childControlDir = childrenDir + '/' + childDirName;
         if (isControlValid(childControlDir)) {
             paths.append(childControlDir);
