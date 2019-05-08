@@ -1,11 +1,12 @@
 #ifndef HASHFACTORY_H
 #define HASHFACTORY_H
 
-class QString;
+class QByteArray;
 
 namespace HashFactory {
 
-QString generate();
+QByteArray generate();
+QByteArray generateSalt();
 
 } // HashFactory
 

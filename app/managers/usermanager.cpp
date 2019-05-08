@@ -1,22 +1,24 @@
 #include <usermanager.h>
 #include <applicationcore.h>
-#include <filesystemutils.h>
-
+#include <saveutils.h>
+#include <utilityfunctions.h>
+#include <servermanager.h>
+#include <registrationapimanager.h>
+#include <hashfactory.h>
 #include <QDir>
-#include <QCryptographicHash>
-#include <QByteArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QRandomGenerator>
-#include <QFileInfo>
 
 UserManager* UserManager::s_instance = nullptr;
-QString UserManager::s_user;
-QByteArray UserManager::s_password;
+UserManager::Plans UserManager::s_plan = UserManager::Free;
+QString UserManager::s_email;
+QString UserManager::s_password;
 
 UserManager::UserManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginSuccessful,
+            this, &UserManager::onLoginSuccessful);
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginFailure,
+            this, &UserManager::onLoginFailure);
 }
 
 UserManager::~UserManager()
@@ -29,127 +31,145 @@ UserManager* UserManager::instance()
     return s_instance;
 }
 
-bool UserManager::exists(const QString& user)
+QString UserManager::baseDirectory()
 {
-//    return QFileInfo::exists(generateUserDirectory(user));
+    static const QString& userBaseDir = ApplicationCore::appDataLocation() + QStringLiteral("/users");
+    return userBaseDir;
 }
 
-QString UserManager::dir(const QString& user)
+QStringList UserManager::userDirs()
 {
-//    if (!exists(user)) return QString();
-//    return generateUserDirectory(user);
+    QStringList dirs;
+    for (const QString& userDirName
+         : QDir(baseDirectory()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& userDir = baseDirectory() + '/' + userDirName;
+        if (SaveUtils::isUserValid(userDir))
+            dirs.append(userDir);
+    }
+    return dirs;
 }
 
-void UserManager::setAutoLogin(const QString& /*password*/)
-{
-//    if (s_user.isEmpty() || dir().isEmpty()) return;
-//    QString json = "{ \"e\" : \"%1\", \"p\" : \"%2\" }";
-//    auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
-//    auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
-//  FIXME  wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME,
-//        Aes::encrypt(sstep, QByteArray().insert(0, json.arg(s_user, password))));
+QStringList UserManager::users()
+{    
+    QStringList userList;
+    for (const QString& userDir : userDirs())
+        userList.append(SaveUtils::userEmail(userDir));
+    return userList;
 }
 
-const QString& UserManager::user()
+QString UserManager::dir(const QString& email)
 {
-    return s_user;
+    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
+        qWarning("UserManager: User dir requested with incorrect email format");
+        return QString();
+    }
+
+    for (const QString& userDir : userDirs()) {
+        if (SaveUtils::userEmail(userDir) == email)
+            return userDir;
+    }
+
+    return QString();
 }
 
-const QByteArray& UserManager::key()
+UserManager::Plans UserManager::plan()
+{
+    return s_plan;
+}
+
+QString UserManager::email()
+{
+    return s_email;
+}
+
+QString UserManager::password()
 {
     return s_password;
 }
 
-void UserManager::clearAutoLogin()
-{
-//  FIXME  QByteArray shredder;
-//    for (int i = 1048576; i--;) { shredder.append(QRandomGenerator::global()->generate() % 250); }
-//    wrfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME, shredder);
-//    QFile::remove(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-//    FileSystemUtils::makeFile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-}
-
-bool UserManager::hasAutoLogin()
-{
-//  FIXME  auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-    return false /*!algdata.isEmpty()*/;
-}
-
-bool UserManager::tryAutoLogin()
-{
-//  FIXME  if (!hasAutoLogin()) return false;
-//    auto fstep = QByteArray::fromBase64(AUTOLOGIN_PROTECTOR);
-//    auto sstep = QCryptographicHash::hash(fstep, QCryptographicHash::Md5).toHex();
-//    auto algdata = rdfile(ApplicationCore::userResourcePath() + "/data/" + AUTOLOGIN_FILENAME);
-//    auto jobj = QJsonDocument::fromJson(Aes::decrypt(sstep, algdata)).object();
-//    return start(jobj["e"].toString(), jobj["p"].toString());
-    return false;
-}
-
-bool UserManager::login(const QString& email, const QString& password)
-{
-    if (s_user == email) {
-		return true;
-	}
-
-    if (!exists(email)) {
-		return false;
-	}
-
-    if (!s_user.isEmpty()) {
-        logout();
-	}
-
-    auto keyHash = QCryptographicHash::hash(QByteArray().insert(0, password), QCryptographicHash::Sha3_512);
-    keyHash = QCryptographicHash::hash(keyHash, QCryptographicHash::Md5).toHex();
-    s_user = email;
-    s_password = keyHash;
-
-//    if (DirLocker::canUnlock(dir(user), keyHash)) {
-//        /* Clear all previous trash project folders if locked versions already exists */
-//        auto dirlockersFiles = DirLocker::lockFiles();
-//        for (const QString& entry : QDir(dir(user)).entryList(QDir::AllEntries | QDir::System | QDir::Hidden | QDir::NoDotAndDotDot)) {
-//            /* Check if necessary files */
-//            bool breakit = false;
-//            for (auto dlentry : dirlockersFiles) {
-//                if (entry == dlentry) {
-//                    breakit = true;
-//                }
-//            }
-
-//            if (breakit) continue;
-
-//            const QString& dest = dir(user) + '/' + entry;
-//            if (QFileInfo(dest).isDir())
-//                return QDir(dest).removeRecursively();
-//            else
-//                return QFile::remove(dest);
-//        }
-
-//        if (!DirLocker::unlock(dir(user), keyHash)) {
-//            s_user = "";
-//            s_password = "";
-//			return false;
-//		}
-//	}
-
-    emit instance()->started();
-
-    return true;
-}
-
 void UserManager::logout()
 {
-    if (s_user.isEmpty())
-		return;
+    if (!isLoggedIn())
+        return;
 
-    emit instance()->aboutToStop();
+    emit s_instance->aboutToLogout();
 
-//    if (exists(s_user) && !DirLocker::locked(dir())) {
-//        if (!DirLocker::lock(dir(), s_password))
-//            qFatal("ProjectManager : Error occurred");
-//    }
+    s_plan = Free;
+    UtilityFunctions::cleanSensitiveInformation(s_email);
+    UtilityFunctions::cleanSensitiveInformation(s_password);
 
-    s_user = "";
-    s_password = "";
+    emit s_instance->loggedOut();
+}
+
+bool UserManager::isLoggedIn()
+{
+    return !s_email.isEmpty();
+}
+
+void UserManager::login(const QString& email, const QString& password)
+{
+    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
+        qWarning("UserManager: Incorrect email format");
+        return;
+    }
+
+    if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
+        qWarning("UserManager: Incorrect password format");
+        return;
+    }
+
+    if (isLoggedIn()) {
+        qWarning("UserManager: Already logged in");
+        return;
+    }
+
+    if (ServerManager::isConnected()) {
+        RegistrationApiManager::login(email, password);
+    } else {
+        const QString& userDir = dir(email);
+
+        if (userDir.isEmpty()) {
+            qWarning("UserManager: Cannot log in offline with a non-existent user account");
+            return;
+        }
+
+        if (UtilityFunctions::testPassword(password.toUtf8(), SaveUtils::userHash(userDir))) {
+            s_emailCache = email;
+            s_passwordCache = password;
+            s_instance->onLoginSuccessful({});
+        } else {
+            s_instance->onLoginFailure();
+        }
+    }
+}
+
+void UserManager::onLoginFailure()
+{
+    emit loginFailed();
+}
+
+void UserManager::onLoginSuccessful(const QVariantList& userInfo)
+{
+    // userRecord: timestamp, plan, first, last, country, company, title, phone
+
+    QString userDir = dir(s_emailCache);
+
+    if (userDir.isEmpty()) {
+        userDir = baseDirectory() + '/' + HashFactory::generate();
+        if (!QDir(userDir).mkpath(".")) {
+            qWarning("UserManager: Cannot create user directory");
+            UtilityFunctions::cleanSensitiveInformation(s_emailCache);
+            UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
+            return;
+        }
+        SaveUtils::makeUserMetaFile(userDir);
+    }
+
+    s_email = s_emailCache;
+    s_password = QCryptographicHash::hash(s_passwordCache, QCryptographicHash::Sha3_512).toHex();
+
+    UtilityFunctions::cleanSensitiveInformation(s_emailCache);
+    UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
+
+    emit loggedIn();
 }

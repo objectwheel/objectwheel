@@ -244,14 +244,9 @@ QString ApplicationCore::resourcePath()
     return ":";
 }
 
-QString ApplicationCore::userResourcePath()
+QString ApplicationCore::appDataLocation()
 {
-#if defined(Q_OS_WIN)
-    Q_ASSERT(!QStandardPaths::standardLocations(QStandardPaths::DataLocation).isEmpty());
-    return QStandardPaths::standardLocations(QStandardPaths::DataLocation).value(0);
-#else
-    return QCoreApplication::applicationDirPath();
-#endif
+    return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 }
 
 void ApplicationCore::onProjectStop()

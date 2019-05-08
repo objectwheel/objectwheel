@@ -30,6 +30,8 @@ enum ProjectProperties : quint32 {
 
 enum UserProperties : quint32 {
     UserEmail = 0x3000,
+    UserPassword,
+    UserAutoLogin,
     UserFirst,
     UserLast,
     UserCountry,
@@ -40,7 +42,6 @@ enum UserProperties : quint32 {
     UserPlan,
     UserRegistrationDate,
     UserLastOnlineDate,
-    UserHash,
     UserVersion,
     UserSignature
 };

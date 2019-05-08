@@ -5,6 +5,7 @@
 #include <crossplatform.h>
 #include <async.h>
 #include <filesystemutils.h>
+#include <hashfactory.h>
 
 #include <QFileInfo>
 #include <QQmlEngine>
@@ -21,6 +22,8 @@
 #include <QAction>
 #include <QJsonObject>
 #include <QDir>
+#include <QCryptographicHash>
+#include <qpassworddigestor.h>
 
 namespace UtilityFunctions {
 
@@ -518,6 +521,56 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
     }
 #endif
     return static_cast<QMessageBox::StandardButton>(dialog.exec());
+}
+
+QByteArray generatePasswordHash(const QByteArray& password)
+{
+    static const QCryptographicHash::Algorithm algorithm = QCryptographicHash::Sha3_512;
+    static const quint32 dkLen = QCryptographicHash::hashLength(algorithm);
+    static const quint32 iterations = 30000;
+    const QByteArray& salt = HashFactory::generateSalt();
+    const QByteArray& deriveredKey = QPasswordDigestor::deriveKeyPbkdf2(
+                algorithm, password, salt, iterations, dkLen).toHex();
+    return push(iterations, salt, deriveredKey);
+}
+
+bool testPassword(const QByteArray& password, const QByteArray& hash)
+{
+    static const QCryptographicHash::Algorithm algorithm = QCryptographicHash::Sha3_512;
+    static const quint32 dkLen = QCryptographicHash::hashLength(algorithm);
+    quint32 iterations;
+    QByteArray salt;
+    QByteArray deriveredKey;
+    pull(hash, iterations, salt, deriveredKey);
+    return deriveredKey == QPasswordDigestor::deriveKeyPbkdf2(
+                algorithm, password, salt, iterations, dkLen).toHex();
+}
+
+QByteArray generateAutoLoginHash(const QByteArray& password)
+{
+    using Hasher = QCryptographicHash;
+    static const QByteArray& autoLoginSignature = QByteArrayLiteral("TWHFn2FsbGFo");
+    return push(autoLoginSignature, Hasher::hash(password, Hasher::Sha3_512).toHex());
+}
+
+bool testAutoLogin(const QByteArray& hash, QByteArray* password)
+{
+    QByteArray temp;
+    QByteArray autoLoginSignature;
+    pull(hash, autoLoginSignature, temp);
+    if (autoLoginSignature == QByteArrayLiteral("TWHFn2FsbGFo")) {
+        if (password)
+            *password = temp;
+        return true;
+    }
+    return false;
+}
+
+void cleanSensitiveInformation(QString& message)
+{
+    for (int i = 0; i < message.size(); ++i)
+        message[i] = 'x';
+    message.clear();
 }
 
 } // UtilityFunctions

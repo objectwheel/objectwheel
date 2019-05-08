@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QDir>
 #include <QJsonValue>
+#include <QSaveFile>
 
 #define VERSION      2.9
 #define SIGN_OWCTRL  "b3djdHJs"
@@ -263,6 +264,7 @@ QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_5_12);
     in >> map;
+    file.close();
     return map;
 }
 
@@ -277,6 +279,7 @@ QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_5_12);
     in >> map;
+    file.close();
     return map;
 }
 
@@ -291,6 +294,7 @@ QMap<UserProperties, QVariant> userMap(const QString& userDir)
     QDataStream in(&file);
     in.setVersion(QDataStream::Qt_5_12);
     in >> map;
+    file.close();
     return map;
 }
 
@@ -313,14 +317,16 @@ void setProperty(const QString& controlDir, ControlProperties property, const QV
 {
     QMap<ControlProperties, QVariant> map(controlMap(controlDir));
     map.insert(property, value);
-    QFile file(toControlMetaFile(controlDir));
-    if (!file.open(QFile::WriteOnly)) {
+    QSaveFile file(toControlMetaFile(controlDir));
+    if (!file.open(QSaveFile::WriteOnly)) {
         qWarning("SaveUtils: Cannot open control meta file");
         return;
     }
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_12);
     out << map;
+    if (!file.commit())
+        qWarning("SaveUtils: Control meta file save unsuccessful");
 }
 
 void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
@@ -328,28 +334,32 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
     QMap<ProjectProperties, QVariant> map(projectMap(projectDir));
     map.insert(property, value);
     map.insert(ProjectModificationDate, QDateTime::currentDateTime());
-    QFile file(toProjectMetaFile(projectDir));
-    if (!file.open(QFile::WriteOnly)) {
+    QSaveFile file(toProjectMetaFile(projectDir));
+    if (!file.open(QSaveFile::WriteOnly)) {
         qWarning("SaveUtils: Cannot open project meta file");
         return;
     }
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_12);
     out << map;
+    if (!file.commit())
+        qWarning("SaveUtils: Project meta file save unsuccessful");
 }
 
 void setProperty(const QString& userDir, UserProperties property, const QVariant& value)
 {
     QMap<UserProperties, QVariant> map(userMap(userDir));
     map.insert(property, value);
-    QFile file(toUserMetaFile(userDir));
-    if (!file.open(QFile::WriteOnly)) {
+    QSaveFile file(toUserMetaFile(userDir));
+    if (!file.open(QSaveFile::WriteOnly)) {
         qWarning("SaveUtils: Cannot open user meta file");
         return;
     }
     QDataStream out(&file);
     out.setVersion(QDataStream::Qt_5_12);
     out << map;
+    if (!file.commit())
+        qWarning("SaveUtils: User meta file save unsuccessful");
 }
 
 void makeControlMetaFile(const QString& controlDir)
@@ -366,6 +376,7 @@ void makeControlMetaFile(const QString& controlDir)
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_12);
         out << map;
+        file.close();
     }
 }
 
@@ -383,6 +394,7 @@ void makeProjectMetaFile(const QString& projectDir)
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_12);
         out << map;
+        file.close();
     }
 }
 
@@ -400,6 +412,7 @@ void makeUserMetaFile(const QString& userDir)
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_12);
         out << map;
+        file.close();
     }
 }
 

@@ -19,30 +19,40 @@ public:
 
 public:
     static UserManager* instance();
+    static QString baseDirectory();
+    static QStringList userDirs();
     static QStringList users();
-    static QString email();
-    static QString password();
     static QString dir(const QString& = email());
 
+    static Plans plan();
+    static QString email();
+    static QString password();
+
     static void logout();
-    static void clearAutoLogin();
-    static bool hasAutoLogin();
-    static bool exists(const QString& email);
-    static bool login(const QString& email = QString(), const QString& password = QString());
+    static bool isLoggedIn();
+    static void login(const QString& email, const QString& password);
+
+private slots:
+    void onLoginFailure();
+    void onLoginSuccessful(const QVariantList& userInfo);
 
 signals:
+    void loginFailed();
     void loggedIn();
+    void loggedOut();
     void aboutToLogout();
 
 private:
     explicit UserManager(QObject* parent = nullptr);
-    ~UserManager();
+    ~UserManager() override;
 
 private:
     static UserManager* s_instance;
     static Plans s_plan;
     static QString s_email;
     static QString s_password;
+    static QString s_emailCache;
+    static QString s_passwordCache;
 };
 
 #endif // USERMANAGER_H

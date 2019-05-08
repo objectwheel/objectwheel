@@ -102,6 +102,12 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
                                         QMessageBox::StandardButtons buttons = QMessageBox::Ok,
                                         QMessageBox::StandardButton defaultButton = QMessageBox::Ok,
                                         bool modal = true);
+QByteArray generateAutoLoginHash(const QByteArray& password);
+QByteArray generatePasswordHash(const QByteArray& password);
+bool testAutoLogin(const QByteArray& hash, QByteArray* password = nullptr);
+bool testPassword(const QByteArray& password, const QByteArray& hash);
+void cleanSensitiveInformation(QString& message);
+
 } // UtilityFunctions
 
 #endif // UTILITYFUNCTIONS_H

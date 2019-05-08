@@ -2,7 +2,6 @@
 #define REGISTRATIONAPIMANAGER_H
 
 #include <servermanager.h>
-#include <usermanager.h>
 
 class RegistrationApiManager final : public QObject
 {
@@ -28,7 +27,7 @@ private slots:
     void onDataArrival(ServerManager::ServerCommands command, const QByteArray& data);
 
 signals:
-    void loginSuccessful(UserManager::Plans plan);
+    void loginSuccessful(const QVariantList& userInfo);
     void loginFailure();
     void signupSuccessful();
     void signupFailure();

@@ -33,7 +33,7 @@ public:
     static QPalette palette();
     static QSettings* settings();
     static QString resourcePath();
-    static QString userResourcePath();
+    static QString appDataLocation();
 
 private:
     static void onProjectStop();

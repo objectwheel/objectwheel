@@ -54,11 +54,9 @@ void RegistrationApiManager::onDataArrival(ServerManager::ServerCommands command
 {
     switch (command) {
     case ServerManager::LoginSuccessful: {
-        UserManager::Plans plan;
-        UtilityFunctions::pull(data, plan);
-        if (plan != UserManager::Pro && plan != UserManager::Enterprise)
-            plan = UserManager::Free;
-        emit loginSuccessful(plan);
+        QVariantList userInfo;
+        UtilityFunctions::pull(data, userInfo);
+        emit loginSuccessful(userInfo);
     } break;
     case ServerManager::LoginFailure:
         emit loginFailure();

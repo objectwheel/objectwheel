@@ -247,7 +247,7 @@ void ModelManager::delayedInitialization()
 void ModelManager::loadDefaultQmlTypeDescriptions()
 {
     loadQmlTypeDescriptionsInternal(ApplicationCore::resourcePath());
-    loadQmlTypeDescriptionsInternal(ApplicationCore::userResourcePath());
+    loadQmlTypeDescriptionsInternal(ApplicationCore::appDataLocation());
 }
 
 void ModelManager::writeMessageInternal(const QString &/*msg*/) const
