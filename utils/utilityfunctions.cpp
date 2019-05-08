@@ -516,7 +516,7 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
     dialog.setText(title);
     dialog.setInformativeText(text);
     if (auto label = dialog.findChild<QWidget*>(QStringLiteral("qt_msgbox_label"))) {
-        int MIN_WIDTH = qMax(label->fontMetrics().horizontalAdvance(title), 260);
+        int MIN_WIDTH = qMax(label->fontMetrics().horizontalAdvance(title), 300);
         label->setStyleSheet(QStringLiteral("QLabel { min-width: %1px; }").arg(MIN_WIDTH));
     }
 #endif
@@ -527,7 +527,7 @@ QByteArray generatePasswordHash(const QByteArray& password)
 {
     static const QCryptographicHash::Algorithm algorithm = QCryptographicHash::Sha3_512;
     static const quint32 dkLen = QCryptographicHash::hashLength(algorithm);
-    static const quint32 iterations = 30000;
+    static const quint32 iterations = 50000;
     const QByteArray& salt = HashFactory::generateSalt();
     const QByteArray& deriveredKey = QPasswordDigestor::deriveKeyPbkdf2(
                 algorithm, password, salt, iterations, dkLen).toHex();
@@ -542,7 +542,7 @@ bool testPassword(const QByteArray& password, const QByteArray& hash)
     QByteArray salt;
     QByteArray deriveredKey;
     pull(hash, iterations, salt, deriveredKey);
-    return deriveredKey == QPasswordDigestor::deriveKeyPbkdf2(
+    return !deriveredKey.isEmpty() && deriveredKey == QPasswordDigestor::deriveKeyPbkdf2(
                 algorithm, password, salt, iterations, dkLen).toHex();
 }
 

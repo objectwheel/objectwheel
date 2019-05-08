@@ -8,7 +8,7 @@
 #include <usermanager.h>
 #include <async.h>
 #include <utilityfunctions.h>
-#include <servermanager.h>
+#include <saveutils.h>
 
 #include <QGridLayout>
 #include <QHBoxLayout>
@@ -168,12 +168,10 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_legalLabel->setText(QString("<p><b>© 2015 - 2019 %1 All Rights Reserved.</b></p>").arg(APP_CORP));
     m_legalLabel->setAlignment(Qt::AlignHCenter);
 
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginSuccessful,
-            this, &LoginWidget::onLoginSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginFailure,
-            this, &LoginWidget::onLoginFailure);
-    connect(ServerManager::instance(), &ServerManager::disconnected,
-            this, &LoginWidget::unlock);
+    connect(UserManager::instance(), &UserManager::loggedIn,
+            this, &LoginWidget::onLogin);
+    connect(UserManager::instance(), &UserManager::loginFailed,
+            this, &LoginWidget::onLoginFail);
 }
 
 void LoginWidget::lock()
@@ -215,25 +213,29 @@ void LoginWidget::onLoginButtonClick()
     }
 
     if (!ServerManager::isConnected()) {
-        UtilityFunctions::showMessage(
-                    this, tr("No connection"),
-                    tr("Unable to connect to the server, please checkout your internet connection."));
-        return;
+        PlanManager::Plans plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(UserManager::dir(email)));
+        if (!PlanManager::isEligibleForOfflineLogging(plan)) {
+            UtilityFunctions::showMessage(this, tr("No connection"),
+                                          tr("Unable to connect to the server, please checkout "
+                                             "your internet connection or upgrade your account "
+                                             "to a higher plan in order to enable offline mode."));
+            return;
+        }
     }
 
     lock();
 
-    RegistrationApiManager::login(email, password);
+    UserManager::login(email, password);
 }
 
-void LoginWidget::onLoginSuccessful(const RegistrationApiManager::Plans& /*plan*/)
+void LoginWidget::onLogin()
 {
     unlock();
     QTimer::singleShot(0, this, &LoginWidget::startSession);
     emit busy(tr("Decryption in progress"));
 }
 
-void LoginWidget::onLoginFailure()
+void LoginWidget::onLoginFail()
 {
     unlock();
     UtilityFunctions::showMessage(
@@ -256,13 +258,13 @@ void LoginWidget::onSessionStart()
 {
     auto password = m_bulkEdit->get<QLineEdit*>(Password)->text();
 
-    if (m_encryptionWatcher.result()) {
-        if (m_autologinSwitch->isChecked())
-            UserManager::setAutoLogin(password);
-        else
-            UserManager::clearAutoLogin();
-    } else
-        qFatal("Fatal : LoginWidget");
+//    if (m_encryptionWatcher.result()) {
+//        if (m_autologinSwitch->isChecked())
+//            UserManager::setAutoLogin(password);
+//        else
+//            UserManager::clearAutoLogin();
+//    } else
+//        qFatal("Fatal : LoginWidget");
 
     QTimer::singleShot(500, this, &LoginWidget::clear);
 

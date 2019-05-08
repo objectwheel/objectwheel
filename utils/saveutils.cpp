@@ -233,9 +233,9 @@ QString userPhone(const QString& userDir)
     return property(userDir, UserPhone).value<QString>();
 }
 
-QByteArray userHash(const QString& userDir)
+QByteArray userPassword(const QString& userDir)
 {
-    return property(userDir, UserHash).value<QByteArray>();
+    return property(userDir, UserPassword).value<QByteArray>();
 }
 
 QByteArray userIcon(const QString& userDir)

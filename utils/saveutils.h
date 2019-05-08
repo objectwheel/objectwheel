@@ -31,7 +31,6 @@ enum ProjectProperties : quint32 {
 enum UserProperties : quint32 {
     UserEmail = 0x3000,
     UserPassword,
-    UserAutoLogin,
     UserFirst,
     UserLast,
     UserCountry,
@@ -91,7 +90,7 @@ QString userCountry(const QString& userDir);
 QString userCompany(const QString& userDir);
 QString userTitle(const QString& userDir);
 QString userPhone(const QString& userDir);
-QByteArray userHash(const QString& userDir);
+QByteArray userPassword(const QString& userDir);
 QByteArray userIcon(const QString& userDir);
 QDateTime userLastOnlineDate(const QString& userDir);
 QDateTime userRegistrationDate(const QString& userDir);

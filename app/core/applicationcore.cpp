@@ -130,10 +130,10 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /** Ui initialization **/
     s_windowManager = new WindowManager(app);
     s_menuManager = new MenuManager(app);
-    QObject::connect(s_userManager, &UserManager::started,
-                     &ApplicationCore::onUserSessionStart);
-    QObject::connect(s_userManager, &UserManager::aboutToStop,
-                     &ApplicationCore::onUserSessionStop);
+//  FIXME  QObject::connect(s_userManager, &UserManager::started,
+//                     &ApplicationCore::onUserSessionStart);
+//    QObject::connect(s_userManager, &UserManager::aboutToStop,
+//                     &ApplicationCore::onUserSessionStop);
     QObject::connect(s_projectManager, &ProjectManager::started,
                      &ApplicationCore::onProjectStart);
     QObject::connect(s_projectManager, &ProjectManager::stopped,

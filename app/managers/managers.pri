@@ -7,6 +7,7 @@ HEADERS += $$PWD/controlcreationmanager.h \
            $$PWD/controlremovingmanager.h \
            $$PWD/documentmanager.h \
            $$PWD/menumanager.h \
+           $$PWD/planmanager.h \
            $$PWD/projectexposingmanager.h \
            $$PWD/projectmanager.h \
            $$PWD/savemanager.h \
@@ -24,6 +25,7 @@ SOURCES += $$PWD/controlcreationmanager.cpp \
            $$PWD/controlremovingmanager.cpp \
            $$PWD/documentmanager.cpp \
            $$PWD/menumanager.cpp \
+           $$PWD/planmanager.cpp \
            $$PWD/projectexposingmanager.cpp \
            $$PWD/projectmanager.cpp \
            $$PWD/savemanager.cpp \

@@ -86,7 +86,7 @@ void addSchemes(SchemeListModel* model)
     QDir resourceStyleDir(resourceStylesPath + "/styles");
     resourceStyleDir.setNameFilters(QStringList() << "*.xml");
     resourceStyleDir.setFilter(QDir::Files);
-    const QString& customStylesPath = ApplicationCore::userResourcePath();
+    const QString& customStylesPath = ApplicationCore::appDataLocation();
     QDir customStyleDir(customStylesPath + "/styles");
     customStyleDir.setNameFilters(QStringList() << "*.xml");
     customStyleDir.setFilter(QDir::Files);
@@ -99,7 +99,7 @@ void addSchemes(SchemeListModel* model)
 
 QString createColorSchemeFileName(const QString& pattern)
 {
-    const QString stylesPath = ApplicationCore::userResourcePath() + "/styles/";
+    const QString stylesPath = ApplicationCore::appDataLocation() + "/styles/";
     QString baseFileName = stylesPath;
     baseFileName += pattern;
 

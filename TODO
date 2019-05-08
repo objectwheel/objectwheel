@@ -1,4 +1,5 @@
 - Use QPasswordDigestor to store passwords more safely
+- Add caching mechanism to SaveUtils (cache/commit all setProperty calls)
 
 https://stackoverflow.com/questions/31498114/how-to-programmatically-prevent-linux-computer-from-sleeping-or-turning-on-scree
 https://developer.apple.com/library/archive/qa/qa1340/_index.html

@@ -29,8 +29,8 @@ private slots:
     void startSession();
     void onSessionStart();
     void onLoginButtonClick();
-    void onLoginSuccessful(const RegistrationApiManager::Plans& plan);
-    void onLoginFailure();
+    void onLogin();
+    void onLoginFail();
 
 signals:
     void done();
