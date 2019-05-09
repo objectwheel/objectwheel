@@ -1,12 +1,9 @@
 #include <usermanager.h>
 #include <applicationcore.h>
 #include <saveutils.h>
-#include <utilityfunctions.h>
 #include <registrationapimanager.h>
 #include <hashfactory.h>
-
 #include <QDir>
-#include <QDateTime>
 
 UserManager* UserManager::s_instance = nullptr;
 PlanManager::Plans UserManager::s_plan = PlanManager::Free;
@@ -95,6 +92,11 @@ QString UserManager::hashPassword(const QString& password)
     return QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha3_512).toHex();
 }
 
+bool UserManager::isLoggedIn()
+{
+    return !s_email.isEmpty();
+}
+
 bool UserManager::hasLocalData(const QString& email)
 {
     return users().contains(email);
@@ -112,11 +114,6 @@ void UserManager::logout()
     UtilityFunctions::cleanSensitiveInformation(s_password);
 
     emit s_instance->loggedOut();
-}
-
-bool UserManager::isLoggedIn()
-{
-    return !s_email.isEmpty();
 }
 
 void UserManager::login(const QString& email, const QString& password)
@@ -195,7 +192,6 @@ void UserManager::onLoginSuccessful(const QVariantList& userInfo)
         SaveUtils::makeUserMetaFile(userDir);
     }
 
-    s_plan = PlanManager::Free;
     s_email = s_emailCache;
     s_password = s_passwordCache;
 
