@@ -1,4 +1,5 @@
 #include <registrationapimanager.h>
+#include <planmanager.h>
 
 RegistrationApiManager* RegistrationApiManager::s_instance = nullptr;
 RegistrationApiManager::RegistrationApiManager(QObject* parent) : QObject(parent)
@@ -54,8 +55,22 @@ void RegistrationApiManager::onDataArrival(ServerManager::ServerCommands command
 {
     switch (command) {
     case ServerManager::LoginSuccessful: {
+        QByteArray icon;
+        QDateTime regdate;
+        PlanManager::Plans plan;
+        QString first, last, country, company, title, phone;
+        UtilityFunctions::pull(data, icon, regdate, plan, first, last, country, company, title, phone);
+
         QVariantList userInfo;
-        UtilityFunctions::pull(data, userInfo);
+        userInfo.append(icon);
+        userInfo.append(regdate);
+        userInfo.append(plan);
+        userInfo.append(first);
+        userInfo.append(last);
+        userInfo.append(country);
+        userInfo.append(company);
+        userInfo.append(title);
+        userInfo.append(phone);
         emit loginSuccessful(userInfo);
     } break;
     case ServerManager::LoginFailure:

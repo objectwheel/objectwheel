@@ -213,12 +213,28 @@ void LoginWidget::onLoginButtonClick()
     }
 
     if (!ServerManager::isConnected()) {
-        PlanManager::Plans plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(UserManager::dir(email)));
-        if (!PlanManager::isEligibleForOfflineLogging(plan)) {
+        if (UserManager::hasLocalData(email)) {
+            PlanManager::Plans plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(UserManager::dir(email)));
+            if (!PlanManager::isEligibleForOfflineLogging(plan)) {
+                UtilityFunctions::showMessage(this, tr("No connection"),
+                                              tr("Unable to connect to the server, please checkout "
+                                                 "your internet connection or upgrade your account "
+                                                 "to a higher plan in order to enable offline mode."));
+                return;
+            }
+
+            lock();
+
+            UserManager::loginOffline(email, UserManager::hashPassword(password));
+
+            return;
+        } else {
             UtilityFunctions::showMessage(this, tr("No connection"),
                                           tr("Unable to connect to the server, please checkout "
-                                             "your internet connection or upgrade your account "
-                                             "to a higher plan in order to enable offline mode."));
+                                             "your internet connection. Also we couldn't find "
+                                             "any local data to enable offline mode. You must "
+                                             "login to your account via using internet for the "
+                                             "first time in order to enable offline mode."));
             return;
         }
     }

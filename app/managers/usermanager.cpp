@@ -2,7 +2,6 @@
 #include <applicationcore.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
-#include <servermanager.h>
 #include <registrationapimanager.h>
 #include <hashfactory.h>
 
@@ -91,6 +90,16 @@ QString UserManager::password()
     return s_password;
 }
 
+QString UserManager::hashPassword(const QString& password)
+{
+    return QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha3_512).toHex();
+}
+
+bool UserManager::hasLocalData(const QString& email)
+{
+    return users().contains(email);
+}
+
 void UserManager::logout()
 {
     if (!isLoggedIn())
@@ -128,25 +137,40 @@ void UserManager::login(const QString& email, const QString& password)
     }
 
     s_emailCache = email;
-    s_passwordCache = QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha3_512).toHex();
+    s_passwordCache = hashPassword(password);
 
-    if (ServerManager::isConnected()) {
-        RegistrationApiManager::login(s_emailCache, s_passwordCache);
-    } else {
-        const QString& userDir = dir(s_emailCache);
+    RegistrationApiManager::login(s_emailCache, s_passwordCache);
+}
 
-        if (userDir.isEmpty()) {
-            qWarning("UserManager: Cannot login offline with a non-existent user account");
-            UtilityFunctions::cleanSensitiveInformation(s_emailCache);
-            UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
-            return;
-        }
-
-        if (UtilityFunctions::testPassword(s_passwordCache.toUtf8(), SaveUtils::userPassword(userDir)))
-            s_instance->onLoginSuccessful(QVariantList());
-        else
-            s_instance->onLoginFailure();
+void UserManager::loginOffline(const QString& email, const QString& hash)
+{
+    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
+        qWarning("UserManager: Incorrect email format");
+        return;
     }
+
+    if (hash.size() != 128) {
+        qWarning("UserManager: Incorrect hash format");
+        return;
+    }
+
+    if (isLoggedIn()) {
+        qWarning("UserManager: Already logged in");
+        return;
+    }
+
+    if (!hasLocalData(email)) {
+        qWarning("UserManager: Cannot login offline, no local data");
+        return;
+    }
+
+    s_emailCache = email;
+    s_passwordCache = hash;
+
+    if (UtilityFunctions::testPassword(hash.toUtf8(), SaveUtils::userPassword(dir(email))))
+        s_instance->onLoginSuccessful(QVariantList());
+    else
+        s_instance->onLoginFailure();
 }
 
 void UserManager::onLoginFailure()
@@ -178,19 +202,19 @@ void UserManager::onLoginSuccessful(const QVariantList& userInfo)
     UtilityFunctions::cleanSensitiveInformation(s_emailCache);
     UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
 
-    // userRecord: timestamp, plan, first, last, country, company, title, phone, icon
+    // userRecord: icon, timestamp, plan, first, last, country, company, title, phone
     if (!userInfo.isEmpty()) {
-        SaveUtils::setProperty(userDir, SaveUtils::UserRegistrationDate, userInfo.at(0));
-        SaveUtils::setProperty(userDir, SaveUtils::UserPlan, userInfo.at(1));
-        SaveUtils::setProperty(userDir, SaveUtils::UserFirst, userInfo.at(2));
-        SaveUtils::setProperty(userDir, SaveUtils::UserLast, userInfo.at(3));
-        SaveUtils::setProperty(userDir, SaveUtils::UserCountry, userInfo.at(4));
-        SaveUtils::setProperty(userDir, SaveUtils::UserCompany, userInfo.at(5));
-        SaveUtils::setProperty(userDir, SaveUtils::UserTitle, userInfo.at(6));
-        SaveUtils::setProperty(userDir, SaveUtils::UserPhone, userInfo.at(7));
-        SaveUtils::setProperty(userDir, SaveUtils::UserIcon, userInfo.at(8));
+        SaveUtils::setProperty(userDir, SaveUtils::UserRegistrationDate, userInfo.at(1));
+        SaveUtils::setProperty(userDir, SaveUtils::UserPlan, userInfo.at(2));
+        SaveUtils::setProperty(userDir, SaveUtils::UserFirst, userInfo.at(3));
+        SaveUtils::setProperty(userDir, SaveUtils::UserLast, userInfo.at(4));
+        SaveUtils::setProperty(userDir, SaveUtils::UserCountry, userInfo.at(5));
+        SaveUtils::setProperty(userDir, SaveUtils::UserCompany, userInfo.at(6));
+        SaveUtils::setProperty(userDir, SaveUtils::UserTitle, userInfo.at(7));
+        SaveUtils::setProperty(userDir, SaveUtils::UserPhone, userInfo.at(8));
         SaveUtils::setProperty(userDir, SaveUtils::UserLastOnlineDate, QDateTime::currentDateTime());
         SaveUtils::setProperty(userDir, SaveUtils::UserEmail, s_email);
+        SaveUtils::setProperty(userDir, SaveUtils::UserIcon, userInfo.at(0));
         SaveUtils::setProperty(userDir, SaveUtils::UserPassword, UtilityFunctions::generatePasswordHash(s_password.toUtf8()));
         s_plan = userInfo.at(1).value<PlanManager::Plans>();
     } else {

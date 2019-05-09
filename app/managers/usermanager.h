@@ -20,10 +20,14 @@ public:
     static PlanManager::Plans plan();
     static QString email();
     static QString password();
+    static QString hashPassword(const QString& password);
+
+    static bool isLoggedIn();
+    static bool hasLocalData(const QString& email);
 
     static void logout();
-    static bool isLoggedIn();
     static void login(const QString& email, const QString& password);
+    static void loginOffline(const QString& email, const QString& hash);
 
 private slots:
     void onLoginFailure();
