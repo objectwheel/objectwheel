@@ -10,9 +10,8 @@
 #include <servermanager.h>
 #include <applicationcore.h>
 
-#include <QGridLayout>
-#include <QLabel>
 #include <QSettings>
+#include <QGridLayout>
 
 enum Fields { Email, Password };
 enum Buttons { Login, Register };
@@ -130,7 +129,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
         if (ret == QMessageBox::Help)
             return emit about();
         if (ret == QMessageBox::Reset)
-            return emit forget();
+            return emit resetPassword();
     });
 
     restoreRememberMe();
@@ -160,14 +159,107 @@ void LoginWidget::unlock()
     m_loadingIndicator->stop();
 }
 
-void LoginWidget::clearRememberMe()
+void LoginWidget::onLoginFailure()
 {
-    QSettings* settings = ApplicationCore::settings();
-    Q_ASSERT(settings);
-    settings->setValue(QStringLiteral("User/Security.RememberMe"),
-                       UtilityFunctions::generateJunk(9999));
-    settings->sync();
-    settings->setValue(QStringLiteral("User/Security.RememberMe"), QVariant());
+    clearRememberMe();
+
+    unlock();
+
+    UtilityFunctions::showMessage(this,
+                                  tr("Unable to log in"),
+                                  tr("Incorrect email address or password, "
+                                     "please checkout the information you entered."));
+}
+
+void LoginWidget::onLoginSuccessful()
+{
+    if (m_rememberMeSwitch->isChecked())
+        saveRememberMe();
+    else
+        clearRememberMe();
+
+    unlock();
+
+    QTimer::singleShot(200, this, &LoginWidget::clear);
+
+    emit done();
+}
+
+void LoginWidget::onLoginButtonClick()
+{
+    const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
+    const QString& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
+    const QString& hash = UtilityFunctions::isPasswordHashFormatCorrect(password)
+            ? password : UserManager::hashPassword(password);
+
+    if (email.isEmpty() || password.isEmpty()) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Fields cannot be left blank"),
+                                      tr("Please fill in the required fields first."),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (email.size() > 255 || password.size() > 255) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Entry too long"),
+                                      tr("Length of any fields cannot exceed 255 characters."),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Corrupt email address"),
+                                      tr("Your email address doesn't comply with "
+                                         "the standard email address format."),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (!UtilityFunctions::isPasswordFormatCorrect(password) && password != hash) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Corrupt password"),
+                                      tr("Your password must comply with following standards:\n"
+                                         "•  Length must be between 6 and 35 characters\n"
+                                         "•  Only Latin-1 characters are allowed\n"
+                                         "•  Whitespace characters are not allowed\n"
+                                         "•  It can contain a-z, A-Z, 0-9\n"
+                                         "•  It can also contain following special characters:\n"
+                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (!ServerManager::isConnected()) {
+        if (UserManager::hasLocalData(email)) {
+            const QDateTime& lastOnline = SaveUtils::userLastOnlineDate(UserManager::dir(email));
+            PlanManager::Plans plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(UserManager::dir(email)));
+            if (lastOnline.daysTo(QDateTime::currentDateTime()) > 30) {
+                UtilityFunctions::showMessage(this,
+                                              tr("You have reached the offline usage limit"),
+                                              tr("Please connect to the Internet in order to "
+                                                 "continue using Objectwheel in offline mode."));
+            } else if (!PlanManager::isEligibleForOfflineLogging(plan)) {
+                UtilityFunctions::showMessage(this,
+                                              tr("You are not eligible for offline mode"),
+                                              tr("Please upgrade your plan in order to enable offline "
+                                                 "mode or checkout your internet connection."));
+            } else {
+                lock();
+                UserManager::loginOffline(email, hash);
+            }
+        } else {
+            UtilityFunctions::showMessage(this,
+                                          tr("Unable to connect to the Internet"),
+                                          tr("We could not find any local data to enable offline "
+                                             "logging in, please checkout your internet connection."),
+                                          QMessageBox::Information);
+        }
+    } else {
+        lock();
+        UserManager::login(email, hash);
+    }
 }
 
 void LoginWidget::saveRememberMe()
@@ -180,6 +272,16 @@ void LoginWidget::saveRememberMe()
                                                                UserManager::password()));
 }
 
+void LoginWidget::clearRememberMe()
+{
+    QSettings* settings = ApplicationCore::settings();
+    Q_ASSERT(settings);
+    settings->setValue(QStringLiteral("User/Security.RememberMe"),
+                       UtilityFunctions::generateJunk(999));
+    settings->sync();
+    settings->setValue(QStringLiteral("User/Security.RememberMe"), QVariant());
+}
+
 void LoginWidget::restoreRememberMe()
 {
     QString em, pw;
@@ -189,108 +291,7 @@ void LoginWidget::restoreRememberMe()
         m_bulkEdit->get<QLineEdit*>(Email)->setText(em);
         m_bulkEdit->get<QLineEdit*>(Password)->setText(pw);
         m_rememberMeSwitch->setChecked(true);
+    } else {
+        m_rememberMeSwitch->setChecked(false);
     }
-}
-
-void LoginWidget::onLoginButtonClick()
-{
-    const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
-    const QString& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
-    const QString& hash = UtilityFunctions::isPasswordHashFormatCorrect(password)
-            ? password : UserManager::hashPassword(password);
-
-    if (email.isEmpty() || password.isEmpty()) {
-        UtilityFunctions::showMessage(this,
-                                      tr("Email and password fields cannot be left blank"),
-                                      tr("Please fill in the required fields first."));
-        return;
-    }
-
-    if (email.size() > 255 || password.size() > 255) {
-        UtilityFunctions::showMessage(this,
-                                      tr("Inputs are too long"),
-                                      tr("The length of any fields cannot exceed 255 characters."));
-        return;
-    }
-
-    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
-        UtilityFunctions::showMessage(this,
-                                      tr("Corrupt email address"),
-                                      tr("Your email address doesn't comply with "
-                                         "the standard email address format."));
-        return;
-    }
-
-    if (!UtilityFunctions::isPasswordFormatCorrect(password)
-            && !UtilityFunctions::isPasswordHashFormatCorrect(password)) {
-        UtilityFunctions::showMessage(this,
-                                      tr("Corrupt password"),
-                                      tr("Your password must comply with following standards:\n"
-                                         "•  Length must be between 6 and 35 characters\n"
-                                         "•  Only Latin-1 characters are allowed\n"
-                                         "•  Whitespace characters are not allowed\n"
-                                         "•  It can contain a-z, A-Z, 0-9\n"
-                                         "•  It can also contain following special characters:\n"
-                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"));
-        return;
-    }
-
-    if (!ServerManager::isConnected()) {
-        if (UserManager::hasLocalData(email)) {
-            PlanManager::Plans plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(UserManager::dir(email)));
-            if (!PlanManager::isEligibleForOfflineLogging(plan)) {
-                UtilityFunctions::showMessage(this,
-                                              tr("No connection"),
-                                              tr("Unable to connect to the server, please checkout "
-                                                 "your internet connection or upgrade your account "
-                                                 "to a higher plan in order to enable offline mode."));
-                return;
-            }
-
-            lock();
-
-            UserManager::loginOffline(email, hash);
-
-            return;
-        } else {
-            UtilityFunctions::showMessage(this,
-                                          tr("No connection"),
-                                          tr("Unable to connect to the server, please checkout "
-                                             "your internet connection. Also we couldn't find "
-                                             "any local data to enable offline mode. You must "
-                                             "login to your account via using internet for the "
-                                             "first time in order to enable offline mode."));
-            return;
-        }
-    }
-
-    lock();
-
-    UserManager::login(email, hash);
-}
-
-void LoginWidget::onLoginSuccessful()
-{
-    if (m_rememberMeSwitch->isChecked())
-        saveRememberMe();
-    else
-        clearRememberMe();
-
-    unlock();
-
-    QTimer::singleShot(100, this, &LoginWidget::clear);
-
-    emit done();
-}
-
-void LoginWidget::onLoginFailure()
-{
-    clearRememberMe();
-
-    unlock();
-
-    UtilityFunctions::showMessage(this,
-                                  tr("Unable to login"),
-                                  tr("Incorrect information, please "
-                                     "checkout the information you entered."));
 }

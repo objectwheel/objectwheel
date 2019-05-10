@@ -13,6 +13,7 @@ class WaitingSpinnerWidget;
 class LoginWidget final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(LoginWidget)
 
 public:
     explicit LoginWidget(QWidget* parent = nullptr);
@@ -21,18 +22,20 @@ private slots:
     void clear();
     void lock();
     void unlock();
-    void saveRememberMe();
-    void clearRememberMe();
-    void restoreRememberMe();
     void onLoginFailure();
     void onLoginSuccessful();
     void onLoginButtonClick();
+
+private:
+    void saveRememberMe();
+    void clearRememberMe();
+    void restoreRememberMe();
 
 signals:
     void done();
     void about();
     void signup();
-    void forget();
+    void resetPassword();
 
 private:
     QGridLayout* m_layout;

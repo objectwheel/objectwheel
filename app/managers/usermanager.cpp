@@ -123,7 +123,7 @@ void UserManager::login(const QString& email, const QString& password)
         return;
     }
 
-    if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
+    if (!UtilityFunctions::isPasswordHashFormatCorrect(password)) {
         qWarning("UserManager: Incorrect password format");
         return;
     }

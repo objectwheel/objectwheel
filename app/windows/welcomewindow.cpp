@@ -76,7 +76,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(Registration, View::RightToLeft);
     });
-    connect(m_loginWidget, &LoginWidget::forget, [=]
+    connect(m_loginWidget, &LoginWidget::resetPassword, [=]
     {
         m_view->show(Forget, View::RightToLeft);
     });
