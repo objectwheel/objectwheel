@@ -21,7 +21,9 @@ private slots:
     void clear();
     void lock();
     void unlock();
-
+    void saveRememberMe();
+    void clearRememberMe();
+    void restoreRememberMe();
     void onLoginFailure();
     void onLoginSuccessful();
     void onLoginButtonClick();
@@ -37,8 +39,8 @@ private:
     QLabel* m_logoLabel;
     QLabel* m_loginLabel;
     BulkEdit* m_bulkEdit;
-    Switch* m_autologinSwitch;
-    QLabel* m_autologinLabel;
+    Switch* m_rememberMeSwitch;
+    QLabel* m_rememberMeLabel;
     ButtonSlice* m_buttons;
     FlatButton* m_helpButton;
     WaitingSpinnerWidget* m_loadingIndicator;

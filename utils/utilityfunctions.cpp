@@ -219,6 +219,11 @@ bool isPasswordFormatCorrect(const QString& password)
     return password.contains(QRegularExpression("^[><{}\\[\\]*!@\\-#$%^&+=~\\.\\,\\:a-zA-Z0-9]{6,35}$"));
 }
 
+bool isPasswordHashFormatCorrect(const QString& hash)
+{
+    return hash.contains(QRegularExpression(QStringLiteral("^[a-fA-F0-9]{128}$")));
+}
+
 QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left)
 {
     QRectF ret({0, 0}, size);
@@ -546,21 +551,22 @@ bool testPassword(const QByteArray& password, const QByteArray& hash)
                 algorithm, password, salt, iterations, dkLen).toHex();
 }
 
-QByteArray generateAutoLoginHash(const QByteArray& password)
+QByteArray generateAutoLoginHash(const QString& email, const QString& pwhash)
 {
-    using Hasher = QCryptographicHash;
     static const QByteArray& autoLoginSignature = QByteArrayLiteral("TWHFn2FsbGFo");
-    return push(autoLoginSignature, Hasher::hash(password, Hasher::Sha3_512).toHex());
+    return push(autoLoginSignature, email, pwhash);
 }
 
-bool testAutoLogin(const QByteArray& hash, QByteArray* password)
+bool testAutoLogin(const QByteArray& hash, QString* email, QString* pwhash)
 {
-    QByteArray temp;
+    QString em, pw;
     QByteArray autoLoginSignature;
-    pull(hash, autoLoginSignature, temp);
+    pull(hash, autoLoginSignature, em, pw);
     if (autoLoginSignature == QByteArrayLiteral("TWHFn2FsbGFo")) {
-        if (password)
-            *password = temp;
+        if (pwhash)
+            *pwhash = pw;
+        if (email)
+            *email = em;
         return true;
     }
     return false;
@@ -571,6 +577,14 @@ void cleanSensitiveInformation(QString& message)
     for (int i = 0; i < message.size(); ++i)
         message[i] = 'x';
     message.clear();
+}
+
+QByteArray generateJunk(int sizeInBytes)
+{
+    QByteArray junk;
+    for (int i = 0; i < sizeInBytes; ++i)
+        junk.append('x');
+    return junk;
 }
 
 } // UtilityFunctions

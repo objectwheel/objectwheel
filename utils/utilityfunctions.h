@@ -72,6 +72,7 @@ void adjustFontPixelSize(QWidget* widget, int advance);
 bool hasHover(const QWidget* widget);
 bool isEmailFormatCorrect(const QString& email);
 bool isPasswordFormatCorrect(const QString& password);
+bool isPasswordHashFormatCorrect(const QString& hash); // SHA3-512
 QWidget* createSpacingWidget(const QSize& size);
 QWidget* createSpacerWidget(Qt::Orientation orientation);
 QWidget* createSeparatorWidget(Qt::Orientation orientation);
@@ -102,9 +103,10 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
                                         QMessageBox::StandardButtons buttons = QMessageBox::Ok,
                                         QMessageBox::StandardButton defaultButton = QMessageBox::Ok,
                                         bool modal = true);
-QByteArray generateAutoLoginHash(const QByteArray& password);
+QByteArray generateJunk(int sizeInBytes);
+QByteArray generateAutoLoginHash(const QString& email, const QString& pwhash);
 QByteArray generatePasswordHash(const QByteArray& password);
-bool testAutoLogin(const QByteArray& hash, QByteArray* password = nullptr);
+bool testAutoLogin(const QByteArray& hash, QString* email = nullptr, QString* pwhash = nullptr);
 bool testPassword(const QByteArray& password, const QByteArray& hash);
 void cleanSensitiveInformation(QString& message);
 

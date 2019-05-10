@@ -134,19 +134,19 @@ void UserManager::login(const QString& email, const QString& password)
     }
 
     s_emailCache = email;
-    s_passwordCache = hashPassword(password);
+    s_passwordCache = password;
 
-    RegistrationApiManager::login(s_emailCache, s_passwordCache);
+    RegistrationApiManager::login(email, password);
 }
 
-void UserManager::loginOffline(const QString& email, const QString& hash)
+void UserManager::loginOffline(const QString& email, const QString& password)
 {
     if (!UtilityFunctions::isEmailFormatCorrect(email)) {
         qWarning("UserManager: Incorrect email format");
         return;
     }
 
-    if (hash.size() != 128) {
+    if (!UtilityFunctions::isPasswordHashFormatCorrect(password)) {
         qWarning("UserManager: Incorrect hash format");
         return;
     }
@@ -162,9 +162,9 @@ void UserManager::loginOffline(const QString& email, const QString& hash)
     }
 
     s_emailCache = email;
-    s_passwordCache = hash;
+    s_passwordCache = password;
 
-    if (UtilityFunctions::testPassword(hash.toUtf8(), SaveUtils::userPassword(dir(email))))
+    if (UtilityFunctions::testPassword(password.toUtf8(), SaveUtils::userPassword(dir(email))))
         s_instance->onLoginSuccessful(QVariantList());
     else
         s_instance->onLoginFailure();

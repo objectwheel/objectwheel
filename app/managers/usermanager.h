@@ -27,7 +27,7 @@ public:
 
     static void logout();
     static void login(const QString& email, const QString& password);
-    static void loginOffline(const QString& email, const QString& hash);
+    static void loginOffline(const QString& email, const QString& password);
 
 private slots:
     void onLoginFailure();
