@@ -9,6 +9,7 @@
 #include <mainwindow.h>
 #include <utilityfunctions.h>
 #include <transparentstyle.h>
+#include <planmanager.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -452,7 +453,7 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
 {
     m_listWidget->clear();
 
-    if (UserManager::dir().isEmpty())
+    if (!UserManager::isLoggedIn())
         return;
 
     int row = 0;
@@ -488,10 +489,20 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
 
 void ProjectsWidget::onNewButtonClick()
 {
-    if (UserManager::dir().isEmpty()) return;
-    m_buttons->setDisabled(true);
+    if (!UserManager::isLoggedIn())
+        return;
 
     auto projects = ProjectManager::projectNames();
+
+    if (!PlanManager::isEligibleForNewProject(UserManager::plan(), projects.size())) {
+        UtilityFunctions::showMessage(this,
+                                      tr("You are not eligible for this"),
+                                      tr("Please upgrade your plan in order to have "
+                                         "more than 3 projects at the same time."));
+        return;
+    }
+
+    m_buttons->setDisabled(true);
     QString projectName = tr("Project") + " - 1";
 
     while (projects.contains(projectName))

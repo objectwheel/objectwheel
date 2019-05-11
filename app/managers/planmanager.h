@@ -15,6 +15,7 @@ enum Plans : quint32 {
 Q_ENUM_NS(Plans)
 
 bool isEligibleForOfflineLogging(Plans plan);
+bool isEligibleForNewProject(Plans plan, int projectCount);
 
 } // PlanManager
 

@@ -9,4 +9,13 @@ bool isEligibleForOfflineLogging(Plans plan)
     return false;
 }
 
+bool isEligibleForNewProject(Plans plan, int projectCount)
+{
+    if (plan == Pro || plan == Enterprise)
+        return true;
+    if (projectCount < 3)
+        return true;
+    return false;
+}
+
 } // PlanManager
