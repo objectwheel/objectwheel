@@ -3,6 +3,8 @@
 #include <hashfactory.h>
 #include <serializeenum.h>
 
+#include <private/qfilesystemengine_p.h>
+
 #include <QDateTime>
 #include <QJsonValue>
 #include <QSaveFile>
@@ -20,17 +22,19 @@
 #define DIR_GLOBAL   "GlobalResources"
 
 QBasicTimer SaveUtils::s_syncTimer;
-QMap<QDir, SaveUtils::ControlMap> SaveUtils::s_controlCache;
-QMap<QDir, SaveUtils::ProjectMap> SaveUtils::s_projectCache;
-QMap<QDir, SaveUtils::UserMap> SaveUtils::s_userCache;
+SaveUtils::ControlCache SaveUtils::s_controlCache;
+SaveUtils::ProjectCache SaveUtils::s_projectCache;
+SaveUtils::UserCache SaveUtils::s_userCache;
 
 SaveUtils::SaveUtils(QObject* parent) : QObject(parent)
 {
     s_syncTimer.start(5000, Qt::VeryCoarseTimer, this);
 }
-
+#include <QDebug>
 SaveUtils::~SaveUtils()
 {
+    qDebug() << "asdasdasdasd";
+
     sync();
 }
 
@@ -274,121 +278,103 @@ QDateTime SaveUtils::userRegistrationDate(const QString& userDir)
     return property(userDir, UserRegistrationDate).value<QDateTime>();
 }
 
-SaveUtils::ControlMap SaveUtils::controlMap(const QString& controlDir)
+SaveUtils::ControlHash& SaveUtils::controlHash(const QString& controlDir)
 {
-    ControlMap map;
-    QFile file(toControlMetaFile(controlDir));
-    if (!file.open(QFile::ReadOnly)) {
-        qWarning("SaveUtils: Cannot open control meta file");
-        return map;
+    const QDir dir(controlDir);
+    if (s_controlCache.contains(dir)) {
+        return s_controlCache[dir];
+    } else {
+        QFile file(toControlMetaFile(controlDir));
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning("SaveUtils: Cannot open control meta file");
+            return s_controlCache[dir];
+        }
+        QDataStream in(&file);
+        in.setVersion(QDataStream::Qt_5_12);
+        in >> s_controlCache[dir];
+        file.close();
+        return s_controlCache[dir];
     }
-    QDataStream in(&file);
-    in.setVersion(QDataStream::Qt_5_12);
-    in >> map;
-    file.close();
-    return map;
 }
 
-SaveUtils::ProjectMap SaveUtils::projectMap(const QString& projectDir)
+SaveUtils::ProjectHash& SaveUtils::projectHash(const QString& projectDir)
 {
-    ProjectMap map;
-    QFile file(toProjectMetaFile(projectDir));
-    if (!file.open(QFile::ReadOnly)) {
-        qWarning("SaveUtils: Cannot open project meta file");
-        return map;
+    const QDir dir(projectDir);
+    if (s_projectCache.contains(dir)) {
+        return s_projectCache[dir];
+    } else {
+        QFile file(toProjectMetaFile(projectDir));
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning("SaveUtils: Cannot open project meta file");
+            return s_projectCache[dir];
+        }
+        QDataStream in(&file);
+        in.setVersion(QDataStream::Qt_5_12);
+        in >> s_projectCache[dir];
+        file.close();
+        return s_projectCache[dir];
     }
-    QDataStream in(&file);
-    in.setVersion(QDataStream::Qt_5_12);
-    in >> map;
-    file.close();
-    return map;
 }
 
-SaveUtils::UserMap SaveUtils::userMap(const QString& userDir)
+SaveUtils::UserHash& SaveUtils::userHash(const QString& userDir)
 {
-    UserMap map;
-    QFile file(toUserMetaFile(userDir));
-    if (!file.open(QFile::ReadOnly)) {
-        qWarning("SaveUtils: Cannot open user meta file");
-        return map;
+    const QDir dir(userDir);
+    if (s_userCache.contains(dir)) {
+        return s_userCache[dir];
+    } else {
+        QFile file(toUserMetaFile(userDir));
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning("SaveUtils: Cannot open user meta file");
+            return s_userCache[dir];
+        }
+        QDataStream in(&file);
+        in.setVersion(QDataStream::Qt_5_12);
+        in >> s_userCache[dir];
+        file.close();
+        return s_userCache[dir];
     }
-    QDataStream in(&file);
-    in.setVersion(QDataStream::Qt_5_12);
-    in >> map;
-    file.close();
-    return map;
 }
 
 QVariant SaveUtils::property(const QString& controlDir, SaveUtils::ControlProperties property)
 {
-    return controlMap(controlDir).value(property);
+    return controlHash(controlDir).value(property);
 }
 
 QVariant SaveUtils::property(const QString& projectDir, SaveUtils::ProjectProperties property)
 {
-    return projectMap(projectDir).value(property);
+    return projectHash(projectDir).value(property);
 }
 
 QVariant SaveUtils::property(const QString& userDir, SaveUtils::UserProperties property)
 {
-    return userMap(userDir).value(property);
+    return userHash(userDir).value(property);
 }
 
 void SaveUtils::setProperty(const QString& controlDir, SaveUtils::ControlProperties property, const QVariant& value)
 {
-    ControlMap map(controlMap(controlDir));
-    map.insert(property, value);
-    QSaveFile file(toControlMetaFile(controlDir));
-    if (!file.open(QSaveFile::WriteOnly)) {
-        qWarning("SaveUtils: Cannot open control meta file");
-        return;
-    }
-    QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_5_12);
-    out << map;
-    if (!file.commit())
-        qWarning("SaveUtils: Control meta file save unsuccessful");
+    ControlHash& hash(controlHash(controlDir));
+    hash.insert(property, value);
 }
 
 void SaveUtils::setProperty(const QString& projectDir, SaveUtils::ProjectProperties property, const QVariant& value)
 {
-    ProjectMap map(projectMap(projectDir));
-    map.insert(property, value);
-    map.insert(ProjectModificationDate, QDateTime::currentDateTime());
-    QSaveFile file(toProjectMetaFile(projectDir));
-    if (!file.open(QSaveFile::WriteOnly)) {
-        qWarning("SaveUtils: Cannot open project meta file");
-        return;
-    }
-    QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_5_12);
-    out << map;
-    if (!file.commit())
-        qWarning("SaveUtils: Project meta file save unsuccessful");
+    ProjectHash& hash(projectHash(projectDir));
+    hash.insert(property, value);
+    hash.insert(ProjectModificationDate, QDateTime::currentDateTime());
 }
 
 void SaveUtils::setProperty(const QString& userDir, SaveUtils::UserProperties property, const QVariant& value)
 {
-    UserMap map(userMap(userDir));
-    map.insert(property, value);
-    QSaveFile file(toUserMetaFile(userDir));
-    if (!file.open(QSaveFile::WriteOnly)) {
-        qWarning("SaveUtils: Cannot open user meta file");
-        return;
-    }
-    QDataStream out(&file);
-    out.setVersion(QDataStream::Qt_5_12);
-    out << map;
-    if (!file.commit())
-        qWarning("SaveUtils: User meta file save unsuccessful");
+    UserHash& hash(userHash(userDir));
+    hash.insert(property, value);
 }
 
 void SaveUtils::makeControlMetaFile(const QString& controlDir)
 {
     if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
-        ControlMap map;
-        map.insert(ControlVersion, qreal(VERSION));
-        map.insert(ControlSignature, QStringLiteral(SIGN_OWCTRL));
+        ControlHash hash;
+        hash.insert(ControlVersion, qreal(VERSION));
+        hash.insert(ControlSignature, QStringLiteral(SIGN_OWCTRL));
         QFile file(toControlMetaFile(controlDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open control meta file");
@@ -396,7 +382,7 @@ void SaveUtils::makeControlMetaFile(const QString& controlDir)
         }
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_12);
-        out << map;
+        out << hash;
         file.close();
     }
 }
@@ -404,9 +390,9 @@ void SaveUtils::makeControlMetaFile(const QString& controlDir)
 void SaveUtils::makeProjectMetaFile(const QString& projectDir)
 {
     if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
-        ProjectMap map;
-        map.insert(ProjectVersion, qreal(VERSION));
-        map.insert(ProjectSignature, QStringLiteral(SIGN_OWPRJT));
+        ProjectHash hash;
+        hash.insert(ProjectVersion, qreal(VERSION));
+        hash.insert(ProjectSignature, QStringLiteral(SIGN_OWPRJT));
         QFile file(toProjectMetaFile(projectDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open project meta file");
@@ -414,7 +400,7 @@ void SaveUtils::makeProjectMetaFile(const QString& projectDir)
         }
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_12);
-        out << map;
+        out << hash;
         file.close();
     }
 }
@@ -422,9 +408,9 @@ void SaveUtils::makeProjectMetaFile(const QString& projectDir)
 void SaveUtils::makeUserMetaFile(const QString& userDir)
 {
     if (!QFileInfo::exists(toUserMetaFile(userDir))) {
-        UserMap map;
-        map.insert(UserVersion, qreal(VERSION));
-        map.insert(UserSignature, QStringLiteral(SIGN_OWUSER));
+        UserHash hash;
+        hash.insert(UserVersion, qreal(VERSION));
+        hash.insert(UserSignature, QStringLiteral(SIGN_OWUSER));
         QFile file(toUserMetaFile(userDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open user meta file");
@@ -432,14 +418,51 @@ void SaveUtils::makeUserMetaFile(const QString& userDir)
         }
         QDataStream out(&file);
         out.setVersion(QDataStream::Qt_5_12);
-        out << map;
+        out << hash;
         file.close();
     }
 }
 
 void SaveUtils::sync()
 {
+    for (const QDir& userDir : s_userCache.keys()) {
+        QSaveFile file(toUserMetaFile(userDir.path()));
+        if (!file.open(QSaveFile::WriteOnly)) {
+            qWarning("SaveUtils: Cannot open user meta file");
+            return;
+        }
+        QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_12);
+        out << s_userCache.value(userDir);
+        if (!file.commit())
+            qWarning("SaveUtils: User meta file save unsuccessful");
+    }
 
+    for (const QDir& projectDir : s_projectCache.keys()) {
+        QSaveFile file(toProjectMetaFile(projectDir.path()));
+        if (!file.open(QSaveFile::WriteOnly)) {
+            qWarning("SaveUtils: Cannot open project meta file");
+            return;
+        }
+        QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_12);
+        out << s_projectCache.value(projectDir);
+        if (!file.commit())
+            qWarning("SaveUtils: Project meta file save unsuccessful");
+    }
+
+    for (const QDir& controlDir : s_controlCache.keys()) {
+        QSaveFile file(toControlMetaFile(controlDir.path()));
+        if (!file.open(QSaveFile::WriteOnly)) {
+            qWarning("SaveUtils: Cannot open control meta file");
+            return;
+        }
+        QDataStream out(&file);
+        out.setVersion(QDataStream::Qt_5_12);
+        out << s_controlCache.value(controlDir);
+        if (!file.commit())
+            qWarning("SaveUtils: Control meta file save unsuccessful");
+    }
 }
 
 void SaveUtils::regenerateUids(const QString& topPath)
@@ -481,3 +504,18 @@ QStringList SaveUtils::childrenPaths(const QString& controlDir)
     return paths;
 }
 
+uint qHash(const QDir& key, uint seed)
+{
+    // Filters, sort order, nameFilters are ignored
+    if (QFileSystemEngine::isCaseSensitive()) {
+        if (key.exists())
+            return qHash(key.canonicalPath(), seed);
+        else
+            return qHash(key.absolutePath(), seed);
+    } else {
+        if (key.exists())
+            return qHash(key.canonicalPath().toLower(), seed);
+        else
+            return qHash(key.absolutePath().toLower(), seed);
+    }
+}

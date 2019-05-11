@@ -51,9 +51,14 @@ public:
         UserSignature
     };
 
-    using ControlMap = QMap<ControlProperties, QVariant>;
-    using ProjectMap = QMap<ProjectProperties, QVariant>;
-    using UserMap = QMap<UserProperties, QVariant>;
+    using ControlHash = QHash<ControlProperties, QVariant>;
+    using ProjectHash = QHash<ProjectProperties, QVariant>;
+    using UserHash = QHash<UserProperties, QVariant>;
+
+private:
+    using ControlCache = QHash<QDir, ControlHash>;
+    using ProjectCache = QHash<QDir, ProjectHash>;
+    using UserCache = QHash<QDir, UserHash>;
 
 public:
     static bool isForm(const QString& controlDir);
@@ -106,9 +111,9 @@ public:
     static QDateTime userLastOnlineDate(const QString& userDir);
     static QDateTime userRegistrationDate(const QString& userDir);
 
-    static ControlMap controlMap(const QString& controlDir);
-    static ProjectMap projectMap(const QString& projectDir);
-    static UserMap userMap(const QString& userDir);
+    static ControlHash& controlHash(const QString& controlDir);
+    static ProjectHash& projectHash(const QString& projectDir);
+    static UserHash& userHash(const QString& userDir);
 
     static QVariant property(const QString& controlDir, ControlProperties property);
     static QVariant property(const QString& projectDir, ProjectProperties property);
@@ -136,9 +141,11 @@ private:
 
 private:
     static QBasicTimer s_syncTimer;
-    static QMap<QDir, ControlMap> s_controlCache;
-    static QMap<QDir, ProjectMap> s_projectCache;
-    static QMap<QDir, UserMap> s_userCache;
+    static ControlCache s_controlCache;
+    static ProjectCache s_projectCache;
+    static UserCache s_userCache;
 };
+
+uint qHash(const QDir& key, uint seed);
 
 #endif // SAVEUTILS_H
