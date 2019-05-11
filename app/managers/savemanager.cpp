@@ -59,10 +59,17 @@ inline int countIdInProjectFormScope(const QString& id, const QString formRootPa
 
 QString detectedFormRootPath(const QString& rootPath)
 {
-    //! FIXME: This might crash on Windows due to back-slash path names
+    Q_ASSERT(!rootPath.isEmpty());
     Q_ASSERT(!ProjectManager::uid().isEmpty());
-    const QString& designsDir = SaveUtils::toDesignsDir(ProjectManager::dir()) + '/';
-    const QString& formRootPath = QRegularExpression("^" + designsDir + "\\d+").match(rootPath).captured();
+    const QDir designs(SaveUtils::toDesignsDir(ProjectManager::dir()));
+    QDir root(rootPath);
+    Q_ASSERT(root != designs);
+    QDir deeper;
+    do {
+        deeper = root;
+    } while(root.cdUp() && root != designs);
+
+    const QString& formRootPath = deeper.path();
     Q_ASSERT(!formRootPath.isEmpty());
     Q_ASSERT(QFileInfo::exists(formRootPath));
     Q_ASSERT(SaveUtils::isForm(formRootPath));

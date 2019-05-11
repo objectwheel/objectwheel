@@ -105,9 +105,11 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
         topItem->setExpanded(true);
     }
 
+    QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::icon(toolPath)));
+    icon.setDevicePixelRatio(tree->devicePixelRatioF());
     QTreeWidgetItem* item = new QTreeWidgetItem;
     item->setText(0, name);
-    item->setIcon(0, QIcon(dir + "icon.png"));
+    item->setIcon(0, QIcon(icon));
     topItem->addChild(item);
     tree->addUrls(item, urls);
 
@@ -173,9 +175,11 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
             topItem->setExpanded(true);
         }
 
+        QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::icon(newToolPath)));
+        icon.setDevicePixelRatio(tree->devicePixelRatioF());
         QTreeWidgetItem* item = new QTreeWidgetItem;
         item->setText(0, name);
-        item->setIcon(0, QIcon(dir + "icon.png"));
+        item->setIcon(0, QIcon(icon));
         topItem->addChild(item);
         tree->addUrls(item, urls);
 

@@ -532,7 +532,7 @@ QByteArray generatePasswordHash(const QByteArray& password)
 {
     static const QCryptographicHash::Algorithm algorithm = QCryptographicHash::Sha3_512;
     static const quint32 dkLen = QCryptographicHash::hashLength(algorithm);
-    static const quint32 iterations = 50000;
+    static const quint32 iterations = 20000;
     const QByteArray& salt = HashFactory::generateSalt();
     const QByteArray& deriveredKey = QPasswordDigestor::deriveKeyPbkdf2(
                 algorithm, password, salt, iterations, dkLen).toHex();

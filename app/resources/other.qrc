@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/resources">
         <file>qmls/form/t/main.qml</file>
-        <file>qmls/control/t/icon.png</file>
         <file>qmls/control/t/main.qml</file>
         <file>other/android-permissions.txt</file>
         <file>other/ow-modules.txt</file>
@@ -9,9 +8,9 @@
         <file>qmls/buildsScreen/main.qml</file>
         <file>qmls/buildsScreen/ProgressPage.qml</file>
         <file>other/countries.txt</file>
-        <file>qmls/form/t/control.json</file>
-        <file>qmls/control/t/control.json</file>
         <file>qmls/buildsScreen/delaycaller.js</file>
         <file>other/form.js</file>
+        <file>qmls/form/t/control.meta</file>
+        <file>qmls/control/t/control.meta</file>
     </qresource>
 </RCC>
