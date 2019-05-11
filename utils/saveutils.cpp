@@ -4,9 +4,9 @@
 #include <serializeenum.h>
 
 #include <QDateTime>
-#include <QDir>
 #include <QJsonValue>
 #include <QSaveFile>
+#include <QTimerEvent>
 
 #define VERSION      2.9
 #define SIGN_OWCTRL  "b3djdHJs"
@@ -19,88 +19,109 @@
 #define DIR_OW       "Objectwheel"
 #define DIR_GLOBAL   "GlobalResources"
 
-namespace SaveUtils {
+QBasicTimer SaveUtils::s_syncTimer;
+QMap<QDir, SaveUtils::ControlMap> SaveUtils::s_controlCache;
+QMap<QDir, SaveUtils::ProjectMap> SaveUtils::s_projectCache;
+QMap<QDir, SaveUtils::UserMap> SaveUtils::s_userCache;
 
-bool isForm(const QString& controlDir)
+SaveUtils::SaveUtils(QObject* parent) : QObject(parent)
+{
+    s_syncTimer.start(5000, Qt::VeryCoarseTimer, this);
+}
+
+SaveUtils::~SaveUtils()
+{
+    sync();
+}
+
+void SaveUtils::timerEvent(QTimerEvent* event)
+{
+    if (event->timerId() == s_syncTimer.timerId())
+        sync();
+    else
+        QObject::timerEvent(event);
+}
+
+bool SaveUtils::isForm(const QString& controlDir)
 {
     QDir dir(controlDir);
     dir.cdUp();
     return QStringLiteral(DIR_DESIGNS) == dir.dirName();
 }
 
-bool isControlValid(const QString& controlDir)
+bool SaveUtils::isControlValid(const QString& controlDir)
 {
     const QString& sign = property(controlDir, ControlSignature).toString();
     return sign == QStringLiteral(SIGN_OWCTRL) && !uid(controlDir).isEmpty();
 }
 
-bool isProjectValid(const QString& projectDir)
+bool SaveUtils::isProjectValid(const QString& projectDir)
 {
     const QString& sign = property(projectDir, ProjectSignature).toString();
     return sign == QStringLiteral(SIGN_OWPRJT);
 }
 
-bool isUserValid(const QString& userDir)
+bool SaveUtils::isUserValid(const QString& userDir)
 {
     const QString& sign = property(userDir, UserSignature).toString();
     return sign == QStringLiteral(SIGN_OWUSER);
 }
 
-QString controlMetaFileName()
+QString SaveUtils::controlMetaFileName()
 {
     static const QString& controlMetaFile = QStringLiteral("control.meta");
     return controlMetaFile;
 }
 
-QString projectMetaFileName()
+QString SaveUtils::projectMetaFileName()
 {
     static const QString& projectMetaFile = QStringLiteral("project.meta");
     return projectMetaFile;
 }
 
-QString userMetaFileName()
+QString SaveUtils::userMetaFileName()
 {
     static const QString& userMetaFile = QStringLiteral("user.meta");
     return userMetaFile;
 }
 
-QString mainQmlFileName()
+QString SaveUtils::mainQmlFileName()
 {
     static const QString& mainQmlFile = QStringLiteral("main.qml");
     return mainQmlFile;
 }
 
-QString toControlMetaFile(const QString& controlDir)
+QString SaveUtils::toControlMetaFile(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + controlMetaFileName();
 }
 
-QString toProjectMetaFile(const QString& projectDir)
+QString SaveUtils::toProjectMetaFile(const QString& projectDir)
 {
     return projectDir + '/' + projectMetaFileName();
 }
 
-QString toUserMetaFile(const QString& userDir)
+QString SaveUtils::toUserMetaFile(const QString& userDir)
 {
     return userDir + '/' + userMetaFileName();
 }
 
-QString toMainQmlFile(const QString& controlDir)
+QString SaveUtils::toMainQmlFile(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + mainQmlFileName();
 }
 
-QString toThisDir(const QString& controlDir)
+QString SaveUtils::toThisDir(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_THIS);
 }
 
-QString toChildrenDir(const QString& controlDir)
+QString SaveUtils::toChildrenDir(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_CHILDREN);
 }
 
-QString toParentDir(const QString& controlDir)
+QString SaveUtils::toParentDir(const QString& controlDir)
 {
     QDir dir(controlDir);
     dir.cdUp();
@@ -108,154 +129,154 @@ QString toParentDir(const QString& controlDir)
     return dir.path();
 }
 
-QString toDesignsDir(const QString& projectDir)
+QString SaveUtils::toDesignsDir(const QString& projectDir)
 {
     return projectDir + '/' + QStringLiteral(DIR_DESIGNS);
 }
 
-QString toImportsDir(const QString& projectDir)
+QString SaveUtils::toImportsDir(const QString& projectDir)
 {
     return projectDir + '/' + QStringLiteral(DIR_IMPORTS);
 }
 
-QString toOwDir(const QString& projectDir)
+QString SaveUtils::toOwDir(const QString& projectDir)
 {
     return toImportsDir(projectDir) + '/' + QStringLiteral(DIR_OW);
 }
 
-QString toGlobalDir(const QString& projectDir)
+QString SaveUtils::toGlobalDir(const QString& projectDir)
 {
     return toOwDir(projectDir) + '/' + QStringLiteral(DIR_GLOBAL);
 }
 
-QString id(const QString& controlDir)
+QString SaveUtils::id(const QString& controlDir)
 {
     return property(controlDir, ControlId).toString();
 }
 
-QString uid(const QString& controlDir)
+QString SaveUtils::uid(const QString& controlDir)
 {
     return property(controlDir, ControlUid).toString();
 }
 
-QString name(const QString& controlDir)
+QString SaveUtils::name(const QString& controlDir)
 {
     return property(controlDir, ControlToolName).toString();
 }
 
-QString category(const QString& controlDir)
+QString SaveUtils::category(const QString& controlDir)
 {
     return property(controlDir, ControlToolCategory).toString();
 }
 
-QByteArray icon(const QString& controlDir)
+QByteArray SaveUtils::icon(const QString& controlDir)
 {
     return property(controlDir, ControlIcon).toByteArray();
 }
 
-bool projectHdpiScaling(const QString& projectDir)
+bool SaveUtils::projectHdpiScaling(const QString& projectDir)
 {
     return property(projectDir, ProjectHdpiScaling).value<bool>();
 }
 
-qint64 projectSize(const QString& projectDir)
+qint64 SaveUtils::projectSize(const QString& projectDir)
 {
     return property(projectDir, ProjectSize).value<qint64>();
 }
 
-QString projectUid(const QString& projectDir)
+QString SaveUtils::projectUid(const QString& projectDir)
 {
     return property(projectDir, ProjectUid).value<QString>();
 }
 
-QString projectName(const QString& projectDir)
+QString SaveUtils::projectName(const QString& projectDir)
 {
     return property(projectDir, ProjectName).value<QString>();
 }
 
-QString projectDescription(const QString& projectDir)
+QString SaveUtils::projectDescription(const QString& projectDir)
 {
     return property(projectDir, ProjectDescription).value<QString>();
 }
 
-QDateTime projectCreationDate(const QString& projectDir)
+QDateTime SaveUtils::projectCreationDate(const QString& projectDir)
 {
     return property(projectDir, ProjectCreationDate).value<QDateTime>();
 }
 
-QDateTime projectModificationDate(const QString& projectDir)
+QDateTime SaveUtils::projectModificationDate(const QString& projectDir)
 {
     return property(projectDir, ProjectModificationDate).value<QDateTime>();
 }
 
-QJsonValue projectTheme(const QString& projectDir)
+QJsonValue SaveUtils::projectTheme(const QString& projectDir)
 {
     return property(projectDir, ProjectTheme).value<QJsonValue>();
 }
 
-quint32 userPlan(const QString& userDir)
+quint32 SaveUtils::userPlan(const QString& userDir)
 {
     return property(userDir, UserPlan).value<quint32>();
 }
 
-QString userEmail(const QString& userDir)
+QString SaveUtils::userEmail(const QString& userDir)
 {
     return property(userDir, UserEmail).value<QString>();
 }
 
-QString userFirst(const QString& userDir)
+QString SaveUtils::userFirst(const QString& userDir)
 {
     return property(userDir, UserFirst).value<QString>();
 }
 
-QString userLast(const QString& userDir)
+QString SaveUtils::userLast(const QString& userDir)
 {
     return property(userDir, UserLast).value<QString>();
 }
 
-QString userCountry(const QString& userDir)
+QString SaveUtils::userCountry(const QString& userDir)
 {
     return property(userDir, UserCountry).value<QString>();
 }
 
-QString userCompany(const QString& userDir)
+QString SaveUtils::userCompany(const QString& userDir)
 {
     return property(userDir, UserCompany).value<QString>();
 }
 
-QString userTitle(const QString& userDir)
+QString SaveUtils::userTitle(const QString& userDir)
 {
     return property(userDir, UserTitle).value<QString>();
 }
 
-QString userPhone(const QString& userDir)
+QString SaveUtils::userPhone(const QString& userDir)
 {
     return property(userDir, UserPhone).value<QString>();
 }
 
-QByteArray userPassword(const QString& userDir)
+QByteArray SaveUtils::userPassword(const QString& userDir)
 {
     return property(userDir, UserPassword).value<QByteArray>();
 }
 
-QByteArray userIcon(const QString& userDir)
+QByteArray SaveUtils::userIcon(const QString& userDir)
 {
     return property(userDir, UserIcon).value<QByteArray>();
 }
 
-QDateTime userLastOnlineDate(const QString& userDir)
+QDateTime SaveUtils::userLastOnlineDate(const QString& userDir)
 {
     return property(userDir, UserLastOnlineDate).value<QDateTime>();
 }
 
-QDateTime userRegistrationDate(const QString& userDir)
+QDateTime SaveUtils::userRegistrationDate(const QString& userDir)
 {
     return property(userDir, UserRegistrationDate).value<QDateTime>();
 }
 
-QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
+SaveUtils::ControlMap SaveUtils::controlMap(const QString& controlDir)
 {
-    QMap<ControlProperties, QVariant> map;
+    ControlMap map;
     QFile file(toControlMetaFile(controlDir));
     if (!file.open(QFile::ReadOnly)) {
         qWarning("SaveUtils: Cannot open control meta file");
@@ -268,9 +289,9 @@ QMap<ControlProperties, QVariant> controlMap(const QString& controlDir)
     return map;
 }
 
-QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
+SaveUtils::ProjectMap SaveUtils::projectMap(const QString& projectDir)
 {
-    QMap<ProjectProperties, QVariant> map;
+    ProjectMap map;
     QFile file(toProjectMetaFile(projectDir));
     if (!file.open(QFile::ReadOnly)) {
         qWarning("SaveUtils: Cannot open project meta file");
@@ -283,9 +304,9 @@ QMap<ProjectProperties, QVariant> projectMap(const QString& projectDir)
     return map;
 }
 
-QMap<UserProperties, QVariant> userMap(const QString& userDir)
+SaveUtils::UserMap SaveUtils::userMap(const QString& userDir)
 {
-    QMap<UserProperties, QVariant> map;
+    UserMap map;
     QFile file(toUserMetaFile(userDir));
     if (!file.open(QFile::ReadOnly)) {
         qWarning("SaveUtils: Cannot open user meta file");
@@ -298,24 +319,24 @@ QMap<UserProperties, QVariant> userMap(const QString& userDir)
     return map;
 }
 
-QVariant property(const QString& controlDir, ControlProperties property)
+QVariant SaveUtils::property(const QString& controlDir, SaveUtils::ControlProperties property)
 {
     return controlMap(controlDir).value(property);
 }
 
-QVariant property(const QString& projectDir, ProjectProperties property)
+QVariant SaveUtils::property(const QString& projectDir, SaveUtils::ProjectProperties property)
 {
     return projectMap(projectDir).value(property);
 }
 
-QVariant property(const QString& userDir, UserProperties property)
+QVariant SaveUtils::property(const QString& userDir, SaveUtils::UserProperties property)
 {
     return userMap(userDir).value(property);
 }
 
-void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
+void SaveUtils::setProperty(const QString& controlDir, SaveUtils::ControlProperties property, const QVariant& value)
 {
-    QMap<ControlProperties, QVariant> map(controlMap(controlDir));
+    ControlMap map(controlMap(controlDir));
     map.insert(property, value);
     QSaveFile file(toControlMetaFile(controlDir));
     if (!file.open(QSaveFile::WriteOnly)) {
@@ -329,9 +350,9 @@ void setProperty(const QString& controlDir, ControlProperties property, const QV
         qWarning("SaveUtils: Control meta file save unsuccessful");
 }
 
-void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
+void SaveUtils::setProperty(const QString& projectDir, SaveUtils::ProjectProperties property, const QVariant& value)
 {
-    QMap<ProjectProperties, QVariant> map(projectMap(projectDir));
+    ProjectMap map(projectMap(projectDir));
     map.insert(property, value);
     map.insert(ProjectModificationDate, QDateTime::currentDateTime());
     QSaveFile file(toProjectMetaFile(projectDir));
@@ -346,9 +367,9 @@ void setProperty(const QString& projectDir, ProjectProperties property, const QV
         qWarning("SaveUtils: Project meta file save unsuccessful");
 }
 
-void setProperty(const QString& userDir, UserProperties property, const QVariant& value)
+void SaveUtils::setProperty(const QString& userDir, SaveUtils::UserProperties property, const QVariant& value)
 {
-    QMap<UserProperties, QVariant> map(userMap(userDir));
+    UserMap map(userMap(userDir));
     map.insert(property, value);
     QSaveFile file(toUserMetaFile(userDir));
     if (!file.open(QSaveFile::WriteOnly)) {
@@ -362,10 +383,10 @@ void setProperty(const QString& userDir, UserProperties property, const QVariant
         qWarning("SaveUtils: User meta file save unsuccessful");
 }
 
-void makeControlMetaFile(const QString& controlDir)
+void SaveUtils::makeControlMetaFile(const QString& controlDir)
 {
     if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
-        QMap<ControlProperties, QVariant> map;
+        ControlMap map;
         map.insert(ControlVersion, qreal(VERSION));
         map.insert(ControlSignature, QStringLiteral(SIGN_OWCTRL));
         QFile file(toControlMetaFile(controlDir));
@@ -380,10 +401,10 @@ void makeControlMetaFile(const QString& controlDir)
     }
 }
 
-void makeProjectMetaFile(const QString& projectDir)
+void SaveUtils::makeProjectMetaFile(const QString& projectDir)
 {
     if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
-        QMap<ProjectProperties, QVariant> map;
+        ProjectMap map;
         map.insert(ProjectVersion, qreal(VERSION));
         map.insert(ProjectSignature, QStringLiteral(SIGN_OWPRJT));
         QFile file(toProjectMetaFile(projectDir));
@@ -398,10 +419,10 @@ void makeProjectMetaFile(const QString& projectDir)
     }
 }
 
-void makeUserMetaFile(const QString& userDir)
+void SaveUtils::makeUserMetaFile(const QString& userDir)
 {
     if (!QFileInfo::exists(toUserMetaFile(userDir))) {
-        QMap<UserProperties, QVariant> map;
+        UserMap map;
         map.insert(UserVersion, qreal(VERSION));
         map.insert(UserSignature, QStringLiteral(SIGN_OWUSER));
         QFile file(toUserMetaFile(userDir));
@@ -416,7 +437,12 @@ void makeUserMetaFile(const QString& userDir)
     }
 }
 
-void regenerateUids(const QString& topPath)
+void SaveUtils::sync()
+{
+
+}
+
+void SaveUtils::regenerateUids(const QString& topPath)
 {
     for (const QString& controlFilePath
          : FileSystemUtils::searchFiles(controlMetaFileName(), topPath)) {
@@ -427,7 +453,7 @@ void regenerateUids(const QString& topPath)
     }
 }
 
-QStringList formPaths(const QString& projectDir)
+QStringList SaveUtils::formPaths(const QString& projectDir)
 {
     QStringList paths;
     const QString& designsDir = toDesignsDir(projectDir);
@@ -440,7 +466,7 @@ QStringList formPaths(const QString& projectDir)
     return paths;
 }
 
-QStringList childrenPaths(const QString& controlDir)
+QStringList SaveUtils::childrenPaths(const QString& controlDir)
 {
     QStringList paths;
     const QString& childrenDir = toChildrenDir(controlDir);
@@ -455,4 +481,3 @@ QStringList childrenPaths(const QString& controlDir)
     return paths;
 }
 
-} // SaveUtils

@@ -1,22 +1,19 @@
 #ifndef ABOUTWINDOW_H
 #define ABOUTWINDOW_H
 
-#include <QWidget>
+#include <QLabel>
 
-class QLabel;
 class QVBoxLayout;
 class QPushButton;
 
-class AboutWindow : public QWidget
+class AboutWindow final : public QWidget
 {
     Q_OBJECT
-
-    friend class WindowManager;
+    Q_DISABLE_COPY(AboutWindow)
 
 public:
     explicit AboutWindow(QWidget* parent = nullptr);
 
-private:
     QSize sizeHint() const override;
 
 signals:
@@ -24,7 +21,6 @@ signals:
 
 private:
     QVBoxLayout* m_layout;
-    QLabel* m_titleLabel;
     QLabel* m_logoLabel;
     QLabel* m_versionLabel;
     QPushButton* m_okButton;
