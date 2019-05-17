@@ -36,6 +36,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
                                            "<br>%3<br>support@objectwheel.com</p>")
                             .arg(APP_VER).arg(APP_GITHASH).arg(APP_GITDATE));
 
+    m_okButton->setDefault(true);
     m_okButton->setText(tr("Close"));
     m_okButton->setFixedWidth(100);
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")

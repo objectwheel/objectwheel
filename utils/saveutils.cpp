@@ -254,7 +254,7 @@ QDateTime userRegistrationDate(const QString& userDir)
     return property(userDir, UserRegistrationDate).value<QDateTime>();
 }
 
-SaveUtils::ControlHash controlHash(const QString& controlDir)
+ControlHash controlHash(const QString& controlDir)
 {
     ControlHash hash;
     QFile file(toControlMetaFile(controlDir));
@@ -269,7 +269,7 @@ SaveUtils::ControlHash controlHash(const QString& controlDir)
     return hash;
 }
 
-SaveUtils::ProjectHash projectHash(const QString& projectDir)
+ProjectHash projectHash(const QString& projectDir)
 {
     ProjectHash hash;
     QFile file(toProjectMetaFile(projectDir));
@@ -284,7 +284,7 @@ SaveUtils::ProjectHash projectHash(const QString& projectDir)
     return hash;
 }
 
-SaveUtils::UserHash userHash(const QString& userDir)
+UserHash userHash(const QString& userDir)
 {
     UserHash hash;
     QFile file(toUserMetaFile(userDir));
@@ -299,22 +299,22 @@ SaveUtils::UserHash userHash(const QString& userDir)
     return hash;
 }
 
-QVariant property(const QString& controlDir, SaveUtils::ControlProperties property)
+QVariant property(const QString& controlDir, ControlProperties property)
 {
     return controlHash(controlDir).value(property);
 }
 
-QVariant property(const QString& projectDir, SaveUtils::ProjectProperties property)
+QVariant property(const QString& projectDir, ProjectProperties property)
 {
     return projectHash(projectDir).value(property);
 }
 
-QVariant property(const QString& userDir, SaveUtils::UserProperties property)
+QVariant property(const QString& userDir, UserProperties property)
 {
     return userHash(userDir).value(property);
 }
 
-void setProperty(const QString& controlDir, SaveUtils::ControlProperties property, const QVariant& value)
+void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
 {
     ControlHash hash(controlHash(controlDir));
     hash.insert(property, value);
@@ -330,7 +330,7 @@ void setProperty(const QString& controlDir, SaveUtils::ControlProperties propert
         qWarning("SaveUtils: Control meta file save unsuccessful");
 }
 
-void setProperty(const QString& projectDir, SaveUtils::ProjectProperties property, const QVariant& value)
+void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
 {
     ProjectHash hash(projectHash(projectDir));
     hash.insert(property, value);
@@ -347,10 +347,10 @@ void setProperty(const QString& projectDir, SaveUtils::ProjectProperties propert
         qWarning("SaveUtils: Project meta file save unsuccessful");
 }
 
-void setProperty(const QString& userDir, SaveUtils::UserProperties property, const QVariant& value)
+void setProperty(const QString& userDir, UserProperties property, const QVariant& value)
 {
     UserHash hash(userHash(userDir));
-    hash.insert(property, value);    
+    hash.insert(property, value);
     QSaveFile file(toUserMetaFile(userDir));
     if (!file.open(QSaveFile::WriteOnly)) {
         qWarning("SaveUtils: Cannot open user meta file");
@@ -368,7 +368,7 @@ void makeControlMetaFile(const QString& controlDir)
     if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
         ControlHash hash;
         hash.insert(ControlVersion, qreal(VERSION));
-        hash.insert(ControlSignature, QStringLiteral(SIGN_OWCTRL));
+        hash.insert(ControlSignature, QLatin1String(SIGN_OWCTRL));
         QFile file(toControlMetaFile(controlDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open control meta file");
@@ -386,7 +386,7 @@ void makeProjectMetaFile(const QString& projectDir)
     if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
         ProjectHash hash;
         hash.insert(ProjectVersion, qreal(VERSION));
-        hash.insert(ProjectSignature, QStringLiteral(SIGN_OWPRJT));
+        hash.insert(ProjectSignature, QLatin1String(SIGN_OWPRJT));
         QFile file(toProjectMetaFile(projectDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open project meta file");
@@ -404,7 +404,7 @@ void makeUserMetaFile(const QString& userDir)
     if (!QFileInfo::exists(toUserMetaFile(userDir))) {
         UserHash hash;
         hash.insert(UserVersion, qreal(VERSION));
-        hash.insert(UserSignature, QStringLiteral(SIGN_OWUSER));
+        hash.insert(UserSignature, QLatin1String(SIGN_OWUSER));
         QFile file(toUserMetaFile(userDir));
         if (!file.open(QFile::WriteOnly)) {
             qWarning("SaveUtils: Cannot open user meta file");
