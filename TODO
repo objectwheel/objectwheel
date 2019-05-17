@@ -1,5 +1,8 @@
-- Use QPasswordDigestor to store passwords more safely
-- Add caching mechanism to SaveUtils (cache/commit all setProperty calls)
+- Clean this TODO file
+- ServerManager Socket Error:  "Connection timed out", fix this
+- Project import/export fix
+- Also fix all zipSync/unzipSync usages
+- Connection to the Server must be based on a known stream format like CBOR
 
 https://stackoverflow.com/questions/31498114/how-to-programmatically-prevent-linux-computer-from-sleeping-or-turning-on-scree
 https://developer.apple.com/library/archive/qa/qa1340/_index.html

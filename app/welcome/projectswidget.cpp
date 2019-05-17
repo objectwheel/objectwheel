@@ -616,11 +616,11 @@ void ProjectsWidget::onExportButtonClick()
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
 
     if (dialog.exec()) {
-        if (!QFile::remove(dialog.selectedFiles().at(0) + '/' + pname + ".zip"))
+        if (!QFile::remove(dialog.selectedFiles().at(0) + '/' + pname + ".opf"))
             return;
 
         if (!ProjectManager::exportProject(uid, dialog.selectedFiles().at(0) +
-                                           '/' + pname + ".zip")) {
+                                           '/' + pname + ".opf")) {
             return;
         }
 
@@ -634,7 +634,7 @@ void ProjectsWidget::onImportButtonClick()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFiles);
-    dialog.setNameFilter(tr("Zip files (*.zip)"));
+    dialog.setNameFilter(tr("Objectwheel Projects (*.opf)"));
     dialog.setViewMode(QFileDialog::Detail);
 
     if (dialog.exec()) {

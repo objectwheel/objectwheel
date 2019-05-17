@@ -5,10 +5,8 @@
 
 #include <private/qfilesystemengine_p.h>
 
-#include <QDateTime>
 #include <QJsonValue>
 #include <QSaveFile>
-#include <QTimerEvent>
 
 #define VERSION      2.9
 #define SIGN_OWCTRL  "b3djdHJs"
@@ -21,111 +19,89 @@
 #define DIR_OW       "Objectwheel"
 #define DIR_GLOBAL   "GlobalResources"
 
-QBasicTimer SaveUtils::s_syncTimer;
-SaveUtils::ControlCache SaveUtils::s_controlCache;
-SaveUtils::ProjectCache SaveUtils::s_projectCache;
-SaveUtils::UserCache SaveUtils::s_userCache;
+namespace SaveUtils {
 
-SaveUtils::SaveUtils(QObject* parent) : QObject(parent)
-{
-    s_syncTimer.start(5000, Qt::VeryCoarseTimer, this);
-}
-#include <QDebug>
-SaveUtils::~SaveUtils()
-{
-    qDebug() << "asdasdasdasd";
-
-    sync();
-}
-
-void SaveUtils::timerEvent(QTimerEvent* event)
-{
-    if (event->timerId() == s_syncTimer.timerId())
-        sync();
-    else
-        QObject::timerEvent(event);
-}
-
-bool SaveUtils::isForm(const QString& controlDir)
+bool isForm(const QString& controlDir)
 {
     QDir dir(controlDir);
     dir.cdUp();
-    return QStringLiteral(DIR_DESIGNS) == dir.dirName();
+    return dir.dirName().compare(QLatin1String(DIR_DESIGNS), QFileSystemEngine::isCaseSensitive()
+                                 ? Qt::CaseSensitive : Qt::CaseInsensitive) == 0;
 }
 
-bool SaveUtils::isControlValid(const QString& controlDir)
+bool isControlValid(const QString& controlDir)
 {
     const QString& sign = property(controlDir, ControlSignature).toString();
-    return sign == QStringLiteral(SIGN_OWCTRL) && !uid(controlDir).isEmpty();
+    return sign == QLatin1String(SIGN_OWCTRL) && !uid(controlDir).isEmpty();
 }
 
-bool SaveUtils::isProjectValid(const QString& projectDir)
+bool isProjectValid(const QString& projectDir)
 {
     const QString& sign = property(projectDir, ProjectSignature).toString();
-    return sign == QStringLiteral(SIGN_OWPRJT);
+    return sign == QLatin1String(SIGN_OWPRJT);
 }
 
-bool SaveUtils::isUserValid(const QString& userDir)
+bool isUserValid(const QString& userDir)
 {
     const QString& sign = property(userDir, UserSignature).toString();
-    return sign == QStringLiteral(SIGN_OWUSER);
+    return sign == QLatin1String(SIGN_OWUSER);
 }
 
-QString SaveUtils::controlMetaFileName()
+QString controlMetaFileName()
 {
     static const QString& controlMetaFile = QStringLiteral("control.meta");
     return controlMetaFile;
 }
 
-QString SaveUtils::projectMetaFileName()
+QString projectMetaFileName()
 {
     static const QString& projectMetaFile = QStringLiteral("project.meta");
     return projectMetaFile;
 }
 
-QString SaveUtils::userMetaFileName()
+QString userMetaFileName()
 {
     static const QString& userMetaFile = QStringLiteral("user.meta");
     return userMetaFile;
 }
 
-QString SaveUtils::mainQmlFileName()
+QString mainQmlFileName()
 {
     static const QString& mainQmlFile = QStringLiteral("main.qml");
     return mainQmlFile;
 }
 
-QString SaveUtils::toControlMetaFile(const QString& controlDir)
+QString toControlMetaFile(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + controlMetaFileName();
 }
 
-QString SaveUtils::toProjectMetaFile(const QString& projectDir)
+QString toProjectMetaFile(const QString& projectDir)
 {
     return projectDir + '/' + projectMetaFileName();
 }
 
-QString SaveUtils::toUserMetaFile(const QString& userDir)
+QString toUserMetaFile(const QString& userDir)
 {
     return userDir + '/' + userMetaFileName();
 }
 
-QString SaveUtils::toMainQmlFile(const QString& controlDir)
+QString toMainQmlFile(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_THIS) + '/' + mainQmlFileName();
 }
 
-QString SaveUtils::toThisDir(const QString& controlDir)
+QString toThisDir(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_THIS);
 }
 
-QString SaveUtils::toChildrenDir(const QString& controlDir)
+QString toChildrenDir(const QString& controlDir)
 {
     return controlDir + '/' + QStringLiteral(DIR_CHILDREN);
 }
 
-QString SaveUtils::toParentDir(const QString& controlDir)
+QString toParentDir(const QString& controlDir)
 {
     QDir dir(controlDir);
     dir.cdUp();
@@ -133,243 +109,261 @@ QString SaveUtils::toParentDir(const QString& controlDir)
     return dir.path();
 }
 
-QString SaveUtils::toDesignsDir(const QString& projectDir)
+QString toDesignsDir(const QString& projectDir)
 {
     return projectDir + '/' + QStringLiteral(DIR_DESIGNS);
 }
 
-QString SaveUtils::toImportsDir(const QString& projectDir)
+QString toImportsDir(const QString& projectDir)
 {
     return projectDir + '/' + QStringLiteral(DIR_IMPORTS);
 }
 
-QString SaveUtils::toOwDir(const QString& projectDir)
+QString toOwDir(const QString& projectDir)
 {
     return toImportsDir(projectDir) + '/' + QStringLiteral(DIR_OW);
 }
 
-QString SaveUtils::toGlobalDir(const QString& projectDir)
+QString toGlobalDir(const QString& projectDir)
 {
     return toOwDir(projectDir) + '/' + QStringLiteral(DIR_GLOBAL);
 }
 
-QString SaveUtils::id(const QString& controlDir)
+QString id(const QString& controlDir)
 {
     return property(controlDir, ControlId).toString();
 }
 
-QString SaveUtils::uid(const QString& controlDir)
+QString uid(const QString& controlDir)
 {
     return property(controlDir, ControlUid).toString();
 }
 
-QString SaveUtils::name(const QString& controlDir)
+QString name(const QString& controlDir)
 {
     return property(controlDir, ControlToolName).toString();
 }
 
-QString SaveUtils::category(const QString& controlDir)
+QString category(const QString& controlDir)
 {
     return property(controlDir, ControlToolCategory).toString();
 }
 
-QByteArray SaveUtils::icon(const QString& controlDir)
+QByteArray icon(const QString& controlDir)
 {
     return property(controlDir, ControlIcon).toByteArray();
 }
 
-bool SaveUtils::projectHdpiScaling(const QString& projectDir)
+bool projectHdpiScaling(const QString& projectDir)
 {
     return property(projectDir, ProjectHdpiScaling).value<bool>();
 }
 
-qint64 SaveUtils::projectSize(const QString& projectDir)
+qint64 projectSize(const QString& projectDir)
 {
     return property(projectDir, ProjectSize).value<qint64>();
 }
 
-QString SaveUtils::projectUid(const QString& projectDir)
+QString projectUid(const QString& projectDir)
 {
     return property(projectDir, ProjectUid).value<QString>();
 }
 
-QString SaveUtils::projectName(const QString& projectDir)
+QString projectName(const QString& projectDir)
 {
     return property(projectDir, ProjectName).value<QString>();
 }
 
-QString SaveUtils::projectDescription(const QString& projectDir)
+QString projectDescription(const QString& projectDir)
 {
     return property(projectDir, ProjectDescription).value<QString>();
 }
 
-QDateTime SaveUtils::projectCreationDate(const QString& projectDir)
+QDateTime projectCreationDate(const QString& projectDir)
 {
     return property(projectDir, ProjectCreationDate).value<QDateTime>();
 }
 
-QDateTime SaveUtils::projectModificationDate(const QString& projectDir)
+QDateTime projectModificationDate(const QString& projectDir)
 {
     return property(projectDir, ProjectModificationDate).value<QDateTime>();
 }
 
-QJsonValue SaveUtils::projectTheme(const QString& projectDir)
+QJsonValue projectTheme(const QString& projectDir)
 {
     return property(projectDir, ProjectTheme).value<QJsonValue>();
 }
 
-quint32 SaveUtils::userPlan(const QString& userDir)
+quint32 userPlan(const QString& userDir)
 {
     return property(userDir, UserPlan).value<quint32>();
 }
 
-QString SaveUtils::userEmail(const QString& userDir)
+QString userEmail(const QString& userDir)
 {
     return property(userDir, UserEmail).value<QString>();
 }
 
-QString SaveUtils::userFirst(const QString& userDir)
+QString userFirst(const QString& userDir)
 {
     return property(userDir, UserFirst).value<QString>();
 }
 
-QString SaveUtils::userLast(const QString& userDir)
+QString userLast(const QString& userDir)
 {
     return property(userDir, UserLast).value<QString>();
 }
 
-QString SaveUtils::userCountry(const QString& userDir)
+QString userCountry(const QString& userDir)
 {
     return property(userDir, UserCountry).value<QString>();
 }
 
-QString SaveUtils::userCompany(const QString& userDir)
+QString userCompany(const QString& userDir)
 {
     return property(userDir, UserCompany).value<QString>();
 }
 
-QString SaveUtils::userTitle(const QString& userDir)
+QString userTitle(const QString& userDir)
 {
     return property(userDir, UserTitle).value<QString>();
 }
 
-QString SaveUtils::userPhone(const QString& userDir)
+QString userPhone(const QString& userDir)
 {
     return property(userDir, UserPhone).value<QString>();
 }
 
-QByteArray SaveUtils::userPassword(const QString& userDir)
+QByteArray userPassword(const QString& userDir)
 {
     return property(userDir, UserPassword).value<QByteArray>();
 }
 
-QByteArray SaveUtils::userIcon(const QString& userDir)
+QByteArray userIcon(const QString& userDir)
 {
     return property(userDir, UserIcon).value<QByteArray>();
 }
 
-QDateTime SaveUtils::userLastOnlineDate(const QString& userDir)
+QDateTime userLastOnlineDate(const QString& userDir)
 {
     return property(userDir, UserLastOnlineDate).value<QDateTime>();
 }
 
-QDateTime SaveUtils::userRegistrationDate(const QString& userDir)
+QDateTime userRegistrationDate(const QString& userDir)
 {
     return property(userDir, UserRegistrationDate).value<QDateTime>();
 }
 
-SaveUtils::ControlHash& SaveUtils::controlHash(const QString& controlDir)
+SaveUtils::ControlHash controlHash(const QString& controlDir)
 {
-    const QDir dir(controlDir);
-    if (s_controlCache.contains(dir)) {
-        return s_controlCache[dir];
-    } else {
-        QFile file(toControlMetaFile(controlDir));
-        if (!file.open(QFile::ReadOnly)) {
-            qWarning("SaveUtils: Cannot open control meta file");
-            return s_controlCache[dir];
-        }
-        QDataStream in(&file);
-        in.setVersion(QDataStream::Qt_5_12);
-        in >> s_controlCache[dir];
-        file.close();
-        return s_controlCache[dir];
+    ControlHash hash;
+    QFile file(toControlMetaFile(controlDir));
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("SaveUtils: Cannot open control meta file");
+        return hash;
     }
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_12);
+    in >> hash;
+    file.close();
+    return hash;
 }
 
-SaveUtils::ProjectHash& SaveUtils::projectHash(const QString& projectDir)
+SaveUtils::ProjectHash projectHash(const QString& projectDir)
 {
-    const QDir dir(projectDir);
-    if (s_projectCache.contains(dir)) {
-        return s_projectCache[dir];
-    } else {
-        QFile file(toProjectMetaFile(projectDir));
-        if (!file.open(QFile::ReadOnly)) {
-            qWarning("SaveUtils: Cannot open project meta file");
-            return s_projectCache[dir];
-        }
-        QDataStream in(&file);
-        in.setVersion(QDataStream::Qt_5_12);
-        in >> s_projectCache[dir];
-        file.close();
-        return s_projectCache[dir];
+    ProjectHash hash;
+    QFile file(toProjectMetaFile(projectDir));
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("SaveUtils: Cannot open project meta file");
+        return hash;
     }
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_12);
+    in >> hash;
+    file.close();
+    return hash;
 }
 
-SaveUtils::UserHash& SaveUtils::userHash(const QString& userDir)
+SaveUtils::UserHash userHash(const QString& userDir)
 {
-    const QDir dir(userDir);
-    if (s_userCache.contains(dir)) {
-        return s_userCache[dir];
-    } else {
-        QFile file(toUserMetaFile(userDir));
-        if (!file.open(QFile::ReadOnly)) {
-            qWarning("SaveUtils: Cannot open user meta file");
-            return s_userCache[dir];
-        }
-        QDataStream in(&file);
-        in.setVersion(QDataStream::Qt_5_12);
-        in >> s_userCache[dir];
-        file.close();
-        return s_userCache[dir];
+    UserHash hash;
+    QFile file(toUserMetaFile(userDir));
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("SaveUtils: Cannot open user meta file");
+        return hash;
     }
+    QDataStream in(&file);
+    in.setVersion(QDataStream::Qt_5_12);
+    in >> hash;
+    file.close();
+    return hash;
 }
 
-QVariant SaveUtils::property(const QString& controlDir, SaveUtils::ControlProperties property)
+QVariant property(const QString& controlDir, SaveUtils::ControlProperties property)
 {
     return controlHash(controlDir).value(property);
 }
 
-QVariant SaveUtils::property(const QString& projectDir, SaveUtils::ProjectProperties property)
+QVariant property(const QString& projectDir, SaveUtils::ProjectProperties property)
 {
     return projectHash(projectDir).value(property);
 }
 
-QVariant SaveUtils::property(const QString& userDir, SaveUtils::UserProperties property)
+QVariant property(const QString& userDir, SaveUtils::UserProperties property)
 {
     return userHash(userDir).value(property);
 }
 
-void SaveUtils::setProperty(const QString& controlDir, SaveUtils::ControlProperties property, const QVariant& value)
+void setProperty(const QString& controlDir, SaveUtils::ControlProperties property, const QVariant& value)
 {
-    ControlHash& hash(controlHash(controlDir));
+    ControlHash hash(controlHash(controlDir));
     hash.insert(property, value);
+    QSaveFile file(toControlMetaFile(controlDir));
+    if (!file.open(QSaveFile::WriteOnly)) {
+        qWarning("SaveUtils: Cannot open control meta file");
+        return;
+    }
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_12);
+    out << hash;
+    if (!file.commit())
+        qWarning("SaveUtils: Control meta file save unsuccessful");
 }
 
-void SaveUtils::setProperty(const QString& projectDir, SaveUtils::ProjectProperties property, const QVariant& value)
+void setProperty(const QString& projectDir, SaveUtils::ProjectProperties property, const QVariant& value)
 {
-    ProjectHash& hash(projectHash(projectDir));
+    ProjectHash hash(projectHash(projectDir));
     hash.insert(property, value);
     hash.insert(ProjectModificationDate, QDateTime::currentDateTime());
+    QSaveFile file(toProjectMetaFile(projectDir));
+    if (!file.open(QSaveFile::WriteOnly)) {
+        qWarning("SaveUtils: Cannot open project meta file");
+        return;
+    }
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_12);
+    out << hash;
+    if (!file.commit())
+        qWarning("SaveUtils: Project meta file save unsuccessful");
 }
 
-void SaveUtils::setProperty(const QString& userDir, SaveUtils::UserProperties property, const QVariant& value)
+void setProperty(const QString& userDir, SaveUtils::UserProperties property, const QVariant& value)
 {
-    UserHash& hash(userHash(userDir));
-    hash.insert(property, value);
+    UserHash hash(userHash(userDir));
+    hash.insert(property, value);    
+    QSaveFile file(toUserMetaFile(userDir));
+    if (!file.open(QSaveFile::WriteOnly)) {
+        qWarning("SaveUtils: Cannot open user meta file");
+        return;
+    }
+    QDataStream out(&file);
+    out.setVersion(QDataStream::Qt_5_12);
+    out << hash;
+    if (!file.commit())
+        qWarning("SaveUtils: User meta file save unsuccessful");
 }
 
-void SaveUtils::makeControlMetaFile(const QString& controlDir)
+void makeControlMetaFile(const QString& controlDir)
 {
     if (!QFileInfo::exists(toControlMetaFile(controlDir))) {
         ControlHash hash;
@@ -387,7 +381,7 @@ void SaveUtils::makeControlMetaFile(const QString& controlDir)
     }
 }
 
-void SaveUtils::makeProjectMetaFile(const QString& projectDir)
+void makeProjectMetaFile(const QString& projectDir)
 {
     if (!QFileInfo::exists(toProjectMetaFile(projectDir))) {
         ProjectHash hash;
@@ -405,7 +399,7 @@ void SaveUtils::makeProjectMetaFile(const QString& projectDir)
     }
 }
 
-void SaveUtils::makeUserMetaFile(const QString& userDir)
+void makeUserMetaFile(const QString& userDir)
 {
     if (!QFileInfo::exists(toUserMetaFile(userDir))) {
         UserHash hash;
@@ -423,49 +417,7 @@ void SaveUtils::makeUserMetaFile(const QString& userDir)
     }
 }
 
-void SaveUtils::sync()
-{
-    for (const QDir& userDir : s_userCache.keys()) {
-        QSaveFile file(toUserMetaFile(userDir.path()));
-        if (!file.open(QSaveFile::WriteOnly)) {
-            qWarning("SaveUtils: Cannot open user meta file");
-            return;
-        }
-        QDataStream out(&file);
-        out.setVersion(QDataStream::Qt_5_12);
-        out << s_userCache.value(userDir);
-        if (!file.commit())
-            qWarning("SaveUtils: User meta file save unsuccessful");
-    }
-
-    for (const QDir& projectDir : s_projectCache.keys()) {
-        QSaveFile file(toProjectMetaFile(projectDir.path()));
-        if (!file.open(QSaveFile::WriteOnly)) {
-            qWarning("SaveUtils: Cannot open project meta file");
-            return;
-        }
-        QDataStream out(&file);
-        out.setVersion(QDataStream::Qt_5_12);
-        out << s_projectCache.value(projectDir);
-        if (!file.commit())
-            qWarning("SaveUtils: Project meta file save unsuccessful");
-    }
-
-    for (const QDir& controlDir : s_controlCache.keys()) {
-        QSaveFile file(toControlMetaFile(controlDir.path()));
-        if (!file.open(QSaveFile::WriteOnly)) {
-            qWarning("SaveUtils: Cannot open control meta file");
-            return;
-        }
-        QDataStream out(&file);
-        out.setVersion(QDataStream::Qt_5_12);
-        out << s_controlCache.value(controlDir);
-        if (!file.commit())
-            qWarning("SaveUtils: Control meta file save unsuccessful");
-    }
-}
-
-void SaveUtils::regenerateUids(const QString& topPath)
+void regenerateUids(const QString& topPath)
 {
     for (const QString& controlFilePath
          : FileSystemUtils::searchFiles(controlMetaFileName(), topPath)) {
@@ -476,7 +428,7 @@ void SaveUtils::regenerateUids(const QString& topPath)
     }
 }
 
-QStringList SaveUtils::formPaths(const QString& projectDir)
+QStringList formPaths(const QString& projectDir)
 {
     QStringList paths;
     const QString& designsDir = toDesignsDir(projectDir);
@@ -489,7 +441,7 @@ QStringList SaveUtils::formPaths(const QString& projectDir)
     return paths;
 }
 
-QStringList SaveUtils::childrenPaths(const QString& controlDir)
+QStringList childrenPaths(const QString& controlDir)
 {
     QStringList paths;
     const QString& childrenDir = toChildrenDir(controlDir);
@@ -504,18 +456,4 @@ QStringList SaveUtils::childrenPaths(const QString& controlDir)
     return paths;
 }
 
-uint qHash(const QDir& key, uint seed)
-{
-    // Filters, sort order, nameFilters are ignored
-    if (QFileSystemEngine::isCaseSensitive()) {
-        if (key.exists())
-            return qHash(key.canonicalPath(), seed);
-        else
-            return qHash(key.absolutePath(), seed);
-    } else {
-        if (key.exists())
-            return qHash(key.canonicalPath().toLower(), seed);
-        else
-            return qHash(key.absolutePath().toLower(), seed);
-    }
-}
+} // SaveUtils
