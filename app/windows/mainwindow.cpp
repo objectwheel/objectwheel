@@ -6,7 +6,7 @@
 #include <globalresourcespane.h>
 #include <formspane.h>
 #include <inspectorpane.h>
-#include <pageswitcherpane.h>
+#include <modeselectorpane.h>
 #include <centralwidget.h>
 #include <windowmanager.h>
 #include <toolmanager.h>
@@ -82,7 +82,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
   , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))
   , m_globalResourcesPane(new GlobalResourcesPane)
-  , m_pageSwitcherPane(new PageSwitcherPane)
+  , m_modeSelectorPane(new ModeSelectorPane)
 {
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
@@ -116,8 +116,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     pageSwitcherBar->setContentsMargins(0, 0, 0, 0);
     pageSwitcherBar->layout()->setContentsMargins(0, 0, 0, 0);
     pageSwitcherBar->layout()->setSpacing(0);
-    pageSwitcherBar->addWidget(m_pageSwitcherPane);
-    m_pageSwitcherPane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    pageSwitcherBar->addWidget(m_modeSelectorPane);
+    m_modeSelectorPane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     addToolBar(Qt::LeftToolBarArea , pageSwitcherBar);
 
     /** Set Dock Widgets **/
@@ -280,19 +280,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             this, &MainWindow::showLeftPanes);
     connect(m_centralWidget->bottomBar(), &BottomBar::showHideRightPanesButtonActivated,
             this, &MainWindow::showRightPanes);
-    connect(m_pageSwitcherPane, &PageSwitcherPane::buildsActivated,
+    connect(m_modeSelectorPane, &ModeSelectorPane::buildsActivated,
             this, &MainWindow::hideDocks);
-    connect(m_pageSwitcherPane, &PageSwitcherPane::designerActivated,
+    connect(m_modeSelectorPane, &ModeSelectorPane::designerActivated,
             this, &MainWindow::restoreDocks);
-    connect(m_pageSwitcherPane, &PageSwitcherPane::splitViewActivated,
+    connect(m_modeSelectorPane, &ModeSelectorPane::splitViewActivated,
             this, &MainWindow::restoreDocks);
-    connect(m_pageSwitcherPane, &PageSwitcherPane::helpActivated,
+    connect(m_modeSelectorPane, &ModeSelectorPane::helpActivated,
             this, &MainWindow::hideDocks);
-    connect(m_pageSwitcherPane, &PageSwitcherPane::qmlCodeEditorActivated,
+    connect(m_modeSelectorPane, &ModeSelectorPane::qmlCodeEditorActivated,
             this, &MainWindow::hideDocks);
-    connect(m_pageSwitcherPane, &PageSwitcherPane::projectOptionsActivated,
+    connect(m_modeSelectorPane, &ModeSelectorPane::projectOptionsActivated,
             this, &MainWindow::hideDocks);
-    connect(m_pageSwitcherPane, &PageSwitcherPane::currentPageChanged,
+    connect(m_modeSelectorPane, &ModeSelectorPane::currentPageChanged,
             m_centralWidget, &CentralWidget::setCurrentPage);
     connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
             m_centralWidget->designerWidget(), &DesignerWidget::onControlSelectionChange);
@@ -301,12 +301,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
-                && m_pageSwitcherPane->currentPage() != Page_SplitView) {
-            m_pageSwitcherPane->setCurrentPage(Page_Designer);
+                && m_modeSelectorPane->currentPage() != Page_SplitView) {
+            m_modeSelectorPane->setCurrentPage(Page_Designer);
         }
         if (m_centralWidget->qmlCodeEditorWidget()->count() > 0
-                && m_pageSwitcherPane->currentPage() != Page_QmlCodeEditor) {
-            m_pageSwitcherPane->setCurrentPage(Page_SplitView);
+                && m_modeSelectorPane->currentPage() != Page_QmlCodeEditor) {
+            m_modeSelectorPane->setCurrentPage(Page_SplitView);
         }
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
@@ -374,7 +374,7 @@ void MainWindow::discharge()
     m_inspectorPane->discharge();
     m_propertiesPane->discharge();
     m_globalResourcesPane->discharge();
-    m_pageSwitcherPane->discharge();
+    m_modeSelectorPane->discharge();
 
     showLeftPanes(true);
     showRightPanes(true);

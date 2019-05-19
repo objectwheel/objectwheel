@@ -1,4 +1,4 @@
-#include <pageswitcherpane.h>
+#include <modeselectorpane.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <utilityfunctions.h>
@@ -11,7 +11,7 @@ namespace {
 const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1 <b>%2</b></span>";
 }
 
-PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
+ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_qmlCodeEditorButton(new FlatButton(this))
   , m_designerButton(new FlatButton(this))
@@ -134,10 +134,10 @@ PageSwitcherPane::PageSwitcherPane(QWidget* parent) : QWidget(parent)
     connect(m_buildsButton, &FlatButton::pressed,
             this, [=] { setCurrentPage(Page_Builds); });
     connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
-            this, &PageSwitcherPane::updateColors);
+            this, &ModeSelectorPane::updateColors);
 }
 
-Pages PageSwitcherPane::currentPage() const
+Pages ModeSelectorPane::currentPage() const
 {
     if (m_buildsButton->isChecked())
         return Page_Builds;
@@ -153,7 +153,7 @@ Pages PageSwitcherPane::currentPage() const
         return Page_ProjectOptions;
 }
 
-bool PageSwitcherPane::isPageEnabled(const Pages& page) const
+bool ModeSelectorPane::isPageEnabled(const Pages& page) const
 {
     switch (page) {
     case Page_Builds:
@@ -179,7 +179,7 @@ bool PageSwitcherPane::isPageEnabled(const Pages& page) const
     }
 }
 
-void PageSwitcherPane::setCurrentPage(const Pages& page)
+void ModeSelectorPane::setCurrentPage(const Pages& page)
 {
     switch (page) {
     case Page_Builds:
@@ -220,7 +220,7 @@ void PageSwitcherPane::setCurrentPage(const Pages& page)
     }
 }
 
-void PageSwitcherPane::setPageEnabled(const Pages& page)
+void ModeSelectorPane::setPageEnabled(const Pages& page)
 {
     switch (page) {
     case Page_Builds:
@@ -243,7 +243,7 @@ void PageSwitcherPane::setPageEnabled(const Pages& page)
     }
 }
 
-void PageSwitcherPane::setPageDisabled(const Pages& page)
+void ModeSelectorPane::setPageDisabled(const Pages& page)
 {
     switch (page) {
     case Page_Builds:
@@ -266,7 +266,7 @@ void PageSwitcherPane::setPageDisabled(const Pages& page)
     }
 }
 
-void PageSwitcherPane::updateColors()
+void ModeSelectorPane::updateColors()
 {
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     const QColor& lighter = settings->leftBarColor.lighter(106);
@@ -296,12 +296,12 @@ void PageSwitcherPane::updateColors()
     update();
 }
 
-void PageSwitcherPane::discharge()
+void ModeSelectorPane::discharge()
 {
     setCurrentPage(Page_Designer);
 }
 
-void PageSwitcherPane::paintEvent(QPaintEvent*)
+void ModeSelectorPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);

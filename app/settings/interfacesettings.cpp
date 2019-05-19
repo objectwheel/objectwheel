@@ -70,7 +70,7 @@ void InterfaceSettings::reset()
     hdpiEnabled = true;
     theme = "Light";
     language = "English";
-    topBarColor = "#247dd6";
+    topBarColor = "#d8d8d8";
     leftBarColor = "#3e474f";
     /****/
     fontPreferThick = false;

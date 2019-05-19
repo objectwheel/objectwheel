@@ -11,7 +11,7 @@ class InspectorPane;
 class CentralWidget;
 class PropertiesPane;
 class GlobalResourcesPane;
-class PageSwitcherPane;
+class ModeSelectorPane;
 
 class MainWindow : public QMainWindow
 {
@@ -60,7 +60,7 @@ private:
     InspectorPane* m_inspectorPane;
     PropertiesPane* m_propertiesPane;
     GlobalResourcesPane* m_globalResourcesPane;
-    PageSwitcherPane* m_pageSwitcherPane;
+    ModeSelectorPane* m_modeSelectorPane;
 };
 
 #endif // MAINWINDOW_H

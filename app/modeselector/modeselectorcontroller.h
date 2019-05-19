@@ -1,18 +1,18 @@
-#ifndef PAGESWITCHERPANE_H
-#define PAGESWITCHERPANE_H
+#ifndef MODESELECTORPANE_H
+#define MODESELECTORPANE_H
 
-#include <QWidget>
-#include <pages.h>
+#include <QToolBar>
 
 class FlatButton;
 class QVBoxLayout;
 
-class PageSwitcherPane : public QWidget
+class ModeSelectorPane final : public QToolBar
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ModeSelectorPane)
 
 public:
-    explicit PageSwitcherPane(QWidget* parent = nullptr);
+    explicit ModeSelectorPane(QWidget* parent = nullptr);
     Pages currentPage() const;
     bool isPageEnabled(const Pages& page) const;
 
@@ -47,4 +47,4 @@ private:
     FlatButton* m_splitViewButton;
 };
 
-#endif // PAGESWITCHERPANE_H
+#endif // MODESELECTORPANE_H
