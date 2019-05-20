@@ -27,7 +27,6 @@ public slots:
     void discharge();
 
 private slots:
-    void onInterfaceSettingsChange();
     void onProjectsButtonClick();
     void onPreferencesButtonClick();
     void onRunButtonClick();

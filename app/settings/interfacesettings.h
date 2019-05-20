@@ -25,8 +25,6 @@ struct InterfaceSettings : public Settings
     bool hdpiEnabled;
     QString theme;
     QString language;
-    QColor topBarColor;
-    QColor leftBarColor;
     /****/
     bool fontPreferThick;
     bool fontPreferAntialiasing;

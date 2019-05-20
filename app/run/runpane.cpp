@@ -10,12 +10,12 @@
 #include <QLayout>
 
 RunPane::RunPane(QWidget* parent) : QToolBar(parent)
-  , m_runButton(new PushButton)
-  , m_stopButton(new PushButton)
-  , m_projectsButton(new PushButton)
-  , m_preferencesButton(new PushButton)
-  , m_runProgressBar(new RunProgressBar)
-  , m_runDevicesButton(new RunDevicesButton)
+  , m_runButton(new PushButton(this))
+  , m_stopButton(new PushButton(this))
+  , m_projectsButton(new PushButton(this))
+  , m_preferencesButton(new PushButton(this))
+  , m_runProgressBar(new RunProgressBar(this))
+  , m_runDevicesButton(new RunDevicesButton(this))
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
@@ -156,9 +156,15 @@ void RunPane::changeEvent(QEvent* event)
 void RunPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), palette().window());
-//  FIXME  painter.setPen("#bebebe");
-//    painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5), QRectF(rect()).bottomRight() - QPointF(0, 0.5));
-//    painter.setPen("#a7a7a7");
-//    painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
+    QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
+    gradient.setCoordinateMode(QGradient::ObjectMode);
+    gradient.setColorAt(0, "#e5e5e5");
+    gradient.setColorAt(1, "#d7d7d7");
+    painter.fillRect(rect(), gradient);
+    painter.setPen("#c8c8c8");
+    painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5),
+                     QRectF(rect()).bottomRight() - QPointF(0, 0.5));
+    painter.setPen("#b2b2b2");
+    painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
+
 }

@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QStyleOption>
 #include <QPalette>
+#include <QFileInfo>
 
 QImage PaintUtils::renderFilledImage(const QSizeF& size, const QColor& fillColor, const QWidget* widget)
 {
@@ -145,6 +146,23 @@ QIcon PaintUtils::renderMaskedButtonIcon(const QString& fileName, const QWidget*
     QColor down = widget->palette().buttonText().color().darker();
     icon.addPixmap(renderMaskedPixmap(fileName, up, widget), QIcon::Normal);
     icon.addPixmap(renderMaskedPixmap(fileName, down, widget), QIcon::Active);
+    return icon;
+}
+
+QIcon PaintUtils::renderModeButtonIcon(const QString& fileName, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QFileInfo fileInfo(fileName);
+    QPixmap off, on;
+
+    off.load(fileName);
+    on.load(fileInfo.path() + '/' + fileInfo.baseName() + "-active." + fileInfo.suffix());
+    off.setDevicePixelRatio(dpr);
+    on.setDevicePixelRatio(dpr);
+
+    QIcon icon;
+    icon.addPixmap(off, QIcon::Normal, QIcon::Off);
+    icon.addPixmap(on, QIcon::Normal, QIcon::On);
     return icon;
 }
 

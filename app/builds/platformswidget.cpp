@@ -92,7 +92,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _layout.setAlignment(&_btnNext, Qt::AlignHCenter);
 
     _lblLogo.setFixedSize(50, 50);
-    _lblLogo.setPixmap(QPixmap(":/images/helmet.png"));
+// FIXME   _lblLogo.setPixmap(QPixmap(":/images/helmet.png"));
     _lblLogo.setScaledContents(true);
 
     QFont f;

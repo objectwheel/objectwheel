@@ -28,6 +28,7 @@ QIcon renderOverlaidIcon(const QIcon& icon, const QSize& size, const QColor& col
 QIcon renderButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QIcon renderOverlaidButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QIcon renderMaskedButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
+QIcon renderModeButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmapFromData(const QByteArray& data, const QColor& color, const QWidget* widget = nullptr);

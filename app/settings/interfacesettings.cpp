@@ -2,8 +2,6 @@
 #include <generalsettings.h>
 
 namespace {
-const char* g_leftBarColor = "LeftBarColor";
-const char* g_topBarColor = "TopBarColor";
 const char* g_theme = "Theme";
 const char* g_fontFamily = "FontFamily";
 const char* g_fontPixelSize = "FontPixelSize";
@@ -29,8 +27,6 @@ void InterfaceSettings::read()
     hdpiEnabled = value<bool>(g_hdpiEnabled, hdpiEnabled);
     theme = value<QString>(g_theme, theme);
     language = value<QString>(g_language, language);
-    topBarColor = value<QColor>(g_topBarColor, topBarColor);
-    leftBarColor = value<QColor>(g_leftBarColor, leftBarColor);
     /****/
     fontPreferThick = value<bool>(g_fontPreferThick, fontPreferThick);
     fontPreferAntialiasing = value<bool>(g_fontPreferAntialiasing, fontPreferAntialiasing);
@@ -49,8 +45,6 @@ void InterfaceSettings::write()
     setValue(g_hdpiEnabled, hdpiEnabled);
     setValue(g_theme, theme);
     setValue(g_language, language);
-    setValue(g_topBarColor, topBarColor);
-    setValue(g_leftBarColor, leftBarColor);
     /****/
     setValue(g_fontPreferThick, fontPreferThick);
     setValue(g_fontPreferAntialiasing, fontPreferAntialiasing);
@@ -70,8 +64,6 @@ void InterfaceSettings::reset()
     hdpiEnabled = true;
     theme = "Light";
     language = "English";
-    topBarColor = "#d8d8d8";
-    leftBarColor = "#3e474f";
     /****/
     fontPreferThick = false;
     fontPreferAntialiasing = true;

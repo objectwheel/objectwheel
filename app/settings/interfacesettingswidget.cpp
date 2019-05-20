@@ -227,12 +227,12 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     addLanguages(m_languageBox);
     addBottomPanes(m_visibleBottomPaneBox);
 
-    connect(m_leftBarColorResetButton, &QPushButton::clicked, this, [=] {
-        m_leftBarColorButton->setColor(InterfaceSettings().leftBarColor);
-    });
-    connect(m_topBarColorResetButton, &QPushButton::clicked, this, [=] {
-        m_topBarColorButton->setColor(InterfaceSettings().topBarColor);
-    });
+//  FIXME  connect(m_leftBarColorResetButton, &QPushButton::clicked, this, [=] {
+//        m_leftBarColorButton->setColor(InterfaceSettings().leftBarColor);
+//    });
+//    connect(m_topBarColorResetButton, &QPushButton::clicked, this, [=] {
+//        m_topBarColorButton->setColor(InterfaceSettings().topBarColor);
+//    });
     connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
         const InterfaceSettings settings;
         m_fontFamilyBox->setCurrentText(settings.fontFamily);
@@ -331,8 +331,8 @@ void InterfaceSettingsWidget::apply()
 
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     /****/
-    settings->topBarColor = m_topBarColorButton->color();
-    settings->leftBarColor = m_leftBarColorButton->color();
+//  FIXME  settings->topBarColor = m_topBarColorButton->color();
+//    settings->leftBarColor = m_leftBarColorButton->color();
     settings->theme = m_themeBox->currentData().toString();
     settings->language = m_languageBox->currentData().toString();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
@@ -363,8 +363,8 @@ void InterfaceSettingsWidget::reset()
 
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     /****/
-    m_topBarColorButton->setColor(settings->topBarColor);
-    m_leftBarColorButton->setColor(settings->leftBarColor);
+//  FIXME  m_topBarColorButton->setColor(settings->topBarColor);
+//    m_leftBarColorButton->setColor(settings->leftBarColor);
     m_themeBox->setCurrentText(tr(settings->theme.toUtf8()));
     m_languageBox->setCurrentText(tr(settings->language.toUtf8()));
     m_hdpiCheckBox->setChecked(settings->hdpiEnabled);

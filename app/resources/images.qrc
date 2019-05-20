@@ -13,7 +13,6 @@
         <file>images/unload.png</file>
         <file>images/complete.gif</file>
         <file>images/android.png</file>
-        <file>images/helmet.png</file>
         <file>images/ios.png</file>
         <file>images/linux.png</file>
         <file>images/macos.png</file>
@@ -44,11 +43,7 @@
         <file>images/fileicon.png</file>
         <file>images/options.png</file>
         <file>images/dots.png</file>
-        <file>images/designer.png</file>
-        <file>images/editor.png</file>
-        <file>images/help.png</file>
         <file>images/projectoptions.png</file>
-        <file>images/split.png</file>
         <file>images/universal.png</file>
         <file>images/material.png</file>
         <file>images/templates.png</file>
@@ -83,5 +78,17 @@
         <file>images/search.svg</file>
         <file>images/projects.svg</file>
         <file>images/settings.svg</file>
+        <file>images/modes/builds-active.svg</file>
+        <file>images/modes/builds.svg</file>
+        <file>images/modes/designer-active.svg</file>
+        <file>images/modes/designer.svg</file>
+        <file>images/modes/documents-active.svg</file>
+        <file>images/modes/documents.svg</file>
+        <file>images/modes/editor-active.svg</file>
+        <file>images/modes/editor.svg</file>
+        <file>images/modes/options-active.svg</file>
+        <file>images/modes/options.svg</file>
+        <file>images/modes/split-active.svg</file>
+        <file>images/modes/split.svg</file>
     </qresource>
 </RCC>

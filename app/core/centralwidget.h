@@ -2,7 +2,6 @@
 #define CENTRALWIDGET_H
 
 #include <QWidget>
-#include <pages.h>
 
 class QSplitter;
 class QVBoxLayout;
@@ -29,7 +28,7 @@ public:
 
 public slots:
     void discharge();
-    void setCurrentPage(const Pages& page);
+//    void setCurrentPage(const Pages& page);
 
 private slots:
     void hideWidgets();

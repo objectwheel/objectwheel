@@ -8,7 +8,7 @@ Rectangle {
     color: "#135D52"
     Image {
         id: helmetIcon
-        source: "qrc:///images/helmet.png"
+        // FIXME source: "qrc:///images/helmet.png"
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
         anchors.topMargin: 15

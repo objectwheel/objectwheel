@@ -186,6 +186,15 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         Delayer::delay(3000);
         m_designerWidget->refresh();
     });
+
+    //   FIXME
+    hideWidgets();
+    m_bottomBar->show();
+    if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+        m_consolePane->show();
+    if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+        m_issuesPane->show();
+    m_designerWidget->show();
 }
 
 DesignerWidget* CentralWidget::designerWidget() const
@@ -210,7 +219,7 @@ ConsolePane* CentralWidget::consolePane() const
 
 void CentralWidget::discharge()
 {
-    setCurrentPage(Page_Designer);
+//    setCurrentPage(Page_Designer);
     m_consolePane->hide();
     m_issuesPane->hide();
     m_bottomBar->discharge();
@@ -223,46 +232,46 @@ void CentralWidget::discharge()
     m_helpWidget->discharge();
 }
 
-void CentralWidget::setCurrentPage(const Pages& page)
-{
-    hideWidgets();
+// FIXME void CentralWidget::setCurrentPage(const Pages& page)
+//{
+//    hideWidgets();
 
-    switch (page) {
-    case Page_Builds:
-        return m_buildsWidget->show();
+//    switch (page) {
+//    case Page_Builds:
+//        return m_buildsWidget->show();
 
-    case Page_Designer:
-        m_bottomBar->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consolePane->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesPane->show();
-        return m_designerWidget->show();
+//    case Page_Designer:
+//        m_bottomBar->show();
+//        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+//            m_consolePane->show();
+//        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+//            m_issuesPane->show();
+//        return m_designerWidget->show();
 
-    case Page_SplitView:
-        m_bottomBar->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consolePane->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesPane->show();
-        m_designerWidget->show();
-        return g_editorContainer->show();
+//    case Page_SplitView:
+//        m_bottomBar->show();
+//        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+//            m_consolePane->show();
+//        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+//            m_issuesPane->show();
+//        m_designerWidget->show();
+//        return g_editorContainer->show();
 
-    case Page_Help:
-        return m_helpWidget->show();
+//    case Page_Help:
+//        return m_helpWidget->show();
 
-    case Page_QmlCodeEditor:
-        m_bottomBar->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consolePane->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesPane->show();
-        return g_editorContainer->show();
+//    case Page_QmlCodeEditor:
+//        m_bottomBar->show();
+//        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+//            m_consolePane->show();
+//        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+//            m_issuesPane->show();
+//        return g_editorContainer->show();
 
-    case Page_ProjectOptions:
-        return m_projectOptionsWidget->show();
-    }
-}
+//    case Page_ProjectOptions:
+//        return m_projectOptionsWidget->show();
+//    }
+//}
 
 void CentralWidget::hideWidgets()
 {

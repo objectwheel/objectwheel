@@ -8,8 +8,6 @@
 #include <windowmanager.h>
 #include <welcomewindow.h>
 #include <preferenceswindow.h>
-#include <generalsettings.h>
-#include <interfacesettings.h>
 #include <utilityfunctions.h>
 #include <QTime>
 
@@ -17,11 +15,7 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
   , m_runScheduled(false)
   , m_appManuallyTerminated(false)
   , m_runPane(runPane)
-{    
-    onInterfaceSettingsChange();
-
-    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
-            this, &RunController::onInterfaceSettingsChange);
+{
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &RunController::discharge);
     connect(m_runPane->projectsButton(), &PushButton::clicked,
@@ -58,18 +52,6 @@ void RunController::discharge()
     m_runPane->runProgressBar()->setProgress(0);
     m_runPane->runProgressBar()->setProgressColor(QColor());
     m_runPane->runProgressBar()->setText(progressBarMessageFor(Welcome));
-}
-
-void RunController::onInterfaceSettingsChange()
-{
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    QPalette palette(m_runPane->palette());
-    QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
-    gradient.setCoordinateMode(QGradient::ObjectMode);
-    gradient.setColorAt(0, settings->topBarColor.lighter(106));
-    gradient.setColorAt(1, settings->topBarColor.darker(107));
-    palette.setBrush(QPalette::Window, gradient);
-    m_runPane->setPalette(palette);
 }
 
 void RunController::onProjectsButtonClick()

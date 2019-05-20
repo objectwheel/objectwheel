@@ -1,314 +1,191 @@
 #include <modeselectorpane.h>
-#include <generalsettings.h>
-#include <interfacesettings.h>
 #include <utilityfunctions.h>
-#include <flatbutton.h>
+#include <paintutils.h>
 
 #include <QPainter>
 #include <QVBoxLayout>
 
-namespace {
-const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1 <b>%2</b></span>";
+#define TOOLTIP(x) QStringLiteral(QT_TR_NOOP(R"(<span style="font-size:12px">Open <b>%2</b></span>)")).arg(tr((x)))
+#include <QTimer>
+ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
+  , m_designerAction(new QAction(this))
+  , m_editorAction(new QAction(this))
+  , m_splitAction(new QAction(this))
+  , m_optionsAction(new QAction(this))
+  , m_buildsAction(new QAction(this))
+  , m_documentsAction(new QAction(this))
+{
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    setIconSize({16, 16});
+
+    // Workaround for QToolBarLayout's obsolote serMargin function usage
+    QMetaObject::invokeMethod(this, [=] {
+        setContentsMargins(0, 0, 0, 0);
+        layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
+        layout()->setSpacing(7);
+    }, Qt::QueuedConnection);
+
+    m_designerAction->setCheckable(true);
+    m_designerAction->setText(tr("Designer"));
+    m_designerAction->setToolTip(TOOLTIP("Designer"));
+
+    m_editorAction->setCheckable(true);
+    m_editorAction->setText(tr("Code Editor"));
+    m_editorAction->setToolTip(TOOLTIP("Code Editor"));
+
+    m_splitAction->setCheckable(true);
+    m_splitAction->setText(tr("Split View"));
+    m_splitAction->setToolTip(TOOLTIP("Splitted View"));
+
+    m_optionsAction->setCheckable(true);
+    m_optionsAction->setText(tr("Project Options"));
+    m_optionsAction->setToolTip(TOOLTIP("Project Options"));
+
+    m_buildsAction->setCheckable(true);
+    m_buildsAction->setText(tr("Cloud Builds"));
+    m_buildsAction->setToolTip(TOOLTIP("Cloud Builds"));
+
+    m_documentsAction->setCheckable(true);
+    m_documentsAction->setText(tr("Documents"));
+    m_documentsAction->setToolTip(TOOLTIP("Documents"));
+
+    auto actionGroup = new QActionGroup(this);
+    actionGroup->addAction(m_designerAction);
+    actionGroup->addAction(m_editorAction);
+    actionGroup->addAction(m_splitAction);
+    actionGroup->addAction(m_optionsAction);
+    actionGroup->addAction(m_buildsAction);
+    actionGroup->addAction(m_documentsAction);
+
+    addAction(m_designerAction);
+    addAction(m_editorAction);
+    addAction(m_splitAction);
+    addAction(m_optionsAction);
+    addAction(m_buildsAction);
+    addAction(m_documentsAction);
+    updateIcons();
+    //    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
+    //            this, &ModeSelectorPane::updateColors);
+
+    setStyleSheet(
+                  "QToolButton { /* all types of tool button */"
+                  "    border: none;"
+                  "    background: none;"
+                  "    font-weight: 400;"
+                  "    font-size: 14;"
+                  "}"
+
+                  "QToolButton::checked { /* all types of tool button */"
+                  "    font-weight: 480;"
+                  "}"
+
+//                  "QToolButton::hover { /* all types of tool button */"
+//                  "    border: 5px solid #8f8f91;"
+//                  "    border-radius: 6px;"
+//                  "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
+//                  "                                      stop: 0 #f6f7fa, stop: 1 #dadbde);"
+//                  "}"
+
+//                  "QToolButton[popupMode=\"1\"] { /* only for MenuButtonPopup */"
+//                  "    padding-right: 20px; /* make way for the popup button */"
+//                  "}"
+
+//                  "QToolButton:pressed {"
+//                  "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
+//                  "                                      stop: 0 #dadbde, stop: 1 #f6f7fa);"
+//                  "}"
+
+//                  "/* the subcontrols below are used only in the MenuButtonPopup mode */"
+//                  "QToolButton::menu-button {"
+//                  "    border: 2px solid gray;"
+//                  "    border-top-right-radius: 6px;"
+//                  "    border-bottom-right-radius: 6px;"
+//                  "    /* 16px width + 4px for border = 20px allocated above */"
+//                  "    width: 16px;"
+//                  "}"
+
+//                  "QToolButton::menu-arrow {"
+//                  "    image: url(downarrow.png);"
+//                  "}"
+
+//                  "QToolButton::menu-arrow:open {"
+//                      "top: 1px; left: 1px; /* shift it a bit */"
+//                  "}"
+                );
 }
 
-ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QWidget(parent)
-  , m_layout(new QVBoxLayout(this))
-  , m_qmlCodeEditorButton(new FlatButton(this))
-  , m_designerButton(new FlatButton(this))
-  , m_projectOptionsButton(new FlatButton(this))
-  , m_buildsButton(new FlatButton(this))
-  , m_helpButton(new FlatButton(this))
-  , m_splitViewButton(new FlatButton(this))
+QAction* ModeSelectorPane::designerAction() const
 {
-    setContentsMargins(0, 0, 0, 0);
-    m_layout->setSpacing(0);
-    m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_designerButton);
-    m_layout->addWidget(m_qmlCodeEditorButton);
-    m_layout->addWidget(m_splitViewButton);
-    m_layout->addWidget(m_projectOptionsButton);
-    m_layout->addWidget(m_buildsButton);
-    m_layout->addWidget(m_helpButton);
-    m_layout->addStretch();
-
-    QFont labelFont;
-    labelFont.setWeight(QFont::DemiBold);
-    labelFont.setPixelSize(labelFont.pixelSize() - 2.0);
-
-    m_buildsButton->setFont(labelFont);
-    m_splitViewButton->setFont(labelFont);
-    m_helpButton->setFont(labelFont);
-    m_projectOptionsButton->setFont(labelFont);
-    m_qmlCodeEditorButton->setFont(labelFont);
-    m_designerButton->setFont(labelFont);
-
-    m_designerButton->setText(tr("Designer"));
-    m_qmlCodeEditorButton->setText(tr("Editor"));
-    m_projectOptionsButton->setText(tr("Options"));
-    m_helpButton->setText(tr("Help"));
-    m_splitViewButton->setText(tr("Split View"));
-    m_buildsButton->setText(tr("Builds"));
-
-    m_designerButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Designer")));
-    m_qmlCodeEditorButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Qml Code Editor")));
-    m_projectOptionsButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Project Options")));
-    m_helpButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Help and Documentations")));
-    m_splitViewButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Splitted View")));
-    m_buildsButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Open")).arg(tr("Cloud Builds")));
-
-    m_designerButton->setAutoExclusive(true);
-    m_qmlCodeEditorButton->setAutoExclusive(true);
-    m_projectOptionsButton->setAutoExclusive(true);
-    m_helpButton->setAutoExclusive(true);
-    m_splitViewButton->setAutoExclusive(true);
-    m_buildsButton->setAutoExclusive(true);
-
-    m_designerButton->setFixedHeight(60);
-    m_qmlCodeEditorButton->setFixedHeight(60);
-    m_projectOptionsButton->setFixedHeight(60);
-    m_helpButton->setFixedHeight(60);
-    m_splitViewButton->setFixedHeight(60);
-    m_buildsButton->setFixedHeight(60);
-
-    m_designerButton->setCheckable(true);
-    m_qmlCodeEditorButton->setCheckable(true);
-    m_projectOptionsButton->setCheckable(true);
-    m_helpButton->setCheckable(true);
-    m_splitViewButton->setCheckable(true);
-    m_buildsButton->setCheckable(true);
-
-    m_designerButton->setIconSize(QSize(23, 23));
-    m_qmlCodeEditorButton->setIconSize(QSize(23, 23));
-    m_projectOptionsButton->setIconSize(QSize(23, 23));
-    m_helpButton->setIconSize(QSize(23, 23));
-    m_splitViewButton->setIconSize(QSize(23, 23));
-    m_buildsButton->setIconSize(QSize(23, 23));
-
-    m_designerButton->setIcon(QIcon(":/images/designer.png"));
-    m_qmlCodeEditorButton->setIcon(QIcon(":/images/editor.png"));
-    m_projectOptionsButton->setIcon(QIcon(":/images/projectoptions.png"));
-    m_helpButton->setIcon(QIcon(":/images/help.png"));
-    m_splitViewButton->setIcon(QIcon(":/images/split.png"));
-    m_buildsButton->setIcon(QIcon(":/images/helmet.png"));
-
-    m_designerButton->settings().showShadow = false;
-    m_qmlCodeEditorButton->settings().showShadow = false;
-    m_projectOptionsButton->settings().showShadow = false;
-    m_helpButton->settings().showShadow = false;
-    m_splitViewButton->settings().showShadow = false;
-    m_buildsButton->settings().showShadow = false;
-
-    m_designerButton->settings().textUnderIcon = true;
-    m_qmlCodeEditorButton->settings().textUnderIcon = true;
-    m_projectOptionsButton->settings().textUnderIcon = true;
-    m_helpButton->settings().textUnderIcon = true;
-    m_splitViewButton->settings().textUnderIcon = true;
-    m_buildsButton->settings().textUnderIcon = true;
-
-    m_designerButton->settings().verticalGradient = false;
-    m_qmlCodeEditorButton->settings().verticalGradient = false;
-    m_projectOptionsButton->settings().verticalGradient = false;
-    m_helpButton->settings().verticalGradient = false;
-    m_splitViewButton->settings().verticalGradient = false;
-    m_buildsButton->settings().verticalGradient = false;
-
-    m_designerButton->settings().textMargin = 0;
-    m_qmlCodeEditorButton->settings().textMargin = 0;
-    m_projectOptionsButton->settings().textMargin = 0;
-    m_helpButton->settings().textMargin = 0;
-    m_splitViewButton->settings().textMargin = 0;
-    m_buildsButton->settings().textMargin = 0;
-
-    updateColors();
-
-    connect(m_designerButton, &FlatButton::pressed,
-            this, [=] { setCurrentPage(Page_Designer); });
-    connect(m_qmlCodeEditorButton, &FlatButton::pressed,
-            this, [=] { setCurrentPage(Page_QmlCodeEditor); });
-    connect(m_projectOptionsButton, &FlatButton::pressed,
-            this, [=] { setCurrentPage(Page_ProjectOptions); });
-    connect(m_helpButton, &FlatButton::pressed,
-            this, [=] { setCurrentPage(Page_Help); });
-    connect(m_splitViewButton, &FlatButton::pressed,
-            this, [=] { setCurrentPage(Page_SplitView); });
-    connect(m_buildsButton, &FlatButton::pressed,
-            this, [=] { setCurrentPage(Page_Builds); });
-    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
-            this, &ModeSelectorPane::updateColors);
+    return m_designerAction;
 }
 
-Pages ModeSelectorPane::currentPage() const
+QAction* ModeSelectorPane::editorAction() const
 {
-    if (m_buildsButton->isChecked())
-        return Page_Builds;
-    if (m_designerButton->isChecked())
-        return Page_Designer;
-    if (m_splitViewButton->isChecked())
-        return Page_SplitView;
-    if (m_helpButton->isChecked())
-        return Page_Help;
-    if (m_qmlCodeEditorButton->isChecked())
-        return Page_QmlCodeEditor;
-    else
-        return Page_ProjectOptions;
+    return m_editorAction;
 }
 
-bool ModeSelectorPane::isPageEnabled(const Pages& page) const
+QAction* ModeSelectorPane::splitAction() const
 {
-    switch (page) {
-    case Page_Builds:
-        return m_buildsButton->isEnabled();
-
-    case Page_Designer:
-        return m_designerButton->isEnabled();
-
-    case Page_SplitView:
-        return m_splitViewButton->isEnabled();
-
-    case Page_Help:
-        return m_helpButton->isEnabled();
-
-    case Page_QmlCodeEditor:
-        return m_qmlCodeEditorButton->isEnabled();
-
-    case Page_ProjectOptions:
-        return m_projectOptionsButton->isEnabled();
-    default:
-        Q_ASSERT(false);
-        return false;
-    }
+    return m_splitAction;
 }
 
-void ModeSelectorPane::setCurrentPage(const Pages& page)
+QAction* ModeSelectorPane::optionsAction() const
 {
-    switch (page) {
-    case Page_Builds:
-        m_buildsButton->setChecked(true);
-        emit buildsActivated();
-        emit currentPageChanged(Page_Builds);
-        break;
-
-    case Page_Designer:
-        m_designerButton->setChecked(true);
-        emit designerActivated();
-        emit currentPageChanged(Page_Designer);
-        break;
-
-    case Page_SplitView:
-        m_splitViewButton->setChecked(true);
-        emit splitViewActivated();
-        emit currentPageChanged(Page_SplitView);
-        break;
-
-    case Page_Help:
-        m_helpButton->setChecked(true);
-        emit helpActivated();
-        emit currentPageChanged(Page_Help);
-        break;
-
-    case Page_QmlCodeEditor:
-        m_qmlCodeEditorButton->setChecked(true);
-        emit qmlCodeEditorActivated();
-        emit currentPageChanged(Page_QmlCodeEditor);
-        break;
-
-    case Page_ProjectOptions:
-        m_projectOptionsButton->setChecked(true);
-        emit projectOptionsActivated();
-        emit currentPageChanged(Page_ProjectOptions);
-        break;
-    }
+    return m_optionsAction;
 }
 
-void ModeSelectorPane::setPageEnabled(const Pages& page)
+QAction* ModeSelectorPane::buildsAction() const
 {
-    switch (page) {
-    case Page_Builds:
-        return m_buildsButton->setEnabled(true);
-
-    case Page_Designer:
-        return m_designerButton->setEnabled(true);
-
-    case Page_SplitView:
-        return m_splitViewButton->setEnabled(true);
-
-    case Page_Help:
-        return m_helpButton->setEnabled(true);
-
-    case Page_QmlCodeEditor:
-        return m_qmlCodeEditorButton->setEnabled(true);
-
-    case Page_ProjectOptions:
-        return m_projectOptionsButton->setEnabled(true);
-    }
+    return m_buildsAction;
 }
 
-void ModeSelectorPane::setPageDisabled(const Pages& page)
+QAction* ModeSelectorPane::helpAction() const
 {
-    switch (page) {
-    case Page_Builds:
-        return m_buildsButton->setDisabled(true);
-
-    case Page_Designer:
-        return m_designerButton->setDisabled(true);
-
-    case Page_SplitView:
-        return m_splitViewButton->setDisabled(true);
-
-    case Page_Help:
-        return m_helpButton->setDisabled(true);
-
-    case Page_QmlCodeEditor:
-        return m_qmlCodeEditorButton->setDisabled(true);
-
-    case Page_ProjectOptions:
-        return m_projectOptionsButton->setDisabled(true);
-    }
+    return m_documentsAction;
 }
 
-void ModeSelectorPane::updateColors()
+QSize ModeSelectorPane::sizeHint() const
 {
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    const QColor& lighter = settings->leftBarColor.lighter(106);
-    const QColor& darker = settings->leftBarColor.darker(110);
-
-    m_buildsButton->settings().textColor = Qt::white;
-    m_splitViewButton->settings().textColor = Qt::white;
-    m_helpButton->settings().textColor = Qt::white;
-    m_projectOptionsButton->settings().textColor = Qt::white;
-    m_qmlCodeEditorButton->settings().textColor = Qt::white;
-    m_designerButton->settings().textColor = Qt::white;
-
-    m_designerButton->settings().topColor = lighter;
-    m_qmlCodeEditorButton->settings().topColor = lighter;
-    m_projectOptionsButton->settings().topColor = lighter;
-    m_helpButton->settings().topColor = lighter;
-    m_splitViewButton->settings().topColor = lighter;
-    m_buildsButton->settings().topColor = lighter;
-
-    m_designerButton->settings().bottomColor = darker;
-    m_qmlCodeEditorButton->settings().bottomColor = darker;
-    m_projectOptionsButton->settings().bottomColor = darker;
-    m_helpButton->settings().bottomColor = darker;
-    m_splitViewButton->settings().bottomColor = darker;
-    m_buildsButton->settings().bottomColor = darker;
-
-    update();
+    return {100, 26};
 }
 
-void ModeSelectorPane::discharge()
+QSize ModeSelectorPane::minimumSizeHint() const
 {
-    setCurrentPage(Page_Designer);
+    return {0, 26};
+}
+
+void ModeSelectorPane::updateIcons()
+{
+    using namespace PaintUtils;
+    m_designerAction->setIcon(renderModeButtonIcon(":/images/modes/designer.svg", this));
+    m_editorAction->setIcon(renderModeButtonIcon(":/images/modes/editor.svg", this));
+    m_splitAction->setIcon(renderModeButtonIcon(":/images/modes/split.svg", this));
+    m_optionsAction->setIcon(renderModeButtonIcon(":/images/modes/options.svg", this));
+    m_buildsAction->setIcon(renderModeButtonIcon(":/images/modes/builds.svg", this));
+    m_documentsAction->setIcon(renderModeButtonIcon(":/images/modes/documents.svg", this));
+}
+
+bool ModeSelectorPane::event(QEvent* event)
+{
+    return QToolBar::event(event);
+}
+
+void ModeSelectorPane::changeEvent(QEvent* event)
+{
+    QToolBar::changeEvent(event);
 }
 
 void ModeSelectorPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    QLinearGradient gradient(QRectF(rect()).topRight(), QRectF(rect()).topLeft());
-    gradient.setColorAt(0, settings->leftBarColor.lighter(106));
-    gradient.setColorAt(1, settings->leftBarColor.darker(110));
+    QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
+    gradient.setCoordinateMode(QGradient::ObjectMode);
+    gradient.setColorAt(0, "#d6d6d6");
+    gradient.setColorAt(1, "#cccccc");
     painter.fillRect(rect(), gradient);
+    painter.setPen("#bebebe");
+    painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5),
+                     QRectF(rect()).bottomRight() - QPointF(0, 0.5));
+    painter.setPen("#a7a7a7");
+    painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
 }

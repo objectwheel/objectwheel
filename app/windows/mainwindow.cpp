@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
+    setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     setStyleSheet("QMainWindow::separator{ height: 1px; }");
 #if defined(Q_OS_MACOS)
     WindowOperations::removeTitleBar(this);
@@ -95,30 +96,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Set Tool Bars **/
     /* Add Run Pane */
-    m_runPane->setObjectName("runController");
-    m_runPane->setOrientation(Qt::Horizontal);
-    m_runPane->setFloatable(false);
     m_runPane->setMovable(false);
-    m_runPane->setWindowTitle(tr("Run Bar"));
+    m_runPane->setFloatable(false);
+    m_runPane->setOrientation(Qt::Horizontal);
     addToolBar(Qt::TopToolBarArea, m_runPane);
+    addToolBarBreak(Qt::TopToolBarArea);
 
-    /* Add Page Switcher Pane */
-    auto pageSwitcherBar = new QToolBar;
-    pageSwitcherBar->setObjectName("pageSwitcherBar");
-    pageSwitcherBar->setOrientation(Qt::Vertical);
-    pageSwitcherBar->setFixedWidth(70);
-    pageSwitcherBar->setWindowFlags(pageSwitcherBar->windowFlags() | Qt::WindowStaysOnTopHint);
-    pageSwitcherBar->setFloatable(false);
-    pageSwitcherBar->setMovable(false);
-    pageSwitcherBar->setWindowTitle(tr("Page Bar"));
-    pageSwitcherBar->setStyleSheet("border: none; spacing: 0;"
-                                   "QToolBar { background: #3b444c; border: none }");
-    pageSwitcherBar->setContentsMargins(0, 0, 0, 0);
-    pageSwitcherBar->layout()->setContentsMargins(0, 0, 0, 0);
-    pageSwitcherBar->layout()->setSpacing(0);
-    pageSwitcherBar->addWidget(m_modeSelectorPane);
-    m_modeSelectorPane->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    addToolBar(Qt::LeftToolBarArea , pageSwitcherBar);
+    /* Add Mode Selector Pane */
+    m_modeSelectorPane->setMovable(false);
+    m_modeSelectorPane->setFloatable(false);
+    m_modeSelectorPane->setOrientation(Qt::Horizontal);
+    addToolBar(Qt::TopToolBarArea, m_modeSelectorPane);
 
     /** Set Dock Widgets **/
     /* Add Inspector Pane */
@@ -280,34 +268,34 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             this, &MainWindow::showLeftPanes);
     connect(m_centralWidget->bottomBar(), &BottomBar::showHideRightPanesButtonActivated,
             this, &MainWindow::showRightPanes);
-    connect(m_modeSelectorPane, &ModeSelectorPane::buildsActivated,
-            this, &MainWindow::hideDocks);
-    connect(m_modeSelectorPane, &ModeSelectorPane::designerActivated,
-            this, &MainWindow::restoreDocks);
-    connect(m_modeSelectorPane, &ModeSelectorPane::splitViewActivated,
-            this, &MainWindow::restoreDocks);
-    connect(m_modeSelectorPane, &ModeSelectorPane::helpActivated,
-            this, &MainWindow::hideDocks);
-    connect(m_modeSelectorPane, &ModeSelectorPane::qmlCodeEditorActivated,
-            this, &MainWindow::hideDocks);
-    connect(m_modeSelectorPane, &ModeSelectorPane::projectOptionsActivated,
-            this, &MainWindow::hideDocks);
-    connect(m_modeSelectorPane, &ModeSelectorPane::currentPageChanged,
-            m_centralWidget, &CentralWidget::setCurrentPage);
+//  FIXME  connect(m_modeSelectorPane, &ModeSelectorPane::buildsActivated,
+//            this, &MainWindow::hideDocks);
+//    connect(m_modeSelectorPane, &ModeSelectorPane::designerActivated,
+//            this, &MainWindow::restoreDocks);
+//    connect(m_modeSelectorPane, &ModeSelectorPane::splitViewActivated,
+//            this, &MainWindow::restoreDocks);
+//    connect(m_modeSelectorPane, &ModeSelectorPane::helpActivated,
+//            this, &MainWindow::hideDocks);
+//    connect(m_modeSelectorPane, &ModeSelectorPane::qmlCodeEditorActivated,
+//            this, &MainWindow::hideDocks);
+//    connect(m_modeSelectorPane, &ModeSelectorPane::projectOptionsActivated,
+//            this, &MainWindow::hideDocks);
+//    connect(m_modeSelectorPane, &ModeSelectorPane::currentPageChanged,
+//            m_centralWidget, &CentralWidget::setCurrentPage);
     connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
             m_centralWidget->designerWidget(), &DesignerWidget::onControlSelectionChange);
     connect(m_inspectorPane, &InspectorPane::controlDoubleClicked,
             m_centralWidget->designerWidget(), &DesignerWidget::onInspectorItemDoubleClick);
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
-        if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
-                && m_modeSelectorPane->currentPage() != Page_SplitView) {
-            m_modeSelectorPane->setCurrentPage(Page_Designer);
-        }
-        if (m_centralWidget->qmlCodeEditorWidget()->count() > 0
-                && m_modeSelectorPane->currentPage() != Page_QmlCodeEditor) {
-            m_modeSelectorPane->setCurrentPage(Page_SplitView);
-        }
+//        if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
+//                && m_modeSelectorPane->currentPage() != Page_SplitView) {
+//            m_modeSelectorPane->setCurrentPage(Page_Designer);
+//        }
+//        if (m_centralWidget->qmlCodeEditorWidget()->count() > 0
+//                && m_modeSelectorPane->currentPage() != Page_QmlCodeEditor) {
+//            m_modeSelectorPane->setCurrentPage(Page_SplitView);
+//        }
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { m_globalResourcesPane->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
@@ -374,7 +362,7 @@ void MainWindow::discharge()
     m_inspectorPane->discharge();
     m_propertiesPane->discharge();
     m_globalResourcesPane->discharge();
-    m_modeSelectorPane->discharge();
+//    FIXME m_modeSelectorPane->discharge();
 
     showLeftPanes(true);
     showRightPanes(true);
