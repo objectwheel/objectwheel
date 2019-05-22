@@ -1,12 +1,13 @@
 #ifndef APPLICATIONSTYLE_H
 #define APPLICATIONSTYLE_H
 
-#include <QProxyStyle>
+#include <private/qfusionstyle_p.h>
 
-class ApplicationStyle : public QProxyStyle
+class ApplicationStyle : public QFusionStyle
 {
     Q_OBJECT
     Q_DISABLE_COPY(ApplicationStyle)
+    Q_DECLARE_PRIVATE(QFusionStyle)
 
 public:
     ApplicationStyle();
@@ -19,8 +20,8 @@ public:
                          QStyle::SubControl subControl, const QWidget* widget) const override;
     QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt,
                            const QWidget* widget) const override;
-    int styleHint(StyleHint hint, const QStyleOption *option, const QWidget *widget,
-                  QStyleHintReturn *returnData) const override;
+    int styleHint(StyleHint hint, const QStyleOption *option = nullptr, const QWidget *widget = nullptr,
+                  QStyleHintReturn *returnData = nullptr) const override;
     int pixelMetric(PixelMetric metric, const QStyleOption *option,
                     const QWidget *widget) const override;
     void drawPrimitive(PrimitiveElement element, const QStyleOption *option, QPainter *painter,
@@ -30,7 +31,6 @@ public:
     void polish(QWidget* w) override;
 
     void unpolish(QWidget* w) override;
-
 };
 
 #endif // APPLICATIONSTYLE_H

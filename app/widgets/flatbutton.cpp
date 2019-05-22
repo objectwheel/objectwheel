@@ -78,8 +78,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
                     rect(),
                     Qt::AlignLeft | Qt::AlignTop,
                     isEnabled() ? QIcon::Normal : QIcon::Disabled,
-                    isChecked() ? QIcon::On : QIcon::Off
-                                  );
+                    isChecked() ? QIcon::On : QIcon::Off);
         pn.end();
 
         for (int i = 0; i < image.width(); i++) {
@@ -169,8 +168,7 @@ void FlatButton::paintEvent(QPaintEvent* event)
                         ir.toRect(),
                         Qt::AlignLeft | Qt::AlignTop,
                         isEnabled() ? QIcon::Normal : QIcon::Disabled,
-                        isChecked() ? QIcon::On : QIcon::Off
-                                      );
+                        isChecked() ? QIcon::On : QIcon::Off);
         }
 
         /* Draw text */

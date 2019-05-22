@@ -5,8 +5,8 @@
 #include <QPainter>
 #include <QVBoxLayout>
 
-#define TOOLTIP(x) QStringLiteral(QT_TR_NOOP(R"(<span style="font-size:12px">Open <b>%2</b></span>)")).arg(tr((x)))
-#include <QTimer>
+#define TOOLTIP(x) QStringLiteral(QT_TR_NOOP(R"(<span style="font-size:12px">Open <b>%2</b></span>)")).arg(x)
+
 ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
   , m_designerAction(new QAction(this))
   , m_editorAction(new QAction(this))
@@ -15,39 +15,39 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
   , m_buildsAction(new QAction(this))
   , m_documentsAction(new QAction(this))
 {
-    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setIconSize({16, 16});
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {
         setContentsMargins(0, 0, 0, 0);
-        layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
+        layout()->setContentsMargins(2, 2, 2, 2); // They must be all same
         layout()->setSpacing(7);
     }, Qt::QueuedConnection);
 
     m_designerAction->setCheckable(true);
     m_designerAction->setText(tr("Designer"));
-    m_designerAction->setToolTip(TOOLTIP("Designer"));
+    m_designerAction->setToolTip(TOOLTIP(tr("Designer")));
 
     m_editorAction->setCheckable(true);
     m_editorAction->setText(tr("Code Editor"));
-    m_editorAction->setToolTip(TOOLTIP("Code Editor"));
+    m_editorAction->setToolTip(TOOLTIP(tr("Code Editor")));
 
     m_splitAction->setCheckable(true);
     m_splitAction->setText(tr("Split View"));
-    m_splitAction->setToolTip(TOOLTIP("Splitted View"));
+    m_splitAction->setToolTip(TOOLTIP(tr("Splitted View")));
 
     m_optionsAction->setCheckable(true);
     m_optionsAction->setText(tr("Project Options"));
-    m_optionsAction->setToolTip(TOOLTIP("Project Options"));
+    m_optionsAction->setToolTip(TOOLTIP(tr("Project Options")));
 
     m_buildsAction->setCheckable(true);
     m_buildsAction->setText(tr("Cloud Builds"));
-    m_buildsAction->setToolTip(TOOLTIP("Cloud Builds"));
+    m_buildsAction->setToolTip(TOOLTIP(tr("Cloud Builds")));
 
     m_documentsAction->setCheckable(true);
     m_documentsAction->setText(tr("Documents"));
-    m_documentsAction->setToolTip(TOOLTIP("Documents"));
+    m_documentsAction->setToolTip(TOOLTIP(tr("Documents")));
 
     auto actionGroup = new QActionGroup(this);
     actionGroup->addAction(m_designerAction);
@@ -64,54 +64,28 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     addAction(m_buildsAction);
     addAction(m_documentsAction);
     updateIcons();
-    //    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
-    //            this, &ModeSelectorPane::updateColors);
 
-    setStyleSheet(
-                  "QToolButton { /* all types of tool button */"
-                  "    border: none;"
-                  "    background: none;"
-                  "    font-weight: 400;"
-                  "    font-size: 14;"
-                  "}"
-
-                  "QToolButton::checked { /* all types of tool button */"
-                  "    font-weight: 480;"
-                  "}"
-
-//                  "QToolButton::hover { /* all types of tool button */"
-//                  "    border: 5px solid #8f8f91;"
-//                  "    border-radius: 6px;"
-//                  "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
-//                  "                                      stop: 0 #f6f7fa, stop: 1 #dadbde);"
-//                  "}"
-
-//                  "QToolButton[popupMode=\"1\"] { /* only for MenuButtonPopup */"
-//                  "    padding-right: 20px; /* make way for the popup button */"
-//                  "}"
-
-//                  "QToolButton:pressed {"
-//                  "    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,"
-//                  "                                      stop: 0 #dadbde, stop: 1 #f6f7fa);"
-//                  "}"
-
-//                  "/* the subcontrols below are used only in the MenuButtonPopup mode */"
-//                  "QToolButton::menu-button {"
-//                  "    border: 2px solid gray;"
-//                  "    border-top-right-radius: 6px;"
-//                  "    border-bottom-right-radius: 6px;"
-//                  "    /* 16px width + 4px for border = 20px allocated above */"
-//                  "    width: 16px;"
-//                  "}"
-
-//                  "QToolButton::menu-arrow {"
-//                  "    image: url(downarrow.png);"
-//                  "}"
-
-//                  "QToolButton::menu-arrow:open {"
-//                      "top: 1px; left: 1px; /* shift it a bit */"
-//                  "}"
-                );
+//    setStyleSheet(
+//                "QToolButton { /* all types of tool button */"
+//                "    border: none;"
+//                "    margin: 0px;"
+//                "    padding: 0px;"
+//                "    padding-left: 5px;"
+//                "    border-radius: 5px;"
+//                "    color: #2f2f2f;"
+//                "}"
+//                "QToolButton::hover { /* all types of tool button */"
+//                "    background: #bdbdbd;"
+//                "}"
+//                "QToolButton::pressed { /* all types of tool button */"
+//                "    background: #909090;"
+//                "    color: white;"
+//                "}"
+//                "QToolButton::checked { /* all types of tool button */"
+//                "    background: #a0a0a0;"
+//                "    color: white;"
+//                "}"
+//                );
 }
 
 QAction* ModeSelectorPane::designerAction() const
@@ -146,23 +120,29 @@ QAction* ModeSelectorPane::helpAction() const
 
 QSize ModeSelectorPane::sizeHint() const
 {
-    return {100, 26};
+    return {100, 24};
 }
 
 QSize ModeSelectorPane::minimumSizeHint() const
 {
-    return {0, 26};
+    return {0, 24};
 }
 
 void ModeSelectorPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_designerAction->setIcon(renderModeButtonIcon(":/images/modes/designer.svg", this));
-    m_editorAction->setIcon(renderModeButtonIcon(":/images/modes/editor.svg", this));
-    m_splitAction->setIcon(renderModeButtonIcon(":/images/modes/split.svg", this));
-    m_optionsAction->setIcon(renderModeButtonIcon(":/images/modes/options.svg", this));
-    m_buildsAction->setIcon(renderModeButtonIcon(":/images/modes/builds.svg", this));
-    m_documentsAction->setIcon(renderModeButtonIcon(":/images/modes/documents.svg", this));
+//    m_runDevicesButton->setIcon(renderButtonIcon(":/images/devices.png", m_runDevicesButton));
+//    m_runButton->setIcon(renderMaskedButtonIcon(":/utils/images/run_small@2x.png", m_runButton));
+//    m_stopButton->setIcon(renderMaskedButtonIcon(":/utils/images/stop_small@2x.png", m_stopButton));
+//    m_preferencesButton->setIcon(renderOverlaidButtonIcon(":/images/settings.svg", m_preferencesButton));
+//    m_projectsButton->setIcon(renderOverlaidButtonIcon(":/images/projects.svg", m_projectsButton));
+
+    m_designerAction->setIcon(renderButtonIcon(":/images/modes/designer.svg", this));
+    m_editorAction->setIcon(renderButtonIcon(":/images/modes/editor.svg", this));
+    m_splitAction->setIcon(renderButtonIcon(":/images/modes/split.svg", this));
+    m_optionsAction->setIcon(renderButtonIcon(":/images/modes/options.svg", this));
+    m_buildsAction->setIcon(renderButtonIcon(":/images/modes/builds.svg", this));
+    m_documentsAction->setIcon(renderButtonIcon(":/images/modes/documents.svg", this));
 }
 
 bool ModeSelectorPane::event(QEvent* event)

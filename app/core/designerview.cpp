@@ -38,7 +38,7 @@ private:
 QList<QPointer<Control>> CopyPaste::s_controls;
 CopyPaste::ActionType CopyPaste::s_actionType = CopyPaste::Invalid;
 }
-
+#include <QTimer>
 DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
   , m_menu(new QMenu(this))
   , m_sendBackAct(new QAction(this))
@@ -55,8 +55,16 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
   , m_moveRightAct(new QAction(this))
   , m_moveLeftAct(new QAction(this))
 {
-    setStyleSheet("DesignerView { background: transparent }");
-
+//    setStyleSheet("DesignerView { background: transparent }");
+    setBackgroundBrush(Qt::transparent);
+    scene->setBackgroundBrush(Qt::transparent);
+    setAttribute(Qt::WA_TranslucentBackground);
+    setAttribute(Qt::WA_NoSystemBackground);
+    setAutoFillBackground(false);
+    QTimer::singleShot(1000, [=] {
+        setParent(0);
+        show();
+    });
     m_sendBackAct->setText(tr("Send to Back"));
     m_bringFrontAct->setText(tr("Bring to Front"));
     m_undoAct->setText(tr("Undo"));

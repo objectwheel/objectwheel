@@ -53,8 +53,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_splitterOut);
 
-    m_splitterOut->setStyleSheet("QSplitter, QSplitter::handle { border: none }");
     m_splitterOut->setHandleWidth(0);
+    m_splitterOut->setFrameShape(QFrame::NoFrame);
     m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
     m_splitterOut->addWidget(m_consolePane);
@@ -79,7 +79,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     g_editorContainer->layout()->addWidget(m_qmlCodeEditorWidget);
 
     m_splitterIn->setHandleWidth(0);
-    m_splitterIn->setStyleSheet("QSplitter, QSplitter::handle { border: none; }");
+    m_splitterIn->setFrameShape(QFrame::NoFrame);
     m_splitterIn->setOrientation(Qt::Horizontal);
     m_splitterIn->addWidget(m_designerWidget);
     m_splitterIn->addWidget(g_editorContainer);

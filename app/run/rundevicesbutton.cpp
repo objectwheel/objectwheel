@@ -103,11 +103,15 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     painter.setRenderHint(QPainter::Antialiasing);
 
     // Settings
+    QStyleOptionButton option;
+    initStyleOption(&option);
     int left = LEFT_PADDING;
     int textWidth = fontMetrics().horizontalAdvance(text());
-    bool isSunken = isDown() || (isCheckable() && isChecked());
-    QIcon::Mode iconMode = isEnabled() ? isSunken ? QIcon::Active : QIcon::Normal : QIcon::Disabled;
-    const QColor& textColor = isSunken ? palette().buttonText().color().darker() : palette().buttonText().color();
+    bool isSunken = option.state & QStyle::State_Sunken || option.state & QStyle::State_On;
+    QIcon::Mode iconMode = isEnabled() ? QIcon::Normal : QIcon::Disabled;
+    QIcon::State iconState = isSunken ? QIcon::On : QIcon::Off;
+    const QColor& textColor = isSunken ? palette().buttonText().color().darker()
+                                       : palette().buttonText().color();
 
     QPen arrowPen(textColor);
     arrowPen.setWidthF(1.3);
@@ -115,13 +119,10 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     arrowPen.setJoinStyle(Qt::MiterJoin);
 
     // Draw background
-    QStyleOptionButton option;
-    option.initFrom(this);
-    option.state |= isSunken ? QStyle::State_Sunken : QStyle::State_Raised;
     PaintUtils::drawPanelButtonBevel(&painter, option);
 
     // Draw icon
-    icon().paint(&painter, left, 0, iconSize().width(), height(), Qt::AlignCenter, iconMode);
+    icon().paint(&painter, left, 0, iconSize().width(), height(), Qt::AlignCenter, iconMode, iconState);
 
     // Draw text
     left += iconSize().width() + SPACING;
@@ -138,7 +139,7 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
 
     // Draw device icon
     left += FORWARD_ARROW_LENGTH + SPACING;
-    m_menu->icon().paint(&painter, left, 0, iconSize().width(), height(), Qt::AlignCenter, iconMode);
+    m_menu->icon().paint(&painter, left, 0, iconSize().width(), height(), Qt::AlignCenter, iconMode, iconState);
 
     // Draw device name
     left += iconSize().width() + SPACING;

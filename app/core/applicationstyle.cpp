@@ -15,6 +15,7 @@
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
+#include <private/qfusionstyle_p_p.h>
 
 namespace {
 
@@ -40,16 +41,47 @@ QRect comboboxInnerBounds(const QRect& outerBounds)
     return outerBounds.adjusted(3, 3, -1, -5);
 }
 
+QWindow *qt_getWindow(const QWidget *widget)
+{
+    return widget ? widget->window()->windowHandle() : 0;
 }
 
-QRectF comboboxEditBounds(const QRectF& outerBounds)
+void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
+               const QRect &rect, QPainter *painter, const QWidget *widget = 0)
+{
+    QStyle::PrimitiveElement pe;
+    switch (toolbutton->arrowType) {
+    case Qt::LeftArrow:
+        pe = QStyle::PE_IndicatorArrowLeft;
+        break;
+    case Qt::RightArrow:
+        pe = QStyle::PE_IndicatorArrowRight;
+        break;
+    case Qt::UpArrow:
+        pe = QStyle::PE_IndicatorArrowUp;
+        break;
+    case Qt::DownArrow:
+        pe = QStyle::PE_IndicatorArrowDown;
+        break;
+    default:
+        return;
+    }
+    QStyleOption arrowOpt = *toolbutton;
+    arrowOpt.rect = rect;
+    style->drawPrimitive(pe, &arrowOpt, painter, widget);
+}
+
+}
+
+QRectF comboboxEditBounds(const QRectF& outerBounds) // Used by transparentstyle.cpp
 {
     QRectF ret = outerBounds;
     ret = ret.adjusted(-5, 0, -24, 0).translated(3, 2);
     ret.setHeight(14);
     return ret;
 }
-QRectF adjustedControlFrame(const QRectF& rect)
+
+QRectF adjustedControlFrame(const QRectF& rect) // Used by transparentstyle.cpp
 {
     QRectF frameRect;
     const auto frameSize = QSizeF(-1, comboBoxDefaultHeight[2]);
@@ -61,9 +93,8 @@ QRectF adjustedControlFrame(const QRectF& rect)
     return frameRect;
 }
 
-ApplicationStyle::ApplicationStyle() : QProxyStyle("fusion")
+ApplicationStyle::ApplicationStyle() : QFusionStyle()
 {
-    Q_ASSERT(QStyleFactory::keys().contains("fusion", Qt::CaseInsensitive));
 }
 
 QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption* option, const QSize& contentsSize, const QWidget* widget) const
@@ -134,11 +165,11 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
     case CT_ItemViewItem:
         if (const QStyleOptionViewItem *vopt
                 = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
-            sz = QProxyStyle::sizeFromContents(type, vopt, contentsSize, widget);
+            sz = QFusionStyle::sizeFromContents(type, vopt, contentsSize, widget);
             sz.setHeight(sz.height() + 2);
         } break;
     default:
-        sz = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
+        sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
         break;
     }
 
@@ -162,7 +193,7 @@ QRect ApplicationStyle::subElementRect(QStyle::SubElement element, const QStyleO
             setLayoutItemMargins(+2, +1, -3, -4, &rect, option->direction);
         } break;
     default:
-        rect = QProxyStyle::subElementRect(element, option, widget);
+        rect = QFusionStyle::subElementRect(element, option, widget);
     }
 
     return rect;
@@ -194,13 +225,13 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
                                 1);
                 } break;
             default:
-                ret = QProxyStyle::subControlRect(control, option, subControl, widget);
+                ret = QFusionStyle::subControlRect(control, option, subControl, widget);
                 break;
             }
         } break;
 
     default:
-        ret = QProxyStyle::subControlRect(control, option, subControl, widget);
+        ret = QFusionStyle::subControlRect(control, option, subControl, widget);
         break;
     }
 
@@ -217,7 +248,7 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
         pixmap = Utils::Icons::EDIT_CLEAR.icon().pixmap(UtilityFunctions::window(widget), {64, 64});
         break;
     default:
-        pixmap = QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+        pixmap = QFusionStyle::standardPixmap(standardPixmap, opt, widget);
         break;
     }
 
@@ -254,7 +285,7 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
     case SH_Menu_FillScreenWithScroll:
         return false;
     default:
-        return QProxyStyle::styleHint(hint, option, widget, returnData);
+        return QFusionStyle::styleHint(hint, option, widget, returnData);
     }
 }
 
@@ -268,7 +299,7 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_MenuScrollerHeight:
         return 15;
     default:
-        return QProxyStyle::pixelMetric(metric, option, widget);
+        return QFusionStyle::pixelMetric(metric, option, widget);
     }
 }
 
@@ -308,13 +339,15 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->restore();
     } break;
     default:
-        QProxyStyle::drawPrimitive(element, option, painter, widget);
+        QFusionStyle::drawPrimitive(element, option, painter, widget);
         break;
     }
 }
 
 void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
 {
+    Q_D (const QFusionStyle);
+
     switch (element) {
     case CE_MenuItem:
     case CE_MenuHMargin:
@@ -459,10 +492,148 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             auto copy = *cb;
             copy.direction = Qt::LeftToRight;
             // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
-            QProxyStyle::drawControl(CE_ComboBoxLabel, &copy, painter, widget);
+            QFusionStyle::drawControl(CE_ComboBoxLabel, &copy, painter, widget);
+        } break;
+    case CE_PushButtonLabel:
+        if (const QStyleOptionButton *button = qstyleoption_cast<const QStyleOptionButton *>(option)) {
+            QRect ir = button->rect;
+            uint tf = Qt::AlignVCenter;
+            if (styleHint(SH_UnderlineShortcut, button, widget))
+                tf |= Qt::TextShowMnemonic;
+            else
+                tf |= Qt::TextHideMnemonic;
+            if (!button->icon.isNull()) {
+                //Center both icon and text
+                QPoint point;
+                QIcon::Mode mode = button->state & State_Enabled ? QIcon::Normal
+                                                                 : QIcon::Disabled;
+                if (mode == QIcon::Normal && button->state & State_HasFocus)
+                    mode = QIcon::Active;
+                QIcon::State state = QIcon::Off;
+                if (button->state & State_On || button->state & State_Sunken)
+                    state = QIcon::On;
+
+                QPixmap pixmap = button->icon.pixmap(button->iconSize, mode, state);
+                int w = pixmap.width() / pixmap.devicePixelRatio();
+                int h = pixmap.height() / pixmap.devicePixelRatio();
+                if (!button->text.isEmpty())
+                    w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 2;
+                point = QPoint(ir.x() + ir.width() / 2 - w / 2,
+                               ir.y() + ir.height() / 2 - h / 2);
+                w = pixmap.width() / pixmap.devicePixelRatio();
+                if (button->direction == Qt::RightToLeft)
+                    point.rx() += w;
+                painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap);
+                if (button->direction == Qt::RightToLeft)
+                    ir.translate(-point.x() - 2, 0);
+                else
+                    ir.translate(point.x() + w, 0);
+                // left-align text if there is
+                if (!button->text.isEmpty())
+                    tf |= Qt::AlignLeft;
+            } else {
+                tf |= Qt::AlignHCenter;
+            }
+            if (button->features & QStyleOptionButton::HasMenu)
+                ir = ir.adjusted(0, 0, -proxy()->pixelMetric(PM_MenuButtonIndicator, button, widget), 0);
+            // Draw item text
+            QStyleOptionButton copy(*button);
+            if (copy.state & State_On || copy.state & State_Sunken)
+                copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
+            proxy()->drawItemText(painter, ir, tf, copy.palette, (copy.state & State_Enabled),
+                                  copy.text, QPalette::ButtonText);
+        } break;
+    case CE_ToolButtonLabel:
+        if (const QStyleOptionToolButton *toolbutton
+                = qstyleoption_cast<const QStyleOptionToolButton *>(option)) {
+
+            QStyleOptionToolButton copy(*toolbutton);
+            if (copy.state & State_On || copy.state & State_Sunken)
+                copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
+
+            QRect rect = copy.rect;
+            int shiftX = 0;
+            int shiftY = 0;
+            if (copy.state & (State_Sunken | State_On)) {
+                shiftX = proxy()->pixelMetric(PM_ButtonShiftHorizontal, &copy, widget);
+                shiftY = proxy()->pixelMetric(PM_ButtonShiftVertical, &copy, widget);
+            }
+            // Arrow type always overrules and is always shown
+            bool hasArrow = copy.features & QStyleOptionToolButton::Arrow;
+            if (((!hasArrow && copy.icon.isNull()) && !copy.text.isEmpty())
+                    || copy.toolButtonStyle == Qt::ToolButtonTextOnly) {
+                int alignment = Qt::AlignCenter | Qt::TextShowMnemonic;
+                if (!proxy()->styleHint(SH_UnderlineShortcut, option, widget))
+                    alignment |= Qt::TextHideMnemonic;
+                rect.translate(shiftX, shiftY);
+                painter->setFont(copy.font);
+                proxy()->drawItemText(painter, rect, alignment, copy.palette,
+                                      option->state & State_Enabled, copy.text,
+                                      QPalette::ButtonText);
+            } else {
+                QPixmap pm;
+                QSize pmSize = copy.iconSize;
+                if (!copy.icon.isNull()) {
+                    QIcon::State state = QIcon::Off;
+                    if (copy.state & State_On || copy.state & State_Sunken)
+                        state = QIcon::On;
+
+                    QIcon::Mode mode;
+                    if (!(copy.state & State_Enabled))
+                        mode = QIcon::Disabled;
+                    else if ((option->state & State_MouseOver) && (option->state & State_AutoRaise))
+                        mode = QIcon::Active;
+                    else
+                        mode = QIcon::Normal;
+                    pm = copy.icon.pixmap(qt_getWindow(widget), copy.rect.size().boundedTo(copy.iconSize),
+                                                 mode, state);
+                    pmSize = pm.size() / pm.devicePixelRatio();
+                }
+                if (copy.toolButtonStyle != Qt::ToolButtonIconOnly) {
+                    painter->setFont(copy.font);
+                    QRect pr = rect,
+                            tr = rect;
+                    int alignment = Qt::TextShowMnemonic;
+                    if (!proxy()->styleHint(SH_UnderlineShortcut, option, widget))
+                        alignment |= Qt::TextHideMnemonic;
+                    if (copy.toolButtonStyle == Qt::ToolButtonTextUnderIcon) {
+                        pr.setHeight(pmSize.height() + 4); //### 4 is currently hardcoded in QToolButton::sizeHint()
+                        tr.adjust(0, pr.height() - 1, 0, -1);
+                        pr.translate(shiftX, shiftY);
+                        if (!hasArrow) {
+                            proxy()->drawItemPixmap(painter, pr, Qt::AlignCenter, pm);
+                        } else {
+                            drawArrow(proxy(), &copy, pr, painter, widget);
+                        }
+                        alignment |= Qt::AlignCenter;
+                    } else {
+                        pr.setWidth(pmSize.width() + 4); //### 4 is currently hardcoded in QToolButton::sizeHint()
+                        tr.adjust(pr.width(), 0, 0, 0);
+                        pr.translate(shiftX, shiftY);
+                        if (!hasArrow) {
+                            proxy()->drawItemPixmap(painter, QStyle::visualRect(option->direction, rect, pr), Qt::AlignCenter, pm);
+                        } else {
+                            drawArrow(proxy(), &copy, pr, painter, widget);
+                        }
+                        alignment |= Qt::AlignLeft | Qt::AlignVCenter;
+                    }
+                    tr.translate(shiftX, shiftY);
+                    const QString text = d->toolButtonElideText(&copy, tr, alignment);
+                    proxy()->drawItemText(painter, QStyle::visualRect(option->direction, rect, tr), alignment, copy.palette,
+                                          copy.state & State_Enabled, text,
+                                          QPalette::ButtonText);
+                } else {
+                    rect.translate(shiftX, shiftY);
+                    if (hasArrow) {
+                        drawArrow(proxy(), &copy, rect, painter, widget);
+                    } else {
+                        proxy()->drawItemPixmap(painter, rect, Qt::AlignCenter, pm);
+                    }
+                }
+            }
         } break;
     default:
-        QProxyStyle::drawControl(element, option, painter, widget);
+        QFusionStyle::drawControl(element, option, painter, widget);
         break;
     }
 }
@@ -502,7 +673,7 @@ void ApplicationStyle::polish(QWidget* w)
         w->setAutoFillBackground(false);
     }
 
-    QProxyStyle::polish(w);
+    QFusionStyle::polish(w);
 
     if (qobject_cast<QScrollBar*>(w)) {
         w->setAttribute(Qt::WA_OpaquePaintEvent, false);
@@ -530,7 +701,7 @@ void ApplicationStyle::unpolish(QWidget* w)
     if (QFocusFrame *frame = qobject_cast<QFocusFrame*>(w))
         frame->setAttribute(Qt::WA_NoSystemBackground, true);
 
-    QProxyStyle::unpolish(w);
+    QFusionStyle::unpolish(w);
 
     if (qobject_cast<QScrollBar*>(w)) {
         w->setAttribute(Qt::WA_OpaquePaintEvent, true);

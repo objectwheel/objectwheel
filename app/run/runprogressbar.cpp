@@ -193,15 +193,14 @@ void RunProgressBar::updateDocument()
     cursor.mergeCharFormat(format);
     cursor.setPosition(0);
 
-    if (m_textFormat == Qt::RichText) {
+    if (m_textFormat == Qt::RichText)
         cursor.insertHtml(m_text);
-    } else if (m_textFormat == Qt::PlainText) {
+    else if (m_textFormat == Qt::PlainText)
         cursor.insertText(m_text);
-    } else if (Qt::mightBeRichText(m_text)) {
+    else if (Qt::mightBeRichText(m_text))
         cursor.insertHtml(m_text);
-    } else {
+    else
         cursor.insertText(m_text);
-    }
 }
 
 int RunProgressBar::paddingWidth() const
@@ -232,6 +231,7 @@ void RunProgressBar::changeEvent(QEvent* event)
     if(event->type() == QEvent::FontChange
             || event->type() == QEvent::ApplicationFontChange
             || event->type() == QEvent::PaletteChange) {
+        m_busyIndicator->setColor(palette().buttonText().color());
         updateDocument();
         updateLine();
         updateToolTip();
@@ -261,7 +261,6 @@ void RunProgressBar::paintEvent(QPaintEvent*)
     // Draw background
     QStyleOptionFrame option;
     option.initFrom(this);
-    option.state |= QStyle::State_Raised;
     PaintUtils::drawPanelButtonBevel(&painter, option);
 
     // Draw text

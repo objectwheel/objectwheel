@@ -79,7 +79,6 @@ QWidget* createSeparatorWidget(Qt::Orientation orientation);
 QWindow* window(const QWidget* widget);
 QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left = 0);
 QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top = 0);
-QPixmap pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size);
 QPixmap scaled(const QPixmap& pixmap, const QSize& size);
 QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view);
 QPoint centerPos(const QSize& size);

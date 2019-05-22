@@ -13,7 +13,7 @@ QSize PushButton::sizeHint() const
 {
     return QSize(QPushButton::sizeHint().width(), 24);
 }
-
+#include <QDebug>
 void PushButton::paintEvent(QPaintEvent*)
 {
     QStylePainter painter(this);
@@ -24,14 +24,8 @@ void PushButton::paintEvent(QPaintEvent*)
     initStyleOption(&option);
     PaintUtils::drawPanelButtonBevel(&painter, option);
 
-    // Draw the rest (FIXME: Remove this "&& option.palette.buttonText().color() != Qt::white")
-    if ((isDown() || isChecked()) && option.palette.buttonText().color() != Qt::white)
-        option.palette.setColor(QPalette::ButtonText, option.palette.buttonText().color().darker());
-
-    // qfusionstyle.cpp selects QIcon::Active icon when State_HasFocus is present
-    option.state &= ~QStyle::State_HasFocus;
-    if (isDown() || isChecked())
-        option.state |= QStyle::State_HasFocus;
+    qDebug() << style() << style()->objectName() << style()->metaObject()->className();
+    // Draw label
     option.rect = style()->subElementRect(QStyle::SE_PushButtonContents, &option, this);
     painter.drawControl(QStyle::CE_PushButtonLabel, option);
 }

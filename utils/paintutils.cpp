@@ -123,9 +123,12 @@ QIcon PaintUtils::renderOverlaidIcon(const QIcon& icon, const QSize& size, const
 
 QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QWidget* widget)
 {
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
     QIcon icon;
-    icon.addPixmap(QPixmap(fileName), QIcon::Normal);
-    icon.addPixmap(renderOverlaidPixmap(fileName, "#20000000", widget), QIcon::Active);
+    QPixmap pixmap(fileName);
+    pixmap.setDevicePixelRatio(dpr);
+    icon.addPixmap(pixmap, QIcon::Normal, QIcon::Off);
+    icon.addPixmap(renderOverlaidPixmap(fileName, "#20000000", widget), QIcon::Normal, QIcon::On);
     return icon;
 }
 
@@ -134,8 +137,8 @@ QIcon PaintUtils::renderOverlaidButtonIcon(const QString& fileName, const QWidge
     QIcon icon;
     QColor up = widget->palette().buttonText().color();
     QColor down = widget->palette().buttonText().color().darker();
-    icon.addPixmap(renderOverlaidPixmap(fileName, up, widget), QIcon::Normal);
-    icon.addPixmap(renderOverlaidPixmap(fileName, down, widget), QIcon::Active);
+    icon.addPixmap(renderOverlaidPixmap(fileName, up, widget), QIcon::Normal, QIcon::Off);
+    icon.addPixmap(renderOverlaidPixmap(fileName, down, widget), QIcon::Normal, QIcon::On);
     return icon;
 }
 
@@ -144,25 +147,8 @@ QIcon PaintUtils::renderMaskedButtonIcon(const QString& fileName, const QWidget*
     QIcon icon;
     QColor up = widget->palette().buttonText().color();
     QColor down = widget->palette().buttonText().color().darker();
-    icon.addPixmap(renderMaskedPixmap(fileName, up, widget), QIcon::Normal);
-    icon.addPixmap(renderMaskedPixmap(fileName, down, widget), QIcon::Active);
-    return icon;
-}
-
-QIcon PaintUtils::renderModeButtonIcon(const QString& fileName, const QWidget* widget)
-{
-    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
-    QFileInfo fileInfo(fileName);
-    QPixmap off, on;
-
-    off.load(fileName);
-    on.load(fileInfo.path() + '/' + fileInfo.baseName() + "-active." + fileInfo.suffix());
-    off.setDevicePixelRatio(dpr);
-    on.setDevicePixelRatio(dpr);
-
-    QIcon icon;
-    icon.addPixmap(off, QIcon::Normal, QIcon::Off);
-    icon.addPixmap(on, QIcon::Normal, QIcon::On);
+    icon.addPixmap(renderMaskedPixmap(fileName, up, widget), QIcon::Normal, QIcon::Off);
+    icon.addPixmap(renderMaskedPixmap(fileName, down, widget), QIcon::Normal, QIcon::On);
     return icon;
 }
 

@@ -242,14 +242,6 @@ QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top)
     return ret;
 }
 
-QPixmap pixmap(QAbstractButton* button, const QIcon& icon, const QSizeF& size)
-{
-    Q_ASSERT(window(button));
-    return icon.pixmap(window(button), size.toSize(), !button->isEnabled()
-                       ? QIcon::Disabled
-                       : (button->isDown() ? QIcon::Active : QIcon::Normal));
-}
-
 QPixmap scaled(const QPixmap& pixmap, const QSize& size)
 {
     return pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);

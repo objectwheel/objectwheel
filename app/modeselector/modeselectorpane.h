@@ -25,7 +25,7 @@ private:
     void updateIcons();
     bool event(QEvent* event) override;
     void changeEvent(QEvent* event) override;
-    void paintEvent(QPaintEvent*) override;
+    void paintEvent(QPaintEvent* event) override;
 
 private:
     QAction* m_designerAction;
