@@ -12,8 +12,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     , _signingBoxLay(&_signingBox)
 {
     auto buttonsLay = new QHBoxLayout;
-    buttonsLay->addWidget(&_btnBack);
-    buttonsLay->addWidget(&_btnBuild);
+//    buttonsLay->addWidget(&_btnBack);
+//    buttonsLay->addWidget(&_btnBuild);
 
     _layout.setContentsMargins(20,
       20, 20, 20);
@@ -405,27 +405,27 @@ AndroidWidget::AndroidWidget(QWidget *parent)
         }
     });
 
-    _btnBack.settings().topColor = "#38A3F6";
-    _btnBack.settings().bottomColor = _btnBack.settings().topColor.darker(120);
-    _btnBack.settings().borderRadius = 7.5;
-    _btnBack.settings().textColor = Qt::white;
-    _btnBack.setFixedSize(200,28);
-    _btnBack.setIconSize(QSize(14,14));
-    _btnBack.setIcon(QIcon(":/images/unload.png"));
-    _btnBack.setText("Back");
-    connect(&_btnBack, &FlatButton::clicked, [&]{
-        emit backClicked();
-    });
+//    _btnBack.settings().topColor = "#38A3F6";
+//    _btnBack.settings().bottomColor = _btnBack.settings().topColor.darker(120);
+//    _btnBack.settings().borderRadius = 7.5;
+//    _btnBack.settings().textColor = Qt::white;
+//    _btnBack.setFixedSize(200,28);
+//    _btnBack.setIconSize(QSize(14,14));
+//    _btnBack.setIcon(QIcon(":/images/unload.png"));
+//    _btnBack.setText("Back");
+//  FIXME  connect(&_btnBack, &FlarButton::clicked, [&]{
+//        emit backClicked();
+//    });
 
-    _btnBuild.settings().topColor = "#84BF52";
-    _btnBuild.settings().bottomColor = _btnBuild.settings().topColor.darker(120);
-    _btnBuild.settings().borderRadius = 7.5;
-    _btnBuild.settings().textColor = Qt::white;
-    _btnBuild.setFixedSize(200,28);
-    _btnBuild.setIconSize(QSize(14,14));
-    _btnBuild.setIcon(QIcon(":/images/load.png"));
-    _btnBuild.setText("Build");
-    connect(&_btnBuild, &FlatButton::clicked, this, &AndroidWidget::handleBtnBuildClicked);
+//    _btnBuild.settings().topColor = "#84BF52";
+//    _btnBuild.settings().bottomColor = _btnBuild.settings().topColor.darker(120);
+//    _btnBuild.settings().borderRadius = 7.5;
+//    _btnBuild.settings().textColor = Qt::white;
+//    _btnBuild.setFixedSize(200,28);
+//    _btnBuild.setIconSize(QSize(14,14));
+//    _btnBuild.setIcon(QIcon(":/images/load.png"));
+//    _btnBuild.setText("Build");
+// FIXME   connect(&_btnBuild, &FlarButton::clicked, this, &AndroidWidget::handleBtnBuildClicked);
 }
 
 bool AndroidWidget::checkFields()

@@ -2,7 +2,6 @@
 #define PLATFORMSWIDGET_H
 
 #include <global.h>
-#include <flatbutton.h>
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -27,7 +26,7 @@ private:
     QLabel _lblTitle;
     QLabel _lblMsg;
     QListWidget _listWidget;
-    FlatButton _btnNext;
+//  FIXME  FlarButton _btnNext;
 };
 
 #endif // PLATFORMSWIDGET_H

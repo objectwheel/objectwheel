@@ -2,7 +2,6 @@
 //#include <generalsettings.h>
 //#include <interfacesettings.h>
 //#include <utilityfunctions.h>
-//#include <flatbutton.h>
 
 //#include <QPainter>
 //#include <QVBoxLayout>
@@ -13,12 +12,12 @@
 
 //ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QWidget(parent)
 //  , m_layout(new QVBoxLayout(this))
-//  , m_qmlCodeEditorButton(new FlatButton(this))
-//  , m_designerButton(new FlatButton(this))
-//  , m_projectOptionsButton(new FlatButton(this))
-//  , m_buildsButton(new FlatButton(this))
-//  , m_helpButton(new FlatButton(this))
-//  , m_splitViewButton(new FlatButton(this))
+//  , m_qmlCodeEditorButton(new FlarButton(this))
+//  , m_designerButton(new FlarButton(this))
+//  , m_projectOptionsButton(new FlarButton(this))
+//  , m_buildsButton(new FlarButton(this))
+//  , m_helpButton(new FlarButton(this))
+//  , m_splitViewButton(new FlarButton(this))
 //{
 //    setContentsMargins(0, 0, 0, 0);
 //    m_layout->setSpacing(0);
@@ -121,17 +120,17 @@
 
 //    updateColors();
 
-//    connect(m_designerButton, &FlatButton::pressed,
+//    connect(m_designerButton, &FlarButton::pressed,
 //            this, [=] { setCurrentPage(Page_Designer); });
-//    connect(m_qmlCodeEditorButton, &FlatButton::pressed,
+//    connect(m_qmlCodeEditorButton, &FlarButton::pressed,
 //            this, [=] { setCurrentPage(Page_QmlCodeEditor); });
-//    connect(m_projectOptionsButton, &FlatButton::pressed,
+//    connect(m_projectOptionsButton, &FlarButton::pressed,
 //            this, [=] { setCurrentPage(Page_ProjectOptions); });
-//    connect(m_helpButton, &FlatButton::pressed,
+//    connect(m_helpButton, &FlarButton::pressed,
 //            this, [=] { setCurrentPage(Page_Help); });
-//    connect(m_splitViewButton, &FlatButton::pressed,
+//    connect(m_splitViewButton, &FlarButton::pressed,
 //            this, [=] { setCurrentPage(Page_SplitView); });
-//    connect(m_buildsButton, &FlatButton::pressed,
+//    connect(m_buildsButton, &FlarButton::pressed,
 //            this, [=] { setCurrentPage(Page_Builds); });
 //    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
 //            this, &ModeSelectorPane::updateColors);

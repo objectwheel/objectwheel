@@ -84,12 +84,12 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _layout.addWidget(&_lblTitle);
     _layout.addWidget(&_lblMsg);
     _layout.addWidget(&_listWidget);
-    _layout.addWidget(&_btnNext);
+//    _layout.addWidget(&_btnNext);
     _layout.setAlignment(&_lblLogo, Qt::AlignHCenter);
     _layout.setAlignment(&_lblTitle, Qt::AlignHCenter);
     _layout.setAlignment(&_lblMsg, Qt::AlignHCenter);
     _layout.setAlignment(&_listWidget, Qt::AlignHCenter);
-    _layout.setAlignment(&_btnNext, Qt::AlignHCenter);
+//    _layout.setAlignment(&_btnNext, Qt::AlignHCenter);
 
     _lblLogo.setFixedSize(50, 50);
 // FIXME   _lblLogo.setPixmap(QPixmap(":/images/helmet.png"));
@@ -106,24 +106,24 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _lblMsg.setFont(f);
     _lblMsg.setText("Select your target platform");
 
-    _btnNext.settings().topColor = "#F4BA48";
-    _btnNext.settings().bottomColor = _btnNext.settings().topColor.darker(120);
-    _btnNext.settings().borderRadius = 7.5;
-    _btnNext.settings().textColor = Qt::white;
-    _btnNext.setFixedSize(200,28);
-    _btnNext.setIconSize(QSize(14,14));
-    _btnNext.setIcon(QIcon(":/images/load.png"));
-    _btnNext.setText("Next");
-    connect(&_btnNext, &FlatButton::clicked, this, &PlatformsWidget::handleBtnNextClicked);
+//    _btnNext.settings().topColor = "#F4BA48";
+//    _btnNext.settings().bottomColor = _btnNext.settings().topColor.darker(120);
+//    _btnNext.settings().borderRadius = 7.5;
+//    _btnNext.settings().textColor = Qt::white;
+//    _btnNext.setFixedSize(200,28);
+//    _btnNext.setIconSize(QSize(14,14));
+//    _btnNext.setIcon(QIcon(":/images/load.png"));
+//    _btnNext.setText("Next");
+//  FIXME  connect(&_btnNext, &FlarButton::clicked, this, &PlatformsWidget::handleBtnNextClicked);
 
     _listWidget.setIconSize({52, 52});
     _listWidget.setMinimumWidth(400);
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));
     _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _listWidget.setFocusPolicy(Qt::NoFocus);
-    connect(&_listWidget, &QListWidget::itemSelectionChanged, [&] {
-       _btnNext.setEnabled(_listWidget.currentItem());
-    });
+//    connect(&_listWidget, &QListWidget::itemSelectionChanged, [&] {
+//       _btnNext.setEnabled(_listWidget.currentItem());
+//    });
 
     auto android = new QListWidgetItem;
     android->setText("Android 4.0+");

@@ -3,7 +3,7 @@
 
 //#include <QToolBar>
 
-//class FlatButton;
+//class FlarButton;
 //class QVBoxLayout;
 
 //class ModeSelectorPane final : public QToolBar
@@ -39,12 +39,12 @@
 
 //private:
 //    QVBoxLayout* m_layout;
-//    FlatButton* m_qmlCodeEditorButton;
-//    FlatButton* m_designerButton;
-//    FlatButton* m_projectOptionsButton;
-//    FlatButton* m_buildsButton;
-//    FlatButton* m_helpButton;
-//    FlatButton* m_splitViewButton;
+//    FlarButton* m_qmlCodeEditorButton;
+//    FlarButton* m_designerButton;
+//    FlarButton* m_projectOptionsButton;
+//    FlarButton* m_buildsButton;
+//    FlarButton* m_helpButton;
+//    FlarButton* m_splitViewButton;
 //};
 
 #endif // MODESELECTORPANE_H

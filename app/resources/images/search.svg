@@ -3,8 +3,7 @@
 <svg version="1.2" baseProfile="tiny" id="katman_1"
 	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 32 32"
 	 xml:space="preserve">
-<g>
-	<circle fill="none" stroke="#595959" stroke-width="2" stroke-miterlimit="10" cx="14" cy="14" r="9"/>
-	<line fill="none" stroke="#595959" stroke-width="2" stroke-miterlimit="10" x1="28" y1="28" x2="20" y2="20"/>
-</g>
+<path d="M28.3,28.3L28.3,28.3c-0.4,0.4-1,0.4-1.4,0l-7.1-7.1c-0.4-0.4-0.4-1,0-1.4l0,0c0.4-0.4,1-0.4,1.4,0l7.1,7.1
+	C28.7,27.3,28.7,27.9,28.3,28.3z"/>
+<circle fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" cx="14" cy="14" r="9"/>
 </svg>

@@ -2,7 +2,6 @@
 #define MODULESELECTIONWIDGET_H
 
 #include <QtWidgets>
-#include <flatbutton.h>
 
 class ModuleSelectionWidget : public QWidget
 {

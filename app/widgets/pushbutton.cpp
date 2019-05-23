@@ -19,10 +19,12 @@ void PushButton::paintEvent(QPaintEvent*)
     QStylePainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // Draw background
     QStyleOptionButton option;
     initStyleOption(&option);
-    PaintUtils::drawPanelButtonBevel(&painter, option);
+
+    // Draw background
+    if (!isFlat())
+        PaintUtils::drawPanelButtonBevel(&painter, option);
 
     // Draw label
     option.rect = style()->subElementRect(QStyle::SE_PushButtonContents, &option, this);

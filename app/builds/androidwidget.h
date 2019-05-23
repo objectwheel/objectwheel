@@ -1,7 +1,6 @@
 #ifndef ANDROIDWIDGET_H
 #define ANDROIDWIDGET_H
 
-#include <flatbutton.h>
 #include <QtWidgets>
 
 class AndroidWidget : public QWidget
@@ -27,8 +26,8 @@ private:
     QLabel _lblLogo;
     QLabel _lblTitle;
     QLabel _lblMsg;
-    FlatButton _btnBack;
-    FlatButton _btnBuild;
+//  FIXME  FlarButton _btnBack;
+//    FlarButton _btnBuild;
     QScrollArea _scrollArea;
     QVBoxLayout _scrollAreaLay;
 

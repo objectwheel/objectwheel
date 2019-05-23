@@ -18,8 +18,8 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
     QScrollArea* owScArea = new QScrollArea;
     QGroupBox* owBox = new QGroupBox;
     QHBoxLayout* buttonsLay = new QHBoxLayout;
-    FlatButton* btnNext = new FlatButton;
-    FlatButton* btnBack = new FlatButton;
+// FIXME   FlarButton* btnNext = new FlarButton;
+//    FlarButton* btnBack = new FlarButton;
 
     layout->setContentsMargins(0, 20, 0, 20);
     layout->setSpacing(20);
@@ -155,29 +155,29 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
 //        qtScLay->addWidget(checkbox);
 //    }
 
-    buttonsLay->addWidget(btnBack);
-    buttonsLay->addWidget(btnNext);
+//    buttonsLay->addWidget(btnBack);
+//    buttonsLay->addWidget(btnNext);
     buttonsLay->setSpacing(10);
 
-    btnNext->settings().topColor = "#84BF52";
-    btnNext->settings().bottomColor = btnNext->settings().topColor.darker(120);
-    btnNext->settings().borderRadius = 7.5;
-    btnNext->settings().textColor = Qt::white;
-    btnNext->setFixedSize(200,28);
-    btnNext->setIconSize(QSize(14,14));
-    btnNext->setIcon(QIcon(":/images/load.png"));
-    btnNext->setText("Next");
-    connect(btnNext, &FlatButton::clicked, this, &ModuleSelectionWidget::handleBtnNextClicked);
+//    btnNext->settings().topColor = "#84BF52";
+//    btnNext->settings().bottomColor = btnNext->settings().topColor.darker(120);
+//    btnNext->settings().borderRadius = 7.5;
+//    btnNext->settings().textColor = Qt::white;
+//    btnNext->setFixedSize(200,28);
+//    btnNext->setIconSize(QSize(14,14));
+//    btnNext->setIcon(QIcon(":/images/load.png"));
+//    btnNext->setText("Next");
+//    connect(btnNext, &FlarButton::clicked, this, &ModuleSelectionWidget::handleBtnNextClicked);
 
-    btnBack->settings().topColor = "#38A3F6";
-    btnBack->settings().bottomColor = btnBack->settings().topColor.darker(120);
-    btnBack->settings().borderRadius = 7.5;
-    btnBack->settings().textColor = Qt::white;
-    btnBack->setFixedSize(200,28);
-    btnBack->setIconSize(QSize(14,14));
-    btnBack->setIcon(QIcon(":/images/unload.png"));
-    btnBack->setText("Back");
-    connect(btnBack, &FlatButton::clicked, [&]{ emit backClicked(); });
+//    btnBack->settings().topColor = "#38A3F6";
+//    btnBack->settings().bottomColor = btnBack->settings().topColor.darker(120);
+//    btnBack->settings().borderRadius = 7.5;
+//    btnBack->settings().textColor = Qt::white;
+//    btnBack->setFixedSize(200,28);
+//    btnBack->setIconSize(QSize(14,14));
+//    btnBack->setIcon(QIcon(":/images/unload.png"));
+//    btnBack->setText("Back");
+//    connect(btnBack, &FlarButton::clicked, [&]{ emit backClicked(); });
 }
 
 void ModuleSelectionWidget::handleBtnNextClicked()

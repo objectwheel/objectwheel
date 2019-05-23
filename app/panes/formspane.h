@@ -3,7 +3,7 @@
 
 #include <QTreeWidget>
 
-class FlatButton;
+class PushButton;
 class DesignerScene;
 
 class FormsPane : public QTreeWidget
@@ -29,8 +29,8 @@ private:
 
 private:
     DesignerScene* m_designerScene;
-    FlatButton* m_addButton;
-    FlatButton* m_removeButton;
+    PushButton* m_addButton;
+    PushButton* m_removeButton;
 };
 
 #endif // FORMSPANE_H

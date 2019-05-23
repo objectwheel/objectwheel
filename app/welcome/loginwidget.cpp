@@ -2,13 +2,14 @@
 #include <switch.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
-#include <flatbutton.h>
 #include <waitingspinnerwidget.h>
 #include <usermanager.h>
 #include <utilityfunctions.h>
 #include <saveutils.h>
 #include <servermanager.h>
 #include <applicationcore.h>
+#include <paintutils.h>
+#include <pushbutton.h>
 
 #include <QSettings>
 #include <QGridLayout>
@@ -24,7 +25,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
   , m_rememberMeSwitch(new Switch(this))
   , m_rememberMeLabel(new QLabel(this))
   , m_buttons(new ButtonSlice(this))
-  , m_helpButton(new FlatButton(this))
+  , m_helpButton(new PushButton(this))
   , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
   , m_legalLabel(new QLabel(this))
 {
@@ -69,9 +70,11 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
                           .arg(QDate::currentDate().year()).arg(APP_CORP));
 
-    m_helpButton->settings().iconButton = true;
-    m_helpButton->setIcon(QIcon(":/images/question.png"));
-    m_helpButton->setFixedSize(20,20);
+    m_helpButton->setIcon(PaintUtils::renderButtonIcon(":/images/question.png", m_helpButton));
+    m_helpButton->setFixedSize(18, 18);
+    m_helpButton->setIconSize({18, 18});
+    m_helpButton->setCursor(Qt::PointingHandCursor);
+    m_helpButton->setFlat(true);
 
     QPixmap p(":/images/logo.png");
     p.setDevicePixelRatio(devicePixelRatioF());
@@ -121,7 +124,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
             this, &LoginWidget::signup);
     connect(m_buttons->get(Login), &QPushButton::clicked,
             this, &LoginWidget::onLoginButtonClick);
-    connect(m_helpButton, &FlatButton::clicked, this, [=] {
+    connect(m_helpButton, &QPushButton::clicked, this, [=] {
         auto ret = UtilityFunctions::showMessage(
                     this, tr("Need help?"), tr("Do you want to reset your password?"),
                     QMessageBox::Question, QMessageBox::Reset | QMessageBox::Help |

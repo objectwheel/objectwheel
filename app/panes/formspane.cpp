@@ -1,5 +1,5 @@
 #include <formspane.h>
-#include <flatbutton.h>
+#include <pushbutton.h>
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <designerscene.h>
@@ -121,8 +121,8 @@ private:
 
 FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
-  , m_addButton(new FlatButton(this))
-  , m_removeButton(new FlatButton(this))
+  , m_addButton(new PushButton(this))
+  , m_removeButton(new PushButton(this))
 {
     initPalette(this);
 
@@ -169,25 +169,21 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
                 .arg(palette().brightText().color().name())
     );
 
-    m_addButton->settings().topColor = palette().brightText().color();
-    m_addButton->settings().bottomColor = palette().brightText().color().darker(108);
-    m_addButton->settings().borderRadius = 10;
+    m_removeButton->setCursor(Qt::PointingHandCursor);
     m_addButton->setToolTip(tr("Add new form to the project"));
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_addButton->setFixedSize(18, 18);
     m_addButton->setIconSize(QSize(12, 12));
     m_addButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/plus.png", palette().text().color(), this)));
-    connect(m_addButton, &FlatButton::clicked, this, &FormsPane::onAddButtonClick);
+    connect(m_addButton, &PushButton::clicked, this, &FormsPane::onAddButtonClick);
 
-    m_removeButton->settings().topColor = palette().brightText().color();
-    m_removeButton->settings().bottomColor = palette().brightText().color().darker(108);
-    m_removeButton->settings().borderRadius = 10;
+    m_removeButton->setCursor(Qt::PointingHandCursor);
     m_removeButton->setToolTip(tr("Remove selected form from the project"));
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_removeButton->setFixedSize(18, 18);
     m_removeButton->setIconSize(QSize(12, 12));
     m_removeButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/minus.png", palette().text().color(), this)));
-    connect(m_removeButton, &FlatButton::clicked, this, &FormsPane::onRemoveButtonClick);
+    connect(m_removeButton, &PushButton::clicked, this, &FormsPane::onRemoveButtonClick);
 
     /*
         NOTE: No need to catch any signals about form creation or deletion from ControlRemovingManager

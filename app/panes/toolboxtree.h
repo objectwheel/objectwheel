@@ -4,8 +4,6 @@
 #include <QTreeWidget>
 #include <QUrl>
 
-class FlatButton;
-
 class ToolboxTree : public QTreeWidget
 {
     Q_OBJECT
