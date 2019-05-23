@@ -27,7 +27,7 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
         }
     });
 
-    _searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#888888", _searchEdit)),
+    _searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", _searchEdit)),
                            QLineEdit::LeadingPosition);
     _searchEdit->setPlaceholderText(tr("Search"));
     _searchEdit->setClearButtonEnabled(true);

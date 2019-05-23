@@ -355,3 +355,29 @@ QPalette PaintUtils::defaultButtonPalette(bool lightTheme)
 
     return palette;
 }
+
+void PaintUtils::drawSearchEditBevel(QPainter* painter, const QStyleOption& option)
+{
+    painter->save();
+
+    // Draw outline
+    QPainterPath outlinePath;
+    outlinePath.addRoundedRect(option.rect, 4.0, 4.0);
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(QColor("#b1b1b1"));
+    painter->drawPath(outlinePath);
+
+    // Draw inline
+    QPainterPath inlinePath;
+    inlinePath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5), 3.5, 3.5);
+    painter->setBrush(QColor("#f0f0f0"));
+    painter->drawPath(inlinePath);
+
+    // Draw body
+    QPainterPath bodyPath;
+    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(1.0, 1.0, -1.0, -1.0), 3.0, 3.0);
+    painter->setBrush(QColor("#ffffff"));
+    painter->drawPath(bodyPath);
+
+    painter->restore();
+}

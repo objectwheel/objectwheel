@@ -35,6 +35,7 @@ QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const Q
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
 QPalette defaultButtonPalette(bool lightTheme = true);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);
+void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);
 }
 
 #endif // PAINTUTILS_H

@@ -101,7 +101,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_contentsLayout->setContentsMargins(5, 5, 5, 5);
     m_contentsLayout->addWidget(engine->contentWidget());
 
-    m_indexFilterEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#888888", m_indexFilterEdit)),
+    m_indexFilterEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_indexFilterEdit)),
                                  QLineEdit::LeadingPosition);
     m_indexFilterEdit->setPlaceholderText(tr("Search"));
     m_indexFilterEdit->setClearButtonEnabled(true);

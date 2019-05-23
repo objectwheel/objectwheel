@@ -8,9 +8,6 @@
 #include <QStylePainter>
 #include <QStyleOption>
 
-class FocuslessLineEditPrivate final : public QLineEditPrivate
-{ Q_DECLARE_PUBLIC(QLineEdit) };
-
 const int QLineEditPrivate::verticalMargin(1);
 const int QLineEditPrivate::horizontalMargin(2);
 
@@ -69,11 +66,9 @@ void FocuslessLineEdit::paintEvent(QPaintEvent*)
     // Draw background
     QStyleOptionFrame option;
     initStyleOption(&option);
-    option.state &= ~QStyle::State_Sunken;
-    option.state &= ~QStyle::State_On;
-    PaintUtils::drawPanelButtonBevel(&p, option);
+    PaintUtils::drawSearchEditBevel(&p, option);
 
-    // Draw text, selection and icon etc
+    // Draw text and selection
     QRect r = style()->subElementRect(QStyle::SE_LineEditContents, &option, this);
     r.setX(r.x() + d->effectiveLeftTextMargin());
     r.setY(r.y() + d->topTextMargin);
@@ -200,5 +195,10 @@ void FocuslessLineEdit::mousePressEvent(QMouseEvent* event)
 
 QSize FocuslessLineEdit::sizeHint() const
 {
-    return QSize(QLineEdit::sizeHint().width(), 24);
+    return QSize(QLineEdit::sizeHint().width(), 21);
+}
+
+QSize FocuslessLineEdit::minimumSizeHint() const
+{
+    return QSize(QLineEdit::minimumSizeHint().width(), 21);
 }
