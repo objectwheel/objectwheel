@@ -17,7 +17,7 @@
 
 #include <fileexplorer.h>
 #include <fileexplorer_p.h>
-#include <focuslesslineedit.h>
+#include <lineedit.h>
 #include <utilityfunctions.h>
 #include <transparentstyle.h>
 #include <utilsicons.h>
@@ -78,7 +78,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_droppingBlurEffect(new QGraphicsBlurEffect(this))
   , m_searchEditCompleterModel(new FileSearchModel(this))
   , m_searchEditCompleter(new QCompleter(this))
-  , m_searchEdit(new FocuslessLineEdit(this))
+  , m_searchEdit(new LineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
   , m_fileSystemProxyModel(new FileSystemProxyModel(this))
   , m_toolBar(new QToolBar(this))
@@ -255,7 +255,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
         m_fileSystemProxyModel->setDynamicSortFilter(false);
         m_fileSystemProxyModel->setDynamicSortFilter(true);
     });
-    connect(m_searchEdit, qOverload<>(&FocuslessLineEdit::editingFinished), this, &FileExplorer::filterList);
+    connect(m_searchEdit, qOverload<>(&LineEdit::editingFinished), this, &FileExplorer::filterList);
     connect(m_pathIndicator, &PathIndicator::pathUpdated, this, &FileExplorer::goToRelativePath);
 
     connect(this, &FileExplorer::doubleClicked,

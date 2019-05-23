@@ -1,8 +1,7 @@
 #include <toolboxpane.h>
 #include <toolmanager.h>
 #include <toolboxtree.h>
-#include <flatbutton.h>
-#include <focuslesslineedit.h>
+#include <lineedit.h>
 #include <mainwindow.h>
 #include <paintutils.h>
 
@@ -13,7 +12,7 @@
 ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
-    _searchEdit = new FocuslessLineEdit(this);
+    _searchEdit = new LineEdit(this);
     _toolboxTree = new ToolboxTree(this);
 
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
@@ -31,7 +30,7 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
                            QLineEdit::LeadingPosition);
     _searchEdit->setPlaceholderText(tr("Search"));
     _searchEdit->setClearButtonEnabled(true);
-    connect(_searchEdit, &FocuslessLineEdit::textChanged, this, &ToolboxPane::filterList);
+    connect(_searchEdit, &LineEdit::textChanged, this, &ToolboxPane::filterList);
 
     _layout->addWidget(_searchEdit);
     _layout->addWidget(_toolboxTree);

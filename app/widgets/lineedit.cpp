@@ -1,12 +1,7 @@
-#include <focuslesslineedit.h>
+#include <lineedit.h>
 #include <paintutils.h>
-
 #include <private/qlineedit_p.h>
-#include <private/qstylesheetstyle_p.h>
-
-#include <QFocusEvent>
 #include <QStylePainter>
-#include <QStyleOption>
 
 const int QLineEditPrivate::verticalMargin(1);
 const int QLineEditPrivate::horizontalMargin(2);
@@ -41,13 +36,13 @@ QLineEditPrivate::SideWidgetParameters QLineEditPrivate::sideWidgetParameters() 
     return result;
 }
 
-/* FocuslessLineEdit: This widget should never have initial focus
+/* LineEdit: This widget should never have initial focus
  * (ie, be the first widget of a dialog, else, the hint cannot be displayed.
  * As it is the only focusable control in the widget box, it clears the focus
  * policy and focusses explicitly on click only (note that setting Qt::ClickFocus
  * is not sufficient for that as an ActivationFocus will occur). */
 
-FocuslessLineEdit::FocuslessLineEdit(QWidget* parent) : QLineEdit(parent)
+LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent)
 {
     resize(sizeHint());
     setFocusPolicy(Qt::NoFocus);
@@ -55,7 +50,7 @@ FocuslessLineEdit::FocuslessLineEdit(QWidget* parent) : QLineEdit(parent)
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
 }
 
-void FocuslessLineEdit::paintEvent(QPaintEvent*)
+void LineEdit::paintEvent(QPaintEvent*)
 {
     Q_D(QLineEdit);
 
@@ -169,7 +164,7 @@ void FocuslessLineEdit::paintEvent(QPaintEvent*)
     d->control->draw(&p, topLeft, r, flags);
 }
 
-void FocuslessLineEdit::focusInEvent(QFocusEvent* event)
+void LineEdit::focusInEvent(QFocusEvent* event)
 {
     // Refuse the focus if the mouse it outside. In addition to the mouse
     // press logic, this prevents a re-focussing which occurs once
@@ -186,19 +181,19 @@ void FocuslessLineEdit::focusInEvent(QFocusEvent* event)
     QLineEdit::focusInEvent(event);
 }
 
-void FocuslessLineEdit::mousePressEvent(QMouseEvent* event)
+void LineEdit::mousePressEvent(QMouseEvent* event)
 {
     if (!hasFocus()) // Explicitly focus on click.
         setFocus(Qt::OtherFocusReason);
     QLineEdit::mousePressEvent(event);
 }
 
-QSize FocuslessLineEdit::sizeHint() const
+QSize LineEdit::sizeHint() const
 {
     return QSize(QLineEdit::sizeHint().width(), 21);
 }
 
-QSize FocuslessLineEdit::minimumSizeHint() const
+QSize LineEdit::minimumSizeHint() const
 {
     return QSize(QLineEdit::minimumSizeHint().width(), 21);
 }

@@ -1,5 +1,4 @@
 #include <toolboxtree.h>
-#include <flatbutton.h>
 #include <global.h>
 
 #include <QMimeData>

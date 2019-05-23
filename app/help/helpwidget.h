@@ -8,7 +8,7 @@ class QSplitter;
 class QComboBox;
 class QHelpEngine;
 class QVBoxLayout;
-class FocuslessLineEdit;
+class LineEdit;
 class QToolBar;
 class QToolButton;
 class QLabel;
@@ -53,7 +53,7 @@ private:
     QVBoxLayout* m_contentsLayout;
     QWidget* m_indexWidget;
     QVBoxLayout* m_indexLayout;
-    FocuslessLineEdit* m_indexFilterEdit;
+    LineEdit* m_indexFilterEdit;
 };
 
 #endif // HELPWIDGET_H

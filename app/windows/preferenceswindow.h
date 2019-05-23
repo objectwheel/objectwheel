@@ -7,7 +7,7 @@
 class QLabel;
 class QGridLayout;
 class QListWidget;
-class FocuslessLineEdit;
+class LineEdit;
 class QDialogButtonBox;
 class SettingsPage;
 
@@ -46,7 +46,7 @@ signals:
 private:
     QGridLayout* m_layout;
     QListWidget* m_listWidget;
-    FocuslessLineEdit* m_searchLineEdit;
+    LineEdit* m_searchLineEdit;
     QDialogButtonBox* m_dialogButtonBox;
 };
 

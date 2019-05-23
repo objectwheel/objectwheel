@@ -5,7 +5,7 @@
 
 class QVBoxLayout;
 class ToolboxTree;
-class FocuslessLineEdit;
+class LineEdit;
 class QTreeWidgetItem;
 class MainWindow;
 
@@ -33,7 +33,7 @@ signals:
 private:
     QVBoxLayout* _layout;
     ToolboxTree* _toolboxTree;
-    FocuslessLineEdit* _searchEdit;
+    LineEdit* _searchEdit;
 };
 
 #endif // TOOLBOXPANE_H

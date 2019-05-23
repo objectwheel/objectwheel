@@ -1,5 +1,5 @@
 #include <preferenceswindow.h>
-#include <focuslesslineedit.h>
+#include <lineedit.h>
 #include <generalsettingspage.h>
 #include <codeeditorsettingspage.h>
 #include <generalsettings.h>
@@ -34,7 +34,7 @@ SettingsPage* pageFromItem(QListWidgetItem* item)
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
   , m_layout(new QGridLayout(this))
   , m_listWidget(new QListWidget(this))
-  , m_searchLineEdit(new FocuslessLineEdit(this))
+  , m_searchLineEdit(new LineEdit(this))
   , m_dialogButtonBox(new QDialogButtonBox(this))
 {
     setWindowTitle(tr("Preferences"));
@@ -69,7 +69,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setPlaceholderText(tr("Search"));
     m_searchLineEdit->setClearButtonEnabled(true);
-    connect(m_searchLineEdit, &FocuslessLineEdit::textEdited,
+    connect(m_searchLineEdit, &LineEdit::textEdited,
             this, &PreferencesWindow::search);
 
     m_dialogButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Apply | QDialogButtonBox::Ok);

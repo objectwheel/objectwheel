@@ -5,7 +5,6 @@
 #include <usermanager.h>
 #include <saveutils.h>
 #include <projectswidget.h>
-#include <flatbutton.h>
 #include <mainwindow.h>
 #include <build.h>
 #include <zipasync.h>

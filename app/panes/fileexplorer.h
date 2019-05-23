@@ -3,7 +3,7 @@
 
 #include <QTreeView>
 
-class FocuslessLineEdit;
+class LineEdit;
 class QFileSystemModel;
 class QToolBar;
 class QToolButton;
@@ -72,7 +72,7 @@ private:
     QGraphicsBlurEffect* m_droppingBlurEffect;
     FileSearchModel* m_searchEditCompleterModel;
     QCompleter* m_searchEditCompleter;
-    FocuslessLineEdit* m_searchEdit;
+    LineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
     FileSystemProxyModel* m_fileSystemProxyModel;
     QToolBar* m_toolBar;

@@ -1,5 +1,5 @@
 #include <helpwidget.h>
-#include <focuslesslineedit.h>
+#include <lineedit.h>
 #include <transparentstyle.h>
 #include <utilsicons.h>
 #include <utilityfunctions.h>
@@ -39,7 +39,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_contentsLayout(new QVBoxLayout(m_contentsWidget))
   , m_indexWidget(new QWidget)
   , m_indexLayout(new QVBoxLayout(m_indexWidget))
-  , m_indexFilterEdit(new FocuslessLineEdit)
+  , m_indexFilterEdit(new LineEdit)
 {
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -118,9 +118,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
     connect(m_typeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &HelpWidget::onTypeChange);
-    connect(m_indexFilterEdit, &FocuslessLineEdit::textChanged,
+    connect(m_indexFilterEdit, &LineEdit::textChanged,
             this, &HelpWidget::onIndexFilterTextChange);
-    connect(m_indexFilterEdit, &FocuslessLineEdit::returnPressed,
+    connect(m_indexFilterEdit, &LineEdit::returnPressed,
             engine->indexWidget(), &QHelpIndexWidget::activateCurrentItem);
     connect(engine->contentWidget(), qOverload<const QUrl&>(&QHelpContentWidget::linkActivated),
             this, qOverload<const QUrl&>(&HelpWidget::onUrlChange));

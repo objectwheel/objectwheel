@@ -1,5 +1,5 @@
 #include <bulkedit.h>
-#include <focuslesslineedit.h>
+#include <lineedit.h>
 #include <QPainter>
 #include <QLineEdit>
 #include <QVBoxLayout>

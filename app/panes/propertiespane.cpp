@@ -1,5 +1,5 @@
 #include <propertiespane.h>
-#include <focuslesslineedit.h>
+#include <lineedit.h>
 #include <saveutils.h>
 #include <controlpropertymanager.h>
 #include <designerscene.h>
@@ -924,7 +924,7 @@ private:
 
 PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
-  , m_searchEdit(new FocuslessLineEdit(this))
+  , m_searchEdit(new LineEdit(this))
 {
     initPalette(this);
 
@@ -984,7 +984,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
                            QLineEdit::LeadingPosition);
     m_searchEdit->setPlaceholderText(tr("Search"));
     m_searchEdit->setClearButtonEnabled(true);
-    connect(m_searchEdit, &FocuslessLineEdit::textChanged, this, &PropertiesPane::filterList);
+    connect(m_searchEdit, &LineEdit::textChanged, this, &PropertiesPane::filterList);
 
     connect(verticalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
     {

@@ -3,7 +3,7 @@
 
 #include <QTreeWidget>
 
-class FocuslessLineEdit;
+class LineEdit;
 class DesignerScene;
 class Control;
 
@@ -36,7 +36,7 @@ private:
 
 public:
     DesignerScene* m_designerScene;
-    FocuslessLineEdit* m_searchEdit;
+    LineEdit* m_searchEdit;
 };
 
 #endif // PROPERTIESPANE_H

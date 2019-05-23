@@ -273,8 +273,8 @@ void FormsPane::refresh()
             selectionItem = item;
     }
 
-    Q_ASSERT(selectionItem);
-    selectionItem->setSelected(true);
+    if (selectionItem)
+        selectionItem->setSelected(true);
 
     blockSignals(false);
 }

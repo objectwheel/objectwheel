@@ -75,7 +75,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "PushButton");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunProgressBar");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunDevicesButton");
-    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "FocuslessLineEdit");
+    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "LineEdit");
 
     const QString fontPath = ":/fonts";
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
