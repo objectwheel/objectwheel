@@ -5,13 +5,14 @@
 
 class RunPane;
 class RunController;
+class ModeSelectorPane;
+class ModeSelectorController;
 class FormsPane;
 class ToolboxPane;
 class InspectorPane;
 class CentralWidget;
 class PropertiesPane;
 class GlobalResourcesPane;
-class ModeSelectorPane;
 
 class MainWindow : public QMainWindow
 {
@@ -55,12 +56,13 @@ private:
     CentralWidget* m_centralWidget;
     RunPane* m_runPane;
     RunController* m_runController;
+    ModeSelectorPane* m_modeSelectorPane;
+    ModeSelectorController* m_modeSelectorController;
     FormsPane* m_formsPane;
     ToolboxPane* m_toolboxPane;
     InspectorPane* m_inspectorPane;
     PropertiesPane* m_propertiesPane;
     GlobalResourcesPane* m_globalResourcesPane;
-    ModeSelectorPane* m_modeSelectorPane;
 };
 
 #endif // MAINWINDOW_H

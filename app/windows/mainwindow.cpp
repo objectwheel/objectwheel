@@ -1,12 +1,13 @@
 #include <mainwindow.h>
 #include <runpane.h>
 #include <runcontroller.h>
+#include <modeselectorpane.h>
+#include <modeselectorcontroller.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
 #include <globalresourcespane.h>
 #include <formspane.h>
 #include <inspectorpane.h>
-#include <modeselectorpane.h>
 #include <centralwidget.h>
 #include <windowmanager.h>
 #include <toolmanager.h>
@@ -77,12 +78,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
   , m_runPane(new RunPane(this))
   , m_runController(new RunController(m_runPane, this))
+  , m_modeSelectorPane(new ModeSelectorPane)
+  , m_modeSelectorController(new ModeSelectorController(m_modeSelectorPane, this))
   , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
   , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))
   , m_globalResourcesPane(new GlobalResourcesPane)
-  , m_modeSelectorPane(new ModeSelectorPane)
 {
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
@@ -355,13 +357,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 void MainWindow::discharge()
 {
     m_runController->discharge();
+    m_modeSelectorController->discharge();
     m_centralWidget->discharge();
     m_formsPane->discharge();
     m_toolboxPane->discharge();
     m_inspectorPane->discharge();
     m_propertiesPane->discharge();
     m_globalResourcesPane->discharge();
-//    FIXME m_modeSelectorPane->discharge();
 
     showLeftPanes(true);
     showRightPanes(true);

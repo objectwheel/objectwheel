@@ -16,7 +16,7 @@ public:
     QAction* splitAction() const;
     QAction* optionsAction() const;
     QAction* buildsAction() const;
-    QAction* helpAction() const;
+    QAction* documentsAction() const;
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;

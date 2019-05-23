@@ -1,50 +1,31 @@
-#ifndef MODESELECTORPANE_H
-#define MODESELECTORPANE_H
+#ifndef MODESELECTORCONTROLLER_H
+#define MODESELECTORCONTROLLER_H
 
-//#include <QToolBar>
+#include <modemanager.h>
 
-//class FlarButton;
-//class QVBoxLayout;
+class ModeSelectorPane;
+class ModeSelectorController final : public QObject
+{
+    Q_OBJECT
+    Q_DISABLE_COPY(ModeSelectorController)
 
-//class ModeSelectorPane final : public QToolBar
-//{
-//    Q_OBJECT
-//    Q_DISABLE_COPY(ModeSelectorPane)
+public:
+    explicit ModeSelectorController(ModeSelectorPane* m_modeSelectorPane, QObject* parent = nullptr);
 
-//public:
-//    explicit ModeSelectorPane(QWidget* parent = nullptr);
-//    Pages currentPage() const;
-//    bool isPageEnabled(const Pages& page) const;
+public slots:
+    void discharge();
 
-//public slots:
-//    void discharge();
-//    void setCurrentPage(const Pages& page);
-//    void setPageEnabled(const Pages& page);
-//    void setPageDisabled(const Pages& page);
+private slots:
+    void onModeChange(ModeManager::Mode mode);
+    void onDesignerActionTriggered(bool checked);
+    void onEditorActionTriggered(bool checked);
+    void onSplitActionTriggered(bool checked);
+    void onOptionsActionTriggered(bool checked);
+    void onBuildsActionTriggered(bool checked);
+    void onDocumentsActionTriggered(bool checked);
 
-//private slots:
-//    void updateColors();
+private:
+    ModeSelectorPane* m_modeSelectorPane;
+};
 
-//protected:
-//    void paintEvent(QPaintEvent* e) override;
-
-//signals:
-//    void buildsActivated();
-//    void designerActivated();
-//    void splitViewActivated();
-//    void helpActivated();
-//    void qmlCodeEditorActivated();
-//    void projectOptionsActivated();
-//    void currentPageChanged(const Pages& page);
-
-//private:
-//    QVBoxLayout* m_layout;
-//    FlarButton* m_qmlCodeEditorButton;
-//    FlarButton* m_designerButton;
-//    FlarButton* m_projectOptionsButton;
-//    FlarButton* m_buildsButton;
-//    FlarButton* m_helpButton;
-//    FlarButton* m_splitViewButton;
-//};
-
-#endif // MODESELECTORPANE_H
+#endif // MODESELECTORCONTROLLER_H

@@ -90,7 +90,7 @@ QAction* ModeSelectorPane::buildsAction() const
     return m_buildsAction;
 }
 
-QAction* ModeSelectorPane::helpAction() const
+QAction* ModeSelectorPane::documentsAction() const
 {
     return m_documentsAction;
 }

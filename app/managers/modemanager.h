@@ -14,7 +14,7 @@ public:
     enum Mode {
         Designer,
         Editor,
-        SplitView,
+        Split,
         Options,
         Builds,
         Documents
