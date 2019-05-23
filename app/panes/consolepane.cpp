@@ -34,7 +34,6 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     m_titleLabel->setText("   " + tr("Console Output") + "   ");
     m_titleLabel->setFixedHeight(20);
 
-    TransparentStyle::attach(m_toolBar);
     m_toolBar->addWidget(m_titleLabel);
     m_toolBar->addSeparator();
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({4, 4}));
@@ -45,6 +44,8 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     m_toolBar->addWidget(m_minimizeButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->setIconSize({14, 14});
+
+    TransparentStyle::attach(m_toolBar);
 
     m_clearButton->setFixedSize({18, 18});
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());

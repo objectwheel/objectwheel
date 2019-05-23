@@ -3,7 +3,7 @@
 
 #include <applicationstyle.h>
 
-class TransparentStyle : public ApplicationStyle
+class TransparentStyle final : public ApplicationStyle
 {
     Q_OBJECT
     Q_DISABLE_COPY(TransparentStyle)

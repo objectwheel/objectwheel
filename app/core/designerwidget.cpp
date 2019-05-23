@@ -133,7 +133,7 @@ bool warnIfFileDoesNotExist(const QString& filePath)
     return false;
 }
 }
-
+#include <QTimer>
 DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent) : QWidget(parent)
   , m_lastScale(1.0)
   , m_signalChooserDialog(new SignalChooserDialog(this))
@@ -152,6 +152,10 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
   , m_hideDockWidgetTitleBarsButton(new QToolButton)
   , m_zoomlLevelCombobox(new QComboBox)
 {
+    QTimer::singleShot(10000, [=] {
+        qDebug() << m_toolBar->style()->metaObject()->className() << m_toolBar->style();
+    });
+
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_toolBar);
@@ -226,8 +230,6 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     connect(m_refreshButton, &QToolButton::clicked, this, &DesignerWidget::onRefreshButtonClick);
     connect(m_clearButton, &QToolButton::clicked, this, &DesignerWidget::onClearButtonClick);
 
-    TransparentStyle::attach(m_toolBar);
-
     m_undoButton->setFixedHeight(20);
     m_redoButton->setFixedHeight(20);
     m_clearButton->setFixedHeight(20);
@@ -257,6 +259,8 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolBar->addWidget(m_hideDockWidgetTitleBarsButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
+
+    TransparentStyle::attach(m_toolBar);
 }
 
 void DesignerWidget::scaleScene(qreal ratio)

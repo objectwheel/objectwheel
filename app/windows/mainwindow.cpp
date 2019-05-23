@@ -89,7 +89,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
     setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-//    setStyleSheet("QMainWindow::separator{ height: 1px; }");
 #if defined(Q_OS_MACOS)
     WindowOperations::removeTitleBar(this);
 #endif

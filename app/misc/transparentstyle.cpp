@@ -29,7 +29,7 @@ QColor outlineColor(const QPalette &pal)
 QRectF comboboxEditBounds(const QRectF& outerBounds);
 QRectF adjustedControlFrame(const QRectF& rect);
 
-TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent)
+TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent) : ApplicationStyle()
 {
     setParent(parent);
 }

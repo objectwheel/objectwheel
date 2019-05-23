@@ -197,9 +197,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     connect(m_modeComboBox, qOverload<const QString&>(&QComboBox::activated),
             this, &FileExplorer::onModeChange);
 
-    TransparentStyle::attach(m_toolBar);
-    TransparentStyle::attach(m_pathIndicator);
-
     m_upButton->setFixedHeight(20);
     m_backButton->setFixedHeight(20);
     m_forthButton->setFixedHeight(20);
@@ -232,6 +229,9 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_toolBar->addWidget(m_newFileButton);
     m_toolBar->addWidget(m_newFolderButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
+
+    TransparentStyle::attach(m_toolBar);
+    TransparentStyle::attach(m_pathIndicator);
 
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
     m_fileSystemProxyModel->setDynamicSortFilter(true);

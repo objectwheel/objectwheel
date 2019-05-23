@@ -18,7 +18,6 @@
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <bottombar.h>
-#include <transparentstyle.h>
 #include <consolepane.h>
 #include <controlpropertymanager.h>
 
@@ -61,7 +60,6 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->addWidget(m_issuesPane);
     m_splitterOut->addWidget(m_bottomBar);
     m_splitterOut->setChildrenCollapsible(false);
-
     m_splitterOut->handle(3)->setDisabled(true);
 
     m_bottomBar->setFixedHeight(24);

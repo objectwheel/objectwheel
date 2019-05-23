@@ -71,6 +71,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
 
     QApplication::setPalette(palette());
+//    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "ModeSelectorPane");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "PushButton");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunProgressBar");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunDevicesButton");

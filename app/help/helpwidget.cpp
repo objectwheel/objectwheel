@@ -46,8 +46,6 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_splitter);
 
-    TransparentStyle::attach(m_toolBar);
-
     m_homeButton->setFixedHeight(20);
     m_backButton->setFixedHeight(20);
     m_forthButton->setFixedHeight(20);
@@ -112,6 +110,8 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_indexLayout->setContentsMargins(5, 5, 5, 5);
     m_indexLayout->addWidget(m_indexFilterEdit);
     m_indexLayout->addWidget(engine->indexWidget());
+
+    TransparentStyle::attach(m_toolBar);
 
     engine->indexWidget()->installEventFilter(this);
     engine->contentWidget()->viewport()->installEventFilter(this);

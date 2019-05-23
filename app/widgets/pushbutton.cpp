@@ -13,7 +13,7 @@ QSize PushButton::sizeHint() const
 {
     return QSize(QPushButton::sizeHint().width(), 24);
 }
-#include <QDebug>
+
 void PushButton::paintEvent(QPaintEvent*)
 {
     QStylePainter painter(this);
@@ -24,7 +24,6 @@ void PushButton::paintEvent(QPaintEvent*)
     initStyleOption(&option);
     PaintUtils::drawPanelButtonBevel(&painter, option);
 
-    qDebug() << style() << style()->objectName() << style()->metaObject()->className();
     // Draw label
     option.rect = style()->subElementRect(QStyle::SE_PushButtonContents, &option, this);
     painter.drawControl(QStyle::CE_PushButtonLabel, option);

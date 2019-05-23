@@ -29,9 +29,9 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
     QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_welcomeWindow, &WelcomeWindow::hide);
     QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_mainWindow, &MainWindow::show);
 
-    s_aboutWindow->setGeometry(QStyle::alignedRect(
-                                   Qt::LeftToRight, Qt::AlignCenter, s_aboutWindow->sizeHint(),
-                                   qApp->primaryScreen()->availableGeometry()));
+    s_aboutWindow->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
+                                                   s_aboutWindow->sizeHint(),
+                                                   qApp->primaryScreen()->availableGeometry()));
 }
 
 WindowManager::~WindowManager()

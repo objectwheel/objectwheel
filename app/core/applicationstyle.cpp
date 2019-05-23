@@ -298,6 +298,8 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 4;
     case PM_MenuScrollerHeight:
         return 15;
+    case PM_DockWidgetSeparatorExtent:
+        return 1;
     default:
         return QFusionStyle::pixelMetric(metric, option, widget);
     }
