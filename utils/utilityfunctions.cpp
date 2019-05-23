@@ -324,9 +324,9 @@ QString increasedNumberedText(const QString& text, bool addSpace, bool trim)
 
 QString toPrettyBytesString(qint64 bytes)
 {
-    #define KB 1024.0
-    #define MB 1048576.0
-    #define GB 1073741824.0
+#define KB 1024.0
+#define MB 1048576.0
+#define GB 1073741824.0
 
     QString ret;
     if (bytes < KB) {
@@ -343,6 +343,13 @@ QString toPrettyBytesString(qint64 bytes)
         ret += QStringLiteral(" Gb");
     }
     return ret;
+}
+
+QString toModeToolTip(const QString& mode)
+{
+    return QStringLiteral(QT_TR_NOOP(
+                              R"(<span style="font-size:12px">Switch to <b>%2</b> mode</span>)"
+                              )).arg(mode);
 }
 
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
@@ -467,24 +474,24 @@ QString deviceName(const QVariantMap& deviceInfo)
 QString deviceInfoToolTip(const QVariantMap& deviceInfo)
 {
     return QString(
-    R"(
-      <html><body><table>
-        <tr style='white-space:pre'><th><img src=":/images/info.png" width="16"/></th><th>%1</th><th></th></tr>
-        <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
-        <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
-        <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>
-        <tr style='white-space:pre'><td></td><td>%8</td><td>: %9</td></tr>
-        <tr style='white-space:pre'><td></td><td>%10</td><td>: %11</td></tr>
-        <tr style='white-space:pre'><td></td><td>%12</td><td>: %13</td></tr>
-      </table></body></html>
-    )")
-    .arg(QObject::tr("Device Information"))
-    .arg(QObject::tr("Name")).arg(deviceName(deviceInfo))
-    .arg(QObject::tr("Unique ID")).arg(deviceInfo["deviceUid"].toString())
-    .arg(QObject::tr("Operating System")).arg(deviceInfo["prettyProductName"].toString())
-    .arg(QObject::tr("Kernel Type")).arg(deviceInfo["kernelType"].toString())
-    .arg(QObject::tr("Kernel Version")).arg(deviceInfo["kernelVersion"].toString())
-    .arg(QObject::tr("Cpu Architecture")).arg(deviceInfo["currentCpuArchitecture"].toString());
+                R"(
+                <html><body><table>
+                <tr style='white-space:pre'><th><img src=":/images/info.png" width="16"/></th><th>%1</th><th></th></tr>
+                <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
+                <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
+                <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>
+                <tr style='white-space:pre'><td></td><td>%8</td><td>: %9</td></tr>
+                <tr style='white-space:pre'><td></td><td>%10</td><td>: %11</td></tr>
+                <tr style='white-space:pre'><td></td><td>%12</td><td>: %13</td></tr>
+                </table></body></html>
+                )")
+            .arg(QObject::tr("Device Information"))
+            .arg(QObject::tr("Name")).arg(deviceName(deviceInfo))
+            .arg(QObject::tr("Unique ID")).arg(deviceInfo["deviceUid"].toString())
+            .arg(QObject::tr("Operating System")).arg(deviceInfo["prettyProductName"].toString())
+            .arg(QObject::tr("Kernel Type")).arg(deviceInfo["kernelType"].toString())
+            .arg(QObject::tr("Kernel Version")).arg(deviceInfo["kernelVersion"].toString())
+            .arg(QObject::tr("Cpu Architecture")).arg(deviceInfo["currentCpuArchitecture"].toString());
 }
 
 QString deviceUid(const QAction* action)

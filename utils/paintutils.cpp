@@ -132,6 +132,23 @@ QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QWidget* widge
     return icon;
 }
 
+QIcon PaintUtils::renderToolButtonIcon(const QString& fileName, const QWidget* widget)
+{
+    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+    QFileInfo fileInfo(fileName);
+    QPixmap off, on;
+
+    off.load(fileName);
+    on.load(fileInfo.path() + '/' + fileInfo.baseName() + "-active." + fileInfo.suffix());
+    off.setDevicePixelRatio(dpr);
+    on.setDevicePixelRatio(dpr);
+
+    QIcon icon;
+    icon.addPixmap(off, QIcon::Normal, QIcon::Off);
+    icon.addPixmap(on, QIcon::Normal, QIcon::On);
+    return icon;
+}
+
 QIcon PaintUtils::renderOverlaidButtonIcon(const QString& fileName, const QWidget* widget)
 {
     QIcon icon;

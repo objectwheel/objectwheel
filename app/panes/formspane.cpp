@@ -169,7 +169,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
                 .arg(palette().brightText().color().name())
     );
 
-    m_removeButton->setCursor(Qt::PointingHandCursor);
+    m_addButton->setCursor(Qt::PointingHandCursor);
     m_addButton->setToolTip(tr("Add new form to the project"));
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_addButton->setFixedSize(18, 18);

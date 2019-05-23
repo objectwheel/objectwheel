@@ -28,6 +28,7 @@
 #include <components.h>
 #include <paintutils.h>
 #include <servermanager.h>
+#include <modemanager.h>
 
 #include <QStandardPaths>
 #include <QSettings>
@@ -43,6 +44,7 @@
 QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
+ModeManager* ApplicationCore::s_modeManager = nullptr;
 GlobalResources* ApplicationCore::s_globalResources = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
 RegistrationApiManager* ApplicationCore::s_accountManager = nullptr;
@@ -71,7 +73,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
 
     QApplication::setPalette(palette());
-//    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "ModeSelectorPane");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "PushButton");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunProgressBar");
     QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunDevicesButton");
@@ -101,6 +102,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     SplashScreen splashScreen;
     Q_UNUSED(splashScreen);
 
+    s_modeManager = new ModeManager(app);
     s_serverManager = new ServerManager(QUrl(APP_WSSSERVER), app);
     s_accountManager = new RegistrationApiManager(app);
     s_userManager = new UserManager(app);

@@ -316,9 +316,9 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->drawLine(option->rect.topLeft(), option->rect.topRight());
         painter->restore();
     } break;
-    case PE_PanelTipLabel:
+    case PE_PanelTipLabel: {
         painter->fillRect(option->rect, option->palette.brush(QPalette::ToolTipBase));
-        break;
+    } break;
     case PE_PanelMenu: {
         painter->save();
         painter->setPen("#b0b0b0");
@@ -338,6 +338,27 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->setPen(pc);
         painter->setFont(QFont());
         painter->drawText(option->rect.adjusted(-2, 1, -2, 1), "\u2713", QTextOption(Qt::AlignCenter));
+        painter->restore();
+    } break;
+    case PE_PanelButtonTool: {
+        painter->save();
+        if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
+            if (widget && widget->inherits("QDockWidgetTitleButton")) {
+                if (option->state & State_MouseOver)
+                    proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);
+            } else {
+                painter->setRenderHint(QPainter::Antialiasing);
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(Qt::NoBrush);
+                if (option->state & State_Sunken)
+                    painter->setBrush(QColor("#80000000"));
+                else if (option->state & State_On)
+                    painter->setBrush(QColor("#60000000"));
+                else if (option->state & State_MouseOver)
+                    painter->setBrush(QColor("#20000000"));
+                painter->drawRoundedRect(option->rect, 6, 6);
+            }
+        }
         painter->restore();
     } break;
     default:
@@ -551,15 +572,15 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
             QStyleOptionToolButton copy(*toolbutton);
             if (copy.state & State_On || copy.state & State_Sunken)
-                copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
+                copy.palette.setColor(QPalette::ButtonText, Qt::white);
 
             QRect rect = copy.rect;
-            int shiftX = 0;
+            int shiftX = copy.text.isEmpty() ? 0 : 5;
             int shiftY = 0;
-            if (copy.state & (State_Sunken | State_On)) {
-                shiftX = proxy()->pixelMetric(PM_ButtonShiftHorizontal, &copy, widget);
-                shiftY = proxy()->pixelMetric(PM_ButtonShiftVertical, &copy, widget);
-            }
+//            if (copy.state & (State_Sunken | State_On)) {
+//                shiftX = proxy()->pixelMetric(PM_ButtonShiftHorizontal, &copy, widget);
+//                shiftY = proxy()->pixelMetric(PM_ButtonShiftVertical, &copy, widget);
+//            }
             // Arrow type always overrules and is always shown
             bool hasArrow = copy.features & QStyleOptionToolButton::Arrow;
             if (((!hasArrow && copy.icon.isNull()) && !copy.text.isEmpty())
@@ -588,7 +609,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     else
                         mode = QIcon::Normal;
                     pm = copy.icon.pixmap(qt_getWindow(widget), copy.rect.size().boundedTo(copy.iconSize),
-                                                 mode, state);
+                                          mode, state);
                     pmSize = pm.size() / pm.devicePixelRatio();
                 }
                 if (copy.toolButtonStyle != Qt::ToolButtonIconOnly) {

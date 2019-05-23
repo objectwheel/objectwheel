@@ -166,5 +166,5 @@ void RunPane::paintEvent(QPaintEvent*)
                      QRectF(rect()).bottomRight() - QPointF(0, 0.5));
     painter.setPen("#b2b2b2");
     painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
-
+    // FIXME: hardcoded, what happens if it is vertical toolbar?
 }

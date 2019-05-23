@@ -100,7 +100,6 @@ public:
     static void sendExecute(const QString& uid, const QString& projectDirectory);
     static void scheduleUploadCancelation();
 
-
 private slots:
     void onNewConnection();
     void onDisconnected();
