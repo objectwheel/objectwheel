@@ -50,9 +50,9 @@ QToolBar { \
     border-bottom: 1px solid #c4c4c4;\
     border-right: 1px solid #c4c4c4;\
     border-left: 3px solid #0D74C8;\
-    margin: 0px;\
-    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #ffffff, stop:1 #e3e3e3); \
-    spacing: 5px; \
+margin: 0px;\
+background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #ffffff, stop:1 #e3e3e3); \
+spacing: 5px; \
 }"
 
 namespace {
@@ -269,34 +269,22 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             this, &MainWindow::showLeftPanes);
     connect(m_centralWidget->bottomBar(), &BottomBar::showHideRightPanesButtonActivated,
             this, &MainWindow::showRightPanes);
-//  FIXME  connect(m_modeSelectorPane, &ModeSelectorPane::buildsActivated,
-//            this, &MainWindow::hideDocks);
-//    connect(m_modeSelectorPane, &ModeSelectorPane::designerActivated,
-//            this, &MainWindow::restoreDocks);
-//    connect(m_modeSelectorPane, &ModeSelectorPane::splitViewActivated,
-//            this, &MainWindow::restoreDocks);
-//    connect(m_modeSelectorPane, &ModeSelectorPane::helpActivated,
-//            this, &MainWindow::hideDocks);
-//    connect(m_modeSelectorPane, &ModeSelectorPane::qmlCodeEditorActivated,
-//            this, &MainWindow::hideDocks);
-//    connect(m_modeSelectorPane, &ModeSelectorPane::projectOptionsActivated,
-//            this, &MainWindow::hideDocks);
-//    connect(m_modeSelectorPane, &ModeSelectorPane::currentPageChanged,
-//            m_centralWidget, &CentralWidget::setCurrentPage);
+    connect(ModeManager::instance(), &ModeManager::modeChanged,
+            this, &MainWindow::onModeChange);
     connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
             m_centralWidget->designerWidget(), &DesignerWidget::onControlSelectionChange);
     connect(m_inspectorPane, &InspectorPane::controlDoubleClicked,
             m_centralWidget->designerWidget(), &DesignerWidget::onInspectorItemDoubleClick);
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
-//        if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
-//                && m_modeSelectorPane->currentPage() != Page_SplitView) {
-//            m_modeSelectorPane->setCurrentPage(Page_Designer);
-//        }
-//        if (m_centralWidget->qmlCodeEditorWidget()->count() > 0
-//                && m_modeSelectorPane->currentPage() != Page_QmlCodeEditor) {
-//            m_modeSelectorPane->setCurrentPage(Page_SplitView);
-//        }
+        if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
+                && ModeManager::mode() != ModeManager::Split) {
+            ModeManager::setMode(ModeManager::Designer);
+        }
+        if (m_centralWidget->qmlCodeEditorWidget()->count() > 0
+                && ModeManager::mode() != ModeManager::Editor) {
+            ModeManager::setMode(ModeManager::Split);
+        }
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { m_globalResourcesPane->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
@@ -351,7 +339,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
 
     discharge();
-    //resetState = saveState();    
+    //resetState = saveState();
 }
 
 void MainWindow::discharge()
@@ -481,6 +469,24 @@ void MainWindow::restoreDocks()
     formsDockWidget->setVisible(formsDockWidgetVisible);
     inspectorDockWidget->setVisible(inspectorDockWidgetVisible);
     toolboxDockWidget->setVisible(toolboxDockWidgetVisible);
+}
+
+void MainWindow::onModeChange(ModeManager::Mode mode)
+{
+    switch (mode) {
+    case ModeManager::Builds:
+    case ModeManager::Documents:
+    case ModeManager::Editor:
+    case ModeManager::Options:
+        hideDocks();
+        break;
+    case ModeManager::Designer:
+    case ModeManager::Split:
+        restoreDocks();
+        break;
+    default:
+        break;
+    }
 }
 
 CentralWidget* MainWindow::centralWidget() const

@@ -5,7 +5,7 @@
 ModeSelectorController::ModeSelectorController(ModeSelectorPane* modeSelectorPane, QObject* parent) : QObject(parent)
   , m_modeSelectorPane(modeSelectorPane)
 {
-    m_modeSelectorPane->designerAction()->setChecked(true);
+    onModeChange(ModeManager::mode());
 
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &ModeSelectorController::discharge);

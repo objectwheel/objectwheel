@@ -86,6 +86,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterIn->addWidget(m_helpWidget);
     m_splitterIn->setChildrenCollapsible(false);
 
+    onModeChange(ModeManager::mode());
+
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
             this, [=] (Control* control, int codeChanged) {
         if (codeChanged)
@@ -184,15 +186,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
         Delayer::delay(3000);
         m_designerWidget->refresh();
     });
-
-    //   FIXME
-    hideWidgets();
-    m_bottomBar->show();
-    if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-        m_consolePane->show();
-    if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-        m_issuesPane->show();
-    m_designerWidget->show();
+    connect(ModeManager::instance(), &ModeManager::modeChanged,
+            this, &CentralWidget::onModeChange);
 }
 
 DesignerWidget* CentralWidget::designerWidget() const
@@ -217,7 +212,6 @@ ConsolePane* CentralWidget::consolePane() const
 
 void CentralWidget::discharge()
 {
-//    setCurrentPage(Page_Designer);
     m_consolePane->hide();
     m_issuesPane->hide();
     m_bottomBar->discharge();
@@ -230,47 +224,6 @@ void CentralWidget::discharge()
     m_helpWidget->discharge();
 }
 
-// FIXME void CentralWidget::setCurrentPage(const Pages& page)
-//{
-//    hideWidgets();
-
-//    switch (page) {
-//    case Page_Builds:
-//        return m_buildsWidget->show();
-
-//    case Page_Designer:
-//        m_bottomBar->show();
-//        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-//            m_consolePane->show();
-//        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-//            m_issuesPane->show();
-//        return m_designerWidget->show();
-
-//    case Page_SplitView:
-//        m_bottomBar->show();
-//        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-//            m_consolePane->show();
-//        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-//            m_issuesPane->show();
-//        m_designerWidget->show();
-//        return g_editorContainer->show();
-
-//    case Page_Help:
-//        return m_helpWidget->show();
-
-//    case Page_QmlCodeEditor:
-//        m_bottomBar->show();
-//        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-//            m_consolePane->show();
-//        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-//            m_issuesPane->show();
-//        return g_editorContainer->show();
-
-//    case Page_ProjectOptions:
-//        return m_projectOptionsWidget->show();
-//    }
-//}
-
 void CentralWidget::hideWidgets()
 {
     m_bottomBar->hide();
@@ -281,6 +234,56 @@ void CentralWidget::hideWidgets()
     m_projectOptionsWidget->hide();
     m_buildsWidget->hide();
     m_helpWidget->hide();
+}
+
+void CentralWidget::onModeChange(ModeManager::Mode mode)
+{
+    hideWidgets();
+
+    switch (mode) {
+    case ModeManager::Designer:
+        m_bottomBar->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+            m_consolePane->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+            m_issuesPane->show();
+        m_designerWidget->show();
+        break;
+
+    case ModeManager::Editor:
+        m_bottomBar->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+            m_consolePane->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+            m_issuesPane->show();
+        g_editorContainer->show();
+        break;
+
+    case ModeManager::Split:
+        m_bottomBar->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
+            m_consolePane->show();
+        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+            m_issuesPane->show();
+        m_designerWidget->show();
+        g_editorContainer->show();
+        break;
+
+    case ModeManager::Options:
+        m_projectOptionsWidget->show();
+        break;
+
+    case ModeManager::Builds:
+        m_buildsWidget->show();
+        break;
+
+    case ModeManager::Documents:
+        m_helpWidget->show();
+        break;
+
+    default:
+        break;
+    }
 }
 
 QmlCodeEditorWidget* CentralWidget::qmlCodeEditorWidget() const

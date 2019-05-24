@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <modemanager.h>
 #include <QMainWindow>
 
 class RunPane;
@@ -38,6 +39,7 @@ private slots:
     void hideDocks();
     void showDocks();
     void restoreDocks();
+    void onModeChange(ModeManager::Mode mode);
 
 protected:
     QSize sizeHint() const override;
