@@ -28,13 +28,11 @@ QIcon renderOverlaidIcon(const QIcon& icon, const QSize& size, const QColor& col
 QIcon renderButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QIcon renderToolButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QIcon renderOverlaidButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
-QIcon renderMaskedButtonIcon(const QString& fileName, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderOverlaidPixmapFromData(const QByteArray& data, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
-QPalette defaultButtonPalette(bool lightTheme = true);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);
 void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);
 }

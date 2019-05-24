@@ -71,8 +71,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
                           .arg(QDate::currentDate().year()).arg(APP_CORP));
 
     m_helpButton->setIcon(PaintUtils::renderButtonIcon(":/images/question.png", m_helpButton));
-    m_helpButton->setFixedSize(18, 18);
-    m_helpButton->setIconSize({18, 18});
+    m_helpButton->setFixedSize(20, 20);
+    m_helpButton->setIconSize({20, 20});
     m_helpButton->setCursor(Qt::PointingHandCursor);
     m_helpButton->setFlat(true);
 

@@ -356,7 +356,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                     painter->setBrush(QColor("#60000000"));
                 else if (option->state & State_MouseOver)
                     painter->setBrush(QColor("#20000000"));
-                painter->drawRoundedRect(option->rect, 6, 6);
+                painter->drawRoundedRect(QRectF(option->rect).adjusted(0.5, 0.5, -0.5, -0.5), 6, 6);
             }
         }
         painter->restore();

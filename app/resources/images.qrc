@@ -90,5 +90,7 @@
         <file>images/modes/editor-active.svg</file>
         <file>images/modes/options-active.svg</file>
         <file>images/modes/split-active.svg</file>
+        <file>images/stop.svg</file>
+        <file>images/run.svg</file>
     </qresource>
 </RCC>

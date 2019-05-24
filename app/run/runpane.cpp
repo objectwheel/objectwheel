@@ -32,22 +32,22 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
 
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
-    m_runButton->setFixedWidth(39);
+    m_runButton->setFixedWidth(38);
     m_runButton->setIconSize({16, 16});
 
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setToolTip(tr("Stop"));
-    m_stopButton->setFixedWidth(39);
+    m_stopButton->setFixedWidth(38);
     m_stopButton->setIconSize({16, 16});
 
     m_preferencesButton->setCursor(Qt::PointingHandCursor);
     m_preferencesButton->setToolTip(tr("Show Preferences"));
-    m_preferencesButton->setFixedWidth(39);
+    m_preferencesButton->setFixedWidth(38);
     m_preferencesButton->setIconSize({16, 16});
 
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
-    m_projectsButton->setFixedWidth(39);
+    m_projectsButton->setFixedWidth(38);
     m_projectsButton->setIconSize({16, 16});
 
     int baseSize = 0;
@@ -115,9 +115,9 @@ QSize RunPane::minimumSizeHint() const
 void RunPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_runDevicesButton->setIcon(renderButtonIcon(":/images/devices.png", m_runDevicesButton));
-    m_runButton->setIcon(renderMaskedButtonIcon(":/utils/images/run_small@2x.png", m_runButton));
-    m_stopButton->setIcon(renderMaskedButtonIcon(":/utils/images/stop_small@2x.png", m_stopButton));
+    m_runDevicesButton->setIcon(renderButtonIcon(":/images/devices.png", this));
+    m_runButton->setIcon(renderOverlaidButtonIcon(":/images/run.svg", m_runButton));
+    m_stopButton->setIcon(renderOverlaidButtonIcon(":/images/stop.svg", m_stopButton));
     m_preferencesButton->setIcon(renderOverlaidButtonIcon(":/images/settings.svg", m_preferencesButton));
     m_projectsButton->setIcon(renderOverlaidButtonIcon(":/images/projects.svg", m_projectsButton));
 }

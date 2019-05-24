@@ -105,7 +105,7 @@ QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem &opt, const QModelInd
 
 ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
 {
-    setIconSize({22, 22});
+    setIconSize({20, 20});
     setFocusPolicy(Qt::NoFocus);
     setIndentation(0);
     setRootIsDecorated(false);

@@ -71,12 +71,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
-
     QApplication::setPalette(palette());
-    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "PushButton");
-    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunProgressBar");
-    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "RunDevicesButton");
-    QApplication::setPalette(PaintUtils::defaultButtonPalette(), "LineEdit");
 
     const QString fontPath = ":/fonts";
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
@@ -190,56 +185,32 @@ void ApplicationCore::prepare(const char* filePath)
 
 QPalette ApplicationCore::palette()
 {
-    const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
+//    const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
+    //  FIXME  QSettings settings(settingsPath, QSettings::IniFormat);
+    //    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light")
     QPalette palette(QApplication::palette());
-    QSettings settings(settingsPath, QSettings::IniFormat);
-    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light") {
-        palette.setColor(QPalette::Active, QPalette::Text, "#272727");
-        palette.setColor(QPalette::Inactive, QPalette::Text, "#272727");
-        palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
-        palette.setColor(QPalette::Active, QPalette::WindowText, "#272727");
-        palette.setColor(QPalette::Inactive, QPalette::WindowText, "#272727");
-        palette.setColor(QPalette::Disabled, QPalette::WindowText, "#6f7e8c");
-        palette.setColor(QPalette::Active, QPalette::ButtonText, "#272727");
-        palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#272727");
-        palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#6f7e8c");
-        palette.setColor(QPalette::Active, QPalette::PlaceholderText, "#bfbfbf");
-        palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#bfbfbf");
-        palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, "#bfbfbf");
-        palette.setColor(QPalette::Base, "#ffffff");
-        palette.setColor(QPalette::Button, "#f0f0f0");
-        palette.setColor(QPalette::Window, "#f0f0f0");
-        palette.setColor(QPalette::Highlight, "#1C77D5");
-        palette.setColor(QPalette::BrightText, "#ffffff");
-        palette.setColor(QPalette::HighlightedText, "#ffffff");
-        palette.setColor(QPalette::ToolTipText, "#272727");
-        palette.setColor(QPalette::ToolTipBase, "#f0f0f0");
-        palette.setColor(QPalette::Link, "#025dbf");
-        palette.setColor(QPalette::LinkVisited, "#B44B46");
-    } else {
-        palette.setColor(QPalette::Active, QPalette::Text, "#e5e5e5");
-        palette.setColor(QPalette::Inactive, QPalette::Text, "#e5e5e5");
-        palette.setColor(QPalette::Disabled, QPalette::Text, "#e5e5e5");
-        palette.setColor(QPalette::Active, QPalette::WindowText, "#e5e5e5");
-        palette.setColor(QPalette::Inactive, QPalette::WindowText, "#e5e5e5");
-        palette.setColor(QPalette::Disabled, QPalette::WindowText, "#b0b0b0");
-        palette.setColor(QPalette::Active, QPalette::ButtonText, "#e5e5e5");
-        palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#e5e5e5");
-        palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#b0b0b0");
-        palette.setColor(QPalette::Active, QPalette::PlaceholderText, "#666666");
-        palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#666666");
-        palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, "#666666");
-        palette.setColor(QPalette::Base, "#444e57");
-        palette.setColor(QPalette::Button, "#444e57");
-        palette.setColor(QPalette::Window, "#2F363C");
-        palette.setColor(QPalette::Highlight, "#1C77D5");
-        palette.setColor(QPalette::BrightText, "#e5e5e5");
-        palette.setColor(QPalette::HighlightedText, "#e5e5e5");
-        palette.setColor(QPalette::ToolTipText, "#e5e5e5");
-        palette.setColor(QPalette::ToolTipBase, "#2F363C");
-        palette.setColor(QPalette::Link, "#025dbf");
-        palette.setColor(QPalette::LinkVisited, "#B44B46");
-    }
+    palette.setColor(QPalette::Active, QPalette::Text, "#2f2f2f");
+    palette.setColor(QPalette::Inactive, QPalette::Text, "#2f2f2f");
+    palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
+    palette.setColor(QPalette::Active, QPalette::WindowText, "#2f2f2f");
+    palette.setColor(QPalette::Inactive, QPalette::WindowText, "#2f2f2f");
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, "#6f7e8c");
+    palette.setColor(QPalette::Active, QPalette::ButtonText, "#505050");
+    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#505050");
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#6f7e8c");
+    palette.setColor(QPalette::Active, QPalette::PlaceholderText, "#bfbfbf");
+    palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#bfbfbf");
+    palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, "#bfbfbf");
+    palette.setColor(QPalette::Base, "#ffffff");
+    palette.setColor(QPalette::Button, "#f0f0f0");
+    palette.setColor(QPalette::Window, "#f0f0f0");
+    palette.setColor(QPalette::Highlight, "#1C77D5");
+    palette.setColor(QPalette::BrightText, "#ffffff");
+    palette.setColor(QPalette::HighlightedText, "#ffffff");
+    palette.setColor(QPalette::ToolTipText, "#2f2f2f");
+    palette.setColor(QPalette::ToolTipBase, "#f0f0f0");
+    palette.setColor(QPalette::Link, "#025dbf");
+    palette.setColor(QPalette::LinkVisited, "#B44B46");
     return palette;
 }
 
