@@ -84,7 +84,7 @@ QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view);
 QPoint centerPos(const QSize& size);
 QString increasedNumberedText(const QString& text, bool addSpace, bool trim);
 QString toPrettyBytesString(qint64 bytes);
-QString toModeToolTip(const QString& mode);
+QString toToolTip(const QString& str);
 bool comboContainsWord(QComboBox* comboBox, const QString& word);
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties);
 QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties);

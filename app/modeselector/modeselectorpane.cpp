@@ -26,27 +26,27 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     using namespace UtilityFunctions;
     m_designerAction->setCheckable(true);
     m_designerAction->setText(tr("Designer"));
-    m_designerAction->setToolTip(toModeToolTip(tr("Designer")));
+    m_designerAction->setToolTip(toToolTip(tr("Switch to <b>Designer</b>")));
 
     m_editorAction->setCheckable(true);
     m_editorAction->setText(tr("Code Editor"));
-    m_editorAction->setToolTip(toModeToolTip(tr("Code Editor")));
+    m_editorAction->setToolTip(toToolTip(tr("Switch to <b>Code Editor</b>")));
 
     m_splitAction->setCheckable(true);
     m_splitAction->setText(tr("Split View"));
-    m_splitAction->setToolTip(toModeToolTip(tr("Splitted View")));
+    m_splitAction->setToolTip(toToolTip(tr("Switch to <b>Split View</b>")));
 
     m_optionsAction->setCheckable(true);
     m_optionsAction->setText(tr("Project Options"));
-    m_optionsAction->setToolTip(toModeToolTip(tr("Project Options")));
+    m_optionsAction->setToolTip(toToolTip(tr("Switch to <b>Project Options</b>")));
 
     m_buildsAction->setCheckable(true);
     m_buildsAction->setText(tr("Cloud Builds"));
-    m_buildsAction->setToolTip(toModeToolTip(tr("Cloud Builds")));
+    m_buildsAction->setToolTip(toToolTip(tr("Switch to <b>Cloud Builds</b>")));
 
     m_documentsAction->setCheckable(true);
     m_documentsAction->setText(tr("Documents"));
-    m_documentsAction->setToolTip(toModeToolTip(tr("Documents")));
+    m_documentsAction->setToolTip(toToolTip(tr("Switch to <b>Documents</b>")));
 
     auto actionGroup = new QActionGroup(this);
     actionGroup->addAction(m_designerAction);
@@ -122,9 +122,9 @@ void ModeSelectorPane::paintEvent(QPaintEvent*)
     QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
     gradient.setCoordinateMode(QGradient::ObjectMode);
     gradient.setColorAt(0, "#d6d6d6");
-    gradient.setColorAt(1, "#cccccc");
+    gradient.setColorAt(1, "#cdcdcd");
     painter.fillRect(rect(), gradient);
-    painter.setPen("#bebebe");
+    painter.setPen("#bdbdbd");
     painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5),
                      QRectF(rect()).bottomRight() - QPointF(0, 0.5));
     painter.setPen("#a7a7a7");

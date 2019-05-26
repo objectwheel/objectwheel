@@ -202,13 +202,13 @@ QPalette ApplicationCore::palette()
     palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#bfbfbf");
     palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, "#bfbfbf");
     palette.setColor(QPalette::Base, "#ffffff");
-    palette.setColor(QPalette::Button, "#f0f0f0");
-    palette.setColor(QPalette::Window, "#f0f0f0");
+    palette.setColor(QPalette::Button, "#ececec");
+    palette.setColor(QPalette::Window, "#ececec");
     palette.setColor(QPalette::Highlight, "#1C77D5");
     palette.setColor(QPalette::BrightText, "#ffffff");
     palette.setColor(QPalette::HighlightedText, "#ffffff");
     palette.setColor(QPalette::ToolTipText, "#2f2f2f");
-    palette.setColor(QPalette::ToolTipBase, "#f0f0f0");
+    palette.setColor(QPalette::ToolTipBase, "#ececec");
     palette.setColor(QPalette::Link, "#025dbf");
     palette.setColor(QPalette::LinkVisited, "#B44B46");
     return palette;

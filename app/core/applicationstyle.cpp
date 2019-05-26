@@ -300,6 +300,9 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 15;
     case PM_DockWidgetSeparatorExtent:
         return 1;
+    case PM_SmallIconSize:
+        if (widget && widget->inherits("LineEdit"))
+            return 13;
     default:
         return QFusionStyle::pixelMetric(metric, option, widget);
     }
@@ -561,7 +564,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 ir = ir.adjusted(0, 0, -proxy()->pixelMetric(PM_MenuButtonIndicator, button, widget), 0);
             // Draw item text
             QStyleOptionButton copy(*button);
-            if (copy.state & State_On || copy.state & State_Sunken)
+            if ((copy.state & State_On || copy.state & State_Sunken) && copy.palette.buttonText().color() != Qt::white)
                 copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
             proxy()->drawItemText(painter, ir, tf, copy.palette, (copy.state & State_Enabled),
                                   copy.text, QPalette::ButtonText);

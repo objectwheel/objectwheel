@@ -1,21 +1,26 @@
 #ifndef BOTTOMBAR_H
 #define BOTTOMBAR_H
 
-#include <QWidget>
+#include <pushbutton.h>
 
 class QHBoxLayout;
-class QAbstractButton;
-class PushButton;
 class QButtonGroup;
+class ButtonFlasher;
 
-class BottomBar : public QWidget
+class BottomBar final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(BottomBar)
+
 public:
     explicit BottomBar(QWidget* parent = nullptr);
+
     QAbstractButton* activeButton() const;
     QAbstractButton* consoleButton() const;
     QAbstractButton* issuesButton() const;
+
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 public slots:
     void discharge();
@@ -28,8 +33,6 @@ private slots:
 
 protected:
     void paintEvent(QPaintEvent*) override;
-    QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
 
 signals:
     void showHideLeftPanesButtonActivated(bool);
@@ -43,6 +46,8 @@ private:
     PushButton* m_issuesButton;
     PushButton* m_showHideLeftPanesButton;
     PushButton* m_showHideRightPanesButton;
+    ButtonFlasher* m_consoleFlasher;
+    ButtonFlasher* m_issuesFlasher;
 };
 
 #endif // BOTTOMBAR_H

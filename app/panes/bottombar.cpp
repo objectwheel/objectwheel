@@ -1,120 +1,39 @@
 #include <bottombar.h>
-#include <pushbutton.h>
 #include <paintutils.h>
-#include <utilsicons.h>
 #include <utilityfunctions.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
 
 #include <QHBoxLayout>
 #include <QStylePainter>
-#include <QStyleOption>
 #include <QButtonGroup>
 #include <QApplication>
 
-class ButtonFlasher;
-
 using namespace PaintUtils;
-using namespace Utils;
-using namespace Utils::Icons;
 
-namespace {
-const char* g_tooltip = "<span style=\"font-size: 12px !important;\">%1</span>";
-ButtonFlasher* g_consoleFlasher;
-ButtonFlasher* g_issuesFlasher;
-
-/*!
-    QPalette::Light     :  Button's frame rect color (not used)
-    QPalette::Midlight  :  Button's glowing color (when pressed)
-    QPalette::Button    :  Button's normal body color
-    QPalette::Mid       :  Button's pressed body color
-    QPalette::Dark      :  Button's base and surrounding border's color
-    QPalette::Shadow    :  Button's drop shadow color
-*/
-void setPanelButtonPaletteDarkerShadows(QWidget* widget)
-{
-    QPalette palette(widget->palette());
-    QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
-    shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-    shadowGrad.setColorAt(0, "#52202020");
-    shadowGrad.setColorAt(0.05, "#50202020");
-    shadowGrad.setColorAt(0.5, "#50202020");
-    shadowGrad.setColorAt(0.95, "#50202020");
-    shadowGrad.setColorAt(1, "#52202020");
-    palette.setBrush(QPalette::Shadow, shadowGrad);
-
-    QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
-    darkGrad.setCoordinateMode(QGradient::ObjectMode);
-    darkGrad.setColorAt(0.85, "#60303030");
-    darkGrad.setColorAt(1, "#7d000000");
-    palette.setBrush(QPalette::Dark, darkGrad);
-
-    QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
-    midGrad.setCoordinateMode(QGradient::ObjectMode);
-    midGrad.setColorAt(0, "#e7e7e7");
-    midGrad.setColorAt(1, "#e1e1e1");
-    palette.setBrush(QPalette::Mid, midGrad);
-
-    QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
-    buttonGrad.setCoordinateMode(QGradient::ObjectMode);
-    buttonGrad.setColorAt(0, "#fefefe");
-    buttonGrad.setColorAt(1, "#f7f7f7");
-    palette.setBrush(QPalette::Button, buttonGrad);
-
-    QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
-    midlightGrad.setCoordinateMode(QGradient::ObjectMode);
-    midlightGrad.setColorAt(0, "#f4f4f4");
-    midlightGrad.setColorAt(0.1, "#ededed");
-    palette.setBrush(QPalette::Midlight, midlightGrad);
-    palette.setBrush(QPalette::ButtonText, qApp->palette().buttonText());
-    widget->setProperty("ow_flashed", false);
-    widget->setPalette(palette);
-}
-
-void setPanelButtonPaletteRed(QWidget* widget)
-{
-    QPalette palette(widget->palette());
-    QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
-    shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-    shadowGrad.setColorAt(0, "#22202020");
-    shadowGrad.setColorAt(0.05, "#20202020");
-    shadowGrad.setColorAt(0.5, "#20202020");
-    shadowGrad.setColorAt(0.95, "#20202020");
-    shadowGrad.setColorAt(1, "#22202020");
-    palette.setBrush(QPalette::Shadow, shadowGrad);
-
-    QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
-    darkGrad.setCoordinateMode(QGradient::ObjectMode);
-    darkGrad.setColorAt(0.85, "#60303030");
-    darkGrad.setColorAt(1, "#7d000000");
-    palette.setBrush(QPalette::Dark, darkGrad);
-
-    QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
-    midGrad.setCoordinateMode(QGradient::ObjectMode);
-    midGrad.setColorAt(0, "#b34b46");
-    midGrad.setColorAt(1, "#a2403b");
-    palette.setBrush(QPalette::Mid, midGrad);
-
-    QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
-    buttonGrad.setCoordinateMode(QGradient::ObjectMode);
-    buttonGrad.setColorAt(0, "#c2504b");
-    buttonGrad.setColorAt(1, "#b34b46");
-    palette.setBrush(QPalette::Button, buttonGrad);
-
-    QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
-    midlightGrad.setCoordinateMode(QGradient::ObjectMode);
-    midlightGrad.setColorAt(0.1, "#cc5650");
-    midlightGrad.setColorAt(0, "#e5615a");
-    palette.setBrush(QPalette::Midlight, midlightGrad);
-    palette.setBrush(QPalette::ButtonText, Qt::white);
-    widget->setProperty("ow_flashed", true);
-    widget->setPalette(palette);
-}
-}
-
-class ButtonFlasher : public QObject
+class ButtonFlasher final : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ButtonFlasher)
+
+    static void setBright(QWidget* widget, bool bright)
+    {
+        QPalette palette(widget->palette());
+        palette.setBrush(QPalette::Active, QPalette::ButtonText, bright
+                         ? Qt::white : qApp->palette().color(QPalette::Active, QPalette::ButtonText));
+        palette.setBrush(QPalette::Inactive, QPalette::ButtonText, bright
+                         ? Qt::white : qApp->palette().color(QPalette::Inactive, QPalette::ButtonText));
+        palette.setBrush(QPalette::Disabled, QPalette::ButtonText, bright
+                         ? QColor("#cccccc") : qApp->palette().color(QPalette::Disabled, QPalette::ButtonText));
+        widget->setPalette(palette);
+        widget->setProperty("ow_bottombar_bright", bright);
+    }
+
+    static bool isBright(QWidget* widget)
+    {
+        return widget->property("ow_bottombar_bright").toBool();
+    }
+
 public:
     explicit ButtonFlasher(QAbstractButton* button) : QObject(button)
       , m_id(0)
@@ -128,9 +47,9 @@ public:
 
         m_repeat = 2 * repeat - 1;
         QAbstractButton* button = qobject_cast<QAbstractButton*>(parent());
-        setPanelButtonPaletteRed(button);
+        setBright(button, true);
         button->setIcon(renderOverlaidIcon(button->icon(), button->iconSize(),
-                                            button->palette().buttonText().color(), button));
+                                           button->palette().buttonText().color(), button));
         m_id = startTimer(timeout);
     }
 
@@ -144,13 +63,13 @@ private:
         }
 
         QAbstractButton* button = qobject_cast<QAbstractButton*>(parent());
-        if (button->property("ow_flashed").toBool())
-            setPanelButtonPaletteDarkerShadows(button);
+        if (isBright(button))
+            setBright(button, false);
         else
-            setPanelButtonPaletteRed(button);
+            setBright(button, true);
 
         QIcon icon;
-        if (!button->property("ow_flashed").toBool()) {
+        if (!isBright(button)) {
             QColor up = button->palette().buttonText().color().lighter(130); // not pressed
             QColor down = button->palette().buttonText().color().darker(180); // pressed
             Q_ASSERT(UtilityFunctions::window(button));
@@ -162,7 +81,7 @@ private:
                            QIcon::Normal, QIcon::On);
         } else {
             icon = renderOverlaidIcon(button->icon(), button->iconSize(),
-                                       button->palette().buttonText().color(), button);
+                                      button->palette().buttonText().color(), button);
         }
         button->setIcon(icon);
     }
@@ -178,11 +97,13 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
   , m_issuesButton(new PushButton(this))
   , m_showHideLeftPanesButton(new PushButton(this))
   , m_showHideRightPanesButton(new PushButton(this))
+  , m_consoleFlasher(new ButtonFlasher(m_consoleButton))
+  , m_issuesFlasher(new ButtonFlasher(m_issuesButton))
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 
-    m_layout->setSpacing(2);
-    m_layout->setContentsMargins(2, 2, 2, 2);
+    m_layout->setSpacing(4);
+    m_layout->setContentsMargins(4, 2, 4, 2);
     m_layout->addWidget(m_showHideLeftPanesButton, 0, Qt::AlignVCenter);
     m_layout->addWidget(m_issuesButton, 0, Qt::AlignVCenter);
     m_layout->addWidget(m_consoleButton, 0, Qt::AlignVCenter);
@@ -195,18 +116,13 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     connect(m_buttonGroup, qOverload<QAbstractButton*>(&QButtonGroup::buttonClicked),
             this, &BottomBar::onButtonClick);
 
-    setPanelButtonPaletteDarkerShadows(m_consoleButton);
-    setPanelButtonPaletteDarkerShadows(m_issuesButton);
-    setPanelButtonPaletteDarkerShadows(m_showHideLeftPanesButton);
-    setPanelButtonPaletteDarkerShadows(m_showHideRightPanesButton);
-
     QIcon consoleIcon;
     QColor up = m_consoleButton->palette().buttonText().color().lighter(130); // not pressed
     QColor down = m_consoleButton->palette().buttonText().color().darker(180); // pressed
     consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", up, this), QIcon::Normal, QIcon::Off);
     consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", down, this), QIcon::Normal, QIcon::On);
 
-    m_consoleButton->setMaximumHeight(20);
+    m_consoleButton->setMaximumHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
     m_consoleButton->setCheckable(true);
     m_consoleButton->setText(tr("Console Output"));
@@ -220,7 +136,7 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", up, this), QIcon::Normal, QIcon::Off);
     issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", down, this), QIcon::Normal, QIcon::On);
 
-    m_issuesButton->setMaximumHeight(20);
+    m_issuesButton->setMaximumHeight(22);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setCheckable(true);
     m_issuesButton->setText(tr("Issues") + " [0]");
@@ -228,18 +144,15 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setIconSize({14, 14});
     m_issuesButton->setIcon(issuesIcon);
 
-    g_consoleFlasher = new ButtonFlasher(m_consoleButton);
-    g_issuesFlasher = new ButtonFlasher(m_issuesButton);
-
     QIcon showHideLeftPanesIcon;
     up = palette().buttonText().color().lighter(130); // not pressed
     down = palette().buttonText().color().darker(180); // pressed
     showHideLeftPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/leftsidebaricon@2x.png",
-        up, this), QIcon::Normal, QIcon::Off);
+                                                       up, this), QIcon::Normal, QIcon::Off);
     showHideLeftPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/leftsidebaricon@2x.png",
-        down, this), QIcon::Normal, QIcon::On);
+                                                       down, this), QIcon::Normal, QIcon::On);
 
-    m_showHideLeftPanesButton->setMaximumHeight(20);
+    m_showHideLeftPanesButton->setMaximumHeight(22);
     m_showHideLeftPanesButton->setCursor(Qt::PointingHandCursor);
     m_showHideLeftPanesButton->setCheckable(true);
     m_showHideLeftPanesButton->setIconSize({16, 16});
@@ -247,11 +160,11 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
 
     QIcon showHideRightPanesIcon;
     showHideRightPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/rightsidebaricon@2x.png",
-        up, this), QIcon::Normal, QIcon::Off);
+                                                        up, this), QIcon::Normal, QIcon::Off);
     showHideRightPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/rightsidebaricon@2x.png",
-        down, this), QIcon::Normal, QIcon::On);
+                                                        down, this), QIcon::Normal, QIcon::On);
 
-    m_showHideRightPanesButton->setMaximumHeight(20);
+    m_showHideRightPanesButton->setMaximumHeight(22);
     m_showHideRightPanesButton->setCursor(Qt::PointingHandCursor);
     m_showHideRightPanesButton->setCheckable(true);
     m_showHideRightPanesButton->setIconSize({16, 16});
@@ -265,65 +178,6 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
             this, &BottomBar::setLeftShowHideButtonToolTip);
     connect(m_showHideRightPanesButton, &PushButton::clicked,
             this, &BottomBar::setRightShowHideButtonToolTip);
-}
-
-void BottomBar::flash(QAbstractButton* button)
-{
-    if (button == m_consoleButton)
-        g_consoleFlasher->flash(400, 3);
-    else if (button == m_issuesButton)
-        g_issuesFlasher->flash(400, 3);
-
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    if (settings->bottomPanesPop && !button->isChecked())
-        button->animateClick();
-}
-
-void BottomBar::setLeftShowHideButtonToolTip(bool checked)
-{
-    if (checked)
-        m_showHideLeftPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Hide left panes")));
-    else
-        m_showHideLeftPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Show left panes")));
-}
-
-void BottomBar::setRightShowHideButtonToolTip(bool checked)
-{
-    if (checked)
-        m_showHideRightPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Hide right panes")));
-    else
-        m_showHideRightPanesButton->setToolTip(QString::fromUtf8(g_tooltip).arg(tr("Show right panes")));
-}
-
-void BottomBar::onButtonClick(QAbstractButton* button)
-{
-    emit buttonActivated(button, button->isChecked());
-    if (!button->isChecked())
-        return;
-    for (QAbstractButton* b : m_buttonGroup->buttons()) {
-        if (b != button) {
-            b->setChecked(false);
-            emit buttonActivated(b, false);
-        }
-    }
-}
-
-void BottomBar::discharge()
-{
-    m_issuesButton->setChecked(false);
-    m_consoleButton->setChecked(false);
-    m_showHideLeftPanesButton->setChecked(true);
-    m_showHideRightPanesButton->setChecked(true);
-    setLeftShowHideButtonToolTip(true);
-    setRightShowHideButtonToolTip(true);
-
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    if (settings->visibleBottomPane != "None") {
-        if (settings->visibleBottomPane == "Console Pane")
-            m_consoleButton->animateClick();
-        else
-            m_issuesButton->animateClick();
-    }
 }
 
 QAbstractButton* BottomBar::activeButton() const
@@ -345,6 +199,75 @@ QAbstractButton* BottomBar::issuesButton() const
     return m_issuesButton;
 }
 
+QSize BottomBar::sizeHint() const
+{
+    return {100, 26};
+}
+
+QSize BottomBar::minimumSizeHint() const
+{
+    return {0, 26};
+}
+
+void BottomBar::discharge()
+{
+    m_issuesButton->setChecked(false);
+    m_consoleButton->setChecked(false);
+    m_showHideLeftPanesButton->setChecked(true);
+    m_showHideRightPanesButton->setChecked(true);
+    setLeftShowHideButtonToolTip(true);
+    setRightShowHideButtonToolTip(true);
+
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    if (settings->visibleBottomPane != "None") {
+        if (settings->visibleBottomPane == "Console Pane")
+            m_consoleButton->animateClick();
+        else
+            m_issuesButton->animateClick();
+    }
+}
+
+void BottomBar::flash(QAbstractButton* button)
+{
+    if (button == m_consoleButton)
+        m_consoleFlasher->flash(400, 3);
+    else if (button == m_issuesButton)
+        m_issuesFlasher->flash(400, 3);
+
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    if (settings->bottomPanesPop && !button->isChecked())
+        button->animateClick();
+}
+
+void BottomBar::setLeftShowHideButtonToolTip(bool checked)
+{
+    if (checked)
+        m_showHideLeftPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Hide left panes")));
+    else
+        m_showHideLeftPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Show left panes")));
+}
+
+void BottomBar::setRightShowHideButtonToolTip(bool checked)
+{
+    if (checked)
+        m_showHideRightPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Hide right panes")));
+    else
+        m_showHideRightPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Show right panes")));
+}
+
+void BottomBar::onButtonClick(QAbstractButton* button)
+{
+    emit buttonActivated(button, button->isChecked());
+    if (!button->isChecked())
+        return;
+    for (QAbstractButton* b : m_buttonGroup->buttons()) {
+        if (b != button) {
+            b->setChecked(false);
+            emit buttonActivated(b, false);
+        }
+    }
+}
+
 void BottomBar::paintEvent(QPaintEvent*)
 {
     QStylePainter p(this);
@@ -357,16 +280,6 @@ void BottomBar::paintEvent(QPaintEvent*)
                rect().bottomLeft() + QPointF(0.0, 0.5));
     p.drawLine(rect().topRight() + QPointF(1.0, 0.5),
                rect().bottomRight() + QPointF(1.0, 0.5));
-}
-
-QSize BottomBar::minimumSizeHint() const
-{
-    return QSize(0, 24);
-}
-
-QSize BottomBar::sizeHint() const
-{
-    return QSize(100, 24);
 }
 
 #include "bottombar.moc"

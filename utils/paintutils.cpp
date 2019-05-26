@@ -247,6 +247,7 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     painter->save();
 
     const bool down = (option.state & QStyle::State_Sunken) || (option.state & QStyle::State_On);
+    const bool bright = option.styleObject->property("ow_bottombar_bright").toBool();
 
     // Draw drop shadow
     QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
@@ -266,9 +267,9 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
     darkGrad.setCoordinateMode(QGradient::ObjectMode);
     darkGrad.setColorAt(0.85, "#20303030");
-    darkGrad.setColorAt(1, "#3d000000");
+    darkGrad.setColorAt(1, "#3f000000");
     QPainterPath shadowPath;
-    shadowPath.addRoundedRect(QRectF(option.rect).adjusted(0, 0.5, 0, -0.5), 4.25, 4.25);
+    shadowPath.addRoundedRect(QRectF(option.rect).adjusted(0, 0.5, 0, -0.5), 4, 4);
     painter->setPen(Qt::NoPen);
     painter->setBrush(darkGrad);
     painter->drawPath(shadowPath);
@@ -276,14 +277,24 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     // Draw body
     QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
     midGrad.setCoordinateMode(QGradient::ObjectMode);
-    midGrad.setColorAt(0, "#e7e7e7");
-    midGrad.setColorAt(1, "#e1e1e1");
+    if (bright) {
+        midGrad.setColorAt(0, "#b34b46");
+        midGrad.setColorAt(1, "#a2403b");
+    } else {
+        midGrad.setColorAt(0, "#e4e4e4");
+        midGrad.setColorAt(1, "#dedede");
+    }
     QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
     buttonGrad.setCoordinateMode(QGradient::ObjectMode);
-    buttonGrad.setColorAt(0, "#fefefe");
-    buttonGrad.setColorAt(1, "#f7f7f7");
+    if (bright) {
+        buttonGrad.setColorAt(0, "#c2504b");
+        buttonGrad.setColorAt(1, "#b34b46");
+    } else {
+        buttonGrad.setColorAt(0, "#fdfdfd");
+        buttonGrad.setColorAt(1, "#f3f3f3");
+    }
     QPainterPath bodyPath;
-    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 1, -0.5, -1), 3.65, 3.65);
+    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 1, -0.5, -1), 3.5, 3.5);
     painter->setPen(Qt::NoPen);
     painter->setBrush(down ? midGrad : buttonGrad);
     painter->drawPath(bodyPath);
@@ -292,15 +303,21 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
 
     // Draw glowing for pressed state
     if (down) {
-        QLinearGradient midlightGrad({0.5, 0.0}, {0.5, 1.0});
-        midlightGrad.setCoordinateMode(QGradient::ObjectMode);
-        midlightGrad.setColorAt(0, "#f4f4f4");
-        midlightGrad.setColorAt(0.1, "#ededed");
-        QPainterPath glowPath;
-        glowPath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 2, -0.5, 1), 3.65, 3.65);
+        QPainterPath glowPathUp;
+        glowPathUp.addRoundedRect(QRectF(option.rect).adjusted(0, 1.5, 0, 1), 4.5, 4.5);
+        QPainterPath glowPathDown;
+        glowPathDown.addRoundedRect(QRectF(option.rect).adjusted(0, 2, 0, 1), 4.5, 4.5);
         painter->setPen(Qt::NoPen);
-        painter->setBrush(midlightGrad);
-        painter->drawPath(bodyPath.subtracted(glowPath));
+        if (bright) {
+            painter->setBrush(QColor("#cc5650"));
+            painter->drawPath(bodyPath.subtracted(glowPathDown));
+            painter->setBrush(QColor("#e5615a"));
+        } else {
+            painter->setBrush(QColor("#ebebeb"));
+            painter->drawPath(bodyPath.subtracted(glowPathDown));
+            painter->setBrush(QColor("#f3f3f3"));
+        }
+        painter->drawPath(bodyPath.subtracted(glowPathUp));
     }
 
     painter->restore();
@@ -312,7 +329,7 @@ void PaintUtils::drawSearchEditBevel(QPainter* painter, const QStyleOption& opti
 
     // Draw outline
     QPainterPath outlinePath;
-    outlinePath.addRoundedRect(option.rect, 4.0, 4.0);
+    outlinePath.addRoundedRect(option.rect, 4, 4);
     painter->setPen(Qt::NoPen);
     painter->setBrush(QColor("#b1b1b1"));
     painter->drawPath(outlinePath);
@@ -325,7 +342,7 @@ void PaintUtils::drawSearchEditBevel(QPainter* painter, const QStyleOption& opti
 
     // Draw body
     QPainterPath bodyPath;
-    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(1.0, 1.0, -1.0, -1.0), 3.0, 3.0);
+    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(1, 1, -1, -1), 3, 3);
     painter->setBrush(QColor("#ffffff"));
     painter->drawPath(bodyPath);
 

@@ -159,12 +159,12 @@ void RunPane::paintEvent(QPaintEvent*)
     QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
     gradient.setCoordinateMode(QGradient::ObjectMode);
     gradient.setColorAt(0, "#e5e5e5");
-    gradient.setColorAt(1, "#d7d7d7");
+    gradient.setColorAt(1, "#d6d6d6");
     painter.fillRect(rect(), gradient);
-    painter.setPen("#c8c8c8");
+    painter.setPen("#c7c7c7");
     painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5),
                      QRectF(rect()).bottomRight() - QPointF(0, 0.5));
-    painter.setPen("#b2b2b2");
+    painter.setPen("#b1b1b1");
     painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
     // FIXME: hardcoded, what happens if it is vertical toolbar?
 }

@@ -324,9 +324,9 @@ QString increasedNumberedText(const QString& text, bool addSpace, bool trim)
 
 QString toPrettyBytesString(qint64 bytes)
 {
-#define KB 1024.0
-#define MB 1048576.0
-#define GB 1073741824.0
+    #define KB 1024.0
+    #define MB 1048576.0
+    #define GB 1073741824.0
 
     QString ret;
     if (bytes < KB) {
@@ -345,11 +345,9 @@ QString toPrettyBytesString(qint64 bytes)
     return ret;
 }
 
-QString toModeToolTip(const QString& mode)
+QString toToolTip(const QString& str)
 {
-    return QStringLiteral(QT_TR_NOOP(
-                              R"(<span style="font-size:12px">Switch to <b>%2</b> mode</span>)"
-                              )).arg(mode);
+    return QStringLiteral(R"(<span style="font-size:12px !important;">%1</span>)").arg(str);
 }
 
 QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)

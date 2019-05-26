@@ -17,6 +17,7 @@ class QPalette;
 class QByteArray;
 
 namespace PaintUtils {
+
 QImage renderFilledImage(const QSizeF& size, const QColor& fillColor, const QWidget* widget = nullptr);
 QImage renderTransparentImage(const QSizeF& size, const QWidget* widget = nullptr);
 QImage renderInitialControlImage(const QSizeF& size, const QWidget* widget = nullptr);
@@ -35,6 +36,7 @@ QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const Q
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);
 void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);
-}
+
+} // PaintUtils
 
 #endif // PAINTUTILS_H
