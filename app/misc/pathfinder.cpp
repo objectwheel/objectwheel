@@ -20,15 +20,15 @@ QString PathFinder::cleansed(const QString& text, bool withUid)
     QString cleansed(text);
     for (const Control* control : Control::controls()) {
         const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
-        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(
-            withBase(control->dir(), RunManager::recentProjectDirectory())) + '/');
+        QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toThisDir(
+            withBase(control->dir(), RunManager::recentProjectDirectory())) + '/'));
         if (cleansed.contains(exp))
             cleansed.replace(exp, clean);
     }
 
     const QString& clean = QObject::tr("GlobalResources") + "::";
     QRegularExpression exp("file:\\/{1,3}" +
-        SaveUtils::toGlobalDir(RunManager::recentProjectDirectory()) + '/');
+        QRegularExpression::escape(SaveUtils::toGlobalDir(RunManager::recentProjectDirectory()) + '/'));
     if (cleansed.contains(exp))
         cleansed.replace(exp, clean);
 
@@ -40,13 +40,13 @@ QString PathFinder::locallyCleansed(const QString& text, bool withUid)
     QString cleansed(text);
     for (const Control* control : Control::controls()) {
         const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
-        QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toThisDir(control->dir()) + '/');
+        QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toThisDir(control->dir()) + '/'));
         if (cleansed.contains(exp))
             cleansed.replace(exp, clean);
     }
 
     const QString& clean = QObject::tr("GlobalResources") + "::";
-    QRegularExpression exp("file:\\/{1,3}" + SaveUtils::toGlobalDir(ProjectManager::dir()) + '/');
+    QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toGlobalDir(ProjectManager::dir()) + '/'));
     if (cleansed.contains(exp))
         cleansed.replace(exp, clean);
 
