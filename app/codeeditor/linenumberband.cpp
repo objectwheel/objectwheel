@@ -53,7 +53,7 @@ int LineNumberBand::calculatedWidth() const
         ++digits;
     }
 
-    int space = 1 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
+    int space = 3 + fontMetrics().horizontalAdvance(QLatin1Char('9')) * digits;
 
     return space;
 }
@@ -98,7 +98,7 @@ void LineNumberBand::paintEvent(QPaintEvent* e)
                 painter.setPen(data.currentLineNumberFormat.foreground().color());
             }
 
-            painter.drawText(0, top, width(), fontMetrics().height(),
+            painter.drawText(0, top, width() - 2, fontMetrics().height(),
                              Qt::AlignRight | Qt::AlignTop, number);
         }
 

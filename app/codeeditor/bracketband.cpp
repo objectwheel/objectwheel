@@ -23,7 +23,7 @@ BracketBand::BracketBand(QmlCodeEditor* editor, QWidget* parent) : QWidget(paren
 
 int BracketBand::calculatedWidth() const
 {
-    return 20;
+    return 16;
 }
 
 bool BracketBand::toggleFold(const QPoint& pos) const

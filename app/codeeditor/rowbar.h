@@ -4,7 +4,6 @@
 #include <QWidget>
 
 class BracketBand;
-class BreakpointBand;
 class LineNumberBand;
 class MarkBand;
 class QHBoxLayout;
@@ -21,7 +20,6 @@ public:
     BracketBand* bracketBand() const;
     LineNumberBand* linenumberBand() const;
     MarkBand* markBand() const;
-    BreakpointBand* breakpointBand() const;
 
 private:
     void paintEvent(QPaintEvent *event) override;
@@ -31,7 +29,6 @@ private:
 private:
     QmlCodeEditor* m_qmlCodeEditor;
     QHBoxLayout* m_layout;
-    BreakpointBand* m_breakpointBand;
     MarkBand* m_markBand;
     LineNumberBand* m_linenumberBand;
     BracketBand* m_bracketBand;

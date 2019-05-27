@@ -1,6 +1,5 @@
 #include <rowbar.h>
 #include <bracketband.h>
-#include <breakpointband.h>
 #include <linenumberband.h>
 #include <markband.h>
 #include <qmlcodedocument.h>
@@ -15,16 +14,14 @@
 RowBar::RowBar(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
   , m_qmlCodeEditor(editor)
   , m_layout(new QHBoxLayout(this))
-  , m_breakpointBand(new BreakpointBand(editor))
   , m_markBand(new MarkBand(editor))
   , m_linenumberBand(new LineNumberBand(editor))
   , m_bracketBand(new BracketBand(editor))
 {
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_breakpointBand);
-    m_layout->addWidget(m_linenumberBand);
     m_layout->addWidget(m_markBand);
+    m_layout->addWidget(m_linenumberBand);
     m_layout->addWidget(m_bracketBand);
 
     connect(m_qmlCodeEditor, &QmlCodeEditor::updateRequest, this, qOverload<>(&RowBar::update));
@@ -34,8 +31,9 @@ RowBar::RowBar(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
 
 int RowBar::calculatedWidth() const
 {
-    return m_breakpointBand->calculatedWidth() + m_markBand->calculatedWidth()
-            + m_linenumberBand->calculatedWidth() + m_bracketBand->calculatedWidth();
+    return m_markBand->calculatedWidth()
+            + m_linenumberBand->calculatedWidth()
+            + m_bracketBand->calculatedWidth();
 }
 
 QSize RowBar::sizeHint() const
@@ -49,16 +47,10 @@ void RowBar::mouseReleaseEvent(QMouseEvent* e)
     m_qmlCodeEditor->setTextCursor(cursor);
 }
 
-BreakpointBand* RowBar::breakpointBand() const
-{
-    return m_breakpointBand;
-}
-
 void RowBar::paintEvent(QPaintEvent*)
 {
     QPainter p(this);
-    p.fillRect(rect(),
-               CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_LINE_NUMBER).background());
+    p.fillRect(rect(), CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_LINE_NUMBER).background());
 }
 
 MarkBand* RowBar::markBand() const

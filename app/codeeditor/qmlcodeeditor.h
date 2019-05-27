@@ -106,7 +106,6 @@ class QmlCodeEditor : public QPlainTextEdit
     friend class RowBar;
     friend class MarkBand;
     friend class BracketBand;
-    friend class BreakpointBand;
     friend class LineNumberBand;
     friend class TextEditor::Internal::TextEditorOverlay;
 

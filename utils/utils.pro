@@ -23,7 +23,6 @@ HEADERS += \
     $$PWD/previewercommands.h \
     $$PWD/paintutils.h \
     $$PWD/utilityfunctions.h \
-    $$PWD/qtcolorbutton.h \
     $$PWD/filesystemutils.h \
     $$PWD/serializeenum.h
 
@@ -36,7 +35,6 @@ SOURCES += \
     $$PWD/quicktheme.cpp \
     $$PWD/paintutils.cpp \
     $$PWD/utilityfunctions.cpp \
-    $$PWD/qtcolorbutton.cpp \
     $$PWD/filesystemutils.cpp
 
 RESOURCES += \

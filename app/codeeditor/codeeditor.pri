@@ -5,7 +5,6 @@ include($$PWD/qmleditor/qmleditor.pri)
 
 HEADERS += $$PWD/blockdata.h \
            $$PWD/bracketband.h \
-           $$PWD/breakpointband.h \
            $$PWD/linenumberband.h \
            $$PWD/markband.h \
            $$PWD/qmlcodedocument.h \
@@ -15,7 +14,6 @@ HEADERS += $$PWD/blockdata.h \
            $$PWD/rowbar.h
 
 SOURCES += $$PWD/bracketband.cpp \
-           $$PWD/breakpointband.cpp \
            $$PWD/linenumberband.cpp \
            $$PWD/markband.cpp \
            $$PWD/qmlcodedocument.cpp \
