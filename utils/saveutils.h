@@ -6,30 +6,31 @@
 namespace SaveUtils {
 
 enum ControlProperties : quint32 {
-    ControlId = 0x1000,
+    ControlSignature = 0x1000,
+    ControlVersion,
+    ControlId,
     ControlUid,
     ControlIcon,
     ControlToolName,
-    ControlToolCategory,
-    ControlVersion,
-    ControlSignature
+    ControlToolCategory
 };
 
 enum ProjectProperties : quint32 {
-    ProjectName = 0x2000,
+    ProjectSignature = 0x2000,
+    ProjectVersion,
+    ProjectName,
     ProjectDescription,
     ProjectCreationDate,
     ProjectModificationDate,
     ProjectSize,
-    ProjectUid,
     ProjectTheme,
-    ProjectHdpiScaling,
-    ProjectVersion,
-    ProjectSignature
+    ProjectHdpiScaling
 };
 
 enum UserProperties : quint32 {
-    UserEmail = 0x3000,
+    UserSignature = 0x3000,
+    UserVersion,
+    UserEmail,
     UserPassword,
     UserFirst,
     UserLast,
@@ -40,51 +41,49 @@ enum UserProperties : quint32 {
     UserIcon,
     UserPlan,
     UserRegistrationDate,
-    UserLastOnlineDate,
-    UserVersion,
-    UserSignature
+    UserLastOnlineDate
 };
 
-using ControlHash = QHash<ControlProperties, QVariant>;
-using ProjectHash = QHash<ProjectProperties, QVariant>;
-using UserHash = QHash<UserProperties, QVariant>;
+using ControlMetaHash = QHash<ControlProperties, QVariant>;
+using ProjectMetaHash = QHash<ProjectProperties, QVariant>;
+using UserMetaHash = QHash<UserProperties, QVariant>;
 
-bool isForm(const QString& controlDir);
-bool isControlValid(const QString& controlDir);
-bool isProjectValid(const QString& projectDir);
-bool isUserValid(const QString& userDir);
-
+QString controlMainQmlFileName();
+QString controlIconFileName();
 QString controlMetaFileName();
 QString projectMetaFileName();
+QString userIconFileName();
 QString userMetaFileName();
-QString mainQmlFileName();
 
+QString toControlThisDir(const QString& controlDir);
+QString toControlChildrenDir(const QString& controlDir);
+QString toControlMetaDir(const QString& controlDir);
+QString toProjectDesignsDir(const QString& projectDir);
+QString toProjectAssetsDir(const QString& projectDir);
+QString toProjectMetaDir(const QString& projectDir);
+QString toUserProjectsDir(const QString& userDir);
+QString toUserMetaDir(const QString& userDir);
+
+QString toControlMainQmlFile(const QString& controlDir);
+QString toControlIconFile(const QString& controlDir);
 QString toControlMetaFile(const QString& controlDir);
 QString toProjectMetaFile(const QString& projectDir);
+QString toUserIconFile(const QString& userDir);
 QString toUserMetaFile(const QString& userDir);
-QString toMainQmlFile(const QString& controlDir);
-QString toThisDir(const QString& controlDir);
-QString toChildrenDir(const QString& controlDir);
-QString toParentDir(const QString& controlDir);
-QString toDesignsDir(const QString& projectDir);
-QString toImportsDir(const QString& projectDir);
-QString toOwDir(const QString& projectDir);
-QString toGlobalDir(const QString& projectDir);
 
-QString id(const QString& controlDir);
-QString uid(const QString& controlDir);
-QString name(const QString& controlDir);
-QString category(const QString& controlDir);
-QByteArray icon(const QString& controlDir);
+QString controlId(const QString& controlDir);
+QString controlUid(const QString& controlDir);
+QString controlToolName(const QString& controlDir);
+QString controlToolCategory(const QString& controlDir);
+QByteArray controlIcon(const QString& controlDir);
 
 bool projectHdpiScaling(const QString& projectDir);
 qint64 projectSize(const QString& projectDir);
-QString projectUid(const QString& projectDir);
 QString projectName(const QString& projectDir);
 QString projectDescription(const QString& projectDir);
 QDateTime projectCreationDate(const QString& projectDir);
 QDateTime projectModificationDate(const QString& projectDir);
-QJsonValue projectTheme(const QString& projectDir);
+QByteArray projectTheme(const QString& projectDir);
 
 quint32 userPlan(const QString& userDir);
 QString userEmail(const QString& userDir);
@@ -94,28 +93,33 @@ QString userCountry(const QString& userDir);
 QString userCompany(const QString& userDir);
 QString userTitle(const QString& userDir);
 QString userPhone(const QString& userDir);
-QByteArray userPassword(const QString& userDir);
-QByteArray userIcon(const QString& userDir);
 QDateTime userLastOnlineDate(const QString& userDir);
 QDateTime userRegistrationDate(const QString& userDir);
+QByteArray userPassword(const QString& userDir);
+QByteArray userIcon(const QString& userDir);
 
-ControlHash controlHash(const QString& controlDir);
-ProjectHash projectHash(const QString& projectDir);
-UserHash userHash(const QString& userDir);
+ControlMetaHash controlMetaHash(const QString& controlDir);
+ProjectMetaHash projectMetaHash(const QString& projectDir);
+UserMetaHash userMetaHash(const QString& userDir);
 
 QVariant property(const QString& controlDir, ControlProperties property);
 QVariant property(const QString& projectDir, ProjectProperties property);
 QVariant property(const QString& userDir, UserProperties property);
 
-void setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
-void setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
-void setProperty(const QString& userDir, UserProperties property, const QVariant& value);
+bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
+bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
+bool setProperty(const QString& userDir, UserProperties property, const QVariant& value);
 
-void makeControlMetaFile(const QString& controlDir);
-void makeProjectMetaFile(const QString& projectDir);
-void makeUserMetaFile(const QString& userDir);
+bool makeProjectMeta(const QString& projectDir);
+bool makeUserMeta(const QString& userDir);
+
+bool isForm(const QString& controlDir);
+bool isControlValid(const QString& controlDir);
+bool isProjectValid(const QString& projectDir);
+bool isUserValid(const QString& userDir);
 
 void regenerateUids(const QString& topPath);
+QString toDoubleUp(const QString& path);
 QStringList formPaths(const QString& projectDir);
 QStringList childrenPaths(const QString& controlDir);
 

@@ -8,4 +8,3 @@ SUBDIRS      = $$PWD/utils/utils.pro \
                $$PWD/previewer/previewer.pro \
                $$PWD/themer/themer.pro \
                $$PWD/app/app.pro
-
