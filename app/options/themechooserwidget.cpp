@@ -538,7 +538,8 @@ void ThemeChooserWidget::run()
     m_loadingIndicator->start();
 
     QTemporaryDir tmpDir;
-    SaveUtils::makeProjectMetaFile(tmpDir.path());
+    Q_ASSERT(tmpDir.isValid());
+    SaveUtils::makeProjectMeta(tmpDir.path());
     SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     static QProcess* process = nullptr;
@@ -568,13 +569,13 @@ void ThemeChooserWidget::save()
     m_saveButton->setDisabled(true);
     m_resetButton->setDisabled(true);
 
-    auto object = SaveUtils::projectTheme(ProjectManager::dir()).toObject();
-    auto newObject = toJson();
+    auto object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
+    auto newObject = QJsonDocument::fromBinaryData(toJson()).object();
 
     for (const auto& key : newObject.keys())
         object[key] = newObject[key];
 
-    SaveUtils::setProperty(ProjectManager::dir(), SaveUtils::ProjectTheme, object);
+    SaveUtils::setProperty(ProjectManager::dir(), SaveUtils::ProjectTheme, QJsonDocument(object).toBinaryData());
 
     emit saved();
 }
@@ -595,7 +596,8 @@ void ThemeChooserWidget::refresh()
     tmpFile.close();
 
     QTemporaryDir tmpDir;
-    SaveUtils::makeProjectMetaFile(tmpDir.path());
+    Q_ASSERT(tmpDir.isValid());
+    SaveUtils::makeProjectMeta(tmpDir.path());
     SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     QProcess process;
@@ -618,7 +620,7 @@ void ThemeChooserWidget::refresh()
     m_loadingIndicator->stop();
 }
 
-QJsonObject ThemeChooserWidget::toJson() const
+QByteArray ThemeChooserWidget::toJson() const
 {
     QJsonObject object;
     QRegularExpression exp("#.*(?=\\))");
@@ -658,7 +660,7 @@ QJsonObject ThemeChooserWidget::toJson() const
             object.insert("foreground", "");
     }
 
-    return object;
+    return QJsonDocument(object).toBinaryData();
 }
 
 QString ThemeChooserWidget::toItem(QComboBox* comboBox, const QString& colorName) const

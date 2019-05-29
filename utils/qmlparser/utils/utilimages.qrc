@@ -237,11 +237,11 @@
         <file>images/arrowforth@2x.png</file>
         <file>images/code.png</file>
         <file>images/code@2x.png</file>
-        <file>images/external.png</file>
-        <file>images/external@2x.png</file>
-        <file>images/global.png</file>
-        <file>images/global@2x.png</file>
-        <file>images/internal.png</file>
-        <file>images/internal@2x.png</file>
+        <file>images/assets.png</file>
+        <file>images/assets@2x.png</file>
+        <file>images/designs.png</file>
+        <file>images/designs@2x.png</file>
+        <file>images/others.png</file>
+        <file>images/others@2x.png</file>
     </qresource>
 </RCC>

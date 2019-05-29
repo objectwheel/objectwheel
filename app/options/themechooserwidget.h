@@ -33,7 +33,7 @@ signals:
     void saved();
 
 private:
-    QJsonObject toJson() const;
+    QByteArray toJson() const;
     QString toItem(QComboBox* comboBox, const QString& colorName) const;
 
 private:

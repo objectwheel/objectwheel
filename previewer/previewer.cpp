@@ -33,8 +33,7 @@ Previewer::Previewer(QObject* parent) : QObject(parent)
     DesignerSupport::createOpenGLContext(m_view);
     DesignerSupport::setRootItem(m_view, PreviewerUtils::createDummyItem(m_view->engine()));
     m_view->engine()->setOutputWarningsToStandardError(false);
-    m_view->engine()->addImportPath(SaveUtils::toImportsDir(CommandlineParser::projectDirectory()));
-    m_view->engine()->addImportPath(SaveUtils::toGlobalDir(CommandlineParser::projectDirectory()));
+    m_view->engine()->addImportPath(SaveUtils::toProjectImportsDir(CommandlineParser::projectDirectory()));
 }
 
 Previewer::~Previewer()
@@ -58,7 +57,7 @@ void Previewer::init()
 
         // TODO: What if a child is a master-control?
         for (const QString& childPath : SaveUtils::childrenPaths(formPath)) {
-            ControlInstance* parentInstance = instanceTree.value(SaveUtils::toParentDir(childPath));
+            ControlInstance* parentInstance = instanceTree.value(SaveUtils::toDoubleUp(childPath));
             Q_ASSERT(parentInstance);
             ControlInstance* childInstance = createInstance(childPath, parentInstance);
             Q_ASSERT(childInstance);
@@ -743,12 +742,12 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     ComponentCompleteDisabler disabler;
     Q_UNUSED(disabler)
 
-    const QString& url = SaveUtils::toMainQmlFile(dir);
+    const QString& url = SaveUtils::toControlMainQmlFile(dir);
 
     auto instance = new Previewer::ControlInstance;
     instance->dir = dir;
-    instance->id = SaveUtils::id(dir);
-    instance->uid = SaveUtils::uid(dir);
+    instance->id = SaveUtils::controlId(dir);
+    instance->uid = SaveUtils::controlUid(dir);
     instance->codeChanged = true;
 
     Q_ASSERT(!instance->id.isEmpty());

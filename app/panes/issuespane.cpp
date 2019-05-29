@@ -200,14 +200,14 @@ void IssuesPane::onItemDoubleClick(QListWidgetItem* item)
     const ControlErrors* controlErrors = item->data(ControlErrorsRole).value<const ControlErrors*>();
     const QQmlError& error = controlErrors->errors.at(errorIndex);
     const QString& fullPath = error.url().toLocalFile();
-    const QString& assetsPath = SaveUtils::toGlobalDir(ProjectManager::dir());
+    const QString& assetsPath = SaveUtils::toProjectAssetsDir(ProjectManager::dir());
 
     if (fullPath.contains(assetsPath)) {
         emit assetsFileOpened(QDir(assetsPath).relativeFilePath(fullPath), error.line(),
                               error.column());
     } else {
         emit designsFileOpened(controlErrors->control,
-            QDir(SaveUtils::toThisDir(controlErrors->control->dir())).relativeFilePath(fullPath),
+            QDir(SaveUtils::toControlThisDir(controlErrors->control->dir())).relativeFilePath(fullPath),
             error.line(), error.column());
     }
 }
