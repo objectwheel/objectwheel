@@ -162,10 +162,10 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
             item->setText(1, QObject::tr("No"));
 
         QIcon icon, itemIcon;
-        icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(child->dir()),
+        icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::controlIcon(child->dir()),
                                                         treeWidget->palette().text().color(),
                                                         treeWidget), QIcon::Normal);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(child->dir()),
+        icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::controlIcon(child->dir()),
                                                         treeWidget->palette().highlightedText().color(),
                                                         treeWidget), QIcon::Selected);
         itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
@@ -629,10 +629,10 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     childItem->setIcon(0, formIcon);
                 } else {
                     QIcon icon;
-                    icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(control->dir()),
+                    icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::controlIcon(control->dir()),
                                                                             palette().text().color(),
                                                                             this), QIcon::Normal);
-                    icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::icon(control->dir()),
+                    icon.addPixmap(PaintUtils::renderOverlaidPixmapFromData(SaveUtils::controlIcon(control->dir()),
                                                                             palette().highlightedText().color(),
                                                                             this), QIcon::Selected);
                     childItem->setIcon(0, icon.isNull() ? itemIcon : icon);

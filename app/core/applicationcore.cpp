@@ -24,7 +24,6 @@
 #include <applicationstyle.h>
 #include <splashscreen.h>
 #include <helpmanager.h>
-#include <globalresources.h>
 #include <components.h>
 #include <paintutils.h>
 #include <servermanager.h>
@@ -45,7 +44,6 @@ QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 ModeManager* ApplicationCore::s_modeManager = nullptr;
-GlobalResources* ApplicationCore::s_globalResources = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
 RegistrationApiManager* ApplicationCore::s_accountManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
@@ -104,7 +102,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlPreviewingManager = new ControlPreviewingManager(app);
     s_saveManager = new SaveManager(app);
     s_projectManager = new ProjectManager(app);
-    s_globalResources = new GlobalResources([=] () -> QString { return ProjectManager::dir(); }, app);
     s_projectExposingManager = new ProjectExposingManager(app);
     s_controlCreationManager = new ControlCreationManager(app);
     s_controlRemovingManager = new ControlRemovingManager(app);

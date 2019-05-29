@@ -22,9 +22,9 @@ public:
         QmlCodeDocument* document;
         QmlCodeEditorToolBar::Scope scope;
     };
-    struct GlobalDocument : Document { QString relativePath; };
-    struct InternalDocument : GlobalDocument { Control* control; };
-    struct ExternalDocument : Document { QString fullPath; };
+    struct AssetsDocument : Document { QString relativePath; };
+    struct DesignsDocument : AssetsDocument { Control* control; };
+    struct OthersDocument : Document { QString fullPath; };
 
     class SaveFilter {
     public:
@@ -41,21 +41,21 @@ public:
     bool controlExists(const Control* control);
     bool controlModified(const Control* control);
 
-    void openGlobal(const QString& relativePath);
-    void openInternal(Control* control, const QString& relativePath);
-    void openExternal(const QString& fullPath);
+    void openAssets(const QString& relativePath);
+    void openDesigns(Control* control, const QString& relativePath);
+    void openOthers(const QString& fullPath);
 
-    bool globalExists(const QString& relativePath) const;
-    bool internalExists(Control* control, const QString& relativePath) const;
-    bool externalExists(const QString& fullPath) const;
+    bool assetsExists(const QString& relativePath) const;
+    bool designsExists(Control* control, const QString& relativePath) const;
+    bool othersExists(const QString& fullPath) const;
 
-    GlobalDocument* getGlobal(const QString& relativePath) const;
-    InternalDocument* getInternal(Control* control, const QString& relativePath) const;
-    ExternalDocument* getExternal(const QString& fullPath) const;
+    AssetsDocument* getAssets(const QString& relativePath) const;
+    DesignsDocument* getDesigns(Control* control, const QString& relativePath) const;
+    OthersDocument* getOthers(const QString& fullPath) const;
 
-    GlobalDocument* addGlobal(const QString& relativePath);
-    InternalDocument* addInternal(Control* control, const QString& relativePath);
-    ExternalDocument* addExternal(const QString& fullPath);
+    AssetsDocument* addAssets(const QString& relativePath);
+    DesignsDocument* addDesigns(Control* control, const QString& relativePath);
+    OthersDocument* addOthers(const QString& fullPath);
 
     QmlCodeEditor* codeEditor() const;
     QmlCodeEditorToolBar* toolBar() const;
@@ -71,8 +71,8 @@ public slots:
     void setFileExplorerVisible(bool visible);
 
 private slots:
-    void onNewExternalFile();
-    void onOpenExternalFile();
+    void onNewOthersFile();
+    void onOpenOthersFile();
     void onModificationChange(Document* document);
     void onPinActivation(bool pinned);
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
@@ -105,14 +105,14 @@ private:
 
     Document* m_openDocument;
     QList<SaveFilter*> m_saveFilters;
-    QList<GlobalDocument*> m_globalDocuments;
-    QList<InternalDocument*> m_internalDocuments;
-    QList<ExternalDocument*> m_externalDocuments;
+    QList<AssetsDocument*> m_assetsDocuments;
+    QList<DesignsDocument*> m_designsDocuments;
+    QList<OthersDocument*> m_OthersDocuments;
 };
 
 Q_DECLARE_METATYPE(QmlCodeEditorWidget::Document*)
-Q_DECLARE_METATYPE(QmlCodeEditorWidget::GlobalDocument*)
-Q_DECLARE_METATYPE(QmlCodeEditorWidget::InternalDocument*)
-Q_DECLARE_METATYPE(QmlCodeEditorWidget::ExternalDocument*)
+Q_DECLARE_METATYPE(QmlCodeEditorWidget::AssetsDocument*)
+Q_DECLARE_METATYPE(QmlCodeEditorWidget::DesignsDocument*)
+Q_DECLARE_METATYPE(QmlCodeEditorWidget::OthersDocument*)
 
 #endif // QMLCODEEDITORWIDGET_H

@@ -27,7 +27,7 @@ private:
 
     static QString addForm(const QString& formRootPath);
     static void removeForm(const QString& formRootPath);
-    static void setupFormGlobalConnections(const QString& formRootPath);
+    static void setupFormConnections(const QString& formRootPath);
 
     static QString addControl(const QString& controlRootPath, const QString& targetParentControlRootPath);
     static bool moveControl(Control* control, const Control* parentControl);
@@ -36,7 +36,7 @@ private:
     static void setProperty(Control* control, const QString& property, const QString& value);
 
 signals:
-    void formGlobalConnectionsDone(const QString& FormJS, const QString& id);
+    void formConnectionsDone(const QString& FormJS, const QString& id);
     void propertyChanged(Control* control, const QString& property, const QString& value);
 
 private:

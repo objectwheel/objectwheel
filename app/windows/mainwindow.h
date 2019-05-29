@@ -13,7 +13,7 @@ class ToolboxPane;
 class InspectorPane;
 class CentralWidget;
 class PropertiesPane;
-class GlobalResourcesPane;
+class AssetsPane;
 
 class MainWindow : public QMainWindow
 {
@@ -27,7 +27,7 @@ public:
     CentralWidget* centralWidget() const;
     InspectorPane* inspectorPane() const;
     PropertiesPane* propertiesPane() const;
-    GlobalResourcesPane* globalResourcesPane() const;
+    AssetsPane* assetsPane() const;
 
 public slots:
     void discharge();
@@ -64,7 +64,7 @@ private:
     ToolboxPane* m_toolboxPane;
     InspectorPane* m_inspectorPane;
     PropertiesPane* m_propertiesPane;
-    GlobalResourcesPane* m_globalResourcesPane;
+    AssetsPane* m_assetsPane;
 };
 
 #endif // MAINWINDOW_H

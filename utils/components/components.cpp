@@ -1,5 +1,4 @@
 #include <components.h>
-#include <globalresources.h>
 #include <offlinestorage.h>
 #include <QQmlEngine>
 
@@ -61,12 +60,6 @@ void init()
     qmlRegisterSingletonType<OfflineStorage>("Objectwheel.Core", 1, 0, "OfflineStorage",
                                              [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
         return new OfflineStorage(engine);
-    });
-
-    qmlRegisterSingletonType<GlobalResources>("Objectwheel.GlobalResources", 1, 0, "GlobalResources",
-                                              [] (QQmlEngine* engine, QJSEngine* /*jsEngine*/) -> QObject* {
-        engine->setObjectOwnership(GlobalResources::instance(), QQmlEngine::CppOwnership);
-        return GlobalResources::instance();
     });
 }
 }

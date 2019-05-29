@@ -12,6 +12,7 @@ using namespace QmlJS;
 using namespace AST;
 
 namespace {
+
 QString cleanPropertyValue(const QString& value)
 {
     QString val(value);
@@ -299,20 +300,22 @@ void changeProperty(QTextDocument* document, const UiObjectMemberList* list, con
             document->setModified(false);
     }
 }
+
 }
 
 namespace ParserUtils {
 
-bool exists(const QString& url, const QString& property)
+bool exists(const QString& controlDir, const QString& property)
 {
-    QFile file(url);
+    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
+    QFile file(mainQmlFilePath);
     if (!file.open(QFile::ReadOnly)) {
         qWarning("ParserUtils: Cannot open file");
         return false;
     }
 
     Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
     document->setSource(file.readAll());
     file.close();
 
@@ -352,39 +355,32 @@ bool exists(const QString& url, const QString& property)
     return propertyExists(uiObjectInitializer->members, property);
 }
 
-bool canParse(const QString& url)
+bool canParse(const QString& controlDir)
 {
-    QFile file(url);
+    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
+    QFile file(mainQmlFilePath);
     if (!file.open(QFile::ReadOnly)) {
         qWarning("ParserUtils: Cannot open file");
         return false;
     }
     Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
     document->setSource(file.readAll());
     file.close();
     return document->parse();
 }
 
-bool canParse(QTextDocument* doc, const QString& url)
+QString id(const QString& controlDir)
 {
-    const QString& source = doc->toPlainText();
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
-    document->setSource(source);
-    return document->parse();
+    if (canParse(controlDir))
+        return property(controlDir, "id");
+    return SaveUtils::controlId(controlDir);
 }
 
-QString id(const QString& url)
+QString property(const QString& controlDir, const QString& property)
 {
-    if (canParse(url))
-        return property(url, "id");
-    return SaveUtils::id(SaveUtils::toParentDir(url));
-}
-
-QString property(const QString& url, const QString& property)
-{
-    QFile file(url);
+    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
+    QFile file(mainQmlFilePath);
     if (!file.open(QFile::ReadOnly)) {
         qWarning("ParserUtils: Cannot open file");
         return {};
@@ -392,7 +388,7 @@ QString property(const QString& url, const QString& property)
     const QString& source = file.readAll();
     file.close();
     Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
     document->setSource(source);
 
     if (!document->parse()) {
@@ -434,11 +430,11 @@ QString property(const QString& url, const QString& property)
     return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
-QString property(QTextDocument* doc, const QString& url, const QString& property)
+QString property(QTextDocument* doc, const QString& controlDir, const QString& property)
 {
     const QString& source = doc->toPlainText();
     Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
+    QSharedPointer<Document> document = Document::create(SaveUtils::toControlMainQmlFile(controlDir), dialect);
     document->setSource(source);
 
     if (!document->parse()) {
@@ -478,6 +474,115 @@ QString property(QTextDocument* doc, const QString& url, const QString& property
         return QString();
 
     return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
+}
+
+void setId(const QString& controlDir, const QString& id)
+{
+    if (canParse(controlDir))
+        setProperty(controlDir, "id", id);
+    SaveUtils::setProperty(controlDir, SaveUtils::ControlId, id);
+}
+
+void setProperty(const QString& controlDir, const QString& property, const QString& value)
+{
+    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
+    QFile file(mainQmlFilePath);
+    if (!file.open(QFile::ReadWrite)) {
+        qWarning("ParserUtils: Cannot open file");
+        return;
+    }
+    QString source = file.readAll();
+
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
+    document->setSource(source);
+
+    if (!document->parse()) {
+        qWarning() << "Property couldn't set. Unable to parse qml file.";
+        return;
+    }
+
+    auto uiProgram = document->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't set. Corrupted ui program.";
+        return;
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't set. Empty source file.";
+        return;
+    }
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't set. Bad file format 0x1.";
+        return;
+    }
+
+    auto uiObjectInitializer = uiObjectDefinition->initializer;
+
+    if (!uiObjectInitializer) {
+        qWarning() << "Property couldn't set. Bad file format 0x2.";
+        return;
+    }
+
+    if (propertyExists(uiObjectInitializer->members, property))
+        changeProperty(source, uiObjectInitializer->members, property, value);
+    else
+        addProperty(source, uiObjectInitializer, property, value);
+
+    file.resize(0);
+    file.write(source.toUtf8());
+    file.close();
+}
+
+void setProperty(QTextDocument* doc, const QString& controlDir, const QString& property, const QString& value)
+{
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> document = Document::create(SaveUtils::toControlMainQmlFile(controlDir), dialect);
+    document->setSource(doc->toPlainText());
+
+    if (!document->parse()) {
+        qWarning() << "Property couldn't set. Unable to parse qml file.";
+        return;
+    }
+
+    auto uiProgram = document->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't set. Corrupted ui program.";
+        return;
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't set. Empty source file.";
+        return;
+    }
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't set. Bad file format 0x1.";
+        return;
+    }
+
+    auto uiObjectInitializer = uiObjectDefinition->initializer;
+
+    if (!uiObjectInitializer) {
+        qWarning() << "Property couldn't set. Bad file format 0x2.";
+        return;
+    }
+
+    if (propertyExists(uiObjectInitializer->members, property))
+        changeProperty(doc, uiObjectInitializer->members, property, value);
+    else
+        addProperty(doc, uiObjectInitializer, property, value);
 }
 
 int addMethod(QTextDocument* document, const QString& url, const QString& method)
@@ -626,112 +731,4 @@ void addConnection(QTextDocument* document, const QString& url, const QString& l
     }
 }
 
-void setId(const QString& url, const QString& id)
-{
-    if (canParse(url))
-        setProperty(url, "id", id);
-
-    SaveUtils::setProperty(SaveUtils::toParentDir(url), SaveUtils::ControlId, id);
-}
-
-void setProperty(const QString& url, const QString& property, const QString& value)
-{
-    QFile file(url);
-    if (!file.open(QFile::ReadWrite)) {
-        qWarning("ParserUtils: Cannot open file");
-        return;
-    }
-    QString source = file.readAll();
-
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
-    document->setSource(source);
-
-    if (!document->parse()) {
-        qWarning() << "Property couldn't set. Unable to parse qml file.";
-        return;
-    }
-
-    auto uiProgram = document->qmlProgram();
-
-    if (!uiProgram) {
-        qWarning() << "Property couldn't set. Corrupted ui program.";
-        return;
-    }
-
-    auto uiObjectMemberList = uiProgram->members;
-
-    if (!uiObjectMemberList) {
-        qWarning() << "Property couldn't set. Empty source file.";
-        return;
-    }
-
-    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
-
-    if (!uiObjectDefinition) {
-        qWarning() << "Property couldn't set. Bad file format 0x1.";
-        return;
-    }
-
-    auto uiObjectInitializer = uiObjectDefinition->initializer;
-
-    if (!uiObjectInitializer) {
-        qWarning() << "Property couldn't set. Bad file format 0x2.";
-        return;
-    }
-
-    if (propertyExists(uiObjectInitializer->members, property))
-        changeProperty(source, uiObjectInitializer->members, property, value);
-    else
-        addProperty(source, uiObjectInitializer, property, value);
-
-    file.resize(0);
-    file.write(source.toUtf8());
-    file.close();
-}
-
-void setProperty(QTextDocument* doc, const QString& url, const QString& property, const QString& value)
-{
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(url, dialect);
-    document->setSource(doc->toPlainText());
-
-    if (!document->parse()) {
-        qWarning() << "Property couldn't set. Unable to parse qml file.";
-        return;
-    }
-
-    auto uiProgram = document->qmlProgram();
-
-    if (!uiProgram) {
-        qWarning() << "Property couldn't set. Corrupted ui program.";
-        return;
-    }
-
-    auto uiObjectMemberList = uiProgram->members;
-
-    if (!uiObjectMemberList) {
-        qWarning() << "Property couldn't set. Empty source file.";
-        return;
-    }
-
-    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
-
-    if (!uiObjectDefinition) {
-        qWarning() << "Property couldn't set. Bad file format 0x1.";
-        return;
-    }
-
-    auto uiObjectInitializer = uiObjectDefinition->initializer;
-
-    if (!uiObjectInitializer) {
-        qWarning() << "Property couldn't set. Bad file format 0x2.";
-        return;
-    }
-
-    if (propertyExists(uiObjectInitializer->members, property))
-        changeProperty(doc, uiObjectInitializer->members, property, value);
-    else
-        addProperty(doc, uiObjectInitializer, property, value);
-}
 } // ParserUtils

@@ -62,7 +62,7 @@ QStringList ToolManager::categories()
 
     for (auto dir : QDir(toolsDir()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         auto toolPath = toolsDir() + '/' + dir;
-        auto category = SaveUtils::category(toolPath);
+        auto category = SaveUtils::controlToolCategory(toolPath);
         if (!categories.contains(category))
             categories << category;
     }

@@ -67,7 +67,7 @@ void fixPosForForm(const Control* control, const QString& propertyName, SpinBox 
 {
     if (control->form()) {
         if ((propertyName == "x" || propertyName == "y")
-                && !ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), propertyName)) {
+                && !ParserUtils::exists(control->dir(), propertyName)) {
             spinBox->setValue(0);
         }
     }
@@ -76,13 +76,13 @@ void fixPosForForm(const Control* control, const QString& propertyName, SpinBox 
 void fixVisibleForPopup(Control* control, const QString& propertyName, QCheckBox* checkBox)
 {
     if (control->popup() && propertyName == "visible")
-        checkBox->setChecked(ParserUtils::property(SaveUtils::toMainQmlFile(control->dir()), propertyName) == "true");
+        checkBox->setChecked(ParserUtils::property(control->dir(), propertyName) == "true");
 }
 
 void fixVisibleForWindow(Control* control, const QString& propertyName, QCheckBox* checkBox)
 {
     if (control->window() && propertyName == "visible")
-        checkBox->setChecked(ParserUtils::property(SaveUtils::toMainQmlFile(control->dir()), propertyName) == "true");
+        checkBox->setChecked(ParserUtils::property(control->dir(), propertyName) == "true");
 }
 
 void fixVisibilityForWindow(Control* control, const QString& propertyName, QComboBox* comboBox)
@@ -90,7 +90,7 @@ void fixVisibilityForWindow(Control* control, const QString& propertyName, QComb
     if (control->window() && propertyName == "visibility") {
         comboBox->setCurrentText("AutomaticVisibility");
 
-        const QString& visibility = ParserUtils::property(SaveUtils::toMainQmlFile(control->dir()), propertyName);
+        const QString& visibility = ParserUtils::property(control->dir(), propertyName);
         if (visibility.isEmpty())
             return;
 
@@ -167,7 +167,7 @@ QString urlToDisplayText(const QUrl& url, const QString& controlDir)
     QString displayText = url.toDisplayString();
     if (url.isLocalFile()) {
         displayText = url.toLocalFile().remove(
-                    SaveUtils::toThisDir(controlDir) + '/');
+                    SaveUtils::toControlThisDir(controlDir) + '/');
     }
     return displayText;
 }
@@ -315,7 +315,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     {
         // TODO: Clear whitespaces in the url
         const QUrl& url = QUrl::fromUserInput(lineEdit->text(),
-                                              SaveUtils::toThisDir(control->dir()),
+                                              SaveUtils::toControlThisDir(control->dir()),
                                               QUrl::AssumeLocalFile);
         const QString& displayText = urlToDisplayText(url, control->dir());
         const QUrl& previousUrl = UtilityFunctions::getProperty(propertyName, control->properties()).value<QUrl>();
@@ -352,7 +352,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
         if (previousValue == comboBox->currentText())
             return;
 
-        QFile file(SaveUtils::toMainQmlFile(control->dir()));
+        QFile file(SaveUtils::toControlMainQmlFile(control->dir()));
         if (!file.open(QFile::ReadOnly)) {
             qWarning("createEnumHandlerWidget: Cannot open control main qml file");
             return;
@@ -696,8 +696,8 @@ void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
 
     bool xUnknown = false, yUnknown = false;
     if (control->form()) {
-        xUnknown = !ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "x");
-        yUnknown = !ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "y");
+        xUnknown = !ParserUtils::exists(control->dir(), "x");
+        yUnknown = !ParserUtils::exists(control->dir(), "y");
     }
 
     const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
@@ -706,10 +706,10 @@ void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
             .arg(int(geometry.width()))
             .arg(int(geometry.height()));
 
-    const bool xChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "x");
-    const bool yChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "y");
-    const bool wChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "width");
-    const bool hChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "height");
+    const bool xChanged = ParserUtils::exists(control->dir(), "x");
+    const bool yChanged = ParserUtils::exists(control->dir(), "y");
+    const bool wChanged = ParserUtils::exists(control->dir(), "width");
+    const bool hChanged = ParserUtils::exists(control->dir(), "height");
     const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
 
     auto geometryItem = new QTreeWidgetItem;
@@ -760,18 +760,18 @@ void createAndAddFontPropertiesBlock(QTreeWidgetItem* classItem, const QFont& fo
             .arg(isPx ? font.pixelSize() : font.pointSize())
             .arg(isPx ? "px" : "pt");
 
-    const bool fChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.family");
-    const bool bChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.bold");
-    const bool iChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.italic");
-    const bool uChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.underline");
-    const bool poChanged   = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.pointSize");
-    const bool piChanged   = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.pixelSize");
-    const bool wChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.weight");
-    const bool oChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.overline");
-    const bool sChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.strikeout");
-    const bool cChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.capitalization");
-    const bool kChanged    = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.kerning");
-    const bool prChanged   = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "font.preferShaping");
+    const bool fChanged    = ParserUtils::exists(control->dir(), "font.family");
+    const bool bChanged    = ParserUtils::exists(control->dir(), "font.bold");
+    const bool iChanged    = ParserUtils::exists(control->dir(), "font.italic");
+    const bool uChanged    = ParserUtils::exists(control->dir(), "font.underline");
+    const bool poChanged   = ParserUtils::exists(control->dir(), "font.pointSize");
+    const bool piChanged   = ParserUtils::exists(control->dir(), "font.pixelSize");
+    const bool wChanged    = ParserUtils::exists(control->dir(), "font.weight");
+    const bool oChanged    = ParserUtils::exists(control->dir(), "font.overline");
+    const bool sChanged    = ParserUtils::exists(control->dir(), "font.strikeout");
+    const bool cChanged    = ParserUtils::exists(control->dir(), "font.capitalization");
+    const bool kChanged    = ParserUtils::exists(control->dir(), "font.kerning");
+    const bool prChanged   = ParserUtils::exists(control->dir(), "font.preferShaping");
     const bool fontChanged = fChanged || bChanged || iChanged || uChanged || poChanged || piChanged
             || wChanged || oChanged || sChanged || cChanged || kChanged || prChanged;
 
@@ -1104,7 +1104,7 @@ void PropertiesPane::onSelectionChange()
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
                 item->setData(0, Qt::DecorationRole,
-                              ParserUtils::exists(SaveUtils::toMainQmlFile(selectedControl->dir()), propertyName));
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1,
                               createColorHandlerWidget(propertyName, color, selectedControl));
@@ -1116,7 +1116,7 @@ void PropertiesPane::onSelectionChange()
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
                 item->setData(0, Qt::DecorationRole,
-                              ParserUtils::exists(SaveUtils::toMainQmlFile(selectedControl->dir()), propertyName));
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1,
                               createBoolHandlerWidget(propertyName, checked, selectedControl));
@@ -1128,7 +1128,7 @@ void PropertiesPane::onSelectionChange()
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
                 item->setData(0, Qt::DecorationRole,
-                              ParserUtils::exists(SaveUtils::toMainQmlFile(selectedControl->dir()), propertyName));
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1,
                               createStringHandlerWidget(propertyName, text, selectedControl));
@@ -1141,7 +1141,7 @@ void PropertiesPane::onSelectionChange()
                 auto item = new QTreeWidgetItem;
                 item->setText(0, propertyName);
                 item->setData(0, Qt::DecorationRole,
-                              ParserUtils::exists(SaveUtils::toMainQmlFile(selectedControl->dir()), propertyName));
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 setItemWidget(item, 1,
                               createUrlHandlerWidget(propertyName, displayText, selectedControl));
@@ -1159,7 +1159,7 @@ void PropertiesPane::onSelectionChange()
                     auto item = new QTreeWidgetItem;
                     item->setText(0, propertyName);
                     item->setData(0, Qt::DecorationRole,
-                                  ParserUtils::exists(SaveUtils::toMainQmlFile(selectedControl->dir()), propertyName));
+                                  ParserUtils::exists(selectedControl->dir(), propertyName));
                     classItem->addChild(item);
                     setItemWidget(item, 1,
                                   createNumberHandlerWidget(propertyName, number, selectedControl, false));
@@ -1178,7 +1178,7 @@ void PropertiesPane::onSelectionChange()
                     auto item = new QTreeWidgetItem;
                     item->setText(0, propertyName);
                     item->setData(0, Qt::DecorationRole,
-                                  ParserUtils::exists(SaveUtils::toMainQmlFile(selectedControl->dir()), propertyName));
+                                  ParserUtils::exists(selectedControl->dir(), propertyName));
                     classItem->addChild(item);
                     setItemWidget(item, 1,
                                   createNumberHandlerWidget(propertyName, number, selectedControl, true));
@@ -1194,7 +1194,7 @@ void PropertiesPane::onSelectionChange()
         for (const Enum& enumm : enumList) {
             auto item = new QTreeWidgetItem;
             item->setText(0, enumm.name);
-            item->setData(0, Qt::DecorationRole, ParserUtils::exists(SaveUtils::toMainQmlFile(selectedControl->dir()), enumm.name));
+            item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->dir(), enumm.name));
             classItem->addChild(item);
             setItemWidget(item, 1, createEnumHandlerWidget(enumm, selectedControl));
         }
@@ -1235,7 +1235,7 @@ void PropertiesPane::onZChange(Control* control)
                         = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
                 Q_ASSERT(iSpinBox || dSpinBox);
 
-                childItem->setData(0, Qt::DecorationRole, ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "z"));
+                childItem->setData(0, Qt::DecorationRole, ParserUtils::exists(control->dir(), "z"));
                 if (dSpinBox) {
                     dSpinBox->blockSignals(true);
                     dSpinBox->setValue(control->zValue());
@@ -1285,8 +1285,8 @@ void PropertiesPane::onGeometryChange(const Control* control)
 
     bool xUnknown = false, yUnknown = false;
     if (control->form()) {
-        xUnknown = !ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "x");
-        yUnknown = !ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "y");
+        xUnknown = !ParserUtils::exists(control->dir(), "x");
+        yUnknown = !ParserUtils::exists(control->dir(), "y");
     }
 
     const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
@@ -1295,10 +1295,10 @@ void PropertiesPane::onGeometryChange(const Control* control)
             .arg(int(geometry.width()))
             .arg(int(geometry.height()));
 
-    const bool xChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "x");
-    const bool yChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "y");
-    const bool wChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "width");
-    const bool hChanged = ParserUtils::exists(SaveUtils::toMainQmlFile(control->dir()), "height");
+    const bool xChanged = ParserUtils::exists(control->dir(), "x");
+    const bool yChanged = ParserUtils::exists(control->dir(), "y");
+    const bool wChanged = ParserUtils::exists(control->dir(), "width");
+    const bool hChanged = ParserUtils::exists(control->dir(), "height");
     const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {

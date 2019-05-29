@@ -127,22 +127,22 @@ void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight 
     QTextStream stream(text.toUtf8());
     while (stream.readLineInto(&line)) {
         line = PathFinder::cleansed(line, true);
-        const PathFinder::GlobalResult& globalResult = PathFinder::findGlobal(line);
-        const PathFinder::InternalResult& internalResult = PathFinder::findInternal(line);
+        const PathFinder::AssetsResult& assetsResult = PathFinder::findAssets(line);
+        const PathFinder::DesignsResult& designsResult = PathFinder::findDesigns(line);
 
         if (cursor.position() != 0)
             cursor.insertBlock();
 
-        if (globalResult.isNull() && internalResult.isNull()) {
+        if (assetsResult.isNull() && designsResult.isNull()) {
             cursor.insertText(line, format);
             continue;
         }
 
-        Q_ASSERT(globalResult.isNull() || internalResult.isNull());
+        Q_ASSERT(assetsResult.isNull() || designsResult.isNull());
 
-        const PathFinder::Result& result = !globalResult.isNull()
-                ? static_cast<const PathFinder::Result&>(globalResult)
-                : static_cast<const PathFinder::Result&>(internalResult);
+        const PathFinder::Result& result = !assetsResult.isNull()
+                ? static_cast<const PathFinder::Result&>(assetsResult)
+                : static_cast<const PathFinder::Result&>(designsResult);
         cursor.insertText(line.mid(0, result.begin), format);
         cursor.insertText(line.mid(result.begin, result.length), linkFormat);
         cursor.insertText(line.mid(result.end), format);
@@ -157,10 +157,10 @@ void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight 
 
 void ConsolePane::onLinkClick(const PathFinder::Result& result)
 {
-    if (result.type == PathFinder::Result::Global) {
-        emit globalFileOpened(result.relativePath, result.line, 0);
+    if (result.type == PathFinder::Result::Assets) {
+        emit assetsFileOpened(result.relativePath, result.line, 0);
     } else {
-        emit internalFileOpened(static_cast<const PathFinder::InternalResult&>(result).control,
+        emit designsFileOpened(static_cast<const PathFinder::DesignsResult&>(result).control,
                                 result.relativePath, result.line, 0);
     }
 }
@@ -183,17 +183,17 @@ bool ConsolePane::eventFilter(QObject* w, QEvent* e)
         while (block.isValid() && top <= viewport()->rect().bottom()) {
             if (event->pos().y() >= top && event->pos().y() <= bottom) {
                 const QString& line = block.text();
-                const PathFinder::GlobalResult& globalResult = PathFinder::findGlobal(line);
-                const PathFinder::InternalResult& internalResult = PathFinder::findInternal(line);
+                const PathFinder::assetsResult& assetsResult = PathFinder::findAssets(line);
+                const PathFinder::DesignsResult& designsResult = PathFinder::findDesigns(line);
 
-                if (globalResult.isNull() && internalResult.isNull()) {
+                if (assetsResult.isNull() && designsResult.isNull()) {
                     viewport()->setCursor(Qt::IBeamCursor);
                 } else {
-                    Q_ASSERT(globalResult.isNull() || internalResult.isNull());
+                    Q_ASSERT(assetsResult.isNull() || designsResult.isNull());
 
-                    const PathFinder::Result& result = !globalResult.isNull()
-                            ? static_cast<const PathFinder::Result&>(globalResult)
-                            : static_cast<const PathFinder::Result&>(internalResult);
+                    const PathFinder::Result& result = !assetsResult.isNull()
+                            ? static_cast<const PathFinder::Result&>(assetsResult)
+                            : static_cast<const PathFinder::Result&>(designsResult);
                     int begin = fontMetrics().horizontalAdvance(line.mid(0, result.begin));
                     int end = fontMetrics().horizontalAdvance(line.mid(0, result.end));
 

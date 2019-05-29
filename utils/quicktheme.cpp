@@ -1,12 +1,13 @@
 #include <quicktheme.h>
 #include <saveutils.h>
 #include <QJsonObject>
+#include <QJsonDocument>
 
 namespace QuickTheme {
 
 void setTheme(const QString& projectDir, int* version)
 {
-    const QJsonObject& object = SaveUtils::projectTheme(projectDir).toObject();
+    const QJsonObject& object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(projectDir)).object();
     const QString& stylev1 = object.value("stylev1").toString();
     const QString& stylev2 = object.value("stylev2").toString();
     const QString& theme = object.value("theme").toString();

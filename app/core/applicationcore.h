@@ -7,7 +7,6 @@ class QSettings;
 class GeneralSettings;
 class CodeEditorSettings;
 class ModeManager;
-class GlobalResources;
 class RegistrationApiManager;
 class UserManager;
 class DocumentManager;
@@ -52,7 +51,6 @@ private:
     static GeneralSettings* s_generalSettings;
     static CodeEditorSettings* s_codeEditorSettings;
     static ModeManager* s_modeManager;
-    static GlobalResources* s_globalResources;
     static ServerManager* s_serverManager;
     static RegistrationApiManager* s_accountManager;
     static UserManager* s_userManager;

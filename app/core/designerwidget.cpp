@@ -379,9 +379,9 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
     if (warnIfFileDoesNotExist(fullPath))
         return;
 
-    m_qmlCodeEditorWidget->openGlobal(formJS);
+    m_qmlCodeEditorWidget->openAssets(formJS);
 
-    QmlCodeEditorWidget::GlobalDocument* document = m_qmlCodeEditorWidget->getGlobal(formJS);
+    QmlCodeEditorWidget::AssetsDocument* document = m_qmlCodeEditorWidget->getAssets(formJS);
     Q_ASSERT(document);
 
     int pos = ParserUtils::methodLine(document->document, fullPath, methodSign);
@@ -399,18 +399,18 @@ void DesignerWidget::onInspectorItemDoubleClick(Control* control)
 
 void DesignerWidget::onControlDoubleClick(Control* control)
 {
-    m_qmlCodeEditorWidget->openInternal(control, SaveUtils::mainQmlFileName());
+    m_qmlCodeEditorWidget->openDesigns(control, SaveUtils::mainQmlFileName());
 }
 
-void DesignerWidget::onGlobalFileOpen(const QString& relativePath, int line, int column)
+void DesignerWidget::onAssetsFileOpen(const QString& relativePath, int line, int column)
 {
-    m_qmlCodeEditorWidget->openGlobal(relativePath);
+    m_qmlCodeEditorWidget->openAssets(relativePath);
     m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
 }
 
-void DesignerWidget::onInternalFileOpen(Control* control, const QString& relativePath, int line, int column)
+void DesignerWidget::onDesignsFileOpen(Control* control, const QString& relativePath, int line, int column)
 {
-    m_qmlCodeEditorWidget->openInternal(control, relativePath);
+    m_qmlCodeEditorWidget->openDesigns(control, relativePath);
     m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
 }
 

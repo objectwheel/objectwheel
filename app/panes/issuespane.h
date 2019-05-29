@@ -39,8 +39,8 @@ signals:
     void flash();
     void minimized();
     void titleChanged(const QString& title);
-    void globalFileOpened(const QString& relativePath, int line, int column);
-    void internalFileOpened(Control* control, const QString& relativePath, int line, int column);
+    void assetsFileOpened(const QString& relativePath, int line, int column);
+    void designsFileOpened(Control* control, const QString& relativePath, int line, int column);
 
 private:
     QToolBar* m_toolBar;

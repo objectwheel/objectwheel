@@ -1,4 +1,4 @@
-#include <globalresourcespane.h>
+#include <assetspane.h>
 #include <utilityfunctions.h>
 #include <QHeaderView>
 
@@ -19,12 +19,12 @@ QPalette initPalette(QWidget* widget)
 }
 }
 
-GlobalResourcesPane::GlobalResourcesPane(QWidget* parent) : FileExplorer(parent)
+AssetsPane::AssetsPane(QWidget* parent) : FileExplorer(parent)
 {
     setPalette(initPalette(this));
 }
 
-QSize GlobalResourcesPane::sizeHint() const
+QSize AssetsPane::sizeHint() const
 {
     return QSize{310, 250};
 }

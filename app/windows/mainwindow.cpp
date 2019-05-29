@@ -5,7 +5,7 @@
 #include <modeselectorcontroller.h>
 #include <toolboxpane.h>
 #include <propertiespane.h>
-#include <globalresourcespane.h>
+#include <assetspane.h>
 #include <formspane.h>
 #include <inspectorpane.h>
 #include <centralwidget.h>
@@ -57,17 +57,17 @@ spacing: 5px; \
 
 namespace {
 QByteArray resetState;
-QDockWidget* globalDockWidget;
+QDockWidget* assetsDockWidget;
 QDockWidget* propertiesDockWidget;
 QDockWidget* formsDockWidget;
 QDockWidget* toolboxDockWidget;
 QDockWidget* inspectorDockWidget;
-QToolBar* globalTitleBar;
+QToolBar* assetsTitleBar;
 QToolBar* propertiesTitleBar;
 QToolBar* formsTitleBar;
 QToolBar* toolboxTitleBar;
 QToolBar* inspectorTitleBar;
-bool globalDockWidgetVisible;
+bool assetsDockWidgetVisible;
 bool propertiesDockWidgetVisible;
 bool formsDockWidgetVisible;
 bool toolboxDockWidgetVisible;
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_toolboxPane(new ToolboxPane)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
   , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))
-  , m_globalResourcesPane(new GlobalResourcesPane)
+  , m_assetsPane(new AssetsPane)
 {
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
@@ -170,37 +170,37 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
 
-    /* Add Global Resources Pane */
-    auto globalTitleLabel = new QLabel;
-    globalTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    globalTitleLabel->setText("   " + tr("Global Resources"));
+    /* Add Assets Pane */
+    auto assetsTitleLabel = new QLabel;
+    assetsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    assetsTitleLabel->setText("   " + tr("Assets"));
 
-    auto globalTitlePinButton = new QToolButton;
-    globalTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    globalTitlePinButton->setCursor(Qt::PointingHandCursor);
-    globalTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
-    connect(globalTitlePinButton, &QToolButton::clicked,
+    auto assetsTitlePinButton = new QToolButton;
+    assetsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    assetsTitlePinButton->setCursor(Qt::PointingHandCursor);
+    assetsTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    connect(assetsTitlePinButton, &QToolButton::clicked,
             this, [] {
-        globalDockWidget->setFloating(!globalDockWidget->isFloating());
+        assetsDockWidget->setFloating(!assetsDockWidget->isFloating());
     });
 
-    globalTitleBar = new QToolBar;
-    globalTitleBar->addWidget(globalTitleLabel);
-    globalTitleBar->addWidget(globalTitlePinButton);
-    globalTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    globalTitleBar->setIconSize(QSize(11, 11));
-    globalTitleBar->setFixedHeight(24);
+    assetsTitleBar = new QToolBar;
+    assetsTitleBar->addWidget(assetsTitleLabel);
+    assetsTitleBar->addWidget(assetsTitlePinButton);
+    assetsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
+    assetsTitleBar->setIconSize(QSize(11, 11));
+    assetsTitleBar->setFixedHeight(24);
 
-    globalDockWidget = new QDockWidget;
-    globalDockWidget->setObjectName("globalDockWidget");
-    globalDockWidget->setStyleSheet("QDockWidget { border: none }");
-    globalDockWidget->setTitleBarWidget(globalTitleBar);
-    globalDockWidget->setWidget(m_globalResourcesPane);
-    globalDockWidget->setWindowTitle(tr("Global Resources"));
-    globalDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, globalDockWidget);
-    connect(m_globalResourcesPane, &GlobalResourcesPane::fileOpened,
-            centralWidget()->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openGlobal);
+    assetsDockWidget = new QDockWidget;
+    assetsDockWidget->setObjectName("assetsDockWidget");
+    assetsDockWidget->setStyleSheet("QDockWidget { border: none }");
+    assetsDockWidget->setTitleBarWidget(assetsTitleBar);
+    assetsDockWidget->setWidget(m_assetsPane);
+    assetsDockWidget->setWindowTitle(tr("Assets"));
+    assetsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, assetsDockWidget);
+    connect(m_assetsPane, &AssetsPane::fileOpened,
+            centralWidget()->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openAssets);
 
     /* Add Toolbox Pane */
     auto toolboxTitleLabel = new QLabel;
@@ -287,7 +287,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         }
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] { m_globalResourcesPane->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
+            this, [=] { m_assetsPane->setRootPath(SaveUtils::toGlobalDir(ProjectManager::dir())); });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             m_formsPane, &FormsPane::refresh);
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
@@ -351,7 +351,7 @@ void MainWindow::discharge()
     m_toolboxPane->discharge();
     m_inspectorPane->discharge();
     m_propertiesPane->discharge();
-    m_globalResourcesPane->discharge();
+    m_assetsPane->discharge();
 
     showLeftPanes(true);
     showRightPanes(true);
@@ -359,9 +359,9 @@ void MainWindow::discharge()
 
 void MainWindow::showLeftPanes(bool show)
 {
-    if (dockWidgetArea(globalDockWidget) == Qt::LeftDockWidgetArea) {
-        globalDockWidget->setVisible(show);
-        globalDockWidgetVisible = show;
+    if (dockWidgetArea(assetsDockWidget) == Qt::LeftDockWidgetArea) {
+        assetsDockWidget->setVisible(show);
+        assetsDockWidgetVisible = show;
     }
     if (dockWidgetArea(propertiesDockWidget) == Qt::LeftDockWidgetArea) {
         propertiesDockWidget->setVisible(show);
@@ -383,9 +383,9 @@ void MainWindow::showLeftPanes(bool show)
 
 void MainWindow::showRightPanes(bool show)
 {
-    if (dockWidgetArea(globalDockWidget) == Qt::RightDockWidgetArea) {
-        globalDockWidget->setVisible(show);
-        globalDockWidgetVisible = show;
+    if (dockWidgetArea(assetsDockWidget) == Qt::RightDockWidgetArea) {
+        assetsDockWidget->setVisible(show);
+        assetsDockWidgetVisible = show;
     }
     if (dockWidgetArea(propertiesDockWidget) == Qt::RightDockWidgetArea) {
         propertiesDockWidget->setVisible(show);
@@ -434,19 +434,19 @@ void MainWindow::setDockWidgetTitleBarsHidden(bool yes)
         toolboxDockWidget->setTitleBarWidget(w2);
         inspectorDockWidget->setTitleBarWidget(w3);
         propertiesDockWidget->setTitleBarWidget(w4);
-        globalDockWidget->setTitleBarWidget(w5);
+        assetsDockWidget->setTitleBarWidget(w5);
     } else {
         formsDockWidget->setTitleBarWidget(formsTitleBar);
         toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
         inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
         propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
-        globalDockWidget->setTitleBarWidget(globalTitleBar);
+        assetsDockWidget->setTitleBarWidget(assetsTitleBar);
     }
 }
 
 void MainWindow::hideDocks()
 {
-    globalDockWidget->hide();
+    assetsDockWidget->hide();
     propertiesDockWidget->hide();
     formsDockWidget->hide();
     inspectorDockWidget->hide();
@@ -455,7 +455,7 @@ void MainWindow::hideDocks()
 
 void MainWindow::showDocks()
 {
-    globalDockWidget->show();
+    assetsDockWidget->show();
     propertiesDockWidget->show();
     formsDockWidget->show();
     inspectorDockWidget->show();
@@ -464,7 +464,7 @@ void MainWindow::showDocks()
 
 void MainWindow::restoreDocks()
 {
-    globalDockWidget->setVisible(globalDockWidgetVisible);
+    assetsDockWidget->setVisible(assetsDockWidgetVisible);
     propertiesDockWidget->setVisible(propertiesDockWidgetVisible);
     formsDockWidget->setVisible(formsDockWidgetVisible);
     inspectorDockWidget->setVisible(inspectorDockWidgetVisible);
@@ -494,9 +494,9 @@ CentralWidget* MainWindow::centralWidget() const
     return m_centralWidget;
 }
 
-GlobalResourcesPane* MainWindow::globalResourcesPane() const
+AssetsPane* MainWindow::assetsPane() const
 {
-    return m_globalResourcesPane;
+    return m_assetsPane;
 }
 
 PropertiesPane* MainWindow::propertiesPane() const

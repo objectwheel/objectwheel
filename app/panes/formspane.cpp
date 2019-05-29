@@ -260,7 +260,7 @@ void FormsPane::refresh()
 
     QTreeWidgetItem* selectionItem = nullptr;
     for (const QString& path : SaveUtils::formPaths(ProjectManager::dir())) {
-        const QString& id = SaveUtils::id(path);
+        const QString& id = SaveUtils::controlId(path);
         Q_ASSERT(!id.isEmpty());
 
         auto item = new QTreeWidgetItem;

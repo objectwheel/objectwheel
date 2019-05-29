@@ -21,7 +21,7 @@ int countIdInProjectForms(const QString& id)
 
     int counter = 0;
     for (const QString& formRootPath : SaveUtils::formPaths(ProjectManager::dir())) {
-        const QString& formId = ParserUtils::id(SaveUtils::toMainQmlFile(formRootPath));
+        const QString& formId = ParserUtils::id(formRootPath);
         if (formId.isEmpty()) {
             qWarning("SaveManager::countIdInProjectForms: Empty id detected! Control: %s",
                      formRootPath.toUtf8().constData());
@@ -40,7 +40,7 @@ int countIdInControlChildrenScope(const QString& id, const QString rootPath)
 
     int counter = 0;
     for (const QString& controlRootPath : SaveUtils::childrenPaths(rootPath)) {
-        const QString& controlId = ParserUtils::id(SaveUtils::toMainQmlFile(controlRootPath));
+        const QString& controlId = ParserUtils::id(controlRootPath);
         if (controlId.isEmpty()) {
             qWarning("SaveManager::ccountIdInControlChildrenScope: Empty id detected! Control: %s",
                      controlRootPath.toUtf8().constData());
@@ -92,7 +92,7 @@ void repairIds(const QString& rootPath, bool recursive)
     const QString& formRootPath = detectedFormRootPath(rootPath);
 
     for (const QString& controlRootPath : controlRootPaths) {
-        const QString& idOrig = ParserUtils::id(SaveUtils::toMainQmlFile(controlRootPath));
+        const QString& idOrig = ParserUtils::id(controlRootPath);
 
         QString id(idOrig);
         if (id.isEmpty())
@@ -101,7 +101,7 @@ void repairIds(const QString& rootPath, bool recursive)
         while (countIdInProjectFormScope(id, formRootPath) > (id == idOrig ? 1 : 0))
             id = UtilityFunctions::increasedNumberedText(id, false, true);
 
-        ParserUtils::setId(SaveUtils::toMainQmlFile(controlRootPath), id);
+        ParserUtils::setId(controlRootPath, id);
     }
 }
 }
@@ -137,15 +137,14 @@ bool SaveManager::initProject(const QString& projectDirectory, int templateNumbe
     return true;
 }
 
-void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
+void SaveManager::setupFormConnections(const QString& formRootPath)
 {
     Q_ASSERT(SaveUtils::isControlValid(formRootPath));
 
-    const QString& mainQmlFilePath = SaveUtils::toMainQmlFile(formRootPath);
-    const QString& id = ParserUtils::id(mainQmlFilePath);
+    const QString& id = ParserUtils::id(formRootPath);
     Q_ASSERT(!id.isEmpty());
 
-    QFile file(mainQmlFilePath);
+    QFile file(SaveUtils::toMainQmlFile(formRootPath));
     if (!file.open(QFile::ReadWrite)) {
         qWarning("SaveManager: Cannot open main qml file");
         return;
@@ -156,13 +155,13 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
 
     QString FormJS(id + "JS");
     FormJS.replace(0, 1, FormJS[0].toUpper());
-    content.replace("// GlobalConnectionHere",
+    content.replace("// AssetsHere",
                     QString::fromUtf8("Component.onCompleted: %1.%2_onCompleted()").arg(FormJS).arg(id).toUtf8());
     file.resize(0);
     file.write(content);
     file.close();
 
-    const QString& globalJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + id + ".js";
+    const QString& assetsJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + id + ".js";
     file.setFileName(":/resources/other/form.js");
     if (!file.open(QFile::ReadOnly)) {
         qWarning("SaveManager: Cannot open :/resources/other/form.js");
@@ -171,21 +170,21 @@ void SaveManager::setupFormGlobalConnections(const QString& formRootPath)
     QString js = file.readAll();
     file.close();
     js = js.arg(id);
-    if (!QFileInfo::exists(globalJSPath)) {
-        file.setFileName(globalJSPath);
+    if (!QFileInfo::exists(assetsJSPath)) {
+        file.setFileName(assetsJSPath);
         if (!file.open(QFile::WriteOnly)) {
-            qWarning("SaveManager: Cannot open globalJSPath");
+            qWarning("SaveManager: Cannot open assetsJSPath");
             return;
         }
         file.write(js.toUtf8());
         file.close();
     } else {
-        qWarning("SaveManager::setupFormGlobalConnections: Global %s file is already exists.",
+        qWarning("SaveManager::setupFormConnections: Assets %s file is already exists.",
                  (id + ".js").toUtf8().constData());
         return;
     }
 
-    emit instance()->formGlobalConnectionsDone(FormJS, id);
+    emit instance()->formConnectionsDone(FormJS, id);
 }
 
 QString SaveManager::addForm(const QString& formRootPath)
@@ -289,12 +288,12 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
 
     for (Control* child : control->childControls()) {
         child->setDir(child->dir().replace(control->dir(), newControlRootPath, Qt::CaseInsensitive));
-        const QString& childId = ParserUtils::id(SaveUtils::toMainQmlFile(control->dir()));
+        const QString& childId = ParserUtils::id(control->dir());
         Q_ASSERT(!childId.isEmpty());
         child->setId(childId);
     }
     control->setDir(newControlRootPath);
-    const QString& controlId = ParserUtils::id(SaveUtils::toMainQmlFile(control->dir()));
+    const QString& controlId = ParserUtils::id(control->dir());
     Q_ASSERT(!controlId.isEmpty());
     control->setId(controlId);
 
@@ -352,13 +351,13 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
                   which means idChanged signal is already emitted.
         */
 
-        ParserUtils::setId(SaveUtils::toMainQmlFile(control->dir()), copy);
+        ParserUtils::setId(control->dir(), copy);
         repairIds(control->dir(), false);
-        copy = ParserUtils::id(SaveUtils::toMainQmlFile(control->dir()));
+        copy = ParserUtils::id(control->dir());
         control->setId(copy);
         Q_ASSERT(!copy.isEmpty());
     } else {
-        ParserUtils::setProperty(SaveUtils::toMainQmlFile(control->dir()), property, copy);
+        ParserUtils::setProperty(control->dir(), property, copy);
     }
 
     ProjectManager::updateLastModification(ProjectManager::uid());

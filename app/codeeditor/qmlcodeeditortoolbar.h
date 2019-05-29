@@ -26,7 +26,7 @@ public:
         AllActions = LeftAction | RightAction | CloseAction | FileActions | LineColAction | ShowAction
     };
     enum Combo { LeftCombo, RightCombo };
-    enum Scope { Global, Internal, External };
+    enum Scope { Assets, Designs, Others };
 
     Q_ENUM(Scope)
     Q_DECLARE_FLAGS(DocumentActions, DocumentAction)

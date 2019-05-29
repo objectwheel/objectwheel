@@ -6,7 +6,7 @@ HEADERS += $$PWD/bottombar.h \
            $$PWD/fileexplorer_p.h \
            $$PWD/fileexplorer.h \
            $$PWD/formspane.h \
-           $$PWD/globalresourcespane.h \
+           $$PWD/assetspane.h \
            $$PWD/inspectorpane.h \
            $$PWD/issuespane.h \
            $$PWD/propertiespane.h \
@@ -18,7 +18,7 @@ SOURCES += $$PWD/bottombar.cpp \
            $$PWD/fileexplorer_p.cpp \
            $$PWD/fileexplorer.cpp \
            $$PWD/formspane.cpp \
-           $$PWD/globalresourcespane.cpp \
+           $$PWD/assetspane.cpp \
            $$PWD/inspectorpane.cpp \
            $$PWD/issuespane.cpp \
            $$PWD/propertiespane.cpp \

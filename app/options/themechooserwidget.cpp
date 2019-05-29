@@ -498,7 +498,7 @@ void ThemeChooserWidget::discharge()
     if (ProjectManager::uid().isEmpty())
         return;
 
-    const auto& object = SaveUtils::projectTheme(ProjectManager::dir()).toObject();
+    const auto& object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
 
     if (m_version == V1) {
         const auto& style = object.value("stylev1").toString();

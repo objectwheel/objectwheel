@@ -47,7 +47,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_dragging(false)
   , m_resizing(false)
   , m_dir(dir)
-  , m_uid(SaveUtils::uid(m_dir))
+  , m_uid(SaveUtils::controlUid(m_dir))
   , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(g_baseControlSize)))
   , m_resizers(initializeResizers(this))
 {
@@ -60,7 +60,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    ControlPropertyManager::setId(this, ParserUtils::id(SaveUtils::toMainQmlFile(m_dir)),
+    ControlPropertyManager::setId(this, ParserUtils::id(m_dir),
                                   ControlPropertyManager::NoOption);
     ControlPropertyManager::setSize(this, g_baseControlSize, ControlPropertyManager::NoOption);
 

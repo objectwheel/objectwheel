@@ -131,9 +131,14 @@ QString toProjectDesignsDir(const QString& projectDir)
     return projectDir + QStringLiteral("/designs");
 }
 
+QString toProjectImportsDir(const QString& projectDir)
+{
+    return projectDir + QStringLiteral("/imports");
+}
+
 QString toProjectAssetsDir(const QString& projectDir)
 {
-    return projectDir + QStringLiteral("/assets");
+    return toProjectImportsDir(projectDir) + QStringLiteral("/assets");
 }
 
 QString toProjectMetaDir(const QString& projectDir)

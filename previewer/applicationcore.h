@@ -6,7 +6,6 @@
 class PreviewerSocket;
 class Previewer;
 class CommandDispatcher;
-class GlobalResources;
 
 class ApplicationCore final : public QObject
 {
@@ -30,7 +29,6 @@ private:
     ~ApplicationCore();
 
 private:
-    static GlobalResources* s_globalResources;
     static PreviewerSocket* s_previewerSocket;
     static QThread* s_socketThread;
     static CommandDispatcher* s_commandDispatcher;

@@ -3,6 +3,7 @@
 - Project import/export fix
 - Also fix all zipSync/unzipSync usages
 - Connection to the Server must be based on a known stream format like CBOR
+- Delete delayer.h
 
 https://stackoverflow.com/questions/31498114/how-to-programmatically-prevent-linux-computer-from-sleeping-or-turning-on-scree
 https://developer.apple.com/library/archive/qa/qa1340/_index.html
@@ -46,7 +47,6 @@ data
     ----
 AboutWindow gösterilirken (loginwidget.cpp'den) arka planda gizli olarak gösteriliyor, öne fırlamalı
 ZipAsync'deki senkron fonksiyonlardan, asenkron fonksiyonların kullanımına geçilsin.
-Bee projesinde, kapanırken crash oluyor. Sebebi singleton GlobalResource'un QmlEngine'den önce silinmesi
 MainWindow'un state save etme bokunu düzelt, show ve close eventlerde hiç bi bok kaydetme, daha iyi bi yol bul
 QmlCodeEditorWidget, bir kontrolün main.qml'i ilk açılınca, açıldıktan sonra bir tuşa basmadan önce, ilgili kontrolun klasöründe bulunan qml tüpleri eğer main.qml de kullanılmışsa, o tipler için error işaretleri belirmiş oluyor, ama bir tuşa basınca aynı klasördeki tipleri yakalıyor ve errorlar gidiyor
 QmlCodeEDitorWidge'de IssuesPane'deki her error için bir mark oluşturulmalı

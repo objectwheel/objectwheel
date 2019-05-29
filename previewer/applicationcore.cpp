@@ -6,7 +6,6 @@
 #include <commandlineparser.h>
 #include <commanddispatcher.h>
 #include <quicktheme.h>
-#include <globalresources.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -20,7 +19,6 @@
 #include <windows.h>
 #endif
 
-GlobalResources* ApplicationCore::s_globalResources = nullptr;
 PreviewerSocket* ApplicationCore::s_previewerSocket = nullptr;
 QThread* ApplicationCore::s_socketThread = nullptr;
 CommandDispatcher* ApplicationCore::s_commandDispatcher = nullptr;
@@ -42,7 +40,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QtWebView::initialize();
     qRegisterMetaType<PreviewerCommands>("PreviewerCommands");
 
-    s_globalResources = new GlobalResources(&CommandlineParser::projectDirectory, this);
     s_previewerSocket = new PreviewerSocket;
     s_socketThread = new QThread(this);
 

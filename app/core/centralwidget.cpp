@@ -95,14 +95,14 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     });
     connect(m_issuesPane, &IssuesPane::titleChanged,
             m_bottomBar->issuesButton(), &QAbstractButton::setText);
-    connect(m_issuesPane, &IssuesPane::internalFileOpened,
-            m_designerWidget, &DesignerWidget::onInternalFileOpen);
-    connect(m_issuesPane, &IssuesPane::globalFileOpened,
-            m_designerWidget, &DesignerWidget::onGlobalFileOpen);
-    connect(m_consolePane, &ConsolePane::internalFileOpened,
-            m_designerWidget, &DesignerWidget::onInternalFileOpen);
-    connect(m_consolePane, &ConsolePane::globalFileOpened,
-            m_designerWidget, &DesignerWidget::onGlobalFileOpen);
+    connect(m_issuesPane, &IssuesPane::designsFileOpened,
+            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
+    connect(m_issuesPane, &IssuesPane::assetsFileOpened,
+            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
+    connect(m_consolePane, &ConsolePane::designsFileOpened,
+            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
+    connect(m_consolePane, &ConsolePane::assetsFileOpened,
+            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
     connect(m_issuesPane, &IssuesPane::flash,
             this, [=] {
         m_bottomBar->flash(m_bottomBar->issuesButton());
@@ -139,16 +139,16 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
     connect(SaveManager::instance(), &SaveManager::propertyChanged,    // Changes made out of code editor
             this, [=] (Control* control, const QString& property, const QString& value) {
-        QmlCodeEditorWidget::InternalDocument* document = qmlCodeEditorWidget()->getInternal(control, SaveUtils::mainQmlFileName());
+        QmlCodeEditorWidget::DesignsDocument* document = qmlCodeEditorWidget()->getDesigns(control, SaveUtils::mainQmlFileName());
         if (document)
-            ParserUtils::setProperty(document->document, SaveUtils::toMainQmlFile(control->dir()), property, value);
+            ParserUtils::setProperty(document->document, control->dir(), property, value);
     });
-    connect(SaveManager::instance(), &SaveManager::formGlobalConnectionsDone,
+    connect(SaveManager::instance(), &SaveManager::formConnectionsDone,
             this, [=] (const QString& FormJS, const QString& id) {
-        qmlCodeEditorWidget()->openGlobal(id + ".js");
+        qmlCodeEditorWidget()->openAssets(id + ".js");
         qmlCodeEditorWidget()->codeEditor()->gotoLine(4);
 
-        QmlCodeEditorWidget::GlobalDocument* qmldirDoc = qmlCodeEditorWidget()->getGlobal("qmldir");
+        QmlCodeEditorWidget::AssetsDocument* qmldirDoc = qmlCodeEditorWidget()->getAssets("qmldir");
         if (qmldirDoc) {
             bool modified = qmldirDoc->document->isModified();
             QTextCursor cursor(qmldirDoc->document);

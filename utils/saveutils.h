@@ -59,6 +59,7 @@ QString toControlThisDir(const QString& controlDir);
 QString toControlChildrenDir(const QString& controlDir);
 QString toControlMetaDir(const QString& controlDir);
 QString toProjectDesignsDir(const QString& projectDir);
+QString toProjectImportsDir(const QString& projectDir);
 QString toProjectAssetsDir(const QString& projectDir);
 QString toProjectMetaDir(const QString& projectDir);
 QString toUserProjectsDir(const QString& userDir);

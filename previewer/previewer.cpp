@@ -548,12 +548,12 @@ void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstanc
                 continue;
 
             if (instance->window
-                    && (ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") != "true"
-                        || ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visibility").contains("Hidden"))) {
+                    && (ParserUtils::property(instance->dir, "visible") != "true"
+                        || ParserUtils::property(instance->dir, "visibility").contains("Hidden"))) {
                 continue;
             }
 
-            if (instance->popup && ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") == "false")
+            if (instance->popup && ParserUtils::property(instance->dir, "visible") == "false")
                 continue;
 
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
@@ -672,10 +672,10 @@ QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
         }
 
         if (instance->window
-                && (ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") != "true"
-                    || ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visibility").contains("Hidden"))) {
+                && (ParserUtils::property(instance->dir, "visible") != "true"
+                    || ParserUtils::property(instance->dir, "visibility").contains("Hidden"))) {
             return QImage();
-        } else if (instance->popup && ParserUtils::property(SaveUtils::toMainQmlFile(instance->dir), "visible") == "false") {
+        } else if (instance->popup && ParserUtils::property(instance->dir, "visible") == "false") {
             return QImage();
         } else {
             if (item->isVisible())

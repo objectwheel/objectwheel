@@ -20,13 +20,13 @@ QString PathFinder::cleansed(const QString& text, bool withUid)
     QString cleansed(text);
     for (const Control* control : Control::controls()) {
         const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
-        QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toThisDir(
+        QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toControlThisDir(
             withBase(control->dir(), RunManager::recentProjectDirectory())) + '/'));
         if (cleansed.contains(exp))
             cleansed.replace(exp, clean);
     }
 
-    const QString& clean = QObject::tr("GlobalResources") + "::";
+    const QString& clean = QObject::tr("Assets") + "::";
     QRegularExpression exp("file:\\/{1,3}" +
         QRegularExpression::escape(SaveUtils::toGlobalDir(RunManager::recentProjectDirectory()) + '/'));
     if (cleansed.contains(exp))
@@ -45,7 +45,7 @@ QString PathFinder::locallyCleansed(const QString& text, bool withUid)
             cleansed.replace(exp, clean);
     }
 
-    const QString& clean = QObject::tr("GlobalResources") + "::";
+    const QString& clean = QObject::tr("Assets") + "::";
     QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toGlobalDir(ProjectManager::dir()) + '/'));
     if (cleansed.contains(exp))
         cleansed.replace(exp, clean);
@@ -53,13 +53,13 @@ QString PathFinder::locallyCleansed(const QString& text, bool withUid)
     return cleansed;
 }
 
-PathFinder::GlobalResult PathFinder::findGlobal(const QString& line)
+PathFinder::AssetsResult PathFinder::findAssets(const QString& line)
 {
-    const QRegularExpression exp(QString("%1::([\\w\\\\\\/\\.\\d]+):-?(\\d+)").arg(QObject::tr("GlobalResources")));
+    const QRegularExpression exp(QString("%1::([\\w\\\\\\/\\.\\d]+):-?(\\d+)").arg(QObject::tr("Assets")));
     const QRegularExpressionMatch& match = exp.match(line);
 
-    GlobalResult result;
-    result.type = Result::Global;
+    AssetsResult result;
+    result.type = Result::Assets;
     result.begin = match.capturedStart();
     result.end = match.capturedEnd();
     result.length = result.end - result.begin;
@@ -69,14 +69,14 @@ PathFinder::GlobalResult PathFinder::findGlobal(const QString& line)
     return result;
 }
 
-PathFinder::InternalResult PathFinder::findInternal(const QString& line)
+PathFinder::DesignsResult PathFinder::findDesigns(const QString& line)
 {
     const QRegularExpression exp("[a-z_][a-zA-Z0-9_]+::([a-f0-9]+)::([\\w\\\\\\/\\.\\d]+):-?(\\d+)");
     const QRegularExpressionMatch& match = exp.match(line);
     const QString& uid = match.captured(1);
 
-    InternalResult result;
-    result.type = Result::Internal;
+    DesignsResult result;
+    result.type = Result::Designs;
     result.begin = match.capturedStart();
     result.end = match.capturedEnd();
     result.length = result.end - result.begin;

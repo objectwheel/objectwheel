@@ -41,7 +41,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
 
     s_designerScene->addForm(form);
 
-    SaveManager::setupFormGlobalConnections(form->dir());
+    SaveManager::setupFormConnections(form->dir());
 
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
     // parent concept for forms in Designer; forms are directly put into DesignerScene

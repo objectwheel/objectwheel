@@ -24,29 +24,29 @@
 #include <QScreen>
 
 // FIXME:
-// What happens if a global open file get renamed
-// What happens if a global open file get deleted
-// What happens if a global open file get overwritten/content changed outside
+// What happens if a assets open file get renamed
+// What happens if a assets open file get deleted
+// What happens if a assets open file get overwritten/content changed outside
 
-// What happens if a external open file get renamed
-// What happens if a external open file get deleted
-// What happens if a external open file get overwritten/content changed outside
+// What happens if a others open file get renamed
+// What happens if a others open file get deleted
+// What happens if a others open file get overwritten/content changed outside
 
-// What happens if a internal open file get renamed
-// What happens if a internal open file get deleted
-// What happens if a internal open file get overwritten/content changed outside
+// What happens if a designs open file get renamed
+// What happens if a designs open file get deleted
+// What happens if a designs open file get overwritten/content changed outside
 // What happens if a control get deleted
 // What happens if a control's dir changes
 // What happens if a control's id changes (within code editor/out of code editor)
 // What happens to the file explorer's root path if a control's dir changes
 
 #define MARK_ASTERISK "*"
-#define global(x) static_cast<QmlCodeEditorWidget::GlobalDocument*>((x))
-#define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
-#define external(x) static_cast<QmlCodeEditorWidget::ExternalDocument*>((x))
-#define globalDir() SaveUtils::toGlobalDir(ProjectManager::dir())
-#define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
-#define externalDir(x) QFileInfo(external((x))->fullPath).path()
+#define assets(x) static_cast<QmlCodeEditorWidget::AssetsDocument*>((x))
+#define designs(x) static_cast<QmlCodeEditorWidget::DesignsDocument*>((x))
+#define others(x) static_cast<QmlCodeEditorWidget::OthersDocument*>((x))
+#define assetsDir() SaveUtils::toGlobalDir(ProjectManager::dir())
+#define designsDir(x) SaveUtils::toThisDir(designs((x))->control->dir())
+#define othersDir(x) QFileInfo(others((x))->fullPath).path()
 #define fullPath(x, y) (x) + '/' + (y)
 #define modified(x, y) (x)->isModified() ? ((y) + MARK_ASTERISK) : (y)
 #define modifiedControlId(x) controlModified((x)) ? (x)->id() + MARK_ASTERISK : (x)->id()
@@ -57,18 +57,18 @@ enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
 namespace {
 
 bool g_fileExplorerHid = false;
-QmlCodeEditorWidget::GlobalDocument* g_lastGlobalDocument;
-QmlCodeEditorWidget::InternalDocument* g_lastInternalDocument;
-QmlCodeEditorWidget::ExternalDocument* g_lastExternalDocument;
+QmlCodeEditorWidget::AssetsDocument* g_lastAssetsDocument;
+QmlCodeEditorWidget::DesignsDocument* g_lastDesignsDocument;
+QmlCodeEditorWidget::OthersDocument* g_lastOthersDocument;
 
 void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document)
 {
-    if (document->scope == QmlCodeEditorToolBar::Global)
-        g_lastGlobalDocument = global(document);
-    else if (document->scope == QmlCodeEditorToolBar::Internal)
-        g_lastInternalDocument = internal(document);
+    if (document->scope == QmlCodeEditorToolBar::Assets)
+        g_lastAssetsDocument = assets(document);
+    else if (document->scope == QmlCodeEditorToolBar::Designs)
+        g_lastDesignsDocument = designs(document);
     else
-        g_lastExternalDocument = external(document);
+        g_lastOthersDocument = others(document);
 }
 
 int warnIfModifiedContent(const QmlCodeEditorWidget::Document* document)
@@ -122,10 +122,10 @@ QString choppedPath(const QString& path)
     return choppedPath;
 }
 
-QList<Control*> controls(const QList<QmlCodeEditorWidget::InternalDocument*>& documents)
+QList<Control*> controls(const QList<QmlCodeEditorWidget::DesignsDocument*>& documents)
 {
     QSet<Control*> controlSet;
-    for (QmlCodeEditorWidget::InternalDocument* document : documents)
+    for (QmlCodeEditorWidget::DesignsDocument* document : documents)
         controlSet.insert(document->control);
     return controlSet.toList();
 }
@@ -166,9 +166,9 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
     connect(toolBar(), &QmlCodeEditorToolBar::comboActivated,
             this, &QmlCodeEditorWidget::onComboActivation);
     connect(toolBar(), &QmlCodeEditorToolBar::newFile,
-            this, &QmlCodeEditorWidget::onNewExternalFile);
+            this, &QmlCodeEditorWidget::onNewOthersFile);
     connect(toolBar(), &QmlCodeEditorToolBar::openFile,
-            this, &QmlCodeEditorWidget::onOpenExternalFile);
+            this, &QmlCodeEditorWidget::onOpenOthersFile);
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
@@ -177,7 +177,7 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
 
 int QmlCodeEditorWidget::count() const
 {
-    return m_globalDocuments.size() + m_internalDocuments.size() + m_externalDocuments.size();
+    return m_assetsDocuments.size() + m_designsDocuments.size() + m_OthersDocuments.size();
 }
 
 void QmlCodeEditorWidget::discharge()
@@ -190,28 +190,28 @@ void QmlCodeEditorWidget::discharge()
 
     m_openDocument = nullptr;
     g_fileExplorerHid = false;
-    g_lastGlobalDocument = nullptr;
-    g_lastInternalDocument = nullptr;
-    g_lastExternalDocument = nullptr;
+    g_lastAssetsDocument = nullptr;
+    g_lastDesignsDocument = nullptr;
+    g_lastOthersDocument = nullptr;
 
     setFileExplorerVisible(false);
     toolBar()->setHiddenActions(QmlCodeEditorToolBar::AllActions);
 
-    for (GlobalDocument* document : m_globalDocuments) {
+    for (AssetsDocument* document : m_assetsDocuments) {
         delete document->document;
         delete document;
     }
-    for (InternalDocument* document : m_internalDocuments) {
+    for (DesignsDocument* document : m_designsDocuments) {
         delete document->document;
         delete document;
     }
-    for (ExternalDocument* document : m_externalDocuments) {
+    for (OthersDocument* document : m_OthersDocuments) {
         delete document->document;
         delete document;
     }
-    m_globalDocuments.clear();
-    m_internalDocuments.clear();
-    m_externalDocuments.clear();
+    m_assetsDocuments.clear();
+    m_designsDocuments.clear();
+    m_OthersDocuments.clear();
 }
 
 void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
@@ -220,7 +220,7 @@ void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
     m_fileExplorer->setHidden(!visible);
 }
 
-void QmlCodeEditorWidget::onNewExternalFile()
+void QmlCodeEditorWidget::onNewOthersFile()
 {
     const QString& fullPath = QFileDialog::getSaveFileName(
                 this,
@@ -234,10 +234,10 @@ void QmlCodeEditorWidget::onNewExternalFile()
     if (!FileSystemUtils::makeFile(fullPath))
         return;
 
-    openExternal(fullPath);
+    openOthers(fullPath);
 }
 
-void QmlCodeEditorWidget::onOpenExternalFile()
+void QmlCodeEditorWidget::onOpenOthersFile()
 {
     const QString& fullPath = QFileDialog::getOpenFileName(
                 this,
@@ -248,7 +248,7 @@ void QmlCodeEditorWidget::onOpenExternalFile()
     if (fullPath.isEmpty())
         return;
 
-    openExternal(fullPath);
+    openOthers(fullPath);
 }
 
 void QmlCodeEditorWidget::onModificationChange(Document* document)
@@ -261,33 +261,33 @@ void QmlCodeEditorWidget::onModificationChange(Document* document)
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
     switch (scope) {
-    case QmlCodeEditorToolBar::Global:
+    case QmlCodeEditorToolBar::Assets:
         for (int i = 0; i < leftCombo->count(); ++i) {
-            GlobalDocument* doc = leftCombo->itemData(i, DocumentRole).value<GlobalDocument*>();
+            AssetsDocument* doc = leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>();
             if (doc == document) {
                 leftCombo->setItemText(i, modified(doc->document, doc->relativePath));
                 break;
             }
         } break;
 
-    case QmlCodeEditorToolBar::External:
+    case QmlCodeEditorToolBar::Others:
         for (int i = 0; i < leftCombo->count(); ++i) {
-            ExternalDocument* doc = leftCombo->itemData(i, DocumentRole).value<ExternalDocument*>();
+            OthersDocument* doc = leftCombo->itemData(i, DocumentRole).value<OthersDocument*>();
             if (doc == document) {
                 leftCombo->setItemText(i, modified(doc->document, QFileInfo(doc->fullPath).fileName()));
                 break;
             }
         } break;
 
-    case QmlCodeEditorToolBar::Internal:
+    case QmlCodeEditorToolBar::Designs:
         for (int i = 0; i < leftCombo->count(); ++i) {
             Control* control = leftCombo->itemData(i, ControlRole).value<Control*>();
-            if (control == internal(document)->control) {
+            if (control == designs(document)->control) {
                 leftCombo->setItemText(i, modifiedControlId(control));
                 break;
             }
         } for (int i = 0; i < rightCombo->count(); ++i) {
-            InternalDocument* doc = rightCombo->itemData(i, DocumentRole).value<InternalDocument*>();
+            DesignsDocument* doc = rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>();
             if (doc == document) {
                 rightCombo->setItemText(i, modified(doc->document, doc->relativePath));
                 break;
@@ -321,11 +321,11 @@ void QmlCodeEditorWidget::saveOpen()
 
 void QmlCodeEditorWidget::saveAll()
 {
-    for (GlobalDocument* document : m_globalDocuments)
+    for (AssetsDocument* document : m_assetsDocuments)
         save(document);
-    for (InternalDocument* document : m_internalDocuments)
+    for (DesignsDocument* document : m_designsDocuments)
         save(document);
-    for (ExternalDocument* document : m_externalDocuments)
+    for (OthersDocument* document : m_OthersDocuments)
         save(document);
 }
 
@@ -335,12 +335,12 @@ void QmlCodeEditorWidget::save(QmlCodeEditorWidget::Document* document)
         return;
 
     QString path;
-    if (document->scope == QmlCodeEditorToolBar::Global)
-        path = fullPath(globalDir(), global(document)->relativePath);
-    else if (document->scope == QmlCodeEditorToolBar::Internal)
-        path = fullPath(internalDir(document), internal(document)->relativePath);
+    if (document->scope == QmlCodeEditorToolBar::Assets)
+        path = fullPath(assetsDir(), assets(document)->relativePath);
+    else if (document->scope == QmlCodeEditorToolBar::Designs)
+        path = fullPath(designsDir(document), designs(document)->relativePath);
     else
-        path = external(document)->fullPath;
+        path = others(document)->fullPath;
 
     Q_ASSERT(!path.isEmpty());
 
@@ -382,11 +382,11 @@ void QmlCodeEditorWidget::close()
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
-    if (scope == QmlCodeEditorToolBar::Global) {
-        g_lastGlobalDocument = nullptr;
-        m_globalDocuments.removeOne(global(m_openDocument));
+    if (scope == QmlCodeEditorToolBar::Assets) {
+        g_lastAssetsDocument = nullptr;
+        m_assetsDocuments.removeOne(assets(m_openDocument));
         for (int i = 0; i < leftCombo->count(); ++i) {
-            if (leftCombo->itemData(i, DocumentRole).value<GlobalDocument*>() == m_openDocument) {
+            if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == m_openDocument) {
                 indexForRemoval = i;
                 break;
             }
@@ -394,13 +394,13 @@ void QmlCodeEditorWidget::close()
         if (indexForRemoval >= 0)
             leftCombo->removeItem(indexForRemoval);
         if (leftCombo->count() > 0)
-            nextDocument = leftCombo->itemData(0, DocumentRole).value<GlobalDocument*>();
-        toolBar()->setScopeWide(QmlCodeEditorToolBar::Global, !m_globalDocuments.isEmpty());
-    } else if (scope == QmlCodeEditorToolBar::Internal) {
-        g_lastInternalDocument = nullptr;
-        m_internalDocuments.removeOne(internal(m_openDocument));
+            nextDocument = leftCombo->itemData(0, DocumentRole).value<AssetsDocument*>();
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::Assets, !m_assetsDocuments.isEmpty());
+    } else if (scope == QmlCodeEditorToolBar::Designs) {
+        g_lastDesignsDocument = nullptr;
+        m_designsDocuments.removeOne(designs(m_openDocument));
         for (int i = 0; i < rightCombo->count(); ++i) {
-            if (rightCombo->itemData(i, DocumentRole).value<InternalDocument*>() == m_openDocument) {
+            if (rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>() == m_openDocument) {
                 indexForRemoval = i;
                 break;
             }
@@ -408,11 +408,11 @@ void QmlCodeEditorWidget::close()
         if (indexForRemoval >= 0)
             rightCombo->removeItem(indexForRemoval);
         if (rightCombo->count() > 0) {
-            nextDocument = rightCombo->itemData(0, DocumentRole).value<InternalDocument*>();
+            nextDocument = rightCombo->itemData(0, DocumentRole).value<DesignsDocument*>();
         } else {
             indexForRemoval = -1;
             for (int i = 0; i < leftCombo->count(); ++i) {
-                if (leftCombo->itemData(i, ControlRole).value<Control*>() == internal(m_openDocument)->control) {
+                if (leftCombo->itemData(i, ControlRole).value<Control*>() == designs(m_openDocument)->control) {
                     indexForRemoval = i;
                     break;
                 }
@@ -420,16 +420,16 @@ void QmlCodeEditorWidget::close()
             if (indexForRemoval >= 0)
                 leftCombo->removeItem(indexForRemoval);
             if (leftCombo->count() > 0) {
-                Q_ASSERT(m_internalDocuments.size() > 0);
-                nextDocument = m_internalDocuments.last();
+                Q_ASSERT(m_designsDocuments.size() > 0);
+                nextDocument = m_designsDocuments.last();
             }
         }
-        toolBar()->setScopeWide(QmlCodeEditorToolBar::Internal, !m_internalDocuments.isEmpty());
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::Designs, !m_designsDocuments.isEmpty());
     } else {
-        g_lastExternalDocument = nullptr;
-        m_externalDocuments.removeOne(external(m_openDocument));
+        g_lastOthersDocument = nullptr;
+        m_OthersDocuments.removeOne(others(m_openDocument));
         for (int i = 0; i < leftCombo->count(); ++i) {
-            if (leftCombo->itemData(i, DocumentRole).value<ExternalDocument*>() == m_openDocument) {
+            if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == m_openDocument) {
                 indexForRemoval = i;
                 break;
             }
@@ -437,8 +437,8 @@ void QmlCodeEditorWidget::close()
         if (indexForRemoval >= 0)
             leftCombo->removeItem(indexForRemoval);
         if (leftCombo->count() > 0)
-            nextDocument = leftCombo->itemData(0, DocumentRole).value<ExternalDocument*>();
-        toolBar()->setScopeWide(QmlCodeEditorToolBar::External, !m_externalDocuments.isEmpty());
+            nextDocument = leftCombo->itemData(0, DocumentRole).value<OthersDocument*>();
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::Others, !m_OthersDocuments.isEmpty());
     }
 
     Q_ASSERT(m_openDocument != nextDocument);
@@ -456,7 +456,7 @@ void QmlCodeEditorWidget::close()
 void QmlCodeEditorWidget::showNoDocumentsOpen()
 {
     QmlCodeEditorToolBar::DocumentActions hiddenActions = QmlCodeEditorToolBar::AllActions;
-    if (toolBar()->scope() == QmlCodeEditorToolBar::External)
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Others)
         hiddenActions &= ~QmlCodeEditorToolBar::FileActions;
     m_openDocument = nullptr;
     m_codeEditor->setNoDocsVisible(true);
@@ -469,33 +469,33 @@ void QmlCodeEditorWidget::showNoDocumentsOpen()
 
 void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 {
-    if (scope == QmlCodeEditorToolBar::Global && g_lastGlobalDocument)
-        return openGlobal(QString());
-    if (scope == QmlCodeEditorToolBar::Internal && g_lastInternalDocument)
-        return openInternal(nullptr, QString());
-    if (scope == QmlCodeEditorToolBar::External && g_lastExternalDocument)
-        return openExternal(QString());
+    if (scope == QmlCodeEditorToolBar::Assets && g_lastAssetsDocument)
+        return openAssets(QString());
+    if (scope == QmlCodeEditorToolBar::Designs && g_lastDesignsDocument)
+        return openDesigns(nullptr, QString());
+    if (scope == QmlCodeEditorToolBar::Others && g_lastOthersDocument)
+        return openOthers(QString());
     showNoDocumentsOpen();
 }
 
 void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
 {
-    Q_ASSERT(toolBar()->scope() != QmlCodeEditorToolBar::Global || combo != QmlCodeEditorToolBar::RightCombo);
-    Q_ASSERT(toolBar()->scope() != QmlCodeEditorToolBar::External || combo != QmlCodeEditorToolBar::RightCombo);
+    Q_ASSERT(toolBar()->scope() != QmlCodeEditorToolBar::Assets || combo != QmlCodeEditorToolBar::RightCombo);
+    Q_ASSERT(toolBar()->scope() != QmlCodeEditorToolBar::Others || combo != QmlCodeEditorToolBar::RightCombo);
 
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
-    if (toolBar()->scope() == QmlCodeEditorToolBar::Global)
-        return openGlobal(choppedPath(leftCombo->currentText()));
-    if (toolBar()->scope() == QmlCodeEditorToolBar::External)
-        return openExternal(fullPath(m_fileExplorer->rootPath(), choppedPath(leftCombo->currentText())));
-    if (toolBar()->scope() == QmlCodeEditorToolBar::Internal) {
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Assets)
+        return openAssets(choppedPath(leftCombo->currentText()));
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Others)
+        return openOthers(fullPath(m_fileExplorer->rootPath(), choppedPath(leftCombo->currentText())));
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Designs) {
         Control* control = leftCombo->itemData(leftCombo->currentIndex(), ControlRole).value<Control*>();
         if (combo == QmlCodeEditorToolBar::RightCombo)
-            return openInternal(control, choppedPath(rightCombo->currentText()));
+            return openDesigns(control, choppedPath(rightCombo->currentText()));
         if (combo == QmlCodeEditorToolBar::LeftCombo) {
-            InternalDocument* lastDoc = control->property("ow_last_document").value<InternalDocument*>();
+            DesignsDocument* lastDoc = control->property("ow_last_document").value<DesignsDocument*>();
             return openDocument(lastDoc);
         }
     }
@@ -503,137 +503,137 @@ void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
 
 void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
 {
-    if (m_openDocument->scope == QmlCodeEditorToolBar::Global)
-        return openGlobal(relativePath);
-    if (m_openDocument->scope == QmlCodeEditorToolBar::Internal)
-        return openInternal(internal(m_openDocument)->control, relativePath);
-    if (m_openDocument->scope == QmlCodeEditorToolBar::External)
-        return openExternal(fullPath(m_fileExplorer->rootPath(), relativePath));
+    if (m_openDocument->scope == QmlCodeEditorToolBar::Assets)
+        return openAssets(relativePath);
+    if (m_openDocument->scope == QmlCodeEditorToolBar::Designs)
+        return openDesigns(designs(m_openDocument)->control, relativePath);
+    if (m_openDocument->scope == QmlCodeEditorToolBar::Others)
+        return openOthers(fullPath(m_fileExplorer->rootPath(), relativePath));
 }
 
 bool QmlCodeEditorWidget::documentExists(QmlCodeEditorWidget::Document* document) const
 {
-    for (GlobalDocument* doc : m_globalDocuments) {
+    for (AssetsDocument* doc : m_assetsDocuments) {
         if (doc == document)
             return true;
     }
-    for (InternalDocument* doc : m_internalDocuments) {
+    for (DesignsDocument* doc : m_designsDocuments) {
         if (doc == document)
             return true;
     }
-    for (ExternalDocument* doc : m_externalDocuments) {
+    for (OthersDocument* doc : m_OthersDocuments) {
         if (doc == document)
             return true;
     }
     return false;
 }
 
-void QmlCodeEditorWidget::openGlobal(const QString& relativePath)
+void QmlCodeEditorWidget::openAssets(const QString& relativePath)
 {
     if (relativePath.isEmpty())
-        return openDocument(g_lastGlobalDocument);
-    if (!QFileInfo::exists(fullPath(globalDir(), relativePath)))
-        return (void) (qWarning() << tr("openGlobal: File not exists."));
-    if (warnIfNotATextFile(fullPath(globalDir(), relativePath)))
+        return openDocument(g_lastAssetsDocument);
+    if (!QFileInfo::exists(fullPath(assetsDir(), relativePath)))
+        return (void) (qWarning() << tr("openAssets: File not exists."));
+    if (warnIfNotATextFile(fullPath(assetsDir(), relativePath)))
         return;
-    if (!globalExists(relativePath))
-        return openDocument(addGlobal(relativePath));
-    openDocument(getGlobal(relativePath));
+    if (!assetsExists(relativePath))
+        return openDocument(addAssets(relativePath));
+    openDocument(getAssets(relativePath));
 }
 
-void QmlCodeEditorWidget::openInternal(Control* control, const QString& relativePath)
+void QmlCodeEditorWidget::openDesigns(Control* control, const QString& relativePath)
 {
     if (!control || relativePath.isEmpty())
-        return openDocument(g_lastInternalDocument);
+        return openDocument(g_lastDesignsDocument);
     if (!QFileInfo::exists(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
-        return (void) (qWarning() << tr("openInternal: File not exists."));
+        return (void) (qWarning() << tr("openDesigns: File not exists."));
     if (warnIfNotATextFile(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
         return;
-    if (!internalExists(control, relativePath))
-        return openDocument(addInternal(control, relativePath));
-    openDocument(getInternal(control, relativePath));
+    if (!designsExists(control, relativePath))
+        return openDocument(addDesigns(control, relativePath));
+    openDocument(getDesigns(control, relativePath));
 }
 
-void QmlCodeEditorWidget::openExternal(const QString& fullPath)
+void QmlCodeEditorWidget::openOthers(const QString& fullPath)
 {
     if (fullPath.isEmpty())
-        return openDocument(g_lastExternalDocument);
+        return openDocument(g_lastOthersDocument);
     if (!QFileInfo::exists(fullPath))
-        return (void) (qWarning() << tr("openExternal: File not exists."));
+        return (void) (qWarning() << tr("openOthers: File not exists."));
     if (warnIfNotATextFile(fullPath))
         return;
-    if (!externalExists(fullPath))
-        return openDocument(addExternal(fullPath));
-    openDocument(getExternal(fullPath));
+    if (!othersExists(fullPath))
+        return openDocument(addOthers(fullPath));
+    openDocument(getOthers(fullPath));
 }
 
-bool QmlCodeEditorWidget::globalExists(const QString& relativePath) const
+bool QmlCodeEditorWidget::assetsExists(const QString& relativePath) const
 {
-    for (GlobalDocument* document : m_globalDocuments) {
+    for (AssetsDocument* document : m_assetsDocuments) {
         if (document->relativePath == relativePath)
             return true;
     }
     return false;
 }
 
-bool QmlCodeEditorWidget::internalExists(Control* control, const QString& relativePath) const
+bool QmlCodeEditorWidget::designsExists(Control* control, const QString& relativePath) const
 {
-    for (InternalDocument* document : m_internalDocuments) {
+    for (DesignsDocument* document : m_designsDocuments) {
         if (document->relativePath == relativePath && control == document->control)
             return true;
     }
     return false;
 }
 
-bool QmlCodeEditorWidget::externalExists(const QString& fullPath) const
+bool QmlCodeEditorWidget::othersExists(const QString& fullPath) const
 {
-    for (ExternalDocument* document : m_externalDocuments) {
+    for (OthersDocument* document : m_OthersDocuments) {
         if (document->fullPath == fullPath)
             return true;
     }
     return false;
 }
 
-QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::getGlobal(const QString& relativePath) const
+QmlCodeEditorWidget::AssetsDocument* QmlCodeEditorWidget::getAssets(const QString& relativePath) const
 {
-    for (GlobalDocument* document : m_globalDocuments) {
+    for (AssetsDocument* document : m_assetsDocuments) {
         if (document->relativePath == relativePath)
             return document;
     }
     return nullptr;
 }
 
-QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::getInternal(Control* control,
+QmlCodeEditorWidget::DesignsDocument* QmlCodeEditorWidget::getDesigns(Control* control,
                                                                         const QString& relativePath) const
 {
-    for (InternalDocument* document : m_internalDocuments) {
+    for (DesignsDocument* document : m_designsDocuments) {
         if (document->relativePath == relativePath && control == document->control)
             return document;
     }
     return nullptr;
 }
 
-QmlCodeEditorWidget::ExternalDocument*QmlCodeEditorWidget::getExternal(const QString& fullPath) const
+QmlCodeEditorWidget::OthersDocument*QmlCodeEditorWidget::getOthers(const QString& fullPath) const
 {
-    for (ExternalDocument* document : m_externalDocuments) {
+    for (OthersDocument* document : m_OthersDocuments) {
         if (document->fullPath == fullPath)
             return document;
     }
     return nullptr;
 }
 
-QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QString& relativePath)
+QmlCodeEditorWidget::AssetsDocument* QmlCodeEditorWidget::addAssets(const QString& relativePath)
 {
-    const QString& filePath = globalDir() + '/' + relativePath;
+    const QString& filePath = assetsDir() + '/' + relativePath;
 
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly)) {
-        qWarning("QmlCodeEditorWidget: Cannot open global file");
+        qWarning("QmlCodeEditorWidget: Cannot open assets file");
         return nullptr; // TODO: Guard against nullptr for those who uses this function
     }
 
-    GlobalDocument* document = new GlobalDocument;
-    document->scope = QmlCodeEditorToolBar::Global;
+    AssetsDocument* document = new AssetsDocument;
+    document->scope = QmlCodeEditorToolBar::Assets;
     document->relativePath = relativePath;
     document->document = new QmlCodeDocument(m_codeEditor);
     document->document->setFilePath(filePath);
@@ -642,9 +642,9 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
     document->textCursor = QTextCursor(document->document);
     file.close();
 
-    m_globalDocuments.append(document);
+    m_assetsDocuments.append(document);
 
-    if (toolBar()->scope() == QmlCodeEditorToolBar::Global) {
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Assets) {
         QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
         int i = leftCombo->count();
         leftCombo->addItem(document->relativePath);
@@ -652,24 +652,24 @@ QmlCodeEditorWidget::GlobalDocument* QmlCodeEditorWidget::addGlobal(const QStrin
         leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
 
-    toolBar()->setScopeWide(QmlCodeEditorToolBar::Global, true);
+    toolBar()->setScopeWide(QmlCodeEditorToolBar::Assets, true);
 
     return document;
 }
 
-QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control* control,
+QmlCodeEditorWidget::DesignsDocument* QmlCodeEditorWidget::addDesigns(Control* control,
                                                                         const QString& relativePath)
 {
     const QString& filePath = fullPath(SaveUtils::toThisDir(control->dir()), relativePath);
 
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly)) {
-        qWarning("QmlCodeEditorWidget: Cannot open internal file");
+        qWarning("QmlCodeEditorWidget: Cannot open designs file");
         return nullptr; // TODO: Guard against nullptr for those who uses this function
     }
 
-    InternalDocument* document = new InternalDocument;
-    document->scope = QmlCodeEditorToolBar::Internal;
+    DesignsDocument* document = new DesignsDocument;
+    document->scope = QmlCodeEditorToolBar::Designs;
     document->control = control;
     document->relativePath = relativePath;
     document->document = new QmlCodeDocument(m_codeEditor);
@@ -679,9 +679,9 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control*
     document->textCursor = QTextCursor(document->document);
     file.close();
 
-    m_internalDocuments.append(document);
+    m_designsDocuments.append(document);
 
-    if (toolBar()->scope() == QmlCodeEditorToolBar::Internal) {
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Designs) {
         if (!controlExists(control)) {
             QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
             int i = leftCombo->count();
@@ -696,12 +696,12 @@ QmlCodeEditorWidget::InternalDocument* QmlCodeEditorWidget::addInternal(Control*
         rightCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
 
-    toolBar()->setScopeWide(QmlCodeEditorToolBar::Internal, true);
+    toolBar()->setScopeWide(QmlCodeEditorToolBar::Designs, true);
 
     return document;
 }
 
-QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QString& fullPath)
+QmlCodeEditorWidget::OthersDocument* QmlCodeEditorWidget::addOthers(const QString& fullPath)
 {
     QFile file(fullPath);
     if (!file.open(QFile::ReadOnly)) {
@@ -709,8 +709,8 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
         return nullptr; // TODO: Guard against nullptr for those who uses this function
     }
 
-    ExternalDocument* document = new ExternalDocument;
-    document->scope = QmlCodeEditorToolBar::External;
+    OthersDocument* document = new OthersDocument;
+    document->scope = QmlCodeEditorToolBar::Others;
     document->fullPath = fullPath;
     document->document = new QmlCodeDocument(m_codeEditor);
     document->document->setFilePath(fullPath);
@@ -719,9 +719,9 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
     document->textCursor = QTextCursor(document->document);
     file.close();
 
-    m_externalDocuments.append(document);
+    m_OthersDocuments.append(document);
 
-    if (toolBar()->scope() == QmlCodeEditorToolBar::External) {
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Others) {
         QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
         int i = leftCombo->count();
         leftCombo->addItem(QFileInfo(document->fullPath).fileName());
@@ -729,7 +729,7 @@ QmlCodeEditorWidget::ExternalDocument* QmlCodeEditorWidget::addExternal(const QS
         leftCombo->setItemData(i, QVariant::fromValue(document), ComboDataRole::DocumentRole);
     }
 
-    toolBar()->setScopeWide(QmlCodeEditorToolBar::External, true);
+    toolBar()->setScopeWide(QmlCodeEditorToolBar::Others, true);
 
     return document;
 }
@@ -773,12 +773,12 @@ void QmlCodeEditorWidget::setupCodeEditor(QmlCodeEditorWidget::Document* documen
 
 void QmlCodeEditorWidget::setupFileExplorer(QmlCodeEditorWidget::Document* document)
 {
-    if (document->scope == QmlCodeEditorToolBar::Global)
-        return m_fileExplorer->setRootPath(globalDir());
-    if (document->scope == QmlCodeEditorToolBar::Internal)
-        return m_fileExplorer->setRootPath(internalDir(document));
-    if (document->scope == QmlCodeEditorToolBar::External)
-        return m_fileExplorer->setRootPath(externalDir(document));
+    if (document->scope == QmlCodeEditorToolBar::Assets)
+        return m_fileExplorer->setRootPath(assetsDir());
+    if (document->scope == QmlCodeEditorToolBar::Designs)
+        return m_fileExplorer->setRootPath(designsDir(document));
+    if (document->scope == QmlCodeEditorToolBar::Others)
+        return m_fileExplorer->setRootPath(othersDir(document));
 }
 
 void QmlCodeEditorWidget::dragEnterEvent(QDragEnterEvent* e)
@@ -803,7 +803,7 @@ void QmlCodeEditorWidget::dropEvent(QDropEvent* e)
         e->accept();
         for (const QUrl& url : mimeData->urls()) {
             if (url.isLocalFile())
-                openExternal(url.toLocalFile());
+                openOthers(url.toLocalFile());
         }
     } else {
         e->ignore();
@@ -830,8 +830,8 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
 
     bool refresh = !m_openDocument
             || m_openDocument->scope != document->scope
-            || (m_openDocument->scope == QmlCodeEditorToolBar::Internal
-                && internal(m_openDocument)->control != internal(document)->control);
+            || (m_openDocument->scope == QmlCodeEditorToolBar::Designs
+                && designs(m_openDocument)->control != designs(document)->control);
 
     if (refresh) {
         leftCombo->clear();
@@ -839,10 +839,10 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
         toolBar()->setScope(scope);
 
         switch (scope) {
-        case QmlCodeEditorToolBar::Global:
+        case QmlCodeEditorToolBar::Assets:
             toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction | QmlCodeEditorToolBar::FileActions);
-            leftCombo->setToolTip(tr("Relative file path of the open document within the Global Resources"));
-            for (GlobalDocument* doc : m_globalDocuments) {
+            leftCombo->setToolTip(tr("Relative file path of the open document within the Assets"));
+            for (AssetsDocument* doc : m_assetsDocuments) {
                 int i = leftCombo->count();
                 leftCombo->addItem(modified(doc->document, doc->relativePath));
                 leftCombo->setItemData(i, doc->relativePath, Qt::ToolTipRole);
@@ -851,34 +851,34 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
                     leftCombo->setCurrentIndex(i);
             } break;
 
-        case QmlCodeEditorToolBar::Internal:
+        case QmlCodeEditorToolBar::Designs:
             toolBar()->setHiddenActions(QmlCodeEditorToolBar::FileActions);
             leftCombo->setToolTip(tr("Control name"));
             rightCombo->setToolTip(tr("Relative file path of the open document within the control"));
-            for (Control* control : controls(m_internalDocuments)) {
+            for (Control* control : controls(m_designsDocuments)) {
                 int i = leftCombo->count();
                 leftCombo->addItem(modifiedControlId(control));
                 leftCombo->setItemData(i, control->id() + "::" + control->uid(), Qt::ToolTipRole);
                 leftCombo->setItemData(i, QVariant::fromValue(control), ComboDataRole::ControlRole);
-                if (internal(document)->control == control)
+                if (designs(document)->control == control)
                     leftCombo->setCurrentIndex(i);
-            } for (InternalDocument* doc : m_internalDocuments) {
-                if (internal(document)->control == doc->control) {
+            } for (DesignsDocument* doc : m_designsDocuments) {
+                if (designs(document)->control == doc->control) {
                     int i = rightCombo->count();
                     rightCombo->addItem(modified(doc->document, doc->relativePath));
                     rightCombo->setItemData(i, doc->relativePath, Qt::ToolTipRole);
                     rightCombo->setItemData(i, QVariant::fromValue(doc), ComboDataRole::DocumentRole);
                     if (doc == document) {
                         rightCombo->setCurrentIndex(i);
-                        internal(document)->control->setProperty("ow_last_document", QVariant::fromValue(doc));
+                        designs(document)->control->setProperty("ow_last_document", QVariant::fromValue(doc));
                     }
                 }
             } break;
 
-        case QmlCodeEditorToolBar::External:
+        case QmlCodeEditorToolBar::Others:
             toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction);
             leftCombo->setToolTip(tr("File name of the open document"));
-            for (ExternalDocument* doc : m_externalDocuments) {
+            for (OthersDocument* doc : m_OthersDocuments) {
                 int i = leftCombo->count();
                 leftCombo->addItem(modified(doc->document, QFileInfo(doc->fullPath).fileName()));
                 leftCombo->setItemData(i, doc->fullPath, Qt::ToolTipRole);
@@ -889,33 +889,33 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
         }
     } else {
         switch (scope) {
-        case QmlCodeEditorToolBar::Global:
+        case QmlCodeEditorToolBar::Assets:
             for (int i = 0; i < leftCombo->count(); ++i) {
-                if (leftCombo->itemData(i, DocumentRole).value<GlobalDocument*>() == document) {
+                if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == document) {
                     leftCombo->setCurrentIndex(i);
                     break;
                 }
             } break;
 
-        case QmlCodeEditorToolBar::External:
+        case QmlCodeEditorToolBar::Others:
             for (int i = 0; i < leftCombo->count(); ++i) {
-                if (leftCombo->itemData(i, DocumentRole).value<ExternalDocument*>() == document) {
+                if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == document) {
                     leftCombo->setCurrentIndex(i);
                     break;
                 }
             } break;
 
-        case QmlCodeEditorToolBar::Internal:
+        case QmlCodeEditorToolBar::Designs:
             for (int i = 0; i < leftCombo->count(); ++i) {
-                if (leftCombo->itemData(i, ControlRole).value<Control*>() == internal(document)->control) {
+                if (leftCombo->itemData(i, ControlRole).value<Control*>() == designs(document)->control) {
                     leftCombo->setCurrentIndex(i);
                     break;
                 }
             } for (int i = 0; i < rightCombo->count(); ++i) {
-                InternalDocument* doc = rightCombo->itemData(i, DocumentRole).value<InternalDocument*>();
+                DesignsDocument* doc = rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>();
                 if (doc == document) {
                     rightCombo->setCurrentIndex(i);
-                    internal(document)->control->setProperty("ow_last_document", QVariant::fromValue(doc));
+                    designs(document)->control->setProperty("ow_last_document", QVariant::fromValue(doc));
                     break;
                 }
             } break;
@@ -925,7 +925,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
 
 bool QmlCodeEditorWidget::controlExists(const Control* control)
 {
-    for (QmlCodeEditorWidget::InternalDocument* document : m_internalDocuments) {
+    for (QmlCodeEditorWidget::DesignsDocument* document : m_designsDocuments) {
         if (document->control == control)
             return true;
     }
@@ -935,7 +935,7 @@ bool QmlCodeEditorWidget::controlExists(const Control* control)
 bool QmlCodeEditorWidget::controlModified(const Control* control)
 {
     Q_ASSERT(controlExists(control));
-    for (QmlCodeEditorWidget::InternalDocument* document : m_internalDocuments) {
+    for (QmlCodeEditorWidget::DesignsDocument* document : m_designsDocuments) {
         if (document->control == control) {
             if (document->document->isModified())
                 return true;

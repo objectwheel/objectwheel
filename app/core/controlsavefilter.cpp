@@ -6,9 +6,7 @@
 #include <controlpreviewingmanager.h>
 #include <qmlcodedocument.h>
 
-#define internal(x) static_cast<QmlCodeEditorWidget::InternalDocument*>((x))
-#define internalDir(x) SaveUtils::toThisDir(internal((x))->control->dir())
-#define fullPath(x) internalDir((x)) + '/' + internal((x))->relativePath
+#define designs(x) static_cast<QmlCodeEditorWidget::DesignsDocument*>((x))
 
 ControlSaveFilter::ControlSaveFilter(QObject* parent) : QObject(parent)
 {
@@ -16,31 +14,31 @@ ControlSaveFilter::ControlSaveFilter(QObject* parent) : QObject(parent)
 
 void ControlSaveFilter::beforeSave(QmlCodeEditorWidget::Document* document)
 {
-    if (document->scope != QmlCodeEditorToolBar::Internal)
+    if (document->scope != QmlCodeEditorToolBar::Designs)
         return;
 
-    if (internal(document)->relativePath != SaveUtils::mainQmlFileName())
+    if (designs(document)->relativePath != SaveUtils::controlMainQmlFileName())
         return;
 
-    Control* control = internal(document)->control;
-    QmlCodeDocument* doc = internal(document)->document;
+    Control* control = designs(document)->control;
+    QmlCodeDocument* doc = designs(document)->document;
 
-    m_id = ParserUtils::property(doc, fullPath(document), "id");
+    m_id = ParserUtils::property(doc, control->dir(), "id");
 
     if (m_id.isEmpty()) {
-        ParserUtils::setProperty(doc, fullPath(document), "id", control->id());
+        ParserUtils::setProperty(doc, control->dir(), "id", control->id());
         m_id = control->id();
     }
 }
 
 void ControlSaveFilter::afterSave(QmlCodeEditorWidget::Document* document)
 {
-    if (document->scope != QmlCodeEditorToolBar::Internal)
+    if (document->scope != QmlCodeEditorToolBar::Designs)
         return;
 
-    Control* control = internal(document)->control;
+    Control* control = designs(document)->control;
 
-    if (internal(document)->relativePath == SaveUtils::mainQmlFileName()) {
+    if (designs(document)->relativePath == SaveUtils::controlMainQmlFileName()) {
         if (control->id() != m_id)
             ControlPropertyManager::setId(control, m_id, ControlPropertyManager::SaveChanges); // For refactorId
     }

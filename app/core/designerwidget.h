@@ -26,8 +26,8 @@ public slots:
     void refresh() { onRefreshButtonClick(); }
     void onControlDoubleClick(Control*);
     void onInspectorItemDoubleClick(Control*);
-    void onGlobalFileOpen(const QString& relativePath, int line, int column);
-    void onInternalFileOpen(Control* control, const QString& relativePath, int line, int column);
+    void onAssetsFileOpen(const QString& relativePath, int line, int column);
+    void onDesignsFileOpen(Control* control, const QString& relativePath, int line, int column);
     void onControlDrop(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos);
     void onControlSelectionChange(const QList<Control*>& selectedControls);
 
