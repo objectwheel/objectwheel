@@ -403,6 +403,22 @@ bool setProperty(const QString& userDir, UserProperties property, const QVariant
     }
 }
 
+bool initControlMeta(const QString& controlDir)
+{
+    if (QFileInfo::exists(toControlMetaFile(controlDir)))
+        return true;
+
+    if (!QDir(toControlMetaDir(controlDir)).mkpath(QStringLiteral(".")))
+        return false;
+
+    ControlMetaHash hash;
+    hash.insert(ControlSignature, Internal::controlSignature());
+    hash.insert(ControlVersion, Internal::version());
+    hash.insert(ControlUid, HashFactory::generate());
+
+    return Internal::saveMetaHash(hash, toControlMetaFile(controlDir));
+}
+
 bool initProjectMeta(const QString& projectDir)
 {
     if (QFileInfo::exists(toProjectMetaFile(projectDir)))

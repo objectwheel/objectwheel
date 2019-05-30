@@ -1,4 +1,4 @@
-5
+4
 Qt Core
 Qt GUI
 Qt Network

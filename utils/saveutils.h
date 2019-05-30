@@ -114,6 +114,7 @@ bool setProperty(const QString& controlDir, ControlProperties property, const QV
 bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
 bool setProperty(const QString& userDir, UserProperties property, const QVariant& value);
 
+bool initControlMeta(const QString& controlDir);
 bool initProjectMeta(const QString& projectDir);
 bool initUserMeta(const QString& userDir);
 

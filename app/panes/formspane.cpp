@@ -14,6 +14,7 @@
 #include <QStyledItemDelegate>
 #include <QHeaderView>
 #include <QDir>
+#include <QTemporaryDir>
 
 namespace {
 bool isProjectStarted = false;
@@ -210,17 +211,17 @@ void FormsPane::discharge()
 
 void FormsPane::onAddButtonClick()
 {
-    QString tempPath = QStandardPaths::writableLocation(QStandardPaths::TempLocation);
-    tempPath = tempPath + '/' + APP_NAME;
+    QTemporaryDir temp;
+    Q_ASSERT(temp.isValid());
 
-    QDir(tempPath).removeRecursively();
+    SaveUtils::initControlMeta(temp.path());
+    SaveUtils::setProperty(temp.path(), SaveUtils::ControlId, QStringLiteral("form"));
 
-    if (!QDir(tempPath).mkpath(".") || !FileSystemUtils::copy(":/resources/qmls/form", tempPath, true, true))
-        return;
+    const QString& thisDir = SaveUtils::toControlThisDir(temp.path());
 
-    ControlCreationManager::createForm(tempPath);
-
-    QDir(tempPath).removeRecursively();
+    QDir(thisDir).mkpath(".");
+    FileSystemUtils::copy(":/resources/qmls/form.qml", thisDir, true, true);
+    ControlCreationManager::createForm(temp.path());
 
     refresh(); // FIXME: This function has severe performance issues.
 }
