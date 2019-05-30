@@ -25,7 +25,7 @@ void ProjectExposingManager::exposeProject()
         if (form->id().isEmpty())
             ControlPropertyManager::setId(form, "form", ControlPropertyManager::SaveChanges);
 
-        if (form->id() != SaveUtils::id(form->dir()))
+        if (form->id() != SaveUtils::controlId(form->dir()))
             SaveUtils::setProperty(form->dir(), SaveUtils::ControlId, form->id());
 
         s_designerScene->addForm(form);
@@ -34,7 +34,7 @@ void ProjectExposingManager::exposeProject()
         controlTree.insert(formPath, form);
 
         for (const QString& childPath : SaveUtils::childrenPaths(formPath)) {
-            Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
+            Control* parentControl = controlTree.value(SaveUtils::toDoubleUp(childPath));
             Q_ASSERT(parentControl);
 
             auto control = new Control(childPath);
@@ -42,7 +42,7 @@ void ProjectExposingManager::exposeProject()
             if (control->id().isEmpty())
                 ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);
 
-            if (control->id() != SaveUtils::id(control->dir()))
+            if (control->id() != SaveUtils::controlId(control->dir()))
                 SaveUtils::setProperty(control->dir(), SaveUtils::ControlId, control->id());
 
             ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);

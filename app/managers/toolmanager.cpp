@@ -21,77 +21,53 @@
 #include <QEventLoop>
 #include <QtCore/QBuffer>
 
-#define DEFAULT_CATEGORY            "Others"
-#define DEFAULT_NAME                "Tool"
-#define TOOLS_SOURCE_DIRECTORY      ":/tools"
-#define TOOLS_DESTINATION_DIRECTORY "tools"
-#define DIR_QRC_CONTROL             ":/resources/qmls/control"
-
-namespace {
-
-static bool currentProjectHasToolsInstalled()
-{
-    if (ProjectManager::uid().isEmpty())
-        return false;
-    if (!QDir().exists(
-                ProjectManager::dir() +
-                '/' +
-                TOOLS_DESTINATION_DIRECTORY
-                ))
-        return false;
-    else
-        return true;
-}
-}
+#define DEFAULT_NAME     "Tool"
+#define DEFAULT_CATEGORY "Others"
 
 QList<ToolboxTree*> ToolManager::s_toolboxTreeList;
-
-QString ToolManager::toolsDir()
-{
-    auto projectDir = ProjectManager::dir();
-    if (projectDir.isEmpty()) return projectDir;
-    return projectDir + '/' + TOOLS_DESTINATION_DIRECTORY;
-}
 
 QStringList ToolManager::categories()
 {
     QStringList categories;
 
-    if (!currentProjectHasToolsInstalled())
+    const QString& toolsDir = SaveUtils::toProjectToolsDir(ProjectManager::dir());
+
+    if (!QFileInfo::exists(toolsDir))
         return categories;
 
-    for (auto dir : QDir(toolsDir()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-        auto toolPath = toolsDir() + '/' + dir;
-        auto category = SaveUtils::controlToolCategory(toolPath);
+    for (const QString& toolDirName : QDir(toolsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& category = SaveUtils::controlToolCategory(toolsDir + '/' + toolDirName);
         if (!categories.contains(category))
             categories << category;
     }
+
     return categories;
 }
 
 void ToolManager::fillTree(ToolboxTree* tree)
 {
-    if (!currentProjectHasToolsInstalled())
+    const QString& toolsDir = SaveUtils::toProjectToolsDir(ProjectManager::dir());
+
+    if (!QFileInfo::exists(toolsDir))
         return;
 
     tree->clear();
     tree->clearUrls();
-    for (auto toolDir : QDir(toolsDir()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
-        addToTree(toolsDir() + '/' + toolDir, tree);
+
+    for (const QString& toolDirName : QDir(toolsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
+        addToTree(toolsDir + '/' + toolDirName, tree);
 }
 
 bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
 {
-    if (ProjectManager::uid().isEmpty() ||
-            toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
+    if (ProjectManager::uid().isEmpty() || toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
         return false;
 
     QList<QUrl> urls;
-    auto dir = SaveUtils::toThisDir(toolPath) + '/';
-    auto category = SaveUtils::category(toolPath);
-    auto name = SaveUtils::name(toolPath);
+    auto category = SaveUtils::controlToolCategory(toolPath);
+    auto name = SaveUtils::controlToolName(toolPath);
 
-    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFileName());
+    urls << QUrl::fromLocalFile(toolPath);
     if (category.isEmpty())
         category = DEFAULT_CATEGORY;
     if (name.isEmpty())
@@ -105,7 +81,7 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
         topItem->setExpanded(true);
     }
 
-    QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::icon(toolPath)));
+    QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::controlIcon(toolPath)));
     icon.setDevicePixelRatio(tree->devicePixelRatioF());
     QTreeWidgetItem* item = new QTreeWidgetItem;
     item->setText(0, name);
@@ -116,12 +92,9 @@ bool ToolManager::addToTree(const QString& toolPath, ToolboxTree* tree)
     return true;
 }
 
-void ToolManager::discharge()
+void ToolManager::clear()
 {
-    if (!currentProjectHasToolsInstalled())
-        return;
-
-    for (auto tree : s_toolboxTreeList) {
+    for (ToolboxTree* tree : s_toolboxTreeList) {
         tree->clearSelection();
         tree->setCurrentItem(nullptr);
         tree->clear();
@@ -130,39 +103,20 @@ void ToolManager::discharge()
     }
 }
 
-bool ToolManager::addTool(const QString& toolPath, const bool select, const bool qrc)
+bool ToolManager::addToolToTrees(const QString& toolPath, const bool select, const bool qrc)
 {
-    if (ProjectManager::uid().isEmpty() ||
-            toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
+    if (toolPath.isEmpty() || !SaveUtils::isControlValid(toolPath))
         return false;
-
-    if (!currentProjectHasToolsInstalled())
-        return false;
-
-    const bool isNewTool = !toolPath.contains(toolsDir());
-    QString newToolPath;
-    if (isNewTool) {
-        newToolPath = toolsDir() + '/' + HashFactory::generate();
-
-        if (!QDir(newToolPath).mkpath("."))
-            return false;
-
-        if (!FileSystemUtils::copy(toolPath, newToolPath, true, qrc))
-            return false;
-
-        SaveUtils::regenerateUids(newToolPath);
-    } else {
-        newToolPath = toolPath;
-    }
 
     QList<QUrl> urls;
-    auto dir = SaveUtils::toThisDir(newToolPath) + '/';
-    auto category = SaveUtils::category(newToolPath);
-    auto name = SaveUtils::name(newToolPath);
+    auto category = SaveUtils::controlToolCategory(toolPath);
+    auto name = SaveUtils::controlToolName(toolPath);
 
-    urls << QUrl::fromLocalFile(dir + SaveUtils::mainQmlFileName());
+    urls << QUrl::fromLocalFile(toolPath);
+
     if (category.isEmpty())
         category = DEFAULT_CATEGORY;
+
     if (name.isEmpty())
         name = DEFAULT_NAME;
 
@@ -175,7 +129,7 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
             topItem->setExpanded(true);
         }
 
-        QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::icon(newToolPath)));
+        QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::controlIcon(toolPath)));
         icon.setDevicePixelRatio(tree->devicePixelRatioF());
         QTreeWidgetItem* item = new QTreeWidgetItem;
         item->setText(0, name);
@@ -194,38 +148,17 @@ bool ToolManager::addTool(const QString& toolPath, const bool select, const bool
     return true;
 }
 
-void ToolManager::removeTool(const QString& toolPath)
-{
-    for (auto tree : s_toolboxTreeList) {
-        tree->clearSelection();
-        tree->setCurrentItem(nullptr);
-        for (int i = 0; i < tree->topLevelItemCount(); i++) {
-            auto tli = tree->topLevelItem(i);
-            for (int j = 0; j < tli->childCount(); j++) {
-                auto ci = tli->child(j);
-                if (SaveUtils::toParentDir(tree->urls(ci).first().
-                                toLocalFile()) == toolPath) {
-                    tree->removeUrls(ci);
-                    delete tli->takeChild(j);
-                    if (tli->childCount() <= 0)
-                        delete tree->takeTopLevelItem(i);
-                    QDir(toolPath).removeRecursively();
-                    emit tree->itemSelectionChanged();
-                }
-            }
-        }
-    }
-}
-
 void ToolManager::addToolboxTree(ToolboxTree* toolboxTree)
 {
     s_toolboxTreeList << toolboxTree;
     fillTree(toolboxTree);
 }
 
-void ToolManager::exposeTools()
+void ToolManager::initTools(const QString& projectDir)
 {
-    if (ProjectManager::uid().isEmpty())
+    const QString& toolsDir = SaveUtils::toProjectToolsDir(projectDir);
+
+    if (!QFileInfo::exists(projectDir))
         return;
 
     for (ToolboxTree* tree : s_toolboxTreeList) {
@@ -233,52 +166,35 @@ void ToolManager::exposeTools()
         tree->clearUrls();
     }
 
-    if (currentProjectHasToolsInstalled()) {
-        for (const QString& toolDirName : QDir(toolsDir()).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
-            addTool(toolsDir() + '/' + toolDirName, false);
-    } else {
-        for (const QString& toolName : QDir(TOOLS_SOURCE_DIRECTORY).entryList(QDir::Files)) {
-            const QString& toolPath = QString(TOOLS_SOURCE_DIRECTORY) + '/' + toolName;
-            const QString& newToolPath = toolsDir() + '/' + HashFactory::generate();
+    const QString& toolsSourceDir = ":/tools";
+    for (const QString& toolName : QDir(toolsSourceDir).entryList(QDir::Files)) {
+        const QString& toolPath = toolsSourceDir + '/' + toolName;
+        const QString& newToolPath = toolsDir + '/' + HashFactory::generate();
 
-            if (!QDir(newToolPath).mkpath(".")) {
-                qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x01");
-                break;
-            }
+        if (!QDir(newToolPath).mkpath(".")) {
+            qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x01");
+            break;
+        }
 
-            if (!ZipAsync::unzipSync(toolPath, newToolPath)) {
-                qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x02");
-                break;
-            }
-
-
-            if (!addTool(newToolPath, false)) {
-                qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x03");
-                break;
-            }
+        if (!ZipAsync::unzipSync(toolPath, newToolPath)) {
+            qWarning() << QObject::tr("ToolsManager::exposeTools(): ERROR! 0x02");
+            break;
         }
     }
 }
 
-void ToolManager::newTool()
+void ToolManager::exposeTools()
 {
-    addTool(DIR_QRC_CONTROL, true, true);
-}
+    const QString& toolsDir = SaveUtils::toProjectToolsDir(ProjectManager::dir());
 
-void ToolManager::resetTools()
-{
-    if (!currentProjectHasToolsInstalled())
+    if (!QFileInfo::exists(toolsDir))
         return;
 
     for (ToolboxTree* tree : s_toolboxTreeList) {
-        tree->clearSelection();
-        tree->setCurrentItem(nullptr);
         tree->clear();
         tree->clearUrls();
-        emit tree->itemSelectionChanged();
     }
 
-    QDir(toolsDir()).removeRecursively();
-    exposeTools();
+    for (const QString& toolDirName : QDir(toolsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot))
+        addToolToTrees(toolsDir + '/' + toolDirName, false);
 }
-

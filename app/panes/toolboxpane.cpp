@@ -47,7 +47,7 @@ ToolboxTree* ToolboxPane::toolboxTree()
 
 void ToolboxPane::discharge()
 {
-    ToolManager::discharge();
+    ToolManager::clear();
     _searchEdit->clear();
 }
 

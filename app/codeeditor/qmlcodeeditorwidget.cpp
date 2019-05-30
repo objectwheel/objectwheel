@@ -44,8 +44,8 @@
 #define assets(x) static_cast<QmlCodeEditorWidget::AssetsDocument*>((x))
 #define designs(x) static_cast<QmlCodeEditorWidget::DesignsDocument*>((x))
 #define others(x) static_cast<QmlCodeEditorWidget::OthersDocument*>((x))
-#define assetsDir() SaveUtils::toGlobalDir(ProjectManager::dir())
-#define designsDir(x) SaveUtils::toThisDir(designs((x))->control->dir())
+#define assetsDir() SaveUtils::toProjectAssetsDir(ProjectManager::dir())
+#define designsDir(x) SaveUtils::toControlThisDir(designs((x))->control->dir())
 #define othersDir(x) QFileInfo(others((x))->fullPath).path()
 #define fullPath(x, y) (x) + '/' + (y)
 #define modified(x, y) (x)->isModified() ? ((y) + MARK_ASTERISK) : (y)
@@ -545,9 +545,9 @@ void QmlCodeEditorWidget::openDesigns(Control* control, const QString& relativeP
 {
     if (!control || relativePath.isEmpty())
         return openDocument(g_lastDesignsDocument);
-    if (!QFileInfo::exists(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
+    if (!QFileInfo::exists(fullPath(SaveUtils::toControlThisDir(control->dir()), relativePath)))
         return (void) (qWarning() << tr("openDesigns: File not exists."));
-    if (warnIfNotATextFile(fullPath(SaveUtils::toThisDir(control->dir()), relativePath)))
+    if (warnIfNotATextFile(fullPath(SaveUtils::toControlThisDir(control->dir()), relativePath)))
         return;
     if (!designsExists(control, relativePath))
         return openDocument(addDesigns(control, relativePath));
@@ -604,7 +604,7 @@ QmlCodeEditorWidget::AssetsDocument* QmlCodeEditorWidget::getAssets(const QStrin
 }
 
 QmlCodeEditorWidget::DesignsDocument* QmlCodeEditorWidget::getDesigns(Control* control,
-                                                                        const QString& relativePath) const
+                                                                      const QString& relativePath) const
 {
     for (DesignsDocument* document : m_designsDocuments) {
         if (document->relativePath == relativePath && control == document->control)
@@ -658,9 +658,9 @@ QmlCodeEditorWidget::AssetsDocument* QmlCodeEditorWidget::addAssets(const QStrin
 }
 
 QmlCodeEditorWidget::DesignsDocument* QmlCodeEditorWidget::addDesigns(Control* control,
-                                                                        const QString& relativePath)
+                                                                      const QString& relativePath)
 {
-    const QString& filePath = fullPath(SaveUtils::toThisDir(control->dir()), relativePath);
+    const QString& filePath = fullPath(SaveUtils::toControlThisDir(control->dir()), relativePath);
 
     QFile file(filePath);
     if (!file.open(QFile::ReadOnly)) {

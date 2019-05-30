@@ -18,6 +18,7 @@ enum ControlProperties : quint32 {
 enum ProjectProperties : quint32 {
     ProjectSignature = 0x2000,
     ProjectVersion,
+    ProjectUid,
     ProjectName,
     ProjectDescription,
     ProjectCreationDate,
@@ -61,6 +62,7 @@ QString toControlMetaDir(const QString& controlDir);
 QString toProjectDesignsDir(const QString& projectDir);
 QString toProjectImportsDir(const QString& projectDir);
 QString toProjectAssetsDir(const QString& projectDir);
+QString toProjectToolsDir(const QString& projectDir);
 QString toProjectMetaDir(const QString& projectDir);
 QString toUserProjectsDir(const QString& userDir);
 QString toUserMetaDir(const QString& userDir);
@@ -80,6 +82,7 @@ QByteArray controlIcon(const QString& controlDir);
 
 bool projectHdpiScaling(const QString& projectDir);
 qint64 projectSize(const QString& projectDir);
+QString projectUid(const QString& projectDir);
 QString projectName(const QString& projectDir);
 QString projectDescription(const QString& projectDir);
 QDateTime projectCreationDate(const QString& projectDir);
@@ -111,8 +114,8 @@ bool setProperty(const QString& controlDir, ControlProperties property, const QV
 bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
 bool setProperty(const QString& userDir, UserProperties property, const QVariant& value);
 
-bool makeProjectMeta(const QString& projectDir);
-bool makeUserMeta(const QString& userDir);
+bool initProjectMeta(const QString& projectDir);
+bool initUserMeta(const QString& userDir);
 
 bool isForm(const QString& controlDir);
 bool isControlValid(const QString& controlDir);

@@ -141,6 +141,11 @@ QString toProjectAssetsDir(const QString& projectDir)
     return toProjectImportsDir(projectDir) + QStringLiteral("/assets");
 }
 
+QString toProjectToolsDir(const QString& projectDir)
+{
+    return projectDir + QStringLiteral("/tools");
+}
+
 QString toProjectMetaDir(const QString& projectDir)
 {
     return projectDir + QStringLiteral("/meta");
@@ -219,6 +224,11 @@ bool projectHdpiScaling(const QString& projectDir)
 qint64 projectSize(const QString& projectDir)
 {
     return property(projectDir, ProjectSize).value<qint64>();
+}
+
+QString projectUid(const QString& projectDir)
+{
+    return property(projectDir, ProjectUid).value<QString>();
 }
 
 QString projectName(const QString& projectDir)
@@ -358,7 +368,7 @@ bool setProperty(const QString& userDir, UserProperties property, const QVariant
     return Internal::saveMetaHash(hash, toUserMetaFile(userDir));
 }
 
-bool makeProjectMeta(const QString& projectDir)
+bool initProjectMeta(const QString& projectDir)
 {
     if (QFileInfo::exists(toProjectMetaFile(projectDir)))
         return true;
@@ -369,10 +379,12 @@ bool makeProjectMeta(const QString& projectDir)
     ProjectMetaHash hash;
     hash.insert(ProjectSignature, Internal::projectSignature());
     hash.insert(ProjectVersion, Internal::version());
+    hash.insert(ProjectUid, HashFactory::generate());
+
     return Internal::saveMetaHash(hash, toProjectMetaFile(projectDir));
 }
 
-bool makeUserMeta(const QString& userDir)
+bool initUserMeta(const QString& userDir)
 {
     if (QFileInfo::exists(toUserMetaFile(userDir)))
         return true;
@@ -401,7 +413,8 @@ bool isControlValid(const QString& controlDir)
 
 bool isProjectValid(const QString& projectDir)
 {
-    return property(projectDir, ProjectSignature).toString() == Internal::projectSignature();
+    return property(projectDir, ProjectSignature).toString() == Internal::projectSignature()
+            && !projectUid(projectDir).isEmpty();
 }
 
 bool isUserValid(const QString& userDir)

@@ -61,7 +61,7 @@ QString detectedFormRootPath(const QString& rootPath)
 {
     Q_ASSERT(!rootPath.isEmpty());
     Q_ASSERT(!ProjectManager::uid().isEmpty());
-    const QDir designs(SaveUtils::toDesignsDir(ProjectManager::dir()));
+    const QDir designs(SaveUtils::toProjectDesignsDir(ProjectManager::dir()));
     QDir root(rootPath);
     Q_ASSERT(root != designs);
     QDir deeper;
@@ -122,21 +122,6 @@ SaveManager* SaveManager::instance()
     return s_instance;
 }
 
-bool SaveManager::initProject(const QString& projectDirectory, int templateNumber)
-{
-    if (projectDirectory.isEmpty() ||
-            !QFileInfo::exists(projectDirectory) ||
-            QFileInfo::exists(SaveUtils::toDesignsDir(projectDirectory)) ||
-            !ZipAsync::unzipSync(":/templates/template" + QString::number(templateNumber) + ".zip",
-                                projectDirectory)) {
-        return false;
-    }
-
-    SaveUtils::regenerateUids(SaveUtils::toDesignsDir(projectDirectory));
-
-    return true;
-}
-
 void SaveManager::setupFormConnections(const QString& formRootPath)
 {
     Q_ASSERT(SaveUtils::isControlValid(formRootPath));
@@ -144,7 +129,7 @@ void SaveManager::setupFormConnections(const QString& formRootPath)
     const QString& id = ParserUtils::id(formRootPath);
     Q_ASSERT(!id.isEmpty());
 
-    QFile file(SaveUtils::toMainQmlFile(formRootPath));
+    QFile file(SaveUtils::toControlMainQmlFile(formRootPath));
     if (!file.open(QFile::ReadWrite)) {
         qWarning("SaveManager: Cannot open main qml file");
         return;
@@ -161,7 +146,7 @@ void SaveManager::setupFormConnections(const QString& formRootPath)
     file.write(content);
     file.close();
 
-    const QString& assetsJSPath = SaveUtils::toGlobalDir(ProjectManager::dir()) + '/' + id + ".js";
+    const QString& assetsJSPath = SaveUtils::toProjectAssetsDir(ProjectManager::dir()) + '/' + id + ".js";
     file.setFileName(":/resources/other/form.js");
     if (!file.open(QFile::ReadOnly)) {
         qWarning("SaveManager: Cannot open :/resources/other/form.js");
@@ -196,7 +181,7 @@ QString SaveManager::addForm(const QString& formRootPath)
         return {};
     }
 
-    const QString& targetDesignsDir = SaveUtils::toDesignsDir(ProjectManager::dir());
+    const QString& targetDesignsDir = SaveUtils::toProjectDesignsDir(ProjectManager::dir());
     const QString& newFormRootPath = targetDesignsDir + '/' + HashFactory::generate();
 
     if (!QDir(newFormRootPath).mkpath(".")) {
@@ -228,7 +213,7 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
         return {};
     }
 
-    const QString& targetParentControlChildrenDir = SaveUtils::toChildrenDir(targetParentControlRootPath);
+    const QString& targetParentControlChildrenDir = SaveUtils::toControlChildrenDir(targetParentControlRootPath);
     const QString& newControlRootPath = targetParentControlChildrenDir + '/' + HashFactory::generate();
 
     if (!QDir(newControlRootPath).mkpath(".")) {
@@ -261,12 +246,12 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
         return false;
     }
 
-    if (QString::compare(SaveUtils::toParentDir(control->dir()),
+    if (QString::compare(SaveUtils::toDoubleUp(control->dir()),
                          parentControl->dir(), Qt::CaseInsensitive) == 0) {
         return true;
     }
 
-    const QString& targetControlChildrenDir = SaveUtils::toChildrenDir(parentControl->dir());
+    const QString& targetControlChildrenDir = SaveUtils::toControlChildrenDir(parentControl->dir());
     const QString& newControlRootPath = targetControlChildrenDir + '/' + QDir(control->dir()).dirName();
 
     if (!QDir(newControlRootPath).mkpath(".")) {

@@ -25,29 +25,37 @@ ProjectManager* ProjectManager::instance()
 bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
                                 const QDateTime& crDate)
 {
-    const auto& udir = UserManager::dir();
+    const QString& userDir = UserManager::dir();
 
-    if (udir.isEmpty()
+    if (userDir.isEmpty()
             || name.isEmpty()
             || description.isEmpty()
             || !crDate.isValid()) {
         return false;
     }
 
-    const QString& pdir = udir + '/' + HashFactory::generate();
+    const QString& projectDir = userDir + '/' + HashFactory::generate();
     const QString& uid = HashFactory::generate();
 
-    if (!QDir(pdir).mkpath("."))
+    if (QFileInfo::exists(projectDir))
         return false;
 
-    SaveUtils::makeProjectMetaFile(pdir);
-    SaveUtils::setProperty(pdir, SaveUtils::ProjectName, name);
-    SaveUtils::setProperty(pdir, SaveUtils::ProjectDescription, description);
-    SaveUtils::setProperty(pdir, SaveUtils::ProjectCreationDate, crDate);
-    SaveUtils::setProperty(pdir, SaveUtils::ProjectUid, uid);
-
-    if (!SaveManager::initProject(pdir, templateNumber))
+    if (!QDir(projectDir).mkpath("."))
         return false;
+
+    // Extract "designs" and "imports" directories
+    if (!ZipAsync::unzipSync(":/templates/template" + QString::number(templateNumber) + ".zip", projectDir)) {
+        qWarning("WARNING: Unzipping project template unsuccessful");
+        return false;
+    }
+
+    ToolManager::initTools(projectDir);
+
+    SaveUtils::initProjectMeta(projectDir);
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectName, name);
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectDescription, description);
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectCreationDate, crDate);
+    SaveUtils::regenerateUids(SaveUtils::toProjectDesignsDir(projectDir));
 
     updateSize(uid);
 
@@ -122,7 +130,7 @@ bool ProjectManager::importProject(const QString &filePath, QString* uid)
     *uid = HashFactory::generate();
 
     SaveUtils::setProperty(pdir, SaveUtils::ProjectUid, *uid);
-    SaveUtils::regenerateUids(SaveUtils::toDesignsDir(pdir));
+    SaveUtils::regenerateUids(SaveUtils::toProjectDesignsDir(pdir));
 
     return true;
 }

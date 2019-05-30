@@ -308,7 +308,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     event->accept();
     WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(
                 this,
-                SaveUtils::toParentDir(event->mimeData()->urls().first().toLocalFile()),
+                event->mimeData()->urls().first().toLocalFile(),
                 event->pos());
     update();
 }
@@ -540,7 +540,7 @@ void Control::updatePreview(const PreviewResult& result)
         if (m_gui)
             m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size()));
         else
-            m_pixmap = QPixmap::fromImage(PaintUtils::renderNonGuiControlImage(SaveUtils::icon(m_dir), size()));
+            m_pixmap = QPixmap::fromImage(PaintUtils::renderNonGuiControlImage(SaveUtils::controlIcon(m_dir), size()));
     }
 
     for (auto resizer : m_resizers)

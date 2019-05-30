@@ -178,7 +178,7 @@ QMimeData* ToolboxTree::mimeData(const QList<QTreeWidgetItem*> items) const
     if (itemAt(_pressPoint) &&
       itemAt(_pressPoint)->parent() != nullptr) {
         QMimeData *data = QTreeWidget::mimeData(items);
-        data->setUrls(_urls[items[0]]);
+        data->setUrls(_urls.value(items.first()));
         data->setText(TOOL_KEY);
         return data;
     } else {

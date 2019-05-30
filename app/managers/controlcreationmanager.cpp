@@ -70,7 +70,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
     QMap<QString, Control*> controlTree;
     controlTree.insert(control->dir(), control);
     for (const QString& childPath : SaveUtils::childrenPaths(control->dir())) {
-        Control* parentControl = controlTree.value(SaveUtils::toParentDir(childPath));
+        Control* parentControl = controlTree.value(SaveUtils::toDoubleUp(childPath));
         Q_ASSERT(parentControl);
 
         auto childControl = new Control(childPath);

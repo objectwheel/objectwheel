@@ -23,8 +23,6 @@ private:
     explicit SaveManager(QObject* parent = nullptr);
     ~SaveManager();
 
-    static bool initProject(const QString& projectDirectory, int templateNumber);
-
     static QString addForm(const QString& formRootPath);
     static void removeForm(const QString& formRootPath);
     static void setupFormConnections(const QString& formRootPath);

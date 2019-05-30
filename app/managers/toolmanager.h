@@ -1,26 +1,18 @@
 #ifndef TOOLMANAGER_H
 #define TOOLMANAGER_H
 
-#include <QtGlobal>
-#include <QUrl>
+#include <QStringList>
 
-class QJsonObject;
 class ToolboxTree;
 
 class ToolManager final
 {
-    Q_DISABLE_COPY(ToolManager)
-
 public:
-    static void discharge();
-    static void newTool();
-    static void resetTools();
+    static void clear();
     static void exposeTools();
-    static void removeTool(const QString& toolPath);
+    static void initTools(const QString& projectDir);
     static void addToolboxTree(ToolboxTree* toolboxTree);
-    static bool addTool(const QString& toolPath, const bool select, const bool qrc = false);
-
-    static QString toolsDir();
+    static bool addToolToTrees(const QString& toolPath, const bool select, const bool qrc = false);
     static QStringList categories();
 
 private:
@@ -28,7 +20,9 @@ private:
     static bool addToTree(const QString& toolPath, ToolboxTree* tree);
 
 private:
-    ToolManager() {}
+    ToolManager() = delete;
+    ToolManager(const ToolManager&) = delete;
+    ToolManager&operator=(const ToolManager&) = delete;
 
 private:
     static QList<ToolboxTree*> s_toolboxTreeList;
