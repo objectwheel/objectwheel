@@ -235,7 +235,7 @@ bool ProjectManager::start(const QString& uid)
     if (projectDir.isEmpty())
         return false;
 
-    if (!ProjectManager::uid().isEmpty())
+    if (ProjectManager::isStarted())
         stop();
 
     s_uid = uid;
@@ -257,4 +257,9 @@ void ProjectManager::stop()
     updateSize(s_uid);
     s_uid = "";
     emit instance()->stopped();
+}
+
+bool ProjectManager::isStarted()
+{
+    return !s_uid.isEmpty();
 }

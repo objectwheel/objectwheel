@@ -28,6 +28,7 @@ public:
     InspectorPane* inspectorPane() const;
     PropertiesPane* propertiesPane() const;
     AssetsPane* assetsPane() const;
+    ToolboxPane* toolboxPane() const;
 
 public slots:
     void discharge();

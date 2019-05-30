@@ -183,7 +183,7 @@ bool ConsolePane::eventFilter(QObject* w, QEvent* e)
         while (block.isValid() && top <= viewport()->rect().bottom()) {
             if (event->pos().y() >= top && event->pos().y() <= bottom) {
                 const QString& line = block.text();
-                const PathFinder::assetsResult& assetsResult = PathFinder::findAssets(line);
+                const PathFinder::AssetsResult& assetsResult = PathFinder::findAssets(line);
                 const PathFinder::DesignsResult& designsResult = PathFinder::findDesigns(line);
 
                 if (assetsResult.isNull() && designsResult.isNull()) {

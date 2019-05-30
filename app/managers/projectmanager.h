@@ -24,6 +24,7 @@ public:
     static qint64 size(const QString& = uid());
 
     static void stop();
+    static bool isStarted();
     static bool start(const QString& uid);
     static void updateSize(const QString& uid);
     static void updateLastModification(const QString& uid);

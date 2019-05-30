@@ -7,21 +7,9 @@
 #include <controlpropertymanager.h>
 
 DesignerScene* ControlCreationManager::s_designerScene = nullptr;
-ControlCreationManager* ControlCreationManager::s_instance = nullptr;
 
 ControlCreationManager::ControlCreationManager(QObject* parent) : QObject(parent)
 {
-    s_instance = this;
-}
-
-ControlCreationManager::~ControlCreationManager()
-{
-    s_instance = nullptr;
-}
-
-ControlCreationManager* ControlCreationManager::instance()
-{
-    return s_instance;
 }
 
 void ControlCreationManager::init(DesignerScene* designerScene)

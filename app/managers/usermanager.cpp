@@ -189,7 +189,7 @@ void UserManager::onLoginSuccessful(const QVariantList& userInfo)
             UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
             return;
         }
-        SaveUtils::makeUserMetaFile(userDir);
+        SaveUtils::initUserMeta(userDir);
     }
 
     s_email = s_emailCache;

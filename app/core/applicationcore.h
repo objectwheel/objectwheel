@@ -16,6 +16,7 @@ class ControlPreviewingManager;
 class ControlCreationManager;
 class ControlRemovingManager;
 class ControlPropertyManager;
+class ToolManager;
 class RunManager;
 class SaveManager;
 class WindowManager;
@@ -61,6 +62,7 @@ private:
     static ControlCreationManager* s_controlCreationManager;
     static ControlRemovingManager* s_controlRemovingManager;
     static ControlPropertyManager* s_controlPropertyManager;
+    static ToolManager* s_toolManager;
     static RunManager* s_runManager;
     static HelpManager* s_helpManager;
     static DocumentManager* s_documentManager;

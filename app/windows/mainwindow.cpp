@@ -231,7 +231,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxDockWidget->setWindowTitle(tr("Toolbox"));
     toolboxDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, toolboxDockWidget);
-    ToolManager::addToolboxTree(m_toolboxPane->toolboxTree());
 
     /* Add Forms Pane */
     auto formsTitleLabel = new QLabel;
@@ -507,6 +506,11 @@ PropertiesPane* MainWindow::propertiesPane() const
 InspectorPane* MainWindow::inspectorPane() const
 {
     return m_inspectorPane;
+}
+
+ToolboxPane* MainWindow::toolboxPane() const
+{
+    return m_toolboxPane;
 }
 
 void MainWindow::resetSettings()

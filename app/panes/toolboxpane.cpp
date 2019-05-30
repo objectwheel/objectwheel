@@ -47,7 +47,10 @@ ToolboxTree* ToolboxPane::toolboxTree()
 
 void ToolboxPane::discharge()
 {
-    ToolManager::clear();
+    _toolboxTree->clearSelection();
+    _toolboxTree->setCurrentItem(nullptr);
+    _toolboxTree->clear();
+    _toolboxTree->clearUrls();
     _searchEdit->clear();
 }
 

@@ -60,7 +60,7 @@ inline int countIdInProjectFormScope(const QString& id, const QString formRootPa
 QString detectedFormRootPath(const QString& rootPath)
 {
     Q_ASSERT(!rootPath.isEmpty());
-    Q_ASSERT(!ProjectManager::uid().isEmpty());
+    Q_ASSERT(ProjectManager::isStarted());
     const QDir designs(SaveUtils::toProjectDesignsDir(ProjectManager::dir()));
     QDir root(rootPath);
     Q_ASSERT(root != designs);
@@ -174,7 +174,7 @@ void SaveManager::setupFormConnections(const QString& formRootPath)
 
 QString SaveManager::addForm(const QString& formRootPath)
 {
-    Q_ASSERT(!ProjectManager::uid().isEmpty());
+    Q_ASSERT(ProjectManager::isStarted());
 
     if (!SaveUtils::isControlValid(formRootPath)) {
         qWarning("SaveManager::addForm: Failed. Form data broken.");

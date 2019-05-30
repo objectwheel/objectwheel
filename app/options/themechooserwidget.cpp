@@ -495,7 +495,7 @@ void ThemeChooserWidget::discharge()
     m_saveButton->setDisabled(true);
     m_resetButton->setDisabled(true);
 
-    if (ProjectManager::uid().isEmpty())
+    if (!ProjectManager::isStarted())
         return;
 
     const auto& object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
@@ -539,7 +539,7 @@ void ThemeChooserWidget::run()
 
     QTemporaryDir tmpDir;
     Q_ASSERT(tmpDir.isValid());
-    SaveUtils::makeProjectMeta(tmpDir.path());
+    SaveUtils::initProjectMeta(tmpDir.path());
     SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     static QProcess* process = nullptr;
@@ -597,7 +597,7 @@ void ThemeChooserWidget::refresh()
 
     QTemporaryDir tmpDir;
     Q_ASSERT(tmpDir.isValid());
-    SaveUtils::makeProjectMeta(tmpDir.path());
+    SaveUtils::initProjectMeta(tmpDir.path());
     SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     QProcess process;

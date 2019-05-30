@@ -1,31 +1,26 @@
 #ifndef TOOLMANAGER_H
 #define TOOLMANAGER_H
 
-#include <QStringList>
+#include <QObject>
 
 class ToolboxTree;
 
-class ToolManager final
+class ToolManager final : public QObject
 {
-public:
-    static void clear();
-    static void exposeTools();
+    Q_OBJECT
+    Q_DISABLE_COPY(ToolManager)
+
+    friend class ApplicationCore; // For constructor, init
+    friend class ProjectManager; // For initTools, exposeTools
+
+private:
+    explicit ToolManager(QObject* parent = nullptr);
+    static void init(ToolboxTree* tree);
     static void initTools(const QString& projectDir);
-    static void addToolboxTree(ToolboxTree* toolboxTree);
-    static bool addToolToTrees(const QString& toolPath, const bool select, const bool qrc = false);
-    static QStringList categories();
+    static void exposeTools();
 
 private:
-    static void fillTree(ToolboxTree* tree);
-    static bool addToTree(const QString& toolPath, ToolboxTree* tree);
-
-private:
-    ToolManager() = delete;
-    ToolManager(const ToolManager&) = delete;
-    ToolManager&operator=(const ToolManager&) = delete;
-
-private:
-    static QList<ToolboxTree*> s_toolboxTreeList;
+    static ToolboxTree* s_toolboxTree;
 };
 
 #endif // TOOLMANAGER_H

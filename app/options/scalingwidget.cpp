@@ -23,7 +23,7 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
 
 void ScalingWidget::discharge()
 {
-    if (ProjectManager::uid().isEmpty())
+    if (!ProjectManager::isStarted())
         return;
 
     if (SaveUtils::projectHdpiScaling(ProjectManager::dir()))

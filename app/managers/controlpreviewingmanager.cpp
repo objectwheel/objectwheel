@@ -169,7 +169,7 @@ void ControlPreviewingManager::onConnected()
 
 void ControlPreviewingManager::onDisconnected()
 {
-    if (!ProjectManager::uid().isEmpty()) {
+    if (ProjectManager::isStarted()) {
         QMessageBox::StandardButton result = UtilityFunctions::showMessage(
                     nullptr, tr("Previewing Engine Crashed"),
                     tr("Would you like to start it over again?"),

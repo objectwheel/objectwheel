@@ -10,14 +10,12 @@ class ProjectExposingManager final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(ProjectExposingManager)
 
-    friend class ApplicationCore; // For constructor
+    friend class ApplicationCore; // For constructor, init
     friend class ProjectManager; // For exposeProject()
-
-public:
-    static void init(DesignerScene* designerScene);
 
 private:
     explicit ProjectExposingManager(QObject* parent = nullptr);
+    static void init(DesignerScene* designerScene);
     static void exposeProject();
 
 private:
