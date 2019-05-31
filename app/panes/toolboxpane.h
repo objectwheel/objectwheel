@@ -24,6 +24,7 @@ protected:
     QSize sizeHint() const override;
 
 private slots:
+    void fillPane();
     void filterList(const QString& filter);
     void handleMousePress(QTreeWidgetItem* item);
 

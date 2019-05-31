@@ -129,7 +129,11 @@ ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() 
     //        projectInfo.qtImportsPath = QFileInfo(qtVersion->qmakeProperty("QT_INSTALL_IMPORTS")).canonicalFilePath();
     //        projectInfo.qtVersionString = qtVersion->qtVersionString();
     //    } else {
-    projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toProjectImportsDir(ProjectManager::dir())), Dialect::Qml);
+
+    if (ProjectManager::isStarted()) {
+        projectInfo.importPaths.maybeInsert(
+                    FileName::fromString(SaveUtils::toProjectImportsDir(ProjectManager::dir())));
+    }
 
     projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
     projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();

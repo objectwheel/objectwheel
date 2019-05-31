@@ -189,6 +189,7 @@ public:
 //    void maybeQueueCppQmlTypeUpdate(const CPlusPlus::Document::Ptr &doc);
 
 signals:
+    void idle();
     void documentUpdated(QmlJS::Document::Ptr doc);
     void documentChangedOnDisk(QmlJS::Document::Ptr doc);
     void aboutToRemoveFiles(const QStringList &files);
@@ -246,6 +247,7 @@ private:
     QSet<QString> m_scannedPaths;
 
 //    QTimer *m_updateCppQmlTypesTimer;
+    QTimer *m_idleDetector;
     QTimer *m_asyncResetTimer;
 //    QHash<QString, QPair<CPlusPlus::Document::Ptr, bool> > m_queuedCppDocuments;
 //    QFuture<void> m_cppQmlTypesUpdater;

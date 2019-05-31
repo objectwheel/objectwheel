@@ -3,15 +3,66 @@
 
 #include <qmljs/qmljsdocument.h>
 #include <qmljs/parser/qmljsast_p.h>
+#include <qmljs/qmljsmodelmanagerinterface.h>
+#include <qmljs/qmljsscopechain.h>
+#include <qmljs/qmljslink.h>
 
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QRegularExpression>
+#include <QDir>
 
 using namespace QmlJS;
 using namespace AST;
 
-namespace {
+namespace ParserUtils {
+
+namespace Internal {
+
+QString getModuleName(const ScopeChain &scopeChain, const Document::Ptr &qmlDocument, const ObjectValue *value)
+{
+    if (!value)
+        return QString();
+
+    const CppComponentValue *qmlValue = value_cast<CppComponentValue>(value);
+    if (qmlValue) {
+        const QString moduleName = qmlValue->moduleName();
+        const Imports *imports = scopeChain.context()->imports(qmlDocument.data());
+        const ImportInfo importInfo = imports->info(qmlValue->className(), scopeChain.context().data());
+        if (importInfo.isValid() && importInfo.type() == ImportType::Library) {
+            const int majorVersion = importInfo.version().majorVersion();
+            const int minorVersion = importInfo.version().minorVersion();
+            return moduleName + QString::number(majorVersion) + QLatin1Char('.')
+                    + QString::number(minorVersion) ;
+        }
+        return QString();
+    } else {
+        QString typeName = value->className();
+
+        const Imports *imports = scopeChain.context()->imports(qmlDocument.data());
+        const ImportInfo importInfo = imports->info(typeName, scopeChain.context().data());
+        if (importInfo.isValid() && importInfo.type() == ImportType::Library) {
+            const QString moduleName = importInfo.name();
+            const int majorVersion = importInfo.version().majorVersion();
+            const int minorVersion = importInfo.version().minorVersion();
+            return moduleName + QString::number(majorVersion) + QLatin1Char('.')
+                    + QString::number(minorVersion) ;
+        } else if (importInfo.isValid() && importInfo.type() == ImportType::Directory) {
+            const QString path = importInfo.path();
+            const QDir dir(qmlDocument->path());
+            // should probably try to make it relatve to some import path, not to the document path
+            QString relativeDir = dir.relativeFilePath(path);
+            const QString name = relativeDir.replace(QLatin1Char('/'), QLatin1Char('.'));
+            return name;
+        } else if (importInfo.isValid() && importInfo.type() == ImportType::QrcDirectory) {
+            QString path = QrcParser::normalizedQrcDirectoryPath(importInfo.path());
+            path = path.mid(1, path.size() - ((path.size() > 1) ? 2 : 1));
+            const QString name = path.replace(QLatin1Char('/'), QLatin1Char('.'));
+            return name;
+        }
+    }
+    return QString();
+}
 
 QString cleanPropertyValue(const QString& value)
 {
@@ -301,9 +352,7 @@ void changeProperty(QTextDocument* document, const UiObjectMemberList* list, con
     }
 }
 
-}
-
-namespace ParserUtils {
+} // Internal
 
 bool exists(const QString& controlDir, const QString& property)
 {
@@ -352,7 +401,7 @@ bool exists(const QString& controlDir, const QString& property)
         return false;
     }
 
-    return propertyExists(uiObjectInitializer->members, property);
+    return Internal::propertyExists(uiObjectInitializer->members, property);
 }
 
 bool canParse(const QString& controlDir)
@@ -375,6 +424,62 @@ QString id(const QString& controlDir)
     if (canParse(controlDir))
         return property(controlDir, "id");
     return SaveUtils::controlId(controlDir);
+}
+
+QString typeName(const QString& controlDir)
+{
+    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
+    QFile file(mainQmlFilePath);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("ParserUtils: Cannot open file");
+        return {};
+    }
+    const QString& source = file.readAll();
+    file.close();
+    Dialect dialect(Dialect::Qml);
+    QSharedPointer<Document> doc = Document::create(mainQmlFilePath, dialect);
+    doc->setSource(source);
+
+    if (!doc->parse()) {
+        qWarning() << "Property couldn't read. Unable to parse qml file.";
+        return QString();
+    }
+
+    auto uiProgram = doc->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't read. Corrupted ui program.";
+        return QString();
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't read. Empty source file.";
+        return QString();
+    }
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't read. Bad file format 0x1.";
+        return QString();
+    }
+
+    auto qualifiedId = cast<UiQualifiedId *>(uiObjectDefinition->qualifiedTypeNameId);
+
+    if (!qualifiedId) {
+        qWarning() << "Property couldn't read. Bad file format 0x1.";
+        return QString();
+    }
+
+    ModelManagerInterface* manager = ModelManagerInterface::instance();
+    Link link(manager->snapshot(), manager->defaultVContext(doc->language(), doc), manager->builtins(doc));
+    ScopeChain scopeChain(doc, link(doc, nullptr));
+    QString moduleName(qualifiedId->name.toString());
+    moduleName.prepend('.');
+    moduleName.prepend(Internal::getModuleName(scopeChain, doc, scopeChain.context()->lookupType(doc.data(), qualifiedId)));
+    return moduleName;
 }
 
 QString property(const QString& controlDir, const QString& property)
@@ -424,10 +529,10 @@ QString property(const QString& controlDir, const QString& property)
         return QString();
     }
 
-    if (!propertyExists(uiObjectInitializer->members, property))
+    if (!Internal::propertyExists(uiObjectInitializer->members, property))
         return QString();
 
-    return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
+    return Internal::cleanPropertyValue(Internal::fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
 QString property(QTextDocument* doc, const QString& controlDir, const QString& property)
@@ -470,10 +575,10 @@ QString property(QTextDocument* doc, const QString& controlDir, const QString& p
         return QString();
     }
 
-    if (!propertyExists(uiObjectInitializer->members, property))
+    if (!Internal::propertyExists(uiObjectInitializer->members, property))
         return QString();
 
-    return cleanPropertyValue(fullPropertyValue(source, property, uiObjectInitializer->members));
+    return Internal::cleanPropertyValue(Internal::fullPropertyValue(source, property, uiObjectInitializer->members));
 }
 
 void setId(const QString& controlDir, const QString& id)
@@ -530,10 +635,10 @@ void setProperty(const QString& controlDir, const QString& property, const QStri
         return;
     }
 
-    if (propertyExists(uiObjectInitializer->members, property))
-        changeProperty(source, uiObjectInitializer->members, property, value);
+    if (Internal::propertyExists(uiObjectInitializer->members, property))
+        Internal::changeProperty(source, uiObjectInitializer->members, property, value);
     else
-        addProperty(source, uiObjectInitializer, property, value);
+        Internal::addProperty(source, uiObjectInitializer, property, value);
 
     file.resize(0);
     file.write(source.toUtf8());
@@ -579,10 +684,10 @@ void setProperty(QTextDocument* doc, const QString& controlDir, const QString& p
         return;
     }
 
-    if (propertyExists(uiObjectInitializer->members, property))
-        changeProperty(doc, uiObjectInitializer->members, property, value);
+    if (Internal::propertyExists(uiObjectInitializer->members, property))
+        Internal::changeProperty(doc, uiObjectInitializer->members, property, value);
     else
-        addProperty(doc, uiObjectInitializer, property, value);
+        Internal::addProperty(doc, uiObjectInitializer, property, value);
 }
 
 int addMethod(QTextDocument* document, const QString& url, const QString& method)

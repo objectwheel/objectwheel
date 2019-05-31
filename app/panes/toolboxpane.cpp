@@ -4,6 +4,7 @@
 #include <mainwindow.h>
 #include <paintutils.h>
 #include <saveutils.h>
+#include <qmljs/qmljsmodelmanagerinterface.h>
 
 #include <QApplication>
 #include <QTreeWidget>
@@ -15,6 +16,8 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
     _layout = new QVBoxLayout(this);
     _searchEdit = new LineEdit(this);
     _toolboxTree = new ToolboxTree(this);
+
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
 
@@ -38,43 +41,8 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
     _layout->setSpacing(2);
     _layout->setContentsMargins(3, 3, 3, 3);
 
-    const QString& toolsDir = SaveUtils::toProjectToolsDir(ProjectManager::dir());
-
-    for (const QString& toolDirName
-         : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-        const QString& toolPath = toolsDir + '/' + toolDirName;
-        Q_ASSERT(SaveUtils::isControlValid(toolPath));
-
-        QList<QUrl> urls;
-        QString category = SaveUtils::controlToolCategory(toolPath);
-        QString name = SaveUtils::controlToolName(toolPath);
-
-        urls << QUrl::fromLocalFile(toolPath);
-
-        if (category.isEmpty())
-            category = QStringLiteral("Others");
-
-        if (name.isEmpty())
-            name = QStringLiteral("Tool");
-
-        QTreeWidgetItem* topItem = _toolboxTree->categoryItem(category);
-        if (!topItem) {
-            topItem = new QTreeWidgetItem;
-            topItem->setText(0, category);
-            _toolboxTree->addTopLevelItem(topItem);
-            topItem->setExpanded(true);
-        }
-
-        QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::controlIcon(toolPath)));
-        icon.setDevicePixelRatio(devicePixelRatioF());
-        QTreeWidgetItem* item = new QTreeWidgetItem;
-        item->setText(0, name);
-        item->setIcon(0, QIcon(icon));
-        topItem->addChild(item);
-        _toolboxTree->addUrls(item, urls);
-    }
-
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    connect(QmlJS::ModelManagerInterface::instance(), &QmlJS::ModelManagerInterface::idle,
+            this, &ToolboxPane::fillPane);
 }
 
 ToolboxTree* ToolboxPane::toolboxTree()
@@ -130,4 +98,41 @@ void ToolboxPane::filterList(const QString& filter)
 QSize ToolboxPane::sizeHint() const
 {
     return QSize{140, 710};
+}
+
+void ToolboxPane::fillPane()
+{
+    for (const QString& toolDirName
+         : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& toolPath = ":/tools/" + toolDirName;
+        Q_ASSERT(SaveUtils::isControlValid(toolPath));
+
+        QList<QUrl> urls;
+        QString category /*= SaveUtils::controlToolCategory(toolPath)*/;
+        QString name /*= SaveUtils::controlToolName(toolPath)*/;
+
+        urls << QUrl::fromLocalFile(toolPath);
+
+        if (category.isEmpty())
+            category = QStringLiteral("Others");
+
+        if (name.isEmpty())
+            name = QStringLiteral("Tool");
+
+        QTreeWidgetItem* topItem = _toolboxTree->categoryItem(category);
+        if (!topItem) {
+            topItem = new QTreeWidgetItem;
+            topItem->setText(0, category);
+            _toolboxTree->addTopLevelItem(topItem);
+            topItem->setExpanded(true);
+        }
+
+        //        QPixmap icon = QPixmap::fromImage(QImage::fromData(SaveUtils::controlIcon(toolPath)));
+        //        icon.setDevicePixelRatio(devicePixelRatioF());
+        QTreeWidgetItem* item = new QTreeWidgetItem;
+        item->setText(0, name);
+        //        item->setIcon(0, QIcon(icon));
+        topItem->addChild(item);
+        _toolboxTree->addUrls(item, urls);
+    }
 }

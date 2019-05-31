@@ -539,8 +539,8 @@ void Control::updatePreview(const PreviewResult& result)
     if (m_pixmap.isNull()) {
         if (m_gui)
             m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size()));
-        else
-            m_pixmap = QPixmap::fromImage(PaintUtils::renderNonGuiControlImage(SaveUtils::controlIcon(m_dir), size()));
+//        else
+//            m_pixmap = QPixmap::fromImage(PaintUtils::renderNonGuiControlImage(SaveUtils::controlIcon(m_dir), size()));
     }
 
     for (auto resizer : m_resizers)

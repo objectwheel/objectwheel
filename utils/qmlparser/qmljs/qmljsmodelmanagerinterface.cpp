@@ -113,6 +113,16 @@ ModelManagerInterface::ModelManagerInterface(QObject *parent)
     m_asyncResetTimer->setSingleShot(true);
     connect(m_asyncResetTimer, &QTimer::timeout, this, &ModelManagerInterface::resetCodeModel);
 
+    m_idleDetector = new QTimer(this);
+    m_idleDetector->setInterval(500);
+    connect(m_idleDetector, &QTimer::timeout, this, [=] {
+        cleanupFutures();
+        if (isIdle()) {
+            m_idleDetector->stop();
+            emit idle();
+        }
+    });
+
     qRegisterMetaType<QmlJS::Document::Ptr>("QmlJS::Document::Ptr");
     qRegisterMetaType<QmlJS::LibraryInfo>("QmlJS::LibraryInfo");
     qRegisterMetaType<QmlJS::Dialect>("QmlJS::Dialect");
@@ -304,14 +314,14 @@ void ModelManagerInterface::updateSourceFiles(const QStringList &files,
 
 void ModelManagerInterface::cleanupFutures()
 {
-    if (m_futures.size() > 10) {
+//    if (m_futures.size() > 10) { FIXME: Do we need this
         QList<QFuture<void> > futures = m_futures;
         m_futures.clear();
         foreach (const QFuture<void> &future, futures) {
             if (!(future.isFinished() || future.isCanceled()))
                 m_futures.append(future);
         }
-    }
+//    }
 }
 
 QFuture<void> ModelManagerInterface::refreshSourceFiles(const QStringList &sourceFiles,
@@ -326,6 +336,7 @@ QFuture<void> ModelManagerInterface::refreshSourceFiles(const QStringList &sourc
                                            emitDocumentOnDiskChanged);
     cleanupFutures();
     m_futures.append(result);
+    m_idleDetector->start();
 
     if (sourceFiles.count() > 1)
          addTaskInternal(result, tr("Parsing QML Files"), Constants::TASK_INDEX);
@@ -1044,6 +1055,7 @@ void ModelManagerInterface::maybeScan(const PathsAndLanguages &importPaths)
                                                this, true, true, false);
         cleanupFutures();
         m_futures.append(result);
+        m_idleDetector->start();
 
         addTaskInternal(result, tr("Scanning QML Imports"), Constants::TASK_IMPORT_SCAN);
     }

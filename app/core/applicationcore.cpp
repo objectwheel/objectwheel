@@ -119,6 +119,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
                      s_helpManager, &HelpManager::aboutToShutdown);
 
     s_documentManager = new DocumentManager(app);
+    s_documentManager->updateProjectInfo(); // Needed for ParserUtils::typeName(), for ToolBoxPane
 
     Components::init();
 
