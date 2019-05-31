@@ -727,7 +727,7 @@ void Previewer::refreshBindings(QQmlContext* context)
         QString uid;
         QString dir;
         QObject* object;
-        QList<QQmlError> errors;
+        QList<QmlError> errors;
 
     If item contains any error, its "gui" property is set to true and a dummy quick
     item is placed. And initial properties are also set by setInitialProperties().
@@ -779,7 +779,8 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
         instance->popup = false;
         instance->window = false;
         instance->object = nullptr;
-        instance->errors = component.errors();
+        for (const QQmlError& e : component.errors())
+            instance->errors.append(e);
 
         m_dirtyInstanceSet.insert(instance);
         return instance;

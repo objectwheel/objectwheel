@@ -13,7 +13,6 @@
 #include <QHeaderView>
 #include <QScrollBar>
 #include <QCheckBox>
-#include <QJSEngine>
 #include <QToolButton>
 #include <QColorDialog>
 #include <QSpinBox>
@@ -172,13 +171,6 @@ QString urlToDisplayText(const QUrl& url, const QString& controlDir)
     return displayText;
 }
 
-QString stringify(const QString& text)
-{
-    QJSEngine engine;
-    engine.globalObject().setProperty("text", text);
-    return engine.evaluate("JSON.stringify(text)").toString();
-}
-
 QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
 {
     QList<QTreeWidgetItem*> items;
@@ -290,7 +282,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
             return;
 
         ControlPropertyManager::setProperty(control,
-                                            propertyName, stringify(lineEdit->text()),
+                                            propertyName, UtilityFunctions::stringify(lineEdit->text()),
                                             lineEdit->text(),
                                             ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
@@ -323,7 +315,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
         if (url == previousUrl)
             return;
 
-        ControlPropertyManager::setProperty(control, propertyName, stringify(displayText), url,
+        ControlPropertyManager::setProperty(control, propertyName, UtilityFunctions::stringify(displayText), url,
                                             ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
     });
@@ -444,7 +436,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
         toolButton->setText(color.name(QColor::HexArgb));
         toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black})));
         ControlPropertyManager::setProperty(control, propertyName,
-                                            stringify(color.name(QColor::HexArgb)), color,
+                                            UtilityFunctions::stringify(color.name(QColor::HexArgb)), color,
                                             ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
     });
@@ -553,7 +545,7 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, 
         fontText.replace(previousFamily, comboBox->currentText());
         fontItem->setText(1, fontText);
 
-        ControlPropertyManager::setProperty(control, "font.family", stringify(comboBox->currentText()),
+        ControlPropertyManager::setProperty(control, "font.family", UtilityFunctions::stringify(comboBox->currentText()),
                                             comboBox->currentText(), ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdatePreviewer);
     });

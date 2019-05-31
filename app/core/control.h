@@ -40,7 +40,7 @@ public:
     DesignerScene* scene() const;
     Control* parentControl() const;
 
-    QList<QQmlError> errors() const;
+    QList<QmlError> errors() const;
     QList<QString> events() const;
     QList<PropertyNode> properties() const;
     QList<Control*> childControls(bool dive = true) const;
@@ -108,7 +108,7 @@ private:
     QString m_id;
     QPixmap m_pixmap;
 
-    QList<QQmlError> m_errors;
+    QList<QmlError> m_errors;
     QList<Resizer*> m_resizers;
     QList<QString> m_events;
     QList<PropertyNode> m_properties;

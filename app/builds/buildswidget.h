@@ -6,7 +6,7 @@
 
 class View;
 class AndroidWidget;
-class DownloadWidget;
+//class DownloadWidget;
 class PlatformsWidget;
 class ModuleSelectionWidget;
 
@@ -44,7 +44,7 @@ private:
     PlatformsWidget* _platformsWidget;
     ModuleSelectionWidget* _modulesWidget;
     AndroidWidget* _androidWidget;
-    DownloadWidget* _downloadWidget;
+//    DownloadWidget* _downloadWidget;
 };
 
 #endif // BUILDSWINDOW_H

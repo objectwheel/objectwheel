@@ -24,7 +24,8 @@ HEADERS += \
     $$PWD/paintutils.h \
     $$PWD/utilityfunctions.h \
     $$PWD/filesystemutils.h \
-    $$PWD/serializeenum.h
+    $$PWD/serializeenum.h \
+    $$PWD/qmlerror.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -35,7 +36,8 @@ SOURCES += \
     $$PWD/quicktheme.cpp \
     $$PWD/paintutils.cpp \
     $$PWD/utilityfunctions.cpp \
-    $$PWD/filesystemutils.cpp
+    $$PWD/filesystemutils.cpp \
+    $$PWD/qmlerror.cpp
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \

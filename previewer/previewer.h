@@ -7,7 +7,7 @@
 #include <private/qquickdesignersupport_p.h>
 
 class QQuickView;
-class QQmlError;
+class QmlError;
 class QQuickWindow;
 struct PreviewResult;
 
@@ -37,7 +37,7 @@ public:
         QString dir;
         QObject* object;
         QQmlContext* context;
-        QList<QQmlError> errors;
+        QList<QmlError> errors;
 
         ControlInstance* parent = nullptr;
         QList<ControlInstance*> children;

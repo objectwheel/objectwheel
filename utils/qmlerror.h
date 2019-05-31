@@ -33,12 +33,17 @@ QT_BEGIN_NAMESPACE
 // ### Qt 6: should this be called QmlMessage, since it can have a message type?
 class QDebug;
 class QmlErrorPrivate;
+class QQmlError;
 class QmlError
 {
 public:
     QmlError();
     QmlError(const QmlError &);
     QmlError &operator=(const QmlError &);
+#if defined(QT_QML_LIB)
+    QmlError(const QQmlError &);
+    QmlError &operator=(const QQmlError &);
+#endif
     ~QmlError();
 
     bool isValid() const;

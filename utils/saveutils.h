@@ -9,10 +9,7 @@ enum ControlProperties : quint32 {
     ControlSignature = 0x1000,
     ControlVersion,
     ControlId,
-    ControlUid,
-    ControlIcon,
-    ControlToolName,
-    ControlToolCategory
+    ControlUid
 };
 
 enum ProjectProperties : quint32 {
@@ -76,9 +73,6 @@ QString toUserMetaFile(const QString& userDir);
 
 QString controlId(const QString& controlDir);
 QString controlUid(const QString& controlDir);
-QString controlToolName(const QString& controlDir);
-QString controlToolCategory(const QString& controlDir);
-QByteArray controlIcon(const QString& controlDir);
 
 bool projectHdpiScaling(const QString& projectDir);
 qint64 projectSize(const QString& projectDir);

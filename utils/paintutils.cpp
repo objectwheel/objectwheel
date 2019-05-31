@@ -89,18 +89,18 @@ QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QWidget* wi
 QImage PaintUtils::renderNonGuiControlImage(const QByteArray& data, const QSizeF& size, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
+
     QImage dest = renderTransparentImage(size, widget);
+    QRectF destRect{{}, size};
 
     QImage source(QImage::fromData(data));
     source.setDevicePixelRatio(dpr);
-
-    QRectF destRect{{}, size};
     QRectF sourceRect{{}, QSizeF{24, 24}};
     sourceRect.moveCenter(destRect.center());
 
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
-    p.drawImage(sourceRect, source, source.rect());
+    p.drawImage(sourceRect, source, source.rect()); // Note: The image is scaled to fit the rectangle
     p.end();
 
     return dest;

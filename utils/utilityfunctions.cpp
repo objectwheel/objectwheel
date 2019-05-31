@@ -247,7 +247,7 @@ QPixmap scaled(const QPixmap& pixmap, const QSize& size)
     return pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 }
 
-QIcon iconForQmlError(const QQmlError& error, const QAbstractItemView* view)
+QIcon iconForQmlError(const QmlError& error, const QAbstractItemView* view)
 {
     static QIcon info, warning, critical;
     if (info.isNull()) {
@@ -324,9 +324,9 @@ QString increasedNumberedText(const QString& text, bool addSpace, bool trim)
 
 QString toPrettyBytesString(qint64 bytes)
 {
-    #define KB 1024.0
-    #define MB 1048576.0
-    #define GB 1073741824.0
+#define KB 1024.0
+#define MB 1048576.0
+#define GB 1073741824.0
 
     QString ret;
     if (bytes < KB) {
@@ -582,6 +582,13 @@ QByteArray generateJunk(int sizeInBytes)
     for (int i = 0; i < sizeInBytes; ++i)
         junk.append('x');
     return junk;
+}
+
+QString stringify(const QString& text)
+{
+    QJSEngine engine;
+    engine.globalObject().setProperty("text", text);
+    return engine.evaluate("JSON.stringify(text)").toString();
 }
 
 } // UtilityFunctions

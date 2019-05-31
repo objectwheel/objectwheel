@@ -139,6 +139,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
 
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerWidget()->designerScene();
     s_toolManager->init(s_windowManager->mainWindow()->toolboxPane()->toolboxTree());
+    s_toolManager->initTools("/users/omergoktas/desktop");
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
     s_controlRemovingManager->init(scene);

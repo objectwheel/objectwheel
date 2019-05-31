@@ -3,7 +3,6 @@
 #include <platformswidget.h>
 #include <androidwidget.h>
 #include <moduleselectionwidget.h>
-#include <downloadwidget.h>
 
 BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
 {
@@ -12,20 +11,20 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
     _modulesWidget = new ModuleSelectionWidget;
     _androidWidget = new AndroidWidget;
     _platformsWidget = new PlatformsWidget;
-    _downloadWidget = new DownloadWidget;
+//   FIXME _downloadWidget = new DownloadWidget;
 
     connect(_modulesWidget, &ModuleSelectionWidget::backClicked, this, &BuildsWidget::showPlatforms);
     connect(_modulesWidget, &ModuleSelectionWidget::done, this, &BuildsWidget::handleModuleSelection);
     connect(_androidWidget, &AndroidWidget::backClicked, this, &BuildsWidget::showModules);
     connect(_platformsWidget, &PlatformsWidget::platformSelected, this, &BuildsWidget::handlePlatformSelection);
     connect(_androidWidget, &AndroidWidget::downloadBuild, this, &BuildsWidget::handleDownload);
-    connect(_downloadWidget, &DownloadWidget::done, this, &BuildsWidget::handleModuleSelection);
+//    connect(_downloadWidget, &DownloadWidget::done, this, &BuildsWidget::handleModuleSelection);
 
     _view = new View(this);
     _view->add(Platforms, _platformsWidget);
     _view->add(Modules, _modulesWidget);
     _view->add(Android, _androidWidget);
-    _view->add(Download, _downloadWidget);
+//    _view->add(Download, _downloadWidget);
     _view->show(Platforms);
 }
 
@@ -75,5 +74,5 @@ void BuildsWidget::handlePlatformSelection(OTargets::Targets platform)
 void BuildsWidget::handleDownload()
 {
     _view->show(Download);
-    _downloadWidget->download(_target);
+//    _downloadWidget->download(_target);
 }

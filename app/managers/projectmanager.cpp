@@ -22,23 +22,17 @@ ProjectManager* ProjectManager::instance()
     return s_instance;
 }
 
-bool ProjectManager::newProject(int templateNumber, const QString& name, const QString& description,
-                                const QDateTime& crDate)
+bool ProjectManager::initProject(int templateNumber, const QString& name, const QString& description,
+                                 const QDateTime& crDate)
 {
-    const QString& userDir = UserManager::dir();
-
-    if (userDir.isEmpty()
+    if (!UserManager::isLoggedIn()
             || name.isEmpty()
             || description.isEmpty()
             || !crDate.isValid()) {
         return false;
     }
 
-    const QString& projectDir = userDir + '/' + HashFactory::generate();
-    const QString& uid = HashFactory::generate();
-
-    if (QFileInfo::exists(projectDir))
-        return false;
+    const QString& projectDir = SaveUtils::toUserProjectsDir(UserManager::dir()) + '/' + HashFactory::generate();
 
     if (!QDir(projectDir).mkpath("."))
         return false;
@@ -57,7 +51,7 @@ bool ProjectManager::newProject(int templateNumber, const QString& name, const Q
     SaveUtils::setProperty(projectDir, SaveUtils::ProjectCreationDate, crDate);
     SaveUtils::regenerateUids(SaveUtils::toProjectDesignsDir(projectDir));
 
-    updateSize(uid);
+    updateSize(SaveUtils::projectUid(projectDir));
 
     return true;
 }
@@ -116,21 +110,23 @@ bool ProjectManager::exportProject(const QString& uid, const QString& filePath)
     return ZipAsync::zipSync(projectDir, filePath);
 }
 
-bool ProjectManager::importProject(const QString &filePath, QString* uid)
+bool ProjectManager::importProject(const QString& filePath, QString* uid)
 {
-    const auto& udir = UserManager::dir();
-    const auto& pdir = udir + '/' + HashFactory::generate();
-
-    if (filePath.isEmpty() || udir.isEmpty())
+    if (filePath.isEmpty())
         return false;
 
-    if (!QDir(pdir).mkpath(".") || !ZipAsync::unzipSync(filePath, pdir))
+    if (!UserManager::isLoggedIn())
+        return false;
+
+    const QString& projectDir = SaveUtils::toUserProjectsDir(UserManager::dir()) + '/' + HashFactory::generate();
+
+    if (!QDir(projectDir).mkpath(".") || !ZipAsync::unzipSync(filePath, projectDir))
         return false;
 
     *uid = HashFactory::generate();
 
-    SaveUtils::setProperty(pdir, SaveUtils::ProjectUid, *uid);
-    SaveUtils::regenerateUids(SaveUtils::toProjectDesignsDir(pdir));
+    SaveUtils::setProperty(projectDir, SaveUtils::ProjectUid, *uid);
+    SaveUtils::regenerateUids(SaveUtils::toProjectDesignsDir(projectDir));
 
     return true;
 }
@@ -142,16 +138,16 @@ QString ProjectManager::dir(const QString& uid)
         return QStringLiteral("");
     }
 
-    const QString& userDirectory = UserManager::dir();
-
-    if (userDirectory.isEmpty()) {
-        qWarning("ProjectManager: Caution, empty user dir.");
+    if (!UserManager::isLoggedIn()) {
+        qWarning("ProjectManager: Caution, user is not logged in yet.");
         return QStringLiteral("");
     }
 
+    const QString& projectsDirectory = SaveUtils::toUserProjectsDir(UserManager::dir());
+
     for (const QString& projectDirName
-         : QDir(userDirectory).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-        const QString& projectDir = userDirectory + '/' + projectDirName;
+         : QDir(projectsDirectory).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& projectDir = projectsDirectory + '/' + projectDirName;
         if (SaveUtils::isProjectValid(projectDir) && SaveUtils::projectUid(projectDir) == uid)
             return projectDir;
     }
@@ -192,15 +188,17 @@ QString ProjectManager::uid()
 QStringList ProjectManager::projects()
 {
     QStringList uids;
-    const auto& udir = UserManager::dir();
 
-    if (udir.isEmpty())
+    if (!UserManager::isLoggedIn()) {
+        qWarning("ProjectManager: User not logged in yet");
         return uids;
+    }
 
-    for (const auto& dir : QDir(udir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-        const auto& p = udir + '/' + dir;
-        if (SaveUtils::isProjectValid(p))
-            uids << SaveUtils::projectUid(p);
+    const QString& projectsDir = SaveUtils::toUserProjectsDir(UserManager::dir());
+    for (const QString& projectDirName : QDir(projectsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& projectDir = projectsDir + '/' + projectDirName;
+        if (SaveUtils::isProjectValid(projectDir))
+            uids << SaveUtils::projectUid(projectDir);
     }
 
     return uids;

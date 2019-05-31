@@ -125,6 +125,34 @@ QmlError &QmlError::operator=(const QmlError &other)
     return *this;
 }
 
+#if defined(QT_QML_LIB)
+#include <QQmlError>
+
+QmlError::QmlError(const QQmlError& other)
+: d(0)
+{
+    *this = other;
+}
+
+QmlError& QmlError::operator=(const QQmlError& other)
+{
+    if (!other.isValid()) {
+        delete d;
+        d = 0;
+    } else {
+        if (!d)
+            d = new QmlErrorPrivate;
+        d->url = other.url();
+        d->description = other.description();
+        d->line = other.line();
+        d->column = other.column();
+        d->object = other.object();
+        d->messageType = other.messageType();
+    }
+    return *this;
+}
+#endif
+
 /*!
     \internal
 */

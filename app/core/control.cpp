@@ -182,7 +182,7 @@ Control* Control::parentControl() const
     return dynamic_cast<Control*>(parentItem());
 }
 
-QList<QQmlError> Control::errors() const
+QList<QmlError> Control::errors() const
 {
     return m_errors;
 }

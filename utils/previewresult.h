@@ -5,7 +5,7 @@
 #include <QHash>
 #include <QImage>
 #include <QVariant>
-#include <QQmlError>
+#include <qmlerror.h>
 
 struct Enum {
     QString name;
@@ -29,12 +29,12 @@ struct PreviewResult {
     QString id;
     QString uid;
     QImage image;
-    QList<QQmlError> errors;
+    QList<QmlError> errors;
     QList<QString> events;
     QList<PropertyNode> properties;
 };
 
-inline QDataStream& operator>> (QDataStream& in, QQmlError& error)
+inline QDataStream& operator>> (QDataStream& in, QmlError& error)
 {
     QUrl u;
     QString d;
@@ -54,7 +54,7 @@ inline QDataStream& operator>> (QDataStream& in, QQmlError& error)
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const QQmlError& error)
+inline QDataStream& operator<< (QDataStream& out, const QmlError& error)
 {
     out << error.column();
     out << error.description();

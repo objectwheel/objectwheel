@@ -1,14 +1,13 @@
 ### App Settings
 TEMPLATE = app
-CONFIG  += c++14 strict_c++
 CONFIG  -= qtquickcompiler
+CONFIG  += c++14 strict_c++
 TARGET   = Objectwheel
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += PREVIEWER_DEBUG
 
-QT += quickwidgets quick-private qml-private
-QT += network qml quick websockets help widgets widgets-private
+QT += network websockets help widgets widgets-private
 
 ### Includes
 include($$PWD/app.pri)

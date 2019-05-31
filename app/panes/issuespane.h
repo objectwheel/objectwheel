@@ -2,7 +2,7 @@
 #define ISSUESPANE_H
 
 #include <QListWidget>
-#include <QQmlError>
+#include <qmlerror.h>
 
 class QToolBar;
 class QLabel;
@@ -16,7 +16,7 @@ class IssuesPane : public QListWidget
     template <typename T> friend struct QMetaTypeId;
     struct ControlErrors {
         Control* control;
-        QList<QQmlError> errors;
+        QList<QmlError> errors;
     };
 
 public:

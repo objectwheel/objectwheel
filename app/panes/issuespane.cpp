@@ -15,7 +15,6 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QStyledItemDelegate>
-#include <QQmlError>
 
 enum Roles {
     ControlErrorsRole = Qt::UserRole + 1,
@@ -177,7 +176,7 @@ void IssuesPane::refresh(Control* control)
 
     Q_ASSERT(control->hasErrors());
 
-    for (const QQmlError& error : control->errors()) {
+    for (const QmlError& error : control->errors()) {
         controlErrors->errors.append(error);
         auto item = new QListWidgetItem;
         item->setData(QmlErrorIndexRole, controlErrors->errors.size() - 1);
@@ -198,7 +197,7 @@ void IssuesPane::onItemDoubleClick(QListWidgetItem* item)
 {
     const int errorIndex = item->data(QmlErrorIndexRole).toInt();
     const ControlErrors* controlErrors = item->data(ControlErrorsRole).value<const ControlErrors*>();
-    const QQmlError& error = controlErrors->errors.at(errorIndex);
+    const QmlError& error = controlErrors->errors.at(errorIndex);
     const QString& fullPath = error.url().toLocalFile();
     const QString& assetsPath = SaveUtils::toProjectAssetsDir(ProjectManager::dir());
 

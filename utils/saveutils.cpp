@@ -216,21 +216,6 @@ QString controlUid(const QString& controlDir)
     return property(controlDir, ControlUid).value<QString>();
 }
 
-QString controlToolName(const QString& controlDir)
-{
-    return property(controlDir, ControlToolName).value<QString>();
-}
-
-QString controlToolCategory(const QString& controlDir)
-{
-    return property(controlDir, ControlToolCategory).value<QString>();
-}
-
-QByteArray controlIcon(const QString& controlDir)
-{
-    return property(controlDir, ControlIcon).value<QByteArray>();
-}
-
 bool projectHdpiScaling(const QString& projectDir)
 {
     return property(projectDir, ProjectHdpiScaling).value<bool>();

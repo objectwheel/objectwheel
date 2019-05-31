@@ -144,7 +144,7 @@ void ProjectDetailsWidget::onSaveClick()
     }
 
     if (m_uid.isEmpty()) {
-        if (!ProjectManager::newProject(
+        if (!ProjectManager::initProject(
             m_templateNumber,
             projectnametext,
             descriptiontext,
