@@ -2,7 +2,7 @@
 - ServerManager Socket Error:  "Connection timed out", fix this
 - Project import/export fix
 - Also fix all zipSync/unzipSync usages
-- Connection to the Server must be based on a known stream format like CBOR
+- Connection to the Server must be based on a known stream format like CBOR or JSON
 - Delete delayer.h
 
 https://stackoverflow.com/questions/31498114/how-to-programmatically-prevent-linux-computer-from-sleeping-or-turning-on-scree

@@ -1,5 +1,4 @@
 #include <applicationcore.h>
-#include <toolmanager.h>
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <projectexposingmanager.h>
@@ -55,7 +54,6 @@ ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
 ControlCreationManager* ApplicationCore::s_controlCreationManager = nullptr;
 ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
 ControlPropertyManager* ApplicationCore::s_controlPropertyManager = nullptr;
-ToolManager* ApplicationCore::s_toolManager = nullptr;
 RunManager* ApplicationCore::s_runManager = nullptr;
 HelpManager* ApplicationCore::s_helpManager = nullptr;
 DocumentManager* ApplicationCore::s_documentManager = nullptr;
@@ -108,7 +106,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlCreationManager = new ControlCreationManager(app);
     s_controlRemovingManager = new ControlRemovingManager(app);
     s_controlPropertyManager = new ControlPropertyManager(app);
-    s_toolManager = new ToolManager(app);
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
@@ -138,8 +135,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
                      &ApplicationCore::onProjectStop);
 
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerWidget()->designerScene();
-    s_toolManager->init(s_windowManager->mainWindow()->toolboxPane()->toolboxTree());
-    s_toolManager->initTools("/users/omergoktas/desktop");
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
     s_controlRemovingManager->init(scene);

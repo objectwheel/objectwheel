@@ -47,7 +47,6 @@ using ProjectMetaHash = QHash<ProjectProperties, QVariant>;
 using UserMetaHash = QHash<UserProperties, QVariant>;
 
 QString controlMainQmlFileName();
-QString controlIconFileName();
 QString controlMetaFileName();
 QString projectMetaFileName();
 QString userIconFileName();
@@ -65,7 +64,6 @@ QString toUserProjectsDir(const QString& userDir);
 QString toUserMetaDir(const QString& userDir);
 
 QString toControlMainQmlFile(const QString& controlDir);
-QString toControlIconFile(const QString& controlDir);
 QString toControlMetaFile(const QString& controlDir);
 QString toProjectMetaFile(const QString& projectDir);
 QString toUserIconFile(const QString& userDir);

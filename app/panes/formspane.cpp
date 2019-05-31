@@ -215,7 +215,7 @@ void FormsPane::onAddButtonClick()
     Q_ASSERT(temp.isValid());
 
     SaveUtils::initControlMeta(temp.path());
-    SaveUtils::setProperty(temp.path(), SaveUtils::ControlId, QStringLiteral("form"));
+    // FIXME: SaveUtils::setProperty(temp.path(), SaveUtils::ControlId, QStringLiteral("form"));
 
     const QString& thisDir = SaveUtils::toControlThisDir(temp.path());
 

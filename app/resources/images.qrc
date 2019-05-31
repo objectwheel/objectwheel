@@ -92,5 +92,36 @@
         <file>images/modes/split-active.svg</file>
         <file>images/stop.svg</file>
         <file>images/run.svg</file>
+        <file>images/tools/AnimatedImage.png</file>
+        <file>images/tools/BusyIndicator.png</file>
+        <file>images/tools/Button.png</file>
+        <file>images/tools/CheckBox.png</file>
+        <file>images/tools/CircularGauge.png</file>
+        <file>images/tools/ComboBox.png</file>
+        <file>images/tools/DelayButton.png</file>
+        <file>images/tools/DelayButton2.png</file>
+        <file>images/tools/Dial.png</file>
+        <file>images/tools/Dial2.png</file>
+        <file>images/tools/Frame.png</file>
+        <file>images/tools/Gauge.png</file>
+        <file>images/tools/GroupBox.png</file>
+        <file>images/tools/Image.png</file>
+        <file>images/tools/Label.png</file>
+        <file>images/tools/PageIndicator.png</file>
+        <file>images/tools/ProgressBar.png</file>
+        <file>images/tools/RadioButton.png</file>
+        <file>images/tools/RangeSlider.png</file>
+        <file>images/tools/Rectangle.png</file>
+        <file>images/tools/RoundButton.png</file>
+        <file>images/tools/Slider.png</file>
+        <file>images/tools/SpinBox.png</file>
+        <file>images/tools/StatusIndicator.png</file>
+        <file>images/tools/Switch.png</file>
+        <file>images/tools/TextArea.png</file>
+        <file>images/tools/TextField.png</file>
+        <file>images/tools/Timer.png</file>
+        <file>images/tools/ToggleButton.png</file>
+        <file>images/tools/Tumbler.png</file>
+        <file>images/tools/Tumbler2.png</file>
     </qresource>
 </RCC>

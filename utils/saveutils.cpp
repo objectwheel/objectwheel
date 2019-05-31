@@ -101,11 +101,6 @@ QString controlMainQmlFileName()
     return QStringLiteral("main.qml");
 }
 
-QString controlIconFileName()
-{
-    return QStringLiteral("control.icon");
-}
-
 QString controlMetaFileName()
 {
     return QStringLiteral("control.meta");
@@ -179,11 +174,6 @@ QString toUserMetaDir(const QString& userDir)
 QString toControlMainQmlFile(const QString& controlDir)
 {
     return toControlThisDir(controlDir) + '/' + controlMainQmlFileName();
-}
-
-QString toControlIconFile(const QString& controlDir)
-{
-    return toControlMetaDir(controlDir) + '/' + controlIconFileName();
 }
 
 QString toControlMetaFile(const QString& controlDir)
@@ -333,10 +323,7 @@ UserMetaHash userMetaHash(const QString& userDir)
 
 QVariant property(const QString& controlDir, ControlProperties property)
 {
-    if (property == ControlIcon)
-        return Internal::readFile(toControlIconFile(controlDir));
-    else
-        return controlMetaHash(controlDir).value(property);
+    return controlMetaHash(controlDir).value(property);
 }
 
 QVariant property(const QString& projectDir, ProjectProperties property)
@@ -354,16 +341,9 @@ QVariant property(const QString& userDir, UserProperties property)
 
 bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
 {
-    if (property == ControlIcon) {
-        if (value.toByteArray().isEmpty())
-            return true;
-        else
-            return Internal::writeFile(toControlIconFile(controlDir), value.toByteArray());
-    } else {
-        ControlMetaHash hash(controlMetaHash(controlDir));
-        hash.insert(property, value);
-        return Internal::saveMetaHash(hash, toControlMetaFile(controlDir));
-    }
+    ControlMetaHash hash(controlMetaHash(controlDir));
+    hash.insert(property, value);
+    return Internal::saveMetaHash(hash, toControlMetaFile(controlDir));
 }
 
 bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)

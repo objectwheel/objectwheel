@@ -10,7 +10,6 @@
 #include <inspectorpane.h>
 #include <centralwidget.h>
 #include <windowmanager.h>
-#include <toolmanager.h>
 #include <designerwidget.h>
 #include <controlcreationmanager.h>
 #include <runmanager.h>
@@ -506,11 +505,6 @@ PropertiesPane* MainWindow::propertiesPane() const
 InspectorPane* MainWindow::inspectorPane() const
 {
     return m_inspectorPane;
-}
-
-ToolboxPane* MainWindow::toolboxPane() const
-{
-    return m_toolboxPane;
 }
 
 void MainWindow::resetSettings()

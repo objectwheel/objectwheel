@@ -5,7 +5,6 @@
 #include <saveutils.h>
 #include <controlpreviewingmanager.h>
 #include <projectexposingmanager.h>
-#include <toolmanager.h>
 #include <documentmanager.h>
 #include <zipasync.h>
 #include <filesystemutils.h>
@@ -42,8 +41,6 @@ bool ProjectManager::initProject(int templateNumber, const QString& name, const 
         qWarning("WARNING: Unzipping project template unsuccessful");
         return false;
     }
-
-    ToolManager::initTools(projectDir);
 
     SaveUtils::initProjectMeta(projectDir);
     SaveUtils::setProperty(projectDir, SaveUtils::ProjectName, name);
@@ -238,7 +235,6 @@ bool ProjectManager::start(const QString& uid)
 
     s_uid = uid;
 
-    ToolManager::exposeTools();
     ProjectExposingManager::exposeProject();
     ControlPreviewingManager::scheduleInit();
     DocumentManager::updateProjectInfo();
