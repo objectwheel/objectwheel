@@ -162,21 +162,14 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
         else
             item->setText(1, QObject::tr("No"));
 
-        QIcon icon, itemIcon;
+        QIcon icon;
         icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(child->dir(), treeWidget->devicePixelRatioF()),
                                                         treeWidget->palette().text().color(),
                                                         treeWidget), QIcon::Normal);
         icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(child->dir(), treeWidget->devicePixelRatioF()),
                                                         treeWidget->palette().highlightedText().color(),
                                                         treeWidget), QIcon::Selected);
-        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
-                                                            treeWidget->palette().text().color(),
-                                                            treeWidget), QIcon::Normal);
-        itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
-                                                            treeWidget->palette().highlightedText().color(),
-                                                            treeWidget), QIcon::Selected);
-
-        item->setIcon(0, icon.isNull() ? itemIcon : icon);
+        item->setIcon(0, icon);
         parentItem->addChild(item);
         addChildrenIntoItem(item, child->childControls(false));
     }
@@ -598,20 +591,6 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
         return;
     }
 
-    QIcon formIcon, itemIcon;
-    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
-                                                        palette().text().color(),
-                                                        this), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
-                                                        palette().highlightedText().color(),
-                                                        this), QIcon::Selected);
-    itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
-                                                        palette().text().color(),
-                                                        this), QIcon::Normal);
-    itemIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/item.png",
-                                                        palette().highlightedText().color(),
-                                                        this), QIcon::Selected);
-
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (control->id() == childItem->text(0)) {
@@ -627,6 +606,13 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     childItem->setText(1, tr("No"));
 
                 if (control->form()) {
+                    QIcon formIcon;
+                    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
+                                                                        palette().text().color(),
+                                                                        this), QIcon::Normal);
+                    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
+                                                                        palette().highlightedText().color(),
+                                                                        this), QIcon::Selected);
                     childItem->setIcon(0, formIcon);
                 } else {
                     QIcon icon;
@@ -636,7 +622,7 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(control->dir(), devicePixelRatioF()),
                                                                     palette().highlightedText().color(),
                                                                     this), QIcon::Selected);
-                    childItem->setIcon(0, icon.isNull() ? itemIcon : icon);
+                    childItem->setIcon(0, icon);
                 }
                 return;
             }

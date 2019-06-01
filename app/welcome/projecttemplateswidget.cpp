@@ -253,8 +253,8 @@ namespace {
 // TODO: Finish other templates
 const QStringList NAMES = {
     QObject::tr("Blank Project"),
-    QObject::tr("Plain Application Project"),
-    QObject::tr("Hello World Application Project")/*,
+    QObject::tr("Plain Application Project")/*,
+    QObject::tr("Hello World Application Project"),
     QObject::tr("Multi-page Application Project"),
     QObject::tr("Multi-window Application Project"),
     QObject::tr("Desktop Oriented Application Project"),
@@ -266,8 +266,8 @@ const QStringList NAMES = {
 
 const QStringList DESCRIPTIONS = {
     QObject::tr("A pure and clean project template with an empty 'Window'."),
-    QObject::tr("A base project template for applications with an empty 'ApplicationWindow'."),
-    QObject::tr("A simple application project template with a 'hello world' setup.")/*,
+    QObject::tr("A base project template for applications with an empty 'ApplicationWindow'.")/*,
+    QObject::tr("A simple application project template with a 'hello world' setup."),
     QObject::tr("A base project template for multi-page applications."),
     QObject::tr("A base project template for multi-window applications."),
     QObject::tr("A base project template for desktop oriented applications."),

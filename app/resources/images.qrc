@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>images/plus.png</file>
         <file>images/minus.png</file>
-        <file>images/item.png</file>
         <file>images/logo.png</file>
         <file>images/reset.png</file>
         <file>images/cancel.png</file>
@@ -123,5 +122,6 @@
         <file>images/tools/ToggleButton.png</file>
         <file>images/tools/Tumbler.png</file>
         <file>images/tools/Tumbler2.png</file>
+        <file>images/item.svg</file>
     </qresource>
 </RCC>

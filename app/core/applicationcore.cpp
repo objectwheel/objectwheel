@@ -147,11 +147,12 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlCreationManager->init(scene);
     s_controlRemovingManager->init(scene);
 
-    QObject::connect(s_windowManager->mainWindow()->toolboxPane(), &ToolboxPane::filled,
-                     [=] {
+    QMetaObject::Connection i;
+    i = QObject::connect(s_windowManager->mainWindow()->toolboxPane(), &ToolboxPane::filled, [=] {
         s_windowManager->welcomeWindow()->show();
         splash->finish(s_windowManager->welcomeWindow());
         QTimer::singleShot(2000, [=] { delete splash; });
+        QObject::disconnect(i);
     });
 }
 

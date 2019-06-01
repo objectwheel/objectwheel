@@ -19,17 +19,6 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
-
-    connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=]
-    {
-        if (_toolboxTree->currentItem()
-                && _toolboxTree->currentItem()->parent()) {
-            emit itemDoubleClicked(
-                        _toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile());
-        }
-    });
-
     _searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", _searchEdit)),
                            QLineEdit::LeadingPosition);
     _searchEdit->setPlaceholderText(tr("Search"));
@@ -43,6 +32,12 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 
     connect(QmlJS::ModelManagerInterface::instance(), &QmlJS::ModelManagerInterface::idle,
             this, &ToolboxPane::fillPane);
+    connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
+
+    connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=] {
+        if (_toolboxTree->currentItem() && _toolboxTree->currentItem()->parent())
+            emit itemDoubleClicked( _toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile());
+    });
 }
 
 ToolboxTree* ToolboxPane::toolboxTree()
@@ -54,8 +49,6 @@ void ToolboxPane::discharge()
 {
     _toolboxTree->clearSelection();
     _toolboxTree->setCurrentItem(nullptr);
-    _toolboxTree->clear();
-    _toolboxTree->clearUrls();
     _searchEdit->clear();
 }
 
@@ -68,8 +61,7 @@ void ToolboxPane::handleMousePress(QTreeWidgetItem* item)
         return;
 
     if (item->parent() == 0) {
-        _toolboxTree->setItemExpanded(item,
-                                      !_toolboxTree->isItemExpanded(item));
+        _toolboxTree->setItemExpanded(item, !_toolboxTree->isItemExpanded(item));
         return;
     }
 }

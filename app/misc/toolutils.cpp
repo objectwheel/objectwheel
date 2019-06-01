@@ -49,8 +49,11 @@ QPixmap toolIcon(const QString& controlDir, double dpr)
 
     const QJsonObject& icons(Internal::toolIcons());
     const QString& module = ParserUtils::module(controlDir);
+    const QString& iconPath = icons.contains(module)
+            ? icons.value(module).toString()
+            : QStringLiteral(":/images/item.svg");
 
-    QPixmap icon(icons.value(module).toString());
+    QPixmap icon(iconPath);
     icon.setDevicePixelRatio(dpr);
     return icon;
 }

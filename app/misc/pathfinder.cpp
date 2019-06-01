@@ -27,8 +27,7 @@ QString PathFinder::cleansed(const QString& text, bool withUid)
     }
 
     const QString& clean = QObject::tr("Assets::");
-    QRegularExpression exp("file:\\/{1,3}" +
-        QRegularExpression::escape(SaveUtils::toProjectAssetsDir(RunManager::recentProjectDirectory()) + '/'));
+    QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toProjectAssetsDir(RunManager::recentProjectDirectory()) + '/'));
     if (cleansed.contains(exp))
         cleansed.replace(exp, clean);
 
@@ -45,7 +44,7 @@ QString PathFinder::locallyCleansed(const QString& text, bool withUid)
             cleansed.replace(exp, clean);
     }
 
-    const QString& clean = QObject::tr("Assets") + "::";
+    const QString& clean = QObject::tr("Assets::");
     QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toProjectAssetsDir(ProjectManager::dir()) + '/'));
     if (cleansed.contains(exp))
         cleansed.replace(exp, clean);
