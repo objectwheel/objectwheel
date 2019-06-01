@@ -6,5 +6,7 @@
         <file>other/countries.txt</file>
         <file>other/form.js</file>
         <file>qmls/form.qml</file>
+        <file>other/qml-icons.json</file>
+        <file>other/tool-categories.json</file>
     </qresource>
 </RCC>

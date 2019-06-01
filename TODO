@@ -4,6 +4,7 @@
 - Also fix all zipSync/unzipSync usages
 - Connection to the Server must be based on a known stream format like CBOR or JSON
 - Delete delayer.h
+- Update moduleresolver content, add more libs and upgrade versions
 
 https://stackoverflow.com/questions/31498114/how-to-programmatically-prevent-linux-computer-from-sleeping-or-turning-on-scree
 https://developer.apple.com/library/archive/qa/qa1340/_index.html

@@ -315,11 +315,10 @@ void ModelManagerInterface::updateSourceFiles(const QStringList &files,
 void ModelManagerInterface::cleanupFutures()
 {
 //    if (m_futures.size() > 10) { FIXME: Do we need this
-        QList<QFuture<void> > futures = m_futures;
-        m_futures.clear();
-        foreach (const QFuture<void> &future, futures) {
-            if (!(future.isFinished() || future.isCanceled()))
-                m_futures.append(future);
+        for (int i = m_futures.size() - 1; i >= 0; --i) {
+            const QFuture<void>& future = m_futures.at(i);
+            if (future.isFinished() || future.isCanceled())
+                m_futures.removeAt(i);
         }
 //    }
 }

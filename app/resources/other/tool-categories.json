@@ -1,0 +1,5 @@
+{
+    "QtQuick2"          : "Qt Quick - Basic",
+    "QtQuick.Controls2" : "Qt Quick - Controls 2",
+    "QtQuick.Extras1"   : "Qt Quick - Extras"
+}

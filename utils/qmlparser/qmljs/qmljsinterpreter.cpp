@@ -2520,6 +2520,38 @@ ImportInfo Imports::info(const QString &name, const Context *context) const
     return ImportInfo();
 }
 
+QList<ImportInfo> Imports::infos(const QString &name, const Context *context) const
+{
+    QList<ImportInfo> infos;
+    QString firstId = name;
+    int dotIdx = firstId.indexOf(QLatin1Char('.'));
+    if (dotIdx != -1)
+        firstId = firstId.left(dotIdx);
+
+    QListIterator<Import> it(m_imports);
+    it.toBack();
+    while (it.hasPrevious()) {
+        const Import &i = it.previous();
+        const ObjectValue *import = i.object;
+        const ImportInfo &info = i.info;
+
+        if (!info.as().isEmpty()) {
+            if (info.as() == firstId)
+                infos.append(info);
+            continue;
+        }
+
+        if (info.type() == ImportType::File || info.type() == ImportType::QrcFile) {
+            if (import->className() == firstId)
+                infos.append(info);
+        } else {
+            if (import->lookupMember(firstId, context))
+                infos.append(info);
+        }
+    }
+    return infos;
+}
+
 QString Imports::nameForImportedObject(const ObjectValue *value, const Context *context) const
 {
     QListIterator<Import> it(m_imports);

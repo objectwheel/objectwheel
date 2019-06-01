@@ -1088,6 +1088,7 @@ public:
     void setImportFailed();
 
     ImportInfo info(const QString &name, const Context *context) const;
+    QList<ImportInfo> infos(const QString& name, const Context* context) const;
     QString nameForImportedObject(const ObjectValue *value, const Context *context) const;
     bool importFailed() const;
 

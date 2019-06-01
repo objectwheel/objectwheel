@@ -11,7 +11,7 @@ bool canParse(const QString& controlDir);
 bool exists(const QString& controlDir, const QString& property);
 
 QString id(const QString& controlDir);
-QString typeName(const QString& controlDir);
+QString moduleName(const QString& controlDir);
 QString property(const QString& controlDir, const QString& property);
 QString property(QTextDocument* document, const QString& controlDir, const QString& property);
 
