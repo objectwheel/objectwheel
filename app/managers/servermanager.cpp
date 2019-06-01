@@ -66,9 +66,10 @@ void ServerManager::onDisconnect()
     s_connectionTimer.start(CONNECTION_TIMEOUT, Qt::VeryCoarseTimer, this);
 }
 
-void ServerManager::onError(QAbstractSocket::SocketError)
+void ServerManager::onError(QAbstractSocket::SocketError error)
 {
-    qWarning() << "ServerManager Socket Error: " << errorString();
+    if (error != QAbstractSocket::SocketTimeoutError)
+        qWarning() << "ServerManager Socket Error: " << errorString();
 }
 
 void ServerManager::onSslErrors(const QList<QSslError>& errors)

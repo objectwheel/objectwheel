@@ -10,27 +10,11 @@
 
 namespace SaveUtils {
 
+using ControlMetaHash = QHash<ControlProperties, QVariant>;
+using ProjectMetaHash = QHash<ProjectProperties, QVariant>;
+using UserMetaHash = QHash<UserProperties, QVariant>;
+
 namespace Internal {
-
-constexpr double version()
-{
-    return 3.0;
-}
-
-QString controlSignature()
-{
-    return QStringLiteral("b3djdHJs");
-}
-
-QString projectSignature()
-{
-    return QStringLiteral("b3dwcmp0");
-}
-
-QString userSignature()
-{
-    return QStringLiteral("b3d1c2Vy");
-}
 
 QByteArray readFile(const QString& filePath)
 {
@@ -94,11 +78,24 @@ bool saveMetaHash(const MetaHash& hash, const QString& metaFilePath)
     return true;
 }
 
-} // Internal
-
-QString controlMainQmlFileName()
+double version()
 {
-    return QStringLiteral("main.qml");
+    return 3.0;
+}
+
+QString controlSignature()
+{
+    return QStringLiteral("b3djdHJs");
+}
+
+QString projectSignature()
+{
+    return QStringLiteral("b3dwcmp0");
+}
+
+QString userSignature()
+{
+    return QStringLiteral("b3d1c2Vy");
 }
 
 QString controlMetaFileName()
@@ -121,39 +118,9 @@ QString userMetaFileName()
     return QStringLiteral("user.meta");
 }
 
-QString toControlThisDir(const QString& controlDir)
-{
-    return controlDir + QStringLiteral("/t");
-}
-
-QString toControlChildrenDir(const QString& controlDir)
-{
-    return controlDir + QStringLiteral("/c");
-}
-
 QString toControlMetaDir(const QString& controlDir)
 {
     return controlDir + QStringLiteral("/m");
-}
-
-QString toProjectDesignsDir(const QString& projectDir)
-{
-    return projectDir + QStringLiteral("/designs");
-}
-
-QString toProjectImportsDir(const QString& projectDir)
-{
-    return projectDir + QStringLiteral("/imports");
-}
-
-QString toProjectAssetsDir(const QString& projectDir)
-{
-    return toProjectImportsDir(projectDir) + QStringLiteral("/assets");
-}
-
-QString toProjectToolsDir(const QString& projectDir)
-{
-    return projectDir + QStringLiteral("/tools");
 }
 
 QString toProjectMetaDir(const QString& projectDir)
@@ -161,19 +128,9 @@ QString toProjectMetaDir(const QString& projectDir)
     return projectDir + QStringLiteral("/meta");
 }
 
-QString toUserProjectsDir(const QString& userDir)
-{
-    return userDir + QStringLiteral("/projects");
-}
-
 QString toUserMetaDir(const QString& userDir)
 {
     return userDir + QStringLiteral("/meta");
-}
-
-QString toControlMainQmlFile(const QString& controlDir)
-{
-    return toControlThisDir(controlDir) + '/' + controlMainQmlFileName();
 }
 
 QString toControlMetaFile(const QString& controlDir)
@@ -196,129 +153,19 @@ QString toUserMetaFile(const QString& userDir)
     return toUserMetaDir(userDir) + '/' + userMetaFileName();
 }
 
-QString controlId(const QString& controlDir)
-{
-    return property(controlDir, ControlId).value<QString>();
-}
-
-QString controlUid(const QString& controlDir)
-{
-    return property(controlDir, ControlUid).value<QString>();
-}
-
-bool projectHdpiScaling(const QString& projectDir)
-{
-    return property(projectDir, ProjectHdpiScaling).value<bool>();
-}
-
-qint64 projectSize(const QString& projectDir)
-{
-    return property(projectDir, ProjectSize).value<qint64>();
-}
-
-QString projectUid(const QString& projectDir)
-{
-    return property(projectDir, ProjectUid).value<QString>();
-}
-
-QString projectName(const QString& projectDir)
-{
-    return property(projectDir, ProjectName).value<QString>();
-}
-
-QString projectDescription(const QString& projectDir)
-{
-    return property(projectDir, ProjectDescription).value<QString>();
-}
-
-QDateTime projectCreationDate(const QString& projectDir)
-{
-    return property(projectDir, ProjectCreationDate).value<QDateTime>();
-}
-
-QDateTime projectModificationDate(const QString& projectDir)
-{
-    return property(projectDir, ProjectModificationDate).value<QDateTime>();
-}
-
-QByteArray projectTheme(const QString& projectDir)
-{
-    return property(projectDir, ProjectTheme).value<QByteArray>();
-}
-
-quint32 userPlan(const QString& userDir)
-{
-    return property(userDir, UserPlan).value<quint32>();
-}
-
-QString userEmail(const QString& userDir)
-{
-    return property(userDir, UserEmail).value<QString>();
-}
-
-QString userFirst(const QString& userDir)
-{
-    return property(userDir, UserFirst).value<QString>();
-}
-
-QString userLast(const QString& userDir)
-{
-    return property(userDir, UserLast).value<QString>();
-}
-
-QString userCountry(const QString& userDir)
-{
-    return property(userDir, UserCountry).value<QString>();
-}
-
-QString userCompany(const QString& userDir)
-{
-    return property(userDir, UserCompany).value<QString>();
-}
-
-QString userTitle(const QString& userDir)
-{
-    return property(userDir, UserTitle).value<QString>();
-}
-
-QString userPhone(const QString& userDir)
-{
-    return property(userDir, UserPhone).value<QString>();
-}
-
-QDateTime userLastOnlineDate(const QString& userDir)
-{
-    return property(userDir, UserLastOnlineDate).value<QDateTime>();
-}
-
-QDateTime userRegistrationDate(const QString& userDir)
-{
-    return property(userDir, UserRegistrationDate).value<QDateTime>();
-}
-
-QByteArray userPassword(const QString& userDir)
-{
-    return property(userDir, UserPassword).value<QByteArray>();
-}
-
-QByteArray userIcon(const QString& userDir)
-{
-    return property(userDir, UserIcon).value<QByteArray>();
-}
-
 ControlMetaHash controlMetaHash(const QString& controlDir)
 {
-    return Internal::readMetaHash<ControlMetaHash>(toControlMetaFile(controlDir));
+    return readMetaHash<ControlMetaHash>(toControlMetaFile(controlDir));
 }
 
 ProjectMetaHash projectMetaHash(const QString& projectDir)
 {
-    return Internal::readMetaHash<ProjectMetaHash>(toProjectMetaFile(projectDir));
+    return readMetaHash<ProjectMetaHash>(toProjectMetaFile(projectDir));
 }
 
 UserMetaHash userMetaHash(const QString& userDir)
 {
-    return Internal::readMetaHash<UserMetaHash>(toUserMetaFile(userDir));
+    return readMetaHash<UserMetaHash>(toUserMetaFile(userDir));
 }
 
 QVariant property(const QString& controlDir, ControlProperties property)
@@ -332,86 +179,61 @@ QVariant property(const QString& projectDir, ProjectProperties property)
 }
 
 QVariant property(const QString& userDir, UserProperties property)
-{   
+{
     if (property == UserIcon)
-        return Internal::readFile(toUserIconFile(userDir));
+        return readFile(toUserIconFile(userDir));
     else
         return userMetaHash(userDir).value(property);
 }
 
-bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
+} // Internal
+
+QString controlMainQmlFileName()
 {
-    ControlMetaHash hash(controlMetaHash(controlDir));
-    hash.insert(property, value);
-    return Internal::saveMetaHash(hash, toControlMetaFile(controlDir));
+    return QStringLiteral("main.qml");
 }
 
-bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
+QString toControlThisDir(const QString& controlDir)
 {
-    ProjectMetaHash hash(projectMetaHash(projectDir));
-    hash.insert(property, value);
-    hash.insert(ProjectModificationDate, QDateTime::currentDateTime());
-    return Internal::saveMetaHash(hash, toProjectMetaFile(projectDir));
+    return controlDir + QStringLiteral("/t");
 }
 
-bool setProperty(const QString& userDir, UserProperties property, const QVariant& value)
+QString toControlChildrenDir(const QString& controlDir)
 {
-    if (property == UserIcon) {
-        if (value.toByteArray().isEmpty())
-            return true;
-        else
-            return Internal::writeFile(toUserIconFile(userDir), value.toByteArray());
-    } else {
-        UserMetaHash hash(userMetaHash(userDir));
-        hash.insert(property, value);
-        return Internal::saveMetaHash(hash, toUserMetaFile(userDir));
-    }
+    return controlDir + QStringLiteral("/c");
 }
 
-bool initControlMeta(const QString& controlDir)
+QString toProjectDesignsDir(const QString& projectDir)
 {
-    if (QFileInfo::exists(toControlMetaFile(controlDir)))
-        return true;
-
-    if (!QDir(toControlMetaDir(controlDir)).mkpath(QStringLiteral(".")))
-        return false;
-
-    ControlMetaHash hash;
-    hash.insert(ControlSignature, Internal::controlSignature());
-    hash.insert(ControlVersion, Internal::version());
-    hash.insert(ControlUid, HashFactory::generate());
-
-    return Internal::saveMetaHash(hash, toControlMetaFile(controlDir));
+    return projectDir + QStringLiteral("/designs");
 }
 
-bool initProjectMeta(const QString& projectDir)
+QString toProjectImportsDir(const QString& projectDir)
 {
-    if (QFileInfo::exists(toProjectMetaFile(projectDir)))
-        return true;
-
-    if (!QDir(toProjectMetaDir(projectDir)).mkpath(QStringLiteral(".")))
-        return false;
-
-    ProjectMetaHash hash;
-    hash.insert(ProjectSignature, Internal::projectSignature());
-    hash.insert(ProjectVersion, Internal::version());
-    hash.insert(ProjectUid, HashFactory::generate());
-
-    return Internal::saveMetaHash(hash, toProjectMetaFile(projectDir));
+    return projectDir + QStringLiteral("/imports");
 }
 
-bool initUserMeta(const QString& userDir)
+QString toProjectAssetsDir(const QString& projectDir)
 {
-    if (QFileInfo::exists(toUserMetaFile(userDir)))
-        return true;
+    return toProjectImportsDir(projectDir) + QStringLiteral("/assets");
+}
 
-    if (!QDir(toUserMetaDir(userDir)).mkpath(QStringLiteral(".")))
-        return false;
+QString toUserProjectsDir(const QString& userDir)
+{
+    return userDir + QStringLiteral("/projects");
+}
 
-    UserMetaHash hash;
-    hash.insert(UserSignature, Internal::userSignature());
-    hash.insert(UserVersion, Internal::version());
-    return Internal::saveMetaHash(hash, toUserMetaFile(userDir));
+QString toControlMainQmlFile(const QString& controlDir)
+{
+    return toControlThisDir(controlDir) + '/' + controlMainQmlFileName();
+}
+
+QString toDoubleUp(const QString& path)
+{
+    Q_ASSERT(QFileInfo::exists(path));
+    QDir dir(QFileInfo(path).dir());
+    dir.cdUp();
+    return dir.path();
 }
 
 bool isForm(const QString& controlDir)
@@ -423,40 +245,217 @@ bool isForm(const QString& controlDir)
 
 bool isControlValid(const QString& controlDir)
 {
-    return property(controlDir, ControlSignature).toString() == Internal::controlSignature()
+    return Internal::property(controlDir, ControlSignature).toString() == Internal::controlSignature()
             && !controlUid(controlDir).isEmpty();
 }
 
 bool isProjectValid(const QString& projectDir)
 {
-    return property(projectDir, ProjectSignature).toString() == Internal::projectSignature()
+    return Internal::property(projectDir, ProjectSignature).toString() == Internal::projectSignature()
             && !projectUid(projectDir).isEmpty();
 }
 
 bool isUserValid(const QString& userDir)
 {
-    return property(userDir, UserSignature).toString() == Internal::userSignature();
+    return Internal::property(userDir, UserSignature).toString() == Internal::userSignature();
+}
+
+QString controlId(const QString& controlDir)
+{
+    return Internal::property(controlDir, ControlId).value<QString>();
+}
+
+QString controlUid(const QString& controlDir)
+{
+    return Internal::property(controlDir, ControlUid).value<QString>();
+}
+
+bool projectHdpiScaling(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectHdpiScaling).value<bool>();
+}
+
+qint64 projectSize(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectSize).value<qint64>();
+}
+
+QString projectUid(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectUid).value<QString>();
+}
+
+QString projectName(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectName).value<QString>();
+}
+
+QString projectDescription(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectDescription).value<QString>();
+}
+
+QDateTime projectCreationDate(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectCreationDate).value<QDateTime>();
+}
+
+QDateTime projectModificationDate(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectModificationDate).value<QDateTime>();
+}
+
+QByteArray projectTheme(const QString& projectDir)
+{
+    return Internal::property(projectDir, ProjectTheme).value<QByteArray>();
+}
+
+quint32 userPlan(const QString& userDir)
+{
+    return Internal::property(userDir, UserPlan).value<quint32>();
+}
+
+QString userEmail(const QString& userDir)
+{
+    return Internal::property(userDir, UserEmail).value<QString>();
+}
+
+QString userFirst(const QString& userDir)
+{
+    return Internal::property(userDir, UserFirst).value<QString>();
+}
+
+QString userLast(const QString& userDir)
+{
+    return Internal::property(userDir, UserLast).value<QString>();
+}
+
+QString userCountry(const QString& userDir)
+{
+    return Internal::property(userDir, UserCountry).value<QString>();
+}
+
+QString userCompany(const QString& userDir)
+{
+    return Internal::property(userDir, UserCompany).value<QString>();
+}
+
+QString userTitle(const QString& userDir)
+{
+    return Internal::property(userDir, UserTitle).value<QString>();
+}
+
+QString userPhone(const QString& userDir)
+{
+    return Internal::property(userDir, UserPhone).value<QString>();
+}
+
+QDateTime userLastOnlineDate(const QString& userDir)
+{
+    return Internal::property(userDir, UserLastOnlineDate).value<QDateTime>();
+}
+
+QDateTime userRegistrationDate(const QString& userDir)
+{
+    return Internal::property(userDir, UserRegistrationDate).value<QDateTime>();
+}
+
+QByteArray userPassword(const QString& userDir)
+{
+    return Internal::property(userDir, UserPassword).value<QByteArray>();
+}
+
+QByteArray userIcon(const QString& userDir)
+{
+    return Internal::property(userDir, UserIcon).value<QByteArray>();
+}
+
+bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
+{
+    ControlMetaHash hash(Internal::controlMetaHash(controlDir));
+    hash.insert(property, value);
+    return Internal::saveMetaHash(hash, Internal::toControlMetaFile(controlDir));
+}
+
+bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
+{
+    ProjectMetaHash hash(Internal::projectMetaHash(projectDir));
+    hash.insert(property, value);
+    hash.insert(ProjectModificationDate, QDateTime::currentDateTime());
+    return Internal::saveMetaHash(hash, Internal::toProjectMetaFile(projectDir));
+}
+
+bool setProperty(const QString& userDir, UserProperties property, const QVariant& value)
+{
+    if (property == UserIcon) {
+        if (value.toByteArray().isEmpty())
+            return true;
+        else
+            return Internal::writeFile(Internal::toUserIconFile(userDir), value.toByteArray());
+    } else {
+        UserMetaHash hash(Internal::userMetaHash(userDir));
+        hash.insert(property, value);
+        return Internal::saveMetaHash(hash, Internal::toUserMetaFile(userDir));
+    }
+}
+
+bool initControlMeta(const QString& controlDir)
+{
+    if (QFileInfo::exists(Internal::toControlMetaFile(controlDir)))
+        return true;
+
+    if (!QDir(Internal::toControlMetaDir(controlDir)).mkpath(QStringLiteral(".")))
+        return false;
+
+    ControlMetaHash hash;
+    hash.insert(ControlSignature, Internal::controlSignature());
+    hash.insert(ControlVersion, Internal::version());
+    hash.insert(ControlUid, HashFactory::generate());
+
+    return Internal::saveMetaHash(hash, Internal::toControlMetaFile(controlDir));
+}
+
+bool initProjectMeta(const QString& projectDir)
+{
+    if (QFileInfo::exists(Internal::toProjectMetaFile(projectDir)))
+        return true;
+
+    if (!QDir(Internal::toProjectMetaDir(projectDir)).mkpath(QStringLiteral(".")))
+        return false;
+
+    ProjectMetaHash hash;
+    hash.insert(ProjectSignature, Internal::projectSignature());
+    hash.insert(ProjectVersion, Internal::version());
+    hash.insert(ProjectUid, HashFactory::generate());
+
+    return Internal::saveMetaHash(hash, Internal::toProjectMetaFile(projectDir));
+}
+
+bool initUserMeta(const QString& userDir)
+{
+    if (QFileInfo::exists(Internal::toUserMetaFile(userDir)))
+        return true;
+
+    if (!QDir(Internal::toUserMetaDir(userDir)).mkpath(QStringLiteral(".")))
+        return false;
+
+    UserMetaHash hash;
+    hash.insert(UserSignature, Internal::userSignature());
+    hash.insert(UserVersion, Internal::version());
+    return Internal::saveMetaHash(hash, Internal::toUserMetaFile(userDir));
 }
 
 void regenerateUids(const QString& topPath)
 {
     for (const QString& controlFilePath
-         : FileSystemUtils::searchFiles(controlMetaFileName(), topPath)) {
+         : FileSystemUtils::searchFiles(Internal::controlMetaFileName(), topPath)) {
         const QString& controlDir = toDoubleUp(controlFilePath);
         if (!isControlValid(controlDir)) {
-            Q_ASSERT(property(controlDir, ControlSignature).toString() != Internal::controlSignature());
+            Q_ASSERT(Internal::property(controlDir, ControlSignature).toString() != Internal::controlSignature());
             continue;
         }
         setProperty(controlDir, ControlUid, HashFactory::generate());
     }
-}
-
-QString toDoubleUp(const QString& path)
-{
-    Q_ASSERT(QFileInfo::exists(path));
-    QDir dir(QFileInfo(path).dir());
-    dir.cdUp();
-    return dir.path();
 }
 
 QStringList formPaths(const QString& projectDir)

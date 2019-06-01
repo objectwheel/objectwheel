@@ -22,6 +22,8 @@ miniz'e katkıda bulun ve pragma error 64bit android'ler de default olarak göz�
 async'nin readme sindeki hataları zipasync ye bakarak düzelt (ya asynctest projecsi nolcak?)
 proje import/export ları ve diğer zipasync yerlerini de fixleyebiliriz
 Bazı QFileInfo(x).fileName() kullanımları çok riskli, özellikle "/" ile biten dizin isimlerinde
+Form silinince js'i de silinsin mi diye bir kez sor, devamlı sormayı kapatmayı öner, hem form.js'i hem qmldir girdisini sil
+Form üzerindeki Kontrol silinince aynı şekilde bağlı sinyalleri ve form.js içindeki slotlar silinecek
 
 ------------------------------------------
 | file               | directory         |

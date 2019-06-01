@@ -42,32 +42,20 @@ enum UserProperties : quint32 {
     UserLastOnlineDate
 };
 
-using ControlMetaHash = QHash<ControlProperties, QVariant>;
-using ProjectMetaHash = QHash<ProjectProperties, QVariant>;
-using UserMetaHash = QHash<UserProperties, QVariant>;
-
 QString controlMainQmlFileName();
-QString controlMetaFileName();
-QString projectMetaFileName();
-QString userIconFileName();
-QString userMetaFileName();
-
 QString toControlThisDir(const QString& controlDir);
 QString toControlChildrenDir(const QString& controlDir);
-QString toControlMetaDir(const QString& controlDir);
 QString toProjectDesignsDir(const QString& projectDir);
 QString toProjectImportsDir(const QString& projectDir);
 QString toProjectAssetsDir(const QString& projectDir);
-QString toProjectToolsDir(const QString& projectDir);
-QString toProjectMetaDir(const QString& projectDir);
 QString toUserProjectsDir(const QString& userDir);
-QString toUserMetaDir(const QString& userDir);
-
 QString toControlMainQmlFile(const QString& controlDir);
-QString toControlMetaFile(const QString& controlDir);
-QString toProjectMetaFile(const QString& projectDir);
-QString toUserIconFile(const QString& userDir);
-QString toUserMetaFile(const QString& userDir);
+QString toDoubleUp(const QString& path);
+
+bool isForm(const QString& controlDir);
+bool isControlValid(const QString& controlDir);
+bool isProjectValid(const QString& projectDir);
+bool isUserValid(const QString& userDir);
 
 QString controlId(const QString& controlDir);
 QString controlUid(const QString& controlDir);
@@ -94,14 +82,6 @@ QDateTime userRegistrationDate(const QString& userDir);
 QByteArray userPassword(const QString& userDir);
 QByteArray userIcon(const QString& userDir);
 
-ControlMetaHash controlMetaHash(const QString& controlDir);
-ProjectMetaHash projectMetaHash(const QString& projectDir);
-UserMetaHash userMetaHash(const QString& userDir);
-
-QVariant property(const QString& controlDir, ControlProperties property);
-QVariant property(const QString& projectDir, ProjectProperties property);
-QVariant property(const QString& userDir, UserProperties property);
-
 bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
 bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
 bool setProperty(const QString& userDir, UserProperties property, const QVariant& value);
@@ -109,14 +89,8 @@ bool setProperty(const QString& userDir, UserProperties property, const QVariant
 bool initControlMeta(const QString& controlDir);
 bool initProjectMeta(const QString& projectDir);
 bool initUserMeta(const QString& userDir);
-
-bool isForm(const QString& controlDir);
-bool isControlValid(const QString& controlDir);
-bool isProjectValid(const QString& projectDir);
-bool isUserValid(const QString& userDir);
-
 void regenerateUids(const QString& topPath);
-QString toDoubleUp(const QString& path);
+
 QStringList formPaths(const QString& projectDir);
 QStringList childrenPaths(const QString& controlDir);
 
