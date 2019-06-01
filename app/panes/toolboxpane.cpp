@@ -1,17 +1,13 @@
 #include <toolboxpane.h>
 #include <toolboxtree.h>
 #include <lineedit.h>
-#include <mainwindow.h>
 #include <paintutils.h>
 #include <saveutils.h>
-#include <parserutils.h>
+#include <toolutils.h>
 
 #include <qmljs/qmljsmodelmanagerinterface.h>
 
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QApplication>
-#include <QTreeWidget>
 #include <QVBoxLayout>
 #include <QDir>
 
@@ -109,42 +105,13 @@ void ToolboxPane::fillPane()
     if (_toolboxTree->topLevelItemCount() > 0)
         return;
 
-    QFile file(":/resources/other/qml-icons.json");
-    if (!file.open(QFile::ReadOnly)) {
-        qWarning("ToolboxPane: Failed to read icon reference json.");
-        return;
-    }
-    const QJsonObject& icons = QJsonDocument::fromJson(file.readAll()).object();
-    file.close();
-
-    file.setFileName(":/resources/other/tool-categories.json");
-    if (!file.open(QFile::ReadOnly)) {
-        qWarning("ToolboxPane: Failed to read tool categories reference json.");
-        return;
-    }
-    const QJsonObject& categories = QJsonDocument::fromJson(file.readAll()).object();
-    file.close();
-
-    for (const QString& toolDirName
-         : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+    for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& toolPath = ":/tools/" + toolDirName;
         Q_ASSERT(SaveUtils::isControlValid(toolPath));
 
-        const QString& moduleName = ParserUtils::moduleName(toolPath);
-        QString name = QStringLiteral("Tool");
-        QString category = QStringLiteral("Others");
-
-        QString library;
-        QStringList pieces = moduleName.split('.');
-
-        if (pieces.size() > 1) {
-            name = pieces.last();
-            pieces.removeLast();
-            library = pieces.join('.');
-        }
-
-        if (categories.contains(library))
-            category = categories.value(library).toString();
+        const QString& name = ToolUtils::toolName(toolPath);
+        const QString& category = ToolUtils::toolCetegory(toolPath);
+        const QIcon& icon = QIcon(ToolUtils::toolIcon(toolPath, devicePixelRatioF()));
 
         QTreeWidgetItem* topItem = _toolboxTree->categoryItem(category);
         if (!topItem) {
@@ -154,11 +121,9 @@ void ToolboxPane::fillPane()
             topItem->setExpanded(true);
         }
 
-        QPixmap icon(icons.value(moduleName).toString());
-        icon.setDevicePixelRatio(devicePixelRatioF());
         QTreeWidgetItem* item = new QTreeWidgetItem;
         item->setText(0, name);
-        item->setIcon(0, QIcon(icon));
+        item->setIcon(0, icon);
         topItem->addChild(item);
         _toolboxTree->addUrls(item, QList<QUrl>() << QUrl::fromLocalFile(toolPath));
     }

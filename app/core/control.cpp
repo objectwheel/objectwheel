@@ -12,6 +12,7 @@
 #include <paintutils.h>
 #include <parserutils.h>
 #include <utilityfunctions.h>
+#include <toolutils.h>
 
 #include <QtMath>
 #include <QCursor>
@@ -537,10 +538,13 @@ void Control::updatePreview(const PreviewResult& result)
                                               : result.image);
 
     if (m_pixmap.isNull()) {
-        if (m_gui)
+        if (m_gui) {
             m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size()));
-//        else
-//            m_pixmap = QPixmap::fromImage(PaintUtils::renderNonGuiControlImage(SaveUtils::controlIcon(m_dir), size()));
+        } else {
+            m_pixmap = QPixmap::fromImage(
+                        PaintUtils::renderNonGuiControlImage(
+                            ToolUtils::toolIcon(m_dir, qApp->devicePixelRatio()), size()));
+        }
     }
 
     for (auto resizer : m_resizers)

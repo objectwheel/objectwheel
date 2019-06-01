@@ -86,14 +86,14 @@ QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QWidget* wi
     return dest;
 }
 
-QImage PaintUtils::renderNonGuiControlImage(const QByteArray& data, const QSizeF& size, const QWidget* widget)
+QImage PaintUtils::renderNonGuiControlImage(const QPixmap& pixmap, const QSizeF& size, const QWidget* widget)
 {
     qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
 
     QImage dest = renderTransparentImage(size, widget);
     QRectF destRect{{}, size};
 
-    QImage source(QImage::fromData(data));
+    QImage source(pixmap.toImage());
     source.setDevicePixelRatio(dpr);
     QRectF sourceRect{{}, QSizeF{24, 24}};
     sourceRect.moveCenter(destRect.center());
@@ -195,14 +195,6 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     p.end();
 
     return dest;
-}
-
-QPixmap PaintUtils::renderOverlaidPixmapFromData(const QByteArray& data, const QColor& color, const QWidget* widget)
-{
-    qreal dpr = widget ? widget->devicePixelRatioF() : qApp->devicePixelRatio();
-    QPixmap source = QPixmap::fromImage(QImage::fromData(data));
-    source.setDevicePixelRatio(dpr);
-    return renderOverlaidPixmap(source, color, widget);
 }
 
 // For colorizing the files that are located within the "utils/images" directory
