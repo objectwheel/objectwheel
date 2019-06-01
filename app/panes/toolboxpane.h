@@ -29,6 +29,7 @@ private slots:
     void handleMousePress(QTreeWidgetItem* item);
 
 signals:
+    void filled();
     void itemDoubleClicked(const QString& url);
 
 private:

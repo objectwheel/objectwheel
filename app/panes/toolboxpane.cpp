@@ -162,4 +162,6 @@ void ToolboxPane::fillPane()
         topItem->addChild(item);
         _toolboxTree->addUrls(item, QList<QUrl>() << QUrl::fromLocalFile(toolPath));
     }
+
+    emit filled();
 }

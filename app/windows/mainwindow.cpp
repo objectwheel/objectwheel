@@ -497,6 +497,11 @@ AssetsPane* MainWindow::assetsPane() const
     return m_assetsPane;
 }
 
+ToolboxPane* MainWindow::toolboxPane() const
+{
+    return m_toolboxPane;
+}
+
 PropertiesPane* MainWindow::propertiesPane() const
 {
     return m_propertiesPane;

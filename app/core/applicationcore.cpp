@@ -22,7 +22,6 @@
 #include <interfacesettings.h>
 #include <codeeditorsettings.h>
 #include <applicationstyle.h>
-#include <splashscreen.h>
 #include <helpmanager.h>
 #include <components.h>
 #include <paintutils.h>
@@ -35,6 +34,8 @@
 #include <QApplication>
 #include <QFontDatabase>
 #include <QSharedMemory>
+#include <QSplashScreen>
+#include <QTimer>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
@@ -92,8 +93,14 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
 
     /* Show splash screen */
-    SplashScreen splashScreen;
-    Q_UNUSED(splashScreen);
+    QPixmap pixmap(":/images/splash.png");
+    pixmap.setDevicePixelRatio(app->devicePixelRatio());
+    pixmap = pixmap.scaled(int(512 * app->devicePixelRatio()),
+                            int(280 * app->devicePixelRatio()),
+                            Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    QSplashScreen* splash(new QSplashScreen(pixmap));
+    splash->show();
+    app->processEvents();
 
     s_modeManager = new ModeManager(app);
     s_serverManager = new ServerManager(QUrl(APP_WSSSERVER), app);
@@ -139,7 +146,13 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
     s_controlRemovingManager->init(scene);
-    s_windowManager->welcomeWindow()->show();
+
+    QObject::connect(s_windowManager->mainWindow()->toolboxPane(), &ToolboxPane::filled,
+                     [=] {
+        s_windowManager->welcomeWindow()->show();
+        splash->finish(s_windowManager->welcomeWindow());
+        QTimer::singleShot(2000, [=] { delete splash; });
+    });
 }
 
 bool ApplicationCore::locked()
