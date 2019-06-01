@@ -8,6 +8,7 @@ HEADERS += $$PWD/components.h \
            $$PWD/aispeak.h \
            $$PWD/firebasedatabase.h \
            $$PWD/offlinestorage.h \
+           $$PWD/ow.h \
            $$PWD/translation.h
 
 SOURCES += $$PWD/components.cpp \
@@ -17,6 +18,7 @@ SOURCES += $$PWD/components.cpp \
            $$PWD/aispeak.cpp \
            $$PWD/firebasedatabase.cpp \
            $$PWD/offlinestorage.cpp \
+           $$PWD/ow.cpp \
            $$PWD/translation.cpp
 
 DEFINES += OW_APIAI \

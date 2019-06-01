@@ -221,6 +221,7 @@ void FormsPane::onAddButtonClick()
 
     QDir(thisDir).mkpath(".");
     FileSystemUtils::copy(":/resources/qmls/form.qml", thisDir, true, true);
+    QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
     ControlCreationManager::createForm(temp.path());
 
     refresh(); // FIXME: This function has severe performance issues.

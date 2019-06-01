@@ -48,9 +48,9 @@ QPixmap toolIcon(const QString& controlDir, double dpr)
     Q_ASSERT(SaveUtils::isControlValid(controlDir));
 
     const QJsonObject& icons(Internal::toolIcons());
-    const QString& moduleName = ParserUtils::moduleName(controlDir);
+    const QString& module = ParserUtils::module(controlDir);
 
-    QPixmap icon(icons.value(moduleName).toString());
+    QPixmap icon(icons.value(module).toString());
     icon.setDevicePixelRatio(dpr);
     return icon;
 }
@@ -59,8 +59,8 @@ QString toolName(const QString& controlDir)
 {
     Q_ASSERT(SaveUtils::isControlValid(controlDir));
 
-    const QString& moduleName = ParserUtils::moduleName(controlDir);
-    const QStringList& pieces = moduleName.split('.');
+    const QString& module = ParserUtils::module(controlDir);
+    const QStringList& pieces = module.split('.');
 
     QString name(QObject::tr("Tool"));
     if (pieces.size() > 1)
@@ -74,8 +74,8 @@ QString toolCetegory(const QString& controlDir)
     Q_ASSERT(SaveUtils::isControlValid(controlDir));
 
     const QJsonObject& categories(Internal::toolCategories());
-    const QString& moduleName = ParserUtils::moduleName(controlDir);
-    QStringList pieces = moduleName.split('.');
+    const QString& module = ParserUtils::module(controlDir);
+    QStringList pieces = module.split('.');
 
     QString category(QObject::tr("Others"));
     QString library;

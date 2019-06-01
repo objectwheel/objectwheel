@@ -221,7 +221,7 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
         return {};
     }
 
-    if (!FileSystemUtils::copy(controlRootPath, newControlRootPath, true)) {
+    if (!FileSystemUtils::copy(controlRootPath, newControlRootPath, true, true)) {
         qWarning("SaveManager::addControl: Failed. Cannot copy the control to its new root path.");
         return {};
     }

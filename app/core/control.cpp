@@ -61,8 +61,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    ControlPropertyManager::setId(this, ParserUtils::id(m_dir),
-                                  ControlPropertyManager::NoOption);
+    ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setSize(this, g_baseControlSize, ControlPropertyManager::NoOption);
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,

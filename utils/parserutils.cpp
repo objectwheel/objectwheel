@@ -89,16 +89,13 @@ QString cleanPropertyValue(const QString& value)
 QString fullPropertyName(const UiQualifiedId* qualifiedId)
 {
     QString name;
-
     while(qualifiedId) {
         if (name.isEmpty())
             name = qualifiedId->name.toString();
         else
             name += "." + qualifiedId->name.toString();
-
         qualifiedId = qualifiedId->next;
     }
-
     return name;
 }
 
@@ -141,14 +138,8 @@ QString fullPropertyValue(const QString& source, const QString& property, const 
         list = list->next;
     }
 
-    if (begin > 0 && end > 0) {
-        QTextDocument document(source);
-        QTextCursor cursor(&document);
-
-        cursor.setPosition(begin);
-        cursor.setPosition(end, QTextCursor::KeepAnchor);
-        return cursor.selectedText();
-    }
+    if (begin > 0 && end > 0)
+        return source.mid(begin, end - begin);
 
     return QString();
 }
@@ -189,7 +180,7 @@ void addProperty(QString& source, const UiObjectInitializer* initializer, const 
     cursor.setPosition(initializer->lbraceToken.end());
     cursor.movePosition(QTextCursor::NextBlock, QTextCursor::KeepAnchor);
 
-    auto rightBlock = cursor.selectedText();
+    const QString& rightBlock = cursor.selectedText();
     bool addNewLine = rightBlock.contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]"));
     int rightSpaces = 0;
     int depth = 4;
@@ -258,16 +249,8 @@ void changeProperty(QString& source, const UiObjectMemberList* list, const QStri
         list = list->next;
     }
 
-    if (begin > 0 && end > 0) {
-        QTextDocument document(source);
-        QTextCursor cursor(&document);
-
-        cursor.setPosition(begin);
-        cursor.setPosition(end, QTextCursor::KeepAnchor);
-        cursor.insertText(property + ": " + value);
-
-        source = document.toPlainText();
-    }
+    if (begin > 0 && end > 0)
+        source.replace(begin, end - begin, property + ": " + value);
 }
 
 void addProperty(QTextDocument* document, const UiObjectInitializer* initializer, const QString& property, const QString& value)
@@ -364,6 +347,65 @@ void changeProperty(QTextDocument* document, const UiObjectMemberList* list, con
     }
 }
 
+int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace)
+{
+    QString source = document->toPlainText();
+    QSharedPointer<Document> doc = Document::create(url, Dialect::JavaScript);
+    doc->setSource(source);
+
+    if (!doc->parse()) {
+        qWarning() << "JS File couldn't read. Unable to parse js file.";
+        return -1;
+    }
+
+    auto jsProgram = doc->jsProgram();
+
+    if (!jsProgram) {
+        qWarning() << "JS File couldn't read. Corrupted js program.";
+        return -1;
+    }
+
+    auto jsElements = jsProgram->elements;
+
+    if (jsElements) {
+        while (jsElements) {
+            Q_ASSERT(jsElements->element);
+            if (jsElements->element->kind == Node::Kind_FunctionSourceElement) {
+                auto element = static_cast<FunctionSourceElement*>(jsElements->element);
+                Q_ASSERT(element->declaration);
+                if (element->declaration->name == methodSign) {
+                    if (lbrace)
+                        return element->declaration->lbraceToken.end();
+                    else
+                        return element->declaration->rbraceToken.begin();
+                }
+
+            }
+
+            jsElements = jsElements->next;
+        }
+    } else {
+        qWarning() << "JS File error. Empty source file.";
+        return -1;
+    }
+
+    return -1;
+}
+
+bool canParse(const QString& controlDir)
+{
+    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
+    QFile file(mainQmlFilePath);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("ParserUtils: Cannot open file");
+        return false;
+    }
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, Dialect::Qml);
+    document->setSource(file.readAll());
+    file.close();
+    return document->parse();
+}
+
 } // Internal
 
 bool exists(const QString& controlDir, const QString& property)
@@ -375,8 +417,7 @@ bool exists(const QString& controlDir, const QString& property)
         return false;
     }
 
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, Dialect::Qml);
     document->setSource(file.readAll());
     file.close();
 
@@ -416,29 +457,14 @@ bool exists(const QString& controlDir, const QString& property)
     return Internal::propertyExists(uiObjectInitializer->members, property);
 }
 
-bool canParse(const QString& controlDir)
-{
-    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
-    QFile file(mainQmlFilePath);
-    if (!file.open(QFile::ReadOnly)) {
-        qWarning("ParserUtils: Cannot open file");
-        return false;
-    }
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
-    document->setSource(file.readAll());
-    file.close();
-    return document->parse();
-}
-
 QString id(const QString& controlDir)
 {
-    if (canParse(controlDir))
+    if (Internal::canParse(controlDir))
         return property(controlDir, "id");
     return SaveUtils::controlId(controlDir);
 }
 
-QString moduleName(const QString& controlDir)
+QString module(const QString& controlDir)
 {
     const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
     QFile file(mainQmlFilePath);
@@ -448,8 +474,7 @@ QString moduleName(const QString& controlDir)
     }
     const QString& source = file.readAll();
     file.close();
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> doc = Document::create(mainQmlFilePath, dialect);
+    QSharedPointer<Document> doc = Document::create(mainQmlFilePath, Dialect::Qml);
     doc->setSource(source);
 
     if (!doc->parse()) {
@@ -533,8 +558,7 @@ QString property(const QString& controlDir, const QString& property)
     }
     const QString& source = file.readAll();
     file.close();
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, Dialect::Qml);
     document->setSource(source);
 
     if (!document->parse()) {
@@ -579,8 +603,7 @@ QString property(const QString& controlDir, const QString& property)
 QString property(QTextDocument* doc, const QString& controlDir, const QString& property)
 {
     const QString& source = doc->toPlainText();
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(SaveUtils::toControlMainQmlFile(controlDir), dialect);
+    QSharedPointer<Document> document = Document::create(SaveUtils::toControlMainQmlFile(controlDir), Dialect::Qml);
     document->setSource(source);
 
     if (!document->parse()) {
@@ -624,7 +647,7 @@ QString property(QTextDocument* doc, const QString& controlDir, const QString& p
 
 void setId(const QString& controlDir, const QString& id)
 {
-    if (canParse(controlDir))
+    if (Internal::canParse(controlDir))
         setProperty(controlDir, "id", id);
     SaveUtils::setProperty(controlDir, SaveUtils::ControlId, id);
 }
@@ -639,8 +662,7 @@ void setProperty(const QString& controlDir, const QString& property, const QStri
     }
     QString source = file.readAll();
 
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(mainQmlFilePath, dialect);
+    QSharedPointer<Document> document = Document::create(mainQmlFilePath, Dialect::Qml);
     document->setSource(source);
 
     if (!document->parse()) {
@@ -688,8 +710,7 @@ void setProperty(const QString& controlDir, const QString& property, const QStri
 
 void setProperty(QTextDocument* doc, const QString& controlDir, const QString& property, const QString& value)
 {
-    Dialect dialect(Dialect::Qml);
-    QSharedPointer<Document> document = Document::create(SaveUtils::toControlMainQmlFile(controlDir), dialect);
+    QSharedPointer<Document> document = Document::create(SaveUtils::toControlMainQmlFile(controlDir), Dialect::Qml);
     document->setSource(doc->toPlainText());
 
     if (!document->parse()) {
@@ -735,8 +756,7 @@ int addMethod(QTextDocument* document, const QString& url, const QString& method
 {
     quint32 begin = 0;
     const QString& source = document->toPlainText();
-    Dialect dialect(Dialect::JavaScript);
-    QSharedPointer<Document> doc = Document::create(url, dialect);
+    QSharedPointer<Document> doc = Document::create(url, Dialect::JavaScript);
     doc->setSource(source);
 
     if (!doc->parse()) {
@@ -774,8 +794,7 @@ int addMethod(QTextDocument* document, const QString& url, const QString& method
 int methodLine(QTextDocument* document, const QString& url, const QString& methodSign)
 {
     QString source = document->toPlainText();
-    Dialect dialect(Dialect::JavaScript);
-    QSharedPointer<Document> doc = Document::create(url, dialect);
+    QSharedPointer<Document> doc = Document::create(url, Dialect::JavaScript);
     doc->setSource(source);
 
     if (!doc->parse()) {
@@ -819,55 +838,9 @@ int methodLine(QTextDocument* document, const QString& url, const QString& metho
     return -1;
 }
 
-int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace)
-{
-    QString source = document->toPlainText();
-    Dialect dialect(Dialect::JavaScript);
-    QSharedPointer<Document> doc = Document::create(url, dialect);
-    doc->setSource(source);
-
-    if (!doc->parse()) {
-        qWarning() << "JS File couldn't read. Unable to parse js file.";
-        return -1;
-    }
-
-    auto jsProgram = doc->jsProgram();
-
-    if (!jsProgram) {
-        qWarning() << "JS File couldn't read. Corrupted js program.";
-        return -1;
-    }
-
-    auto jsElements = jsProgram->elements;
-
-    if (jsElements) {
-        while (jsElements) {
-            Q_ASSERT(jsElements->element);
-            if (jsElements->element->kind == Node::Kind_FunctionSourceElement) {
-                auto element = static_cast<FunctionSourceElement*>(jsElements->element);
-                Q_ASSERT(element->declaration);
-                if (element->declaration->name == methodSign) {
-                    if (lbrace)
-                        return element->declaration->lbraceToken.end();
-                    else
-                        return element->declaration->rbraceToken.begin();
-                }
-
-            }
-
-            jsElements = jsElements->next;
-        }
-    } else {
-        qWarning() << "JS File error. Empty source file.";
-        return -1;
-    }
-
-    return -1;
-}
-
 void addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection)
 {
-    int i = methodPosition(document, url, loaderSign, true);
+    int i = Internal::methodPosition(document, url, loaderSign, true);
     if (i > 0) {
         QTextCursor cursor(document);
         cursor.beginEditBlock();

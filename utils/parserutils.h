@@ -7,11 +7,10 @@ class QTextDocument;
 
 namespace ParserUtils {
 
-bool canParse(const QString& controlDir);
 bool exists(const QString& controlDir, const QString& property);
 
 QString id(const QString& controlDir);
-QString moduleName(const QString& controlDir);
+QString module(const QString& controlDir);
 QString property(const QString& controlDir, const QString& property);
 QString property(QTextDocument* document, const QString& controlDir, const QString& property);
 
@@ -21,7 +20,6 @@ void setProperty(QTextDocument* document, const QString& controlDir, const QStri
 
 int addMethod(QTextDocument* document, const QString& url, const QString& method);
 int methodLine(QTextDocument* document, const QString& url, const QString& methodSign);
-int methodPosition(QTextDocument* document, const QString& url, const QString& methodSign, bool lbrace);
 void addConnection(QTextDocument* document, const QString& url, const QString& loaderSign, const QString& connection);
 
 } // ParserUtils
