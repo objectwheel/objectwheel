@@ -18,6 +18,9 @@ class Control : public QGraphicsWidget
     using QGraphicsWidget::contains;
 
 public:
+    enum { Type = UserType + 1 };
+
+public:
     bool gui() const;
     bool form() const;
     bool clip() const;
@@ -29,6 +32,8 @@ public:
     bool hasErrors() const;
     bool contains(const QString& id) const;
 
+    unsigned int index() const;
+    int type() const override;
     int higherZValue() const;
     int lowerZValue() const;
 
@@ -55,6 +60,7 @@ public:
     void setDragIn(bool dragIn);
     void setDragging(bool dragging);
     void setResizing(bool resizing);
+    void setIndex(unsigned int index);
 
 public slots:
     void hideResizers();
@@ -100,6 +106,7 @@ private:
     bool m_hoverOn;
     bool m_dragging;
     bool m_resizing;
+    unsigned int m_index;
     QMarginsF m_margins;
     QRectF m_cachedGeometry;
 

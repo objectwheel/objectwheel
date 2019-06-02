@@ -9,6 +9,11 @@ Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
     setFlag(ItemIsMovable, false);
 }
 
+int Form::type() const
+{
+    return Type;
+}
+
 QRectF Form::frameGeometry() const
 {
     return QRectF(QPointF(-size().width() / 2.0, -size().height() / 2.0), size());

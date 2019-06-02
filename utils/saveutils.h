@@ -9,7 +9,8 @@ enum ControlProperties : quint32 {
     ControlSignature = 0x1000,
     ControlVersion,
     ControlId,
-    ControlUid
+    ControlUid,
+    ControlIndex
 };
 
 enum ProjectProperties : quint32 {
@@ -57,6 +58,7 @@ bool isControlValid(const QString& controlDir);
 bool isProjectValid(const QString& projectDir);
 bool isUserValid(const QString& userDir);
 
+quint32 controlIndex(const QString& controlDir);
 QString controlId(const QString& controlDir);
 QString controlUid(const QString& controlDir);
 
@@ -92,7 +94,7 @@ bool initUserMeta(const QString& userDir);
 void regenerateUids(const QString& topPath);
 
 QStringList formPaths(const QString& projectDir);
-QStringList childrenPaths(const QString& controlDir);
+QStringList childrenPaths(const QString& controlDir, bool dive = true);
 
 } // SaveUtils
 

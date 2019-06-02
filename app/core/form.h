@@ -12,6 +12,10 @@ class Form final : public Control
     friend class ProjectExposingManager; // For constructor
 
 public:
+    enum { Type = UserType + 2 };
+
+public:
+    int type() const override;
     QRectF frameGeometry() const;
 
 private:

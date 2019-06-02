@@ -616,9 +616,6 @@ void ProjectsWidget::onExportButtonClick()
     dialog.setOption(QFileDialog::ShowDirsOnly, true);
 
     if (dialog.exec()) {
-        if (!QFile::remove(dialog.selectedFiles().at(0) + '/' + pname + ".opf"))
-            return;
-
         if (!ProjectManager::exportProject(uid, dialog.selectedFiles().at(0) +
                                            '/' + pname + ".opf")) {
             return;

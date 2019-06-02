@@ -24,6 +24,8 @@ proje import/export ları ve diğer zipasync yerlerini de fixleyebiliriz
 Bazı QFileInfo(x).fileName() kullanımları çok riskli, özellikle "/" ile biten dizin isimlerinde
 Form silinince js'i de silinsin mi diye bir kez sor, devamlı sormayı kapatmayı öner, hem form.js'i hem qmldir girdisini sil
 Form üzerindeki Kontrol silinince aynı şekilde bağlı sinyalleri ve form.js içindeki slotlar silinecek
+QML COde Editor'deki Global Internal External ikonlarını değiştir
+Windows 260 MAX FILE LENGTH olayına bak, biggestDir vs vs
 
 ------------------------------------------
 | file               | directory         |

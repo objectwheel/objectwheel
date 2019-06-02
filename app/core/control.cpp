@@ -47,6 +47,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_hoverOn(false)
   , m_dragging(false)
   , m_resizing(false)
+  , m_index(0)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(g_baseControlSize)))
@@ -87,7 +88,7 @@ bool Control::gui() const
 
 bool Control::form() const
 {
-    return (dynamic_cast<const Form*>(this) != nullptr);
+    return qgraphicsitem_cast<const Form*>(this);
 }
 
 bool Control::clip() const
@@ -132,6 +133,16 @@ bool Control::contains(const QString& id) const
             return true;
     }
     return false;
+}
+
+unsigned int Control::index() const
+{
+    return m_index;
+}
+
+int Control::type() const
+{
+    return Type;
 }
 
 int Control::higherZValue() const
@@ -179,7 +190,7 @@ DesignerScene* Control::scene() const
 
 Control* Control::parentControl() const
 {
-    return dynamic_cast<Control*>(parentItem());
+    return qgraphicsitem_cast<Control*>(parentItem());
 }
 
 QList<QmlError> Control::errors() const
@@ -200,11 +211,11 @@ QList<PropertyNode> Control::properties() const
 QList<Control*> Control::childControls(bool dive) const
 {
     QList<Control*> controls;
-    for (auto item : childItems()) {
-        if (dynamic_cast<Control*>(item)) {
-            controls << static_cast<Control*>(item);
+    for (QGraphicsItem* item : childItems()) {
+        if (Control* control = qgraphicsitem_cast<Control*>(item)) {
+            controls << control;
             if (dive)
-                controls << controls.last()->childControls(dive);
+                controls << control->childControls(true);
         }
     }
     return controls;
@@ -256,6 +267,11 @@ void Control::setResizing(bool resizing)
     // FIXME:
     Suppressor::suppress(150, "resizingChanged", std::bind(&Control::resizingChanged, this));
     //    emit resizingChanged();
+}
+
+void Control::setIndex(unsigned int index)
+{
+    m_index = index;
 }
 
 void Control::hideResizers()

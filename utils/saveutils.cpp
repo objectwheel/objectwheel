@@ -1,3 +1,54 @@
+/****************************************************************************
+**  THE CONTROL MODEL
+**
+**    users
+**        a95db34f1234 // user 1
+**        f9713917f242 // user 2
+**        52078796f7be // user 3
+**            projects
+**                906e6f1f676a // project1
+**                a0d66c014b35 // project2
+**                    build
+**                        build.json
+**                    meta
+**                        project.meta
+**                    imports
+**                        Assets
+**                            qmldir
+**                            assets.qml
+**                            form1.js
+**                            form2.js
+**                            form3.js
+**                            ... // other resources
+**                    designs
+**                        fcdb1a5d095d // form1
+**                        1ad2135d47fc // form2
+**                        4cbcd2ef095d // form3
+**                            t
+**                                main.qml
+**                            m
+**                                control.meta
+**                            c
+**                                63e9fc09515d // child control 1
+**                                510c11157413 // child control 2
+**                                    t
+**                                        main.qml
+**                                    m
+**                                        control.meta
+**                                    c
+**                                        2aaa80a57c91 // child control 1
+**                                        85024917dacc // child control 2
+**                                        ae4ab544d4bc // child control 3
+**                                            t
+**                                                main.qml
+**                                            m
+**                                                control.meta
+**            meta
+**                user.meta
+**                user.icon
+**
+****************************************************************************/
+
 #include <saveutils.h>
 #include <filesystemutils.h>
 #include <hashfactory.h>
@@ -260,6 +311,11 @@ bool isUserValid(const QString& userDir)
     return Internal::property(userDir, UserSignature).toString() == Internal::userSignature();
 }
 
+quint32 controlIndex(const QString& controlDir)
+{
+    return Internal::property(controlDir, ControlIndex).value<quint32>();
+}
+
 QString controlId(const QString& controlDir)
 {
     return Internal::property(controlDir, ControlId).value<QString>();
@@ -471,7 +527,7 @@ QStringList formPaths(const QString& projectDir)
     return paths;
 }
 
-QStringList childrenPaths(const QString& controlDir)
+QStringList childrenPaths(const QString& controlDir, bool dive)
 {
     QStringList paths;
     const QString& childrenDir = toControlChildrenDir(controlDir);
@@ -480,7 +536,8 @@ QStringList childrenPaths(const QString& controlDir)
         const QString& childControlDir = childrenDir + '/' + childDirName;
         if (isControlValid(childControlDir)) {
             paths.append(childControlDir);
-            paths.append(childrenPaths(childControlDir));
+            if (dive)
+                paths.append(childrenPaths(childControlDir, true));
         }
     }
     return paths;
