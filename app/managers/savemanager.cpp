@@ -83,7 +83,7 @@ QString detectedFormRootPath(const QString& rootPath)
 */
 void repairIds(const QString& rootPath, bool recursive)
 {
-    QStringList controlRootPaths;
+    QVector<QString> controlRootPaths;
     controlRootPaths.append(rootPath);
 
     if (recursive)

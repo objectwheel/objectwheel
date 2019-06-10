@@ -58,6 +58,7 @@
 #include <QDir>
 #include <QDateTime>
 #include <QDataStream>
+#include <QVector>
 
 namespace SaveUtils {
 
@@ -514,9 +515,9 @@ void regenerateUids(const QString& topPath)
     }
 }
 
-QStringList formPaths(const QString& projectDir)
+QVector<QString> formPaths(const QString& projectDir)
 {
-    QStringList paths;
+    QVector<QString> paths;
     const QString& designsDir = toProjectDesignsDir(projectDir);
     for (const QString& formDirName
          : QDir(designsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
@@ -524,22 +525,44 @@ QStringList formPaths(const QString& projectDir)
         if (isControlValid(formDir))
             paths.append(formDir);
     }
+    std::sort(paths.begin(), paths.end(), [] (const QString& left, const QString& right) {
+        return controlIndex(left) < controlIndex(right);
+    });
     return paths;
 }
 
-QStringList childrenPaths(const QString& controlDir, bool dive)
+QVector<QString> childrenPaths(const QString& controlDir)
 {
-    QStringList paths;
-    const QString& childrenDir = toControlChildrenDir(controlDir);
-    for (const QString& childDirName
-         : QDir(childrenDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-        const QString& childControlDir = childrenDir + '/' + childDirName;
-        if (isControlValid(childControlDir)) {
-            paths.append(childControlDir);
-            if (dive)
-                paths.append(childrenPaths(childControlDir, true));
-        }
+    if (!isControlValid(controlDir)) {
+        qWarning("SaveUtils: Invalid control dir has given");
+        return {};
     }
+
+    int i = -1;
+    QVector<QString> paths;
+    QString childrenDir = toControlChildrenDir(controlDir);
+
+    forever {
+        QVector<QString> siblings;
+
+        for (const QString& childDirName : QDir(childrenDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+            const QString& childControlDir = childrenDir + '/' + childDirName;
+            if (isControlValid(childControlDir))
+                siblings.append(childControlDir);
+        }
+
+        std::sort(siblings.begin(), siblings.end(), [] (const QString& left, const QString& right) {
+            return controlIndex(left) < controlIndex(right);
+        });
+
+        paths.append(siblings);
+
+        if (++i >= paths.size())
+            break;
+
+        childrenDir = toControlChildrenDir(paths.at(i));
+    }
+
     return paths;
 }
 
