@@ -529,9 +529,13 @@ quint32 maxControlIndex(const QString& controlDir)
 
 QVector<QString> formPaths(const QString& projectDir)
 {
+    if (!isProjectValid(projectDir)) {
+        qWarning("SaveUtils: Invalid project dir has given");
+        return {};
+    }
+
     QVector<QString> paths;
     const QString& designsDir = toProjectDesignsDir(projectDir);
-
     for (const QString& formDirName : QDir(designsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& formDir = designsDir + '/' + formDirName;
         if (isControlValid(formDir))
@@ -552,32 +556,21 @@ QVector<QString> childrenPaths(const QString& controlDir, bool recursive)
         return {};
     }
 
-    int i = -1;
     QVector<QString> paths;
-    QString childrenDir = toControlChildrenDir(controlDir);
+    const QString& childrenDir = toControlChildrenDir(controlDir);
+    for (const QString& childDirName : QDir(childrenDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& childControlDir = childrenDir + '/' + childDirName;
+        if (isControlValid(childControlDir))
+            paths.append(childControlDir);
+    }
 
-    forever {
-        QVector<QString> siblings;
+    std::sort(paths.begin(), paths.end(), [] (const QString& left, const QString& right) {
+        return controlIndex(left) < controlIndex(right);
+    });
 
-        for (const QString& childDirName : QDir(childrenDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-            const QString& childControlDir = childrenDir + '/' + childDirName;
-            if (isControlValid(childControlDir))
-                siblings.append(childControlDir);
-        }
-
-        std::sort(siblings.begin(), siblings.end(), [] (const QString& left, const QString& right) {
-            return controlIndex(left) < controlIndex(right);
-        });
-
-        paths.append(siblings);
-
-        if (++i >= paths.size())
-            break;
-
-        if (!recursive)
-            break;
-
-        childrenDir = toControlChildrenDir(paths.at(i));
+    if (recursive) {
+        for (const QString& path : paths)
+            paths.append(childrenPaths(path, true));
     }
 
     return paths;
