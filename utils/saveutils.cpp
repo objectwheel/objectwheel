@@ -569,8 +569,9 @@ QVector<QString> childrenPaths(const QString& controlDir, bool recursive)
     });
 
     if (recursive) {
-        for (const QString& path : paths)
-            paths.append(childrenPaths(path, true));
+        const int SIBLINGS_COUNT = paths.size();
+        for (int i = 0; i < SIBLINGS_COUNT; ++i)
+            paths.append(childrenPaths(paths.at(i), true));
     }
 
     return paths;

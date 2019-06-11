@@ -68,10 +68,12 @@ void Previewer::init()
     emit initializationProgressChanged(g_progress_2);
 
     // FIXME: Object completetion order must be parent -> to -> child
-    for (ControlInstance* instance : instanceTree.values())
+    // according to Qt's internal completion order read here:
+    // stackoverflow.com/questions/46196831
+    for (ControlInstance* instance : instanceTree)
         PreviewerUtils::doComplete(instance, this);
 
-    for (ControlInstance* instance : instanceTree.values()) {
+    for (ControlInstance* instance : instanceTree) {
         if (QQuickItem* item = PreviewerUtils::guiItem(instance))
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
     }
