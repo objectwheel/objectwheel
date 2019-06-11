@@ -515,23 +515,37 @@ void regenerateUids(const QString& topPath)
     }
 }
 
+quint32 maxFormIndex(const QString& projectDir)
+{
+    const QVector<QString>& paths = SaveUtils::formPaths(projectDir);
+    return paths.isEmpty() ? 0 : controlIndex(paths.last());
+}
+
+quint32 maxControlIndex(const QString& controlDir)
+{
+    const QVector<QString>& paths = SaveUtils::childrenPaths(controlDir, false);
+    return paths.isEmpty() ? 0 : controlIndex(paths.last());
+}
+
 QVector<QString> formPaths(const QString& projectDir)
 {
     QVector<QString> paths;
     const QString& designsDir = toProjectDesignsDir(projectDir);
-    for (const QString& formDirName
-         : QDir(designsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+
+    for (const QString& formDirName : QDir(designsDir).entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& formDir = designsDir + '/' + formDirName;
         if (isControlValid(formDir))
             paths.append(formDir);
     }
+
     std::sort(paths.begin(), paths.end(), [] (const QString& left, const QString& right) {
         return controlIndex(left) < controlIndex(right);
     });
+
     return paths;
 }
 
-QVector<QString> childrenPaths(const QString& controlDir)
+QVector<QString> childrenPaths(const QString& controlDir, bool recursive)
 {
     if (!isControlValid(controlDir)) {
         qWarning("SaveUtils: Invalid control dir has given");
@@ -558,6 +572,9 @@ QVector<QString> childrenPaths(const QString& controlDir)
         paths.append(siblings);
 
         if (++i >= paths.size())
+            break;
+
+        if (!recursive)
             break;
 
         childrenDir = toControlChildrenDir(paths.at(i));
