@@ -314,6 +314,14 @@ void SaveManager::removeForm(const QString& formRootPath)
 /*!
     NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
 */
+void SaveManager::setIndex(Control* control, quint32 index)
+{
+// FIXME
+}
+
+/*!
+    NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
+*/
 void SaveManager::setProperty(Control* control, const QString& property, const QString& value)
 {
     if (!control)

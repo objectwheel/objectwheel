@@ -19,6 +19,7 @@ void ProjectExposingManager::init(DesignerScene* designerScene)
 
 void ProjectExposingManager::exposeProject()
 {
+    int formIndex = 0;
     for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
         auto form = new Form(formPath);
 
@@ -27,6 +28,11 @@ void ProjectExposingManager::exposeProject()
 
         if (form->id() != SaveUtils::controlId(form->dir()))
             SaveUtils::setProperty(form->dir(), SaveUtils::ControlId, form->id());
+
+        // FIXME
+        if (form->index() != formIndex++) {
+            SaveUtils::setProperty(form->dir(), SaveUtils::ControlIndex, form->id());
+        }
 
         s_designerScene->addForm(form);
 

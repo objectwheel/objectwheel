@@ -43,6 +43,7 @@ public:
     static void setGeometry(Control* control, const QRectF& geometry, Options options); // Set geometry, based on scene coord jargon
     static void setParent(Control* control, Control* parentControl, Options options);
     static void setId(Control* control, const QString& id, Options options);
+    static void setIndex(Control* control, quint32 index, Options options);
     static void setProperty(Control* control, const QString& propertyName, const QString& parserValue,
                             const QVariant& propertyValue, Options options);
 
@@ -59,6 +60,7 @@ signals:
     void parentChanged(Control*);
     void geometryChanged(Control*);
     void previewChanged(Control*, bool codeChanged);
+    void indexChanged(Control*);
     void idChanged(Control*, const QString& previousId);
     void propertyChanged(Control*, const QString& propertyName);
 

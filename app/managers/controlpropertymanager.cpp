@@ -446,15 +446,31 @@ void ControlPropertyManager::setId(Control* control, const QString& id, ControlP
 
     const QString& previousId = control->id();
 
-    if (options & SaveChanges)
+    if (options & SaveChanges) // Already applies the property change to the designer
         SaveManager::setProperty(control, "id", id);
-    else
+    else if (!(options & DontApplyDesigner))
         control->setId(id);
 
     if (options & UpdatePreviewer)
         ControlPreviewingManager::scheduleIdUpdate(control->uid(), control->id());
 
     emit instance()->idChanged(control, previousId);
+}
+
+void ControlPropertyManager::setIndex(Control* control, quint32 index, ControlPropertyManager::Options options)
+{
+    if (!control)
+        return;
+
+    if (options & SaveChanges) // Already applies the property change to the designer
+        SaveManager::setIndex(control, index);
+    else if (!(options & DontApplyDesigner))
+        control->setIndex(index);
+
+    if (options & UpdatePreviewer)
+        ControlPreviewingManager::scheduleIndexUpdate(control->uid(), control->index());
+
+    emit instance()->indexChanged(control);
 }
 
 void ControlPropertyManager::setProperty(Control* control, const QString& propertyName,

@@ -47,7 +47,6 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_hoverOn(false)
   , m_dragging(false)
   , m_resizing(false)
-  , m_index(0)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(g_baseControlSize)))
@@ -63,6 +62,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemSendsGeometryChanges);
 
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
+    ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setSize(this, g_baseControlSize, ControlPropertyManager::NoOption);
 
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
@@ -126,16 +126,7 @@ bool Control::hasErrors() const
     return !m_errors.isEmpty();
 }
 
-bool Control::contains(const QString& id) const
-{
-    for (auto control : childControls()) {
-        if (control->id() == id)
-            return true;
-    }
-    return false;
-}
-
-unsigned int Control::index() const
+quint32 Control::index() const
 {
     return m_index;
 }
@@ -269,7 +260,7 @@ void Control::setResizing(bool resizing)
     //    emit resizingChanged();
 }
 
-void Control::setIndex(unsigned int index)
+void Control::setIndex(quint32 index)
 {
     m_index = index;
 }

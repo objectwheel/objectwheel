@@ -15,7 +15,6 @@ class Control : public QGraphicsWidget
     friend class ControlCreationManager; // For constructor
     friend class ProjectExposingManager; // For constructor
     friend class DesignerScene; // For destructor (delete operator)
-    using QGraphicsWidget::contains;
 
 public:
     enum { Type = UserType + 1 };
@@ -30,9 +29,8 @@ public:
     bool dragging() const;
     bool resizing() const;
     bool hasErrors() const;
-    bool contains(const QString& id) const;
 
-    unsigned int index() const;
+    quint32 index() const;
     int type() const override;
     int higherZValue() const;
     int lowerZValue() const;
@@ -60,7 +58,7 @@ public:
     void setDragIn(bool dragIn);
     void setDragging(bool dragging);
     void setResizing(bool resizing);
-    void setIndex(unsigned int index);
+    void setIndex(quint32 index);
 
 public slots:
     void hideResizers();
@@ -106,7 +104,8 @@ private:
     bool m_hoverOn;
     bool m_dragging;
     bool m_resizing;
-    unsigned int m_index;
+
+    quint32 m_index;
     QMarginsF m_margins;
     QRectF m_cachedGeometry;
 

@@ -31,6 +31,7 @@ private:
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const QString& rootPath);
 
+    static void setIndex(Control* control, quint32 index);
     static void setProperty(Control* control, const QString& property, const QString& value);
 
 signals:
