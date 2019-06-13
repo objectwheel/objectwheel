@@ -205,9 +205,10 @@ QList<Control*> Control::siblings() const
 {
     QList<Control*> siblings;
     if (form()) {
-        Q_ASSERT(scene());
-        for (Form* form : scene()->forms())
-            siblings.append(form);
+        if (const DesignerScene* scene = this->scene()) {
+            for (Form* form : scene->forms())
+                siblings.append(form);
+        }
     } else {
         if (const Control* parent = parentControl())
             siblings = parent->childControls(false);
@@ -545,6 +546,11 @@ void Control::updatePreview(const PreviewResult& result)
     if (result.uid != uid())
         return;
 
+    // FIXME
+    // result.id ?? Preview Engine bize yeni id değeri göndermeli mi, zaten id değişikliğini
+    // önce biz ona gönderiyoruz, kod değişikliği yada propertis pane'den değiştirerek??
+    // zaten her halükarda id bu tarafta değiştirilip orada değişik kod gitmiyormu ve bu kod
+    // daki id değişikliği daha preview engine gitmeden önce zaten ilgili control'e setId edilmiyor mu?
     ControlPropertyManager::setId(this, result.id, ControlPropertyManager::NoOption);
 
     m_errors = result.errors;

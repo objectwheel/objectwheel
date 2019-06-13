@@ -34,6 +34,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
     // parent concept for forms in Designer; forms are directly put into DesignerScene
 
+    ControlPropertyManager::setIndex(form, form->siblings().size(), ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleFormCreation(form->dir());
 
     // NOTE: We don't have to worry about possible child controls since createForm is only
@@ -53,6 +54,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
     auto control = new Control(newControlRootPath);
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
+    ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);
     ControlPreviewingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
 
     QMap<QString, Control*> controlTree;
@@ -63,6 +65,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
 
         auto childControl = new Control(childPath);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
+        ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
         ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         controlTree.insert(childPath, childControl);
     }

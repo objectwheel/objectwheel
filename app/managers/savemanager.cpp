@@ -189,6 +189,9 @@ void SaveManager::setupFormConnections(const QString& formRootPath)
     emit instance()->formConnectionsDone(FormJS, id);
 }
 
+/*!
+    NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
+*/
 QString SaveManager::addForm(const QString& formRootPath)
 {
     Q_ASSERT(ProjectManager::isStarted());
@@ -218,6 +221,9 @@ QString SaveManager::addForm(const QString& formRootPath)
     return newFormRootPath;
 }
 
+/*!
+    NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
+*/
 QString SaveManager::addControl(const QString& controlRootPath, const QString& targetParentControlRootPath)
 {
     if (!SaveUtils::isControlValid(controlRootPath)) {

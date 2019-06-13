@@ -93,9 +93,6 @@ bool initProjectMeta(const QString& projectDir);
 bool initUserMeta(const QString& userDir);
 void regenerateUids(const QString& topPath);
 
-//FIXME: quint32 maxFormIndex(const QString& projectDir);
-//FIXME: quint32 maxControlIndex(const QString& controlDir);
-
 QVector<QString> formPaths(const QString& projectDir);
 QVector<QString> childrenPaths(const QString& controlDir, bool recursive = true);
 

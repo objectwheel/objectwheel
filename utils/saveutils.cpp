@@ -515,18 +515,6 @@ void regenerateUids(const QString& topPath)
     }
 }
 
-//FIXME: quint32 maxFormIndex(const QString& projectDir)
-//{
-//    const QVector<QString>& paths = SaveUtils::formPaths(projectDir);
-//    return paths.isEmpty() ? 0 : controlIndex(paths.last());
-//}
-
-//FIXME: quint32 maxControlIndex(const QString& controlDir)
-//{
-//    const QVector<QString>& paths = SaveUtils::childrenPaths(controlDir, false);
-//    return paths.isEmpty() ? 0 : controlIndex(paths.last());
-//}
-
 QVector<QString> formPaths(const QString& projectDir)
 {
     if (!isProjectValid(projectDir)) {
@@ -549,6 +537,7 @@ QVector<QString> formPaths(const QString& projectDir)
     return paths;
 }
 
+// FIXME: Do we need recursive after all?
 QVector<QString> childrenPaths(const QString& controlDir, bool recursive)
 {
     if (!isControlValid(controlDir)) {
