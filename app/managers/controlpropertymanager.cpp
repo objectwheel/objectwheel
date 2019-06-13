@@ -9,7 +9,6 @@
 #include <QPointer>
 
 ControlPropertyManager* ControlPropertyManager::s_instance = nullptr;
-DesignerScene* ControlPropertyManager::s_designerScene = nullptr;
 QTimer* ControlPropertyManager::s_dirtyPropertyProcessingTimer = nullptr;
 QList<ControlPropertyManager::DirtyProperty> ControlPropertyManager::s_dirtyProperties;
 
@@ -26,11 +25,6 @@ ControlPropertyManager::ControlPropertyManager(QObject* parent) : QObject(parent
 ControlPropertyManager::~ControlPropertyManager()
 {
     s_instance = nullptr;
-}
-
-void ControlPropertyManager::init(DesignerScene* designerScene)
-{
-    s_designerScene = designerScene;
 }
 
 ControlPropertyManager* ControlPropertyManager::instance()
@@ -414,8 +408,16 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     if (!control)
         return;
 
+    Q_ASSERT(!control->form());
+
     if (!parentControl)
         return;
+
+    // If parent change is gonna be saved, make sure to fix indexes of the
+    // previous siblings of the related control before setting new parent
+    // WARNING: Should we use ControlPropertyManager::setIndex instead?
+    if (options & SaveChanges)
+        SaveManager::setIndex(control, std::numeric_limits<quint32>::max());
 
     if (!(options & DontApplyDesigner))
         control->setParentItem(parentControl);
@@ -431,8 +433,11 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        if (options & SaveChanges)
+        if (options & SaveChanges) {
             SaveManager::moveControl(control, parentControl);
+            // WARNING: Should we use ControlPropertyManager::setIndex instead?
+            SaveManager::setIndex(control, control->siblings().size());
+        }
 
         if (options & UpdatePreviewer) {
             ControlPreviewingManager::scheduleParentUpdate(control->dir(),
@@ -464,29 +469,27 @@ void ControlPropertyManager::setId(Control* control, const QString& id, ControlP
     emit instance()->idChanged(control, previousId);
 }
 
+// NOTE: Call for controls only these are present on the Designer Scene
 void ControlPropertyManager::setIndex(Control* control, quint32 index, ControlPropertyManager::Options options)
 {
     if (!control)
         return;
 
-    if (options & SaveChanges) { // Already applies the property change to the designer
-        QList<Control*> siblings;
-        if (control->form()) {
-            for (Form* form : s_designerScene->forms())
-                siblings.append(form);
-        } else {
-            siblings = control->siblings();
-        }
-        Q_ASSERT(!siblings.isEmpty());
-        SaveManager::setIndex(control, siblings, index);
-    } else if (!(options & DontApplyDesigner)) {
+    if (options & SaveChanges) // Already applies the property change to the designer
+        SaveManager::setIndex(control, index);
+    else if (!(options & DontApplyDesigner))
         control->setIndex(index);
-    }
 
-//  FIXME  if (options & UpdatePreviewer)
-//        ControlPreviewingManager::scheduleIndexUpdate(control->uid(), control->index());
+    // NOTE: No need for this right now. If you need
+    // this, make sure you emit it on other places
+    // where SaveManager::setIndex was used
+    // if (options & UpdatePreviewer)
+    //     ControlPreviewingManager::scheduleIndexUpdate(control->uid(), control->index());
 
-    emit instance()->indexChanged(control);
+    // NOTE: No need for this right now. If you need
+    // this, make sure you emit it on other places
+    // where SaveManager::setIndex was used
+    // emit instance()->indexChanged(control);
 }
 
 void ControlPropertyManager::setProperty(Control* control, const QString& propertyName,

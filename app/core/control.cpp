@@ -204,8 +204,19 @@ QList<PropertyNode> Control::properties() const
 QList<Control*> Control::siblings() const
 {
     QList<Control*> siblings;
-    if (const Control* parent = parentControl())
-        siblings = parent->childControls(false);
+    if (form()) {
+        Q_ASSERT(scene());
+        for (Form* form : scene()->forms())
+            siblings.append(form);
+    } else {
+        if (const Control* parent = parentControl())
+            siblings = parent->childControls(false);
+    }
+    Q_ASSERT(siblings.contains(const_cast<Control*>(this)));
+    siblings.removeOne(const_cast<Control*>(this));
+    std::sort(siblings.begin(), siblings.end(), [] (const Control* left, const Control* right) {
+        return left->index() < right->index();
+    });
     return siblings;
 }
 
@@ -409,9 +420,8 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     for (auto control : scene()->currentForm()->childControls()) {
         if (control->dragIn() && dragging() && parentControl() != control) {
             for (auto sc : selectedControls) {
-                if (sc->dragging()) {
+                if (sc->dragging())
                     control->dropControl(sc);
-                }
             }
             scene()->clearSelection();
             control->setSelected(true);

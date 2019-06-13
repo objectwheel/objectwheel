@@ -515,17 +515,17 @@ void regenerateUids(const QString& topPath)
     }
 }
 
-quint32 maxFormIndex(const QString& projectDir)
-{
-    const QVector<QString>& paths = SaveUtils::formPaths(projectDir);
-    return paths.isEmpty() ? 0 : controlIndex(paths.last());
-}
+//FIXME: quint32 maxFormIndex(const QString& projectDir)
+//{
+//    const QVector<QString>& paths = SaveUtils::formPaths(projectDir);
+//    return paths.isEmpty() ? 0 : controlIndex(paths.last());
+//}
 
-quint32 maxControlIndex(const QString& controlDir)
-{
-    const QVector<QString>& paths = SaveUtils::childrenPaths(controlDir, false);
-    return paths.isEmpty() ? 0 : controlIndex(paths.last());
-}
+//FIXME: quint32 maxControlIndex(const QString& controlDir)
+//{
+//    const QVector<QString>& paths = SaveUtils::childrenPaths(controlDir, false);
+//    return paths.isEmpty() ? 0 : controlIndex(paths.last());
+//}
 
 QVector<QString> formPaths(const QString& projectDir)
 {

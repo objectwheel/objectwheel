@@ -5,7 +5,6 @@
 #include <controlpreviewingmanager.h>
 #include <QDebug>
 
-DesignerScene* ControlRemovingManager::s_designerScene = nullptr;
 ControlRemovingManager* ControlRemovingManager::s_instance = nullptr;
 
 ControlRemovingManager::ControlRemovingManager(QObject* parent) : QObject(parent)
@@ -23,17 +22,15 @@ ControlRemovingManager* ControlRemovingManager::instance()
     return s_instance;
 }
 
-void ControlRemovingManager::init(DesignerScene* designerScene)
-{
-    s_designerScene = designerScene;
-}
-
 void ControlRemovingManager::removeForm(Form* form)
 {
     if (!form || !form->form())
         return;
 
-    if (!s_designerScene->forms().contains(form))
+    DesignerScene* scene = form->scene();
+    Q_ASSERT(scene);
+
+    if (!scene->forms().contains(form))
         return;
 
     for (Control* childControl : form->childControls())
@@ -44,7 +41,7 @@ void ControlRemovingManager::removeForm(Form* form)
     ControlPreviewingManager::scheduleFormDeletion(form->uid());
 
     SaveManager::removeForm(form->dir());
-    s_designerScene->removeForm(form);
+    scene->removeForm(form);
 }
 
 void ControlRemovingManager::removeControl(Control* control)
@@ -60,7 +57,9 @@ void ControlRemovingManager::removeControl(Control* control)
     ControlPreviewingManager::scheduleControlDeletion(control->uid());
 
     SaveManager::removeControl(control->dir());
-    s_designerScene->removeControl(control);
+    DesignerScene* scene = control->scene();
+    Q_ASSERT(scene);
+    scene->removeControl(control);
 }
 
 void ControlRemovingManager::removeControls(const QList<Control*>& controls)

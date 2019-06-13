@@ -5,7 +5,6 @@
 
 class Form;
 class Control;
-class DesignerScene;
 
 class ControlRemovingManager final : public QObject
 {
@@ -28,12 +27,10 @@ private:
     explicit ControlRemovingManager(QObject* parent = nullptr);
     ~ControlRemovingManager() override;
 
-    static void init(DesignerScene* designerScene);
     static void removeForm(Form* form);  // FormsPane dependency: Should be a private member
 
 private:
     static ControlRemovingManager* s_instance;
-    static DesignerScene* s_designerScene;
 };
 
 

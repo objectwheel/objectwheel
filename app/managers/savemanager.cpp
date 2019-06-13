@@ -105,15 +105,15 @@ void repairIds(const QString& rootPath, bool recursive)
     }
 }
 
-void repairIndexes(Control* control, QList<Control*> siblings)
+void repairSiblingIndexes(Control* control)
 {
-    std::sort(siblings.begin(), siblings.end(), [] (const Control* left, const Control* right) {
-        return left->index() < right->index();
-    });
-
     quint32 i = 0;
-    for (Control* sibling : siblings) {
-        if (sibling != control && i != control->index() && i != sibling->index()) {
+    for (Control* sibling : control->siblings()) {
+        if (i == control->index())
+            i++;
+        // Make sure you set indexes for zeros no matter what, since Controls
+        // with no-index set could return 0 from SaveUtils::controlIndex anyway
+        if (i == 0 || i != sibling->index()) {
             SaveUtils::setProperty(sibling->dir(), SaveUtils::ControlIndex, i);
             sibling->setIndex(i);
         }
@@ -250,6 +250,9 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
     return newControlRootPath;
 }
 
+/*!
+    NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
+*/
 bool SaveManager::moveControl(Control* control, const Control* parentControl)
 {
     if (control == parentControl)
@@ -331,21 +334,20 @@ void SaveManager::removeForm(const QString& formRootPath)
 /*!
     NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
 */
-void SaveManager::setIndex(Control* control, const QList<Control*>& siblings, quint32 index)
+void SaveManager::setIndex(Control* control, quint32 index)
 {
-    Q_ASSERT(!siblings.isEmpty());
-
     if (!control)
         return;
 
     if (!SaveUtils::isControlValid(control->dir()))
         return;
 
-    SaveUtils::setProperty(control->dir(), SaveUtils::ControlIndex, index);
-    control->setIndex(index);
-    repairIndexes(control, siblings);
-
-    ProjectManager::updateLastModification(ProjectManager::uid());
+    if (index == 0 || index != control->index()) {
+        SaveUtils::setProperty(control->dir(), SaveUtils::ControlIndex, index);
+        control->setIndex(index);
+        repairSiblingIndexes(control);
+        ProjectManager::updateLastModification(ProjectManager::uid());
+    }
 }
 
 /*!

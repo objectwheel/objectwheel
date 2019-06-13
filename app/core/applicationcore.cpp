@@ -144,9 +144,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
 
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerWidget()->designerScene();
     s_projectExposingManager->init(scene);
-    s_controlPropertyManager->init(scene);
     s_controlCreationManager->init(scene);
-    s_controlRemovingManager->init(scene);
 
     QMetaObject::Connection i;
     i = QObject::connect(s_windowManager->mainWindow()->toolboxPane(), &ToolboxPane::filled, [=] {
