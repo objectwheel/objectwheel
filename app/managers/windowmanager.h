@@ -23,7 +23,7 @@ public:
 
 private:
     explicit WindowManager(QObject* parent = nullptr);
-    ~WindowManager();
+    ~WindowManager() override;
 
 private:
     static AboutWindow* s_aboutWindow;

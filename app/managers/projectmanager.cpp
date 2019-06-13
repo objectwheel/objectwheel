@@ -235,7 +235,10 @@ bool ProjectManager::start(const QString& uid)
 
     s_uid = uid;
 
+    // Must be executed before running preview engine
+    // Because it might fix broken id and indexes
     ProjectExposingManager::exposeProject();
+
     ControlPreviewingManager::scheduleInit();
     DocumentManager::updateProjectInfo();
     updateLastModification(s_uid);

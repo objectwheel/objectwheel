@@ -3,7 +3,7 @@
 
 #include <QObject>
 
-class Ow final : public QObject
+class Ow : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(Ow)

@@ -26,7 +26,7 @@ private:
 
 private:
     explicit ApplicationCore(QObject* parent = nullptr);
-    ~ApplicationCore();
+    ~ApplicationCore() override;
 
 private:
     static PreviewerSocket* s_previewerSocket;

@@ -7,7 +7,7 @@
 
 class QTimer;
 
-class PreviewerSocket : public QObject
+class PreviewerSocket final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(PreviewerSocket)

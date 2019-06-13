@@ -37,7 +37,7 @@ class QHelpEngine;
 
 struct HelpManagerPrivate;
 
-class HelpManager : public QObject
+class HelpManager final : public QObject
 {
     Q_OBJECT
 
@@ -104,7 +104,7 @@ signals:
 
 private:
     explicit HelpManager(QObject *parent = nullptr);
-    ~HelpManager();
+    ~HelpManager() override;
 
     static void setupHelpManager();
     static void registerDocumentationNow(QFutureInterface<bool> &futureInterface,

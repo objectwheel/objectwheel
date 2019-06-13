@@ -3,11 +3,13 @@
 #include <savemanager.h>
 #include <saveutils.h>
 #include <controlpreviewingmanager.h>
+#include <designerscene.h>
 
 #include <QTimer>
 #include <QPointer>
 
 ControlPropertyManager* ControlPropertyManager::s_instance = nullptr;
+DesignerScene* ControlPropertyManager::s_designerScene = nullptr;
 QTimer* ControlPropertyManager::s_dirtyPropertyProcessingTimer = nullptr;
 QList<ControlPropertyManager::DirtyProperty> ControlPropertyManager::s_dirtyProperties;
 
@@ -24,6 +26,11 @@ ControlPropertyManager::ControlPropertyManager(QObject* parent) : QObject(parent
 ControlPropertyManager::~ControlPropertyManager()
 {
     s_instance = nullptr;
+}
+
+void ControlPropertyManager::init(DesignerScene* designerScene)
+{
+    s_designerScene = designerScene;
 }
 
 ControlPropertyManager* ControlPropertyManager::instance()
@@ -462,13 +469,22 @@ void ControlPropertyManager::setIndex(Control* control, quint32 index, ControlPr
     if (!control)
         return;
 
-    if (options & SaveChanges) // Already applies the property change to the designer
-        SaveManager::setIndex(control, index);
-    else if (!(options & DontApplyDesigner))
+    if (options & SaveChanges) { // Already applies the property change to the designer
+        QList<Control*> siblings;
+        if (control->form()) {
+            for (Form* form : s_designerScene->forms())
+                siblings.append(form);
+        } else {
+            siblings = control->siblings();
+        }
+        Q_ASSERT(!siblings.isEmpty());
+        SaveManager::setIndex(control, siblings, index);
+    } else if (!(options & DontApplyDesigner)) {
         control->setIndex(index);
+    }
 
-    if (options & UpdatePreviewer)
-        ControlPreviewingManager::scheduleIndexUpdate(control->uid(), control->index());
+//  FIXME  if (options & UpdatePreviewer)
+//        ControlPreviewingManager::scheduleIndexUpdate(control->uid(), control->index());
 
     emit instance()->indexChanged(control);
 }

@@ -88,7 +88,7 @@ bool Control::gui() const
 
 bool Control::form() const
 {
-    return qgraphicsitem_cast<const Form*>(this);
+    return type() == Form::Type;
 }
 
 bool Control::clip() const
@@ -181,7 +181,9 @@ DesignerScene* Control::scene() const
 
 Control* Control::parentControl() const
 {
-    return qgraphicsitem_cast<Control*>(parentItem());
+    if (parentItem() && (parentItem()->type() == Form::Type || parentItem()->type() == Control::Type))
+        return static_cast<Control*>(parentItem());
+    return nullptr;
 }
 
 QList<QmlError> Control::errors() const
@@ -199,11 +201,20 @@ QList<PropertyNode> Control::properties() const
     return m_properties;
 }
 
+QList<Control*> Control::siblings() const
+{
+    QList<Control*> siblings;
+    if (const Control* parent = parentControl())
+        siblings = parent->childControls(false);
+    return siblings;
+}
+
 QList<Control*> Control::childControls(bool dive) const
 {
     QList<Control*> controls;
     for (QGraphicsItem* item : childItems()) {
-        if (Control* control = qgraphicsitem_cast<Control*>(item)) {
+        if (item->type() == Form::Type || item->type() == Control::Type) {
+            Control* control = static_cast<Control*>(item);
             controls << control;
             if (dive)
                 controls << control->childControls(true);

@@ -44,7 +44,7 @@ signals:
 
 private:
     explicit ControlPreviewingManager(QObject* parent = nullptr);
-    ~ControlPreviewingManager();
+    ~ControlPreviewingManager() override;
 
 private:
     static ControlPreviewingManager* s_instance;

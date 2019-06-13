@@ -9,6 +9,7 @@ class ApiAiPrivate;
 class ApiAi : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ApiAi)
     Q_PROPERTY(QString token READ token WRITE setToken)
     Q_PROPERTY(QString language READ language WRITE setLanguage)
     Q_PROPERTY(bool state READ state NOTIFY stateChanged)
@@ -23,7 +24,7 @@ private:
 
 public:
     explicit ApiAi(QObject *parent = 0);
-    ~ApiAi();
+    ~ApiAi() override;
     const QString& token() const;
     void setToken(const QString& token);
     const QString& language() const;

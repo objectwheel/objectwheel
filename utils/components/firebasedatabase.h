@@ -36,6 +36,7 @@ class QNetworkAccessManager;
 class FirebaseDatabase : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(FirebaseDatabase)
     Q_PROPERTY(QString baseAddress READ baseAddress WRITE setBaseAddress)
 
 public:

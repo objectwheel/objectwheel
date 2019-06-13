@@ -19,20 +19,22 @@ void ProjectExposingManager::init(DesignerScene* designerScene)
 
 void ProjectExposingManager::exposeProject()
 {
-    int formIndex = 0;
+    Form* firstForm = nullptr;
+    QMap<Control*, Control*> firstChilds;
+
     for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
         auto form = new Form(formPath);
+
+        // Since SaveUtils::formPaths sorts out the form paths based
+        // on indexes, thus the first form is the one with lower index
+        if (!firstForm)
+            firstForm = form;
 
         if (form->id().isEmpty())
             ControlPropertyManager::setId(form, "form", ControlPropertyManager::SaveChanges);
 
         if (form->id() != SaveUtils::controlId(form->dir()))
             SaveUtils::setProperty(form->dir(), SaveUtils::ControlId, form->id());
-
-        // FIXME
-        if (form->index() != formIndex++) {
-            SaveUtils::setProperty(form->dir(), SaveUtils::ControlIndex, form->id());
-        }
 
         s_designerScene->addForm(form);
 
@@ -45,6 +47,11 @@ void ProjectExposingManager::exposeProject()
 
             auto control = new Control(childPath);
 
+            // Since SaveUtils::childrenPaths sorts out the siblings based
+            // on indexes, thus the first control is the one with lower index
+            if (!firstChilds.contains(parentControl))
+                firstChilds.insert(parentControl, control);
+
             if (control->id().isEmpty())
                 ControlPropertyManager::setId(control, "control", ControlPropertyManager::SaveChanges);
 
@@ -55,4 +62,10 @@ void ProjectExposingManager::exposeProject()
             controlTree.insert(childPath, control);
         }
     }
+
+    // Let the SaveManager fix (rebuild) indexes
+    // Make sure setIndex is called after controls put upon DesignerScene
+    ControlPropertyManager::setIndex(firstForm, 0, ControlPropertyManager::SaveChanges);
+    for (Control* firstChild : firstChilds)
+        ControlPropertyManager::setIndex(firstChild, 0, ControlPropertyManager::SaveChanges);
 }

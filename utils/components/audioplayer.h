@@ -7,6 +7,7 @@
 class AudioPlayer : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(AudioPlayer)
     Q_PROPERTY(int sampleRate READ sampleRate WRITE setSampleRate)
     Q_PROPERTY(int channelCount READ channelCount WRITE setChannelCount)
     Q_PROPERTY(int sampleSize READ sampleSize WRITE setSampleSize)

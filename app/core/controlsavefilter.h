@@ -6,6 +6,7 @@
 class ControlSaveFilter final : public QObject, public QmlCodeEditorWidget::SaveFilter
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ControlSaveFilter)
 
 public:
     explicit ControlSaveFilter(QObject* parent = nullptr);

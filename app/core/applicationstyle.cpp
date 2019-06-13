@@ -676,7 +676,7 @@ void ApplicationStyle::polish(QWidget* w)
                 if (wd != w)
                     wd->setStyleSheet("QWidget { background: transparent; }");
             }
-            class A : public QObject {
+            class A final : public QObject {
                 bool eventFilter(QObject* w, QEvent* e) override
                 {
                     if (e->type() == QEvent::Show) {

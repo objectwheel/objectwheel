@@ -5,6 +5,7 @@
 #include <QList>
 
 class Control;
+class DesignerScene;
 class QTimer;
 
 class ControlPropertyManager final : public QObject
@@ -66,10 +67,12 @@ signals:
 
 private:
     explicit ControlPropertyManager(QObject* parent = nullptr);
-    ~ControlPropertyManager();
+    static void init(DesignerScene* designerScene);
+    ~ControlPropertyManager() override;
 
 private:
     static ControlPropertyManager* s_instance;
+    static DesignerScene* s_designerScene;
     static QTimer* s_dirtyPropertyProcessingTimer;
     static QList<DirtyProperty> s_dirtyProperties;
 };

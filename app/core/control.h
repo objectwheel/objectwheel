@@ -46,6 +46,7 @@ public:
     QList<QmlError> errors() const;
     QList<QString> events() const;
     QList<PropertyNode> properties() const;
+    QList<Control*> siblings() const;
     QList<Control*> childControls(bool dive = true) const;
     QVariant::Type propertyType(const QString& propertyName) const;
 

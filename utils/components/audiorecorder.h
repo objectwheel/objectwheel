@@ -8,6 +8,7 @@ class QIODevice;
 class AudioRecorder : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(AudioRecorder)
     Q_PROPERTY(bool error READ error)
     Q_PROPERTY(bool recording READ recording NOTIFY recordingChanged)
     Q_PROPERTY(int bufferSize READ bufferSize WRITE setBufferSize)

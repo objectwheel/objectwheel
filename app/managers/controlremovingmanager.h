@@ -26,7 +26,7 @@ signals:
 
 private:
     explicit ControlRemovingManager(QObject* parent = nullptr);
-    ~ControlRemovingManager();
+    ~ControlRemovingManager() override;
 
     static void init(DesignerScene* designerScene);
     static void removeForm(Form* form);  // FormsPane dependency: Should be a private member

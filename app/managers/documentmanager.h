@@ -34,7 +34,7 @@ public:
 
 private:
     explicit DocumentManager(QObject* parent = nullptr);
-    ~DocumentManager();
+    ~DocumentManager() override;
 
 private:
     static DocumentManager* s_instance;

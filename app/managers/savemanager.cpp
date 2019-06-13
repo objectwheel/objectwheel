@@ -104,6 +104,23 @@ void repairIds(const QString& rootPath, bool recursive)
         ParserUtils::setId(controlRootPath, id);
     }
 }
+
+void repairIndexes(Control* control, QList<Control*> siblings)
+{
+    std::sort(siblings.begin(), siblings.end(), [] (const Control* left, const Control* right) {
+        return left->index() < right->index();
+    });
+
+    quint32 i = 0;
+    for (Control* sibling : siblings) {
+        if (sibling != control && i != control->index() && i != sibling->index()) {
+            SaveUtils::setProperty(sibling->dir(), SaveUtils::ControlIndex, i);
+            sibling->setIndex(i);
+        }
+        i++;
+    }
+}
+
 }
 
 SaveManager* SaveManager::s_instance = nullptr;
@@ -314,9 +331,21 @@ void SaveManager::removeForm(const QString& formRootPath)
 /*!
     NOTE: Do not use this directly from anywhere, use ControlPropertyManager instead
 */
-void SaveManager::setIndex(Control* control, quint32 index)
+void SaveManager::setIndex(Control* control, const QList<Control*>& siblings, quint32 index)
 {
-// FIXME
+    Q_ASSERT(!siblings.isEmpty());
+
+    if (!control)
+        return;
+
+    if (!SaveUtils::isControlValid(control->dir()))
+        return;
+
+    SaveUtils::setProperty(control->dir(), SaveUtils::ControlIndex, index);
+    control->setIndex(index);
+    repairIndexes(control, siblings);
+
+    ProjectManager::updateLastModification(ProjectManager::uid());
 }
 
 /*!

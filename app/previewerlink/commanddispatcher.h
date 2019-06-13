@@ -7,9 +7,10 @@
 struct PreviewResult;
 class PreviewerServer;
 
-class CommandDispatcher : public QObject
+class CommandDispatcher final : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(CommandDispatcher)
 
 public:
     explicit CommandDispatcher(PreviewerServer* server, QObject* parent = nullptr);

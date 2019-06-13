@@ -41,7 +41,7 @@ signals:
 
 private:
     explicit ProjectManager(QObject* parent = nullptr);
-    ~ProjectManager();
+    ~ProjectManager() override;
 
 private:
     static ProjectManager* s_instance;

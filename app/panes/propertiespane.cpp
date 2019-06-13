@@ -37,7 +37,7 @@ void initPalette(QWidget* widget)
     widget->setPalette(palette);
 }
 
-class WheelDisabler : public QObject {
+class WheelDisabler final : public QObject {
     Q_OBJECT
     bool eventFilter(QObject* o, QEvent* e) override {
         if (e->type() == QEvent::Wheel && qobject_cast<QAbstractSpinBox*>(o)) {

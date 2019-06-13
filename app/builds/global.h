@@ -3,8 +3,11 @@
 
 #include <QObject>
 
-class OTargets : public QObject {
+class OTargets final : public QObject
+{
     Q_OBJECT
+    Q_DISABLE_COPY(OTargets)
+
 public:
     enum Targets {
         android_armeabi_v7a,

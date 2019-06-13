@@ -50,12 +50,13 @@ class QmlJSHoverHandler;
 }
 }
 
-class TextEditorAnimator : public QObject
+class TextEditorAnimator final : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(TextEditorAnimator)
 
 public:
-    TextEditorAnimator(QObject *parent);
+    explicit TextEditorAnimator(QObject* parent);
 
     void init(const QTextCursor &cursor, const QFont &f, const QPalette &pal);
     inline QTextCursor cursor() const { return m_cursor; }

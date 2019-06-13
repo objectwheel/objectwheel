@@ -13,7 +13,7 @@ class SaveManager final : public QObject
     friend class ApplicationCore;        // For constructor and destructor
     friend class ControlRemovingManager; // For removeControl()
     friend class ControlCreationManager; // For addControl()
-    friend class ControlPropertyManager; // For setProperty(), moveControl()
+    friend class ControlPropertyManager; // For setProperty(), setIndex(), moveControl()
     friend class ProjectManager;         // For initProject()
 
 public:
@@ -21,7 +21,7 @@ public:
 
 private:
     explicit SaveManager(QObject* parent = nullptr);
-    ~SaveManager();
+    ~SaveManager() override;
 
     static QString addForm(const QString& formRootPath);
     static void removeForm(const QString& formRootPath);
@@ -31,7 +31,7 @@ private:
     static bool moveControl(Control* control, const Control* parentControl);
     static void removeControl(const QString& rootPath);
 
-    static void setIndex(Control* control, quint32 index);
+    static void setIndex(Control* control, const QList<Control*>& siblings, quint32 index);
     static void setProperty(Control* control, const QString& property, const QString& value);
 
 signals:

@@ -8,9 +8,10 @@ class QQmlEngine;
 class Translation : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(Translation)
 
 public:
-    Translation(QQmlEngine* engine, QObject* parent = nullptr);
+    explicit Translation(QQmlEngine* engine, QObject* parent = nullptr);
 
 public slots:
     void clear();

@@ -24,6 +24,7 @@ public:
 class Previewer final : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(Previewer)
 
 public:
     struct ControlInstance {
@@ -45,7 +46,7 @@ public:
 
 public:
     explicit Previewer(QObject* parent = nullptr);
-    ~Previewer();
+    ~Previewer() override;
 
 public:
     bool hasInstanceForObject(const QObject* object) const;

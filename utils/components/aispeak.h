@@ -9,6 +9,7 @@ class AiSpeakPrivate;
 class AiSpeak : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(AiSpeak)
     Q_PROPERTY(QString token READ token WRITE setToken)
     Q_PROPERTY(QString language READ language WRITE setLanguage)
 
@@ -19,7 +20,7 @@ private:
 
 public:
     explicit AiSpeak(QObject *parent = 0);
-    ~AiSpeak();
+    ~AiSpeak() override;
     const QString& token() const;
     void setToken(const QString& token);
     const QString& language() const;

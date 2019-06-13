@@ -6,12 +6,13 @@
 
 class QPlainTextEdit;
 
-class UTILS_EXPORT QmlFormatter : public QObject
+class UTILS_EXPORT QmlFormatter final : public QObject
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QmlFormatter)
 
 public:
-    explicit QmlFormatter(QObject *parent = nullptr);
+    explicit QmlFormatter(QObject* parent = nullptr);
     static void format(QString& text);
 };
 
