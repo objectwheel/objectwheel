@@ -297,6 +297,8 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
                 .arg(palette().brightText().color().name())
                 );
 
+    // WARNING: Beware, ControlPropertyManager signals are emitted everytime a setProperty called
+    // no matter what. I think we should consider reviewing related slots against possible miscalls
     connect(this, &InspectorPane::itemSelectionChanged,
             this, &InspectorPane::onItemSelectionChange);
     connect(m_designerScene, &DesignerScene::currentFormChanged,

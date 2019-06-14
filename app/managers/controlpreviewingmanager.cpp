@@ -100,6 +100,11 @@ void ControlPreviewingManager::scheduleControlDeletion(const QString& uid)
     s_commandDispatcher->scheduleControlDeletion(uid);
 }
 
+void ControlPreviewingManager::scheduleIndexUpdate(const QString& uid)
+{
+    s_commandDispatcher->scheduleIndexUpdate(uid);
+}
+
 void ControlPreviewingManager::scheduleIdUpdate(const QString& uid, const QString& newId)
 {
     s_commandDispatcher->scheduleIdUpdate(uid, newId);

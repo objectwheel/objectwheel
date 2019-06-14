@@ -51,6 +51,11 @@ void CommandDispatcher::scheduleParentUpdate(const QString& newDir, const QStrin
     send(m_server, PreviewerCommands::ParentUpdate, push(newDir, uid, parentUid));
 }
 
+void CommandDispatcher::scheduleIndexUpdate(const QString& uid)
+{
+    send(m_server, PreviewerCommands::IndexUpdate, push(uid));
+}
+
 void CommandDispatcher::scheduleIdUpdate(const QString& uid, const QString& newId)
 {
     send(m_server, PreviewerCommands::IdUpdate, push(uid, newId));

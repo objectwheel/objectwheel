@@ -31,6 +31,7 @@ signals:
     void controlCreation(const QString& dir, const QString& parentUid);
     void refresh(const QString& formUid);
     void parentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
+    void indexUpdate(const QString& uid);
     void idUpdate(const QString& uid, const QString& newId);
     void controlDeletion(const QString& uid);
     void formDeletion(const QString& uid);

@@ -415,9 +415,9 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
 
     // If parent change is gonna be saved, make sure to fix indexes of the
     // previous siblings of the related control before setting new parent
-    // WARNING: Should we use ControlPropertyManager::setIndex instead?
     if (options & SaveChanges)
-        SaveManager::setIndex(control, std::numeric_limits<quint32>::max());
+        // FIXME: Should we also add UpdatePreviewer here?
+        setIndex(control, std::numeric_limits<quint32>::max(), SaveChanges);
 
     if (!(options & DontApplyDesigner))
         control->setParentItem(parentControl);
@@ -435,8 +435,8 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     } else {
         if (options & SaveChanges) {
             SaveManager::moveControl(control, parentControl);
-            // WARNING: Should we use ControlPropertyManager::setIndex instead?
-            SaveManager::setIndex(control, control->siblings().size());
+            // FIXME: Should we also add UpdatePreviewer here?
+            setIndex(control, control->siblings().size(), SaveChanges);
         }
 
         if (options & UpdatePreviewer) {
@@ -480,16 +480,10 @@ void ControlPropertyManager::setIndex(Control* control, quint32 index, ControlPr
     else if (!(options & DontApplyDesigner))
         control->setIndex(index);
 
-    // NOTE: No need for this right now. If you need
-    // this, make sure you emit it on other places
-    // where SaveManager::setIndex was used
-    // if (options & UpdatePreviewer)
-    //     ControlPreviewingManager::scheduleIndexUpdate(control->uid(), control->index());
+    if (options & UpdatePreviewer)
+        ControlPreviewingManager::scheduleIndexUpdate(control->uid());
 
-    // NOTE: No need for this right now. If you need
-    // this, make sure you emit it on other places
-    // where SaveManager::setIndex was used
-    // emit instance()->indexChanged(control);
+    emit instance()->indexChanged(control);
 }
 
 void ControlPropertyManager::setProperty(Control* control, const QString& propertyName,

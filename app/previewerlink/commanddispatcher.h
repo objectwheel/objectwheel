@@ -23,6 +23,7 @@ public slots:
     void scheduleControlCreation(const QString& dir, const QString& parentUid);
     void scheduleRefresh(const QString& formUid);
     void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
+    void scheduleIndexUpdate(const QString& uid);
     void scheduleIdUpdate(const QString& uid, const QString& newId);
     void scheduleControlDeletion(const QString& uid);
     void scheduleFormDeletion(const QString& uid);

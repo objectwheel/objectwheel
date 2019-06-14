@@ -12,6 +12,7 @@ enum PreviewerCommands : quint32 {
     FormCreation,
     FormDeletion,
     IdUpdate,
+    IndexUpdate,
     Init,
     InitializationProgress,
     ParentUpdate,

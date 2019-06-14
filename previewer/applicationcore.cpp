@@ -66,6 +66,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             s_previewer, &Previewer::refresh);
     connect(s_commandDispatcher, &CommandDispatcher::parentUpdate,
             s_previewer, &Previewer::updateParent);
+    connect(s_commandDispatcher, &CommandDispatcher::indexUpdate,
+            s_previewer, &Previewer::updateIndex);
     connect(s_commandDispatcher, &CommandDispatcher::idUpdate,
             s_previewer, &Previewer::updateId);
     connect(s_commandDispatcher, &CommandDispatcher::controlDeletion,

@@ -60,6 +60,7 @@ signals:
     void parentChanged(Control*);
     void geometryChanged(Control*);
     void previewChanged(Control*, bool codeChanged);
+    void indexChanged(Control*);
     void idChanged(Control*, const QString& previousId);
     void propertyChanged(Control*, const QString& propertyName);
 

@@ -111,7 +111,7 @@ void Previewer::updateProperty(const QString& uid, const QString& propertyName, 
     schedulePreview(formInstance);
 }
 
-// BUG: Inter form reparents have problems, cause context of the moved control will still remain
+// BUG: Inter-form reparents have problems, cause context of the moved control will still remain
 // pointing to old forms context.
 void Previewer::updateParent(const QString& newDir, const QString& uid, const QString& parentUid)
 {
@@ -158,6 +158,8 @@ void Previewer::updateParent(const QString& newDir, const QString& uid, const QS
         item->setParentItem(PreviewerUtils::guiItem(parentObject));
     }
 
+    repairIndexes(previousParentInstance);
+    repairIndexes(parentInstance);
     refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
@@ -248,9 +250,10 @@ void Previewer::updateControlCode(const QString& uid)
     if (oldObject)
         delete oldObject;
 
-
     PreviewerUtils::doComplete(oldInstance, this);
 
+    repairIndexes(oldInstance);
+    repairIndexes(oldInstance->parent);
     refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
@@ -330,6 +333,9 @@ void Previewer::updateFormCode(const QString& uid)
     for (ControlInstance* instance : oldFormInstance->children)
         m_dirtyInstanceSet.insert(instance);
 
+    // Form indexes ignored, since they are put upon rootObject of the engine
+    // So, no need this: repairIndexes(oldFormInstance->parent??);
+    repairIndexes(oldFormInstance);
     refreshAllBindings();
     schedulePreview(oldFormInstance);
 }
@@ -340,6 +346,16 @@ void Previewer::refreshAllBindings()
     for (ControlInstance* formInstance : m_formInstances)
         DesignerSupport::refreshExpressions(formInstance->context);
     DesignerSupport::refreshExpressions(m_view->rootContext());
+}
+
+void Previewer::updateIndex(const QString& uid)
+{
+    ControlInstance* instance = instanceForUid(uid);
+
+    Q_ASSERT(instance);
+    Q_ASSERT(instance->parent);
+
+    repairIndexes(instance->parent);
 }
 
 void Previewer::updateId(const QString& uid, const QString& newId)
@@ -380,6 +396,8 @@ void Previewer::createControl(const QString& dir, const QString& parentUid)
 
     PreviewerUtils::doComplete(instance, this);
 
+    // No need to repairIndexes, since the instance is already added
+    // as the last children on its parent
     refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
@@ -391,6 +409,8 @@ void Previewer::createForm(const QString& dir)
     m_formInstances.append(formInstance);
     PreviewerUtils::doComplete(formInstance, this);
 
+    // No need to repairIndexes, since form indexes ignored,
+    // because they are put upon rootObject of the engine
     refreshAllBindings();
     schedulePreview(formInstance);
 }
@@ -716,6 +736,11 @@ void Previewer::refreshBindings(QQmlContext* context)
 {
     m_designerSupport.refreshExpressions(context);
     m_designerSupport.refreshExpressions(m_view->rootContext());
+}
+
+void Previewer::repairIndexes(ControlInstance* parentInstance)
+{
+
 }
 
 /*

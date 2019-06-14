@@ -72,6 +72,13 @@ void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const Q
         break;
     }
 
+    case IndexUpdate: {
+        QString uid;
+        pull(data, uid);
+        emit indexUpdate(uid);
+        break;
+    }
+
     case IdUpdate: {
         QString uid, newId;
         pull(data, uid, newId);

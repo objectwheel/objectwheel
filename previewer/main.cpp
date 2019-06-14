@@ -1,6 +1,5 @@
 #include <applicationcore.h>
 #include <commandlineparser.h>
-
 #include <QApplication>
 
 int main(int argc, char* argv[])

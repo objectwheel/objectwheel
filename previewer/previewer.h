@@ -64,6 +64,7 @@ public slots:
     void deleteControl(const QString& uid); // NOTE: Deletes control and its children
     void createForm(const QString& dir); // NOTE: It doesn't create children
     void createControl(const QString& dir, const QString& parentUid); // NOTE: It doesn't create children
+    void updateIndex(const QString& uid);
     void updateId(const QString& uid, const QString& newId);
     void updateParent(const QString& newDir, const QString& uid, const QString& parentUid);
     void updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
@@ -73,6 +74,7 @@ public slots:
 private:
     void refreshAllBindings();
     void refreshBindings(QQmlContext* context);
+    void repairIndexes(ControlInstance* parentInstance);
     void preview(ControlInstance* formInstance);
     void schedulePreview(ControlInstance* formInstance, int msecLater = 100);
     void scheduleRepreviewForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);
