@@ -355,7 +355,13 @@ void Previewer::updateIndex(const QString& uid)
     Q_ASSERT(instance);
     Q_ASSERT(instance->parent);
 
+    ControlInstance* formInstance = formInstanceFor(instance);
+
+    Q_ASSERT(formInstance);
+
     repairIndexes(instance->parent);
+    refreshBindings(formInstance->context);
+    schedulePreview(formInstance);
 }
 
 void Previewer::updateId(const QString& uid, const QString& newId)
@@ -425,6 +431,8 @@ void Previewer::deleteForm(const QString& uid)
     PreviewerUtils::cleanUpFormInstances(QList<ControlInstance*>{formInstance},
                                          m_view->rootContext(), m_designerSupport);
 
+    // No need to repairIndexes, since form indexes ignored,
+    // because they are put upon rootObject of the engine
     refreshAllBindings();
 
     for (ControlInstance* formInstance : m_formInstances)
@@ -446,6 +454,7 @@ void Previewer::deleteControl(const QString& uid)
     PreviewerUtils::deleteInstancesRecursive(instance, m_designerSupport);
     instance->parent->children.removeAll(instance);
 
+    repairIndexes(instance->parent);
     refreshBindings(formInstance->context);
     schedulePreview(formInstance);
 }
@@ -658,8 +667,9 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
 
         if (instance->errors.isEmpty()
                 && instance->gui
-                && PreviewerUtils::guiItem(instance)->isVisible())
+                && PreviewerUtils::guiItem(instance)->isVisible()) {
             instance->needsRepreview = PreviewerUtils::needsRepreview(result.image);
+        }
 
         if (!m_initialized) {
             g_progress += g_progressPerInstance;
@@ -740,9 +750,41 @@ void Previewer::refreshBindings(QQmlContext* context)
 
 void Previewer::repairIndexes(ControlInstance* parentInstance)
 {
+    Q_ASSERT(parentInstance);
 
+    if (!parentInstance->gui)
+        return;
+
+    if (!parentInstance->errors.isEmpty())
+        return;
+
+    if (!parentInstance->object)
+        return;
+
+    if (parentInstance->children.isEmpty())
+        return;
+
+    std::sort(parentInstance->children.begin(), parentInstance->children.end(),
+              [] (const ControlInstance* left, const ControlInstance* right) {
+        return SaveUtils::controlIndex(left->dir) < SaveUtils::controlIndex(right->dir);
+    });
+
+    QQmlProperty defaultProperty(parentInstance->object);
+    Q_ASSERT(defaultProperty.isValid());
+    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+    Q_ASSERT(childList.canClear());
+    childList.clear();
+
+    for (ControlInstance* childInstance : parentInstance->children) {
+        if (childInstance->errors.isEmpty() && childInstance->object) {
+            childList.append(childInstance->object);
+            if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
+                QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
+                item->setParentItem(PreviewerUtils::guiItem(parentInstance->object));
+            }
+        }
+    }
 }
-
 /*
     Creates control instance on engine's root context.
 

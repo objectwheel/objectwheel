@@ -520,6 +520,33 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     return abstractSpinBox;
 }
 
+QWidget* createIndexHandlerWidget(Control* control)
+{
+    auto spinBox = new QSpinBox;
+    TransparentStyle::attach(spinBox);
+    spinBox->setCursor(Qt::PointingHandCursor);
+    spinBox->installEventFilter(&g_wheelDisabler);
+    spinBox->setFocusPolicy(Qt::StrongFocus);
+    spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
+    spinBox->setMinimumWidth(1);
+    spinBox->setMaximum(std::numeric_limits<int>::max());
+    spinBox->setMinimum(std::numeric_limits<int>::min());
+    spinBox->setValue(control->index());
+    initPalette(spinBox);
+
+    QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
+    {
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed
+        ControlPropertyManager::Options options =
+                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdatePreviewer;
+
+        ControlPropertyManager::setIndex(control, spinBox->value(), options);
+    });
+
+    return spinBox;
+}
+
 QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, QTreeWidgetItem* fontItem)
 {
     auto comboBox = new QComboBox;
@@ -876,7 +903,7 @@ public:
         painter->setRenderHint(QPainter::Antialiasing);
 
         const QAbstractItemModel* model = index.model();
-        const bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
+        const bool isClassRow = !model->parent(index).isValid() && index.row() > 3; // FIXME: For Temporary "index" entry, should be 2 otherwise
 
         fillBackground(painter, option,
                        calculateVisibleRow(m_propertiesPane->itemFromIndex(index)),
@@ -970,10 +997,10 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
                 .arg(palette().brightText().color().name())
-    );
+                );
 
     m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit)),
-                           QLineEdit::LeadingPosition);
+                            QLineEdit::LeadingPosition);
     m_searchEdit->setPlaceholderText(tr("Search"));
     m_searchEdit->setClearButtonEnabled(true);
     connect(m_searchEdit, &LineEdit::textChanged, this, &PropertiesPane::filterList);
@@ -1069,6 +1096,14 @@ void PropertiesPane::onSelectionChange()
     idItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     addTopLevelItem(idItem);
     setItemWidget(idItem, 1, createIdHandlerWidget(selectedControl));
+
+    // FIXME: For Temporary "index" entry
+    QTreeWidgetItem* indexItem = new QTreeWidgetItem;
+    indexItem->setText(0, "index");
+    indexItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
+    addTopLevelItem(indexItem);
+    setItemWidget(indexItem, 1, createIndexHandlerWidget(selectedControl));
+
 
     for (const PropertyNode& propertyNode : properties) {
         const QList<Enum>& enumList = propertyNode.enums;
@@ -1406,7 +1441,7 @@ void PropertiesPane::filterList(const QString& filter)
             for (int z = 0; z < tci->childCount(); z++) {
                 auto tdi = tci->child(z);
                 auto v = (filter.isEmpty() || vv) ? true :
-                  tdi->text(0).contains(filter, Qt::CaseInsensitive);
+                                                    tdi->text(0).contains(filter, Qt::CaseInsensitive);
 
                 tdi->setHidden(!v);
                 if (v)
@@ -1432,7 +1467,7 @@ void PropertiesPane::drawBranches(QPainter* painter, const QRect& rect, const QM
     const qreal width = 10;
     const QAbstractItemModel* model = index.model();
     const bool hasChild = itemFromIndex(index)->childCount();
-    const bool isClassRow = !model->parent(index).isValid() && index.row() > 2;
+    const bool isClassRow = !model->parent(index).isValid() && index.row() > 3; // FIXME: For Temporary "index" entry, should be 2 otherwise
 
     QRectF handleRect(0, 0, width, width);
     handleRect.moveCenter(rect.center());
