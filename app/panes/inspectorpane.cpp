@@ -316,6 +316,8 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onControlPreviewChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &InspectorPane::onControlIdChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
+            this, &InspectorPane::onControlIndexChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::parentChanged,
             this, &InspectorPane::onControlParentChange);
 }
@@ -503,6 +505,7 @@ void InspectorPane::onFormRemove(Form* form)
     m_formStates.remove(form);
 }
 
+// FIXME: FFFF
 void InspectorPane::onControlCreation(Control* control)
 {
     if (!isProjectStarted)
@@ -539,6 +542,7 @@ void InspectorPane::onControlRemove(Control* control)
     }
 }
 
+// FIXME: FFFF
 void InspectorPane::onControlParentChange(Control* control)
 {
     if (!isProjectStarted)
@@ -632,6 +636,40 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
     }
 }
 
+// FIXME: FFFF
+void InspectorPane::onControlIndexChange(Control* control)
+{
+//    if (!isProjectStarted)
+//        return;
+
+//    if (control->form())
+//        return;
+
+//    if (!m_designerScene->currentForm()->isAncestorOf(control))
+//        return;
+
+//    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+//        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+//            if (previousId == childItem->text(0)) {
+//                childItem->setText(0, control->id());
+//                sortItems(0, Qt::AscendingOrder);
+//                goto phase2;
+//            }
+//        }
+//    }
+
+//phase2:
+
+//    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+//        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+//            if (childItem->isSelected()) {
+//                scrollToItem(childItem, QAbstractItemView::PositionAtCenter);
+//                return;
+//            }
+//        }
+//    }
+}
+
 void InspectorPane::onControlIdChange(Control* control, const QString& previousId)
 {
     if (!isProjectStarted)
@@ -653,22 +691,8 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
-            if (previousId == childItem->text(0)) {
+            if (previousId == childItem->text(0))
                 childItem->setText(0, control->id());
-                sortItems(0, Qt::AscendingOrder);
-                goto phase2;
-            }
-        }
-    }
-
-phase2:
-
-    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
-            if (childItem->isSelected()) {
-                scrollToItem(childItem, QAbstractItemView::PositionAtCenter);
-                return;
-            }
         }
     }
 }

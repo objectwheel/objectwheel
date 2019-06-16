@@ -1044,6 +1044,8 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
             this, &PropertiesPane::onPropertyChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &PropertiesPane::onIdChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
+            this, &PropertiesPane::onIndexChange);
 }
 
 void PropertiesPane::discharge()
@@ -1386,6 +1388,44 @@ void PropertiesPane::onGeometryChange(const Control* control)
                 dSpinBox->blockSignals(false);
             else
                 iSpinBox->blockSignals(false);
+        }
+    }
+}
+
+void PropertiesPane::onIndexChange(Control* control)
+{
+    if (topLevelItemCount() <= 0)
+        return;
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    QList<Control*> affectedControls({control});
+    affectedControls.append(control->siblings());
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (!affectedControls.contains(selectedControl))
+        return;
+
+    Control* issuedControl = nullptr;
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "uid") {
+                const QString& uid = childItem->text(1);
+                for (Control* ctrl : affectedControls) {
+                    if (ctrl->uid() == uid)
+                        issuedControl = ctrl;
+                }
+            } else if (childItem->text(0) == "index") {
+                Q_ASSERT(issuedControl);
+                QTreeWidget* treeWidget = childItem->treeWidget();
+                Q_ASSERT(treeWidget);
+                QSpinBox* spinBox
+                        = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                Q_ASSERT(spinBox);
+                spinBox->setValue(control->index());
+                break;
+            }
         }
     }
 }

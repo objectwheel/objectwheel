@@ -1,3 +1,56 @@
+LAYOUTS TODOS:
+Formlar ->
+ * FormsPane'de indexlerine göre sıralancak, yukarı aşağı haraket edebilecekler, yada drag
+   drop ile hareket ettirilebilecekler, formların formspane'de gösterilen indexleri, visual index
+   yerine creation order'ı mı ifade etmeli, temsim etmeli?
+ * FormsPane'de seçili olan her formun sağ ya da sol tarafında "sürükleme noktası" bulunmalı, bu
+   sürükleme noktası kullanılarak da ilgili formun indeksi rahatlıkla sürükle bırak ile değiştirile-
+   bilmeli
+
+Controller ->
+ * InspectorPane'de indexlerine göre sıralancak, yukarı aşağı haraket edebilecekler, yada
+   drag drop ile hareket ettirilebilecekler, bu indexler visual index'i ifade edecek.
+ * Controller aynı zamanda dashboard vasıtası ile yukarı aşağı drag & drop edilmek suretiyle index
+   leri değiştirilebilmeli
+ * Ayrıca bir kontrol toolbox'dan sürükle bırak ile dashboard üzerine atılmak istendiğinde, index'i
+   ni belirtecek şekilde hizalama çizgileri, sürüklenme esnasında gösterilmeli
+ * Bununla birlikte kontroller toolbox'dan dashboard'a sürüklenirken, fare işaretçisinin üzerine
+   geldiği kontrol kararmamalı, bunun yerine etrafına ince bir renkli çerçeve çizilmeli
+
+
+SaveUtils'deki FIXME'yi düzelt
+Previewer.cpp'de updateParent kodunda sadece parent'i değişen kontrolun dir'i değişiyor, peki ya o
+  kontrolün child kontrollerinin dirleri ne olacak?
+Inspector ve Properties Pane'ler için id kullanımlarına bak ve index'i kullanımlarını da ona göre tasarla
+  ayrıca indexChanged sinyalinin her ControlPropertyManager::setIndex için yayıldığını düşün buna önlem
+  olarak bütün index olayları bittikten sonra pane'lerin indexChanged slotlarını tasarla, korunaklı olarak
+SaveManager::setProperty ile id set edilince, control.meta'ya işlenmiyor, halbuki runtime'da bu dosya
+  önemli olan, ayrıca SaveManager::setProperty içinden yapılan repairId ler de meta lara işlenmemiş oluyor??
+  SaveManager::setProperty'nin id ile çağrıldığı her durumu bu perspektiften yeniden değerlendir
+ControlPropertyManager'deki WARNING ve NOTE'lari vs hallet, setIndex scheduleIndex update yapmalı mı?
+setIndex kullanılan her yerden previewer engine'e update gidecek
+repairIds'yi ekleyerek aramayı genişlet ve id geçen heryere index olayını entegre et
+Herşey bitince, previewer tarafı vs'de bitince Control::updatePreview'deki ControlPropertyManager::setId
+  gibi, preview engine'den gelecek olan muhtemel index değişikliğine yönelik (varsa böyle birşey)
+  ControlPropertyManager::setIndex gibi bir çağrıya ihtiyaç var mı?
+Sonraki hedef Formların SwipeView gibi konteynerler içinde kullanımı ile ilgili fikir yürütmek olsun
+  Hakikaten de formlar nasıl ir karaktere sahip olacak, nasıl oluyorda SaveUtils ağacında en dışta oluyorlar
+  bu karakteri iyice düşün, ayrıca bu karakter formların oluşturulma sırasını --index-- ini nasıl etkileyecek
+  buna bağlı olarak import/Assetler mevzusunu nasıl etkilececek. Ayrıca her proje runtime için gerekli bilgiler
+  ve IDE için gerekli bilgiler olmak üzere kesin ve apayrı klasörlerde bulunmalı, proje run için gönderilirken
+  sadece runtime için gerekli olan çok minimal bilgiler gitmeli, projelerin meta klasörlerini bir düşün,
+  meta ve designs, imports yan yana olmayıp, meta runtime -> designs, imports gibi bişey olmalı, bunu tartış
+  aynı mevzu çerçevesinde user ve kulanıcı (AppData) klasörleri için de tartış
+
+id\(\)|controlId|setId|m_id|ControlId|\"id\"|repairIds|repairId bu aramanın, inspector ve properties pane'den sonraki kısmında kalmıştık
+  ayrıca controlproperymanager::setIndex ve controlpreviewmanager'deki scheduleIndex olaylarını en son yaptık
+  heralde pane'lerden sonra arama listesinde preview.cpp yada previewutils gibi bir yerlerde geziyorduk
+
+her previewer update gerektiren ControlPropertyManager::setVsVs ve PreviewManager::scheduleVsVs durumu için
+  index olayı kontrol edilecek
+
+
+
 - Clean this TODO file
 - ServerManager Socket Error:  "Connection timed out", fix this
 - Project import/export fix

@@ -47,7 +47,7 @@ public:
     QList<QString> events() const;
     QList<PropertyNode> properties() const;
     QList<Control*> siblings() const;
-    QList<Control*> childControls(bool dive = true) const;
+    QList<Control*> childControls(bool recursive = true) const;
     QVariant::Type propertyType(const QString& propertyName) const;
 
     static QList<Control*> controls();

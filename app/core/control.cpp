@@ -221,17 +221,25 @@ QList<Control*> Control::siblings() const
     return siblings;
 }
 
-QList<Control*> Control::childControls(bool dive) const
+QList<Control*> Control::childControls(bool recursive) const
 {
     QList<Control*> controls;
+
     for (QGraphicsItem* item : childItems()) {
-        if (item->type() == Form::Type || item->type() == Control::Type) {
-            Control* control = static_cast<Control*>(item);
-            controls << control;
-            if (dive)
-                controls << control->childControls(true);
-        }
+        if (item->type() == Form::Type || item->type() == Control::Type)
+            controls.append(static_cast<Control*>(item));
     }
+
+    std::sort(controls.begin(), controls.end(), [] (const Control* left, const Control* right) {
+        return left->index() < right->index();
+    });
+
+    if (recursive) {
+        const int SIBLINGS_COUNT = controls.size();
+        for (int i = 0; i < SIBLINGS_COUNT; ++i)
+            controls.append(controls.at(i)->childControls(true));
+    }
+
     return controls;
 }
 
