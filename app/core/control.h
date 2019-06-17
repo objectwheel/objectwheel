@@ -27,7 +27,7 @@ public:
     bool window() const;
     bool dragIn() const;
     bool dragging() const;
-    bool resizing() const;
+    bool resized() const;
     bool hasErrors() const;
 
     quint32 index() const;
@@ -58,7 +58,7 @@ public:
     void setDir(const QString& dir);
     void setDragIn(bool dragIn);
     void setDragging(bool dragging);
-    void setResizing(bool resizing);
+    void setResized(bool resized);
     void setIndex(quint32 index);
 
 public slots:
@@ -66,7 +66,7 @@ public slots:
     void showResizers();
 
 signals:
-    void resizingChanged();
+    void resizedChanged();
     void draggingChanged();
 
 private:
@@ -104,7 +104,7 @@ private:
     bool m_dragIn;
     bool m_hoverOn;
     bool m_dragging;
-    bool m_resizing;
+    bool m_resized;
 
     quint32 m_index;
     QMarginsF m_margins;

@@ -164,9 +164,14 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         return;
 
     auto selectedControls = this->selectedControls();
+    bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
+    for (auto ctrl : selectedControls) {
+        if (ctrl->resized())
+            resizedAnyway = true;
+    }
     selectedControls.removeOne(m_currentForm);
 
-    if (m_currentForm && !selectedControls.isEmpty() && itemPressed && !Resizer::resizing()) {
+    if (m_currentForm && !selectedControls.isEmpty() && itemPressed && !resizedAnyway) {
         itemMoving = true;
         if (m_snapping) {
             auto controlUnderMouse = (Control*)(itemAt(event->scenePos(), QTransform()));
@@ -222,11 +227,16 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
     painter->setRenderHint(QPainter::Antialiasing);
 
-    if ((itemMoving || Resizer::resizing())/*&& m_snapping */&& m_currentForm != nullptr) {
-        {
-            auto selectedControls = this->selectedControls();
-            selectedControls.removeOne(m_currentForm);
+    auto selectedControls = this->selectedControls();
+    bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
+    for (auto ctrl : selectedControls) {
+        if (ctrl->resized())
+            resizedAnyway = true;
+    }
+    selectedControls.removeOne(m_currentForm);
 
+    if ((itemMoving || resizedAnyway)/*&& m_snapping */&& m_currentForm != nullptr) {
+        {
             const QList<Control*> copy(selectedControls);
             for (const Control* control : copy) {
                 for (Control* childControl : control->childControls())

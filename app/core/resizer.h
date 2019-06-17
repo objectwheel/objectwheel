@@ -1,14 +1,12 @@
 #ifndef RESIZER_H
 #define RESIZER_H
 
-#include <QGraphicsWidget>
+#include <QGraphicsRectItem>
 
-typedef QGraphicsSceneMouseEvent QGsme;
-typedef QStyleOptionGraphicsItem QSogi;
-
-class Resizer : public QGraphicsWidget
+class Control;
+class Resizer final : public QGraphicsRectItem
 {
-    Q_OBJECT
+    Q_DISABLE_COPY(Resizer)
 
 public:
     enum Placement {
@@ -23,25 +21,23 @@ public:
     };
 
 public:
-    explicit Resizer(QGraphicsWidget* parent, Placement placement);
-    bool disabled() const;
-    void setDisabled(bool disabled);
-    static bool resizing();
+    explicit Resizer(Placement placement, Control* parent);
 
-public slots:
-    void correct();
+    Control* parentControl() const;
 
-protected:
-    virtual QRectF boundingRect() const override;
-    virtual void mousePressEvent(QGsme* event) override;
-    virtual void mouseMoveEvent(QGsme* event) override;
-    virtual void mouseReleaseEvent(QGsme* event) override;
-    virtual void paint(QPainter* painter, const QSogi* option, QWidget* widget = nullptr) override;
+    Placement placement() const;
+    void setPlacement(Placement placement);
+
+    void updateCursor();
+    void updatePosition();
+
+private:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
     Placement m_placement;
-    bool m_disabled;
-    static bool m_resizing;
 };
 
 #endif // RESIZER_H

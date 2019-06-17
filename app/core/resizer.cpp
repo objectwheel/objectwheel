@@ -2,268 +2,237 @@
 #include <control.h>
 #include <controlpropertymanager.h>
 
-#include <QPainter>
 #include <QCursor>
 #include <QGraphicsSceneMouseEvent>
 
-#define MAX_Z_VALUE   99999
-#define COLOR         Qt::white
-#define SIZE          6.0
-#define OUTLINE_COLOR Qt::black
-
-bool Resizer::m_resizing = false;
-
-Resizer::Resizer(QGraphicsWidget* parent, Placement placement) : QGraphicsWidget(parent)
-  , m_placement(placement)
-  , m_disabled(true)
+Resizer::Resizer(Placement placement, Control* parent) : QGraphicsRectItem(0, 0, 5, 5, parent)
 {
     setVisible(false);
+    setBrush(Qt::white);
+    setPlacement(placement);
     setAcceptedMouseButtons(Qt::LeftButton);
-    setAcceptHoverEvents(true);
+    setZValue(std::numeric_limits<qreal>::max());
+}
 
+Control* Resizer::parentControl() const
+{
+    return static_cast<Control*>(parentItem());
+}
+
+Resizer::Placement Resizer::placement() const
+{
+    return m_placement;
+}
+
+void Resizer::setPlacement(Resizer::Placement placement)
+{
+    m_placement = placement;
+    updateCursor();
+}
+
+void Resizer::updateCursor()
+{
     switch (m_placement) {
     case Resizer::Top:
         setCursor(Qt::SizeVerCursor);
         break;
-
     case Resizer::Right:
         setCursor(Qt::SizeHorCursor);
         break;
-
     case Resizer::Bottom:
         setCursor(Qt::SizeVerCursor);
         break;
-
     case Resizer::Left:
         setCursor(Qt::SizeHorCursor);
         break;
-
     case Resizer::TopLeft:
         setCursor(Qt::SizeFDiagCursor);
         break;
-
     case Resizer::TopRight:
         setCursor(Qt::SizeBDiagCursor);
         break;
-
     case Resizer::BottomRight:
         setCursor(Qt::SizeFDiagCursor);
         break;
-
     case Resizer::BottomLeft:
         setCursor(Qt::SizeBDiagCursor);
         break;
     }
 }
 
-bool Resizer::disabled() const
+void Resizer::updatePosition()
 {
-    return m_disabled;
-}
+    const qreal length = rect().width();
+    const qreal parentWidth = parentControl()->size().width();
+    const qreal parentHeight = parentControl()->size().height();
 
-void Resizer::setDisabled(bool disabled)
-{
-    m_disabled = disabled;
-}
-
-bool Resizer::resizing()
-{
-    return m_resizing;
-}
-
-void Resizer::correct()
-{
     switch (m_placement) {
     case Resizer::Top:
-        setPos(parentWidget()->size().width() / 2.0 - SIZE / 2.0, - SIZE / 2.0 + 0.5);
+        setPos(parentWidth / 2 - length / 2, - length / 2 + 0.5);
         break;
-
     case Resizer::Right:
-        setPos(parentWidget()->size().width() - SIZE / 2.0 - 0.5, parentWidget()->size().height() / 2.0 - SIZE / 2.0);
+        setPos(parentWidth - length / 2 - 0.5, parentHeight / 2 - length / 2);
         break;
-
     case Resizer::Bottom:
-        setPos(parentWidget()->size().width() / 2.0 - SIZE / 2.0, parentWidget()->size().height() - SIZE / 2.0 - 0.5);
+        setPos(parentWidth / 2 - length / 2, parentHeight - length / 2 - 0.5);
         break;
-
     case Resizer::Left:
-        setPos(- SIZE / 2.0 + 0.5, parentWidget()->size().height() / 2.0 - SIZE / 2.0);
+        setPos(-length / 2 + 0.5, parentHeight / 2 - length / 2);
         break;
-
     case Resizer::TopLeft:
-        setPos(- SIZE / 2.0 + 0.5, - SIZE / 2.0 + 0.5);
+        setPos(-length / 2 + 0.5, - length / 2 + 0.5);
         break;
-
     case Resizer::TopRight:
-        setPos(parentWidget()->size().width() - SIZE / 2.0 - 0.5, - SIZE / 2.0 + 0.5);
+        setPos(parentWidth - length / 2 - 0.5, - length / 2 + 0.5);
         break;
-
     case Resizer::BottomRight:
-        setPos(parentWidget()->size().width() - SIZE / 2.0 - 0.5, parentWidget()->size().height() - SIZE / 2.0 - 0.5);
+        setPos(parentWidth - length / 2 - 0.5, parentHeight - length / 2 - 0.5);
         break;
-
     case Resizer::BottomLeft:
-        setPos( - SIZE / 2.0 + 0.5, parentWidget()->size().height() - SIZE / 2.0 - 0.5);
+        setPos(-length / 2 + 0.5, parentHeight - length / 2 - 0.5);
         break;
     }
-
-    setZValue(MAX_Z_VALUE);
 }
 
-void Resizer::paint(QPainter* painter, const QSogi*, QWidget*)
+void Resizer::mousePressEvent(QGraphicsSceneMouseEvent*)
 {
-    painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(OUTLINE_COLOR);
-    painter->setBrush(COLOR);
-    painter->drawRoundedRect(boundingRect().adjusted(0.5, 0.5, -0.5, -0.5), SIZE / 4.0, SIZE / 4.0);
+    parentControl()->setResized(true);
 }
 
-void Resizer::mousePressEvent(QGsme* event)
+void Resizer::mouseReleaseEvent(QGraphicsSceneMouseEvent*)
 {
-    QGraphicsItem::mousePressEvent(event);
-    event->accept();
-    m_resizing = true;
-    static_cast<Control*>(parentWidget())->setResizing(true);
+    parentControl()->setResized(false);
 }
 
-void Resizer::mouseMoveEvent(QGsme* event)
+void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mouseMoveEvent(event);
-
-    auto parent = static_cast<Control*>(parentWidget());
-
-    if (!parent || m_disabled || !m_resizing)
+    Control* control = parentControl();
+    if (!isEnabled() || !control->resized())
         return;
 
-    qreal diff_x, diff_y;
-    auto startSize = parent->size();
+    qreal dx, dy;
+    const qreal length = rect().width();
+    const QRectF parentGeo = control->geometry();
+    const qreal parentWidth = parentGeo.width();
+    const qreal parentHeight = parentGeo.height();
+    auto adj = [=] (qreal x1, qreal y1, qreal x2, qreal y2) {
+        return parentGeo.adjusted(x1, y1, x2, y2);
+    };
 
-    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+    ControlPropertyManager::Options opt = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::UpdatePreviewer
             | ControlPropertyManager::CompressedCall;
 
     switch (m_placement) {
     case Top:
-        diff_y = event->lastPos().y() - event->pos().y();
-        if (diff_y == 0)
+        dy = event->lastPos().y() - event->pos().y();
+        if (dy == 0)
             break;
-        if (parent->form()) {
-            diff_y *= 2.0;
-            ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
+        if (control->form()) {
+            dy *= 2.0;
+            ControlPropertyManager::setHeight(control, parentHeight + dy, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, -diff_y, 0, 0), options);
+            ControlPropertyManager::setGeometry(control, adj(0, -dy, 0, 0), opt);
         }
         break;
 
     case Right:
-        diff_x = event->pos().x() - event->lastPos().x();
-        if (diff_x == 0)
+        dx = event->pos().x() - event->lastPos().x();
+        if (dx == 0)
             break;
-        if (parent->form()) {
-            diff_x *= 2.0;
-            ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
+        if (control->form()) {
+            dx *= 2.0;
+            ControlPropertyManager::setWidth(control, parentWidth + dx, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, 0, diff_x, 0), options);
+            ControlPropertyManager::setGeometry(control, adj(0, 0, dx, 0), opt);
         }
         break;
 
     case Bottom:
-        diff_y = event->pos().y() - event->lastPos().y();
-        if (diff_y == 0)
+        dy = event->pos().y() - event->lastPos().y();
+        if (dy == 0)
             break;
-        if (parent->form()) {
-            diff_y *= 2.0;
-            ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
+        if (control->form()) {
+            dy *= 2.0;
+            ControlPropertyManager::setHeight(control, parentHeight + dy, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, 0, 0, diff_y), options);
+            ControlPropertyManager::setGeometry(control, adj(0, 0, 0, dy), opt);
         }
         break;
 
     case Left:
-        diff_x = event->lastPos().x() - event->pos().x();
-        if (diff_x == 0)
+        dx = event->lastPos().x() - event->pos().x();
+        if (dx == 0)
             break;
-        if (parent->form()) {
-            diff_x *= 2.0;
-            ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
+        if (control->form()) {
+            dx *= 2.0;
+            ControlPropertyManager::setWidth(control, parentWidth + dx, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(-diff_x, 0, 0, 0), options);
+            ControlPropertyManager::setGeometry(control, adj(-dx, 0, 0, 0), opt);
         }
         break;
 
     case TopLeft:
-        diff_x = event->lastPos().x() - event->pos().x();
-        diff_y = event->lastPos().y() - event->pos().y();
-        if (diff_x == 0 && diff_y == 0)
+        dx = event->lastPos().x() - event->pos().x();
+        dy = event->lastPos().y() - event->pos().y();
+        if (dx == 0 && dy == 0)
             break;
-        if (parent->form()) {
-            diff_x *= 2.0;
-            diff_y *= 2.0;
-            ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
-            ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
+        if (control->form()) {
+            dx *= 2.0;
+            dy *= 2.0;
+            ControlPropertyManager::setWidth(control, parentWidth + dx, opt);
+            ControlPropertyManager::setHeight(control, parentHeight + dy, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(-diff_x, -diff_y, 0, 0), options);
+            ControlPropertyManager::setGeometry(control, adj(-dx, -dy, 0, 0), opt);
         }
         break;
 
     case TopRight:
-        diff_x = event->pos().x() - event->lastPos().x();
-        diff_y = event->lastPos().y() - event->pos().y();
-        if (diff_x == 0 && diff_y == 0)
+        dx = event->pos().x() - event->lastPos().x();
+        dy = event->lastPos().y() - event->pos().y();
+        if (dx == 0 && dy == 0)
             break;
-        if (parent->form()) {
-            diff_x *= 2.0;
-            diff_y *= 2.0;
-            ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
-            ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
+        if (control->form()) {
+            dx *= 2.0;
+            dy *= 2.0;
+            ControlPropertyManager::setWidth(control, parentWidth + dx, opt);
+            ControlPropertyManager::setHeight(control, parentHeight + dy, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, -diff_y, diff_x, 0), options);
+            ControlPropertyManager::setGeometry(control, adj(0, -dy, dx, 0), opt);
         }
         break;
 
     case BottomRight:
-        diff_x = event->pos().x() - event->lastPos().x();
-        diff_y = event->pos().y() - event->lastPos().y();
-        if (diff_x == 0 && diff_y == 0)
+        dx = event->pos().x() - event->lastPos().x();
+        dy = event->pos().y() - event->lastPos().y();
+        if (dx == 0 && dy == 0)
             break;
-        if (parent->form()) {
-            diff_x *= 2.0;
-            diff_y *= 2.0;
-            ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
-            ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
+        if (control->form()) {
+            dx *= 2.0;
+            dy *= 2.0;
+            ControlPropertyManager::setWidth(control, parentWidth + dx, opt);
+            ControlPropertyManager::setHeight(control, parentHeight + dy, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(0, 0, diff_x, diff_y), options);
+            ControlPropertyManager::setGeometry(control, adj(0, 0, dx, dy), opt);
         }
         break;
 
     case BottomLeft:
-        diff_x = event->lastPos().x() - event->pos().x();
-        diff_y = event->pos().y() - event->lastPos().y();
-        if (diff_x == 0 && diff_y == 0)
+        dx = event->lastPos().x() - event->pos().x();
+        dy = event->pos().y() - event->lastPos().y();
+        if (dx == 0 && dy == 0)
             break;
-        if (parent->form()) {
-            diff_x *= 2.0;
-            diff_y *= 2.0;
-            ControlPropertyManager::setWidth(parent, parent->size().width() + diff_x, options);
-            ControlPropertyManager::setHeight(parent, parent->size().height() + diff_y, options);
+        if (control->form()) {
+            dx *= 2.0;
+            dy *= 2.0;
+            ControlPropertyManager::setWidth(control, parentWidth + dx, opt);
+            ControlPropertyManager::setHeight(control, parentHeight + dy, opt);
         } else {
-            ControlPropertyManager::setGeometry(parent, parent->geometry().adjusted(-diff_x, 0, 0, diff_y), options);
+            ControlPropertyManager::setGeometry(control, adj(-dx, 0, 0, dy), opt);
         }
         break;
     }
 
-    if (parent->size().width() < SIZE || parent->size().height() < SIZE)
-        ControlPropertyManager::setSize(parent, startSize, options);
-}
-
-void Resizer::mouseReleaseEvent(QGsme* event)
-{
-    QGraphicsItem::mouseReleaseEvent(event);
-    m_resizing = false;
-    static_cast<Control*>(parentWidget())->setResizing(false);
-}
-
-QRectF Resizer::boundingRect() const
-{
-    return QRectF(0, 0, SIZE, SIZE);
+    if (parentWidth < length || parentHeight < length)
+        ControlPropertyManager::setSize(control, parentGeo.size(), opt);
 }

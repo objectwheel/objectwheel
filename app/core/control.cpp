@@ -32,7 +32,7 @@ QList<Resizer*> initializeResizers(Control* control)
 {
     QList<Resizer*> resizers;
     for (int i = 0; i < 8; ++i)
-        resizers.append(new Resizer(control, Resizer::Placement(i)));
+        resizers.append(new Resizer(Resizer::Placement(i), control));
     return resizers;
 }
 }
@@ -46,7 +46,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_dragIn(false)
   , m_hoverOn(false)
   , m_dragging(false)
-  , m_resizing(false)
+  , m_resized(false)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(g_baseControlSize)))
@@ -68,7 +68,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
             this, &Control::updatePreview);
 
-    connect(this, &Control::resizingChanged,
+    connect(this, &Control::resizedChanged,
             this, &Control::applyCachedGeometry);
     connect(this, &Control::draggingChanged,
             this, &Control::applyCachedGeometry);
@@ -116,9 +116,9 @@ bool Control::dragging() const
     return m_dragging;
 }
 
-bool Control::resizing() const
+bool Control::resized() const
 {
-    return m_resizing;
+    return m_resized;
 }
 
 bool Control::hasErrors() const
@@ -283,12 +283,12 @@ void Control::setDragging(bool dragging)
     //    emit draggingChanged();
 }
 
-void Control::setResizing(bool resizing)
+void Control::setResized(bool resized)
 {
-    m_resizing = resizing;
+    m_resized = resized;
     // FIXME:
-    Suppressor::suppress(150, "resizingChanged", std::bind(&Control::resizingChanged, this));
-    //    emit resizingChanged();
+    Suppressor::suppress(150, "resizedChanged", std::bind(&Control::resizedChanged, this));
+    //    emit resizedChanged();
 }
 
 void Control::setIndex(quint32 index)
@@ -488,7 +488,7 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
     QGraphicsWidget::resizeEvent(event);
 
     for (auto resizer : m_resizers)
-        resizer->correct();
+        resizer->updatePosition();
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
@@ -572,7 +572,7 @@ void Control::updatePreview(const PreviewResult& result)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
     m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
 
-    if (!dragging() && !resizing())
+    if (!dragging() && !resized())
         applyCachedGeometry();
 
     m_pixmap = QPixmap::fromImage(hasErrors() ? PaintUtils::renderErrorControlImage(size())
@@ -589,7 +589,7 @@ void Control::updatePreview(const PreviewResult& result)
     }
 
     for (auto resizer : m_resizers)
-        resizer->setDisabled(!gui());
+        resizer->setEnabled(gui());
 
     update();
 
@@ -598,7 +598,7 @@ void Control::updatePreview(const PreviewResult& result)
 
 void Control::applyCachedGeometry()
 {
-    if (!dragging() && !resizing()) {
+    if (!dragging() && !resized()) {
         if (form()) {
             ControlPropertyManager::setSize(this, m_cachedGeometry.size(),
                                             ControlPropertyManager::NoOption);
