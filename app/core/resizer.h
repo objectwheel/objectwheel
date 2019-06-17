@@ -32,9 +32,12 @@ public:
     void updatePosition();
 
 private:
+    void calculatePositionDifference(const QGraphicsSceneMouseEvent* event, qreal* dx, qreal* dy);
+
+private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
     Placement m_placement;

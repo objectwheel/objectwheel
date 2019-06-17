@@ -243,5 +243,6 @@
         <file>images/designs@2x.png</file>
         <file>images/others.png</file>
         <file>images/others@2x.png</file>
+        <file>tooltip/images/f1@2x.png</file>
     </qresource>
 </RCC>
