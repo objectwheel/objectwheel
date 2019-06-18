@@ -1,3 +1,55 @@
+GUI CORE V2 TODOS:
+
+ --> FormsPane ve Form Altyapısı
+   * FormsPane Tree Şeklinde Olacak
+   * Paernt Formlar ve Child Formlar olacak
+   * Child Formlar FormsPane'de Parent Form'larının altında gözükecek
+   * Her formun eskiden olduğu gibi kendine ait context'i olacak
+   * Her form contexti içinde kendi child controllerinin id lerini barındıracak
+   * Her form contextine "Form Scope" diyebiliriz
+   * Formlar "export as alias" gibi bir özellik ile içlerindeki child kontrolleri
+     dış formlara export edebilecek
+   * FormsPane'de Control InspectorPane gibi olacak, her child form parent form'un
+     altında sıralanacak
+   * Ancak Her child form, görsel olarak ilgili parent form'un yada o parent form
+     üzerindeki bir child formun üzerinde olacak.
+   * FormsPane'de herhangi bir child form'un esas parent'i olan, ilgili formun parent
+     formunun, kendiside dahil, tüm child kontrolleri bir şekilde FormsPane'de listelenecek
+     böylece ilgili formun esas parent'i kolaylıkla FormsPane'de değiştirilebilecek.
+   * Ancak burada öyle bir Tree benzeri vs bir FormsPane tasarımı yapılmalı ki, her bir
+     child form kendi esas parent controlü altında gözükmeli, yalnızca parent form altında
+     değil.
+   * Mesela TreeView'in ikinci column'una ilgili child form'un esas parent'inin ismi yazılabilir.
+   * FormsPane'de drag ve drop yolu ile kolaylıkla bir parent form başka bir formun child
+     formu haline gelebilmeli
+   * FormsPane'den bir işaretleme bantığı ile, bir ipin iki ucunu bağlar gibi
+     Bir child form, ilgili parent form üzerindeki alt kontrole reparent edilebilir
+   * Child formların creation order'ı onların esas parent'i içindeki sibling/kardeşler arasındaki
+     index'e göre belirlenmeli
+   * Ayrıca reparent edilen bir child form, ilgili esas parent'in içine taşınabilir, veritabanı/
+     dosya sistemi ağaçı olarak yani
+   * Reparent edilen child formlar ayrıca, reparent edildikleri form içindeki esas parent'leri içinde
+     Designer üzerinde gösterilmeli, ama ilgili form'un alt elemanları/kontrolleri dokunulmaz olmalı
+   * FormsPane, üzerine eklenecek butonlarla vs, yada sağ tıklma menüsüyle vs direk child form olarak
+     bir parent altına child form oluşturulmasına müsade etmeli, buna uygun butonlar vs widgetlar
+     geliştirilmeli
+   * ExpanAll, Collapse all gibi sağ tık menüsü
+
+ --> ToolBoxPane
+   * Toolar şeçilememeli
+   * Tool press olunca hemen toolun resmini içeren bir drag ikon çıkmalı
+   * Toollar için ITEM_KEY saçmalığı düzeltilmeli, daha iyi bir yol ile değiştirilmeli
+   * Tool Pane drop ve drag kabul etmemeli
+   * Tool yerlerini değiştirebilecek, tool kütüphanesini daraltıp genişletebilecek
+     bir tool box pane ayarları penceresi olmalı, ayrıca bu pencereyi açacak bir ayar
+     butonu toolpane üzerinde bir yerlere yerleştirilmeli
+   * Toolbox'da toolar sadece ikon, sadece yazı, her ikiside, grid view, alt alta ...
+     vs gibi gözükebilmeli diye bir ayar da olmalı
+   * Daha iyi tool ikonları ayarlanmalı
+   * Toolbox içeriğini arttır, çeşitlendir
+   * Qt Creator vs Visual Studio C# IDE'leri daha fazla özellik için kontrol edilebilir
+     Onlarda sağtık menüsü vs gibi özellikler varmı vs vs??
+
 LAYOUTS TODOS:
 Formlar ->
  * FormsPane'de indexlerine göre sıralancak, yukarı aşağı haraket edebilecekler, yada drag
@@ -41,12 +93,8 @@ Sonraki hedef Formların SwipeView gibi konteynerler içinde kullanımı ile ilg
   sadece runtime için gerekli olan çok minimal bilgiler gitmeli, projelerin meta klasörlerini bir düşün,
   meta ve designs, imports yan yana olmayıp, meta runtime -> designs, imports gibi bişey olmalı, bunu tartış
   aynı mevzu çerçevesinde user ve kulanıcı (AppData) klasörleri için de tartış
-
-id\(\)|controlId|setId|m_id|ControlId|\"id\"|repairIds|repairId bu aramanın, inspector ve properties pane'den sonraki kısmında kalmıştık
-  ayrıca controlproperymanager::setIndex ve controlpreviewmanager'deki scheduleIndex olaylarını en son yaptık
-  heralde pane'lerden sonra arama listesinde preview.cpp yada previewutils gibi bir yerlerde geziyorduk
-
-her previewer update gerektiren ControlPropertyManager::setVsVs ve PreviewManager::scheduleVsVs durumu için
+Inspector ve properties pane de ki fixme'leri hallet
+Her previewer update gerektiren ControlPropertyManager::setVsVs ve PreviewManager::scheduleVsVs durumu için
   index olayı kontrol edilecek
 
 
