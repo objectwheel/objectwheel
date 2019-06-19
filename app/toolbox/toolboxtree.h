@@ -4,12 +4,13 @@
 #include <QTreeWidget>
 #include <QUrl>
 
-class ToolboxTree : public QTreeWidget
+class ToolboxTree final : public QTreeWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ToolboxTree)
 
 public:
-    explicit ToolboxTree(QWidget *parent = nullptr);
+    explicit ToolboxTree(QWidget* parent = nullptr);
 
     void addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls);
     void removeUrls(QTreeWidgetItem* item);

@@ -132,7 +132,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     inspectorDockWidget = new QDockWidget;
     inspectorDockWidget->setObjectName("inspectorDockWidget");
-    inspectorDockWidget->setStyleSheet("QDockWidget { border: none }");
     inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
     inspectorDockWidget->setWidget(m_inspectorPane);
     inspectorDockWidget->setWindowTitle(tr("Control Inspector"));
@@ -162,7 +161,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     propertiesDockWidget = new QDockWidget;
     propertiesDockWidget->setObjectName("propertiesDockWidget");
-    propertiesDockWidget->setStyleSheet("QDockWidget { border: none }");
     propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
     propertiesDockWidget->setWidget(m_propertiesPane);
     propertiesDockWidget->setWindowTitle(tr("Properties"));
@@ -192,7 +190,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     assetsDockWidget = new QDockWidget;
     assetsDockWidget->setObjectName("assetsDockWidget");
-    assetsDockWidget->setStyleSheet("QDockWidget { border: none }");
     assetsDockWidget->setTitleBarWidget(assetsTitleBar);
     assetsDockWidget->setWidget(m_assetsPane);
     assetsDockWidget->setWindowTitle(tr("Assets"));
@@ -224,7 +221,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     toolboxDockWidget = new QDockWidget;
     toolboxDockWidget->setObjectName("toolboxDockWidget");
-    toolboxDockWidget->setStyleSheet("QDockWidget { border: none }");
     toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
     toolboxDockWidget->setWidget(m_toolboxPane);
     toolboxDockWidget->setWindowTitle(tr("Toolbox"));
@@ -254,7 +250,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     formsDockWidget = new QDockWidget;
     formsDockWidget->setObjectName("formsDockWidget");
-    formsDockWidget->setStyleSheet("QDockWidget { border: none }");
     formsDockWidget->setTitleBarWidget(formsTitleBar);
     formsDockWidget->setWidget(m_formsPane);
     formsDockWidget->setWindowTitle(tr("Form Navigator"));
