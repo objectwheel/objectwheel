@@ -7,54 +7,67 @@ ToolboxDelegate::ToolboxDelegate(QTreeView* parent) : QStyledItemDelegate(parent
 {
 }
 
-void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
-                            const QModelIndex &index) const
+void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
+                            const QModelIndex& index) const
 {
     const QAbstractItemModel* model = index.model();
     Q_ASSERT(model);
-    painter->setRenderHint(QPainter::Antialiasing);
 
+    // Only top-level items
     if (!model->parent(index).isValid()) {
-        // this is a top-level item.
         painter->save();
 
-        // Only draw topline if the previous item is expanded
+        // Only draw top line if the previous item is expanded
+        QRectF rect(option.rect);
         QModelIndex previousIndex = model->index(index.row() - 1, index.column());
-        bool drawTopline = (index.row() > 0 && m_view->isExpanded(previousIndex));
+        bool drawTopline = index.row() > 0 && m_view->isExpanded(previousIndex);
+        qreal highlightOffset = drawTopline ? 0 : -0.5;
 
-        auto frame = option.rect;
+        painter->setClipRect(rect);
+        painter->setClipping(true);
 
-        QLinearGradient gradient(frame.topLeft(), frame.bottomLeft());
-        gradient.setColorAt(0, QColor("#fafafa"));
-        gradient.setColorAt(1, QColor("#e3e3e3"));
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(gradient);
-        painter->drawRect(frame);
+        // Fill background
+        QLinearGradient gradient(0, 0, 0, 1);
+        gradient.setCoordinateMode(QGradient::ObjectMode);
+        gradient.setColorAt(0, QColor("#ececec"));
+        gradient.setColorAt(1, QColor("#dddddd"));
+        painter->fillRect(rect, gradient);
 
-        painter->setPen("#d0d0d0");
-        if (drawTopline)
-            painter->drawLine(frame.topLeft(), frame.topRight());
-        painter->drawLine(frame.bottomLeft(), frame.bottomRight());
-        painter->restore();
+        // Draw top line
+        painter->setPen("#f5f5f5");
+        painter->drawLine(rect.topLeft() + QPointF(0.5, 0.5) + QPointF(0.0, highlightOffset),
+                          rect.topRight() + QPointF(-0.5, 0.5) + QPointF(0.0, highlightOffset));
+        if (drawTopline) {
+            painter->setPen("#bfbfbf");
+            painter->drawLine(rect.topLeft() + QPointF(0.5, 0.0),
+                              rect.topRight() + QPointF(-0.5, 0.0));
+        }
 
+        // Draw bottom line
+        painter->setPen("#bdbdbd");
+        painter->drawLine(rect.bottomLeft() + QPointF(0.5, -0.5),
+                          rect.bottomRight() + QPointF(-0.5, -0.5));
+        painter->setPen("#a7a7a7");
+        painter->drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
+                          rect.bottomRight() + QPointF(-0.5, 0.0));
+
+        // Draw collapse/expand indicator
         QStyleOption branchOption;
-        static const int i = 9; // ### hardcoded in qcommonstyle.cpp
-        QRect r = frame;
-        branchOption.rect = QRect(r.left() + i/2, r.top() + (r.height() - i)/2, i, i);
+        branchOption.rect = QRect(rect.left() + 5, rect.top() + rect.height() / 2 - 5, 10, 10);
+        branchOption.palette = option.palette;
         branchOption.state = QStyle::State_Children;
-
         if (m_view->isExpanded(index))
             branchOption.state |= QStyle::State_Open;
-
         m_view->style()->drawPrimitive(QStyle::PE_IndicatorBranch, &branchOption, painter, m_view);
 
-        // draw text
-        QRect textrect = QRect(r.left() + i*2, r.top(), r.width() - ((5*i)/2), r.height());
-        QString text = elidedText(option.fontMetrics, textrect.width(), Qt::ElideMiddle,
-                                  model->data(index, Qt::DisplayRole).toString());
-        m_view->style()->drawItemText(painter, textrect, Qt::AlignCenter,
-                                      option.palette, m_view->isEnabled(), text);
+        painter->restore();
 
+        // Draw text
+        QRect textRect(rect.left() + 20, rect.top(), rect.width() - 25, rect.height());
+        QString text = elidedText(option.fontMetrics, textRect.width(), Qt::ElideMiddle,
+                                  model->data(index, Qt::DisplayRole).toString());
+        m_view->style()->drawItemText(painter, textRect, Qt::AlignCenter,
+                                      option.palette, m_view->isEnabled(), text);
     } else {
         QStyledItemDelegate::paint(painter, option, index);
     }

@@ -242,7 +242,7 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     const bool bright = option.styleObject->property("ow_bottombar_bright").toBool();
 
     // Draw drop shadow
-    QLinearGradient shadowGrad({0.0, 0.5}, {1.0, 0.5});
+    QLinearGradient shadowGrad(0, 0, 1, 0);
     shadowGrad.setCoordinateMode(QGradient::ObjectMode);
     shadowGrad.setColorAt(0, "#12202020");
     shadowGrad.setColorAt(0.05, "#10202020");
@@ -256,7 +256,7 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     painter->drawPath(dropShadowPath);
 
     // Draw shadow
-    QLinearGradient darkGrad({0.0, 0.0}, {0.0, 1.0});
+    QLinearGradient darkGrad(0, 0, 0, 1);
     darkGrad.setCoordinateMode(QGradient::ObjectMode);
     darkGrad.setColorAt(0.85, "#20303030");
     darkGrad.setColorAt(1, "#3f000000");
@@ -267,7 +267,7 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     painter->drawPath(shadowPath);
 
     // Draw body
-    QLinearGradient midGrad({0.0, 0.0}, {0.0, 1.0});
+    QLinearGradient midGrad(0, 0, 0, 1);
     midGrad.setCoordinateMode(QGradient::ObjectMode);
     if (bright) {
         midGrad.setColorAt(0, "#b34b46");
@@ -276,7 +276,7 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
         midGrad.setColorAt(0, "#e4e4e4");
         midGrad.setColorAt(1, "#dedede");
     }
-    QLinearGradient buttonGrad({0.0, 0.0}, {0.0, 1.0});
+    QLinearGradient buttonGrad(0, 0, 0, 1);
     buttonGrad.setCoordinateMode(QGradient::ObjectMode);
     if (bright) {
         buttonGrad.setColorAt(0, "#c2504b");

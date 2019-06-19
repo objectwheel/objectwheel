@@ -119,7 +119,7 @@ void ModeSelectorPane::updateIcons()
 void ModeSelectorPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
+    QLinearGradient gradient(0, 0, 0, 1);
     gradient.setCoordinateMode(QGradient::ObjectMode);
     gradient.setColorAt(0, "#d6d6d6");
     gradient.setColorAt(1, "#cdcdcd");

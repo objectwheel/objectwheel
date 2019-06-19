@@ -156,7 +156,7 @@ void RunPane::changeEvent(QEvent* event)
 void RunPane::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    QLinearGradient gradient({0.0, 0.0}, {0.0, 1.0});
+    QLinearGradient gradient(0, 0, 0, 1);
     gradient.setCoordinateMode(QGradient::ObjectMode);
     gradient.setColorAt(0, "#e5e5e5");
     gradient.setColorAt(1, "#d6d6d6");
