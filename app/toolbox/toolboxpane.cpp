@@ -11,6 +11,8 @@
 #include <QVBoxLayout>
 #include <QDir>
 
+const char* TOOL_KEY = "QURBUEFaQVJMSVlJWiBIQUZJWg";
+
 ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
@@ -32,12 +34,6 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 
     connect(QmlJS::ModelManagerInterface::instance(), &QmlJS::ModelManagerInterface::idle,
             this, &ToolboxPane::fillPane);
-    connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
-
-    connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=] {
-        if (_toolboxTree->currentItem() && _toolboxTree->currentItem()->parent())
-            emit itemDoubleClicked( _toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile());
-    });
 }
 
 ToolboxTree* ToolboxPane::toolboxTree()
@@ -50,20 +46,6 @@ void ToolboxPane::discharge()
     _toolboxTree->clearSelection();
     _toolboxTree->setCurrentItem(nullptr);
     _searchEdit->clear();
-}
-
-void ToolboxPane::handleMousePress(QTreeWidgetItem* item)
-{
-    if (item == 0)
-        return;
-
-    if (QApplication::mouseButtons() != Qt::LeftButton)
-        return;
-
-    if (item->parent() == 0) {
-        _toolboxTree->setItemExpanded(item, !_toolboxTree->isItemExpanded(item));
-        return;
-    }
 }
 
 void ToolboxPane::filterList(const QString& filter)
@@ -92,6 +74,16 @@ QSize ToolboxPane::sizeHint() const
     return QSize{140, 710};
 }
 
+//    QMimeData* mimeData = new QMimeData;
+//    mimeData->setUrls(_urls.value(item));
+//    mimeData->setText(TOOL_KEY);
+
+//    QDrag* drag = new QDrag(this);
+//    drag->setMimeData(mimeData);
+//    drag->setPixmap(item->icon(column).pixmap(iconSize()));
+
+//    Qt::DropAction dropAction = drag->exec();
+
 void ToolboxPane::fillPane()
 {
     if (_toolboxTree->topLevelItemCount() > 0)
@@ -100,24 +92,10 @@ void ToolboxPane::fillPane()
     for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& toolPath = ":/tools/" + toolDirName;
         Q_ASSERT(SaveUtils::isControlValid(toolPath));
-
         const QString& name = ToolUtils::toolName(toolPath);
         const QString& category = ToolUtils::toolCetegory(toolPath);
         const QIcon& icon = QIcon(ToolUtils::toolIcon(toolPath, devicePixelRatioF()));
-
-        QTreeWidgetItem* topItem = _toolboxTree->categoryItem(category);
-        if (!topItem) {
-            topItem = new QTreeWidgetItem;
-            topItem->setText(0, category);
-            _toolboxTree->addTopLevelItem(topItem);
-            topItem->setExpanded(true);
-        }
-
-        QTreeWidgetItem* item = new QTreeWidgetItem;
-        item->setText(0, name);
-        item->setIcon(0, icon);
-        topItem->addChild(item);
-        _toolboxTree->addUrls(item, QList<QUrl>() << QUrl::fromLocalFile(toolPath));
+        _toolboxTree->addTool(name, category, toolPath, icon);
     }
 
     emit filled();

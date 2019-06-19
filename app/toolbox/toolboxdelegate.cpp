@@ -72,8 +72,3 @@ void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
         QStyledItemDelegate::paint(painter, option, index);
     }
 }
-
-QSize ToolboxDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    return QStyledItemDelegate::sizeHint(option, index) + QSize(2, 2);
-}

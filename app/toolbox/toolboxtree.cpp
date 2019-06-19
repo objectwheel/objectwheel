@@ -1,111 +1,72 @@
 #include <toolboxtree.h>
-#include <global.h>
+#include <toolboxitem.h>
 #include <toolboxdelegate.h>
 
-#include <QMimeData>
 #include <QApplication>
-#include <QMouseEvent>
-#include <QScrollBar>
-#include <QScroller>
-#include <QStyledItemDelegate>
-#include <QPainter>
 #include <QHeaderView>
 
-//!
-//! *********************** [ToolboxDelegate] ***********************
-//!
-
-const char* TOOL_KEY = "QURBUEFaQVJMSVlJWiBIQUZJWg";
-
-//!
-//! ********************** [ToolboxTree] **********************
-//!
-
-ToolboxTree::ToolboxTree(QWidget *parent) : QTreeWidget(parent)
+ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
 {
-    setIconSize({20, 20});
-    setFocusPolicy(Qt::NoFocus);
-    setIndentation(0);
-    setRootIsDecorated(false);
-    setColumnCount(1);
     header()->hide();
     header()->setSectionResizeMode(QHeaderView::Stretch);
+
+    setIndentation(0);
+    setColumnCount(1);
+    setIconSize({20, 20});
+    setRootIsDecorated(false);
+    setFocusPolicy(Qt::NoFocus);
+    setSelectionMode(NoSelection);
     setTextElideMode(Qt::ElideMiddle);
-
-    setDragEnabled(true);
+    setVerticalScrollMode(ScrollPerPixel);
+    setHorizontalScrollMode(ScrollPerPixel);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setDragDropMode(QAbstractItemView::DragOnly);
-    setSelectionBehavior(QAbstractItemView::SelectRows);
-    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     setItemDelegate(new ToolboxDelegate(this));
+
+    connect(this, &QTreeWidget::itemPressed, this, &ToolboxTree::onMousePress);
 }
 
-void ToolboxTree::addUrls(QTreeWidgetItem* item, const QList<QUrl>& urls)
+void ToolboxTree::addTool(const QString& name, const QString& category, const QString& dir,
+                          const QIcon& icon)
 {
-    _urls.insert(item, urls);
+    ToolboxItem* topItem = categoryItem(category);
+    if (topItem == 0) {
+        topItem = new ToolboxItem;
+        topItem->setText(0, category);
+        addTopLevelItem(topItem);
+        topItem->setExpanded(true);
+    }
+    ToolboxItem* item = new ToolboxItem;
+    item->setDir(dir);
+    item->setText(0, name);
+    item->setIcon(0, icon);
+    topItem->addChild(item);
 }
 
-void ToolboxTree::removeUrls(QTreeWidgetItem* item)
+ToolboxItem* ToolboxTree::categoryItem(const QString& category)
 {
-    _urls.remove(item);
-}
-
-void ToolboxTree::clearUrls()
-{
-    _urls.clear();
-}
-
-const QMap<QTreeWidgetItem*, QList<QUrl>>& ToolboxTree::allUrls() const
-{
-    return _urls;
-}
-
-QList<QUrl> ToolboxTree::urls(QTreeWidgetItem* item) const
-{
-    return _urls.value(item);
-}
-
-bool ToolboxTree::contains(const QString& itemName)
-{
-    for (int i = 0; i < topLevelItemCount(); i++)
-        for (int j = 0; j < topLevelItem(i)->childCount(); j++)
-            if (topLevelItem(i)->child(j)->text(0) == itemName)
-                return true;
-    return false;
-}
-
-bool ToolboxTree::categoryContains(const QString& categoryName)
-{
-    for (int i = 0; i < topLevelItemCount(); i++)
-        if (topLevelItem(i)->text(0) == categoryName)
-            return true;
-    return false;
-}
-
-QTreeWidgetItem* ToolboxTree::categoryItem(const QString& categoryName)
-{
-    for (int i = 0; i < topLevelItemCount(); i++)
-        if (topLevelItem(i)->text(0) == categoryName)
-            return topLevelItem(i);
+    for (int i = 0; i < topLevelItemCount(); ++i) {
+        QTreeWidgetItem* item = topLevelItem(i);
+        if (item->text(0) == category)
+            return static_cast<ToolboxItem*>(item);
+    }
     return nullptr;
 }
 
-QMimeData* ToolboxTree::mimeData(const QList<QTreeWidgetItem*> items) const
+void ToolboxTree::onMousePress(QTreeWidgetItem* item, int column)
 {
-    if (itemAt(_pressPoint) &&
-            itemAt(_pressPoint)->parent() != nullptr) {
-        QMimeData *data = QTreeWidget::mimeData(items);
-        data->setUrls(_urls.value(items.first()));
-        data->setText(TOOL_KEY);
-        return data;
-    } else {
-        return nullptr;
-    }
-}
+    if (item == 0)
+        return;
 
-void ToolboxTree::mousePressEvent(QMouseEvent* event)
-{
-    _pressPoint = event->pos();
-    QTreeWidget::mousePressEvent(event);
+    if (column > 0)
+        return;
+
+    if (QApplication::mouseButtons() != Qt::LeftButton)
+        return;
+
+    if (item->parent() == 0) {
+        setItemExpanded(item, !isItemExpanded(item));
+        return;
+    }
+
+    emit pressed(static_cast<ToolboxItem*>(item));
 }

@@ -9,9 +9,10 @@ class LineEdit;
 class QTreeWidgetItem;
 class MainWindow;
 
-class ToolboxPane : public QWidget
+class ToolboxPane final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ToolboxPane)
 
 public:
     explicit ToolboxPane(QWidget* parent = nullptr);
@@ -26,7 +27,6 @@ protected:
 private slots:
     void fillPane();
     void filterList(const QString& filter);
-    void handleMousePress(QTreeWidgetItem* item);
 
 signals:
     void filled();
