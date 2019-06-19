@@ -9,9 +9,7 @@ HEADERS += $$PWD/bottombar.h \
            $$PWD/assetspane.h \
            $$PWD/inspectorpane.h \
            $$PWD/issuespane.h \
-           $$PWD/propertiespane.h \
-           $$PWD/toolboxpane.h \
-           $$PWD/toolboxtree.h
+           $$PWD/propertiespane.h
 
 SOURCES += $$PWD/bottombar.cpp \
            $$PWD/consolepane.cpp \
@@ -21,6 +19,4 @@ SOURCES += $$PWD/bottombar.cpp \
            $$PWD/assetspane.cpp \
            $$PWD/inspectorpane.cpp \
            $$PWD/issuespane.cpp \
-           $$PWD/propertiespane.cpp \
-           $$PWD/toolboxpane.cpp \
-           $$PWD/toolboxtree.cpp
+           $$PWD/propertiespane.cpp
