@@ -18,6 +18,7 @@ public:
 public slots:
     void scheduleInitializationProgress(int progress);
     void schedulePreviewDone(const QList<PreviewResult>& results);
+    void scheduleIndividualPreviewDone(const QImage& preview);
     void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
 
 private:
@@ -28,6 +29,7 @@ signals:
     void terminate();
     void propertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void formCreation(const QString& dir);
+    void individualPreview(const QString& url);
     void controlCreation(const QString& dir, const QString& parentUid);
     void refresh(const QString& formUid);
     void parentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);

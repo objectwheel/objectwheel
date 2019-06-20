@@ -24,7 +24,6 @@ public:
     static QList<Previewer::ControlInstance*> allSubInstance(Previewer::ControlInstance* parentInstance);
     static int countAllSubInstance(const Previewer::ControlInstance* parentInstance);
 
-    static bool needsRepreview(const QImage& image);
     static void updateDirtyNodesRecursive(QQuickItem* parentItem, Previewer* previewer);
     static void doComplete(Previewer::ControlInstance* instance, const Previewer* previewer);
     static void tweakObjects(QObject* object);

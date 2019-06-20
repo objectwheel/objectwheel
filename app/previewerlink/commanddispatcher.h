@@ -21,6 +21,7 @@ public slots:
     void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void scheduleFormCreation(const QString& dir);
     void scheduleControlCreation(const QString& dir, const QString& parentUid);
+    void scheduleIndividualPreview(const QString& url);
     void scheduleRefresh(const QString& formUid);
     void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
     void scheduleIndexUpdate(const QString& uid);
@@ -37,6 +38,7 @@ private:
 signals:
     void initializationProgressChanged(int progress);
     void previewDone(const QList<PreviewResult>& results);
+    void individualPreviewDone(const QImage& preview);
 
 private:
     PreviewerServer* m_server;

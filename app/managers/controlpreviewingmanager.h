@@ -24,6 +24,7 @@ public:
     static void scheduleFormDeletion(const QString& uid);
     static void scheduleFormCreation(const QString& dir);
     static void scheduleControlDeletion(const QString& uid);
+    static void scheduleIndividualPreview(const QString& url);
     static void scheduleControlCreation(const QString& dir, const QString& parentUid);
     static void scheduleIndexUpdate(const QString& uid);
     static void scheduleIdUpdate(const QString& uid, const QString& newId);
@@ -41,6 +42,7 @@ private slots:
 
 signals:
     void previewDone(const PreviewResult& result);
+    void individualPreviewDone(const QImage& preview);
     void initializationProgressChanged(int progress);
 
 private:

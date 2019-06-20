@@ -44,6 +44,8 @@ ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(pa
             this, &ControlPreviewingManager::initializationProgressChanged);
     connect(s_commandDispatcher, &CommandDispatcher::previewDone,
             this, &ControlPreviewingManager::onPreviewResultsReady);
+    connect(s_commandDispatcher, &CommandDispatcher::individualPreviewDone,
+            this, &ControlPreviewingManager::individualPreviewDone);
 
 #if defined(PREVIEWER_DEBUG)
     QLocalServer::removeServer("serverName");
@@ -98,6 +100,11 @@ void ControlPreviewingManager::scheduleFormDeletion(const QString& uid)
 void ControlPreviewingManager::scheduleControlDeletion(const QString& uid)
 {
     s_commandDispatcher->scheduleControlDeletion(uid);
+}
+
+void ControlPreviewingManager::scheduleIndividualPreview(const QString& url)
+{
+    s_commandDispatcher->scheduleIndividualPreview(url);
 }
 
 void ControlPreviewingManager::scheduleIndexUpdate(const QString& uid)

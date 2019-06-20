@@ -474,33 +474,6 @@ int PreviewerUtils::countAllSubInstance(const Previewer::ControlInstance* parent
     return counter;
 }
 
-bool PreviewerUtils::needsRepreview(const QImage& image)
-{
-    if (image.isNull())
-        return true;
-
-    int totalAlpha = 200 * 8;
-    const int hspacing = 8;
-    const int wspacing = qRound(qMax(hspacing * qreal(image.width()) / image.height(), 1.0));
-
-    for (int w = 0, h = image.height() / 2.0; w < image.width(); w += wspacing)
-        totalAlpha -= qAlpha(image.pixel(w, h));
-
-    if (totalAlpha < 0)
-        return false;
-
-    for (int w = 0, h = 0; w < image.width() && h < image.height(); w += wspacing, h += hspacing)
-        totalAlpha -= qAlpha(image.pixel(w, h));
-
-    if (totalAlpha < 0)
-        return false;
-
-    for (int w = image.width() - 1, h = 0; w >= 0 && h < image.height(); w -= wspacing, h += hspacing)
-        totalAlpha -= qAlpha(image.pixel(w, h));
-
-    return totalAlpha > 0;
-}
-
 void PreviewerUtils::resetAllItems(Previewer::ControlInstance* formInstance)
 {
     Q_ASSERT(formInstance);
@@ -623,7 +596,6 @@ void PreviewerUtils::deleteInstancesRecursive(Previewer::ControlInstance* instan
                                               DesignerSupport& designerSupport)
 {
     Q_ASSERT(instance);
-    Q_ASSERT(instance->parent);
 
     for (Previewer::ControlInstance* childInstance : instance->children)
         PreviewerUtils::deleteInstancesRecursive(childInstance, designerSupport);

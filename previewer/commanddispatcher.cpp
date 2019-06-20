@@ -26,6 +26,11 @@ void CommandDispatcher::schedulePreviewDone(const QList<PreviewResult>& results)
     send(m_socket, PreviewerCommands::PreviewDone, push(results));
 }
 
+void CommandDispatcher::scheduleIndividualPreviewDone(const QImage& preview)
+{
+    send(m_socket, PreviewerCommands::IndividualPreviewDone, push(preview));
+}
+
 void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
 {
     switch (command) {
@@ -112,6 +117,13 @@ void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const Q
         QString dir, parentUid;
         pull(data, dir, parentUid);
         emit controlCreation(dir, parentUid);
+        break;
+    }
+
+    case IndividualPreview: {
+        QString url;
+        pull(data, url);
+        emit individualPreview(url);
         break;
     }
 

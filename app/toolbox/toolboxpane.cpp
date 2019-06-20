@@ -2,13 +2,17 @@
 #include <toolboxtree.h>
 #include <lineedit.h>
 #include <paintutils.h>
+
 #include <QBoxLayout>
+#include <QDragEnterEvent>
+#include <QMimeData>
 
 ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
   , m_searchEdit(new LineEdit(this))
   , m_toolboxTree(new ToolboxTree(this))
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    setAcceptDrops(true);
 
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setPlaceholderText(tr("Search"));
@@ -35,4 +39,10 @@ ToolboxTree* ToolboxPane::toolboxTree() const
 QSize ToolboxPane::sizeHint() const
 {
     return {140, 710};
+}
+
+void ToolboxPane::dragEnterEvent(QDragEnterEvent* event)
+{
+    if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool")))
+        event->accept();
 }

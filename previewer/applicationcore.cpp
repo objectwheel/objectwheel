@@ -62,6 +62,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             s_previewer, &Previewer::updateProperty);
     connect(s_commandDispatcher, &CommandDispatcher::controlCreation,
             s_previewer, &Previewer::createControl);
+    connect(s_commandDispatcher, &CommandDispatcher::individualPreview,
+            s_previewer, &Previewer::previewIndividually);
     connect(s_commandDispatcher, &CommandDispatcher::refresh,
             s_previewer, &Previewer::refresh);
     connect(s_commandDispatcher, &CommandDispatcher::parentUpdate,
@@ -85,6 +87,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             s_commandDispatcher, &CommandDispatcher::scheduleInitializationProgress);
     connect(s_previewer, &Previewer::previewDone,
             s_commandDispatcher, &CommandDispatcher::schedulePreviewDone);
+    connect(s_previewer, &Previewer::individualPreviewDone,
+            s_commandDispatcher, &CommandDispatcher::scheduleIndividualPreviewDone);
 
     QMetaObject::invokeMethod(s_previewerSocket, "start",
                               Q_ARG(QString, CommandlineParser::serverName()));

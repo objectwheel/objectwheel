@@ -36,6 +36,11 @@ void CommandDispatcher::scheduleControlCreation(const QString& dir, const QStrin
     send(m_server, PreviewerCommands::ControlCreation, push(dir, parentUid));
 }
 
+void CommandDispatcher::scheduleIndividualPreview(const QString& url)
+{
+    send(m_server, PreviewerCommands::IndividualPreview, push(url));
+}
+
 void CommandDispatcher::scheduleFormCreation(const QString& dir)
 {
     send(m_server, PreviewerCommands::FormCreation, push(dir));
@@ -95,6 +100,13 @@ void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const Q
         QList<PreviewResult> results;
         pull(data, results);
         emit previewDone(results);
+        break;
+    }
+
+    case IndividualPreviewDone: {
+        QImage preview;
+        pull(data, preview);
+        emit individualPreviewDone(preview);
         break;
     }
 

@@ -41,6 +41,7 @@ SOURCES += \
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \
+    $$PWD/resources/shared/tools/tools.qrc \
     $$PWD/resources/shared/moduleresolver/moduleresolver.qrc
 
 ###Includes

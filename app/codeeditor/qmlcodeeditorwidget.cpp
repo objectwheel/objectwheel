@@ -50,7 +50,6 @@
 #define fullPath(x, y) (x) + '/' + (y)
 #define modified(x, y) (x)->isModified() ? ((y) + MARK_ASTERISK) : (y)
 #define modifiedControlId(x) controlModified((x)) ? (x)->id() + MARK_ASTERISK : (x)->id()
-extern const char* TOOL_KEY;
 
 enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
 
@@ -799,8 +798,8 @@ void QmlCodeEditorWidget::dragLeaveEvent(QDragLeaveEvent* e)
 void QmlCodeEditorWidget::dropEvent(QDropEvent* e)
 {
     const QMimeData* mimeData = e->mimeData();
-    if (mimeData->hasUrls() && !(mimeData->hasText() && mimeData->text() == TOOL_KEY)) {
-        e->accept();
+    if (mimeData->hasUrls()) {
+        e->acceptProposedAction();
         for (const QUrl& url : mimeData->urls()) {
             if (url.isLocalFile())
                 openOthers(url.toLocalFile());

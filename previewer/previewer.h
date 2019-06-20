@@ -26,6 +26,8 @@ class Previewer final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(Previewer)
 
+    enum { TIMEOUT = 0 };
+
 public:
     struct ControlInstance {
         bool gui;
@@ -70,25 +72,28 @@ public slots:
     void updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void updateControlCode(const QString& uid);
     void updateFormCode(const QString& uid);
+    void previewIndividually(const QString& url);
 
 private:
     void refreshAllBindings();
     void refreshBindings(QQmlContext* context);
     void repairIndexes(ControlInstance* parentInstance);
     void preview(ControlInstance* formInstance);
-    void schedulePreview(ControlInstance* formInstance, int msecLater = 100);
+    void schedulePreview(ControlInstance* formInstance, int msecLater = TIMEOUT);
     void scheduleRepreviewForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);
 
     QImage grabImage(const ControlInstance* instance);
     QImage renderItem(QQuickItem* item, const QColor& bgColor);
 
     QList<PreviewResult> previewDirtyInstances(const QList<ControlInstance*>& instances);
+    Previewer::ControlInstance* createInstance(const QString& url);
     Previewer::ControlInstance* createInstance(const QString& dir, ControlInstance* parentInstance,
                                                QQmlContext* oldFormContext = nullptr);
 
 signals:
     void initializationProgressChanged(int progress);
     void previewDone(const QList<PreviewResult>& results);
+    void individualPreviewDone(const QImage& preview);
 
 private:
     bool m_initialized;

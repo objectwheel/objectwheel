@@ -20,6 +20,9 @@ public:
     QSize sizeHint() const override;
 
 private:
+    void dragEnterEvent(QDragEnterEvent* event) override;
+
+private:
     LineEdit* m_searchEdit;
     ToolboxTree* m_toolboxTree;
 };

@@ -41,8 +41,6 @@
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
 
-extern const char* TOOL_KEY;
-
 using namespace Utils;
 
 namespace {
@@ -733,10 +731,8 @@ void FileExplorer::filterList()
 void FileExplorer::dropEvent(QDropEvent* event)
 {
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
-    if (event->mimeData()->hasUrls()
-            && !(event->mimeData()->hasText()
-                 && event->mimeData()->text() == TOOL_KEY)) {
-        event->accept();
+    if (event->mimeData()->hasUrls()) {
+        event->acceptProposedAction();
         UtilityFunctions::copyFiles(rootPath, event->mimeData()->urls(), this);
     }
     m_dropHereLabel->setHidden(true);
@@ -745,9 +741,7 @@ void FileExplorer::dropEvent(QDropEvent* event)
 
 void FileExplorer::dragEnterEvent(QDragEnterEvent* event)
 {
-    if (event->mimeData()->hasUrls()
-            && !(event->mimeData()->hasText()
-                 && event->mimeData()->text() == TOOL_KEY)) {
+    if (event->mimeData()->hasUrls()) {
         event->accept();
         m_dropHereLabel->setVisible(true);
         m_droppingBlurEffect->setEnabled(true);

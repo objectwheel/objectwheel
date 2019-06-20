@@ -340,3 +340,30 @@ void PaintUtils::drawSearchEditBevel(QPainter* painter, const QStyleOption& opti
 
     painter->restore();
 }
+
+bool PaintUtils::isBlankImage(const QImage& image)
+{
+    if (image.isNull())
+        return true;
+
+    int totalAlpha = 150 * 8;
+    const int hspacing = 8;
+    const int wspacing = qRound(qMax(hspacing * qreal(image.width()) / image.height(), 1.0));
+
+    for (int w = 0, h = image.height() / 2.0; w < image.width(); w += wspacing)
+        totalAlpha -= qAlpha(image.pixel(w, h));
+
+    if (totalAlpha < 0)
+        return false;
+
+    for (int w = 0, h = 0; w < image.width() && h < image.height(); w += wspacing, h += hspacing)
+        totalAlpha -= qAlpha(image.pixel(w, h));
+
+    if (totalAlpha < 0)
+        return false;
+
+    for (int w = image.width() - 1, h = 0; w >= 0 && h < image.height(); w -= wspacing, h += hspacing)
+        totalAlpha -= qAlpha(image.pixel(w, h));
+
+    return totalAlpha > 0;
+}

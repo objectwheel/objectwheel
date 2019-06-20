@@ -22,7 +22,7 @@ ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setItemDelegate(new ToolboxDelegate(this));
 
-    connect(this, &QTreeWidget::itemPressed, this, &ToolboxTree::onMousePress);
+    connect(this, &QTreeWidget::itemPressed, this, &ToolboxTree::onItemPress);
 }
 
 void ToolboxTree::addTool(const QString& name, const QString& category, const QString& dir,
@@ -52,7 +52,7 @@ ToolboxItem* ToolboxTree::categoryItem(const QString& category)
     return nullptr;
 }
 
-void ToolboxTree::onMousePress(QTreeWidgetItem* item, int column)
+void ToolboxTree::onItemPress(QTreeWidgetItem* item, int column)
 {
     if (item == 0)
         return;
@@ -68,5 +68,5 @@ void ToolboxTree::onMousePress(QTreeWidgetItem* item, int column)
         return;
     }
 
-    emit pressed(static_cast<ToolboxItem*>(item));
+    emit itemPressed(static_cast<ToolboxItem*>(item));
 }

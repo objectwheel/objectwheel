@@ -17,6 +17,8 @@ enum PreviewerCommands : quint32 {
     InitializationProgress,
     ParentUpdate,
     PreviewDone,
+    IndividualPreview,
+    IndividualPreviewDone,
     PropertyUpdate,
     Refresh,
     Terminate

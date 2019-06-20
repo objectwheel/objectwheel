@@ -19,10 +19,10 @@ private:
     ToolboxItem* categoryItem(const QString& category);
 
 private slots:
-    void onMousePress(QTreeWidgetItem* item, int column);
+    void onItemPress(QTreeWidgetItem* item, int column);
 
 signals:
-    void pressed(ToolboxItem* item);
+    void itemPressed(ToolboxItem* item);
 };
 
 #endif // TOOLBOXTREE_H

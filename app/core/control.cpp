@@ -22,8 +22,6 @@
 #include <QGraphicsSceneDragDropEvent>
 #include <QApplication>
 
-extern const char* TOOL_KEY;
-
 namespace {
 
 const QSize g_baseControlSize(40, 40);
@@ -342,13 +340,16 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     // FIXME: Move this out of Control.cpp. Move everything unrelated with a Control
     // to DesignerView or DesignerScene or somewhere else that is related to.
-    m_dragIn = false;
-    event->accept();
-    WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(
-                this,
-                event->mimeData()->urls().first().toLocalFile(),
-                event->pos());
-    update();
+    const QMimeData* mimeData = event->mimeData();
+    if (mimeData->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
+        m_dragIn = false;
+        event->acceptProposedAction();
+        QString dir;
+        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
+        Q_ASSERT(!dir.isEmpty());
+        WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(this, dir, event->pos());
+        update();
+    }
 }
 
 void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
@@ -358,9 +359,7 @@ void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
-    auto mimeData = event->mimeData();
-    if (mimeData->hasUrls() && mimeData->hasText() &&
-            mimeData->text() == TOOL_KEY) {
+    if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
         m_dragIn = true;
         event->accept();
     } else {

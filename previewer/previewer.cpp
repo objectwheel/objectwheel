@@ -6,6 +6,7 @@
 #include <previewresult.h>
 #include <utilityfunctions.h>
 #include <components.h>
+#include <paintutils.h>
 
 #include <private/qqmlengine_p.h>
 
@@ -340,6 +341,32 @@ void Previewer::updateFormCode(const QString& uid)
     schedulePreview(oldFormInstance);
 }
 
+void Previewer::previewIndividually(const QString& url)
+{
+    Q_ASSERT(!url.isEmpty());
+
+    ControlInstance* instance = createInstance(url);
+
+    PreviewerUtils::doComplete(instance, this);
+
+    refreshBindings(instance->context);
+
+    QTimer::singleShot(TIMEOUT, [=] {
+        DesignerSupport::polishItems(m_view);
+
+        for (QQuickItem* item : PreviewerUtils::allItems(instance)) {
+            if (item)
+                DesignerSupport::updateDirtyNode(item);
+        }
+
+        emit individualPreviewDone(grabImage(instance));
+
+        auto ctx = instance->context;
+        PreviewerUtils::deleteInstancesRecursive(instance, m_designerSupport);
+        delete ctx;
+    });
+}
+
 void Previewer::refreshAllBindings()
 {
     DesignerSupport::refreshExpressions(m_view->rootContext());
@@ -668,7 +695,7 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
         if (instance->errors.isEmpty()
                 && instance->gui
                 && PreviewerUtils::guiItem(instance)->isVisible()) {
-            instance->needsRepreview = PreviewerUtils::needsRepreview(result.image);
+            instance->needsRepreview = PaintUtils::isBlankImage(result.image);
         }
 
         if (!m_initialized) {
@@ -785,6 +812,72 @@ void Previewer::repairIndexes(ControlInstance* parentInstance)
         }
     }
 }
+
+Previewer::ControlInstance* Previewer::createInstance(const QString& url)
+{
+    ComponentCompleteDisabler disabler;
+    Q_UNUSED(disabler)
+
+    auto instance = new Previewer::ControlInstance;
+    instance->context = new QQmlContext(m_view->engine());
+
+    // m_view->engine()->clearComponentCache();
+    QQmlComponent component(m_view->engine());
+    component.loadUrl(QUrl::fromUserInput(url));
+
+    QObject* object = component.beginCreate(instance->context);
+
+    if (component.isError()) {
+        if (object)
+            delete object;
+
+        instance->gui = false;
+        instance->popup = false;
+        instance->window = false;
+        instance->object = nullptr;
+        for (const QQmlError& e : component.errors())
+            instance->errors.append(e);
+        return instance;
+    }
+
+    Q_ASSERT(object);
+    Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
+
+    PreviewerUtils::tweakObjects(object);
+    component.completeCreate();
+    // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
+
+    QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
+    QQmlEnginePrivate::get(m_view->engine())->cache(object->metaObject());
+
+    instance->object = object;
+    instance->popup = object->inherits("QQuickPopup");
+    instance->window = object->isWindowType();
+    instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");
+
+    QQmlProperty defaultProperty(m_view->rootObject());
+    Q_ASSERT(defaultProperty.isValid());
+
+    if (instance->gui) {
+        QQuickItem* item = PreviewerUtils::guiItem(instance->object);
+        item->setFlag(QQuickItem::ItemHasContents, true);
+        static_cast<QQmlParserStatus*>(item)->classBegin();
+    }
+
+    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+    childList.append(instance->object);
+
+    if (instance->gui) {
+        QQuickItem* item = PreviewerUtils::guiItem(instance->object);
+        if (instance->window || instance->popup)
+            item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject())); // We still reparent it anyway, may a window comes
+        m_designerSupport.refFromEffectItem(item);
+        item->update();
+    }
+
+    return instance;
+}
+
 /*
     Creates control instance on engine's root context.
 

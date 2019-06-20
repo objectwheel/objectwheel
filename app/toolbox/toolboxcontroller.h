@@ -18,14 +18,9 @@ public slots:
     void discharge();
 
 private slots:
-    void onToolboxPress(ToolboxItem* item);
+    void onProjectInfoUpdate();
+    void onToolboxItemPress(ToolboxItem* item);
     void onSearchTextEdit(const QString& text);
-
-private:
-    void fillPane();
-
-signals:
-    void filled();
 
 private:
     ToolboxPane* m_toolboxPane;

@@ -35,6 +35,7 @@ QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const Q
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);
 void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);
+bool isBlankImage(const QImage& image);
 
 } // PaintUtils
 
