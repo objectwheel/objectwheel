@@ -347,7 +347,8 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         QString dir;
         UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
         Q_ASSERT(!dir.isEmpty());
-        WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(this, dir, event->pos());
+        WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(
+                    this, dir, event->pos() - QPointF(5, 5));
         update();
     }
 }

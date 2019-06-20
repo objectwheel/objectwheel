@@ -22,8 +22,8 @@ ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) 
             this, &ToolboxController::onProjectInfoUpdate);
     connect(m_toolboxPane->toolboxTree(), &ToolboxTree::itemPressed,
             this, &ToolboxController::onToolboxItemPress);
-    connect(m_toolboxPane->searchEdit(), &LineEdit::textEdited,
-            this, &ToolboxController::onSearchTextEdit);
+    connect(m_toolboxPane->searchEdit(), &LineEdit::textChanged,
+            this, &ToolboxController::onSearchTextChange);
 }
 
 void ToolboxController::discharge()
@@ -33,17 +33,85 @@ void ToolboxController::discharge()
 
 void ToolboxController::onProjectInfoUpdate()
 {
+    DocumentManager::instance()->disconnect(this);
     for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& toolPath = ":/tools/" + toolDirName;
         Q_ASSERT(SaveUtils::isControlValid(toolPath));
-        const QString& name = ToolUtils::toolName(toolPath);
-        const QString& category = ToolUtils::toolCetegory(toolPath);
-        const QIcon& icon = QIcon(ToolUtils::toolIcon(toolPath, m_toolboxPane->devicePixelRatioF()));
-        m_toolboxPane->toolboxTree()->addTool(name, category, toolPath, icon);
+        m_toolboxPane->toolboxTree()->addTool(
+                    ToolUtils::toolName(toolPath),
+                    ToolUtils::toolCetegory(toolPath), toolPath,
+                    QIcon(ToolUtils::toolIcon(toolPath, m_toolboxPane->devicePixelRatioF())));
     }
 }
 
 void ToolboxController::onToolboxItemPress(ToolboxItem* item)
+{
+    static bool locked = false;
+    static bool processLocked = false;
+
+    if (locked)
+        return;
+
+    if (processLocked)
+        return;
+
+    locked = true;
+    processLocked = true;
+
+    auto conn = new QMetaObject::Connection;
+    *conn = connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::individualPreviewDone,
+                    [=] (const QImage& preview) {
+        if (locked) {
+            disconnect(*conn);
+            delete conn;
+            QDrag* drag = establishDrag(item);
+            if (!PaintUtils::isBlankImage(preview)) {
+                QPixmap pixmap(QPixmap::fromImage(preview));
+                pixmap.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
+                drag->setPixmap(pixmap);
+            }
+            locked = false;
+            drag->exec(Qt::CopyAction);
+            processLocked = false;
+        }
+    });
+
+    QTimer::singleShot(150, [=] {
+        if (locked) {
+            disconnect(*conn);
+            delete conn;
+            locked = false;
+            establishDrag(item)->exec(Qt::CopyAction);
+            processLocked = false;
+        }
+    });
+
+    ControlPreviewingManager::scheduleIndividualPreview(SaveUtils::toControlMainQmlFile(item->dir()));
+}
+
+void ToolboxController::onSearchTextChange(const QString& text)
+{
+    for (int i = 0; i < m_toolboxPane->toolboxTree()->topLevelItemCount(); ++i) {
+        bool categoryItemVisible = false;
+        QTreeWidgetItem* categoryItem = m_toolboxPane->toolboxTree()->topLevelItem(i);
+
+        for (int j = 0; j < categoryItem->childCount(); ++j) {
+            QTreeWidgetItem* toolboxItem = categoryItem->child(j);
+            bool itemVisible = text.isEmpty()
+                    ? true : toolboxItem->text(0).contains(text, Qt::CaseInsensitive);
+
+            if (toolboxItem->isHidden() == itemVisible)
+                toolboxItem->setHidden(!itemVisible);
+            if (itemVisible)
+                categoryItemVisible = true;
+        }
+
+        if (categoryItem->isHidden() == categoryItemVisible)
+            categoryItem->setHidden(!categoryItemVisible);
+    }
+}
+
+QDrag* ToolboxController::establishDrag(ToolboxItem* item)
 {
     QMimeData* mimeData = new QMimeData;
     mimeData->setData(QStringLiteral("application/x-objectwheel-tool"),
@@ -55,50 +123,6 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
     QPointer<QDrag> drag = new QDrag(this);
     drag->setMimeData(mimeData);
     drag->setPixmap(pixmap);
-    drag->setHotSpot({1, 1});
-
-    QPointer<QMetaObject::Connection> conn = new QMetaObject::Connection;
-    *conn = connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::individualPreviewDone,
-                    [=] (const QImage& preview) {
-        if (conn) {
-            disconnect(*conn);
-            delete conn;
-        }
-        if (drag && !PaintUtils::isBlankImage(preview)) {
-            QPixmap pixmap(QPixmap::fromImage(preview));
-            pixmap.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
-            drag->setPixmap(pixmap);
-        }
-    });
-
-    QTimer::singleShot(150, [=] {
-        if (conn) {
-            disconnect(*conn);
-            delete conn;
-        }
-        if (drag)
-            drag->exec(Qt::CopyAction);
-    });
-
-    ControlPreviewingManager::scheduleIndividualPreview(SaveUtils::toControlMainQmlFile(item->dir()));
-}
-
-void ToolboxController::onSearchTextEdit(const QString& filter)
-{
-    for (int i = 0; i < m_toolboxPane->toolboxTree()->topLevelItemCount(); i++) {
-        QTreeWidgetItem* tli = m_toolboxPane->toolboxTree()->topLevelItem(i);
-        bool tlv = false;
-
-        for (int j = 0; j < tli->childCount(); j++) {
-            QTreeWidgetItem* tci = tli->child(j);
-            bool v = filter.isEmpty() ? true : tci->text(0).contains(filter, Qt::CaseInsensitive);
-
-            tci->setHidden(!v);
-            if (v)
-                tlv = v;
-        }
-
-        bool v = filter.isEmpty() ? true : tlv;
-        tli->setHidden(!v);
-    }
+    drag->setHotSpot({5, 5});
+    return drag;
 }

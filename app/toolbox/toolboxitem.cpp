@@ -2,6 +2,7 @@
 
 ToolboxItem::ToolboxItem(int type) : QTreeWidgetItem(type)
 {
+    setFlags(Qt::ItemIsEnabled);
 }
 
 bool ToolboxItem::isCategory() const

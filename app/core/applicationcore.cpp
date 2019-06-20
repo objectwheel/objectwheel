@@ -141,7 +141,10 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
 
-    QObject::connect(s_documentManager, &DocumentManager::projectInfoUpdated, [=] {
+    auto conn = new QMetaObject::Connection;
+    *conn = QObject::connect(s_documentManager, &DocumentManager::projectInfoUpdated, [=] {
+        QObject::disconnect(*conn);
+        delete conn;
         s_windowManager->welcomeWindow()->show();
         splash->finish(s_windowManager->welcomeWindow());
         QTimer::singleShot(2000, [=] { delete splash; });

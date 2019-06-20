@@ -5,6 +5,7 @@
 
 class ToolboxPane;
 class ToolboxItem;
+class QDrag;
 
 class ToolboxController final : public QObject
 {
@@ -20,7 +21,10 @@ public slots:
 private slots:
     void onProjectInfoUpdate();
     void onToolboxItemPress(ToolboxItem* item);
-    void onSearchTextEdit(const QString& text);
+    void onSearchTextChange(const QString& text);
+
+private:
+    QDrag* establishDrag(ToolboxItem* item);
 
 private:
     ToolboxPane* m_toolboxPane;

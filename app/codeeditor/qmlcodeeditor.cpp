@@ -467,7 +467,6 @@ QmlCodeEditor::~QmlCodeEditor()
 
 void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
 {
-    QMetaObject::Connection con;
     auto settings = TextEditorSettings::instance();
     auto documentLayout = qobject_cast<QPlainTextDocumentLayout*>(document->documentLayout());
 
@@ -479,7 +478,6 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
         disconnect(settings, 0, codeDocument(), 0);
     }
     disconnect(settings, 0, this, 0);
-    disconnect(con);
 
     m_extraSelections.clear();
     QPlainTextEdit::setExtraSelections({});
@@ -514,8 +512,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
     //    connect(document, &QmlCodeDocument::reloadFinished,
     //            this, &QmlCodeEditor::documentReloadFinished);
 
-    con = connect(document, &QmlCodeDocument::tabSettingsChanged,
-                  this, [this] () {
+    connect(document, &QmlCodeDocument::tabSettingsChanged,
+            this, [this] () {
         updateTabStops();
         m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
     });
@@ -548,8 +546,8 @@ void QmlCodeEditor::setCodeDocument(QmlCodeDocument* document)
             document, &QmlCodeDocument::setTypingSettings);
     connect(settings, &TextEditorSettings::storageSettingsChanged,
             document, &QmlCodeDocument::setStorageSettings);
-//    connect(settings, &TextEditorSettings::behaviorSettingsChanged,
-//            this, &QmlCodeEditor::setBehaviorSettings);
+    //    connect(settings, &TextEditorSettings::behaviorSettingsChanged,
+    //            this, &QmlCodeEditor::setBehaviorSettings);
     //    connect(settings, &TextEditorSettings::marginSettingsChanged,
     //            this, &QmlCodeEditor::setMarginSettings);
     //    connect(settings, &TextEditorSettings::displaySettingsChanged,
@@ -1307,7 +1305,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                            && */m_linkPressed
+                                                                                                                                                    && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -2651,8 +2649,8 @@ void QmlCodeEditor::clearLink()
 
 void QmlCodeEditor::requestUpdateLink(QMouseEvent *e, bool immediate)
 {
-//    if (!mouseNavigationEnabled())
-//        return;
+    //    if (!mouseNavigationEnabled())
+    //        return;
     if (e->modifiers() & Qt::ControlModifier) {
         // Link emulation behaviour for 'go to definition'
         const QTextCursor cursor = cursorForPosition(e->pos());
@@ -3091,7 +3089,7 @@ void QmlCodeEditor::paintReplacement(PaintEventData &data, QPainter &painter,
                                      qreal top) const
 {
     QTextBlock nextBlock = data.block.next();
-//    QTextBlock nextVisibleBlock = QmlCodeEditor::nextVisibleBlock(data.block, data.doc);
+    //    QTextBlock nextVisibleBlock = QmlCodeEditor::nextVisibleBlock(data.block, data.doc);
 
     if (nextBlock.isValid() && !nextBlock.isVisible() && replacementVisible(data.block.blockNumber())) {
         const bool selectThis = (data.textCursor.hasSelection()
