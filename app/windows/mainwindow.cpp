@@ -4,6 +4,7 @@
 #include <modeselectorpane.h>
 #include <modeselectorcontroller.h>
 #include <toolboxpane.h>
+#include <toolboxcontroller.h>
 #include <propertiespane.h>
 #include <assetspane.h>
 #include <formspane.h>
@@ -79,8 +80,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_runController(new RunController(m_runPane, this))
   , m_modeSelectorPane(new ModeSelectorPane)
   , m_modeSelectorController(new ModeSelectorController(m_modeSelectorPane, this))
-  , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_toolboxPane(new ToolboxPane)
+  , m_toolboxController(new ToolboxController(m_toolboxPane, this))
+  , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
   , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))
   , m_assetsPane(new AssetsPane)
@@ -339,9 +341,9 @@ void MainWindow::discharge()
 {
     m_runController->discharge();
     m_modeSelectorController->discharge();
+    m_toolboxController->discharge();
     m_centralWidget->discharge();
     m_formsPane->discharge();
-    m_toolboxPane->discharge();
     m_inspectorPane->discharge();
     m_propertiesPane->discharge();
     m_assetsPane->discharge();

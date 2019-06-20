@@ -1,124 +1,79 @@
-//#include <toolboxpane.h>
-//#include <toolboxtree.h>
-//#include <lineedit.h>
-//#include <paintutils.h>
-//#include <saveutils.h>
-//#include <toolutils.h>
+#include <toolboxcontroller.h>
+#include <toolboxpane.h>
+#include <toolboxitem.h>
+#include <toolboxtree.h>
+#include <lineedit.h>
+#include <saveutils.h>
+#include <toolutils.h>
 
-//#include <qmljs/qmljsmodelmanagerinterface.h>
+#include <qmljs/qmljsmodelmanagerinterface.h>
 
-//#include <QApplication>
-//#include <QVBoxLayout>
-//#include <QDir>
+#include <QDir>
 
-//ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
-//{
-//    _layout = new QVBoxLayout(this);
-//    _searchEdit = new LineEdit(this);
-//    _toolboxTree = new ToolboxTree(this);
+const char* TOOL_KEY = "QURBUEFaQVJMSVlJWiBIQUZJWg";
 
-//    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) : QObject(parent)
+  , m_toolboxPane(toolboxPane)
+{
+    connect(m_toolboxPane->searchEdit(), &LineEdit::textEdited,
+            this, &ToolboxController::onSearchTextEdit);
+    connect(QmlJS::ModelManagerInterface::instance(), &QmlJS::ModelManagerInterface::idle,
+            this, &ToolboxController::fillPane);
+}
 
-//    _searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", _searchEdit)),
-//                           QLineEdit::LeadingPosition);
-//    _searchEdit->setPlaceholderText(tr("Search"));
-//    _searchEdit->setClearButtonEnabled(true);
-//    connect(_searchEdit, &LineEdit::textChanged, this, &ToolboxPane::filterList);
+void ToolboxController::discharge()
+{
+    m_toolboxPane->searchEdit()->clear();
+}
 
-//    _layout->addWidget(_searchEdit);
-//    _layout->addWidget(_toolboxTree);
-//    _layout->setSpacing(2);
-//    _layout->setContentsMargins(3, 3, 3, 3);
+void ToolboxController::onToolboxPress(ToolboxItem* item)
+{
+    //    QMimeData* mimeData = new QMimeData;
+    //    mimeData->setUrls(_urls.value(item));
+    //    mimeData->setText(TOOL_KEY);
 
-//    connect(QmlJS::ModelManagerInterface::instance(), &QmlJS::ModelManagerInterface::idle,
-//            this, &ToolboxPane::fillPane);
-//    connect(_toolboxTree, &QTreeWidget::itemPressed, this, &ToolboxPane::handleMousePress);
+    //    QDrag* drag = new QDrag(this);
+    //    drag->setMimeData(mimeData);
+    //    drag->setPixmap(item->icon(column).pixmap(iconSize()));
 
-//    connect(_toolboxTree, &QTreeWidget::itemDoubleClicked, this, [=] {
-//        if (_toolboxTree->currentItem() && _toolboxTree->currentItem()->parent())
-//            emit itemDoubleClicked( _toolboxTree->urls(_toolboxTree->currentItem()).first().toLocalFile());
-//    });
-//}
+    //    Qt::DropAction dropAction = drag->exec();
 
-//ToolboxTree* ToolboxPane::toolboxTree()
-//{
-//    return _toolboxTree;
-//}
+}
 
-//void ToolboxPane::discharge()
-//{
-//    _toolboxTree->clearSelection();
-//    _toolboxTree->setCurrentItem(nullptr);
-//    _searchEdit->clear();
-//}
+void ToolboxController::onSearchTextEdit(const QString& filter)
+{
+    for (int i = 0; i < m_toolboxPane->toolboxTree()->topLevelItemCount(); i++) {
+        auto tli = m_toolboxPane->toolboxTree()->topLevelItem(i);
+        auto tlv = false;
 
-//void ToolboxPane::handleMousePress(QTreeWidgetItem* item)
-//{
-//    if (item == 0)
-//        return;
+        for (int j = 0; j < tli->childCount(); j++) {
+            auto tci = tli->child(j);
+            auto v = filter.isEmpty() ? true :
+                                        tci->text(0).contains(filter, Qt::CaseInsensitive);
 
-//    if (QApplication::mouseButtons() != Qt::LeftButton)
-//        return;
+            tci->setHidden(!v);
+            if (v)
+                tlv = v;
+        }
 
-//    if (item->parent() == 0) {
-//        _toolboxTree->setItemExpanded(item, !_toolboxTree->isItemExpanded(item));
-//        return;
-//    }
-//}
+        auto v = filter.isEmpty() ? true : tlv;
+        tli->setHidden(!v);
+    }
+}
 
-//void ToolboxPane::filterList(const QString& filter)
-//{
-//    for (int i = 0; i < _toolboxTree->topLevelItemCount(); i++) {
-//        auto tli = _toolboxTree->topLevelItem(i);
-//        auto tlv = false;
+void ToolboxController::fillPane()
+{
+    if (m_toolboxPane->toolboxTree()->topLevelItemCount() > 0)
+        return;
 
-//        for (int j = 0; j < tli->childCount(); j++) {
-//            auto tci = tli->child(j);
-//            auto v = filter.isEmpty() ? true :
-//                                        tci->text(0).contains(filter, Qt::CaseInsensitive);
+    for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
+        const QString& toolPath = ":/tools/" + toolDirName;
+        Q_ASSERT(SaveUtils::isControlValid(toolPath));
+        const QString& name = ToolUtils::toolName(toolPath);
+        const QString& category = ToolUtils::toolCetegory(toolPath);
+        const QIcon& icon = QIcon(ToolUtils::toolIcon(toolPath, m_toolboxPane->devicePixelRatioF()));
+        m_toolboxPane->toolboxTree()->addTool(name, category, toolPath, icon);
+    }
 
-//            tci->setHidden(!v);
-//            if (v)
-//                tlv = v;
-//        }
-
-//        auto v = filter.isEmpty() ? true : tlv;
-//        tli->setHidden(!v);
-//    }
-//}
-
-//QSize ToolboxPane::sizeHint() const
-//{
-//    return QSize{140, 710};
-//}
-
-//void ToolboxPane::fillPane()
-//{
-//    if (_toolboxTree->topLevelItemCount() > 0)
-//        return;
-
-//    for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
-//        const QString& toolPath = ":/tools/" + toolDirName;
-//        Q_ASSERT(SaveUtils::isControlValid(toolPath));
-
-//        const QString& name = ToolUtils::toolName(toolPath);
-//        const QString& category = ToolUtils::toolCetegory(toolPath);
-//        const QIcon& icon = QIcon(ToolUtils::toolIcon(toolPath, devicePixelRatioF()));
-
-//        QTreeWidgetItem* topItem = _toolboxTree->categoryItem(category);
-//        if (!topItem) {
-//            topItem = new QTreeWidgetItem;
-//            topItem->setText(0, category);
-//            _toolboxTree->addTopLevelItem(topItem);
-//            topItem->setExpanded(true);
-//        }
-
-//        QTreeWidgetItem* item = new QTreeWidgetItem;
-//        item->setText(0, name);
-//        item->setIcon(0, icon);
-//        topItem->addChild(item);
-//        _toolboxTree->addUrls(item, QList<QUrl>() << QUrl::fromLocalFile(toolPath));
-//    }
-
-//    emit filled();
-//}
+    emit filled();
+}

@@ -21,6 +21,7 @@ class DocumentManager final : public QObject
 
 public:
     static DocumentManager* instance();
+
     static void updateProjectInfo();
 
     static QList<QmlCodeDocument*> documents()
@@ -31,6 +32,9 @@ public:
 
     static void removeDocument(QmlCodeDocument* document)
     { m_documents.removeAll(document); }
+
+signals:
+    void projectInfoUpdated();
 
 private:
     explicit DocumentManager(QObject* parent = nullptr);

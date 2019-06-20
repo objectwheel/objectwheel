@@ -24,5 +24,10 @@ DocumentManager* DocumentManager::instance()
 
 void DocumentManager::updateProjectInfo()
 {
+    QMetaObject::Connection conn;
+    conn = connect(&instance()->m_modelManager, &QmlJSTools::Internal::ModelManager::idle, [=] {
+        disconnect(conn);
+        emit instance()->projectInfoUpdated();
+    });
     instance()->m_modelManager.updateDefaultProjectInfo();
 }

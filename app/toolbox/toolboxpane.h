@@ -3,11 +3,8 @@
 
 #include <QWidget>
 
-class QVBoxLayout;
-class ToolboxTree;
 class LineEdit;
-class QTreeWidgetItem;
-class MainWindow;
+class ToolboxTree;
 
 class ToolboxPane final : public QWidget
 {
@@ -16,26 +13,15 @@ class ToolboxPane final : public QWidget
 
 public:
     explicit ToolboxPane(QWidget* parent = nullptr);
-    ToolboxTree* toolboxTree();
 
-public slots:
-    void discharge();
+    LineEdit* searchEdit() const;
+    ToolboxTree* toolboxTree() const;
 
-protected:
     QSize sizeHint() const override;
 
-private slots:
-    void fillPane();
-    void filterList(const QString& filter);
-
-signals:
-    void filled();
-    void itemDoubleClicked(const QString& url);
-
 private:
-    QVBoxLayout* _layout;
-    ToolboxTree* _toolboxTree;
-    LineEdit* _searchEdit;
+    LineEdit* m_searchEdit;
+    ToolboxTree* m_toolboxTree;
 };
 
 #endif // TOOLBOXPANE_H

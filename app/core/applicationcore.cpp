@@ -14,7 +14,6 @@
 #include <menumanager.h>
 #include <centralwidget.h>
 #include <designerwidget.h>
-#include <toolboxpane.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
 #include <welcomewindow.h>
@@ -23,7 +22,6 @@
 #include <codeeditorsettings.h>
 #include <applicationstyle.h>
 #include <helpmanager.h>
-#include <components.h>
 #include <paintutils.h>
 #include <servermanager.h>
 #include <modemanager.h>
@@ -126,9 +124,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
                      s_helpManager, &HelpManager::aboutToShutdown);
 
     s_documentManager = new DocumentManager(app);
-    s_documentManager->updateProjectInfo(); // Needed for ParserUtils::typeName(), for ToolBoxPane
-
-    Components::init();
 
     /** Ui initialization **/
     s_windowManager = new WindowManager(app);
@@ -146,13 +141,12 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
 
-    QMetaObject::Connection i;
-    i = QObject::connect(s_windowManager->mainWindow()->toolboxPane(), &ToolboxPane::filled, [=] {
+    QObject::connect(s_documentManager, &DocumentManager::projectInfoUpdated, [=] {
         s_windowManager->welcomeWindow()->show();
         splash->finish(s_windowManager->welcomeWindow());
         QTimer::singleShot(2000, [=] { delete splash; });
-        QObject::disconnect(i);
     });
+    s_documentManager->updateProjectInfo(); // Needed for ParserUtils::typeName(), for ToolBoxPane
 }
 
 bool ApplicationCore::locked()

@@ -1,41 +1,34 @@
-//#ifndef TOOLBOXPANE_H
-//#define TOOLBOXPANE_H
+#ifndef TOOLBOXCONTROLLER_H
+#define TOOLBOXCONTROLLER_H
 
-//#include <QWidget>
+#include <QObject>
 
-//class QVBoxLayout;
-//class ToolboxTree;
-//class LineEdit;
-//class QTreeWidgetItem;
-//class MainWindow;
+class ToolboxPane;
+class ToolboxItem;
 
-//class ToolboxPane : public QWidget
-//{
-//    Q_OBJECT
+class ToolboxController final : public QObject
+{
+    Q_OBJECT
+    Q_DISABLE_COPY(ToolboxController)
 
-//public:
-//    explicit ToolboxPane(QWidget* parent = nullptr);
-//    ToolboxTree* toolboxTree();
+public:
+    explicit ToolboxController(ToolboxPane* m_toolboxPane, QObject* parent = nullptr);
 
-//public slots:
-//    void discharge();
+public slots:
+    void discharge();
 
-//protected:
-//    QSize sizeHint() const override;
+private slots:
+    void onToolboxPress(ToolboxItem* item);
+    void onSearchTextEdit(const QString& text);
 
-//private slots:
-//    void fillPane();
-//    void filterList(const QString& filter);
-//    void handleMousePress(QTreeWidgetItem* item);
+private:
+    void fillPane();
 
-//signals:
-//    void filled();
-//    void itemDoubleClicked(const QString& url);
+signals:
+    void filled();
 
-//private:
-//    QVBoxLayout* _layout;
-//    ToolboxTree* _toolboxTree;
-//    LineEdit* _searchEdit;
-//};
+private:
+    ToolboxPane* m_toolboxPane;
+};
 
-//#endif // TOOLBOXPANE_H
+#endif // TOOLBOXCONTROLLER_H
