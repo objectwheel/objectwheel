@@ -1,13 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.2" baseProfile="tiny" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-	 x="0px" y="0px" viewBox="0 0 32 32" xml:space="preserve">
-<g>
-	<path d="M26,1H6L0,19v10c0,1,1,2,2,2h28c1,0,2-1,2-2V19L26,1z M7.2,3h17.5L30,19h-7c-0.6,0.1-0.9,0.4-1,1v2c0,0.1,0.1,0,0,0H10
-		c0,0,0,0.1,0,0v-2c-0.1-0.6-0.5-0.9-1-1H2L7.2,3z M30,28c-0.1,0.5-0.5,0.8-1,1H3c-0.4,0-1-0.6-1-1v-7h6v2c0.1,0.5,0.4,0.9,1,1h14
-		c0.5-0.1,0.9-0.5,1-1v-2h6V28z"/>
-	<polygon points="25,18 27,18 27,14 5,14 5,18 7,18 7,16 25,16 	"/>
-	<polygon points="9,11 23,11 23,13 25,13 25,9 7,9 7,13 9,13 	"/>
-	<polygon points="10,6 22,6 22,8 24,8 24,4 8,4 8,8 10,8 	"/>
-</g>
+<svg version="1.2" baseProfile="tiny" id="katman_1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 32 32"
+	 xml:space="preserve">
+<path d="M0,15h12v3.5c0,0.3,0.2,0.5,0.5,0.5h7c0.3,0,0.5-0.2,0.5-0.5V15h12v12.5c0,0.3-0.2,0.5-0.5,0.5h-31C0.2,28,0,27.8,0,27.5V15
+	z"/>
+<path d="M14.5,13h3c0.3,0,0.5,0.2,0.5,0.5v3c0,0.3-0.2,0.5-0.5,0.5h-3c-0.3,0-0.5-0.2-0.5-0.5v-3C14,13.2,14.2,13,14.5,13z"/>
+<path d="M22,7V5.5C22,4.1,20.9,3,19.5,3h-7C11.1,3,10,4.1,10,5.5V7H1.6C0.7,7,0,7.7,0,8.6V13h12v-1.5c0-0.3,0.2-0.5,0.5-0.5h7
+	c0.3,0,0.5,0.2,0.5,0.5V13h12V8.6C32,7.7,31.3,7,30.4,7H22z M12,7V6c0-0.6,0.4-1,1-1h6c0.6,0,1,0.4,1,1v1H12z"/>
 </svg>

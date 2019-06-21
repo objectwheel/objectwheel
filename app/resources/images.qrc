@@ -123,5 +123,9 @@
         <file>images/tools/Tumbler.png</file>
         <file>images/tools/Tumbler2.png</file>
         <file>images/item.svg</file>
+        <file>images/bottom.svg</file>
+        <file>images/top.svg</file>
+        <file>images/right.svg</file>
+        <file>images/left.svg</file>
     </qresource>
 </RCC>
