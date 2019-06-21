@@ -2,6 +2,7 @@
 #include <pushbutton.h>
 #include <rundevicesbutton.h>
 #include <runprogressbar.h>
+#include <segmentedbar.h>
 #include <smartspacer.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
@@ -14,6 +15,7 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
   , m_stopButton(new PushButton(this))
   , m_projectsButton(new PushButton(this))
   , m_preferencesButton(new PushButton(this))
+  , m_segmentedBar(new SegmentedBar(this))
   , m_runProgressBar(new RunProgressBar(this))
   , m_runDevicesButton(new RunDevicesButton(this))
 {
@@ -50,14 +52,34 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     m_projectsButton->setFixedWidth(38);
     m_projectsButton->setIconSize({16, 16});
 
-    int baseSize = 0;
+    m_segmentedBar->setCursor(Qt::PointingHandCursor);
+    m_segmentedBar->setToolTip(tr("Control Visibility of the Panes"));
+    m_segmentedBar->setIconSize({18, 18});
+
+    QAction* leftAction = m_segmentedBar->addAction();
+    leftAction->setCheckable(true);
+    leftAction->setToolTip(tr("Hide or show left panes"));
+
+    QAction* rightAction = m_segmentedBar->addAction();
+    rightAction->setCheckable(true);
+    rightAction->setToolTip(tr("Hide or show bottom panes"));
+
+    QAction* bottomAction = m_segmentedBar->addAction();
+    bottomAction->setCheckable(true);
+    bottomAction->setToolTip(tr("Hide or show right panes"));
+
+    m_segmentedBar->setFixedSize(m_segmentedBar->sizeHint());
+    connect(m_segmentedBar, &SegmentedBar::actionTriggered, this, &RunPane::updateIcons);
+
+    int baseSize = - 7 - m_segmentedBar->width();
 #if defined(Q_OS_MACOS)
     auto spacer = new QWidget(this);
     spacer->setFixedSize(60, 1);
-    baseSize = 67;
+    baseSize += 67;
     addWidget(spacer);
 #endif
 
+    qDebug() << baseSize;
     addWidget(m_runButton);
     addWidget(m_stopButton);
     addWidget(m_runDevicesButton);
@@ -69,6 +91,7 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
                               m_runDevicesButton->sizePolicy().verticalPolicy(), this));
     addWidget(m_projectsButton);
     addWidget(m_preferencesButton);
+    addWidget(m_segmentedBar);
     updateIcons();
 }
 
@@ -90,6 +113,11 @@ PushButton* RunPane::projectsButton() const
 PushButton* RunPane::preferencesButton() const
 {
     return m_preferencesButton;
+}
+
+SegmentedBar* RunPane::segmentedBar() const
+{
+    return m_segmentedBar;
 }
 
 RunProgressBar* RunPane::runProgressBar() const
@@ -120,6 +148,22 @@ void RunPane::updateIcons()
     m_stopButton->setIcon(renderOverlaidButtonIcon(":/images/stop.svg", m_stopButton));
     m_preferencesButton->setIcon(renderOverlaidButtonIcon(":/images/settings.svg", m_preferencesButton));
     m_projectsButton->setIcon(renderOverlaidButtonIcon(":/images/projects.svg", m_projectsButton));
+
+    QStringList iconFileNames {
+        ":/images/left.svg",
+        ":/images/bottom.svg",
+        ":/images/right.svg"
+    };
+    for (int i = 0; i < iconFileNames.size(); ++i) {
+        QAction* action = m_segmentedBar->actions().at(i);
+        const QString& fileName = iconFileNames.at(i);
+        QIcon icon;
+        QColor up = m_segmentedBar->palette().buttonText().color();
+        QColor down = !action->isChecked() ? m_segmentedBar->palette().buttonText().color().darker() : QColor("#157efb");
+        icon.addPixmap(renderOverlaidPixmap(fileName, up, m_segmentedBar), QIcon::Normal, QIcon::Off);
+        icon.addPixmap(renderOverlaidPixmap(fileName, down, m_segmentedBar), QIcon::Normal, QIcon::On);
+        action->setIcon(icon);
+    }
 }
 
 bool RunPane::event(QEvent* event)

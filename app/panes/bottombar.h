@@ -27,16 +27,12 @@ public slots:
     void flash(QAbstractButton*);
 
 private slots:
-    void setLeftShowHideButtonToolTip(bool);
-    void setRightShowHideButtonToolTip(bool);
     void onButtonClick(QAbstractButton* button);
 
 protected:
     void paintEvent(QPaintEvent*) override;
 
 signals:
-    void showHideLeftPanesButtonActivated(bool);
-    void showHideRightPanesButtonActivated(bool);
     void buttonActivated(QAbstractButton* button, bool checked);
 
 private:
@@ -44,8 +40,6 @@ private:
     QButtonGroup* m_buttonGroup;
     PushButton* m_consoleButton;
     PushButton* m_issuesButton;
-    PushButton* m_showHideLeftPanesButton;
-    PushButton* m_showHideRightPanesButton;
     ButtonFlasher* m_consoleFlasher;
     ButtonFlasher* m_issuesFlasher;
 };

@@ -95,8 +95,6 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
   , m_buttonGroup(new QButtonGroup(this))
   , m_consoleButton(new PushButton(this))
   , m_issuesButton(new PushButton(this))
-  , m_showHideLeftPanesButton(new PushButton(this))
-  , m_showHideRightPanesButton(new PushButton(this))
   , m_consoleFlasher(new ButtonFlasher(m_consoleButton))
   , m_issuesFlasher(new ButtonFlasher(m_issuesButton))
 {
@@ -104,11 +102,9 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
 
     m_layout->setSpacing(4);
     m_layout->setContentsMargins(4, 2, 4, 2);
-    m_layout->addWidget(m_showHideLeftPanesButton, 0, Qt::AlignVCenter);
     m_layout->addWidget(m_issuesButton, 0, Qt::AlignVCenter);
     m_layout->addWidget(m_consoleButton, 0, Qt::AlignVCenter);
     m_layout->addStretch();
-    m_layout->addWidget(m_showHideRightPanesButton, 0, Qt::AlignVCenter);
 
     m_buttonGroup->addButton(m_consoleButton);
     m_buttonGroup->addButton(m_issuesButton);
@@ -143,41 +139,6 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     m_issuesButton->setToolTip(tr("Activate issues list"));
     m_issuesButton->setIconSize({14, 14});
     m_issuesButton->setIcon(issuesIcon);
-
-    QIcon showHideLeftPanesIcon;
-    up = palette().buttonText().color().lighter(130); // not pressed
-    down = palette().buttonText().color().darker(180); // pressed
-    showHideLeftPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/leftsidebaricon@2x.png",
-                                                       up, this), QIcon::Normal, QIcon::Off);
-    showHideLeftPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/leftsidebaricon@2x.png",
-                                                       down, this), QIcon::Normal, QIcon::On);
-
-    m_showHideLeftPanesButton->setMaximumHeight(22);
-    m_showHideLeftPanesButton->setCursor(Qt::PointingHandCursor);
-    m_showHideLeftPanesButton->setCheckable(true);
-    m_showHideLeftPanesButton->setIconSize({16, 16});
-    m_showHideLeftPanesButton->setIcon(showHideLeftPanesIcon);
-
-    QIcon showHideRightPanesIcon;
-    showHideRightPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/rightsidebaricon@2x.png",
-                                                        up, this), QIcon::Normal, QIcon::Off);
-    showHideRightPanesIcon.addPixmap(renderMaskedPixmap(":/utils/images/rightsidebaricon@2x.png",
-                                                        down, this), QIcon::Normal, QIcon::On);
-
-    m_showHideRightPanesButton->setMaximumHeight(22);
-    m_showHideRightPanesButton->setCursor(Qt::PointingHandCursor);
-    m_showHideRightPanesButton->setCheckable(true);
-    m_showHideRightPanesButton->setIconSize({16, 16});
-    m_showHideRightPanesButton->setIcon(showHideRightPanesIcon);
-
-    connect(m_showHideLeftPanesButton, &PushButton::clicked,
-            this, &BottomBar::showHideLeftPanesButtonActivated);
-    connect(m_showHideRightPanesButton, &PushButton::clicked,
-            this, &BottomBar::showHideRightPanesButtonActivated);
-    connect(m_showHideLeftPanesButton, &PushButton::clicked,
-            this, &BottomBar::setLeftShowHideButtonToolTip);
-    connect(m_showHideRightPanesButton, &PushButton::clicked,
-            this, &BottomBar::setRightShowHideButtonToolTip);
 }
 
 QAbstractButton* BottomBar::activeButton() const
@@ -213,10 +174,6 @@ void BottomBar::discharge()
 {
     m_issuesButton->setChecked(false);
     m_consoleButton->setChecked(false);
-    m_showHideLeftPanesButton->setChecked(true);
-    m_showHideRightPanesButton->setChecked(true);
-    setLeftShowHideButtonToolTip(true);
-    setRightShowHideButtonToolTip(true);
 
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     if (settings->visibleBottomPane != "None") {
@@ -237,22 +194,6 @@ void BottomBar::flash(QAbstractButton* button)
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     if (settings->bottomPanesPop && !button->isChecked())
         button->animateClick();
-}
-
-void BottomBar::setLeftShowHideButtonToolTip(bool checked)
-{
-    if (checked)
-        m_showHideLeftPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Hide left panes")));
-    else
-        m_showHideLeftPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Show left panes")));
-}
-
-void BottomBar::setRightShowHideButtonToolTip(bool checked)
-{
-    if (checked)
-        m_showHideRightPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Hide right panes")));
-    else
-        m_showHideRightPanesButton->setToolTip(UtilityFunctions::toToolTip(tr("Show right panes")));
 }
 
 void BottomBar::onButtonClick(QAbstractButton* button)

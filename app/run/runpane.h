@@ -6,6 +6,7 @@
 class PushButton;
 class RunProgressBar;
 class RunDevicesButton;
+class SegmentedBar;
 
 class RunPane final : public QToolBar
 {
@@ -19,6 +20,7 @@ public:
     PushButton* stopButton() const;
     PushButton* projectsButton() const;
     PushButton* preferencesButton() const;
+    SegmentedBar* segmentedBar() const;
     RunProgressBar* runProgressBar() const;
     RunDevicesButton* runDevicesButton() const;
 
@@ -36,6 +38,7 @@ private:
     PushButton* m_stopButton;
     PushButton* m_projectsButton;
     PushButton* m_preferencesButton;
+    SegmentedBar* m_segmentedBar;
     RunProgressBar* m_runProgressBar;
     RunDevicesButton* m_runDevicesButton;
 };

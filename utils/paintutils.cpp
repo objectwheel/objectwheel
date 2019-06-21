@@ -239,7 +239,7 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
     painter->save();
 
     const bool down = (option.state & QStyle::State_Sunken) || (option.state & QStyle::State_On);
-    const bool bright = option.styleObject->property("ow_bottombar_bright").toBool();
+    const bool bright = option.styleObject ? option.styleObject->property("ow_bottombar_bright").toBool() : false;
 
     // Draw drop shadow
     QLinearGradient shadowGrad(0, 0, 1, 0);
