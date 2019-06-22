@@ -28,6 +28,8 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
         layout()->setSpacing(7);
     }, Qt::QueuedConnection);
 
+    m_runProgressBar->setAttribute(Qt::WA_TransparentForMouseEvents);
+
     m_runDevicesButton->setCursor(Qt::PointingHandCursor);
     m_runDevicesButton->setText(tr("Devices"));
     m_runDevicesButton->setIconSize({16, 16});
@@ -79,7 +81,6 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     addWidget(spacer);
 #endif
 
-    qDebug() << baseSize;
     addWidget(m_runButton);
     addWidget(m_stopButton);
     addWidget(m_runDevicesButton);
@@ -163,28 +164,6 @@ void RunPane::updateIcons()
         icon.addPixmap(renderOverlaidPixmap(fileName, up, m_segmentedBar), QIcon::Normal, QIcon::Off);
         icon.addPixmap(renderOverlaidPixmap(fileName, down, m_segmentedBar), QIcon::Normal, QIcon::On);
         action->setIcon(icon);
-    }
-}
-
-bool RunPane::event(QEvent* event)
-{
-    // Qt's QToolBar implementation implements a dragging feature on the tool bar
-    // when the main window has the unifiedTitleAndToolBarOnMac property enabled
-    // On the other hand, macOS already provides its own grabbing and dragging
-    // feature on the field where tool bar sits. So they interfere each other
-    // We block QToolBar getting mouse events and forward those events to QWidget
-    switch (event->type()) {
-    case QEvent::MouseButtonPress:
-        QWidget::mousePressEvent(static_cast<QMouseEvent*>(event));
-        return true;
-    case QEvent::MouseButtonRelease:
-        QWidget::mouseReleaseEvent(static_cast<QMouseEvent*>(event));
-        return true;
-    case QEvent::MouseMove:
-        QWidget::mouseMoveEvent(static_cast<QMouseEvent*>(event));
-        return true;
-    default:
-        return QToolBar::event(event);
     }
 }
 

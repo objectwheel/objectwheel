@@ -15,6 +15,7 @@ void removeTitleBar(QMainWindow* mainWindow)
     toolBar.showsBaselineSeparator = false;
     [window setToolbar: toolBar];
     [window setTitleVisibility: NSWindowTitleHidden];
+    window.movable = false;
     window.styleMask |= NSWindowStyleMaskFullSizeContentView;
 }
 
