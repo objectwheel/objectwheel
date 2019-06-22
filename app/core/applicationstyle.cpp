@@ -298,6 +298,8 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 4;
     case PM_MenuScrollerHeight:
         return 15;
+    case PM_MenuButtonIndicator:
+        return 12;
     case PM_DockWidgetSeparatorExtent:
         return 1;
     case PM_SmallIconSize:
@@ -341,6 +343,33 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->setPen(pc);
         painter->setFont(QFont());
         painter->drawText(option->rect.adjusted(-2, 1, -2, 1), "\u2713", QTextOption(Qt::AlignCenter));
+        painter->restore();
+    } break;
+    case PE_IndicatorArrowDown: {
+        if (option->rect.width() <= 1 || option->rect.height() <= 1)
+            break;
+        if (!(option->state & State_Enabled))
+            break;
+
+        painter->save();
+
+        enum { ARROW_LENGTH = 3 };
+        QRectF r(0, 0, ARROW_LENGTH, ARROW_LENGTH / 2.0);
+        r.moveCenter(QRectF(option->rect).center());
+
+        const QColor& textColor = (option->state & State_Sunken)
+                ? option->palette.buttonText().color().darker()
+                : option->palette.buttonText().color();
+        QPen arrowPen(textColor);
+        arrowPen.setWidthF(1.3);
+        arrowPen.setCapStyle(Qt::RoundCap);
+        arrowPen.setJoinStyle(Qt::MiterJoin);
+
+        QPointF points[] = {{0, 0}, {ARROW_LENGTH / 2.0, ARROW_LENGTH / 2.0}, {ARROW_LENGTH, 0}};
+        points[0] += r.topLeft(); points[1] += r.topLeft(); points[2] += r.topLeft();
+        painter->setPen(arrowPen);
+        painter->setBrush(textColor);
+        painter->drawPolygon(points, 3);
         painter->restore();
     } break;
     case PE_PanelButtonTool: {
@@ -572,6 +601,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_ToolButtonLabel:
         if (const QStyleOptionToolButton *toolbutton
                 = qstyleoption_cast<const QStyleOptionToolButton *>(option)) {
+            painter->save();
 
             QStyleOptionToolButton copy(*toolbutton);
             if (copy.state & State_On || copy.state & State_Sunken)
@@ -657,6 +687,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     }
                 }
             }
+
+            painter->restore();
         } break;
     default:
         QFusionStyle::drawControl(element, option, painter, widget);

@@ -29,6 +29,7 @@ public:
 
 private:
     qreal cellWidth() const;
+    QPoint adjustedMenuPosition(QAction* action);
     void initStyleOption(QAction* action, QStyleOptionButton* option) const;
 
 private:

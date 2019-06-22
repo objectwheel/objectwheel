@@ -105,6 +105,9 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     // Settings
     QStyleOptionButton option;
     initStyleOption(&option);
+    if (!UtilityFunctions::hasHover(this)) // FIXME: This is a workaround for QTBUG-44400
+        option.state &= ~QStyle::State_MouseOver;
+
     int left = LEFT_PADDING;
     int textWidth = fontMetrics().horizontalAdvance(text());
     bool isSunken = option.state & QStyle::State_Sunken || option.state & QStyle::State_On;
@@ -147,14 +150,4 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     painter.setPen(textColor);
     painter.drawText(left, 0, textWidth, height(), Qt::AlignVCenter | Qt::AlignLeft,
                      fontMetrics().elidedText(m_menu->title(), Qt::ElideRight, textWidth + 1));
-
-    // Draw menu down arrow
-    if (isSunken || UtilityFunctions::hasHover(this)) {
-        QPointF topLeft(width() - 2.5 * DOWN_ARROW_LENGTH, height() - 2 * DOWN_ARROW_LENGTH);
-        QPointF points[] = {{0, 0}, {DOWN_ARROW_LENGTH / 2.0, DOWN_ARROW_LENGTH / 2.0}, {DOWN_ARROW_LENGTH, 0}};
-        points[0] += topLeft; points[1] += topLeft; points[2] += topLeft;
-        painter.setPen(arrowPen);
-        painter.setBrush(textColor);
-        painter.drawPolygon(points, 3);
-    }
 }

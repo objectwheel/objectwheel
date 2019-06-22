@@ -258,8 +258,9 @@ void RunProgressBar::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    // Draw background
-    QStyleOptionFrame option;
+    // Draw background, Sunken, Raised, On, Off, MouseOver etc states
+    // aren't important, we just want to paint a raised button bevel
+    QStyleOptionButton option;
     option.initFrom(this);
     PaintUtils::drawPanelButtonBevel(&painter, option);
 

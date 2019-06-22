@@ -11,6 +11,7 @@ class QImage;
 class QPen;
 class QPainter;
 class QStyleOption;
+class QStyleOptionButton;
 class QPointF;
 class QIcon;
 class QPalette;
@@ -33,7 +34,7 @@ QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, const
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderMaskedPixmap(const QString& fileName, const QColor& color, const QWidget* widget = nullptr);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, const QWidget* widget = nullptr);
-void drawPanelButtonBevel(QPainter* painter, const QStyleOption& option);
+void drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option, bool downWhenChecked = true);
 void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);
 bool isBlankImage(const QImage& image);
 

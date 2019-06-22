@@ -234,12 +234,14 @@ QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& c
     return QPixmap::fromImage(dest);
 }
 
-void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& option)
+void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option, bool downWhenChecked)
 {
     painter->save();
 
-    const bool down = (option.state & QStyle::State_Sunken) || (option.state & QStyle::State_On);
-    const bool bright = option.styleObject ? option.styleObject->property("ow_bottombar_bright").toBool() : false;
+    const bool down = (option.state & QStyle::State_Sunken)
+            || (downWhenChecked && (option.state & QStyle::State_On));
+    const bool bright = option.styleObject
+            ? option.styleObject->property("ow_bottombar_bright").toBool() : false;
 
     // Draw drop shadow
     QLinearGradient shadowGrad(0, 0, 1, 0);
@@ -310,6 +312,15 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOption& opt
             painter->setBrush(QColor("#f3f3f3"));
         }
         painter->drawPath(bodyPath.subtracted(glowPathUp));
+    }
+
+    if ((option.features & QStyleOptionButton::HasMenu)
+            && ((option.state & QStyle::State_MouseOver) || (option.state & QStyle::State_Sunken))) {
+        int mbi = qApp->style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &option);
+        QRectF ir = option.rect;
+        QStyleOptionButton newBtn = option;
+        newBtn.rect = QRect(ir.right() - mbi, ir.bottom() - mbi, mbi, mbi);
+        qApp->style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &newBtn, painter);
     }
 
     painter->restore();

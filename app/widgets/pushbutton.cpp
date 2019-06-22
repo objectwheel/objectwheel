@@ -1,5 +1,6 @@
 #include <pushbutton.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
 #include <QStylePainter>
 #include <QStyleOption>
@@ -21,6 +22,8 @@ void PushButton::paintEvent(QPaintEvent*)
 
     QStyleOptionButton option;
     initStyleOption(&option);
+    if (!UtilityFunctions::hasHover(this)) // FIXME: This is a workaround for QTBUG-44400
+        option.state &= ~QStyle::State_MouseOver;
 
     // Draw background
     if (!isFlat())

@@ -8,13 +8,17 @@
 #include <QAction>
 #include <QActionEvent>
 #include <QMenu>
+#include <QGuiApplication>
+#include <QScreen>
 
 static const char isDownProperty[] = "__SegmentedBar_isDown";
+static const char originalCursorShapeProperty[] = "__SegmentedBar_originalCursorShape";
 
 SegmentedBar::SegmentedBar(QWidget* parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setIconSize(QSize());
+    setAttribute(Qt::WA_Hover);
 }
 
 void SegmentedBar::clear()
@@ -112,6 +116,25 @@ qreal SegmentedBar::cellWidth() const
     return width() / qreal(actions().size());
 }
 
+QPoint SegmentedBar::adjustedMenuPosition(QAction* action)
+{
+    QStyleOptionButton option;
+    initStyleOption(action, &option);
+    QRect rect = option.rect;
+    QSize menuSize = action->menu()->sizeHint();
+    QPoint globalPos = mapToGlobal(rect.topLeft());
+    int x = globalPos.x();
+    int y = globalPos.y();
+    const QRect availableGeometry = QGuiApplication::primaryScreen()->availableGeometry();
+    if (y + rect.height() + menuSize.height() <= availableGeometry.bottom())
+        y += rect.height();
+    else if (y - menuSize.height() >= availableGeometry.y())
+        y -= menuSize.height();
+    if (layoutDirection() == Qt::RightToLeft)
+        x += rect.width() - menuSize.width();
+    return QPoint(x,y);
+}
+
 void SegmentedBar::initStyleOption(QAction* action, QStyleOptionButton* option) const
 {
     const int i = actions().indexOf(action);
@@ -124,19 +147,18 @@ void SegmentedBar::initStyleOption(QAction* action, QStyleOptionButton* option) 
     option->state = QStyle::State_None;
     if (action->isEnabled())
         option->state |= QStyle::State_Enabled;
-    // TODO: Add me later
-    // if (widget->underMouse())
-    //    option->state |= QStyle::State_MouseOver;
+    if (option->rect.contains(mapFromGlobal(QCursor::pos())))
+        option->state |= QStyle::State_MouseOver;
     if (window()->isActiveWindow())
         option->state |= QStyle::State_Active;
     if (action->menu())
         option->features |= QStyleOptionButton::HasMenu;
     if (action->property(isDownProperty).toBool() || (action->menu() && action->menu()->isVisible()))
         option->state |= QStyle::State_Sunken;
+    else
+        option->state |= QStyle::State_Raised;
     if (action->isChecked())
         option->state |= QStyle::State_On;
-    if (!action->property(isDownProperty).toBool())
-        option->state |= QStyle::State_Raised;
     option->text = action->text();
     option->icon = action->icon();
     option->iconSize = iconSize();
@@ -150,9 +172,11 @@ void SegmentedBar::mousePressEvent(QMouseEvent* event)
         return;
 
     if (QAction* action = actionAt(event->pos())) {
-        action->setProperty(isDownProperty, true);
-        repaint();
-        event->accept();
+        if (action->isEnabled()) {
+            action->setProperty(isDownProperty, true);
+            repaint();
+            event->accept();
+        }
     }
 }
 
@@ -162,7 +186,9 @@ void SegmentedBar::mouseReleaseEvent(QMouseEvent* event)
 
     if (QAction* action = actionAt(event->pos())) {
         if (action->property(isDownProperty).toBool()) {
-            if (action->isCheckable())
+            if (action->menu())
+                action->menu()->exec(adjustedMenuPosition(action));
+            if (!action->menu() && action->isCheckable())
                 action->setChecked(!action->isChecked());
             emit actionTriggered(action);
             emit action->triggered(action->isChecked());
@@ -198,19 +224,35 @@ void SegmentedBar::paintEvent(QPaintEvent*)
     for (QAction* action : actions()) {
         QStyleOptionButton option;
         initStyleOption(action, &option);
+
+        // Draw background
         const QRectF r(option.rect);
         painter.setClipRect(r);
+        painter.setFont(action->font());
         option.rect = rect();
-        PaintUtils::drawPanelButtonBevel(&painter, option);
+        PaintUtils::drawPanelButtonBevel(&painter, option, false);
         option.rect = r.toRect();
-        painter.drawControl(QStyle::CE_PushButtonLabel, option);
-        const bool down = (option.state & QStyle::State_Sunken) /*|| (option.state & QStyle::State_On)*/;
-        if (down)
-            painter.setPen("#22000000");
-        else
-            painter.setPen("#18000000");
 
+        // Draw menu indicator, which is cropped by "clip rect"
+        if (action != actions().last()
+                && (option.features & QStyleOptionButton::HasMenu)
+                && ((option.state & QStyle::State_MouseOver) || (option.state & QStyle::State_Sunken))) {
+            int mbi = style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &option);
+            QRectF ir = option.rect;
+            QStyleOptionButton newBtn = option;
+            newBtn.rect = QRect(ir.right() - mbi, ir.bottom() - mbi, mbi, mbi);
+            style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &newBtn, &painter);
+        }
+
+        // Draw label (icon, texts etc..)
+        painter.drawControl(QStyle::CE_PushButtonLabel, option);
+
+        // Draw separators
         if (action != actions().last()) {
+            if (option.state & QStyle::State_Sunken)
+                painter.setPen("#22000000");
+            else
+                painter.setPen("#18000000");
             painter.drawLine(r.topRight() + QPointF(-0.5, 1.5),
                              r.bottomRight() - QPointF(0.5, 1.5));
         }
@@ -219,11 +261,29 @@ void SegmentedBar::paintEvent(QPaintEvent*)
 
 bool SegmentedBar::event(QEvent* event)
 {
+    if (event->type() == QEvent::HoverMove) {
+        auto e = static_cast<QHoverEvent*>(event);
+        if (QAction* action = actionAt(e->pos())) {
+            if (!action->isEnabled() && cursor().shape() != Qt::ArrowCursor) {
+                setProperty(originalCursorShapeProperty, int(cursor().shape()));
+                setCursor(Qt::ArrowCursor);
+            } else if (action->isEnabled()) {
+                bool ok = false;
+                Qt::CursorShape recentCursorShape
+                        = Qt::CursorShape(property(originalCursorShapeProperty).toInt(&ok));
+                if (ok && recentCursorShape != cursor().shape())
+                    setCursor(recentCursorShape);
+            }
+        }
+        update();
+    }
+
     if (event->type() == QEvent::ToolTip) {
         auto e = static_cast<QHelpEvent*>(event);
-        auto action = actionAt(e->pos());
+        QAction* action = actionAt(e->pos());
         if (action)
             setToolTip(action->toolTip());
     }
+
     return QWidget::event(event);
 }
