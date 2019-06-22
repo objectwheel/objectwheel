@@ -480,7 +480,6 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     connect(m_resetButton, &QPushButton::clicked, this, &ThemeChooserWidget::discharge);
     connect(m_saveButton, &QPushButton::clicked, this, &ThemeChooserWidget::save);
     connect(m_seeRunningButton, &QPushButton::clicked, this, &ThemeChooserWidget::run);
-    resize(1299, 1299);
 }
 
 void ThemeChooserWidget::discharge()

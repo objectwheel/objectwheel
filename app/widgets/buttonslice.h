@@ -32,11 +32,13 @@ public:
     QPushButton* get(int id);
     Settings& settings();
 
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+
 public slots:
     void triggerSettings();
 
 protected:
-    QSize sizeHint() const override;
     void paintEvent(QPaintEvent* event) override;
 
 private:

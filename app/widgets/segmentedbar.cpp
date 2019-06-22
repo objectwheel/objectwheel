@@ -16,9 +16,16 @@ static const char originalCursorShapeProperty[] = "__SegmentedBar_originalCursor
 
 SegmentedBar::SegmentedBar(QWidget* parent) : QWidget(parent)
 {
-    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setIconSize(QSize());
+    // Used to enable hover events on the widget, which
+    // makes calls to update() function (defined in QWidget)
+    // Thus we can paint menu indicator whenever a mouse hovers
+    // Normally, for instance, for QAbstractButton, this
+    // attribute is enabled in ie QFusionStyle::polish, so
+    // it is hardcoded and in order to have the same effect
+    // on our custom button we gotta enable it here.
     setAttribute(Qt::WA_Hover);
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 }
 
 void SegmentedBar::clear()
@@ -108,7 +115,7 @@ QSize SegmentedBar::sizeHint() const
 
 QSize SegmentedBar::minimumSizeHint() const
 {
-    return QSize(qMax(24, actions().size() * 24), 24);
+    return QSize(qMax(actions().size() * 24, 24), 24);
 }
 
 qreal SegmentedBar::cellWidth() const

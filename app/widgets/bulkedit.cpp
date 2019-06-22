@@ -5,14 +5,10 @@
 #include <QVBoxLayout>
 
 #define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
-#define SIZE (QSize(300, 0))
 
 BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
 {
-    _layout = new QVBoxLayout(this);
-
-    resize(SIZE);
-
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     /* Set color settings */
     _settings.borderColor = "#18000000";
     _settings.backgroundColor = "#12000000";
@@ -24,6 +20,7 @@ BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
     _settings.leftMargin = 10;
     _settings.rightMargin = 10;
 
+    _layout = new QVBoxLayout(this);
     _layout->setSpacing(0);
     _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
 }
@@ -45,7 +42,8 @@ void BulkEdit::add(int id, const QString& label, QWidget* widget)
     _elements << element;
 
     _layout->addWidget(element.edit);
-    setFixedHeight(_settings.cellHeight * _elements.size());
+    updateGeometry();
+    update();
 }
 
 BulkEdit::Settings& BulkEdit::settings()
@@ -55,14 +53,20 @@ BulkEdit::Settings& BulkEdit::settings()
 
 void BulkEdit::triggerSettings()
 {
-    setFixedHeight(_settings.cellHeight * _elements.size());
     _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
+    adjustSize(); // In case we are not in a layout
+    updateGeometry();
     update();
 }
 
 QSize BulkEdit::sizeHint() const
 {
-    return SIZE;
+    return QSize(300, qMax(qreal(minimumSizeHint().height()), _elements.size() * _settings.cellHeight));
+}
+
+QSize BulkEdit::minimumSizeHint() const
+{
+    return QSize(300, qMax(_elements.size() * _settings.cellHeight, _settings.cellHeight));
 }
 
 void BulkEdit::paintEvent(QPaintEvent*)

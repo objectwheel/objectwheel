@@ -242,11 +242,17 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_searchEditCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     m_searchEditCompleter->setModel(m_searchEditCompleterModel);
     m_searchEditCompleter->popup()->setIconSize({15, 15});
-    m_searchEdit->setCompleter(m_searchEditCompleter);    
+
+    m_searchEdit->setCompleter(m_searchEditCompleter);
     m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit)),
                            QLineEdit::LeadingPosition);
     m_searchEdit->setPlaceholderText(tr("Search"));
     m_searchEdit->setClearButtonEnabled(true);
+    // Since FileExplorer (parent of the m_searchEdit) has
+    // its own layout and we don't add m_searchEdit into it
+    // QWidget::setVisible does not adjust the size. So we
+    // must call it manually.
+    m_searchEdit->adjustSize();
 
     connect(m_fileSystemModel, &QFileSystemModel::fileRenamed, this, [=]
     {

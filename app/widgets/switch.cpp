@@ -2,7 +2,6 @@
 #include <QPainter>
 #include <QVariantAnimation>
 
-#define SIZE (QSize(48, 30))
 #define ADJUST(x) ((x).adjusted(\
     2.5 + 0.5, 2.5 + 0.5,\
     - 2.5 - 0.5, - 2.5 - 0.5\
@@ -14,6 +13,18 @@ namespace {
 
 Switch::Switch(QWidget* parent) : QAbstractButton(parent)
 {
+    setCheckable(true);
+    setCursor(Qt::PointingHandCursor);
+    setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // We need to adjust the size of the widget to fit its
+    // sizeHint() before even it is shown. Because otherwise,
+    // since painting is done based on the shape of the switch
+    // we are unable to handle toggling of the switch state
+    // if it happens before the switch is visible. It makes
+    // calculations based on wrong size (the initial size of
+    // widgets which is hardcoded in qwidget.cpp (100x30))
+    adjustSize();
+
     _settings.activeBackgroundColor = "#8BBB56";
     _settings.activeBorderColor = _settings.activeBackgroundColor.darker(120);
     _settings.inactiveBackgroundColor = "#cccccc";
@@ -22,10 +33,6 @@ Switch::Switch(QWidget* parent) : QAbstractButton(parent)
     _settings.handleBorderColor = _settings.handleColor.darker(125);
     _settings.animationType = QEasingCurve::OutBack;
     _settings.animationDuration = 300;
-
-    resize(SIZE);
-    setCheckable(true);
-    setCursor(Qt::PointingHandCursor);
 
     _animation = new QVariantAnimation(this);
     _animation->setEasingCurve(_settings.animationType );
@@ -138,7 +145,7 @@ void Switch::paintEvent(QPaintEvent*)
 
 QSize Switch::sizeHint() const
 {
-    return SIZE;
+    return {48, 30};
 }
 
 namespace {

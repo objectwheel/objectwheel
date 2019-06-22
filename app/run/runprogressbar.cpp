@@ -18,7 +18,14 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setProgressColor(QColor());
-    resize(sizeHint());
+    // Since maximumTextWidth() uses width() and maximumTextWidth()
+    // is used by updateLine and updateToolTip functions. And they
+    // are used by setText(); If user wants to setText on the
+    // RunProgressBar before the widget is shown, we must have a
+    // valid, proper base size in order to make proper maximumTextWidth
+    // calculations. Because QWidget::setVisible, thus adjustSize()
+    // function is only called when the widget is shown.
+    adjustSize();
 
     m_document->setIndentWidth(0);
     m_document->setDocumentMargin(0);
@@ -215,7 +222,7 @@ int RunProgressBar::maximumTextWidth() const
 
 QSize RunProgressBar::sizeHint() const
 {
-    return QSize(480, 24);
+    return {480, 24};
 }
 
 QSize RunProgressBar::minimumSizeHint() const

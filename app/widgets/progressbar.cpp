@@ -4,7 +4,6 @@
 ProgressBar::ProgressBar(QWidget *parent) : QProgressBar(parent)
   , m_indeterminate(false)
 {
-    resize(sizeHint());
     setTextVisible(false);
     setIndeterminate(false);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
@@ -21,7 +20,7 @@ ProgressBar::ProgressBar(QWidget *parent) : QProgressBar(parent)
     m_settings.chunkColor = "#419BF9";
     m_settings.borderColor = "#40000000";
     m_settings.indeterminateColor = "#45ffffff";
-    m_settings.borderRadius = height() / 2.0;
+    m_settings.borderRadius = minimumSizeHint().height() / 2.0;
 }
 
 bool ProgressBar::isIndeterminate() const

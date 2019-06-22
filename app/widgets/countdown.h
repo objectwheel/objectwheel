@@ -38,7 +38,7 @@ public slots:
 
 protected:
     QSize sizeHint() const override;
-    void paintEvent(QPaintEvent *event) override;
+    void paintEvent(QPaintEvent* event) override;
 
 signals:
     void stopped();

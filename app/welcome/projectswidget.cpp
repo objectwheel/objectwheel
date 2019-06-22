@@ -272,6 +272,11 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
     m_layout->addStretch();
 
+    // Since viewport (parent of the m_progressBar) has its
+    // own layout and we don't add m_progressBar into it
+    // QWidget::setVisible does not adjust the size. So we
+    // must call it manually.
+    m_progressBar->adjustSize();
     m_progressBar->hide();
 
     QPixmap p(PATH_LOGO);
@@ -354,7 +359,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     m_progressBar->setFixedWidth(WIDTH_PROGRESS);
 
-    m_buttons_2->setFixedHeight(20);
+    m_buttons_2->setFixedSize(20, 20);
     m_buttons_2->add(Settings, "#55A6F6", "#448DDE");
     m_buttons_2->get(Settings)->setIconSize(QSize(12, 12));
     m_buttons_2->get(Settings)->setIcon(QIcon(PATH_SICON));

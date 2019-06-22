@@ -44,7 +44,6 @@ QLineEditPrivate::SideWidgetParameters QLineEditPrivate::sideWidgetParameters() 
 
 LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent)
 {
-    resize(sizeHint());
     setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);

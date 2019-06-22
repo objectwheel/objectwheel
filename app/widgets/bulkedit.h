@@ -50,6 +50,7 @@ public slots:
 
 protected:
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
     void paintEvent(QPaintEvent* event) override;
 
 private:

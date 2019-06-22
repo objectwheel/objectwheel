@@ -1003,6 +1003,12 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
                             QLineEdit::LeadingPosition);
     m_searchEdit->setPlaceholderText(tr("Search"));
     m_searchEdit->setClearButtonEnabled(true);
+    // Since PropertiesPane (parent of the m_searchEdit) has
+    // its own layout and we don't add m_searchEdit into it
+    // QWidget::setVisible does not adjust the size. So we
+    // must call it manually.
+    m_searchEdit->adjustSize();
+
     connect(m_searchEdit, &LineEdit::textChanged, this, &PropertiesPane::filterList);
 
     connect(verticalScrollBar(), &QScrollBar::valueChanged, [=] (int value)

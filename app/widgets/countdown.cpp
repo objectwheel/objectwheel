@@ -3,12 +3,13 @@
 #include <QPainter>
 
 #define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
-#define SIZE (QSize(270, 86))
 
 Countdown::Countdown(QWidget *parent) : QWidget(parent)
   , _second(0)
   , _timer(new QTimer(this))
 {
+    setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
+
     _settings.borderColor = "#22000000";
     _settings.backgroundColor = "#12000000";
     _settings.leftDigitColor = "#7EBE5D";
@@ -22,7 +23,6 @@ Countdown::Countdown(QWidget *parent) : QWidget(parent)
     _settings.digitRadius = 4;
     _settings.margins = 8;
 
-    resize(SIZE);
     connect(_timer, &QTimer::timeout, this, &Countdown::decrease);
 }
 
@@ -221,6 +221,6 @@ void Countdown::paintEvent(QPaintEvent*)
 
 QSize Countdown::sizeHint() const
 {
-    return SIZE;
+    return {270, 86};
 }
 
