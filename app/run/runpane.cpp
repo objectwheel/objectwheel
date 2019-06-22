@@ -9,7 +9,7 @@
 
 #include <QPainter>
 #include <QLayout>
-
+#include <QMenu>
 RunPane::RunPane(QWidget* parent) : QToolBar(parent)
   , m_runButton(new PushButton(this))
   , m_stopButton(new PushButton(this))
@@ -55,20 +55,32 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     m_projectsButton->setIconSize({16, 16});
 
     m_segmentedBar->setCursor(Qt::PointingHandCursor);
-    m_segmentedBar->setToolTip(tr("Control Visibility of the Panes"));
     m_segmentedBar->setIconSize({18, 18});
 
-    QAction* leftAction = m_segmentedBar->addAction();
+    QAction* leftAction = m_segmentedBar->addAction("Akıllı");
     leftAction->setCheckable(true);
     leftAction->setToolTip(tr("Hide or show left panes"));
 
-    QAction* rightAction = m_segmentedBar->addAction();
+    QAction* rightAction = m_segmentedBar->addAction("Ol lan");
     rightAction->setCheckable(true);
     rightAction->setToolTip(tr("Hide or show bottom panes"));
+//    rightAction->setMenu(new QMenu(this));
+//    rightAction->menu()->addAction("A");
+//    rightAction->menu()->addAction("B")/*->setChecked(true)*/;
+//    rightAction->menu()->addAction("C");
 
-    QAction* bottomAction = m_segmentedBar->addAction();
+    QAction* bottomAction = m_segmentedBar->addAction("Yavşak");
     bottomAction->setCheckable(true);
     bottomAction->setToolTip(tr("Hide or show right panes"));
+    bottomAction->setChecked(true);
+//    bottomAction->setDisabled(true);
+//    bottomAction->setVisible(false);
+
+    auto g = new QActionGroup(this);
+    g->addAction(leftAction);
+    g->addAction(bottomAction);
+    g->addAction(rightAction);
+    g->setExclusive(true);
 
     m_segmentedBar->setFixedSize(m_segmentedBar->sizeHint());
     connect(m_segmentedBar, &SegmentedBar::actionTriggered, this, &RunPane::updateIcons);

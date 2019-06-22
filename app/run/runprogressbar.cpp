@@ -227,6 +227,7 @@ QSize RunProgressBar::sizeHint() const
 
 QSize RunProgressBar::minimumSizeHint() const
 {
+    ensurePolished();
     int computedWidth = paddingWidth();
     if (m_line.isValid())
         computedWidth += qCeil(m_line.naturalTextWidth());

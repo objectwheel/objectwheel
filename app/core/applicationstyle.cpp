@@ -572,7 +572,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 int w = pixmap.width() / pixmap.devicePixelRatio();
                 int h = pixmap.height() / pixmap.devicePixelRatio();
                 if (!button->text.isEmpty())
-                    w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 2;
+                    w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 3;
                 point = QPoint(ir.x() + ir.width() / 2 - w / 2,
                                ir.y() + ir.height() / 2 - h / 2);
                 w = pixmap.width() / pixmap.devicePixelRatio();
@@ -580,9 +580,9 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     point.rx() += w;
                 painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap);
                 if (button->direction == Qt::RightToLeft)
-                    ir.translate(-point.x() - 2, 0);
+                    ir.translate(ir.x() - point.x() - 2, 0);
                 else
-                    ir.translate(point.x() + w, 0);
+                    ir.translate(point.x() - ir.x() + w + 3, 0);
                 // left-align text if there is
                 if (!button->text.isEmpty())
                     tf |= Qt::AlignLeft;
@@ -593,7 +593,11 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 ir = ir.adjusted(0, 0, -proxy()->pixelMetric(PM_MenuButtonIndicator, button, widget), 0);
             // Draw item text
             QStyleOptionButton copy(*button);
-            if ((copy.state & State_On || copy.state & State_Sunken) && copy.palette.buttonText().color() != Qt::white)
+            if (option->styleObject && option->styleObject->parent() &&
+                    option->styleObject->parent()->inherits("SegmentedBar")) {
+                if (copy.state & State_Sunken && copy.palette.buttonText().color() != Qt::white)
+                    copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
+            } else if ((copy.state & State_On || copy.state & State_Sunken) && copy.palette.buttonText().color() != Qt::white)
                 copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
             proxy()->drawItemText(painter, ir, tf, copy.palette, (copy.state & State_Enabled),
                                   copy.text, QPalette::ButtonText);
@@ -610,10 +614,10 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             QRect rect = copy.rect;
             int shiftX = copy.text.isEmpty() ? 0 : 5;
             int shiftY = 0;
-//            if (copy.state & (State_Sunken | State_On)) {
-//                shiftX = proxy()->pixelMetric(PM_ButtonShiftHorizontal, &copy, widget);
-//                shiftY = proxy()->pixelMetric(PM_ButtonShiftVertical, &copy, widget);
-//            }
+            //            if (copy.state & (State_Sunken | State_On)) {
+            //                shiftX = proxy()->pixelMetric(PM_ButtonShiftHorizontal, &copy, widget);
+            //                shiftY = proxy()->pixelMetric(PM_ButtonShiftVertical, &copy, widget);
+            //            }
             // Arrow type always overrules and is always shown
             bool hasArrow = copy.features & QStyleOptionToolButton::Arrow;
             if (((!hasArrow && copy.icon.isNull()) && !copy.text.isEmpty())

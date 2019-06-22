@@ -9,6 +9,9 @@ class SegmentedBar final : public QWidget
     Q_OBJECT
     Q_DISABLE_COPY(SegmentedBar)
 
+    using QWidget::toolTip;
+    using QWidget::setToolTip;
+
 public:
     explicit SegmentedBar(QWidget* parent = nullptr);
 
@@ -29,6 +32,8 @@ public:
 
 private:
     qreal cellWidth() const;
+    int visibleActionCount() const;
+    QList<QAction*> visibleActions() const;
     QPoint adjustedMenuPosition(QAction* action);
     void initStyleOption(QAction* action, QStyleOptionButton* option) const;
 
