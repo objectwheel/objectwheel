@@ -260,10 +260,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(m_centralWidget->designerWidget(), &DesignerWidget::hideDockWidgetTitleBars,
             this, &MainWindow::setDockWidgetTitleBarsHidden);
-    connect(m_centralWidget->bottomBar(), &BottomBar::showHideLeftPanesButtonActivated,
-            this, &MainWindow::showLeftPanes);
-    connect(m_centralWidget->bottomBar(), &BottomBar::showHideRightPanesButtonActivated,
-            this, &MainWindow::showRightPanes);
+// FIXME   connect(m_centralWidget->bottomBar(), &BottomBar::showHideLeftPanesButtonActivated,
+//            this, &MainWindow::showLeftPanes);
+//    connect(m_centralWidget->bottomBar(), &BottomBar::showHideRightPanesButtonActivated,
+//            this, &MainWindow::showRightPanes);
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &MainWindow::onModeChange);
     connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
@@ -570,5 +570,5 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 QSize MainWindow::sizeHint() const
 {
-    return {1260, 700};
+    return {1200, 700};
 }
