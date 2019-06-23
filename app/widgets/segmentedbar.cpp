@@ -162,12 +162,12 @@ QSize SegmentedBar::sizeHint() const
     }
     if (textWidth > 0)
         preferredCellWidth += textWidth + 3;
-    return QSize(qMax(visibleActionCount() * preferredCellWidth, minimumSizeHint().width()), 24);
+    return QSize(qMax(visibleActionCount() * preferredCellWidth, 24), 24);
 }
 
 QSize SegmentedBar::minimumSizeHint() const
 {
-    return QSize(qMax(visibleActionCount() * 24, 24), 24);
+    return sizeHint();
 }
 
 qreal SegmentedBar::cellWidth() const
