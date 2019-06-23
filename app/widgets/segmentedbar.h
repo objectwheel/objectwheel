@@ -27,6 +27,7 @@ public:
     QAction* actionAt(int x, int y) const;
     QAction* actionAt(const QPoint& p) const;
 
+    using QWidget::addAction;
     QAction* addAction(const QIcon& icon);
     QAction* addAction(const QString& text = QString());
     QAction* addAction(const QString& text, const QIcon& icon);
@@ -38,7 +39,7 @@ private:
     qreal cellWidth() const;
     int visibleActionCount() const;
     QList<QAction*> visibleActions() const;
-    QPoint adjustedMenuPosition(QAction* action);
+    QPoint adjustedMenuPosition(QAction* action) const;
     void initStyleOption(QAction* action, QStyleOptionButton* option) const;
 
 private:

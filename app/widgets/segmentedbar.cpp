@@ -1,20 +1,20 @@
 #include <segmentedbar.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
+#include <private/qwidget_p.h>
 
-#include <QLayout>
 #include <QStyleOption>
 #include <QStylePainter>
-#include <QToolButton>
 #include <QAction>
 #include <QActionEvent>
 #include <QMenu>
-#include <QGuiApplication>
+#include <QDesktopWidget>
+#include <QApplication>
 #include <QScreen>
-#include <QToolTip>
 
-static const char isDownProperty[] = "__SegmentedBar_isDown";
-static const char animatedActionProperty[] = "__SegmentedBar_animatedActionProperty";
-static const char originalCursorShapeProperty[] = "__SegmentedBar_originalCursorShape";
+static const char downProperty[] = "_q_SegmentedBar_down";
+static const char animatedActionProperty[] = "_q_SegmentedBar_animatedActionProperty";
+static const char originalCursorShapeProperty[] = "_q_SegmentedBar_originalCursorShape";
 
 SegmentedBar::SegmentedBar(QWidget* parent) : QWidget(parent)
 {
@@ -32,9 +32,9 @@ SegmentedBar::SegmentedBar(QWidget* parent) : QWidget(parent)
 
 void SegmentedBar::clear()
 {
-    const QList<QAction*>& actions = this->actions();
-    for(int i = 0; i < actions.size(); ++i)
-        removeAction(actions.at(i));
+    QList<QAction*> actions = this->actions();
+    for(QAction* action : actions)
+        removeAction(action);
 }
 
 void SegmentedBar::click(QAction* action)
@@ -57,7 +57,7 @@ void SegmentedBar::click(QAction* action)
             action->menu()->exec(adjustedMenuPosition(action));
         if (changeState && action->isCheckable())
             action->setChecked(!action->isChecked());
-        action->setProperty(isDownProperty, false);
+        action->setProperty(downProperty, false);
         emit actionTriggered(action);
         emit action->triggered(action->isChecked());
         update();
@@ -70,7 +70,7 @@ void SegmentedBar::animateClick(QAction* action, int msec)
         return;
     if (!action->isEnabled())
         return;
-    action->setProperty(isDownProperty, true);
+    action->setProperty(downProperty, true);
     setProperty(animatedActionProperty, qintptr(action));
     repaint();
     m_animateTimer.start(msec, this);
@@ -125,37 +125,31 @@ QAction* SegmentedBar::actionAt(const QPoint& p) const
 
 QAction* SegmentedBar::addAction(const QIcon& icon)
 {
-    auto action = new QAction(this);
-    action->setIcon(icon);
-    QWidget::addAction(action);
-    return action;
+    return addAction(QString(), icon);
 }
 
 QAction* SegmentedBar::addAction(const QString& text)
 {
-    auto action = new QAction(this);
-    action->setText(text);
-    QWidget::addAction(action);
+    auto action = new QAction(text, this);
+    addAction(action);
     return action;
 }
 
 QAction* SegmentedBar::addAction(const QString& text, const QIcon& icon)
 {
-    auto action = new QAction(this);
-    action->setText(text);
-    action->setIcon(icon);
-    QWidget::addAction(action);
+    auto action = new QAction(icon, text, this);
+    addAction(action);
     return action;
 }
 
 QSize SegmentedBar::sizeHint() const
 {
-    ensurePolished();
-    int preferredCellWidth = iconSize().width() + 21;
+    ensurePolished(); // Since we make calcs based on text width
+    int preferredCellWidth = iconSize().width() + 20;
     int textWidth = 0;
-    for (QAction* action : visibleActions()) {
+    for (const QAction* action : visibleActions()) {
         if (!action->text().isEmpty()) {
-            int w = fontMetrics().horizontalAdvance(action->text());
+            int w = QFontMetrics(action->font()).horizontalAdvance(action->text());
             if (w > textWidth)
                 textWidth = w;
         }
@@ -178,7 +172,7 @@ qreal SegmentedBar::cellWidth() const
 int SegmentedBar::visibleActionCount() const
 {
     int i = 0;
-    for (QAction* action : actions()) {
+    for (const QAction* action : actions()) {
         if (action->isVisible())
             i++;
     }
@@ -195,7 +189,7 @@ QList<QAction*> SegmentedBar::visibleActions() const
     return visibleActions;
 }
 
-QPoint SegmentedBar::adjustedMenuPosition(QAction* action)
+QPoint SegmentedBar::adjustedMenuPosition(QAction* action) const
 {
     QStyleOptionButton option;
     initStyleOption(action, &option);
@@ -204,7 +198,9 @@ QPoint SegmentedBar::adjustedMenuPosition(QAction* action)
     QPoint globalPos = mapToGlobal(rect.topLeft());
     int x = globalPos.x();
     int y = globalPos.y();
-    const QRect availableGeometry = QGuiApplication::primaryScreen()->availableGeometry();
+    QRect availableGeometry = QWidgetPrivate::screenGeometry(this);
+    if (availableGeometry.isNull())
+        availableGeometry = QApplication::desktop()->availableGeometry(this);
     if (y + rect.height() + menuSize.height() <= availableGeometry.bottom())
         y += rect.height();
     else if (y - menuSize.height() >= availableGeometry.y())
@@ -216,11 +212,10 @@ QPoint SegmentedBar::adjustedMenuPosition(QAction* action)
 
 void SegmentedBar::initStyleOption(QAction* action, QStyleOptionButton* option) const
 {
-    const int i = visibleActions().indexOf(action);
-    option->rect = QRect(i * cellWidth(), 0, cellWidth(), height());
+    option->rect = QRect(visibleActions().indexOf(action) * cellWidth(), 0, cellWidth(), height());
     option->direction = layoutDirection();
     option->palette = palette();
-    option->fontMetrics = fontMetrics();
+    option->fontMetrics = QFontMetrics(action->font());
     option->iconSize = iconSize();
     option->icon = action->icon();
     option->text = action->text();
@@ -235,7 +230,7 @@ void SegmentedBar::initStyleOption(QAction* action, QStyleOptionButton* option) 
         option->state |= QStyle::State_Active;
     if (action->menu())
         option->features |= QStyleOptionButton::HasMenu;
-    if (action->property(isDownProperty).toBool() || (action->menu() && action->menu()->isVisible()))
+    if (action->property(downProperty).toBool() || (action->menu() && action->menu()->isVisible()))
         option->state |= QStyle::State_Sunken;
     else
         option->state |= QStyle::State_Raised;
@@ -252,7 +247,7 @@ void SegmentedBar::mousePressEvent(QMouseEvent* event)
 
     if (QAction* action = actionAt(event->pos())) {
         if (action->isEnabled()) {
-            action->setProperty(isDownProperty, true);
+            action->setProperty(downProperty, true);
             repaint();
             event->accept();
         }
@@ -264,12 +259,12 @@ void SegmentedBar::mouseReleaseEvent(QMouseEvent* event)
     event->accept();
 
     if (QAction* action = actionAt(event->pos())) {
-        if (action->property(isDownProperty).toBool())
+        if (action->property(downProperty).toBool())
             click(action);
     }
 
     for (QAction* action : visibleActions())
-        action->setProperty(isDownProperty, false);
+        action->setProperty(downProperty, false);
 
     repaint();
 }
@@ -324,7 +319,7 @@ void SegmentedBar::paintEvent(QPaintEvent*)
             QRectF ir = option.rect;
             QStyleOptionButton newBtn = option;
             newBtn.rect = QRect(ir.right() - mbi, ir.bottom() - mbi, mbi, mbi);
-            style()->drawPrimitive(QStyle::PE_IndicatorArrowDown, &newBtn, &painter);
+            painter.drawPrimitive(QStyle::PE_IndicatorArrowDown, newBtn);
         }
 
         // Draw label (icon, texts etc..)
