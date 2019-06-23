@@ -1,6 +1,5 @@
 #include <segmentedbar.h>
 #include <paintutils.h>
-#include <utilityfunctions.h>
 #include <private/qwidget_p.h>
 
 #include <QStyleOption>
@@ -302,19 +301,18 @@ void SegmentedBar::paintEvent(QPaintEvent*)
     for (QAction* action : visibleActions()) {
         QStyleOptionButton option;
         initStyleOption(action, &option);
+        painter.setFont(action->font());
+        painter.setClipRect(option.rect);
 
         // Draw background
-        const QRectF r(option.rect);
-        painter.setClipRect(r);
-        painter.setFont(action->font());
-        option.rect = rect();
-        PaintUtils::drawPanelButtonBevel(&painter, option, false);
-        option.rect = r.toRect();
+        QStyleOptionButton copy(option);
+        copy.rect = rect();
+        PaintUtils::drawPanelButtonBevel(&painter, copy, false);
 
         // Draw menu indicator, which is cropped by "clip rect"
         if (action != visibleActions().last()
-                && (option.features & QStyleOptionButton::HasMenu)
-                && ((option.state & QStyle::State_MouseOver) || (option.state & QStyle::State_Sunken))) {
+                && option.features & QStyleOptionButton::HasMenu
+                && (option.state & QStyle::State_MouseOver || option.state & QStyle::State_Sunken)) {
             int mbi = style()->pixelMetric(QStyle::PM_MenuButtonIndicator, &option);
             QRectF ir = option.rect;
             QStyleOptionButton newBtn = option;
@@ -331,36 +329,42 @@ void SegmentedBar::paintEvent(QPaintEvent*)
                 painter.setPen("#22000000");
             else
                 painter.setPen("#18000000");
-            painter.drawLine(r.topRight() + QPointF(-0.5, 1.5),
-                             r.bottomRight() - QPointF(0.5, 1.5));
+            painter.drawLine(QRectF(option.rect).topRight() + QPointF(-0.5, 1.5),
+                             QRectF(option.rect).bottomRight() - QPointF(0.5, 1.5));
         }
     }
 }
 
 bool SegmentedBar::event(QEvent* event)
 {
-    if (event->type() == QEvent::HoverMove && isEnabled()) {
-        auto e = static_cast<QHoverEvent*>(event);
-        if (QAction* action = actionAt(e->pos())) {
-            if (!action->isEnabled() && cursor().shape() != Qt::ArrowCursor) {
-                setProperty(originalCursorShapeProperty, int(cursor().shape()));
-                setCursor(Qt::ArrowCursor);
-            } else if (action->isEnabled()) {
-                bool ok = false;
-                Qt::CursorShape recentCursorShape
-                        = Qt::CursorShape(property(originalCursorShapeProperty).toInt(&ok));
-                if (ok && recentCursorShape != cursor().shape())
-                    setCursor(recentCursorShape);
+    switch (event->type()) {
+    case QEvent::HoverMove: {
+        if (isEnabled()) {
+            const auto e = static_cast<QHoverEvent*>(event);
+            if (const QAction* action = actionAt(e->pos())) {
+                if (!action->isEnabled() && cursor().shape() != Qt::ArrowCursor) {
+                    setProperty(originalCursorShapeProperty, int(cursor().shape()));
+                    setCursor(Qt::ArrowCursor);
+                } else if (action->isEnabled()) {
+                    bool ok = false;
+                    Qt::CursorShape recentCursorShape
+                            = Qt::CursorShape(property(originalCursorShapeProperty).toInt(&ok));
+                    if (ok && recentCursorShape != cursor().shape())
+                        setCursor(recentCursorShape);
+                }
             }
+            update();
         }
-        update();
-    }
+    } break;
 
-    if (event->type() == QEvent::ToolTip) {
-        auto e = static_cast<QHelpEvent*>(event);
-        QAction* action = actionAt(e->pos());
-        if (action)
+    case QEvent::ToolTip: {
+        const auto e = static_cast<QHelpEvent*>(event);
+        if (const QAction* action = actionAt(e->pos()))
             setToolTip(action->toolTip());
+    } break;
+
+    default:
+        break;
     }
 
     return QWidget::event(event);
