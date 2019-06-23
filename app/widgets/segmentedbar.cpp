@@ -145,7 +145,7 @@ QAction* SegmentedBar::addAction(const QString& text, const QIcon& icon)
 QSize SegmentedBar::sizeHint() const
 {
     ensurePolished(); // Since we make calcs based on text width
-    int preferredCellWidth = iconSize().width() + 20;
+    int preferredCellWidth = iconSize().width() + 21;
     int textWidth = 0;
     for (const QAction* action : visibleActions()) {
         if (!action->text().isEmpty()) {

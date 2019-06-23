@@ -152,8 +152,8 @@ QIcon PaintUtils::renderToolButtonIcon(const QString& fileName, const QWidget* w
 QIcon PaintUtils::renderOverlaidButtonIcon(const QString& fileName, const QWidget* widget)
 {
     QIcon icon;
-    QColor up = widget->palette().buttonText().color();
-    QColor down = widget->palette().buttonText().color().darker();
+    QColor up = widget->palette().color(QPalette::Active, QPalette::ButtonText);
+    QColor down = widget->palette().color(QPalette::Active, QPalette::ButtonText).darker();
     icon.addPixmap(renderOverlaidPixmap(fileName, up, widget), QIcon::Normal, QIcon::Off);
     icon.addPixmap(renderOverlaidPixmap(fileName, down, widget), QIcon::Normal, QIcon::On);
     return icon;
