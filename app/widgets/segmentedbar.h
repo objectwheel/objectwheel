@@ -2,6 +2,7 @@
 #define SEGMENTEDBAR_H
 
 #include <QWidget>
+#include <QBasicTimer>
 
 class QStyleOptionButton;
 class SegmentedBar final : public QWidget
@@ -16,6 +17,9 @@ public:
     explicit SegmentedBar(QWidget* parent = nullptr);
 
     void clear();
+
+    void click(QAction* action);
+    void animateClick(QAction* action, int msec = 100);
 
     QSize iconSize() const;
     void setIconSize(const QSize& iconSize);
@@ -41,6 +45,7 @@ private:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void actionEvent(QActionEvent* event) override;
+    void timerEvent(QTimerEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
     bool event(QEvent* event) override;
 
@@ -50,6 +55,7 @@ signals:
 
 private:
     QSize m_iconSize;
+    QBasicTimer m_animateTimer;
 };
 
 #endif // SEGMENTEDBAR_H

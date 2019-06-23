@@ -13,6 +13,7 @@
 #include <QToolTip>
 
 static const char isDownProperty[] = "__SegmentedBar_isDown";
+static const char animatedActionProperty[] = "__SegmentedBar_animatedActionProperty";
 static const char originalCursorShapeProperty[] = "__SegmentedBar_originalCursorShape";
 
 SegmentedBar::SegmentedBar(QWidget* parent) : QWidget(parent)
@@ -34,6 +35,45 @@ void SegmentedBar::clear()
     const QList<QAction*>& actions = this->actions();
     for(int i = 0; i < actions.size(); ++i)
         removeAction(actions.at(i));
+}
+
+void SegmentedBar::click(QAction* action)
+{
+    if (!isEnabled())
+        return;
+
+    if (actions().contains(action)) {
+        if (!action->isEnabled())
+            return;
+        bool changeState = true;
+        if (action->isChecked()
+                && action->actionGroup()
+                && action->actionGroup()->checkedAction() == action
+                && action->actionGroup()->isExclusive()) {
+            // the checked button of an exclusive or autoexclusive group cannot be unchecked
+            changeState = false;
+        }
+        if (action->menu())
+            action->menu()->exec(adjustedMenuPosition(action));
+        if (changeState && action->isCheckable())
+            action->setChecked(!action->isChecked());
+        action->setProperty(isDownProperty, false);
+        emit actionTriggered(action);
+        emit action->triggered(action->isChecked());
+        update();
+    }
+}
+
+void SegmentedBar::animateClick(QAction* action, int msec)
+{
+    if (!isEnabled())
+        return;
+    if (!action->isEnabled())
+        return;
+    action->setProperty(isDownProperty, true);
+    setProperty(animatedActionProperty, qintptr(action));
+    repaint();
+    m_animateTimer.start(msec, this);
 }
 
 QSize SegmentedBar::iconSize() const
@@ -187,7 +227,7 @@ void SegmentedBar::initStyleOption(QAction* action, QStyleOptionButton* option) 
     option->styleObject = action;
     option->features = QStyleOptionButton::None;
     option->state = QStyle::State_None;
-    if (action->isEnabled())
+    if (isEnabled() && action->isEnabled())
         option->state |= QStyle::State_Enabled;
     if (option->rect.contains(mapFromGlobal(QCursor::pos())))
         option->state |= QStyle::State_MouseOver;
@@ -224,14 +264,8 @@ void SegmentedBar::mouseReleaseEvent(QMouseEvent* event)
     event->accept();
 
     if (QAction* action = actionAt(event->pos())) {
-        if (action->property(isDownProperty).toBool()) {
-            if (action->menu())
-                action->menu()->exec(adjustedMenuPosition(action));
-            if (action->isCheckable())
-                action->setChecked(!action->isChecked());
-            emit actionTriggered(action);
-            emit action->triggered(action->isChecked());
-        }
+        if (action->property(isDownProperty).toBool())
+            click(action);
     }
 
     for (QAction* action : visibleActions())
@@ -251,6 +285,16 @@ void SegmentedBar::actionEvent(QActionEvent* event)
         break;
     default:
         Q_ASSERT_X(false, "SegmentedBar::actionEvent", "internal error");
+    }
+}
+
+void SegmentedBar::timerEvent(QTimerEvent* event)
+{
+    if (event->timerId() == m_animateTimer.timerId()) {
+        m_animateTimer.stop();
+        click((QAction*) property(animatedActionProperty).value<qintptr>());
+    } else {
+        QWidget::timerEvent(event);
     }
 }
 
@@ -300,7 +344,7 @@ void SegmentedBar::paintEvent(QPaintEvent*)
 
 bool SegmentedBar::event(QEvent* event)
 {
-    if (event->type() == QEvent::HoverMove) {
+    if (event->type() == QEvent::HoverMove && isEnabled()) {
         auto e = static_cast<QHoverEvent*>(event);
         if (QAction* action = actionAt(e->pos())) {
             if (!action->isEnabled() && cursor().shape() != Qt::ArrowCursor) {
@@ -320,14 +364,8 @@ bool SegmentedBar::event(QEvent* event)
     if (event->type() == QEvent::ToolTip) {
         auto e = static_cast<QHelpEvent*>(event);
         QAction* action = actionAt(e->pos());
-        if (action) {
-            if (action->isEnabled()) {
-                setToolTip(action->toolTip());
-            } else {
-                setToolTip("");
-                QToolTip::hideText();
-            }
-        }
+        if (action)
+            setToolTip(action->toolTip());
     }
 
     return QWidget::event(event);
