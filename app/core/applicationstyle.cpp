@@ -591,15 +591,16 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             }
             if (button->features & QStyleOptionButton::HasMenu)
                 ir = ir.adjusted(0, 0, -proxy()->pixelMetric(PM_MenuButtonIndicator, button, widget), 0);
+
             // Draw item text
             QStyleOptionButton copy(*button);
             if (option->styleObject && option->styleObject->parent() &&
                     option->styleObject->parent()->inherits("SegmentedBar")) {
                 if (copy.state & State_Sunken && copy.palette.buttonText().color() != Qt::white)
-                    copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
+                    copy.palette.setColor(QPalette::Active, QPalette::ButtonText, copy.palette.buttonText().color().darker());
             } else if ((copy.state & State_On || copy.state & State_Sunken) && copy.palette.buttonText().color() != Qt::white)
-                copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
-            proxy()->drawItemText(painter, ir, tf, copy.palette, (copy.state & State_Enabled),
+                copy.palette.setColor(QPalette::Active, QPalette::ButtonText, copy.palette.buttonText().color().darker());
+            proxy()->drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
                                   copy.text, QPalette::ButtonText);
         } break;
     case CE_ToolButtonLabel:
@@ -698,6 +699,22 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         QFusionStyle::drawControl(element, option, painter, widget);
         break;
     }
+}
+
+void ApplicationStyle::drawItemText(QPainter* painter, const QRect& rect, int alignment,
+                                    const QPalette& pal, bool enabled, const QString& text,
+                                    QPalette::ColorRole textRole) const
+{
+    if (text.isEmpty())
+        return;
+
+    QPen savedPen = painter->pen();
+    if (textRole != QPalette::NoRole) {
+        painter->setPen(QPen(pal.brush(enabled ? QPalette::Active : QPalette::Disabled, textRole),
+                             savedPen.widthF()));
+    }
+    painter->drawText(rect, alignment, text);
+    painter->setPen(savedPen);
 }
 
 void ApplicationStyle::polish(QWidget* w)

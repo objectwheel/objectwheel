@@ -28,6 +28,8 @@ public:
                        const QWidget *widget) const override;
     void drawControl(QStyle::ControlElement element, const QStyleOption* option,
                      QPainter* painter, const QWidget* widget) const override;
+    void drawItemText(QPainter *painter, const QRect &rect, int alignment, const QPalette &pal,
+                      bool enabled, const QString& text, QPalette::ColorRole textRole) const override;
     void polish(QWidget* w) override;
 
     void unpolish(QWidget* w) override;
