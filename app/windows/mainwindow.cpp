@@ -29,6 +29,7 @@
 #include <interfacesettings.h>
 #include <codeeditorsettings.h>
 #include <behaviorsettings.h>
+#include <segmentedbar.h>
 
 #include <QProcess>
 #include <QToolBar>
@@ -260,10 +261,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(m_centralWidget->designerWidget(), &DesignerWidget::hideDockWidgetTitleBars,
             this, &MainWindow::setDockWidgetTitleBarsHidden);
-// FIXME   connect(m_centralWidget->bottomBar(), &BottomBar::showHideLeftPanesButtonActivated,
-//            this, &MainWindow::showLeftPanes);
-//    connect(m_centralWidget->bottomBar(), &BottomBar::showHideRightPanesButtonActivated,
-//            this, &MainWindow::showRightPanes);
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &MainWindow::onModeChange);
     connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
@@ -279,6 +276,21 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         if (m_centralWidget->qmlCodeEditorWidget()->count() > 0
                 && ModeManager::mode() != ModeManager::Editor) {
             ModeManager::setMode(ModeManager::Split);
+        }
+    });
+    connect(m_centralWidget, &CentralWidget::bottomPaneTriggered,
+            [=] (bool visible) {
+        QAction* bottomAction = m_runPane->segmentedBar()->actions().at(1);
+        bottomAction->setChecked(visible);
+    });
+    connect(m_runController, &RunController::segmentedBarActionTriggered,
+            [=] (int index, bool checked) {
+        if (index == 0) {
+            showLeftPanes(checked);
+        } else if (index == 1) {
+            m_centralWidget->setBottomPaneVisible(checked);
+        } else {
+            showRightPanes(checked);
         }
     });
     connect(ProjectManager::instance(), &ProjectManager::started,

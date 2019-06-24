@@ -29,10 +29,14 @@ public:
 
 public slots:
     void discharge();
-    
+    void setBottomPaneVisible(bool visible);
+
 private slots:
     void hideWidgets();
     void onModeChange(ModeManager::Mode mode);
+
+signals:
+    bool bottomPaneTriggered(bool visible);
 
 private:
     QVBoxLayout* m_layout;

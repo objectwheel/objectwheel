@@ -115,11 +115,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             this, [=] {
         m_bottomBar->issuesButton()->setChecked(false);
         m_issuesPane->hide();
+        emit bottomPaneTriggered(false);
     });
     connect(m_consolePane, &ConsolePane::minimized,
             this, [=] {
         m_bottomBar->consoleButton()->setChecked(false);
         m_consolePane->hide();
+        emit bottomPaneTriggered(false);
     });
     connect(m_bottomBar, &BottomBar::buttonActivated,
             this, [=] (QAbstractButton* button) {
@@ -134,6 +136,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             else
                 m_issuesPane->hide();
         }
+        emit bottomPaneTriggered(m_issuesPane->isVisible() || m_consolePane->isVisible());
     });
 
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
@@ -222,6 +225,24 @@ void CentralWidget::discharge()
     m_projectOptionsWidget->discharge();
     m_buildsWidget->discharge();
     m_helpWidget->discharge();
+}
+
+void CentralWidget::setBottomPaneVisible(bool visible)
+{
+    if (m_bottomBar->activeButton() && visible)
+        return;
+    if (!m_bottomBar->activeButton() && !visible)
+        return;
+    if (m_bottomBar->activeButton()) {
+        m_bottomBar->activeButton()->setChecked(false);
+        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
+            m_issuesPane->hide();
+        else
+            m_consolePane->hide();
+    } else {
+        m_bottomBar->consoleButton()->setChecked(true);
+        m_consolePane->show();
+    }
 }
 
 void CentralWidget::hideWidgets()

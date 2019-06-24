@@ -7,9 +7,9 @@
 #include <paintutils.h>
 #include <utilityfunctions.h>
 
-#include <QPainter>
 #include <QLayout>
-#include <QMenu>
+#include <QPainter>
+
 RunPane::RunPane(QWidget* parent) : QToolBar(parent)
   , m_runButton(new PushButton(this))
   , m_stopButton(new PushButton(this))
@@ -57,39 +57,23 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     m_segmentedBar->setCursor(Qt::PointingHandCursor);
     m_segmentedBar->setIconSize({18, 18});
 
-    QAction* leftAction = m_segmentedBar->addAction("Akıllı");
+    QAction* leftAction = m_segmentedBar->addAction();
     leftAction->setCheckable(true);
     leftAction->setToolTip(tr("Hide or show left panes"));
 
-    QAction* rightAction = m_segmentedBar->addAction("Ol lan");
-    rightAction->setCheckable(true);
-    rightAction->setToolTip(tr("Hide or show bottom panes"));
-//    rightAction->setMenu(new QMenu(this));
-//    rightAction->menu()->addAction("A");
-//    rightAction->menu()->addAction("B")/*->setChecked(true)*/;
-//    rightAction->menu()->addAction("C");
-
-    QAction* bottomAction = m_segmentedBar->addAction("Yavşak");
+    QAction* bottomAction = m_segmentedBar->addAction();
     bottomAction->setCheckable(true);
-    bottomAction->setToolTip(tr("Hide or show right panes"));
-    bottomAction->setChecked(true);
-//    bottomAction->setDisabled(true);
-//    bottomAction->setVisible(false);
+    bottomAction->setToolTip(tr("Hide or show bottom panes"));
 
-    auto g = new QActionGroup(this);
-    g->addAction(leftAction);
-    g->addAction(bottomAction);
-    g->addAction(rightAction);
-    g->setExclusive(true);
+    QAction* rightAction = m_segmentedBar->addAction();
+    rightAction->setCheckable(true);
+    rightAction->setToolTip(tr("Hide or show right panes"));
 
-    m_segmentedBar->setFixedSize(m_segmentedBar->sizeHint());
-    connect(m_segmentedBar, &SegmentedBar::actionTriggered, this, &RunPane::updateIcons);
-
-    int baseSize = - 7 - m_segmentedBar->width();
+    int baseSize = - 7 - m_segmentedBar->sizeHint().width();
 #if defined(Q_OS_MACOS)
     auto spacer = new QWidget(this);
-    spacer->setFixedSize(60, 1);
-    baseSize += 67;
+    spacer->setFixedSize(63, 1);
+    baseSize += 70;
     addWidget(spacer);
 #endif
 
@@ -172,7 +156,7 @@ void RunPane::updateIcons()
         const QString& fileName = iconFileNames.at(i);
         QIcon icon;
         QColor up = m_segmentedBar->palette().buttonText().color();
-        QColor down = !action->isChecked() ? m_segmentedBar->palette().buttonText().color().darker() : QColor("#157efb");
+        QColor down = QColor("#157efb");
         icon.addPixmap(renderOverlaidPixmap(fileName, up, m_segmentedBar), QIcon::Normal, QIcon::Off);
         icon.addPixmap(renderOverlaidPixmap(fileName, down, m_segmentedBar), QIcon::Normal, QIcon::On);
         action->setIcon(icon);

@@ -9,6 +9,7 @@
 #include <welcomewindow.h>
 #include <preferenceswindow.h>
 #include <utilityfunctions.h>
+#include <segmentedbar.h>
 #include <QTime>
 
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
@@ -26,6 +27,8 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
             this, &RunController::onRunButtonClick);
     connect(m_runPane->stopButton(), &PushButton::clicked,
             this, &RunController::onStopButtonClick);
+    connect(m_runPane->segmentedBar(), &SegmentedBar::actionTriggered,
+            this, &RunController::onSegmentedBarActionTrigger);
 
     connect(RunManager::instance(), &RunManager::applicationStarted,
             this, &RunController::onApplicationStart);
@@ -52,6 +55,10 @@ void RunController::discharge()
     m_runPane->runProgressBar()->setProgress(0);
     m_runPane->runProgressBar()->setProgressColor(QColor());
     m_runPane->runProgressBar()->setText(progressBarMessageFor(Welcome));
+
+    m_runPane->segmentedBar()->actions().at(0)->setChecked(true);
+    m_runPane->segmentedBar()->actions().at(1)->setChecked(false);
+    m_runPane->segmentedBar()->actions().at(2)->setChecked(true);
 }
 
 void RunController::onProjectsButtonClick()
@@ -87,6 +94,11 @@ void RunController::onStopButtonClick()
 {
     m_appManuallyTerminated = true;
     RunManager::sendTerminate();
+}
+
+void RunController::onSegmentedBarActionTrigger(QAction* action)
+{
+    emit segmentedBarActionTriggered(m_runPane->segmentedBar()->actions().indexOf(action), action->isChecked());
 }
 
 void RunController::onApplicationStart()

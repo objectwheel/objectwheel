@@ -34,24 +34,24 @@ void removeTitleBar(QMainWindow* mainWindow)
     [close.widthAnchor constraintEqualToConstant: 14].active = true;
     [close.heightAnchor constraintEqualToConstant: 14].active = true;
     [close.leadingAnchor constraintEqualToAnchor: container.leadingAnchor constant: 0.0].active = true;
-    [close.centerYAnchor constraintEqualToAnchor: container.centerYAnchor].active = true;
+    [close.topAnchor constraintEqualToAnchor: container.topAnchor constant: 0.0].active = true;
 
     minimize.translatesAutoresizingMaskIntoConstraints = false;
     [minimize.widthAnchor constraintEqualToConstant: 14].active = true;
     [minimize.heightAnchor constraintEqualToConstant: 14].active = true;
     [minimize.leadingAnchor constraintEqualToAnchor: close.trailingAnchor constant: 6.0].active = true;
-    [minimize.centerYAnchor constraintEqualToAnchor: close.centerYAnchor].active = true;
+    [minimize.topAnchor constraintEqualToAnchor: container.topAnchor constant: 0.0].active = true;
 
     maximize.translatesAutoresizingMaskIntoConstraints = false;
     [maximize.widthAnchor constraintEqualToConstant: 14].active = true;
     [maximize.heightAnchor constraintEqualToConstant: 14].active = true;
     [maximize.leadingAnchor constraintEqualToAnchor: minimize.trailingAnchor constant: 6.0].active = true;
-    [maximize.centerYAnchor constraintEqualToAnchor: minimize.centerYAnchor].active = true;
+    [maximize.topAnchor constraintEqualToAnchor: container.topAnchor constant: 0.0].active = true;
 
     [container.widthAnchor constraintEqualToConstant: 54].active = true;
     [container.heightAnchor constraintEqualToConstant: 14].active = true;
+    [container.leadingAnchor constraintEqualToAnchor: window.contentView.leadingAnchor constant: 11.5].active = true;
     [container.topAnchor constraintEqualToAnchor: window.contentView.topAnchor constant: 12.0].active = true;
-    [container.leadingAnchor constraintEqualToAnchor: window.contentView.leadingAnchor constant: 10.0].active = true;
 
     [window.contentView layoutSubtreeIfNeeded];
     [window.contentView.superview viewDidEndLiveResize];

@@ -3,7 +3,9 @@
 
 #include <QProcess>
 
+class QAction;
 class RunPane;
+
 class RunController final : public QObject
 {
     Q_OBJECT
@@ -31,6 +33,7 @@ private slots:
     void onPreferencesButtonClick();
     void onRunButtonClick();
     void onStopButtonClick();
+    void onSegmentedBarActionTrigger(QAction* action);
 
     void onApplicationStart();
     void onApplicationErrorOccur(QProcess::ProcessError error, const QString& errorString);
@@ -45,6 +48,7 @@ private:
 
 signals:
     void ran();
+    void segmentedBarActionTriggered(int index, bool checked);
 
 private:
     bool m_runScheduled;

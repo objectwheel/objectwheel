@@ -178,9 +178,9 @@ void BottomBar::discharge()
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     if (settings->visibleBottomPane != "None") {
         if (settings->visibleBottomPane == "Console Pane")
-            m_consoleButton->animateClick();
+            m_consoleButton->click();
         else
-            m_issuesButton->animateClick();
+            m_issuesButton->click();
     }
 }
 
