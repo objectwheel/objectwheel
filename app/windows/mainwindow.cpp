@@ -259,6 +259,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
 
+    connect(ModeManager::instance(), &ModeManager::modeChanged,
+            this, [=] (ModeManager::Mode mode) {
+        if (mode == ModeManager::Designer || mode == ModeManager::Split)
+            m_runPane->segmentedBar()->setEnabled(true);
+        else
+            m_runPane->segmentedBar()->setEnabled(false);
+    });
+
     connect(m_centralWidget->designerWidget(), &DesignerWidget::hideDockWidgetTitleBars,
             this, &MainWindow::setDockWidgetTitleBarsHidden);
     connect(ModeManager::instance(), &ModeManager::modeChanged,
