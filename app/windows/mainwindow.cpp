@@ -30,7 +30,9 @@
 #include <codeeditorsettings.h>
 #include <behaviorsettings.h>
 #include <segmentedbar.h>
+#include <controlpreviewingmanager.h>
 
+#include <QWindow>
 #include <QProcess>
 #include <QToolBar>
 #include <QLabel>
@@ -55,6 +57,7 @@ margin: 0px;\
 background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #ffffff, stop:1 #e3e3e3); \
 spacing: 5px; \
 }"
+#include <QTimer>
 
 namespace {
 QByteArray resetState;
@@ -353,6 +356,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
                 setValue(m_centralWidget->consolePane()->verticalScrollBar()->maximum());
     });
 
+    connect(windowHandle(), &QWindow::screenChanged,
+            this, &MainWindow::onScreenChange);
+
     discharge();
     //resetState = saveState();
 }
@@ -502,6 +508,11 @@ void MainWindow::onModeChange(ModeManager::Mode mode)
     default:
         break;
     }
+}
+
+void MainWindow::onScreenChange(QScreen* screen)
+{
+    ControlPreviewingManager::setDevicePixelRatio(screen->devicePixelRatio());
 }
 
 CentralWidget* MainWindow::centralWidget() const

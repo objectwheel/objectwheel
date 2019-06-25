@@ -140,7 +140,7 @@ QSize RunPane::minimumSizeHint() const
 void RunPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_runDevicesButton->setIcon(renderButtonIcon(":/images/devices.png", this));
+    m_runDevicesButton->setIcon(renderButtonIcon(":/images/devices.png", devicePixelRatioF()));
     m_runButton->setIcon(renderOverlaidButtonIcon(":/images/run.svg", m_runButton));
     m_stopButton->setIcon(renderOverlaidButtonIcon(":/images/stop.svg", m_stopButton));
     m_preferencesButton->setIcon(renderOverlaidButtonIcon(":/images/settings.svg", m_preferencesButton));
@@ -157,8 +157,8 @@ void RunPane::updateIcons()
         QIcon icon;
         QColor up = m_segmentedBar->palette().buttonText().color();
         QColor down = QColor("#157efb");
-        icon.addPixmap(renderOverlaidPixmap(fileName, up, m_segmentedBar), QIcon::Normal, QIcon::Off);
-        icon.addPixmap(renderOverlaidPixmap(fileName, down, m_segmentedBar), QIcon::Normal, QIcon::On);
+        icon.addPixmap(renderOverlaidPixmap(fileName, up, m_segmentedBar->devicePixelRatioF()), QIcon::Normal, QIcon::Off);
+        icon.addPixmap(renderOverlaidPixmap(fileName, down, m_segmentedBar->devicePixelRatioF()), QIcon::Normal, QIcon::On);
         action->setIcon(icon);
     }
 }

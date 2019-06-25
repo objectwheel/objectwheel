@@ -42,6 +42,7 @@ private slots:
     void showDocks();
     void restoreDocks();
     void onModeChange(ModeManager::Mode mode);
+    void onScreenChange(QScreen* screen);
 
 protected:
     QSize sizeHint() const override;

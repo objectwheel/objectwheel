@@ -70,7 +70,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
                           .arg(QDate::currentDate().year()).arg(APP_CORP));
 
-    m_helpButton->setIcon(PaintUtils::renderButtonIcon(":/images/question.png", m_helpButton));
+    m_helpButton->setIcon(PaintUtils::renderButtonIcon(":/images/question.png", m_helpButton->devicePixelRatioF()));
     m_helpButton->setFixedSize(20, 20);
     m_helpButton->setIconSize({20, 20});
     m_helpButton->setCursor(Qt::PointingHandCursor);

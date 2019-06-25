@@ -59,6 +59,9 @@ public:
     ControlInstance* formInstanceFor(const ControlInstance* instance);
     ControlInstance* findNodeInstanceForItem(QQuickItem* item) const;
 
+    qreal devicePixelRatio() const;
+    void setDevicePixelRatio(qreal devicePixelRatio);
+
 public slots:
     void init();
     void refresh(const QString& formUid);
@@ -82,6 +85,9 @@ private:
     void schedulePreview(ControlInstance* formInstance, int msecLater = TIMEOUT);
     void scheduleRepreviewForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);
 
+    QRectF boundingRectWithStepChilds(QQuickItem* item);
+    QRectF boundingRect(QQuickItem* item);
+
     QImage grabImage(const ControlInstance* instance);
     QImage renderItem(QQuickItem* item, const QColor& bgColor);
 
@@ -97,6 +103,7 @@ signals:
 
 private:
     bool m_initialized;
+    qreal m_devicePixelRatio;
     DesignerSupport m_designerSupport;
     QList<ControlInstance*> m_formInstances;
     OnlyOneInstanceList<ControlInstance*> m_dirtyInstanceSet;

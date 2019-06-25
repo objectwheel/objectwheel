@@ -25,10 +25,16 @@ const int g_progress_1 = 2;
 const int g_progress_2 = 6;
 const int g_progress_3 = 10;
 const int g_progress_4 = 100;
+
+static inline bool isRectangleSane(const QRectF &rect)
+{
+    return rect.isValid() && (rect.width() < 10000) && (rect.height() < 10000);
+}
 }
 
 Previewer::Previewer(QObject* parent) : QObject(parent)
   , m_initialized(false)
+  , m_devicePixelRatio(qgetenv("PREVIEWER_DEVICE_PIXEL_RATIO").toDouble())
   , m_view(new QQuickView)
 {
     DesignerSupport::createOpenGLContext(m_view);
@@ -708,6 +714,34 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
     return results;
 }
 
+QRectF Previewer::boundingRectWithStepChilds(QQuickItem* item)
+{
+    QRectF boundingRect = item->boundingRect();
+
+    boundingRect = boundingRect.united(QRectF(QPointF(0, 0), item->size()));
+
+    foreach (QQuickItem *childItem, item->childItems()) {
+        if (!hasInstanceForObject(childItem)) {
+            QRectF transformedRect = childItem->mapRectToItem(item, boundingRectWithStepChilds(childItem));
+            if (isRectangleSane(transformedRect))
+                boundingRect = boundingRect.united(transformedRect);
+        }
+    }
+
+    return boundingRect;
+}
+
+QRectF Previewer::boundingRect(QQuickItem* item)
+{
+    if (item) {
+        if (item->clip())
+            return item->boundingRect();
+        else
+            return boundingRectWithStepChilds(item);
+    }
+    return QRectF();
+}
+
 QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
 {
     Q_ASSERT(instance);
@@ -749,12 +783,12 @@ QImage Previewer::renderItem(QQuickItem* item, const QColor& bgColor)
     Q_ASSERT(item);
     PreviewerUtils::updateDirtyNodesRecursive(item, this);
 
-    QRectF renderBoundingRect = QRectF(QPointF(), item->size());
+    QRectF renderBoundingRect = boundingRect(item);
     QSize size = renderBoundingRect.size().toSize();
-    size *= qApp->devicePixelRatio();
+    size *= devicePixelRatio();
 
     QImage renderImage(size, QImage::Format_ARGB32_Premultiplied);
-    renderImage.setDevicePixelRatio(qApp->devicePixelRatio());
+    renderImage.setDevicePixelRatio(devicePixelRatio());
 
     if (bgColor.isValid())
         renderImage.fill(bgColor);
@@ -762,9 +796,9 @@ QImage Previewer::renderItem(QQuickItem* item, const QColor& bgColor)
         renderImage.fill(Qt::transparent);
 
     QPainter painter(&renderImage);
-    painter.drawImage(QRect{{0, 0}, size / qApp->devicePixelRatio()},
+    painter.drawImage(QRect({0, 0}, size / devicePixelRatio()),
                       m_designerSupport.renderImageForItem(item, renderBoundingRect, size),
-                      QRect{{0, 0}, size});
+                      QRect({0, 0}, size));
 
     return renderImage;
 }
@@ -1019,4 +1053,14 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     }
 
     return instance;
+}
+
+qreal Previewer::devicePixelRatio() const
+{
+    return m_devicePixelRatio;
+}
+
+void Previewer::setDevicePixelRatio(qreal devicePixelRatio)
+{
+    m_devicePixelRatio = devicePixelRatio;
 }

@@ -67,7 +67,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
             QDrag* drag = establishDrag(item);
             if (!PaintUtils::isBlankImage(preview)) {
                 QPixmap pixmap(QPixmap::fromImage(preview));
-                pixmap.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
+                pixmap.setDevicePixelRatio(ControlPreviewingManager::devicePixelRatio());
                 drag->setPixmap(pixmap);
             }
             locked = false;

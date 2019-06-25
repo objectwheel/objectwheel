@@ -26,6 +26,7 @@
 #include <servermanager.h>
 #include <modemanager.h>
 
+#include <QScreen>
 #include <QStandardPaths>
 #include <QSettings>
 #include <QMessageBox>
@@ -92,9 +93,9 @@ ApplicationCore::ApplicationCore(QApplication* app)
 
     /* Show splash screen */
     QPixmap pixmap(":/images/splash.png");
-    pixmap.setDevicePixelRatio(app->devicePixelRatio());
-    pixmap = pixmap.scaled(int(512 * app->devicePixelRatio()),
-                            int(280 * app->devicePixelRatio()),
+    pixmap.setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
+    pixmap = pixmap.scaled(int(512 * QApplication::primaryScreen()->devicePixelRatio()),
+                            int(280 * QApplication::primaryScreen()->devicePixelRatio()),
                             Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
     QSplashScreen* splash(new QSplashScreen(pixmap));
     splash->show();
@@ -140,6 +141,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerWidget()->designerScene();
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
+    s_controlPreviewingManager->setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
 
     auto conn = new QMetaObject::Connection;
     *conn = QObject::connect(s_documentManager, &DocumentManager::projectInfoUpdated, [=] {
@@ -179,9 +181,10 @@ void ApplicationCore::prepare(const char* filePath)
     // qputenv("QT_SCALE_FACTOR", "2");
     const QString settingsPath = QFileInfo(filePath).path() + "/settings.ini";
     QSettings settings(settingsPath, QSettings::IniFormat);
-    if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings().hdpiEnabled).toBool())
+    if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings().hdpiEnabled).toBool()) {
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    }
 
     /* Disable Qml Parser warnings */
     QLoggingCategory::setFilterRules("qtc*.info=false\n"

@@ -165,10 +165,10 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
         QIcon icon;
         icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(child->dir(), treeWidget->devicePixelRatioF()),
                                                         treeWidget->palette().text().color(),
-                                                        treeWidget), QIcon::Normal);
+                                                        treeWidget->devicePixelRatioF()), QIcon::Normal);
         icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(child->dir(), treeWidget->devicePixelRatioF()),
                                                         treeWidget->palette().highlightedText().color(),
-                                                        treeWidget), QIcon::Selected);
+                                                        treeWidget->devicePixelRatioF()), QIcon::Selected);
         item->setIcon(0, icon);
         parentItem->addChild(item);
         addChildrenIntoItem(item, child->childControls(false));
@@ -449,10 +449,10 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     QIcon formIcon;
     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                         palette().text().color(),
-                                                        this), QIcon::Normal);
+                                                        devicePixelRatioF()), QIcon::Normal);
     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                         palette().highlightedText().color(),
-                                                        this), QIcon::Selected);
+                                                        devicePixelRatioF()), QIcon::Selected);
 
     /* Create items for incoming form */
     auto formItem = new QTreeWidgetItem;
@@ -615,19 +615,19 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
                     QIcon formIcon;
                     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                                         palette().text().color(),
-                                                                        this), QIcon::Normal);
+                                                                        devicePixelRatioF()), QIcon::Normal);
                     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                                         palette().highlightedText().color(),
-                                                                        this), QIcon::Selected);
+                                                                        devicePixelRatioF()), QIcon::Selected);
                     childItem->setIcon(0, formIcon);
                 } else {
                     QIcon icon;
                     icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(control->dir(), devicePixelRatioF()),
                                                                     palette().text().color(),
-                                                                    this), QIcon::Normal);
+                                                                    devicePixelRatioF()), QIcon::Normal);
                     icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(control->dir(), devicePixelRatioF()),
                                                                     palette().highlightedText().color(),
-                                                                    this), QIcon::Selected);
+                                                                    devicePixelRatioF()), QIcon::Selected);
                     childItem->setIcon(0, icon);
                 }
                 return;

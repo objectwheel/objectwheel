@@ -35,7 +35,7 @@ void RunDevicesButton::addDevice(const DeviceInfo& deviceInfo)
     auto action = new QAction(this);
     action->setCheckable(true);
     action->setText(UtilityFunctions::deviceName(deviceInfo));
-    action->setIcon(UtilityFunctions::deviceIcon(deviceInfo));
+    action->setIcon(UtilityFunctions::deviceIcon(deviceInfo, devicePixelRatioF()));
     action->setToolTip(UtilityFunctions::deviceInfoToolTip(deviceInfo));
     UtilityFunctions::setDeviceInfo(action, deviceInfo);
 

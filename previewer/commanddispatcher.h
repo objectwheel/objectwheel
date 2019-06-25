@@ -39,6 +39,7 @@ signals:
     void formDeletion(const QString& uid);
     void controlCodeUpdate(const QString& uid);
     void formCodeUpdate(const QString& uid);
+    void devicePixelRatioUpdate(qreal devicePixelRatio);
 
 private:
     PreviewerSocket* m_socket;

@@ -74,10 +74,10 @@ private:
             QColor down = button->palette().buttonText().color().darker(180); // pressed
             Q_ASSERT(UtilityFunctions::window(button));
             icon.addPixmap(renderOverlaidPixmap(button->icon().pixmap(UtilityFunctions::window(button),
-                                                                      button->iconSize()), up, button),
+                                                                      button->iconSize()), up, button->devicePixelRatioF()),
                            QIcon::Normal, QIcon::Off);
             icon.addPixmap(renderOverlaidPixmap(button->icon().pixmap(UtilityFunctions::window(button),
-                                                                      button->iconSize()), down, button),
+                                                                      button->iconSize()), down, button->devicePixelRatioF()),
                            QIcon::Normal, QIcon::On);
         } else {
             icon = renderOverlaidIcon(button->icon(), button->iconSize(),
@@ -115,8 +115,8 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     QIcon consoleIcon;
     QColor up = m_consoleButton->palette().buttonText().color().lighter(130); // not pressed
     QColor down = m_consoleButton->palette().buttonText().color().darker(180); // pressed
-    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", up, this), QIcon::Normal, QIcon::Off);
-    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", down, this), QIcon::Normal, QIcon::On);
+    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", up, devicePixelRatioF()), QIcon::Normal, QIcon::Off);
+    consoleIcon.addPixmap(renderOverlaidPixmap(":/images/console.svg", down, devicePixelRatioF()), QIcon::Normal, QIcon::On);
 
     m_consoleButton->setMaximumHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
@@ -129,8 +129,8 @@ BottomBar::BottomBar(QWidget* parent) : QWidget(parent)
     QIcon issuesIcon;
     up = m_issuesButton->palette().buttonText().color().lighter(130); // not pressed
     down = m_issuesButton->palette().buttonText().color().darker(180); // pressed
-    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", up, this), QIcon::Normal, QIcon::Off);
-    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", down, this), QIcon::Normal, QIcon::On);
+    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", up, devicePixelRatioF()), QIcon::Normal, QIcon::Off);
+    issuesIcon.addPixmap(renderOverlaidPixmap(":/images/issues.svg", down, devicePixelRatioF()), QIcon::Normal, QIcon::On);
 
     m_issuesButton->setMaximumHeight(22);
     m_issuesButton->setCursor(Qt::PointingHandCursor);

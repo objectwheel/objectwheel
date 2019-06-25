@@ -34,6 +34,9 @@ public:
     static void scheduleTerminate();
     static void scheduleInit();
 
+    static qreal devicePixelRatio();
+    static void setDevicePixelRatio(const qreal& value);
+
 private slots:
     void onConnected();
     void onDisconnected();
@@ -54,7 +57,7 @@ private:
     static PreviewerServer* s_previewerServer;
     static QThread* s_serverThread;
     static CommandDispatcher* s_commandDispatcher;
-
+    static qreal s_devicePixelRatio;
 };
 
 #endif // CONTROLPREVIEWINGMANAGER_H

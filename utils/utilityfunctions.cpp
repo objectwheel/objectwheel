@@ -432,27 +432,27 @@ QVariantMap localDeviceInfo()
     return info.toVariantMap();
 }
 
-QIcon deviceIcon(const QVariantMap& deviceInfo)
+QIcon deviceIcon(const QVariantMap& deviceInfo, qreal devicePixelRatio)
 {
     const QString productType = deviceInfo.value("productType").toString();
     const QString deviceName = deviceInfo.value("deviceName").toString();
     const QString deviceUid = deviceInfo.value("deviceUid").toString();
 
     if (deviceUid == localDeviceInfo().value("deviceUid"))
-        return PaintUtils::renderButtonIcon(":/images/mycomputer.png");
+        return PaintUtils::renderButtonIcon(":/images/mycomputer.png", devicePixelRatio);
     if (productType == "ios") {
         if (deviceName.contains("ipad", Qt::CaseInsensitive))
-            return PaintUtils::renderButtonIcon(":/images/ipad.svg");
-        return PaintUtils::renderButtonIcon(":/images/ios.svg");
+            return PaintUtils::renderButtonIcon(":/images/ipad.svg", devicePixelRatio);
+        return PaintUtils::renderButtonIcon(":/images/ios.svg", devicePixelRatio);
     }
     if (productType == "android")
-        return PaintUtils::renderButtonIcon(":/images/android.svg");
+        return PaintUtils::renderButtonIcon(":/images/android.svg", devicePixelRatio);
     if (productType == "osx") {
         if (deviceName.contains("macbook", Qt::CaseInsensitive))
-            return PaintUtils::renderButtonIcon(":/images/macbook.svg");
-        return PaintUtils::renderButtonIcon(":/images/imac.svg");
+            return PaintUtils::renderButtonIcon(":/images/macbook.svg", devicePixelRatio);
+        return PaintUtils::renderButtonIcon(":/images/imac.svg", devicePixelRatio);
     }
-    return PaintUtils::renderButtonIcon(":/images/mycomputer.png");
+    return PaintUtils::renderButtonIcon(":/images/mycomputer.png", devicePixelRatio);
 }
 
 QString deviceUid(const QVariantMap& deviceInfo)

@@ -64,7 +64,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    m_searchLineEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchLineEdit)),
+    m_searchLineEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchLineEdit->devicePixelRatioF())),
                                 QLineEdit::LeadingPosition);
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setPlaceholderText(tr("Search"));

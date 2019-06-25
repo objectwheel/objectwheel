@@ -47,7 +47,8 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_resized(false)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
-  , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(g_baseControlSize)))
+  , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(
+                                    g_baseControlSize, ControlPreviewingManager::devicePixelRatio())))
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -508,7 +509,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     }
 
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect(), m_pixmap, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
+    painter->drawPixmap(rect(), m_pixmap, QRectF(QPointF(0, 0), size() * ControlPreviewingManager::devicePixelRatio()));
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
@@ -523,7 +524,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(m_pixmap.rect(), gradient);
             p.end();
-            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * qApp->devicePixelRatio()));
+            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * ControlPreviewingManager::devicePixelRatio()));
         }
     }
 
@@ -575,16 +576,19 @@ void Control::updatePreview(const PreviewResult& result)
     if (!dragging() && !resized())
         applyCachedGeometry();
 
-    m_pixmap = QPixmap::fromImage(hasErrors() ? PaintUtils::renderErrorControlImage(size())
-                                              : result.image);
+    m_pixmap = QPixmap::fromImage(
+                hasErrors()
+                ? PaintUtils::renderErrorControlImage(size(), ControlPreviewingManager::devicePixelRatio())
+                : result.image);
+    m_pixmap.setDevicePixelRatio(ControlPreviewingManager::devicePixelRatio());
 
     if (m_pixmap.isNull()) {
         if (m_gui) {
-            m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size()));
+            m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size(), ControlPreviewingManager::devicePixelRatio()));
         } else {
             m_pixmap = QPixmap::fromImage(
                         PaintUtils::renderNonGuiControlImage(
-                            ToolUtils::toolIcon(m_dir, qApp->devicePixelRatio()), size()));
+                            ToolUtils::toolIcon(m_dir, ControlPreviewingManager::devicePixelRatio()), size(), ControlPreviewingManager::devicePixelRatio()));
         }
     }
 

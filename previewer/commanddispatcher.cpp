@@ -91,6 +91,13 @@ void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const Q
         break;
     }
 
+    case DevicePixelRatioUpdate: {
+        qreal dpr;
+        pull(data, dpr);
+        emit devicePixelRatioUpdate(dpr);
+        break;
+    }
+
     case Refresh: {
         QString formUid;
         pull(data, formUid);

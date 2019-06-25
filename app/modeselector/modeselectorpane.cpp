@@ -108,12 +108,12 @@ QSize ModeSelectorPane::minimumSizeHint() const
 void ModeSelectorPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_designerAction->setIcon(renderToolButtonIcon(":/images/modes/designer.svg", this));
-    m_editorAction->setIcon(renderToolButtonIcon(":/images/modes/editor.svg", this));
-    m_splitAction->setIcon(renderToolButtonIcon(":/images/modes/split.svg", this));
-    m_optionsAction->setIcon(renderToolButtonIcon(":/images/modes/options.svg", this));
-    m_buildsAction->setIcon(renderToolButtonIcon(":/images/modes/builds.svg", this));
-    m_documentsAction->setIcon(renderToolButtonIcon(":/images/modes/documents.svg", this));
+    m_designerAction->setIcon(renderToolButtonIcon(":/images/modes/designer.svg", devicePixelRatioF()));
+    m_editorAction->setIcon(renderToolButtonIcon(":/images/modes/editor.svg", devicePixelRatioF()));
+    m_splitAction->setIcon(renderToolButtonIcon(":/images/modes/split.svg", devicePixelRatioF()));
+    m_optionsAction->setIcon(renderToolButtonIcon(":/images/modes/options.svg", devicePixelRatioF()));
+    m_buildsAction->setIcon(renderToolButtonIcon(":/images/modes/builds.svg", devicePixelRatioF()));
+    m_documentsAction->setIcon(renderToolButtonIcon(":/images/modes/documents.svg", devicePixelRatioF()));
 }
 
 void ModeSelectorPane::paintEvent(QPaintEvent*)

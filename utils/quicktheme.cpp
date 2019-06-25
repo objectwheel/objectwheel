@@ -18,6 +18,7 @@ void setTheme(const QString& projectDir, int* version)
 
     qputenv("QT_QUICK_CONTROLS_1_STYLE", stylev1.toUtf8());
     qputenv("QT_QUICK_CONTROLS_STYLE", stylev2.toUtf8());
+    qputenv("QT_LABS_CONTROLS_STYLE", stylev2.toUtf8());
 
     if (stylev2 == "Material") {
         if (!theme.isEmpty())

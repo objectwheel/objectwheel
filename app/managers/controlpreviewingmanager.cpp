@@ -18,6 +18,7 @@ ControlPreviewingManager* ControlPreviewingManager::s_instance = nullptr;
 PreviewerServer* ControlPreviewingManager::s_previewerServer = nullptr;
 QThread* ControlPreviewingManager::s_serverThread = nullptr;
 CommandDispatcher* ControlPreviewingManager::s_commandDispatcher = nullptr;
+qreal ControlPreviewingManager::s_devicePixelRatio = 1;
 
 ControlPreviewingManager::ControlPreviewingManager(QObject *parent) : QObject(parent)
 {
@@ -165,6 +166,18 @@ void ControlPreviewingManager::scheduleInit()
 
         g_initScheduled = true;
     }
+}
+
+qreal ControlPreviewingManager::devicePixelRatio()
+{
+    return s_devicePixelRatio;
+}
+
+void ControlPreviewingManager::setDevicePixelRatio(const qreal& value)
+{
+    s_devicePixelRatio = value;
+    s_commandDispatcher->scheduleDevicePixelRatioUpdate(value);
+    qputenv("PREVIEWER_DEVICE_PIXEL_RATIO", QByteArray::number(value));
 }
 
 void ControlPreviewingManager::scheduleTerminate()

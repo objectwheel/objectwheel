@@ -20,6 +20,7 @@ enum PreviewerCommands : quint32 {
     IndividualPreview,
     IndividualPreviewDone,
     PropertyUpdate,
+    DevicePixelRatioUpdate,
     Refresh,
     Terminate
 };

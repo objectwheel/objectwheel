@@ -6,6 +6,7 @@
 #include <commandlineparser.h>
 #include <commanddispatcher.h>
 #include <quicktheme.h>
+#include <saveutils.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -82,6 +83,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             s_previewer, &Previewer::updateControlCode);
     connect(s_commandDispatcher, &CommandDispatcher::formCodeUpdate,
             s_previewer, &Previewer::updateFormCode);
+    connect(s_commandDispatcher, &CommandDispatcher::devicePixelRatioUpdate,
+            s_previewer, &Previewer::setDevicePixelRatio);
 
     connect(s_previewer, &Previewer::initializationProgressChanged,
             s_commandDispatcher, &CommandDispatcher::scheduleInitializationProgress);
@@ -120,19 +123,21 @@ void ApplicationCore::prepare()
     QApplication::setApplicationName("previewer");
     QApplication::setApplicationVersion("1.1.0");
     QApplication::setQuitOnLastWindowClosed(false);
-
-    QuickTheme::setTheme(CommandlineParser::projectDirectory());
-
-    // Boot settings
-    qputenv("QML_DISABLE_DISK_CACHE", "true");
-    qputenv("QSG_DISTANCEFIELD_ANTIALIASING", "gray");
-
-#ifdef Q_OS_MACOS // Disable focus stealing on macOS
-    qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "true");
-#endif
-
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QuickTheme::setTheme(CommandlineParser::projectDirectory());
+
+    // Since we always render text into an FBO, we need to globally disable
+    // subpixel antialiasing and instead use gray.
+    qputenv("QSG_DISTANCEFIELD_ANTIALIASING", "gray");
+#ifdef Q_OS_OSX //This keeps qml2puppet from stealing focus
+    qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "true");
+#endif
+    qputenv("QML_BAD_GUI_RENDER_LOOP", "true");
+    qputenv("QML_PUPPET_MODE", "true");
+    qputenv("QML_DISABLE_DISK_CACHE", "true");
+    qputenv("QT_QUICK_CONTROLS_CONF",
+            SaveUtils::toProjectAssetsDir(CommandlineParser::projectDirectory()).toUtf8());
 }
 
 void ApplicationCore::startQuitCountdown(int msec)

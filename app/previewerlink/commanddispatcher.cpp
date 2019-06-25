@@ -26,6 +26,11 @@ void CommandDispatcher::scheduleTerminate()
     send(m_server, PreviewerCommands::Terminate);
 }
 
+void CommandDispatcher::scheduleDevicePixelRatioUpdate(qreal devicePixelRatio)
+{
+    send(m_server, PreviewerCommands::DevicePixelRatioUpdate, push(devicePixelRatio));
+}
+
 void CommandDispatcher::schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
 {
     send(m_server, PreviewerCommands::PropertyUpdate, push(uid, propertyName, propertyValue));

@@ -244,7 +244,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_searchEditCompleter->popup()->setIconSize({15, 15});
 
     m_searchEdit->setCompleter(m_searchEditCompleter);
-    m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit)),
+    m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit->devicePixelRatioF())),
                            QLineEdit::LeadingPosition);
     m_searchEdit->setPlaceholderText(tr("Search"));
     m_searchEdit->setClearButtonEnabled(true);
@@ -572,8 +572,7 @@ void FileExplorer::setPalette(const QPalette& pal)
     m_pathIndicator->setPalette(pal);
 
     QPixmap icon = PaintUtils::renderMaskedPixmap(":/utils/images/filtericon@2x.png",
-                                                          pal.buttonText().color(), this);
-    icon.setDevicePixelRatio(devicePixelRatioF());
+                                                          pal.buttonText().color(), devicePixelRatioF());
     g_modeIFilterIconLabel->setPixmap(icon.scaled(16 * devicePixelRatioF(),
                                                   16 * devicePixelRatioF(),
                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));

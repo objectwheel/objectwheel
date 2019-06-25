@@ -93,7 +93,7 @@ QVariant getProperty(const QString& property, const QList<PropertyNode>& propert
 Enum getEnum(const QString& name, const QList<PropertyNode>& properties);
 QVariantMap localDeviceInfo();
 QString stringify(const QString& text);
-QIcon deviceIcon(const QVariantMap& deviceInfo);
+QIcon deviceIcon(const QVariantMap& deviceInfo, qreal devicePixelRatio);
 QString deviceUid(const QVariantMap& deviceInfo);
 QString deviceName(const QVariantMap& deviceInfo);
 QString deviceInfoToolTip(const QVariantMap& deviceInfo);

@@ -175,7 +175,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_addButton->setFixedSize(18, 18);
     m_addButton->setIconSize(QSize(12, 12));
-    m_addButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/plus.png", palette().text().color(), this)));
+    m_addButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/plus.png", palette().text().color(), devicePixelRatioF())));
     connect(m_addButton, &PushButton::clicked, this, &FormsPane::onAddButtonClick);
 
     m_removeButton->setCursor(Qt::PointingHandCursor);
@@ -183,7 +183,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_removeButton->setFixedSize(18, 18);
     m_removeButton->setIconSize(QSize(12, 12));
-    m_removeButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/minus.png", palette().text().color(), this)));
+    m_removeButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/minus.png", palette().text().color(), devicePixelRatioF())));
     connect(m_removeButton, &PushButton::clicked, this, &FormsPane::onRemoveButtonClick);
 
     /*
@@ -251,10 +251,10 @@ void FormsPane::refresh()
     QIcon formIcon;
     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                         palette().text().color(),
-                                                        this), QIcon::Normal);
+                                                        devicePixelRatioF()), QIcon::Normal);
     formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
                                                         palette().highlightedText().color(),
-                                                        this), QIcon::Selected);
+                                                        devicePixelRatioF()), QIcon::Selected);
     blockSignals(true);
 
     clear();

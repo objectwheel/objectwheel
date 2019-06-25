@@ -16,7 +16,7 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setPlaceholderText(tr("Search"));
-    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit),
+    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit->devicePixelRatioF()),
                             QLineEdit::LeadingPosition);
 
     auto layout = new QVBoxLayout(this);
