@@ -1,53 +1,38 @@
-//#ifndef CONSOLEWIDGET_H
-//#define CONSOLEWIDGET_H
+#ifndef OUTPUTPANE_H
+#define OUTPUTPANE_H
 
-//#include <QApplication>
-//#include <QPlainTextEdit>
-//#include <pathfinder.h>
+//#include <pushbutton.h>
 
-//class QToolButton;
-//class QToolBar;
-//class QLabel;
-//class Control;
-
-//class ConsoleWidget : public QPlainTextEdit
+//class ButtonFlasher;
+//class OutputPane final : public QWidget
 //{
 //    Q_OBJECT
+//    Q_DISABLE_COPY(OutputPane)
 
 //public:
-//    explicit ConsoleWidget(QWidget* widget = nullptr);
+//    explicit OutputPane(QWidget* parent = nullptr);
+
+//    QAbstractButton* activeButton() const;
+//    QAbstractButton* consoleButton() const;
+//    QAbstractButton* issuesButton() const;
 
 //public slots:
-//    void fade();
-//    void discharge();
-//    void press(const QString& text, const QBrush& brush = QApplication::palette().text(),
-//               QFont::Weight weight = QFont::Normal);
+//    void flash(QAbstractButton* button);
 
 //private slots:
-//    void onLinkClick(const PathFinder::Result& result);
-
-//protected:
-//    bool eventFilter(QObject*, QEvent*) override;
-//    void resizeEvent(QResizeEvent*) override;
-//    QSize minimumSizeHint() const override;
-//    QSize sizeHint() const override;
+//    void onButtonClick(bool checked);
 
 //private:
-//    void updateViewportMargins();
+//    void paintEvent(QPaintEvent* event) override;
 
 //signals:
-//    void flash();
-//    void minimized();
-//    void assetsFileOpened(const QString& relativePath, int line, int column);
-//    void designsFileOpened(Control* control, const QString& relativePath, int line, int column);
+//    void buttonActivated(QAbstractButton* button, bool checked);
 
 //private:
-//    QToolBar* m_toolBar;
-//    QLabel* m_titleLabel;
-//    QToolButton* m_clearButton;
-//    QToolButton* m_fontSizeUpButton;
-//    QToolButton* m_fontSizeDownButton;
-//    QToolButton* m_minimizeButton;
+//    PushButton* m_consoleButton;
+//    PushButton* m_issuesButton;
+//    ButtonFlasher* m_consoleFlasher;
+//    ButtonFlasher* m_issuesFlasher;
 //};
 
-//#endif // CONSOLEWIDGET_H
+#endif // OUTPUTPANE_H

@@ -3,10 +3,7 @@
 
 #include <pushbutton.h>
 
-class QHBoxLayout;
-class QButtonGroup;
 class ButtonFlasher;
-
 class OutputBar final : public QWidget
 {
     Q_OBJECT
@@ -19,25 +16,19 @@ public:
     QAbstractButton* consoleButton() const;
     QAbstractButton* issuesButton() const;
 
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
-
 public slots:
-    void discharge();
-    void flash(QAbstractButton*);
+    void flash(QAbstractButton* button);
 
 private slots:
-    void onButtonClick(QAbstractButton* button);
+    void onButtonClick(bool checked);
 
-protected:
-    void paintEvent(QPaintEvent*) override;
+private:
+    void paintEvent(QPaintEvent* event) override;
 
 signals:
     void buttonActivated(QAbstractButton* button, bool checked);
 
 private:
-    QHBoxLayout* m_layout;
-    QButtonGroup* m_buttonGroup;
     PushButton* m_consoleButton;
     PushButton* m_issuesButton;
     ButtonFlasher* m_consoleFlasher;

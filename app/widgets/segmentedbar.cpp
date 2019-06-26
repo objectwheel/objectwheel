@@ -12,7 +12,7 @@
 #include <QScreen>
 
 static const char downProperty[] = "_q_SegmentedBar_down";
-static const char animatedActionProperty[] = "_q_SegmentedBar_animatedActionProperty";
+static const char animatedActionProperty[] = "_q_SegmentedBar_animatedAction";
 static const char originalCursorShapeProperty[] = "_q_SegmentedBar_originalCursorShape";
 
 SegmentedBar::SegmentedBar(QWidget* parent) : QWidget(parent)

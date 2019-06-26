@@ -62,8 +62,6 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->setChildrenCollapsible(false);
     m_splitterOut->handle(3)->setDisabled(true);
 
-    m_outputBar->setFixedHeight(24);
-
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
     g_editorContainer->setObjectName("g_editorContainer");
@@ -105,6 +103,17 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             m_designerWidget, &DesignerWidget::onAssetsFileOpen);
     connect(m_issuesWidget, &IssuesWidget::flash,
             this, [=] {
+// FIXME       void OutputBar::flash(QAbstractButton* button)
+//        {
+//            if (button == m_consoleButton)
+//                m_consoleFlasher->flash(400, 3);
+//            else if (button == m_issuesButton)
+//                m_issuesFlasher->flash(400, 3);
+
+//            const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+//            if (settings->bottomPanesPop && !button->isChecked())
+//                button->click();
+//        }
         m_outputBar->flash(m_outputBar->issuesButton());
     });
     connect(m_consoleWidget, &ConsoleWidget::flash,
@@ -217,7 +226,7 @@ void CentralWidget::discharge()
 {
     m_consoleWidget->hide();
     m_issuesWidget->hide();
-    m_outputBar->discharge();
+// FIXME   m_outputBar->discharge();
     m_consoleWidget->discharge();
     m_issuesWidget->discharge();
     m_qmlCodeEditorWidget->discharge();

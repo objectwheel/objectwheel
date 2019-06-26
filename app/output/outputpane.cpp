@@ -12,6 +12,20 @@
 //#include <QTextStream>
 //#include <QToolBar>
 
+//void OutputBar::discharge()
+//{
+//    m_issuesButton->setChecked(false);
+//    m_consoleButton->setChecked(false);
+
+//    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+//    if (settings->visibleBottomPane != "None") {
+//        if (settings->visibleBottomPane == "Console Pane")
+//            m_consoleButton->click();
+//        else
+//            m_issuesButton->click();
+//    }
+//}
+
 //ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
 //  , m_toolBar(new QToolBar(this))
 //  , m_titleLabel(new QLabel(this))
