@@ -261,8 +261,16 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
 
 void DesignerWidget::scaleScene(qreal ratio)
 {
-    m_designerView->scale((1.0 / m_lastScale) * ratio, (1.0 / m_lastScale) * ratio);
-    m_lastScale = ratio;
+    if (m_lastScale != ratio) {
+        m_designerView->scale((1.0 / m_lastScale) * ratio, (1.0 / m_lastScale) * ratio);
+        m_lastScale = ratio;
+        emit scalingRatioChanged();
+    }
+}
+
+qreal DesignerWidget::scalingRatio() const
+{
+    return m_lastScale;
 }
 
 DesignerScene* DesignerWidget::designerScene() const

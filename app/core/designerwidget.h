@@ -21,6 +21,8 @@ public:
     explicit DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget* parent = nullptr);
     DesignerScene* designerScene() const;
 
+    qreal scalingRatio() const;
+
 public slots:
     void discharge();
     void refresh() { onRefreshButtonClick(); }
@@ -46,6 +48,7 @@ private slots:
 
 signals:
     void hideDockWidgetTitleBars(bool);
+    void scalingRatioChanged();
 
 private:
     void scaleScene(qreal ratio);

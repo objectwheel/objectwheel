@@ -494,15 +494,22 @@ void Previewer::deleteControl(const QString& uid)
 
 void Previewer::refresh(const QString& formUid)
 {
-    Q_ASSERT(!formUid.isEmpty());
-    ControlInstance* formInstance = instanceForUid(formUid);
+    if (formUid.isEmpty()) {
+        for (ControlInstance* formInstance : m_formInstances) {
+            PreviewerUtils::makeDirtyRecursive(formInstance);
+            refreshBindings(formInstance->context);
+            schedulePreview(formInstance);
+        }
+    } else {
+        ControlInstance* formInstance = instanceForUid(formUid);
 
-    Q_ASSERT(formInstance);
+        Q_ASSERT(formInstance);
 
-    PreviewerUtils::makeDirtyRecursive(formInstance);
+        PreviewerUtils::makeDirtyRecursive(formInstance);
 
-    refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+        refreshBindings(formInstance->context);
+        schedulePreview(formInstance);
+    }
 }
 
 bool Previewer::hasInstanceForObject(const QObject* object) const
@@ -1062,5 +1069,8 @@ qreal Previewer::devicePixelRatio() const
 
 void Previewer::setDevicePixelRatio(qreal devicePixelRatio)
 {
-    m_devicePixelRatio = devicePixelRatio;
+    if (m_devicePixelRatio != devicePixelRatio) {
+        m_devicePixelRatio = devicePixelRatio;
+        refresh(QString());
+    }
 }
