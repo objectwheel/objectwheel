@@ -4,9 +4,7 @@
 #include <QObject>
 #include <QBasicTimer>
 
-class QBasicTimer;
 class QAbstractButton;
-
 class ButtonFlasher final : public QObject
 {
     Q_OBJECT
