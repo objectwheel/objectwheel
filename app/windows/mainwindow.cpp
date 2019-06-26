@@ -15,11 +15,11 @@
 #include <controlcreationmanager.h>
 #include <runmanager.h>
 #include <projectmanager.h>
-#include <consolepane.h>
+#include <consolewidget.h>
 #include <control.h>
 #include <qmlcodeeditorwidget.h>
 #include <utilityfunctions.h>
-#include <bottombar.h>
+#include <outputbar.h>
 #include <saveutils.h>
 #include <windowmanager.h>
 #include <welcomewindow.h>
@@ -57,7 +57,6 @@ margin: 0px;\
 background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #ffffff, stop:1 #e3e3e3); \
 spacing: 5px; \
 }"
-#include <QTimer>
 
 namespace {
 QByteArray resetState;
@@ -312,10 +311,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             this, &MainWindow::resetSettings);
 
     connect(RunManager::instance(), &RunManager::applicationReadyOutput, this, [=] (const QString& output)
-    { m_centralWidget->consolePane()->press(output, palette().linkVisited()); });
+    { m_centralWidget->consoleWidget()->press(output, palette().linkVisited()); });
     connect(RunManager::instance(), &RunManager::applicationFinished,
             [=] (int exitCode, QProcess::ExitStatus exitStatus) {
-        auto console = m_centralWidget->consolePane();
+        auto console = m_centralWidget->consoleWidget();
         auto timestamp = QTime::currentTime().toString();
         if (exitStatus != QProcess::CrashExit) {
             if (exitCode == EXIT_FAILURE) {
@@ -328,7 +327,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(RunManager::instance(), &RunManager::applicationErrorOccurred,
             [=] (QProcess::ProcessError error, const QString& errorString) {
-        auto console = m_centralWidget->consolePane();
+        auto console = m_centralWidget->consoleWidget();
         auto timestamp = QTime::currentTime().toString();
         if (error == QProcess::FailedToStart) {
             console->press(timestamp + tr(": System Failure: ") + errorString + "\n",
@@ -347,13 +346,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
         if (settings->autoSaveBeforeRunning)
             WindowManager::mainWindow()->centralWidget()->qmlCodeEditorWidget()->saveAll();
-        m_centralWidget->consolePane()->fade();
-        if (!m_centralWidget->consolePane()->toPlainText().isEmpty())
-            m_centralWidget->consolePane()->press("\n");
-        m_centralWidget->consolePane()->press(timestamp + tr(": Starting") + " " + ProjectManager::name() + "...\n",
+        m_centralWidget->consoleWidget()->fade();
+        if (!m_centralWidget->consoleWidget()->toPlainText().isEmpty())
+            m_centralWidget->consoleWidget()->press("\n");
+        m_centralWidget->consoleWidget()->press(timestamp + tr(": Starting") + " " + ProjectManager::name() + "...\n",
                                               QColor("#025dbf"), QFont::DemiBold);
-        m_centralWidget->consolePane()->verticalScrollBar()->
-                setValue(m_centralWidget->consolePane()->verticalScrollBar()->maximum());
+        m_centralWidget->consoleWidget()->verticalScrollBar()->
+                setValue(m_centralWidget->consoleWidget()->verticalScrollBar()->maximum());
     });
 
     connect(windowHandle(), &QWindow::screenChanged,

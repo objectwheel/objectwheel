@@ -6,9 +6,9 @@ class QPixmap;
 
 namespace ToolUtils {
 
-QPixmap toolIcon(const QString& controlDir, double dpr);
 QString toolName(const QString& controlDir);
 QString toolCetegory(const QString& controlDir);
+QString toolIconPath(const QString& controlDir);
 
 } // ToolUtils
 

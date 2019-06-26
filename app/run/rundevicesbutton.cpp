@@ -35,7 +35,7 @@ void RunDevicesButton::addDevice(const DeviceInfo& deviceInfo)
     auto action = new QAction(this);
     action->setCheckable(true);
     action->setText(UtilityFunctions::deviceName(deviceInfo));
-    action->setIcon(UtilityFunctions::deviceIcon(deviceInfo, devicePixelRatioF()));
+    action->setIcon(UtilityFunctions::deviceIcon(deviceInfo));
     action->setToolTip(UtilityFunctions::deviceInfoToolTip(deviceInfo));
     UtilityFunctions::setDeviceInfo(action, deviceInfo);
 
@@ -110,11 +110,11 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
 
     int left = LEFT_PADDING;
     int textWidth = fontMetrics().horizontalAdvance(text());
-    bool isSunken = option.state & QStyle::State_Sunken || option.state & QStyle::State_On;
     QIcon::Mode iconMode = isEnabled() ? QIcon::Normal : QIcon::Disabled;
-    QIcon::State iconState = isSunken ? QIcon::On : QIcon::Off;
-    const QColor& textColor = isSunken ? palette().buttonText().color().darker()
-                                       : palette().buttonText().color();
+    QIcon::State iconState = option.state & QStyle::State_On ? QIcon::On : QIcon::Off;
+    const QColor& textColor = option.state & QStyle::State_Sunken
+            ? palette().buttonText().color().darker()
+            : palette().buttonText().color();
 
     QPen arrowPen(textColor);
     arrowPen.setWidthF(1.3);
@@ -125,7 +125,15 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     PaintUtils::drawPanelButtonBevel(&painter, option);
 
     // Draw icon
-    icon().paint(&painter, left, 0, iconSize().width(), height(), Qt::AlignCenter, iconMode, iconState);
+    QPixmap pixmap = icon().pixmap(UtilityFunctions::window(this), iconSize(), iconMode, iconState);
+    if (option.state & QStyle::State_Sunken)
+        pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
+    QRect ir(left, 0, iconSize().width(), height());
+    int w = pixmap.width() / pixmap.devicePixelRatio();
+    int h = pixmap.height() / pixmap.devicePixelRatio();
+    QPoint point(ir.x() + ir.width() / 2 - w / 2,
+                 ir.y() + ir.height() / 2 - h / 2);
+    painter.drawPixmap(style()->visualPos(layoutDirection(), ir, point), pixmap);
 
     // Draw text
     left += iconSize().width() + SPACING;
@@ -142,7 +150,15 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
 
     // Draw device icon
     left += FORWARD_ARROW_LENGTH + SPACING;
-    m_menu->icon().paint(&painter, left, 0, iconSize().width(), height(), Qt::AlignCenter, iconMode, iconState);
+    pixmap = m_menu->icon().pixmap(UtilityFunctions::window(this), iconSize(), iconMode, iconState);
+    if (option.state & QStyle::State_Sunken)
+        pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
+    ir = QRect(left, 0, iconSize().width(), height());
+    w = pixmap.width() / pixmap.devicePixelRatio();
+    h = pixmap.height() / pixmap.devicePixelRatio();
+    point = QPoint(ir.x() + ir.width() / 2 - w / 2,
+                   ir.y() + ir.height() / 2 - h / 2);
+    painter.drawPixmap(style()->visualPos(layoutDirection(), ir, point), pixmap);
 
     // Draw device name
     left += iconSize().width() + SPACING;

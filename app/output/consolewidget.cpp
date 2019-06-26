@@ -1,4 +1,4 @@
-#include <consolepane.h>
+#include <consolewidget.h>
 #include <utilityfunctions.h>
 #include <utilsicons.h>
 #include <transparentstyle.h>
@@ -12,7 +12,7 @@
 #include <QTextStream>
 #include <QToolBar>
 
-ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
+ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
   , m_toolBar(new QToolBar(this))
   , m_titleLabel(new QLabel(this))
   , m_clearButton(new QToolButton(this))
@@ -52,7 +52,7 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     m_clearButton->setToolTip(tr("Clean console output"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
     connect(m_clearButton, &QToolButton::clicked,
-            this, &ConsolePane::clear);
+            this, &ConsoleWidget::clear);
 
     m_fontSizeUpButton->setFixedSize({18, 18});
     m_fontSizeUpButton->setIcon(Utils::Icons::PLUS_TOOLBAR.icon());
@@ -79,9 +79,9 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     m_minimizeButton->setToolTip(tr("Minimize the pane"));
     m_minimizeButton->setCursor(Qt::PointingHandCursor);
     connect(m_minimizeButton, &QToolButton::clicked,
-            this, &ConsolePane::minimized);
-    connect(this, &ConsolePane::blockCountChanged,
-            this, &ConsolePane::updateViewportMargins);
+            this, &ConsoleWidget::minimized);
+    connect(this, &ConsoleWidget::blockCountChanged,
+            this, &ConsoleWidget::updateViewportMargins);
 
     QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
         m_toolBar->setContentsMargins(0, 0, 0, 0);
@@ -92,7 +92,7 @@ ConsolePane::ConsolePane(QWidget* parent) : QPlainTextEdit(parent)
     });
 }
 
-void ConsolePane::fade()
+void ConsoleWidget::fade()
 {
     QTextCharFormat faded;
     faded.setForeground(palette().brush(QPalette::Disabled, QPalette::Text));
@@ -102,12 +102,12 @@ void ConsolePane::fade()
     cursor.mergeCharFormat(faded);
 }
 
-void ConsolePane::discharge()
+void ConsoleWidget::discharge()
 {
     clear();
 }
 
-void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight weight)
+void ConsoleWidget::press(const QString& text, const QBrush& brush, QFont::Weight weight)
 {
     bool scrollDown = verticalScrollBar()->value() == verticalScrollBar()->maximum();
 
@@ -155,7 +155,7 @@ void ConsolePane::press(const QString& text, const QBrush& brush, QFont::Weight 
         emit flash();
 }
 
-void ConsolePane::onLinkClick(const PathFinder::Result& result)
+void ConsoleWidget::onLinkClick(const PathFinder::Result& result)
 {
     if (result.type == PathFinder::Result::Assets) {
         emit assetsFileOpened(result.relativePath, result.line, 0);
@@ -165,14 +165,14 @@ void ConsolePane::onLinkClick(const PathFinder::Result& result)
     }
 }
 
-void ConsolePane::updateViewportMargins()
+void ConsoleWidget::updateViewportMargins()
 {
     QMargins vm = viewportMargins();
     vm.setTop(m_toolBar->height());
     setViewportMargins(vm);
 }
 
-bool ConsolePane::eventFilter(QObject* w, QEvent* e)
+bool ConsoleWidget::eventFilter(QObject* w, QEvent* e)
 {
     if (w == viewport() && (e->type() == QEvent::MouseMove || e->type() == QEvent::MouseButtonRelease)) {
         QMouseEvent* event = static_cast<QMouseEvent*>(e);
@@ -216,18 +216,18 @@ bool ConsolePane::eventFilter(QObject* w, QEvent* e)
     return false;
 }
 
-void ConsolePane::resizeEvent(QResizeEvent* e)
+void ConsoleWidget::resizeEvent(QResizeEvent* e)
 {
     QPlainTextEdit::resizeEvent(e);
     m_toolBar->setGeometry(0, 0, viewport()->width() + 2, m_toolBar->height());
 }
 
-QSize ConsolePane::minimumSizeHint() const
+QSize ConsoleWidget::minimumSizeHint() const
 {
     return {0, 100};
 }
 
-QSize ConsolePane::sizeHint() const
+QSize ConsoleWidget::sizeHint() const
 {
     return {0, 100};
 }

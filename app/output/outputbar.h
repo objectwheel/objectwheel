@@ -1,5 +1,5 @@
-#ifndef BOTTOMBAR_H
-#define BOTTOMBAR_H
+#ifndef OUTPUTBAR_H
+#define OUTPUTBAR_H
 
 #include <pushbutton.h>
 
@@ -7,13 +7,13 @@ class QHBoxLayout;
 class QButtonGroup;
 class ButtonFlasher;
 
-class BottomBar final : public QWidget
+class OutputBar final : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(BottomBar)
+    Q_DISABLE_COPY(OutputBar)
 
 public:
-    explicit BottomBar(QWidget* parent = nullptr);
+    explicit OutputBar(QWidget* parent = nullptr);
 
     QAbstractButton* activeButton() const;
     QAbstractButton* consoleButton() const;
@@ -44,4 +44,4 @@ private:
     ButtonFlasher* m_issuesFlasher;
 };
 
-#endif // BOTTOMBAR_H
+#endif // OUTPUTBAR_H

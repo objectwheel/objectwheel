@@ -307,7 +307,7 @@ void SegmentedBar::paintEvent(QPaintEvent*)
         // Draw background
         QStyleOptionButton copy(option);
         copy.rect = rect();
-        PaintUtils::drawPanelButtonBevel(&painter, copy, false);
+        PaintUtils::drawPanelButtonBevel(&painter, copy);
 
         // Draw menu indicator, which is cropped by "clip rect"
         if (action != visibleActions().last()

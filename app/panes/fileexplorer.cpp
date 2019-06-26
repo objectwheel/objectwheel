@@ -571,8 +571,9 @@ void FileExplorer::setPalette(const QPalette& pal)
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
 
-    QPixmap icon = PaintUtils::renderMaskedPixmap(":/utils/images/filtericon@2x.png",
-                                                          pal.buttonText().color(), devicePixelRatioF());
+    QPixmap icon = PaintUtils::renderOverlaidPixmap(":images/filter.svg",
+                                                    pal.buttonText().color(),
+                                                    devicePixelRatioF());
     g_modeIFilterIconLabel->setPixmap(icon.scaled(16 * devicePixelRatioF(),
                                                   16 * devicePixelRatioF(),
                                                   Qt::IgnoreAspectRatio, Qt::SmoothTransformation));

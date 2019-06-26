@@ -1,6 +1,7 @@
 #include <applicationstyle.h>
 #include <utilityfunctions.h>
 #include <utilsicons.h>
+#include <paintutils.h>
 
 #include <QStyleFactory>
 #include <QApplication>
@@ -39,11 +40,6 @@ void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect,
 QRect comboboxInnerBounds(const QRect& outerBounds)
 {
     return outerBounds.adjusted(3, 3, -1, -5);
-}
-
-QWindow *qt_getWindow(const QWidget *widget)
-{
-    return widget ? widget->window()->windowHandle() : 0;
 }
 
 void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
@@ -495,10 +491,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 }
 
                 QWindow* window = nullptr;
-                if (widget) {
-                    Q_ASSERT(UtilityFunctions::window(widget));
+                if (widget)
                     window = UtilityFunctions::window(widget);
-                }
                 QPixmap pixmap = mi.icon.pixmap(window, iconSize, mode);
                 int pixw = pixmap.width() / pixmap.devicePixelRatioF();
                 int pixh = pixmap.height() / pixmap.devicePixelRatioF();
@@ -565,10 +559,12 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 if (mode == QIcon::Normal && button->state & State_HasFocus)
                     mode = QIcon::Active;
                 QIcon::State state = QIcon::Off;
-                if (button->state & State_On || button->state & State_Sunken)
+                if (button->state & State_On)
                     state = QIcon::On;
 
-                QPixmap pixmap = button->icon.pixmap(button->iconSize, mode, state);
+                QPixmap pixmap = button->icon.pixmap(UtilityFunctions::window(widget), button->iconSize, mode, state);
+                if (button->state & State_Sunken)
+                    pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
                 int w = pixmap.width() / pixmap.devicePixelRatio();
                 int h = pixmap.height() / pixmap.devicePixelRatio();
                 if (!button->text.isEmpty())
@@ -594,12 +590,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
             // Draw item text
             QStyleOptionButton copy(*button);
-            if (option->styleObject && option->styleObject->parent() &&
-                    option->styleObject->parent()->inherits("SegmentedBar")) {
-                if (copy.state & State_Sunken && copy.palette.buttonText().color() != Qt::white)
-                    copy.palette.setColor(QPalette::Active, QPalette::ButtonText, copy.palette.buttonText().color().darker());
-            } else if ((copy.state & State_On || copy.state & State_Sunken) && copy.palette.buttonText().color() != Qt::white)
-                copy.palette.setColor(QPalette::Active, QPalette::ButtonText, copy.palette.buttonText().color().darker());
+            if (copy.state & State_Sunken)
+                copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
             proxy()->drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
                                   copy.text, QPalette::ButtonText);
         } break;
@@ -646,7 +638,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                         mode = QIcon::Active;
                     else
                         mode = QIcon::Normal;
-                    pm = copy.icon.pixmap(qt_getWindow(widget), copy.rect.size().boundedTo(copy.iconSize),
+                    pm = copy.icon.pixmap(UtilityFunctions::window(widget), copy.rect.size().boundedTo(copy.iconSize),
                                           mode, state);
                     pmSize = pm.size() / pm.devicePixelRatio();
                 }

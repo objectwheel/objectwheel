@@ -1,5 +1,5 @@
-#ifndef CONSOLEPANE_H
-#define CONSOLEPANE_H
+#ifndef CONSOLEWIDGET_H
+#define CONSOLEWIDGET_H
 
 #include <QApplication>
 #include <QPlainTextEdit>
@@ -10,12 +10,12 @@ class QToolBar;
 class QLabel;
 class Control;
 
-class ConsolePane : public QPlainTextEdit
+class ConsoleWidget : public QPlainTextEdit
 {
     Q_OBJECT
 
 public:
-    explicit ConsolePane(QWidget* widget = nullptr);
+    explicit ConsoleWidget(QWidget* widget = nullptr);
 
 public slots:
     void fade();
@@ -50,4 +50,4 @@ private:
     QToolButton* m_minimizeButton;
 };
 
-#endif // CONSOLEPANE_H
+#endif // CONSOLEWIDGET_H

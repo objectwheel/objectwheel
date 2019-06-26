@@ -166,7 +166,7 @@ AboutWindow gösterilirken (loginwidget.cpp'den) arka planda gizli olarak göste
 ZipAsync'deki senkron fonksiyonlardan, asenkron fonksiyonların kullanımına geçilsin.
 MainWindow'un state save etme bokunu düzelt, show ve close eventlerde hiç bi bok kaydetme, daha iyi bi yol bul
 QmlCodeEditorWidget, bir kontrolün main.qml'i ilk açılınca, açıldıktan sonra bir tuşa basmadan önce, ilgili kontrolun klasöründe bulunan qml tüpleri eğer main.qml de kullanılmışsa, o tipler için error işaretleri belirmiş oluyor, ama bir tuşa basınca aynı klasördeki tipleri yakalıyor ve errorlar gidiyor
-QmlCodeEDitorWidge'de IssuesPane'deki her error için bir mark oluşturulmalı
+QmlCodeEDitorWidge'de IssuesWidget'deki her error için bir mark oluşturulmalı
 QmlCodeEDitorWidge'de bir kodu kopyalayıp yapıştırınca hep ilk satır ileri doğru kayık başlıyor
 QmlCodeEDitorWidget top bar'daki comboboxlar git gide dokumanlar açılıp kapandıkça genişliyor, çok fazla yer kaplıyor
 Control:visible propertysinin propertiespane'de ver previewer'deki durumunu tartış
@@ -266,7 +266,7 @@ progressbar başarılı "run" mavi rengi değiştirilecek
 Çift tıklayınca satır sütün şeklinde açacak editörü, global, internal, external, inline alayı halledilmeli
 global resource'dan veya external bir kaynaktan bir dosya kod editörde editlenirken save edilirse, o dosyayı import eden tüm internal ve external ne varsa alayına ilişkin context'ler deki Qml objeleri sanki code change olmuş gibi yeniden derlenecek, preveiew edilecek
 
-PropertiesPane, IssuesPane... gibi tüm pane kodlarında ControlPropertyManager sinyallerinin ilgili pane slotlarına connect edilmesi yanlış, bu connectionlar bir üst sınıflara taşınacak, CentralWidget, MainWindow gibi
+PropertiesPane, IssuesWidget... gibi tüm pane kodlarında ControlPropertyManager sinyallerinin ilgili pane slotlarına connect edilmesi yanlış, bu connectionlar bir üst sınıflara taşınacak, CentralWidget, MainWindow gibi
 Anchors should be able to edited from PropertiesPane
 PropertiesPane should be able to support attached properties, like Component.xx, Layout.xx, ScrollView.xx
 Double click on a control leads to a signal list, that signal list should be able to support and show attached signals and slots

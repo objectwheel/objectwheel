@@ -40,7 +40,7 @@ void ToolboxController::onProjectInfoUpdate()
         m_toolboxPane->toolboxTree()->addTool(
                     ToolUtils::toolName(toolPath),
                     ToolUtils::toolCetegory(toolPath), toolPath,
-                    QIcon(ToolUtils::toolIcon(toolPath, m_toolboxPane->devicePixelRatioF())));
+                    QIcon(ToolUtils::toolIconPath(toolPath)));
     }
 }
 
@@ -117,7 +117,7 @@ QDrag* ToolboxController::establishDrag(ToolboxItem* item)
     mimeData->setData(QStringLiteral("application/x-objectwheel-tool"),
                       UtilityFunctions::push(item->dir()));
 
-    QPixmap pixmap(item->icon().pixmap(m_toolboxPane->toolboxTree()->iconSize()));
+    QPixmap pixmap(item->icon().pixmap(UtilityFunctions::window(m_toolboxPane), m_toolboxPane->toolboxTree()->iconSize()));
     pixmap.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
 
     QPointer<QDrag> drag = new QDrag(this);

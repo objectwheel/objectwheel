@@ -140,11 +140,11 @@ QSize RunPane::minimumSizeHint() const
 void RunPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_runDevicesButton->setIcon(renderButtonIcon(":/images/devices.png", devicePixelRatioF()));
-    m_runButton->setIcon(renderOverlaidButtonIcon(":/images/run.svg", m_runButton));
-    m_stopButton->setIcon(renderOverlaidButtonIcon(":/images/stop.svg", m_stopButton));
-    m_preferencesButton->setIcon(renderOverlaidButtonIcon(":/images/settings.svg", m_preferencesButton));
-    m_projectsButton->setIcon(renderOverlaidButtonIcon(":/images/projects.svg", m_projectsButton));
+    m_runDevicesButton->setIcon(QIcon(":/images/devices.png"));
+    m_runButton->setIcon(renderButtonIcon(":/images/run.svg", m_runButton->palette()));
+    m_stopButton->setIcon(renderButtonIcon(":/images/stop.svg", m_stopButton->palette()));
+    m_preferencesButton->setIcon(renderButtonIcon(":/images/settings.svg", m_preferencesButton->palette()));
+    m_projectsButton->setIcon(renderButtonIcon(":/images/projects.svg", m_projectsButton->palette()));
 
     QStringList iconFileNames {
         ":/images/left.svg",
@@ -153,13 +153,7 @@ void RunPane::updateIcons()
     };
     for (int i = 0; i < iconFileNames.size(); ++i) {
         QAction* action = m_segmentedBar->actions().at(i);
-        const QString& fileName = iconFileNames.at(i);
-        QIcon icon;
-        QColor up = m_segmentedBar->palette().buttonText().color();
-        QColor down = QColor("#157efb");
-        icon.addPixmap(renderOverlaidPixmap(fileName, up, m_segmentedBar->devicePixelRatioF()), QIcon::Normal, QIcon::Off);
-        icon.addPixmap(renderOverlaidPixmap(fileName, down, m_segmentedBar->devicePixelRatioF()), QIcon::Normal, QIcon::On);
-        action->setIcon(icon);
+        action->setIcon(renderButtonIcon(iconFileNames.at(i), m_segmentedBar->palette()));
     }
 }
 

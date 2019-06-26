@@ -242,11 +242,6 @@ QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top)
     return ret;
 }
 
-QPixmap scaled(const QPixmap& pixmap, const QSize& size)
-{
-    return pixmap.scaled(size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-}
-
 QIcon iconForQmlError(const QmlError& error, const QAbstractItemView* view)
 {
     static QIcon info, warning, critical;
@@ -432,27 +427,27 @@ QVariantMap localDeviceInfo()
     return info.toVariantMap();
 }
 
-QIcon deviceIcon(const QVariantMap& deviceInfo, qreal devicePixelRatio)
+QIcon deviceIcon(const QVariantMap& deviceInfo)
 {
     const QString productType = deviceInfo.value("productType").toString();
     const QString deviceName = deviceInfo.value("deviceName").toString();
     const QString deviceUid = deviceInfo.value("deviceUid").toString();
 
     if (deviceUid == localDeviceInfo().value("deviceUid"))
-        return PaintUtils::renderButtonIcon(":/images/mycomputer.png", devicePixelRatio);
+        return QIcon(":/images/mycomputer.png");
     if (productType == "ios") {
         if (deviceName.contains("ipad", Qt::CaseInsensitive))
-            return PaintUtils::renderButtonIcon(":/images/ipad.svg", devicePixelRatio);
-        return PaintUtils::renderButtonIcon(":/images/ios.svg", devicePixelRatio);
+            return QIcon(":/images/ipad.svg");
+        return QIcon(":/images/ios.svg");
     }
     if (productType == "android")
-        return PaintUtils::renderButtonIcon(":/images/android.svg", devicePixelRatio);
+        return QIcon(":/images/android.svg");
     if (productType == "osx") {
         if (deviceName.contains("macbook", Qt::CaseInsensitive))
-            return PaintUtils::renderButtonIcon(":/images/macbook.svg", devicePixelRatio);
-        return PaintUtils::renderButtonIcon(":/images/imac.svg", devicePixelRatio);
+            return QIcon(":/images/macbook.svg");
+        return QIcon(":/images/imac.svg");
     }
-    return PaintUtils::renderButtonIcon(":/images/mycomputer.png", devicePixelRatio);
+    return QIcon(":/images/mycomputer.png");
 }
 
 QString deviceUid(const QVariantMap& deviceInfo)

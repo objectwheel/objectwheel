@@ -3,7 +3,7 @@
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
 #include <buildswidget.h>
-#include <issuespane.h>
+#include <issueswidget.h>
 #include <designerscene.h>
 #include <controlrenderingmanager.h>
 #include <controlremovingmanager.h>
@@ -17,8 +17,8 @@
 #include <qmlcodeeditor.h>
 #include <saveutils.h>
 #include <projectmanager.h>
-#include <bottombar.h>
-#include <consolepane.h>
+#include <outputbar.h>
+#include <consolewidget.h>
 #include <controlpropertymanager.h>
 
 #include <QWindow>
@@ -39,9 +39,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_splitterOut(new QSplitter)
   , m_splitterIn(new QSplitter)
-  , m_bottomBar(new BottomBar)
-  , m_consolePane(new ConsolePane)
-  , m_issuesPane(new IssuesPane)
+  , m_outputBar(new OutputBar)
+  , m_consoleWidget(new ConsoleWidget)
+  , m_issuesWidget(new IssuesWidget)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
@@ -56,13 +56,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->setFrameShape(QFrame::NoFrame);
     m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
-    m_splitterOut->addWidget(m_consolePane);
-    m_splitterOut->addWidget(m_issuesPane);
-    m_splitterOut->addWidget(m_bottomBar);
+    m_splitterOut->addWidget(m_consoleWidget);
+    m_splitterOut->addWidget(m_issuesWidget);
+    m_splitterOut->addWidget(m_outputBar);
     m_splitterOut->setChildrenCollapsible(false);
     m_splitterOut->handle(3)->setDisabled(true);
 
-    m_bottomBar->setFixedHeight(24);
+    m_outputBar->setFixedHeight(24);
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
@@ -91,52 +91,52 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
             this, [=] (Control* control, int codeChanged) {
         if (codeChanged)
-            m_issuesPane->refresh(control);
+            m_issuesWidget->refresh(control);
     });
-    connect(m_issuesPane, &IssuesPane::titleChanged,
-            m_bottomBar->issuesButton(), &QAbstractButton::setText);
-    connect(m_issuesPane, &IssuesPane::designsFileOpened,
+    connect(m_issuesWidget, &IssuesWidget::titleChanged,
+            m_outputBar->issuesButton(), &QAbstractButton::setText);
+    connect(m_issuesWidget, &IssuesWidget::designsFileOpened,
             m_designerWidget, &DesignerWidget::onDesignsFileOpen);
-    connect(m_issuesPane, &IssuesPane::assetsFileOpened,
+    connect(m_issuesWidget, &IssuesWidget::assetsFileOpened,
             m_designerWidget, &DesignerWidget::onAssetsFileOpen);
-    connect(m_consolePane, &ConsolePane::designsFileOpened,
+    connect(m_consoleWidget, &ConsoleWidget::designsFileOpened,
             m_designerWidget, &DesignerWidget::onDesignsFileOpen);
-    connect(m_consolePane, &ConsolePane::assetsFileOpened,
+    connect(m_consoleWidget, &ConsoleWidget::assetsFileOpened,
             m_designerWidget, &DesignerWidget::onAssetsFileOpen);
-    connect(m_issuesPane, &IssuesPane::flash,
+    connect(m_issuesWidget, &IssuesWidget::flash,
             this, [=] {
-        m_bottomBar->flash(m_bottomBar->issuesButton());
+        m_outputBar->flash(m_outputBar->issuesButton());
     });
-    connect(m_consolePane, &ConsolePane::flash,
+    connect(m_consoleWidget, &ConsoleWidget::flash,
             this, [=] {
-        m_bottomBar->flash(m_bottomBar->consoleButton());
+        m_outputBar->flash(m_outputBar->consoleButton());
     });
-    connect(m_issuesPane, &IssuesPane::minimized,
+    connect(m_issuesWidget, &IssuesWidget::minimized,
             this, [=] {
-        m_bottomBar->issuesButton()->setChecked(false);
-        m_issuesPane->hide();
+        m_outputBar->issuesButton()->setChecked(false);
+        m_issuesWidget->hide();
         emit bottomPaneTriggered(false);
     });
-    connect(m_consolePane, &ConsolePane::minimized,
+    connect(m_consoleWidget, &ConsoleWidget::minimized,
             this, [=] {
-        m_bottomBar->consoleButton()->setChecked(false);
-        m_consolePane->hide();
+        m_outputBar->consoleButton()->setChecked(false);
+        m_consoleWidget->hide();
         emit bottomPaneTriggered(false);
     });
-    connect(m_bottomBar, &BottomBar::buttonActivated,
+    connect(m_outputBar, &OutputBar::buttonActivated,
             this, [=] (QAbstractButton* button) {
-        if (button == m_bottomBar->consoleButton()) {
+        if (button == m_outputBar->consoleButton()) {
             if (button->isChecked())
-                m_consolePane->show();
+                m_consoleWidget->show();
             else
-                m_consolePane->hide();
+                m_consoleWidget->hide();
         } else {
             if (button->isChecked())
-                m_issuesPane->show();
+                m_issuesWidget->show();
             else
-                m_issuesPane->hide();
+                m_issuesWidget->hide();
         }
-        emit bottomPaneTriggered(m_issuesPane->isVisible() || m_consolePane->isVisible());
+        emit bottomPaneTriggered(m_issuesWidget->isVisible() || m_consoleWidget->isVisible());
     });
 
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
@@ -198,28 +198,28 @@ DesignerWidget* CentralWidget::designerWidget() const
     return m_designerWidget;
 }
 
-IssuesPane* CentralWidget::issuesPane() const
+IssuesWidget* CentralWidget::issuesWidget() const
 {
-    return m_issuesPane;
+    return m_issuesWidget;
 }
 
-BottomBar* CentralWidget::bottomBar() const
+OutputBar* CentralWidget::outputBar() const
 {
-    return m_bottomBar;
+    return m_outputBar;
 }
 
-ConsolePane* CentralWidget::consolePane() const
+ConsoleWidget* CentralWidget::consoleWidget() const
 {
-    return m_consolePane;
+    return m_consoleWidget;
 }
 
 void CentralWidget::discharge()
 {
-    m_consolePane->hide();
-    m_issuesPane->hide();
-    m_bottomBar->discharge();
-    m_consolePane->discharge();
-    m_issuesPane->discharge();
+    m_consoleWidget->hide();
+    m_issuesWidget->hide();
+    m_outputBar->discharge();
+    m_consoleWidget->discharge();
+    m_issuesWidget->discharge();
     m_qmlCodeEditorWidget->discharge();
     m_designerWidget->discharge();
     m_projectOptionsWidget->discharge();
@@ -229,27 +229,27 @@ void CentralWidget::discharge()
 
 void CentralWidget::setBottomPaneVisible(bool visible)
 {
-    if (m_bottomBar->activeButton() && visible)
+    if (m_outputBar->activeButton() && visible)
         return;
-    if (!m_bottomBar->activeButton() && !visible)
+    if (!m_outputBar->activeButton() && !visible)
         return;
-    if (m_bottomBar->activeButton()) {
-        m_bottomBar->activeButton()->setChecked(false);
-        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesPane->hide();
+    if (m_outputBar->activeButton()) {
+        m_outputBar->activeButton()->setChecked(false);
+        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+            m_issuesWidget->hide();
         else
-            m_consolePane->hide();
+            m_consoleWidget->hide();
     } else {
-        m_bottomBar->consoleButton()->setChecked(true);
-        m_consolePane->show();
+        m_outputBar->consoleButton()->setChecked(true);
+        m_consoleWidget->show();
     }
 }
 
 void CentralWidget::hideWidgets()
 {
-    m_bottomBar->hide();
-    m_issuesPane->hide();
-    m_consolePane->hide();
+    m_outputBar->hide();
+    m_issuesWidget->hide();
+    m_consoleWidget->hide();
     m_designerWidget->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();
@@ -263,29 +263,29 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
 
     switch (mode) {
     case ModeManager::Designer:
-        m_bottomBar->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consolePane->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesPane->show();
+        m_outputBar->show();
+        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
+            m_consoleWidget->show();
+        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+            m_issuesWidget->show();
         m_designerWidget->show();
         break;
 
     case ModeManager::Editor:
-        m_bottomBar->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consolePane->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesPane->show();
+        m_outputBar->show();
+        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
+            m_consoleWidget->show();
+        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+            m_issuesWidget->show();
         g_editorContainer->show();
         break;
 
     case ModeManager::Split:
-        m_bottomBar->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->consoleButton())
-            m_consolePane->show();
-        if (m_bottomBar->activeButton() == m_bottomBar->issuesButton())
-            m_issuesPane->show();
+        m_outputBar->show();
+        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
+            m_consoleWidget->show();
+        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+            m_issuesWidget->show();
         m_designerWidget->show();
         g_editorContainer->show();
         break;

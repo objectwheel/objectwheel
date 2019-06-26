@@ -9,7 +9,7 @@ class RunDevicesButton final : public QPushButton
     Q_DISABLE_COPY(RunDevicesButton)
 
     enum {
-        SPACING = 4,
+        SPACING = 3,
         LEFT_PADDING = 8,
         FORWARD_ARROW_LENGTH = 9,
         RIGHT_PADDING = LEFT_PADDING + 2

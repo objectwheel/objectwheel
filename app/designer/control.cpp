@@ -588,7 +588,8 @@ void Control::updateImage(const RenderResult& result)
         } else {
             m_pixmap = QPixmap::fromImage(
                         PaintUtils::renderNonGuiControlImage(
-                            ToolUtils::toolIcon(m_dir, ControlRenderingManager::devicePixelRatio()), size(), ControlRenderingManager::devicePixelRatio()));
+                            ToolUtils::toolIconPath(m_dir), size(),
+                            ControlRenderingManager::devicePixelRatio()));
         }
     }
 

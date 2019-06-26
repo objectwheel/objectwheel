@@ -82,12 +82,12 @@ QImage PaintUtils::renderErrorControlImage(const QSizeF& size, qreal dpr)
     return dest;
 }
 
-QImage PaintUtils::renderNonGuiControlImage(const QPixmap& pixmap, const QSizeF& size, qreal dpr)
+QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, qreal dpr)
 {
     QImage dest = renderTransparentImage(size, dpr);
     QRectF destRect{{}, size};
 
-    QImage source(pixmap.toImage());
+    QImage source(imagePath);
     source.setDevicePixelRatio(dpr);
     QRectF sourceRect{{}, QSizeF{24, 24}};
     sourceRect.moveCenter(destRect.center());
@@ -100,54 +100,33 @@ QImage PaintUtils::renderNonGuiControlImage(const QPixmap& pixmap, const QSizeF&
     return dest;
 }
 
-QIcon PaintUtils::renderOverlaidIcon(const QString& fileName, const QColor& color, qreal dpr)
+QIcon PaintUtils::renderItemIcon(const QString& fileName, const QPalette& palette)
 {
     QIcon icon;
-    icon.addPixmap(renderOverlaidPixmap(fileName, color, dpr));
+    QColor normal = palette.text().color();
+    QColor selected = palette.highlightedText().color();
+    icon.addPixmap(renderOverlaidPixmap(fileName, normal, 1), QIcon::Normal);
+    icon.addPixmap(renderOverlaidPixmap(fileName, selected, 1), QIcon::Selected);
     return icon;
 }
 
-QIcon PaintUtils::renderOverlaidIcon(const QIcon& icon, const QSize& size, const QColor& color, const QWidget* widget)
-{
-    QIcon i;
-    Q_ASSERT(UtilityFunctions::window(widget));
-    i.addPixmap(renderOverlaidPixmap(icon.pixmap(UtilityFunctions::window(widget), size), color, widget->devicePixelRatioF()));
-    return i;
-}
-
-QIcon PaintUtils::renderButtonIcon(const QString& fileName, qreal dpr)
+QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QPalette& palette)
 {
     QIcon icon;
-    QPixmap pixmap(fileName);
-    pixmap.setDevicePixelRatio(dpr);
-    icon.addPixmap(pixmap, QIcon::Normal, QIcon::Off);
-    icon.addPixmap(renderOverlaidPixmap(fileName, "#20000000", dpr), QIcon::Normal, QIcon::On);
+    QColor up = palette.color(QPalette::Normal, QPalette::ButtonText);
+    QColor down("#157efb");
+    icon.addPixmap(renderOverlaidPixmap(fileName, up, 1), QIcon::Normal, QIcon::Off);
+    icon.addPixmap(renderOverlaidPixmap(fileName, down, 1), QIcon::Normal, QIcon::On);
     return icon;
 }
 
-QIcon PaintUtils::renderToolButtonIcon(const QString& fileName, qreal dpr)
+QIcon PaintUtils::renderModeButtonIcon(const QString& fileName)
 {
     QFileInfo fileInfo(fileName);
-    QPixmap off, on;
-
-    off.load(fileName);
-    on.load(fileInfo.path() + '/' + fileInfo.baseName() + "-active." + fileInfo.suffix());
-    off.setDevicePixelRatio(dpr);
-    on.setDevicePixelRatio(dpr);
-
+    QPixmap off(fileName), on(fileInfo.path() + '/' + fileInfo.baseName() + "-active." + fileInfo.suffix());
     QIcon icon;
     icon.addPixmap(off, QIcon::Normal, QIcon::Off);
     icon.addPixmap(on, QIcon::Normal, QIcon::On);
-    return icon;
-}
-
-QIcon PaintUtils::renderOverlaidButtonIcon(const QString& fileName, const QWidget* widget)
-{
-    QIcon icon;
-    QColor up = widget->palette().color(QPalette::Active, QPalette::ButtonText);
-    QColor down = widget->palette().color(QPalette::Active, QPalette::ButtonText).darker();
-    icon.addPixmap(renderOverlaidPixmap(fileName, up, widget->devicePixelRatioF()), QIcon::Normal, QIcon::Off);
-    icon.addPixmap(renderOverlaidPixmap(fileName, down, widget->devicePixelRatioF()), QIcon::Normal, QIcon::On);
     return icon;
 }
 
@@ -155,23 +134,22 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QString& fileName, const QColor& 
 {
     QPixmap source(fileName);
     source.setDevicePixelRatio(dpr);
-    return renderOverlaidPixmap(source, color, dpr);
+    return renderOverlaidPixmap(source, color);
 }
 
-QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color, qreal dpr)
+QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color)
 {
     QPixmap dest(pixmap);
-    dest.setDevicePixelRatio(dpr);
-
     QColor opaque(color);
     opaque.setAlphaF(1);
 
-    QImage overlay = renderFilledImage(pixmap.size() / dpr, opaque, dpr);
+    QImage overlay = renderFilledImage(pixmap.size() / pixmap.devicePixelRatioF(),
+                                       opaque, pixmap.devicePixelRatioF());
     {
         QPainter p(&overlay);
         p.setRenderHint(QPainter::Antialiasing);
         p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        p.drawPixmap(QRectF({}, pixmap.size() / dpr), pixmap, pixmap.rect());
+        p.drawPixmap(QRectF({}, pixmap.size() / pixmap.devicePixelRatioF()), pixmap, pixmap.rect());
     }
 
     if (color.alphaF() == 1)
@@ -180,32 +158,10 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
     p.setOpacity(color.alphaF());
-    p.drawImage(QRectF({}, dest.size() / dpr), overlay, overlay.rect());
+    p.drawImage(QRectF({}, dest.size() / pixmap.devicePixelRatioF()), overlay, overlay.rect());
     p.end();
 
     return dest;
-}
-
-// For colorizing the files that are located within the "utils/images" directory
-QPixmap PaintUtils::renderMaskedPixmap(const QString& fileName, const QColor& color, qreal dpr)
-{
-    QImage source(fileName);
-    source.setDevicePixelRatio(dpr);
-
-    QImage dest = renderFilledImage(source.size() / dpr, Qt::transparent, dpr);
-
-    Q_ASSERT(source.size() == dest.size());
-
-    QColor copy(color);
-    for (int i = 0; i < dest.width(); ++i) {
-        for (int j = 0; j < dest.height(); ++j) {
-            int alpha = QColor(source.pixel(i, j)).black();
-            copy.setAlpha(alpha);
-            dest.setPixelColor(QPoint(i, j), copy);
-        }
-    }
-
-    return QPixmap::fromImage(dest);
 }
 
 QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, qreal dpr)
@@ -222,14 +178,11 @@ QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& c
     return QPixmap::fromImage(dest);
 }
 
-void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option, bool downWhenChecked)
+void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option)
 {
     painter->save();
 
-    const bool down = (option.state & QStyle::State_Sunken)
-            || (downWhenChecked && (option.state & QStyle::State_On));
-    const bool bright = option.styleObject
-            ? option.styleObject->property("ow_bottombar_bright").toBool() : false;
+    const bool isSunken = option.state & QStyle::State_Sunken;
 
     // Draw drop shadow
     QLinearGradient shadowGrad(0, 0, 1, 0);
@@ -259,46 +212,30 @@ void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOptionButto
     // Draw body
     QLinearGradient midGrad(0, 0, 0, 1);
     midGrad.setCoordinateMode(QGradient::ObjectMode);
-    if (bright) {
-        midGrad.setColorAt(0, "#b34b46");
-        midGrad.setColorAt(1, "#a2403b");
-    } else {
-        midGrad.setColorAt(0, "#e4e4e4");
-        midGrad.setColorAt(1, "#dedede");
-    }
+    midGrad.setColorAt(0, "#e4e4e4");
+    midGrad.setColorAt(1, "#dedede");
     QLinearGradient buttonGrad(0, 0, 0, 1);
     buttonGrad.setCoordinateMode(QGradient::ObjectMode);
-    if (bright) {
-        buttonGrad.setColorAt(0, "#c2504b");
-        buttonGrad.setColorAt(1, "#b34b46");
-    } else {
-        buttonGrad.setColorAt(0, "#fdfdfd");
-        buttonGrad.setColorAt(1, "#f3f3f3");
-    }
+    buttonGrad.setColorAt(0, "#fdfdfd");
+    buttonGrad.setColorAt(1, "#f3f3f3");
     QPainterPath bodyPath;
     bodyPath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 1, -0.5, -1), 3.5, 3.5);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(down ? midGrad : buttonGrad);
+    painter->setBrush(isSunken ? midGrad : buttonGrad);
     painter->drawPath(bodyPath);
     // NOTE: QRect's bottom() and bottomLeft()... are different from QRectF, for historical reasons
     // as stated in the docs, those functions return top() + height() - 1 (QRect)
 
     // Draw glowing for pressed state
-    if (down) {
+    if (isSunken) {
         QPainterPath glowPathUp;
         glowPathUp.addRoundedRect(QRectF(option.rect).adjusted(0, 1.5, 0, 1), 4.5, 4.5);
         QPainterPath glowPathDown;
         glowPathDown.addRoundedRect(QRectF(option.rect).adjusted(0, 2, 0, 1), 4.5, 4.5);
         painter->setPen(Qt::NoPen);
-        if (bright) {
-            painter->setBrush(QColor("#cc5650"));
-            painter->drawPath(bodyPath.subtracted(glowPathDown));
-            painter->setBrush(QColor("#e5615a"));
-        } else {
-            painter->setBrush(QColor("#ebebeb"));
-            painter->drawPath(bodyPath.subtracted(glowPathDown));
-            painter->setBrush(QColor("#f3f3f3"));
-        }
+        painter->setBrush(QColor("#ebebeb"));
+        painter->drawPath(bodyPath.subtracted(glowPathDown));
+        painter->setBrush(QColor("#f3f3f3"));
         painter->drawPath(bodyPath.subtracted(glowPathUp));
     }
 

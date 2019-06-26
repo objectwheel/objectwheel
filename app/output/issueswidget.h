@@ -1,5 +1,5 @@
-#ifndef ISSUESPANE_H
-#define ISSUESPANE_H
+#ifndef ISSUESWIDGET_H
+#define ISSUESWIDGET_H
 
 #include <QListWidget>
 #include <qmlerror.h>
@@ -9,7 +9,7 @@ class QLabel;
 class QToolButton;
 class Control;
 
-class IssuesPane : public QListWidget
+class IssuesWidget : public QListWidget
 {
     Q_OBJECT
 
@@ -20,7 +20,7 @@ class IssuesPane : public QListWidget
     };
 
 public:
-    explicit IssuesPane(QWidget* parent = nullptr);
+    explicit IssuesWidget(QWidget* parent = nullptr);
 
 public slots:
     void discharge();
@@ -52,6 +52,6 @@ private:
     QList<ControlErrors*> m_erroneousControls;
 };
 
-Q_DECLARE_METATYPE(const IssuesPane::ControlErrors*)
+Q_DECLARE_METATYPE(const IssuesWidget::ControlErrors*)
 
-#endif // ISSUESPANE_H
+#endif // ISSUESWIDGET_H

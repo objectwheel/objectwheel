@@ -43,21 +43,6 @@ const QJsonObject& toolCategories()
 
 } // Internal
 
-QPixmap toolIcon(const QString& controlDir, double dpr)
-{
-    Q_ASSERT(SaveUtils::isControlValid(controlDir));
-
-    const QJsonObject& icons(Internal::toolIcons());
-    const QString& module = ParserUtils::module(controlDir);
-    const QString& iconPath = icons.contains(module)
-            ? icons.value(module).toString()
-            : QStringLiteral(":/images/item.svg");
-
-    QPixmap icon(iconPath);
-    icon.setDevicePixelRatio(dpr);
-    return icon;
-}
-
 QString toolName(const QString& controlDir)
 {
     Q_ASSERT(SaveUtils::isControlValid(controlDir));
@@ -91,6 +76,18 @@ QString toolCetegory(const QString& controlDir)
         category = categories.value(library).toString();
 
     return category;
+}
+
+QString toolIconPath(const QString& controlDir)
+{
+    Q_ASSERT(SaveUtils::isControlValid(controlDir));
+
+    const QJsonObject& icons(Internal::toolIcons());
+    const QString& module = ParserUtils::module(controlDir);
+    const QString& iconPath = icons.contains(module)
+            ? icons.value(module).toString()
+            : QStringLiteral(":/images/item.svg");
+    return iconPath;
 }
 
 } // ToolUtils

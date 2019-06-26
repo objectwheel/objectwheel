@@ -79,7 +79,6 @@ QWidget* createSeparatorWidget(Qt::Orientation orientation);
 QWindow* window(const QWidget* widget);
 QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left = 0);
 QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top = 0);
-QPixmap scaled(const QPixmap& pixmap, const QSize& size);
 QIcon iconForQmlError(const QmlError& error, const QAbstractItemView* view);
 QPoint centerPos(const QSize& size);
 QString increasedNumberedText(const QString& text, bool addSpace, bool trim);
@@ -93,7 +92,7 @@ QVariant getProperty(const QString& property, const QList<PropertyNode>& propert
 Enum getEnum(const QString& name, const QList<PropertyNode>& properties);
 QVariantMap localDeviceInfo();
 QString stringify(const QString& text);
-QIcon deviceIcon(const QVariantMap& deviceInfo, qreal devicePixelRatio);
+QIcon deviceIcon(const QVariantMap& deviceInfo);
 QString deviceUid(const QVariantMap& deviceInfo);
 QString deviceName(const QVariantMap& deviceInfo);
 QString deviceInfoToolTip(const QVariantMap& deviceInfo);

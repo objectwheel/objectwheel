@@ -162,14 +162,8 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
         else
             item->setText(1, QObject::tr("No"));
 
-        QIcon icon;
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(child->dir(), treeWidget->devicePixelRatioF()),
-                                                        treeWidget->palette().text().color(),
-                                                        treeWidget->devicePixelRatioF()), QIcon::Normal);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(child->dir(), treeWidget->devicePixelRatioF()),
-                                                        treeWidget->palette().highlightedText().color(),
-                                                        treeWidget->devicePixelRatioF()), QIcon::Selected);
-        item->setIcon(0, icon);
+        item->setIcon(0, PaintUtils::renderItemIcon(ToolUtils::toolIconPath(child->dir()),
+                                                    treeWidget->palette()));
         parentItem->addChild(item);
         addChildrenIntoItem(item, child->childControls(false));
     }
@@ -446,20 +440,12 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     clear();
     m_designerScene->clearSelection();
 
-    QIcon formIcon;
-    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
-                                                        palette().text().color(),
-                                                        devicePixelRatioF()), QIcon::Normal);
-    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
-                                                        palette().highlightedText().color(),
-                                                        devicePixelRatioF()), QIcon::Selected);
-
     /* Create items for incoming form */
     auto formItem = new QTreeWidgetItem;
     formItem->setText(0, currentForm->id());
     formItem->setData(0, Qt::UserRole, currentForm->hasErrors());
     formItem->setData(1, Qt::UserRole, currentForm->hasErrors());
-    formItem->setIcon(0, formIcon);
+    formItem->setIcon(0, PaintUtils::renderItemIcon(":/images/form.png", palette()));
 
     if (currentForm->gui() && !currentForm->hasErrors())
         formItem->setText(1, tr("Yes"));
@@ -611,25 +597,10 @@ void InspectorPane::onControlImageChange(Control* control, bool codeChanged)
                 else
                     childItem->setText(1, tr("No"));
 
-                if (control->form()) {
-                    QIcon formIcon;
-                    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
-                                                                        palette().text().color(),
-                                                                        devicePixelRatioF()), QIcon::Normal);
-                    formIcon.addPixmap(PaintUtils::renderOverlaidPixmap(":/images/form.png",
-                                                                        palette().highlightedText().color(),
-                                                                        devicePixelRatioF()), QIcon::Selected);
-                    childItem->setIcon(0, formIcon);
-                } else {
-                    QIcon icon;
-                    icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(control->dir(), devicePixelRatioF()),
-                                                                    palette().text().color(),
-                                                                    devicePixelRatioF()), QIcon::Normal);
-                    icon.addPixmap(PaintUtils::renderOverlaidPixmap(ToolUtils::toolIcon(control->dir(), devicePixelRatioF()),
-                                                                    palette().highlightedText().color(),
-                                                                    devicePixelRatioF()), QIcon::Selected);
-                    childItem->setIcon(0, icon);
-                }
+                childItem->setIcon(0, PaintUtils::renderItemIcon(
+                                       control->form() ? ":/images/form.png"
+                                                       : ToolUtils::toolIconPath(control->dir()),
+                                       palette()));
                 return;
             }
         }
