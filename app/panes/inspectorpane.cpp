@@ -312,8 +312,8 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
             this, &InspectorPane::onSelectionChange);
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
-            this, &InspectorPane::onControlPreviewChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
+            this, &InspectorPane::onControlImageChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &InspectorPane::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
@@ -581,7 +581,7 @@ void InspectorPane::onControlParentChange(Control* control)
     }
 }
 
-void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
+void InspectorPane::onControlImageChange(Control* control, bool codeChanged)
 {
     if (!isProjectStarted)
         return;
@@ -600,7 +600,7 @@ void InspectorPane::onControlPreviewChange(Control* control, bool codeChanged)
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
             if (control->id() == childItem->text(0)) {
-                // No need to following, onControlIdChange takes place before the preview operation
+                // No need to following, onControlIdChange takes place before the render operation
                 // childItem->setText(0, control->id());
                 // Hence no need to this too: sortItems(0, Qt::AscendingOrder);
                 childItem->setData(0, Qt::UserRole, control->hasErrors());

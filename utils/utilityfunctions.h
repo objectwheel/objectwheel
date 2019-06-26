@@ -6,7 +6,7 @@
 #include <QMessageBox>
 
 #include <serializeenum.h>
-#include <previewresult.h>
+#include <renderresult.h>
 
 class QTextDocument;
 class QWidget;

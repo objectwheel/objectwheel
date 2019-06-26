@@ -3,8 +3,8 @@
 
 #include <QObject>
 
-class PreviewerSocket;
-class Previewer;
+class RenderSocket;
+class RenderEngine;
 class CommandDispatcher;
 
 class ApplicationCore final : public QObject
@@ -29,10 +29,10 @@ private:
     ~ApplicationCore() override;
 
 private:
-    static PreviewerSocket* s_previewerSocket;
+    static RenderSocket* s_renderSocket;
     static QThread* s_socketThread;
     static CommandDispatcher* s_commandDispatcher;
-    static Previewer* s_previewer;
+    static RenderEngine* s_renderEngine;
 };
 
 #endif // APPLICATIONCORE_H

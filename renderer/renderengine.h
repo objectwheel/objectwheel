@@ -1,5 +1,5 @@
-#ifndef PREVIEWER_H
-#define PREVIEWER_H
+#ifndef RENDERENGINE_H
+#define RENDERENGINE_H
 
 #include <QSet>
 #include <QObject>
@@ -9,10 +9,10 @@
 class QQuickView;
 class QmlError;
 class QQuickWindow;
-struct PreviewResult;
+struct RenderResult;
 
-// Due to possible margins on an ApplicationWindow the previewing order is important
-// And a parent must be always previewed first.
+// Due to possible margins on an ApplicationWindow the rendering order is important
+// And a parent must always be rendered first.
 template <typename T>
 class OnlyOneInstanceList : public QList<T>
 {
@@ -21,10 +21,10 @@ public:
     inline void remove(const T& t) { this->removeOne(t); }
 };
 
-class Previewer final : public QObject
+class RenderEngine final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(Previewer)
+    Q_DISABLE_COPY(RenderEngine)
 
     enum { TIMEOUT = 0 };
 
@@ -33,8 +33,9 @@ public:
         bool gui;
         bool popup;
         bool window;
-        bool needsRepreview = false;
+        bool needsRerender = false;
         bool codeChanged = false;
+        bool preview = false;
         QString id;
         QString uid;
         QString dir;
@@ -47,8 +48,8 @@ public:
     };
 
 public:
-    explicit Previewer(QObject* parent = nullptr);
-    ~Previewer() override;
+    explicit RenderEngine(QObject* parent = nullptr);
+    ~RenderEngine() override;
 
 public:
     bool hasInstanceForObject(const QObject* object) const;
@@ -75,31 +76,31 @@ public slots:
     void updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void updateControlCode(const QString& uid);
     void updateFormCode(const QString& uid);
-    void previewIndividually(const QString& url);
+    void preview(const QString& url);
 
 private:
     void refreshAllBindings();
     void refreshBindings(QQmlContext* context);
     void repairIndexes(ControlInstance* parentInstance);
-    void preview(ControlInstance* formInstance);
-    void schedulePreview(ControlInstance* formInstance, int msecLater = TIMEOUT);
-    void scheduleRepreviewForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);
+    void render(ControlInstance* formInstance);
+    void scheduleRender(ControlInstance* formInstance, int msecLater = TIMEOUT);
+    void scheduleRerenderForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);
 
     QRectF boundingRectWithStepChilds(QQuickItem* item);
     QRectF boundingRect(QQuickItem* item);
 
-    QImage grabImage(const ControlInstance* instance);
-    QImage renderItem(QQuickItem* item, const QColor& bgColor);
+    QImage grabImage(const ControlInstance* instance, QRectF& boundingRect);
+    QImage renderItem(QQuickItem* item, QRectF& boundingRect, bool preview, const QColor& bgColor);
 
-    QList<PreviewResult> previewDirtyInstances(const QList<ControlInstance*>& instances);
-    Previewer::ControlInstance* createInstance(const QString& url);
-    Previewer::ControlInstance* createInstance(const QString& dir, ControlInstance* parentInstance,
+    QList<RenderResult> renderDirtyInstances(const QList<ControlInstance*>& instances);
+    RenderEngine::ControlInstance* createInstance(const QString& url);
+    RenderEngine::ControlInstance* createInstance(const QString& dir, ControlInstance* parentInstance,
                                                QQmlContext* oldFormContext = nullptr);
 
 signals:
     void initializationProgressChanged(int progress);
-    void previewDone(const QList<PreviewResult>& results);
-    void individualPreviewDone(const QImage& preview);
+    void renderDone(const QList<RenderResult>& results);
+    void previewDone(const QImage& preview);
 
 private:
     bool m_initialized;
@@ -110,4 +111,4 @@ private:
     QQuickView* m_view;
 };
 
-#endif // PREVIEWER_H
+#endif // RENDERENGINE_H

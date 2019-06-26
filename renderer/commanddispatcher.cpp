@@ -1,37 +1,37 @@
 #include <commanddispatcher.h>
-#include <previewersocket.h>
-#include <previewresult.h>
+#include <rendersocket.h>
+#include <renderresult.h>
 #include <utilityfunctions.h>
 
 using namespace UtilityFunctions;
 
-CommandDispatcher::CommandDispatcher(PreviewerSocket* socket, QObject *parent) : QObject(parent)
+CommandDispatcher::CommandDispatcher(RenderSocket* socket, QObject *parent) : QObject(parent)
   , m_socket(socket)
 {
-    connect(m_socket, &PreviewerSocket::dataArrived, this, &CommandDispatcher::onDataReceived);
+    connect(m_socket, &RenderSocket::dataArrived, this, &CommandDispatcher::onDataReceived);
 }
 
-void CommandDispatcher::send(PreviewerSocket* socket, PreviewerCommands command, const QByteArray& data)
+void CommandDispatcher::send(RenderSocket* socket, RendererCommands command, const QByteArray& data)
 {
-    QMetaObject::invokeMethod(socket, "send", Q_ARG(PreviewerCommands, command), Q_ARG(QByteArray, data));
+    QMetaObject::invokeMethod(socket, "send", Q_ARG(RendererCommands, command), Q_ARG(QByteArray, data));
 }
 
 void CommandDispatcher::scheduleInitializationProgress(int progress)
 {
-    send(m_socket, PreviewerCommands::InitializationProgress, push(progress));
+    send(m_socket, RendererCommands::InitializationProgress, push(progress));
 }
 
-void CommandDispatcher::schedulePreviewDone(const QList<PreviewResult>& results)
+void CommandDispatcher::scheduleRenderDone(const QList<RenderResult>& results)
 {
-    send(m_socket, PreviewerCommands::PreviewDone, push(results));
+    send(m_socket, RendererCommands::RenderDone, push(results));
 }
 
-void CommandDispatcher::scheduleIndividualPreviewDone(const QImage& preview)
+void CommandDispatcher::schedulePreviewDone(const QImage& preview)
 {
-    send(m_socket, PreviewerCommands::IndividualPreviewDone, push(preview));
+    send(m_socket, RendererCommands::PreviewDone, push(preview));
 }
 
-void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const QByteArray& data)
+void CommandDispatcher::onDataReceived(const RendererCommands& command, const QByteArray& data)
 {
     switch (command) {
     case Terminate:
@@ -127,10 +127,10 @@ void CommandDispatcher::onDataReceived(const PreviewerCommands& command, const Q
         break;
     }
 
-    case IndividualPreview: {
+    case Preview: {
         QString url;
         pull(data, url);
-        emit individualPreview(url);
+        emit preview(url);
         break;
     }
 

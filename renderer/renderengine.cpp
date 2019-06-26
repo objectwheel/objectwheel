@@ -1,9 +1,9 @@
-#include <previewer.h>
+#include <renderengine.h>
 #include <commandlineparser.h>
 #include <saveutils.h>
 #include <parserutils.h>
-#include <previewerutils.h>
-#include <previewresult.h>
+#include <renderutils.h>
+#include <renderresult.h>
 #include <utilityfunctions.h>
 #include <components.h>
 #include <paintutils.h>
@@ -32,24 +32,24 @@ static inline bool isRectangleSane(const QRectF &rect)
 }
 }
 
-Previewer::Previewer(QObject* parent) : QObject(parent)
+RenderEngine::RenderEngine(QObject* parent) : QObject(parent)
   , m_initialized(false)
-  , m_devicePixelRatio(qgetenv("PREVIEWER_DEVICE_PIXEL_RATIO").toDouble())
+  , m_devicePixelRatio(qgetenv("RENDERER_DEVICE_PIXEL_RATIO").toDouble())
   , m_view(new QQuickView)
 {
     DesignerSupport::createOpenGLContext(m_view);
-    DesignerSupport::setRootItem(m_view, PreviewerUtils::createDummyItem(m_view->engine()));
+    DesignerSupport::setRootItem(m_view, RenderUtils::createDummyItem(m_view->engine()));
     m_view->engine()->setOutputWarningsToStandardError(false);
     m_view->engine()->addImportPath(SaveUtils::toProjectImportsDir(CommandlineParser::projectDirectory()));
 }
 
-Previewer::~Previewer()
+RenderEngine::~RenderEngine()
 {
-    PreviewerUtils::cleanUpFormInstances(m_formInstances, m_view->rootContext(), m_designerSupport);
+    RenderUtils::cleanUpFormInstances(m_formInstances, m_view->rootContext(), m_designerSupport);
     delete m_view;
 }
 
-void Previewer::init()
+void RenderEngine::init()
 {
     emit initializationProgressChanged(g_progress_1);
 
@@ -78,10 +78,10 @@ void Previewer::init()
     // according to Qt's internal completion order read here:
     // stackoverflow.com/questions/46196831
     for (ControlInstance* instance : instanceTree)
-        PreviewerUtils::doComplete(instance, this);
+        RenderUtils::doComplete(instance, this);
 
     for (ControlInstance* instance : instanceTree) {
-        if (QQuickItem* item = PreviewerUtils::guiItem(instance))
+        if (QQuickItem* item = RenderUtils::guiItem(instance))
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
     }
 
@@ -90,17 +90,17 @@ void Previewer::init()
 
     emit initializationProgressChanged(g_progress_3);
 
-    /* Preview */
+    /* Render */
     int totalInstanceCount = 0;
-    for (Previewer::ControlInstance* formInstance : m_formInstances)
-        totalInstanceCount += PreviewerUtils::countAllSubInstance(formInstance);
+    for (RenderEngine::ControlInstance* formInstance : m_formInstances)
+        totalInstanceCount += RenderUtils::countAllSubInstance(formInstance);
     g_progressPerInstance = qreal(g_progress_4 - g_progress_3) / totalInstanceCount;
     g_progress = g_progress_3;
     for (ControlInstance* formInstance : m_formInstances)
-        schedulePreview(formInstance);
+        scheduleRender(formInstance);
 }
 
-void Previewer::updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
+void RenderEngine::updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
 {
     ControlInstance* instance = instanceForUid(uid);
 
@@ -112,15 +112,15 @@ void Previewer::updateProperty(const QString& uid, const QString& propertyName, 
 
     Q_ASSERT(formInstance);
 
-    PreviewerUtils::setInstancePropertyVariant(instance, propertyName, propertyValue);
+    RenderUtils::setInstancePropertyVariant(instance, propertyName, propertyValue);
 
     refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
 // BUG: Inter-form reparents have problems, cause context of the moved control will still remain
 // pointing to old forms context.
-void Previewer::updateParent(const QString& newDir, const QString& uid, const QString& parentUid)
+void RenderEngine::updateParent(const QString& newDir, const QString& uid, const QString& parentUid)
 {
     Q_ASSERT_X(!SaveUtils::isForm(newDir), "parentUpdate", "You can't change parent of a form.");
 
@@ -161,17 +161,17 @@ void Previewer::updateParent(const QString& newDir, const QString& uid, const QS
     childList.append(instance->object);
 
     if (instance->window || instance->popup) { // We still reparent it anyway, may a window comes
-        QQuickItem* item = PreviewerUtils::guiItem(instance->object);
-        item->setParentItem(PreviewerUtils::guiItem(parentObject));
+        QQuickItem* item = RenderUtils::guiItem(instance->object);
+        item->setParentItem(RenderUtils::guiItem(parentObject));
     }
 
     repairIndexes(previousParentInstance);
     repairIndexes(parentInstance);
     refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
-void Previewer::updateControlCode(const QString& uid)
+void RenderEngine::updateControlCode(const QString& uid)
 {
     ControlInstance* oldInstance = instanceForUid(uid);
 
@@ -187,11 +187,11 @@ void Previewer::updateControlCode(const QString& uid)
 
     QObject* oldObject = oldInstance->object;
 
-    QQuickItem* item = PreviewerUtils::guiItem(oldObject);
+    QQuickItem* item = RenderUtils::guiItem(oldObject);
     if (item)
         m_designerSupport.derefFromEffectItem(item);
 
-    PreviewerUtils::setId(oldInstance->context, nullptr, oldInstance->id, QString());
+    RenderUtils::setId(oldInstance->context, nullptr, oldInstance->id, QString());
 
     ControlInstance* instance = createInstance(oldInstance->dir, oldInstance->parent);
     oldInstance->gui = instance->gui;
@@ -219,8 +219,8 @@ void Previewer::updateControlCode(const QString& uid)
                     childList.append(childInstance->object);
 
                     if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                        QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
-                        item->setParentItem(PreviewerUtils::guiItem(oldInstance->object));
+                        QQuickItem* item = RenderUtils::guiItem(childInstance->object);
+                        item->setParentItem(RenderUtils::guiItem(oldInstance->object));
                     }
                 }
             } else {
@@ -232,8 +232,8 @@ void Previewer::updateControlCode(const QString& uid)
                     childList.append(childInstance->object);
 
                     if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                        QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
-                        item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
+                        QQuickItem* item = RenderUtils::guiItem(childInstance->object);
+                        item->setParentItem(RenderUtils::guiItem(m_view->rootObject()));
                     }
                 }
             }
@@ -246,8 +246,8 @@ void Previewer::updateControlCode(const QString& uid)
                 childList.append(childInstance->object);
 
                 if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                    QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
-                    item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
+                    QQuickItem* item = RenderUtils::guiItem(childInstance->object);
+                    item->setParentItem(RenderUtils::guiItem(m_view->rootObject()));
                 }
             }
         }
@@ -257,15 +257,15 @@ void Previewer::updateControlCode(const QString& uid)
     if (oldObject)
         delete oldObject;
 
-    PreviewerUtils::doComplete(oldInstance, this);
+    RenderUtils::doComplete(oldInstance, this);
 
     repairIndexes(oldInstance);
     repairIndexes(oldInstance->parent);
     refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
-void Previewer::updateFormCode(const QString& uid)
+void RenderEngine::updateFormCode(const QString& uid)
 {
     ControlInstance* oldFormInstance = instanceForUid(uid);
 
@@ -275,10 +275,10 @@ void Previewer::updateFormCode(const QString& uid)
 
     QObject* oldObject = oldFormInstance->object;
 
-    PreviewerUtils::setId(m_view->rootContext(), nullptr, oldFormInstance->id, QString());
-    PreviewerUtils::setId(oldFormInstance->context, nullptr, oldFormInstance->id, QString());
+    RenderUtils::setId(m_view->rootContext(), nullptr, oldFormInstance->id, QString());
+    RenderUtils::setId(oldFormInstance->context, nullptr, oldFormInstance->id, QString());
 
-    QQuickItem* item = PreviewerUtils::guiItem(oldObject);
+    QQuickItem* item = RenderUtils::guiItem(oldObject);
 
     if (item)
         m_designerSupport.derefFromEffectItem(item);
@@ -308,8 +308,8 @@ void Previewer::updateFormCode(const QString& uid)
                 childList.append(childInstance->object);
 
                 if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                    QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
-                    item->setParentItem(PreviewerUtils::guiItem(oldFormInstance->object));
+                    QQuickItem* item = RenderUtils::guiItem(childInstance->object);
+                    item->setParentItem(RenderUtils::guiItem(oldFormInstance->object));
                 }
             }
         } else {
@@ -321,8 +321,8 @@ void Previewer::updateFormCode(const QString& uid)
                 childList.append(childInstance->object);
 
                 if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                    QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
-                    item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject()));
+                    QQuickItem* item = RenderUtils::guiItem(childInstance->object);
+                    item->setParentItem(RenderUtils::guiItem(m_view->rootObject()));
                 }
             }
         }
@@ -331,9 +331,9 @@ void Previewer::updateFormCode(const QString& uid)
     if (oldObject)
         delete oldObject;
 
-    PreviewerUtils::doComplete(oldFormInstance, this);
+    RenderUtils::doComplete(oldFormInstance, this);
 
-    // NOTE: We would normally wait until preview() function to detect if there are any dirts
+    // NOTE: We would normally wait until render() function to detect if there are any dirts
     // But since we have a "margin" problem, all the (first) sub-childs should be updated in the first place
     // In order to let chilren to know if there were any "header", "footer" (therefore margin) changes.
     m_dirtyInstanceSet.insert(oldFormInstance);
@@ -344,36 +344,38 @@ void Previewer::updateFormCode(const QString& uid)
     // So, no need this: repairIndexes(oldFormInstance->parent??);
     repairIndexes(oldFormInstance);
     refreshAllBindings();
-    schedulePreview(oldFormInstance);
+    scheduleRender(oldFormInstance);
 }
 
-void Previewer::previewIndividually(const QString& url)
+void RenderEngine::preview(const QString& url)
 {
     Q_ASSERT(!url.isEmpty());
 
     ControlInstance* instance = createInstance(url);
 
-    PreviewerUtils::doComplete(instance, this);
+    RenderUtils::doComplete(instance, this);
 
     refreshBindings(instance->context);
 
     QTimer::singleShot(TIMEOUT, [=] {
         DesignerSupport::polishItems(m_view);
 
-        for (QQuickItem* item : PreviewerUtils::allItems(instance)) {
+        for (QQuickItem* item : RenderUtils::allItems(instance)) {
             if (item)
                 DesignerSupport::updateDirtyNode(item);
         }
 
-        emit individualPreviewDone(grabImage(instance));
+        QRectF boundingRect;
+        instance->preview = true;
+        emit previewDone(grabImage(instance, boundingRect));
 
         auto ctx = instance->context;
-        PreviewerUtils::deleteInstancesRecursive(instance, m_designerSupport);
+        RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
         delete ctx;
     });
 }
 
-void Previewer::refreshAllBindings()
+void RenderEngine::refreshAllBindings()
 {
     DesignerSupport::refreshExpressions(m_view->rootContext());
     for (ControlInstance* formInstance : m_formInstances)
@@ -381,7 +383,7 @@ void Previewer::refreshAllBindings()
     DesignerSupport::refreshExpressions(m_view->rootContext());
 }
 
-void Previewer::updateIndex(const QString& uid)
+void RenderEngine::updateIndex(const QString& uid)
 {
     ControlInstance* instance = instanceForUid(uid);
 
@@ -394,10 +396,10 @@ void Previewer::updateIndex(const QString& uid)
 
     repairIndexes(instance->parent);
     refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
-void Previewer::updateId(const QString& uid, const QString& newId)
+void RenderEngine::updateId(const QString& uid, const QString& newId)
 {
     Q_ASSERT(!newId.isEmpty());
 
@@ -412,16 +414,16 @@ void Previewer::updateId(const QString& uid, const QString& newId)
     Q_ASSERT(formInstance);
 
     if (formInstance == instance)
-        PreviewerUtils::setId(m_view->rootContext(), instance->object, instance->id, newId);
-    PreviewerUtils::setId(instance->context, instance->object, instance->id, newId);
+        RenderUtils::setId(m_view->rootContext(), instance->object, instance->id, newId);
+    RenderUtils::setId(instance->context, instance->object, instance->id, newId);
 
     instance->id = newId;
 
     refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
-void Previewer::createControl(const QString& dir, const QString& parentUid)
+void RenderEngine::createControl(const QString& dir, const QString& parentUid)
 {
     ControlInstance* parentInstance = instanceForUid(parentUid);
 
@@ -433,35 +435,35 @@ void Previewer::createControl(const QString& dir, const QString& parentUid)
 
     ControlInstance* instance = createInstance(dir, parentInstance);
 
-    PreviewerUtils::doComplete(instance, this);
+    RenderUtils::doComplete(instance, this);
 
     // No need to repairIndexes, since the instance is already added
     // as the last children on its parent
     refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
-void Previewer::createForm(const QString& dir)
+void RenderEngine::createForm(const QString& dir)
 {
     ControlInstance* formInstance = createInstance(dir, nullptr);
 
     m_formInstances.append(formInstance);
-    PreviewerUtils::doComplete(formInstance, this);
+    RenderUtils::doComplete(formInstance, this);
 
     // No need to repairIndexes, since form indexes ignored,
     // because they are put upon rootObject of the engine
     refreshAllBindings();
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
-void Previewer::deleteForm(const QString& uid)
+void RenderEngine::deleteForm(const QString& uid)
 {
     ControlInstance* formInstance = instanceForUid(uid);
 
     Q_ASSERT(formInstance);
 
     m_formInstances.removeAll(formInstance);
-    PreviewerUtils::cleanUpFormInstances(QList<ControlInstance*>{formInstance},
+    RenderUtils::cleanUpFormInstances(QList<ControlInstance*>{formInstance},
                                          m_view->rootContext(), m_designerSupport);
 
     // No need to repairIndexes, since form indexes ignored,
@@ -469,10 +471,10 @@ void Previewer::deleteForm(const QString& uid)
     refreshAllBindings();
 
     for (ControlInstance* formInstance : m_formInstances)
-        schedulePreview(formInstance);
+        scheduleRender(formInstance);
 }
 
-void Previewer::deleteControl(const QString& uid)
+void RenderEngine::deleteControl(const QString& uid)
 {
     Q_ASSERT(!uid.isEmpty());
     ControlInstance* instance = instanceForUid(uid);
@@ -484,54 +486,54 @@ void Previewer::deleteControl(const QString& uid)
 
     Q_ASSERT(formInstance);
 
-    PreviewerUtils::deleteInstancesRecursive(instance, m_designerSupport);
+    RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
     instance->parent->children.removeAll(instance);
 
     repairIndexes(instance->parent);
     refreshBindings(formInstance->context);
-    schedulePreview(formInstance);
+    scheduleRender(formInstance);
 }
 
-void Previewer::refresh(const QString& formUid)
+void RenderEngine::refresh(const QString& formUid)
 {
     if (formUid.isEmpty()) {
         for (ControlInstance* formInstance : m_formInstances) {
-            PreviewerUtils::makeDirtyRecursive(formInstance);
+            RenderUtils::makeDirtyRecursive(formInstance);
             refreshBindings(formInstance->context);
-            schedulePreview(formInstance);
+            scheduleRender(formInstance);
         }
     } else {
         ControlInstance* formInstance = instanceForUid(formUid);
 
         Q_ASSERT(formInstance);
 
-        PreviewerUtils::makeDirtyRecursive(formInstance);
+        RenderUtils::makeDirtyRecursive(formInstance);
 
         refreshBindings(formInstance->context);
-        schedulePreview(formInstance);
+        scheduleRender(formInstance);
     }
 }
 
-bool Previewer::hasInstanceForObject(const QObject* object) const
+bool RenderEngine::hasInstanceForObject(const QObject* object) const
 {
     Q_ASSERT(object);
     for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : PreviewerUtils::allSubInstance(formInstance)) {
+        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
             if (instance->object == object)
                 return true;
-            if (instance->window && PreviewerUtils::guiItem(instance) == object)
+            if (instance->window && RenderUtils::guiItem(instance) == object)
                 return true;
-            if (instance->popup && PreviewerUtils::guiItem(instance) == object)
+            if (instance->popup && RenderUtils::guiItem(instance) == object)
                 return true;
         }
     }
     return false;
 }
 
-bool Previewer::hasInstanceForUid(const QString& uid) const
+bool RenderEngine::hasInstanceForUid(const QString& uid) const
 {
     for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : PreviewerUtils::allSubInstance(formInstance)) {
+        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
             if (instance->uid == uid)
                 return true;
         }
@@ -540,27 +542,27 @@ bool Previewer::hasInstanceForUid(const QString& uid) const
     return false;
 }
 
-Previewer::ControlInstance* Previewer::instanceForObject(const QObject* object) const
+RenderEngine::ControlInstance* RenderEngine::instanceForObject(const QObject* object) const
 {
     Q_ASSERT(object);
     for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : PreviewerUtils::allSubInstance(formInstance)) {
+        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
             if (instance->object == object)
                 return instance;
-            if (instance->window && PreviewerUtils::guiItem(instance) == object)
+            if (instance->window && RenderUtils::guiItem(instance) == object)
                 return instance;
-            if (instance->popup && PreviewerUtils::guiItem(instance) == object)
+            if (instance->popup && RenderUtils::guiItem(instance) == object)
                 return instance;
         }
     }
     return nullptr;
 }
 
-Previewer::ControlInstance* Previewer::instanceForUid(const QString& uid) const
+RenderEngine::ControlInstance* RenderEngine::instanceForUid(const QString& uid) const
 {
     Q_ASSERT(!uid.isEmpty());
     for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : PreviewerUtils::allSubInstance(formInstance)) {
+        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
             if (instance->uid == uid)
                 return instance;
         }
@@ -569,10 +571,10 @@ Previewer::ControlInstance* Previewer::instanceForUid(const QString& uid) const
     return nullptr;
 }
 
-Previewer::ControlInstance* Previewer::formInstanceFor(const Previewer::ControlInstance* instance)
+RenderEngine::ControlInstance* RenderEngine::formInstanceFor(const RenderEngine::ControlInstance* instance)
 {
     for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* childInstance : PreviewerUtils::allSubInstance(formInstance)) {
+        for (ControlInstance* childInstance : RenderUtils::allSubInstance(formInstance)) {
             if (instance == childInstance)
                 return formInstance;
         }
@@ -581,7 +583,7 @@ Previewer::ControlInstance* Previewer::formInstanceFor(const Previewer::ControlI
     return nullptr;
 }
 
-Previewer::ControlInstance* Previewer::findNodeInstanceForItem(QQuickItem* item) const
+RenderEngine::ControlInstance* RenderEngine::findNodeInstanceForItem(QQuickItem* item) const
 {
     if (item) {
         if (hasInstanceForObject(item))
@@ -593,17 +595,17 @@ Previewer::ControlInstance* Previewer::findNodeInstanceForItem(QQuickItem* item)
     return nullptr;
 }
 
-void Previewer::schedulePreview(ControlInstance* formInstance, int msecLater)
+void RenderEngine::scheduleRender(ControlInstance* formInstance, int msecLater)
 {
-    QTimer::singleShot(msecLater, std::bind(&Previewer::preview, this, formInstance));
+    QTimer::singleShot(msecLater, std::bind(&RenderEngine::render, this, formInstance));
 }
 
-void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstance* formInstance, int msecLater)
+void RenderEngine::scheduleRerenderForInvisibleInstances(RenderEngine::ControlInstance* formInstance, int msecLater)
 {
     QTimer::singleShot(msecLater, this, [=] {
-        QList<ControlInstance*> repreviewInstances;
-        for (ControlInstance* instance : PreviewerUtils::allSubInstance(formInstance)) {
-            if (!instance->needsRepreview)
+        QList<ControlInstance*> rerenderInstances;
+        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+            if (!instance->needsRerender)
                 continue;
 
             if (!instance->errors.isEmpty())
@@ -612,7 +614,7 @@ void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstanc
             if (!instance->gui)
                 continue;
 
-            QQuickItem* item = PreviewerUtils::guiItem(instance);
+            QQuickItem* item = RenderUtils::guiItem(instance);
 
             if (!item->isVisible())
                 continue;
@@ -628,15 +630,15 @@ void Previewer::scheduleRepreviewForInvisibleInstances(Previewer::ControlInstanc
 
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
 
-            repreviewInstances.append(instance);
+            rerenderInstances.append(instance);
         }
 
         refreshBindings(formInstance->context);
-        emit previewDone(previewDirtyInstances(repreviewInstances));
+        emit renderDone(renderDirtyInstances(rerenderInstances));
     });
 }
 
-void Previewer::preview(ControlInstance* formInstance)
+void RenderEngine::render(ControlInstance* formInstance)
 {
     Q_ASSERT(formInstance);
 
@@ -650,7 +652,7 @@ void Previewer::preview(ControlInstance* formInstance)
                 | DesignerSupport::OpacityValue
                 | DesignerSupport::AllMask);
 
-    for (QQuickItem* item : PreviewerUtils::allItems(formInstance)) {
+    for (QQuickItem* item : RenderUtils::allItems(formInstance)) {
         if (item) {
             if (hasInstanceForObject(item)) {
                 if (DesignerSupport::isDirty(item, dirty))
@@ -665,13 +667,13 @@ void Previewer::preview(ControlInstance* formInstance)
     }
 
     if (!m_dirtyInstanceSet.isEmpty()) {
-        emit previewDone(previewDirtyInstances(m_dirtyInstanceSet));
+        emit renderDone(renderDirtyInstances(m_dirtyInstanceSet));
         if (m_initialized)
-            scheduleRepreviewForInvisibleInstances(formInstance);
+            scheduleRerenderForInvisibleInstances(formInstance);
         m_dirtyInstanceSet.clear();
     }
 
-    PreviewerUtils::resetAllItems(formInstance);
+    RenderUtils::resetAllItems(formInstance);
 
     if (!m_initialized) {
         static QList<ControlInstance*> initializedInstances;
@@ -680,35 +682,35 @@ void Previewer::preview(ControlInstance* formInstance)
             emit initializationProgressChanged(g_progress_4);
             m_initialized = true;
             for (ControlInstance* formInstance : m_formInstances)
-                scheduleRepreviewForInvisibleInstances(formInstance);
+                scheduleRerenderForInvisibleInstances(formInstance);
         }
     }
 }
 
-QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::ControlInstance*>& instances)
+QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine::ControlInstance*>& instances)
 {
-    QList<PreviewResult> results;
+    QList<RenderResult> results;
     for (int i = 0; i < instances.size(); ++i) {
         ControlInstance* instance = instances.at(i);
         Q_ASSERT(instance);
-        PreviewResult result;
+        RenderResult result;
         result.id = instance->id;
         result.uid = instance->uid;
         result.gui = instance->gui;
         result.popup = instance->popup;
         result.window = instance->window;
         result.codeChanged = instance->codeChanged;
-        result.properties = PreviewerUtils::properties(instance);
-        result.events = PreviewerUtils::events(instance);
+        result.properties = RenderUtils::properties(instance);
+        result.events = RenderUtils::events(instance);
         instance->codeChanged = false;
         result.errors = instance->errors;
-        result.image = grabImage(instance);
+        result.image = grabImage(instance, result.boundingRect);
         results.append(result);
 
         if (instance->errors.isEmpty()
                 && instance->gui
-                && PreviewerUtils::guiItem(instance)->isVisible()) {
-            instance->needsRepreview = PaintUtils::isBlankImage(result.image);
+                && RenderUtils::guiItem(instance)->isVisible()) {
+            instance->needsRerender = PaintUtils::isBlankImage(result.image);
         }
 
         if (!m_initialized) {
@@ -721,11 +723,9 @@ QList<PreviewResult> Previewer::previewDirtyInstances(const QList<Previewer::Con
     return results;
 }
 
-QRectF Previewer::boundingRectWithStepChilds(QQuickItem* item)
+QRectF RenderEngine::boundingRectWithStepChilds(QQuickItem* item)
 {
-    QRectF boundingRect = item->boundingRect();
-
-    boundingRect = boundingRect.united(QRectF(QPointF(0, 0), item->size()));
+    QRectF boundingRect = item->clipRect();
 
     foreach (QQuickItem *childItem, item->childItems()) {
         if (!hasInstanceForObject(childItem)) {
@@ -738,7 +738,7 @@ QRectF Previewer::boundingRectWithStepChilds(QQuickItem* item)
     return boundingRect;
 }
 
-QRectF Previewer::boundingRect(QQuickItem* item)
+QRectF RenderEngine::boundingRect(QQuickItem* item)
 {
     if (item) {
         if (item->clip())
@@ -749,7 +749,7 @@ QRectF Previewer::boundingRect(QQuickItem* item)
     return QRectF();
 }
 
-QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
+QImage RenderEngine::grabImage(const RenderEngine::ControlInstance* instance, QRectF& boundingRect)
 {
     Q_ASSERT(instance);
     if (!instance->errors.isEmpty()) {
@@ -765,7 +765,7 @@ QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
             item = window->contentItem();
             winColor = window->color();
         } else if (instance->popup) {
-            item = PreviewerUtils::guiItem(instance->object);
+            item = RenderUtils::guiItem(instance->object);
         } else {
             item = static_cast<QQuickItem*>(instance->object);
         }
@@ -778,20 +778,20 @@ QImage Previewer::grabImage(const Previewer::ControlInstance* instance)
             return QImage();
         } else {
             if (item->isVisible())
-                return renderItem(item, winColor);
+                return renderItem(item, boundingRect, instance->preview, winColor);
             else
                 return QImage();
         }
     }
 }
 
-QImage Previewer::renderItem(QQuickItem* item, const QColor& bgColor)
+QImage RenderEngine::renderItem(QQuickItem* item, QRectF& boundingRect, bool preview, const QColor& bgColor)
 {
     Q_ASSERT(item);
-    PreviewerUtils::updateDirtyNodesRecursive(item, this);
+    RenderUtils::updateDirtyNodesRecursive(item, this);
 
-    QRectF renderBoundingRect = boundingRect(item);
-    QSize size = renderBoundingRect.size().toSize();
+    boundingRect = preview ? QRectF(QPointF(), item->size()) : this->boundingRect(item);
+    QSize size = boundingRect.size().toSize();
     size *= devicePixelRatio();
 
     QImage renderImage(size, QImage::Format_ARGB32_Premultiplied);
@@ -804,19 +804,19 @@ QImage Previewer::renderItem(QQuickItem* item, const QColor& bgColor)
 
     QPainter painter(&renderImage);
     painter.drawImage(QRect({0, 0}, size / devicePixelRatio()),
-                      m_designerSupport.renderImageForItem(item, renderBoundingRect, size),
+                      m_designerSupport.renderImageForItem(item, boundingRect, size),
                       QRect({0, 0}, size));
 
     return renderImage;
 }
 
-void Previewer::refreshBindings(QQmlContext* context)
+void RenderEngine::refreshBindings(QQmlContext* context)
 {
     m_designerSupport.refreshExpressions(context);
     m_designerSupport.refreshExpressions(m_view->rootContext());
 }
 
-void Previewer::repairIndexes(ControlInstance* parentInstance)
+void RenderEngine::repairIndexes(ControlInstance* parentInstance)
 {
     Q_ASSERT(parentInstance);
 
@@ -847,19 +847,19 @@ void Previewer::repairIndexes(ControlInstance* parentInstance)
         if (childInstance->errors.isEmpty() && childInstance->object) {
             childList.append(childInstance->object);
             if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                QQuickItem* item = PreviewerUtils::guiItem(childInstance->object);
-                item->setParentItem(PreviewerUtils::guiItem(parentInstance->object));
+                QQuickItem* item = RenderUtils::guiItem(childInstance->object);
+                item->setParentItem(RenderUtils::guiItem(parentInstance->object));
             }
         }
     }
 }
 
-Previewer::ControlInstance* Previewer::createInstance(const QString& url)
+RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
 {
     ComponentCompleteDisabler disabler;
     Q_UNUSED(disabler)
 
-    auto instance = new Previewer::ControlInstance;
+    auto instance = new RenderEngine::ControlInstance;
     instance->context = new QQmlContext(m_view->engine());
 
     // m_view->engine()->clearComponentCache();
@@ -884,7 +884,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& url)
     Q_ASSERT(object);
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
-    PreviewerUtils::tweakObjects(object);
+    RenderUtils::tweakObjects(object);
     component.completeCreate();
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
 
@@ -900,7 +900,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& url)
     Q_ASSERT(defaultProperty.isValid());
 
     if (instance->gui) {
-        QQuickItem* item = PreviewerUtils::guiItem(instance->object);
+        QQuickItem* item = RenderUtils::guiItem(instance->object);
         item->setFlag(QQuickItem::ItemHasContents, true);
         static_cast<QQmlParserStatus*>(item)->classBegin();
     }
@@ -909,9 +909,9 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& url)
     childList.append(instance->object);
 
     if (instance->gui) {
-        QQuickItem* item = PreviewerUtils::guiItem(instance->object);
+        QQuickItem* item = RenderUtils::guiItem(instance->object);
         if (instance->window || instance->popup)
-            item->setParentItem(PreviewerUtils::guiItem(m_view->rootObject())); // We still reparent it anyway, may a window comes
+            item->setParentItem(RenderUtils::guiItem(m_view->rootObject())); // We still reparent it anyway, may a window comes
         m_designerSupport.refFromEffectItem(item);
         item->update();
     }
@@ -936,7 +936,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& url)
     item is placed. And initial properties are also set by setInitialProperties().
     All the window objects are hid. Id property is also set on root context.
 */
-Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
+RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
                                                       ControlInstance* parentInstance,
                                                       QQmlContext* oldFormContext)
 {
@@ -947,7 +947,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
 
     const QString& url = SaveUtils::toControlMainQmlFile(dir);
 
-    auto instance = new Previewer::ControlInstance;
+    auto instance = new RenderEngine::ControlInstance;
     instance->dir = dir;
     instance->id = SaveUtils::controlId(dir);
     instance->uid = SaveUtils::controlUid(dir);
@@ -992,7 +992,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     Q_ASSERT(object);
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
-    PreviewerUtils::tweakObjects(object);
+    RenderUtils::tweakObjects(object);
     component.completeCreate();
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
 
@@ -1002,8 +1002,8 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
     QQmlEnginePrivate::get(m_view->engine())->cache(object->metaObject());
     if (SaveUtils::isForm(dir))
-        PreviewerUtils::setId(m_view->rootContext(), object, QString(), instance->id);
-    PreviewerUtils::setId(instance->context, object, QString(), instance->id);
+        RenderUtils::setId(m_view->rootContext(), object, QString(), instance->id);
+    RenderUtils::setId(instance->context, object, QString(), instance->id);
 
     instance->object = object;
     instance->popup = object->inherits("QQuickPopup");
@@ -1021,7 +1021,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
         m_dirtyInstanceSet.insert(instance);
 
     if (SaveUtils::isForm(dir)) {
-        QQuickItem* formItem = PreviewerUtils::guiItem(instance);
+        QQuickItem* formItem = RenderUtils::guiItem(instance);
         formItem->setFlag(QQuickItem::ItemHasContents, true);
         static_cast<QQmlParserStatus*>(formItem)->classBegin();
         formItem->setParentItem(m_view->rootObject());
@@ -1042,7 +1042,7 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
         Q_ASSERT(defaultProperty.isValid());
 
         if (instance->gui) {
-            QQuickItem* item = PreviewerUtils::guiItem(instance->object);
+            QQuickItem* item = RenderUtils::guiItem(instance->object);
             item->setFlag(QQuickItem::ItemHasContents, true);
             static_cast<QQmlParserStatus*>(item)->classBegin();
         }
@@ -1051,9 +1051,9 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
         childList.append(instance->object);
 
         if (instance->gui) {
-            QQuickItem* item = PreviewerUtils::guiItem(instance->object);
+            QQuickItem* item = RenderUtils::guiItem(instance->object);
             if (instance->window || instance->popup)
-                item->setParentItem(PreviewerUtils::guiItem(parentObject)); // We still reparent it anyway, may a window comes
+                item->setParentItem(RenderUtils::guiItem(parentObject)); // We still reparent it anyway, may a window comes
             m_designerSupport.refFromEffectItem(item);
             item->update();
         }
@@ -1062,12 +1062,12 @@ Previewer::ControlInstance* Previewer::createInstance(const QString& dir,
     return instance;
 }
 
-qreal Previewer::devicePixelRatio() const
+qreal RenderEngine::devicePixelRatio() const
 {
     return m_devicePixelRatio;
 }
 
-void Previewer::setDevicePixelRatio(qreal devicePixelRatio)
+void RenderEngine::setDevicePixelRatio(qreal devicePixelRatio)
 {
     if (m_devicePixelRatio != devicePixelRatio) {
         m_devicePixelRatio = devicePixelRatio;

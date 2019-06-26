@@ -12,7 +12,7 @@ class UserManager;
 class DocumentManager;
 class ProjectManager;
 class ProjectExposingManager;
-class ControlPreviewingManager;
+class ControlRenderingManager;
 class ControlCreationManager;
 class ControlRemovingManager;
 class ControlPropertyManager;
@@ -54,7 +54,7 @@ private:
     static ServerManager* s_serverManager;
     static RegistrationApiManager* s_accountManager;
     static UserManager* s_userManager;
-    static ControlPreviewingManager* s_controlPreviewingManager;
+    static ControlRenderingManager* s_controlRenderingManager;
     static SaveManager* s_saveManager;
     static ProjectManager* s_projectManager;
     static ProjectExposingManager* s_projectExposingManager;

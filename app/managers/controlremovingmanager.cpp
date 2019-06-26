@@ -2,7 +2,7 @@
 #include <form.h>
 #include <designerscene.h>
 #include <savemanager.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <QDebug>
 
 ControlRemovingManager* ControlRemovingManager::s_instance = nullptr;
@@ -38,7 +38,7 @@ void ControlRemovingManager::removeForm(Form* form)
 
     emit instance()->formAboutToBeRemoved(form);
 
-    ControlPreviewingManager::scheduleFormDeletion(form->uid());
+    ControlRenderingManager::scheduleFormDeletion(form->uid());
 
     SaveManager::removeForm(form->dir());
     scene->removeForm(form);
@@ -54,7 +54,7 @@ void ControlRemovingManager::removeControl(Control* control)
 
     emit instance()->controlAboutToBeRemoved(control);
 
-    ControlPreviewingManager::scheduleControlDeletion(control->uid());
+    ControlRenderingManager::scheduleControlDeletion(control->uid());
 
     SaveManager::removeControl(control->dir());
     DesignerScene* scene = control->scene();

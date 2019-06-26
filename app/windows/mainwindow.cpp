@@ -30,7 +30,7 @@
 #include <codeeditorsettings.h>
 #include <behaviorsettings.h>
 #include <segmentedbar.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 
 #include <QWindow>
 #include <QProcess>
@@ -512,7 +512,7 @@ void MainWindow::onModeChange(ModeManager::Mode mode)
 
 void MainWindow::onScreenChange(QScreen* screen)
 {
-    ControlPreviewingManager::setDevicePixelRatio(screen->devicePixelRatio());
+    ControlRenderingManager::setDevicePixelRatio(screen->devicePixelRatio());
 }
 
 CentralWidget* MainWindow::centralWidget() const

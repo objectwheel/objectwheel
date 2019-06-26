@@ -3,7 +3,7 @@
 #include <parserutils.h>
 #include <control.h>
 #include <controlpropertymanager.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <qmlcodedocument.h>
 
 #define designs(x) static_cast<QmlCodeEditorWidget::DesignsDocument*>((x))
@@ -44,7 +44,7 @@ void ControlSaveFilter::afterSave(QmlCodeEditorWidget::Document* document)
     }
 
     if (control->form())
-        ControlPreviewingManager::scheduleFormCodeUpdate(control->uid());
+        ControlRenderingManager::scheduleFormCodeUpdate(control->uid());
     else
-        ControlPreviewingManager::scheduleControlCodeUpdate(control->uid());
+        ControlRenderingManager::scheduleControlCodeUpdate(control->uid());
 }

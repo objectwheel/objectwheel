@@ -7,9 +7,9 @@
 	<key>CFBundleSignature</key>
 	<string>????</string>
 	<key>CFBundleExecutable</key>
-    <string>previewer</string>
+    <string>renderer</string>
 	<key>CFBundleIdentifier</key>
-    <string>com.objectwheel.objectwheelpreviewer</string>
+    <string>com.objectwheel.renderer</string>
     <key>LSUIElement</key>
     <string>1</string>
 </dict>

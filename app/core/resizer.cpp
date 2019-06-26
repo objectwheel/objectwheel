@@ -162,7 +162,7 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     };
 
     ControlPropertyManager::Options option = ControlPropertyManager::SaveChanges
-            | ControlPropertyManager::UpdatePreviewer
+            | ControlPropertyManager::UpdateRenderer
             | ControlPropertyManager::CompressedCall;
 
     calculatePositionDifference(event, &dx, &dy);

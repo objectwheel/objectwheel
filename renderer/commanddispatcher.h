@@ -2,10 +2,10 @@
 #define COMMANDDISPATCHER_H
 
 #include <QObject>
-#include <previewercommands.h>
+#include <renderercommands.h>
 
-struct PreviewResult;
-class PreviewerSocket;
+struct RenderResult;
+class RenderSocket;
 
 class CommandDispatcher final : public QObject
 {
@@ -13,23 +13,23 @@ class CommandDispatcher final : public QObject
     Q_DISABLE_COPY(CommandDispatcher)
 
 public:
-    explicit CommandDispatcher(PreviewerSocket* socket, QObject* parent = nullptr);
+    explicit CommandDispatcher(RenderSocket* socket, QObject* parent = nullptr);
 
 public slots:
     void scheduleInitializationProgress(int progress);
-    void schedulePreviewDone(const QList<PreviewResult>& results);
-    void scheduleIndividualPreviewDone(const QImage& preview);
-    void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
+    void scheduleRenderDone(const QList<RenderResult>& results);
+    void schedulePreviewDone(const QImage& preview);
+    void onDataReceived(const RendererCommands& command, const QByteArray& data);
 
 private:
-    void send(PreviewerSocket* socket, PreviewerCommands command, const QByteArray& data = QByteArray());
+    void send(RenderSocket* socket, RendererCommands command, const QByteArray& data = QByteArray());
 
 signals:
     void init();
     void terminate();
     void propertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void formCreation(const QString& dir);
-    void individualPreview(const QString& url);
+    void preview(const QString& url);
     void controlCreation(const QString& dir, const QString& parentUid);
     void refresh(const QString& formUid);
     void parentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
@@ -42,7 +42,7 @@ signals:
     void devicePixelRatioUpdate(qreal devicePixelRatio);
 
 private:
-    PreviewerSocket* m_socket;
+    RenderSocket* m_socket;
 };
 
 #endif // COMMANDDISPATCHER_H

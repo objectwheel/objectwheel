@@ -3,7 +3,7 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <delayer.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
@@ -413,7 +413,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     connect(m_buttons_2->get(Settings), &QPushButton::clicked,
             this, &ProjectsWidget::onSettingsButtonClick);
 
-    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::initializationProgressChanged,
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::initializationProgressChanged,
             this, &ProjectsWidget::onProgressChange);
 }
 

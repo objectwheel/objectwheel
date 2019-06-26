@@ -1,8 +1,8 @@
 #include <applicationcore.h>
-#include <previewersocket.h>
+#include <rendersocket.h>
 #include <components.h>
-#include <previewer.h>
-#include <previewerutils.h>
+#include <renderengine.h>
+#include <renderutils.h>
 #include <commandlineparser.h>
 #include <commanddispatcher.h>
 #include <quicktheme.h>
@@ -20,10 +20,10 @@
 #include <windows.h>
 #endif
 
-PreviewerSocket* ApplicationCore::s_previewerSocket = nullptr;
+RenderSocket* ApplicationCore::s_renderSocket = nullptr;
 QThread* ApplicationCore::s_socketThread = nullptr;
 CommandDispatcher* ApplicationCore::s_commandDispatcher = nullptr;
-Previewer* ApplicationCore::s_previewer = nullptr;
+RenderEngine* ApplicationCore::s_renderEngine = nullptr;
 
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 {
@@ -37,63 +37,63 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
     DesignerSupport::activateDesignerWindowManager();
     DesignerSupport::activateDesignerMode();
-    PreviewerUtils::stopUnifiedTimer();
+    RenderUtils::stopUnifiedTimer();
     QtWebView::initialize();
-    qRegisterMetaType<PreviewerCommands>("PreviewerCommands");
+    qRegisterMetaType<RendererCommands>("RendererCommands");
 
-    s_previewerSocket = new PreviewerSocket;
+    s_renderSocket = new RenderSocket;
     s_socketThread = new QThread(this);
 
     Components::init();
 
-    s_previewerSocket->moveToThread(s_socketThread);
+    s_renderSocket->moveToThread(s_socketThread);
     s_socketThread->start();
 
-    s_commandDispatcher = new CommandDispatcher(s_previewerSocket, this);
-    s_previewer = new Previewer(this);
+    s_commandDispatcher = new CommandDispatcher(s_renderSocket, this);
+    s_renderEngine = new RenderEngine(this);
 
-    connect(s_previewerSocket, &PreviewerSocket::disconnected,
+    connect(s_renderSocket, &RenderSocket::disconnected,
             std::bind(&ApplicationCore::startQuitCountdown, this, 1200));
 
     connect(s_commandDispatcher, &CommandDispatcher::terminate,
             this, &ApplicationCore::onTerminateCommand);
     connect(s_commandDispatcher, &CommandDispatcher::init,
-            s_previewer, &Previewer::init);
+            s_renderEngine, &RenderEngine::init);
     connect(s_commandDispatcher, &CommandDispatcher::propertyUpdate,
-            s_previewer, &Previewer::updateProperty);
+            s_renderEngine, &RenderEngine::updateProperty);
     connect(s_commandDispatcher, &CommandDispatcher::controlCreation,
-            s_previewer, &Previewer::createControl);
-    connect(s_commandDispatcher, &CommandDispatcher::individualPreview,
-            s_previewer, &Previewer::previewIndividually);
+            s_renderEngine, &RenderEngine::createControl);
+    connect(s_commandDispatcher, &CommandDispatcher::preview,
+            s_renderEngine, &RenderEngine::preview);
     connect(s_commandDispatcher, &CommandDispatcher::refresh,
-            s_previewer, &Previewer::refresh);
+            s_renderEngine, &RenderEngine::refresh);
     connect(s_commandDispatcher, &CommandDispatcher::parentUpdate,
-            s_previewer, &Previewer::updateParent);
+            s_renderEngine, &RenderEngine::updateParent);
     connect(s_commandDispatcher, &CommandDispatcher::indexUpdate,
-            s_previewer, &Previewer::updateIndex);
+            s_renderEngine, &RenderEngine::updateIndex);
     connect(s_commandDispatcher, &CommandDispatcher::idUpdate,
-            s_previewer, &Previewer::updateId);
+            s_renderEngine, &RenderEngine::updateId);
     connect(s_commandDispatcher, &CommandDispatcher::controlDeletion,
-            s_previewer, &Previewer::deleteControl);
+            s_renderEngine, &RenderEngine::deleteControl);
     connect(s_commandDispatcher, &CommandDispatcher::formDeletion,
-            s_previewer, &Previewer::deleteForm);
+            s_renderEngine, &RenderEngine::deleteForm);
     connect(s_commandDispatcher, &CommandDispatcher::formCreation,
-            s_previewer, &Previewer::createForm);
+            s_renderEngine, &RenderEngine::createForm);
     connect(s_commandDispatcher, &CommandDispatcher::controlCodeUpdate,
-            s_previewer, &Previewer::updateControlCode);
+            s_renderEngine, &RenderEngine::updateControlCode);
     connect(s_commandDispatcher, &CommandDispatcher::formCodeUpdate,
-            s_previewer, &Previewer::updateFormCode);
+            s_renderEngine, &RenderEngine::updateFormCode);
     connect(s_commandDispatcher, &CommandDispatcher::devicePixelRatioUpdate,
-            s_previewer, &Previewer::setDevicePixelRatio);
+            s_renderEngine, &RenderEngine::setDevicePixelRatio);
 
-    connect(s_previewer, &Previewer::initializationProgressChanged,
+    connect(s_renderEngine, &RenderEngine::initializationProgressChanged,
             s_commandDispatcher, &CommandDispatcher::scheduleInitializationProgress);
-    connect(s_previewer, &Previewer::previewDone,
+    connect(s_renderEngine, &RenderEngine::renderDone,
+            s_commandDispatcher, &CommandDispatcher::scheduleRenderDone);
+    connect(s_renderEngine, &RenderEngine::previewDone,
             s_commandDispatcher, &CommandDispatcher::schedulePreviewDone);
-    connect(s_previewer, &Previewer::individualPreviewDone,
-            s_commandDispatcher, &CommandDispatcher::scheduleIndividualPreviewDone);
 
-    QMetaObject::invokeMethod(s_previewerSocket, "start",
+    QMetaObject::invokeMethod(s_renderSocket, "start",
                               Q_ARG(QString, CommandlineParser::serverName()));
 
     startQuitCountdown(30000);
@@ -101,7 +101,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
 ApplicationCore::~ApplicationCore()
 {
-    QMetaObject::invokeMethod(s_previewerSocket, "deleteLater");
+    QMetaObject::invokeMethod(s_renderSocket, "deleteLater");
 
     s_socketThread->quit();
     s_socketThread->wait();
@@ -120,7 +120,7 @@ void ApplicationCore::prepare()
 {
     QApplication::setOrganizationName("Objectwheel");
     QApplication::setOrganizationDomain("objectwheel.com");
-    QApplication::setApplicationName("previewer");
+    QApplication::setApplicationName("renderer");
     QApplication::setApplicationVersion("1.1.0");
     QApplication::setQuitOnLastWindowClosed(false);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -147,13 +147,13 @@ void ApplicationCore::startQuitCountdown(int msec)
 
 void ApplicationCore::onTerminateCommand()
 {
-    QMetaObject::invokeMethod(s_previewerSocket, "abort");
+    QMetaObject::invokeMethod(s_renderSocket, "abort");
     QMetaObject::invokeMethod(QCoreApplication::instance(), "quit");
 }
 
 void ApplicationCore::quitIfDisconnected()
 {
-    if (s_previewerSocket->state() != QLocalSocket::ConnectedState) {
+    if (s_renderSocket->state() != QLocalSocket::ConnectedState) {
         qWarning() << tr("No connection, quitting...");
         QCoreApplication::exit(EXIT_FAILURE);
     }

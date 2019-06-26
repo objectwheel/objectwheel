@@ -1,9 +1,9 @@
-#ifndef PREVIEWERCOMMANDS_H
-#define PREVIEWERCOMMANDS_H
+#ifndef RENDERERCOMMANDS_H
+#define RENDERERCOMMANDS_H
 
 #include <QtGlobal>
 
-enum PreviewerCommands : quint32 {
+enum RendererCommands : quint32 {
     ConnectionAlive = 0x1000,
     ControlCodeUpdate,
     ControlCreation,
@@ -16,13 +16,13 @@ enum PreviewerCommands : quint32 {
     Init,
     InitializationProgress,
     ParentUpdate,
+    RenderDone,
+    Preview,
     PreviewDone,
-    IndividualPreview,
-    IndividualPreviewDone,
     PropertyUpdate,
     DevicePixelRatioUpdate,
     Refresh,
     Terminate
 };
 
-#endif // PREVIEWERCOMMANDS_H
+#endif // RENDERERCOMMANDS_H

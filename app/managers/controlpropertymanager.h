@@ -25,7 +25,7 @@ public:
     enum Option {
         NoOption = 0x0,
         SaveChanges = 0x1,
-        UpdatePreviewer = 0x2,
+        UpdateRenderer = 0x2,
         CompressedCall = 0x4,
         DontApplyDesigner = 0x8
     };
@@ -59,7 +59,7 @@ signals:
     void zChanged(Control*);
     void parentChanged(Control*);
     void geometryChanged(Control*);
-    void previewChanged(Control*, bool codeChanged);
+    void imageChanged(Control*, bool codeChanged);
     void indexChanged(Control*);
     void idChanged(Control*, const QString& previousId);
     void propertyChanged(Control*, const QString& propertyName);

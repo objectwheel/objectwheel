@@ -5,7 +5,7 @@ CONFIG  += c++14 strict_c++
 TARGET   = Objectwheel
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
-#DEFINES += PREVIEWER_DEBUG
+#DEFINES += RENDERER_DEBUG
 
 QT += network websockets help widgets widgets-private
 
@@ -22,7 +22,7 @@ include($$PWD/managers/managers.pri)
 include($$PWD/misc/misc.pri)
 include($$PWD/options/options.pri)
 include($$PWD/panes/panes.pri)
-include($$PWD/previewerlink/previewerlink.pri)
+include($$PWD/render/render.pri)
 include($$PWD/welcome/welcome.pri)
 include($$PWD/widgets/widgets.pri)
 include($$PWD/windows/windows.pri)

@@ -3,7 +3,7 @@
 #include <saveutils.h>
 #include <suppressor.h>
 #include <designerscene.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <centralwidget.h>
@@ -48,7 +48,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(
-                                    g_baseControlSize, ControlPreviewingManager::devicePixelRatio())))
+                                    g_baseControlSize, ControlRenderingManager::devicePixelRatio())))
   , m_resizers(initializeResizers(this))
 {
     m_controls << this;
@@ -64,8 +64,8 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setSize(this, g_baseControlSize, ControlPropertyManager::NoOption);
 
-    connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::previewDone,
-            this, &Control::updatePreview);
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
+            this, &Control::updateImage);
 
     connect(this, &Control::resizedChanged,
             this, &Control::applyCachedGeometry);
@@ -327,9 +327,9 @@ void Control::dropControl(Control* control)
     // NOTE: Do not move this assignment below setParent, because parent change effects the newPos result
     const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
-                                      | ControlPropertyManager::UpdatePreviewer);
+                                      | ControlPropertyManager::UpdateRenderer);
     ControlPropertyManager::setPos(control, newPos, ControlPropertyManager::SaveChanges
-                                   | ControlPropertyManager::UpdatePreviewer
+                                   | ControlPropertyManager::UpdateRenderer
                                    | ControlPropertyManager::CompressedCall);
     // NOTE: We compress setPos because there might be some other compressed setPos'es in the list
     // We want the setPos that happens after reparent operation to take place at the very last
@@ -405,7 +405,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     if (!form()) {
         ControlPropertyManager::setPos(this, pos(), ControlPropertyManager::SaveChanges
-                                       | ControlPropertyManager::UpdatePreviewer
+                                       | ControlPropertyManager::UpdateRenderer
                                        | ControlPropertyManager::CompressedCall);
     }
 }
@@ -508,8 +508,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
                     );
     }
 
-    painter->setRenderHint(QPainter::Antialiasing);
-    painter->drawPixmap(rect(), m_pixmap, QRectF(QPointF(0, 0), size() * ControlPreviewingManager::devicePixelRatio()));
+    painter->drawPixmap(m_frame, m_pixmap, m_pixmap.rect());
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
@@ -524,7 +523,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
             p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
             p.fillRect(m_pixmap.rect(), gradient);
             p.end();
-            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * ControlPreviewingManager::devicePixelRatio()));
+            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * ControlRenderingManager::devicePixelRatio()));
         }
     }
 
@@ -546,20 +545,20 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
 
         painter->setPen(pen);
-        painter->drawRect(rect().adjusted(0.5, 0.5, -0.5, -0.5));
+        painter->drawRect(rect());
     }
 }
 
-void Control::updatePreview(const PreviewResult& result)
+void Control::updateImage(const RenderResult& result)
 {
     if (result.uid != uid())
         return;
 
     // FIXME
-    // result.id ?? Preview Engine bize yeni id değeri göndermeli mi, zaten id değişikliğini
+    // result.id ?? Render Engine bize yeni id değeri göndermeli mi, zaten id değişikliğini
     // önce biz ona gönderiyoruz, kod değişikliği yada propertis pane'den değiştirerek??
     // zaten her halükarda id bu tarafta değiştirilip orada değişik kod gitmiyormu ve bu kod
-    // daki id değişikliği daha preview engine gitmeden önce zaten ilgili control'e setId edilmiyor mu?
+    // daki id değişikliği daha render engine gitmeden önce zaten ilgili control'e setId edilmiyor mu?
     ControlPropertyManager::setId(this, result.id, ControlPropertyManager::NoOption);
 
     m_errors = result.errors;
@@ -576,19 +575,20 @@ void Control::updatePreview(const PreviewResult& result)
     if (!dragging() && !resized())
         applyCachedGeometry();
 
+    m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_pixmap = QPixmap::fromImage(
                 hasErrors()
-                ? PaintUtils::renderErrorControlImage(size(), ControlPreviewingManager::devicePixelRatio())
+                ? PaintUtils::renderErrorControlImage(size(), ControlRenderingManager::devicePixelRatio())
                 : result.image);
-    m_pixmap.setDevicePixelRatio(ControlPreviewingManager::devicePixelRatio());
+    m_pixmap.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
 
     if (m_pixmap.isNull()) {
         if (m_gui) {
-            m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size(), ControlPreviewingManager::devicePixelRatio()));
+            m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size(), ControlRenderingManager::devicePixelRatio()));
         } else {
             m_pixmap = QPixmap::fromImage(
                         PaintUtils::renderNonGuiControlImage(
-                            ToolUtils::toolIcon(m_dir, ControlPreviewingManager::devicePixelRatio()), size(), ControlPreviewingManager::devicePixelRatio()));
+                            ToolUtils::toolIcon(m_dir, ControlRenderingManager::devicePixelRatio()), size(), ControlRenderingManager::devicePixelRatio()));
         }
     }
 
@@ -597,7 +597,7 @@ void Control::updatePreview(const PreviewResult& result)
 
     update();
 
-    ControlPropertyManager::instance()->previewChanged(this, result.codeChanged);
+    ControlPropertyManager::instance()->imageChanged(this, result.codeChanged);
 }
 
 void Control::applyCachedGeometry()

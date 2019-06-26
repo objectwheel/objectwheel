@@ -2,7 +2,7 @@ DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/commanddispatcher.h \
-           $$PWD/previewerserver.h
+           $$PWD/renderserver.h
 
 SOURCES += $$PWD/commanddispatcher.cpp \
-           $$PWD/previewerserver.cpp
+           $$PWD/renderserver.cpp

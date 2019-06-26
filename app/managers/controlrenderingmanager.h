@@ -1,21 +1,21 @@
-#ifndef CONTROLPREVIEWINGMANAGER_H
-#define CONTROLPREVIEWINGMANAGER_H
+#ifndef CONTROLRENDERINGMANAGER_H
+#define CONTROLRENDERINGMANAGER_H
 
 #include <QObject>
 
-class PreviewerServer;
+class RenderServer;
 class CommandDispatcher;
-struct PreviewResult;
+struct RenderResult;
 
-class ControlPreviewingManager final : public QObject
+class ControlRenderingManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(ControlPreviewingManager)
+    Q_DISABLE_COPY(ControlRenderingManager)
 
     friend class ApplicationCore;
 
 public:
-    static ControlPreviewingManager* instance();
+    static ControlRenderingManager* instance();
 
     static void scheduleAnchorChange(){}
 
@@ -24,7 +24,7 @@ public:
     static void scheduleFormDeletion(const QString& uid);
     static void scheduleFormCreation(const QString& dir);
     static void scheduleControlDeletion(const QString& uid);
-    static void scheduleIndividualPreview(const QString& url);
+    static void schedulePreview(const QString& url);
     static void scheduleControlCreation(const QString& dir, const QString& parentUid);
     static void scheduleIndexUpdate(const QString& uid);
     static void scheduleIdUpdate(const QString& uid, const QString& newId);
@@ -41,23 +41,23 @@ private slots:
     void onConnected();
     void onDisconnected();
     void onConnectionTimeout();
-    void onPreviewResultsReady(const QList<PreviewResult>& results);
+    void onRenderResultsReady(const QList<RenderResult>& results);
 
 signals:
-    void previewDone(const PreviewResult& result);
-    void individualPreviewDone(const QImage& preview);
+    void renderDone(const RenderResult& result);
+    void previewDone(const QImage& preview);
     void initializationProgressChanged(int progress);
 
 private:
-    explicit ControlPreviewingManager(QObject* parent = nullptr);
-    ~ControlPreviewingManager() override;
+    explicit ControlRenderingManager(QObject* parent = nullptr);
+    ~ControlRenderingManager() override;
 
 private:
-    static ControlPreviewingManager* s_instance;
-    static PreviewerServer* s_previewerServer;
+    static ControlRenderingManager* s_instance;
+    static RenderServer* s_renderServer;
     static QThread* s_serverThread;
     static CommandDispatcher* s_commandDispatcher;
     static qreal s_devicePixelRatio;
 };
 
-#endif // CONTROLPREVIEWINGMANAGER_H
+#endif // CONTROLRENDERINGMANAGER_H

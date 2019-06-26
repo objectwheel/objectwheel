@@ -254,7 +254,7 @@ QWidget* createIdHandlerWidget(Control* control)
             } else {
                 ControlPropertyManager::setId(control, lineEdit->text(),
                                               ControlPropertyManager::SaveChanges
-                                              | ControlPropertyManager::UpdatePreviewer);
+                                              | ControlPropertyManager::UpdateRenderer);
             }
         }
     });
@@ -285,7 +285,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
                                             propertyName, UtilityFunctions::stringify(lineEdit->text()),
                                             lineEdit->text(),
                                             ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     return lineEdit;
@@ -317,7 +317,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
 
         ControlPropertyManager::setProperty(control, propertyName, UtilityFunctions::stringify(displayText), url,
                                             ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     return lineEdit;
@@ -361,7 +361,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
                                             enumm.name, fixedScope + "." + comboBox->currentText(),
                                             enumm.keys.value(comboBox->currentText()),
                                             ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     return comboBox;
@@ -387,7 +387,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
                                             propertyName, checkBox->isChecked() ? "true" : "false",
                                             checkBox->isChecked(),
                                             ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     auto widget = new QWidget;
@@ -438,7 +438,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
         ControlPropertyManager::setProperty(control, propertyName,
                                             UtilityFunctions::stringify(color.name(QColor::HexArgb)), color,
                                             ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     return toolButton;
@@ -480,7 +480,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
         // when the value is changed
 
         ControlPropertyManager::Options options =
-                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdatePreviewer;
+                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
 
         if (control->form() && (propertyName == "x" || propertyName == "y"))
             options |= ControlPropertyManager::DontApplyDesigner;
@@ -539,7 +539,7 @@ QWidget* createIndexHandlerWidget(Control* control)
         // NOTE: No need for previous value equality check, since this signal is only emitted
         // when the value is changed
         ControlPropertyManager::Options options =
-                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdatePreviewer;
+                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
 
         ControlPropertyManager::setIndex(control, spinBox->value(), options);
     });
@@ -574,7 +574,7 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, 
 
         ControlPropertyManager::setProperty(control, "font.family", UtilityFunctions::stringify(comboBox->currentText()),
                                             comboBox->currentText(), ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     return comboBox;
@@ -610,7 +610,7 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
         ControlPropertyManager::setProperty(control, "font.weight",
                                             "Font." + comboBox->currentText(), weightValue,
                                             ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     return comboBox;
@@ -647,7 +647,7 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
                                             "Font." + comboBox->currentText(),
                                             QFont::Capitalization(capitalizationValue),
                                             ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdatePreviewer);
+                                            | ControlPropertyManager::UpdateRenderer);
     });
 
     return comboBox;
@@ -698,7 +698,7 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
                                             QString::number(spinBox->value()), spinBox->value(),
                                             ControlPropertyManager::SaveChanges);
         ControlPropertyManager::setProperty(control, "font", QString(), font,
-                                            ControlPropertyManager::UpdatePreviewer);
+                                            ControlPropertyManager::UpdateRenderer);
     });
 
     return spinBox;
@@ -1042,8 +1042,8 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
             this, &PropertiesPane::onSelectionChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::zChanged,
             this, &PropertiesPane::onZChange);
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
-            this, &PropertiesPane::onPreviewChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
+            this, &PropertiesPane::onImageChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
             this, &PropertiesPane::onGeometryChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::propertyChanged,
@@ -1065,6 +1065,7 @@ void PropertiesPane::discharge()
 // FIXME: This function has severe performance issues.
 void PropertiesPane::onSelectionChange()
 {
+    return; // FIXME
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;
     const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
 
@@ -1286,7 +1287,7 @@ void PropertiesPane::onZChange(Control* control)
     }
 }
 
-void PropertiesPane::onPreviewChange(Control* control, bool codeChanged)
+void PropertiesPane::onImageChange(Control* control, bool codeChanged)
 {
     if (m_designerScene->selectedControls().size() != 1)
         return;

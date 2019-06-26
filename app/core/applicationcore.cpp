@@ -5,7 +5,7 @@
 #include <controlcreationmanager.h>
 #include <windowmanager.h>
 #include <registrationapimanager.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <documentmanager.h>
 #include <mainwindow.h>
 #include <runmanager.h>
@@ -47,7 +47,7 @@ ModeManager* ApplicationCore::s_modeManager = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
 RegistrationApiManager* ApplicationCore::s_accountManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
-ControlPreviewingManager* ApplicationCore::s_controlPreviewingManager = nullptr;
+ControlRenderingManager* ApplicationCore::s_controlRenderingManager = nullptr;
 SaveManager* ApplicationCore::s_saveManager = nullptr;
 ProjectManager* ApplicationCore::s_projectManager = nullptr;
 ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
@@ -105,7 +105,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_serverManager = new ServerManager(QUrl(APP_WSSSERVER), app);
     s_accountManager = new RegistrationApiManager(app);
     s_userManager = new UserManager(app);
-    s_controlPreviewingManager = new ControlPreviewingManager(app);
+    s_controlRenderingManager = new ControlRenderingManager(app);
     s_saveManager = new SaveManager(app);
     s_projectManager = new ProjectManager(app);
     s_projectExposingManager = new ProjectExposingManager(app);
@@ -141,7 +141,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerWidget()->designerScene();
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
-    s_controlPreviewingManager->setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
+    s_controlRenderingManager->setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
 
     auto conn = new QMetaObject::Connection;
     *conn = QObject::connect(s_documentManager, &DocumentManager::projectInfoUpdated, [=] {

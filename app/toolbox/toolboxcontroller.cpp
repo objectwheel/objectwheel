@@ -7,7 +7,7 @@
 #include <toolutils.h>
 #include <documentmanager.h>
 #include <utilityfunctions.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <paintutils.h>
 
 #include <QDir>
@@ -59,7 +59,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
     processLocked = true;
 
     auto conn = new QMetaObject::Connection;
-    *conn = connect(ControlPreviewingManager::instance(), &ControlPreviewingManager::individualPreviewDone,
+    *conn = connect(ControlRenderingManager::instance(), &ControlRenderingManager::previewDone,
                     [=] (const QImage& preview) {
         if (locked) {
             disconnect(*conn);
@@ -67,7 +67,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
             QDrag* drag = establishDrag(item);
             if (!PaintUtils::isBlankImage(preview)) {
                 QPixmap pixmap(QPixmap::fromImage(preview));
-                pixmap.setDevicePixelRatio(ControlPreviewingManager::devicePixelRatio());
+                pixmap.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
                 drag->setPixmap(pixmap);
             }
             locked = false;
@@ -86,7 +86,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
         }
     });
 
-    ControlPreviewingManager::scheduleIndividualPreview(SaveUtils::toControlMainQmlFile(item->dir()));
+    ControlRenderingManager::schedulePreview(SaveUtils::toControlMainQmlFile(item->dir()));
 }
 
 void ToolboxController::onSearchTextChange(const QString& text)

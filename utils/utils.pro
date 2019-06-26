@@ -16,11 +16,11 @@ HEADERS += \
     $$PWD/saveutils.h \
     $$PWD/parserutils.h \
     $$PWD/qmlformatter.h \
-    $$PWD/previewresult.h \
+    $$PWD/renderresult.h \
     $$PWD/hashfactory.h \
     $$PWD/utils_global.h \
     $$PWD/quicktheme.h \
-    $$PWD/previewercommands.h \
+    $$PWD/renderercommands.h \
     $$PWD/paintutils.h \
     $$PWD/utilityfunctions.h \
     $$PWD/filesystemutils.h \

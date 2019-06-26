@@ -2,7 +2,7 @@
 #include <buttonslice.h>
 #include <usermanager.h>
 #include <projectmanager.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <utilityfunctions.h>

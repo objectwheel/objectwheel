@@ -3,7 +3,7 @@
 #include <savemanager.h>
 #include <hashfactory.h>
 #include <saveutils.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <projectexposingmanager.h>
 #include <documentmanager.h>
 #include <zipasync.h>
@@ -235,11 +235,11 @@ bool ProjectManager::start(const QString& uid)
 
     s_uid = uid;
 
-    // Must be executed before running preview engine
+    // Must be executed before running render engine
     // Because it might fix broken id and indexes
     ProjectExposingManager::exposeProject();
 
-    ControlPreviewingManager::scheduleInit();
+    ControlRenderingManager::scheduleInit();
     DocumentManager::updateProjectInfo();
     updateLastModification(s_uid);
 
@@ -250,7 +250,7 @@ bool ProjectManager::start(const QString& uid)
 
 void ProjectManager::stop()
 {
-    ControlPreviewingManager::scheduleTerminate();
+    ControlRenderingManager::scheduleTerminate();
     updateSize(s_uid);
     s_uid = "";
     emit instance()->stopped();

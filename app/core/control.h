@@ -1,7 +1,7 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <previewresult.h>
+#include <renderresult.h>
 #include <QGraphicsWidget>
 
 class Resizer;
@@ -93,7 +93,7 @@ protected:
     ~Control() override;
 
 private slots:
-    void updatePreview(const PreviewResult& result);
+    void updateImage(const RenderResult& result);
     void applyCachedGeometry();
 
 private:
@@ -113,6 +113,7 @@ private:
     QString m_dir;
     QString m_uid;
     QString m_id;
+    QRectF m_frame;
     QPixmap m_pixmap;
 
     QList<QmlError> m_errors;

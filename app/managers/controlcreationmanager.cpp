@@ -3,7 +3,7 @@
 #include <designerscene.h>
 #include <saveutils.h>
 #include <savemanager.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <controlpropertymanager.h>
 
 DesignerScene* ControlCreationManager::s_designerScene = nullptr;
@@ -35,7 +35,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     // parent concept for forms in Designer; forms are directly put into DesignerScene
 
     ControlPropertyManager::setIndex(form, form->siblings().size(), ControlPropertyManager::SaveChanges);
-    ControlPreviewingManager::scheduleFormCreation(form->dir());
+    ControlRenderingManager::scheduleFormCreation(form->dir());
 
     // NOTE: We don't have to worry about possible child controls since createForm is only
     // called from FormsPane
@@ -55,7 +55,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);
-    ControlPreviewingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
+    ControlRenderingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
 
     QMap<QString, Control*> controlTree;
     controlTree.insert(control->dir(), control);
@@ -66,7 +66,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
         auto childControl = new Control(childPath);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
-        ControlPreviewingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
+        ControlRenderingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         controlTree.insert(childPath, childControl);
     }
 

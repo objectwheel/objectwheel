@@ -303,7 +303,7 @@ bool DesignerScene::stick() const
     auto center = geometry.center();
 
     const ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
-            | ControlPropertyManager::UpdatePreviewer
+            | ControlPropertyManager::UpdateRenderer
             | ControlPropertyManager::CompressedCall;
 
     /* Child center <-> Parent center */

@@ -1,10 +1,10 @@
-#include <previewerserver.h>
+#include <renderserver.h>
 #include <serializeenum.h>
 
 #include <QTimer>
 #include <QLocalServer>
 
-PreviewerServer::PreviewerServer(QObject* parent)
+RenderServer::RenderServer(QObject* parent)
     : QObject(parent)
     , m_blockSize(0)
     , m_server(new QLocalServer(this))
@@ -12,23 +12,23 @@ PreviewerServer::PreviewerServer(QObject* parent)
 {
     m_checkAliveTimer->setInterval(4000);
 
-    connect(m_checkAliveTimer, &QTimer::timeout, this, &PreviewerServer::connectionTimeout);
+    connect(m_checkAliveTimer, &QTimer::timeout, this, &RenderServer::connectionTimeout);
 
-    connect(m_server, &QLocalServer::newConnection, this, &PreviewerServer::onNewConnection);
+    connect(m_server, &QLocalServer::newConnection, this, &RenderServer::onNewConnection);
 }
 
-QString PreviewerServer::serverName() const
+QString RenderServer::serverName() const
 {
     return m_server->serverName();
 }
 
-bool PreviewerServer::isConnected() const
+bool RenderServer::isConnected() const
 {
     return !m_socket.isNull();
 }
 
 // Only aborts current connection, server remains active
-void PreviewerServer::abort()
+void RenderServer::abort()
 {
     m_checkAliveTimer->stop();
     if (m_socket)
@@ -37,22 +37,22 @@ void PreviewerServer::abort()
 }
 
 // Existing connections aren't effected, only server deactivated
-void PreviewerServer::close()
+void RenderServer::close()
 {
     m_server->close();
 }
 
-void PreviewerServer::listen(const QString& serverName)
+void RenderServer::listen(const QString& serverName)
 {
     m_server->listen(serverName);
 }
 
-void PreviewerServer::send(const PreviewerCommands& command, const QByteArray& data)
+void RenderServer::send(const RendererCommands& command, const QByteArray& data)
 {
     send(m_socket, command, data);
 }
 
-void PreviewerServer::send(QLocalSocket* socket, const PreviewerCommands& command, const QByteArray& data)
+void RenderServer::send(QLocalSocket* socket, const RendererCommands& command, const QByteArray& data)
 {
     if (!socket || !socket->isOpen() || !socket->isWritable())
         return;
@@ -71,7 +71,7 @@ void PreviewerServer::send(QLocalSocket* socket, const PreviewerCommands& comman
     socket->flush();
 }
 
-void PreviewerServer::onNewConnection()
+void RenderServer::onNewConnection()
 {
     QLocalSocket* pendingConnection = m_server->nextPendingConnection();
 
@@ -82,20 +82,20 @@ void PreviewerServer::onNewConnection()
         m_checkAliveTimer->start();
 
         connect(m_socket, &QLocalSocket::disconnected, m_checkAliveTimer, &QTimer::stop);
-        connect(m_socket, &QLocalSocket::disconnected, this, &PreviewerServer::disconnected);
+        connect(m_socket, &QLocalSocket::disconnected, this, &RenderServer::disconnected);
         connect(m_socket, &QLocalSocket::disconnected, m_socket, &QLocalSocket::deleteLater);
-        connect(m_socket, &QLocalSocket::readyRead, this, &PreviewerServer::onReadReady);
+        connect(m_socket, &QLocalSocket::readyRead, this, &RenderServer::onReadReady);
         connect(m_socket, qOverload<QLocalSocket::LocalSocketError>(&QLocalSocket::error),
-                this, &PreviewerServer::onError);
+                this, &RenderServer::onError);
 
         emit connected();
     } else {
-        send(pendingConnection, PreviewerCommands::Terminate);
+        send(pendingConnection, RendererCommands::Terminate);
         pendingConnection->abort();
     }
 }
 
-void PreviewerServer::onReadReady()
+void RenderServer::onReadReady()
 {
     QDataStream incoming(m_socket);
     incoming.setVersion(QDataStream::Qt_5_12);
@@ -111,14 +111,14 @@ void PreviewerServer::onReadReady()
         return;
 
     QByteArray data;
-    PreviewerCommands command;
+    RendererCommands command;
 
     incoming >> command;
     incoming >> data;
 
     m_blockSize = 0;
 
-    if (command == PreviewerCommands::ConnectionAlive)
+    if (command == RendererCommands::ConnectionAlive)
         m_checkAliveTimer->start();
     else
         emit dataArrived(command, data);
@@ -127,7 +127,7 @@ void PreviewerServer::onReadReady()
         onReadReady();
 }
 
-void PreviewerServer::onError(QLocalSocket::LocalSocketError socketError)
+void RenderServer::onError(QLocalSocket::LocalSocketError socketError)
 {
     qWarning() << socketError << "Socket error, in" << __FILE__ << ":" << __LINE__;
 }

@@ -2,10 +2,10 @@
 #define COMMANDDISPATCHER_H
 
 #include <QObject>
-#include <previewercommands.h>
+#include <renderercommands.h>
 
-struct PreviewResult;
-class PreviewerServer;
+struct RenderResult;
+class RenderServer;
 
 class CommandDispatcher final : public QObject
 {
@@ -13,7 +13,7 @@ class CommandDispatcher final : public QObject
     Q_DISABLE_COPY(CommandDispatcher)
 
 public:
-    explicit CommandDispatcher(PreviewerServer* server, QObject* parent = nullptr);
+    explicit CommandDispatcher(RenderServer* server, QObject* parent = nullptr);
 
 public slots:
     void scheduleInit();
@@ -22,7 +22,7 @@ public slots:
     void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void scheduleFormCreation(const QString& dir);
     void scheduleControlCreation(const QString& dir, const QString& parentUid);
-    void scheduleIndividualPreview(const QString& url);
+    void schedulePreview(const QString& url);
     void scheduleRefresh(const QString& formUid);
     void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
     void scheduleIndexUpdate(const QString& uid);
@@ -31,18 +31,18 @@ public slots:
     void scheduleFormDeletion(const QString& uid);
     void scheduleControlCodeUpdate(const QString& uid);
     void scheduleFormCodeUpdate(const QString& uid);
-    void onDataReceived(const PreviewerCommands& command, const QByteArray& data);
+    void onDataReceived(const RendererCommands& command, const QByteArray& data);
 
 private:
-    void send(PreviewerServer* server, PreviewerCommands command, const QByteArray& data = QByteArray());
+    void send(RenderServer* server, RendererCommands command, const QByteArray& data = QByteArray());
 
 signals:
     void initializationProgressChanged(int progress);
-    void previewDone(const QList<PreviewResult>& results);
-    void individualPreviewDone(const QImage& preview);
+    void renderDone(const QList<RenderResult>& results);
+    void previewDone(const QImage& preview);
 
 private:
-    PreviewerServer* m_server;
+    RenderServer* m_server;
 };
 
 #endif // COMMANDDISPATCHER_H

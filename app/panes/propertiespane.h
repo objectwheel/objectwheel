@@ -22,7 +22,7 @@ public slots:
 private slots:
     void onSelectionChange();
     void onZChange(Control*);
-    void onPreviewChange(Control*, bool codeChanged);
+    void onImageChange(Control*, bool codeChanged);
     void onGeometryChange(const Control*);
     void onIndexChange(Control*);
     void onIdChange(Control*, const QString& previousId);

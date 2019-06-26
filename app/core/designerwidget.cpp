@@ -3,7 +3,7 @@
 #include <designerscene.h>
 #include <controlcreationmanager.h>
 #include <utilsicons.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <saveutils.h>
 #include <transparentstyle.h>
 #include <signalchooserdialog.h>
@@ -157,7 +157,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_designerView);
 
-    m_designerView->setRenderHint(QPainter::Antialiasing);
+    m_designerView->setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     m_designerView->setRubberBandSelectionMode(Qt::IntersectsItemShape);
     m_designerView->setDragMode(QGraphicsView::RubberBandDrag);
     m_designerView->setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
@@ -199,7 +199,7 @@ DesignerWidget::DesignerWidget(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget
     m_fitButton->setCursor(Qt::PointingHandCursor);
     m_zoomlLevelCombobox->setCursor(Qt::PointingHandCursor);
 
-    m_refreshButton->setToolTip("Refresh control previews on the Dashboard.");
+    m_refreshButton->setToolTip("Refresh control rendering on the Dashboard.");
     m_clearButton->setToolTip("Clear controls on the Dashboard.");
     m_undoButton->setToolTip("Undo action.");
     m_redoButton->setToolTip("Redo action.");
@@ -316,7 +316,7 @@ void DesignerWidget::onZoomLevelChange(const QString& text)
 
 void DesignerWidget::onRefreshButtonClick()
 {
-    ControlPreviewingManager::scheduleRefresh(m_designerScene->currentForm()->uid());
+    ControlRenderingManager::scheduleRefresh(m_designerScene->currentForm()->uid());
 }
 
 void DesignerWidget::onClearButtonClick()

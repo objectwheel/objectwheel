@@ -2,7 +2,7 @@
 #include <control.h>
 #include <savemanager.h>
 #include <saveutils.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <designerscene.h>
 
 #include <QTimer>
@@ -73,11 +73,11 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
                 SaveManager::setProperty(control, "x", QString::number(newX));
         }
 
-        if (options & UpdatePreviewer) {
+        if (options & UpdateRenderer) {
             if (isInt)
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", int(newX));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", int(newX));
             else
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", newX);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", newX);
         }
 
         emit instance()->geometryChanged(control);
@@ -116,11 +116,11 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
                 SaveManager::setProperty(control, "y", QString::number(newY));
         }
 
-        if (options & UpdatePreviewer) {
+        if (options & UpdateRenderer) {
             if (isInt)
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", int(newY));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", int(newY));
             else
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", newY);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", newY);
         }
 
         emit instance()->geometryChanged(control);
@@ -152,8 +152,8 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
         if (options & SaveChanges)
             SaveManager::setProperty(control, "z", QString::number(z));
 
-        if (options & UpdatePreviewer)
-            ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "z", z);
+        if (options & UpdateRenderer)
+            ControlRenderingManager::schedulePropertyUpdate(control->uid(), "z", z);
 
         emit instance()->zChanged(control);
     }
@@ -190,11 +190,11 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
                 SaveManager::setProperty(control, "width", QString::number(width));
         }
 
-        if (options & UpdatePreviewer) {
+        if (options & UpdateRenderer) {
             if (isInt)
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", int(width));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", int(width));
             else
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", width);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", width);
         }
 
         emit instance()->geometryChanged(control);
@@ -232,11 +232,11 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
                 SaveManager::setProperty(control, "height", QString::number(height));
         }
 
-        if (options & UpdatePreviewer) {
+        if (options & UpdateRenderer) {
             if (isInt)
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", int(height));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", int(height));
             else
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", height);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", height);
         }
 
         emit instance()->geometryChanged(control);
@@ -278,13 +278,13 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
             }
         }
 
-        if (options & UpdatePreviewer) {
+        if (options & UpdateRenderer) {
             if (isInt) {
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", int(newPos.x()));
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", int(newPos.y()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", int(newPos.x()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", int(newPos.y()));
             } else {
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", newPos.x());
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", newPos.y());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", newPos.x());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", newPos.y());
             }
         }
 
@@ -329,13 +329,13 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
             }
         }
 
-        if (options & UpdatePreviewer) {
+        if (options & UpdateRenderer) {
             if (isInt) {
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", int(size.width()));
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", int(size.height()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", int(size.width()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", int(size.height()));
             } else {
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", size.width());
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", size.height());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", size.width());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", size.height());
             }
         }
 
@@ -385,17 +385,17 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
             }
         }
 
-        if (options & UpdatePreviewer) {
+        if (options & UpdateRenderer) {
             if (isInt) {
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", int(newGoe.x()));
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", int(newGoe.y()));
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", int(newGoe.width()));
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", int(newGoe.height()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", int(newGoe.x()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", int(newGoe.y()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", int(newGoe.width()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", int(newGoe.height()));
             } else {
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "x", newGoe.x());
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "y", newGoe.y());
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "width", newGoe.width());
-                ControlPreviewingManager::schedulePropertyUpdate(control->uid(), "height", newGoe.height());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", newGoe.x());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", newGoe.y());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", newGoe.width());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", newGoe.height());
             }
         }
 
@@ -416,7 +416,7 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     // If parent change is gonna be saved, make sure to fix indexes of the
     // previous siblings of the related control before setting new parent
     if (options & SaveChanges)
-        // FIXME: Should we also add UpdatePreviewer here?
+        // FIXME: Should we also add UpdateRenderer here?
         setIndex(control, std::numeric_limits<quint32>::max(), SaveChanges);
 
     if (!(options & DontApplyDesigner))
@@ -435,12 +435,12 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     } else {
         if (options & SaveChanges) {
             SaveManager::moveControl(control, parentControl);
-            // FIXME: Should we also add UpdatePreviewer here?
+            // FIXME: Should we also add UpdateRenderer here?
             setIndex(control, control->siblings().size(), SaveChanges);
         }
 
-        if (options & UpdatePreviewer) {
-            ControlPreviewingManager::scheduleParentUpdate(control->dir(),
+        if (options & UpdateRenderer) {
+            ControlRenderingManager::scheduleParentUpdate(control->dir(),
                                                            control->uid(), parentControl->uid());
         }
 
@@ -463,8 +463,8 @@ void ControlPropertyManager::setId(Control* control, const QString& id, ControlP
     else if (!(options & DontApplyDesigner))
         control->setId(id);
 
-    if (options & UpdatePreviewer)
-        ControlPreviewingManager::scheduleIdUpdate(control->uid(), control->id());
+    if (options & UpdateRenderer)
+        ControlRenderingManager::scheduleIdUpdate(control->uid(), control->id());
 
     emit instance()->idChanged(control, previousId);
 }
@@ -480,8 +480,8 @@ void ControlPropertyManager::setIndex(Control* control, quint32 index, ControlPr
     else if (!(options & DontApplyDesigner))
         control->setIndex(index);
 
-    if (options & UpdatePreviewer)
-        ControlPreviewingManager::scheduleIndexUpdate(control->uid());
+    if (options & UpdateRenderer)
+        ControlRenderingManager::scheduleIndexUpdate(control->uid());
 
     emit instance()->indexChanged(control);
 }
@@ -511,8 +511,8 @@ void ControlPropertyManager::setProperty(Control* control, const QString& proper
     if (options & SaveChanges)
         SaveManager::setProperty(control, propertyName, parserValue);
 
-    if (options & UpdatePreviewer)
-        ControlPreviewingManager::schedulePropertyUpdate(control->uid(), propertyName, propertyValue);
+    if (options & UpdateRenderer)
+        ControlRenderingManager::schedulePropertyUpdate(control->uid(), propertyName, propertyValue);
 
     emit instance()->propertyChanged(control, propertyName);
 }

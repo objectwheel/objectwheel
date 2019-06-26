@@ -28,37 +28,37 @@ DEFINES += QT_QML_DEBUG_NO_WARNING \
 macx {
     interpreter.files = $$OUT_PWD/../interpreter/interpreter
     interpreter.path = Contents/MacOS
-    previewer.files = $$OUT_PWD/../previewer/previewer
-    previewer.path = Contents/MacOS
+    renderer.files = $$OUT_PWD/../renderer/renderer
+    renderer.path = Contents/MacOS
     themer.files = $$OUT_PWD/../themer/themer
     themer.path = Contents/MacOS
     utils.files = $$OUT_PWD/../utils/libutils.dylib
     utils.path = Contents/Frameworks
     QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
     QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/interpreter -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
-    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/previewer -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
+    QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/renderer -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
     QMAKE_POST_LINK += $$system(install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/themer -change libutils.dylib @loader_path/../Frameworks/libutils.dylib)
     docs.files = $$PWD/resources/docs
     docs.path = Contents/MacOS
-    QMAKE_BUNDLE_DATA += interpreter previewer themer utils docs
+    QMAKE_BUNDLE_DATA += interpreter renderer themer utils docs
 } else:unix {
     interpreter.files = $$OUT_PWD/../interpreter/interpreter
     interpreter.path = $$OUT_PWD/
-    previewer.files = $$OUT_PWD/../previewer/previewer
-    previewer.path = $$OUT_PWD/
+    renderer.files = $$OUT_PWD/../renderer/renderer
+    renderer.path = $$OUT_PWD/
     themer.files = $$OUT_PWD/../themer/themer
     themer.path = $$OUT_PWD/
     utils.files = $$OUT_PWD/../utils/libutils.so
     utils.path = $$OUT_PWD/
     docs.files = $$PWD/resources/docs/*
     docs.path = $$OUT_PWD/docs
-    INSTALLS += interpreter previewer themer utils docs
+    INSTALLS += interpreter renderer themer utils docs
 } else:windows {
     CONFIG(debug, debug | release):COMPILING_MODE = debug
     CONFIG(release, debug | release):COMPILING_MODE = release
 
     FILES_TO_COPY = $$OUT_PWD/../interpreter/$$COMPILING_MODE/interpreter.exe
-    FILES_TO_COPY += $$OUT_PWD/../previewer/$$COMPILING_MODE/previewer.exe
+    FILES_TO_COPY += $$OUT_PWD/../renderer/$$COMPILING_MODE/renderer.exe
     FILES_TO_COPY += $$OUT_PWD/../themer/$$COMPILING_MODE/themer.exe
     FILES_TO_COPY += $$OUT_PWD/../utils/$$COMPILING_MODE/utils.dll
     DESTINATION_DIR = $$shell_quote($$shell_path($$OUT_PWD/$$COMPILING_MODE))

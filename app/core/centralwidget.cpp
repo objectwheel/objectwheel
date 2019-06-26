@@ -5,7 +5,7 @@
 #include <buildswidget.h>
 #include <issuespane.h>
 #include <designerscene.h>
-#include <controlpreviewingmanager.h>
+#include <controlrenderingmanager.h>
 #include <controlremovingmanager.h>
 #include <delayer.h>
 #include <qmlcodeeditorwidget.h>
@@ -88,7 +88,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
 
     onModeChange(ModeManager::mode());
 
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::previewChanged,
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
             this, [=] (Control* control, int codeChanged) {
         if (codeChanged)
             m_issuesPane->refresh(control);
@@ -182,9 +182,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     //            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
 
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
-            ControlPreviewingManager::scheduleTerminate);
+            ControlRenderingManager::scheduleTerminate);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
-            ControlPreviewingManager::scheduleInit);
+            ControlRenderingManager::scheduleInit);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
         Delayer::delay(3000);
         m_designerWidget->refresh();

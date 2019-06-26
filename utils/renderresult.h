@@ -1,5 +1,5 @@
-#ifndef PREVIEWRESULT_H
-#define PREVIEWRESULT_H
+#ifndef RENDERRESULT_H
+#define RENDERRESULT_H
 
 #include <QMap>
 #include <QHash>
@@ -21,7 +21,7 @@ struct PropertyNode {
     QMap<QString, QVariant> properties;
 };
 
-struct PreviewResult {
+struct RenderResult {
     bool gui;
     bool popup;
     bool window;
@@ -29,6 +29,7 @@ struct PreviewResult {
     QString id;
     QString uid;
     QImage image;
+    QRectF boundingRect;
     QList<QmlError> errors;
     QList<QString> events;
     QList<PropertyNode> properties;
@@ -80,12 +81,13 @@ inline QDataStream& operator<< (QDataStream& out, const PropertyNode& node)
     return out;
 }
 
-inline QDataStream& operator>> (QDataStream& in, PreviewResult& result)
+inline QDataStream& operator>> (QDataStream& in, RenderResult& result)
 {
     in >> result.gui;
     in >> result.id;
     in >> result.uid;
     in >> result.image;
+    in >> result.boundingRect;
     in >> result.popup;
     in >> result.window;
     in >> result.codeChanged;
@@ -95,12 +97,13 @@ inline QDataStream& operator>> (QDataStream& in, PreviewResult& result)
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const PreviewResult& result)
+inline QDataStream& operator<< (QDataStream& out, const RenderResult& result)
 {
     out << result.gui;
     out << result.id;
     out << result.uid;
     out << result.image;
+    out << result.boundingRect;
     out << result.popup;
     out << result.window;
     out << result.codeChanged;
@@ -128,4 +131,4 @@ inline QDataStream& operator<< (QDataStream& out, const Enum& e)
     return out;
 }
 
-#endif // PREVIEWRESULT_H
+#endif // RENDERRESULT_H

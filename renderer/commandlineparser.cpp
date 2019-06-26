@@ -5,7 +5,7 @@ QString CommandlineParser::s_serverName;
 
 void CommandlineParser::init(int argc, char* argv[])
 {
-#if defined(PREVIEWER_DEBUG)
+#if defined(RENDERER_DEBUG)
     s_serverName = "serverName";
 #else
     Q_ASSERT_X(argc == 3, "init", "Number of total commandline arguments must be equal to 3");

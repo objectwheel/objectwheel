@@ -5,10 +5,10 @@ include($$PWD/platform/platform.pri)
 TEMPLATE = app
 CONFIG  -= app_bundle
 CONFIG  += console c++14 strict_c++
-TARGET   = previewer
+TARGET   = renderer
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
-#DEFINES += PREVIEWER_DEBUG
+#DEFINES += RENDERER_DEBUG
 
 QT += quickwidgets webenginewidgets quick-private qml-private quicktemplates2-private
 QT += network qml quick webview websockets gamepad webchannel
@@ -22,19 +22,19 @@ DEPENDPATH  += $$PWD
 DEFINES += QT_QML_DEBUG_NO_WARNING
 
 SOURCES += $$PWD/main.cpp \
-           $$PWD/previewersocket.cpp \
+           $$PWD/rendersocket.cpp \
            $$PWD/applicationcore.cpp \
-           $$PWD/previewer.cpp \
+           $$PWD/renderengine.cpp \
            $$PWD/commanddispatcher.cpp \
            $$PWD/commandlineparser.cpp \
-           $$PWD/previewerutils.cpp
+           $$PWD/renderutils.cpp
 
-HEADERS += $$PWD/previewersocket.h \
+HEADERS += $$PWD/rendersocket.h \
            $$PWD/applicationcore.h \
-           $$PWD/previewer.h \
+           $$PWD/renderengine.h \
            $$PWD/commanddispatcher.h \
            $$PWD/commandlineparser.h \
-           $$PWD/previewerutils.h
+           $$PWD/renderutils.h
 
 
 ### Utils Settings
