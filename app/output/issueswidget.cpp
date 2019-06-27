@@ -30,6 +30,7 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
   , m_fontSizeDownButton(new QToolButton(this))
   , m_minimizeButton(new QToolButton(this))
 {
+    setSelectionMode(NoSelection);
     setTextElideMode(Qt::ElideRight);
     setItemDelegate(new IssuesListDelegate(this));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
@@ -38,6 +39,7 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
                   "border-top: none; border-bottom: none;}");
     setIconSize({16, 16});
     setAttribute(Qt::WA_MacShowFocusRect, false);
+    setFocusPolicy(Qt::NoFocus);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     connect(this, &QListWidget::itemDoubleClicked,
             this, &IssuesWidget::onItemDoubleClick);

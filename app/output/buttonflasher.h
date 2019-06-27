@@ -1,11 +1,11 @@
 #ifndef BUTTONFLASHER_H
 #define BUTTONFLASHER_H
 
-#include <QObject>
-#include <QBasicTimer>
+#include <applicationstyle.h>
+#include <QVariantAnimation>
 
 class QAbstractButton;
-class ButtonFlasher final : public QObject
+class ButtonFlasher final : private ApplicationStyle
 {
     Q_OBJECT
     Q_DISABLE_COPY(ButtonFlasher)
@@ -13,14 +13,14 @@ class ButtonFlasher final : public QObject
 public:
     explicit ButtonFlasher(QAbstractButton* parent);
 
-    void flash(int timeout, int repeat);
+    void flash(int timeout = 500, int repeat = 3);
 
 private:
-    void timerEvent(QTimerEvent* event) override;
+    void drawControl(QStyle::ControlElement element, const QStyleOption* option,
+                     QPainter* painter, const QWidget* widget) const override;
 
 private:
-    int m_repeat;
-    QBasicTimer m_flashTimer;
+    QVariantAnimation m_colorOpacity;
     QAbstractButton* m_button;
 };
 

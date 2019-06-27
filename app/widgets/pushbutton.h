@@ -10,6 +10,7 @@ class PushButton final : public QPushButton
 
 public:
     explicit PushButton(QWidget* parent = nullptr);
+
     QSize sizeHint() const override;
 
 private:

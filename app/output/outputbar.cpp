@@ -66,9 +66,9 @@ QAbstractButton* OutputBar::issuesButton() const
 void OutputBar::flash(QAbstractButton* button)
 {
     if (button == m_consoleButton)
-        m_consoleFlasher->flash(400, 3);
+        m_consoleFlasher->flash();
     else if (button == m_issuesButton)
-        m_issuesFlasher->flash(400, 3);
+        m_issuesFlasher->flash();
 }
 
 void OutputBar::onButtonClick(bool checked)
