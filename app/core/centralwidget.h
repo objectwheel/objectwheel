@@ -11,9 +11,8 @@ class QmlCodeEditorWidget;
 class ProjectOptionsWidget;
 class HelpWidget;
 class BuildsWidget;
-class OutputBar;
-class ConsoleWidget;
-class IssuesWidget;
+class OutputPane;
+class OutputController;
 
 class CentralWidget : public QWidget
 {
@@ -23,9 +22,7 @@ public:
     explicit CentralWidget(QWidget* parent = nullptr);
     QmlCodeEditorWidget* qmlCodeEditorWidget() const;
     DesignerWidget* designerWidget() const;
-    ConsoleWidget* consoleWidget() const;
-    IssuesWidget* issuesWidget() const;
-    OutputBar* outputBar() const;
+    OutputPane* outputPane() const;
 
 public slots:
     void discharge();
@@ -41,9 +38,8 @@ signals:
 private:
     QVBoxLayout* m_layout;
     QSplitter* m_splitterOut,* m_splitterIn;
-    OutputBar* m_outputBar;
-    ConsoleWidget* m_consoleWidget;
-    IssuesWidget* m_issuesWidget;
+    OutputPane* m_outputPane;
+    OutputController* m_outputController;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     DesignerWidget* m_designerWidget;
     ProjectOptionsWidget* m_projectOptionsWidget;

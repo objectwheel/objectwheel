@@ -1,38 +1,28 @@
 #ifndef OUTPUTPANE_H
 #define OUTPUTPANE_H
 
-//#include <pushbutton.h>
+#include <QWidget>
 
-//class ButtonFlasher;
-//class OutputPane final : public QWidget
-//{
-//    Q_OBJECT
-//    Q_DISABLE_COPY(OutputPane)
+class OutputBar;
+class IssuesWidget;
+class ConsoleWidget;
 
-//public:
-//    explicit OutputPane(QWidget* parent = nullptr);
+class OutputPane final : public QWidget
+{
+    Q_OBJECT
+    Q_DISABLE_COPY(OutputPane)
 
-//    QAbstractButton* activeButton() const;
-//    QAbstractButton* consoleButton() const;
-//    QAbstractButton* issuesButton() const;
+public:
+    explicit OutputPane(QWidget* parent = nullptr);
 
-//public slots:
-//    void flash(QAbstractButton* button);
+    OutputBar* outputBar() const;
+    IssuesWidget* issuesWidget() const;
+    ConsoleWidget* consoleWidget() const;
 
-//private slots:
-//    void onButtonClick(bool checked);
-
-//private:
-//    void paintEvent(QPaintEvent* event) override;
-
-//signals:
-//    void buttonActivated(QAbstractButton* button, bool checked);
-
-//private:
-//    PushButton* m_consoleButton;
-//    PushButton* m_issuesButton;
-//    ButtonFlasher* m_consoleFlasher;
-//    ButtonFlasher* m_issuesFlasher;
-//};
+private:
+    OutputBar* m_outputBar;
+    IssuesWidget* m_issuesWidget;
+    ConsoleWidget* m_consoleWidget;
+};
 
 #endif // OUTPUTPANE_H

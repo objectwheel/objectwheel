@@ -1,16 +1,28 @@
-//#include <consolewidget.h>
-//#include <utilityfunctions.h>
-//#include <utilsicons.h>
-//#include <transparentstyle.h>
+#include <outputpane.h>
+#include <issueswidget.h>
+#include <consolewidget.h>
+#include <outputbar.h>
+#include <QStackedLayout>
 
-//#include <QScrollBar>
-//#include <QTextBlock>
-//#include <QLabel>
-//#include <QToolButton>
-//#include <QTimer>
-//#include <QLayout>
-//#include <QTextStream>
-//#include <QToolBar>
+OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
+  , m_outputBar(new OutputBar(this))
+  , m_issuesWidget(new IssuesWidget(this))
+  , m_consoleWidget(new ConsoleWidget(this))
+{
+    setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+
+    auto stackedLayout = new QStackedLayout;
+    stackedLayout->setSpacing(0);
+    stackedLayout->setContentsMargins(0, 0, 0, 0);
+    stackedLayout->addWidget(m_issuesWidget);
+    stackedLayout->addWidget(m_consoleWidget);
+
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addLayout(stackedLayout);
+    layout->addWidget(m_outputBar);
+}
 
 //void OutputBar::discharge()
 //{

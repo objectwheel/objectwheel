@@ -10,7 +10,7 @@ class ModeSelectorController final : public QObject
     Q_DISABLE_COPY(ModeSelectorController)
 
 public:
-    explicit ModeSelectorController(ModeSelectorPane* m_modeSelectorPane, QObject* parent = nullptr);
+    explicit ModeSelectorController(ModeSelectorPane* modeSelectorPane, QObject* parent = nullptr);
 
 public slots:
     void discharge();

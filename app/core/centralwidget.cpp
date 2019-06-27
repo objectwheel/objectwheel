@@ -3,7 +3,6 @@
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
 #include <buildswidget.h>
-#include <issueswidget.h>
 #include <designerscene.h>
 #include <controlrenderingmanager.h>
 #include <controlremovingmanager.h>
@@ -17,9 +16,9 @@
 #include <qmlcodeeditor.h>
 #include <saveutils.h>
 #include <projectmanager.h>
-#include <outputbar.h>
-#include <consolewidget.h>
 #include <controlpropertymanager.h>
+#include <outputpane.h>
+#include <outputcontroller.h>
 
 #include <QWindow>
 #include <QSplitter>
@@ -39,9 +38,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_splitterOut(new QSplitter)
   , m_splitterIn(new QSplitter)
-  , m_outputBar(new OutputBar)
-  , m_consoleWidget(new ConsoleWidget)
-  , m_issuesWidget(new IssuesWidget)
+  , m_outputPane(new OutputPane)
+  , m_outputController(new OutputController(m_outputPane, this))
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
@@ -56,9 +54,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
     m_splitterOut->setFrameShape(QFrame::NoFrame);
     m_splitterOut->setOrientation(Qt::Vertical);
     m_splitterOut->addWidget(m_splitterIn);
-    m_splitterOut->addWidget(m_consoleWidget);
-    m_splitterOut->addWidget(m_issuesWidget);
-    m_splitterOut->addWidget(m_outputBar);
+    m_splitterOut->addWidget(m_outputPane);
     m_splitterOut->setChildrenCollapsible(false);
     m_splitterOut->handle(3)->setDisabled(true);
 
@@ -103,17 +99,17 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
             m_designerWidget, &DesignerWidget::onAssetsFileOpen);
     connect(m_issuesWidget, &IssuesWidget::flash,
             this, [=] {
-// FIXME       void OutputBar::flash(QAbstractButton* button)
-//        {
-//            if (button == m_consoleButton)
-//                m_consoleFlasher->flash(400, 3);
-//            else if (button == m_issuesButton)
-//                m_issuesFlasher->flash(400, 3);
+        // FIXME       void OutputBar::flash(QAbstractButton* button)
+        //        {
+        //            if (button == m_consoleButton)
+        //                m_consoleFlasher->flash(400, 3);
+        //            else if (button == m_issuesButton)
+        //                m_issuesFlasher->flash(400, 3);
 
-//            const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-//            if (settings->bottomPanesPop && !button->isChecked())
-//                button->click();
-//        }
+        //            const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+        //            if (settings->bottomPanesPop && !button->isChecked())
+        //                button->click();
+        //        }
         m_outputBar->flash(m_outputBar->issuesButton());
     });
     connect(m_consoleWidget, &ConsoleWidget::flash,
@@ -207,26 +203,16 @@ DesignerWidget* CentralWidget::designerWidget() const
     return m_designerWidget;
 }
 
-IssuesWidget* CentralWidget::issuesWidget() const
+OutputPane* CentralWidget::outputPane() const
 {
-    return m_issuesWidget;
-}
-
-OutputBar* CentralWidget::outputBar() const
-{
-    return m_outputBar;
-}
-
-ConsoleWidget* CentralWidget::consoleWidget() const
-{
-    return m_consoleWidget;
+    return m_outputPane;
 }
 
 void CentralWidget::discharge()
 {
     m_consoleWidget->hide();
     m_issuesWidget->hide();
-// FIXME   m_outputBar->discharge();
+    // FIXME   m_outputBar->discharge();
     m_consoleWidget->discharge();
     m_issuesWidget->discharge();
     m_qmlCodeEditorWidget->discharge();
