@@ -31,7 +31,7 @@ void ButtonFlasher::drawControl(QStyle::ControlElement element, const QStyleOpti
     if (element == CE_PushButtonLabel) {
         painter->save();
 
-        static const QColor highlight = "#aa0000";
+        static const QColor highlight = "#157efb";
         const QRectF rect = m_button->rect();
         const qreal opacity = qSin(m_colorOpacity.currentValue().toReal());
 
@@ -40,12 +40,12 @@ void ButtonFlasher::drawControl(QStyle::ControlElement element, const QStyleOpti
         outlinePath.addRoundedRect(rect.adjusted(0.5, 1.0, -0.5, -1.0), 3.5, 3.5);
         painter->setPen(Qt::NoPen);
         painter->setBrush(highlight);
-        painter->setOpacity(opacity);
+        painter->setOpacity(opacity * 0.8);
         painter->drawPath(outlinePath);
 
         QPainterPath inlinePath;
         inlinePath.addRoundedRect(rect.adjusted(0.5, 1.0, -0.5, -1.0), 3.5, 3.5);
-        inlinePath.addRoundedRect(rect.adjusted(2.0, 2.5, -2.0, -2.5), 2.5, 2.5);
+        inlinePath.addRoundedRect(rect.adjusted(1.5, 2.0, -1.5, -2.0), 3.0, 3.0);
         painter->setOpacity(opacity * 0.6);
         painter->fillPath(inlinePath, highlight);
 

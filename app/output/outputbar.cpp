@@ -21,7 +21,6 @@ OutputBar::OutputBar(QWidget* parent) : QWidget(parent)
     layout->addStretch();
 
     m_consoleButton->setCheckable(true);
-    m_consoleButton->setAutoExclusive(true);
     m_consoleButton->setFixedHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
     m_consoleButton->setText(tr("Console Output"));
@@ -31,7 +30,6 @@ OutputBar::OutputBar(QWidget* parent) : QWidget(parent)
                                                           m_consoleButton->palette()));
 
     m_issuesButton->setCheckable(true);
-    m_issuesButton->setAutoExclusive(true);
     m_issuesButton->setFixedHeight(22);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setText(tr("Issues") + " [0]");
@@ -44,15 +42,6 @@ OutputBar::OutputBar(QWidget* parent) : QWidget(parent)
     connect(m_consoleButton, &PushButton::clicked, this, &OutputBar::onButtonClick);
 }
 
-QAbstractButton* OutputBar::activeButton() const
-{
-    if (m_consoleButton->isChecked())
-        return m_consoleButton;
-    if (m_issuesButton->isChecked())
-        return m_issuesButton;
-    return nullptr;
-}
-
 QAbstractButton* OutputBar::consoleButton() const
 {
     return m_consoleButton;
@@ -61,6 +50,15 @@ QAbstractButton* OutputBar::consoleButton() const
 QAbstractButton* OutputBar::issuesButton() const
 {
     return m_issuesButton;
+}
+
+QAbstractButton* OutputBar::activeButton() const
+{
+    if (m_consoleButton->isChecked())
+        return m_consoleButton;
+    if (m_issuesButton->isChecked())
+        return m_issuesButton;
+    return nullptr;
 }
 
 void OutputBar::flash(QAbstractButton* button)
@@ -73,12 +71,21 @@ void OutputBar::flash(QAbstractButton* button)
 
 void OutputBar::onButtonClick(bool checked)
 {
-    if (activeButton())
-        emit buttonActivated(activeButton(), false);
-
     auto activatedButton = static_cast<PushButton*>(sender());
-    if (activatedButton != activeButton())
-        emit buttonActivated(activatedButton, checked);
+    emit buttonActivated(activatedButton, checked);
+
+    if (!checked)
+        return;
+
+    if (m_consoleButton != activatedButton) {
+        m_consoleButton->setChecked(false);
+        emit buttonActivated(m_consoleButton, false);
+    }
+
+    if (m_issuesButton != activatedButton) {
+        m_issuesButton->setChecked(false);
+        emit buttonActivated(m_issuesButton, false);
+    }
 }
 
 void OutputBar::paintEvent(QPaintEvent*)

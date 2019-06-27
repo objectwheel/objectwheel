@@ -12,9 +12,9 @@ class OutputBar final : public QWidget
 public:
     explicit OutputBar(QWidget* parent = nullptr);
 
-    QAbstractButton* activeButton() const;
     QAbstractButton* consoleButton() const;
     QAbstractButton* issuesButton() const;
+    QAbstractButton* activeButton() const;
 
 public slots:
     void flash(QAbstractButton* button);
