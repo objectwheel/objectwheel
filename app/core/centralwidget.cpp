@@ -82,68 +82,6 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
 
     onModeChange(ModeManager::mode());
 
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
-            this, [=] (Control* control, int codeChanged) {
-        if (codeChanged)
-            m_issuesWidget->refresh(control);
-    });
-    connect(m_issuesWidget, &IssuesWidget::titleChanged,
-            m_outputBar->issuesButton(), &QAbstractButton::setText);
-    connect(m_issuesWidget, &IssuesWidget::designsFileOpened,
-            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
-    connect(m_issuesWidget, &IssuesWidget::assetsFileOpened,
-            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
-    connect(m_consoleWidget, &ConsoleWidget::designsFileOpened,
-            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
-    connect(m_consoleWidget, &ConsoleWidget::assetsFileOpened,
-            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
-    connect(m_issuesWidget, &IssuesWidget::flash,
-            this, [=] {
-        // FIXME       void OutputBar::flash(QAbstractButton* button)
-        //        {
-        //            if (button == m_consoleButton)
-        //                m_consoleFlasher->flash(400, 3);
-        //            else if (button == m_issuesButton)
-        //                m_issuesFlasher->flash(400, 3);
-
-        //            const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-        //            if (settings->bottomPanesPop && !button->isChecked())
-        //                button->click();
-        //        }
-        m_outputBar->flash(m_outputBar->issuesButton());
-    });
-    connect(m_consoleWidget, &ConsoleWidget::flash,
-            this, [=] {
-        m_outputBar->flash(m_outputBar->consoleButton());
-    });
-    connect(m_issuesWidget, &IssuesWidget::minimized,
-            this, [=] {
-        m_outputBar->issuesButton()->setChecked(false);
-        m_issuesWidget->hide();
-        emit bottomPaneTriggered(false);
-    });
-    connect(m_consoleWidget, &ConsoleWidget::minimized,
-            this, [=] {
-        m_outputBar->consoleButton()->setChecked(false);
-        m_consoleWidget->hide();
-        emit bottomPaneTriggered(false);
-    });
-    connect(m_outputBar, &OutputBar::buttonActivated,
-            this, [=] (QAbstractButton* button) {
-        if (button == m_outputBar->consoleButton()) {
-            if (button->isChecked())
-                m_consoleWidget->show();
-            else
-                m_consoleWidget->hide();
-        } else {
-            if (button->isChecked())
-                m_issuesWidget->show();
-            else
-                m_issuesWidget->hide();
-        }
-        emit bottomPaneTriggered(m_issuesWidget->isVisible() || m_consoleWidget->isVisible());
-    });
-
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
     connect(SaveManager::instance(), &SaveManager::propertyChanged,    // Changes made out of code editor
             this, [=] (Control* control, const QString& property, const QString& value) {
@@ -210,11 +148,6 @@ OutputPane* CentralWidget::outputPane() const
 
 void CentralWidget::discharge()
 {
-    m_consoleWidget->hide();
-    m_issuesWidget->hide();
-    // FIXME   m_outputBar->discharge();
-    m_consoleWidget->discharge();
-    m_issuesWidget->discharge();
     m_qmlCodeEditorWidget->discharge();
     m_designerWidget->discharge();
     m_projectOptionsWidget->discharge();
@@ -224,27 +157,27 @@ void CentralWidget::discharge()
 
 void CentralWidget::setBottomPaneVisible(bool visible)
 {
-    if (m_outputBar->activeButton() && visible)
-        return;
-    if (!m_outputBar->activeButton() && !visible)
-        return;
-    if (m_outputBar->activeButton()) {
-        m_outputBar->activeButton()->setChecked(false);
-        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-            m_issuesWidget->hide();
-        else
-            m_consoleWidget->hide();
-    } else {
-        m_outputBar->consoleButton()->setChecked(true);
-        m_consoleWidget->show();
-    }
+//    if (m_outputBar->activeButton() && visible)
+//        return;
+//    if (!m_outputBar->activeButton() && !visible)
+//        return;
+//    if (m_outputBar->activeButton()) {
+//        m_outputBar->activeButton()->setChecked(false);
+//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+//            m_issuesWidget->hide();
+//        else
+//            m_consoleWidget->hide();
+//    } else {
+//        m_outputBar->consoleButton()->setChecked(true);
+//        m_consoleWidget->show();
+//    }
 }
 
 void CentralWidget::hideWidgets()
 {
-    m_outputBar->hide();
-    m_issuesWidget->hide();
-    m_consoleWidget->hide();
+//    m_outputBar->hide();
+//    m_issuesWidget->hide();
+//    m_consoleWidget->hide();
     m_designerWidget->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();
@@ -256,50 +189,50 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
 {
     hideWidgets();
 
-    switch (mode) {
-    case ModeManager::Designer:
-        m_outputBar->show();
-        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
-            m_consoleWidget->show();
-        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-            m_issuesWidget->show();
-        m_designerWidget->show();
-        break;
+//    switch (mode) {
+//    case ModeManager::Designer:
+//        m_outputBar->show();
+//        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
+//            m_consoleWidget->show();
+//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+//            m_issuesWidget->show();
+//        m_designerWidget->show();
+//        break;
 
-    case ModeManager::Editor:
-        m_outputBar->show();
-        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
-            m_consoleWidget->show();
-        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-            m_issuesWidget->show();
-        g_editorContainer->show();
-        break;
+//    case ModeManager::Editor:
+//        m_outputBar->show();
+//        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
+//            m_consoleWidget->show();
+//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+//            m_issuesWidget->show();
+//        g_editorContainer->show();
+//        break;
 
-    case ModeManager::Split:
-        m_outputBar->show();
-        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
-            m_consoleWidget->show();
-        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-            m_issuesWidget->show();
-        m_designerWidget->show();
-        g_editorContainer->show();
-        break;
+//    case ModeManager::Split:
+//        m_outputBar->show();
+//        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
+//            m_consoleWidget->show();
+//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
+//            m_issuesWidget->show();
+//        m_designerWidget->show();
+//        g_editorContainer->show();
+//        break;
 
-    case ModeManager::Options:
-        m_projectOptionsWidget->show();
-        break;
+//    case ModeManager::Options:
+//        m_projectOptionsWidget->show();
+//        break;
 
-    case ModeManager::Builds:
-        m_buildsWidget->show();
-        break;
+//    case ModeManager::Builds:
+//        m_buildsWidget->show();
+//        break;
 
-    case ModeManager::Documents:
-        m_helpWidget->show();
-        break;
+//    case ModeManager::Documents:
+//        m_helpWidget->show();
+//        break;
 
-    default:
-        break;
-    }
+//    default:
+//        break;
+//    }
 }
 
 QmlCodeEditorWidget* CentralWidget::qmlCodeEditorWidget() const

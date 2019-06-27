@@ -310,51 +310,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, &MainWindow::resetSettings);
 
-    connect(RunManager::instance(), &RunManager::applicationReadyOutput, this, [=] (const QString& output)
-    { m_centralWidget->consoleWidget()->press(output, palette().linkVisited()); });
-    connect(RunManager::instance(), &RunManager::applicationFinished,
-            [=] (int exitCode, QProcess::ExitStatus exitStatus) {
-        auto console = m_centralWidget->consoleWidget();
-        auto timestamp = QTime::currentTime().toString();
-        if (exitStatus != QProcess::CrashExit) {
-            if (exitCode == EXIT_FAILURE) {
-                console->press(timestamp + tr(": The application has not exited normally.\n"),
-                               QColor("#b34b46"), QFont::DemiBold);
-            }
-            console->press(timestamp + ": " + ProjectManager::name() + tr(" exited with code ") +
-                           QString::fromUtf8("%1.\n").arg(exitCode), QColor("#025dbf"), QFont::DemiBold);
-        }
-    });
-    connect(RunManager::instance(), &RunManager::applicationErrorOccurred,
-            [=] (QProcess::ProcessError error, const QString& errorString) {
-        auto console = m_centralWidget->consoleWidget();
-        auto timestamp = QTime::currentTime().toString();
-        if (error == QProcess::FailedToStart) {
-            console->press(timestamp + tr(": System Failure: ") + errorString + "\n",
-                           QColor("#b34b46"), QFont::DemiBold);
-            console->press(timestamp + ": " + ProjectManager::name() + tr(" has failed to start.\n"),
-                           QColor("#025dbf"), QFont::DemiBold);
-        } else {
-            console->press(timestamp + tr(": The application has unexpectedly finished.\n"),
-                           QColor("#b34b46"), QFont::DemiBold);
-            console->press(timestamp + ": " + ProjectManager::name() + tr(" has crashed.\n"),
-                           QColor("#025dbf"), QFont::DemiBold);
-        }
-    });
-    connect(m_runController, &RunController::ran, this, [=] {
-        auto timestamp = QTime::currentTime().toString();
-        BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
-        if (settings->autoSaveBeforeRunning)
-            WindowManager::mainWindow()->centralWidget()->qmlCodeEditorWidget()->saveAll();
-        m_centralWidget->consoleWidget()->fade();
-        if (!m_centralWidget->consoleWidget()->toPlainText().isEmpty())
-            m_centralWidget->consoleWidget()->press("\n");
-        m_centralWidget->consoleWidget()->press(timestamp + tr(": Starting") + " " + ProjectManager::name() + "...\n",
-                                              QColor("#025dbf"), QFont::DemiBold);
-        m_centralWidget->consoleWidget()->verticalScrollBar()->
-                setValue(m_centralWidget->consoleWidget()->verticalScrollBar()->maximum());
-    });
-
     connect(windowHandle(), &QWindow::screenChanged,
             this, &MainWindow::onScreenChange);
 
