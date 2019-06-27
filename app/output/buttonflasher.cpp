@@ -17,10 +17,10 @@ ButtonFlasher::ButtonFlasher(QAbstractButton* parent) : ApplicationStyle()
 
 void ButtonFlasher::flash(int timeout, int repeat)
 {
-    m_colorOpacity.stop();
     m_colorOpacity.setLoopCount(repeat);
     m_colorOpacity.setDuration(timeout * 2);
-    m_colorOpacity.start();
+    if (m_colorOpacity.state() != QAbstractAnimation::Running)
+        m_colorOpacity.start();
 }
 
 void ButtonFlasher::drawControl(QStyle::ControlElement element, const QStyleOption* option,
