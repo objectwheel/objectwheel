@@ -139,7 +139,7 @@ void IssuesWidget::refresh(Control* control)
 
         delete controlErrors;
 
-        if (isHidden())
+        if (!isVisible())
             emit flash();
 
         return titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
@@ -172,7 +172,7 @@ void IssuesWidget::refresh(Control* control)
         addItem(item);
     }
 
-    if (isHidden())
+    if (!isVisible())
         emit flash();
 
     emit titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));
@@ -218,7 +218,7 @@ void IssuesWidget::onControlDestruction(QObject* controlObject)
     if (controlErrors)
         delete controlErrors;
 
-    if (isHidden())
+    if (!isVisible())
         emit flash();
 
     emit titleChanged(tr("Issues") + QString::fromUtf8(" [%1]").arg(count()));

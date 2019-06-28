@@ -30,6 +30,7 @@
 #include <segmentedbar.h>
 #include <controlrenderingmanager.h>
 #include <outputpane.h>
+#include <outputcontroller.h>
 
 #include <QWindow>
 #include <QProcess>
@@ -301,7 +302,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         m_centralWidget->outputPane()->consoleWidget()->verticalScrollBar()->
                 setValue(m_centralWidget->outputPane()->consoleWidget()->verticalScrollBar()->maximum());
     });
-    connect(m_centralWidget, &CentralWidget::bottomPaneTriggered,
+    connect(m_centralWidget->outputController(), &OutputController::currentWidgetChanged,
             [=] (bool visible) {
         QAction* bottomAction = m_runPane->segmentedBar()->actions().at(1);
         bottomAction->setChecked(visible);
@@ -311,7 +312,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         if (index == 0) {
             showLeftPanes(checked);
         } else if (index == 1) {
-//   FIXME         m_centralWidget->setBottomPaneVisible(checked);
+            m_centralWidget->outputController()->setPaneVisible(checked);
         } else {
             showRightPanes(checked);
         }

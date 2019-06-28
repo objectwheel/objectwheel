@@ -33,7 +33,6 @@ OutputController::OutputController(OutputPane* outputPane, QObject* parent) : QO
             this, &OutputController::onWidgetMinimize);
     connect(m_outputPane->consoleWidget(), &ConsoleWidget::minimized,
             this, &OutputController::onWidgetMinimize);
-    //        emit bottomPaneTriggered(m_issuesWidget->isVisible() || m_consoleWidget->isVisible());
     connect(RunManager::instance(), &RunManager::applicationReadyOutput,
             this, &OutputController::onApplicationReadyOutput);
     connect(RunManager::instance(), &RunManager::applicationFinished,
@@ -44,59 +43,52 @@ OutputController::OutputController(OutputPane* outputPane, QObject* parent) : QO
 
 void OutputController::discharge()
 {
-    //    m_consoleWidget->hide();
-    //    m_issuesWidget->hide();
-    // FIXME   m_outputBar->discharge();
-    //    m_consoleWidget->discharge();
-    //    m_issuesWidget->discharge();
+    setCurrentWidget(nullptr);
+    m_outputPane->issuesWidget()->discharge();
+    m_outputPane->consoleWidget()->clear();
 
-    //    m_issuesButton->setChecked(false);
-    //    m_consoleButton->setChecked(false);
-
-    //    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    //    if (settings->visibleBottomPane != "None") {
-    //        if (settings->visibleBottomPane == "Console Pane")
-    //            m_consoleButton->click();
-    //        else
-    //            m_issuesButton->click();
-    //    }
-}
-
-void OutputController::onBarButtonClick()
-{
-    auto activatedButton = static_cast<QAbstractButton*>(sender());
-    auto activatedWidget = m_outputPane->widgetForButton(activatedButton);
-
-    if (activatedButton->isChecked()) {
-        m_outputPane->stackedWidget()->setCurrentWidget(activatedWidget);
-        m_outputPane->stackedWidget()->show();
-    } else {
-        m_outputPane->stackedWidget()->hide();
+    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    if (settings->visibleBottomPane != "None") {
+        if (settings->visibleBottomPane == "Console Pane")
+            setCurrentWidget(m_outputPane->consoleWidget());
+        else
+            setCurrentWidget(m_outputPane->issuesWidget());
     }
-
-    if (m_outputPane->issuesButton() != activatedButton)
-        m_outputPane->issuesButton()->setChecked(false);
-    if (m_outputPane->consoleButton() != activatedButton)
-        m_outputPane->consoleButton()->setChecked(false);
 }
 
-void OutputController::onWidgetMinimize()
+void OutputController::setPaneVisible(bool visible)
 {
-    auto activatedWidget = static_cast<QWidget*>(sender());
-    auto activatedButton = m_outputPane->buttonForWidget(activatedWidget);
-    activatedButton->setChecked(false);
-    m_outputPane->stackedWidget()->hide();
+    if (visible)
+        setCurrentWidget(m_outputPane->stackedWidget()->currentWidget());
+    else
+        setCurrentWidget(nullptr);
 }
 
 void OutputController::onFlash()
 {
-    auto activatedWidget = static_cast<QWidget*>(sender());
-    auto activatedButton = m_outputPane->buttonForWidget(activatedWidget);
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    if (auto activatedWidget = static_cast<QWidget*>(sender())) {
+        if (QAbstractButton* activatedButton = m_outputPane->buttonForWidget(activatedWidget)) {
+            m_outputPane->outputBar()->flash(activatedButton);
+            const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+            if (settings->bottomPanesPop && !activatedButton->isChecked())
+                setCurrentWidget(activatedWidget);
+        }
+    }
+}
 
-    m_outputPane->outputBar()->flash(activatedButton);
-    if (settings->bottomPanesPop && !activatedButton->isChecked())
-        activatedButton->click();
+void OutputController::onBarButtonClick()
+{
+    if (auto activatedButton = static_cast<QAbstractButton*>(sender())) {
+        if (activatedButton->isChecked())
+            setCurrentWidget(m_outputPane->widgetForButton(activatedButton));
+        else
+            setCurrentWidget(nullptr);
+    }
+}
+
+void OutputController::onWidgetMinimize()
+{
+    setCurrentWidget(nullptr);
 }
 
 void OutputController::onApplicationReadyOutput(const QString& output)
@@ -143,4 +135,23 @@ void OutputController::onControlImageChange(Control* control, int codeChanged)
 {
     if (codeChanged)
         m_outputPane->issuesWidget()->refresh(control);
+}
+
+void OutputController::setCurrentWidget(QWidget* widget)
+{
+    for (QAbstractButton* button : m_outputPane->outputBar()->buttons())
+        button->setChecked(false);
+
+    if (widget == 0) {
+        m_outputPane->stackedWidget()->hide();
+        emit currentWidgetChanged(nullptr);
+        return;
+    }
+
+    if (QAbstractButton* button = m_outputPane->buttonForWidget(widget)) {
+        button->setChecked(true);
+        m_outputPane->stackedWidget()->setCurrentWidget(widget);
+        m_outputPane->stackedWidget()->show();
+        emit currentWidgetChanged(widget);
+    }
 }

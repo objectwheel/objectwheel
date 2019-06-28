@@ -16,15 +16,22 @@ public:
 
 public slots:
     void discharge();
+    void setPaneVisible(bool visible);
 
 private slots:
+    void onFlash();
     void onBarButtonClick();
     void onWidgetMinimize();
-    void onFlash();
     void onApplicationReadyOutput(const QString& output);
     void onApplicationFinish(int exitCode, QProcess::ExitStatus exitStatus);
     void onApplicationErrorOccur(QProcess::ProcessError error, const QString& errorString);
     void onControlImageChange(Control* control, int codeChanged);
+
+private:
+    void setCurrentWidget(QWidget* widget);
+
+signals:
+    void currentWidgetChanged(QWidget* widget);
 
 private:
     OutputPane* m_outputPane;

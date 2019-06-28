@@ -83,12 +83,16 @@ QWidget* OutputPane::widgetForButton(const QAbstractButton* button) const
 {
     if (button == m_issuesButton)
         return m_issuesWidget;
-    return m_consoleWidget;
+    if (button == m_consoleButton)
+        return m_consoleWidget;
+    return nullptr;
 }
 
 QAbstractButton* OutputPane::buttonForWidget(const QWidget* widget) const
 {
     if (widget == m_issuesWidget)
         return m_issuesButton;
-    return m_consoleButton;
+    if (widget == m_consoleWidget)
+        return m_consoleButton;
+    return nullptr;
 }

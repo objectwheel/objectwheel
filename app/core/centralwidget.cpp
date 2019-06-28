@@ -3,9 +3,7 @@
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
 #include <buildswidget.h>
-#include <designerscene.h>
 #include <controlrenderingmanager.h>
-#include <controlremovingmanager.h>
 #include <delayer.h>
 #include <qmlcodeeditorwidget.h>
 #include <qmlcodedocument.h>
@@ -16,18 +14,14 @@
 #include <qmlcodeeditor.h>
 #include <saveutils.h>
 #include <projectmanager.h>
-#include <controlpropertymanager.h>
+#include <control.h>
 #include <outputpane.h>
 #include <outputcontroller.h>
 #include <issueswidget.h>
 #include <consolewidget.h>
 
-#include <QWindow>
-#include <QSplitter>
-#include <QVBoxLayout>
-#include <QStyle>
+#include <QBoxLayout>
 #include <QLabel>
-#include <QAbstractButton>
 
 class EditorContainer : public QLabel {
 public: explicit EditorContainer(QWidget* parent) : QLabel(parent) {} 
@@ -46,23 +40,18 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
 {
-    auto a = new QWidget;
-    a->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
     setHandleWidth(0);
     setFrameShape(QFrame::NoFrame);
     setOrientation(Qt::Vertical);
-    addWidget(a);
+    addWidget(m_splitterIn);
     addWidget(m_outputPane);
     setChildrenCollapsible(false);
-    //    handle(1)->setDisabled(true);
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
     g_editorContainer->setObjectName("g_editorContainer");
     g_editorContainer->setText(tr("Editor window\nraised"));
     g_editorContainer->setStyleSheet("#g_editorContainer { background: transparent; color: #808080;}");
-    g_editorContainer->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     g_editorContainer->setLayout(new QHBoxLayout);
     g_editorContainer->layout()->setSpacing(0);
     g_editorContainer->layout()->setContentsMargins(0, 0, 0, 0);
@@ -154,8 +143,14 @@ OutputPane* CentralWidget::outputPane() const
     return m_outputPane;
 }
 
+OutputController* CentralWidget::outputController() const
+{
+    return m_outputController;
+}
+
 void CentralWidget::discharge()
 {
+    m_outputController->discharge();
     m_qmlCodeEditorWidget->discharge();
     m_designerWidget->discharge();
     m_projectOptionsWidget->discharge();
@@ -165,9 +160,7 @@ void CentralWidget::discharge()
 
 void CentralWidget::hideWidgets()
 {
-//    m_outputBar->hide();
-//    m_issuesWidget->hide();
-//    m_consoleWidget->hide();
+    m_outputPane->hide();
     m_designerWidget->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();
@@ -179,50 +172,38 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
 {
     hideWidgets();
 
-//    switch (mode) {
-//    case ModeManager::Designer:
-//        m_outputBar->show();
-//        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
-//            m_consoleWidget->show();
-//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-//            m_issuesWidget->show();
-//        m_designerWidget->show();
-//        break;
+    switch (mode) {
+    case ModeManager::Designer:
+        m_outputPane->show();
+        m_designerWidget->show();
+        break;
 
-//    case ModeManager::Editor:
-//        m_outputBar->show();
-//        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
-//            m_consoleWidget->show();
-//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-//            m_issuesWidget->show();
-//        g_editorContainer->show();
-//        break;
+    case ModeManager::Editor:
+        m_outputPane->show();
+        g_editorContainer->show();
+        break;
 
-//    case ModeManager::Split:
-//        m_outputBar->show();
-//        if (m_outputBar->activeButton() == m_outputBar->consoleButton())
-//            m_consoleWidget->show();
-//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-//            m_issuesWidget->show();
-//        m_designerWidget->show();
-//        g_editorContainer->show();
-//        break;
+    case ModeManager::Split:
+        m_outputPane->show();
+        m_designerWidget->show();
+        g_editorContainer->show();
+        break;
 
-//    case ModeManager::Options:
-//        m_projectOptionsWidget->show();
-//        break;
+    case ModeManager::Options:
+        m_projectOptionsWidget->show();
+        break;
 
-//    case ModeManager::Builds:
-//        m_buildsWidget->show();
-//        break;
+    case ModeManager::Builds:
+        m_buildsWidget->show();
+        break;
 
-//    case ModeManager::Documents:
-//        m_helpWidget->show();
-//        break;
+    case ModeManager::Documents:
+        m_helpWidget->show();
+        break;
 
-//    default:
-//        break;
-//    }
+    default:
+        break;
+    }
 }
 
 QmlCodeEditorWidget* CentralWidget::qmlCodeEditorWidget() const

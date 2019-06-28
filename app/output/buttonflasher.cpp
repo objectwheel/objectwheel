@@ -45,7 +45,7 @@ void ButtonFlasher::drawControl(QStyle::ControlElement element, const QStyleOpti
 
         QPainterPath inlinePath;
         inlinePath.addRoundedRect(rect.adjusted(0.5, 1.0, -0.5, -1.0), 3.5, 3.5);
-        inlinePath.addRoundedRect(rect.adjusted(1.5, 2.0, -1.5, -2.0), 3.0, 3.0);
+        inlinePath.addRoundedRect(rect.adjusted(1.5, 2.0, -1.5, -2.0), 2.7, 2.7);
         painter->setOpacity(opacity * 0.6);
         painter->fillPath(inlinePath, highlight);
 

@@ -19,7 +19,6 @@ public:
 
 public slots:
     void fade();
-    void discharge();
     void press(const QString& text, const QBrush& brush = QApplication::palette().text(),
                QFont::Weight weight = QFont::Normal);
 

@@ -57,7 +57,6 @@ void RunController::discharge()
     m_runPane->runProgressBar()->setText(progressBarMessageFor(Welcome));
 
     m_runPane->segmentedBar()->actions().at(0)->setChecked(true);
-    m_runPane->segmentedBar()->actions().at(1)->setChecked(false);
     m_runPane->segmentedBar()->actions().at(2)->setChecked(true);
 }
 

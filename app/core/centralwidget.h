@@ -22,6 +22,7 @@ public:
     QmlCodeEditorWidget* qmlCodeEditorWidget() const;
     DesignerWidget* designerWidget() const;
     OutputPane* outputPane() const;
+    OutputController* outputController() const;
 
 public slots:
     void discharge();
@@ -29,9 +30,6 @@ public slots:
 private slots:
     void hideWidgets();
     void onModeChange(ModeManager::Mode mode);
-
-signals:
-    bool bottomPaneTriggered(bool visible);
 
 private:
     QSplitter* m_splitterIn;

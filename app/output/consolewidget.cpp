@@ -31,7 +31,7 @@ ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
                   "border-top: none; border-bottom: none;}");
     UtilityFunctions::adjustFontPixelSize(this, -1);
 
-    m_titleLabel->setText("   " + tr("Console Output") + "   ");
+    m_titleLabel->setText("   " + tr("Console") + "   ");
     m_titleLabel->setFixedHeight(20);
 
     m_toolBar->addWidget(m_titleLabel);
@@ -102,11 +102,6 @@ void ConsoleWidget::fade()
     cursor.mergeCharFormat(faded);
 }
 
-void ConsoleWidget::discharge()
-{
-    clear();
-}
-
 void ConsoleWidget::press(const QString& text, const QBrush& brush, QFont::Weight weight)
 {
     bool scrollDown = verticalScrollBar()->value() == verticalScrollBar()->maximum();
@@ -151,7 +146,7 @@ void ConsoleWidget::press(const QString& text, const QBrush& brush, QFont::Weigh
     if (scrollDown)
         verticalScrollBar()->setValue(verticalScrollBar()->maximum());
 
-    if (isHidden())
+    if (!isVisible())
         emit flash();
 }
 
