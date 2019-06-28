@@ -298,7 +298,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         if (index == 0) {
             showLeftPanes(checked);
         } else if (index == 1) {
-            m_centralWidget->setBottomPaneVisible(checked);
+//   FIXME         m_centralWidget->setBottomPaneVisible(checked);
         } else {
             showRightPanes(checked);
         }

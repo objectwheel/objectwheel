@@ -15,9 +15,6 @@ public:
 public slots:
     void discharge();
 
-private slots:
-
-
 private:
     OutputPane* m_outputPane;
 };

@@ -34,9 +34,7 @@ public: QSize sizeHint() const override { return {680, 680}; }
 
 namespace { EditorContainer* g_editorContainer; }
 
-CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
-  , m_layout(new QVBoxLayout(this))
-  , m_splitterOut(new QSplitter)
+CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_splitterIn(new QSplitter)
   , m_outputPane(new OutputPane)
   , m_outputController(new OutputController(m_outputPane, this))
@@ -46,17 +44,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QWidget(parent)
   , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
 {
-    m_layout->setSpacing(0);
-    m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_splitterOut);
-
-    m_splitterOut->setHandleWidth(0);
-    m_splitterOut->setFrameShape(QFrame::NoFrame);
-    m_splitterOut->setOrientation(Qt::Vertical);
-    m_splitterOut->addWidget(m_splitterIn);
-    m_splitterOut->addWidget(m_outputPane);
-    m_splitterOut->setChildrenCollapsible(false);
-    m_splitterOut->handle(3)->setDisabled(true);
+    setHandleWidth(0);
+    setFrameShape(QFrame::NoFrame);
+    setOrientation(Qt::Vertical);
+    addWidget(m_splitterIn);
+    addWidget(m_outputPane);
+    setChildrenCollapsible(false);
+    handle(1)->setDisabled(true);
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
@@ -153,24 +147,6 @@ void CentralWidget::discharge()
     m_projectOptionsWidget->discharge();
     m_buildsWidget->discharge();
     m_helpWidget->discharge();
-}
-
-void CentralWidget::setBottomPaneVisible(bool visible)
-{
-//    if (m_outputBar->activeButton() && visible)
-//        return;
-//    if (!m_outputBar->activeButton() && !visible)
-//        return;
-//    if (m_outputBar->activeButton()) {
-//        m_outputBar->activeButton()->setChecked(false);
-//        if (m_outputBar->activeButton() == m_outputBar->issuesButton())
-//            m_issuesWidget->hide();
-//        else
-//            m_consoleWidget->hide();
-//    } else {
-//        m_outputBar->consoleButton()->setChecked(true);
-//        m_consoleWidget->show();
-//    }
 }
 
 void CentralWidget::hideWidgets()

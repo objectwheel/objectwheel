@@ -1,9 +1,9 @@
 #ifndef OUTPUTBAR_H
 #define OUTPUTBAR_H
 
-#include <pushbutton.h>
+#include <QWidget>
 
-class ButtonFlasher;
+class QAbstractButton;
 class OutputBar final : public QWidget
 {
     Q_OBJECT
@@ -12,27 +12,15 @@ class OutputBar final : public QWidget
 public:
     explicit OutputBar(QWidget* parent = nullptr);
 
-    QAbstractButton* consoleButton() const;
-    QAbstractButton* issuesButton() const;
-    QAbstractButton* activeButton() const;
+    QList<QAbstractButton*> buttons() const;
+
+    QAbstractButton* addButton();
 
 public slots:
     void flash(QAbstractButton* button);
 
-private slots:
-    void onButtonClick(bool checked);
-
 private:
     void paintEvent(QPaintEvent* event) override;
-
-signals:
-    void buttonActivated(QAbstractButton* button, bool checked);
-
-private:
-    PushButton* m_consoleButton;
-    PushButton* m_issuesButton;
-    ButtonFlasher* m_consoleFlasher;
-    ButtonFlasher* m_issuesFlasher;
 };
 
 #endif // OUTPUTBAR_H

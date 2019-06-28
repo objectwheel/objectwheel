@@ -1,11 +1,9 @@
 #ifndef CENTRALWIDGET_H
 #define CENTRALWIDGET_H
 
-#include <QWidget>
+#include <QSplitter>
 #include <modemanager.h>
 
-class QSplitter;
-class QVBoxLayout;
 class DesignerWidget;
 class QmlCodeEditorWidget;
 class ProjectOptionsWidget;
@@ -14,9 +12,10 @@ class BuildsWidget;
 class OutputPane;
 class OutputController;
 
-class CentralWidget : public QWidget
+class CentralWidget final : public QSplitter
 {
     Q_OBJECT
+    Q_DISABLE_COPY(CentralWidget)
 
 public:
     explicit CentralWidget(QWidget* parent = nullptr);
@@ -26,7 +25,6 @@ public:
 
 public slots:
     void discharge();
-    void setBottomPaneVisible(bool visible);
 
 private slots:
     void hideWidgets();
@@ -36,8 +34,7 @@ signals:
     bool bottomPaneTriggered(bool visible);
 
 private:
-    QVBoxLayout* m_layout;
-    QSplitter* m_splitterOut,* m_splitterIn;
+    QSplitter* m_splitterIn;
     OutputPane* m_outputPane;
     OutputController* m_outputController;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
