@@ -4,7 +4,6 @@
 #include <QWidget>
 
 class QStackedWidget;
-class OutputBar;
 class IssuesWidget;
 class ConsoleWidget;
 class QAbstractButton;
@@ -18,15 +17,14 @@ public:
     explicit OutputPane(QWidget* parent = nullptr);
 
     QStackedWidget* stackedWidget() const;
-    OutputBar* outputBar() const;
     QAbstractButton* issuesButton() const;
     QAbstractButton* consoleButton() const;
     IssuesWidget* issuesWidget() const;
     ConsoleWidget* consoleWidget() const;
+    QWidget* widgetForButton(QAbstractButton* button) const;
 
 private:
     QStackedWidget* m_stackedWidget;
-    OutputBar* m_outputBar;
     QAbstractButton* m_issuesButton;
     QAbstractButton* m_consoleButton;
     IssuesWidget* m_issuesWidget;

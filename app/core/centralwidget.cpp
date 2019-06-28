@@ -44,13 +44,16 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
 {
+    auto a = new QWidget;
+    a->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
     setHandleWidth(0);
     setFrameShape(QFrame::NoFrame);
     setOrientation(Qt::Vertical);
-    addWidget(m_splitterIn);
+    addWidget(a);
     addWidget(m_outputPane);
     setChildrenCollapsible(false);
-    handle(1)->setDisabled(true);
+//    handle(1)->setDisabled(true);
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);

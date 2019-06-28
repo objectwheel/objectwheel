@@ -15,6 +15,9 @@ public:
 public slots:
     void discharge();
 
+private slots:
+    void onBarButtonClick();
+
 private:
     OutputPane* m_outputPane;
 };
