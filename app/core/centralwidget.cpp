@@ -19,6 +19,8 @@
 #include <controlpropertymanager.h>
 #include <outputpane.h>
 #include <outputcontroller.h>
+#include <issueswidget.h>
+#include <consolewidget.h>
 
 #include <QWindow>
 #include <QSplitter>
@@ -53,7 +55,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     addWidget(a);
     addWidget(m_outputPane);
     setChildrenCollapsible(false);
-//    handle(1)->setDisabled(true);
+    //    handle(1)->setDisabled(true);
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
@@ -117,6 +119,15 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
         }
         file.write(qmldirLine.toUtf8());
     });
+
+    connect(m_outputPane->issuesWidget(), &IssuesWidget::designsFileOpened,
+            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
+    connect(m_outputPane->issuesWidget(), &IssuesWidget::assetsFileOpened,
+            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
+    connect(m_outputPane->consoleWidget(), &ConsoleWidget::designsFileOpened,
+            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
+    connect(m_outputPane->consoleWidget(), &ConsoleWidget::assetsFileOpened,
+            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
 
     //   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
     //            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);

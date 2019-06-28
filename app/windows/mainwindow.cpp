@@ -10,7 +10,6 @@
 #include <formspane.h>
 #include <inspectorpane.h>
 #include <centralwidget.h>
-#include <windowmanager.h>
 #include <designerwidget.h>
 #include <controlcreationmanager.h>
 #include <runmanager.h>
@@ -21,7 +20,6 @@
 #include <utilityfunctions.h>
 #include <outputbar.h>
 #include <saveutils.h>
-#include <windowmanager.h>
 #include <welcomewindow.h>
 #include <controlpropertymanager.h>
 #include <preferenceswindow.h>
@@ -31,6 +29,7 @@
 #include <behaviorsettings.h>
 #include <segmentedbar.h>
 #include <controlrenderingmanager.h>
+#include <outputpane.h>
 
 #include <QWindow>
 #include <QProcess>
@@ -287,6 +286,20 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
                 && ModeManager::mode() != ModeManager::Editor) {
             ModeManager::setMode(ModeManager::Split);
         }
+    });
+    connect(m_runController, &RunController::ran, this, [=] {
+        const QString& timestamp = QTime::currentTime().toString();
+        BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
+        if (settings->autoSaveBeforeRunning)
+            m_centralWidget->qmlCodeEditorWidget()->saveAll();
+        m_centralWidget->outputPane()->consoleWidget()->fade();
+        if (!m_centralWidget->outputPane()->consoleWidget()->toPlainText().isEmpty())
+            m_centralWidget->outputPane()->consoleWidget()->press("\n");
+        m_centralWidget->outputPane()->consoleWidget()->press(
+                    timestamp + tr(": Starting") + " " + ProjectManager::name() + "...\n",
+                    QColor("#025dbf"), QFont::DemiBold);
+        m_centralWidget->outputPane()->consoleWidget()->verticalScrollBar()->
+                setValue(m_centralWidget->outputPane()->consoleWidget()->verticalScrollBar()->maximum());
     });
     connect(m_centralWidget, &CentralWidget::bottomPaneTriggered,
             [=] (bool visible) {
