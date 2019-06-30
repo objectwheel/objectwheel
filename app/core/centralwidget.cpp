@@ -1,5 +1,5 @@
 #include <centralwidget.h>
-#include <designerwidget.h>
+#include <designerview.h>
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
 #include <buildswidget.h>
@@ -35,7 +35,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_outputPane(new OutputPane)
   , m_outputController(new OutputController(m_outputPane, this))
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
-  , m_designerWidget(new DesignerWidget(m_qmlCodeEditorWidget))
+  , m_designerView(new DesignerView(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
   , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
@@ -61,7 +61,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     m_splitterIn->setHandleWidth(0);
     m_splitterIn->setFrameShape(QFrame::NoFrame);
     m_splitterIn->setOrientation(Qt::Horizontal);
-    m_splitterIn->addWidget(m_designerWidget);
+    m_splitterIn->addWidget(m_designerView);
     m_splitterIn->addWidget(g_editorContainer);
     m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
@@ -110,13 +110,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     });
 
     connect(m_outputPane->issuesWidget(), &IssuesWidget::designsFileOpened,
-            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
+            m_designerView, &DesignerView::onDesignsFileOpen);
     connect(m_outputPane->issuesWidget(), &IssuesWidget::assetsFileOpened,
-            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
+            m_designerView, &DesignerView::onAssetsFileOpen);
     connect(m_outputPane->consoleWidget(), &ConsoleWidget::designsFileOpened,
-            m_designerWidget, &DesignerWidget::onDesignsFileOpen);
+            m_designerView, &DesignerView::onDesignsFileOpen);
     connect(m_outputPane->consoleWidget(), &ConsoleWidget::assetsFileOpened,
-            m_designerWidget, &DesignerWidget::onAssetsFileOpen);
+            m_designerView, &DesignerView::onAssetsFileOpen);
 
     //   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
     //            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
@@ -127,15 +127,15 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
             ControlRenderingManager::scheduleInit);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
         Delayer::delay(3000);
-        m_designerWidget->refresh();
+        m_designerView->refresh();
     });
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &CentralWidget::onModeChange);
 }
 
-DesignerWidget* CentralWidget::designerWidget() const
+DesignerView* CentralWidget::designerView() const
 {
-    return m_designerWidget;
+    return m_designerView;
 }
 
 OutputPane* CentralWidget::outputPane() const
@@ -152,7 +152,7 @@ void CentralWidget::discharge()
 {
     m_outputController->discharge();
     m_qmlCodeEditorWidget->discharge();
-    m_designerWidget->discharge();
+    m_designerView->discharge();
     m_projectOptionsWidget->discharge();
     m_buildsWidget->discharge();
     m_helpWidget->discharge();
@@ -161,7 +161,7 @@ void CentralWidget::discharge()
 void CentralWidget::hideWidgets()
 {
     m_outputPane->hide();
-    m_designerWidget->hide();
+    m_designerView->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();
     m_buildsWidget->hide();
@@ -175,7 +175,7 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
     switch (mode) {
     case ModeManager::Designer:
         m_outputPane->show();
-        m_designerWidget->show();
+        m_designerView->show();
         break;
 
     case ModeManager::Editor:
@@ -185,7 +185,7 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
 
     case ModeManager::Split:
         m_outputPane->show();
-        m_designerWidget->show();
+        m_designerView->show();
         g_editorContainer->show();
         break;
 

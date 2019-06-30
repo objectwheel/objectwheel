@@ -10,7 +10,7 @@
 #include <formspane.h>
 #include <inspectorpane.h>
 #include <centralwidget.h>
-#include <designerwidget.h>
+#include <designerview.h>
 #include <controlcreationmanager.h>
 #include <runmanager.h>
 #include <projectmanager.h>
@@ -85,9 +85,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_modeSelectorController(new ModeSelectorController(m_modeSelectorPane, this))
   , m_toolboxPane(new ToolboxPane)
   , m_toolboxController(new ToolboxController(m_toolboxPane, this))
-  , m_formsPane(new FormsPane(m_centralWidget->designerWidget()->designerScene()))
-  , m_inspectorPane(new InspectorPane(m_centralWidget->designerWidget()->designerScene()))
-  , m_propertiesPane(new PropertiesPane(m_centralWidget->designerWidget()->designerScene()))
+  , m_formsPane(new FormsPane(m_centralWidget->designerView()->scene()))
+  , m_inspectorPane(new InspectorPane(m_centralWidget->designerView()->scene()))
+  , m_propertiesPane(new PropertiesPane(m_centralWidget->designerView()->scene()))
   , m_assetsPane(new AssetsPane)
 {
     setWindowTitle(APP_NAME);
@@ -269,14 +269,14 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_runPane->segmentedBar()->setEnabled(false);
     });
 
-    connect(m_centralWidget->designerWidget(), &DesignerWidget::hideDockWidgetTitleBars,
+    connect(m_centralWidget->designerView(), &DesignerView::hideDockWidgetTitleBars,
             this, &MainWindow::setDockWidgetTitleBarsHidden);
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &MainWindow::onModeChange);
     connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
-            m_centralWidget->designerWidget(), &DesignerWidget::onControlSelectionChange);
+            m_centralWidget->designerView(), &DesignerView::onControlSelectionChange);
     connect(m_inspectorPane, &InspectorPane::controlDoubleClicked,
-            m_centralWidget->designerWidget(), &DesignerWidget::onInspectorItemDoubleClick);
+            m_centralWidget->designerView(), &DesignerView::onInspectorItemDoubleClick);
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0

@@ -15,7 +15,6 @@ class ControlCreationManager final : public QObject
 
     friend class ApplicationCore; // For construction
     friend class FormsPane; // For createForm
-    friend class DesignerWidget; // For createControl
     friend class DesignerView; // For createControl
 
 private:

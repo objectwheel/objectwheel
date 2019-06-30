@@ -1,25 +1,53 @@
-#ifndef FORMVIEW_H
-#define FORMVIEW_H
+#ifndef DESIGNERVIEW_H
+#define DESIGNERVIEW_H
 
 #include <QGraphicsView>
 
+class QmlCodeEditorWidget;
 class DesignerScene;
+class QToolBar;
+class QToolButton;
+class QComboBox;
+class Control;
+class SignalChooserDialog;
 class QMenu;
-class QAction;
 
-class DesignerView : public QGraphicsView
+class DesignerView final : public QGraphicsView
 {
     Q_OBJECT
+    Q_DISABLE_COPY(DesignerView)
+
 public:
-    explicit DesignerView(DesignerScene* scene, QWidget* parent = 0);
+    explicit DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget* parent = nullptr);
+
     DesignerScene* scene() const;
+
+    qreal scalingRatio() const;
 
 public slots:
     void discharge();
+    void refresh() { onRefreshButtonClick(); }
+    void onControlDoubleClick(Control*);
+    void onInspectorItemDoubleClick(Control*);
+    void onAssetsFileOpen(const QString& relativePath, int line, int column);
+    void onDesignsFileOpen(Control* control, const QString& relativePath, int line, int column);
+    void onControlDrop(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos);
+    void onControlSelectionChange(const QList<Control*>& selectedControls);
 
 protected:
+    QSize sizeHint() const override;
     void resizeEvent(QResizeEvent* event) override;
     void contextMenuEvent(QContextMenuEvent *event) override;
+
+private slots:
+    void onFitButtonClick();
+    void onUndoButtonClick();
+    void onRedoButtonClick();
+    void onClearButtonClick();
+    void onRefreshButtonClick();
+    void onOutlineButtonClick(bool value);
+    void onSnappingButtonClick(bool value);
+    void onZoomLevelChange(const QString& text);
 
 private slots:
     void onUndoAction();
@@ -36,7 +64,28 @@ private slots:
     void onSendBackAction();
     void onBringFrontAction();
 
+signals:
+    void hideDockWidgetTitleBars(bool);
+    void scalingRatioChanged();
+
 private:
+    void scaleScene(qreal ratio);
+
+private:
+    qreal m_lastScale;
+    SignalChooserDialog* m_signalChooserDialog;
+    QmlCodeEditorWidget* m_qmlCodeEditorWidget;
+    QToolBar* m_toolBar;
+    QToolButton* m_undoButton;
+    QToolButton* m_redoButton;
+    QToolButton* m_clearButton;
+    QToolButton* m_refreshButton;
+    QToolButton* m_snappingButton;
+    QToolButton* m_fitButton;
+    QToolButton* m_outlineButton;
+    QToolButton* m_hideDockWidgetTitleBarsButton;
+    QComboBox* m_zoomlLevelCombobox;
+
     QMenu* m_menu;
     QAction* m_sendBackAct;
     QAction* m_bringFrontAct;
@@ -53,4 +102,4 @@ private:
     QAction* m_moveLeftAct;
 };
 
-#endif // FORMVIEW_H
+#endif // DESIGNERVIEW_H

@@ -13,7 +13,7 @@
 #include <savemanager.h>
 #include <menumanager.h>
 #include <centralwidget.h>
-#include <designerwidget.h>
+#include <designerview.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
 #include <welcomewindow.h>
@@ -138,7 +138,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QObject::connect(s_projectManager, &ProjectManager::stopped,
                      &ApplicationCore::onProjectStop);
 
-    DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerWidget()->designerScene();
+    DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerView()->scene();
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
     s_controlRenderingManager->setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());

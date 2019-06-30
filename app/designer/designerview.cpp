@@ -1,45 +1,155 @@
 #include <designerview.h>
+#include <designerview.h>
 #include <designerscene.h>
-#include <saveutils.h>
+#include <utilsicons.h>
 #include <controlcreationmanager.h>
-#include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
+#include <controlremovingmanager.h>
 #include <controlrenderingmanager.h>
-#include <QMenu>
+#include <saveutils.h>
+#include <transparentstyle.h>
+#include <signalchooserdialog.h>
+#include <utilityfunctions.h>
+#include <qmlcodeeditorwidget.h>
+#include <parserutils.h>
+#include <projectmanager.h>
+#include <qmlcodeeditor.h>
+#include <qmlcodedocument.h>
 
-// TODO: Improve copy-paste positioning. "Pasting into a sub control and" "positioning wherever you
-// right click".. implement those 2 features in future
+#include <QMenu>
+#include <QDir>
+#include <QToolBar>
+#include <QToolButton>
+#include <QPainter>
+#include <QMessageBox>
+#include <QComboBox>
+#include <QInputDialog>
+
+// 1. Control name; 2. Method name
+#define METHOD_DECL "%1_%2"
+#define FORM_DECL "%1_onCompleted"
+#define METHOD_BODY \
+    "\n\n"\
+    "function %1() {\n"\
+    "    // Do something...\n"\
+    "}"
 
 namespace {
 
-struct CopyPaste final
+QString methodName(const QString& signal)
 {
-    enum ActionType { Invalid, Copy, Cut };
-
-    CopyPaste() = delete;
-    CopyPaste(const CopyPaste&) = delete;
-    CopyPaste &operator=(const CopyPaste&) = delete;
-
-    static inline ActionType actionType()
-    { return s_actionType; }
-    static inline QList<QPointer<Control>> controls()
-    { return s_controls; }
-    static inline bool isValid()
-    { return s_actionType != Invalid && !s_controls.isEmpty(); }
-    static inline void invalidate()
-    { s_actionType = Invalid; s_controls.clear(); }
-    static inline void setControls(const QList<QPointer<Control>>& value, ActionType actionType)
-    { s_controls = value; s_actionType = actionType; }
-
-private:
-    static ActionType s_actionType;
-    static QList<QPointer<Control>> s_controls;
-};
-QList<QPointer<Control>> CopyPaste::s_controls;
-CopyPaste::ActionType CopyPaste::s_actionType = CopyPaste::Invalid;
+    QString method(signal);
+    method.replace(0, 1, method[0].toUpper());
+    return method.prepend("on");
 }
 
-DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsView(scene, parent)
+QString findText(qreal ratio)
+{
+    if (ratio == 0.1)
+        return "10 %";
+    else if (ratio == 0.25)
+        return "25 %";
+    else if (ratio == 0.50)
+        return "50 %";
+    else if (ratio == 0.75)
+        return "75 %";
+    else if (ratio == 0.90)
+        return "90 %";
+    else if (ratio == 1.0)
+        return "100 %";
+    else if (ratio == 1.25)
+        return "125 %";
+    else if (ratio == 1.50)
+        return "150 %";
+    else if (ratio == 1.75)
+        return "175 %";
+    else if (ratio == 2.0)
+        return "200 %";
+    else if (ratio == 3.0)
+        return "300 %";
+    else if (ratio == 5.0)
+        return "500 %";
+    else if (ratio == 10.0)
+        return "1000 %";
+    else
+        return "100 %";
+}
+
+qreal roundRatio(qreal ratio)
+{
+    if (ratio < 0.1)
+        return 0.1;
+    else if (ratio >= 0.1 && ratio < 0.25)
+        return 0.1;
+    else if (ratio >= 0.25 && ratio < 0.5)
+        return 0.25;
+    else if (ratio >= 0.5 && ratio < 0.75)
+        return 0.5;
+    else if (ratio >= 0.75 && ratio < 0.9)
+        return 0.75;
+    else if (ratio >= 0.9 && ratio < 1.0)
+        return 0.9;
+    else
+        return 1.0;
+}
+
+qreal findRatio(const QString& text)
+{
+    if (text == "10 %")
+        return 0.1;
+    else if (text == "25 %")
+        return 0.25;
+    else if (text == "50 %")
+        return 0.50;
+    else if (text == "75 %")
+        return 0.75;
+    else if (text == "90 %")
+        return 0.90;
+    else if (text == "100 %")
+        return 1.0;
+    else if (text == "125 %")
+        return 1.25;
+    else if (text == "150 %")
+        return 1.50;
+    else if (text == "175 %")
+        return 1.75;
+    else if (text == "200 %")
+        return 2.0;
+    else if (text == "300 %")
+        return 3.0;
+    else if (text == "500 %")
+        return 5.0;
+    else if (text == "1000 %")
+        return 10.0;
+    else
+        return 1.0;
+}
+
+bool warnIfFileDoesNotExist(const QString& filePath)
+{
+    if (!QFileInfo::exists(filePath)) {
+        return UtilityFunctions::showMessage(
+                    nullptr, QObject::tr("Oops"),
+                    QObject::tr("File %1 does not exist.").arg(QFileInfo(filePath).fileName()));
+    }
+    return false;
+}
+}
+
+DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent) : QGraphicsView(new DesignerScene, parent)
+  , m_lastScale(1.0)
+  , m_signalChooserDialog(new SignalChooserDialog(this))
+  , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
+  , m_toolBar(new QToolBar)
+  , m_undoButton(new QToolButton)
+  , m_redoButton(new QToolButton)
+  , m_clearButton(new QToolButton)
+  , m_refreshButton(new QToolButton)
+  , m_snappingButton(new QToolButton)
+  , m_fitButton(new QToolButton)
+  , m_outlineButton(new QToolButton)
+  , m_hideDockWidgetTitleBarsButton(new QToolButton)
+  , m_zoomlLevelCombobox(new QComboBox)
   , m_menu(new QMenu(this))
   , m_sendBackAct(new QAction(this))
   , m_bringFrontAct(new QAction(this))
@@ -55,6 +165,113 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
   , m_moveRightAct(new QAction(this))
   , m_moveLeftAct(new QAction(this))
 {
+//    m_layout->setSpacing(0);
+//    m_layout->setContentsMargins(0, 0, 0, 0);
+//    m_layout->addWidget(m_toolBar);
+//    m_layout->addWidget(m_designerView);
+
+    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    setRubberBandSelectionMode(Qt::IntersectsItemShape);
+    setDragMode(QGraphicsView::RubberBandDrag);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
+    setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+    setFrameShape(QFrame::NoFrame);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    m_zoomlLevelCombobox->addItem("10 %");
+    m_zoomlLevelCombobox->addItem("25 %");
+    m_zoomlLevelCombobox->addItem("50 %");
+    m_zoomlLevelCombobox->addItem("75 %");
+    m_zoomlLevelCombobox->addItem("90 %");
+    m_zoomlLevelCombobox->addItem("100 %");
+    m_zoomlLevelCombobox->addItem("125 %");
+    m_zoomlLevelCombobox->addItem("150 %");
+    m_zoomlLevelCombobox->addItem("175 %");
+    m_zoomlLevelCombobox->addItem("200 %");
+    m_zoomlLevelCombobox->addItem("300 %");
+    m_zoomlLevelCombobox->addItem("500 %");
+    m_zoomlLevelCombobox->addItem("1000 %");
+    m_zoomlLevelCombobox->setCurrentIndex(5);
+    m_zoomlLevelCombobox->setMinimumWidth(100);
+    m_zoomlLevelCombobox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+
+    m_outlineButton->setCheckable(true);
+    m_outlineButton->setChecked(scene()->showOutlines());
+    m_hideDockWidgetTitleBarsButton->setCheckable(true);
+    m_hideDockWidgetTitleBarsButton->setChecked(false);
+    m_snappingButton->setCheckable(true);
+    m_snappingButton->setChecked(scene()->snapping());
+
+    m_refreshButton->setCursor(Qt::PointingHandCursor);
+    m_clearButton->setCursor(Qt::PointingHandCursor);
+    m_undoButton->setCursor(Qt::PointingHandCursor);
+    m_redoButton->setCursor(Qt::PointingHandCursor);
+    m_snappingButton->setCursor(Qt::PointingHandCursor);
+    m_outlineButton->setCursor(Qt::PointingHandCursor);
+    m_hideDockWidgetTitleBarsButton->setCursor(Qt::PointingHandCursor);
+    m_fitButton->setCursor(Qt::PointingHandCursor);
+    m_zoomlLevelCombobox->setCursor(Qt::PointingHandCursor);
+
+    m_refreshButton->setToolTip("Refresh control rendering on the Dashboard.");
+    m_clearButton->setToolTip("Clear controls on the Dashboard.");
+    m_undoButton->setToolTip("Undo action.");
+    m_redoButton->setToolTip("Redo action.");
+    m_snappingButton->setToolTip("Enable snapping to help aligning of controls to each others.");
+    m_outlineButton->setToolTip("Show outline frame for controls.");
+    m_hideDockWidgetTitleBarsButton->setToolTip("Hide/Show title bars of Panes.");
+    m_fitButton->setToolTip("Fit scene into the Dashboard.");
+    m_zoomlLevelCombobox->setToolTip("Change zoom level.");
+
+    m_refreshButton->setIcon(Utils::Icons::RELOAD.icon());
+    m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
+    m_undoButton->setIcon(Utils::Icons::UNDO_TOOLBAR.icon());
+    m_redoButton->setIcon(Utils::Icons::REDO_TOOLBAR.icon());
+    m_snappingButton->setIcon(Utils::Icons::SNAPPING_TOOLBAR.icon());
+    m_outlineButton->setIcon(Utils::Icons::BOUNDING_RECT.icon());
+    m_hideDockWidgetTitleBarsButton->setIcon(Utils::Icons::CLOSE_SPLIT_TOP.icon());
+    m_fitButton->setIcon(Utils::Icons::FITTOVIEW_TOOLBAR.icon());
+
+    connect(m_snappingButton, &QToolButton::toggled, this, &DesignerView::onSnappingButtonClick);
+    connect(m_outlineButton, &QToolButton::toggled, this, &DesignerView::onOutlineButtonClick);
+    connect(m_hideDockWidgetTitleBarsButton, &QToolButton::toggled, this, &DesignerView::hideDockWidgetTitleBars);
+    connect(m_zoomlLevelCombobox, &QComboBox::currentTextChanged, this, &DesignerView::onZoomLevelChange);
+    connect(m_fitButton, &QToolButton::clicked, this, &DesignerView::onFitButtonClick);
+    connect(m_refreshButton, &QToolButton::clicked, this, &DesignerView::onRefreshButtonClick);
+    connect(m_clearButton, &QToolButton::clicked, this, &DesignerView::onClearButtonClick);
+
+    m_undoButton->setFixedHeight(20);
+    m_redoButton->setFixedHeight(20);
+    m_clearButton->setFixedHeight(20);
+    m_refreshButton->setFixedHeight(20);
+    m_snappingButton->setFixedHeight(20);
+    m_fitButton->setFixedHeight(20);
+    m_outlineButton->setFixedHeight(20);
+    m_hideDockWidgetTitleBarsButton->setFixedHeight(20);
+    m_zoomlLevelCombobox->setFixedHeight(20);
+
+    m_toolBar->setFixedHeight(24);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
+    m_toolBar->addWidget(m_undoButton);
+    m_toolBar->addWidget(m_redoButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    m_toolBar->addWidget(m_refreshButton);
+    m_toolBar->addWidget(m_clearButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    m_toolBar->addSeparator();
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    m_toolBar->addWidget(m_snappingButton);
+    m_toolBar->addWidget(m_outlineButton);
+    m_toolBar->addWidget(m_fitButton);
+    m_toolBar->addWidget(m_zoomlLevelCombobox);
+    m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
+    m_toolBar->addWidget(m_hideDockWidgetTitleBarsButton);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
+
+    TransparentStyle::attach(m_toolBar);
+
+
     viewport()->setAutoFillBackground(false);
 
     m_sendBackAct->setText(tr("Send to Back"));
@@ -121,6 +338,217 @@ DesignerView::DesignerView(DesignerScene* scene, QWidget* parent) : QGraphicsVie
     addAction(m_moveLeftAct);
 }
 
+void DesignerView::scaleScene(qreal ratio)
+{
+    if (m_lastScale != ratio) {
+        scale((1.0 / m_lastScale) * ratio, (1.0 / m_lastScale) * ratio);
+        m_lastScale = ratio;
+        emit scalingRatioChanged();
+    }
+}
+
+qreal DesignerView::scalingRatio() const
+{
+    return m_lastScale;
+}
+
+void DesignerView::onSnappingButtonClick(bool value)
+{
+    scene()->setSnapping(value);
+}
+
+void DesignerView::onOutlineButtonClick(bool value)
+{
+    scene()->setShowOutlines(value);
+}
+
+void DesignerView::onFitButtonClick()
+{
+    static auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
+    auto diff = qMin(width() / scene()->width(), height() / scene()->height());
+    for (auto ratio : ratios) {
+        if (roundRatio(diff) == ratio)
+            m_zoomlLevelCombobox->setCurrentText(findText(ratio));
+    }
+}
+
+void DesignerView::onUndoButtonClick()
+{
+    // TODO:
+}
+
+void DesignerView::onRedoButtonClick()
+{
+    // TODO:
+}
+
+void DesignerView::onZoomLevelChange(const QString& text)
+{
+    qreal ratio = findRatio(text);
+    scaleScene(ratio);
+}
+
+void DesignerView::onRefreshButtonClick()
+{
+    ControlRenderingManager::scheduleRefresh(scene()->currentForm()->uid());
+}
+
+void DesignerView::onClearButtonClick()
+{
+    if (!scene()->currentForm())
+        return;
+
+    int ret = UtilityFunctions::showMessage(
+                this, tr("This will remove the current scene's content"),
+                tr("Do you want to continue?"),
+                QMessageBox::Question,
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+
+    switch (ret) {
+    case QMessageBox::Yes: { // FIXME
+        //            scene()->removeChildControlsOnly(scene()->currentForm());
+        //            SaveManager::removeChildControlsOnly(scene()->currentForm());
+        break;
+    } default: {
+        // Do nothing
+        break;
+    }
+    }
+}
+
+void DesignerView::discharge()
+{
+    scene()->discharge();
+    update();
+    m_signalChooserDialog->discharge();
+    m_outlineButton->setChecked(scene()->showOutlines());
+    m_hideDockWidgetTitleBarsButton->setChecked(false);
+    m_snappingButton->setChecked(scene()->snapping());
+    onZoomLevelChange("100 %");
+}
+
+QSize DesignerView::sizeHint() const
+{
+    return QSize(680, 680);
+}
+
+void DesignerView::onInspectorItemDoubleClick(Control* control)
+{
+    Q_ASSERT(scene()->currentForm());
+
+    if (control->hasErrors()) {
+        UtilityFunctions::showMessage(
+                    this, tr("Oops"),
+                    tr("Control has got errors, solve these problems first."));
+        return;
+    }
+
+    m_signalChooserDialog->setSignalList(control->events());
+
+    int result = m_signalChooserDialog->exec();
+    if (result == QDialog::Rejected)
+        return;
+
+    const QString& methodSign = QString::fromUtf8(METHOD_DECL)
+            .arg(control->id())
+            .arg(methodName(m_signalChooserDialog->currentSignal()));
+    const QString& methodBody = QString::fromUtf8(METHOD_BODY).arg(methodSign);
+    const QString& formSign = scene()->currentForm()->id();
+    const QString& formJS = formSign + ".js";
+    const QString& fullPath = SaveUtils::toProjectAssetsDir(ProjectManager::dir()) + '/' + formJS;
+
+    if (warnIfFileDoesNotExist(fullPath))
+        return;
+
+    m_qmlCodeEditorWidget->openAssets(formJS);
+
+    QmlCodeEditorWidget::AssetsDocument* document = m_qmlCodeEditorWidget->getAssets(formJS);
+    Q_ASSERT(document);
+
+    int pos = ParserUtils::methodLine(document->document, fullPath, methodSign);
+    if (pos < 0) {
+        const QString& connection =
+                control->id() + "." + m_signalChooserDialog->currentSignal() + ".connect(" + methodSign + ")";
+        const QString& loaderSign = QString::fromUtf8(FORM_DECL).arg(formSign);
+        ParserUtils::addConnection(document->document, fullPath, loaderSign, connection);
+        pos = ParserUtils::addMethod(document->document, fullPath, methodBody);
+        pos += 3;
+    }
+
+    m_qmlCodeEditorWidget->codeEditor()->gotoLine(pos);
+}
+
+void DesignerView::onControlDoubleClick(Control* control)
+{
+    m_qmlCodeEditorWidget->openDesigns(control, SaveUtils::controlMainQmlFileName());
+}
+
+void DesignerView::onAssetsFileOpen(const QString& relativePath, int line, int column)
+{
+    m_qmlCodeEditorWidget->openAssets(relativePath);
+    m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
+}
+
+void DesignerView::onDesignsFileOpen(Control* control, const QString& relativePath, int line, int column)
+{
+    m_qmlCodeEditorWidget->openDesigns(control, relativePath);
+    m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
+}
+
+void DesignerView::onControlDrop(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
+{
+    scene()->clearSelection();
+    // NOTE: Use actual Control position for scene, since createControl deals with margins
+    auto newControl = ControlCreationManager::createControl(targetParentControl, controlRootPath, pos);
+    if (newControl) {
+        newControl->setSelected(true);
+    } else {
+        UtilityFunctions::showMessage(this, tr("Oops"),
+                                      tr("Operation failed, control has got problems."),
+                                      QMessageBox::Critical);
+    }
+}
+
+void DesignerView::onControlSelectionChange(const QList<Control*>& selectedControls)
+{
+    scene()->clearSelection();
+    for (Control* control : selectedControls)
+        control->setSelected(true);
+}
+
+// TODO: Improve copy-paste positioning. "Pasting into a sub control and" "positioning wherever you
+// right click".. implement those 2 features in future
+
+namespace {
+
+struct CopyPaste final
+{
+    enum ActionType { Invalid, Copy, Cut };
+
+    CopyPaste() = delete;
+    CopyPaste(const CopyPaste&) = delete;
+    CopyPaste &operator=(const CopyPaste&) = delete;
+
+    static inline ActionType actionType()
+    { return s_actionType; }
+    static inline QList<QPointer<Control>> controls()
+    { return s_controls; }
+    static inline bool isValid()
+    { return s_actionType != Invalid && !s_controls.isEmpty(); }
+    static inline void invalidate()
+    { s_actionType = Invalid; s_controls.clear(); }
+    static inline void setControls(const QList<QPointer<Control>>& value, ActionType actionType)
+    { s_controls = value; s_actionType = actionType; }
+
+private:
+    static ActionType s_actionType;
+    static QList<QPointer<Control>> s_controls;
+};
+QList<QPointer<Control>> CopyPaste::s_controls;
+CopyPaste::ActionType CopyPaste::s_actionType = CopyPaste::Invalid;
+}
+
 DesignerScene* DesignerView::scene() const
 {
     return static_cast<DesignerScene*>(QGraphicsView::scene());
@@ -153,11 +581,6 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
         m_deleteAct->setDisabled(false);
     }
     m_menu->exec(event->globalPos());
-}
-
-void DesignerView::discharge()
-{
-    update();
 }
 
 void DesignerView::onUndoAction()

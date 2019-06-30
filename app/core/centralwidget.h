@@ -4,7 +4,7 @@
 #include <QSplitter>
 #include <modemanager.h>
 
-class DesignerWidget;
+class DesignerView;
 class QmlCodeEditorWidget;
 class ProjectOptionsWidget;
 class HelpWidget;
@@ -20,7 +20,7 @@ class CentralWidget final : public QSplitter
 public:
     explicit CentralWidget(QWidget* parent = nullptr);
     QmlCodeEditorWidget* qmlCodeEditorWidget() const;
-    DesignerWidget* designerWidget() const;
+    DesignerView* designerView() const;
     OutputPane* outputPane() const;
     OutputController* outputController() const;
 
@@ -36,7 +36,7 @@ private:
     OutputPane* m_outputPane;
     OutputController* m_outputController;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
-    DesignerWidget* m_designerWidget;
+    DesignerView* m_designerView;
     ProjectOptionsWidget* m_projectOptionsWidget;
     BuildsWidget* m_buildsWidget;
     HelpWidget* m_helpWidget;

@@ -201,7 +201,7 @@ QmlCodeEditorWidget'e Toggle comment eklenecek
 QmlCodeEditorWidget'in Follow under symbol özelliği eklenecek/düzeltilecek
 Bir js düzenlenip save edilince, o js dosyasını kullanani, import eden control'ler de save edilmeli, yeniden repreview edilmeli
 HelpView'e Copy, Paste, Cut, Save, Run özelliklerini en kısa zamanda ekle
-DesignerWidget'e Copy, Paste, Cut, Save, Save All, Run özelliklerini en kısa zamanda ekle
+DesignerView'e Copy, Paste, Cut, Save, Save All, Run özelliklerini en kısa zamanda ekle
 HelpView ve Kod Editöre search, replace, replaceAll özellikleri eklenecek (Ctrl + F direk seçecek ve search'i açacak)
 Kod Editör Tab ile auto indent yapacak
 Kod Editör'de sağ taraftaki hizalama çizgisi gösterilebilmeli

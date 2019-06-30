@@ -7,7 +7,7 @@
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <centralwidget.h>
-#include <designerwidget.h>
+#include <designerview.h>
 #include <controlpropertymanager.h>
 #include <paintutils.h>
 #include <parserutils.h>
@@ -348,7 +348,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         QString dir;
         UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
         Q_ASSERT(!dir.isEmpty());
-        WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDrop(
+        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDrop(
                     this, dir, event->pos() - QPointF(5, 5));
         update();
     }
@@ -452,7 +452,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
-    WindowManager::mainWindow()->centralWidget()->designerWidget()->onControlDoubleClick(this);
+    WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
 }
 
 void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
