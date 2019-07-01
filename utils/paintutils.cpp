@@ -24,26 +24,6 @@ QImage PaintUtils::renderTransparentImage(const QSizeF& size, qreal dpr)
     return renderFilledImage(size, Qt::transparent, dpr);
 }
 
-QImage PaintUtils::renderInvisibleControlImage(const QSizeF& size, qreal dpr)
-{
-    QImage dest = renderTransparentImage(size, dpr);
-
-    QBitmap bitmap(":/images/texture.bmp");
-    bitmap.setDevicePixelRatio(dpr);
-
-    QBrush brush("#d0d0d0", bitmap);
-    brush.setStyle(Qt::TexturePattern);
-
-    QPainter p(&dest);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setBrush(brush);
-    p.setPen("#bdbdbd");
-    p.drawRect(QRectF{{}, size}.adjusted(0.5, 0.5, -0.5, -0.5));
-    p.end();
-
-    return dest;
-}
-
 QImage PaintUtils::renderInitialControlImage(const QSizeF& size, qreal dpr)
 {
     QImage dest = renderTransparentImage(size, dpr);

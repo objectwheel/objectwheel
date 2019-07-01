@@ -36,6 +36,35 @@
 
 namespace {
 
+// TODO: Improve copy-paste positioning. "Pasting into a sub control and" "positioning wherever you
+// right click".. implement those 2 features in future
+
+struct CopyPaste final
+{
+    enum ActionType { Invalid, Copy, Cut };
+
+    CopyPaste() = delete;
+    CopyPaste(const CopyPaste&) = delete;
+    CopyPaste &operator=(const CopyPaste&) = delete;
+
+    static inline ActionType actionType()
+    { return s_actionType; }
+    static inline QList<QPointer<Control>> controls()
+    { return s_controls; }
+    static inline bool isValid()
+    { return s_actionType != Invalid && !s_controls.isEmpty(); }
+    static inline void invalidate()
+    { s_actionType = Invalid; s_controls.clear(); }
+    static inline void setControls(const QList<QPointer<Control>>& value, ActionType actionType)
+    { s_controls = value; s_actionType = actionType; }
+
+private:
+    static ActionType s_actionType;
+    static QList<QPointer<Control>> s_controls;
+};
+QList<QPointer<Control>> CopyPaste::s_controls;
+CopyPaste::ActionType CopyPaste::s_actionType = CopyPaste::Invalid;
+
 QString methodName(const QString& signal)
 {
     QString method(signal);
@@ -515,38 +544,6 @@ void DesignerView::onControlSelectionChange(const QList<Control*>& selectedContr
     scene()->clearSelection();
     for (Control* control : selectedControls)
         control->setSelected(true);
-}
-
-// TODO: Improve copy-paste positioning. "Pasting into a sub control and" "positioning wherever you
-// right click".. implement those 2 features in future
-
-namespace {
-
-struct CopyPaste final
-{
-    enum ActionType { Invalid, Copy, Cut };
-
-    CopyPaste() = delete;
-    CopyPaste(const CopyPaste&) = delete;
-    CopyPaste &operator=(const CopyPaste&) = delete;
-
-    static inline ActionType actionType()
-    { return s_actionType; }
-    static inline QList<QPointer<Control>> controls()
-    { return s_controls; }
-    static inline bool isValid()
-    { return s_actionType != Invalid && !s_controls.isEmpty(); }
-    static inline void invalidate()
-    { s_actionType = Invalid; s_controls.clear(); }
-    static inline void setControls(const QList<QPointer<Control>>& value, ActionType actionType)
-    { s_controls = value; s_actionType = actionType; }
-
-private:
-    static ActionType s_actionType;
-    static QList<QPointer<Control>> s_controls;
-};
-QList<QPointer<Control>> CopyPaste::s_controls;
-CopyPaste::ActionType CopyPaste::s_actionType = CopyPaste::Invalid;
 }
 
 DesignerScene* DesignerView::scene() const

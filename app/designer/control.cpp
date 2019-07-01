@@ -21,21 +21,10 @@
 #include <QRegularExpression>
 #include <QGraphicsSceneDragDropEvent>
 #include <QApplication>
-
-namespace {
-
-const QSize g_baseControlSize(40, 40);
-
-QList<Resizer*> initializeResizers(Control* control)
-{
-    QList<Resizer*> resizers;
-    for (int i = 0; i < 8; ++i)
-        resizers.append(new Resizer(Resizer::Placement(i), control));
-    return resizers;
-}
-}
+#include <QDebug>
 
 QList<Control*> Control::m_controls;
+
 Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_gui(false)
   , m_clip(false)
@@ -47,11 +36,10 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_resized(false)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
-  , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage(
-                                    g_baseControlSize, ControlRenderingManager::devicePixelRatio())))
-  , m_resizers(initializeResizers(this))
+  , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio())))
+  , m_resizers(Resizer::init(this))
 {
-    m_controls << this;
+    m_controls.append(this);
 
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
@@ -62,7 +50,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
 
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
-    ControlPropertyManager::setSize(this, g_baseControlSize, ControlPropertyManager::NoOption);
+    ControlPropertyManager::setSize(this, {40, 40}, ControlPropertyManager::NoOption);
 
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateImage);
@@ -494,9 +482,6 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    if (m_pixmap.isNull())
-        return;
-
     if (parentControl() && parentControl()->clip() && !m_dragging) {
         painter->setClipRect(
                     rect().intersected(
@@ -508,7 +493,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
                     );
     }
 
-    painter->drawPixmap(m_frame, m_pixmap, m_pixmap.rect());
+    if (!m_pixmap.isNull())
+        painter->drawPixmap(m_frame, m_pixmap, m_pixmap.rect());
 
     QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
@@ -518,12 +504,9 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         if (scene()->showOutlines()) {
             painter->fillRect(rect(), gradient);
         } else {
-            QPixmap highlight(m_pixmap);
-            QPainter p(&highlight);
-            p.setCompositionMode(QPainter::CompositionMode_SourceAtop);
-            p.fillRect(m_pixmap.rect(), gradient);
-            p.end();
-            painter->drawPixmap(rect(), highlight, QRectF(QPointF(0, 0), size() * ControlRenderingManager::devicePixelRatio()));
+            painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
+            painter->fillRect(rect(), gradient);
+            painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
         }
     }
 
@@ -554,13 +537,6 @@ void Control::updateImage(const RenderResult& result)
     if (result.uid != uid())
         return;
 
-    // FIXME
-    // result.id ?? Render Engine bize yeni id değeri göndermeli mi, zaten id değişikliğini
-    // önce biz ona gönderiyoruz, kod değişikliği yada propertis pane'den değiştirerek??
-    // zaten her halükarda id bu tarafta değiştirilip orada değişik kod gitmiyormu ve bu kod
-    // daki id değişikliği daha render engine gitmeden önce zaten ilgili control'e setId edilmiyor mu?
-    ControlPropertyManager::setId(this, result.id, ControlPropertyManager::NoOption);
-
     m_errors = result.errors;
     m_gui = result.gui;
     m_popup = result.popup;
@@ -582,15 +558,11 @@ void Control::updateImage(const RenderResult& result)
                 : result.image);
     m_pixmap.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
 
-    if (m_pixmap.isNull()) {
-        if (m_gui) {
-            m_pixmap = QPixmap::fromImage(PaintUtils::renderInvisibleControlImage(size(), ControlRenderingManager::devicePixelRatio()));
-        } else {
-            m_pixmap = QPixmap::fromImage(
-                        PaintUtils::renderNonGuiControlImage(
-                            ToolUtils::toolIconPath(m_dir), size(),
-                            ControlRenderingManager::devicePixelRatio()));
-        }
+    if (m_pixmap.isNull() && !m_gui) {
+        m_pixmap = QPixmap::fromImage(
+                    PaintUtils::renderNonGuiControlImage(
+                        ToolUtils::toolIconPath(m_dir), size(),
+                        ControlRenderingManager::devicePixelRatio()));
     }
 
     for (auto resizer : m_resizers)

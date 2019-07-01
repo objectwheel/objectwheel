@@ -31,6 +31,8 @@ public:
     void updateCursor();
     void updatePosition();
 
+    static QList<Resizer*> init(Control* control);
+
 private:
     void calculatePositionDifference(const QGraphicsSceneMouseEvent* event, qreal* dx, qreal* dy);
 

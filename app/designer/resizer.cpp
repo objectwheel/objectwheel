@@ -95,6 +95,14 @@ void Resizer::updatePosition()
     }
 }
 
+QList<Resizer*> Resizer::init(Control* control)
+{
+    QList<Resizer*> resizers;
+    for (int i = 0; i < 8; ++i)
+        resizers.append(new Resizer(Resizer::Placement(i), control));
+    return resizers;
+}
+
 void Resizer::calculatePositionDifference(const QGraphicsSceneMouseEvent* event, qreal* dx, qreal* dy)
 {
     *dx = 0, *dy = 0;

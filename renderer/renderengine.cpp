@@ -694,7 +694,6 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         ControlInstance* instance = instances.at(i);
         Q_ASSERT(instance);
         RenderResult result;
-        result.id = instance->id;
         result.uid = instance->uid;
         result.gui = instance->gui;
         result.popup = instance->popup;

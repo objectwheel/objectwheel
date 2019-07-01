@@ -24,7 +24,6 @@ namespace PaintUtils {
 QImage renderFilledImage(const QSizeF& size, const QColor& fillColor, qreal dpr);
 QImage renderTransparentImage(const QSizeF& size, qreal dpr);
 QImage renderInitialControlImage(const QSizeF& size, qreal dpr);
-QImage renderInvisibleControlImage(const QSizeF& size, qreal dpr);
 QImage renderErrorControlImage(const QSizeF& size, qreal dpr);
 QImage renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, qreal dpr);
 QIcon renderItemIcon(const QString& fileName, const QPalette& palette);

@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>images/error.png</file>
-        <file>images/texture.bmp</file>
         <file>images/wait.png</file>
         <file>fonts/Roboto-Black.ttf</file>
         <file>fonts/Roboto-BlackItalic.ttf</file>
