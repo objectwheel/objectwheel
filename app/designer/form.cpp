@@ -43,7 +43,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             points.append(QPointF(x, y));
     }
     painter->setBrush(Qt::NoBrush);
-    painter->setPen("#444444");
+    painter->setPen("#222222");
     painter->drawPoints(points.data(), points.size());
 
     painter->setPen(isSelected() ? "#4BA2FF" : "#A4A4A4");

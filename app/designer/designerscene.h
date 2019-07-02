@@ -55,6 +55,7 @@ private:
     bool m_snapping;
     bool m_showOutlines;
     QPointF m_lastMousePos;
+    QList<Control*> m_draggedControls;
     QList<Form*> m_forms;
     QPointer<Form> m_currentForm;
 };

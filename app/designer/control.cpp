@@ -9,6 +9,10 @@
 #include <parserutils.h>
 #include <utilityfunctions.h>
 #include <toolutils.h>
+#include <windowmanager.h>
+#include <centralwidget.h>
+#include <designerview.h>
+#include <mainwindow.h>
 
 #include <QCursor>
 #include <QPainter>
@@ -328,8 +332,8 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         QString dir;
         UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
         Q_ASSERT(!dir.isEmpty());
-        //        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDrop(
-        //                    this, dir, event->pos() - QPointF(5, 5));
+        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDrop(
+                    this, dir, event->pos() - QPointF(5, 5));
         update();
     }
 }
@@ -429,13 +433,10 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
     event->accept();
 }
-#include <windowmanager.h>
-#include <centralwidget.h>
-#include <designerview.h>
-#include <mainwindow.h>
+
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
-   //FIXME     WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
+   WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
 }
 
 void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)

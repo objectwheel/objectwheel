@@ -1,0 +1,14 @@
+#include <designersettingspage.h>
+#include <formssettingswidget.h>
+#include <QIcon>
+
+DesignerSettingsPage::DesignerSettingsPage(QWidget* parent) : SettingsPage(parent)
+{
+    setTitle(tr("Designer"));
+    addWidget(new FormsSettingsWidget(this));
+}
+
+QIcon DesignerSettingsPage::icon() const
+{
+    return QIcon(":/images/settings/designer.png");
+}

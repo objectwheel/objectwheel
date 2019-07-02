@@ -128,5 +128,7 @@
         <file>images/left.svg</file>
         <file>images/settings.svg</file>
         <file>images/filter.svg</file>
+        <file>images/settings/forms.png</file>
+        <file>images/settings/designer.png</file>
     </qresource>
 </RCC>

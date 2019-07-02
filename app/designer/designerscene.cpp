@@ -14,6 +14,8 @@
 #define MAGNETIC_FIELD (3)
 
 namespace {
+static const char zValueProperty[] = "_q_DesignerScene_zValueProperty";
+
 QRectF united(const QList<Control*>& controls)
 {
     QRectF rect = controls.first()->geometry();
@@ -151,9 +153,6 @@ void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
     itemMoving = false;
 
-    for (auto control : m_currentForm->childControls())
-        control->setDragging(false);
-
     update();
 }
 
@@ -194,8 +193,13 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 
     if (itemMoving) {
-        for (auto selectedControl : selectedControls)
+        m_draggedControls = selectedControls;
+        for (Control* selectedControl : selectedControls) {
+            selectedControl->setProperty(zValueProperty, selectedControl->zValue());
+            selectedControl->setZValue(std::numeric_limits<qreal>::max());
             selectedControl->setDragging(true);
+            qDebug() << selectedControl->zValue();
+        }
     }
 
     m_lastMousePos = event->scenePos();
@@ -216,8 +220,11 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     if (m_currentForm == nullptr)
         return;
 
-    for (auto control : m_currentForm->childControls())
-        control->setDragging(false);
+    for (Control* draggedControl : m_draggedControls) {
+        draggedControl->setZValue(draggedControl->property(zValueProperty).toReal());
+        draggedControl->setDragging(false);
+        qDebug() << draggedControl->zValue();
+    }
 
     update();
 }
