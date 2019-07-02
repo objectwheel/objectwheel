@@ -25,16 +25,9 @@ public:
     QString title() const override;
     bool containsWord(const QString& word) const override;
 
-
-    bool guidelinesVisible;
-    bool hoverOutlineVisible;
-    int backgroundColorMode;
-    int outlineMode;
-    qreal zoomLevel;
-
 private:
-    QGroupBox* m_formGroup;
-    QGridLayout* m_formLayout;
+    QGroupBox* m_designGroup;
+    QGridLayout* m_designLayout;
     QLabel* m_guidelinesLabel;
     QLabel* m_hoverOutlineLabel;
     QLabel* m_backgroundColorLabel;
@@ -51,7 +44,7 @@ private:
     QLabel* m_visibilityLabel;
     QLabel* m_snappingLabel;
     QLabel* m_sizeLabel;
-    QCheckBox* m_visibilityCheckBox;
+    QCheckBox* m_gridViewVisibleCheckBox;
     QCheckBox* m_snappingCheckBox;
     QSpinBox* m_sizeSpinBox;
 };

@@ -12,13 +12,10 @@
 #include <QMessageBox>
 #include <QAction>
 #include <QFontDatabase>
+#include <QSpinBox>
 
 namespace {
 
-bool g_themeMessageShowed = false;
-bool g_languageMessageShowed = false;
-bool g_hdpiMessageShowed = false;
-bool g_fontMessageShowed = false;
 const char* g_themes[] = {"Light"/*, "Dark"*/};
 const char* g_bottomPanes[] = {"None", "Console Pane", "Issues Pane"};
 const char* g_langIcons[] = {":/images/flags/en.png"};
@@ -44,230 +41,235 @@ void addLanguages(QComboBox* comboBox)
 }
 
 FormsSettingsWidget::FormsSettingsWidget(QWidget *parent) : SettingsWidget(parent)
-  , m_formsGroup(new QGroupBox(contentWidget()))
-  , m_formsLayout(new QGridLayout(m_formsGroup))
-  , m_themeLabel(new QLabel(m_formsGroup))
-  , m_languageLabel(new QLabel(m_formsGroup))
-  , m_hdpiLabel(new QLabel(m_formsGroup))
-  , m_themeBox(new QComboBox(m_formsGroup))
-  , m_languageBox(new QComboBox(m_formsGroup))
-  , m_hdpiCheckBox(new QCheckBox(m_formsGroup))
+  , m_designGroup(new QGroupBox(contentWidget()))
+  , m_designLayout(new QGridLayout(m_designGroup))
+  , m_guidelinesLabel(new QLabel(m_designGroup))
+  , m_hoverOutlineLabel(new QLabel(m_designGroup))
+  , m_backgroundColorLabel(new QLabel(m_designGroup))
+  , m_outlineLabel(new QLabel(m_designGroup))
+  , m_zoomLevelLabel(new QLabel(m_designGroup))
+  , m_guidelinesCheckBox(new QCheckBox(m_designGroup))
+  , m_hoverOutlineCheckBox(new QCheckBox(m_designGroup))
+  , m_backgroundColorBox(new QComboBox(m_designGroup))
+  , m_outlineBox(new QComboBox(m_designGroup))
+  , m_zoomLevelButton(new QComboBox(m_designGroup))
   /****/
-  , m_fontGroup(new QGroupBox(contentWidget()))
-  , m_fontLayout(new QVBoxLayout(m_fontGroup))
-  , m_fontFamilyLabel(new QLabel(m_fontGroup))
-  , m_fontSizeLabel(new QLabel(m_fontGroup))
-  , m_fontFamilyBox(new QComboBox(m_fontGroup))
-  , m_fontSizeBox(new QComboBox(m_fontGroup))
-  , m_fontAntialiasingBox(new QCheckBox(m_fontGroup))
-  , m_fontThickBox(new QCheckBox(m_fontGroup))
-  , m_fontResetButton(new QPushButton(m_fontGroup))
-  /****/
-  , m_behavioralGroup(new QGroupBox(contentWidget()))
-  , m_behavioralLayout(new QGridLayout(m_behavioralGroup))
-  , m_visibleBottomPaneLabel(new QLabel(m_behavioralGroup))
-  , m_bottomPanesCheckBox(new QCheckBox(m_behavioralGroup))
-  , m_preserveDesignerStateCheckBox(new QCheckBox(m_behavioralGroup))
-  , m_visibleBottomPaneBox(new QComboBox(m_behavioralGroup))
-  , m_designerStateResetButton(new QPushButton(m_behavioralGroup))
+  , m_gridViewGroup(new QGroupBox(contentWidget()))
+  , m_gridViewLayout(new QGridLayout(m_gridViewGroup))
+  , m_visibilityLabel(new QLabel(m_gridViewGroup))
+  , m_snappingLabel(new QLabel(m_gridViewGroup))
+  , m_sizeLabel(new QLabel(m_gridViewGroup))
+  , m_gridViewVisibleCheckBox(new QCheckBox(m_gridViewGroup))
+  , m_snappingCheckBox(new QCheckBox(m_gridViewGroup))
+  , m_sizeSpinBox(new QSpinBox(m_gridViewGroup))
 {
-    contentLayout()->addWidget(m_formsGroup);
-    contentLayout()->addWidget(m_fontGroup);
-    contentLayout()->addWidget(m_behavioralGroup);
+    contentLayout()->addWidget(m_designGroup);
+    contentLayout()->addWidget(m_gridViewGroup);
     contentLayout()->addStretch();
 
     /****/
 
-    m_formsLayout->setSpacing(8);
-    m_formsLayout->setContentsMargins(6, 6, 6, 6);
-    m_formsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_formsLayout->addWidget(m_themeLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_formsLayout->addWidget(m_languageLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_formsLayout->addWidget(m_hdpiLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_formsLayout->addWidget(m_themeBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_formsLayout->addWidget(m_languageBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_formsLayout->addWidget(m_hdpiCheckBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_formsLayout->setColumnStretch(3, 1);
-    m_formsLayout->setColumnMinimumWidth(1, 20);
+    m_designLayout->setSpacing(8);
+    m_designLayout->setContentsMargins(6, 6, 6, 6);
+    m_designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    m_designLayout->addWidget(m_guidelinesLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_hoverOutlineLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_backgroundColorLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_outlineLabel, 5, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_zoomLevelLabel, 6, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_guidelinesCheckBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_hoverOutlineCheckBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_backgroundColorBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_outlineBox, 5, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->addWidget(m_zoomLevelButton, 6, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_designLayout->setColumnStretch(3, 1);
+    m_designLayout->setColumnMinimumWidth(1, 20);
 
-    m_formsGroup->setTitle(tr("User Interface"));
-    m_hdpiCheckBox->setText(tr("Enable high DPI scaling"));
-    m_themeLabel->setText(tr("Theme") + ":");
-    m_languageLabel->setText(tr("Language") + ":");
-    m_hdpiLabel->setText(tr("High DPI scaling") + ":");
+    m_designGroup->setTitle(tr("Design"));
+    m_guidelinesCheckBox->setText(tr("Visible"));
+    m_hoverOutlineCheckBox->setText(tr("Visible"));
+    m_guidelinesLabel->setText(tr("Guidelines") + ":");
+    m_hoverOutlineLabel->setText(tr("Hover outline") + ":");
+    m_backgroundColorLabel->setText(tr("Background color") + ":");
+    m_outlineLabel->setText(tr("Outline") + ":");
+    m_zoomLevelLabel->setText(tr("Zoom level") + ":");
 
-    m_themeBox->setToolTip(tr("Change gui theme"));
-    m_languageBox->setToolTip(tr("Change language"));
-    m_hdpiCheckBox->setToolTip(tr("Enable high DPI scaling"));
+    m_guidelinesCheckBox->setToolTip(tr("Show guidelines"));
+    m_hoverOutlineCheckBox->setToolTip(tr("Show outline for mouse hover on controls"));
+    m_backgroundColorBox->setToolTip(tr("Change default background color of forms"));
+    m_outlineBox->setToolTip(tr("Change outline mode for controls"));
+    m_zoomLevelButton->setToolTip(tr("Change zoom level of designer"));
 
-    m_themeBox->setCursor(Qt::PointingHandCursor);
-    m_languageBox->setCursor(Qt::PointingHandCursor);
-    m_hdpiCheckBox->setCursor(Qt::PointingHandCursor);
+    m_guidelinesCheckBox->setCursor(Qt::PointingHandCursor);
+    m_hoverOutlineCheckBox->setCursor(Qt::PointingHandCursor);
+    m_backgroundColorBox->setCursor(Qt::PointingHandCursor);
+    m_outlineBox->setCursor(Qt::PointingHandCursor);
+    m_zoomLevelButton->setCursor(Qt::PointingHandCursor);
 
-    /****/
+//    /****/
 
-    auto hb3 = new QHBoxLayout;
-    hb3->setSpacing(8);
-    hb3->setContentsMargins(0, 0, 0, 0);
-    hb3->addWidget(m_fontFamilyLabel);
-    hb3->addWidget(m_fontFamilyBox);
-    hb3->addSpacing(20);
-    hb3->addWidget(m_fontSizeLabel);
-    hb3->addWidget(m_fontSizeBox);
-    hb3->addSpacing(30);
-    hb3->addWidget(m_fontResetButton);
-    hb3->addStretch();
-    auto hb4 = new QHBoxLayout;
-    hb4->setSpacing(8);
-    hb4->setContentsMargins(0, 0, 0, 0);
-    hb4->addWidget(m_fontAntialiasingBox);
-    hb4->addWidget(m_fontThickBox);
-    hb4->addStretch();
+//    auto hb3 = new QHBoxLayout;
+//    hb3->setSpacing(8);
+//    hb3->setContentsMargins(0, 0, 0, 0);
+//    hb3->addWidget(m_fontFamilyLabel);
+//    hb3->addWidget(m_fontFamilyBox);
+//    hb3->addSpacing(20);
+//    hb3->addWidget(m_fontSizeLabel);
+//    hb3->addWidget(m_fontSizeBox);
+//    hb3->addSpacing(30);
+//    hb3->addWidget(m_fontResetButton);
+//    hb3->addStretch();
+//    auto hb4 = new QHBoxLayout;
+//    hb4->setSpacing(8);
+//    hb4->setContentsMargins(0, 0, 0, 0);
+//    hb4->addWidget(m_fontAntialiasingBox);
+//    hb4->addWidget(m_fontThickBox);
+//    hb4->addStretch();
 
-    m_fontLayout->setSpacing(8);
-    m_fontLayout->setContentsMargins(6, 6, 6, 6);
-    m_fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_fontLayout->addLayout(hb3);
-    m_fontLayout->addLayout(hb4);
+//    m_fontLayout->setSpacing(8);
+//    m_fontLayout->setContentsMargins(6, 6, 6, 6);
+//    m_fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+//    m_fontLayout->addLayout(hb3);
+//    m_fontLayout->addLayout(hb4);
 
-    m_fontGroup->setTitle(tr("Font"));
-    m_fontFamilyLabel->setText(tr("Family") + ":");
-    m_fontFamilyBox->addItems(QFontDatabase().families());
-    m_fontSizeLabel->setText(tr("Size") + ":");
-    m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
-                             "18", "24", "36", "48", "64", "72", "96", "144"});
-    m_fontAntialiasingBox->setText(tr("Prefer antialiasing"));
-    m_fontThickBox->setText(tr("Prefer thicker"));
-    m_fontResetButton->setText(tr("Reset"));
+//    m_fontGroup->setTitle(tr("Font"));
+//    m_fontFamilyLabel->setText(tr("Family") + ":");
+//    m_fontFamilyBox->addItems(QFontDatabase().families());
+//    m_fontSizeLabel->setText(tr("Size") + ":");
+//    m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
+//                             "18", "24", "36", "48", "64", "72", "96", "144"});
+//    m_fontAntialiasingBox->setText(tr("Prefer antialiasing"));
+//    m_fontThickBox->setText(tr("Prefer thicker"));
+//    m_fontResetButton->setText(tr("Reset"));
 
-    m_fontFamilyBox->setToolTip(tr("Chage font family"));
-    m_fontSizeBox->setToolTip(tr("Chage font pixel size"));
-    m_fontAntialiasingBox->setToolTip(tr("Enable font antialiasing"));
-    m_fontThickBox->setToolTip(tr("Enable text thickness increasing"));
-    m_fontResetButton->setToolTip(tr("Reset font settings to default"));
+//    m_fontFamilyBox->setToolTip(tr("Chage font family"));
+//    m_fontSizeBox->setToolTip(tr("Chage font pixel size"));
+//    m_fontAntialiasingBox->setToolTip(tr("Enable font antialiasing"));
+//    m_fontThickBox->setToolTip(tr("Enable text thickness increasing"));
+//    m_fontResetButton->setToolTip(tr("Reset font settings to default"));
 
-    m_fontFamilyBox->setCursor(Qt::PointingHandCursor);
-    m_fontSizeBox->setCursor(Qt::PointingHandCursor);
-    m_fontAntialiasingBox->setCursor(Qt::PointingHandCursor);
-    m_fontThickBox->setCursor(Qt::PointingHandCursor);
-    m_fontResetButton->setCursor(Qt::PointingHandCursor);
+//    m_fontFamilyBox->setCursor(Qt::PointingHandCursor);
+//    m_fontSizeBox->setCursor(Qt::PointingHandCursor);
+//    m_fontAntialiasingBox->setCursor(Qt::PointingHandCursor);
+//    m_fontThickBox->setCursor(Qt::PointingHandCursor);
+//    m_fontResetButton->setCursor(Qt::PointingHandCursor);
 
-    /****/
+//    /****/
 
-    m_behavioralLayout->setSpacing(8);
-    m_behavioralLayout->setContentsMargins(6, 6, 6, 6);
-    m_behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_behavioralLayout->addWidget(m_bottomPanesCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_behavioralLayout->addWidget(m_preserveDesignerStateCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_behavioralLayout->addWidget(m_visibleBottomPaneLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_behavioralLayout->addWidget(m_visibleBottomPaneBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
-    m_behavioralLayout->addWidget(m_designerStateResetButton, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_behavioralLayout->setColumnStretch(4, 1);
-    m_behavioralLayout->setColumnMinimumWidth(1, 20);
+//    m_behavioralLayout->setSpacing(8);
+//    m_behavioralLayout->setContentsMargins(6, 6, 6, 6);
+//    m_behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+//    m_behavioralLayout->addWidget(m_bottomPanesCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+//    m_behavioralLayout->addWidget(m_preserveDesignerStateCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+//    m_behavioralLayout->addWidget(m_visibleBottomPaneLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
+//    m_behavioralLayout->addWidget(m_visibleBottomPaneBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
+//    m_behavioralLayout->addWidget(m_designerStateResetButton, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+//    m_behavioralLayout->setColumnStretch(4, 1);
+//    m_behavioralLayout->setColumnMinimumWidth(1, 20);
 
-    m_behavioralGroup->setTitle(tr("Behavioral"));
-    m_bottomPanesCheckBox->setText(tr("Pop up bottom pane when it flashes"));
-    m_preserveDesignerStateCheckBox->setText(tr("Enable designer state saving"));
-    m_designerStateResetButton->setText(tr("Reset designer states to default"));
-    m_visibleBottomPaneLabel->setText(tr("Show bottom pane at startup") + ":");
+//    m_behavioralGroup->setTitle(tr("Behavioral"));
+//    m_bottomPanesCheckBox->setText(tr("Pop up bottom pane when it flashes"));
+//    m_preserveDesignerStateCheckBox->setText(tr("Enable designer state saving"));
+//    m_designerStateResetButton->setText(tr("Reset designer states to default"));
+//    m_visibleBottomPaneLabel->setText(tr("Show bottom pane at startup") + ":");
 
-    m_bottomPanesCheckBox->setToolTip(tr("Pop up bottom pane when it flashes"));
-    m_preserveDesignerStateCheckBox->setToolTip(tr("Enabling this option leads preserving tool bars, dock widgets, pane "
-                                                   "postions and other designer states between application starts"));
-    m_designerStateResetButton->setToolTip(tr("Resets tool bars, dock widgets, pane postions and other designer "
-                                             "states to default"));
-    m_visibleBottomPaneBox->setToolTip(tr("Bottom pane that will be open at startup by default"));
+//    m_bottomPanesCheckBox->setToolTip(tr("Pop up bottom pane when it flashes"));
+//    m_preserveDesignerStateCheckBox->setToolTip(tr("Enabling this option leads preserving tool bars, dock widgets, pane "
+//                                                   "postions and other designer states between application starts"));
+//    m_designerStateResetButton->setToolTip(tr("Resets tool bars, dock widgets, pane postions and other designer "
+//                                             "states to default"));
+//    m_visibleBottomPaneBox->setToolTip(tr("Bottom pane that will be open at startup by default"));
 
-    m_bottomPanesCheckBox->setCursor(Qt::PointingHandCursor);
-    m_designerStateResetButton->setCursor(Qt::PointingHandCursor);
-    m_preserveDesignerStateCheckBox->setCursor(Qt::PointingHandCursor);
-    m_visibleBottomPaneBox->setCursor(Qt::PointingHandCursor);
+//    m_bottomPanesCheckBox->setCursor(Qt::PointingHandCursor);
+//    m_designerStateResetButton->setCursor(Qt::PointingHandCursor);
+//    m_preserveDesignerStateCheckBox->setCursor(Qt::PointingHandCursor);
+//    m_visibleBottomPaneBox->setCursor(Qt::PointingHandCursor);
 
-    /****/
+//    /****/
 
-    addThemes(m_themeBox);
-    addLanguages(m_languageBox);
-    addBottomPanes(m_visibleBottomPaneBox);
+//    addThemes(m_themeBox);
+//    addLanguages(m_languageBox);
+//    addBottomPanes(m_visibleBottomPaneBox);
 
-    connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
-        const FormsSettings settings;
-        m_fontFamilyBox->setCurrentText(settings.fontFamily);
-        m_fontSizeBox->setCurrentText(QString::number(settings.fontPixelSize));
-        m_fontThickBox->setChecked(settings.fontPreferThick);
-        m_fontAntialiasingBox->setChecked(settings.fontPreferAntialiasing);
-    });
-    connect(m_fontAntialiasingBox, &QCheckBox::clicked, this, [=] {
-        if (g_fontMessageShowed)
-            return;
-        g_fontMessageShowed = true;
-        UtilityFunctions::showMessage(
-                    this, tr("Restart required"),
-                    tr("Be aware that the font settings will take effect after application restart."),
-                    QMessageBox::Information);
-    });
-    connect(m_fontThickBox, &QCheckBox::clicked, this, [=] {
-        if (g_fontMessageShowed)
-            return;
-        g_fontMessageShowed = true;
-        UtilityFunctions::showMessage(
-                    this, tr("Restart required"),
-                    tr("Be aware that the font settings will take effect after application restart."),
-                    QMessageBox::Information);
-    });
-    connect(m_fontSizeBox, qOverload<int>(&QComboBox::activated), this, [=] {
-        if (g_fontMessageShowed)
-            return;
-        g_fontMessageShowed = true;
-        UtilityFunctions::showMessage(
-                    this, tr("Restart required"),
-                    tr("Be aware that the font settings will take effect after application restart."),
-                    QMessageBox::Information);
-    });
-    connect(m_fontFamilyBox, qOverload<int>(&QComboBox::activated), this, [=] {
-        if (g_fontMessageShowed)
-            return;
-        g_fontMessageShowed = true;
-        UtilityFunctions::showMessage(
-                    this, tr("Restart required"),
-                    tr("Be aware that the font settings will take effect after application restart."),
-                    QMessageBox::Information);
-    });
-    connect(m_hdpiCheckBox, &QCheckBox::clicked, this, [=] {
-        if (g_hdpiMessageShowed)
-            return;
-        g_hdpiMessageShowed = true;
-        UtilityFunctions::showMessage(
-                    this, tr("Restart required"),
-                    tr("Be aware that the high DPI settings will take effect after application restart."),
-                    QMessageBox::Information);
-    });
-    connect(m_languageBox, qOverload<int>(&QComboBox::activated), this, [=] {
-        if (g_languageMessageShowed)
-            return;
-        g_languageMessageShowed = true;
-        UtilityFunctions::showMessage(
-                    this, tr("Restart required"),
-                    tr("Be aware that the language change will take effect after application restart."),
-                    QMessageBox::Information);
-    });
-    connect(m_themeBox, qOverload<int>(&QComboBox::activated), this, [=] {
-        if (g_themeMessageShowed)
-            return;
-        g_themeMessageShowed = true;
-        UtilityFunctions::showMessage(
-                    this, tr("Restart required"),
-                    tr("Be aware that the theme change will take effect after application restart."),
-                    QMessageBox::Information);
-    });
-    connect(m_designerStateResetButton, &QCheckBox::clicked, this, [=] {
-        int ret = UtilityFunctions::showMessage(
-                    this, tr("Are you sure?"),
-                    tr("This will reset tool bars, dock widgets, pane postions and other designer "
-                       "states to defaults. Are you sure to proceed?"),
-                    QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-//   FIXME     if (ret == QMessageBox::Yes)
-//            emit DesignerSettings::instance()->designerStateReset();
-    });
+//    connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
+//        const FormsSettings settings;
+//        m_fontFamilyBox->setCurrentText(settings.fontFamily);
+//        m_fontSizeBox->setCurrentText(QString::number(settings.fontPixelSize));
+//        m_fontThickBox->setChecked(settings.fontPreferThick);
+//        m_fontAntialiasingBox->setChecked(settings.fontPreferAntialiasing);
+//    });
+//    connect(m_fontAntialiasingBox, &QCheckBox::clicked, this, [=] {
+//        if (g_fontMessageShowed)
+//            return;
+//        g_fontMessageShowed = true;
+//        UtilityFunctions::showMessage(
+//                    this, tr("Restart required"),
+//                    tr("Be aware that the font settings will take effect after application restart."),
+//                    QMessageBox::Information);
+//    });
+//    connect(m_fontThickBox, &QCheckBox::clicked, this, [=] {
+//        if (g_fontMessageShowed)
+//            return;
+//        g_fontMessageShowed = true;
+//        UtilityFunctions::showMessage(
+//                    this, tr("Restart required"),
+//                    tr("Be aware that the font settings will take effect after application restart."),
+//                    QMessageBox::Information);
+//    });
+//    connect(m_fontSizeBox, qOverload<int>(&QComboBox::activated), this, [=] {
+//        if (g_fontMessageShowed)
+//            return;
+//        g_fontMessageShowed = true;
+//        UtilityFunctions::showMessage(
+//                    this, tr("Restart required"),
+//                    tr("Be aware that the font settings will take effect after application restart."),
+//                    QMessageBox::Information);
+//    });
+//    connect(m_fontFamilyBox, qOverload<int>(&QComboBox::activated), this, [=] {
+//        if (g_fontMessageShowed)
+//            return;
+//        g_fontMessageShowed = true;
+//        UtilityFunctions::showMessage(
+//                    this, tr("Restart required"),
+//                    tr("Be aware that the font settings will take effect after application restart."),
+//                    QMessageBox::Information);
+//    });
+//    connect(m_hdpiCheckBox, &QCheckBox::clicked, this, [=] {
+//        if (g_hdpiMessageShowed)
+//            return;
+//        g_hdpiMessageShowed = true;
+//        UtilityFunctions::showMessage(
+//                    this, tr("Restart required"),
+//                    tr("Be aware that the high DPI settings will take effect after application restart."),
+//                    QMessageBox::Information);
+//    });
+//    connect(m_languageBox, qOverload<int>(&QComboBox::activated), this, [=] {
+//        if (g_languageMessageShowed)
+//            return;
+//        g_languageMessageShowed = true;
+//        UtilityFunctions::showMessage(
+//                    this, tr("Restart required"),
+//                    tr("Be aware that the language change will take effect after application restart."),
+//                    QMessageBox::Information);
+//    });
+//    connect(m_themeBox, qOverload<int>(&QComboBox::activated), this, [=] {
+//        if (g_themeMessageShowed)
+//            return;
+//        g_themeMessageShowed = true;
+//        UtilityFunctions::showMessage(
+//                    this, tr("Restart required"),
+//                    tr("Be aware that the theme change will take effect after application restart."),
+//                    QMessageBox::Information);
+//    });
+//    connect(m_designerStateResetButton, &QCheckBox::clicked, this, [=] {
+//        int ret = UtilityFunctions::showMessage(
+//                    this, tr("Are you sure?"),
+//                    tr("This will reset tool bars, dock widgets, pane postions and other designer "
+//                       "states to defaults. Are you sure to proceed?"),
+//                    QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+////   FIXME     if (ret == QMessageBox::Yes)
+////            emit DesignerSettings::instance()->designerStateReset();
+//    });
 
     activate();
     reset();
@@ -280,25 +282,17 @@ void FormsSettingsWidget::apply()
 
     activate(false);
 
-    g_themeMessageShowed = false;
-    g_languageMessageShowed = false;
-    g_hdpiMessageShowed = false;
-    g_fontMessageShowed = false;
-
     FormsSettings* settings = DesignerSettings::formsSettings();
     /****/
-    settings->theme = m_themeBox->currentData().toString();
-    settings->language = m_languageBox->currentData().toString();
-    settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
+    settings->guidelinesVisible = m_guidelinesCheckBox->currentData().toString();
+    settings->hoverOutlineVisible = m_hoverOutlineCheckBox->currentData().toString();
+    settings->backgroundColorMode = m_backgroundColorBox->isChecked();
+    settings->outlineMode = m_outlineBox->isChecked();
+    settings->zoomLevel = m_zoomLevelButton->isChecked();
     /****/
-    settings->fontFamily = m_fontFamilyBox->currentText();
-    settings->fontPixelSize = m_fontSizeBox->currentText().toInt();
-    settings->fontPreferThick = m_fontThickBox->isChecked();
-    settings->fontPreferAntialiasing = m_fontAntialiasingBox->isChecked();
-    /****/
-    settings->visibleBottomPane = m_visibleBottomPaneBox->currentData().toString();
-    settings->bottomPanesPop = m_bottomPanesCheckBox->isChecked();
-    settings->preserveDesignerState = m_preserveDesignerStateCheckBox->isChecked();
+    settings->gridViewVisible = m_gridViewVisibleCheckBox->currentText().toInt();
+    settings->snappingEnabled = m_snappingCheckBox->isChecked();
+    settings->gridSize = m_sizeSpinBox->isChecked();
     /****/
     settings->write();
 }
@@ -310,25 +304,17 @@ void FormsSettingsWidget::reset()
 
     activate(false);
 
-    g_themeMessageShowed = false;
-    g_languageMessageShowed = false;
-    g_hdpiMessageShowed = false;
-    g_fontMessageShowed = false;
-
     const FormsSettings* settings = DesignerSettings::formsSettings();
     /****/
-    m_themeBox->setCurrentText(tr(settings->theme.toUtf8()));
-    m_languageBox->setCurrentText(tr(settings->language.toUtf8()));
-    m_hdpiCheckBox->setChecked(settings->hdpiEnabled);
+    m_guidelinesCheckBox->setChecked(settings->guidelinesVisible);
+    m_hoverOutlineCheckBox->setChecked(settings->hoverOutlineVisible);
+    m_backgroundColorBox->setCurrentText(tr(settings->backgroundColorMode.toUtf8()));
+    m_outlineBox->setCurrentText(tr(settings->outlineMode.toUtf8()));
+    m_zoomLevelButton->setCurrentText(tr(settings->zoomLevel.toUtf8()));
     /****/
-    m_fontFamilyBox->setCurrentText(settings->fontFamily);
-    m_fontSizeBox->setCurrentText(QString::number(settings->fontPixelSize));
-    m_fontThickBox->setChecked(settings->fontPreferThick);
-    m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
-    /****/
-    m_visibleBottomPaneBox->setCurrentText(tr(settings->visibleBottomPane.toUtf8()));
-    m_bottomPanesCheckBox->setChecked(settings->bottomPanesPop);
-    m_preserveDesignerStateCheckBox->setChecked(settings->preserveDesignerState);
+    m_gridViewVisibleCheckBox->setChecked(settings->gridViewVisible);
+    m_snappingCheckBox->setChecked(settings->snappingEnabled);
+    m_sizeSpinBox->setValue(settings->gridSize);
 }
 
 QIcon FormsSettingsWidget::icon() const
@@ -343,7 +329,7 @@ QString FormsSettingsWidget::title() const
 
 bool FormsSettingsWidget::containsWord(const QString& word) const
 {
-    return title().contains(word, Qt::CaseInsensitive)
+    return title().contains(word, Qt::CaseInsensitive)/*
             || m_fontGroup->title().contains(word, Qt::CaseInsensitive)
             || m_behavioralGroup->title().contains(word, Qt::CaseInsensitive)
             || m_themeLabel->text().contains(word, Qt::CaseInsensitive)
@@ -362,5 +348,5 @@ bool FormsSettingsWidget::containsWord(const QString& word) const
             || m_designerStateResetButton->toolTip().contains(word, Qt::CaseInsensitive)
             || UtilityFunctions::comboContainsWord(m_themeBox, word)
             || UtilityFunctions::comboContainsWord(m_languageBox, word)
-            || UtilityFunctions::comboContainsWord(m_visibleBottomPaneBox, word);
+            || UtilityFunctions::comboContainsWord(m_visibleBottomPaneBox, word)*/;
 }
