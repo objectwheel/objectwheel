@@ -1,25 +1,23 @@
-#include <interfacesettings.h>
-#include <generalsettings.h>
+#include <formssettings.h>
+#include <designersettings.h>
 
-namespace {
-const char* g_theme = "Theme";
-const char* g_fontFamily = "FontFamily";
-const char* g_fontPixelSize = "FontPixelSize";
-const char* g_fontPreferThick = "FontPreferThick";
-const char* g_fontPreferAntialiasing = "FontPreferAntialiasing";
-const char* g_language = "Language";
-const char* g_hdpiEnabled = "HdpiEnabled";
-const char* g_bottomPanesPop = "BottomPanesPop";
-const char* g_preserveDesignerState = "PreserveDesignerState";
-const char* g_visibleBottomPane = "VisibleBottomPane";
-}
+static const char g_theme[] = "Theme";
+static const char g_fontFamily[] = "FontFamily";
+static const char g_fontPixelSize[] = "FontPixelSize";
+static const char g_fontPreferThick[] = "FontPreferThick";
+static const char g_fontPreferAntialiasing[] = "FontPreferAntialiasing";
+static const char g_language[] = "Language";
+static const char g_hdpiEnabled[] = "HdpiEnabled";
+static const char g_bottomPanesPop[] = "BottomPanesPop";
+static const char g_preserveDesignerState[] = "PreserveDesignerState";
+static const char g_visibleBottomPane[] = "VisibleBottomPane";
 
-InterfaceSettings::InterfaceSettings(GeneralSettings* generalSettings) : Settings(generalSettings)
+FormsSettings::FormsSettings(DesignerSettings* designerSettings) : Settings(designerSettings)
 {
     reset();
 }
 
-void InterfaceSettings::read()
+void FormsSettings::read()
 {
     reset();
 
@@ -39,7 +37,7 @@ void InterfaceSettings::read()
     end();
 }
 
-void InterfaceSettings::write()
+void FormsSettings::write()
 {
     begin();
     setValue(g_hdpiEnabled, hdpiEnabled);
@@ -56,10 +54,10 @@ void InterfaceSettings::write()
     setValue(g_visibleBottomPane, visibleBottomPane);
     end();
 
-    emit static_cast<GeneralSettings*>(groupSettings())->interfaceSettingsChanged();
+    emit static_cast<DesignerSettings*>(groupSettings())->formsSettingsChanged();
 }
 
-void InterfaceSettings::reset()
+void FormsSettings::reset()
 {
     hdpiEnabled = true;
     theme = "Light";
@@ -81,12 +79,12 @@ void InterfaceSettings::reset()
     visibleBottomPane = "None";
 }
 
-const char* InterfaceSettings::category() const
+const char* FormsSettings::category() const
 {
-    return "Interface";
+    return "Forms";
 }
 
-QFont InterfaceSettings::toFont() const
+QFont FormsSettings::toFont() const
 {
     QFont font(fontFamily);
     font.setPixelSize(fontPixelSize);

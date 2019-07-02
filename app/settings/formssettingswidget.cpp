@@ -1,6 +1,6 @@
-#include <interfacesettingswidget.h>
-#include <interfacesettings.h>
-#include <generalsettings.h>
+#include <formssettingswidget.h>
+#include <formssettings.h>
+#include <designersettings.h>
 #include <utilityfunctions.h>
 
 #include <QLabel>
@@ -43,15 +43,15 @@ void addLanguages(QComboBox* comboBox)
 }
 }
 
-InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidget(parent)
-  , m_interfaceGroup(new QGroupBox(contentWidget()))
-  , m_interfaceLayout(new QGridLayout(m_interfaceGroup))
-  , m_themeLabel(new QLabel(m_interfaceGroup))
-  , m_languageLabel(new QLabel(m_interfaceGroup))
-  , m_hdpiLabel(new QLabel(m_interfaceGroup))
-  , m_themeBox(new QComboBox(m_interfaceGroup))
-  , m_languageBox(new QComboBox(m_interfaceGroup))
-  , m_hdpiCheckBox(new QCheckBox(m_interfaceGroup))
+FormsSettingsWidget::FormsSettingsWidget(QWidget *parent) : SettingsWidget(parent)
+  , m_formsGroup(new QGroupBox(contentWidget()))
+  , m_formsLayout(new QGridLayout(m_formsGroup))
+  , m_themeLabel(new QLabel(m_formsGroup))
+  , m_languageLabel(new QLabel(m_formsGroup))
+  , m_hdpiLabel(new QLabel(m_formsGroup))
+  , m_themeBox(new QComboBox(m_formsGroup))
+  , m_languageBox(new QComboBox(m_formsGroup))
+  , m_hdpiCheckBox(new QCheckBox(m_formsGroup))
   /****/
   , m_fontGroup(new QGroupBox(contentWidget()))
   , m_fontLayout(new QVBoxLayout(m_fontGroup))
@@ -71,26 +71,26 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
   , m_visibleBottomPaneBox(new QComboBox(m_behavioralGroup))
   , m_designerStateResetButton(new QPushButton(m_behavioralGroup))
 {
-    contentLayout()->addWidget(m_interfaceGroup);
+    contentLayout()->addWidget(m_formsGroup);
     contentLayout()->addWidget(m_fontGroup);
     contentLayout()->addWidget(m_behavioralGroup);
     contentLayout()->addStretch();
 
     /****/
 
-    m_interfaceLayout->setSpacing(8);
-    m_interfaceLayout->setContentsMargins(6, 6, 6, 6);
-    m_interfaceLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_interfaceLayout->addWidget(m_themeLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_languageLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_hdpiLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_themeBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_languageBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->addWidget(m_hdpiCheckBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_interfaceLayout->setColumnStretch(3, 1);
-    m_interfaceLayout->setColumnMinimumWidth(1, 20);
+    m_formsLayout->setSpacing(8);
+    m_formsLayout->setContentsMargins(6, 6, 6, 6);
+    m_formsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    m_formsLayout->addWidget(m_themeLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_formsLayout->addWidget(m_languageLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_formsLayout->addWidget(m_hdpiLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    m_formsLayout->addWidget(m_themeBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_formsLayout->addWidget(m_languageBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_formsLayout->addWidget(m_hdpiCheckBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    m_formsLayout->setColumnStretch(3, 1);
+    m_formsLayout->setColumnMinimumWidth(1, 20);
 
-    m_interfaceGroup->setTitle(tr("User Interface"));
+    m_formsGroup->setTitle(tr("User Interface"));
     m_hdpiCheckBox->setText(tr("Enable high DPI scaling"));
     m_themeLabel->setText(tr("Theme") + ":");
     m_languageLabel->setText(tr("Language") + ":");
@@ -190,7 +190,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
     addBottomPanes(m_visibleBottomPaneBox);
 
     connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
-        const InterfaceSettings settings;
+        const FormsSettings settings;
         m_fontFamilyBox->setCurrentText(settings.fontFamily);
         m_fontSizeBox->setCurrentText(QString::number(settings.fontPixelSize));
         m_fontThickBox->setChecked(settings.fontPreferThick);
@@ -265,15 +265,15 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget *parent) : SettingsWidg
                     tr("This will reset tool bars, dock widgets, pane postions and other designer "
                        "states to defaults. Are you sure to proceed?"),
                     QMessageBox::Question, QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
-        if (ret == QMessageBox::Yes)
-            emit GeneralSettings::instance()->designerStateReset();
+//   FIXME     if (ret == QMessageBox::Yes)
+//            emit DesignerSettings::instance()->designerStateReset();
     });
 
     activate();
     reset();
 }
 
-void InterfaceSettingsWidget::apply()
+void FormsSettingsWidget::apply()
 {
     if (!isActivated())
         return;
@@ -285,7 +285,7 @@ void InterfaceSettingsWidget::apply()
     g_hdpiMessageShowed = false;
     g_fontMessageShowed = false;
 
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    FormsSettings* settings = DesignerSettings::formsSettings();
     /****/
     settings->theme = m_themeBox->currentData().toString();
     settings->language = m_languageBox->currentData().toString();
@@ -303,7 +303,7 @@ void InterfaceSettingsWidget::apply()
     settings->write();
 }
 
-void InterfaceSettingsWidget::reset()
+void FormsSettingsWidget::reset()
 {
     if (!isActivated())
         return;
@@ -315,7 +315,7 @@ void InterfaceSettingsWidget::reset()
     g_hdpiMessageShowed = false;
     g_fontMessageShowed = false;
 
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    const FormsSettings* settings = DesignerSettings::formsSettings();
     /****/
     m_themeBox->setCurrentText(tr(settings->theme.toUtf8()));
     m_languageBox->setCurrentText(tr(settings->language.toUtf8()));
@@ -331,17 +331,17 @@ void InterfaceSettingsWidget::reset()
     m_preserveDesignerStateCheckBox->setChecked(settings->preserveDesignerState);
 }
 
-QIcon InterfaceSettingsWidget::icon() const
+QIcon FormsSettingsWidget::icon() const
 {
-    return QIcon(":/images/settings/interface.png");
+    return QIcon(":/images/settings/forms.png");
 }
 
-QString InterfaceSettingsWidget::title() const
+QString FormsSettingsWidget::title() const
 {
-    return tr("Interface");
+    return tr("Forms");
 }
 
-bool InterfaceSettingsWidget::containsWord(const QString& word) const
+bool FormsSettingsWidget::containsWord(const QString& word) const
 {
     return title().contains(word, Qt::CaseInsensitive)
             || m_fontGroup->title().contains(word, Qt::CaseInsensitive)

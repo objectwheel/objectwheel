@@ -1,19 +1,19 @@
-#ifndef INTERFACESETTINGS_H
-#define INTERFACESETTINGS_H
+#ifndef FORMSSETTINGS_H
+#define FORMSSETTINGS_H
 
 #include <settings.h>
 #include <QColor>
 #include <QFont>
 
-class GeneralSettings;
+class DesignerSettings;
 
-struct InterfaceSettings : public Settings
+struct FormsSettings : public Settings
 {
     friend class MainWindow;
     friend class WelcomeWindow;
     friend class PreferencesWindow;
 
-    InterfaceSettings(GeneralSettings* generalSettings = nullptr);
+    FormsSettings(DesignerSettings* designerSettings = nullptr);
 
     void read() override;
     void write() override;
@@ -36,4 +36,4 @@ struct InterfaceSettings : public Settings
     QString visibleBottomPane;
 };
 
-#endif // INTERFACESETTINGS_H
+#endif // FORMSSETTINGS_H

@@ -2,6 +2,7 @@
 #include <lineedit.h>
 #include <generalsettingspage.h>
 #include <codeeditorsettingspage.h>
+#include <designersettingspage.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
 #include <utilityfunctions.h>
@@ -41,6 +42,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     setAttribute(Qt::WA_QuitOnClose, false);
 
     addPage(new GeneralSettingsPage(this));
+    addPage(new DesignerSettingsPage(this));
     addPage(new CodeEditorSettingsPage(this));
 
     m_layout->setSpacing(6);

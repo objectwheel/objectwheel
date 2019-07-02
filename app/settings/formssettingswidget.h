@@ -1,5 +1,5 @@
-#ifndef INTERFACESETTINGSWIDGET_H
-#define INTERFACESETTINGSWIDGET_H
+#ifndef FORMSSETTINGSWIDGET_H
+#define FORMSSETTINGSWIDGET_H
 
 #include <settingswidget.h>
 
@@ -11,12 +11,12 @@ class QPushButton;
 class QGridLayout;
 class QVBoxLayout;
 
-struct InterfaceSettingsWidget : public SettingsWidget
+struct FormsSettingsWidget : public SettingsWidget
 {
     Q_OBJECT
 
 public:
-    explicit InterfaceSettingsWidget(QWidget* parent = nullptr);
+    explicit FormsSettingsWidget(QWidget* parent = nullptr);
 
     void apply() override;
     void reset() override;
@@ -25,8 +25,8 @@ public:
     bool containsWord(const QString &word) const override;
 
 private:
-    QGroupBox* m_interfaceGroup;
-    QGridLayout* m_interfaceLayout;
+    QGroupBox* m_formsGroup;
+    QGridLayout* m_formsLayout;
     QLabel* m_themeLabel;
     QLabel* m_languageLabel;
     QLabel* m_hdpiLabel;
@@ -53,4 +53,4 @@ private:
     QPushButton* m_designerStateResetButton;
 };
 
-#endif // INTERFACESETTINGSWIDGET_H
+#endif // FORMSSETTINGSWIDGET_H

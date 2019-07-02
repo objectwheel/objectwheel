@@ -18,6 +18,7 @@
 #include <controlpropertymanager.h>
 #include <welcomewindow.h>
 #include <generalsettings.h>
+#include <designersettings.h>
 #include <interfacesettings.h>
 #include <codeeditorsettings.h>
 #include <applicationstyle.h>
@@ -42,6 +43,7 @@
 
 QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
+DesignerSettings* ApplicationCore::s_designerSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 ModeManager* ApplicationCore::s_modeManager = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
@@ -81,10 +83,12 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /* Prepare setting instances */
     s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);
     s_generalSettings = new GeneralSettings(app);
+    s_designerSettings = new DesignerSettings(app);
     s_codeEditorSettings = new CodeEditorSettings(app);
 
     /* Read settings */
     GeneralSettings::read();
+    DesignerSettings::read();
     CodeEditorSettings::read();
 
     /* Set application ui settings */
