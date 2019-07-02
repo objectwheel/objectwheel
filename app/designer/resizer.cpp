@@ -1,6 +1,7 @@
 #include <resizer.h>
 #include <control.h>
 #include <controlpropertymanager.h>
+#include <designerscene.h>
 
 #include <QCursor>
 #include <QGraphicsSceneMouseEvent>
@@ -13,6 +14,11 @@ Resizer::Resizer(Placement placement, Control* parent) : QGraphicsRectItem(0, 0,
     setFlag(QGraphicsItem::ItemClipsToShape);
     setAcceptedMouseButtons(Qt::LeftButton);
     setZValue(std::numeric_limits<qreal>::max());
+}
+
+DesignerScene* Resizer::scene() const
+{
+    return static_cast<DesignerScene*>(QGraphicsRectItem::scene());
 }
 
 Control* Resizer::parentControl() const

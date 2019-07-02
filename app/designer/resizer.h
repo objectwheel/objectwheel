@@ -4,6 +4,8 @@
 #include <QGraphicsRectItem>
 
 class Control;
+class DesignerScene;
+
 class Resizer final : public QGraphicsRectItem
 {
     Q_DISABLE_COPY(Resizer)
@@ -22,6 +24,8 @@ public:
 
 public:
     explicit Resizer(Placement placement, Control* parent);
+
+    DesignerScene* scene() const;
 
     Control* parentControl() const;
 

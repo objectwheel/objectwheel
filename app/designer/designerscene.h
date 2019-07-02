@@ -26,8 +26,10 @@ public:
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QPointF lastMousePos() const;
-    bool stick() const;
+    void stick() const;
     QVector<QLineF> guideLines() const;
+
+    int gridSize() const;
 
 public slots:
     void discharge();
@@ -49,6 +51,7 @@ signals:
     void currentFormChanged(Form* currentForm);
 
 private:
+    int m_gridSize;
     bool m_snapping;
     bool m_showOutlines;
     QPointF m_lastMousePos;

@@ -4,24 +4,16 @@
 #include <suppressor.h>
 #include <designerscene.h>
 #include <controlrenderingmanager.h>
-#include <windowmanager.h>
-#include <mainwindow.h>
-#include <centralwidget.h>
-#include <designerview.h>
 #include <controlpropertymanager.h>
 #include <paintutils.h>
 #include <parserutils.h>
 #include <utilityfunctions.h>
 #include <toolutils.h>
 
-#include <QtMath>
 #include <QCursor>
 #include <QPainter>
 #include <QMimeData>
-#include <QRegularExpression>
 #include <QGraphicsSceneDragDropEvent>
-#include <QApplication>
-#include <QDebug>
 
 QList<Control*> Control::m_controls;
 
@@ -336,8 +328,8 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         QString dir;
         UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
         Q_ASSERT(!dir.isEmpty());
-        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDrop(
-                    this, dir, event->pos() - QPointF(5, 5));
+        //        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDrop(
+        //                    this, dir, event->pos() - QPointF(5, 5));
         update();
     }
 }
@@ -437,10 +429,13 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
     event->accept();
 }
-
+#include <windowmanager.h>
+#include <centralwidget.h>
+#include <designerview.h>
+#include <mainwindow.h>
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
-    WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
+   //FIXME     WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
 }
 
 void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
@@ -458,7 +453,7 @@ void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
-{
+{    
     switch (change) {
     case ItemSelectedHasChanged:
         if (value.toBool())
@@ -510,7 +505,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
     }
 
-    if (!form() && (isSelected() || scene()->showOutlines())) {
+    if (!form() && (isSelected() || scene()->showOutlines() || m_hoverOn)) {
         QPen pen;
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);
@@ -518,13 +513,11 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 
         if (isSelected()) {
             pen.setColor(Qt::black);
+        } else if (m_hoverOn) {
+            pen.setStyle(Qt::SolidLine);
+            pen.setColor("#4BA2FF");
         } else if (scene()->showOutlines()) {
-            if (m_hoverOn) {
-                pen.setStyle(Qt::SolidLine);
-                pen.setColor("#4BA2FF");
-            } else {
-                pen.setColor("#777777");
-            }
+            pen.setColor("#777777");
         }
 
         painter->setPen(pen);

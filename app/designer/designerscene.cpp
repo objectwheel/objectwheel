@@ -29,6 +29,7 @@ bool itemMoving = false;
 }
 
 DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
+  , m_gridSize(8)
   , m_snapping(true)
   , m_showOutlines(false)
   , m_currentForm(nullptr)
@@ -66,8 +67,8 @@ void DesignerScene::removeForm(Form* form)
 {
     Form* currentForm = m_currentForm.data();
     removeControl(form); // 1. If the given form address is the current form, then if this line runs,
-                         // QPointer clears the address within m_currentForm, because its object is "delete"d
-                         // 2. Thus we copy it.
+    // QPointer clears the address within m_currentForm, because its object is "delete"d
+    // 2. Thus we copy it.
 
     m_forms.removeAll(form);
 
@@ -277,15 +278,19 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
     }
 }
 
+int DesignerScene::gridSize() const
+{
+    return m_gridSize;
+}
+
 QPointF DesignerScene::lastMousePos() const
 {
     return m_lastMousePos;
 }
 
 // FIXME: This function has severe performance issues.
-bool DesignerScene::stick() const
+void DesignerScene::stick() const
 {
-    bool ret = false;
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(m_currentForm);
 
@@ -296,387 +301,18 @@ bool DesignerScene::stick() const
     }
 
     if (selectedControls.isEmpty())
-        return ret;
+        return;
 
-    const auto& parent = selectedControls.first()->parentControl();
-    auto geometry = united(selectedControls);
-    auto center = geometry.center();
-
-    const ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+    static const ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::UpdateRenderer
             | ControlPropertyManager::CompressedCall;
 
-    /* Child center <-> Parent center */
-    if (center.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
-            center.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveCenter({center.x(), parent->size().height() / 2.0});
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
+    const QRectF& frame = united(selectedControls);
+    const qreal dx = int(frame.x() / m_gridSize) * m_gridSize - frame.x();
+    const qreal dy = int(frame.y() / m_gridSize) * m_gridSize - frame.y();
 
-    if (center.x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
-            center.x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveCenter({parent->size().width() / 2.0, center.y()});
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child left <-> Parent center */
-    if (geometry.topLeft().x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
-            geometry.topLeft().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveLeft(parent->size().width() / 2.0);
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child left <-> Parent left */
-    if (geometry.topLeft().x() <= MAGNETIC_FIELD &&
-            geometry.topLeft().x() >= - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveLeft(0);
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child right <-> Parent center */
-    if (geometry.topRight().x() <= parent->size().width() / 2.0 + MAGNETIC_FIELD &&
-            geometry.topRight().x() >= parent->size().width() / 2.0 - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveRight(parent->size().width() / 2.0);
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child right <-> Parent right */
-    if (geometry.topRight().x() <= parent->size().width() + MAGNETIC_FIELD &&
-            geometry.topRight().x() >= parent->size().width() - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveRight(parent->size().width());
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child top <-> Parent center */
-    if (geometry.y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
-            geometry.y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveTop(parent->size().height() / 2.0);
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child top <-> Parent top */
-    if (geometry.y() <= MAGNETIC_FIELD &&
-            geometry.y() >= - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveTop(0);
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child bottom <-> Parent center */
-    if (geometry.bottomLeft().y() <= parent->size().height() / 2.0 + MAGNETIC_FIELD &&
-            geometry.bottomLeft().y() >= parent->size().height() / 2.0 - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveBottom(parent->size().height() / 2.0);
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    /* Child bottom <-> Parent bottom */
-    if (geometry.bottomLeft().y() <= parent->size().height() + MAGNETIC_FIELD &&
-            geometry.bottomLeft().y() >= parent->size().height() - MAGNETIC_FIELD) {
-        auto g = geometry;
-        geometry.moveBottom(parent->size().height());
-        center = geometry.center();
-        for (auto control : selectedControls) {
-            ControlPropertyManager::setPos(control,
-                                           control->pos() + geometry.topLeft() - g.topLeft(), options);
-        }
-        ret = true;
-    }
-
-    for (auto childControl : parent->childControls(false)) {
-        if (selectedControls.contains(childControl))
-            continue;
-
-        auto cgeometry = childControl->geometry();
-        auto ccenter = cgeometry.center();
-
-        /* Item1 center <-> Item2 center */
-        if (center.x() <= ccenter.x() + MAGNETIC_FIELD &&
-                center.x() >= ccenter.x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveCenter({ccenter.x(), center.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        if (center.y() <= ccenter.y() + MAGNETIC_FIELD &&
-                center.y() >= ccenter.y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveCenter({center.x(), ccenter.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 center <-> Item2 left */
-        if (center.x() <= cgeometry.topLeft().x() + MAGNETIC_FIELD &&
-                center.x() >= cgeometry.topLeft().x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveCenter({cgeometry.topLeft().x(), center.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 center <-> Item2 top */
-        if (center.y() <= cgeometry.topLeft().y() + MAGNETIC_FIELD &&
-                center.y() >= cgeometry.topLeft().y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveCenter({center.x(), cgeometry.topLeft().y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 center <-> Item2 right */
-        if (center.x() <= cgeometry.bottomRight().x() + MAGNETIC_FIELD &&
-                center.x() >= cgeometry.bottomRight().x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveCenter({cgeometry.bottomRight().x(), center.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 center <-> Item2 bottom */
-        if (center.y() <= cgeometry.bottomRight().y() + MAGNETIC_FIELD &&
-                center.y() >= cgeometry.bottomRight().y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveCenter({center.x(), cgeometry.bottomRight().y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 left <-> Item2 left */
-        if (geometry.x() <= cgeometry.x() + MAGNETIC_FIELD &&
-                geometry.x() >= cgeometry.x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopLeft({cgeometry.x(), geometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 left <-> Item2 center */
-        if (geometry.x() <= ccenter.x() + MAGNETIC_FIELD &&
-                geometry.x() >= ccenter.x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopLeft({ccenter.x(), geometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 left <-> Item2 right */
-        if (geometry.x() <= cgeometry.topRight().x() + MAGNETIC_FIELD &&
-                geometry.x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopLeft({cgeometry.topRight().x(), geometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 right <-> Item2 left */
-        if (geometry.topRight().x() <= cgeometry.x() + MAGNETIC_FIELD &&
-                geometry.topRight().x() >= cgeometry.x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopRight({cgeometry.x(), geometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 right <-> Item2 center */
-        if (geometry.topRight().x() <= ccenter.x() + MAGNETIC_FIELD &&
-                geometry.topRight().x() >= ccenter.x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopRight({ccenter.x(), geometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 right <-> Item2 right */
-        if (geometry.topRight().x() <= cgeometry.topRight().x() + MAGNETIC_FIELD &&
-                geometry.topRight().x() >= cgeometry.topRight().x() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopRight({cgeometry.topRight().x(), geometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 top <-> Item2 top */
-        if (geometry.y() <= cgeometry.y() + MAGNETIC_FIELD &&
-                geometry.y() >= cgeometry.y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopLeft({geometry.x(), cgeometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 top <-> Item2 center */
-        if (geometry.y() <= ccenter.y() + MAGNETIC_FIELD &&
-                geometry.y() >= ccenter.y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopLeft({geometry.x(), ccenter.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 top <-> Item2 bottom */
-        if (geometry.y() <= cgeometry.bottomLeft().y() + MAGNETIC_FIELD &&
-                geometry.y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveTopLeft({geometry.x(), cgeometry.bottomLeft().y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 bottom <-> Item2 top */
-        if (geometry.bottomLeft().y() <= cgeometry.y() + MAGNETIC_FIELD &&
-                geometry.bottomLeft().y() >= cgeometry.y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveBottomLeft({geometry.x(), cgeometry.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 bottom <-> Item2 center */
-        if (geometry.bottomLeft().y() <= ccenter.y() + MAGNETIC_FIELD &&
-                geometry.bottomLeft().y() >= ccenter.y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveBottomLeft({geometry.x(), ccenter.y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-
-        /* Item1 bottom <-> Item2 bottom */
-        if (geometry.bottomLeft().y() <= cgeometry.bottomLeft().y() + MAGNETIC_FIELD &&
-                geometry.bottomLeft().y() >= cgeometry.bottomLeft().y() - MAGNETIC_FIELD) {
-            auto g = geometry;
-            geometry.moveBottomLeft({geometry.x(), cgeometry.bottomLeft().y()});
-            center = geometry.center();
-            for (auto control : selectedControls) {
-                ControlPropertyManager::setPos(control,
-                                               control->pos() + geometry.topLeft() - g.topLeft(), options);
-            }
-            ret = true;
-        }
-    }
-
-    return ret;
+    for (Control* control : selectedControls)
+        ControlPropertyManager::setPos(control, {control->x() + dx, control->y() + dy}, options);
 }
 
 // FIXME: This function has severe performance issues.
