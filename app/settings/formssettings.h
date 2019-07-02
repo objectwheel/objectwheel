@@ -9,10 +9,6 @@ class DesignerSettings;
 
 struct FormsSettings : public Settings
 {
-    friend class MainWindow;
-    friend class WelcomeWindow;
-    friend class PreferencesWindow;
-
     FormsSettings(DesignerSettings* designerSettings = nullptr);
 
     void read() override;
@@ -20,20 +16,15 @@ struct FormsSettings : public Settings
     void reset() override;
     const char* category() const override;
 
-    QFont toFont() const;
-
-    bool hdpiEnabled;
-    QString theme;
-    QString language;
+    bool guidelinesVisible;
+    bool hoverOutlineVisible;
+    int backgroundColorMode;
+    int outlineMode;
+    qreal zoomLevel;
     /****/
-    bool fontPreferThick;
-    bool fontPreferAntialiasing;
-    int fontPixelSize;
-    QString fontFamily;
-    /****/
-    bool bottomPanesPop;
-    bool preserveDesignerState;
-    QString visibleBottomPane;
+    bool gridViewVisible;
+    bool snappingEnabled;
+    int gridSize;
 };
 
 #endif // FORMSSETTINGS_H

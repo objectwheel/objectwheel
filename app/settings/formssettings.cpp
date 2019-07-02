@@ -1,16 +1,14 @@
 #include <formssettings.h>
 #include <designersettings.h>
 
-static const char g_theme[] = "Theme";
-static const char g_fontFamily[] = "FontFamily";
-static const char g_fontPixelSize[] = "FontPixelSize";
-static const char g_fontPreferThick[] = "FontPreferThick";
-static const char g_fontPreferAntialiasing[] = "FontPreferAntialiasing";
-static const char g_language[] = "Language";
-static const char g_hdpiEnabled[] = "HdpiEnabled";
-static const char g_bottomPanesPop[] = "BottomPanesPop";
-static const char g_preserveDesignerState[] = "PreserveDesignerState";
-static const char g_visibleBottomPane[] = "VisibleBottomPane";
+static const char g_guidelinesVisible[] = "GuidelinesVisible";
+static const char g_hoverOutlineVisible[] = "HoverOutlineVisible";
+static const char g_backgroundColorMode[] = "BackgroundColorMode";
+static const char g_outlineMode[] = "OutlineMode";
+static const char g_zoomLevel[] = "ZoomLevel";
+static const char g_gridViewVisible[] = "GridViewVisible";
+static const char g_snappingEnabled[] = "SnappingEnabled";
+static const char g_gridSize[] = "GridSize";
 
 FormsSettings::FormsSettings(DesignerSettings* designerSettings) : Settings(designerSettings)
 {
@@ -22,36 +20,30 @@ void FormsSettings::read()
     reset();
 
     begin();
-    hdpiEnabled = value<bool>(g_hdpiEnabled, hdpiEnabled);
-    theme = value<QString>(g_theme, theme);
-    language = value<QString>(g_language, language);
+    guidelinesVisible = value<bool>(g_guidelinesVisible, guidelinesVisible);
+    hoverOutlineVisible = value<bool>(g_hoverOutlineVisible, hoverOutlineVisible);
+    backgroundColorMode = value<int>(g_backgroundColorMode, backgroundColorMode);
+    outlineMode = value<int>(g_outlineMode, outlineMode);
+    zoomLevel = value<qreal>(g_zoomLevel, zoomLevel);    
     /****/
-    fontPreferThick = value<bool>(g_fontPreferThick, fontPreferThick);
-    fontPreferAntialiasing = value<bool>(g_fontPreferAntialiasing, fontPreferAntialiasing);
-    fontPixelSize = value<int>(g_fontPixelSize, fontPixelSize);
-    fontFamily = value<QString>(g_fontFamily, fontFamily);
-    /****/
-    bottomPanesPop = value<bool>(g_bottomPanesPop, bottomPanesPop);
-    preserveDesignerState = value<bool>(g_preserveDesignerState, preserveDesignerState);
-    visibleBottomPane = value<QString>(g_visibleBottomPane, visibleBottomPane);
+    gridViewVisible = value<bool>(g_gridViewVisible, gridViewVisible);
+    snappingEnabled = value<bool>(g_snappingEnabled, snappingEnabled);
+    gridSize = value<int>(g_gridSize, gridSize);
     end();
 }
 
 void FormsSettings::write()
 {
     begin();
-    setValue(g_hdpiEnabled, hdpiEnabled);
-    setValue(g_theme, theme);
-    setValue(g_language, language);
+    setValue(g_guidelinesVisible, guidelinesVisible);
+    setValue(g_hoverOutlineVisible, hoverOutlineVisible);
+    setValue(g_backgroundColorMode, backgroundColorMode);
+    setValue(g_outlineMode, outlineMode);
+    setValue(g_zoomLevel, zoomLevel);
     /****/
-    setValue(g_fontPreferThick, fontPreferThick);
-    setValue(g_fontPreferAntialiasing, fontPreferAntialiasing);
-    setValue(g_fontPixelSize, fontPixelSize);
-    setValue(g_fontFamily, fontFamily);
-    /****/
-    setValue(g_bottomPanesPop, bottomPanesPop);
-    setValue(g_preserveDesignerState, preserveDesignerState);
-    setValue(g_visibleBottomPane, visibleBottomPane);
+    setValue(g_gridViewVisible, gridViewVisible);
+    setValue(g_snappingEnabled, snappingEnabled);
+    setValue(g_gridSize, gridSize);
     end();
 
     emit static_cast<DesignerSettings*>(groupSettings())->formsSettingsChanged();
@@ -59,24 +51,15 @@ void FormsSettings::write()
 
 void FormsSettings::reset()
 {
-    hdpiEnabled = true;
-    theme = "Light";
-    language = "English";
+    guidelinesVisible = true;
+    hoverOutlineVisible = true;
+    backgroundColorMode = 0;
+    outlineMode = 0;
+    zoomLevel = 1.0;
     /****/
-    fontPreferThick = false;
-    fontPreferAntialiasing = true;
-    fontPixelSize = 13;
-#if defined(Q_OS_MACOS)
-    fontFamily = ".SF NS Display";
-#elif defined(Q_OS_WIN)
-    fontFamily = "Segoe UI";
-#else
-    fontFamily = "Roboto";
-#endif
-    /****/
-    bottomPanesPop = false;
-    preserveDesignerState = true;
-    visibleBottomPane = "None";
+    gridViewVisible = true;
+    snappingEnabled = true;
+    gridSize = 8;
 }
 
 const char* FormsSettings::category() const
@@ -84,11 +67,3 @@ const char* FormsSettings::category() const
     return "Forms";
 }
 
-QFont FormsSettings::toFont() const
-{
-    QFont font(fontFamily);
-    font.setPixelSize(fontPixelSize);
-    font.setWeight(fontPreferThick ? QFont::Medium : QFont::Normal);
-    font.setStyleStrategy(fontPreferAntialiasing ? QFont::PreferAntialias : QFont::NoAntialias);
-    return font;
-}

@@ -194,11 +194,6 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
   , m_moveRightAct(new QAction(this))
   , m_moveLeftAct(new QAction(this))
 {
-//    m_layout->setSpacing(0);
-//    m_layout->setContentsMargins(0, 0, 0, 0);
-//    m_layout->addWidget(m_toolBar);
-//    m_layout->addWidget(m_designerView);
-
     setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
     setRubberBandSelectionMode(Qt::IntersectsItemShape);
     setDragMode(QGraphicsView::RubberBandDrag);
@@ -278,6 +273,8 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_hideDockWidgetTitleBarsButton->setFixedHeight(20);
     m_zoomlLevelCombobox->setFixedHeight(20);
 
+    m_toolBar->move(0, 0);
+    m_toolBar->resize(200, 24);
     m_toolBar->setFixedHeight(24);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_undoButton);

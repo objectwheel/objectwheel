@@ -36,17 +36,16 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 {
     Control::paint(painter, option, widget);
 
-
     QVector<QPointF> points;
     for (qreal x = 0; x < rect().right(); x += scene()->gridSize()) {
         for (qreal y = 0; y < rect().bottom(); y += scene()->gridSize())
             points.append(QPointF(x, y));
     }
     painter->setBrush(Qt::NoBrush);
-    painter->setPen("#222222");
+    painter->setPen("#808080");
     painter->drawPoints(points.data(), points.size());
 
-    painter->setPen(isSelected() ? "#4BA2FF" : "#A4A4A4");
+    painter->setPen(isSelected() ? "#4BA2FF" : "#b0b0b0");
     painter->drawRect(rect());
 
     QString text(QStringLiteral("%1 (%2×%3)").arg(id()).arg(size().width()).arg(size().width()));

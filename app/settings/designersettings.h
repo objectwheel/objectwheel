@@ -8,7 +8,6 @@ struct FormsSettings;
 class DesignerSettings final : public GroupSettings
 {
     Q_OBJECT
-    Q_DISABLE_COPY(DesignerSettings)
 
     friend class ApplicationCore; //  For constructor
 
@@ -26,7 +25,7 @@ signals:
 
 private:
     explicit DesignerSettings(QObject* parent = nullptr);
-    ~DesignerSettings() override;
+    ~DesignerSettings();
 
 private:
     static DesignerSettings* s_instance;

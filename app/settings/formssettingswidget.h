@@ -5,11 +5,12 @@
 
 class QLabel;
 class QGroupBox;
-class QComboBox;
+class QSpinBox;
 class QCheckBox;
 class QPushButton;
 class QGridLayout;
 class QVBoxLayout;
+class QComboBox;
 
 struct FormsSettingsWidget : public SettingsWidget
 {
@@ -22,35 +23,37 @@ public:
     void reset() override;
     QIcon icon() const override;
     QString title() const override;
-    bool containsWord(const QString &word) const override;
+    bool containsWord(const QString& word) const override;
+
+
+    bool guidelinesVisible;
+    bool hoverOutlineVisible;
+    int backgroundColorMode;
+    int outlineMode;
+    qreal zoomLevel;
 
 private:
-    QGroupBox* m_formsGroup;
-    QGridLayout* m_formsLayout;
-    QLabel* m_themeLabel;
-    QLabel* m_languageLabel;
-    QLabel* m_hdpiLabel;
-    QComboBox* m_themeBox;
-    QComboBox* m_languageBox;
-    QCheckBox* m_hdpiCheckBox;
+    QGroupBox* m_formGroup;
+    QGridLayout* m_formLayout;
+    QLabel* m_guidelinesLabel;
+    QLabel* m_hoverOutlineLabel;
+    QLabel* m_backgroundColorLabel;
+    QLabel* m_outlineLabel;
+    QLabel* m_zoomLevelLabel;
+    QCheckBox* m_guidelinesCheckBox;
+    QCheckBox* m_hoverOutlineCheckBox;
+    QComboBox* m_backgroundColorBox;
+    QComboBox* m_outlineBox;
+    QComboBox* m_zoomLevelButton;
     /****/
-    QGroupBox* m_fontGroup;
-    QVBoxLayout* m_fontLayout;
-    QLabel* m_fontFamilyLabel;
-    QLabel* m_fontSizeLabel;
-    QComboBox* m_fontFamilyBox;
-    QComboBox* m_fontSizeBox;
-    QCheckBox* m_fontAntialiasingBox;
-    QCheckBox* m_fontThickBox;
-    QPushButton* m_fontResetButton;
-    /****/
-    QGroupBox* m_behavioralGroup;
-    QGridLayout* m_behavioralLayout;
-    QLabel* m_visibleBottomPaneLabel;
-    QCheckBox* m_bottomPanesCheckBox;
-    QCheckBox* m_preserveDesignerStateCheckBox;
-    QComboBox* m_visibleBottomPaneBox;
-    QPushButton* m_designerStateResetButton;
+    QGroupBox* m_gridViewGroup;
+    QGridLayout* m_gridViewLayout;
+    QLabel* m_visibilityLabel;
+    QLabel* m_snappingLabel;
+    QLabel* m_sizeLabel;
+    QCheckBox* m_visibilityCheckBox;
+    QCheckBox* m_snappingCheckBox;
+    QSpinBox* m_sizeSpinBox;
 };
 
 #endif // FORMSSETTINGSWIDGET_H
