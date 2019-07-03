@@ -5,10 +5,10 @@ HEADERS += $$PWD/settingspage.h \
            $$PWD/generalsettingspage.h \
            $$PWD/designersettingspage.h \
            $$PWD/interfacesettingswidget.h \
-           $$PWD/formssettingswidget.h \
+           $$PWD/scenesettingswidget.h \
            $$PWD/settingswidget.h \
            $$PWD/interfacesettings.h \
-           $$PWD/formssettings.h \
+           $$PWD/scenesettings.h \
            $$PWD/settings.h \
            $$PWD/generalsettings.h \
            $$PWD/designersettings.h \
@@ -24,10 +24,10 @@ SOURCES += $$PWD/settingspage.cpp \
            $$PWD/generalsettingspage.cpp \
            $$PWD/designersettingspage.cpp \
            $$PWD/interfacesettingswidget.cpp \
-           $$PWD/formssettingswidget.cpp \
+           $$PWD/scenesettingswidget.cpp \
            $$PWD/settingswidget.cpp \
            $$PWD/interfacesettings.cpp \
-           $$PWD/formssettings.cpp \
+           $$PWD/scenesettings.cpp \
            $$PWD/settings.cpp \
            $$PWD/generalsettings.cpp \
            $$PWD/designersettings.cpp \

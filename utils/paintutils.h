@@ -31,6 +31,7 @@ QIcon renderButtonIcon(const QString& fileName, const QPalette& palette);
 QIcon renderModeButtonIcon(const QString& fileName);
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, qreal dpr);
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color);
+QPixmap renderPropertyColorPixmap(const QSize& size, const QString& fileName, const QPen& pen, qreal dpr);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, qreal dpr);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option);
 void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);

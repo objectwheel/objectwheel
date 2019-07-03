@@ -1,11 +1,11 @@
 #include <designersettingspage.h>
-#include <formssettingswidget.h>
+#include <scenesettingswidget.h>
 #include <QIcon>
 
 DesignerSettingsPage::DesignerSettingsPage(QWidget* parent) : SettingsPage(parent)
 {
     setTitle(tr("Designer"));
-    addWidget(new FormsSettingsWidget(this));
+    addWidget(new SceneSettingsWidget(this));
 }
 
 QIcon DesignerSettingsPage::icon() const

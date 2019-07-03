@@ -3,7 +3,7 @@
 
 #include <groupsettings.h>
 
-struct FormsSettings;
+struct SceneSettings;
 
 class DesignerSettings final : public GroupSettings
 {
@@ -16,12 +16,12 @@ public:
     static void read();
     static void write();
     static void reset();
-    static FormsSettings* formsSettings();
+    static SceneSettings* sceneSettings();
 
     const char* group() const override;
 
 signals:
-    void formsSettingsChanged();
+    void sceneSettingsChanged();
 
 private:
     explicit DesignerSettings(QObject* parent = nullptr);
@@ -29,7 +29,7 @@ private:
 
 private:
     static DesignerSettings* s_instance;
-    static FormsSettings* s_formsSettings;
+    static SceneSettings* s_sceneSettings;
 };
 
 #endif // DESIGNERSETTINGS_H

@@ -1,13 +1,13 @@
 #include <designersettings.h>
-#include <formssettings.h>
+#include <scenesettings.h>
 
 DesignerSettings* DesignerSettings::s_instance = nullptr;
-FormsSettings* DesignerSettings::s_formsSettings = nullptr;
+SceneSettings* DesignerSettings::s_sceneSettings = nullptr;
 
 DesignerSettings::DesignerSettings(QObject* parent) : GroupSettings(parent)
 {
     s_instance = this;
-    s_formsSettings = new FormsSettings(this);
+    s_sceneSettings = new SceneSettings(this);
 }
 
 DesignerSettings::~DesignerSettings()
@@ -20,9 +20,9 @@ DesignerSettings* DesignerSettings::instance()
     return s_instance;
 }
 
-FormsSettings* DesignerSettings::formsSettings()
+SceneSettings* DesignerSettings::sceneSettings()
 {
-    return s_formsSettings;
+    return s_sceneSettings;
 }
 
 const char* DesignerSettings::group() const
@@ -32,15 +32,15 @@ const char* DesignerSettings::group() const
 
 void DesignerSettings::read()
 {
-    s_formsSettings->read();
+    s_sceneSettings->read();
 }
 
 void DesignerSettings::write()
 {
-    s_formsSettings->write();
+    s_sceneSettings->write();
 }
 
 void DesignerSettings::reset()
 {
-    s_formsSettings->reset();
+    s_sceneSettings->reset();
 }
