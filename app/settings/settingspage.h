@@ -1,15 +1,15 @@
 #ifndef SETTINGSPAGE_H
 #define SETTINGSPAGE_H
 
-#include <QWidget>
+#include <settingswidget.h>
 
 class QLabel;
 class QTabWidget;
-class SettingsWidget;
 
 class SettingsPage : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SettingsPage)
 
 public:
     explicit SettingsPage(QWidget* parent = nullptr);
@@ -30,7 +30,5 @@ private:
     QTabWidget* m_tabWidget;
     QLabel* m_titleLabel;
 };
-
-Q_DECLARE_METATYPE(SettingsPage*)
 
 #endif // SETTINGSPAGE_H

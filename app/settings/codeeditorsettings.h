@@ -9,6 +9,8 @@ struct FontColorsSettings;
 class CodeEditorSettings final : public GroupSettings
 {
     Q_OBJECT
+    Q_DISABLE_COPY(CodeEditorSettings)
+
     friend class ApplicationCore; //  For constructor
 
 public:
@@ -28,7 +30,7 @@ signals:
 
 private:
     explicit CodeEditorSettings(QObject* parent = nullptr);
-    ~CodeEditorSettings();
+    ~CodeEditorSettings() override;
 
 private:
     static CodeEditorSettings* s_instance;

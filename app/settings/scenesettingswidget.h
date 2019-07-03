@@ -9,7 +9,6 @@ class QSpinBox;
 class QCheckBox;
 class QPushButton;
 class QGridLayout;
-class QVBoxLayout;
 class QComboBox;
 
 struct SceneSettingsWidget : public SettingsWidget

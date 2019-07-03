@@ -8,25 +8,25 @@
 
 BehaviorSettingsWidget::BehaviorSettingsWidget(QWidget* parent) : SettingsWidget(parent)
   , m_savingGroup(new QGroupBox(contentWidget()))
-  , m_savingLayout(new QVBoxLayout(m_savingGroup))
-  , m_autoSaveAfterRunningBox(new QCheckBox(m_savingGroup))
+  , m_autoSaveBeforeRunningBox(new QCheckBox(m_savingGroup))
 {
     contentLayout()->addWidget(m_savingGroup);
     contentLayout()->addStretch();
 
     /****/
 
-    m_savingLayout->setSpacing(8);
-    m_savingLayout->setContentsMargins(6, 6, 6, 6);
-    m_savingLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_savingLayout->addWidget(m_autoSaveAfterRunningBox);
+    auto savingLayout = new QVBoxLayout(m_savingGroup);
+    savingLayout->setSpacing(8);
+    savingLayout->setContentsMargins(6, 6, 6, 6);
+    savingLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    savingLayout->addWidget(m_autoSaveBeforeRunningBox);
 
     m_savingGroup->setTitle(tr("Saving"));
-    m_autoSaveAfterRunningBox->setText(tr("Auto save code changes before user runs a project"));
+    m_autoSaveBeforeRunningBox->setText(tr("Automatically save changes on the code before running any project."));
 
-    m_autoSaveAfterRunningBox->setToolTip(tr("Enable automatic code saving right before user runs a project"));
+    m_autoSaveBeforeRunningBox->setToolTip(tr("Enable automatic code saving before running a project"));
 
-    m_autoSaveAfterRunningBox->setCursor(Qt::PointingHandCursor);
+    m_autoSaveBeforeRunningBox->setCursor(Qt::PointingHandCursor);
 
     /****/
 
@@ -43,7 +43,7 @@ void BehaviorSettingsWidget::apply()
 
     BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
     /****/
-    settings->autoSaveBeforeRunning  = m_autoSaveAfterRunningBox->isChecked();
+    settings->autoSaveBeforeRunning  = m_autoSaveBeforeRunningBox->isChecked();
     /****/
     settings->write();
 }
@@ -57,7 +57,7 @@ void BehaviorSettingsWidget::reset()
 
     const BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
     /****/
-    m_autoSaveAfterRunningBox->setChecked(settings->autoSaveBeforeRunning);
+    m_autoSaveBeforeRunningBox->setChecked(settings->autoSaveBeforeRunning);
 }
 
 QIcon BehaviorSettingsWidget::icon() const
@@ -74,5 +74,5 @@ bool BehaviorSettingsWidget::containsWord(const QString& word) const
 {
     return title().contains(word, Qt::CaseInsensitive)
             || m_savingGroup->title().contains(word, Qt::CaseInsensitive)
-            || m_autoSaveAfterRunningBox->text().contains(word, Qt::CaseInsensitive);
+            || m_autoSaveBeforeRunningBox->text().contains(word, Qt::CaseInsensitive);
 }

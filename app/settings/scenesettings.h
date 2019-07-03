@@ -2,8 +2,6 @@
 #define SCENESETTINGS_H
 
 #include <settings.h>
-#include <QColor>
-#include <QFont>
 
 class DesignerSettings;
 

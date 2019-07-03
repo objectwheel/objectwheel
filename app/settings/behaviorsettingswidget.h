@@ -3,13 +3,13 @@
 
 #include <settingswidget.h>
 
-class QLabel;
 class QGroupBox;
 class QCheckBox;
 
-struct BehaviorSettingsWidget : public SettingsWidget
+class BehaviorSettingsWidget final : public SettingsWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(BehaviorSettingsWidget)
 
 public:
     explicit BehaviorSettingsWidget(QWidget* parent = nullptr);
@@ -22,8 +22,7 @@ public:
 
 private:
     QGroupBox* m_savingGroup;
-    QVBoxLayout* m_savingLayout;
-    QCheckBox* m_autoSaveAfterRunningBox;
+    QCheckBox* m_autoSaveBeforeRunningBox;
 };
 
 #endif // BEHAVIORSETTINGSWIDGET_H

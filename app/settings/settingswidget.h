@@ -3,11 +3,11 @@
 
 #include <QScrollArea>
 
-class QVBoxLayout;
-
+class QBoxLayout;
 class SettingsWidget : public QScrollArea
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SettingsWidget)
 
 public:
     explicit SettingsWidget(QWidget* parent = nullptr);
@@ -22,12 +22,10 @@ public:
     bool isActivated() const;
 
     QWidget* contentWidget() const;
-    QVBoxLayout* contentLayout() const;
+    QBoxLayout* contentLayout() const;
 
 private:
     bool m_activated;
-    QWidget* m_contentWidget;
-    QVBoxLayout* m_contentLayout;
 };
 
 #endif // SETTINGSWIDGET_H

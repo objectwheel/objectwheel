@@ -1,6 +1,5 @@
 #include <settingspage.h>
 #include <utilityfunctions.h>
-#include <settingswidget.h>
 
 #include <QLabel>
 #include <QTabWidget>
@@ -13,7 +12,7 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
   , m_titleLabel(new QLabel(this))
 {
     auto layout = new QVBoxLayout(this);
-    layout->setSpacing(6);
+    layout->setSpacing(10);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_titleLabel);
     layout->addWidget(m_tabWidget);
@@ -21,10 +20,9 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
     m_tabWidget->tabBar()->setCursor(Qt::PointingHandCursor);
 
     UtilityFunctions::adjustFontPixelSize(m_titleLabel, 1);
-    UtilityFunctions::adjustFontWeight(m_titleLabel, QFont::DemiBold);
+    UtilityFunctions::adjustFontWeight(m_titleLabel, QFont::Medium);
 
-    connect(m_tabWidget, &QTabWidget::currentChanged,
-            this, [=] (int index) {
+    connect(m_tabWidget, &QTabWidget::currentChanged, this, [=] (int index) {
         if (index < 0)
             return;
         if (!UtilityFunctions::window(this) || !UtilityFunctions::window(this)->isVisible())
@@ -39,6 +37,7 @@ void SettingsPage::reset()
     for (SettingsWidget* widget : widgets())
         widget->reset();
 }
+
 void SettingsPage::apply()
 {
     for (SettingsWidget* widget : widgets())

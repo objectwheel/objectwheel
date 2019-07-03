@@ -3,9 +3,10 @@
 
 #include <settingspage.h>
 
-class CodeEditorSettingsPage : public SettingsPage
+class CodeEditorSettingsPage final : public SettingsPage
 {
     Q_OBJECT
+    Q_DISABLE_COPY(CodeEditorSettingsPage)
 
 public:
     explicit CodeEditorSettingsPage(QWidget* parent = nullptr);

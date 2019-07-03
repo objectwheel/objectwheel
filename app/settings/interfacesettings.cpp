@@ -1,18 +1,16 @@
 #include <interfacesettings.h>
 #include <generalsettings.h>
 
-namespace {
-const char* g_theme = "Theme";
-const char* g_fontFamily = "FontFamily";
-const char* g_fontPixelSize = "FontPixelSize";
-const char* g_fontPreferThick = "FontPreferThick";
-const char* g_fontPreferAntialiasing = "FontPreferAntialiasing";
-const char* g_language = "Language";
-const char* g_hdpiEnabled = "HdpiEnabled";
-const char* g_bottomPanesPop = "BottomPanesPop";
-const char* g_preserveDesignerState = "PreserveDesignerState";
-const char* g_visibleBottomPane = "VisibleBottomPane";
-}
+static const char g_theme[] = "Theme";
+static const char g_fontFamily[] = "FontFamily";
+static const char g_fontPixelSize[] = "FontPixelSize";
+static const char g_fontPreferThick[] = "FontPreferThick";
+static const char g_fontPreferAntialiasing[] = "FontPreferAntialiasing";
+static const char g_language[] = "Language";
+static const char g_hdpiEnabled[] = "HdpiEnabled";
+static const char g_bottomPanesPop[] = "BottomPanesPop";
+static const char g_preserveDesignerState[] = "PreserveDesignerState";
+static const char g_visibleBottomPane[] = "VisibleBottomPane";
 
 InterfaceSettings::InterfaceSettings(GeneralSettings* generalSettings) : Settings(generalSettings)
 {
@@ -25,8 +23,8 @@ void InterfaceSettings::read()
 
     begin();
     hdpiEnabled = value<bool>(g_hdpiEnabled, hdpiEnabled);
-    theme = value<QString>(g_theme, theme);
-    language = value<QString>(g_language, language);
+    theme = value<int>(g_theme, theme);
+    language = value<int>(g_language, language);
     /****/
     fontPreferThick = value<bool>(g_fontPreferThick, fontPreferThick);
     fontPreferAntialiasing = value<bool>(g_fontPreferAntialiasing, fontPreferAntialiasing);
@@ -35,7 +33,7 @@ void InterfaceSettings::read()
     /****/
     bottomPanesPop = value<bool>(g_bottomPanesPop, bottomPanesPop);
     preserveDesignerState = value<bool>(g_preserveDesignerState, preserveDesignerState);
-    visibleBottomPane = value<QString>(g_visibleBottomPane, visibleBottomPane);
+    visibleBottomPane = value<int>(g_visibleBottomPane, visibleBottomPane);
     end();
 }
 
@@ -62,8 +60,8 @@ void InterfaceSettings::write()
 void InterfaceSettings::reset()
 {
     hdpiEnabled = true;
-    theme = "Light";
-    language = "English";
+    theme = 0;
+    language = 0;
     /****/
     fontPreferThick = false;
     fontPreferAntialiasing = true;
@@ -78,7 +76,7 @@ void InterfaceSettings::reset()
     /****/
     bottomPanesPop = false;
     preserveDesignerState = true;
-    visibleBottomPane = "None";
+    visibleBottomPane = 0;
 }
 
 const char* InterfaceSettings::category() const

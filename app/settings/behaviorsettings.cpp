@@ -1,9 +1,7 @@
 #include <behaviorsettings.h>
 #include <codeeditorsettings.h>
 
-namespace {
-const char* g_autoSaveBeforeRunning = "AutoSaveBeforeRunning";
-}
+static const char g_autoSaveBeforeRunning[] = "AutoSaveBeforeRunning";
 
 BehaviorSettings::BehaviorSettings(CodeEditorSettings* codeEditorSettings) : Settings(codeEditorSettings)
 {

@@ -4,11 +4,9 @@
 #include <settings.h>
 
 class CodeEditorSettings;
-
-struct BehaviorSettings : public Settings
+struct BehaviorSettings final : public Settings
 {
-    BehaviorSettings(CodeEditorSettings* codeEditorSettings = nullptr);
-
+    explicit BehaviorSettings(CodeEditorSettings* codeEditorSettings);
     void read() override;
     void write() override;
     void reset() override;

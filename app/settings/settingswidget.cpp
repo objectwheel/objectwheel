@@ -1,19 +1,18 @@
 #include <settingswidget.h>
-#include <QVBoxLayout>
+#include <QBoxLayout>
 
-SettingsWidget::SettingsWidget(QWidget *parent) : QScrollArea(parent)
+SettingsWidget::SettingsWidget(QWidget* parent) : QScrollArea(parent)
   , m_activated(false)
-  , m_contentWidget(new QWidget(this))
-  , m_contentLayout(new QVBoxLayout(m_contentWidget))
 {
-    m_contentLayout->setSpacing(10);
-    m_contentLayout->setContentsMargins(6, 6, 6, 6);
-
     setWidgetResizable(true);
-    setWidget(m_contentWidget);
+    setWidget(new QWidget(this));
     setFrameShape(QFrame::NoFrame);
     viewport()->setAutoFillBackground(false);
-    m_contentWidget->setAutoFillBackground(false);
+    widget()->setAutoFillBackground(false);
+
+    auto contentLayout = new QBoxLayout(QBoxLayout::TopToBottom, widget());
+    contentLayout->setSpacing(10);
+    contentLayout->setContentsMargins(6, 6, 6, 6);
 }
 
 void SettingsWidget::activate(bool activate)
@@ -28,10 +27,10 @@ bool SettingsWidget::isActivated() const
 
 QWidget* SettingsWidget::contentWidget() const
 {
-    return m_contentWidget;
+    return widget();
 }
 
-QVBoxLayout* SettingsWidget::contentLayout() const
+QBoxLayout* SettingsWidget::contentLayout() const
 {
-    return m_contentLayout;
+    return static_cast<QBoxLayout*>(widget()->layout());
 }

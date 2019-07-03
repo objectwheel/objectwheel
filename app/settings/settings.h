@@ -4,10 +4,9 @@
 #include <QVariant>
 
 class GroupSettings;
-
 struct Settings
 {
-    Settings(GroupSettings* groupSettings);
+    explicit Settings(GroupSettings* groupSettings);
     virtual void read() = 0;
     virtual void write() = 0;
     virtual void reset() = 0;
@@ -30,6 +29,8 @@ private:
 
 template<typename T>
 inline T Settings::value(const char* setting, const QVariant& defaultValue)
-{ return qvariant_cast<T>(valueHelper(setting, defaultValue)); }
+{
+    return qvariant_cast<T>(valueHelper(setting, defaultValue));
+}
 
 #endif // SETTINGS_H

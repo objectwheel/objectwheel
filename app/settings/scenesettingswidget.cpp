@@ -1,7 +1,6 @@
 #include <scenesettingswidget.h>
 #include <scenesettings.h>
 #include <designersettings.h>
-#include <utilityfunctions.h>
 #include <paintutils.h>
 
 #include <QLabel>
@@ -9,10 +8,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QAction>
-#include <QFontDatabase>
+#include <QGridLayout>
 #include <QSpinBox>
 #include <QPen>
 

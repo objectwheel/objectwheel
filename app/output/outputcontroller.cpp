@@ -48,11 +48,11 @@ void OutputController::discharge()
     m_outputPane->consoleWidget()->clear();
 
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    if (settings->visibleBottomPane != "None") {
-        if (settings->visibleBottomPane == "Console Pane")
-            setCurrentWidget(m_outputPane->consoleWidget());
-        else
+    if (settings->visibleBottomPane != 0) {
+        if (settings->visibleBottomPane == 1)
             setCurrentWidget(m_outputPane->issuesWidget());
+        else
+            setCurrentWidget(m_outputPane->consoleWidget());
     }
 }
 

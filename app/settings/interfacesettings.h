@@ -23,8 +23,8 @@ struct InterfaceSettings : public Settings
     QFont toFont() const;
 
     bool hdpiEnabled;
-    QString theme;
-    QString language;
+    int theme;
+    int language;
     /****/
     bool fontPreferThick;
     bool fontPreferAntialiasing;
@@ -33,7 +33,7 @@ struct InterfaceSettings : public Settings
     /****/
     bool bottomPanesPop;
     bool preserveDesignerState;
-    QString visibleBottomPane;
+    int visibleBottomPane;
 };
 
 #endif // INTERFACESETTINGS_H
