@@ -8,9 +8,9 @@ static const char g_fontPreferThick[] = "FontPreferThick";
 static const char g_fontPreferAntialiasing[] = "FontPreferAntialiasing";
 static const char g_language[] = "Language";
 static const char g_hdpiEnabled[] = "HdpiEnabled";
-static const char g_bottomPanesPop[] = "BottomPanesPop";
+static const char g_outputPanePops[] = "OutputPanePops";
 static const char g_preserveDesignerState[] = "PreserveDesignerState";
-static const char g_visibleBottomPane[] = "VisibleBottomPane";
+static const char g_visibleOutputWidget[] = "VisibleOutputWidget";
 
 InterfaceSettings::InterfaceSettings(GeneralSettings* generalSettings) : Settings(generalSettings)
 {
@@ -31,9 +31,9 @@ void InterfaceSettings::read()
     fontPixelSize = value<int>(g_fontPixelSize, fontPixelSize);
     fontFamily = value<QString>(g_fontFamily, fontFamily);
     /****/
-    bottomPanesPop = value<bool>(g_bottomPanesPop, bottomPanesPop);
+    outputPanePops = value<bool>(g_outputPanePops, outputPanePops);
     preserveDesignerState = value<bool>(g_preserveDesignerState, preserveDesignerState);
-    visibleBottomPane = value<int>(g_visibleBottomPane, visibleBottomPane);
+    visibleOutputWidget = value<int>(g_visibleOutputWidget, visibleOutputWidget);
     end();
 }
 
@@ -49,9 +49,9 @@ void InterfaceSettings::write()
     setValue(g_fontPixelSize, fontPixelSize);
     setValue(g_fontFamily, fontFamily);
     /****/
-    setValue(g_bottomPanesPop, bottomPanesPop);
+    setValue(g_outputPanePops, outputPanePops);
     setValue(g_preserveDesignerState, preserveDesignerState);
-    setValue(g_visibleBottomPane, visibleBottomPane);
+    setValue(g_visibleOutputWidget, visibleOutputWidget);
     end();
 
     emit static_cast<GeneralSettings*>(groupSettings())->interfaceSettingsChanged();
@@ -74,9 +74,9 @@ void InterfaceSettings::reset()
     fontFamily = "Roboto";
 #endif
     /****/
-    bottomPanesPop = false;
+    outputPanePops = false;
     preserveDesignerState = true;
-    visibleBottomPane = 0;
+    visibleOutputWidget = 0;
 }
 
 const char* InterfaceSettings::category() const

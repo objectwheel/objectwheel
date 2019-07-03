@@ -31,9 +31,9 @@ struct InterfaceSettings : public Settings
     int fontPixelSize;
     QString fontFamily;
     /****/
-    bool bottomPanesPop;
+    bool outputPanePops;
     bool preserveDesignerState;
-    int visibleBottomPane;
+    int visibleOutputWidget;
 };
 
 #endif // INTERFACESETTINGS_H

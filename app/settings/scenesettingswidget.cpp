@@ -136,7 +136,7 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     m_sceneBackgroundColorModeBox->setCursor(Qt::PointingHandCursor);
     m_sceneZoomLevelBox->setCursor(Qt::PointingHandCursor);
 
-    m_sceneBackgroundColorModeBox->setIconSize({14, 14});
+    m_sceneBackgroundColorModeBox->setIconSize({13, 13});
 
     /****/
 
@@ -279,13 +279,13 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
                     || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
                     || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
                     || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
-                    || m_visibleBottomPaneLabel->text().contains(word, Qt::CaseInsensitive)
-                    || m_bottomPanesCheckBox->text().contains(word, Qt::CaseInsensitive)
+                    || m_visibleOutputWidgetLabel->text().contains(word, Qt::CaseInsensitive)
+                    || m_outputPanePopsCheckBox->text().contains(word, Qt::CaseInsensitive)
                     || m_preserveDesignerStateCheckBox->text().contains(word, Qt::CaseInsensitive)
                     || m_preserveDesignerStateCheckBox->toolTip().contains(word, Qt::CaseInsensitive)
                     || m_designerStateResetButton->text().contains(word, Qt::CaseInsensitive)
                     || m_designerStateResetButton->toolTip().contains(word, Qt::CaseInsensitive)
                     || UtilityFunctions::comboContainsWord(m_themeBox, word)
                     || UtilityFunctions::comboContainsWord(m_languageBox, word)
-                    || UtilityFunctions::comboContainsWord(m_visibleBottomPaneBox, word)*/;
+                    || UtilityFunctions::comboContainsWord(m_visibleOutputWidgetBox, word)*/;
 }

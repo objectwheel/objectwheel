@@ -141,10 +141,10 @@ void RunPane::updateIcons()
 {
     using namespace PaintUtils;
     m_runDevicesButton->setIcon(QIcon(":/images/devices.png"));
-    m_runButton->setIcon(renderButtonIcon(":/images/run.svg", m_runButton->palette()));
-    m_stopButton->setIcon(renderButtonIcon(":/images/stop.svg", m_stopButton->palette()));
-    m_preferencesButton->setIcon(renderButtonIcon(":/images/settings.svg", m_preferencesButton->palette()));
-    m_projectsButton->setIcon(renderButtonIcon(":/images/projects.svg", m_projectsButton->palette()));
+    m_runButton->setIcon(renderButtonIcon(":/images/run.svg", palette()));
+    m_stopButton->setIcon(renderButtonIcon(":/images/stop.svg", palette()));
+    m_preferencesButton->setIcon(renderButtonIcon(":/images/settings.svg", palette()));
+    m_projectsButton->setIcon(renderButtonIcon(":/images/projects.svg", palette()));
 
     QStringList iconFileNames {
         ":/images/left.svg",
@@ -153,7 +153,7 @@ void RunPane::updateIcons()
     };
     for (int i = 0; i < iconFileNames.size(); ++i) {
         QAction* action = m_segmentedBar->actions().at(i);
-        action->setIcon(renderButtonIcon(iconFileNames.at(i), m_segmentedBar->palette()));
+        action->setIcon(renderButtonIcon(iconFileNames.at(i), palette()));
     }
 }
 

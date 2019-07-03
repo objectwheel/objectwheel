@@ -48,12 +48,10 @@ void OutputController::discharge()
     m_outputPane->consoleWidget()->clear();
 
     const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    if (settings->visibleBottomPane != 0) {
-        if (settings->visibleBottomPane == 1)
-            setCurrentWidget(m_outputPane->issuesWidget());
-        else
-            setCurrentWidget(m_outputPane->consoleWidget());
-    }
+    if (settings->visibleOutputWidget == 1)
+        setCurrentWidget(m_outputPane->issuesWidget());
+    else if (settings->visibleOutputWidget == 2)
+        setCurrentWidget(m_outputPane->consoleWidget());
 }
 
 void OutputController::setPaneVisible(bool visible)
@@ -70,7 +68,7 @@ void OutputController::onFlash()
         if (QAbstractButton* activatedButton = m_outputPane->buttonForWidget(activatedWidget)) {
             m_outputPane->outputBar()->flash(activatedButton);
             const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-            if (settings->bottomPanesPop && !activatedButton->isChecked())
+            if (settings->outputPanePops && !activatedButton->isChecked())
                 setCurrentWidget(activatedWidget);
         }
     }

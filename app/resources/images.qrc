@@ -134,5 +134,6 @@
         <file>images/outerline.svg</file>
         <file>images/outline.svg</file>
         <file>images/texture.svg</file>
+        <file>images/prohibited.svg</file>
     </qresource>
 </RCC>

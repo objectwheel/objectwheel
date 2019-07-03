@@ -99,10 +99,16 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     WindowOperations::removeTitleBar(this);
 #endif
 
+    QPalette palette(this->palette());
+    palette.setColor(QPalette::Active, QPalette::ButtonText, "#505050");
+    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#505050");
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#9c9c9c");
+
     /** Set Tool Bars **/
     /* Add Run Pane */
     m_runPane->setMovable(false);
     m_runPane->setFloatable(false);
+    m_runPane->setPalette(palette);
     m_runPane->setOrientation(Qt::Horizontal);
     addToolBar(Qt::TopToolBarArea, m_runPane);
     addToolBarBreak(Qt::TopToolBarArea);
@@ -110,6 +116,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Mode Selector Pane */
     m_modeSelectorPane->setMovable(false);
     m_modeSelectorPane->setFloatable(false);
+    m_modeSelectorPane->setPalette(palette);
     m_modeSelectorPane->setOrientation(Qt::Horizontal);
     addToolBar(Qt::TopToolBarArea, m_modeSelectorPane);
 

@@ -210,8 +210,8 @@ QPalette ApplicationCore::palette()
     palette.setColor(QPalette::Active, QPalette::WindowText, "#2f2f2f");
     palette.setColor(QPalette::Inactive, QPalette::WindowText, "#2f2f2f");
     palette.setColor(QPalette::Disabled, QPalette::WindowText, "#6f7e8c");
-    palette.setColor(QPalette::Active, QPalette::ButtonText, "#505050");
-    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#505050");
+    palette.setColor(QPalette::Active, QPalette::ButtonText, "#2f2f2f");
+    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#2f2f2f");
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#6f7e8c");
     palette.setColor(QPalette::Active, QPalette::PlaceholderText, "#bfbfbf");
     palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#bfbfbf");
