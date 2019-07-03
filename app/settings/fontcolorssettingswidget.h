@@ -8,19 +8,19 @@ class QGroupBox;
 class QComboBox;
 class QCheckBox;
 class QPushButton;
-class QVBoxLayout;
-class QGridLayout;
+
+namespace TextEditor { namespace Internal {
 class SchemeListModel;
+class ColorSchemeEdit;
+} }
 
-namespace TextEditor { namespace Internal { class ColorSchemeEdit; } }
-
-struct FontColorsSettingsWidget : public SettingsWidget
+class FontColorsSettingsWidget final : public SettingsWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(FontColorsSettingsWidget)
 
 public:
     explicit FontColorsSettingsWidget(QWidget* parent = nullptr);
-
     void apply() override;
     void reset() override;
     QIcon icon() const override;
@@ -35,12 +35,14 @@ private slots:
     void onColorSchemeDeleteButtonClick();
 
 private:
+    void fill();
     void maybeSaveColorScheme(const QString& fileName);
     void setCurrentColorScheme(const QString& fileName);
 
 private:
+    bool m_disableSaving;
+    /****/
     QGroupBox* m_fontGroup;
-    QVBoxLayout* m_fontLayout;
     QLabel* m_fontFamilyLabel;
     QLabel* m_fontSizeLabel;
     QComboBox* m_fontFamilyBox;
@@ -49,9 +51,8 @@ private:
     QCheckBox* m_fontThickBox;
     QPushButton* m_fontResetButton;
     /****/
-    SchemeListModel* m_schemeListModel;
+    TextEditor::Internal::SchemeListModel* m_schemeListModel;
     QGroupBox* m_colorSchemeGroup;
-    QVBoxLayout* m_colorSchemeLayout;
     QComboBox* m_colorSchemeBox;
     QPushButton* m_colorSchemeCopyButton;
     QPushButton* m_colorSchemeDeleteButton;

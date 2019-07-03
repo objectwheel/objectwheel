@@ -16,10 +16,10 @@
 SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_designGroup(new QGroupBox(contentWidget()))
   , m_showGuideLinesLabel(new QLabel(m_designGroup))
-  , m_sceneBackgroundColorModeLabel(new QLabel(m_designGroup))
+  , m_sceneBackgroundColorLabel(new QLabel(m_designGroup))
   , m_sceneZoomLevelLabel(new QLabel(m_designGroup))
   , m_showGuideLinesCheckBox(new QCheckBox(m_designGroup))
-  , m_sceneBackgroundColorModeBox(new QComboBox(m_designGroup))
+  , m_sceneBackgroundColorBox(new QComboBox(m_designGroup))
   , m_sceneZoomLevelBox(new QComboBox(m_designGroup))
   /****/
   , m_gridViewGroup(new QGroupBox(contentWidget()))
@@ -33,9 +33,9 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
   /****/
   , m_controlsGroup(new QGroupBox(contentWidget()))
   , m_showMouseoverOutlineLabel(new QLabel(m_controlsGroup))
-  , m_controlOutlineModeLabel(new QLabel(m_controlsGroup))
+  , m_controlOutlineLabel(new QLabel(m_controlsGroup))
   , m_showMouseoverOutlineCheckBox(new QCheckBox(m_controlsGroup))
-  , m_controlOutlineModeBox(new QComboBox(m_controlsGroup))
+  , m_controlOutlineBox(new QComboBox(m_controlsGroup))
 {
     contentLayout()->addWidget(m_designGroup);
     contentLayout()->addWidget(m_gridViewGroup);
@@ -49,29 +49,29 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     designLayout->setContentsMargins(6, 6, 6, 6);
     designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     designLayout->addWidget(m_showGuideLinesLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneBackgroundColorModeLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundColorLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_sceneZoomLevelLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_showGuideLinesCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneBackgroundColorModeBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundColorBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_sceneZoomLevelBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->setColumnStretch(3, 1);
     designLayout->setColumnMinimumWidth(1, 20);
 
     m_designGroup->setTitle(tr("Design"));
     m_showGuideLinesLabel->setText(tr("Guide lines") + ":");
-    m_sceneBackgroundColorModeLabel->setText(tr("Background color") + ":");
+    m_sceneBackgroundColorLabel->setText(tr("Background color") + ":");
     m_sceneZoomLevelLabel->setText(tr("Zoom level") + ":");
     m_showGuideLinesCheckBox->setText(tr("Show guide lines"));
 
     m_showGuideLinesCheckBox->setToolTip(tr("Show guide lines while moving controls"));
-    m_sceneBackgroundColorModeBox->setToolTip(tr("Change background color of the scene"));
+    m_sceneBackgroundColorBox->setToolTip(tr("Change background color of the scene"));
     m_sceneZoomLevelBox->setToolTip(tr("Change zoom level of the scene"));
 
     m_showGuideLinesCheckBox->setCursor(Qt::PointingHandCursor);
-    m_sceneBackgroundColorModeBox->setCursor(Qt::PointingHandCursor);
+    m_sceneBackgroundColorBox->setCursor(Qt::PointingHandCursor);
     m_sceneZoomLevelBox->setCursor(Qt::PointingHandCursor);
 
-    m_sceneBackgroundColorModeBox->setIconSize({13, 13});
+    m_sceneBackgroundColorBox->setIconSize({13, 13});
 
     /****/
 
@@ -117,24 +117,24 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     controlsLayout->setContentsMargins(6, 6, 6, 6);
     controlsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     controlsLayout->addWidget(m_showMouseoverOutlineLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_controlOutlineModeLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_controlOutlineLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_showMouseoverOutlineCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_controlOutlineModeBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_controlOutlineBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->setColumnStretch(3, 1);
     controlsLayout->setColumnMinimumWidth(1, 20);
 
     m_controlsGroup->setTitle(tr("Controls") + ":");
     m_showMouseoverOutlineLabel->setText(tr("Mouseover outline") + ":");
-    m_controlOutlineModeLabel->setText(tr("Control outline") + ":");
+    m_controlOutlineLabel->setText(tr("Control outline") + ":");
     m_showMouseoverOutlineCheckBox->setText(tr("Show mouseover outline"));
 
     m_showMouseoverOutlineCheckBox->setToolTip(tr("Show an outline around controls when moving mouse cursor over them"));
-    m_controlOutlineModeBox->setToolTip(tr("Change default outline mode for controls"));
+    m_controlOutlineBox->setToolTip(tr("Change default outline mode for controls"));
 
     m_showMouseoverOutlineCheckBox->setCursor(Qt::PointingHandCursor);
-    m_controlOutlineModeBox->setCursor(Qt::PointingHandCursor);
+    m_controlOutlineBox->setCursor(Qt::PointingHandCursor);
 
-    m_controlOutlineModeBox->setIconSize({14, 14});
+    m_controlOutlineBox->setIconSize({14, 14});
 
     /****/
 
@@ -161,7 +161,7 @@ void SceneSettingsWidget::apply()
     SceneSettings* settings = DesignerSettings::sceneSettings();
     /****/
     settings->showGuideLines = m_showGuideLinesCheckBox->isChecked();
-    settings->sceneBackgroundColorMode = m_sceneBackgroundColorModeBox->currentIndex();
+    settings->sceneBackgroundColor = m_sceneBackgroundColorBox->currentIndex();
     settings->sceneZoomLevel = UtilityFunctions::textToZoomLevel(m_sceneZoomLevelBox->currentText());
     /****/
     settings->showGridViewDots = m_showGridViewDotsCheckBox->isChecked();
@@ -169,7 +169,7 @@ void SceneSettingsWidget::apply()
     settings->gridSize = m_gridSizeSpinBox->value();
     /****/
     settings->showMouseoverOutline = m_showMouseoverOutlineCheckBox->isChecked();
-    settings->controlOutlineMode = m_controlOutlineModeBox->currentIndex();
+    settings->controlOutline = m_controlOutlineBox->currentIndex();
     settings->write();
 }
 
@@ -183,7 +183,7 @@ void SceneSettingsWidget::reset()
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     /****/
     m_showGuideLinesCheckBox->setChecked(settings->showGuideLines);
-    m_sceneBackgroundColorModeBox->setCurrentIndex(settings->sceneBackgroundColorMode);
+    m_sceneBackgroundColorBox->setCurrentIndex(settings->sceneBackgroundColor);
     m_sceneZoomLevelBox->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
     /****/
     m_showGridViewDotsCheckBox->setChecked(settings->showGridViewDots);
@@ -191,7 +191,7 @@ void SceneSettingsWidget::reset()
     m_gridSizeSpinBox->setValue(settings->gridSize);
     /****/
     m_showMouseoverOutlineCheckBox->setChecked(settings->showMouseoverOutline);
-    m_controlOutlineModeBox->setCurrentIndex(settings->controlOutlineMode);
+    m_controlOutlineBox->setCurrentIndex(settings->controlOutline);
 }
 
 QIcon SceneSettingsWidget::icon() const
@@ -211,45 +211,45 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_gridViewGroup->title().contains(word, Qt::CaseInsensitive)
             || m_controlsGroup->title().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesLabel->text().contains(word, Qt::CaseInsensitive)
-            || m_sceneBackgroundColorModeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_sceneBackgroundColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_sceneZoomLevelLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsLabel->text().contains(word, Qt::CaseInsensitive)
             || m_snappingEnabledLabel->text().contains(word, Qt::CaseInsensitive)
             || m_gridSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showMouseoverOutlineLabel->text().contains(word, Qt::CaseInsensitive)
-            || m_controlOutlineModeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_controlOutlineLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_snappingEnabledCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showMouseoverOutlineCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_resetGridViewButton->text().contains(word, Qt::CaseInsensitive)
             || m_resetGridViewButton->toolTip().contains(word, Qt::CaseInsensitive)
-            || UtilityFunctions::comboContainsWord(m_sceneBackgroundColorModeBox, word)
+            || UtilityFunctions::comboContainsWord(m_sceneBackgroundColorBox, word)
             || UtilityFunctions::comboContainsWord(m_sceneZoomLevelBox, word)
-            || UtilityFunctions::comboContainsWord(m_controlOutlineModeBox, word);
+            || UtilityFunctions::comboContainsWord(m_controlOutlineBox, word);
 }
 
 void SceneSettingsWidget::fill()
 {
     using namespace PaintUtils;
     const QPen pen(Qt::black, 2);
-    const qreal dpr = m_sceneBackgroundColorModeBox->devicePixelRatioF();
-    const QSize size = m_sceneBackgroundColorModeBox->iconSize();
+    const qreal dpr = m_sceneBackgroundColorBox->devicePixelRatioF();
+    const QSize size = m_sceneBackgroundColorBox->iconSize();
 
     m_sceneZoomLevelBox->addItems(UtilityFunctions::zoomTexts());
 
-    m_controlOutlineModeBox->addItem(QIcon(":/images/nooutline.svg"), tr("No outline"));
-    m_controlOutlineModeBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping rect outline"));
-    m_controlOutlineModeBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding rect outline"));
+    m_controlOutlineBox->addItem(QIcon(":/images/nooutline.svg"), tr("No outline"));
+    m_controlOutlineBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping rect outline"));
+    m_controlOutlineBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding rect outline"));
 
-    m_sceneBackgroundColorModeBox->addItem(
+    m_sceneBackgroundColorBox->addItem(
     {renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)}, tr("Checkered"));
-    m_sceneBackgroundColorModeBox->addItem(
+    m_sceneBackgroundColorBox->addItem(
     {renderPropertyColorPixmap(size, Qt::black, pen, dpr)}, tr("Black"));
-    m_sceneBackgroundColorModeBox->addItem(
+    m_sceneBackgroundColorBox->addItem(
     {renderPropertyColorPixmap(size, Qt::darkGray, pen, dpr)}, tr("Dark gray"));
-    m_sceneBackgroundColorModeBox->addItem(
+    m_sceneBackgroundColorBox->addItem(
     {renderPropertyColorPixmap(size, Qt::lightGray, pen, dpr)}, tr("Light gray"));
-    m_sceneBackgroundColorModeBox->addItem(
+    m_sceneBackgroundColorBox->addItem(
     {renderPropertyColorPixmap(size, Qt::white, pen, dpr)},tr("White"));
 }

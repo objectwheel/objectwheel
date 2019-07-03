@@ -2,13 +2,13 @@
 #include <designersettings.h>
 
 static const char g_showGuideLines[] = "ShowGuideLines";
-static const char g_sceneBackgroundColorMode[] = "SceneBackgroundColorMode";
+static const char g_sceneBackgroundColor[] = "SceneBackgroundColor";
 static const char g_sceneZoomLevel[] = "SceneZoomLevel";
 static const char g_showGridViewDots[] = "ShowGridViewDots";
 static const char g_snappingEnabled[] = "SnappingEnabled";
 static const char g_gridSize[] = "GridSize";
 static const char g_showMouseoverOutline[] = "ShowMouseoverOutline";
-static const char g_controlOutlineMode[] = "ControlOutlineMode";
+static const char g_controlOutline[] = "ControlOutline";
 
 SceneSettings::SceneSettings(DesignerSettings* designerSettings) : Settings(designerSettings)
 {
@@ -21,7 +21,7 @@ void SceneSettings::read()
 
     begin();
     showGuideLines = value<bool>(g_showGuideLines, showGuideLines);
-    sceneBackgroundColorMode = value<int>(g_sceneBackgroundColorMode, sceneBackgroundColorMode);
+    sceneBackgroundColor = value<int>(g_sceneBackgroundColor, sceneBackgroundColor);
     sceneZoomLevel = value<qreal>(g_sceneZoomLevel, sceneZoomLevel);
     /****/
     showGridViewDots = value<bool>(g_showGridViewDots, showGridViewDots);
@@ -29,7 +29,7 @@ void SceneSettings::read()
     gridSize = value<int>(g_gridSize, gridSize);
     /****/
     showMouseoverOutline = value<bool>(g_showMouseoverOutline, showMouseoverOutline);
-    controlOutlineMode = value<int>(g_controlOutlineMode, controlOutlineMode);
+    controlOutline = value<int>(g_controlOutline, controlOutline);
     end();
 }
 
@@ -37,7 +37,7 @@ void SceneSettings::write()
 {
     begin();
     setValue(g_showGuideLines, showGuideLines);
-    setValue(g_sceneBackgroundColorMode, sceneBackgroundColorMode);
+    setValue(g_sceneBackgroundColor, sceneBackgroundColor);
     setValue(g_sceneZoomLevel, sceneZoomLevel);
     /****/
     setValue(g_showGridViewDots, showGridViewDots);
@@ -45,7 +45,7 @@ void SceneSettings::write()
     setValue(g_gridSize, gridSize);
     /****/
     setValue(g_showMouseoverOutline, showMouseoverOutline);
-    setValue(g_controlOutlineMode, controlOutlineMode);
+    setValue(g_controlOutline, controlOutline);
     end();
 
     emit static_cast<DesignerSettings*>(groupSettings())->sceneSettingsChanged();
@@ -54,7 +54,7 @@ void SceneSettings::write()
 void SceneSettings::reset()
 {
     showGuideLines = true;
-    sceneBackgroundColorMode = 0;
+    sceneBackgroundColor = 0;
     sceneZoomLevel = 1.0;
     /****/
     showGridViewDots = true;
@@ -62,11 +62,10 @@ void SceneSettings::reset()
     gridSize = 8;
     /****/
     showMouseoverOutline = true;
-    controlOutlineMode = 0;
+    controlOutline = 0;
 }
 
 const char* SceneSettings::category() const
 {
     return "Scene";
 }
-

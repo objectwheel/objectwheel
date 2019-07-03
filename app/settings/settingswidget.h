@@ -11,7 +11,6 @@ class SettingsWidget : public QScrollArea
 
 public:
     explicit SettingsWidget(QWidget* parent = nullptr);
-
     virtual void apply() = 0;
     virtual void reset() = 0;
     virtual QIcon icon() const = 0;

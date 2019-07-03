@@ -432,6 +432,17 @@ FormatDescriptions FormatDescription::defaultFormatDescriptions()
     return formatDescr;
 }
 
+bool FormatDescription::formatDescriptionsContainsWord(const QString& word)
+{
+    for (const FormatDescription& desc : FormatDescription::defaultFormatDescriptions()) {
+        if (desc.displayName().contains(word, Qt::CaseInsensitive)
+                || desc.tooltipText().contains(word, Qt::CaseInsensitive)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 FontColorsSettings::FontColorsSettings(CodeEditorSettings* codeEditorSettings) : Settings(codeEditorSettings)
 {
     reset();

@@ -9,7 +9,7 @@ class QComboBox;
 class QCheckBox;
 class QPushButton;
 
-struct InterfaceSettingsWidget final : public SettingsWidget
+class InterfaceSettingsWidget final : public SettingsWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY(InterfaceSettingsWidget)

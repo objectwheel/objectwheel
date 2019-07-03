@@ -26,6 +26,7 @@
 #include "colorscheme.h"
 #include "texteditorconstants.h"
 #include <fontcolorssettings.h>
+#include <applicationcore.h>
 
 #include <utils/fileutils.h>
 
@@ -33,6 +34,7 @@
 #include <QCoreApplication>
 #include <QMetaEnum>
 #include <QXmlStreamWriter>
+#include <QDir>
 #include <QDebug>
 
 using namespace TextEditor;
@@ -474,4 +476,27 @@ bool ColorScheme::loadColorSchemeInto(ColorScheme& scheme, const QString& fileNa
     }
 
     return loaded;
+}
+
+QString ColorScheme::createColorSchemeFileName(const QString& pattern)
+{
+    const QString stylesPath = ApplicationCore::appDataLocation() + "/styles/";
+    QString baseFileName = stylesPath;
+    baseFileName += pattern;
+
+    // Find an available file name
+    int i = 1;
+    QString fileName;
+    do {
+        fileName = baseFileName.arg((i == 1) ? QString() : QString::number(i));
+        ++i;
+    } while (QFile::exists(fileName));
+
+    // Create the base directory when it doesn't exist
+    if (!QFile::exists(stylesPath) && !QDir().mkpath(stylesPath)) {
+        qWarning() << "Failed to create color scheme directory:" << stylesPath;
+        return QString();
+    }
+
+    return fileName;
 }

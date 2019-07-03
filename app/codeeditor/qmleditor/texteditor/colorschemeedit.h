@@ -28,6 +28,7 @@
 #include "colorscheme.h"
 #include <fontcolorssettings.h>
 #include <QDialog>
+#include <QAbstractListModel>
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -39,6 +40,48 @@ namespace Internal {
 namespace Ui { class ColorSchemeEdit; }
 
 class FormatsModel;
+
+class SchemeListModel : public QAbstractListModel
+{
+public:
+    SchemeListModel(QObject* parent = 0): QAbstractListModel(parent)
+    {
+    }
+
+    int rowCount(const QModelIndex& parent) const
+    { return parent.isValid() ? 0 : m_colorSchemes.size(); }
+
+    QVariant data(const QModelIndex& index, int role) const
+    {
+        if (role == Qt::DisplayRole)
+            return m_colorSchemes.at(index.row()).name;
+
+        return QVariant();
+    }
+
+    void removeColorScheme(int index)
+    {
+        beginRemoveRows(QModelIndex(), index, index);
+        m_colorSchemes.removeAt(index);
+        endRemoveRows();
+    }
+
+    void setColorSchemes(const QList<ColorSchemeEntry>& colorSchemes)
+    {
+        beginResetModel();
+        m_colorSchemes = colorSchemes;
+        endResetModel();
+    }
+
+    const ColorSchemeEntry& colorSchemeAt(int index) const
+    { return m_colorSchemes.at(index); }
+
+    const QList<ColorSchemeEntry>& colorSchemes() const
+    { return m_colorSchemes; }
+
+private:
+    QList<ColorSchemeEntry> m_colorSchemes;
+};
 
 /*!
   A widget for editing a color scheme. Used in the FontSettingsPage.
@@ -101,7 +144,6 @@ private:
     FormatsModel *m_formatsModel;
     bool m_readOnly = false;
 };
-
 
 } // namespace Internal
 } // namespace TextEditor

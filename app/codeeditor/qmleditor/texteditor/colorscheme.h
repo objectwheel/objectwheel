@@ -139,9 +139,25 @@ public:
 
     static bool loadColorSchemeInto(ColorScheme& scheme, const QString& fileName);
 
+    static QString createColorSchemeFileName(const QString& pattern);
+
 private:
     QMap<TextStyle, Format> m_formats;
     QString m_displayName;
+};
+
+struct ColorSchemeEntry
+{
+    ColorSchemeEntry(const QString& fileName, bool readOnly):
+        fileName(fileName),
+        name(TextEditor::ColorScheme::readNameOfScheme(fileName)),
+        readOnly(readOnly)
+    { }
+
+    QString fileName;
+    QString name;
+    QString id;
+    bool readOnly;
 };
 
 inline bool operator==(const ColorScheme &cs1, const ColorScheme &cs2) { return cs1.equals(cs2); }

@@ -71,6 +71,8 @@ public:
 
     static FormatDescriptions defaultFormatDescriptions();
 
+    static bool formatDescriptionsContainsWord(const QString& word);
+
 private:
     TextStyle m_id;            // Name of the category
     TextEditor::Format m_format;            // Default format

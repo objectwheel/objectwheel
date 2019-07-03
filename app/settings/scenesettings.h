@@ -13,7 +13,7 @@ struct SceneSettings final : public Settings
     const char* category() const override;
 
     bool showGuideLines;
-    int sceneBackgroundColorMode;
+    int sceneBackgroundColor;
     qreal sceneZoomLevel;
     /****/
     bool showGridViewDots;
@@ -21,7 +21,7 @@ struct SceneSettings final : public Settings
     int gridSize;
     /****/
     bool showMouseoverOutline;
-    int controlOutlineMode;
+    int controlOutline;
 };
 
 #endif // SCENESETTINGS_H

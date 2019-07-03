@@ -8,9 +8,7 @@
 #include <QPushButton>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QAction>
+#include <QBoxLayout>
 #include <QFontDatabase>
 
 InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidget(parent)
@@ -109,10 +107,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
 
     m_fontGroup->setTitle(tr("Font"));
     m_fontFamilyLabel->setText(tr("Family") + ":");
-    m_fontFamilyBox->addItems(QFontDatabase().families());
     m_fontSizeLabel->setText(tr("Size") + ":");
-    m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
-                             "18", "24", "36", "48", "64", "72", "96", "144"});
     m_fontAntialiasingBox->setText(tr("Prefer antialiasing"));
     m_fontThickBox->setText(tr("Prefer thicker"));
     m_fontResetButton->setText(tr("Reset"));
@@ -350,4 +345,7 @@ void InterfaceSettingsWidget::fill()
     m_visibleOutputWidgetBox->addItem(QIcon(":/images/prohibited.svg"), tr("None"));
     m_visibleOutputWidgetBox->addItem(QIcon(":/images/issues.svg"), tr("Issues"));
     m_visibleOutputWidgetBox->addItem(QIcon(":/images/console.svg"), tr("Console"));
+    m_fontFamilyBox->addItems(QFontDatabase().families());
+    m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
+                             "18", "24", "36", "48", "64", "72", "96", "144"});
 }

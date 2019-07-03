@@ -29,10 +29,10 @@ private:
 private:
     QGroupBox* m_designGroup;
     QLabel* m_showGuideLinesLabel;
-    QLabel* m_sceneBackgroundColorModeLabel;
+    QLabel* m_sceneBackgroundColorLabel;
     QLabel* m_sceneZoomLevelLabel;
     QCheckBox* m_showGuideLinesCheckBox;
-    QComboBox* m_sceneBackgroundColorModeBox;
+    QComboBox* m_sceneBackgroundColorBox;
     QComboBox* m_sceneZoomLevelBox;
     /****/
     QGroupBox* m_gridViewGroup;
@@ -46,9 +46,9 @@ private:
     /****/
     QGroupBox* m_controlsGroup;
     QLabel* m_showMouseoverOutlineLabel;
-    QLabel* m_controlOutlineModeLabel;
+    QLabel* m_controlOutlineLabel;
     QCheckBox* m_showMouseoverOutlineCheckBox;
-    QComboBox* m_controlOutlineModeBox;
+    QComboBox* m_controlOutlineBox;
 };
 
 #endif // SCENESETTINGSWIDGET_H

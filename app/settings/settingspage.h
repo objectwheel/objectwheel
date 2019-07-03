@@ -13,7 +13,6 @@ class SettingsPage : public QWidget
 
 public:
     explicit SettingsPage(QWidget* parent = nullptr);
-
     void reset();
     void apply();
     void activateCurrent();
