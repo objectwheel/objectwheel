@@ -2,7 +2,7 @@
 #include <codeeditorsettings.h>
 #include <behaviorsettings.h>
 
-#include <QVBoxLayout>
+#include <QBoxLayout>
 #include <QCheckBox>
 #include <QGroupBox>
 

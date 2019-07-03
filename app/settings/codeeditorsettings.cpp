@@ -23,21 +23,6 @@ CodeEditorSettings* CodeEditorSettings::instance()
     return s_instance;
 }
 
-BehaviorSettings* CodeEditorSettings::behaviorSettings()
-{
-    return s_behaviorSettings;
-}
-
-FontColorsSettings* CodeEditorSettings::fontColorsSettings()
-{
-    return s_fontColorsSettings;
-}
-
-const char* CodeEditorSettings::group() const
-{
-    return "CodeEditor";
-}
-
 void CodeEditorSettings::read()
 {
     s_behaviorSettings->read();
@@ -54,4 +39,19 @@ void CodeEditorSettings::reset()
 {
     s_behaviorSettings->reset();
     s_fontColorsSettings->reset();
+}
+
+const char* CodeEditorSettings::group() const
+{
+    return "CodeEditor";
+}
+
+BehaviorSettings* CodeEditorSettings::behaviorSettings()
+{
+    return s_behaviorSettings;
+}
+
+FontColorsSettings* CodeEditorSettings::fontColorsSettings()
+{
+    return s_fontColorsSettings;
 }

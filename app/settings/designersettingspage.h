@@ -3,9 +3,10 @@
 
 #include <settingspage.h>
 
-class DesignerSettingsPage : public SettingsPage
+class DesignerSettingsPage final : public SettingsPage
 {
     Q_OBJECT
+    Q_DISABLE_COPY(DesignerSettingsPage)
 
 public:
     explicit DesignerSettingsPage(QWidget* parent = nullptr);

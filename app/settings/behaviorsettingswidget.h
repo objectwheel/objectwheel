@@ -13,7 +13,6 @@ class BehaviorSettingsWidget final : public SettingsWidget
 
 public:
     explicit BehaviorSettingsWidget(QWidget* parent = nullptr);
-
     void apply() override;
     void reset() override;
     QIcon icon() const override;

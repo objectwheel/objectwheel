@@ -2,24 +2,20 @@
 #define INTERFACESETTINGS_H
 
 #include <settings.h>
-#include <QColor>
 #include <QFont>
 
 class GeneralSettings;
-
-struct InterfaceSettings : public Settings
+struct InterfaceSettings final : public Settings
 {
     friend class MainWindow;
     friend class WelcomeWindow;
     friend class PreferencesWindow;
 
-    InterfaceSettings(GeneralSettings* generalSettings = nullptr);
-
+    explicit InterfaceSettings(GeneralSettings* generalSettings);
     void read() override;
     void write() override;
     void reset() override;
     const char* category() const override;
-
     QFont toFont() const;
 
     bool hdpiEnabled;

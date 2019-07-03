@@ -163,7 +163,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     fill();
 
     connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
-        const InterfaceSettings settings;
+        const InterfaceSettings settings(0);
         m_fontFamilyBox->setCurrentText(settings.fontFamily);
         m_fontSizeBox->setCurrentText(QString::number(settings.fontPixelSize));
         m_fontThickBox->setChecked(settings.fontPreferThick);

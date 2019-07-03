@@ -185,7 +185,7 @@ void ApplicationCore::prepare(const char* filePath)
     // qputenv("QT_SCALE_FACTOR", "2");
     const QString settingsPath = QFileInfo(filePath).path() + "/settings.ini";
     QSettings settings(settingsPath, QSettings::IniFormat);
-    if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings().hdpiEnabled).toBool()) {
+    if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     }

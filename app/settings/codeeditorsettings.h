@@ -18,11 +18,10 @@ public:
     static void read();
     static void write();
     static void reset();
+    const char* group() const override;
 
     static BehaviorSettings* behaviorSettings();
     static FontColorsSettings* fontColorsSettings();
-
-    const char* group() const override;
 
 signals:
     void behaviorSettingsChanged();
