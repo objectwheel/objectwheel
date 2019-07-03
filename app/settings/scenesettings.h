@@ -4,11 +4,9 @@
 #include <settings.h>
 
 class DesignerSettings;
-
-struct SceneSettings : public Settings
+struct SceneSettings final : public Settings
 {
-    SceneSettings(DesignerSettings* designerSettings = nullptr);
-
+    explicit SceneSettings(DesignerSettings* designerSettings);
     void read() override;
     void write() override;
     void reset() override;

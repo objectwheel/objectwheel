@@ -586,4 +586,40 @@ QString stringify(const QString& text)
     return engine.evaluate("JSON.stringify(text)").toString();
 }
 
+QStringList zoomTexts()
+{
+    static const QStringList texts {
+        "10 %", "25 %", "50 %", "75 %", "90 %", "100 %", "125 %",
+        "150 %", "175 %", "200 %", "300 %", "500 %", "1000 %"
+    };
+    return texts;
+}
+
+QVector<qreal> zoomLevels()
+{
+    static const QVector<qreal> levels {
+        0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25,
+        1.5, 1.75, 2.0, 3.0, 5.0, 10.0
+    };
+    return levels;
+}
+
+QString zoomLevelToText(qreal ratio)
+{
+    for (int i = 0; i < zoomLevels().size(); ++i) {
+        if (zoomLevels().at(i) == ratio)
+            return zoomTexts().at(i);
+    }
+    return QStringLiteral("100 %");
+}
+
+qreal textToZoomLevel(const QString& text)
+{
+    for (int i = 0; i < zoomTexts().size(); ++i) {
+        if (zoomTexts().at(i) == text)
+            return zoomLevels().at(i);
+    }
+    return 1.0;
+}
+
 } // UtilityFunctions

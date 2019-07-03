@@ -2,6 +2,7 @@
 #include <scenesettings.h>
 #include <designersettings.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
 #include <QLabel>
 #include <QGroupBox>
@@ -12,73 +13,8 @@
 #include <QSpinBox>
 #include <QPen>
 
-static const char* g_zoomLevels[] = {
-    "10 %", "25 %", "50 %", "75 %", "90 %", "100 %", "125 %",
-    "150 %", "175 %", "200 %", "300 %", "500 %", "1000 %"
-};
-static const qreal g_zoomRatios[] = {
-    0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25,
-    1.5, 1.75, 2.0, 3.0, 5.0, 10.0
-};
-
-const char* toText(qreal ratio)
-{
-    for (size_t i = 0; i < sizeof(g_zoomRatios) / sizeof(g_zoomRatios[0]); ++i) {
-        if (g_zoomRatios[i] == ratio)
-            return g_zoomLevels[i];
-    }
-    return "100 %";
-}
-
-qreal toRatio(const QString& text)
-{
-    for (size_t i = 0; i < sizeof(g_zoomLevels) / sizeof(g_zoomLevels[0]); ++i) {
-        if (g_zoomLevels[i] == text)
-            return g_zoomRatios[i];
-    }
-    return 1.0;
-}
-
-void addZoomLevels(QComboBox* comboBox)
-{
-    for (size_t i = 0; i < sizeof(g_zoomLevels) / sizeof(g_zoomLevels[0]); ++i)
-        comboBox->addItem(QObject::tr(g_zoomLevels[i]), g_zoomLevels[i]);
-}
-
-void addOutlines(QComboBox* comboBox)
-{
-    comboBox->addItem(QIcon(":/images/nooutline.svg"), QObject::tr("No outline"));
-    comboBox->addItem(QIcon(":/images/outline.svg"), QObject::tr("Clipping rect outline"));
-    comboBox->addItem(QIcon(":/images/outerline.svg"), QObject::tr("Bounding rect outline"));
-}
-
-void addBackgroundColors(QComboBox* comboBox)
-{
-    using namespace PaintUtils;
-    const qreal dpr = comboBox->devicePixelRatioF();
-    const QSize size = comboBox->iconSize();
-    QPen pen;
-    pen.setWidth(2);
-    comboBox->addItem(
-                QIcon(renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)),
-                QObject::tr("Checkered"));
-    comboBox->addItem(
-                QIcon(renderPropertyColorPixmap(size, Qt::black, pen, dpr)),
-                QObject::tr("Black"));
-    comboBox->addItem(
-                QIcon(renderPropertyColorPixmap(size, Qt::darkGray, pen, dpr)),
-                QObject::tr("Dark gray"));
-    comboBox->addItem(
-                QIcon(renderPropertyColorPixmap(size, Qt::lightGray, pen, dpr)),
-                QObject::tr("Light gray"));
-    comboBox->addItem(
-                QIcon(renderPropertyColorPixmap(size, Qt::white, pen, dpr)),
-                QObject::tr("White"));
-}
-
 SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_designGroup(new QGroupBox(contentWidget()))
-  , m_designLayout(new QGridLayout(m_designGroup))
   , m_showGuideLinesLabel(new QLabel(m_designGroup))
   , m_sceneBackgroundColorModeLabel(new QLabel(m_designGroup))
   , m_sceneZoomLevelLabel(new QLabel(m_designGroup))
@@ -87,7 +23,6 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
   , m_sceneZoomLevelBox(new QComboBox(m_designGroup))
   /****/
   , m_gridViewGroup(new QGroupBox(contentWidget()))
-  , m_gridViewLayout(new QGridLayout(m_gridViewGroup))
   , m_showGridViewDotsLabel(new QLabel(m_gridViewGroup))
   , m_snappingEnabledLabel(new QLabel(m_gridViewGroup))
   , m_gridSizeLabel(new QLabel(m_gridViewGroup))
@@ -97,7 +32,6 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
   , m_resetGridViewButton(new QPushButton(m_gridViewGroup))
   /****/
   , m_controlsGroup(new QGroupBox(contentWidget()))
-  , m_controlsLayout(new QGridLayout(m_controlsGroup))
   , m_showMouseoverOutlineLabel(new QLabel(m_controlsGroup))
   , m_controlOutlineModeLabel(new QLabel(m_controlsGroup))
   , m_showMouseoverOutlineCheckBox(new QCheckBox(m_controlsGroup))
@@ -110,17 +44,18 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
 
     /****/
 
-    m_designLayout->setSpacing(8);
-    m_designLayout->setContentsMargins(6, 6, 6, 6);
-    m_designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_designLayout->addWidget(m_showGuideLinesLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_designLayout->addWidget(m_sceneBackgroundColorModeLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_designLayout->addWidget(m_sceneZoomLevelLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_designLayout->addWidget(m_showGuideLinesCheckBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_designLayout->addWidget(m_sceneBackgroundColorModeBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_designLayout->addWidget(m_sceneZoomLevelBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_designLayout->setColumnStretch(3, 1);
-    m_designLayout->setColumnMinimumWidth(1, 20);
+    auto designLayout = new QGridLayout(m_designGroup);
+    designLayout->setSpacing(8);
+    designLayout->setContentsMargins(6, 6, 6, 6);
+    designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    designLayout->addWidget(m_showGuideLinesLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundColorModeLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneZoomLevelLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_showGuideLinesCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundColorModeBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneZoomLevelBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->setColumnStretch(3, 1);
+    designLayout->setColumnMinimumWidth(1, 20);
 
     m_designGroup->setTitle(tr("Design"));
     m_showGuideLinesLabel->setText(tr("Guide lines") + ":");
@@ -140,18 +75,19 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
 
     /****/
 
-    m_gridViewLayout->setSpacing(8);
-    m_gridViewLayout->setContentsMargins(6, 6, 6, 6);
-    m_gridViewLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_gridViewLayout->addWidget(m_showGridViewDotsLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridViewLayout->addWidget(m_snappingEnabledLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridViewLayout->addWidget(m_gridSizeLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridViewLayout->addWidget(m_showGridViewDotsCheckBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridViewLayout->addWidget(m_snappingEnabledCheckBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridViewLayout->addWidget(m_gridSizeSpinBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridViewLayout->addWidget(m_resetGridViewButton, 4, 3, Qt::AlignLeft | Qt::AlignVCenter);
-    m_gridViewLayout->setColumnStretch(4, 1);
-    m_gridViewLayout->setColumnMinimumWidth(1, 20);
+    auto gridViewLayout = new QGridLayout(m_gridViewGroup);
+    gridViewLayout->setSpacing(8);
+    gridViewLayout->setContentsMargins(6, 6, 6, 6);
+    gridViewLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    gridViewLayout->addWidget(m_showGridViewDotsLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    gridViewLayout->addWidget(m_snappingEnabledLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    gridViewLayout->addWidget(m_gridSizeLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    gridViewLayout->addWidget(m_showGridViewDotsCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    gridViewLayout->addWidget(m_snappingEnabledCheckBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    gridViewLayout->addWidget(m_gridSizeSpinBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    gridViewLayout->addWidget(m_resetGridViewButton, 2, 3, Qt::AlignLeft | Qt::AlignVCenter);
+    gridViewLayout->setColumnStretch(4, 1);
+    gridViewLayout->setColumnMinimumWidth(1, 20);
 
     m_gridViewGroup->setTitle(tr("Grid View") + ":");
     m_showGridViewDotsLabel->setText(tr("Grid view dots") + ":");
@@ -173,17 +109,19 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
 
     m_gridSizeSpinBox->setMinimum(1);
     m_gridSizeSpinBox->setMaximum(99);
+
     /****/
 
-    m_controlsLayout->setSpacing(8);
-    m_controlsLayout->setContentsMargins(6, 6, 6, 6);
-    m_controlsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    m_controlsLayout->addWidget(m_showMouseoverOutlineLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_controlsLayout->addWidget(m_controlOutlineModeLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    m_controlsLayout->addWidget(m_showMouseoverOutlineCheckBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_controlsLayout->addWidget(m_controlOutlineModeBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    m_controlsLayout->setColumnStretch(3, 1);
-    m_controlsLayout->setColumnMinimumWidth(1, 20);
+    auto controlsLayout = new QGridLayout(m_controlsGroup);
+    controlsLayout->setSpacing(8);
+    controlsLayout->setContentsMargins(6, 6, 6, 6);
+    controlsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    controlsLayout->addWidget(m_showMouseoverOutlineLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_controlOutlineModeLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_showMouseoverOutlineCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_controlOutlineModeBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->setColumnStretch(3, 1);
+    controlsLayout->setColumnMinimumWidth(1, 20);
 
     m_controlsGroup->setTitle(tr("Controls") + ":");
     m_showMouseoverOutlineLabel->setText(tr("Mouseover outline") + ":");
@@ -196,14 +134,14 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     m_showMouseoverOutlineCheckBox->setCursor(Qt::PointingHandCursor);
     m_controlOutlineModeBox->setCursor(Qt::PointingHandCursor);
 
+    m_controlOutlineModeBox->setIconSize({14, 14});
+
     /****/
 
-    addZoomLevels(m_sceneZoomLevelBox);
-    addOutlines(m_controlOutlineModeBox);
-    addBackgroundColors(m_sceneBackgroundColorModeBox);
+    fill();
 
     connect(m_resetGridViewButton, &QPushButton::clicked, this, [=] {
-        const SceneSettings settings;
+        const SceneSettings settings(0);
         m_showGridViewDotsCheckBox->setChecked(settings.showGridViewDots);
         m_snappingEnabledCheckBox->setChecked(settings.snappingEnabled);
         m_gridSizeSpinBox->setValue(settings.gridSize);
@@ -224,7 +162,7 @@ void SceneSettingsWidget::apply()
     /****/
     settings->showGuideLines = m_showGuideLinesCheckBox->isChecked();
     settings->sceneBackgroundColorMode = m_sceneBackgroundColorModeBox->currentIndex();
-    settings->sceneZoomLevel = toRatio(m_sceneZoomLevelBox->currentText());
+    settings->sceneZoomLevel = UtilityFunctions::textToZoomLevel(m_sceneZoomLevelBox->currentText());
     /****/
     settings->showGridViewDots = m_showGridViewDotsCheckBox->isChecked();
     settings->snappingEnabled = m_snappingEnabledCheckBox->isChecked();
@@ -246,7 +184,7 @@ void SceneSettingsWidget::reset()
     /****/
     m_showGuideLinesCheckBox->setChecked(settings->showGuideLines);
     m_sceneBackgroundColorModeBox->setCurrentIndex(settings->sceneBackgroundColorMode);
-    m_sceneZoomLevelBox->setCurrentText(toText(settings->sceneZoomLevel));
+    m_sceneZoomLevelBox->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
     /****/
     m_showGridViewDotsCheckBox->setChecked(settings->showGridViewDots);
     m_snappingEnabledCheckBox->setChecked(settings->snappingEnabled);
@@ -268,24 +206,50 @@ QString SceneSettingsWidget::title() const
 
 bool SceneSettingsWidget::containsWord(const QString& word) const
 {
-    return title().contains(word, Qt::CaseInsensitive)/*
-                    || m_fontGroup->title().contains(word, Qt::CaseInsensitive)
-                    || m_behavioralGroup->title().contains(word, Qt::CaseInsensitive)
-                    || m_themeLabel->text().contains(word, Qt::CaseInsensitive)
-                    || m_languageLabel->text().contains(word, Qt::CaseInsensitive)
-                    || m_hdpiLabel->text().contains(word, Qt::CaseInsensitive)
-                    || m_hdpiCheckBox->text().contains(word, Qt::CaseInsensitive)
-                    || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
-                    || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
-                    || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
-                    || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
-                    || m_visibleOutputWidgetLabel->text().contains(word, Qt::CaseInsensitive)
-                    || m_outputPanePopsCheckBox->text().contains(word, Qt::CaseInsensitive)
-                    || m_preserveDesignerStateCheckBox->text().contains(word, Qt::CaseInsensitive)
-                    || m_preserveDesignerStateCheckBox->toolTip().contains(word, Qt::CaseInsensitive)
-                    || m_designerStateResetButton->text().contains(word, Qt::CaseInsensitive)
-                    || m_designerStateResetButton->toolTip().contains(word, Qt::CaseInsensitive)
-                    || UtilityFunctions::comboContainsWord(m_themeBox, word)
-                    || UtilityFunctions::comboContainsWord(m_languageBox, word)
-                    || UtilityFunctions::comboContainsWord(m_visibleOutputWidgetBox, word)*/;
+    return title().contains(word, Qt::CaseInsensitive)
+            || m_designGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_gridViewGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_controlsGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_showGuideLinesLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_sceneBackgroundColorModeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_sceneZoomLevelLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_showGridViewDotsLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_snappingEnabledLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_gridSizeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_showMouseoverOutlineLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_controlOutlineModeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_showGuideLinesCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_showGridViewDotsCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_snappingEnabledCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_showMouseoverOutlineCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_resetGridViewButton->text().contains(word, Qt::CaseInsensitive)
+            || m_resetGridViewButton->toolTip().contains(word, Qt::CaseInsensitive)
+            || UtilityFunctions::comboContainsWord(m_sceneBackgroundColorModeBox, word)
+            || UtilityFunctions::comboContainsWord(m_sceneZoomLevelBox, word)
+            || UtilityFunctions::comboContainsWord(m_controlOutlineModeBox, word);
+}
+
+void SceneSettingsWidget::fill()
+{
+    using namespace PaintUtils;
+    const QPen pen(Qt::black, 2);
+    const qreal dpr = m_sceneBackgroundColorModeBox->devicePixelRatioF();
+    const QSize size = m_sceneBackgroundColorModeBox->iconSize();
+
+    m_sceneZoomLevelBox->addItems(UtilityFunctions::zoomTexts());
+
+    m_controlOutlineModeBox->addItem(QIcon(":/images/nooutline.svg"), tr("No outline"));
+    m_controlOutlineModeBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping rect outline"));
+    m_controlOutlineModeBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding rect outline"));
+
+    m_sceneBackgroundColorModeBox->addItem(
+    {renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)}, tr("Checkered"));
+    m_sceneBackgroundColorModeBox->addItem(
+    {renderPropertyColorPixmap(size, Qt::black, pen, dpr)}, tr("Black"));
+    m_sceneBackgroundColorModeBox->addItem(
+    {renderPropertyColorPixmap(size, Qt::darkGray, pen, dpr)}, tr("Dark gray"));
+    m_sceneBackgroundColorModeBox->addItem(
+    {renderPropertyColorPixmap(size, Qt::lightGray, pen, dpr)}, tr("Light gray"));
+    m_sceneBackgroundColorModeBox->addItem(
+    {renderPropertyColorPixmap(size, Qt::white, pen, dpr)},tr("White"));
 }

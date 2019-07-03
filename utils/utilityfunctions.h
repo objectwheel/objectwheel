@@ -109,6 +109,10 @@ QByteArray generatePasswordHash(const QByteArray& password);
 bool testAutoLogin(const QByteArray& hash, QString* email = nullptr, QString* pwhash = nullptr);
 bool testPassword(const QByteArray& password, const QByteArray& hash);
 void cleanSensitiveInformation(QString& message);
+QStringList zoomTexts();
+QVector<qreal> zoomLevels();
+QString zoomLevelToText(qreal ratio);
+qreal textToZoomLevel(const QString& text);
 
 } // UtilityFunctions
 

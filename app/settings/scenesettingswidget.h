@@ -8,16 +8,15 @@ class QGroupBox;
 class QSpinBox;
 class QCheckBox;
 class QPushButton;
-class QGridLayout;
 class QComboBox;
 
-struct SceneSettingsWidget : public SettingsWidget
+class SceneSettingsWidget final : public SettingsWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SceneSettingsWidget)
 
 public:
     explicit SceneSettingsWidget(QWidget* parent = nullptr);
-
     void apply() override;
     void reset() override;
     QIcon icon() const override;
@@ -25,8 +24,10 @@ public:
     bool containsWord(const QString& word) const override;
 
 private:
+    void fill();
+
+private:
     QGroupBox* m_designGroup;
-    QGridLayout* m_designLayout;
     QLabel* m_showGuideLinesLabel;
     QLabel* m_sceneBackgroundColorModeLabel;
     QLabel* m_sceneZoomLevelLabel;
@@ -35,7 +36,6 @@ private:
     QComboBox* m_sceneZoomLevelBox;
     /****/
     QGroupBox* m_gridViewGroup;
-    QGridLayout* m_gridViewLayout;
     QLabel* m_showGridViewDotsLabel;
     QLabel* m_snappingEnabledLabel;
     QLabel* m_gridSizeLabel;
@@ -45,7 +45,6 @@ private:
     QPushButton* m_resetGridViewButton;
     /****/
     QGroupBox* m_controlsGroup;
-    QGridLayout* m_controlsLayout;
     QLabel* m_showMouseoverOutlineLabel;
     QLabel* m_controlOutlineModeLabel;
     QCheckBox* m_showMouseoverOutlineCheckBox;
