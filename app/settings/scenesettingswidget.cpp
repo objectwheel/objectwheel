@@ -52,7 +52,7 @@ void addZoomLevels(QComboBox* comboBox)
 void addOutlines(QComboBox* comboBox)
 {
     comboBox->addItem(QIcon(":/images/nooutline.svg"), QObject::tr("No outline"));
-    comboBox->addItem(QIcon(":/images/outline.svg"), QObject::tr("Control outline"));
+    comboBox->addItem(QIcon(":/images/outline.svg"), QObject::tr("Clipping rect outline"));
     comboBox->addItem(QIcon(":/images/outerline.svg"), QObject::tr("Bounding rect outline"));
 }
 
@@ -65,7 +65,7 @@ void addBackgroundColors(QComboBox* comboBox)
     pen.setWidth(2);
     comboBox->addItem(
                 QIcon(renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)),
-                QObject::tr("Textured"));
+                QObject::tr("Checkered"));
     comboBox->addItem(
                 QIcon(renderPropertyColorPixmap(size, Qt::black, pen, dpr)),
                 QObject::tr("Black"));
@@ -158,7 +158,7 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     m_gridViewLayout->setColumnMinimumWidth(1, 20);
 
     m_gridViewGroup->setTitle(tr("Grid View") + ":");
-    m_showGridViewDotsLabel->setText(tr("Grid View Dots") + ":");
+    m_showGridViewDotsLabel->setText(tr("Grid view dots") + ":");
     m_snappingEnabledLabel->setText(tr("Snapping") + ":");
     m_gridSizeLabel->setText(tr("Grid size") + ":");
     m_showGridViewDotsCheckBox->setText(tr("Show grid view dots"));
