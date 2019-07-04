@@ -1,5 +1,7 @@
 #include <form.h>
 #include <designerscene.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -34,19 +36,24 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
+    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+
+    // Background
+    painter->fillRect(rect(), settings->toBackgroundBrush());
+
+    // Content
     Control::paint(painter, option, widget);
 
-    QVector<QPointF> points;
-    for (qreal x = 0; x < rect().right(); x += scene()->gridSize()) {
-        for (qreal y = 0; y < rect().bottom(); y += scene()->gridSize())
-            points.append(QPointF(x, y));
+    // Grid view dots
+    if (settings->showGridViewDots) {
+        QVector<QPointF> points;
+        for (qreal x = 0; x < rect().right(); x += settings->gridSize) {
+            for (qreal y = 0; y < rect().bottom(); y += settings->gridSize)
+                points.append(QPointF(x, y));
+        }
+        painter->setPen("#505050");
+        painter->drawPoints(points.data(), points.size());
     }
-    painter->setBrush(Qt::NoBrush);
-    painter->setPen("#505050");
-    painter->drawPoints(points.data(), points.size());
-
-    painter->setPen(isSelected() ? "#4BA2FF" : "#b0b0b0");
-    painter->drawRect(rect());
 
     QString text(QStringLiteral("%1 (%2×%3)").arg(id()).arg(size().width()).arg(size().width()));
     QFontMetricsF fm(painter->font());

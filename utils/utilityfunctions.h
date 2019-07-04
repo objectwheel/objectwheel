@@ -111,8 +111,9 @@ bool testPassword(const QByteArray& password, const QByteArray& hash);
 void cleanSensitiveInformation(QString& message);
 QStringList zoomTexts();
 QVector<qreal> zoomLevels();
-QString zoomLevelToText(qreal ratio);
+QString zoomLevelToText(qreal level);
 qreal textToZoomLevel(const QString& text);
+qreal roundZoomLevel(qreal level);
 
 } // UtilityFunctions
 

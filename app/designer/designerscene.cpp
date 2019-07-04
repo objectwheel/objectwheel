@@ -2,6 +2,8 @@
 #include <suppressor.h>
 #include <resizer.h>
 #include <controlpropertymanager.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -31,9 +33,6 @@ bool itemMoving = false;
 }
 
 DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
-  , m_gridSize(8)
-  , m_snapping(true)
-  , m_showOutlines(false)
   , m_currentForm(nullptr)
 {
     connect(this, &DesignerScene::changed, [=] {
@@ -89,28 +88,6 @@ Form* DesignerScene::currentForm()
     return m_currentForm.data();
 }
 
-bool DesignerScene::snapping() const
-{
-    return m_snapping;
-}
-
-void DesignerScene::setSnapping(bool snapping)
-{
-    m_snapping = snapping;
-}
-
-bool DesignerScene::showOutlines() const
-{
-    return m_showOutlines;
-}
-
-void DesignerScene::setShowOutlines(bool value)
-{
-    m_showOutlines = value;
-    if (m_currentForm)
-        m_currentForm->update();
-}
-
 QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
 {
     QList<Control*> controls;
@@ -163,6 +140,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (m_currentForm == nullptr)
         return;
 
+    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
     for (auto ctrl : selectedControls) {
@@ -173,7 +151,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     if (m_currentForm && !selectedControls.isEmpty() && itemPressed && !resizedAnyway) {
         itemMoving = true;
-        if (m_snapping) {
+        if (settings->snappingEnabled) {
             auto controlUnderMouse = (Control*)(itemAt(event->scenePos(), QTransform()));
 
             if (!controlUnderMouse)
@@ -285,11 +263,6 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
     }
 }
 
-int DesignerScene::gridSize() const
-{
-    return m_gridSize;
-}
-
 QPointF DesignerScene::lastMousePos() const
 {
     return m_lastMousePos;
@@ -298,6 +271,8 @@ QPointF DesignerScene::lastMousePos() const
 // FIXME: This function has severe performance issues.
 void DesignerScene::stick() const
 {
+    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(m_currentForm);
 
@@ -315,8 +290,8 @@ void DesignerScene::stick() const
             | ControlPropertyManager::CompressedCall;
 
     const QRectF& frame = united(selectedControls);
-    const qreal dx = int(frame.x() / m_gridSize) * m_gridSize - frame.x();
-    const qreal dy = int(frame.y() / m_gridSize) * m_gridSize - frame.y();
+    const qreal dx = int(frame.x() / settings->gridSize) * settings->gridSize - frame.x();
+    const qreal dy = int(frame.y() / settings->gridSize) * settings->gridSize - frame.y();
 
     for (Control* control : selectedControls)
         ControlPropertyManager::setPos(control, {control->x() + dx, control->y() + dy}, options);
@@ -465,9 +440,6 @@ void DesignerScene::discharge()
 
     m_forms.clear();
     m_currentForm.clear();
-
-    m_snapping = true;
-    m_showOutlines = false;
     m_lastMousePos = QPointF();
 
     itemPressed = false;

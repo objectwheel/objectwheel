@@ -1,5 +1,6 @@
 #include <scenesettings.h>
 #include <designersettings.h>
+#include <QBrush>
 
 static const char g_showGuideLines[] = "ShowGuideLines";
 static const char g_sceneBackgroundColor[] = "SceneBackgroundColor";
@@ -68,4 +69,20 @@ void SceneSettings::reset()
 const char* SceneSettings::category() const
 {
     return "Scene";
+}
+
+QBrush SceneSettings::toBackgroundBrush() const
+{
+    QBrush brush(Qt::SolidPattern);
+    if (sceneBackgroundColor == 0)
+        brush.setTexture(QPixmap(":/images/texture.svg"));
+    else if (sceneBackgroundColor == 1)
+        brush.setColor(Qt::black);
+    else if (sceneBackgroundColor == 2)
+        brush.setColor(Qt::darkGray);
+    else if (sceneBackgroundColor == 3)
+        brush.setColor(Qt::lightGray);
+    else if (sceneBackgroundColor == 4)
+        brush.setColor(Qt::white);
+    return brush;
 }

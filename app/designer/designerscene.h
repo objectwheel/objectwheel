@@ -18,18 +18,12 @@ public:
     const QList<Form*>& forms() const;
     void setCurrentForm(Form* currentForm);
     Form* currentForm();
-    bool snapping() const;
-    void setSnapping(bool snapping);
-    bool showOutlines() const;
-    void setShowOutlines(bool value);
 
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QPointF lastMousePos() const;
     void stick() const;
     QVector<QLineF> guideLines() const;
-
-    int gridSize() const;
 
 public slots:
     void discharge();
@@ -51,9 +45,6 @@ signals:
     void currentFormChanged(Form* currentForm);
 
 private:
-    int m_gridSize;
-    bool m_snapping;
-    bool m_showOutlines;
     QPointF m_lastMousePos;
     QList<Control*> m_draggedControls;
     QList<Form*> m_forms;

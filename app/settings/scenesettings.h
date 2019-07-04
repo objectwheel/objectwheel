@@ -11,6 +11,7 @@ struct SceneSettings final : public Settings
     void write() override;
     void reset() override;
     const char* category() const override;
+    QBrush toBackgroundBrush() const;
 
     bool showGuideLines;
     int sceneBackgroundColor;

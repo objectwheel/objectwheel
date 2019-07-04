@@ -604,10 +604,10 @@ QVector<qreal> zoomLevels()
     return levels;
 }
 
-QString zoomLevelToText(qreal ratio)
+QString zoomLevelToText(qreal level)
 {
     for (int i = 0; i < zoomLevels().size(); ++i) {
-        if (zoomLevels().at(i) == ratio)
+        if (zoomLevels().at(i) == level)
             return zoomTexts().at(i);
     }
     return QStringLiteral("100 %");
@@ -620,6 +620,24 @@ qreal textToZoomLevel(const QString& text)
             return zoomLevels().at(i);
     }
     return 1.0;
+}
+
+qreal roundZoomLevel(qreal level)
+{
+    if (level < 0.1)
+        return 0.1;
+    else if (level >= 0.1 && level < 0.25)
+        return 0.1;
+    else if (level >= 0.25 && level < 0.5)
+        return 0.25;
+    else if (level >= 0.5 && level < 0.75)
+        return 0.5;
+    else if (level >= 0.75 && level < 0.9)
+        return 0.75;
+    else if (level >= 0.9 && level < 1.0)
+        return 0.9;
+    else
+        return 1.0;
 }
 
 } // UtilityFunctions

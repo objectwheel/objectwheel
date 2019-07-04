@@ -15,6 +15,8 @@
 #include <projectmanager.h>
 #include <qmlcodeeditor.h>
 #include <qmlcodedocument.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 #include <QMenu>
 #include <QDir>
@@ -70,88 +72,6 @@ QString methodName(const QString& signal)
     QString method(signal);
     method.replace(0, 1, method[0].toUpper());
     return method.prepend("on");
-}
-
-QString findText(qreal ratio)
-{
-    if (ratio == 0.1)
-        return "10 %";
-    else if (ratio == 0.25)
-        return "25 %";
-    else if (ratio == 0.50)
-        return "50 %";
-    else if (ratio == 0.75)
-        return "75 %";
-    else if (ratio == 0.90)
-        return "90 %";
-    else if (ratio == 1.0)
-        return "100 %";
-    else if (ratio == 1.25)
-        return "125 %";
-    else if (ratio == 1.50)
-        return "150 %";
-    else if (ratio == 1.75)
-        return "175 %";
-    else if (ratio == 2.0)
-        return "200 %";
-    else if (ratio == 3.0)
-        return "300 %";
-    else if (ratio == 5.0)
-        return "500 %";
-    else if (ratio == 10.0)
-        return "1000 %";
-    else
-        return "100 %";
-}
-
-qreal roundRatio(qreal ratio)
-{
-    if (ratio < 0.1)
-        return 0.1;
-    else if (ratio >= 0.1 && ratio < 0.25)
-        return 0.1;
-    else if (ratio >= 0.25 && ratio < 0.5)
-        return 0.25;
-    else if (ratio >= 0.5 && ratio < 0.75)
-        return 0.5;
-    else if (ratio >= 0.75 && ratio < 0.9)
-        return 0.75;
-    else if (ratio >= 0.9 && ratio < 1.0)
-        return 0.9;
-    else
-        return 1.0;
-}
-
-qreal findRatio(const QString& text)
-{
-    if (text == "10 %")
-        return 0.1;
-    else if (text == "25 %")
-        return 0.25;
-    else if (text == "50 %")
-        return 0.50;
-    else if (text == "75 %")
-        return 0.75;
-    else if (text == "90 %")
-        return 0.90;
-    else if (text == "100 %")
-        return 1.0;
-    else if (text == "125 %")
-        return 1.25;
-    else if (text == "150 %")
-        return 1.50;
-    else if (text == "175 %")
-        return 1.75;
-    else if (text == "200 %")
-        return 2.0;
-    else if (text == "300 %")
-        return 3.0;
-    else if (text == "500 %")
-        return 5.0;
-    else if (text == "1000 %")
-        return 10.0;
-    else
-        return 1.0;
 }
 
 bool warnIfFileDoesNotExist(const QString& filePath)
@@ -219,12 +139,13 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_zoomlLevelCombobox->setMinimumWidth(100);
     m_zoomlLevelCombobox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
+    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
     m_outlineButton->setCheckable(true);
     m_outlineButton->setChecked(scene()->showOutlines());
     m_hideDockWidgetTitleBarsButton->setCheckable(true);
     m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setCheckable(true);
-    m_snappingButton->setChecked(scene()->snapping());
+    m_snappingButton->setChecked(settings->snappingEnabled);
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_clearButton->setCursor(Qt::PointingHandCursor);
@@ -390,11 +311,10 @@ void DesignerView::onOutlineButtonClick(bool value)
 
 void DesignerView::onFitButtonClick()
 {
-    static auto ratios = { 0.1, 0.25, 0.5, 0.75, 0.9, 1.0, 1.25, 1.50, 1.75, 2.0, 3.0, 5.0, 10.0 };
-    auto diff = qMin(width() / scene()->width(), height() / scene()->height());
-    for (auto ratio : ratios) {
-        if (roundRatio(diff) == ratio)
-            m_zoomlLevelCombobox->setCurrentText(findText(ratio));
+    qreal diff = qMin(width() / scene()->width(), height() / scene()->height());
+    for (qreal level : UtilityFunctions::zoomLevels()) {
+        if (UtilityFunctions::roundZoomLevel(diff) == level)
+            m_zoomlLevelCombobox->setCurrentText(UtilityFunctions::zoomLevelToText(level));
     }
 }
 
@@ -410,7 +330,7 @@ void DesignerView::onRedoButtonClick()
 
 void DesignerView::onZoomLevelChange(const QString& text)
 {
-    qreal ratio = findRatio(text);
+    qreal ratio = UtilityFunctions::textToZoomLevel(text);
     scaleScene(ratio);
 }
 
@@ -445,12 +365,13 @@ void DesignerView::onClearButtonClick()
 
 void DesignerView::discharge()
 {
+    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
     scene()->discharge();
     update();
     m_signalChooserDialog->discharge();
     m_outlineButton->setChecked(scene()->showOutlines());
     m_hideDockWidgetTitleBarsButton->setChecked(false);
-    m_snappingButton->setChecked(scene()->snapping());
+    m_snappingButton->setChecked(settings->snappingEnabled);
     onZoomLevelChange("100 %");
 }
 

@@ -13,6 +13,8 @@
 #include <centralwidget.h>
 #include <designerview.h>
 #include <mainwindow.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 #include <QCursor>
 #include <QPainter>
@@ -436,7 +438,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 {
-   WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
+    WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
 }
 
 void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
@@ -476,8 +478,21 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
         resizer->updatePosition();
 }
 
+bool showGuideLines;
+int sceneBackgroundColor;
+qreal sceneZoomLevel;
+/****/
+bool showGridViewDots;
+bool snappingEnabled;
+int gridSize;
+/****/
+bool showMouseoverOutline;
+int controlOutline;
+
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
+    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+
     if (parentControl() && parentControl()->clip() && !m_dragging) {
         painter->setClipRect(
                     rect().intersected(
@@ -506,7 +521,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
         }
     }
 
-    if (!form() && (isSelected() || scene()->showOutlines() || m_hoverOn)) {
+    if (isSelected() || scene()->showOutlines() || m_hoverOn) {
         QPen pen;
         pen.setStyle(Qt::DotLine);
         painter->setBrush(Qt::transparent);
