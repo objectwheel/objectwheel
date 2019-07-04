@@ -45,7 +45,7 @@ private slots:
     void onRedoButtonClick();
     void onClearButtonClick();
     void onRefreshButtonClick();
-    void onOutlineButtonClick(bool value);
+    void onOutlineButtonTrigger(QAction* action);
     void onSnappingButtonClick(bool value);
     void onZoomLevelChange(const QString& text);
 

@@ -140,7 +140,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (m_currentForm == nullptr)
         return;
 
-    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
     for (auto ctrl : selectedControls) {
@@ -271,7 +271,7 @@ QPointF DesignerScene::lastMousePos() const
 // FIXME: This function has severe performance issues.
 void DesignerScene::stick() const
 {
-    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
 
     auto selectedControls = this->selectedControls();
     selectedControls.removeOne(m_currentForm);

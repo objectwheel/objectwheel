@@ -39,6 +39,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
   , m_dialogButtonBox(new QDialogButtonBox(this))
 {
     setWindowTitle(tr("Preferences"));
+    setWindowModality(Qt::ApplicationModal);
     setAttribute(Qt::WA_QuitOnClose, false);
 
     addPage(new GeneralSettingsPage(this));

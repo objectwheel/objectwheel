@@ -36,7 +36,7 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
 
     // Background
     painter->fillRect(rect(), settings->toBackgroundBrush());

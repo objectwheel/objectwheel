@@ -89,7 +89,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
   , m_lastScale(1.0)
   , m_signalChooserDialog(new SignalChooserDialog(this))
   , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
-  , m_toolBar(new QToolBar)
+  , m_toolBar(new QToolBar(this))
   , m_undoButton(new QToolButton)
   , m_redoButton(new QToolButton)
   , m_clearButton(new QToolButton)
@@ -139,9 +139,18 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_zoomlLevelCombobox->setMinimumWidth(100);
     m_zoomlLevelCombobox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
-    m_outlineButton->setCheckable(true);
-    m_outlineButton->setChecked(scene()->showOutlines());
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    auto outlineMenu = new QMenu(m_outlineButton);
+    auto ag = new QActionGroup(outlineMenu);
+    ag->addAction(outlineMenu->addAction(QIcon(":/images/nooutline.svg"), tr("No outline")));
+    ag->addAction(outlineMenu->addAction(QIcon(":/images/outline.svg"), tr("Clipping rect outline")));
+    ag->addAction(outlineMenu->addAction(QIcon(":/images/outerline.svg"), tr("Bounding rect outline")));
+    for (QAction* a : ag->actions())
+        a->setCheckable(true);
+    ag->actions().at(settings->controlOutline)->setChecked(true);
+    m_outlineButton->setIcon(ag->actions().at(settings->controlOutline)->icon());
+    m_outlineButton->setPopupMode(QToolButton::InstantPopup);
+    m_outlineButton->setMenu(outlineMenu);
     m_hideDockWidgetTitleBarsButton->setCheckable(true);
     m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setCheckable(true);
@@ -172,12 +181,11 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_undoButton->setIcon(Utils::Icons::UNDO_TOOLBAR.icon());
     m_redoButton->setIcon(Utils::Icons::REDO_TOOLBAR.icon());
     m_snappingButton->setIcon(Utils::Icons::SNAPPING_TOOLBAR.icon());
-    m_outlineButton->setIcon(Utils::Icons::BOUNDING_RECT.icon());
     m_hideDockWidgetTitleBarsButton->setIcon(Utils::Icons::CLOSE_SPLIT_TOP.icon());
     m_fitButton->setIcon(Utils::Icons::FITTOVIEW_TOOLBAR.icon());
 
     connect(m_snappingButton, &QToolButton::toggled, this, &DesignerView::onSnappingButtonClick);
-    connect(m_outlineButton, &QToolButton::toggled, this, &DesignerView::onOutlineButtonClick);
+    connect(m_outlineButton, &QToolButton::triggered, this, &DesignerView::onOutlineButtonTrigger);
     connect(m_hideDockWidgetTitleBarsButton, &QToolButton::toggled, this, &DesignerView::hideDockWidgetTitleBars);
     connect(m_zoomlLevelCombobox, &QComboBox::currentTextChanged, this, &DesignerView::onZoomLevelChange);
     connect(m_fitButton, &QToolButton::clicked, this, &DesignerView::onFitButtonClick);
@@ -194,9 +202,6 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_hideDockWidgetTitleBarsButton->setFixedHeight(20);
     m_zoomlLevelCombobox->setFixedHeight(20);
 
-    m_toolBar->move(0, 0);
-    m_toolBar->resize(200, 24);
-    m_toolBar->setFixedHeight(24);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_undoButton);
     m_toolBar->addWidget(m_redoButton);
@@ -301,12 +306,19 @@ qreal DesignerView::scalingRatio() const
 
 void DesignerView::onSnappingButtonClick(bool value)
 {
-    scene()->setSnapping(value);
+    // FIXME
+    SceneSettings* settings = DesignerSettings::sceneSettings();
+    settings->snappingEnabled = value;
+    settings->write();
 }
 
-void DesignerView::onOutlineButtonClick(bool value)
+void DesignerView::onOutlineButtonTrigger(QAction* action)
 {
-    scene()->setShowOutlines(value);
+    m_outlineButton->setIcon(action->icon());
+    // FIXME
+//    SceneSettings* settings = DesignerSettings::sceneSettings();
+//    settings->controlOutline = m_outlineButton->currentIndex();
+//    settings->write();
 }
 
 void DesignerView::onFitButtonClick()
@@ -365,11 +377,11 @@ void DesignerView::onClearButtonClick()
 
 void DesignerView::discharge()
 {
-    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
     scene()->discharge();
     update();
     m_signalChooserDialog->discharge();
-    m_outlineButton->setChecked(scene()->showOutlines());
+//  FIXME  m_outlineButton->setChecked(scene()->showOutlines());
     m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setChecked(settings->snappingEnabled);
     onZoomLevelChange("100 %");
@@ -472,6 +484,7 @@ DesignerScene* DesignerView::scene() const
 void DesignerView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
+    m_toolBar->setGeometry(0, 0, width(), 24);
     scene()->centralize();
 }
 

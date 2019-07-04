@@ -478,20 +478,9 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
         resizer->updatePosition();
 }
 
-bool showGuideLines;
-int sceneBackgroundColor;
-qreal sceneZoomLevel;
-/****/
-bool showGridViewDots;
-bool snappingEnabled;
-int gridSize;
-/****/
-bool showMouseoverOutline;
-int controlOutline;
-
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    const SceneSettings* settings = DesignerSettings::instance()->sceneSettings();
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
 
     if (parentControl() && parentControl()->clip() && !m_dragging) {
         painter->setClipRect(
@@ -511,34 +500,35 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
     gradient.setColorAt(1, QColor("#174C4C4C").darker(120));
 
+    // FIXME
     if (m_dragIn) {
-        if (scene()->showOutlines()) {
-            painter->fillRect(rect(), gradient);
-        } else {
+//        if (scene()->showOutlines()) {
+//            painter->fillRect(rect(), gradient);
+//        } else {
             painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
             painter->fillRect(rect(), gradient);
             painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
-        }
+//        }
     }
 
-    if (isSelected() || scene()->showOutlines() || m_hoverOn) {
-        QPen pen;
-        pen.setStyle(Qt::DotLine);
-        painter->setBrush(Qt::transparent);
-        painter->setClipping(false);
+//    if (isSelected() || scene()->showOutlines() || m_hoverOn) {
+//        QPen pen;
+//        pen.setDashPattern({2, 2, 2, 2});
+//        painter->setBrush(Qt::transparent);
+//        painter->setClipping(false);
 
-        if (isSelected()) {
-            pen.setColor(Qt::black);
-        } else if (m_hoverOn) {
-            pen.setStyle(Qt::SolidLine);
-            pen.setColor("#4BA2FF");
-        } else if (scene()->showOutlines()) {
-            pen.setColor("#777777");
-        }
+//        if (isSelected()) {
+//            pen.setColor(Qt::black);
+//        } else if (m_hoverOn) {
+//            pen.setStyle(Qt::SolidLine);
+//            pen.setColor("#4BA2FF");
+////        } else if (scene()->showOutlines()) {
+////            pen.setColor("#777777");
+////        }
 
-        painter->setPen(pen);
-        painter->drawRect(rect());
-    }
+//        painter->setPen(pen);
+//        painter->drawRect(rect());
+//    }
 }
 
 void Control::updateImage(const RenderResult& result)
