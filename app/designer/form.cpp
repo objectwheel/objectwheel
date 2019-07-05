@@ -44,6 +44,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     // Content
     Control::paint(painter, option, widget);
 
+    painter->setClipRect(rect());
     // Grid view dots
     if (settings->showGridViewDots) {
         QVector<QPointF> points;
@@ -54,6 +55,12 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
         painter->setPen("#505050");
         painter->drawPoints(points.data(), points.size());
     }
+
+    // Form outline
+    painter->setPen("#b0b0b0");
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(rect());
+    painter->setClipping(false);
 
     QString text(QStringLiteral("%1 (%2×%3)").arg(id()).arg(size().width()).arg(size().width()));
     QFontMetricsF fm(painter->font());

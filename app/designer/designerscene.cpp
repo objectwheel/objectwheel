@@ -8,10 +8,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QPointer>
-#include <QDebug>
+#include <QPen>
 
-#define GUIDELINE_COLOR ("#4BA2FF")
-#define LINE_COLOR ("#606467")
 #define NGCS_PANEL_WIDTH (100)
 #define MAGNETIC_FIELD (3)
 
@@ -176,7 +174,6 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
             selectedControl->setProperty(zValueProperty, selectedControl->zValue());
             selectedControl->setZValue(std::numeric_limits<qreal>::max());
             selectedControl->setDragging(true);
-            qDebug() << selectedControl->zValue();
         }
     }
 
@@ -201,7 +198,6 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     for (Control* draggedControl : m_draggedControls) {
         draggedControl->setZValue(draggedControl->property(zValueProperty).toReal());
         draggedControl->setDragging(false);
-        qDebug() << draggedControl->zValue();
     }
 
     update();
@@ -210,8 +206,6 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
-
-    painter->setRenderHint(QPainter::Antialiasing);
 
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
@@ -241,25 +235,14 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
         }
 
         const auto& guideLines = this->guideLines();
-        painter->setPen(GUIDELINE_COLOR);
+        painter->setPen(highlightPen());
         painter->drawLines(guideLines);
 
         for (QLineF line : guideLines) {
-            painter->setBrush(QColor(GUIDELINE_COLOR));
+            painter->setBrush(highlightPen().color());
             painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
         }
-    }
-
-    if (m_currentForm == nullptr) {
-        QPen pen;
-        pen.setWidthF(1);
-        QRectF rect(0, 0, 150, 60);
-        rect.moveCenter(sceneRect().center());
-        pen.setStyle(Qt::DotLine);
-        pen.setColor(LINE_COLOR);
-        painter->setPen(pen);
-        painter->drawText(rect, "No tools selected", QTextOption(Qt::AlignCenter));
     }
 }
 
@@ -431,6 +414,19 @@ QVector<QLineF> DesignerScene::guideLines() const
                             parent->mapToScene(QPointF(ccenter.x(), geometry.bottomLeft().y())));
     }
     return lines;
+}
+
+QPen DesignerScene::highlightPen()
+{
+    QPen pen(QBrush("#4ba2ff"), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    pen.setCosmetic(true);
+    return pen;
+}
+
+QPen DesignerScene::nonCosmeticHighlightPen()
+{
+    QPen pen(QBrush("#4ba2ff"), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    return pen;
 }
 
 void DesignerScene::discharge()

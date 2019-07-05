@@ -640,4 +640,24 @@ qreal roundZoomLevel(qreal level)
         return 1.0;
 }
 
+QPointF topCenter(const QRectF& rect)
+{
+    return {rect.center().x(), rect.top()};
+}
+
+QPointF leftCenter(const QRectF& rect)
+{
+    return {rect.left(), rect.center().y()};
+}
+
+QPointF rightCenter(const QRectF& rect)
+{
+    return {rect.right(), rect.center().y()};
+}
+
+QPointF bottomCenter(const QRectF& rect)
+{
+    return {rect.center().x(), rect.bottom()};
+}
+
 } // UtilityFunctions

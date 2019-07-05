@@ -25,6 +25,9 @@ public:
     void stick() const;
     QVector<QLineF> guideLines() const;
 
+    static QPen highlightPen();
+    static QPen nonCosmeticHighlightPen();
+
 public slots:
     void discharge();
     void centralize();

@@ -20,6 +20,7 @@
 #include <QPainter>
 #include <QMimeData>
 #include <QGraphicsSceneDragDropEvent>
+#include <QStyleOption>
 
 QList<Control*> Control::m_controls;
 
@@ -29,7 +30,6 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_popup(false)
   , m_window(false)
   , m_dragIn(false)
-  , m_hoverOn(false)
   , m_dragging(false)
   , m_resized(false)
   , m_dir(dir)
@@ -441,20 +441,6 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
     WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
 }
 
-void Control::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-{
-    QGraphicsWidget::hoverEnterEvent(event);
-    m_hoverOn = true;
-    update();
-}
-
-void Control::hoverLeaveEvent(QGraphicsSceneHoverEvent* event)
-{
-    QGraphicsWidget::hoverLeaveEvent(event);
-    m_hoverOn = false;
-    update();
-}
-
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {    
     switch (change) {
@@ -478,7 +464,7 @@ void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
         resizer->updatePosition();
 }
 
-void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
+void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
 
@@ -511,9 +497,9 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 //        }
     }
 
-//    if (isSelected() || scene()->showOutlines() || m_hoverOn) {
+//    if (isSelected() /*|| scene()->showOutlines() */|| m_hoverOn) {
 //        QPen pen;
-//        pen.setDashPattern({2, 2, 2, 2});
+//        pen.setDashPattern({1,2,1,2});
 //        painter->setBrush(Qt::transparent);
 //        painter->setClipping(false);
 
@@ -524,11 +510,27 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 //            pen.setColor("#4BA2FF");
 ////        } else if (scene()->showOutlines()) {
 ////            pen.setColor("#777777");
-////        }
+//        }
 
 //        painter->setPen(pen);
 //        painter->drawRect(rect());
 //    }
+
+    // Hover
+    if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver) {
+        painter->setRenderHint(QPainter::Antialiasing, false);
+        painter->setPen(scene()->highlightPen());
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRect(rect().adjusted(-0.5, -0.5, 0, 0));
+        painter->setRenderHint(QPainter::Antialiasing, true);
+    }
+
+    // Selection
+    if (isSelected()) {
+        painter->setPen(scene()->highlightPen());
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRect(rect());
+    }
 }
 
 void Control::updateImage(const RenderResult& result)

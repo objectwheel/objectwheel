@@ -114,6 +114,10 @@ QVector<qreal> zoomLevels();
 QString zoomLevelToText(qreal level);
 qreal textToZoomLevel(const QString& text);
 qreal roundZoomLevel(qreal level);
+QPointF topCenter(const QRectF& rect);
+QPointF leftCenter(const QRectF& rect);
+QPointF rightCenter(const QRectF& rect);
+QPointF bottomCenter(const QRectF& rect);
 
 } // UtilityFunctions
 
