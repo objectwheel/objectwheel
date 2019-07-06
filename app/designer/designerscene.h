@@ -25,8 +25,8 @@ public:
     void stick() const;
     QVector<QLineF> guideLines() const;
 
-    static QPen highlightPen();
-    static QPen nonCosmeticHighlightPen();
+    static QColor highlightColor();
+    static QPen pen(const QColor& color = highlightColor(), qreal width = 1, bool cosmetic = true);
 
 public slots:
     void discharge();

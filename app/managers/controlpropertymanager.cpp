@@ -58,7 +58,7 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setX";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setX, QPointer<Control>(control),
-                                           x, options ^ CompressedCall);
+                                           x, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -101,7 +101,7 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setY";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setY, QPointer<Control>(control),
-                                           y, options ^ CompressedCall);
+                                           y, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -142,7 +142,7 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setZ";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setZ, QPointer<Control>(control),
-                                           z, options ^ CompressedCall);
+                                           z, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -176,7 +176,7 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setWidth";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setWidth, QPointer<Control>(control),
-                                           width, options ^ CompressedCall);
+                                           width, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -218,7 +218,7 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setHeight";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setHeight, QPointer<Control>(control),
-                                           height, options ^ CompressedCall);
+                                           height, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -260,7 +260,7 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setPos";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setPos, QPointer<Control>(control),
-                                           pos, options ^ CompressedCall);
+                                           pos, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -312,7 +312,7 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setSize";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setSize, QPointer<Control>(control),
-                                           size, options ^ CompressedCall);
+                                           size, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -363,7 +363,7 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setGeometry";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setGeometry, QPointer<Control>(control),
-                                           geometry, options ^ CompressedCall);
+                                           geometry, (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -426,7 +426,8 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setParent";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setParent, QPointer<Control>(control),
-                                           QPointer<Control>(parentControl), options ^ CompressedCall);
+                                           QPointer<Control>(parentControl),
+                                           (options & ~CompressedCall) | DontApplyDesigner);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 

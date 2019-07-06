@@ -37,10 +37,16 @@ public:
     static QList<Resizer*> init(Control* control);
 
 private:
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+    void calculatePositionDifference(const QGraphicsSceneMouseEvent* event, qreal* dx, qreal* dy);
+
+private:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
+    qreal m_collectiveDx, m_collectiveDy;
     Placement m_placement;
 };
 

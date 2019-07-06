@@ -52,15 +52,15 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
             for (qreal y = 0; y < rect().bottom(); y += settings->gridSize)
                 points.append(QPointF(x, y));
         }
-        painter->setPen("#505050");
+        painter->setPen(scene()->pen("#505050", 1, false));
         painter->drawPoints(points.data(), points.size());
     }
 
-    // Form outline
-    painter->setPen("#b0b0b0");
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(rect());
-    painter->setClipping(false);
+//    // Form outline
+//    painter->setPen("#b0b0b0");
+//    painter->setBrush(Qt::NoBrush);
+//    painter->drawRect(rect());
+//    painter->setClipping(false);
 
     QString text(QStringLiteral("%1 (%2×%3)").arg(id()).arg(size().width()).arg(size().width()));
     QFontMetricsF fm(painter->font());

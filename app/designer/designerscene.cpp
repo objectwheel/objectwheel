@@ -235,11 +235,11 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
         }
 
         const auto& guideLines = this->guideLines();
-        painter->setPen(highlightPen());
+        painter->setPen(pen());
         painter->drawLines(guideLines);
 
         for (QLineF line : guideLines) {
-            painter->setBrush(highlightPen().color());
+            painter->setBrush(highlightColor());
             painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
         }
@@ -416,16 +416,16 @@ QVector<QLineF> DesignerScene::guideLines() const
     return lines;
 }
 
-QPen DesignerScene::highlightPen()
+QColor DesignerScene::highlightColor()
 {
-    QPen pen(QBrush("#4ba2ff"), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
-    pen.setCosmetic(true);
-    return pen;
+    static const QColor highlight("#4ba2ff");
+    return highlight;
 }
 
-QPen DesignerScene::nonCosmeticHighlightPen()
+QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
 {
-    QPen pen(QBrush("#4ba2ff"), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    QPen pen(color, width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    pen.setCosmetic(cosmetic);
     return pen;
 }
 

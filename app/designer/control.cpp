@@ -21,6 +21,7 @@
 #include <QMimeData>
 #include <QGraphicsSceneDragDropEvent>
 #include <QStyleOption>
+#include <QDebug>
 
 QList<Control*> Control::m_controls;
 
@@ -42,7 +43,6 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
     setFlag(ItemIsMovable);
-    setFlag(ItemIsFocusable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
@@ -519,17 +519,19 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     // Hover
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver) {
         painter->setRenderHint(QPainter::Antialiasing, false);
-        painter->setPen(scene()->highlightPen());
         painter->setBrush(Qt::NoBrush);
-        painter->drawRect(rect().adjusted(-0.5, -0.5, 0, 0));
+        painter->setPen(scene()->pen());
+        painter->drawRect(rect().adjusted(0, 0, -0.5 / settings->sceneZoomLevel, -0.5 / settings->sceneZoomLevel));
         painter->setRenderHint(QPainter::Antialiasing, true);
     }
 
     // Selection
     if (isSelected()) {
-        painter->setPen(scene()->highlightPen());
+        painter->setRenderHint(QPainter::Antialiasing, false);
+        painter->setPen(scene()->pen(scene()->highlightColor(), 2));
         painter->setBrush(Qt::NoBrush);
         painter->drawRect(rect());
+        painter->setRenderHint(QPainter::Antialiasing, true);
     }
 }
 

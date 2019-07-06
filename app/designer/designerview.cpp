@@ -122,19 +122,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     setFrameShape(QFrame::NoFrame);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    m_zoomlLevelCombobox->addItem("10 %");
-    m_zoomlLevelCombobox->addItem("25 %");
-    m_zoomlLevelCombobox->addItem("50 %");
-    m_zoomlLevelCombobox->addItem("75 %");
-    m_zoomlLevelCombobox->addItem("90 %");
-    m_zoomlLevelCombobox->addItem("100 %");
-    m_zoomlLevelCombobox->addItem("125 %");
-    m_zoomlLevelCombobox->addItem("150 %");
-    m_zoomlLevelCombobox->addItem("175 %");
-    m_zoomlLevelCombobox->addItem("200 %");
-    m_zoomlLevelCombobox->addItem("300 %");
-    m_zoomlLevelCombobox->addItem("500 %");
-    m_zoomlLevelCombobox->addItem("1000 %");
+    m_zoomlLevelCombobox->addItems(UtilityFunctions::zoomTexts());
     m_zoomlLevelCombobox->setCurrentIndex(5);
     m_zoomlLevelCombobox->setMinimumWidth(100);
     m_zoomlLevelCombobox->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -202,6 +190,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_hideDockWidgetTitleBarsButton->setFixedHeight(20);
     m_zoomlLevelCombobox->setFixedHeight(20);
 
+    setViewportMargins(0, 24, 0, 0);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_undoButton);
     m_toolBar->addWidget(m_redoButton);
@@ -292,9 +281,12 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
 
 void DesignerView::scaleScene(qreal ratio)
 {
+    SceneSettings* settings = DesignerSettings::sceneSettings();
     if (m_lastScale != ratio) {
         scale((1.0 / m_lastScale) * ratio, (1.0 / m_lastScale) * ratio);
         m_lastScale = ratio;
+        settings->sceneZoomLevel = ratio;
+        settings->write();
         emit scalingRatioChanged();
     }
 }
@@ -484,7 +476,7 @@ DesignerScene* DesignerView::scene() const
 void DesignerView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
-    m_toolBar->setGeometry(0, 0, width(), 24);
+    m_toolBar->setGeometry(0, 0, viewport()->width(), 24);
     scene()->centralize();
 }
 
