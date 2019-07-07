@@ -10,6 +10,7 @@ static const char g_snappingEnabled[] = "SnappingEnabled";
 static const char g_gridSize[] = "GridSize";
 static const char g_showMouseoverOutline[] = "ShowMouseoverOutline";
 static const char g_controlOutline[] = "ControlOutline";
+static const char g_outlineColor[] = "OutlineColor";
 
 SceneSettings::SceneSettings(DesignerSettings* designerSettings) : Settings(designerSettings)
 {
@@ -31,6 +32,7 @@ void SceneSettings::read()
     /****/
     showMouseoverOutline = value<bool>(g_showMouseoverOutline, showMouseoverOutline);
     controlOutline = value<int>(g_controlOutline, controlOutline);
+    outlineColor = value<QColor>(g_outlineColor, outlineColor);
     end();
 }
 
@@ -47,6 +49,7 @@ void SceneSettings::write()
     /****/
     setValue(g_showMouseoverOutline, showMouseoverOutline);
     setValue(g_controlOutline, controlOutline);
+    setValue(g_outlineColor, outlineColor);
     end();
 
     emit static_cast<DesignerSettings*>(groupSettings())->sceneSettingsChanged();
@@ -64,6 +67,7 @@ void SceneSettings::reset()
     /****/
     showMouseoverOutline = true;
     controlOutline = 0;
+    outlineColor = "#4ba2ff";
 }
 
 const char* SceneSettings::category() const

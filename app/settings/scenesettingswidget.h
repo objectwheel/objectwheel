@@ -9,6 +9,7 @@ class QSpinBox;
 class QCheckBox;
 class QPushButton;
 class QComboBox;
+namespace Utils { class QtColorButton; }
 
 class SceneSettingsWidget final : public SettingsWidget
 {
@@ -18,6 +19,7 @@ class SceneSettingsWidget final : public SettingsWidget
 public:
     explicit SceneSettingsWidget(QWidget* parent = nullptr);
     void apply() override;
+    void revert() override;
     void reset() override;
     QIcon icon() const override;
     QString title() const override;
@@ -47,8 +49,11 @@ private:
     QGroupBox* m_controlsGroup;
     QLabel* m_showMouseoverOutlineLabel;
     QLabel* m_controlOutlineLabel;
+    QLabel* m_outlineColorLabel;
     QCheckBox* m_showMouseoverOutlineCheckBox;
     QComboBox* m_controlOutlineBox;
+    Utils::QtColorButton* m_outlineColorButton;
+    QPushButton* m_outlineColorResetButton;
 };
 
 #endif // SCENESETTINGSWIDGET_H

@@ -22,6 +22,7 @@ class FontColorsSettingsWidget final : public SettingsWidget
 public:
     explicit FontColorsSettingsWidget(QWidget* parent = nullptr);
     void apply() override;
+    void revert() override;
     void reset() override;
     QIcon icon() const override;
     QString title() const override;

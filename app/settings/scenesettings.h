@@ -2,6 +2,7 @@
 #define SCENESETTINGS_H
 
 #include <settings.h>
+#include <QColor>
 
 class DesignerSettings;
 struct SceneSettings final : public Settings
@@ -23,6 +24,7 @@ struct SceneSettings final : public Settings
     /****/
     bool showMouseoverOutline;
     int controlOutline;
+    QColor outlineColor;
 };
 
 #endif // SCENESETTINGS_H

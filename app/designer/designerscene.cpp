@@ -239,7 +239,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
         painter->drawLines(guideLines);
 
         for (QLineF line : guideLines) {
-            painter->setBrush(highlightColor());
+            painter->setBrush(outlineColor());
             painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
         }
@@ -416,10 +416,9 @@ QVector<QLineF> DesignerScene::guideLines() const
     return lines;
 }
 
-QColor DesignerScene::highlightColor()
+QColor DesignerScene::outlineColor()
 {
-    static const QColor highlight("#4ba2ff");
-    return highlight;
+    return DesignerSettings::sceneSettings()->outlineColor;
 }
 
 QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)

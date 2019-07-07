@@ -142,7 +142,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
             this, &FontColorsSettingsWidget::onColorSchemeDeleteButtonClick);
 
     activate();
-    reset();
+    revert();
 }
 
 void FontColorsSettingsWidget::apply()
@@ -168,7 +168,7 @@ void FontColorsSettingsWidget::apply()
     m_colorSchemeEdit->setOriginalColorScheme(settings->colorScheme);
 }
 
-void FontColorsSettingsWidget::reset()
+void FontColorsSettingsWidget::revert()
 {
     if (!isActivated())
         return;
@@ -186,6 +186,14 @@ void FontColorsSettingsWidget::reset()
     m_colorSchemeBox->setCurrentIndex(-1);
     setCurrentColorScheme(settings->colorSchemeFileName);
     m_disableSaving = false;
+}
+
+void FontColorsSettingsWidget::reset()
+{
+    CodeEditorSettings::fontColorsSettings()->reset();
+    CodeEditorSettings::fontColorsSettings()->write();
+    activate();
+    revert();
 }
 
 QIcon FontColorsSettingsWidget::icon() const

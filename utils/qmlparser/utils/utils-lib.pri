@@ -36,7 +36,8 @@ SOURCES += \
     $$PWD/stylehelper.cpp \
     $$PWD/htmldocextractor.cpp \
     $$PWD/utilsicons.cpp \
-    $$PWD/fadingindicator.cpp
+    $$PWD/fadingindicator.cpp \
+    $$PWD/qtcolorbutton.cpp
 
 HEADERS += \
     $$PWD/fileutils.h \
@@ -71,7 +72,8 @@ HEADERS += \
     $$PWD/settingsutils.h \
     $$PWD/filesearch.h \
     $$PWD/mapreduce.h \
-    $$PWD/fadingindicator.h
+    $$PWD/fadingindicator.h \
+    $$PWD/qtcolorbutton.h
 
 RESOURCES += \
     $$PWD/utilimages.qrc

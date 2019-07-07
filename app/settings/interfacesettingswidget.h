@@ -17,6 +17,7 @@ class InterfaceSettingsWidget final : public SettingsWidget
 public:
     explicit InterfaceSettingsWidget(QWidget* parent = nullptr);
     void apply() override;
+    void revert() override;
     void reset() override;
     QIcon icon() const override;
     QString title() const override;

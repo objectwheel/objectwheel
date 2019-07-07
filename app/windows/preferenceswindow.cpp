@@ -75,9 +75,11 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     connect(m_searchLineEdit, &LineEdit::textEdited,
             this, &PreferencesWindow::search);
 
-    m_dialogButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Apply | QDialogButtonBox::Ok);
+    m_dialogButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Reset
+                                          | QDialogButtonBox::Apply | QDialogButtonBox::Ok);
     m_dialogButtonBox->button(QDialogButtonBox::Ok)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Apply)->setCursor(Qt::PointingHandCursor);
+    m_dialogButtonBox->button(QDialogButtonBox::Reset)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
 
     connect(m_listWidget, &QListWidget::currentItemChanged,
@@ -93,6 +95,8 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     connect(m_dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked,
             this, &PreferencesWindow::done);
     connect(m_dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked,
+            this, &PreferencesWindow::revert);
+    connect(m_dialogButtonBox->button(QDialogButtonBox::Reset), &QPushButton::clicked,
             this, &PreferencesWindow::reset);
     connect(m_dialogButtonBox->button(QDialogButtonBox::Apply), &QPushButton::clicked,
             this, &PreferencesWindow::apply);
@@ -114,11 +118,29 @@ void PreferencesWindow::apply()
     }
 }
 
-void PreferencesWindow::reset()
+void PreferencesWindow::revert()
 {
     for (int i = 0; i < m_listWidget->count(); ++i) {
         if (SettingsPage* page = pageFromItem(m_listWidget->item(i)))
-            page->reset();
+            page->revert();
+    }
+}
+
+void PreferencesWindow::reset()
+{
+
+    int ret = UtilityFunctions::showMessage(this, tr("Reset all the settings"),
+                                            tr("This will reset all the settings to the "
+                                               "default values. Some may take affect after "
+                                               "restarting the app. Are you sure to continue?"),
+                                            QMessageBox::Warning, QMessageBox::Yes |
+                                            QMessageBox::No, QMessageBox::No);
+    if (ret == QMessageBox::Yes) {
+        for (int i = 0; i < m_listWidget->count(); ++i) {
+            if (SettingsPage* page = pageFromItem(m_listWidget->item(i)))
+                page->reset();
+        }
+        emit done();
     }
 }
 
@@ -225,7 +247,7 @@ void PreferencesWindow::closeEvent(QCloseEvent* event)
 {
     if (GeneralSettings::interfaceSettings()->preserveDesignerState)
         writeSettings();
-    reset();
+    revert();
 
     // Workaround for a weird behaviour of close event. When you close
     // a window, not hiding it, and reopening it later with "show()",

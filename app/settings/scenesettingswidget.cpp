@@ -3,6 +3,7 @@
 #include <designersettings.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
+#include <qtcolorbutton.h>
 
 #include <QLabel>
 #include <QGroupBox>
@@ -34,8 +35,11 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
   , m_controlsGroup(new QGroupBox(contentWidget()))
   , m_showMouseoverOutlineLabel(new QLabel(m_controlsGroup))
   , m_controlOutlineLabel(new QLabel(m_controlsGroup))
+  , m_outlineColorLabel(new QLabel(m_controlsGroup))
   , m_showMouseoverOutlineCheckBox(new QCheckBox(m_controlsGroup))
   , m_controlOutlineBox(new QComboBox(m_controlsGroup))
+  , m_outlineColorButton(new Utils::QtColorButton(m_controlsGroup))
+  , m_outlineColorResetButton(new QPushButton(m_controlsGroup))
 {
     contentLayout()->addWidget(m_designGroup);
     contentLayout()->addWidget(m_gridViewGroup);
@@ -85,8 +89,8 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     gridViewLayout->addWidget(m_showGridViewDotsCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     gridViewLayout->addWidget(m_snappingEnabledCheckBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     gridViewLayout->addWidget(m_gridSizeSpinBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    gridViewLayout->addWidget(m_resetGridViewButton, 2, 3, Qt::AlignLeft | Qt::AlignVCenter);
-    gridViewLayout->setColumnStretch(4, 1);
+    gridViewLayout->addWidget(m_resetGridViewButton, 2, 2, Qt::AlignRight | Qt::AlignVCenter);
+    gridViewLayout->setColumnStretch(3, 1);
     gridViewLayout->setColumnMinimumWidth(1, 20);
 
     m_gridViewGroup->setTitle(tr("Grid View") + ":");
@@ -118,23 +122,33 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     controlsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     controlsLayout->addWidget(m_showMouseoverOutlineLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_controlOutlineLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_outlineColorLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_showMouseoverOutlineCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_controlOutlineBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_outlineColorButton, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_outlineColorResetButton, 2, 2, Qt::AlignRight | Qt::AlignVCenter);
     controlsLayout->setColumnStretch(3, 1);
     controlsLayout->setColumnMinimumWidth(1, 20);
 
     m_controlsGroup->setTitle(tr("Controls") + ":");
     m_showMouseoverOutlineLabel->setText(tr("Mouseover outline") + ":");
     m_controlOutlineLabel->setText(tr("Control outline") + ":");
+    m_outlineColorLabel->setText(tr("Outline color") + ":");
     m_showMouseoverOutlineCheckBox->setText(tr("Show mouseover outline"));
+    m_outlineColorResetButton->setText(tr("Reset"));
 
     m_showMouseoverOutlineCheckBox->setToolTip(tr("Show an outline around controls when moving mouse cursor over them"));
-    m_controlOutlineBox->setToolTip(tr("Change default outline mode for controls"));
+    m_controlOutlineBox->setToolTip(tr("Change outline mode for controls"));
+    m_outlineColorButton->setToolTip(tr("Change outline color of controls"));
+    m_outlineColorResetButton->setToolTip(tr("Reset outline color to default"));
 
     m_showMouseoverOutlineCheckBox->setCursor(Qt::PointingHandCursor);
     m_controlOutlineBox->setCursor(Qt::PointingHandCursor);
+    m_outlineColorButton->setCursor(Qt::PointingHandCursor);
+    m_outlineColorResetButton->setCursor(Qt::PointingHandCursor);
 
     m_controlOutlineBox->setIconSize({14, 14});
+    m_outlineColorButton->setFixedWidth(64);
 
     /****/
 
@@ -147,8 +161,12 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
         m_gridSizeSpinBox->setValue(settings.gridSize);
     });
 
+    connect(m_outlineColorResetButton, &QPushButton::clicked, this, [=] {
+        m_outlineColorButton->setColor(SceneSettings(0).outlineColor);
+    });
+
     activate();
-    reset();
+    revert();
 }
 
 void SceneSettingsWidget::apply()
@@ -170,10 +188,11 @@ void SceneSettingsWidget::apply()
     /****/
     settings->showMouseoverOutline = m_showMouseoverOutlineCheckBox->isChecked();
     settings->controlOutline = m_controlOutlineBox->currentIndex();
+    settings->outlineColor = m_outlineColorButton->color();
     settings->write();
 }
 
-void SceneSettingsWidget::reset()
+void SceneSettingsWidget::revert()
 {
     if (!isActivated())
         return;
@@ -192,6 +211,15 @@ void SceneSettingsWidget::reset()
     /****/
     m_showMouseoverOutlineCheckBox->setChecked(settings->showMouseoverOutline);
     m_controlOutlineBox->setCurrentIndex(settings->controlOutline);
+    m_outlineColorButton->setColor(settings->outlineColor);
+}
+
+void SceneSettingsWidget::reset()
+{
+    DesignerSettings::sceneSettings()->reset();
+    DesignerSettings::sceneSettings()->write();
+    activate();
+    revert();
 }
 
 QIcon SceneSettingsWidget::icon() const
@@ -218,6 +246,7 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_gridSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showMouseoverOutlineLabel->text().contains(word, Qt::CaseInsensitive)
             || m_controlOutlineLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_outlineColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_snappingEnabledCheckBox->text().contains(word, Qt::CaseInsensitive)

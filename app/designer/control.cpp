@@ -487,7 +487,7 @@ void Control::paintHoverOutline(QPainter* painter)
 void Control::paintSelectionOutline(QPainter* painter)
 {
     painter->setRenderHint(QPainter::Antialiasing, false);
-    painter->setPen(scene()->pen(scene()->highlightColor(), 2));
+    painter->setPen(scene()->pen(scene()->outlineColor(), 2));
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(rect());
     painter->setRenderHint(QPainter::Antialiasing, true);

@@ -370,7 +370,9 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     } break;
     case PE_PanelButtonTool: {
         painter->save();
-        if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
+        if (widget && widget->inherits("Utils::QtColorButton")) {
+            QFusionStyle::drawPrimitive(PE_PanelButtonTool, option, painter, widget);
+        } else if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
             if (widget && widget->inherits("QDockWidgetTitleButton")) {
                 if (option->state & State_MouseOver)
                     proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);

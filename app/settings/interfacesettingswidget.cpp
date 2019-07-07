@@ -243,7 +243,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     });
 
     activate();
-    reset();
+    revert();
 }
 
 void InterfaceSettingsWidget::apply()
@@ -276,7 +276,7 @@ void InterfaceSettingsWidget::apply()
     settings->write();
 }
 
-void InterfaceSettingsWidget::reset()
+void InterfaceSettingsWidget::revert()
 {
     if (!isActivated())
         return;
@@ -302,6 +302,14 @@ void InterfaceSettingsWidget::reset()
     m_visibleOutputWidgetBox->setCurrentIndex(settings->visibleOutputWidget);
     m_outputPanePopsCheckBox->setChecked(settings->outputPanePops);
     m_preserveDesignerStateCheckBox->setChecked(settings->preserveDesignerState);
+}
+
+void InterfaceSettingsWidget::reset()
+{
+    GeneralSettings::interfaceSettings()->reset();
+    GeneralSettings::interfaceSettings()->write();
+    activate();
+    revert();
 }
 
 QIcon InterfaceSettingsWidget::icon() const

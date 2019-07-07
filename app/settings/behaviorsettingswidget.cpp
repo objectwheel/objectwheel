@@ -31,7 +31,7 @@ BehaviorSettingsWidget::BehaviorSettingsWidget(QWidget* parent) : SettingsWidget
     /****/
 
     activate();
-    reset();
+    revert();
 }
 
 void BehaviorSettingsWidget::apply()
@@ -48,7 +48,7 @@ void BehaviorSettingsWidget::apply()
     settings->write();
 }
 
-void BehaviorSettingsWidget::reset()
+void BehaviorSettingsWidget::revert()
 {
     if (!isActivated())
         return;
@@ -58,6 +58,14 @@ void BehaviorSettingsWidget::reset()
     const BehaviorSettings* settings = CodeEditorSettings::behaviorSettings();
     /****/
     m_autoSaveBeforeRunningBox->setChecked(settings->autoSaveBeforeRunning);
+}
+
+void BehaviorSettingsWidget::reset()
+{
+    CodeEditorSettings::behaviorSettings()->reset();
+    CodeEditorSettings::behaviorSettings()->write();
+    activate();
+    revert();
 }
 
 QIcon BehaviorSettingsWidget::icon() const

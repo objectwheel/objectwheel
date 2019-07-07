@@ -32,6 +32,12 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
     });
 }
 
+void SettingsPage::revert()
+{
+    for (SettingsWidget* widget : widgets())
+        widget->revert();
+}
+
 void SettingsPage::reset()
 {
     for (SettingsWidget* widget : widgets())
