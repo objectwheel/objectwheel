@@ -266,6 +266,7 @@ QRectF Resizer::boundingRect() const
 
 void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
+    painter->fillRect(boundingRect(), Qt::red);
     painter->setBrush(Qt::white);
     painter->setPen(scene()->pen());
     painter->setRenderHint(QPainter::Antialiasing, false);

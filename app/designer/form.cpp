@@ -5,6 +5,7 @@
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <QStyleOption>
 
 Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
@@ -21,6 +22,41 @@ QRectF Form::frameGeometry() const
     return QRectF(QPointF(-size().width() / 2.0, -size().height() / 2.0), size());
 }
 
+void Form::paintFrame(QPainter* painter)
+{
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->setPen(scene()->pen(Qt::darkGray));
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(outerRect(rect()));
+    painter->setRenderHint(QPainter::Antialiasing, true);
+}
+
+void Form::paintHeadline(QPainter* painter)
+{
+    QString text(QStringLiteral("%1 (%2×%3)").arg(id()).arg(size().width()).arg(size().width()));
+    QFontMetricsF fm(painter->font());
+    QRectF titleRect(0, 0, fm.horizontalAdvance(text) + 2 * fm.height(), fm.height());
+    titleRect.moveCenter(rect().center());
+    titleRect.moveTop(- fm.height() - 5);
+    painter->setBrush(QBrush("#4BA2FF"));
+    painter->setPen("#4391e5");
+    painter->drawRoundedRect(titleRect, fm.height() / 2.0, fm.height() / 2.0);
+    titleRect.adjust(0, -1, 0, -1);
+    painter->setPen("#FFFFFF");
+    painter->drawText(titleRect, text, QTextOption(Qt::AlignCenter));
+}
+
+void Form::paintGridViewDots(QPainter* painter, int gridSize)
+{
+    QVector<QPointF> points;
+    for (qreal x = 0; x < rect().right(); x += gridSize) {
+        for (qreal y = 0; y < rect().bottom(); y += gridSize)
+            points.append(QPointF(x, y));
+    }
+    painter->setPen(scene()->pen("#505050", 1, false));
+    painter->drawPoints(points.data(), points.size());
+}
+
 void Form::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     Control::resizeEvent(event);
@@ -34,43 +70,35 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
     event->ignore();
 }
 
-void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
 
     // Background
     painter->fillRect(rect(), settings->toBackgroundBrush());
 
-    // Content
-    Control::paint(painter, option, widget);
+    if (parentControl() && parentControl()->clip() && !dragging())
+        restrainPaintRegion(painter);
 
-    painter->setClipRect(rect());
-    // Grid view dots
-    if (settings->showGridViewDots) {
-        QVector<QPointF> points;
-        for (qreal x = 0; x < rect().right(); x += settings->gridSize) {
-            for (qreal y = 0; y < rect().bottom(); y += settings->gridSize)
-                points.append(QPointF(x, y));
-        }
-        painter->setPen(scene()->pen("#505050", 1, false));
-        painter->drawPoints(points.data(), points.size());
-    }
+    if (!image().isNull())
+        paintImage(painter);
 
-//    // Form outline
-//    painter->setPen("#b0b0b0");
-//    painter->setBrush(Qt::NoBrush);
-//    painter->drawRect(rect());
-//    painter->setClipping(false);
+    if (settings->showGridViewDots)
+        paintGridViewDots(painter, settings->gridSize);
 
-    QString text(QStringLiteral("%1 (%2×%3)").arg(id()).arg(size().width()).arg(size().width()));
-    QFontMetricsF fm(painter->font());
-    QRectF titleRect(0, 0, fm.horizontalAdvance(text) + 2 * fm.height(), fm.height());
-    titleRect.moveCenter(rect().center());
-    titleRect.moveTop(- fm.height() - 5);
-    painter->setBrush(QBrush("#4BA2FF"));
-    painter->setPen("#4391e5");
-    painter->drawRoundedRect(titleRect, fm.height() / 2.0, fm.height() / 2.0);
-    titleRect.adjust(0, -1, 0, -1);
-    painter->setPen("#FFFFFF");
-    painter->drawText(titleRect, text, QTextOption(Qt::AlignCenter));
+    if (settings->controlOutline != 0)
+        paintOutline(painter, settings->controlOutline);
+
+    paintFrame(painter);
+
+    if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
+        paintHoverOutline(painter);
+
+    if (isSelected())
+        paintSelectionOutline(painter);
+
+    if (dragIn())
+        paintHighlight(painter);
+
+    paintHeadline(painter);
 }

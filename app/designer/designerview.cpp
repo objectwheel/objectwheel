@@ -172,13 +172,20 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_hideDockWidgetTitleBarsButton->setIcon(Utils::Icons::CLOSE_SPLIT_TOP.icon());
     m_fitButton->setIcon(Utils::Icons::FITTOVIEW_TOOLBAR.icon());
 
-    connect(m_snappingButton, &QToolButton::toggled, this, &DesignerView::onSnappingButtonClick);
-    connect(m_outlineButton, &QToolButton::triggered, this, &DesignerView::onOutlineButtonTrigger);
-    connect(m_hideDockWidgetTitleBarsButton, &QToolButton::toggled, this, &DesignerView::hideDockWidgetTitleBars);
-    connect(m_zoomlLevelCombobox, &QComboBox::currentTextChanged, this, &DesignerView::onZoomLevelChange);
-    connect(m_fitButton, &QToolButton::clicked, this, &DesignerView::onFitButtonClick);
-    connect(m_refreshButton, &QToolButton::clicked, this, &DesignerView::onRefreshButtonClick);
-    connect(m_clearButton, &QToolButton::clicked, this, &DesignerView::onClearButtonClick);
+    connect(m_snappingButton, &QToolButton::toggled,
+            this, &DesignerView::onSnappingButtonClick);
+    connect(m_outlineButton, &QToolButton::triggered,
+            this, &DesignerView::onOutlineButtonTrigger);
+    connect(m_hideDockWidgetTitleBarsButton, &QToolButton::toggled,
+            this, &DesignerView::hideDockWidgetTitleBars);
+    connect(m_zoomlLevelCombobox, &QComboBox::currentTextChanged,
+            this, &DesignerView::onZoomLevelChange);
+    connect(m_fitButton, &QToolButton::clicked,
+            this, &DesignerView::onFitButtonClick);
+    connect(m_refreshButton, &QToolButton::clicked,
+            this, &DesignerView::onRefreshButtonClick);
+    connect(m_clearButton, &QToolButton::clicked,
+            this, &DesignerView::onClearButtonClick);
 
     m_undoButton->setFixedHeight(20);
     m_redoButton->setFixedHeight(20);
@@ -252,19 +259,32 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_menu->addSeparator();
     m_menu->addAction(m_selectAllAct);
 
-    connect(m_undoAct, &QAction::triggered, this, &DesignerView::onUndoAction);
-    connect(m_redoAct, &QAction::triggered, this, &DesignerView::onRedoAction);
-    connect(m_cutAct, &QAction::triggered, this, &DesignerView::onCutAction);
-    connect(m_copyAct, &QAction::triggered, this, &DesignerView::onCopyAction);
-    connect(m_pasteAct, &QAction::triggered, this, &DesignerView::onPasteAction);
-    connect(m_deleteAct, &QAction::triggered, this, &DesignerView::onDeleteAction);
-    connect(m_selectAllAct, &QAction::triggered, this, &DesignerView::onSelectAllAction);
-    connect(m_moveUpAct, &QAction::triggered, this, &DesignerView::onMoveUpAction);
-    connect(m_moveDownAct, &QAction::triggered, this, &DesignerView::onMoveDownAction);
-    connect(m_moveRightAct, &QAction::triggered, this, &DesignerView::onMoveRightAction);
-    connect(m_moveLeftAct, &QAction::triggered, this, &DesignerView::onMoveLeftAction);
-    connect(m_sendBackAct, &QAction::triggered, this, &DesignerView::onSendBackAction);
-    connect(m_bringFrontAct, &QAction::triggered, this, &DesignerView::onBringFrontAction);
+    connect(m_undoAct, &QAction::triggered,
+            this, &DesignerView::onUndoAction);
+    connect(m_redoAct, &QAction::triggered,
+            this, &DesignerView::onRedoAction);
+    connect(m_cutAct, &QAction::triggered,
+            this, &DesignerView::onCutAction);
+    connect(m_copyAct, &QAction::triggered,
+            this, &DesignerView::onCopyAction);
+    connect(m_pasteAct, &QAction::triggered,
+            this, &DesignerView::onPasteAction);
+    connect(m_deleteAct, &QAction::triggered,
+            this, &DesignerView::onDeleteAction);
+    connect(m_selectAllAct, &QAction::triggered,
+            this, &DesignerView::onSelectAllAction);
+    connect(m_moveUpAct, &QAction::triggered,
+            this, &DesignerView::onMoveUpAction);
+    connect(m_moveDownAct, &QAction::triggered,
+            this, &DesignerView::onMoveDownAction);
+    connect(m_moveRightAct, &QAction::triggered,
+            this, &DesignerView::onMoveRightAction);
+    connect(m_moveLeftAct, &QAction::triggered,
+            this, &DesignerView::onMoveLeftAction);
+    connect(m_sendBackAct, &QAction::triggered,
+            this, &DesignerView::onSendBackAction);
+    connect(m_bringFrontAct, &QAction::triggered,
+            this, &DesignerView::onBringFrontAction);
 
     addAction(m_undoAct);
     addAction(m_redoAct);

@@ -225,9 +225,13 @@ void PreferencesWindow::closeEvent(QCloseEvent* event)
 {
     if (GeneralSettings::interfaceSettings()->preserveDesignerState)
         writeSettings();
-    QWidget::closeEvent(event);
-    if (event->isAccepted())
-        reset();
+    reset();
+
+    // Workaround for a weird behaviour of close event. When you close
+    // a window, not hiding it, and reopening it later with "show()",
+    // content of the widget is blank for some reason. So we should hide
+    event->accept();
+    emit done();
 }
 
 QSize PreferencesWindow::sizeHint() const

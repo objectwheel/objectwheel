@@ -39,6 +39,7 @@ public:
     QString uid() const;
     QString dir() const;
     QMarginsF margins() const;
+    QImage image() const;
 
     DesignerScene* scene() const;
     Control* parentControl() const;
@@ -61,15 +62,12 @@ public:
     void setResized(bool resized);
     void setIndex(quint32 index);
 
-public slots:
-    void hideResizers();
-    void showResizers();
-
 signals:
     void resizedChanged();
     void draggingChanged();
 
-private:
+protected:
+    QRectF outerRect(const QRectF& rect) const;
     void dropControl(Control* control);
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragMoveEvent(QGraphicsSceneDragDropEvent* event) override;
@@ -83,8 +81,15 @@ private:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 protected:
+    virtual void restrainPaintRegion(QPainter* painter);
+    virtual void paintImage(QPainter* painter);
+    virtual void paintHighlight(QPainter* painter);
+    virtual void paintHoverOutline(QPainter* painter);
+    virtual void paintSelectionOutline(QPainter* painter);
+    virtual void paintOutline(QPainter* painter, int type);
+
     void resizeEvent(QGraphicsSceneResizeEvent* event) override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = Q_NULLPTR) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
 protected:
     explicit Control(const QString& dir, Control* parent = nullptr);
@@ -111,7 +116,7 @@ private:
     QString m_uid;
     QString m_id;
     QRectF m_frame;
-    QPixmap m_pixmap;
+    QImage m_image;
 
     QList<QmlError> m_errors;
     QList<Resizer*> m_resizers;

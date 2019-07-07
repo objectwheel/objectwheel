@@ -35,7 +35,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_resized(false)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
-  , m_pixmap(QPixmap::fromImage(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio())))
+  , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
   , m_resizers(Resizer::init(this))
 {
     m_controls.append(this);
@@ -159,6 +159,11 @@ QMarginsF Control::margins() const
     return m_margins;
 }
 
+QImage Control::image() const
+{
+    return m_image;
+}
+
 DesignerScene* Control::scene() const
 {
     return static_cast<DesignerScene*>(QGraphicsWidget::scene());
@@ -236,6 +241,7 @@ QList<Control*> Control::controls()
 void Control::setClip(bool clip)
 {
     m_clip = clip;
+    update();
 }
 
 void Control::setId(const QString& id)
@@ -281,16 +287,10 @@ void Control::setIndex(quint32 index)
     m_index = index;
 }
 
-void Control::hideResizers()
+QRectF Control::outerRect(const QRectF& rect) const
 {
-    for (auto resizer : m_resizers)
-        resizer->hide();
-}
-
-void Control::showResizers()
-{
-    for (auto resizer : m_resizers)
-        resizer->show();
+    const SceneSettings* s = DesignerSettings::sceneSettings();
+    return rect.adjusted(-0.5 / s->sceneZoomLevel, -0.5 / s->sceneZoomLevel, 0, 0);
 }
 
 QVariant::Type Control::propertyType(const QString& propertyName) const
@@ -443,24 +443,80 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {    
-    switch (change) {
-    case ItemSelectedHasChanged:
-        if (value.toBool())
-            showResizers();
-        else
-            hideResizers();
-        break;
-    default:
-        break;
+    if (change == ItemSelectedHasChanged) {
+        for (Resizer* resizer : m_resizers)
+            resizer->setVisible(value.toBool());
     }
     return QGraphicsWidget::itemChange(change, value);
+}
+
+void Control::restrainPaintRegion(QPainter* painter)
+{
+    const QRectF& boundingRect = m_frame.adjusted(-1, -1, 1, 1);
+    const QRectF& parentRect = parentControl()->rect().adjusted(1, 1, -1, -1);
+    const QRectF& parentGeometry = parentControl()->mapToItem(this, parentRect).boundingRect();
+    painter->setClipRect(boundingRect.intersected(parentGeometry));
+}
+
+void Control::paintImage(QPainter* painter)
+{
+    painter->drawImage(m_frame.toRect(), m_image);
+}
+
+void Control::paintHighlight(QPainter* painter)
+{
+    QColor shadow("#204C4C4C");
+    QLinearGradient gradient({0, 0, 0, 1});
+    gradient.setColorAt(0, shadow.lighter(110));
+    gradient.setColorAt(1,shadow.darker(120));
+    gradient.setCoordinateMode(QGradient::ObjectMode);
+    painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
+    painter->fillRect(rect(), gradient);
+    painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+}
+
+void Control::paintHoverOutline(QPainter* painter)
+{
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(scene()->pen());
+    painter->drawRect(outerRect(rect()));
+    painter->setRenderHint(QPainter::Antialiasing, true);
+}
+
+void Control::paintSelectionOutline(QPainter* painter)
+{
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->setPen(scene()->pen(scene()->highlightColor(), 2));
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(rect());
+    painter->setRenderHint(QPainter::Antialiasing, true);
+}
+
+void Control::paintOutline(QPainter* painter, int type)
+{
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    QPen linePen(QColor(0, 0, 0, 180));
+    linePen.setCosmetic(true);
+    linePen.setDashPattern({2., 1.});
+
+    painter->setPen(linePen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(outerRect(type == 1 ? rect() : m_frame));
+
+    linePen.setColor(QColor(255, 255, 255, 180));
+    linePen.setDashPattern({1., 2.});
+    linePen.setDashOffset(2.);
+
+    painter->setPen(linePen);
+    painter->drawRect(outerRect(type == 1 ? rect() : m_frame));
+    painter->setRenderHint(QPainter::Antialiasing, true);
 }
 
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
-
-    for (auto resizer : m_resizers)
+    for (Resizer* resizer : m_resizers)
         resizer->updatePosition();
 }
 
@@ -468,71 +524,23 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
 
-    if (parentControl() && parentControl()->clip() && !m_dragging) {
-        painter->setClipRect(
-                    rect().intersected(
-                        parentControl()->mapToItem(
-                            this,
-                            parentControl()->rect().adjusted(1, 1, -1, -1)
-                            ).boundingRect()
-                        )
-                    );
-    }
+    if (parentControl() && parentControl()->clip() && !dragging())
+        restrainPaintRegion(painter);
 
-    if (!m_pixmap.isNull())
-        painter->drawPixmap(m_frame, m_pixmap, m_pixmap.rect());
+    if (!image().isNull())
+        paintImage(painter);
 
-    QLinearGradient gradient(rect().center().x(), rect().y(), rect().center().x(), rect().bottom());
-    gradient.setColorAt(0, QColor("#174C4C4C").lighter(110));
-    gradient.setColorAt(1, QColor("#174C4C4C").darker(120));
+    if (settings->controlOutline != 0)
+        paintOutline(painter, settings->controlOutline);
 
-    // FIXME
-    if (m_dragIn) {
-//        if (scene()->showOutlines()) {
-//            painter->fillRect(rect(), gradient);
-//        } else {
-            painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
-            painter->fillRect(rect(), gradient);
-            painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
-//        }
-    }
+    if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
+        paintHoverOutline(painter);
 
-//    if (isSelected() /*|| scene()->showOutlines() */|| m_hoverOn) {
-//        QPen pen;
-//        pen.setDashPattern({1,2,1,2});
-//        painter->setBrush(Qt::transparent);
-//        painter->setClipping(false);
+    if (isSelected())
+        paintSelectionOutline(painter);
 
-//        if (isSelected()) {
-//            pen.setColor(Qt::black);
-//        } else if (m_hoverOn) {
-//            pen.setStyle(Qt::SolidLine);
-//            pen.setColor("#4BA2FF");
-////        } else if (scene()->showOutlines()) {
-////            pen.setColor("#777777");
-//        }
-
-//        painter->setPen(pen);
-//        painter->drawRect(rect());
-//    }
-
-    // Hover
-    if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver) {
-        painter->setRenderHint(QPainter::Antialiasing, false);
-        painter->setBrush(Qt::NoBrush);
-        painter->setPen(scene()->pen());
-        painter->drawRect(rect().adjusted(0, 0, -0.5 / settings->sceneZoomLevel, -0.5 / settings->sceneZoomLevel));
-        painter->setRenderHint(QPainter::Antialiasing, true);
-    }
-
-    // Selection
-    if (isSelected()) {
-        painter->setRenderHint(QPainter::Antialiasing, false);
-        painter->setPen(scene()->pen(scene()->highlightColor(), 2));
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRect(rect());
-        painter->setRenderHint(QPainter::Antialiasing, true);
-    }
+    if (dragIn())
+        paintHighlight(painter);
 }
 
 void Control::updateImage(const RenderResult& result)
@@ -546,6 +554,7 @@ void Control::updateImage(const RenderResult& result)
     m_window = result.window;
     m_events = result.events;
     m_properties = result.properties;
+    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
 
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
@@ -555,17 +564,15 @@ void Control::updateImage(const RenderResult& result)
         applyCachedGeometry();
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
-    m_pixmap = QPixmap::fromImage(
-                hasErrors()
+    m_image = hasErrors()
                 ? PaintUtils::renderErrorControlImage(size(), ControlRenderingManager::devicePixelRatio())
-                : result.image);
-    m_pixmap.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
+                : result.image;
+    m_image.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
 
-    if (m_pixmap.isNull() && !m_gui) {
-        m_pixmap = QPixmap::fromImage(
-                    PaintUtils::renderNonGuiControlImage(
-                        ToolUtils::toolIconPath(m_dir), size(),
-                        ControlRenderingManager::devicePixelRatio()));
+    if (m_image.isNull() && !m_gui) {
+        m_image = PaintUtils::renderNonGuiControlImage(
+                    ToolUtils::toolIconPath(m_dir), size(),
+                    ControlRenderingManager::devicePixelRatio());
     }
 
     for (auto resizer : m_resizers)

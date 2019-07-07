@@ -70,6 +70,8 @@ void RunController::onPreferencesButtonClick()
 {
     WindowManager::preferencesWindow()->show();
     WindowManager::preferencesWindow()->raise();
+    WindowManager::preferencesWindow()->activateWindow();
+    WindowManager::preferencesWindow()->updateGeometry();
 }
 
 void RunController::onRunButtonClick()
