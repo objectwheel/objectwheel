@@ -131,11 +131,6 @@ void Resizer::calculatePositionDifference(const QGraphicsSceneMouseEvent* event,
         *dy = event->pos().y() - event->lastPos().y();
         break;
     }
-
-    if (parentControl()->form()) {
-        *dx *= 2.0;
-        *dy *= 2.0;
-    }
 }
 
 void Resizer::mousePressEvent(QGraphicsSceneMouseEvent*)
@@ -180,24 +175,24 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (parentWidth + dx < 10 || parentHeight + dy < 10)
         return;
 
-    m_collectiveDy += dy;
-    m_collectiveDx += dx;
+//    m_collectiveDy += dy;
+//    m_collectiveDx += dx;
 
-    qreal closestX = qRound((parentControl()->x() - m_collectiveDx) / settings->gridSize) * settings->gridSize;
-    qreal closestY = qRound((parentControl()->y() - m_collectiveDy) / settings->gridSize) * settings->gridSize;
+//    qreal closestX = qRound((parentControl()->x() - m_collectiveDx) / settings->gridSize) * settings->gridSize;
+//    qreal closestY = qRound((parentControl()->y() - m_collectiveDy) / settings->gridSize) * settings->gridSize;
 
-    if (closestX == parentControl()->x() && closestY == parentControl()->y())
-        return;
+//    if (closestX == parentControl()->x() && closestY == parentControl()->y())
+//        return;
 
-    if (closestX != parentControl()->x()) {
-        dx = parentControl()->x() - closestX;
-        m_collectiveDx -= dx;
-    }
+//    if (closestX != parentControl()->x()) {
+//        dx = parentControl()->x() - closestX;
+//        m_collectiveDx -= dx;
+//    }
 
-    if (closestY != parentControl()->y()) {
-        dy = parentControl()->y() - closestY;
-        m_collectiveDy -= dy;
-    }
+//    if (closestY != parentControl()->y()) {
+//        dy = parentControl()->y() - closestY;
+//        m_collectiveDy -= dy;
+//    }
 
     switch (m_placement) {
     case Top:

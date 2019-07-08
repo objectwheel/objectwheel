@@ -22,7 +22,16 @@ public:
 
     DesignerScene* scene() const;
 
-    qreal scalingRatio() const;
+    void stopPanning(QEvent* event);
+    void startPanning(QEvent* event);
+    void centerScene();
+
+    void keyReleaseEvent(QKeyEvent* event) override;
+    void keyPressEvent(QKeyEvent* event) override;
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void mousePressEvent(QMouseEvent* event) override;
+    void wheelEvent(QWheelEvent* event) override;
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 public slots:
     void discharge();
@@ -66,13 +75,11 @@ private slots:
 
 signals:
     void hideDockWidgetTitleBars(bool);
-    void scalingRatioChanged();
 
 private:
-    void scaleScene(qreal ratio);
+    void setZoomLevel(qreal zoomLevel);
 
 private:
-    qreal m_lastScale;
     SignalChooserDialog* m_signalChooserDialog;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     QToolBar* m_toolBar;
@@ -100,6 +107,14 @@ private:
     QAction* m_moveDownAct;
     QAction* m_moveRightAct;
     QAction* m_moveLeftAct;
+
+private:
+    enum Panning{
+        NotStarted, MouseWheelStarted, SpaceKeyStarted
+    };
+    Panning m_isPanning = Panning::NotStarted;
+    QPoint m_panningStartPosition;
+    QRectF m_rootItemRect;
 };
 
 #endif // DESIGNERVIEW_H

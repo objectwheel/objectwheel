@@ -17,6 +17,7 @@
 #include <qmlcodedocument.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <QScrollBar>
 
 #include <QMenu>
 #include <QDir>
@@ -85,42 +86,52 @@ bool warnIfFileDoesNotExist(const QString& filePath)
 }
 }
 
-DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent) : QGraphicsView(new DesignerScene, parent)
-  , m_lastScale(1.0)
-  , m_signalChooserDialog(new SignalChooserDialog(this))
-  , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
-  , m_toolBar(new QToolBar(this))
-  , m_undoButton(new QToolButton)
-  , m_redoButton(new QToolButton)
-  , m_clearButton(new QToolButton)
-  , m_refreshButton(new QToolButton)
-  , m_snappingButton(new QToolButton)
-  , m_fitButton(new QToolButton)
-  , m_outlineButton(new QToolButton)
-  , m_hideDockWidgetTitleBarsButton(new QToolButton)
-  , m_zoomlLevelCombobox(new QComboBox)
-  , m_menu(new QMenu(this))
-  , m_sendBackAct(new QAction(this))
-  , m_bringFrontAct(new QAction(this))
-  , m_undoAct(new QAction(this))
-  , m_redoAct(new QAction(this))
-  , m_cutAct(new QAction(this))
-  , m_copyAct(new QAction(this))
-  , m_pasteAct(new QAction(this))
-  , m_selectAllAct(new QAction(this))
-  , m_deleteAct(new QAction(this))
-  , m_moveUpAct(new QAction(this))
-  , m_moveDownAct(new QAction(this))
-  , m_moveRightAct(new QAction(this))
-  , m_moveLeftAct(new QAction(this))
+DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent)
+    : QGraphicsView(new DesignerScene(this), parent)
+    , m_signalChooserDialog(new SignalChooserDialog(this))
+    , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
+    , m_toolBar(new QToolBar(this))
+    , m_undoButton(new QToolButton)
+    , m_redoButton(new QToolButton)
+    , m_clearButton(new QToolButton)
+    , m_refreshButton(new QToolButton)
+    , m_snappingButton(new QToolButton)
+    , m_fitButton(new QToolButton)
+    , m_outlineButton(new QToolButton)
+    , m_hideDockWidgetTitleBarsButton(new QToolButton)
+    , m_zoomlLevelCombobox(new QComboBox)
+    , m_menu(new QMenu(this))
+    , m_sendBackAct(new QAction(this))
+    , m_bringFrontAct(new QAction(this))
+    , m_undoAct(new QAction(this))
+    , m_redoAct(new QAction(this))
+    , m_cutAct(new QAction(this))
+    , m_copyAct(new QAction(this))
+    , m_pasteAct(new QAction(this))
+    , m_selectAllAct(new QAction(this))
+    , m_deleteAct(new QAction(this))
+    , m_moveUpAct(new QAction(this))
+    , m_moveDownAct(new QAction(this))
+    , m_moveRightAct(new QAction(this))
+    , m_moveLeftAct(new QAction(this))
 {
-    setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
+    setAlignment(Qt::AlignCenter);
+    setResizeAnchor(QGraphicsView::AnchorViewCenter);
+    setCacheMode(QGraphicsView::CacheNone);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate/*MinimalViewportUpdate*/);
+
     setRubberBandSelectionMode(Qt::IntersectsItemShape);
     setDragMode(QGraphicsView::RubberBandDrag);
-    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-    setTransformationAnchor(QGraphicsView::AnchorViewCenter);
+    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setFrameShape(QFrame::NoFrame);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    setAutoFillBackground(true);
+    setBackgroundRole(QPalette::Window);
+
+    // as mousetracking only works for mouse key it is better to handle it in the
+    // eventFilter method so it works also for the space scrolling case as expected
+    QCoreApplication::instance()->installEventFilter(this);
 
     m_zoomlLevelCombobox->addItems(UtilityFunctions::zoomTexts());
     m_zoomlLevelCombobox->setCurrentIndex(5);
@@ -197,7 +208,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     m_hideDockWidgetTitleBarsButton->setFixedHeight(20);
     m_zoomlLevelCombobox->setFixedHeight(20);
 
-    setViewportMargins(0, 24, 0, 0);
+    m_toolBar->setGeometry(0, 0, viewport()->width(), 24);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_undoButton);
     m_toolBar->addWidget(m_redoButton);
@@ -219,8 +230,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
 
     TransparentStyle::attach(m_toolBar);
 
-
-    viewport()->setAutoFillBackground(false);
+    setViewportMargins(0, 24, 0, 0);
 
     m_sendBackAct->setText(tr("Send to Back"));
     m_bringFrontAct->setText(tr("Bring to Front"));
@@ -299,21 +309,16 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     addAction(m_moveLeftAct);
 }
 
-void DesignerView::scaleScene(qreal ratio)
+void DesignerView::setZoomLevel(qreal zoomLevel)
 {
     SceneSettings* settings = DesignerSettings::sceneSettings();
-    if (m_lastScale != ratio) {
-        scale((1.0 / m_lastScale) * ratio, (1.0 / m_lastScale) * ratio);
-        m_lastScale = ratio;
-        settings->sceneZoomLevel = ratio;
+    qreal recentZoomLevel = matrix().m11();
+    if (recentZoomLevel != zoomLevel) {
+        resetTransform();
+        scale((1.0 / recentZoomLevel) * zoomLevel, (1.0 / recentZoomLevel) * zoomLevel);
+        settings->sceneZoomLevel = zoomLevel;
         settings->write();
-        emit scalingRatioChanged();
     }
-}
-
-qreal DesignerView::scalingRatio() const
-{
-    return m_lastScale;
 }
 
 void DesignerView::onSnappingButtonClick(bool value)
@@ -328,9 +333,9 @@ void DesignerView::onOutlineButtonTrigger(QAction* action)
 {
     m_outlineButton->setIcon(action->icon());
     // FIXME
-//    SceneSettings* settings = DesignerSettings::sceneSettings();
-//    settings->controlOutline = m_outlineButton->currentIndex();
-//    settings->write();
+    //    SceneSettings* settings = DesignerSettings::sceneSettings();
+    //    settings->controlOutline = m_outlineButton->currentIndex();
+    //    settings->write();
 }
 
 void DesignerView::onFitButtonClick()
@@ -354,8 +359,7 @@ void DesignerView::onRedoButtonClick()
 
 void DesignerView::onZoomLevelChange(const QString& text)
 {
-    qreal ratio = UtilityFunctions::textToZoomLevel(text);
-    scaleScene(ratio);
+    setZoomLevel(UtilityFunctions::textToZoomLevel(text));
 }
 
 void DesignerView::onRefreshButtonClick()
@@ -393,7 +397,7 @@ void DesignerView::discharge()
     scene()->discharge();
     update();
     m_signalChooserDialog->discharge();
-//  FIXME  m_outlineButton->setChecked(scene()->showOutlines());
+    //  FIXME  m_outlineButton->setChecked(scene()->showOutlines());
     m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setChecked(settings->snappingEnabled);
     onZoomLevelChange("100 %");
@@ -497,7 +501,6 @@ void DesignerView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
     m_toolBar->setGeometry(0, 0, viewport()->width(), 24);
-    scene()->centralize();
 }
 
 void DesignerView::contextMenuEvent(QContextMenuEvent* event)
@@ -671,3 +674,99 @@ void DesignerView::onBringFrontAction()
                                      | ControlPropertyManager::UpdateRenderer);
     }
 }
+
+
+
+
+
+bool DesignerView::eventFilter(QObject *watched, QEvent *event)
+{
+    if (m_isPanning != Panning::NotStarted) {
+        if (event->type() == QEvent::Leave && m_isPanning == Panning::SpaceKeyStarted) {
+            // there is no way to keep the cursor so we stop panning here
+            stopPanning(event);
+        }
+        if (event->type() == QEvent::MouseMove) {
+            auto mouseEvent = static_cast<QMouseEvent*>(event);
+            if (!m_panningStartPosition.isNull()) {
+                horizontalScrollBar()->setValue(horizontalScrollBar()->value() -
+                                                (mouseEvent->x() - m_panningStartPosition.x()));
+                verticalScrollBar()->setValue(verticalScrollBar()->value() -
+                                              (mouseEvent->y() - m_panningStartPosition.y()));
+            }
+            m_panningStartPosition = mouseEvent->pos();
+            event->accept();
+            return true;
+        }
+    }
+    return QGraphicsView::eventFilter(watched, event);
+}
+
+void DesignerView::wheelEvent(QWheelEvent *event)
+{
+    if (event->modifiers().testFlag(Qt::ControlModifier))
+        event->ignore();
+    else
+        QGraphicsView::wheelEvent(event);
+}
+
+void DesignerView::mousePressEvent(QMouseEvent *event)
+{
+    if (m_isPanning == Panning::NotStarted) {
+        if (event->buttons().testFlag(Qt::MiddleButton))
+            startPanning(event);
+        else
+            QGraphicsView::mousePressEvent(event);
+    }
+}
+
+void DesignerView::mouseReleaseEvent(QMouseEvent *event)
+{
+    // not sure why buttons() are empty here, but we have that information from the enum
+    if (m_isPanning == Panning::MouseWheelStarted)
+        stopPanning(event);
+    else
+        QGraphicsView::mouseReleaseEvent(event);
+}
+
+void DesignerView::keyPressEvent(QKeyEvent *event)
+{
+    // check for autorepeat to avoid a stoped space panning by leave event to be restarted
+    if (!event->isAutoRepeat() && m_isPanning == Panning::NotStarted && event->key() == Qt::Key_Space) {
+        startPanning(event);
+        return;
+    }
+    QGraphicsView::keyPressEvent(event);
+}
+
+void DesignerView::keyReleaseEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Space && !event->isAutoRepeat() && m_isPanning == Panning::SpaceKeyStarted)
+        stopPanning(event);
+
+    QGraphicsView::keyReleaseEvent(event);
+}
+
+void DesignerView::startPanning(QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress)
+        m_isPanning = Panning::SpaceKeyStarted;
+    else
+        m_isPanning = Panning::MouseWheelStarted;
+    viewport()->setCursor(Qt::ClosedHandCursor);
+    event->accept();
+}
+
+void DesignerView::stopPanning(QEvent *event)
+{
+    m_isPanning = Panning::NotStarted;
+    m_panningStartPosition = QPoint();
+    viewport()->unsetCursor();
+    event->accept();
+}
+
+void DesignerView::centerScene()
+{
+    centerOn(sceneRect().center());
+}
+

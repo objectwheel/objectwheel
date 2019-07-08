@@ -4,6 +4,7 @@
 #include <controlpropertymanager.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <designerview.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -14,7 +15,9 @@
 #define MAGNETIC_FIELD (3)
 
 namespace {
-static const char zValueProperty[] = "_q_DesignerScene_zValueProperty";
+static const char parentBeforeDragProperty[] = "_q_DesignerScene_parentBeforeDragProperty";
+static const char zValueBeforeDragProperty[] = "_q_DesignerScene_zValueBeforeDragProperty";
+static const char positionBeforeDragProperty[] = "_q_DesignerScene_positionBeforeDragProperty";
 
 QRectF united(const QList<Control*>& controls)
 {
@@ -30,13 +33,11 @@ bool itemPressed = false;
 bool itemMoving = false;
 }
 
-DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
+DesignerScene::DesignerScene(DesignerView* view, QObject *parent) : QGraphicsScene(parent)
+  , m_view(view)
   , m_currentForm(nullptr)
 {
-    connect(this, &DesignerScene::changed, [=] {
-        if (m_currentForm)
-            setSceneRect(m_currentForm->frameGeometry().adjusted(-8, -8, 8, 8));
-    });
+    setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 
 void DesignerScene::addForm(Form* form)
@@ -84,6 +85,11 @@ void DesignerScene::removeControl(Control* control)
 Form* DesignerScene::currentForm()
 {
     return m_currentForm.data();
+}
+
+DesignerView* DesignerScene::view() const
+{
+    return m_view;
 }
 
 QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
@@ -171,7 +177,12 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (itemMoving) {
         m_draggedControls = selectedControls;
         for (Control* selectedControl : selectedControls) {
-            selectedControl->setProperty(zValueProperty, selectedControl->zValue());
+            selectedControl->setProperty(zValueBeforeDragProperty, selectedControl->zValue());
+            selectedControl->setProperty(positionBeforeDragProperty, selectedControl->pos());
+            selectedControl->setProperty(parentBeforeDragProperty, qintptr(selectedControl->parentItem()));
+            const QPointF& newPos = m_currentForm->mapFromItem(selectedControl->parentItem(), selectedControl->pos());
+            selectedControl->setParentItem(m_currentForm);
+            selectedControl->setPos(newPos);
             selectedControl->setZValue(std::numeric_limits<qreal>::max());
             selectedControl->setDragging(true);
         }
@@ -196,7 +207,7 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         return;
 
     for (Control* draggedControl : m_draggedControls) {
-        draggedControl->setZValue(draggedControl->property(zValueProperty).toReal());
+        draggedControl->setZValue(draggedControl->property(zValueBeforeDragProperty).toReal());
         draggedControl->setDragging(false);
     }
 
@@ -441,15 +452,6 @@ void DesignerScene::discharge()
     itemMoving = false;
 }
 
-void DesignerScene::centralize()
-{
-    if (m_currentForm) {
-        qreal x = -m_currentForm->size().width() / 2.0;
-        qreal y = -m_currentForm->size().height() / 2.0;
-        ControlPropertyManager::setPos(m_currentForm, {x, y}, ControlPropertyManager::NoOption);
-    }
-}
-
 void DesignerScene::setCurrentForm(Form* currentForm)
 {
     if (!m_forms.contains(currentForm) || m_currentForm == currentForm)
@@ -463,12 +465,30 @@ void DesignerScene::setCurrentForm(Form* currentForm)
     */
     blockSignals(true);
 
-    if (m_currentForm)
+    if (m_currentForm) {
+        m_currentForm->disconnect(this);
         m_currentForm->setVisible(false); // Clears selection and emits selectionChanged on DesignerScene
+    }
 
     m_currentForm = currentForm;
-    m_currentForm->setVisible(true);
-    centralize();
+
+    setSceneRect(QRectF());
+    view()->centerScene();
+    view()->viewport()->update();
+
+    if (m_currentForm) {
+        m_currentForm->setVisible(true);
+        setSceneRect(m_currentForm->rect().adjusted(0, -30, 0, 10));
+        connect(m_currentForm, &Form::geometryChanged, this, [=] {
+            const QRectF& rect = m_currentForm->rect();
+            const QRectF& frame = m_currentForm->frame();
+            QRectF boundingRect = rect;
+            if (frame.width() > rect.width() || frame.height() > rect.height())
+                boundingRect = frame;
+            setSceneRect(boundingRect.adjusted(0, -30, 0, 10));
+            view()->viewport()->update();
+        });
+    }
 
     blockSignals(false);
 

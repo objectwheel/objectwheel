@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QGraphicsScene>
 
+class DesignerView;
 class DesignerScene : public QGraphicsScene
 {
     Q_OBJECT
@@ -14,10 +15,11 @@ class DesignerScene : public QGraphicsScene
     friend class ProjectExposingManager; // For addForm(), addControl()
 
 public:
-    explicit DesignerScene(QObject *parent = Q_NULLPTR);
+    explicit DesignerScene(DesignerView* view, QObject* parent = nullptr);
     const QList<Form*>& forms() const;
     void setCurrentForm(Form* currentForm);
     Form* currentForm();
+    DesignerView* view() const;
 
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
@@ -30,7 +32,6 @@ public:
 
 public slots:
     void discharge();
-    void centralize();
 
 private:
     void addForm(Form* form);
@@ -48,6 +49,7 @@ signals:
     void currentFormChanged(Form* currentForm);
 
 private:
+    DesignerView* m_view;
     QPointF m_lastMousePos;
     QList<Control*> m_draggedControls;
     QList<Form*> m_forms;

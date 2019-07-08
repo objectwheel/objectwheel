@@ -24,11 +24,9 @@ QRectF Form::frameGeometry() const
 
 void Form::paintFrame(QPainter* painter)
 {
-    painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setPen(scene()->pen(Qt::darkGray));
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(outerRect(rect()));
-    painter->setRenderHint(QPainter::Antialiasing, true);
 }
 
 void Form::paintHeadline(QPainter* painter)
@@ -55,12 +53,6 @@ void Form::paintGridViewDots(QPainter* painter, int gridSize)
     }
     painter->setPen(scene()->pen("#505050", 1, false));
     painter->drawPoints(points.data(), points.size());
-}
-
-void Form::resizeEvent(QGraphicsSceneResizeEvent* event)
-{
-    Control::resizeEvent(event);
-    scene()->centralize();
 }
 
 void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)

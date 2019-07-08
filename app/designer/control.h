@@ -62,6 +62,8 @@ public:
     void setResized(bool resized);
     void setIndex(quint32 index);
 
+    QRectF frame() const;
+
 signals:
     void resizedChanged();
     void draggingChanged();

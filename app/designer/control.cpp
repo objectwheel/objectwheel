@@ -52,7 +52,6 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
 
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateImage);
-
     connect(this, &Control::resizedChanged,
             this, &Control::applyCachedGeometry);
     connect(this, &Control::draggingChanged,
@@ -264,11 +263,6 @@ void Control::setDragging(bool dragging)
 {
     m_dragging = dragging;
 
-    if (dragging)
-        setCursor(Qt::SizeAllCursor);
-    else
-        setCursor(Qt::ArrowCursor);
-
     // FIXME:
     Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
     //    emit draggingChanged();
@@ -289,16 +283,15 @@ void Control::setIndex(quint32 index)
 
 QRectF Control::outerRect(const QRectF& rect) const
 {
-    const SceneSettings* s = DesignerSettings::sceneSettings();
-    return rect.adjusted(-0.5 / s->sceneZoomLevel, -0.5 / s->sceneZoomLevel, 0, 0);
+    qreal zoomLevel = scene()->view()->matrix().m11();
+    return rect.adjusted(-0.5 / zoomLevel, -0.5 / zoomLevel, 0, 0);
 }
 
 QVariant::Type Control::propertyType(const QString& propertyName) const
 {
     for (const PropertyNode& propertyNode : m_properties) {
-        const QMap<QString, QVariant>& propertyMap = propertyNode.properties;
-        for (const QString& property : propertyMap.keys()) {
-            const QVariant& propertyValue = propertyMap.value(property);
+        for (const QString& property : propertyNode.properties.keys()) {
+            const QVariant& propertyValue = propertyNode.properties.value(property);
             if (property == propertyName)
                 return propertyValue.type();
         }
@@ -477,25 +470,20 @@ void Control::paintHighlight(QPainter* painter)
 
 void Control::paintHoverOutline(QPainter* painter)
 {
-    painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
     painter->setPen(scene()->pen());
     painter->drawRect(outerRect(rect()));
-    painter->setRenderHint(QPainter::Antialiasing, true);
 }
 
 void Control::paintSelectionOutline(QPainter* painter)
 {
-    painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setPen(scene()->pen(scene()->outlineColor(), 2));
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(rect());
-    painter->setRenderHint(QPainter::Antialiasing, true);
 }
 
 void Control::paintOutline(QPainter* painter, int type)
 {
-    painter->setRenderHint(QPainter::Antialiasing, false);
     QPen linePen(QColor(0, 0, 0, 180));
     linePen.setCosmetic(true);
     linePen.setDashPattern({2., 1.});
@@ -510,7 +498,6 @@ void Control::paintOutline(QPainter* painter, int type)
 
     painter->setPen(linePen);
     painter->drawRect(outerRect(type == 1 ? rect() : m_frame));
-    painter->setRenderHint(QPainter::Antialiasing, true);
 }
 
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
@@ -595,4 +582,9 @@ void Control::applyCachedGeometry()
                         ControlPropertyManager::NoOption);
         }
     }
+}
+
+QRectF Control::frame() const
+{
+    return m_frame;
 }
