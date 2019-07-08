@@ -37,6 +37,8 @@ DesignerScene::DesignerScene(DesignerView* view, QObject *parent) : QGraphicsSce
   , m_view(view)
   , m_currentForm(nullptr)
 {
+    int sceneSize = DesignerSettings::sceneSettings()->sceneSize;
+    setSceneRect(QRectF(0, 0, sceneSize, sceneSize));
     setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 
@@ -90,6 +92,11 @@ Form* DesignerScene::currentForm()
 DesignerView* DesignerScene::view() const
 {
     return m_view;
+}
+
+qreal DesignerScene::zoomLevel() const
+{
+    return view()->matrix().m11();
 }
 
 QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
@@ -472,20 +479,13 @@ void DesignerScene::setCurrentForm(Form* currentForm)
 
     m_currentForm = currentForm;
 
-    setSceneRect(QRectF());
     view()->centerScene();
     view()->viewport()->update();
 
     if (m_currentForm) {
         m_currentForm->setVisible(true);
-        setSceneRect(m_currentForm->rect().adjusted(0, -30, 0, 10));
         connect(m_currentForm, &Form::geometryChanged, this, [=] {
-            const QRectF& rect = m_currentForm->rect();
-            const QRectF& frame = m_currentForm->frame();
-            QRectF boundingRect = rect;
-            if (frame.width() > rect.width() || frame.height() > rect.height())
-                boundingRect = frame;
-            setSceneRect(boundingRect.adjusted(0, -30, 0, 10));
+            view()->centerScene();
             view()->viewport()->update();
         });
     }

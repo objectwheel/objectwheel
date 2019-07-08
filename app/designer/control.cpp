@@ -283,8 +283,7 @@ void Control::setIndex(quint32 index)
 
 QRectF Control::outerRect(const QRectF& rect) const
 {
-    qreal zoomLevel = scene()->view()->matrix().m11();
-    return rect.adjusted(-0.5 / zoomLevel, -0.5 / zoomLevel, 0, 0);
+    return rect.adjusted(-0.5 / scene()->zoomLevel(), -0.5 / scene()->zoomLevel(), 0, 0);
 }
 
 QVariant::Type Control::propertyType(const QString& propertyName) const

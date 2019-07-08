@@ -3,8 +3,6 @@
 #include <controlpropertymanager.h>
 #include <designerscene.h>
 #include <utilityfunctions.h>
-#include <designersettings.h>
-#include <scenesettings.h>
 
 #include <QCursor>
 #include <QGraphicsSceneMouseEvent>
@@ -156,7 +154,6 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         return;
 
     qreal dx, dy;
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
     const qreal parentWidth = parentControl()->size().width();
     const qreal parentHeight = parentControl()->size().height();
     const auto& shift = [this] (qreal x1, qreal y1, qreal x2, qreal y2) {
@@ -175,24 +172,26 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (parentWidth + dx < 10 || parentHeight + dy < 10)
         return;
 
-//    m_collectiveDy += dy;
-//    m_collectiveDx += dx;
+    m_collectiveDy += dy;
+    m_collectiveDx += dx;
 
-//    qreal closestX = qRound((parentControl()->x() - m_collectiveDx) / settings->gridSize) * settings->gridSize;
-//    qreal closestY = qRound((parentControl()->y() - m_collectiveDy) / settings->gridSize) * settings->gridSize;
+    qreal closestX = qRound((parentControl()->x() - m_collectiveDx)
+                            / scene()->zoomLevel()) * scene()->zoomLevel();
+    qreal closestY = qRound((parentControl()->y() - m_collectiveDy)
+                            / scene()->zoomLevel()) * scene()->zoomLevel();
 
-//    if (closestX == parentControl()->x() && closestY == parentControl()->y())
-//        return;
+    if (closestX == parentControl()->x() && closestY == parentControl()->y())
+        return;
 
-//    if (closestX != parentControl()->x()) {
-//        dx = parentControl()->x() - closestX;
-//        m_collectiveDx -= dx;
-//    }
+    if (closestX != parentControl()->x()) {
+        dx = parentControl()->x() - closestX;
+        m_collectiveDx -= dx;
+    }
 
-//    if (closestY != parentControl()->y()) {
-//        dy = parentControl()->y() - closestY;
-//        m_collectiveDy -= dy;
-//    }
+    if (closestY != parentControl()->y()) {
+        dy = parentControl()->y() - closestY;
+        m_collectiveDy -= dy;
+    }
 
     switch (m_placement) {
     case Top:
@@ -261,7 +260,6 @@ QRectF Resizer::boundingRect() const
 
 void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    painter->fillRect(boundingRect(), Qt::red);
     painter->setBrush(Qt::white);
     painter->setPen(scene()->pen());
     painter->setRenderHint(QPainter::Antialiasing, false);

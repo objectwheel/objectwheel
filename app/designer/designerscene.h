@@ -21,6 +21,8 @@ public:
     Form* currentForm();
     DesignerView* view() const;
 
+    qreal zoomLevel() const;
+
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QPointF lastMousePos() const;

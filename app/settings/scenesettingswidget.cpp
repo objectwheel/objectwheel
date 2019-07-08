@@ -18,9 +18,11 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
   , m_designGroup(new QGroupBox(contentWidget()))
   , m_showGuideLinesLabel(new QLabel(m_designGroup))
   , m_sceneBackgroundColorLabel(new QLabel(m_designGroup))
+  , m_sceneSizeLabel(new QLabel(m_designGroup))
   , m_sceneZoomLevelLabel(new QLabel(m_designGroup))
   , m_showGuideLinesCheckBox(new QCheckBox(m_designGroup))
   , m_sceneBackgroundColorBox(new QComboBox(m_designGroup))
+  , m_sceneSizeSpinBox(new QSpinBox(m_designGroup))
   , m_sceneZoomLevelBox(new QComboBox(m_designGroup))
   /****/
   , m_gridViewGroup(new QGroupBox(contentWidget()))
@@ -54,28 +56,35 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     designLayout->addWidget(m_showGuideLinesLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_sceneBackgroundColorLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneZoomLevelLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneSizeLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneZoomLevelLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_showGuideLinesCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_sceneBackgroundColorBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_sceneZoomLevelBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneSizeSpinBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->setColumnStretch(3, 1);
     designLayout->setColumnMinimumWidth(1, 20);
 
     m_designGroup->setTitle(tr("Design"));
     m_showGuideLinesLabel->setText(tr("Guide lines") + ":");
     m_sceneBackgroundColorLabel->setText(tr("Background color") + ":");
+    m_sceneSizeLabel->setText(tr("Scene size") + ":");
     m_sceneZoomLevelLabel->setText(tr("Zoom level") + ":");
     m_showGuideLinesCheckBox->setText(tr("Show guide lines"));
 
     m_showGuideLinesCheckBox->setToolTip(tr("Show guide lines while moving controls"));
     m_sceneBackgroundColorBox->setToolTip(tr("Change background color of the scene"));
+    m_sceneSizeSpinBox->setToolTip(tr("Change scene size"));
     m_sceneZoomLevelBox->setToolTip(tr("Change zoom level of the scene"));
 
     m_showGuideLinesCheckBox->setCursor(Qt::PointingHandCursor);
     m_sceneBackgroundColorBox->setCursor(Qt::PointingHandCursor);
+    m_sceneSizeSpinBox->setCursor(Qt::PointingHandCursor);
     m_sceneZoomLevelBox->setCursor(Qt::PointingHandCursor);
 
     m_sceneBackgroundColorBox->setIconSize({13, 13});
+    m_sceneSizeSpinBox->setMinimum(100);
+    m_sceneSizeSpinBox->setMaximum(99999);
 
     /****/
 
@@ -180,6 +189,7 @@ void SceneSettingsWidget::apply()
     /****/
     settings->showGuideLines = m_showGuideLinesCheckBox->isChecked();
     settings->sceneBackgroundColor = m_sceneBackgroundColorBox->currentIndex();
+    settings->sceneSize = m_sceneSizeSpinBox->value();
     settings->sceneZoomLevel = UtilityFunctions::textToZoomLevel(m_sceneZoomLevelBox->currentText());
     /****/
     settings->showGridViewDots = m_showGridViewDotsCheckBox->isChecked();
@@ -203,6 +213,7 @@ void SceneSettingsWidget::revert()
     /****/
     m_showGuideLinesCheckBox->setChecked(settings->showGuideLines);
     m_sceneBackgroundColorBox->setCurrentIndex(settings->sceneBackgroundColor);
+    m_sceneSizeSpinBox->setValue(settings->sceneSize);
     m_sceneZoomLevelBox->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
     /****/
     m_showGridViewDotsCheckBox->setChecked(settings->showGridViewDots);
@@ -240,6 +251,7 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_controlsGroup->title().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesLabel->text().contains(word, Qt::CaseInsensitive)
             || m_sceneBackgroundColorLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_sceneSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_sceneZoomLevelLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsLabel->text().contains(word, Qt::CaseInsensitive)
             || m_snappingEnabledLabel->text().contains(word, Qt::CaseInsensitive)
