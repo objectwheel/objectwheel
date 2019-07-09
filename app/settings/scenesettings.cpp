@@ -4,7 +4,6 @@
 
 static const char g_showGuideLines[] = "ShowGuideLines";
 static const char g_sceneBackgroundColor[] = "SceneBackgroundColor";
-static const char g_sceneSize[] = "SceneSize";
 static const char g_sceneZoomLevel[] = "SceneZoomLevel";
 static const char g_showGridViewDots[] = "ShowGridViewDots";
 static const char g_snappingEnabled[] = "SnappingEnabled";
@@ -25,7 +24,6 @@ void SceneSettings::read()
     begin();
     showGuideLines = value<bool>(g_showGuideLines, showGuideLines);
     sceneBackgroundColor = value<int>(g_sceneBackgroundColor, sceneBackgroundColor);
-    sceneSize = value<int>(g_sceneSize, sceneSize);
     sceneZoomLevel = value<qreal>(g_sceneZoomLevel, sceneZoomLevel);
     /****/
     showGridViewDots = value<bool>(g_showGridViewDots, showGridViewDots);
@@ -43,7 +41,6 @@ void SceneSettings::write()
     begin();
     setValue(g_showGuideLines, showGuideLines);
     setValue(g_sceneBackgroundColor, sceneBackgroundColor);
-    setValue(g_sceneSize, sceneSize);
     setValue(g_sceneZoomLevel, sceneZoomLevel);
     /****/
     setValue(g_showGridViewDots, showGridViewDots);
@@ -62,7 +59,6 @@ void SceneSettings::reset()
 {
     showGuideLines = true;
     sceneBackgroundColor = 0;
-    sceneSize = 5000;
     sceneZoomLevel = 1.0;
     /****/
     showGridViewDots = true;

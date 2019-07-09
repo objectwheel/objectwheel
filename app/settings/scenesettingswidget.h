@@ -32,11 +32,9 @@ private:
     QGroupBox* m_designGroup;
     QLabel* m_showGuideLinesLabel;
     QLabel* m_sceneBackgroundColorLabel;
-    QLabel* m_sceneSizeLabel;
     QLabel* m_sceneZoomLevelLabel;
     QCheckBox* m_showGuideLinesCheckBox;
     QComboBox* m_sceneBackgroundColorBox;
-    QSpinBox* m_sceneSizeSpinBox;
     QComboBox* m_sceneZoomLevelBox;
     /****/
     QGroupBox* m_gridViewGroup;

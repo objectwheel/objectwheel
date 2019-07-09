@@ -689,6 +689,31 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
             painter->restore();
         } break;
+    case CE_RubberBand:
+        if (qstyleoption_cast<const QStyleOptionRubberBand *>(option)) {
+            QRectF rect = option->rect;
+            QColor highlight = Qt::red/*option->palette.color(QPalette::Active, QPalette::Highlight)*/;
+            painter->save();
+            QColor penColor = highlight.darker(120);
+            penColor.setAlpha(180);
+            painter->setPen(penColor);
+            QColor dimHighlight(qMin(highlight.red()/2 + 110, 255),
+                                qMin(highlight.green()/2 + 110, 255),
+                                qMin(highlight.blue()/2 + 110, 255));
+            dimHighlight.setAlpha(widget && widget->isTopLevel() ? 255 : 80);
+            QLinearGradient gradient(rect.topLeft(), QPoint(rect.bottomLeft().x(), rect.bottomLeft().y()));
+            gradient.setColorAt(0, dimHighlight.lighter(120));
+            gradient.setColorAt(1, dimHighlight);
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            painter->translate(0.5, 0.5);
+            painter->setBrush(dimHighlight);
+            painter->drawRoundedRect(option->rect.adjusted(0, 0, -1, -1), 1, 1);
+            QColor innerLine = Qt::white;
+            innerLine.setAlpha(40);
+            painter->setPen(innerLine);
+            painter->drawRoundedRect(option->rect.adjusted(1, 1, -2, -2), 1, 1);
+            painter->restore();
+        } break;
     default:
         QFusionStyle::drawControl(element, option, painter, widget);
         break;

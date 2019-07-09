@@ -764,9 +764,3 @@ void DesignerView::stopPanning(QEvent *event)
     viewport()->unsetCursor();
     event->accept();
 }
-
-void DesignerView::centerScene()
-{
-    centerOn(sceneRect().center());
-}
-

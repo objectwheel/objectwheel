@@ -11,9 +11,6 @@
 #include <QPointer>
 #include <QPen>
 
-#define NGCS_PANEL_WIDTH (100)
-#define MAGNETIC_FIELD (3)
-
 namespace {
 static const char parentBeforeDragProperty[] = "_q_DesignerScene_parentBeforeDragProperty";
 static const char zValueBeforeDragProperty[] = "_q_DesignerScene_zValueBeforeDragProperty";
@@ -37,8 +34,6 @@ DesignerScene::DesignerScene(DesignerView* view, QObject *parent) : QGraphicsSce
   , m_view(view)
   , m_currentForm(nullptr)
 {
-    int sceneSize = DesignerSettings::sceneSettings()->sceneSize;
-    setSceneRect(QRectF(0, 0, sceneSize, sceneSize));
     setItemIndexMethod(QGraphicsScene::NoIndex);
 }
 
@@ -224,6 +219,7 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
+    painter->drawRect(sceneRect());
 
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
@@ -479,16 +475,8 @@ void DesignerScene::setCurrentForm(Form* currentForm)
 
     m_currentForm = currentForm;
 
-    view()->centerScene();
-    view()->viewport()->update();
-
-    if (m_currentForm) {
+    if (m_currentForm)
         m_currentForm->setVisible(true);
-        connect(m_currentForm, &Form::geometryChanged, this, [=] {
-            view()->centerScene();
-            view()->viewport()->update();
-        });
-    }
 
     blockSignals(false);
 

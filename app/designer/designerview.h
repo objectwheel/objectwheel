@@ -24,7 +24,6 @@ public:
 
     void stopPanning(QEvent* event);
     void startPanning(QEvent* event);
-    void centerScene();
 
     void keyReleaseEvent(QKeyEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
@@ -114,7 +113,6 @@ private:
     };
     Panning m_isPanning = Panning::NotStarted;
     QPoint m_panningStartPosition;
-    QRectF m_rootItemRect;
 };
 
 #endif // DESIGNERVIEW_H

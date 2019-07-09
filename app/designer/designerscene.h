@@ -20,7 +20,6 @@ public:
     void setCurrentForm(Form* currentForm);
     Form* currentForm();
     DesignerView* view() const;
-
     qreal zoomLevel() const;
 
     QList<Control*> controlsAt(const QPointF& pos) const;
