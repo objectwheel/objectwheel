@@ -9,6 +9,7 @@ class DesignerView;
 class DesignerScene : public QGraphicsScene
 {
     Q_OBJECT
+    Q_DECLARE_PRIVATE(QGraphicsScene)
 
     friend class ControlRemovingManager; // For removeControl(), removeForm()
     friend class ControlCreationManager; // For addForm(), addControl()

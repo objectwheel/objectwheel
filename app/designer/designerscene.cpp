@@ -5,6 +5,7 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <designerview.h>
+#include <private/qgraphicsscene_p.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -42,7 +43,6 @@ void DesignerScene::addForm(Form* form)
     if (m_forms.contains(form))
         return;
 
-    addItem(form);
     // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
     // parent concept for forms in Designer; fors are directly put into DesignerScene
 
@@ -457,7 +457,12 @@ void DesignerScene::discharge()
 
 void DesignerScene::setCurrentForm(Form* currentForm)
 {
-    if (!m_forms.contains(currentForm) || m_currentForm == currentForm)
+    Q_D(QGraphicsScene);
+
+    if (m_currentForm == currentForm)
+        return;
+
+    if (!m_forms.contains(currentForm))
         return;
 
     /*
@@ -466,21 +471,21 @@ void DesignerScene::setCurrentForm(Form* currentForm)
               hence InspectorPane clears the selection before saving selection state of a form in
               currentFormChanged signal.
     */
-    blockSignals(true);
 
-    if (m_currentForm) {
-        m_currentForm->disconnect(this);
-        m_currentForm->setVisible(false); // Clears selection and emits selectionChanged on DesignerScene
-    }
-
+    Form* previous = m_currentForm;
     m_currentForm = currentForm;
 
-    if (m_currentForm)
+    emit currentFormChanged(currentForm);
+
+    if (previous)
+        removeItem(previous);
+
+    if (m_currentForm) {
+        addItem(m_currentForm);
         m_currentForm->setVisible(true);
-
-    blockSignals(false);
-
-    emit currentFormChanged(m_currentForm);
+        d->growingItemsBoundingRect = QRectF();
+        emit sceneRectChanged(d->growingItemsBoundingRect);
+    }
 }
 
 const QList<Form*>& DesignerScene::forms() const

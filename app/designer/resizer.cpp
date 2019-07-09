@@ -153,6 +153,7 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (!parentControl()->resized())
         return;
 
+    QRectF rect;
     qreal dx, dy;
     const qreal parentWidth = parentControl()->size().width();
     const qreal parentHeight = parentControl()->size().height();
@@ -195,53 +196,36 @@ void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     switch (m_placement) {
     case Top:
-        if (parentControl()->form())
-            ControlPropertyManager::setHeight(parentControl(), parentHeight + dy, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(0, -dy, 0, 0), option);
+        rect = shift(0, -dy, 0, 0);
         break;
     case Right:
-        if (parentControl()->form())
-            ControlPropertyManager::setWidth(parentControl(), parentWidth + dx, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(0, 0, dx, 0), option);
+        rect = shift(0, 0, dx, 0);
         break;
     case Bottom:
-        if (parentControl()->form())
-            ControlPropertyManager::setHeight(parentControl(), parentHeight + dy, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(0, 0, 0, dy), option);
+        rect = shift(0, 0, 0, dy);
         break;
     case Left:
-        if (parentControl()->form())
-            ControlPropertyManager::setWidth(parentControl(), parentWidth + dx, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(-dx, 0, 0, 0), option);
+        rect = shift(-dx, 0, 0, 0);
         break;
     case TopLeft:
-        if (parentControl()->form())
-            ControlPropertyManager::setSize(parentControl(), {parentWidth + dx, parentHeight + dy}, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(-dx, -dy, 0, 0), option);
+        rect = shift(-dx, -dy, 0, 0);
         break;
     case TopRight:
-        if (parentControl()->form())
-            ControlPropertyManager::setSize(parentControl(), {parentWidth + dx, parentHeight + dy}, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(0, -dy, dx, 0), option);
+        rect = shift(0, -dy, dx, 0);
         break;
     case BottomRight:
-        if (parentControl()->form())
-            ControlPropertyManager::setSize(parentControl(), {parentWidth + dx, parentHeight + dy}, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(0, 0, dx, dy), option);
+        rect = shift(0, 0, dx, dy);
         break;
     case BottomLeft:
-        if (parentControl()->form())
-            ControlPropertyManager::setSize(parentControl(), {parentWidth + dx, parentHeight + dy}, option);
-        else
-            ControlPropertyManager::setGeometry(parentControl(), shift(-dx, 0, 0, dy), option);
+        rect = shift(-dx, 0, 0, dy);
         break;
+    }
+
+    if (parentControl()->form()) {
+        ControlPropertyManager::setSize(parentControl(), rect.size(), option);
+        ControlPropertyManager::setPos(parentControl(), rect.topLeft(), ControlPropertyManager::NoOption);
+    } else {
+        ControlPropertyManager::setGeometry(parentControl(), rect, option);
     }
 }
 
