@@ -74,7 +74,7 @@ qreal HeadlineItem::sizeWidth() const
 
 QString HeadlineItem::sizeText() const
 {
-    static const QString textTemplate(QStringLiteral(" [%1×%2]"));
+    static const QString textTemplate(QStringLiteral(" (%1×%2)"));
     return textTemplate.arg(parentControl()->size().width()).arg(parentControl()->size().height());
 }
 
