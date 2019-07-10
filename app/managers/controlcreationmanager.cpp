@@ -28,6 +28,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     auto form = new Form(newFormRootPath);
 
     s_designerScene->addForm(form);
+    s_designerScene->setCurrentForm(form);
 
     SaveManager::setupFormConnections(form->dir());
 

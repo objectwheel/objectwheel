@@ -228,7 +228,8 @@ void FormsPane::onAddButtonClick()
 
 void FormsPane::onRemoveButtonClick()
 {
-    ControlRemovingManager::removeForm(m_designerScene->currentForm());
+    if (topLevelItemCount() > 1) // FIXME
+        ControlRemovingManager::removeForm(m_designerScene->currentForm());
     // refresh(); // Not needed, m_designerScene already emits currentFormChanged signal
 }
 

@@ -1,25 +1,22 @@
 #include <headlineitem.h>
 #include <designerscene.h>
-#include <designerview.h>
 #include <controlpropertymanager.h>
 #include <utilityfunctions.h>
 
+#include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOption>
-#include <QFontDatabase>
+#include <QApplication>
+
+enum { MARGIN = 10 };
 
 HeadlineItem::HeadlineItem(Control* parent) : QGraphicsItem(parent)
 {
     setVisible(false);
-    setFlag(ItemIsMovable);
     setFlag(ItemClipsToShape);
-    setFlag(ItemSendsGeometryChanges);
     setFlag(ItemIgnoresTransformations);
     setAcceptedMouseButtons(Qt::LeftButton);
     setZValue(std::numeric_limits<int>::max());
-    QObject::connect(parent, &Control::geometryChanged, [=] {
-        updateSize();
-    });
 }
 
 DesignerScene* HeadlineItem::scene() const
@@ -42,7 +39,7 @@ void HeadlineItem::setText(const QString& text)
     if (m_text == text)
         return;
     m_text = text;
-    setToolTip(m_text);
+    setToolTip(text);
     updateSize();
 }
 
@@ -53,9 +50,9 @@ void HeadlineItem::updateSize()
     qreal width = size.width();
     qreal height = size.height();
     if (parentControl()->form())
-        width += sizeWidth();
+        width += dimensionTextWidth();
     prepareGeometryChange();
-    m_rect = QRectF(-0.5, -height, qMin(ps.width(), width + 10), height);
+    m_rect = QRectF(-0.5, -height, qMin(ps.width(), width + MARGIN), height);
     update();
 }
 
@@ -65,16 +62,22 @@ QSizeF HeadlineItem::textSize() const
     return QSizeF(fontMetrics.horizontalAdvance(m_text), fontMetrics.height());
 }
 
-QFont HeadlineItem::sizeFont() const
+QString HeadlineItem::dimensionText() const
+{
+    static const QString textTemplate(QStringLiteral(" (%1×%2)"));
+    return textTemplate.arg(parentControl()->size().width()).arg(parentControl()->size().height());
+}
+
+QFont HeadlineItem::dimensionTextFont() const
 {
     QFont font(parentControl()->font());
-    font.setPixelSize(font.pixelSize() - 4);
+    font.setPixelSize(font.pixelSize() - 3);
     return font;
 }
 
-qreal HeadlineItem::sizeWidth() const
+qreal HeadlineItem::dimensionTextWidth() const
 {
-    const QFontMetricsF fontMetrics(sizeFont());
+    const QFontMetricsF fontMetrics(dimensionTextFont());
     int digits = 0;
     digits += UtilityFunctions::numberOfDigits(parentControl()->size().width());
     digits += UtilityFunctions::numberOfDigits(parentControl()->size().height());
@@ -82,64 +85,57 @@ qreal HeadlineItem::sizeWidth() const
             fontMetrics.horizontalAdvance('9') * digits;
 }
 
-QString HeadlineItem::sizeText() const
+QFontMetrics HeadlineItem::dimensionTextFontMetrics() const
 {
-    static const QString textTemplate(QStringLiteral(" (%1×%2)"));
-    return textTemplate.arg(parentControl()->size().width()).arg(parentControl()->size().height());
-}
-
-QFontMetrics HeadlineItem::sizeFontMetrics() const
-{
-    return QFontMetrics(sizeFont());
-}
-
-QVariant HeadlineItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
-{
-    if (change == ItemPositionHasChanged) {
-        const QPointF& newPos = parentControl()->mapToParent(pos());
-        if (!parentControl()->form()) {
-            ControlPropertyManager::setPos(parentControl(), scene()->snapPosition(newPos),
-                                           ControlPropertyManager::SaveChanges
-                                           | ControlPropertyManager::UpdateRenderer
-                                           | ControlPropertyManager::CompressedCall);
-        }
-    }
-    return QGraphicsItem::itemChange(change, value);
+    return QFontMetrics(dimensionTextFont());
 }
 
 void HeadlineItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mousePressEvent(event);
-    if (!parentControl()->form())
-        scene()->view()->viewport()->setCursor(Qt::ClosedHandCursor);
+    m_dragStarted = false;
+    m_dragStartPoint = event->pos();
+    scene()->setViewportCursor(Qt::ClosedHandCursor);
 }
 
-void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsItem::mouseReleaseEvent(event);
-    if (!parentControl()->form())
-        scene()->view()->viewport()->unsetCursor();
+    const QPointF& diff = event->pos() - m_dragStartPoint;
+    if (m_dragStarted || diff.manhattanLength() >= QApplication::startDragDistance()) {
+        m_dragStarted = true;
+        const QPointF& snapPos = scene()->snapPosition(parentControl()->mapToParent(diff));
+        ControlPropertyManager::setPos(parentControl(), snapPos, ControlPropertyManager::SaveChanges
+                                       | ControlPropertyManager::UpdateRenderer
+                                       | ControlPropertyManager::CompressedCall);
+    }
+}
+
+void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent*)
+{
+    scene()->unsetViewportCursor();
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
-    if (parentControl()->form() && !parentControl()->isSelected())
-        painter->fillRect(m_rect, Qt::darkGray);
-    else
-        painter->fillRect(m_rect, scene()->outlineColor());
+    // Background
+    bool isDark = parentControl()->form() && !parentControl()->isSelected();
+    painter->fillRect(m_rect, isDark ? Qt::darkGray : scene()->outlineColor());
 
+    // Text
     painter->setPen(Qt::white);
-    QRectF rect = m_rect.adjusted(5, 0, -5, -1);
-    if (parentControl()->form() && rect.width() >= textSize().width()) {
-        qreal availableWidth = rect.width() - textSize().width();
+    qreal textWidth = textSize().width();
+    QFontMetrics fm = option->fontMetrics;
+    QRectF rect = m_rect.adjusted(MARGIN / 2, 0, -MARGIN / 2, -1);
+    if (parentControl()->form() && rect.width() >= textWidth) {
+        qreal availableWidth = rect.width() - textWidth;
         rect.adjust(0, 0, -availableWidth, 0);
-        painter->drawText(rect, m_text, QTextOption(Qt::AlignLeft));
+        painter->drawText(rect, m_text, {Qt::AlignLeft});
         rect.adjust(rect.width(), 0, availableWidth, 0);
-        painter->setFont(sizeFont());
-        painter->drawText(rect, sizeFontMetrics().elidedText(sizeText(), Qt::ElideRight, rect.width() + 1),
+        painter->setFont(dimensionTextFont());
+        fm = dimensionTextFontMetrics();
+        painter->drawText(rect, fm.elidedText(dimensionText(), Qt::ElideRight, rect.width() + 1),
                           QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
     } else {
-        painter->drawText(rect, option->fontMetrics.elidedText(m_text, Qt::ElideRight, rect.width() + 1),
+        painter->drawText(rect, fm.elidedText(m_text, Qt::ElideRight, rect.width() + 1),
                           QTextOption(Qt::AlignCenter));
     }
 }

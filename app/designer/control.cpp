@@ -60,6 +60,8 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
             this, &Control::applyCachedGeometry);
     connect(this, &Control::draggingChanged,
             this, &Control::applyCachedGeometry);
+    connect(this, &Control::geometryChanged,
+            this, [=] { headlineItem()->updateSize(); });
 }
 
 Control::~Control()

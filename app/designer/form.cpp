@@ -12,8 +12,6 @@ Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
     setFlag(ItemIsMovable, false);
     headlineItem()->setVisible(true);
-    headlineItem()->setFlag(ItemIsMovable, false);
-    headlineItem()->setFlag(ItemSendsGeometryChanges, false);
 }
 
 int Form::type() const
@@ -37,8 +35,8 @@ void Form::paintGridViewDots(QPainter* painter, int gridSize)
 {
     painter->save();
     QVector<QPointF> points;
-    for (qreal x = 0; x < rect().right(); x += gridSize) {
-        for (qreal y = 0; y < rect().bottom(); y += gridSize)
+    for (qreal x = 0; x <= rect().right(); x += gridSize) {
+        for (qreal y = 0; y <= rect().bottom(); y += gridSize)
             points.append(QPointF(x, y));
     }
     painter->setClipRect(rect());

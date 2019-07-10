@@ -23,6 +23,9 @@ public:
     DesignerView* view() const;
     qreal zoomLevel() const;
 
+    void unsetViewportCursor();
+    void setViewportCursor(Qt::CursorShape cursor);
+
     QPointF snapPosition(qreal x, qreal y) const;
     QPointF snapPosition(const QPointF& pos) const;
 

@@ -106,6 +106,16 @@ qreal DesignerScene::zoomLevel() const
     return view()->matrix().m11();
 }
 
+void DesignerScene::unsetViewportCursor()
+{
+    view()->viewport()->unsetCursor();
+}
+
+void DesignerScene::setViewportCursor(Qt::CursorShape cursor)
+{
+    view()->viewport()->setCursor(cursor);
+}
+
 QPointF DesignerScene::snapPosition(qreal x, qreal y) const
 {
     return snapPosition(QPointF(x, y));

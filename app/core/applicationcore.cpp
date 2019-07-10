@@ -94,6 +94,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /* Set application ui settings */
     QApplication::setFont(GeneralSettings::interfaceSettings()->toFont());
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
+    QApplication::setStartDragDistance(8);
 
     /* Show splash screen */
     QPixmap pixmap(":/images/splash.png");

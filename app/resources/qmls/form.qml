@@ -4,7 +4,7 @@ import Assets 1.0
 
 Page {
     id: form
-    width: 342
-    height: 608
+    width: 360
+    height: 640
     // AssetsHere
 }
