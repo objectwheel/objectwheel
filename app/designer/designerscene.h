@@ -23,6 +23,9 @@ public:
     DesignerView* view() const;
     qreal zoomLevel() const;
 
+    QPointF snapPosition(qreal x, qreal y) const;
+    QPointF snapPosition(const QPointF& pos) const;
+
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QPointF lastMousePos() const;

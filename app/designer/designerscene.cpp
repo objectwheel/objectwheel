@@ -5,6 +5,8 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <designerview.h>
+#include <headlineitem.h>
+
 #include <private/qgraphicsscene_p.h>
 
 #include <QGraphicsSceneMouseEvent>
@@ -34,6 +36,18 @@ DesignerScene::DesignerScene(DesignerView* view, QObject *parent) : QGraphicsSce
   , m_currentForm(nullptr)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
+    connect(this, &DesignerScene::selectionChanged, this, [=]{
+        QList<Control*> sc = selectedControls();
+        sc.removeOne(currentForm());
+        if (sc.isEmpty())
+            return;
+        if (sc.size() > 1) {
+            for (Control* c : sc)
+                c->headlineItem()->setVisible(false);
+        } else {
+            sc.first()->headlineItem()->setVisible(true);
+        }
+    });
 }
 
 void DesignerScene::addForm(Form* form)
@@ -90,6 +104,22 @@ DesignerView* DesignerScene::view() const
 qreal DesignerScene::zoomLevel() const
 {
     return view()->matrix().m11();
+}
+
+QPointF DesignerScene::snapPosition(qreal x, qreal y) const
+{
+    return snapPosition(QPointF(x, y));
+}
+
+QPointF DesignerScene::snapPosition(const QPointF& pos) const
+{
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    if (settings->snappingEnabled) {
+        const qreal x = qRound(pos.x() / settings->gridSize) * settings->gridSize;
+        const qreal y = qRound(pos.y() / settings->gridSize) * settings->gridSize;
+        return QPointF(x, y);
+    }
+    return pos;
 }
 
 QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
@@ -249,8 +279,8 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
         for (QLineF line : guideLines) {
             painter->setBrush(outlineColor());
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.0, 1.0), QSizeF(2.0, 2.0)), 1.0, 1.0);
+            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
         }
     }
 }
@@ -282,8 +312,8 @@ void DesignerScene::stick() const
             | ControlPropertyManager::CompressedCall;
 
     const QRectF& frame = united(selectedControls);
-    const qreal dx = int(frame.x() / settings->gridSize) * settings->gridSize - frame.x();
-    const qreal dy = int(frame.y() / settings->gridSize) * settings->gridSize - frame.y();
+    const qreal dx = qRound(frame.x() / settings->gridSize) * settings->gridSize - frame.x();
+    const qreal dy = qRound(frame.y() / settings->gridSize) * settings->gridSize - frame.y();
 
     for (Control* control : selectedControls)
         ControlPropertyManager::setPos(control, {control->x() + dx, control->y() + dy}, options);

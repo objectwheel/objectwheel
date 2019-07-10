@@ -19,6 +19,13 @@ public:
     void updateSize();
 
 private:
+    QSizeF textSize() const;
+    QFont sizeFont() const;
+    qreal sizeWidth() const;
+    QString sizeText() const;
+    QFontMetrics sizeFontMetrics() const;
+
+private:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent *event) override;

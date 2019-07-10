@@ -447,8 +447,8 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
         bool selected = value.toBool();
         for (Resizer* resizer : m_resizers)
             resizer->setVisible(selected);
-        if (type() == Control::Type)
-            m_headlineItem->setVisible(selected);
+        if (type() == Control::Type && !selected)
+            m_headlineItem->setVisible(false);
     }
     return QGraphicsWidget::itemChange(change, value);
 }
