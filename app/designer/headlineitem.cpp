@@ -2,9 +2,11 @@
 #include <designerscene.h>
 #include <designerview.h>
 #include <controlpropertymanager.h>
+#include <utilityfunctions.h>
 
 #include <QPainter>
 #include <QStyleOption>
+#include <QFontDatabase>
 
 HeadlineItem::HeadlineItem(Control* parent) : QGraphicsItem(parent)
 {
@@ -15,6 +17,9 @@ HeadlineItem::HeadlineItem(Control* parent) : QGraphicsItem(parent)
     setFlag(ItemIgnoresTransformations);
     setAcceptedMouseButtons(Qt::LeftButton);
     setZValue(std::numeric_limits<int>::max());
+    QObject::connect(parent, &Control::geometryChanged, [=] {
+        updateSize();
+    });
 }
 
 DesignerScene* HeadlineItem::scene() const
@@ -37,6 +42,7 @@ void HeadlineItem::setText(const QString& text)
     if (m_text == text)
         return;
     m_text = text;
+    setToolTip(m_text);
     updateSize();
 }
 
@@ -69,7 +75,11 @@ QFont HeadlineItem::sizeFont() const
 qreal HeadlineItem::sizeWidth() const
 {
     const QFontMetricsF fontMetrics(sizeFont());
-    return fontMetrics.horizontalAdvance(sizeText());
+    int digits = 0;
+    digits += UtilityFunctions::numberOfDigits(parentControl()->size().width());
+    digits += UtilityFunctions::numberOfDigits(parentControl()->size().height());
+    return fontMetrics.horizontalAdvance(QStringLiteral(" (×)")) +
+            fontMetrics.horizontalAdvance('9') * digits;
 }
 
 QString HeadlineItem::sizeText() const
@@ -121,15 +131,16 @@ void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
 
     painter->setPen(Qt::white);
     QRectF rect = m_rect.adjusted(5, 0, -5, -1);
-    if (parentControl()->form()) {
-        rect.adjust(0, 0, -sizeWidth(), 0);
+    if (parentControl()->form() && rect.width() >= textSize().width()) {
+        qreal availableWidth = rect.width() - textSize().width();
+        rect.adjust(0, 0, -availableWidth, 0);
         painter->drawText(rect, m_text, QTextOption(Qt::AlignLeft));
-        rect.adjust(rect.width(), 0, sizeWidth() + 1, 0);
+        rect.adjust(rect.width(), 0, availableWidth, 0);
         painter->setFont(sizeFont());
-        painter->drawText(rect, sizeFontMetrics().elidedText(sizeText(), Qt::ElideRight, rect.width()),
-                          QTextOption(Qt::AlignLeft | Qt::AlignBottom));
+        painter->drawText(rect, sizeFontMetrics().elidedText(sizeText(), Qt::ElideRight, rect.width() + 1),
+                          QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
     } else {
-        painter->drawText(rect, option->fontMetrics.elidedText(m_text, Qt::ElideRight, rect.width()),
+        painter->drawText(rect, option->fontMetrics.elidedText(m_text, Qt::ElideRight, rect.width() + 1),
                           QTextOption(Qt::AlignCenter));
     }
 }

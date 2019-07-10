@@ -660,4 +660,12 @@ QPointF bottomCenter(const QRectF& rect)
     return {rect.center().x(), rect.bottom()};
 }
 
+int numberOfDigits(int number)
+{
+    int length = 1;
+    while (number /= 10)
+       length++;
+    return length;
+}
+
 } // UtilityFunctions

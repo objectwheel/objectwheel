@@ -593,7 +593,6 @@ void Control::applyCachedGeometry()
                         this, ControlPropertyManager::geoWithMargin(this, m_cachedGeometry, true),
                         ControlPropertyManager::NoOption);
         }
-        m_headlineItem->updateSize();
     }
 }
 

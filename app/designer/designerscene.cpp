@@ -245,7 +245,6 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
-    painter->drawRect(sceneRect());
 
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
