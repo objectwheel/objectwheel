@@ -1,13 +1,14 @@
 #ifndef HEADLINEITEM_H
 #define HEADLINEITEM_H
 
-#include <QGraphicsItem>
+#include <QGraphicsObject>
 
 class Control;
 class DesignerScene;
 
-class HeadlineItem final : public QGraphicsItem
+class HeadlineItem final : public QGraphicsObject
 {
+    Q_OBJECT
     Q_DISABLE_COPY(HeadlineItem)
 
 public:
@@ -27,10 +28,14 @@ private:
     QFontMetrics dimensionTextFontMetrics() const;
 
 private:
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
+signals:
+    void doubleClicked();
 
 private:
     QRectF m_rect;

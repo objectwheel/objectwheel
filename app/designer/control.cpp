@@ -23,7 +23,6 @@
 #include <QMimeData>
 #include <QGraphicsSceneDragDropEvent>
 #include <QStyleOption>
-#include <QDebug>
 
 QList<Control*> Control::m_controls;
 
@@ -61,7 +60,9 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     connect(this, &Control::draggingChanged,
             this, &Control::applyCachedGeometry);
     connect(this, &Control::geometryChanged,
-            this, [=] { headlineItem()->updateSize(); });
+            headlineItem(), &HeadlineItem::updateSize);
+    connect(headlineItem(), &HeadlineItem::doubleClicked,
+            this, [=] { mouseDoubleClickEvent(0); });
 }
 
 Control::~Control()
@@ -440,8 +441,10 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     event->accept();
 }
 
-void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
+void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
+    if (event)
+        event->ignore();
     WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
 }
 
@@ -561,8 +564,8 @@ void Control::updateImage(const RenderResult& result)
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_image = hasErrors()
-                ? PaintUtils::renderErrorControlImage(size(), ControlRenderingManager::devicePixelRatio())
-                : result.image;
+            ? PaintUtils::renderErrorControlImage(size(), ControlRenderingManager::devicePixelRatio())
+            : result.image;
     m_image.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
 
     if (m_image.isNull() && !m_gui) {

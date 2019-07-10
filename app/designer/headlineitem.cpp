@@ -10,7 +10,7 @@
 
 enum { MARGIN = 10 };
 
-HeadlineItem::HeadlineItem(Control* parent) : QGraphicsItem(parent)
+HeadlineItem::HeadlineItem(Control* parent) : QGraphicsObject(parent)
 {
     setVisible(false);
     setFlag(ItemClipsToShape);
@@ -90,11 +90,16 @@ QFontMetrics HeadlineItem::dimensionTextFontMetrics() const
     return QFontMetrics(dimensionTextFont());
 }
 
+void HeadlineItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    event->ignore();
+    emit doubleClicked();
+}
+
 void HeadlineItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_dragStarted = false;
     m_dragStartPoint = event->pos();
-    scene()->setViewportCursor(Qt::ClosedHandCursor);
 }
 
 void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
@@ -102,6 +107,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     const QPointF& diff = event->pos() - m_dragStartPoint;
     if (m_dragStarted || diff.manhattanLength() >= QApplication::startDragDistance()) {
         m_dragStarted = true;
+        scene()->setViewportCursor(Qt::ClosedHandCursor);
         const QPointF& snapPos = scene()->snapPosition(parentControl()->mapToParent(diff));
         ControlPropertyManager::setPos(parentControl(), snapPos, ControlPropertyManager::SaveChanges
                                        | ControlPropertyManager::UpdateRenderer
@@ -111,7 +117,8 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent*)
 {
-    scene()->unsetViewportCursor();
+    if (m_dragStarted)
+        scene()->unsetViewportCursor();
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
