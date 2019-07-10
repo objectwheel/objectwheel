@@ -470,13 +470,8 @@ void Control::paintImage(QPainter* painter)
 
 void Control::paintHighlight(QPainter* painter)
 {
-    QColor shadow("#204C4C4C");
-    QLinearGradient gradient({0, 0, 0, 1});
-    gradient.setColorAt(0, shadow.lighter(110));
-    gradient.setColorAt(1,shadow.darker(120));
-    gradient.setCoordinateMode(QGradient::ObjectMode);
     painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    painter->fillRect(rect(), gradient);
+    painter->fillRect(rect(), QColor(0, 0, 0, 15));
     painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
 }
 

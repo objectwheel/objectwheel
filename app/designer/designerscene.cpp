@@ -128,10 +128,8 @@ QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
 
     const QList<QGraphicsItem*>& itemsUnderPos = items(pos);
     for (QGraphicsItem* item : itemsUnderPos) {
-        Control* control = dynamic_cast<Control*>(item);
-
-        if (control)
-            controls.append(control);
+        if (item->type() == Control::Type || item->type() == Form::Type)
+            controls.append(static_cast<Control*>(item));
     }
 
     return controls;
@@ -140,9 +138,10 @@ QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
 QList<Control*> DesignerScene::selectedControls() const
 {
     QList<Control*> selectedControls;
-    for (auto item : selectedItems())
-        if (dynamic_cast<Control*>(item))
-            selectedControls << static_cast<Control*>(item);
+    for (auto item : selectedItems()) {
+        if (item->type() == Control::Type || item->type() == Form::Type)
+            selectedControls.append(static_cast<Control*>(item));
+    }
     return selectedControls;
 }
 
