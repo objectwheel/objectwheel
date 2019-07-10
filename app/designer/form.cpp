@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <headlineitem.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -10,6 +11,9 @@
 Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
     setFlag(ItemIsMovable, false);
+    headlineItem()->setVisible(true);
+    headlineItem()->setFlag(ItemIsMovable, false);
+    headlineItem()->setFlag(ItemSendsGeometryChanges, false);
 }
 
 int Form::type() const
@@ -27,21 +31,6 @@ void Form::paintFrame(QPainter* painter)
     painter->setPen(scene()->pen(Qt::darkGray));
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(outerRect(rect()));
-}
-
-void Form::paintHeadline(QPainter* painter)
-{
-    QString text(QStringLiteral("%1 (%2×%3)").arg(id()).arg(size().width()).arg(size().width()));
-    QFontMetricsF fm(painter->font());
-    QRectF titleRect(0, 0, fm.horizontalAdvance(text) + 2 * fm.height(), fm.height());
-    titleRect.moveCenter(rect().center());
-    titleRect.moveTop(- fm.height() - 5);
-    painter->setBrush(QBrush("#4BA2FF"));
-    painter->setPen("#4391e5");
-    painter->drawRoundedRect(titleRect, fm.height() / 2.0, fm.height() / 2.0);
-    titleRect.adjust(0, -1, 0, -1);
-    painter->setPen("#FFFFFF");
-    painter->drawText(titleRect, text, QTextOption(Qt::AlignCenter));
 }
 
 void Form::paintGridViewDots(QPainter* painter, int gridSize)
@@ -91,6 +80,4 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
 
     if (dragIn())
         paintHighlight(painter);
-
-    paintHeadline(painter);
 }

@@ -6,6 +6,7 @@
 
 class Resizer;
 class DesignerScene;
+class HeadlineItem;
 
 class Control : public QGraphicsWidget
 {
@@ -43,6 +44,7 @@ public:
 
     DesignerScene* scene() const;
     Control* parentControl() const;
+    HeadlineItem* headlineItem() const;
 
     QList<QmlError> errors() const;
     QList<QString> events() const;
@@ -120,6 +122,7 @@ private:
     QRectF m_frame;
     QImage m_image;
 
+    HeadlineItem* m_headlineItem;
     QList<QmlError> m_errors;
     QList<Resizer*> m_resizers;
     QList<QString> m_events;

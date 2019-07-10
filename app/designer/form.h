@@ -20,7 +20,6 @@ public:
 
 private:
     void paintFrame(QPainter* painter);
-    void paintHeadline(QPainter* painter);
     void paintGridViewDots(QPainter* painter, int gridSize);
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;

@@ -169,7 +169,7 @@ void RunProgressBar::updateLine()
             layout->beginLayout();
             m_line = layout->createLine();
             if (m_line.isValid()) {
-                m_line.setLineWidth(std::numeric_limits<qreal>::max());
+                m_line.setLineWidth(std::numeric_limits<int>::max());
                 m_widerLineWidth = m_line.naturalTextWidth();
                 m_line.setLineWidth(maximumTextWidth());
                 m_line.setPosition({0, 0});

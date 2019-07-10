@@ -6,6 +6,7 @@ HEADERS += $$PWD/control.h \
            $$PWD/designerscene.h \
            $$PWD/designerview.h \
            $$PWD/form.h \
+           $$PWD/headlineitem.h \
            $$PWD/resizer.h \
            $$PWD/signalchooserdialog.h
 
@@ -14,6 +15,7 @@ SOURCES += $$PWD/control.cpp \
            $$PWD/designerscene.cpp \
            $$PWD/designerview.cpp \
            $$PWD/form.cpp \
+           $$PWD/headlineitem.cpp \
            $$PWD/resizer.cpp \
            $$PWD/signalchooserdialog.cpp
 

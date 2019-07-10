@@ -19,7 +19,7 @@ Resizer::Resizer(Placement placement, Control* parent) : QGraphicsItem(parent)
     setFlag(ItemClipsToShape);
     setFlag(ItemIgnoresTransformations);
     setAcceptedMouseButtons(Qt::LeftButton);
-    setZValue(std::numeric_limits<qreal>::max());
+    setZValue(std::numeric_limits<int>::max());
     updateCursor();
 }
 
@@ -66,7 +66,6 @@ void Resizer::updateCursor()
 void Resizer::updatePosition()
 {
     const QRectF& parentRect = parentControl()->rect();
-    prepareGeometryChange();
     switch (m_placement) {
     case Resizer::Top:
         setPos(UtilityFunctions::topCenter(parentRect));

@@ -15,6 +15,7 @@
 #include <mainwindow.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <headlineitem.h>
 
 #include <QCursor>
 #include <QPainter>
@@ -36,6 +37,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
+  , m_headlineItem(new HeadlineItem(this))
   , m_resizers(Resizer::init(this))
 {
     m_controls.append(this);
@@ -175,6 +177,11 @@ Control* Control::parentControl() const
     return nullptr;
 }
 
+HeadlineItem* Control::headlineItem() const
+{
+    return m_headlineItem;
+}
+
 QList<QmlError> Control::errors() const
 {
     return m_errors;
@@ -246,6 +253,7 @@ void Control::setClip(bool clip)
 void Control::setId(const QString& id)
 {
     m_id = id;
+    m_headlineItem->setText(id);
     setToolTip(id);
 }
 
@@ -436,8 +444,11 @@ void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent*)
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {    
     if (change == ItemSelectedHasChanged) {
+        bool selected = value.toBool();
         for (Resizer* resizer : m_resizers)
-            resizer->setVisible(value.toBool());
+            resizer->setVisible(selected);
+        if (type() == Control::Type)
+            m_headlineItem->setVisible(selected);
     }
     return QGraphicsWidget::itemChange(change, value);
 }
@@ -580,6 +591,7 @@ void Control::applyCachedGeometry()
                         this, ControlPropertyManager::geoWithMargin(this, m_cachedGeometry, true),
                         ControlPropertyManager::NoOption);
         }
+        m_headlineItem->updateSize();
     }
 }
 

@@ -13,9 +13,7 @@
 #include <QPen>
 
 namespace {
-static const char parentBeforeDragProperty[] = "_q_DesignerScene_parentBeforeDragProperty";
 static const char zValueBeforeDragProperty[] = "_q_DesignerScene_zValueBeforeDragProperty";
-static const char positionBeforeDragProperty[] = "_q_DesignerScene_positionBeforeDragProperty";
 
 QRectF united(const QList<Control*>& controls)
 {
@@ -180,14 +178,10 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         m_draggedControls = selectedControls;
         for (Control* selectedControl : selectedControls) {
             selectedControl->setProperty(zValueBeforeDragProperty, selectedControl->zValue());
-            selectedControl->setProperty(positionBeforeDragProperty, selectedControl->pos());
-            selectedControl->setProperty(parentBeforeDragProperty, qintptr(selectedControl->parentItem()));
-            const QPointF& newPos = m_currentForm->mapFromItem(selectedControl->parentItem(), selectedControl->pos());
-            selectedControl->setParentItem(m_currentForm);
-            selectedControl->setPos(newPos);
-            selectedControl->setZValue(std::numeric_limits<qreal>::max());
+            selectedControl->setZValue(std::numeric_limits<int>::max());
             selectedControl->setDragging(true);
         }
+        view()->viewport()->setCursor(Qt::ClosedHandCursor);
     }
 
     m_lastMousePos = event->scenePos();
@@ -213,13 +207,14 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         draggedControl->setDragging(false);
     }
 
+    view()->viewport()->unsetCursor();
+
     update();
 }
 
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
-    painter->drawRect(sceneRect());
 
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
