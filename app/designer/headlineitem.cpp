@@ -123,7 +123,6 @@ void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
-    painter->setClipRect(m_rect.adjusted(0, 0, 0, -0.5));
     if (parentControl()->form() && !parentControl()->isSelected())
         painter->fillRect(m_rect, Qt::darkGray);
     else

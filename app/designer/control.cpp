@@ -496,7 +496,7 @@ void Control::paintSelectionOutline(QPainter* painter)
 
 void Control::paintOutline(QPainter* painter, int type)
 {
-    QPen linePen(QColor(0, 0, 0, 180));
+    QPen linePen(QColor(0, 0, 0, 200));
     linePen.setCosmetic(true);
     linePen.setDashPattern({2., 1.});
 
@@ -504,7 +504,7 @@ void Control::paintOutline(QPainter* painter, int type)
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(outerRect(type == 1 ? rect() : m_frame));
 
-    linePen.setColor(QColor(255, 255, 255, 180));
+    linePen.setColor(QColor(255, 255, 255, 200));
     linePen.setDashPattern({1., 2.});
     linePen.setDashOffset(2.);
 
