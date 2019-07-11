@@ -1,18 +1,12 @@
 #include <resizer.h>
-#include <control.h>
 #include <controlpropertymanager.h>
 #include <designerscene.h>
 #include <utilityfunctions.h>
 
-#include <QCursor>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <QTimer>
-#include <QDebug>
 
 Resizer::Resizer(Placement placement, Control* parent) : QGraphicsItem(parent)
-  , m_collectiveDx(0)
-  , m_collectiveDy(0)
   , m_placement(placement)
 {
     setVisible(false);
@@ -23,6 +17,14 @@ Resizer::Resizer(Placement placement, Control* parent) : QGraphicsItem(parent)
     updateCursor();
 }
 
+QList<Resizer*> Resizer::init(Control* control)
+{
+    QList<Resizer*> resizers;
+    for (int i = 0; i < 8; ++i)
+        resizers.append(new Resizer(Resizer::Placement(i), control));
+    return resizers;
+}
+
 DesignerScene* Resizer::scene() const
 {
     return static_cast<DesignerScene*>(QGraphicsItem::scene());
@@ -31,6 +33,11 @@ DesignerScene* Resizer::scene() const
 Control* Resizer::parentControl() const
 {
     return static_cast<Control*>(parentItem());
+}
+
+QRectF Resizer::boundingRect() const
+{
+    return {-3.0, -3.0, 6.0, 6.0};
 }
 
 void Resizer::updateCursor()
@@ -94,158 +101,73 @@ void Resizer::updatePosition()
     }
 }
 
-void Resizer::calculatePositionDifference(const QGraphicsSceneMouseEvent* event, qreal* dx, qreal* dy)
+QRectF Resizer::calculateParentGeometry(const QPointF& snapPos)
 {
-    *dx = 0, *dy = 0;
-
+    QRectF geometry(parentControl()->geometry());
     switch (m_placement) {
     case Top:
-        *dy = event->lastPos().y() - event->pos().y();
+        geometry.setTop(snapPos.y());
         break;
     case Right:
-        *dx = event->pos().x() - event->lastPos().x();
+        geometry.setRight(snapPos.x());
         break;
     case Bottom:
-        *dy = event->pos().y() - event->lastPos().y();
+        geometry.setBottom(snapPos.y());
         break;
     case Left:
-        *dx = event->lastPos().x() - event->pos().x();
+        geometry.setLeft(snapPos.x());
         break;
     case TopLeft:
-        *dx = event->lastPos().x() - event->pos().x();
-        *dy = event->lastPos().y() - event->pos().y();
+        geometry.setTopLeft(snapPos);
         break;
     case TopRight:
-        *dx = event->pos().x() - event->lastPos().x();
-        *dy = event->lastPos().y() - event->pos().y();
+        geometry.setTopRight(snapPos);
         break;
     case BottomRight:
-        *dx = event->pos().x() - event->lastPos().x();
-        *dy = event->pos().y() - event->lastPos().y();
+        geometry.setBottomRight(snapPos);
         break;
     case BottomLeft:
-        *dx = event->lastPos().x() - event->pos().x();
-        *dy = event->pos().y() - event->lastPos().y();
+        geometry.setBottomLeft(snapPos);
         break;
     }
+    return geometry;
 }
 
-void Resizer::mousePressEvent(QGraphicsSceneMouseEvent*)
+void Resizer::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    m_collectiveDx = 0;
-    m_collectiveDy = 0;
-    parentControl()->setResized(true);
+    m_dragStartPoint = event->pos();
 }
 
 void Resizer::mouseReleaseEvent(QGraphicsSceneMouseEvent*)
 {
-    m_collectiveDx = 0;
-    m_collectiveDy = 0;
     parentControl()->setResized(false);
 }
 
 void Resizer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (!isEnabled())
+    const QPointF& diff = event->pos() - m_dragStartPoint;
+    if (!parentControl()->resized() && diff.manhattanLength() < scene()->startDragDistance())
         return;
 
-    if (!parentControl()->resized())
-        return;
-
-    QRectF rect;
-    qreal dx, dy;
-    const qreal parentWidth = parentControl()->size().width();
-    const qreal parentHeight = parentControl()->size().height();
-    const auto& shift = [this] (qreal x1, qreal y1, qreal x2, qreal y2) {
-        return parentControl()->geometry().adjusted(x1, y1, x2, y2);
-    };
+    parentControl()->setResized(true);
+    const QPointF& snapPos = scene()->snapPosition(parentControl()->mapToParent(mapToParent(diff)));
+    const QRectF& geometry = calculateParentGeometry(snapPos);
 
     ControlPropertyManager::Options option = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::UpdateRenderer
             | ControlPropertyManager::CompressedCall;
 
-    calculatePositionDifference(event, &dx, &dy);
-
-    if (dx == 0 && dy == 0)
-        return;
-
-    if (parentWidth + dx < 10 || parentHeight + dy < 10)
-        return;
-
-    m_collectiveDy += dy;
-    m_collectiveDx += dx;
-
-    qreal closestX = qRound((parentControl()->x() - m_collectiveDx)
-                            / scene()->zoomLevel()) * scene()->zoomLevel();
-    qreal closestY = qRound((parentControl()->y() - m_collectiveDy)
-                            / scene()->zoomLevel()) * scene()->zoomLevel();
-
-    if (closestX == parentControl()->x() && closestY == parentControl()->y())
-        return;
-
-    if (closestX != parentControl()->x()) {
-        dx = parentControl()->x() - closestX;
-        m_collectiveDx -= dx;
-    }
-
-    if (closestY != parentControl()->y()) {
-        dy = parentControl()->y() - closestY;
-        m_collectiveDy -= dy;
-    }
-
-    switch (m_placement) {
-    case Top:
-        rect = shift(0, -dy, 0, 0);
-        break;
-    case Right:
-        rect = shift(0, 0, dx, 0);
-        break;
-    case Bottom:
-        rect = shift(0, 0, 0, dy);
-        break;
-    case Left:
-        rect = shift(-dx, 0, 0, 0);
-        break;
-    case TopLeft:
-        rect = shift(-dx, -dy, 0, 0);
-        break;
-    case TopRight:
-        rect = shift(0, -dy, dx, 0);
-        break;
-    case BottomRight:
-        rect = shift(0, 0, dx, dy);
-        break;
-    case BottomLeft:
-        rect = shift(-dx, 0, 0, dy);
-        break;
-    }
-
     if (parentControl()->form()) {
-        ControlPropertyManager::setSize(parentControl(), rect.size(), option);
-        ControlPropertyManager::setPos(parentControl(), rect.topLeft(), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setSize(parentControl(), geometry.size(), option);
+        ControlPropertyManager::setPos(parentControl(), geometry.topLeft(), ControlPropertyManager::NoOption);
     } else {
-        ControlPropertyManager::setGeometry(parentControl(), rect, option);
+        ControlPropertyManager::setGeometry(parentControl(), geometry, option);
     }
-}
-
-QList<Resizer*> Resizer::init(Control* control)
-{
-    QList<Resizer*> resizers;
-    for (int i = 0; i < 8; ++i)
-        resizers.append(new Resizer(Resizer::Placement(i), control));
-    return resizers;
-}
-
-QRectF Resizer::boundingRect() const
-{
-    return {-3.0, -3.0, 6.0, 6.0};
 }
 
 void Resizer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     painter->setBrush(Qt::white);
     painter->setPen(scene()->pen());
-    painter->setRenderHint(QPainter::Antialiasing, false);
     painter->drawRect(boundingRect().adjusted(0, 0, -0.5, -0.5));
 }
-

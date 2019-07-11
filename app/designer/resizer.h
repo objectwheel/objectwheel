@@ -25,19 +25,17 @@ public:
 public:
     explicit Resizer(Placement placement, Control* parent);
 
-    DesignerScene* scene() const;
+    static QList<Resizer*> init(Control* control);
 
+    DesignerScene* scene() const;
     Control* parentControl() const;
+    QRectF boundingRect() const override;
 
     void updateCursor();
     void updatePosition();
 
-    QRectF boundingRect() const override;
-
-    static QList<Resizer*> init(Control* control);
-
 private:
-    void calculatePositionDifference(const QGraphicsSceneMouseEvent* event, qreal* dx, qreal* dy);
+    QRectF calculateParentGeometry(const QPointF& snapPos);
 
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -46,8 +44,8 @@ private:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
-    qreal m_collectiveDx, m_collectiveDy;
     Placement m_placement;
+    QPointF m_dragStartPoint;
 };
 
 #endif // RESIZER_H

@@ -118,7 +118,8 @@ QPointF topCenter(const QRectF& rect);
 QPointF leftCenter(const QRectF& rect);
 QPointF rightCenter(const QRectF& rect);
 QPointF bottomCenter(const QRectF& rect);
-int numberOfDigits(int number);
+int digits(int number);
+int nine(int digits);
 } // UtilityFunctions
 
 #endif // UTILITYFUNCTIONS_H

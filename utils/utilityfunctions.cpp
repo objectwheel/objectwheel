@@ -6,6 +6,7 @@
 #include <async.h>
 #include <filesystemutils.h>
 #include <hashfactory.h>
+#include <cmath>
 
 #include <QFileInfo>
 #include <QQmlEngine>
@@ -660,12 +661,19 @@ QPointF bottomCenter(const QRectF& rect)
     return {rect.center().x(), rect.bottom()};
 }
 
-int numberOfDigits(int number)
+int digits(int number)
 {
     int length = 1;
     while (number /= 10)
        length++;
     return length;
+}
+
+int nine(int digits)
+{
+    int result = 0;
+    for (int i = 0; i < digits; ++i)
+        result += 9 * std::pow(10, i);
 }
 
 } // UtilityFunctions

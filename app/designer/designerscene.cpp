@@ -106,6 +106,11 @@ qreal DesignerScene::zoomLevel() const
     return view()->matrix().m11();
 }
 
+int DesignerScene::startDragDistance() const
+{
+    return QApplication::startDragDistance();
+}
+
 void DesignerScene::unsetViewportCursor()
 {
     view()->viewport()->unsetCursor();
@@ -125,8 +130,8 @@ QPointF DesignerScene::snapPosition(const QPointF& pos) const
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     if (settings->snappingEnabled) {
-        const qreal x = qRound(pos.x() / settings->gridSize) * settings->gridSize;
-        const qreal y = qRound(pos.y() / settings->gridSize) * settings->gridSize;
+        const qreal x = int(pos.x() / settings->gridSize) * settings->gridSize;
+        const qreal y = int(pos.y() / settings->gridSize) * settings->gridSize;
         return QPointF(x, y);
     }
     return pos;

@@ -19,6 +19,7 @@ public:
     QRectF frameGeometry() const;
 
 private:
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     void paintFrame(QPainter* painter);
     void paintGridViewDots(QPainter* painter, int gridSize);
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;

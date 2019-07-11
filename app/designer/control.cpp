@@ -63,6 +63,11 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
             headlineItem(), &HeadlineItem::updateSize);
     connect(headlineItem(), &HeadlineItem::doubleClicked,
             this, [=] { mouseDoubleClickEvent(0); });
+    connect(this, &Control::geometryChanged,
+            this, [=] {
+        for (Resizer* resizer : m_resizers)
+            resizer->updatePosition();
+    });
 }
 
 Control::~Control()
@@ -492,13 +497,6 @@ void Control::paintSelectionOutline(QPainter* painter)
     painter->setPen(scene()->pen(scene()->outlineColor(), 2));
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(rect());
-}
-
-void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
-{
-    QGraphicsWidget::resizeEvent(event);
-    for (Resizer* resizer : m_resizers)
-        resizer->updatePosition();
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)

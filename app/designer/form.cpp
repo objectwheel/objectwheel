@@ -12,6 +12,7 @@ Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
     setFlag(ItemIsMovable, false);
     headlineItem()->setVisible(true);
+    headlineItem()->setBrush(Qt::darkGray);
 }
 
 int Form::type() const
@@ -22,6 +23,13 @@ int Form::type() const
 QRectF Form::frameGeometry() const
 {
     return QRectF(QPointF(-size().width() / 2.0, -size().height() / 2.0), size());
+}
+
+QVariant Form::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+{
+    if (change == ItemSelectedHasChanged)
+        headlineItem()->setBrush(isSelected() ? scene()->outlineColor() : Qt::darkGray);
+    return Control::itemChange(change, value);
 }
 
 void Form::paintFrame(QPainter* painter)

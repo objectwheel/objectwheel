@@ -22,6 +22,7 @@ public:
     Form* currentForm();
     DesignerView* view() const;
     qreal zoomLevel() const;
+    int startDragDistance() const;
 
     void unsetViewportCursor();
     void setViewportCursor(Qt::CursorShape cursor);
