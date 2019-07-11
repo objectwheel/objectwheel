@@ -3,12 +3,11 @@
 #include <QGraphicsSceneMouseEvent>
 
 DesignerItem::DesignerItem(Control* parent) : QGraphicsObject(parent)
-  , m_pen(Qt::white)
-  , m_brush(DesignerScene::outlineColor())
+  , m_pen(DesignerScene::pen())
+  , m_brush(Qt::white)
   , m_dragStarted(false)
 {
     setVisible(false);
-    setFlag(ItemClipsToShape);
     setFlag(ItemIgnoresTransformations);
     setAcceptedMouseButtons(Qt::LeftButton);
     setZValue(std::numeric_limits<int>::max());

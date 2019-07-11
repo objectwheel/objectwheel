@@ -4,7 +4,7 @@
 #include <renderresult.h>
 #include <QGraphicsWidget>
 
-class Resizer;
+class ResizerItem;
 class DesignerScene;
 class HeadlineItem;
 
@@ -121,7 +121,7 @@ private:
 
     HeadlineItem* m_headlineItem;
     QList<QmlError> m_errors;
-    QList<Resizer*> m_resizers;
+    QList<ResizerItem*> m_resizers;
     QList<QString> m_events;
     QList<PropertyNode> m_properties;
 

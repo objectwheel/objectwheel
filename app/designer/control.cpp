@@ -1,5 +1,5 @@
 #include <form.h>
-#include <resizer.h>
+#include <resizeritem.h>
 #include <saveutils.h>
 #include <suppressor.h>
 #include <designerscene.h>
@@ -38,7 +38,7 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
   , m_headlineItem(new HeadlineItem(this))
-  , m_resizers(Resizer::init(this))
+  , m_resizers(ResizerItem::init(this))
 {
     m_controls.append(this);
     new SceneExtendItem(this);
@@ -48,6 +48,9 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
+
+    headlineItem()->setPen(QPen(Qt::white));
+    headlineItem()->setBrush(DesignerScene::outlineColor());
 
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
@@ -59,13 +62,13 @@ Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
             this, &Control::applyCachedGeometry);
     connect(this, &Control::draggingChanged,
             this, &Control::applyCachedGeometry);
-    connect(this, &Control::geometryChanged,
-            headlineItem(), &HeadlineItem::updateSize);
     connect(headlineItem(), &HeadlineItem::doubleClicked,
             this, [=] { mouseDoubleClickEvent(0); });
     connect(this, &Control::geometryChanged,
+            headlineItem(), &HeadlineItem::updateSize);
+    connect(this, &Control::geometryChanged,
             this, [=] {
-        for (Resizer* resizer : m_resizers)
+        for (ResizerItem* resizer : m_resizers)
             resizer->updatePosition();
     });
 }
@@ -457,7 +460,7 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
 {    
     if (change == ItemSelectedHasChanged) {
         bool selected = value.toBool();
-        for (Resizer* resizer : m_resizers)
+        for (ResizerItem* resizer : m_resizers)
             resizer->setVisible(selected);
         if (type() == Control::Type && !selected)
             m_headlineItem->setVisible(false);

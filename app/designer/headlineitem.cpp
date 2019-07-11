@@ -79,10 +79,12 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     DesignerItem::mouseMoveEvent(event);
     if (dragStarted()) {
         scene()->setViewportCursor(Qt::ClosedHandCursor);
-        ControlPropertyManager::setPos(parentControl(), snapPosition(),
-                                       ControlPropertyManager::SaveChanges
-                                       | ControlPropertyManager::UpdateRenderer
-                                       | ControlPropertyManager::CompressedCall);
+        ControlPropertyManager::Options option = parentControl()->form()
+                ? ControlPropertyManager::NoOption
+                : ControlPropertyManager::SaveChanges
+                  | ControlPropertyManager::UpdateRenderer
+                  | ControlPropertyManager::CompressedCall;
+        ControlPropertyManager::setPos(parentControl(), snapPosition(), option);
     }
 }
 

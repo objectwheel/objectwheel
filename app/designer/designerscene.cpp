@@ -1,6 +1,6 @@
 #include <designerscene.h>
 #include <suppressor.h>
-#include <resizer.h>
+#include <resizeritem.h>
 #include <controlpropertymanager.h>
 #include <designersettings.h>
 #include <scenesettings.h>
