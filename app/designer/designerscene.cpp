@@ -272,13 +272,8 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
             }
 
             if (selectedControls.size() > 1) {
-                QPen pen("#777777");
-                pen.setWidthF(1);
-                pen.setStyle(Qt::DotLine);
-                painter->setPen(pen);
-                painter->setBrush(Qt::NoBrush);
                 auto r = united(selectedControls);
-                painter->drawRect(QRectF(selectedControls.first()->parentControl()->mapToScene(r.topLeft()), r.size()));
+                paintOutline(painter, QRectF(selectedControls.first()->parentControl()->mapToScene(r.topLeft()), r.size()));
             }
         }
 
@@ -292,6 +287,24 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
         }
     }
+}
+
+void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
+{
+    QPen linePen(QColor(0, 0, 0, 200));
+    linePen.setCosmetic(true);
+    linePen.setDashPattern({2., 1.});
+
+    painter->setPen(linePen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(rect);
+
+    linePen.setColor(QColor(255, 255, 255, 200));
+    linePen.setDashPattern({1., 2.});
+    linePen.setDashOffset(2.);
+
+    painter->setPen(linePen);
+    painter->drawRect(rect);
 }
 
 QPointF DesignerScene::lastMousePos() const

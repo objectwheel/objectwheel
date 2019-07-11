@@ -11,6 +11,7 @@
 #include <QApplication>
 #include <QScreen>
 
+// TODO: This class is incomplete
 static const char downProperty[] = "_q_SegmentedBar_down";
 static const char animatedActionProperty[] = "_q_SegmentedBar_animatedAction";
 static const char originalCursorShapeProperty[] = "_q_SegmentedBar_originalCursorShape";

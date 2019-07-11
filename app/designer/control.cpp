@@ -494,24 +494,6 @@ void Control::paintSelectionOutline(QPainter* painter)
     painter->drawRect(rect());
 }
 
-void Control::paintOutline(QPainter* painter, int type)
-{
-    QPen linePen(QColor(0, 0, 0, 200));
-    linePen.setCosmetic(true);
-    linePen.setDashPattern({2., 1.});
-
-    painter->setPen(linePen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(outerRect(type == 1 ? rect() : m_frame));
-
-    linePen.setColor(QColor(255, 255, 255, 200));
-    linePen.setDashPattern({1., 2.});
-    linePen.setDashOffset(2.);
-
-    painter->setPen(linePen);
-    painter->drawRect(outerRect(type == 1 ? rect() : m_frame));
-}
-
 void Control::resizeEvent(QGraphicsSceneResizeEvent* event)
 {
     QGraphicsWidget::resizeEvent(event);
@@ -530,7 +512,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         paintImage(painter);
 
     if (settings->controlOutline != 0)
-        paintOutline(painter, settings->controlOutline);
+        scene()->paintOutline(painter, outerRect(settings->controlOutline == 1 ? rect() : frame()));
 
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
         paintHoverOutline(painter);

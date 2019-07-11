@@ -38,6 +38,7 @@ public:
     static QColor outlineColor();
     static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
 
+    void paintOutline(QPainter* painter, const QRectF& rect);
 public slots:
     void discharge();
 

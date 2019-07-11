@@ -20,6 +20,8 @@ public:
                          QStyle::SubControl subControl, const QWidget* widget) const override;
     QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt,
                            const QWidget* widget) const override;
+    QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption *option,
+                       const QWidget *widget) const override;
     int styleHint(StyleHint hint, const QStyleOption *option = nullptr, const QWidget *widget = nullptr,
                   QStyleHintReturn *returnData = nullptr) const override;
     int pixelMetric(PixelMetric metric, const QStyleOption *option,

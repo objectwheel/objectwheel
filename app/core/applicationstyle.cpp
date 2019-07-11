@@ -235,16 +235,18 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
 }
 
 QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
-                                         const QStyleOption* opt, const QWidget* widget) const
+                                         const QStyleOption* option, const QWidget* widget) const
 {
     QPixmap pixmap;
-
     switch (standardPixmap) {
     case SP_LineEditClearButton:
         pixmap = Utils::Icons::EDIT_CLEAR.icon().pixmap(UtilityFunctions::window(widget), {64, 64});
         break;
+    case SP_ToolBarHorizontalExtensionButton:
+        pixmap = PaintUtils::renderOverlaidPixmap(QPixmap(":/images/extension.svg"), QColor("#505050"));
+        break;
     default:
-        pixmap = QFusionStyle::standardPixmap(standardPixmap, opt, widget);
+        pixmap = QFusionStyle::standardPixmap(standardPixmap, option, widget);
         break;
     }
 
@@ -254,6 +256,28 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
         pixmap.setDevicePixelRatio(qApp->devicePixelRatio());
 
     return pixmap;
+}
+
+QIcon ApplicationStyle::standardIcon(QStyle::StandardPixmap standardIcon, const QStyleOption* option,
+                                     const QWidget* widget) const
+{
+    QIcon icon;
+    switch (standardIcon) {
+    case SP_LineEditClearButton:
+        icon.addPixmap(standardPixmap(standardIcon, option, widget), QIcon::Normal);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(standardPixmap(standardIcon, option, widget),
+                                                        QColor(0, 0, 0, 100)), QIcon::Active);
+        break;
+    case SP_ToolBarHorizontalExtensionButton:
+        icon.addPixmap(standardPixmap(standardIcon, option, widget), QIcon::Normal);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(standardPixmap(standardIcon, option, widget),
+                                                        QColor(0, 0, 0, 150)), QIcon::Normal, QIcon::On);
+        break;
+    default:
+        icon = QFusionStyle::standardIcon(standardIcon, option, widget);
+        break;
+    }
+    return icon;
 }
 
 int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* option,
@@ -288,6 +312,10 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
 int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option, const QWidget* widget) const
 {
     switch (metric) {
+    case PM_ToolBarIconSize:
+        return 16;
+    case PM_ToolBarExtensionExtent:
+        return 18;
     case PM_ToolTipLabelFrameWidth:
         return 1;
     case PM_MenuVMargin:
@@ -370,7 +398,9 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     } break;
     case PE_PanelButtonTool: {
         painter->save();
-        if (widget && widget->inherits("Utils::QtColorButton")) {
+        if (widget && widget->objectName() == "qt_toolbar_ext_button") {
+            Q_UNUSED(widget); // nop
+        } else if (widget && widget->inherits("Utils::QtColorButton")) {
             QFusionStyle::drawPrimitive(PE_PanelButtonTool, option, painter, widget);
         } else if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
             if (widget && widget->inherits("QDockWidgetTitleButton")) {
@@ -609,10 +639,6 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             QRect rect = copy.rect;
             int shiftX = copy.text.isEmpty() ? 0 : 5;
             int shiftY = 0;
-            //            if (copy.state & (State_Sunken | State_On)) {
-            //                shiftX = proxy()->pixelMetric(PM_ButtonShiftHorizontal, &copy, widget);
-            //                shiftY = proxy()->pixelMetric(PM_ButtonShiftVertical, &copy, widget);
-            //            }
             // Arrow type always overrules and is always shown
             bool hasArrow = copy.features & QStyleOptionToolButton::Arrow;
             if (((!hasArrow && copy.icon.isNull()) && !copy.text.isEmpty())
