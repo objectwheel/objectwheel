@@ -12,6 +12,7 @@ Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
     setFlag(ItemIsMovable, false);
     headlineItem()->setVisible(true);
+    headlineItem()->setShowDimensions(true);
     headlineItem()->setBrush(Qt::darkGray);
 }
 

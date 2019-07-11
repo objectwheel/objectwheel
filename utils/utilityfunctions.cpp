@@ -661,19 +661,4 @@ QPointF bottomCenter(const QRectF& rect)
     return {rect.center().x(), rect.bottom()};
 }
 
-int digits(int number)
-{
-    int length = 1;
-    while (number /= 10)
-       length++;
-    return length;
-}
-
-int nine(int digits)
-{
-    int result = 0;
-    for (int i = 0; i < digits; ++i)
-        result += 9 * std::pow(10, i);
-}
-
 } // UtilityFunctions

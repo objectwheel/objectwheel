@@ -12,12 +12,14 @@ public:
     explicit HeadlineItem(Control* parent);
     QRectF boundingRect() const override;
     void setText(const QString& text);
+    bool showDimensions() const;
+    void setShowDimensions(bool showDimensions);
     void updateSize();
 
 private:
-    QSizeF textSize() const;
+    QSizeF calculateTextSize() const;
     QFont dimensionTextFont() const;
-    QString dimensionText(int width, int height) const;
+    QString dimensionText(qreal width, qreal height) const;
 
 private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -27,6 +29,7 @@ private:
 private:
     QRectF m_rect;
     QString m_text;
+    bool m_showDimensions;
 };
 
 #endif // HEADLINEITEM_H
