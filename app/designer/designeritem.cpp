@@ -13,14 +13,14 @@ DesignerItem::DesignerItem(Control* parent) : QGraphicsObject(parent)
     setZValue(std::numeric_limits<int>::max());
 }
 
-Control* DesignerItem::parentControl() const
-{
-    return static_cast<Control*>(parentItem());
-}
-
 DesignerScene* DesignerItem::scene() const
 {
     return static_cast<DesignerScene*>(QGraphicsItem::scene());
+}
+
+Control* DesignerItem::parentControl() const
+{
+    return static_cast<Control*>(parentItem());
 }
 
 QPen DesignerItem::pen() const
@@ -43,6 +43,86 @@ void DesignerItem::setBrush(const QBrush& brush)
 {
     m_brush = brush;
     update();
+}
+
+QFont DesignerItem::font() const
+{
+    return m_font;
+}
+
+void DesignerItem::setFont(const QFont& font)
+{
+    m_font = font;
+    update();
+}
+
+qreal DesignerItem::width() const
+{
+    return size().width();
+}
+
+qreal DesignerItem::height() const
+{
+    return size().height();
+}
+
+QSizeF DesignerItem::size() const
+{
+    return m_rect.size();
+}
+
+void DesignerItem::setSize(const QSizeF& size)
+{
+    if (m_rect.size() != size) {
+        prepareGeometryChange();
+        m_rect.setSize(size);
+        update();
+    }
+}
+
+void DesignerItem::setSize(qreal width, qreal height)
+{
+    setSize(QSizeF(width, height));
+}
+
+QRectF DesignerItem::rect() const
+{
+    return m_rect;
+}
+
+void DesignerItem::setRect(const QRectF& rect)
+{
+    if (m_rect != rect) {
+        prepareGeometryChange();
+        m_rect = rect;
+        update();
+    }
+}
+
+void DesignerItem::setRect(qreal x, qreal y, qreal w, qreal h)
+{
+    setRect(QRectF(x, y, w, h));
+}
+
+QRectF DesignerItem::geometry() const
+{
+    return QRectF(pos(), size());
+}
+
+void DesignerItem::setGeometry(const QRectF& geometry)
+{
+    setPos(geometry.topLeft());
+    setSize(geometry.size());
+}
+
+void DesignerItem::setGeometry(qreal x, qreal y, qreal w, qreal h)
+{
+    setGeometry(QRectF(x, y, w, h));
+}
+
+QRectF DesignerItem::boundingRect() const
+{
+    return m_rect;
 }
 
 bool DesignerItem::dragStarted() const
@@ -71,13 +151,19 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     const QPointF& diff = event->pos() - m_dragStartPoint;
     if (m_dragStarted || diff.manhattanLength() >= scene()->startDragDistance()) {
-        m_dragStarted = true;
         m_snapPosition = scene()->snapPosition(parentControl()->mapToParent(mapToParent(diff)));
+        if (!m_dragStarted) {
+            m_dragStarted = true;
+            emit dragStartedChanged();
+        }
     }
 }
 
 void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     Q_UNUSED(event)
-    m_dragStarted = false;
+    if (m_dragStarted) {
+        m_dragStarted = false;
+        emit dragStartedChanged();
+    }
 }

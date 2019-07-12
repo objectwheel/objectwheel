@@ -17,7 +17,6 @@ public:
 public:
     explicit ResizerItem(Placement placement, Control* parent);
     static QList<ResizerItem*> init(Control* control);
-    QRectF boundingRect() const override;
     void updateCursor();
     void updatePosition();
 

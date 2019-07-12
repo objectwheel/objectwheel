@@ -16,7 +16,6 @@ public:
 
 public:
     int type() const override;
-    QRectF frameGeometry() const;
 
 private:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;

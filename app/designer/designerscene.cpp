@@ -367,18 +367,18 @@ QVector<QLineF> DesignerScene::guideLines() const
     const auto& center = geometry.center();
 
     /* Child center <-> Parent center */
-    if (int(center.y()) == int(parent->size().height() / 2.0))
+    if (int(center.y()) == int(parent->height() / 2.0))
         lines << QLineF(parent->mapToScene(center),
-                        parent->mapToScene(QPointF(parent->size().width() / 2.0, center.y())));
+                        parent->mapToScene(QPointF(parent->width() / 2.0, center.y())));
 
-    if (int(center.x()) == int(parent->size().width() / 2.0))
+    if (int(center.x()) == int(parent->width() / 2.0))
         lines << QLineF(parent->mapToScene(center),
-                        parent->mapToScene(QPointF(center.x(), parent->size().height() / 2.0)));
+                        parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)));
 
     /* Child left <-> Parent center */
-    if (int(geometry.x()) == int(parent->size().width() / 2.0))
+    if (int(geometry.x()) == int(parent->width() / 2.0))
         lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
-                        parent->mapToScene(QPointF(geometry.x(), parent->size().height() / 2.0)));
+                        parent->mapToScene(QPointF(geometry.x(), parent->height() / 2.0)));
 
     /* Child left <-> Parent left */
     if (int(geometry.x()) == 0)
@@ -386,34 +386,34 @@ QVector<QLineF> DesignerScene::guideLines() const
                         parent->mapToScene(parent->rect().bottomLeft()));
 
     /* Child right <-> Parent center */
-    if (int(geometry.topRight().x()) == int(parent->size().width() / 2.0))
+    if (int(geometry.topRight().x()) == int(parent->width() / 2.0))
         lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
-                        parent->mapToScene(QPointF(geometry.topRight().x(), parent->size().height() / 2.0)));
+                        parent->mapToScene(QPointF(geometry.topRight().x(), parent->height() / 2.0)));
 
     /* Child right <-> Parent right */
-    if (int(geometry.topRight().x()) == int(parent->size().width()))
-        lines << QLineF(parent->mapToScene(QPointF(parent->size().width(), 0)),
-                        parent->mapToScene(QPointF(parent->size().width(), parent->size().height())));
+    if (int(geometry.topRight().x()) == int(parent->width()))
+        lines << QLineF(parent->mapToScene(QPointF(parent->width(), 0)),
+                        parent->mapToScene(QPointF(parent->width(), parent->height())));
 
     /* Child top <-> Parent center */
-    if (int(geometry.y()) == int(parent->size().height() / 2.0))
-        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->size().height() / 2.0)),
-                        parent->mapToScene(QPointF(parent->size().width() / 2.0, parent->size().height() / 2.0)));
+    if (int(geometry.y()) == int(parent->height() / 2.0))
+        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
+                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
 
     /* Child top <-> Parent top */
     if (int(geometry.y()) == 0)
         lines << QLineF(parent->mapToScene(QPointF(0, 0)),
-                        parent->mapToScene(QPointF(parent->size().width(), 0)));
+                        parent->mapToScene(QPointF(parent->width(), 0)));
 
     /* Child bottom <-> Parent center */
-    if (int(geometry.bottomLeft().y()) == int(parent->size().height() / 2.0))
-        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->size().height() / 2.0)),
-                        parent->mapToScene(QPointF(parent->size().width() / 2.0, parent->size().height() / 2.0)));
+    if (int(geometry.bottomLeft().y()) == int(parent->height() / 2.0))
+        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
+                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
 
     /* Child bottom <-> Parent bottom */
-    if (int(geometry.bottomLeft().y()) == int(parent->size().height()))
-        lines << QLineF(parent->mapToScene(QPointF(0, parent->size().height())),
-                        parent->mapToScene(QPointF(parent->size().width(), parent->size().height())));
+    if (int(geometry.bottomLeft().y()) == int(parent->height()))
+        lines << QLineF(parent->mapToScene(QPointF(0, parent->height())),
+                        parent->mapToScene(QPointF(parent->width(), parent->height())));
 
     for (auto childControl : parent->childControls(false)) {
         if (selectedControls.contains(childControl))

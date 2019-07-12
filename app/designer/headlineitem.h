@@ -10,7 +10,6 @@ class HeadlineItem final : public DesignerItem
 
 public:
     explicit HeadlineItem(Control* parent);
-    QRectF boundingRect() const override;
     void setText(const QString& text);
     bool showDimensions() const;
     void setShowDimensions(bool showDimensions);
@@ -27,7 +26,6 @@ private:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
-    QRectF m_rect;
     QString m_text;
     bool m_showDimensions;
 };

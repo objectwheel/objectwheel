@@ -7,6 +7,7 @@
 ResizerItem::ResizerItem(Placement placement, Control* parent) : DesignerItem(parent)
   , m_placement(placement)
 {
+    setRect(-3, -3, 6, 6);
     updateCursor();
 }
 
@@ -16,11 +17,6 @@ QList<ResizerItem*> ResizerItem::init(Control* control)
     for (int i = 0; i < 8; ++i)
         resizers.append(new ResizerItem(ResizerItem::Placement(i), control));
     return resizers;
-}
-
-QRectF ResizerItem::boundingRect() const
-{
-    return {-3.0, -3.0, 6.0, 6.0};
 }
 
 void ResizerItem::updateCursor()

@@ -26,7 +26,7 @@
 
 QList<Control*> Control::m_controls;
 
-Control::Control(const QString& dir, Control* parent) : QGraphicsWidget(parent)
+Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_gui(false)
   , m_clip(false)
   , m_popup(false)
@@ -176,18 +176,6 @@ QMarginsF Control::margins() const
 QImage Control::image() const
 {
     return m_image;
-}
-
-DesignerScene* Control::scene() const
-{
-    return static_cast<DesignerScene*>(QGraphicsWidget::scene());
-}
-
-Control* Control::parentControl() const
-{
-    if (parentItem() && (parentItem()->type() == Form::Type || parentItem()->type() == Control::Type))
-        return static_cast<Control*>(parentItem());
-    return nullptr;
 }
 
 HeadlineItem* Control::headlineItem() const
@@ -378,7 +366,7 @@ void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsWidget::mouseMoveEvent(event);
+    DesignerItem::mouseMoveEvent(event);
 
     Control* control = nullptr;
     const QList<Control*>& controlsUnderCursor = scene()->controlsAt(event->scenePos());
@@ -411,7 +399,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsWidget::mousePressEvent(event);
+    DesignerItem::mousePressEvent(event);
 
     if (event->button() == Qt::MidButton)
         event->ignore();
@@ -421,7 +409,7 @@ void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    QGraphicsWidget::mouseReleaseEvent(event);
+    DesignerItem::mouseReleaseEvent(event);
 
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
@@ -465,7 +453,7 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
         if (type() == Control::Type && !selected)
             m_headlineItem->setVisible(false);
     }
-    return QGraphicsWidget::itemChange(change, value);
+    return DesignerItem::itemChange(change, value);
 }
 
 void Control::restrainPaintRegion(QPainter* painter)

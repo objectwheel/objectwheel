@@ -1380,15 +1380,15 @@ void PropertiesPane::onGeometryChange(const Control* control)
             } else if (childItem->text(0) == "width") {
                 childItem->setData(0, Qt::DecorationRole, wChanged);
                 if (dSpinBox)
-                    dSpinBox->setValue(control->size().width());
+                    dSpinBox->setValue(control->width());
                 else
-                    iSpinBox->setValue(control->size().width());
+                    iSpinBox->setValue(control->width());
             } else if (childItem->text(0) == "height") {
                 childItem->setData(0, Qt::DecorationRole, hChanged);
                 if (dSpinBox)
-                    dSpinBox->setValue(control->size().height());
+                    dSpinBox->setValue(control->height());
                 else
-                    iSpinBox->setValue(control->size().height());
+                    iSpinBox->setValue(control->height());
             }
 
             if (dSpinBox)

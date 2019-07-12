@@ -21,11 +21,6 @@ int Form::type() const
     return Type;
 }
 
-QRectF Form::frameGeometry() const
-{
-    return QRectF(QPointF(-size().width() / 2.0, -size().height() / 2.0), size());
-}
-
 QVariant Form::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemSelectedHasChanged)

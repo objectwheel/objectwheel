@@ -2,13 +2,13 @@
 #define CONTROL_H
 
 #include <renderresult.h>
-#include <QGraphicsWidget>
+#include <designeritem.h>
 
 class ResizerItem;
 class DesignerScene;
 class HeadlineItem;
 
-class Control : public QGraphicsWidget
+class Control : public DesignerItem
 {
     Q_OBJECT
     Q_DISABLE_COPY(Control)

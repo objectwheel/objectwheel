@@ -170,7 +170,7 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
     bool isInt = control->propertyType("width") == QVariant::Int;
 
     if (!(options & DontApplyDesigner))
-        control->resize(isInt ? int(width) : width, control->size().height());
+        control->setSize(isInt ? int(width) : width, control->height());
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -212,7 +212,7 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
     bool isInt = control->propertyType("height") == QVariant::Int;
 
     if (!(options & DontApplyDesigner))
-        control->resize(control->size().width(), isInt ? int(height) : height);
+        control->setSize(control->width(), isInt ? int(height) : height);
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -306,7 +306,7 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
     bool isInt = control->propertyType("width") == QVariant::Int;
 
     if (!(options & DontApplyDesigner))
-        control->resize(isInt ? size.toSize() : size);
+        control->setSize(isInt ? size.toSize() : size);
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
