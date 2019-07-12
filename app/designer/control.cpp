@@ -24,7 +24,7 @@
 #include <QGraphicsSceneDragDropEvent>
 #include <QStyleOption>
 
-QList<Control*> Control::m_controls;
+QVector<Control*> Control::m_controls;
 
 Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_gui(false)
@@ -38,7 +38,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
   , m_headlineItem(new HeadlineItem(this))
-  , m_resizers(ResizerItem::init(this))
 {
     m_controls.append(this);
     new SceneExtendItem(this);
@@ -49,6 +48,8 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
+    initResizers();
+    headlineItem()->setVisible(false);
     headlineItem()->setPen(QPen(Qt::white));
     headlineItem()->setBrush(DesignerScene::outlineColor());
 
@@ -178,22 +179,34 @@ QImage Control::image() const
     return m_image;
 }
 
+Control* Control::parentControl() const
+{
+    if (parentItem())
+        return parentItem()->controlCast();
+    return nullptr;
+}
+
+Control* Control::controlCast()
+{
+    return this;
+}
+
 HeadlineItem* Control::headlineItem() const
 {
     return m_headlineItem;
 }
 
-QList<QmlError> Control::errors() const
+QVector<QmlError> Control::errors() const
 {
     return m_errors;
 }
 
-QList<QString> Control::events() const
+QVector<QString> Control::events() const
 {
     return m_events;
 }
 
-QList<PropertyNode> Control::properties() const
+QVector<PropertyNode> Control::properties() const
 {
     return m_properties;
 }
@@ -240,7 +253,7 @@ QList<Control*> Control::childControls(bool recursive) const
     return controls;
 }
 
-QList<Control*> Control::controls()
+QVector<Control*> Control::controls()
 {
     return m_controls;
 }
@@ -564,6 +577,15 @@ void Control::applyCachedGeometry()
                         this, ControlPropertyManager::geoWithMargin(this, m_cachedGeometry, true),
                         ControlPropertyManager::NoOption);
         }
+    }
+}
+
+void Control::initResizers()
+{
+    for (int i = 0; i < 8; ++i) {
+        auto resizer = new ResizerItem(ResizerItem::Placement(i), this);
+        resizer->setVisible(false);
+        m_resizers.append(resizer);
     }
 }
 

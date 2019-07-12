@@ -17,7 +17,7 @@ Q_DECLARE_METATYPE(Enum)
 
 struct PropertyNode {
     QString cleanClassName;
-    QList<Enum> enums;
+    QVector<Enum> enums;
     QMap<QString, QVariant> properties;
 };
 
@@ -29,9 +29,9 @@ struct RenderResult {
     QString uid;
     QImage image;
     QRectF boundingRect;
-    QList<QmlError> errors;
-    QList<QString> events;
-    QList<PropertyNode> properties;
+    QVector<QmlError> errors;
+    QVector<QString> events;
+    QVector<PropertyNode> properties;
 };
 
 inline QDataStream& operator>> (QDataStream& in, QmlError& error)

@@ -705,7 +705,7 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
 }
 
 void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
-                                         const QList<PropertyNode>& properties,
+                                         const QVector<PropertyNode>& properties,
                                          Control* control, int integer)
 {
     QTreeWidget* treeWidget = classItem->treeWidget();
@@ -1077,7 +1077,7 @@ void PropertiesPane::onSelectionChange()
     Control* selectedControl = m_designerScene->selectedControls().first();
     setDisabled(selectedControl->hasErrors());
 
-    QList<PropertyNode> properties = selectedControl->properties();
+    QVector<PropertyNode> properties = selectedControl->properties();
     for (PropertyNode& propertyNode : properties) {
         for (const QString& propertyName : propertyNode.properties.keys()) {
             if (propertyName.startsWith("__"))
@@ -1115,7 +1115,7 @@ void PropertiesPane::onSelectionChange()
 
 
     for (const PropertyNode& propertyNode : properties) {
-        const QList<Enum>& enumList = propertyNode.enums;
+        const QVector<Enum>& enumList = propertyNode.enums;
         const QMap<QString, QVariant>& propertyMap = propertyNode.properties;
 
         if (propertyMap.isEmpty() && enumList.isEmpty())

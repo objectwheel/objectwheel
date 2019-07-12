@@ -346,7 +346,7 @@ QString toToolTip(const QString& str)
     return QStringLiteral(R"(<span style="font-size:12px !important;">%1</span>)").arg(str);
 }
 
-QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
+QRectF getGeometryFromProperties(const QVector<PropertyNode>& properties)
 {
     QRectF geometry;
     for (const PropertyNode& propertyNode : properties) {
@@ -364,7 +364,7 @@ QRectF getGeometryFromProperties(const QList<PropertyNode>& properties)
     return geometry;
 }
 
-QMarginsF getMarginsFromProperties(const QList<PropertyNode>& properties)
+QMarginsF getMarginsFromProperties(const QVector<PropertyNode>& properties)
 {
     QMarginsF margins;
     for (const PropertyNode& propertyNode : properties) {
@@ -390,7 +390,7 @@ void putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF
     properties["__ow_margins_bottom"] = margins.bottom();
 }
 
-QVariant getProperty(const QString& property, const QList<PropertyNode>& properties)
+QVariant getProperty(const QString& property, const QVector<PropertyNode>& properties)
 {
     for (const PropertyNode& propertyNode : properties) {
         for (const QString& propertyName : propertyNode.properties.keys()) {
@@ -401,7 +401,7 @@ QVariant getProperty(const QString& property, const QList<PropertyNode>& propert
     return QVariant();
 }
 
-Enum getEnum(const QString& name, const QList<PropertyNode>& properties)
+Enum getEnum(const QString& name, const QVector<PropertyNode>& properties)
 {
     for (const PropertyNode& propertyNode : properties) {
         for (const Enum& enumm : propertyNode.enums) {

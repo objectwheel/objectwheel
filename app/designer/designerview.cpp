@@ -419,7 +419,7 @@ void DesignerView::onInspectorItemDoubleClick(Control* control)
         return;
     }
 
-    m_signalChooserDialog->setSignalList(control->events());
+    m_signalChooserDialog->setSignalList(control->events().toList());
 
     int result = m_signalChooserDialog->exec();
     if (result == QDialog::Rejected)

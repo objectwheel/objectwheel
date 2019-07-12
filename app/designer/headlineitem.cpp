@@ -10,6 +10,8 @@ enum { MARGIN = 10 };
 HeadlineItem::HeadlineItem(Control* parent) : DesignerItem(parent)
   , m_showDimensions(false)
 {
+    setFlag(ItemIgnoresTransformations);
+    setZValue(std::numeric_limits<int>::max());
 }
 
 void HeadlineItem::setText(const QString& text)
@@ -38,24 +40,24 @@ void HeadlineItem::updateSize()
     qreal width = ts.width();
     if (m_showDimensions) {
         const QFontMetrics fm(dimensionTextFont());
-        QString wstr = QString::number(parentControl()->width());
-        QString hstr = QString::number(parentControl()->height());
+        QString wstr = QString::number(parentItem()->width());
+        QString hstr = QString::number(parentItem()->height());
         wstr.replace(QRegularExpression("\\d"), "9");
         hstr.replace(QRegularExpression("\\d"), "9");
         width += fm.horizontalAdvance(dimensionText(wstr.toDouble(), hstr.toDouble()));
     }
-    setRect(-0.5, -ts.height(), qMin(parentControl()->width(), width + MARGIN), ts.height());
+    setRect(-0.5, -ts.height(), qMin(parentItem()->width(), width + MARGIN), ts.height());
 }
 
 QSizeF HeadlineItem::calculateTextSize() const
 {
-    const QFontMetrics fontMetrics(parentControl()->font());
+    const QFontMetrics fontMetrics(parentItem()->font());
     return QSizeF(fontMetrics.horizontalAdvance(m_text), fontMetrics.height());
 }
 
 QFont HeadlineItem::dimensionTextFont() const
 {
-    QFont font(parentControl()->font());
+    QFont font(parentItem()->font());
     font.setPixelSize(font.pixelSize() - 3);
     return font;
 }
@@ -70,13 +72,14 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
     if (dragStarted()) {
+        Q_ASSERT(parentItem() && parentItem()->controlCast());
         scene()->setViewportCursor(Qt::ClosedHandCursor);
-        ControlPropertyManager::Options option = parentControl()->form()
+        ControlPropertyManager::Options option = parentItem()->controlCast()->form()
                 ? ControlPropertyManager::NoOption
                 : ControlPropertyManager::SaveChanges
                   | ControlPropertyManager::UpdateRenderer
                   | ControlPropertyManager::CompressedCall;
-        ControlPropertyManager::setPos(parentControl(), snapPosition(), option);
+        ControlPropertyManager::setPos(parentItem()->controlCast(), snapPosition(), option);
     }
 }
 
@@ -102,7 +105,7 @@ void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
         painter->drawText(r, m_text, QTextOption(Qt::AlignLeft));
         r.adjust(r.width(), 0, availableWidth, 0);
         painter->setFont(dimensionTextFont());
-        const QString& text = dimensionText(parentControl()->width(), parentControl()->height());
+        const QString& text = dimensionText(parentItem()->width(), parentItem()->height());
         painter->drawText(r, painter->fontMetrics().elidedText(text, Qt::ElideRight, r.width() + 1),
                           QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
     } else {

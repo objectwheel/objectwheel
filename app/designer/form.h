@@ -16,6 +16,7 @@ public:
 
 public:
     int type() const override;
+    Form* formCast() override;
 
 private:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;

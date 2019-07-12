@@ -16,7 +16,6 @@ public:
 
 public:
     explicit ResizerItem(Placement placement, Control* parent);
-    static QList<ResizerItem*> init(Control* control);
     void updateCursor();
     void updatePosition();
 

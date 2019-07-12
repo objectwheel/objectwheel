@@ -42,18 +42,18 @@ public:
     QMarginsF margins() const;
     QImage image() const;
 
-    DesignerScene* scene() const;
     Control* parentControl() const;
+    Control* controlCast() override;
     HeadlineItem* headlineItem() const;
 
-    QList<QmlError> errors() const;
-    QList<QString> events() const;
-    QList<PropertyNode> properties() const;
+    QVector<QmlError> errors() const;
+    QVector<QString> events() const;
+    QVector<PropertyNode> properties() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
     QVariant::Type propertyType(const QString& propertyName) const;
 
-    static QList<Control*> controls();
+    static QVector<Control*> controls();
 
 public:
     void setClip(bool clip);
@@ -101,6 +101,9 @@ private slots:
     void applyCachedGeometry();
 
 private:
+    void initResizers();
+
+private:
     bool m_gui;
     bool m_clip;
     bool m_popup;
@@ -120,13 +123,13 @@ private:
     QImage m_image;
 
     HeadlineItem* m_headlineItem;
-    QList<QmlError> m_errors;
-    QList<ResizerItem*> m_resizers;
-    QList<QString> m_events;
-    QList<PropertyNode> m_properties;
+    QVector<QmlError> m_errors;
+    QVector<ResizerItem*> m_resizers;
+    QVector<QString> m_events;
+    QVector<PropertyNode> m_properties;
 
 private:
-    static QList<Control*> m_controls;
+    static QVector<Control*> m_controls;
 };
 
 #endif // CONTROL_H

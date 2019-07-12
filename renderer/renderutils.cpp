@@ -288,7 +288,7 @@ QString cleanScopeName(const QString& scope)
     return sc;
 }
 
-bool propertyExistsInNodes(const QList<PropertyNode>& nodes, const QString& property)
+bool propertyExistsInNodes(const QVector<PropertyNode>& nodes, const QString& property)
 {
     for (const auto& node : nodes) {
         for (const auto& propertyName : node.properties.keys()) {
@@ -303,8 +303,8 @@ bool propertyExistsInNodes(const QList<PropertyNode>& nodes, const QString& prop
     return false;
 }
 
-bool unitePropertiesIfPossible(QList<PropertyNode>& nodes, const QString& className,
-                               const QMap<QString, QVariant>& properties, const QList<Enum>& enums)
+bool unitePropertiesIfPossible(QVector<PropertyNode>& nodes, const QString& className,
+                               const QMap<QString, QVariant>& properties, const QVector<Enum>& enums)
 {
     for (auto& node : nodes) {
         if (node.cleanClassName == className) {
@@ -317,9 +317,9 @@ bool unitePropertiesIfPossible(QList<PropertyNode>& nodes, const QString& classN
     return false;
 }
 
-QList<Enum> subEnums(QMetaProperty property, const QObject* parentObject)
+QVector<Enum> subEnums(QMetaProperty property, const QObject* parentObject)
 {
-    QList<Enum> enums;
+    QVector<Enum> enums;
 
     if (!property.isConstant() || !property.isReadable() || !property.isDesignable())
         return enums;
@@ -423,10 +423,10 @@ QList<QQuickItem*> RenderUtils::allItems(RenderEngine::ControlInstance* formInst
     return itemList;
 }
 
-QList<QString> RenderUtils::events(const RenderEngine::ControlInstance* instance)
+QVector<QString> RenderUtils::events(const RenderEngine::ControlInstance* instance)
 {
     Q_ASSERT(instance);
-    QList<QString> events;
+    QVector<QString> events;
     if (!instance->errors.isEmpty())
         return events;
 
@@ -685,17 +685,17 @@ QQuickItem* RenderUtils::createDummyItem(QQmlEngine* engine)
     return item;
 }
 
-QList<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstance* instance)
+QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstance* instance)
 {
     Q_ASSERT(instance);
-    QList<PropertyNode> propertyNodes;
+    QVector<PropertyNode> propertyNodes;
     if (!instance->errors.isEmpty())
         return propertyNodes;
 
     QObject* object = instance->object;
     Q_ASSERT(object);
 
-    QList<Enum> enums;
+    QVector<Enum> enums;
     QMap<QString, QVariant> properties;
 
     if (instance->gui && instance->codeChanged) {

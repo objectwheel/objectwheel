@@ -6,6 +6,7 @@
 #include <QFont>
 
 class Control;
+class Form;
 class DesignerScene;
 
 class DesignerItem : public QGraphicsObject
@@ -14,10 +15,13 @@ class DesignerItem : public QGraphicsObject
     Q_DISABLE_COPY(DesignerItem)
 
 public:
-    explicit DesignerItem(Control* parent = nullptr);
+    explicit DesignerItem(DesignerItem* parent = nullptr);
+
+    virtual Control* controlCast();
+    virtual Form* formCast();
 
     DesignerScene* scene() const;
-    Control* parentControl() const;
+    DesignerItem* parentItem() const;
 
     QPen pen() const;
     void setPen(const QPen& pen);
@@ -50,6 +54,7 @@ protected:
     QPointF snapPosition() const;
 
 protected:
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -57,6 +62,7 @@ protected:
 
 signals:
     void doubleClicked();
+    void geometryChanged();
     void dragStartedChanged();
 
 private:
@@ -67,6 +73,7 @@ private:
     bool m_dragStarted;
     QPointF m_snapPosition;
     QPointF m_dragStartPoint;
+    bool m_inSetGeometry;
 };
 
 #endif // DESIGNERITEM_H

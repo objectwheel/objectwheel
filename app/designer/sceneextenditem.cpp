@@ -1,11 +1,10 @@
 #include <sceneextenditem.h>
 #include <control.h>
-#include <QGraphicsWidget>
 
 SceneExtendItem::SceneExtendItem(Control* parent) : QGraphicsItem(parent)
 {
     setFlag(ItemStacksBehindParent);
-    QObject::connect(parent, &QGraphicsWidget::geometryChanged, [=] {
+    QObject::connect(parent, &Control::geometryChanged, [=] {
         updateRect();
     });
 }

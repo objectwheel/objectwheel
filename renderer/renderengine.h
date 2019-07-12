@@ -1,7 +1,7 @@
 #ifndef RENDERENGINE_H
 #define RENDERENGINE_H
 
-#include <QSet>
+#include <QVector>
 #include <QObject>
 
 #include <private/qquickdesignersupport_p.h>
@@ -41,10 +41,10 @@ public:
         QString dir;
         QObject* object;
         QQmlContext* context;
-        QList<QmlError> errors;
+        QVector<QmlError> errors;
 
         ControlInstance* parent = nullptr;
-        QList<ControlInstance*> children;
+        QVector<ControlInstance*> children;
     };
 
 public:

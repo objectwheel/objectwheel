@@ -7,16 +7,10 @@
 ResizerItem::ResizerItem(Placement placement, Control* parent) : DesignerItem(parent)
   , m_placement(placement)
 {
+    setFlag(ItemIgnoresTransformations);
+    setZValue(std::numeric_limits<int>::max());
     setRect(-3, -3, 6, 6);
     updateCursor();
-}
-
-QList<ResizerItem*> ResizerItem::init(Control* control)
-{
-    QList<ResizerItem*> resizers;
-    for (int i = 0; i < 8; ++i)
-        resizers.append(new ResizerItem(ResizerItem::Placement(i), control));
-    return resizers;
 }
 
 void ResizerItem::updateCursor()
@@ -51,7 +45,7 @@ void ResizerItem::updateCursor()
 
 void ResizerItem::updatePosition()
 {
-    const QRectF& parentRect = parentControl()->rect();
+    const QRectF& parentRect = parentItem()->rect();
     switch (m_placement) {
     case ResizerItem::Top:
         setPos(UtilityFunctions::topCenter(parentRect));
@@ -82,7 +76,7 @@ void ResizerItem::updatePosition()
 
 QRectF ResizerItem::calculateParentGeometry(const QPointF& snapPos)
 {
-    QRectF geometry(parentControl()->geometry());
+    QRectF geometry(parentItem()->geometry());
     switch (m_placement) {
     case Top:
         geometry.setTop(snapPos.y());
@@ -119,31 +113,34 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (!dragStarted())
         return;
 
-    parentControl()->setResized(true);
+    Q_ASSERT(parentItem() && parentItem()->controlCast());
+
+    parentItem()->controlCast()->setResized(true);
 
     const QRectF& geometry = calculateParentGeometry(snapPosition());
     ControlPropertyManager::Options option = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::UpdateRenderer
             | ControlPropertyManager::CompressedCall;
 
-    if (parentControl()->form()) {
-        ControlPropertyManager::setSize(parentControl(), geometry.size(), option);
-        ControlPropertyManager::setPos(parentControl(), geometry.topLeft(),
+    if (parentItem()->controlCast()->form()) {
+        ControlPropertyManager::setSize(parentItem()->controlCast(), geometry.size(), option);
+        ControlPropertyManager::setPos(parentItem()->controlCast(), geometry.topLeft(),
                                        ControlPropertyManager::NoOption);
     } else {
-        ControlPropertyManager::setGeometry(parentControl(), geometry, option);
+        ControlPropertyManager::setGeometry(parentItem()->controlCast(), geometry, option);
     }
 }
 
 void ResizerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
+    Q_ASSERT(parentItem() && parentItem()->controlCast());
     DesignerItem::mouseReleaseEvent(event);
-    parentControl()->setResized(false);
+    parentItem()->controlCast()->setResized(false);
 }
 
 void ResizerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     painter->setPen(pen());
     painter->setBrush(brush());
-    painter->drawRect(boundingRect().adjusted(0, 0, -0.5, -0.5));
+    painter->drawRect(rect().adjusted(0, 0, -0.5, -0.5));
 }
