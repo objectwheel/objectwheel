@@ -63,8 +63,10 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::applyCachedGeometry);
     connect(this, &Control::draggingChanged,
             this, &Control::applyCachedGeometry);
+    connect(this, &Control::doubleClicked,
+            this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
     connect(headlineItem(), &HeadlineItem::doubleClicked,
-            this, [=] { mouseDoubleClickEvent(0); });
+            this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
     connect(this, &Control::geometryChanged,
             headlineItem(), &HeadlineItem::updateSize);
     connect(this, &Control::geometryChanged,
@@ -377,9 +379,20 @@ void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
     update();
 }
 
+void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    DesignerItem::mousePressEvent(event);
+    QGraphicsItem::mousePressEvent(event);
+}
+
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
+
+    if (!dragStarted())
+        return;
+
+    QGraphicsItem::mouseMoveEvent(event);
 
     Control* control = nullptr;
     const QList<Control*>& controlsUnderCursor = scene()->controlsAt(event->scenePos());
@@ -397,32 +410,12 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         if (scene()->currentForm() != control)
             scene()->currentForm()->setDragIn(false);
     }
-
-    if (event->button() == Qt::MidButton)
-        event->ignore();
-    else
-        event->accept();
-
-    if (!form()) {
-        ControlPropertyManager::setPos(this, pos(), ControlPropertyManager::SaveChanges
-                                       | ControlPropertyManager::UpdateRenderer
-                                       | ControlPropertyManager::CompressedCall);
-    }
-}
-
-void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    DesignerItem::mousePressEvent(event);
-
-    if (event->button() == Qt::MidButton)
-        event->ignore();
-    else
-        event->accept();
 }
 
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseReleaseEvent(event);
+    QGraphicsItem::mouseReleaseEvent(event);
 
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
@@ -446,15 +439,6 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         scene()->currentForm()->setSelected(true);
     }
     scene()->currentForm()->setDragIn(false);
-
-    event->accept();
-}
-
-void Control::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
-    if (event)
-        event->ignore();
-    WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this);
 }
 
 QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -465,6 +449,21 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             resizer->setVisible(selected);
         if (type() == Control::Type && !selected)
             m_headlineItem->setVisible(false);
+    } else if (change == ItemPositionChange && isSelected() && !form()) {
+        bool dragStarted = false;
+        for (Control* control : scene()->selectedControls()) {
+            if (control->dragStarted()) {
+                dragStarted = true;
+                break;
+            }
+        }
+        if (dragStarted) {
+            ControlPropertyManager::setPos(this, snapPosition(), ControlPropertyManager::SaveChanges
+                                           | ControlPropertyManager::UpdateRenderer
+                                           | ControlPropertyManager::CompressedCall
+                                           | ControlPropertyManager::DontApplyDesigner);
+            return snapPosition();
+        }
     }
     return DesignerItem::itemChange(change, value);
 }

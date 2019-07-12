@@ -33,7 +33,6 @@ public:
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QPointF lastMousePos() const;
-    void stick() const;
     QVector<QLineF> guideLines() const;
 
     static QColor outlineColor();

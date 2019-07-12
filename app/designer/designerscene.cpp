@@ -13,6 +13,7 @@
 #include <QPainter>
 #include <QPointer>
 #include <QPen>
+#include <QtMath>
 
 namespace {
 static const char zValueBeforeDragProperty[] = "_q_DesignerScene_zValueBeforeDragProperty";
@@ -130,8 +131,8 @@ QPointF DesignerScene::snapPosition(const QPointF& pos) const
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     if (settings->snappingEnabled) {
-        const qreal x = int(pos.x() / settings->gridSize) * settings->gridSize;
-        const qreal y = int(pos.y() / settings->gridSize) * settings->gridSize;
+        const qreal x = qFloor(pos.x() / settings->gridSize) * settings->gridSize;
+        const qreal y = qFloor(pos.y() / settings->gridSize) * settings->gridSize;
         return QPointF(x, y);
     }
     return pos;
@@ -214,7 +215,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
                 }
             }
 
-            stick();
+//       FIXME     stick();
         }
     }
 
@@ -315,35 +316,6 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
 QPointF DesignerScene::lastMousePos() const
 {
     return m_lastMousePos;
-}
-
-// FIXME: This function has severe performance issues.
-void DesignerScene::stick() const
-{
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
-
-    auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_currentForm);
-
-    const QList<Control*> copy(selectedControls);
-    for (Control* control : copy) {
-        if (copy.contains(control->parentControl()))
-            selectedControls.removeOne(control);
-    }
-
-    if (selectedControls.isEmpty())
-        return;
-
-    static const ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
-            | ControlPropertyManager::UpdateRenderer
-            | ControlPropertyManager::CompressedCall;
-
-    const QRectF& frame = united(selectedControls);
-    const qreal dx = qRound(frame.x() / settings->gridSize) * settings->gridSize - frame.x();
-    const qreal dy = qRound(frame.y() / settings->gridSize) * settings->gridSize - frame.y();
-
-    for (Control* control : selectedControls)
-        ControlPropertyManager::setPos(control, {control->x() + dx, control->y() + dy}, options);
 }
 
 // FIXME: This function has severe performance issues.
