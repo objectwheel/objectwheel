@@ -1,10 +1,9 @@
 #include <resizeritem.h>
-#include <controlpropertymanager.h>
 #include <designerscene.h>
 #include <utilityfunctions.h>
 #include <QPainter>
 
-ResizerItem::ResizerItem(Placement placement, Control* parent) : DesignerItem(parent)
+ResizerItem::ResizerItem(Placement placement, DesignerItem* parent) : DesignerItem(parent)
   , m_placement(placement)
 {
     setFlag(ItemIgnoresTransformations);
@@ -110,13 +109,14 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
 
-    if (!dragStarted())
+    if (!dragDistanceExceeded())
         return;
 
     Q_ASSERT(parentItem() && parentItem()->controlCast());
 
     parentItem()->controlCast()->setResized(true);
 
+    scene()->snapPosition(parentItem()->mapToParent(mapToParent(diff)));
     const QRectF& geometry = calculateParentGeometry(snapPosition());
     ControlPropertyManager::Options option = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::UpdateRenderer

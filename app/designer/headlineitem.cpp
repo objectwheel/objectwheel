@@ -1,13 +1,12 @@
 #include <headlineitem.h>
 #include <designerscene.h>
-#include <controlpropertymanager.h>
 
 #include <QPainter>
 #include <QStyleOption>
 
 enum { MARGIN = 10 };
 
-HeadlineItem::HeadlineItem(Control* parent) : DesignerItem(parent)
+HeadlineItem::HeadlineItem(DesignerItem* parent) : DesignerItem(parent)
   , m_showDimensions(false)
 {
     setFlag(ItemIgnoresTransformations);
@@ -36,28 +35,30 @@ void HeadlineItem::setShowDimensions(bool showDimensions)
 
 void HeadlineItem::updateSize()
 {
+    QSizeF ps;
     const QSizeF& ts = calculateTextSize();
     qreal width = ts.width();
-    if (m_showDimensions) {
+    if (parentItem() && showDimensions()) {
         const QFontMetrics fm(dimensionTextFont());
-        QString wstr = QString::number(parentItem()->width());
-        QString hstr = QString::number(parentItem()->height());
+        ps = parentItem()->size();
+        QString wstr = QString::number(ps.width());
+        QString hstr = QString::number(ps.height());
         wstr.replace(QRegularExpression("\\d"), "9");
         hstr.replace(QRegularExpression("\\d"), "9");
         width += fm.horizontalAdvance(dimensionText(wstr.toDouble(), hstr.toDouble()));
     }
-    setRect(-0.5, -ts.height(), qMin(parentItem()->width(), width + MARGIN), ts.height());
+    setRect(-0.5, -ts.height(), qMin(ps.width(), width + MARGIN), ts.height());
 }
 
 QSizeF HeadlineItem::calculateTextSize() const
 {
-    const QFontMetrics fontMetrics(parentItem()->font());
+    const QFontMetrics fontMetrics(parentItem() ? parentItem()->font() : QFont());
     return QSizeF(fontMetrics.horizontalAdvance(m_text), fontMetrics.height());
 }
 
 QFont HeadlineItem::dimensionTextFont() const
 {
-    QFont font(parentItem()->font());
+    QFont font(parentItem() ? parentItem()->font() : QFont());
     font.setPixelSize(font.pixelSize() - 3);
     return font;
 }
@@ -71,23 +72,22 @@ QString HeadlineItem::dimensionText(qreal width, qreal height) const
 void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
-    if (dragStarted()) {
-        Q_ASSERT(parentItem() && parentItem()->controlCast());
+
+    if (parentItem() && dragDistanceExceeded()) {
         scene()->setViewportCursor(Qt::ClosedHandCursor);
-        ControlPropertyManager::Options option = parentItem()->controlCast()->form()
-                ? ControlPropertyManager::NoOption
-                : ControlPropertyManager::SaveChanges
-                  | ControlPropertyManager::UpdateRenderer
-                  | ControlPropertyManager::CompressedCall;
-        ControlPropertyManager::setPos(parentItem()->controlCast(), snapPosition(), option);
+        parentItem()->setBeingDragged(true);
+        parentItem()->setPos(parentItem()->mapToParent(mapToParent(dragDistance())));
     }
 }
 
 void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (dragStarted())
+    if (parentItem() && dragDistanceExceeded()) {
         scene()->unsetViewportCursor();
-    DesignerItem::mouseReleaseEvent(event);
+        parentItem()->setBeingDragged(false);
+    }
+
+    DesignerItem::mouseReleaseEvent(event); // Clears m_dragDistanceExceeded
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
@@ -99,7 +99,7 @@ void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     painter->setPen(pen());
     const qreal textWidth = calculateTextSize().width();
     QRectF r = rect().adjusted(MARGIN / 2, 0, -MARGIN / 2, -1);
-    if (m_showDimensions && r.width() >= textWidth) {
+    if (parentItem() && m_showDimensions && r.width() >= textWidth) {
         const qreal availableWidth = r.width() - textWidth;
         r.adjust(0, 0, -availableWidth, 0);
         painter->drawText(r, m_text, QTextOption(Qt::AlignLeft));

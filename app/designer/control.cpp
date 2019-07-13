@@ -181,11 +181,6 @@ Control* Control::parentControl() const
     return nullptr;
 }
 
-Control* Control::controlCast()
-{
-    return this;
-}
-
 HeadlineItem* Control::headlineItem() const
 {
     return m_headlineItem;
@@ -446,6 +441,20 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
                                            | ControlPropertyManager::UpdateRenderer
                                            | ControlPropertyManager::CompressedCall
                                            | ControlPropertyManager::DontApplyDesigner);
+
+
+
+
+
+            ControlPropertyManager::Options option = parentItem()->controlCast()->form()
+                    ? ControlPropertyManager::NoOption
+                    : ControlPropertyManager::SaveChanges
+                      | ControlPropertyManager::UpdateRenderer
+                      | ControlPropertyManager::CompressedCall;
+            ControlPropertyManager::setPos(parentItem()->controlCast(), snapPosition(), option);
+
+
+
             return snapPosition();
         }
     }

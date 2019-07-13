@@ -4,23 +4,13 @@
 #include <QGraphicsSceneMouseEvent>
 
 DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
-  , m_pen(DesignerScene::pen())
-  , m_brush(Qt::white)
   , m_inSetGeometry(false)
   , m_beingDragged(false)
   , m_dragDistanceExceeded(false)
+  , m_pen(DesignerScene::pen())
+  , m_brush(Qt::white)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
-}
-
-Control* DesignerItem::controlCast()
-{
-    return nullptr;
-}
-
-Form* DesignerItem::formCast()
-{
-    return nullptr;
 }
 
 DesignerScene* DesignerItem::scene() const
@@ -202,23 +192,22 @@ void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsObject::mousePressEvent(event);
-    event->accept();
     m_dragStartPoint = event->pos();
+    event->accept();
 }
 
 void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    const QPointF& dragDistance = event->pos() - m_dragStartPoint;
+    m_dragDistance = event->pos() - m_dragStartPoint;
 
-    if (!m_dragDistanceExceeded && dragDistance.manhattanLength() < scene()->startDragDistance())
+    if (!m_dragDistanceExceeded && m_dragDistance.manhattanLength() < scene()->startDragDistance())
         return;
 
     m_dragDistanceExceeded = true;
     m_movableSelectedAncestorItems.clear();
 
-    DesignerItem* myMovableSelectedAncestorItem = this;
-
     if (flags() & ItemIsMovable) {
+        DesignerItem* myMovableSelectedAncestorItem = this;
         while (DesignerItem* parent = myMovableSelectedAncestorItem->parentItem()) {
             if (parent->isSelected() && (parent->flags() & ItemIsMovable))
                 myMovableSelectedAncestorItem = parent;
@@ -242,27 +231,30 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
                 m_movableSelectedAncestorItems.remove(movableSelectedAncestorItem);
             }
         }
+
+        m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
+
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
+            movableSelectedAncestorItem->setDragDistance(m_dragDistance);
+            movableSelectedAncestorItem->setBeingDragged(true);
+        }
+
+        scene()->setViewportCursor(Qt::ClosedHandCursor);
+
+        QGraphicsObject::mouseMoveEvent(event);
     }
-
-    m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
-
-    for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
-        movableSelectedAncestorItem->setDragDistance(dragDistance);
-        movableSelectedAncestorItem->setBeingDragged(true);
-    }
-
-    QGraphicsObject::mouseMoveEvent(event);
 }
 
 void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsObject::mouseReleaseEvent(event);
-    if (m_dragDistanceExceeded) {
-        m_dragDistanceExceeded = false;
-        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
-            movableSelectedAncestorItem->setDragDistance(QPointF());
+
+    m_dragDistanceExceeded = false;
+
+    if ((flags() & ItemIsMovable) && m_dragDistanceExceeded) {
+        scene()->unsetViewportCursor();
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
             movableSelectedAncestorItem->setBeingDragged(false);
-        }
     }
 }
 

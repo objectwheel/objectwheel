@@ -6,20 +6,16 @@
 #include <QFont>
 #include <QSet>
 
-class Control;
-class Form;
 class DesignerScene;
-
 class DesignerItem : public QGraphicsObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(DesignerItem)
 
+    friend class HeadlineItem; // For setBeingDragged
+
 public:
     explicit DesignerItem(DesignerItem* parent = nullptr);
-
-    virtual Control* controlCast();
-    virtual Form* formCast();
 
     DesignerScene* scene() const;
     DesignerItem* parentItem() const;
@@ -57,9 +53,9 @@ public:
     int type() const override;
 
     bool beingDragged() const;
-    QPointF dragDistance() const;
 
 protected:
+    QPointF dragDistance() const;
     bool dragDistanceExceeded() const;
 
 protected:
@@ -79,16 +75,16 @@ signals:
     void beingDraggedChanged();
 
 private:
-    QRectF m_rect;
-    QFont m_font;
-    QPen m_pen;
-    QBrush m_brush;
     bool m_inSetGeometry;
     bool m_beingDragged;
-    QPointF m_dragDistance;
-    QSet<DesignerItem*> m_movableSelectedAncestorItems;
-    QPointF m_dragStartPoint;
     bool m_dragDistanceExceeded;
+    QPen m_pen;
+    QBrush m_brush;
+    QFont m_font;
+    QRectF m_rect;
+    QPointF m_dragDistance;
+    QPointF m_dragStartPoint;
+    QSet<DesignerItem*> m_movableSelectedAncestorItems;
 };
 
 #endif // DESIGNERITEM_H

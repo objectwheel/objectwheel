@@ -41,7 +41,6 @@ public:
     QImage image() const;
 
     Control* parentControl() const;
-    Control* controlCast() override;
     HeadlineItem* headlineItem() const;
 
     QVector<QmlError> errors() const;

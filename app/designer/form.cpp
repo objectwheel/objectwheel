@@ -21,11 +21,6 @@ int Form::type() const
     return Type;
 }
 
-Form* Form::formCast()
-{
-    return this;
-}
-
 QVariant Form::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
 {
     if (change == ItemSelectedHasChanged)

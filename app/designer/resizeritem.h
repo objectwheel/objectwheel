@@ -15,7 +15,7 @@ public:
     };
 
 public:
-    explicit ResizerItem(Placement placement, Control* parent);
+    explicit ResizerItem(Placement placement, DesignerItem* parent = nullptr);
     void updateCursor();
     void updatePosition();
 

@@ -9,7 +9,7 @@ class HeadlineItem final : public DesignerItem
     Q_DISABLE_COPY(HeadlineItem)
 
 public:
-    explicit HeadlineItem(Control* parent);
+    explicit HeadlineItem(DesignerItem* parent = nullptr);
     void setText(const QString& text);
     bool showDimensions() const;
     void setShowDimensions(bool showDimensions);

@@ -16,7 +16,6 @@
 #include <QtMath>
 
 namespace {
-static const char zValueBeforeDragProperty[] = "_q_DesignerScene_zValueBeforeDragProperty";
 
 QRectF united(const QList<Control*>& controls)
 {
@@ -229,16 +228,6 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         }
     }
 
-    if (itemMoving) {
-        m_draggedControls = selectedControls;
-        for (Control* selectedControl : selectedControls) {
-            selectedControl->setProperty(zValueBeforeDragProperty, selectedControl->zValue());
-            selectedControl->setZValue(std::numeric_limits<int>::max());
-            selectedControl->setDragging(true);
-        }
-        view()->viewport()->setCursor(Qt::ClosedHandCursor);
-    }
-
     m_lastMousePos = event->scenePos();
 
     QPointer<DesignerScene> p(this);
@@ -253,18 +242,6 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsScene::mouseReleaseEvent(event);
     itemPressed = false;
     itemMoving = false;
-
-    if (m_currentForm == nullptr)
-        return;
-
-    for (Control* draggedControl : m_draggedControls) {
-        draggedControl->setZValue(draggedControl->property(zValueBeforeDragProperty).toReal());
-        draggedControl->setDragging(false);
-    }
-
-    view()->viewport()->unsetCursor();
-
-    update();
 }
 
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
