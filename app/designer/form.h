@@ -12,10 +12,9 @@ class Form final : public Control
     friend class ProjectExposingManager; // For constructor
 
 public:
-    enum { Type = UserType + 2 };
-
-public:
+    enum { Type = UserType + 3 };
     int type() const override;
+
     Form* formCast() override;
 
 private:

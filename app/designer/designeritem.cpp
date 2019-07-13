@@ -1,12 +1,14 @@
 #include <designeritem.h>
 #include <designerscene.h>
+#include <private/qgraphicsitem_p.h>
 #include <QGraphicsSceneMouseEvent>
 
 DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_pen(DesignerScene::pen())
   , m_brush(Qt::white)
-  , m_dragStarted(false)
   , m_inSetGeometry(false)
+  , m_beingDragged(false)
+  , m_dragDistanceExceeded(false)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
 }
@@ -29,6 +31,31 @@ DesignerScene* DesignerItem::scene() const
 DesignerItem* DesignerItem::parentItem() const
 {
     return static_cast<DesignerItem*>(QGraphicsItem::parentItem());
+}
+
+QList<DesignerItem*> DesignerItem::siblingItems() const
+{
+    QList<DesignerItem*> siblings;
+    if (parentItem()) {
+        siblings.append(parentItem()->childItems(false));
+        siblings.removeOne(const_cast<DesignerItem*>(this));
+    }
+    return siblings;
+}
+
+QList<DesignerItem*> DesignerItem::childItems(bool recursive) const
+{
+    QList<DesignerItem*> childs;
+    for (QGraphicsItem* item : QGraphicsItem::childItems()) {
+        if (item->type() >= Type)
+            childs.append(static_cast<DesignerItem*>(item));
+    }
+    if (recursive) {
+        int childCount = childs.size();
+        for (int i = 0; i < childCount; ++i)
+            childs.append(childs.at(i)->childItems(true));
+    }
+    return childs;
 }
 
 QPen DesignerItem::pen() const
@@ -137,14 +164,24 @@ QRectF DesignerItem::boundingRect() const
     return m_rect;
 }
 
-bool DesignerItem::dragStarted() const
+int DesignerItem::type() const
 {
-    return m_dragStarted;
+    return Type;
 }
 
-QPointF DesignerItem::snapPosition() const
+bool DesignerItem::beingDragged() const
 {
-    return m_snapPosition;
+    return m_beingDragged;
+}
+
+QPointF DesignerItem::dragDistance() const
+{
+    return m_dragDistance;
+}
+
+bool DesignerItem::dragDistanceExceeded() const
+{
+    return m_dragDistanceExceeded;
 }
 
 QVariant DesignerItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
@@ -164,27 +201,80 @@ void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    Q_UNUSED(event)
+    QGraphicsObject::mousePressEvent(event);
+    event->accept();
     m_dragStartPoint = event->pos();
 }
 
 void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    const QPointF& diff = event->pos() - m_dragStartPoint;
-    if (m_dragStarted || diff.manhattanLength() >= scene()->startDragDistance()) {
-        m_snapPosition = scene()->snapPosition(parentItem()->mapToParent(mapToParent(diff)));
-        if (!m_dragStarted) {
-            m_dragStarted = true;
-            emit dragStartedChanged();
+    const QPointF& dragDistance = event->pos() - m_dragStartPoint;
+
+    if (!m_dragDistanceExceeded && dragDistance.manhattanLength() < scene()->startDragDistance())
+        return;
+
+    m_dragDistanceExceeded = true;
+    m_movableSelectedAncestorItems.clear();
+
+    DesignerItem* myMovableSelectedAncestorItem = this;
+
+    if (flags() & ItemIsMovable) {
+        while (DesignerItem* parent = myMovableSelectedAncestorItem->parentItem()) {
+            if (parent->isSelected() && (parent->flags() & ItemIsMovable))
+                myMovableSelectedAncestorItem = parent;
+        }
+
+        for (DesignerItem* selectedItem : scene()->selectedItems()) {
+            if (selectedItem->flags() & ItemIsMovable) {
+                if (!QGraphicsItemPrivate::movableAncestorIsSelected(selectedItem))
+                    m_movableSelectedAncestorItems.insert(selectedItem);
+            }
+        }
+
+        m_movableSelectedAncestorItems.remove(myMovableSelectedAncestorItem);
+
+        QList<DesignerItem*> ancestorSiblings = myMovableSelectedAncestorItem->siblingItems();
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems.toList()) {
+            if (!ancestorSiblings.contains(movableSelectedAncestorItem)) {
+                for (DesignerItem* childItem : movableSelectedAncestorItem->childItems())
+                    childItem->setSelected(false);
+                movableSelectedAncestorItem->setSelected(false);
+                m_movableSelectedAncestorItems.remove(movableSelectedAncestorItem);
+            }
         }
     }
+
+    m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
+
+    for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
+        movableSelectedAncestorItem->setDragDistance(dragDistance);
+        movableSelectedAncestorItem->setBeingDragged(true);
+    }
+
+    QGraphicsObject::mouseMoveEvent(event);
 }
 
 void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    Q_UNUSED(event)
-    if (m_dragStarted) {
-        m_dragStarted = false;
-        emit dragStartedChanged();
+    QGraphicsObject::mouseReleaseEvent(event);
+    if (m_dragDistanceExceeded) {
+        m_dragDistanceExceeded = false;
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
+            movableSelectedAncestorItem->setDragDistance(QPointF());
+            movableSelectedAncestorItem->setBeingDragged(false);
+        }
     }
+}
+
+void DesignerItem::setBeingDragged(bool beingDragged)
+{
+    if (m_beingDragged != beingDragged) {
+        m_beingDragged = beingDragged;
+        emit beingDraggedChanged();
+    }
+}
+
+void DesignerItem::setDragDistance(const QPointF& dragDistance)
+{
+    m_dragDistance = dragDistance;
 }

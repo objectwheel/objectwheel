@@ -4,6 +4,7 @@
 #include <QGraphicsObject>
 #include <QPen>
 #include <QFont>
+#include <QSet>
 
 class Control;
 class Form;
@@ -22,6 +23,9 @@ public:
 
     DesignerScene* scene() const;
     DesignerItem* parentItem() const;
+
+    QList<DesignerItem*> siblingItems() const;
+    QList<DesignerItem*> childItems(bool recursive = true) const;
 
     QPen pen() const;
     void setPen(const QPen& pen);
@@ -49,9 +53,14 @@ public:
 
     QRectF boundingRect() const override;
 
+    enum { Type = UserType + 1 };
+    int type() const override;
+
+    bool beingDragged() const;
+    QPointF dragDistance() const;
+
 protected:
-    bool dragStarted() const;
-    QPointF snapPosition() const;
+    bool dragDistanceExceeded() const;
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
@@ -60,20 +69,26 @@ protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
+private:
+    void setBeingDragged(bool beingDragged);
+    void setDragDistance(const QPointF& dragDistance);
+
 signals:
     void doubleClicked();
     void geometryChanged();
-    void dragStartedChanged();
+    void beingDraggedChanged();
 
 private:
     QRectF m_rect;
     QFont m_font;
     QPen m_pen;
     QBrush m_brush;
-    bool m_dragStarted;
-    QPointF m_snapPosition;
-    QPointF m_dragStartPoint;
     bool m_inSetGeometry;
+    bool m_beingDragged;
+    QPointF m_dragDistance;
+    QSet<DesignerItem*> m_movableSelectedAncestorItems;
+    QPointF m_dragStartPoint;
+    bool m_dragDistanceExceeded;
 };
 
 #endif // DESIGNERITEM_H

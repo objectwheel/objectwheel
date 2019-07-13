@@ -18,23 +18,21 @@ class Control : public DesignerItem
     friend class DesignerScene; // For destructor (delete operator)
 
 public:
-    enum { Type = UserType + 1 };
-
-public:
     bool gui() const;
     bool form() const;
     bool clip() const;
     bool popup() const;
     bool window() const;
     bool dragIn() const;
-    bool dragging() const;
     bool resized() const;
     bool hasErrors() const;
 
     quint32 index() const;
-    int type() const override;
     int higherZValue() const;
     int lowerZValue() const;
+
+    enum { Type = UserType + 2 };
+    int type() const override;
 
     QString id() const;
     QString uid() const;
@@ -60,7 +58,6 @@ public:
     void setId(const QString& id);
     void setDir(const QString& dir);
     void setDragIn(bool dragIn);
-    void setDragging(bool dragging);
     void setResized(bool resized);
     void setIndex(quint32 index);
 
@@ -68,7 +65,6 @@ public:
 
 signals:
     void resizedChanged();
-    void draggingChanged();
 
 protected:
     QRectF outerRect(const QRectF& rect) const;
@@ -108,7 +104,6 @@ private:
     bool m_popup;
     bool m_window;
     bool m_dragIn;
-    bool m_dragging;
     bool m_resized;
 
     quint32 m_index;

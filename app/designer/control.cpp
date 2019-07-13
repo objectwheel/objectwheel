@@ -32,7 +32,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_popup(false)
   , m_window(false)
   , m_dragIn(false)
-  , m_dragging(false)
   , m_resized(false)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
@@ -44,9 +43,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
 
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
-    setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
-    setFlag(ItemSendsGeometryChanges);
 
     initResizers();
     headlineItem()->setVisible(false);
@@ -63,6 +60,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::applyCachedGeometry);
     connect(this, &Control::draggingChanged,
             this, &Control::applyCachedGeometry);
+    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
     connect(this, &Control::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
     connect(headlineItem(), &HeadlineItem::doubleClicked,
@@ -111,11 +109,6 @@ bool Control::window() const
 bool Control::dragIn() const
 {
     return m_dragIn;
-}
-
-bool Control::dragging() const
-{
-    return m_dragging;
 }
 
 bool Control::resized() const
@@ -281,15 +274,6 @@ void Control::setDir(const QString& dir)
 void Control::setDragIn(bool dragIn)
 {
     m_dragIn = dragIn;
-}
-
-void Control::setDragging(bool dragging)
-{
-    m_dragging = dragging;
-
-    // FIXME:
-    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
-    //    emit draggingChanged();
 }
 
 void Control::setResized(bool resized)

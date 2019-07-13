@@ -112,6 +112,16 @@ int DesignerScene::startDragDistance() const
     return QApplication::startDragDistance();
 }
 
+QList<DesignerItem*> DesignerScene::selectedItems() const
+{
+    QList<DesignerItem*> selectedItems;
+    for (QGraphicsItem* selectedItem : QGraphicsScene::selectedItems()) {
+        if (selectedItem->type() >= DesignerItem::Type)
+            selectedItems.append(static_cast<DesignerItem*>(selectedItem));
+    }
+    return selectedItems;
+}
+
 void DesignerScene::unsetViewportCursor()
 {
     view()->viewport()->unsetCursor();
@@ -215,7 +225,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
                 }
             }
 
-//       FIXME     stick();
+            //       FIXME     stick();
         }
     }
 

@@ -24,6 +24,8 @@ public:
     qreal zoomLevel() const;
     int startDragDistance() const;
 
+    QList<DesignerItem *> selectedItems() const;
+
     void unsetViewportCursor();
     void setViewportCursor(Qt::CursorShape cursor);
 
