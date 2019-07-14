@@ -21,7 +21,7 @@ int Form::type() const
     return Type;
 }
 
-QVariant Form::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+QVariant Form::itemChange(int change, const QVariant& value)
 {
     if (change == ItemSelectedHasChanged)
         headlineItem()->setBrush(isSelected() ? scene()->outlineColor() : Qt::darkGray);
@@ -63,7 +63,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     // Background
     painter->fillRect(rect(), settings->toBackgroundBrush());
 
-    if (parentControl() && parentControl()->clip() && !dragging())
+    if (parentControl() && parentControl()->clip() && !beingDragged())
         restrainPaintRegion(painter);
 
     if (!image().isNull())

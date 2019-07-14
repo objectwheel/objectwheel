@@ -75,8 +75,7 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+    QVariant itemChange(int change, const QVariant& value) override;
 
 protected:
     virtual void restrainPaintRegion(QPainter* painter);

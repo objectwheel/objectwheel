@@ -13,6 +13,13 @@ class DesignerItem : public QGraphicsObject
     Q_DISABLE_COPY(DesignerItem)
 
     friend class HeadlineItem; // For setBeingDragged
+    friend class ResizerItem; // For setBeingResized and setBeingDragged
+
+public:
+    enum DesignerItemChange {
+        ItemSizeChange = 100,
+        ItemSizeHasChanged
+    };
 
 public:
     explicit DesignerItem(DesignerItem* parent = nullptr);
@@ -53,13 +60,14 @@ public:
     int type() const override;
 
     bool beingDragged() const;
+    bool beingResized() const;
 
 protected:
     QPointF dragDistance() const;
     bool dragDistanceExceeded() const;
 
 protected:
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+    virtual QVariant itemChange(int change, const QVariant& value);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -67,16 +75,20 @@ protected:
 
 private:
     void setBeingDragged(bool beingDragged);
+    void setBeingResized(bool beingResized);
     void setDragDistance(const QPointF& dragDistance);
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 signals:
     void doubleClicked();
     void geometryChanged();
     void beingDraggedChanged();
+    void beingResizedChanged();
 
 private:
     bool m_inSetGeometry;
     bool m_beingDragged;
+    bool m_beingResized;
     bool m_dragDistanceExceeded;
     QPen m_pen;
     QBrush m_brush;

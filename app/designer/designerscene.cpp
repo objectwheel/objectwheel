@@ -103,7 +103,7 @@ DesignerView* DesignerScene::view() const
 
 qreal DesignerScene::zoomLevel() const
 {
-    return view()->matrix().m11();
+    return view()->transform().m11();
 }
 
 int DesignerScene::startDragDistance() const
@@ -145,6 +145,23 @@ QPointF DesignerScene::snapPosition(const QPointF& pos) const
         return QPointF(x, y);
     }
     return pos;
+}
+
+QSizeF DesignerScene::snapSize(qreal x, qreal y, qreal w, qreal h) const
+{
+    return snapSize(QPointF(x, y), QSizeF(w, h));
+}
+
+QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size) const
+{
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    if (settings->snappingEnabled) {
+        const qreal right = pos.x() + size.width();
+        const qreal bottom = pos.y() + size.height();
+        const QPointF& snapPos = snapPosition(right, bottom);
+        return QSizeF(snapPos.x() - pos.x(), snapPos.y() - pos.y());
+    }
+    return size;
 }
 
 QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const

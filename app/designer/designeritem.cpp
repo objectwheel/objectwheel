@@ -6,6 +6,7 @@
 DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_inSetGeometry(false)
   , m_beingDragged(false)
+  , m_beingResized(false)
   , m_dragDistanceExceeded(false)
   , m_pen(DesignerScene::pen())
   , m_brush(Qt::white)
@@ -99,10 +100,21 @@ QSizeF DesignerItem::size() const
 void DesignerItem::setSize(const QSizeF& size)
 {
     if (m_rect.size() != size) {
-        prepareGeometryChange();
-        m_rect.setSize(size);
-        update();
-        emit geometryChanged();
+        if (flags() & ItemSendsGeometryChanges) {
+            const QVariant newSizeVariant(itemChange(ItemSizeChange, QVariant::fromValue<QSizeF>(size)));
+            QSizeF newSize = newSizeVariant.toSizeF();
+            if (newSize == m_rect.size())
+                return;
+            prepareGeometryChange();
+            m_rect.setSize(size);
+            itemChange(ItemSizeHasChanged, newSizeVariant);
+            update();
+            emit geometryChanged();
+        } else {
+            prepareGeometryChange();
+            m_rect.setSize(size);
+            update();
+        }
     }
 }
 
@@ -119,10 +131,8 @@ QRectF DesignerItem::rect() const
 void DesignerItem::setRect(const QRectF& rect)
 {
     if (m_rect != rect) {
-        prepareGeometryChange();
-        m_rect = rect;
-        update();
-        emit geometryChanged();
+        m_rect.moveTopLeft(rect.topLeft());
+        setSize(rect.size());
     }
 }
 
@@ -164,6 +174,11 @@ bool DesignerItem::beingDragged() const
     return m_beingDragged;
 }
 
+bool DesignerItem::beingResized() const
+{
+    return m_beingResized;
+}
+
 QPointF DesignerItem::dragDistance() const
 {
     return m_dragDistance;
@@ -174,13 +189,22 @@ bool DesignerItem::dragDistanceExceeded() const
     return m_dragDistanceExceeded;
 }
 
-QVariant DesignerItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+QVariant DesignerItem::itemChange(int change, const QVariant& value)
 {
     if (change == ItemPositionHasChanged) {
         if (!m_inSetGeometry)
             emit geometryChanged();
     }
-    return QGraphicsObject::itemChange(change, value);
+
+    if (change < ItemSizeChange)
+        return QGraphicsObject::itemChange(GraphicsItemChange(change), value);
+
+    return value;
+}
+
+QVariant DesignerItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+{
+    return itemChange(int(change), value);
 }
 
 void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
@@ -263,6 +287,14 @@ void DesignerItem::setBeingDragged(bool beingDragged)
     if (m_beingDragged != beingDragged) {
         m_beingDragged = beingDragged;
         emit beingDraggedChanged();
+    }
+}
+
+void DesignerItem::setBeingResized(bool beingResized)
+{
+    if (m_beingResized != beingResized) {
+        m_beingResized = beingResized;
+        emit beingResizedChanged();
     }
 }
 

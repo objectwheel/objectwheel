@@ -16,7 +16,7 @@ public:
     int type() const override;
 
 private:
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
+    QVariant itemChange(int change, const QVariant& value) override;
     void paintFrame(QPainter* painter);
     void paintGridViewDots(QPainter* painter, int gridSize);
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;

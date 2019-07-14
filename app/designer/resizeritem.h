@@ -20,7 +20,7 @@ public:
     void updatePosition();
 
 private:
-    QRectF calculateParentGeometry(const QPointF& snapPos);
+    void setParentGeometry(const QPointF& dragDistance);
 
 private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;

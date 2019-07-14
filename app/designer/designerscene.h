@@ -31,6 +31,8 @@ public:
 
     QPointF snapPosition(qreal x, qreal y) const;
     QPointF snapPosition(const QPointF& pos) const;
+    QSizeF snapSize(qreal x, qreal y, qreal w, qreal h) const;
+    QSizeF snapSize(const QPointF& pos,const QSizeF& size) const;
 
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;

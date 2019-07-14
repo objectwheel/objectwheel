@@ -43,6 +43,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
 
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
+    setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
 
     initResizers();
@@ -58,9 +59,9 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::updateImage);
     connect(this, &Control::resizedChanged,
             this, &Control::applyCachedGeometry);
-    connect(this, &Control::draggingChanged,
-            this, &Control::applyCachedGeometry);
-    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
+    connect(this, &Control::beingDraggedChanged,
+            this, &Control::applyCachedGeometry, Qt::QueuedConnection);
+//    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
     connect(this, &Control::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
     connect(headlineItem(), &HeadlineItem::doubleClicked,
@@ -176,9 +177,7 @@ QImage Control::image() const
 
 Control* Control::parentControl() const
 {
-    if (parentItem())
-        return parentItem()->controlCast();
-    return nullptr;
+    return static_cast<Control*>(parentItem());
 }
 
 HeadlineItem* Control::headlineItem() const
@@ -225,7 +224,7 @@ QList<Control*> Control::childControls(bool recursive) const
 {
     QList<Control*> controls;
 
-    for (QGraphicsItem* item : childItems()) {
+    for (DesignerItem* item : childItems()) {
         if (item->type() == Form::Type || item->type() == Control::Type)
             controls.append(static_cast<Control*>(item));
     }
@@ -361,17 +360,14 @@ void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
 void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mousePressEvent(event);
-    QGraphicsItem::mousePressEvent(event);
 }
 
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
 
-    if (!dragStarted())
+    if (!dragDistanceExceeded())
         return;
-
-    QGraphicsItem::mouseMoveEvent(event);
 
     Control* control = nullptr;
     const QList<Control*>& controlsUnderCursor = scene()->controlsAt(event->scenePos());
@@ -379,7 +375,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (controlsUnderCursor.size() > 1)
         control = controlsUnderCursor.at(1);
 
-    if (control && control != this && !control->dragIn() && m_dragging) {
+    if (control && control != this && !control->dragIn() && beingDragged()) {
         control->setDragIn(true);
 
         for (Control* childControls : scene()->currentForm()->childControls())
@@ -394,15 +390,14 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseReleaseEvent(event);
-    QGraphicsItem::mouseReleaseEvent(event);
 
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
 
     for (auto control : scene()->currentForm()->childControls()) {
-        if (control->dragIn() && dragging() && parentControl() != control) {
+        if (control->dragIn() && beingDragged() && parentControl() != control) {
             for (auto sc : selectedControls) {
-                if (sc->dragging())
+                if (sc->beingDragged())
                     control->dropControl(sc);
             }
             scene()->clearSelection();
@@ -411,7 +406,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         control->setDragIn(false);
     }
 
-    if (scene()->currentForm()->dragIn() && dragging() &&
+    if (scene()->currentForm()->dragIn() && beingDragged() &&
             parentControl() != scene()->currentForm()) {
         scene()->currentForm()->dropControl(this);
         scene()->clearSelection();
@@ -420,7 +415,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     scene()->currentForm()->setDragIn(false);
 }
 
-QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value)
+QVariant Control::itemChange(int change, const QVariant& value)
 {    
     if (change == ItemSelectedHasChanged) {
         bool selected = value.toBool();
@@ -428,36 +423,24 @@ QVariant Control::itemChange(QGraphicsItem::GraphicsItemChange change, const QVa
             resizer->setVisible(selected);
         if (type() == Control::Type && !selected)
             m_headlineItem->setVisible(false);
-    } else if (change == ItemPositionChange && isSelected() && !form()) {
-        bool dragStarted = false;
-        for (Control* control : scene()->selectedControls()) {
-            if (control->dragStarted()) {
-                dragStarted = true;
-                break;
-            }
-        }
-        if (dragStarted) {
-            ControlPropertyManager::setPos(this, snapPosition(), ControlPropertyManager::SaveChanges
+    } else if (change == ItemPositionChange && beingDragged()) {
+        const QPointF& snapPos = scene()->snapPosition(value.toPointF());
+        if (!form()) {
+            ControlPropertyManager::setPos(this, snapPos, ControlPropertyManager::SaveChanges
                                            | ControlPropertyManager::UpdateRenderer
                                            | ControlPropertyManager::CompressedCall
                                            | ControlPropertyManager::DontApplyDesigner);
-
-
-
-
-
-            ControlPropertyManager::Options option = parentItem()->controlCast()->form()
-                    ? ControlPropertyManager::NoOption
-                    : ControlPropertyManager::SaveChanges
-                      | ControlPropertyManager::UpdateRenderer
-                      | ControlPropertyManager::CompressedCall;
-            ControlPropertyManager::setPos(parentItem()->controlCast(), snapPosition(), option);
-
-
-
-            return snapPosition();
         }
+        return snapPos;
+    } else if (change == ItemSizeChange && beingResized()) {
+        const QSizeF& snapSize = scene()->snapSize(pos(), value.toSizeF());
+        ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
+                                        | ControlPropertyManager::UpdateRenderer
+                                        | ControlPropertyManager::CompressedCall
+                                        | ControlPropertyManager::DontApplyDesigner);
+        return snapSize;
     }
+
     return DesignerItem::itemChange(change, value);
 }
 
@@ -499,7 +482,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
 
-    if (parentControl() && parentControl()->clip() && !dragging())
+    if (parentControl() && parentControl()->clip() && !beingDragged())
         restrainPaintRegion(painter);
 
     if (!image().isNull())
@@ -535,7 +518,7 @@ void Control::updateImage(const RenderResult& result)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
     m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
 
-    if (!dragging() && !resized())
+    if (!beingDragged() && !resized())
         applyCachedGeometry();
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
@@ -560,7 +543,7 @@ void Control::updateImage(const RenderResult& result)
 
 void Control::applyCachedGeometry()
 {
-    if (!dragging() && !resized()) {
+    if (!beingDragged() && !resized()) {
         if (form()) {
             ControlPropertyManager::setSize(this, m_cachedGeometry.size(),
                                             ControlPropertyManager::NoOption);
