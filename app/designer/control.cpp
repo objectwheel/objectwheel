@@ -45,6 +45,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setAcceptHoverEvents(true);
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
+    setFlag(ItemSendsGeometryChanges);
 
     initResizers();
     headlineItem()->setVisible(false);

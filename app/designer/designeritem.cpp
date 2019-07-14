@@ -107,8 +107,8 @@ void DesignerItem::setSize(const QSizeF& size)
                 return;
             prepareGeometryChange();
             m_rect.setSize(size);
-            itemChange(ItemSizeHasChanged, newSizeVariant);
             update();
+            itemChange(ItemSizeHasChanged, newSizeVariant);
             emit geometryChanged();
         } else {
             prepareGeometryChange();
@@ -131,7 +131,11 @@ QRectF DesignerItem::rect() const
 void DesignerItem::setRect(const QRectF& rect)
 {
     if (m_rect != rect) {
-        m_rect.moveTopLeft(rect.topLeft());
+        if (m_rect.topLeft() != rect.topLeft()) {
+            prepareGeometryChange();
+            m_rect.moveTopLeft(rect.topLeft());
+            update();
+        }
         setSize(rect.size());
     }
 }
@@ -148,10 +152,16 @@ QRectF DesignerItem::geometry() const
 
 void DesignerItem::setGeometry(const QRectF& geometry)
 {
+    const QRectF& oldGeometry = this->geometry();
     m_inSetGeometry = true;
     setPos(geometry.topLeft());
     m_inSetGeometry = false;
     setSize(geometry.size());
+    if ((flags() & ItemSendsGeometryChanges)
+            && oldGeometry.topLeft() != pos()
+            && oldGeometry.size() == size()) {
+        emit geometryChanged();
+    }
 }
 
 void DesignerItem::setGeometry(qreal x, qreal y, qreal w, qreal h)
@@ -177,11 +187,6 @@ bool DesignerItem::beingDragged() const
 bool DesignerItem::beingResized() const
 {
     return m_beingResized;
-}
-
-QPointF DesignerItem::dragDistance() const
-{
-    return m_dragDistance;
 }
 
 bool DesignerItem::dragDistanceExceeded() const
@@ -222,19 +227,21 @@ void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    m_dragDistance = event->pos() - m_dragStartPoint;
+    const QPointF& dragDistance = event->pos() - m_dragStartPoint;
 
-    if (!m_dragDistanceExceeded && m_dragDistance.manhattanLength() < scene()->startDragDistance())
+    if (!m_dragDistanceExceeded && dragDistance.manhattanLength() < scene()->startDragDistance())
         return;
 
     m_dragDistanceExceeded = true;
     m_movableSelectedAncestorItems.clear();
 
     if (flags() & ItemIsMovable) {
-        DesignerItem* myMovableSelectedAncestorItem = this;
-        while (DesignerItem* parent = myMovableSelectedAncestorItem->parentItem()) {
+        DesignerItem* ancestor = this;
+        DesignerItem* myMovableSelectedAncestorItem = ancestor;
+        while (DesignerItem* parent = ancestor->parentItem()) {
             if (parent->isSelected() && (parent->flags() & ItemIsMovable))
                 myMovableSelectedAncestorItem = parent;
+            ancestor = parent;
         }
 
         for (DesignerItem* selectedItem : scene()->selectedItems()) {
@@ -258,10 +265,8 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
         m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
 
-        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
-            movableSelectedAncestorItem->setDragDistance(m_dragDistance);
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
             movableSelectedAncestorItem->setBeingDragged(true);
-        }
 
         scene()->setViewportCursor(Qt::ClosedHandCursor);
 
@@ -273,13 +278,13 @@ void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsObject::mouseReleaseEvent(event);
 
-    m_dragDistanceExceeded = false;
-
     if ((flags() & ItemIsMovable) && m_dragDistanceExceeded) {
         scene()->unsetViewportCursor();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
             movableSelectedAncestorItem->setBeingDragged(false);
     }
+
+    m_dragDistanceExceeded = false;
 }
 
 void DesignerItem::setBeingDragged(bool beingDragged)
@@ -296,9 +301,4 @@ void DesignerItem::setBeingResized(bool beingResized)
         m_beingResized = beingResized;
         emit beingResizedChanged();
     }
-}
-
-void DesignerItem::setDragDistance(const QPointF& dragDistance)
-{
-    m_dragDistance = dragDistance;
 }

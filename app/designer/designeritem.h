@@ -63,8 +63,9 @@ public:
     bool beingResized() const;
 
 protected:
-    QPointF dragDistance() const;
     bool dragDistanceExceeded() const;
+    void setBeingDragged(bool beingDragged);
+    void setBeingResized(bool beingResized);
 
 protected:
     virtual QVariant itemChange(int change, const QVariant& value);
@@ -74,9 +75,6 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
-    void setBeingDragged(bool beingDragged);
-    void setBeingResized(bool beingResized);
-    void setDragDistance(const QPointF& dragDistance);
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 signals:
@@ -94,7 +92,6 @@ private:
     QBrush m_brush;
     QFont m_font;
     QRectF m_rect;
-    QPointF m_dragDistance;
     QPointF m_dragStartPoint;
     QSet<DesignerItem*> m_movableSelectedAncestorItems;
 };

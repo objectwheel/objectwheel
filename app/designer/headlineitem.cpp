@@ -35,12 +35,11 @@ void HeadlineItem::setShowDimensions(bool showDimensions)
 
 void HeadlineItem::updateSize()
 {
-    QSizeF ps;
     const QSizeF& ts = calculateTextSize();
+    const QSizeF& ps = parentItem() ? parentItem()->size() : QSizeF();
     qreal width = ts.width();
-    if (parentItem() && showDimensions()) {
+    if (showDimensions()) {
         const QFontMetrics fm(dimensionTextFont());
-        ps = parentItem()->size();
         QString wstr = QString::number(ps.width());
         QString hstr = QString::number(ps.height());
         wstr.replace(QRegularExpression("\\d"), "9");
