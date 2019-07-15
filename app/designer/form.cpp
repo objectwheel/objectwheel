@@ -12,7 +12,6 @@ Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
     setFlag(ItemIsMovable, false);
     headlineItem()->setVisible(true);
-    headlineItem()->setShowDimensions(true);
     headlineItem()->setBrush(Qt::darkGray);
 }
 
@@ -25,6 +24,8 @@ QVariant Form::itemChange(int change, const QVariant& value)
 {
     if (change == ItemSelectedHasChanged)
         headlineItem()->setBrush(isSelected() ? scene()->outlineColor() : Qt::darkGray);
+    if (change == ItemSizeHasChanged)
+        headlineItem()->setDimensions(size());
     return Control::itemChange(change, value);
 }
 

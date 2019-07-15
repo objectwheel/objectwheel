@@ -6,11 +6,28 @@
 
 enum { MARGIN = 10 };
 
-HeadlineItem::HeadlineItem(DesignerItem* parent) : DesignerItem(parent)
-  , m_showDimensions(false)
+HeadlineItem::HeadlineItem(DesignerItem* parent) : ToolItem(parent)
+  , m_sizeUpdateScheduled(false)
 {
-    setFlag(ItemIgnoresTransformations);
-    setZValue(std::numeric_limits<int>::max());
+}
+
+QSizeF HeadlineItem::dimensions() const
+{
+    return m_dimensions;
+}
+
+void HeadlineItem::setDimensions(const QSizeF& dimensions)
+{
+    if (m_dimensions != dimensions) {
+        m_dimensions = dimensions;
+        updateSize();
+        update();
+    }
+}
+
+QString HeadlineItem::text() const
+{
+    return m_text;
 }
 
 void HeadlineItem::setText(const QString& text)
@@ -19,18 +36,16 @@ void HeadlineItem::setText(const QString& text)
         m_text = text;
         setToolTip(text);
         updateSize();
+        update();
     }
 }
 
-bool HeadlineItem::showDimensions() const
+void HeadlineItem::scheduleSizeUpdate()
 {
-    return m_showDimensions;
-}
-
-void HeadlineItem::setShowDimensions(bool showDimensions)
-{
-    m_showDimensions = showDimensions;
-    updateSize();
+    if (m_sizeUpdateScheduled)
+        return;
+    m_sizeUpdateScheduled = true;
+    QMetaObject::invokeMethod(this, &HeadlineItem::updateSize, Qt::QueuedConnection);
 }
 
 void HeadlineItem::updateSize()
@@ -38,55 +53,56 @@ void HeadlineItem::updateSize()
     const QSizeF& ts = calculateTextSize();
     const QSizeF& ps = parentItem() ? parentItem()->size() : QSizeF();
     qreal width = ts.width();
-    if (showDimensions()) {
-        const QFontMetrics fm(dimensionTextFont());
-        QString wstr = QString::number(ps.width());
-        QString hstr = QString::number(ps.height());
+    if (m_dimensions.isValid()) {
+        const QFontMetrics fm(dimensionsFont());
+        QString wstr = QString::number(m_dimensions.width());
+        QString hstr = QString::number(m_dimensions.height());
         wstr.replace(QRegularExpression("\\d"), "9");
         hstr.replace(QRegularExpression("\\d"), "9");
-        width += fm.horizontalAdvance(dimensionText(wstr.toDouble(), hstr.toDouble()));
+        width += fm.horizontalAdvance(dimensionsText(wstr.toDouble(), hstr.toDouble()));
     }
     setRect(-0.5, -ts.height(), qMin(ps.width(), width + MARGIN), ts.height());
+    m_sizeUpdateScheduled = false;
 }
 
-QSizeF HeadlineItem::calculateTextSize() const
+QFont HeadlineItem::dimensionsFont() const
 {
-    const QFontMetrics fontMetrics(parentItem() ? parentItem()->font() : QFont());
-    return QSizeF(fontMetrics.horizontalAdvance(m_text), fontMetrics.height());
+    QFont f(font());
+    f.setPixelSize(f.pixelSize() - 3);
+    return f;
 }
 
-QFont HeadlineItem::dimensionTextFont() const
-{
-    QFont font(parentItem() ? parentItem()->font() : QFont());
-    font.setPixelSize(font.pixelSize() - 3);
-    return font;
-}
-
-QString HeadlineItem::dimensionText(qreal width, qreal height) const
+QString HeadlineItem::dimensionsText(qreal width, qreal height) const
 {
     static const QString pattern(QStringLiteral(" (%1×%2)"));
     return pattern.arg(width).arg(height);
 }
 
+QSizeF HeadlineItem::calculateTextSize() const
+{
+    const QFontMetrics fm(font());
+    return QSizeF(fm.horizontalAdvance(m_text), fm.height());
+}
+
 void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    DesignerItem::mouseMoveEvent(event);
+    ToolItem::mouseMoveEvent(event);
 
-    if (parentItem() && dragDistanceExceeded()) {
+    if (parentItem() && startDragDistanceExceeded()) {
         scene()->setViewportCursor(Qt::ClosedHandCursor);
         parentItem()->setBeingDragged(true);
-        parentItem()->setPos(parentItem()->mapToParent(mapToParent(dragDistance())));
+        parentItem()->setPos(parentItem()->mapToParent(mapToParent(dragDistanceVector())));
     }
 }
 
 void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (parentItem() && dragDistanceExceeded()) {
+    if (parentItem() && startDragDistanceExceeded()) {
         scene()->unsetViewportCursor();
         parentItem()->setBeingDragged(false);
     }
 
-    DesignerItem::mouseReleaseEvent(event); // Clears m_dragDistanceExceeded
+    ToolItem::mouseReleaseEvent(event); // Clears m_startDragDistanceExceeded
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
@@ -98,13 +114,13 @@ void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     painter->setPen(pen());
     const qreal textWidth = calculateTextSize().width();
     QRectF r = rect().adjusted(MARGIN / 2, 0, -MARGIN / 2, -1);
-    if (parentItem() && m_showDimensions && r.width() >= textWidth) {
+    if (parentItem() && m_dimensions.isValid() && r.width() >= textWidth) {
         const qreal availableWidth = r.width() - textWidth;
         r.adjust(0, 0, -availableWidth, 0);
         painter->drawText(r, m_text, QTextOption(Qt::AlignLeft));
         r.adjust(r.width(), 0, availableWidth, 0);
-        painter->setFont(dimensionTextFont());
-        const QString& text = dimensionText(parentItem()->width(), parentItem()->height());
+        painter->setFont(dimensionsFont());
+        const QString& text = dimensionsText(m_dimensions.width(), m_dimensions.height());
         painter->drawText(r, painter->fontMetrics().elidedText(text, Qt::ElideRight, r.width() + 1),
                           QTextOption(Qt::AlignHCenter | Qt::AlignBottom));
     } else {

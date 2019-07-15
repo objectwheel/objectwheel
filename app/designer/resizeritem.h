@@ -1,9 +1,9 @@
 #ifndef RESIZERITEM_H
 #define RESIZERITEM_H
 
-#include <designeritem.h>
+#include <toolitem.h>
 
-class ResizerItem final : public DesignerItem
+class ResizerItem final : public ToolItem
 {
     Q_OBJECT
     Q_DISABLE_COPY(ResizerItem)

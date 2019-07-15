@@ -48,7 +48,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setFlag(ItemSendsGeometryChanges);
 
     initResizers();
-    headlineItem()->setVisible(false);
     headlineItem()->setPen(QPen(Qt::white));
     headlineItem()->setBrush(DesignerScene::outlineColor());
 
@@ -62,13 +61,13 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::applyCachedGeometry);
     connect(this, &Control::beingDraggedChanged,
             this, &Control::applyCachedGeometry, Qt::QueuedConnection);
-//    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
+    //    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
     connect(this, &Control::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
     connect(headlineItem(), &HeadlineItem::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
     connect(this, &Control::geometryChanged,
-            headlineItem(), &HeadlineItem::updateSize);
+            headlineItem(), &HeadlineItem::scheduleSizeUpdate);
     connect(this, &Control::geometryChanged,
             this, [=] {
         for (ResizerItem* resizer : m_resizers)
@@ -367,7 +366,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
 
-    if (!dragDistanceExceeded())
+    if (!startDragDistanceExceeded())
         return;
 
     Control* control = nullptr;
@@ -560,7 +559,7 @@ void Control::initResizers()
 {
     for (int i = 0; i < 8; ++i) {
         auto resizer = new ResizerItem(ResizerItem::Placement(i), this);
-        resizer->setVisible(false);
+        resizer->setPen(DesignerScene::pen());
         m_resizers.append(resizer);
     }
 }

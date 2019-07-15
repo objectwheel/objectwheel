@@ -10,7 +10,8 @@ HEADERS += $$PWD/control.h \
            $$PWD/headlineitem.h \
            $$PWD/resizeritem.h \
            $$PWD/sceneextenditem.h \
-           $$PWD/signalchooserdialog.h
+           $$PWD/signalchooserdialog.h \
+           $$PWD/toolitem.h
 
 SOURCES += $$PWD/control.cpp \
            $$PWD/controlsavefilter.cpp \
@@ -21,6 +22,7 @@ SOURCES += $$PWD/control.cpp \
            $$PWD/headlineitem.cpp \
            $$PWD/resizeritem.cpp \
            $$PWD/sceneextenditem.cpp \
-           $$PWD/signalchooserdialog.cpp
+           $$PWD/signalchooserdialog.cpp \
+           $$PWD/toolitem.cpp
 
 FORMS += $$PWD/signalchooserdialog.ui

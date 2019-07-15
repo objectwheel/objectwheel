@@ -30,12 +30,6 @@ public:
     QList<DesignerItem*> siblingItems() const;
     QList<DesignerItem*> childItems(bool recursive = true) const;
 
-    QPen pen() const;
-    void setPen(const QPen& pen);
-
-    QBrush brush() const;
-    void setBrush(const QBrush& brush);
-
     QFont font() const;
     void setFont(const QFont& font);
 
@@ -63,9 +57,8 @@ public:
     bool beingResized() const;
 
 protected:
-    bool dragDistanceExceeded() const;
-    void setBeingDragged(bool beingDragged);
-    void setBeingResized(bool beingResized);
+    QPointF mousePressPoint() const;
+    bool startDragDistanceExceeded() const;
 
 protected:
     virtual QVariant itemChange(int change, const QVariant& value);
@@ -73,6 +66,10 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+
+private:
+    void setBeingDragged(bool beingDragged);
+    void setBeingResized(bool beingResized);
 
 private:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
@@ -87,12 +84,10 @@ private:
     bool m_inSetGeometry;
     bool m_beingDragged;
     bool m_beingResized;
-    bool m_dragDistanceExceeded;
-    QPen m_pen;
-    QBrush m_brush;
+    bool m_startDragDistanceExceeded;
     QFont m_font;
     QRectF m_rect;
-    QPointF m_dragStartPoint;
+    QPointF m_mousePressPoint;
     QSet<DesignerItem*> m_movableSelectedAncestorItems;
 };
 

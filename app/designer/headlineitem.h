@@ -1,24 +1,29 @@
 #ifndef HEADLINEITEM_H
 #define HEADLINEITEM_H
 
-#include <designeritem.h>
+#include <toolitem.h>
 
-class HeadlineItem final : public DesignerItem
+class HeadlineItem final : public ToolItem
 {
     Q_OBJECT
     Q_DISABLE_COPY(HeadlineItem)
 
 public:
     explicit HeadlineItem(DesignerItem* parent = nullptr);
+
+    QSizeF dimensions() const;
+    void setDimensions(const QSizeF& dimensions);
+
+    QString text() const;
     void setText(const QString& text);
-    bool showDimensions() const;
-    void setShowDimensions(bool showDimensions);
-    void updateSize();
+
+    void scheduleSizeUpdate();
 
 private:
+    void updateSize();
+    QFont dimensionsFont() const;
+    QString dimensionsText(qreal width, qreal height) const;
     QSizeF calculateTextSize() const;
-    QFont dimensionTextFont() const;
-    QString dimensionText(qreal width, qreal height) const;
 
 private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -27,7 +32,8 @@ private:
 
 private:
     QString m_text;
-    bool m_showDimensions;
+    QSizeF m_dimensions;
+    bool m_sizeUpdateScheduled;
 };
 
 #endif // HEADLINEITEM_H

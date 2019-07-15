@@ -1,13 +1,10 @@
 #include <resizeritem.h>
-#include <designerscene.h>
 #include <utilityfunctions.h>
 #include <QPainter>
 
-ResizerItem::ResizerItem(Placement placement, DesignerItem* parent) : DesignerItem(parent)
+ResizerItem::ResizerItem(Placement placement, DesignerItem* parent) : ToolItem(parent)
   , m_placement(placement)
 {
-    setFlag(ItemIgnoresTransformations);
-    setZValue(std::numeric_limits<int>::max());
     setRect(-3, -3, 6, 6);
     updateCursor();
 }
@@ -48,7 +45,6 @@ void ResizerItem::updatePosition()
         return;
 
     const QRectF& parentRect = parentItem()->rect();
-
     switch (m_placement) {
     case ResizerItem::Top:
         setPos(UtilityFunctions::topCenter(parentRect));
@@ -83,7 +79,6 @@ void ResizerItem::setParentGeometry(const QPointF& dragDistance)
         return;
 
     QRectF geometry = parentItem()->geometry();
-
     switch (m_placement) {
     case Top:
         geometry.setTop(dragDistance.y());
@@ -110,7 +105,6 @@ void ResizerItem::setParentGeometry(const QPointF& dragDistance)
         geometry.setBottomLeft(dragDistance);
         break;
     }
-
     parentItem()->setGeometry(geometry);
 }
 
@@ -118,21 +112,21 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
 
-    if (parentItem() && dragDistanceExceeded()) {
+    if (parentItem() && startDragDistanceExceeded()) {
         parentItem()->setBeingDragged(true);
         parentItem()->setBeingResized(true);
-        setParentGeometry(parentItem()->mapToParent(mapToParent(dragDistance())));
+        setParentGeometry(parentItem()->mapToParent(mapToParent(dragDistanceVector())));
     }
 }
 
 void ResizerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (parentItem() && dragDistanceExceeded()) {
+    if (parentItem() && startDragDistanceExceeded()) {
         parentItem()->setBeingDragged(false);
         parentItem()->setBeingResized(false);
     }
 
-    DesignerItem::mouseReleaseEvent(event); // Clears m_dragDistanceExceeded
+    DesignerItem::mouseReleaseEvent(event); // Clears m_startDragDistanceExceeded
 }
 
 void ResizerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

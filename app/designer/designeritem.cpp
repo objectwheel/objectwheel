@@ -7,9 +7,7 @@ DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_inSetGeometry(false)
   , m_beingDragged(false)
   , m_beingResized(false)
-  , m_dragDistanceExceeded(false)
-  , m_pen(DesignerScene::pen())
-  , m_brush(Qt::white)
+  , m_startDragDistanceExceeded(false)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
 }
@@ -47,28 +45,6 @@ QList<DesignerItem*> DesignerItem::childItems(bool recursive) const
             childs.append(childs.at(i)->childItems(true));
     }
     return childs;
-}
-
-QPen DesignerItem::pen() const
-{
-    return m_pen;
-}
-
-void DesignerItem::setPen(const QPen& pen)
-{
-    m_pen = pen;
-    update();
-}
-
-QBrush DesignerItem::brush() const
-{
-    return m_brush;
-}
-
-void DesignerItem::setBrush(const QBrush& brush)
-{
-    m_brush = brush;
-    update();
 }
 
 QFont DesignerItem::font() const
@@ -189,9 +165,9 @@ bool DesignerItem::beingResized() const
     return m_beingResized;
 }
 
-bool DesignerItem::dragDistanceExceeded() const
+bool DesignerItem::startDragDistanceExceeded() const
 {
-    return m_dragDistanceExceeded;
+    return m_startDragDistanceExceeded;
 }
 
 QVariant DesignerItem::itemChange(int change, const QVariant& value)
@@ -212,6 +188,11 @@ QVariant DesignerItem::itemChange(QGraphicsItem::GraphicsItemChange change, cons
     return itemChange(int(change), value);
 }
 
+QPointF DesignerItem::mousePressPoint() const
+{
+    return m_mousePressPoint;
+}
+
 void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
@@ -221,18 +202,18 @@ void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsObject::mousePressEvent(event);
-    m_dragStartPoint = event->pos();
+    m_mousePressPoint = event->pos();
     event->accept();
 }
 
 void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    const QPointF& dragDistance = event->pos() - m_dragStartPoint;
+    const QPointF& dragDistance = event->pos() - m_mousePressPoint;
 
-    if (!m_dragDistanceExceeded && dragDistance.manhattanLength() < scene()->startDragDistance())
+    if (!m_startDragDistanceExceeded && dragDistance.manhattanLength() < scene()->startDragDistance())
         return;
 
-    m_dragDistanceExceeded = true;
+    m_startDragDistanceExceeded = true;
     m_movableSelectedAncestorItems.clear();
 
     if (flags() & ItemIsMovable) {
@@ -278,13 +259,13 @@ void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsObject::mouseReleaseEvent(event);
 
-    if ((flags() & ItemIsMovable) && m_dragDistanceExceeded) {
+    if ((flags() & ItemIsMovable) && m_startDragDistanceExceeded) {
         scene()->unsetViewportCursor();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
             movableSelectedAncestorItem->setBeingDragged(false);
     }
 
-    m_dragDistanceExceeded = false;
+    m_startDragDistanceExceeded = false;
 }
 
 void DesignerItem::setBeingDragged(bool beingDragged)
