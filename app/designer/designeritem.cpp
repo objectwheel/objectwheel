@@ -132,7 +132,8 @@ void DesignerItem::setGeometry(const QRectF& geometry)
     m_inSetGeometry = true;
     setPos(geometry.topLeft());
     m_inSetGeometry = false;
-    setSize(geometry.size());
+    auto d = geometry.topLeft() - pos();
+    setSize(geometry.size() + QSizeF(d.x(), d.y()));
     if ((flags() & ItemSendsGeometryChanges)
             && oldGeometry.topLeft() != pos()
             && oldGeometry.size() == size()) {

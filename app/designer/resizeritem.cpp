@@ -45,6 +45,7 @@ void ResizerItem::updatePosition()
         return;
 
     const QRectF& parentRect = parentItem()->rect();
+
     switch (m_placement) {
     case ResizerItem::Top:
         setPos(UtilityFunctions::topCenter(parentRect));
@@ -79,6 +80,7 @@ void ResizerItem::setParentGeometry(const QPointF& dragDistance)
         return;
 
     QRectF geometry = parentItem()->geometry();
+
     switch (m_placement) {
     case Top:
         geometry.setTop(dragDistance.y());
@@ -105,12 +107,13 @@ void ResizerItem::setParentGeometry(const QPointF& dragDistance)
         geometry.setBottomLeft(dragDistance);
         break;
     }
+
     parentItem()->setGeometry(geometry);
 }
 
 void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    DesignerItem::mouseMoveEvent(event);
+    ToolItem::mouseMoveEvent(event);
 
     if (parentItem() && startDragDistanceExceeded()) {
         parentItem()->setBeingDragged(true);
@@ -126,7 +129,7 @@ void ResizerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         parentItem()->setBeingResized(false);
     }
 
-    DesignerItem::mouseReleaseEvent(event); // Clears m_startDragDistanceExceeded
+    ToolItem::mouseReleaseEvent(event); // Clears m_startDragDistanceExceeded
 }
 
 void ResizerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
