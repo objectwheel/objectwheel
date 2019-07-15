@@ -2,8 +2,6 @@
 #define DESIGNERITEM_H
 
 #include <QGraphicsObject>
-#include <QPen>
-#include <QFont>
 #include <QSet>
 
 class DesignerScene;
@@ -24,14 +22,17 @@ public:
 public:
     explicit DesignerItem(DesignerItem* parent = nullptr);
 
+    enum { Type = UserType + 1 };
+    int type() const override;
+
+    bool beingDragged() const;
+    bool beingResized() const;
+
     DesignerScene* scene() const;
     DesignerItem* parentItem() const;
 
     QList<DesignerItem*> siblingItems() const;
     QList<DesignerItem*> childItems(bool recursive = true) const;
-
-    QFont font() const;
-    void setFont(const QFont& font);
 
     qreal width() const;
     qreal height() const;
@@ -50,22 +51,16 @@ public:
 
     QRectF boundingRect() const override;
 
-    enum { Type = UserType + 1 };
-    int type() const override;
-
-    bool beingDragged() const;
-    bool beingResized() const;
-
 protected:
+    bool dragAccepted() const;
     QPointF mousePressPoint() const;
-    bool startDragDistanceExceeded() const;
 
 protected:
-    virtual QVariant itemChange(int change, const QVariant& value);
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    virtual QVariant itemChange(int change, const QVariant& value);
 
 private:
     void setBeingDragged(bool beingDragged);
@@ -84,8 +79,7 @@ private:
     bool m_inSetGeometry;
     bool m_beingDragged;
     bool m_beingResized;
-    bool m_startDragDistanceExceeded;
-    QFont m_font;
+    bool m_dragAccepted;
     QRectF m_rect;
     QPointF m_mousePressPoint;
     QSet<DesignerItem*> m_movableSelectedAncestorItems;

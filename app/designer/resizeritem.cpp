@@ -115,7 +115,7 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     ToolItem::mouseMoveEvent(event);
 
-    if (parentItem() && startDragDistanceExceeded()) {
+    if (parentItem() && dragAccepted()) {
         parentItem()->setBeingDragged(true);
         parentItem()->setBeingResized(true);
         setParentGeometry(parentItem()->mapToParent(mapToParent(dragDistanceVector())));
@@ -124,12 +124,12 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void ResizerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (parentItem() && startDragDistanceExceeded()) {
+    if (parentItem() && dragAccepted()) {
         parentItem()->setBeingDragged(false);
         parentItem()->setBeingResized(false);
     }
 
-    ToolItem::mouseReleaseEvent(event); // Clears m_startDragDistanceExceeded
+    ToolItem::mouseReleaseEvent(event); // Clears m_dragAccepted
 }
 
 void ResizerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

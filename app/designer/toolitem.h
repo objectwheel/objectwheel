@@ -2,6 +2,7 @@
 #define TOOLITEM_H
 
 #include <designeritem.h>
+#include <QPen>
 
 class ToolItem : public DesignerItem
 {
@@ -21,6 +22,7 @@ protected:
     QPointF dragDistanceVector() const;
 
 protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 

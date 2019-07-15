@@ -67,7 +67,7 @@ void HeadlineItem::updateSize()
 
 QFont HeadlineItem::dimensionsFont() const
 {
-    QFont f(font());
+    QFont f; // App default font
     f.setPixelSize(f.pixelSize() - 3);
     return f;
 }
@@ -80,7 +80,7 @@ QString HeadlineItem::dimensionsText(qreal width, qreal height) const
 
 QSizeF HeadlineItem::calculateTextSize() const
 {
-    const QFontMetrics fm(font());
+    const QFontMetrics fm(QFont{}); // App default font
     return QSizeF(fm.horizontalAdvance(m_text), fm.height());
 }
 
@@ -88,7 +88,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     ToolItem::mouseMoveEvent(event);
 
-    if (parentItem() && startDragDistanceExceeded()) {
+    if (parentItem() && dragAccepted()) {
         scene()->setViewportCursor(Qt::ClosedHandCursor);
         parentItem()->setBeingDragged(true);
         parentItem()->setPos(parentItem()->mapToParent(mapToParent(dragDistanceVector())));
@@ -97,12 +97,12 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (parentItem() && startDragDistanceExceeded()) {
+    if (parentItem() && dragAccepted()) {
         scene()->unsetViewportCursor();
         parentItem()->setBeingDragged(false);
     }
 
-    ToolItem::mouseReleaseEvent(event); // Clears m_startDragDistanceExceeded
+    ToolItem::mouseReleaseEvent(event); // Clears m_dragAccepted
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)

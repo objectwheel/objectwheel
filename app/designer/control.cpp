@@ -366,7 +366,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
 
-    if (!startDragDistanceExceeded())
+    if (!dragAccepted())
         return;
 
     Control* control = nullptr;

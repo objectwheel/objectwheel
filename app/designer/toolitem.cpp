@@ -39,6 +39,12 @@ QPointF ToolItem::dragDistanceVector() const
     return m_dragDistanceVector;
 }
 
+void ToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    DesignerItem::mousePressEvent(event);
+    event->accept();
+}
+
 void ToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
