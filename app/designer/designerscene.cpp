@@ -219,7 +219,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
     for (auto ctrl : selectedControls) {
-        if (ctrl->resized())
+        if (ctrl->beingResized())
             resizedAnyway = true;
     }
     selectedControls.removeOne(m_currentForm);
@@ -268,7 +268,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
     auto selectedControls = this->selectedControls();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
     for (auto ctrl : selectedControls) {
-        if (ctrl->resized())
+        if (ctrl->beingResized())
             resizedAnyway = true;
     }
     selectedControls.removeOne(m_currentForm);

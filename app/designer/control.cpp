@@ -32,7 +32,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_popup(false)
   , m_window(false)
   , m_dragIn(false)
-  , m_resized(false)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
@@ -58,11 +57,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
 
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateImage);
-    connect(this, &Control::resizedChanged,
-            this, &Control::applyCachedGeometry);
-    connect(this, &Control::beingDraggedChanged,
-            this, &Control::applyCachedGeometry, Qt::QueuedConnection);
-    //    Suppressor::suppress(150, "draggingChanged", std::bind(&Control::draggingChanged, this));
     connect(this, &Control::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
     connect(headlineItem(), &HeadlineItem::doubleClicked,
@@ -111,11 +105,6 @@ bool Control::window() const
 bool Control::dragIn() const
 {
     return m_dragIn;
-}
-
-bool Control::resized() const
-{
-    return m_resized;
 }
 
 bool Control::hasErrors() const
@@ -271,14 +260,6 @@ void Control::setDragIn(bool dragIn)
     m_dragIn = dragIn;
 }
 
-void Control::setResized(bool resized)
-{
-    m_resized = resized;
-    // FIXME:
-    Suppressor::suppress(150, "resizedChanged", std::bind(&Control::resizedChanged, this));
-    //    emit resizedChanged();
-}
-
 void Control::setIndex(quint32 index)
 {
     m_index = index;
@@ -415,10 +396,11 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     }
     scene()->currentForm()->setDragIn(false);
 }
-
+#include <QDebug>
 QVariant Control::itemChange(int change, const QVariant& value)
 {    
     if (change == ItemSelectedHasChanged) {
+//        qDebug() << isSelected();
         bool selected = value.toBool();
         for (ResizerItem* resizer : m_resizers)
             resizer->setVisible(selected);
@@ -520,10 +502,19 @@ void Control::updateImage(const RenderResult& result)
 
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
-    m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
 
-    if (!beingDragged() && !resized())
-        applyCachedGeometry();
+    if (result.propertyChanged) {
+        const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(result.properties);
+        qDebug() << id() << geometry;
+        if (form()) {
+            ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
+        } else {
+            ControlPropertyManager::setGeometry(
+                        this,
+                        ControlPropertyManager::geoWithMargin(this, geometry, true),
+                        ControlPropertyManager::NoOption);
+        }
+    }
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_image = hasErrors()
@@ -543,20 +534,6 @@ void Control::updateImage(const RenderResult& result)
     update();
 
     ControlPropertyManager::instance()->imageChanged(this, result.codeChanged);
-}
-
-void Control::applyCachedGeometry()
-{
-    if (!beingDragged() && !resized()) {
-        if (form()) {
-            ControlPropertyManager::setSize(this, m_cachedGeometry.size(),
-                                            ControlPropertyManager::NoOption);
-        } else {
-            ControlPropertyManager::setGeometry(
-                        this, ControlPropertyManager::geoWithMargin(this, m_cachedGeometry, true),
-                        ControlPropertyManager::NoOption);
-        }
-    }
 }
 
 void Control::initResizers()

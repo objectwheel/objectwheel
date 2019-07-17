@@ -24,7 +24,6 @@ public:
     bool popup() const;
     bool window() const;
     bool dragIn() const;
-    bool resized() const;
     bool hasErrors() const;
 
     quint32 index() const;
@@ -57,13 +56,9 @@ public:
     void setId(const QString& id);
     void setDir(const QString& dir);
     void setDragIn(bool dragIn);
-    void setResized(bool resized);
     void setIndex(quint32 index);
 
     QRectF frame() const;
-
-signals:
-    void resizedChanged();
 
 protected:
     QRectF outerRect(const QRectF& rect) const;
@@ -91,7 +86,6 @@ protected:
 
 private slots:
     void updateImage(const RenderResult& result);
-    void applyCachedGeometry();
 
 private:
     void initResizers();
@@ -102,11 +96,9 @@ private:
     bool m_popup;
     bool m_window;
     bool m_dragIn;
-    bool m_resized;
 
     quint32 m_index;
     QMarginsF m_margins;
-    QRectF m_cachedGeometry;
 
     QString m_dir;
     QString m_uid;

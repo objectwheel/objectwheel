@@ -699,6 +699,7 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         result.popup = instance->popup;
         result.window = instance->window;
         result.codeChanged = instance->codeChanged;
+        result.propertyChanged = RenderUtils::isPropertyChanged(instance);
         result.properties = RenderUtils::properties(instance);
         result.events = RenderUtils::events(instance);
         instance->codeChanged = false;

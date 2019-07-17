@@ -437,7 +437,7 @@ QVector<QString> RenderUtils::events(const RenderEngine::ControlInstance* instan
 
     for (int i = metaObject->methodCount(); i--;) {
         if (metaObject->method(i).methodType() == QMetaMethod::Signal
-            && !metaObject->method(i).name().startsWith("__"))
+                && !metaObject->method(i).name().startsWith("__"))
             events << metaObject->method(i).name();
     }
 
@@ -560,22 +560,40 @@ void RenderUtils::makeDirtyRecursive(RenderEngine::ControlInstance* beginningIns
         makeDirtyRecursive(childInstance);
 }
 
+bool RenderUtils::isPropertyChanged(const RenderEngine::ControlInstance* instance)
+{
+    if (instance == 0)
+        return true;
+
+    if (instance->object == 0)
+        return true;
+
+    if (instance->propertyChanges.isEmpty())
+        return true;
+
+    for (const QString& propertyName : instance->propertyChanges.keys()) {
+        if (instance->propertyChanges.value(propertyName) != instance->object->property(propertyName.toUtf8()))
+            return true;
+    }
+    return false;
+}
+
 void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* instance,
-                                                const QString& propertyName,
-                                                const QVariant& propertyValue)
+                                             const QString& propertyName,
+                                             const QVariant& propertyValue)
 {
     Q_ASSERT(instance);
     Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(instance->object);
 
-    QVariant adjustedValue(propertyValue);
+    instance->propertyChanges.insert(propertyName, propertyValue);
+
     QQmlProperty property(instance->object, propertyName, instance->context);
 
     if (!property.isValid())
         return;
 
-    DesignerSupport::addDirty(RenderUtils::guiItem(instance),
-                              DesignerSupport::ContentUpdateMask);
+    DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
 
     if (instance->window && (propertyName == "visible" || propertyName == "visibility"))
         return;
@@ -583,16 +601,16 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     if (instance->popup && propertyName == "visible")
         return;
 
-    bool isWritten = property.write(adjustedValue);
+    bool isWritten = property.write(propertyValue);
 
     if (!isWritten) {
         qDebug() << "setInstancePropertyVariant: Cannot be written: "
-                 << instance->object << propertyName << adjustedValue;
+                 << instance->object << propertyName << propertyValue;
     }
 }
 
 void RenderUtils::deleteInstancesRecursive(RenderEngine::ControlInstance* instance,
-                                              DesignerSupport& designerSupport)
+                                           DesignerSupport& designerSupport)
 {
     Q_ASSERT(instance);
 
@@ -613,7 +631,7 @@ void RenderUtils::deleteInstancesRecursive(RenderEngine::ControlInstance* instan
 }
 
 void RenderUtils::cleanUpFormInstances(const QList<RenderEngine::ControlInstance*>& formInstances,
-                                          QQmlContext* rootContext, DesignerSupport& designerSupport)
+                                       QQmlContext* rootContext, DesignerSupport& designerSupport)
 {
     for (RenderEngine::ControlInstance* formInstance : formInstances) {
         Q_ASSERT(formInstance);
@@ -638,7 +656,7 @@ void RenderUtils::cleanUpFormInstances(const QList<RenderEngine::ControlInstance
 }
 
 void RenderUtils::setId(QQmlContext* context, QObject* object, const QString& oldId,
-                           const QString& newId)
+                        const QString& newId)
 {
     if (!oldId.isEmpty() && context)
         context->setContextProperty(oldId, 0);

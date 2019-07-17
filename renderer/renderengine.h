@@ -1,9 +1,8 @@
 #ifndef RENDERENGINE_H
 #define RENDERENGINE_H
 
+#include <QVariant>
 #include <QVector>
-#include <QObject>
-
 #include <private/qquickdesignersupport_p.h>
 
 class QQuickView;
@@ -26,7 +25,7 @@ class RenderEngine final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(RenderEngine)
 
-    enum { TIMEOUT = 0 };
+    enum { TIMEOUT = 10 };
 
 public:
     struct ControlInstance {
@@ -42,6 +41,7 @@ public:
         QObject* object;
         QQmlContext* context;
         QVector<QmlError> errors;
+        QHash<QString, QVariant> propertyChanges;
 
         ControlInstance* parent = nullptr;
         QVector<ControlInstance*> children;
@@ -95,7 +95,7 @@ private:
     QList<RenderResult> renderDirtyInstances(const QList<ControlInstance*>& instances);
     RenderEngine::ControlInstance* createInstance(const QString& url);
     RenderEngine::ControlInstance* createInstance(const QString& dir, ControlInstance* parentInstance,
-                                               QQmlContext* oldFormContext = nullptr);
+                                                  QQmlContext* oldFormContext = nullptr);
 
 signals:
     void initializationProgressChanged(int progress);

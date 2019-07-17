@@ -22,6 +22,7 @@ public:
     static QVector<QString> events(const RenderEngine::ControlInstance* instance);
     static QVector<PropertyNode> properties(const RenderEngine::ControlInstance* instance);
     static QList<RenderEngine::ControlInstance*> allSubInstance(RenderEngine::ControlInstance* parentInstance);
+    static bool isPropertyChanged(const RenderEngine::ControlInstance* instance);
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
 
     static void updateDirtyNodesRecursive(QQuickItem* parentItem, RenderEngine* engine);
