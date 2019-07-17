@@ -86,7 +86,7 @@ void DesignerItem::setSize(const QSizeF& size)
             if (newSize == m_rect.size())
                 return;
             prepareGeometryChange();
-            m_rect.setSize(size);
+            m_rect.setSize(newSize);
             update();
             itemChange(ItemSizeHasChanged, newSizeVariant);
             emit geometryChanged();

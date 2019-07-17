@@ -36,6 +36,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
+  , m_snapMargin(QSizeF(0, 0))
   , m_headlineItem(new HeadlineItem(this))
 {
     m_controls.append(this);
@@ -425,6 +426,8 @@ QVariant Control::itemChange(int change, const QVariant& value)
             m_headlineItem->setVisible(false);
     } else if (change == ItemPositionChange && beingDragged()) {
         const QPointF& snapPos = scene()->snapPosition(value.toPointF());
+        const QPointF& snapMargin = value.toPointF() - snapPos;
+        m_snapMargin = QSizeF(snapMargin.x(), snapMargin.y());
         if (!form()) {
             ControlPropertyManager::setPos(this, snapPos, ControlPropertyManager::SaveChanges
                                            | ControlPropertyManager::UpdateRenderer
@@ -433,7 +436,8 @@ QVariant Control::itemChange(int change, const QVariant& value)
         }
         return snapPos;
     } else if (change == ItemSizeChange && beingResized()) {
-        const QSizeF& snapSize = scene()->snapSize(pos(), value.toSizeF());
+        const QSizeF snapSize = scene()->snapSize(pos(), value.toSizeF() + m_snapMargin);
+        m_snapMargin = QSizeF(0, 0);
         ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
                                         | ControlPropertyManager::UpdateRenderer
                                         | ControlPropertyManager::CompressedCall

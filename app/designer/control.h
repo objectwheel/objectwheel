@@ -113,6 +113,7 @@ private:
     QString m_id;
     QRectF m_frame;
     QImage m_image;
+    QSizeF m_snapMargin;
 
     HeadlineItem* m_headlineItem;
     QVector<QmlError> m_errors;
