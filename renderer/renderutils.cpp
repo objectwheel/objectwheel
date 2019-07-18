@@ -482,6 +482,16 @@ int RenderUtils::countAllSubInstance(const RenderEngine::ControlInstance* parent
     return counter;
 }
 
+bool RenderUtils::isVisible(const RenderEngine::ControlInstance* instance)
+{
+    if (!instance->gui)
+        return false;
+    bool visible = QQmlProperty(instance->object, "visible", instance->context).read().toBool();
+    if (!instance->window)
+        return visible;
+    return visible && QQmlProperty(instance->object, "visibility", instance->context).read().toUInt();
+}
+
 void RenderUtils::refreshLayoutable(RenderEngine::ControlInstance* instance)
 {
     if (instance->layout == false)
@@ -589,11 +599,12 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     if (!property.isValid())
         return;
 
-    if (instance->window && (propertyName == "visible" || propertyName == "visibility"))
+    if (propertyName == "visible" || propertyName == "visibility") {
+        instance->visible = propertyValue.toBool(); // works for visibility either
+        // This lets dirty collector to collect dirt and send a render back
+        DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
         return;
-
-    if (instance->popup && propertyName == "visible")
-        return;
+    }
 
     property.write(propertyValue);
     instance->propertyChanges.insert(propertyName, propertyValue);
@@ -680,7 +691,6 @@ QQuickItem* RenderUtils::guiItem(QObject* object)
 {
     if (!object)
         return nullptr;
-
     if (object->isWindowType())
         return qobject_cast<QQuickWindow*>(object)->contentItem();
     else if (object->inherits("QQuickPopup"))

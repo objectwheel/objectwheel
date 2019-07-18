@@ -202,6 +202,7 @@ void RenderEngine::updateControlCode(const QString& uid)
     oldInstance->layout = instance->layout;
     oldInstance->popup = instance->popup;
     oldInstance->window = instance->window;
+    oldInstance->visible = instance->visible;
     oldInstance->codeChanged = instance->codeChanged;
     oldInstance->id = instance->id;
     oldInstance->object = instance->object;
@@ -293,6 +294,7 @@ void RenderEngine::updateFormCode(const QString& uid)
     oldFormInstance->layout = instance->layout;
     oldFormInstance->popup = instance->popup;
     oldFormInstance->window = instance->window;
+    oldFormInstance->visible = instance->visible;
     oldFormInstance->codeChanged = instance->codeChanged;
     oldFormInstance->id = instance->id;
     oldFormInstance->object = instance->object;
@@ -692,6 +694,7 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         result.gui = instance->gui;
         result.popup = instance->popup;
         result.window = instance->window;
+        result.visible = instance->visible;
         result.codeChanged = instance->codeChanged;
         result.blockedPropertyChanges = RenderUtils::blockedPropertyChanges(instance);
         result.properties = RenderUtils::properties(instance);
@@ -751,7 +754,9 @@ QImage RenderEngine::grabImage(const RenderEngine::ControlInstance* instance, QR
         QColor winColor;
         if (instance->window)
             winColor = static_cast<QQuickWindow*>(instance->object)->color();
-        return renderItem(RenderUtils::guiItem(instance->object), boundingRect, instance->preview, winColor);
+        if (instance->visible)
+            return renderItem(RenderUtils::guiItem(instance->object), boundingRect, instance->preview, winColor);
+        return QImage();
     }
 }
 
@@ -855,11 +860,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     Q_ASSERT(object);
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
-    // Make sure everything is visible
-    QQmlProperty(object, "visible", instance->context).write(true);
-    if (QQuickItem* item = RenderUtils::guiItem(object))
-        item->setVisible(true); // Especially important for popup
-
     // Hides windows anyway, since we only need their contentItem to be visible
     RenderUtils::tweakObjects(object);
     component.completeCreate();
@@ -891,6 +891,16 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
         if (instance->window || instance->popup)
             item->setParentItem(RenderUtils::guiItem(m_view->rootObject())); // We still reparent it anyway, may a window comes
         m_designerSupport.refFromEffectItem(item);
+        item->update();
+    }
+
+    // Make sure everything is visible
+    if (instance->gui) {
+        instance->visible = RenderUtils::isVisible(instance);
+        if (!instance->window)
+            QQmlProperty(object, "visible", instance->context).write(true);
+        QQuickItem* item = RenderUtils::guiItem(instance->object);
+        item->setVisible(true); // Especially important for popup
         item->update();
     }
 
@@ -953,11 +963,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
 
     Q_ASSERT(object);
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
-
-    // Make sure everything is visible
-    QQmlProperty(object, "visible", instance->context).write(true);
-    if (QQuickItem* item = RenderUtils::guiItem(object))
-        item->setVisible(true); // Especially important for popup
 
     // Hides windows anyway, since we only need their contentItem to be visible
     RenderUtils::tweakObjects(object);
@@ -1026,6 +1031,16 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
             m_designerSupport.refFromEffectItem(item);
             item->update();
         }
+    }
+
+    // Make sure everything is visible
+    if (instance->gui) {
+        instance->visible = RenderUtils::isVisible(instance);
+        if (!instance->window)
+            QQmlProperty(object, "visible", instance->context).write(true);
+        QQuickItem* item = RenderUtils::guiItem(instance->object);
+        item->setVisible(true); // Especially important for popup
+        item->update();
     }
 
     return instance;

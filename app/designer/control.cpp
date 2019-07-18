@@ -32,6 +32,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_popup(false)
   , m_window(false)
   , m_dragIn(false)
+  , m_visible(true)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
@@ -114,6 +115,11 @@ bool Control::dragIn() const
 bool Control::hasErrors() const
 {
     return !m_errors.isEmpty();
+}
+
+bool Control::visible() const
+{
+    return m_visible;
 }
 
 quint32 Control::index() const
@@ -526,6 +532,7 @@ void Control::updateImage(const RenderResult& result)
     m_gui = result.gui;
     m_popup = result.popup;
     m_window = result.window;
+    m_visible = result.visible;
     m_events = result.events;
     m_properties = result.properties;
     setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());

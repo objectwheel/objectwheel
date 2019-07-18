@@ -25,6 +25,7 @@ public:
     bool window() const;
     bool dragIn() const;
     bool hasErrors() const;
+    bool visible() const;
 
     quint32 index() const;
     int higherZValue() const;
@@ -97,6 +98,7 @@ private:
     bool m_popup;
     bool m_window;
     bool m_dragIn;
+    bool m_visible;
 
     quint32 m_index;
     QString m_dir;

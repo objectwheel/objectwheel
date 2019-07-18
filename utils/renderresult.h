@@ -25,6 +25,7 @@ struct RenderResult {
     bool gui;
     bool popup;
     bool window;
+    bool visible;
     bool codeChanged;
     QString uid;
     QImage image;
@@ -89,6 +90,7 @@ inline QDataStream& operator>> (QDataStream& in, RenderResult& result)
     in >> result.boundingRect;
     in >> result.popup;
     in >> result.window;
+    in >> result.visible;
     in >> result.codeChanged;
     in >> result.errors;
     in >> result.events;
@@ -105,6 +107,7 @@ inline QDataStream& operator<< (QDataStream& out, const RenderResult& result)
     out << result.boundingRect;
     out << result.popup;
     out << result.window;
+    out << result.visible;
     out << result.codeChanged;
     out << result.errors;
     out << result.events;

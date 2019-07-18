@@ -72,16 +72,10 @@ void fixPosForForm(const Control* control, const QString& propertyName, SpinBox 
     }
 }
 
-void fixVisibleForPopup(Control* control, const QString& propertyName, QCheckBox* checkBox)
+void fixVisible(Control* control, const QString& propertyName, QCheckBox* checkBox)
 {
-    if (control->popup() && propertyName == "visible")
-        checkBox->setChecked(ParserUtils::property(control->dir(), propertyName) == "true");
-}
-
-void fixVisibleForWindow(Control* control, const QString& propertyName, QCheckBox* checkBox)
-{
-    if (control->window() && propertyName == "visible")
-        checkBox->setChecked(ParserUtils::property(control->dir(), propertyName) == "true");
+    if (propertyName == "visible")
+        checkBox->setChecked(control->visible());
 }
 
 void fixVisibilityForWindow(Control* control, const QString& propertyName, QComboBox* comboBox)
@@ -375,8 +369,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     checkBox->setChecked(checked);
     checkBox->setFocusPolicy(Qt::ClickFocus);
     checkBox->setMinimumWidth(1);
-    fixVisibleForPopup(control, propertyName, checkBox);
-    fixVisibleForWindow(control, propertyName, checkBox);
+    fixVisible(control, propertyName, checkBox);
     initPalette(checkBox);
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
@@ -1065,7 +1058,7 @@ void PropertiesPane::discharge()
 // FIXME: This function has severe performance issues.
 void PropertiesPane::onSelectionChange()
 {
-    return; // FIXME
+//    return; // FIXME
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;
     const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
 

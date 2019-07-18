@@ -32,6 +32,7 @@ public:
         bool gui;
         bool popup;
         bool window;
+        bool visible = true;
         bool layout = false;
         bool needsRerender = false;
         bool codeChanged = false;
