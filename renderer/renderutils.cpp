@@ -41,17 +41,6 @@ void hideWindow(QObject* object)
     }
 }
 
-void showPopup(QObject* object)
-{
-    if (!object)
-        return;
-
-    if (object->inherits("QQuickPopup")) {
-        QQuickPopup* popup = static_cast<QQuickPopup*>(object);
-        popup->setVisible(true);
-    }
-}
-
 void stopAnimation(QObject *object)
 {
     if (object == nullptr)
@@ -538,7 +527,6 @@ void RenderUtils::tweakObjects(QObject* object)
     for(QObject* childObject : objectList) {
         stopAnimation(childObject);
         hideWindow(childObject);
-        showPopup(childObject);
     }
 }
 

@@ -622,18 +622,6 @@ void RenderEngine::scheduleRerenderForInvisibleInstances(RenderEngine::ControlIn
 
             QQuickItem* item = RenderUtils::guiItem(instance);
 
-            if (!item->isVisible())
-                continue;
-
-            if (instance->window
-                    && (ParserUtils::property(instance->dir, "visible") != "true"
-                        || ParserUtils::property(instance->dir, "visibility").contains("Hidden"))) {
-                continue;
-            }
-
-            if (instance->popup && ParserUtils::property(instance->dir, "visible") == "false")
-                continue;
-
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
 
             rerenderInstances.append(instance);
@@ -713,11 +701,8 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         result.image = grabImage(instance, result.boundingRect);
         results.append(result);
 
-        if (instance->errors.isEmpty()
-                && instance->gui
-                && RenderUtils::guiItem(instance)->isVisible()) {
+        if (instance->errors.isEmpty() && instance->gui)
             instance->needsRerender = PaintUtils::isBlankImage(result.image);
-        }
 
         if (!m_initialized) {
             g_progress += g_progressPerInstance;
@@ -764,30 +749,9 @@ QImage RenderEngine::grabImage(const RenderEngine::ControlInstance* instance, QR
         return QImage();
     } else {
         QColor winColor;
-        QQuickItem* item;
-
-        if (instance->window) {
-            QQuickWindow* window = static_cast<QQuickWindow*>(instance->object);
-            item = window->contentItem();
-            winColor = window->color();
-        } else if (instance->popup) {
-            item = RenderUtils::guiItem(instance->object);
-        } else {
-            item = static_cast<QQuickItem*>(instance->object);
-        }
-
-        if (instance->window
-                && (ParserUtils::property(instance->dir, "visible") != "true"
-                    || ParserUtils::property(instance->dir, "visibility").contains("Hidden"))) {
-            return QImage();
-        } else if (instance->popup && ParserUtils::property(instance->dir, "visible") == "false") {
-            return QImage();
-        } else {
-            if (item->isVisible())
-                return renderItem(item, boundingRect, instance->preview, winColor);
-            else
-                return QImage();
-        }
+        if (instance->window)
+            winColor = static_cast<QQuickWindow*>(instance->object)->color();
+        return renderItem(RenderUtils::guiItem(instance->object), boundingRect, instance->preview, winColor);
     }
 }
 
@@ -891,6 +855,12 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     Q_ASSERT(object);
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
+    // Make sure everything is visible
+    QQmlProperty(object, "visible", instance->context).write(true);
+    if (QQuickItem* item = RenderUtils::guiItem(object))
+        item->setVisible(true); // Especially important for popup
+
+    // Hides windows anyway, since we only need their contentItem to be visible
     RenderUtils::tweakObjects(object);
     component.completeCreate();
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
@@ -938,7 +908,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
 
     const QString& url = SaveUtils::toControlMainQmlFile(dir);
 
-
     auto instance = new RenderEngine::ControlInstance;
     instance->dir = dir;
     instance->id = SaveUtils::controlId(dir);
@@ -985,6 +954,12 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     Q_ASSERT(object);
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
+    // Make sure everything is visible
+    QQmlProperty(object, "visible", instance->context).write(true);
+    if (QQuickItem* item = RenderUtils::guiItem(object))
+        item->setVisible(true); // Especially important for popup
+
+    // Hides windows anyway, since we only need their contentItem to be visible
     RenderUtils::tweakObjects(object);
     component.completeCreate();
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
