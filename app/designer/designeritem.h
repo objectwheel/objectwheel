@@ -56,10 +56,14 @@ protected:
     QPointF mousePressPoint() const;
 
 protected:
+    bool event(QEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+
+protected:
+    virtual void ungrabMouseEvent(QEvent* event);
     virtual QVariant itemChange(int change, const QVariant& value);
 
 private:

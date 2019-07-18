@@ -586,14 +586,10 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(instance->object);
 
-    instance->propertyChanges.insert(propertyName, propertyValue);
-
     QQmlProperty property(instance->object, propertyName, instance->context);
 
     if (!property.isValid())
         return;
-
-    DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
 
     if (instance->window && (propertyName == "visible" || propertyName == "visibility"))
         return;
@@ -601,11 +597,14 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     if (instance->popup && propertyName == "visible")
         return;
 
-    bool isWritten = property.write(propertyValue);
+    property.write(propertyValue);
+    instance->propertyChanges.insert(propertyName, propertyValue);
 
-    if (!isWritten) {
-        qDebug() << "setInstancePropertyVariant: Cannot be written: "
-                 << instance->object << propertyName << propertyValue;
+    DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
+    if (instance->parent && instance->parent->object) {
+        DesignerSupport::addDirty(RenderUtils::guiItem(instance->parent), DesignerSupport::ChildrenUpdateMask);
+        QCoreApplication::postEvent(instance->object, new QEvent(QEvent::LayoutRequest));
+        QCoreApplication::postEvent(instance->parent->object, new QEvent(QEvent::LayoutRequest));
     }
 }
 

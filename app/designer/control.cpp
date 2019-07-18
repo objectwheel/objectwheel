@@ -400,7 +400,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 QVariant Control::itemChange(int change, const QVariant& value)
 {    
     if (change == ItemSelectedHasChanged) {
-//        qDebug() << isSelected();
+        //        qDebug() << isSelected();
         bool selected = value.toBool();
         for (ResizerItem* resizer : m_resizers)
             resizer->setVisible(selected);
@@ -505,7 +505,8 @@ void Control::updateImage(const RenderResult& result)
 
     if (result.propertyChanged) {
         const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(result.properties);
-        qDebug() << id() << geometry;
+        if (beingDragged() || beingResized())
+            ungrabMouse();
         if (form()) {
             ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
         } else {

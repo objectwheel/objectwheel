@@ -164,6 +164,19 @@ QPointF DesignerItem::mousePressPoint() const
     return m_mousePressPoint;
 }
 
+bool DesignerItem::event(QEvent* event)
+{
+    switch (event->type()) {
+    case QEvent::UngrabMouse:
+        ungrabMouseEvent(event);
+        break;
+    default:
+        break;
+    }
+
+    return QGraphicsObject::event(event);
+}
+
 void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
@@ -234,7 +247,17 @@ void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
             movableSelectedAncestorItem->setBeingDragged(false);
         m_movableSelectedAncestorItems.clear();
     }
+    m_dragAccepted = false;
+}
 
+void DesignerItem::ungrabMouseEvent(QEvent*)
+{
+    if ((flags() & ItemIsMovable) && m_dragAccepted) {
+        scene()->unsetViewportCursor();
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
+            movableSelectedAncestorItem->setBeingDragged(false);
+        m_movableSelectedAncestorItems.clear();
+    }
     m_dragAccepted = false;
 }
 
