@@ -85,6 +85,7 @@ protected:
     ~Control() override;
 
 private slots:
+    void applyCachedGeometry();
     void updateImage(const RenderResult& result);
 
 private:
@@ -98,14 +99,15 @@ private:
     bool m_dragIn;
 
     quint32 m_index;
-    QMarginsF m_margins;
-
     QString m_dir;
     QString m_uid;
     QString m_id;
     QRectF m_frame;
     QImage m_image;
     QSizeF m_snapMargin;
+    QMarginsF m_margins;
+    QRectF m_cachedGeometry;
+    QVector<QString> m_blockedPropertyChanges;
 
     HeadlineItem* m_headlineItem;
     QVector<QmlError> m_errors;

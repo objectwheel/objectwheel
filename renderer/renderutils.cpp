@@ -444,6 +444,26 @@ QVector<QString> RenderUtils::events(const RenderEngine::ControlInstance* instan
     return events;
 }
 
+QVector<QString> RenderUtils::blockedPropertyChanges(RenderEngine::ControlInstance* instance)
+{
+    QVector<QString> blockedPropertyNames;
+
+    if (instance == 0)
+        return blockedPropertyNames;
+
+    if (instance->object == 0)
+        return blockedPropertyNames;
+
+    for (const QString& propertyName : instance->propertyChanges.keys()) {
+        if (instance->propertyChanges.value(propertyName) == instance->object->property(propertyName.toUtf8()))
+            blockedPropertyNames.append(propertyName);
+    }
+
+    instance->propertyChanges.clear();
+
+    return blockedPropertyNames;
+}
+
 QList<RenderEngine::ControlInstance*> RenderUtils::allSubInstance(RenderEngine::ControlInstance* parentInstance)
 {
     QList<RenderEngine::ControlInstance*> instances;
@@ -566,24 +586,6 @@ void RenderUtils::makeDirtyRecursive(RenderEngine::ControlInstance* beginningIns
 
     for (RenderEngine::ControlInstance* childInstance : beginningInstance->children)
         makeDirtyRecursive(childInstance);
-}
-
-bool RenderUtils::isPropertyChanged(const RenderEngine::ControlInstance* instance)
-{
-    if (instance == 0)
-        return true;
-
-    if (instance->object == 0)
-        return true;
-
-    if (instance->propertyChanges.isEmpty())
-        return true;
-
-    for (const QString& propertyName : instance->propertyChanges.keys()) {
-        if (instance->propertyChanges.value(propertyName) != instance->object->property(propertyName.toUtf8()))
-            return true;
-    }
-    return false;
 }
 
 void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* instance,

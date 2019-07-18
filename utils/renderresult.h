@@ -26,13 +26,13 @@ struct RenderResult {
     bool popup;
     bool window;
     bool codeChanged;
-    bool propertyChanged;
     QString uid;
     QImage image;
     QRectF boundingRect;
     QVector<QmlError> errors;
     QVector<QString> events;
     QVector<PropertyNode> properties;
+    QVector<QString> blockedPropertyChanges;
 };
 
 inline QDataStream& operator>> (QDataStream& in, QmlError& error)
@@ -90,10 +90,10 @@ inline QDataStream& operator>> (QDataStream& in, RenderResult& result)
     in >> result.popup;
     in >> result.window;
     in >> result.codeChanged;
-    in >> result.propertyChanged;
     in >> result.errors;
     in >> result.events;
     in >> result.properties;
+    in >> result.blockedPropertyChanges;
     return in;
 }
 
@@ -106,10 +106,10 @@ inline QDataStream& operator<< (QDataStream& out, const RenderResult& result)
     out << result.popup;
     out << result.window;
     out << result.codeChanged;
-    out << result.propertyChanged;
     out << result.errors;
     out << result.events;
     out << result.properties;
+    out << result.blockedPropertyChanges;
     return out;
 }
 

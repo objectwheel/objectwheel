@@ -55,6 +55,10 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setSize(this, {40, 40}, ControlPropertyManager::NoOption);
 
+    connect(this, &Control::beingDraggedChanged,
+            this, &Control::applyCachedGeometry);
+    connect(this, &Control::beingResizedChanged,
+            this, &Control::applyCachedGeometry);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateImage);
     connect(this, &Control::doubleClicked,
@@ -487,6 +491,32 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         paintHighlight(painter);
 }
 
+void Control::applyCachedGeometry()
+{
+    if (beingDragged() || beingResized())
+        return;
+
+    if (!m_blockedPropertyChanges.contains("width"))
+        ControlPropertyManager::setWidth(this, m_cachedGeometry.width(),
+                                         ControlPropertyManager::NoOption);
+
+    if (!m_blockedPropertyChanges.contains("height"))
+        ControlPropertyManager::setHeight(this, m_cachedGeometry.height(),
+                                          ControlPropertyManager::NoOption);
+
+    if (!form()) {
+        if (!m_blockedPropertyChanges.contains("x"))
+            ControlPropertyManager::setX(
+                        this, ControlPropertyManager::xWithMargin(this, m_cachedGeometry.x(), true),
+                        ControlPropertyManager::NoOption);
+
+        if (!m_blockedPropertyChanges.contains("y"))
+            ControlPropertyManager::setY(
+                        this, ControlPropertyManager::yWithMargin(this, m_cachedGeometry.y(), true),
+                        ControlPropertyManager::NoOption);
+    }
+}
+
 void Control::updateImage(const RenderResult& result)
 {
     if (result.uid != uid())
@@ -503,19 +533,11 @@ void Control::updateImage(const RenderResult& result)
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
 
-    if (result.propertyChanged) {
-        const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(result.properties);
-        if (beingDragged() || beingResized())
-            ungrabMouse();
-        if (form()) {
-            ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
-        } else {
-            ControlPropertyManager::setGeometry(
-                        this,
-                        ControlPropertyManager::geoWithMargin(this, geometry, true),
-                        ControlPropertyManager::NoOption);
-        }
-    }
+    m_blockedPropertyChanges = result.blockedPropertyChanges;
+    m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
+
+    if (!beingDragged() && !beingResized())
+        applyCachedGeometry();
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_image = hasErrors()
