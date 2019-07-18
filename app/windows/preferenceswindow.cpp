@@ -252,7 +252,7 @@ void PreferencesWindow::closeEvent(QCloseEvent* event)
     // Workaround for a weird behaviour of close event. When you close
     // a window, not hiding it, and reopening it later with "show()",
     // content of the widget is blank for some reason. So we should hide
-    event->accept();
+    event->ignore();
     emit done();
 }
 

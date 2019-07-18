@@ -16,17 +16,6 @@
 #include <QtMath>
 
 namespace {
-
-QRectF united(const QList<Control*>& controls)
-{
-    QRectF rect = controls.first()->geometry();
-    for (auto control : controls)
-        if (controls.first() != control)
-            rect |= QRectF(controls.first()->parentControl()->mapFromItem
-                           (control->parentControl(), control->pos()), control->size());
-    return rect;
-}
-
 bool itemPressed = false;
 bool itemMoving = false;
 }
@@ -265,29 +254,29 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    auto selectedControls = this->selectedControls();
+    auto selectedItems = this->selectedItems();
     bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
-    for (auto ctrl : selectedControls) {
+    for (auto ctrl : selectedItems) {
         if (ctrl->beingResized())
             resizedAnyway = true;
     }
-    selectedControls.removeOne(m_currentForm);
+    selectedItems.removeOne(m_currentForm);
 
     if ((itemMoving || resizedAnyway)/*&& m_snapping */&& m_currentForm != nullptr) {
         {
-            const QList<Control*> copy(selectedControls);
-            for (const Control* control : copy) {
-                for (Control* childControl : control->childControls())
-                    selectedControls.removeOne(childControl);
+            const QList<DesignerItem*> copy(selectedItems);
+            for (const DesignerItem* control : copy) {
+                for (DesignerItem* childControl : control->childItems())
+                    selectedItems.removeOne(childControl);
             }
 
-            if (selectedControls.size() > 1) {
-                auto r = united(selectedControls);
-                paintOutline(painter, QRectF(selectedControls.first()->parentControl()->mapToScene(r.topLeft()), r.size()));
+            if (selectedItems.size() > 1) {
+                auto r = boundingRect(selectedItems);
+                paintOutline(painter, QRectF(selectedItems.first()->parentItem()->mapToScene(r.topLeft()), r.size()));
             }
         }
 
-        const auto& guideLines = this->guideLines();
+        const auto& guideLines = this->guidelines();
         painter->setPen(pen());
         painter->drawLines(guideLines);
 
@@ -323,24 +312,23 @@ QPointF DesignerScene::lastMousePos() const
 }
 
 // FIXME: This function has severe performance issues.
-QVector<QLineF> DesignerScene::guideLines() const
+QVector<QLineF> DesignerScene::guidelines() const
 {
     QVector<QLineF> lines;
-    auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_currentForm);
+    QList<DesignerItem*> items(selectedItems());
 
-    const QList<Control*> copy(selectedControls);
-    for (Control* control : copy) {
-        if (copy.contains(control->parentControl()))
-            selectedControls.removeOne(control);
+    for (int i = items.size() - 1; i >= 0; --i) {
+        DesignerItem* item = items.at(i);
+        if (!item->beingDragged() && !item->beingResized())
+            items.removeAt(i);
     }
 
-    if (selectedControls.isEmpty())
+    if (items.isEmpty())
         return lines;
 
-    const auto& parent = selectedControls.first()->parentControl();
-    const auto& geometry = united(selectedControls);
-    const auto& center = geometry.center();
+    const QRectF& geometry = boundingRect(items);
+    const QPointF& center = geometry.center();
+    const DesignerItem* parent = items.first()->parentItem();
 
     /* Child center <-> Parent center */
     if (int(center.y()) == int(parent->height() / 2.0))
@@ -391,8 +379,8 @@ QVector<QLineF> DesignerScene::guideLines() const
         lines << QLineF(parent->mapToScene(QPointF(0, parent->height())),
                         parent->mapToScene(QPointF(parent->width(), parent->height())));
 
-    for (auto childControl : parent->childControls(false)) {
-        if (selectedControls.contains(childControl))
+    for (auto childControl : parent->childItems(false)) {
+        if (items.contains(childControl))
             continue;
 
         auto cgeometry = childControl->geometry();
@@ -468,6 +456,15 @@ QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
     QPen pen(color, width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     pen.setCosmetic(cosmetic);
     return pen;
+}
+
+QRectF DesignerScene::boundingRect(const QList<DesignerItem*>& items)
+{
+    QRectF rect = items.first()->geometry();
+    for (const DesignerItem* item : items)
+        if (items.first() != item)
+            rect |= QRectF(items.first()->parentItem()->mapFromItem(item->parentItem(), item->pos()), item->size());
+    return rect;
 }
 
 void DesignerScene::discharge()

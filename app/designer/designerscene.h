@@ -24,7 +24,7 @@ public:
     qreal zoomLevel() const;
     int startDragDistance() const;
 
-    QList<DesignerItem *> selectedItems() const;
+    QList<DesignerItem*> selectedItems() const;
 
     void unsetViewportCursor();
     void setViewportCursor(Qt::CursorShape cursor);
@@ -37,10 +37,11 @@ public:
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QPointF lastMousePos() const;
-    QVector<QLineF> guideLines() const;
+    QVector<QLineF> guidelines() const;
 
     static QColor outlineColor();
     static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
+    static QRectF boundingRect(const QList<DesignerItem*>& items);
 
     void paintOutline(QPainter* painter, const QRectF& rect);
 public slots:
