@@ -25,6 +25,7 @@ public:
     static bool isPropertyChanged(const RenderEngine::ControlInstance* instance);
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
 
+    static void refreshLayoutable(RenderEngine::ControlInstance* instance);
     static void updateDirtyNodesRecursive(QQuickItem* parentItem, RenderEngine* engine);
     static void doComplete(RenderEngine::ControlInstance* instance, const RenderEngine* engine);
     static void tweakObjects(QObject* object);

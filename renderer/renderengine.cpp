@@ -7,6 +7,7 @@
 #include <utilityfunctions.h>
 #include <components.h>
 #include <paintutils.h>
+#include <private/qquickdesignersupportmetainfo_p.h>
 
 #include <private/qqmlengine_p.h>
 
@@ -195,6 +196,7 @@ void RenderEngine::updateControlCode(const QString& uid)
 
     ControlInstance* instance = createInstance(oldInstance->dir, oldInstance->parent);
     oldInstance->gui = instance->gui;
+    oldInstance->layout = instance->layout;
     oldInstance->popup = instance->popup;
     oldInstance->window = instance->window;
     oldInstance->codeChanged = instance->codeChanged;
@@ -285,6 +287,7 @@ void RenderEngine::updateFormCode(const QString& uid)
 
     ControlInstance* instance = createInstance(oldFormInstance->dir, nullptr, oldFormInstance->context);
     oldFormInstance->gui = instance->gui;
+    oldFormInstance->layout = instance->layout;
     oldFormInstance->popup = instance->popup;
     oldFormInstance->window = instance->window;
     oldFormInstance->codeChanged = instance->codeChanged;
@@ -464,7 +467,7 @@ void RenderEngine::deleteForm(const QString& uid)
 
     m_formInstances.removeAll(formInstance);
     RenderUtils::cleanUpFormInstances(QList<ControlInstance*>{formInstance},
-                                         m_view->rootContext(), m_designerSupport);
+                                      m_view->rootContext(), m_designerSupport);
 
     // No need to repairIndexes, since form indexes ignored,
     // because they are put upon rootObject of the engine
@@ -874,6 +877,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
 
         instance->gui = false;
         instance->popup = false;
+        instance->layout = false;
         instance->window = false;
         instance->object = nullptr;
         for (const QQmlError& e : component.errors())
@@ -894,6 +898,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     instance->object = object;
     instance->popup = object->inherits("QQuickPopup");
     instance->window = object->isWindowType();
+    instance->layout = QQuickDesignerSupportMetaInfo::isSubclassOf(instance->object, "QQuickLayout");
     instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");
 
     QQmlProperty defaultProperty(m_view->rootObject());
@@ -919,26 +924,9 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     return instance;
 }
 
-/*
-    Creates control instance on engine's root context.
-
-    Following properties are always set:
-
-        bool gui;
-        bool window;
-        QString id;
-        QString uid;
-        QString dir;
-        QObject* object;
-        QList<QmlError> errors;
-
-    If item contains any error, its "gui" property is set to true and a dummy quick
-    item is placed. And initial properties are also set by setInitialProperties().
-    All the window objects are hid. Id property is also set on root context.
-*/
 RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
-                                                      ControlInstance* parentInstance,
-                                                      QQmlContext* oldFormContext)
+                                                            ControlInstance* parentInstance,
+                                                            QQmlContext* oldFormContext)
 {
     Q_ASSERT_X(SaveUtils::isControlValid(dir), "createInstance", "Owctrl™ structure is corrupted.");
 
@@ -946,6 +934,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     Q_UNUSED(disabler)
 
     const QString& url = SaveUtils::toControlMainQmlFile(dir);
+
 
     auto instance = new RenderEngine::ControlInstance;
     instance->dir = dir;
@@ -979,6 +968,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
             delete object;
 
         instance->gui = false;
+        instance->layout = false;
         instance->popup = false;
         instance->window = false;
         instance->object = nullptr;
@@ -1006,6 +996,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     RenderUtils::setId(instance->context, object, QString(), instance->id);
 
     instance->object = object;
+    instance->layout = QQuickDesignerSupportMetaInfo::isSubclassOf(instance->object, "QQuickLayout");
     instance->popup = object->inherits("QQuickPopup");
     instance->window = object->isWindowType();
     instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");

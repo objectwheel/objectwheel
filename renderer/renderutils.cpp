@@ -473,6 +473,14 @@ int RenderUtils::countAllSubInstance(const RenderEngine::ControlInstance* parent
     return counter;
 }
 
+void RenderUtils::refreshLayoutable(RenderEngine::ControlInstance* instance)
+{
+    if (instance->layout == false)
+        return;
+    if (QQuickItem* item = guiItem(instance->object))
+        item->polish();
+}
+
 void RenderUtils::resetAllItems(RenderEngine::ControlInstance* formInstance)
 {
     Q_ASSERT(formInstance);
@@ -603,8 +611,7 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
     if (instance->parent && instance->parent->object) {
         DesignerSupport::addDirty(RenderUtils::guiItem(instance->parent), DesignerSupport::ChildrenUpdateMask);
-        QCoreApplication::postEvent(instance->object, new QEvent(QEvent::LayoutRequest));
-        QCoreApplication::postEvent(instance->parent->object, new QEvent(QEvent::LayoutRequest));
+        refreshLayoutable(instance->parent);
     }
 }
 
