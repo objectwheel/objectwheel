@@ -166,6 +166,9 @@ void RenderEngine::updateParent(const QString& newDir, const QString& uid, const
         item->setParentItem(RenderUtils::guiItem(parentObject));
     }
 
+    RenderUtils::refreshLayoutable(previousParentInstance);
+    RenderUtils::refreshLayoutable(parentInstance);
+
     repairIndexes(previousParentInstance);
     repairIndexes(parentInstance);
     refreshBindings(formInstance->context);

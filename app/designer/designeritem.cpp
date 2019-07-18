@@ -252,13 +252,9 @@ void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerItem::ungrabMouseEvent(QEvent*)
 {
-    if ((flags() & ItemIsMovable) && m_dragAccepted) {
-        scene()->unsetViewportCursor();
-        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
-            movableSelectedAncestorItem->setBeingDragged(false);
-        m_movableSelectedAncestorItems.clear();
-    }
-    m_dragAccepted = false;
+    QGraphicsSceneMouseEvent release;
+    release.setButtons(acceptedMouseButtons());
+    mouseReleaseEvent(&release);
 }
 
 QVariant DesignerItem::itemChange(int change, const QVariant& value)
