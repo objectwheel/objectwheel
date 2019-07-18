@@ -2,6 +2,7 @@
 #include <saveutils.h>
 #include <renderresult.h>
 #include <utilityfunctions.h>
+#include <parserutils.h>
 
 #include <QAnimationDriver>
 #include <QQuickWindow>
@@ -482,14 +483,25 @@ int RenderUtils::countAllSubInstance(const RenderEngine::ControlInstance* parent
     return counter;
 }
 
+QVariant RenderUtils::evaluate(const RenderEngine::ControlInstance* instance, const QString& binding)
+{
+    QQmlExpression expr(instance->context, instance->object, binding);
+    return expr.evaluate();
+}
+
 bool RenderUtils::isVisible(const RenderEngine::ControlInstance* instance)
 {
-    if (!instance->gui)
-        return false;
-    bool visible = QQmlProperty(instance->object, "visible", instance->context).read().toBool();
-    if (!instance->window)
+    if (instance->gui) {
+        bool visible;
+        if (instance->object->isWindowType())
+            visible = evaluate(instance, ParserUtils::property(instance->dir, "visible")).toBool();
+        else
+            visible = QQmlProperty::read(instance->object, "visible").toBool();
+        if (instance->object->isWindowType())
+            return visible && !ParserUtils::property(instance->dir, "visibility").contains("Hidden");
         return visible;
-    return visible && QQmlProperty(instance->object, "visibility", instance->context).read().toUInt();
+    }
+    return false;
 }
 
 void RenderUtils::refreshLayoutable(RenderEngine::ControlInstance* instance)

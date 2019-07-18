@@ -18,6 +18,7 @@ public:
     static QQuickItem* guiItem(QObject* object);
     static QQuickItem* createDummyItem(QQmlEngine* engine);
 
+    static QVariant evaluate(const RenderEngine::ControlInstance* instance, const QString& binding);
     static QList<QQuickItem*> allItems(RenderEngine::ControlInstance* formInstance);
     static QVector<QString> events(const RenderEngine::ControlInstance* instance);
     static QVector<QString> blockedPropertyChanges(RenderEngine::ControlInstance* instance);

@@ -1,7 +1,6 @@
 #include <renderengine.h>
 #include <commandlineparser.h>
 #include <saveutils.h>
-#include <parserutils.h>
 #include <renderutils.h>
 #include <renderresult.h>
 #include <utilityfunctions.h>
@@ -837,7 +836,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     auto instance = new RenderEngine::ControlInstance;
     instance->context = new QQmlContext(m_view->engine());
 
-    // m_view->engine()->clearComponentCache();
     QQmlComponent component(m_view->engine());
     component.loadUrl(QUrl::fromUserInput(url));
 
@@ -862,8 +860,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
 
     // Hides windows anyway, since we only need their contentItem to be visible
     RenderUtils::tweakObjects(object);
-    component.completeCreate();
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
+    component.completeCreate();
 
     QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
     QQmlEnginePrivate::get(m_view->engine())->cache(object->metaObject());
@@ -873,6 +871,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     instance->window = object->isWindowType();
     instance->layout = QQuickDesignerSupportMetaInfo::isSubclassOf(instance->object, "QQuickLayout");
     instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");
+    instance->visible = RenderUtils::isVisible(instance);
 
     QQmlProperty defaultProperty(m_view->rootObject());
     Q_ASSERT(defaultProperty.isValid());
@@ -896,7 +895,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
 
     // Make sure everything is visible
     if (instance->gui) {
-        instance->visible = RenderUtils::isVisible(instance);
         if (!instance->window)
             QQmlProperty(object, "visible", instance->context).write(true);
         QQuickItem* item = RenderUtils::guiItem(instance->object);
@@ -966,8 +964,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
 
     // Hides windows anyway, since we only need their contentItem to be visible
     RenderUtils::tweakObjects(object);
-    component.completeCreate();
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
+    component.completeCreate();
 
     if (QQmlEngine::contextForObject(object) == nullptr)
         QQmlEngine::setContextForObject(object, instance->context);
@@ -983,12 +981,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     instance->popup = object->inherits("QQuickPopup");
     instance->window = object->isWindowType();
     instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");
+    instance->visible = RenderUtils::isVisible(instance);
 
-    /*!
-        FIXME: Popup (from QtQuick.Controls 2.0) is based on QtObject type, hence it is not a gui
-               object in theory, but it is. And if it comes, as a form, or anything that inherits
-               Popup comes (Dialog i.e.) crashes here.
-    */
     Q_ASSERT(!SaveUtils::isForm(dir) || instance->gui);
 
     if (!instance->gui)
@@ -1035,7 +1029,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
 
     // Make sure everything is visible
     if (instance->gui) {
-        instance->visible = RenderUtils::isVisible(instance);
         if (!instance->window)
             QQmlProperty(object, "visible", instance->context).write(true);
         QQuickItem* item = RenderUtils::guiItem(instance->object);
