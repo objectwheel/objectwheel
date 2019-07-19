@@ -89,7 +89,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     ToolItem::mouseMoveEvent(event);
 
     if (parentItem() && dragAccepted()) {
-        scene()->setViewportCursor(Qt::ClosedHandCursor);
+        scene()->setCursor(Qt::ClosedHandCursor);
         parentItem()->setBeingDragged(true);
         parentItem()->setPos(parentItem()->mapToParent(mapToParent(dragDistanceVector())));
     }
@@ -98,7 +98,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     if (parentItem() && dragAccepted()) {
-        scene()->unsetViewportCursor();
+        scene()->unsetCursor();
         parentItem()->setBeingDragged(false);
     }
 

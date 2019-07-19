@@ -231,7 +231,7 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
             movableSelectedAncestorItem->setBeingDragged(true);
 
-        scene()->setViewportCursor(Qt::ClosedHandCursor);
+        scene()->setCursor(Qt::ClosedHandCursor);
 
         QGraphicsObject::mouseMoveEvent(event);
     }
@@ -242,7 +242,7 @@ void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsObject::mouseReleaseEvent(event);
 
     if ((flags() & ItemIsMovable) && m_dragAccepted) {
-        scene()->unsetViewportCursor();
+        scene()->unsetCursor();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
             movableSelectedAncestorItem->setBeingDragged(false);
         m_movableSelectedAncestorItems.clear();

@@ -349,11 +349,6 @@ void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
     update();
 }
 
-void Control::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    DesignerItem::mousePressEvent(event);
-}
-
 void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);

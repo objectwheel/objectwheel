@@ -4,7 +4,6 @@
 #include <controlpropertymanager.h>
 #include <designersettings.h>
 #include <scenesettings.h>
-#include <designerview.h>
 #include <headlineitem.h>
 
 #include <private/qgraphicsscene_p.h>
@@ -15,13 +14,7 @@
 #include <QPen>
 #include <QtMath>
 
-namespace {
-bool itemPressed = false;
-bool itemMoving = false;
-}
-
-DesignerScene::DesignerScene(DesignerView* view, QObject *parent) : QGraphicsScene(parent)
-  , m_view(view)
+DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
   , m_currentForm(nullptr)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -55,12 +48,6 @@ void DesignerScene::addForm(Form* form)
         setCurrentForm(form);
 }
 
-void DesignerScene::addControl(Control* /*control*/, Control* /*parentControl*/)
-{
-    // TODO
-    Q_ASSERT(0);
-}
-
 void DesignerScene::removeForm(Form* form)
 {
     Form* currentForm = m_currentForm.data();
@@ -85,17 +72,12 @@ Form* DesignerScene::currentForm()
     return m_currentForm.data();
 }
 
-DesignerView* DesignerScene::view() const
-{
-    return m_view;
-}
-
 qreal DesignerScene::zoomLevel() const
 {
-    return view()->transform().m11();
+    return views().first()->transform().m11();
 }
 
-int DesignerScene::startDragDistance() const
+int DesignerScene::startDragDistance()
 {
     return QApplication::startDragDistance();
 }
@@ -110,22 +92,22 @@ QList<DesignerItem*> DesignerScene::selectedItems() const
     return selectedItems;
 }
 
-void DesignerScene::unsetViewportCursor()
+void DesignerScene::unsetCursor()
 {
-    view()->viewport()->unsetCursor();
+    views().first()->viewport()->unsetCursor();
 }
 
-void DesignerScene::setViewportCursor(Qt::CursorShape cursor)
+void DesignerScene::setCursor(Qt::CursorShape cursor)
 {
-    view()->viewport()->setCursor(cursor);
+    views().first()->viewport()->setCursor(cursor);
 }
 
-QPointF DesignerScene::snapPosition(qreal x, qreal y) const
+QPointF DesignerScene::snapPosition(qreal x, qreal y)
 {
     return snapPosition(QPointF(x, y));
 }
 
-QPointF DesignerScene::snapPosition(const QPointF& pos) const
+QPointF DesignerScene::snapPosition(const QPointF& pos)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     if (settings->snappingEnabled) {
@@ -136,12 +118,12 @@ QPointF DesignerScene::snapPosition(const QPointF& pos) const
     return pos;
 }
 
-QSizeF DesignerScene::snapSize(qreal x, qreal y, qreal w, qreal h) const
+QSizeF DesignerScene::snapSize(qreal x, qreal y, qreal w, qreal h)
 {
     return snapSize(QPointF(x, y), QSizeF(w, h));
 }
 
-QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size) const
+QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     if (settings->snappingEnabled) {
@@ -169,121 +151,46 @@ QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
 QList<Control*> DesignerScene::selectedControls() const
 {
     QList<Control*> selectedControls;
-    for (auto item : selectedItems()) {
-        if (item->type() == Control::Type || item->type() == Form::Type)
+    for (DesignerItem* item : selectedItems()) {
+        if (item->type() >= Control::Type)
             selectedControls.append(static_cast<Control*>(item));
     }
     return selectedControls;
 }
 
-void DesignerScene::mousePressEvent(QGraphicsSceneMouseEvent* event)
+QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
 {
-    QGraphicsScene::mousePressEvent(event);
-
-    if (m_currentForm == nullptr)
-        return;
-
-    auto selectedControls = this->selectedControls();
-    selectedControls.removeOne(m_currentForm);
-
-    //TODO: Raise selected controls
-
-    auto itemUnderMouse = itemAt(event->scenePos(), QTransform());
-    if (selectedControls.contains((Control*)itemUnderMouse))
-        itemPressed = true;
-
-    itemMoving = false;
-
-    update();
-}
-
-void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsScene::mouseMoveEvent(event);
-
-    if (m_currentForm == nullptr)
-        return;
-
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
-    auto selectedControls = this->selectedControls();
-    bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
-    for (auto ctrl : selectedControls) {
-        if (ctrl->beingResized())
-            resizedAnyway = true;
+    QList<DesignerItem*> items(selectedItems());
+    for (int i = items.size() - 1; i >= 0; --i) {
+        DesignerItem* item = items.at(i);
+        if (!item->beingDragged() && !item->beingResized())
+            items.removeAt(i);
     }
-    selectedControls.removeOne(m_currentForm);
-
-    if (m_currentForm && !selectedControls.isEmpty() && itemPressed && !resizedAnyway) {
-        itemMoving = true;
-        if (settings->snappingEnabled) {
-            auto controlUnderMouse = (Control*)(itemAt(event->scenePos(), QTransform()));
-
-            if (!controlUnderMouse)
-                return;
-
-            const QList<Control*> copy(selectedControls);
-            for(Control* control : copy) {
-                if (controlUnderMouse->parentControl() != control->parentControl()
-                        || copy.contains(control->parentControl())) {
-                    selectedControls.removeOne(control);
-                    control->setSelected(false);
-                }
-            }
-
-            //       FIXME     stick();
-        }
-    }
-
-    m_lastMousePos = event->scenePos();
-
-    QPointer<DesignerScene> p(this);
-    Suppressor::suppress(100, "update", [=] {
-        if (p)
-            update();
-    });
-}
-
-void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
-{
-    QGraphicsScene::mouseReleaseEvent(event);
-    itemPressed = false;
-    itemMoving = false;
+    return items;
 }
 
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
-    auto selectedItems = this->selectedItems();
-    bool resizedAnyway = false; // NOTE: Might we use scene->mauseGrabberItem in a way?
-    for (auto ctrl : selectedItems) {
-        if (ctrl->beingResized())
-            resizedAnyway = true;
+    const QList<DesignerItem*>& items = draggedResizedSelectedItems();
+    if (items.size() > 1) { // Multiple items moving
+        const QRectF& itemsBoundingRect = boundingRect(items);
+        const QRectF& outlineRect = QRectF(items.first()->parentItem()->mapToScene(itemsBoundingRect.topLeft()),
+                                           itemsBoundingRect.size());
+        paintOutline(painter, outlineRect);
     }
-    selectedItems.removeOne(m_currentForm);
 
-    if ((itemMoving || resizedAnyway)/*&& m_snapping */&& m_currentForm != nullptr) {
-        {
-            const QList<DesignerItem*> copy(selectedItems);
-            for (const DesignerItem* control : copy) {
-                for (DesignerItem* childControl : control->childItems())
-                    selectedItems.removeOne(childControl);
-            }
-
-            if (selectedItems.size() > 1) {
-                auto r = boundingRect(selectedItems);
-                paintOutline(painter, QRectF(selectedItems.first()->parentItem()->mapToScene(r.topLeft()), r.size()));
-            }
-        }
-
-        const auto& guideLines = this->guidelines();
+    const QVector<QLineF>& lines = guidelines();
+    if (!lines.isEmpty()) {
         painter->setPen(pen());
-        painter->drawLines(guideLines);
-
-        for (QLineF line : guideLines) {
+        painter->drawLines(lines);
+        for (const QLineF& line : lines) {
             painter->setBrush(outlineColor());
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5),
+                                            QSizeF(3.0, 3.0)), 1.5, 1.5);
+            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5),
+                                            QSizeF(3.0, 3.0)), 1.5, 1.5);
         }
     }
 }
@@ -306,12 +213,6 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
     painter->drawRect(rect);
 }
 
-QPointF DesignerScene::lastMousePos() const
-{
-    return m_lastMousePos;
-}
-
-// FIXME: This function has severe performance issues.
 QVector<QLineF> DesignerScene::guidelines() const
 {
     QVector<QLineF> lines;
@@ -474,10 +375,6 @@ void DesignerScene::discharge()
 
     m_forms.clear();
     m_currentForm.clear();
-    m_lastMousePos = QPointF();
-
-    itemPressed = false;
-    itemMoving = false;
 }
 
 void DesignerScene::setCurrentForm(Form* currentForm)
