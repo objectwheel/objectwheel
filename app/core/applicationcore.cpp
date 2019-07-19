@@ -178,7 +178,7 @@ bool ApplicationCore::locked()
 void ApplicationCore::run(QApplication* app)
 {
     static ApplicationCore instance(app);
-    Q_UNUSED(instance);
+    Q_UNUSED(instance)
 }
 
 void ApplicationCore::prepare(const char* filePath)

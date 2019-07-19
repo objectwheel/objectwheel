@@ -326,11 +326,6 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
     }
 }
 
-void Control::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
-{
-    event->accept();
-}
-
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
     if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
@@ -344,8 +339,8 @@ void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 
 void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
 {
+    Q_UNUSED(event)
     m_dragIn = false;
-    event->accept();
     update();
 }
 

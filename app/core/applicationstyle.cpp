@@ -399,7 +399,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     case PE_PanelButtonTool: {
         painter->save();
         if (widget && widget->objectName() == "qt_toolbar_ext_button") {
-            Q_UNUSED(widget); // nop
+            Q_UNUSED(widget) // nop
         } else if (widget && widget->inherits("Utils::QtColorButton")) {
             QFusionStyle::drawPrimitive(PE_PanelButtonTool, option, painter, widget);
         } else if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {

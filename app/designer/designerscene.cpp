@@ -244,6 +244,10 @@ QVector<QLineF> DesignerScene::guidelines() const
             items.removeAt(i);
     }
 
+    // May contain it since we can resize the form
+    if (items.contains(m_currentForm))
+        items.removeOne(m_currentForm);
+
     if (items.isEmpty())
         return lines;
 

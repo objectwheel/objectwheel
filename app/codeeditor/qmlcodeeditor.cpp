@@ -3165,7 +3165,7 @@ QString QmlCodeEditor::foldReplacementText(const QTextBlock &) const
 
 bool QmlCodeEditor::selectionVisible(int blockNumber) const
 {
-    Q_UNUSED(blockNumber);
+    Q_UNUSED(blockNumber)
     return true;
 }
 

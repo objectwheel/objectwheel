@@ -65,7 +65,6 @@ protected:
     QRectF outerRect(const QRectF& rect) const;
     void dropControl(Control* control);
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
-    void dragMoveEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;

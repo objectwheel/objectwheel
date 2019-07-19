@@ -174,7 +174,6 @@ bool DesignerItem::event(QEvent* event)
     default:
         break;
     }
-
     return QGraphicsObject::event(event);
 }
 
@@ -230,13 +229,12 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
 
         scene()->prepareDragLayer(this);
+        scene()->setCursor(Qt::ClosedHandCursor);
 
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
             movableSelectedAncestorItem->setBeingDragged(true);
             movableSelectedAncestorItem->setRaised(true);
         }
-
-        scene()->setCursor(Qt::ClosedHandCursor);
 
         QGraphicsObject::mouseMoveEvent(event);
     }
@@ -273,9 +271,14 @@ void DesignerItem::ungrabMouseEvent(QEvent*)
 
 QVariant DesignerItem::itemChange(int change, const QVariant& value)
 {
-    if (change == ItemPositionHasChanged) {
+    switch (change) {
+    case ItemPositionHasChanged:
         if (!m_inSetGeometry)
             emit geometryChanged();
+        break;
+
+    default:
+        break;
     }
 
     if (change < ItemSizeChange)

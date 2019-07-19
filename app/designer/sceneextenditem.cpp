@@ -3,7 +3,10 @@
 
 SceneExtendItem::SceneExtendItem(Control* parent) : QGraphicsItem(parent)
 {
+    // NOTE: Don't set ItemHasNoContents, otherwise
+    // sceneRect() won't count us an intersecting item
     setFlag(ItemStacksBehindParent);
+    setAcceptedMouseButtons(Qt::NoButton);
     QObject::connect(parent, &Control::geometryChanged, [=] {
         updateRect();
     });
@@ -32,7 +35,9 @@ void SceneExtendItem::updateRect()
     update();
 }
 
-void SceneExtendItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
+void SceneExtendItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    Q_UNUSED(painter);
+    Q_UNUSED(painter)
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
 }
