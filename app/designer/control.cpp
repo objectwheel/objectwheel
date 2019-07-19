@@ -401,11 +401,10 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
     }
     scene()->currentForm()->setDragIn(false);
 }
-#include <QDebug>
+
 QVariant Control::itemChange(int change, const QVariant& value)
 {    
     if (change == ItemSelectedHasChanged) {
-        //        qDebug() << isSelected();
         bool selected = value.toBool();
         for (ResizerItem* resizer : m_resizers)
             resizer->setVisible(selected);

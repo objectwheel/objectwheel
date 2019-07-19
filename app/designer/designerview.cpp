@@ -87,7 +87,7 @@ bool warnIfFileDoesNotExist(const QString& filePath)
 }
 
 DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent)
-    : QGraphicsView(new DesignerScene(this), parent)
+    : QGraphicsView(new DesignerScene(parent), parent)
     , m_signalChooserDialog(new SignalChooserDialog(this))
     , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
     , m_toolBar(new QToolBar(this))
@@ -118,7 +118,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     setAlignment(Qt::AlignCenter);
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
     setCacheMode(QGraphicsView::CacheNone);
-    setViewportUpdateMode(QGraphicsView::FullViewportUpdate/*MinimalViewportUpdate*/);
+    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
     setRubberBandSelectionMode(Qt::IntersectsItemShape);
     setDragMode(QGraphicsView::RubberBandDrag);

@@ -8,6 +8,7 @@
 class DesignerScene final : public QGraphicsScene
 {
     Q_OBJECT
+    Q_DISABLE_COPY(DesignerScene)
     Q_DECLARE_PRIVATE(QGraphicsScene)
 
     friend class ControlRemovingManager; // For removeControl(), removeForm()
@@ -16,20 +17,22 @@ class DesignerScene final : public QGraphicsScene
 
 public:
     explicit DesignerScene(QObject* parent = nullptr);
+
     const QList<Form*>& forms() const;
     void setCurrentForm(Form* currentForm);
-    Form* currentForm();
+    Form* currentForm() const;
     qreal zoomLevel() const;
-
-    QList<DesignerItem*> selectedItems() const;
 
     void unsetCursor();
     void setCursor(Qt::CursorShape cursor);
+    void prepareDragLayer(DesignerItem* item);
 
+    QVector<QLineF> guidelines() const;
+    DesignerItem* dragLayerItem() const;
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
+    QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
-    QVector<QLineF> guidelines() const;
 
     static int startDragDistance();
     static QColor outlineColor();
@@ -51,7 +54,7 @@ private:
     void removeControl(Control* control);
 
 private:
-    void drawForeground(QPainter* painter, const QRectF& rect);
+    void drawForeground(QPainter* painter, const QRectF& rect) override;
 
 signals:
     void currentFormChanged(Form* currentForm);
@@ -59,6 +62,7 @@ signals:
 private:
     QList<Form*> m_forms;
     QPointer<Form> m_currentForm;
+    DesignerItem* m_dragLayerItem;
 };
 
 #endif // FORMSCENE_H

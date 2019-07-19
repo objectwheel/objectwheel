@@ -61,12 +61,14 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 protected:
     virtual void ungrabMouseEvent(QEvent* event);
     virtual QVariant itemChange(int change, const QVariant& value);
 
 private:
+    void setRaised(bool raised);
     void setBeingDragged(bool beingDragged);
     void setBeingResized(bool beingResized);
 
@@ -84,8 +86,10 @@ private:
     bool m_beingDragged;
     bool m_beingResized;
     bool m_dragAccepted;
+    bool m_raised;
     QRectF m_rect;
     QPointF m_mousePressPoint;
+    DesignerItem* m_parentItemBeforeRaise;
     QSet<DesignerItem*> m_movableSelectedAncestorItems;
 };
 

@@ -8,6 +8,7 @@ DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_beingDragged(false)
   , m_beingResized(false)
   , m_dragAccepted(false)
+  , m_raised(false)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
 }
@@ -228,8 +229,12 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
         m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
 
-        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
+        scene()->prepareDragLayer(this);
+
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
             movableSelectedAncestorItem->setBeingDragged(true);
+            movableSelectedAncestorItem->setRaised(true);
+        }
 
         scene()->setCursor(Qt::ClosedHandCursor);
 
@@ -243,11 +248,20 @@ void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
     if ((flags() & ItemIsMovable) && m_dragAccepted) {
         scene()->unsetCursor();
-        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems)
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
             movableSelectedAncestorItem->setBeingDragged(false);
+            movableSelectedAncestorItem->setRaised(false);
+        }
         m_movableSelectedAncestorItems.clear();
     }
     m_dragAccepted = false;
+}
+
+void DesignerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+{
+    Q_UNUSED(painter)
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
 }
 
 void DesignerItem::ungrabMouseEvent(QEvent*)
@@ -268,6 +282,20 @@ QVariant DesignerItem::itemChange(int change, const QVariant& value)
         return QGraphicsObject::itemChange(GraphicsItemChange(change), value);
 
     return value;
+}
+
+void DesignerItem::setRaised(bool raised)
+{
+    Q_ASSERT(parentItem() && scene());
+    if (m_raised != raised) {
+        m_raised = raised;
+        if (m_raised) {
+            m_parentItemBeforeRaise = parentItem();
+            setParentItem(scene()->dragLayerItem());
+        } else {
+            setParentItem(m_parentItemBeforeRaise);
+        }
+    }
 }
 
 void DesignerItem::setBeingDragged(bool beingDragged)

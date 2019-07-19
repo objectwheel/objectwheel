@@ -14,10 +14,17 @@
 #include <QPen>
 #include <QtMath>
 
-DesignerScene::DesignerScene(QObject *parent) : QGraphicsScene(parent)
+DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_currentForm(nullptr)
+  , m_dragLayerItem(new DesignerItem)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
+
+    m_dragLayerItem->setAcceptedMouseButtons(Qt::NoButton);
+    m_dragLayerItem->setFlag(DesignerItem::ItemHasNoContents);
+    m_dragLayerItem->setZValue(std::numeric_limits<int>::max());
+    addItem(m_dragLayerItem);
+
     connect(this, &DesignerScene::selectionChanged, this, [=]{
         QList<Control*> sc = selectedControls();
         sc.removeOne(currentForm());
@@ -37,8 +44,9 @@ void DesignerScene::addForm(Form* form)
     if (m_forms.contains(form))
         return;
 
-    // NOTE: We don't have to call ControlPropertyManager::setParent, since there is no valid
-    // parent concept for forms in Designer; fors are directly put into DesignerScene
+    // NOTE: We don't have to call ControlPropertyManager::setParent,
+    // since there is no valid parent concept for forms in Designer;
+    // fors are directly put into DesignerScene
 
     form->setVisible(false);
 
@@ -50,14 +58,16 @@ void DesignerScene::addForm(Form* form)
 
 void DesignerScene::removeForm(Form* form)
 {
-    Form* currentForm = m_currentForm.data();
-    removeControl(form); // 1. If the given form address is the current form, then if this line runs,
-    // QPointer clears the address within m_currentForm, because its object is "delete"d
-    // 2. Thus we copy it.
+    bool currentFormRemoved = m_currentForm.data() == form;
+
+    // NOTE: If the given form address is the current form,
+    // then if this line runs, QPointer clears the address
+    // within m_currentForm, because its object is "delete"d
+    removeControl(form);
 
     m_forms.removeAll(form);
 
-    if (currentForm == form) // 3. And we compare it here with the copied one
+    if (currentFormRemoved)
         setCurrentForm(m_forms.first());
 }
 
@@ -67,7 +77,7 @@ void DesignerScene::removeControl(Control* control)
     delete control;
 }
 
-Form* DesignerScene::currentForm()
+Form* DesignerScene::currentForm() const
 {
     return m_currentForm.data();
 }
@@ -100,6 +110,16 @@ void DesignerScene::unsetCursor()
 void DesignerScene::setCursor(Qt::CursorShape cursor)
 {
     views().first()->viewport()->setCursor(cursor);
+}
+
+void DesignerScene::prepareDragLayer(DesignerItem* item)
+{
+    if (item == 0)
+        return;
+    if (const DesignerItem* targetItem = item->parentItem()) {
+        m_dragLayerItem->setSize(targetItem->size());
+        m_dragLayerItem->setPos(targetItem->scenePos());
+    }
 }
 
 QPointF DesignerScene::snapPosition(qreal x, qreal y)
@@ -347,6 +367,11 @@ QVector<QLineF> DesignerScene::guidelines() const
     return lines;
 }
 
+DesignerItem* DesignerScene::dragLayerItem() const
+{
+    return m_dragLayerItem;
+}
+
 QColor DesignerScene::outlineColor()
 {
     return DesignerSettings::sceneSettings()->outlineColor;
@@ -371,7 +396,8 @@ QRectF DesignerScene::boundingRect(const QList<DesignerItem*>& items)
 void DesignerScene::discharge()
 {
     clearSelection();
-    clear();
+    if (m_currentForm)
+        removeForm(m_currentForm);
 
     m_forms.clear();
     m_currentForm.clear();
