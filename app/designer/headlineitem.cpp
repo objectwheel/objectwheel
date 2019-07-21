@@ -6,7 +6,7 @@
 
 enum { MARGIN = 10 };
 
-HeadlineItem::HeadlineItem(DesignerItem* parent) : ToolItem(parent)
+HeadlineItem::HeadlineItem(DesignerItem* parent) : GadgetItem(parent)
   , m_sizeUpdateScheduled(false)
 {
     setCursor(Qt::OpenHandCursor);
@@ -87,7 +87,7 @@ QSizeF HeadlineItem::calculateTextSize() const
 
 void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    ToolItem::mouseMoveEvent(event);
+    GadgetItem::mouseMoveEvent(event);
 
     if (parentItem() && dragAccepted()) {
         scene()->setCursor(Qt::ClosedHandCursor);
@@ -103,7 +103,7 @@ void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         parentItem()->setBeingDragged(false);
     }
 
-    ToolItem::mouseReleaseEvent(event); // Clears dragAccepted state
+    GadgetItem::mouseReleaseEvent(event); // Clears dragAccepted state
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)

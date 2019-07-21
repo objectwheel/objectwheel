@@ -455,13 +455,6 @@ void Control::paintHoverOutline(QPainter* painter)
     painter->drawRect(outerRect(rect()));
 }
 
-void Control::paintSelectionOutline(QPainter* painter)
-{
-    painter->setPen(scene()->pen(scene()->outlineColor(), 2));
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(rect());
-}
-
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
@@ -477,9 +470,6 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
 
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
         paintHoverOutline(painter);
-
-    if (isSelected())
-        paintSelectionOutline(painter);
 
     if (dragIn())
         paintHighlight(painter);

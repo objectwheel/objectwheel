@@ -1,7 +1,7 @@
-#include <toolitem.h>
+#include <gadgetitem.h>
 #include <QGraphicsSceneMouseEvent>
 
-ToolItem::ToolItem(DesignerItem* parent) : DesignerItem(parent)
+GadgetItem::GadgetItem(DesignerItem* parent) : DesignerItem(parent)
   , m_brush(Qt::white)
 {
     QPen pen(Qt::black, 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
@@ -9,49 +9,48 @@ ToolItem::ToolItem(DesignerItem* parent) : DesignerItem(parent)
     setPen(pen);
     setVisible(false);
     setFlag(ItemIgnoresTransformations);
-    setZValue(std::numeric_limits<int>::max());
 }
 
-QPen ToolItem::pen() const
+QPen GadgetItem::pen() const
 {
     return m_pen;
 }
 
-void ToolItem::setPen(const QPen& pen)
+void GadgetItem::setPen(const QPen& pen)
 {
     m_pen = pen;
     update();
 }
 
-QBrush ToolItem::brush() const
+QBrush GadgetItem::brush() const
 {
     return m_brush;
 }
 
-void ToolItem::setBrush(const QBrush& brush)
+void GadgetItem::setBrush(const QBrush& brush)
 {
     m_brush = brush;
     update();
 }
 
-QPointF ToolItem::dragDistanceVector() const
+QPointF GadgetItem::dragDistanceVector() const
 {
     return m_dragDistanceVector;
 }
 
-void ToolItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
+void GadgetItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mousePressEvent(event);
     event->accept();
 }
 
-void ToolItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+void GadgetItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
     m_dragDistanceVector = event->pos() - mousePressPoint();
 }
 
-void ToolItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void GadgetItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseReleaseEvent(event);
     m_dragDistanceVector = QPointF();

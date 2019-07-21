@@ -1,9 +1,9 @@
 #ifndef HEADLINEITEM_H
 #define HEADLINEITEM_H
 
-#include <toolitem.h>
+#include <gadgetitem.h>
 
-class HeadlineItem final : public ToolItem
+class HeadlineItem final : public GadgetItem
 {
     Q_OBJECT
     Q_DISABLE_COPY(HeadlineItem)

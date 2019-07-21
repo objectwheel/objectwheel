@@ -294,7 +294,7 @@ void DesignerItem::setRaised(bool raised)
         m_raised = raised;
         if (m_raised) {
             m_parentItemBeforeRaise = parentItem();
-            setParentItem(scene()->dragLayerItem());
+            setParentItem(scene()->dragLayer());
         } else {
             setParentItem(m_parentItemBeforeRaise);
         }

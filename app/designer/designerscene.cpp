@@ -5,23 +5,35 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <headlineitem.h>
+#include <gadgetlayer.h>
 
+#include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QPointer>
 #include <QPen>
 #include <QtMath>
+#include <QApplication>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_currentForm(nullptr)
-  , m_dragLayerItem(new DesignerItem)
+  , m_dragLayer(new DesignerItem)
+  , m_gadgetLayer(new GadgetLayer)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
-    m_dragLayerItem->setAcceptedMouseButtons(Qt::NoButton);
-    m_dragLayerItem->setFlag(DesignerItem::ItemHasNoContents);
-    m_dragLayerItem->setZValue(std::numeric_limits<int>::max());
-    addItem(m_dragLayerItem);
+    m_dragLayer->setAcceptedMouseButtons(Qt::NoButton);
+    m_dragLayer->setFlag(DesignerItem::ItemHasNoContents);
+    m_dragLayer->setZValue(std::numeric_limits<int>::max());
+    addItem(m_dragLayer);
+
+    m_gadgetLayer->setAcceptedMouseButtons(Qt::NoButton);
+    m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
+    addItem(m_gadgetLayer);
+
+    connect(this, &DesignerScene::sceneRectChanged, this, [=] {
+        m_gadgetLayer->setGeometry(sceneRect());
+    });
 
     connect(this, &DesignerScene::changed, this, [=] {
         setSceneRect(sceneRect() | itemsBoundingRect());
@@ -119,8 +131,8 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
     if (item == 0)
         return;
     if (const DesignerItem* targetItem = item->parentItem()) {
-        m_dragLayerItem->setSize(targetItem->size());
-        m_dragLayerItem->setPos(targetItem->scenePos());
+        m_dragLayer->setSize(targetItem->size());
+        m_dragLayer->setPos(targetItem->scenePos());
     }
 }
 
@@ -378,9 +390,14 @@ QVector<QLineF> DesignerScene::guidelines() const
     return lines;
 }
 
-DesignerItem* DesignerScene::dragLayerItem() const
+DesignerItem* DesignerScene::dragLayer() const
 {
-    return m_dragLayerItem;
+    return m_dragLayer;
+}
+
+GadgetLayer* DesignerScene::gadgetLayer() const
+{
+    return m_gadgetLayer;
 }
 
 QColor DesignerScene::outlineColor()
@@ -444,7 +461,7 @@ void DesignerScene::setCurrentForm(Form* currentForm)
     }
 }
 
-const QList<Form*>& DesignerScene::forms() const
+QList<Form*> DesignerScene::forms() const
 {
     return m_forms;
 }

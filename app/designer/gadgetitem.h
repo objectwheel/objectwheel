@@ -1,16 +1,16 @@
-#ifndef TOOLITEM_H
-#define TOOLITEM_H
+#ifndef GADGETITEM_H
+#define GADGETITEM_H
 
 #include <designeritem.h>
 #include <QPen>
 
-class ToolItem : public DesignerItem
+class GadgetItem : public DesignerItem
 {
     Q_OBJECT
-    Q_DISABLE_COPY(ToolItem)
+    Q_DISABLE_COPY(GadgetItem)
 
 public:
-    explicit ToolItem(DesignerItem* parent = nullptr);
+    explicit GadgetItem(DesignerItem* parent = nullptr);
 
     QPen pen() const;
     void setPen(const QPen& pen);
@@ -32,4 +32,4 @@ private:
     QPointF m_dragDistanceVector;
 };
 
-#endif // TOOLITEM_H
+#endif // GADGETITEM_H

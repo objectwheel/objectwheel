@@ -82,9 +82,6 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
         paintHoverOutline(painter);
 
-    if (isSelected())
-        paintSelectionOutline(painter);
-
     if (dragIn())
         paintHighlight(painter);
 }

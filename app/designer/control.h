@@ -76,7 +76,6 @@ protected:
     virtual void paintImage(QPainter* painter);
     virtual void paintHighlight(QPainter* painter);
     virtual void paintHoverOutline(QPainter* painter);
-    virtual void paintSelectionOutline(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
 protected:

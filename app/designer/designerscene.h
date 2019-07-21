@@ -2,6 +2,8 @@
 #define FORMSCENE_H
 
 #include <form.h>
+#include <gadgetlayer.h>
+
 #include <QPointer>
 #include <QGraphicsScene>
 
@@ -17,17 +19,20 @@ class DesignerScene final : public QGraphicsScene
 public:
     explicit DesignerScene(QObject* parent = nullptr);
 
-    const QList<Form*>& forms() const;
-    void setCurrentForm(Form* currentForm);
-    Form* currentForm() const;
     qreal zoomLevel() const;
+
+    Form* currentForm() const;
+    void setCurrentForm(Form* currentForm);
 
     void unsetCursor();
     void setCursor(Qt::CursorShape cursor);
     void prepareDragLayer(DesignerItem* item);
 
+    DesignerItem* dragLayer() const;
+    GadgetLayer* gadgetLayer() const;
+
+    QList<Form*> forms() const;
     QVector<QLineF> guidelines() const;
-    DesignerItem* dragLayerItem() const;
     QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QList<DesignerItem*> selectedItems() const;
@@ -62,7 +67,8 @@ signals:
 private:
     QList<Form*> m_forms;
     QPointer<Form> m_currentForm;
-    DesignerItem* m_dragLayerItem;
+    DesignerItem* m_dragLayer;
+    GadgetLayer* m_gadgetLayer;
 };
 
 #endif // FORMSCENE_H

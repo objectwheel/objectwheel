@@ -2,7 +2,7 @@
 #include <utilityfunctions.h>
 #include <QPainter>
 
-ResizerItem::ResizerItem(Placement placement, DesignerItem* parent) : ToolItem(parent)
+ResizerItem::ResizerItem(Placement placement, DesignerItem* parent) : GadgetItem(parent)
   , m_placement(placement)
 {
     setRect(-3, -3, 6, 6);
@@ -113,7 +113,7 @@ void ResizerItem::setParentGeometry(const QPointF& dragDistance)
 
 void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    ToolItem::mouseMoveEvent(event);
+    GadgetItem::mouseMoveEvent(event);
 
     if (parentItem() && dragAccepted()) {
         parentItem()->setBeingDragged(true);
@@ -129,7 +129,7 @@ void ResizerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         parentItem()->setBeingResized(false);
     }
 
-    ToolItem::mouseReleaseEvent(event); // Clears dragAccepted state
+    GadgetItem::mouseReleaseEvent(event); // Clears dragAccepted state
 }
 
 void ResizerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
