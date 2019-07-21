@@ -17,7 +17,7 @@ public:
 
 private:
     QVariant itemChange(int change, const QVariant& value) override;
-    void paintFrame(QPainter* painter);
+    void paintFormFrame(QPainter* painter);
     void paintGridViewDots(QPainter* painter, int gridSize);
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;

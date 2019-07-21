@@ -9,6 +9,7 @@ enum { MARGIN = 10 };
 HeadlineItem::HeadlineItem(DesignerItem* parent) : ToolItem(parent)
   , m_sizeUpdateScheduled(false)
 {
+    setCursor(Qt::OpenHandCursor);
 }
 
 QSizeF HeadlineItem::dimensions() const

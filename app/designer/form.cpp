@@ -10,6 +10,7 @@
 
 Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
+    setCursor(Qt::ArrowCursor);
     setFlag(ItemIsMovable, false);
     headlineItem()->setVisible(true);
     headlineItem()->setBrush(Qt::darkGray);
@@ -29,7 +30,7 @@ QVariant Form::itemChange(int change, const QVariant& value)
     return Control::itemChange(change, value);
 }
 
-void Form::paintFrame(QPainter* painter)
+void Form::paintFormFrame(QPainter* painter)
 {
     painter->setPen(scene()->pen(Qt::darkGray));
     painter->setBrush(Qt::NoBrush);
@@ -76,7 +77,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     if (settings->controlOutline != 0)
         scene()->paintOutline(painter, outerRect(settings->controlOutline == 1 ? rect() : frame()));
 
-    paintFrame(painter);
+    paintFormFrame(painter);
 
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
         paintHoverOutline(painter);

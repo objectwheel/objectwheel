@@ -216,7 +216,7 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
         m_movableSelectedAncestorItems.remove(myMovableSelectedAncestorItem);
 
-        QList<DesignerItem*> ancestorSiblings = myMovableSelectedAncestorItem->siblingItems();
+        const QList<DesignerItem*>& ancestorSiblings = myMovableSelectedAncestorItem->siblingItems();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems.toList()) {
             if (!ancestorSiblings.contains(movableSelectedAncestorItem)) {
                 for (DesignerItem* childItem : movableSelectedAncestorItem->childItems())
@@ -228,8 +228,8 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
         m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
 
-        scene()->prepareDragLayer(this);
         scene()->setCursor(Qt::ClosedHandCursor);
+        scene()->prepareDragLayer(myMovableSelectedAncestorItem);
 
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
             movableSelectedAncestorItem->setBeingDragged(true);
