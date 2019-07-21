@@ -6,8 +6,6 @@
 #include <scenesettings.h>
 #include <headlineitem.h>
 
-#include <private/qgraphicsscene_p.h>
-
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QPointer>
@@ -24,6 +22,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_dragLayerItem->setFlag(DesignerItem::ItemHasNoContents);
     m_dragLayerItem->setZValue(std::numeric_limits<int>::max());
     addItem(m_dragLayerItem);
+
+    connect(this, &DesignerScene::changed, this, [=] {
+        setSceneRect(sceneRect() | itemsBoundingRect());
+    });
 
     connect(this, &DesignerScene::selectionChanged, this, [=]{
         QList<Control*> sc = selectedControls();
@@ -187,6 +189,11 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
             items.removeAt(i);
     }
     return items;
+}
+
+QRectF DesignerScene::itemsBoundingRect() const
+{
+    return QGraphicsScene::itemsBoundingRect().adjusted(-20, -25, 20, 20);
 }
 
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -409,8 +416,6 @@ void DesignerScene::discharge()
 
 void DesignerScene::setCurrentForm(Form* currentForm)
 {
-    Q_D(QGraphicsScene);
-
     if (m_currentForm == currentForm)
         return;
 
@@ -435,8 +440,7 @@ void DesignerScene::setCurrentForm(Form* currentForm)
     if (m_currentForm) {
         addItem(m_currentForm);
         m_currentForm->setVisible(true);
-        d->growingItemsBoundingRect = QRectF();
-        emit sceneRectChanged(d->growingItemsBoundingRect);
+        setSceneRect(itemsBoundingRect());
     }
 }
 

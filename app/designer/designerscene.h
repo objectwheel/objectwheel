@@ -9,7 +9,6 @@ class DesignerScene final : public QGraphicsScene
 {
     Q_OBJECT
     Q_DISABLE_COPY(DesignerScene)
-    Q_DECLARE_PRIVATE(QGraphicsScene)
 
     friend class ControlRemovingManager; // For removeControl(), removeForm()
     friend class ControlCreationManager; // For addForm(), addControl()
@@ -33,6 +32,7 @@ public:
     QList<Control*> selectedControls() const;
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
+    QRectF itemsBoundingRect() const;
 
     static int startDragDistance();
     static QColor outlineColor();

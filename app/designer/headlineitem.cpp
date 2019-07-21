@@ -103,7 +103,7 @@ void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         parentItem()->setBeingDragged(false);
     }
 
-    ToolItem::mouseReleaseEvent(event); // Clears m_dragAccepted
+    ToolItem::mouseReleaseEvent(event); // Clears dragAccepted state
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)

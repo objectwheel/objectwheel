@@ -16,7 +16,6 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <headlineitem.h>
-#include <sceneextenditem.h>
 
 #include <QCursor>
 #include <QPainter>
@@ -40,7 +39,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_headlineItem(new HeadlineItem(this))
 {
     m_controls.append(this);
-    new SceneExtendItem(this);
 
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
