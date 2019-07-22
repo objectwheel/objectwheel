@@ -79,7 +79,7 @@ protected:
     ~Control() override;
 
 private slots:
-    void applyCachedGeometry();
+    void updateGeometry();
     void updateImage(const RenderResult& result);
 
 private:

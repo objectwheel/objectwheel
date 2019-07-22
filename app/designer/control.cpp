@@ -49,9 +49,9 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     ControlPropertyManager::setSize(this, {40, 40}, ControlPropertyManager::NoOption);
 
     connect(this, &Control::beingDraggedChanged,
-            this, &Control::applyCachedGeometry);
+            this, &Control::updateGeometry);
     connect(this, &Control::beingResizedChanged,
-            this, &Control::applyCachedGeometry);
+            this, &Control::updateGeometry);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateImage);
     connect(this, &Control::doubleClicked,
@@ -378,7 +378,7 @@ QVariant Control::itemChange(int change, const QVariant& value)
         const QPointF& snapPos = scene()->snapPosition(value.toPointF());
         const QPointF& snapMargin = value.toPointF() - snapPos;
         m_snapMargin = QSizeF(snapMargin.x(), snapMargin.y());
-        if (!form()) {
+        if (gui() && !form()) {
             ControlPropertyManager::setPos(this, snapPos, ControlPropertyManager::SaveChanges
                                            | ControlPropertyManager::UpdateRenderer
                                            | ControlPropertyManager::CompressedCall
@@ -388,10 +388,12 @@ QVariant Control::itemChange(int change, const QVariant& value)
     } else if (change == ItemSizeChange && beingResized()) {
         const QSizeF snapSize = scene()->snapSize(pos(), value.toSizeF() + m_snapMargin);
         m_snapMargin = QSizeF(0, 0);
-        ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
-                                        | ControlPropertyManager::UpdateRenderer
-                                        | ControlPropertyManager::CompressedCall
-                                        | ControlPropertyManager::DontApplyDesigner);
+        if (gui()) {
+            ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdateRenderer
+                                            | ControlPropertyManager::CompressedCall
+                                            | ControlPropertyManager::DontApplyDesigner);
+        }
         return snapSize;
     }
 
@@ -445,9 +447,9 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         paintHighlight(painter);
 }
 
-void Control::applyCachedGeometry()
+void Control::updateGeometry()
 {
-    if (beingDragged() || beingResized())
+    if (beingDragged() || beingResized() || !gui())
         return;
 
     if (!m_blockedPropertyChanges.contains("width"))
@@ -476,37 +478,32 @@ void Control::updateImage(const RenderResult& result)
     if (result.uid != uid())
         return;
 
-    m_errors = result.errors;
     m_gui = result.gui;
     m_popup = result.popup;
     m_window = result.window;
     m_visible = result.visible;
+    m_errors = result.errors;
     m_events = result.events;
     m_properties = result.properties;
-
-    setResizable(gui());
-    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
-
-    if (result.codeChanged)
-        m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
-
     m_blockedPropertyChanges = result.blockedPropertyChanges;
     m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
-
-    if (!beingDragged() && !beingResized())
-        applyCachedGeometry();
-
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_image = hasErrors()
             ? PaintUtils::renderErrorControlImage(size(), ControlRenderingManager::devicePixelRatio())
             : result.image;
     m_image.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
-
     if (m_image.isNull() && !m_gui) {
-        m_image = PaintUtils::renderNonGuiControlImage(
-                    ToolUtils::toolIconPath(m_dir), size(),
-                    ControlRenderingManager::devicePixelRatio());
+        m_image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(),
+                                                       ControlRenderingManager::devicePixelRatio());
     }
+    if (result.codeChanged)
+        m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
+
+    setResizable(gui());
+    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
+
+    if (!beingDragged() && !beingResized())
+        updateGeometry();
 
     update();
 

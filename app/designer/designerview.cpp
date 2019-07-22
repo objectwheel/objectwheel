@@ -658,9 +658,10 @@ void DesignerView::onSendBackAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls) {
-        ControlPropertyManager::setZ(control, scene()->currentForm()->lowerZValue() - 1,
-                                     ControlPropertyManager::SaveChanges
-                                     | ControlPropertyManager::UpdateRenderer);
+        ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+        if (control->gui() && !control->window() && !control->popup())
+            options |= ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
+        ControlPropertyManager::setZ(control, scene()->currentForm()->lowerZValue() - 1, options);
     }
 }
 
@@ -669,15 +670,12 @@ void DesignerView::onBringFrontAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls) {
-        ControlPropertyManager::setZ(control, scene()->currentForm()->higherZValue() + 1,
-                                     ControlPropertyManager::SaveChanges
-                                     | ControlPropertyManager::UpdateRenderer);
+        ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+        if (control->gui() && !control->window() && !control->popup())
+            options |= ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
+        ControlPropertyManager::setZ(control, scene()->currentForm()->higherZValue() + 1, options);
     }
 }
-
-
-
-
 
 bool DesignerView::eventFilter(QObject *watched, QEvent *event)
 {

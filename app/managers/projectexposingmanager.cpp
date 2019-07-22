@@ -46,6 +46,7 @@ void ProjectExposingManager::exposeProject()
             Q_ASSERT(parentControl);
 
             auto control = new Control(childPath);
+            ControlPropertyManager::setPos(control, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
 
             // Since SaveUtils::childrenPaths sorts out the siblings based
             // on indexes, thus the first control is the one with lower index
