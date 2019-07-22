@@ -3,9 +3,11 @@
 
 #include <QVariant>
 
+// ### TODO: Finish the mess below
+
 namespace SaveUtils {
 
-enum ControlProperties : quint32 {
+enum ControlProperties : quint32 { // ### Application related properties
     ControlSignature = 0x1000,
     ControlVersion,
     ControlId,
@@ -13,7 +15,13 @@ enum ControlProperties : quint32 {
     ControlIndex
 };
 
-enum ProjectProperties : quint32 {
+enum DesignerProperties : quint32 { // ### Designer related properties
+    DesignerSignature = 0x1000,
+    DesignerVersion,
+    DesignerPosition
+};
+
+enum ProjectProperties : quint32 { // ### Designer related properties
     ProjectSignature = 0x2000,
     ProjectVersion,
     ProjectUid,
@@ -22,11 +30,11 @@ enum ProjectProperties : quint32 {
     ProjectCreationDate,
     ProjectModificationDate,
     ProjectSize,
-    ProjectTheme,
-    ProjectHdpiScaling
+    ProjectTheme,      // ### Marked for removal, qtquickcontrols2.conf takes place
+    ProjectHdpiScaling // ### Marked for removal, move it to qtquickcontrols2.conf, it is a QSettings ini, right? then we should be able to add custom values right?
 };
 
-enum UserProperties : quint32 {
+enum UserProperties : quint32 { // ### Designer related properties
     UserSignature = 0x3000,
     UserVersion,
     UserEmail,
