@@ -4,7 +4,6 @@
 #include <renderresult.h>
 #include <designeritem.h>
 
-class ResizerItem;
 class DesignerScene;
 
 class Control : public DesignerItem
@@ -60,7 +59,6 @@ public:
     QRectF frame() const;
 
 protected:
-    QRectF outerRect(const QRectF& rect) const;
     void dropControl(Control* control);
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
@@ -85,9 +83,6 @@ private slots:
     void updateImage(const RenderResult& result);
 
 private:
-    void initResizers();
-
-private:
     bool m_gui;
     bool m_clip;
     bool m_popup;
@@ -107,7 +102,6 @@ private:
     QVector<QString> m_blockedPropertyChanges;
 
     QVector<QmlError> m_errors;
-    QVector<ResizerItem*> m_resizers;
     QVector<QString> m_events;
     QVector<PropertyNode> m_properties;
 

@@ -2,6 +2,7 @@
 #define RESIZERITEM_H
 
 #include <gadgetitem.h>
+#include <QPointer>
 
 class ResizerItem final : public GadgetItem
 {
@@ -17,11 +18,12 @@ public:
 public:
     explicit ResizerItem(Placement placement, DesignerItem* parent = nullptr);
 
+    DesignerItem* targetItem() const;
+    void setTargetItem(DesignerItem* targetItem);
+
     void updateCursor();
     void updatePosition();
-
-private:
-    void setParentGeometry(const QPointF& dragDistance);
+    void updateTargetGeometry();
 
 private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -30,6 +32,7 @@ private:
 
 private:
     Placement m_placement;
+    QPointer<DesignerItem> m_targetItem;
 };
 
 #endif // RESIZERITEM_H

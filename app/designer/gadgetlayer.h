@@ -3,7 +3,9 @@
 
 #include <designeritem.h>
 
+class ResizerItem;
 class HeadlineItem;
+
 class GadgetLayer final : public DesignerItem
 {
     Q_OBJECT
@@ -24,7 +26,7 @@ signals:
     void headlineDoubleClicked(bool isFormHeadline);
 
 private:
-    QList<DesignerItem*> m_items;
+    QList<ResizerItem*> m_resizers;
     HeadlineItem* m_headlineItem;
     HeadlineItem* m_formHeadlineItem;
 };

@@ -1,5 +1,4 @@
 #include <form.h>
-#include <resizeritem.h>
 #include <saveutils.h>
 #include <suppressor.h>
 #include <designerscene.h>
@@ -45,8 +44,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
 
-    initResizers();
-
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setSize(this, {40, 40}, ControlPropertyManager::NoOption);
@@ -59,11 +56,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::updateImage);
     connect(this, &Control::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
-    connect(this, &Control::geometryChanged,
-            this, [=] {
-        for (ResizerItem* resizer : m_resizers)
-            resizer->updatePosition();
-    });
 }
 
 Control::~Control()
@@ -263,11 +255,6 @@ void Control::setIndex(quint32 index)
     m_index = index;
 }
 
-QRectF Control::outerRect(const QRectF& rect) const
-{
-    return rect.adjusted(-0.5 / scene()->zoomLevel(), -0.5 / scene()->zoomLevel(), 0, 0);
-}
-
 QVariant::Type Control::propertyType(const QString& propertyName) const
 {
     for (const PropertyNode& propertyNode : m_properties) {
@@ -387,11 +374,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 QVariant Control::itemChange(int change, const QVariant& value)
 {    
-    if (change == ItemSelectedHasChanged) {
-        bool selected = value.toBool();
-        for (ResizerItem* resizer : m_resizers)
-            resizer->setVisible(selected);
-    } else if (change == ItemPositionChange && beingDragged()) {
+    if (change == ItemPositionChange && beingDragged()) {
         const QPointF& snapPos = scene()->snapPosition(value.toPointF());
         const QPointF& snapMargin = value.toPointF() - snapPos;
         m_snapMargin = QSizeF(snapMargin.x(), snapMargin.y());
@@ -439,7 +422,7 @@ void Control::paintHoverOutline(QPainter* painter)
 {
     painter->setBrush(Qt::NoBrush);
     painter->setPen(scene()->pen());
-    painter->drawRect(outerRect(rect()));
+    painter->drawRect(scene()->outerRect(rect()));
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
@@ -453,7 +436,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         paintImage(painter);
 
     if (settings->controlOutline != 0)
-        scene()->paintOutline(painter, outerRect(settings->controlOutline == 1 ? rect() : frame()));
+        scene()->paintOutline(painter, scene()->outerRect(settings->controlOutline == 1 ? rect() : frame()));
 
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
         paintHoverOutline(painter);
@@ -523,21 +506,12 @@ void Control::updateImage(const RenderResult& result)
                     ControlRenderingManager::devicePixelRatio());
     }
 
-    for (auto resizer : m_resizers)
-        resizer->setEnabled(gui());
+//    for (auto resizer : m_resizers)
+//        resizer->setEnabled(gui());
 
     update();
 
     ControlPropertyManager::instance()->imageChanged(this, result.codeChanged);
-}
-
-void Control::initResizers()
-{
-    for (int i = 0; i < 8; ++i) {
-        auto resizer = new ResizerItem(ResizerItem::Placement(i), this);
-        resizer->setPen(DesignerScene::pen());
-        m_resizers.append(resizer);
-    }
 }
 
 QRectF Control::frame() const

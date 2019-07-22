@@ -160,6 +160,11 @@ QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
     return size;
 }
 
+QRectF DesignerScene::outerRect(const QRectF& rect)
+{
+    return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
+}
+
 QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
 {
     QList<Control*> controls;

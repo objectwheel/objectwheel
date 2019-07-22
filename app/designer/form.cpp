@@ -22,7 +22,7 @@ void Form::paintFormFrame(QPainter* painter)
 {
     painter->setPen(scene()->pen(Qt::darkGray));
     painter->setBrush(Qt::NoBrush);
-    painter->drawRect(outerRect(rect()));
+    painter->drawRect(scene()->outerRect(rect()));
 }
 
 void Form::paintGridViewDots(QPainter* painter, int gridSize)
@@ -63,7 +63,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
         paintGridViewDots(painter, settings->gridSize);
 
     if (settings->controlOutline != 0)
-        scene()->paintOutline(painter, outerRect(settings->controlOutline == 1 ? rect() : frame()));
+        scene()->paintOutline(painter, scene()->outerRect(settings->controlOutline == 1 ? rect() : frame()));
 
     paintFormFrame(painter);
 

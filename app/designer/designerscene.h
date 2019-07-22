@@ -38,6 +38,7 @@ public:
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
     QRectF itemsBoundingRect() const;
+    QRectF outerRect(const QRectF& rect);
 
     static int startDragDistance();
     static QColor outlineColor();

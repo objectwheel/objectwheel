@@ -9,6 +9,19 @@ ResizerItem::ResizerItem(Placement placement, DesignerItem* parent) : GadgetItem
     updateCursor();
 }
 
+DesignerItem* ResizerItem::targetItem() const
+{
+    return m_targetItem;
+}
+
+void ResizerItem::setTargetItem(DesignerItem* targetItem)
+{
+    if (m_targetItem != targetItem) {
+        m_targetItem = targetItem;
+        updatePosition();
+    }
+}
+
 void ResizerItem::updateCursor()
 {
     switch (m_placement) {
@@ -41,92 +54,94 @@ void ResizerItem::updateCursor()
 
 void ResizerItem::updatePosition()
 {
-    if (parentItem() == 0)
+    if (targetItem() == 0)
         return;
 
-    const QRectF& parentRect = parentItem()->rect();
+    const QRectF& targetRect = targetItem()->mapRectToScene(targetItem()->rect());
 
     switch (m_placement) {
     case ResizerItem::Top:
-        setPos(UtilityFunctions::topCenter(parentRect));
+        setPos(UtilityFunctions::topCenter(targetRect));
         break;
     case ResizerItem::Right:
-        setPos(UtilityFunctions::rightCenter(parentRect));
+        setPos(UtilityFunctions::rightCenter(targetRect));
         break;
     case ResizerItem::Bottom:
-        setPos(UtilityFunctions::bottomCenter(parentRect));
+        setPos(UtilityFunctions::bottomCenter(targetRect));
         break;
     case ResizerItem::Left:
-        setPos(UtilityFunctions::leftCenter(parentRect));
+        setPos(UtilityFunctions::leftCenter(targetRect));
         break;
     case ResizerItem::TopLeft:
-        setPos(parentRect.topLeft());
+        setPos(targetRect.topLeft());
         break;
     case ResizerItem::TopRight:
-        setPos(parentRect.topRight());
+        setPos(targetRect.topRight());
         break;
     case ResizerItem::BottomRight:
-        setPos(parentRect.bottomRight());
+        setPos(targetRect.bottomRight());
         break;
     case ResizerItem::BottomLeft:
-        setPos(parentRect.bottomLeft());
+        setPos(targetRect.bottomLeft());
         break;
     }
 }
 
-void ResizerItem::setParentGeometry(const QPointF& dragDistance)
+void ResizerItem::updateTargetGeometry()
 {
-    if (parentItem() == 0)
+    if (targetItem() == 0)
         return;
 
-    QRectF geometry = parentItem()->geometry();
+    qreal dx = dragDistanceVector().x();
+    qreal dy = dragDistanceVector().y();
+    QRectF geometry = targetItem()->geometry();
 
     switch (m_placement) {
     case Top:
-        geometry.setTop(dragDistance.y());
+        geometry.adjust(0, dy, 0, 0);
         break;
     case Right:
-        geometry.setRight(dragDistance.x());
+        geometry.adjust(0, 0, dx, 0);
         break;
     case Bottom:
-        geometry.setBottom(dragDistance.y());
+        geometry.adjust(0, 0, 0, dy);
         break;
     case Left:
-        geometry.setLeft(dragDistance.x());
+        geometry.adjust(dx, 0, 0, 0);
         break;
     case TopLeft:
-        geometry.setTopLeft(dragDistance);
+        geometry.adjust(dx, dy, 0, 0);
         break;
     case TopRight:
-        geometry.setTopRight(dragDistance);
+        geometry.adjust(0, dy, dx, 0);
         break;
     case BottomRight:
-        geometry.setBottomRight(dragDistance);
+        geometry.adjust(0, 0, dx, dy);
         break;
     case BottomLeft:
-        geometry.setBottomLeft(dragDistance);
+        geometry.adjust(dx, 0, 0, dy);
         break;
     }
 
-    parentItem()->setGeometry(geometry);
+    targetItem()->setGeometry(geometry);
 }
 
 void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     GadgetItem::mouseMoveEvent(event);
 
-    if (parentItem() && dragAccepted()) {
-        parentItem()->setBeingDragged(true);
-        parentItem()->setBeingResized(true);
-        setParentGeometry(parentItem()->mapToParent(mapToParent(dragDistanceVector())));
+    if (targetItem() && dragAccepted()) {
+        targetItem()->setBeingDragged(true);
+        targetItem()->setBeingResized(true);
+        updateTargetGeometry();
     }
 }
 
 void ResizerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (parentItem() && dragAccepted()) {
-        parentItem()->setBeingDragged(false);
-        parentItem()->setBeingResized(false);
+    if (targetItem() && dragAccepted()) {
+        targetItem()->setBeingDragged(false);
+        targetItem()->setBeingResized(false);
     }
 
     GadgetItem::mouseReleaseEvent(event); // Clears dragAccepted state

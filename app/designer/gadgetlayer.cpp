@@ -1,12 +1,19 @@
 #include <gadgetlayer.h>
 #include <designerscene.h>
 #include <headlineitem.h>
+#include <resizeritem.h>
 #include <QPainter>
 
 GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
   , m_headlineItem(new HeadlineItem(this))
   , m_formHeadlineItem(new HeadlineItem(this))
 {
+    for (int i = 0; i < 8; ++i) {
+        auto resizer = new ResizerItem(ResizerItem::Placement(i), this);
+        resizer->setPen(DesignerScene::pen());
+        m_resizers.append(resizer);
+    }
+
     m_headlineItem->setPen(QPen(Qt::white));
     m_headlineItem->setBrush(DesignerScene::outlineColor());
     m_formHeadlineItem->setVisible(true);
@@ -29,6 +36,18 @@ void GadgetLayer::onSceneSelectionChange()
     if (currentFormItem)
         m_formHeadlineItem->setBrush(currentFormItem->isSelected() ? scene()->outlineColor() : Qt::darkGray);
     QList<DesignerItem*> selectedItems = scene()->selectedItems();
+    for (ResizerItem* resizer : m_resizers) {
+        if (resizer->targetItem())
+            resizer->targetItem()->disconnect(resizer);
+        if (selectedItems.size() == 1) {
+            DesignerItem* selectedItem = selectedItems.first();
+            connect(selectedItem, &DesignerItem::geometryChanged,
+                    resizer, &ResizerItem::updatePosition);
+            resizer->setTargetItem(selectedItem);
+            resizer->updatePosition();
+        }
+        resizer->setVisible(selectedItems.size() == 1);
+    }
     if (currentFormItem && currentFormItem->isSelected())
         selectedItems.removeOne(currentFormItem);
     if (m_headlineItem->targetItem())
@@ -41,8 +60,8 @@ void GadgetLayer::onSceneSelectionChange()
                 m_headlineItem, &HeadlineItem::setText);
         m_headlineItem->setTargetItem(selectedItem);
         m_headlineItem->setText(selectedItem->objectName()); // id
-        m_headlineItem->updateGeometry();
-        m_headlineItem->setVisible(true);
+        m_headlineItem->updateGeometry(); // Schedules an update, so prevent flicker below
+        QMetaObject::invokeMethod(m_headlineItem, std::bind(&HeadlineItem::setVisible, m_headlineItem, true));
     } else {
         m_headlineItem->setVisible(false);
     }
