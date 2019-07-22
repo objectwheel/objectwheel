@@ -50,6 +50,7 @@ public:
     static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
 
     void paintOutline(QPainter* painter, const QRectF& rect);
+    void paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem);
 
 public slots:
     void discharge();
@@ -68,6 +69,7 @@ signals:
 private:
     QList<Form*> m_forms;
     QPointer<Form> m_currentForm;
+    QList<DesignerItem*> m_siblingsBeforeDrag;
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
 };

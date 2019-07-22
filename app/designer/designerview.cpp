@@ -120,7 +120,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     setCacheMode(QGraphicsView::CacheNone);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
 
-    setRubberBandSelectionMode(Qt::IntersectsItemShape);
+    setRubberBandSelectionMode(Qt::IntersectsItemBoundingRect);
     setDragMode(QGraphicsView::RubberBandDrag);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setFrameShape(QFrame::NoFrame);

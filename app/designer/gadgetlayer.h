@@ -13,22 +13,19 @@ class GadgetLayer final : public DesignerItem
 
 public:
     explicit GadgetLayer(DesignerScene* scene);
+    QList<ResizerItem*> resizers() const;
 
 private slots:
     void onSceneSelectionChange();
     void onSceneCurrentFormChange(DesignerItem* formItem);
-
-private:
-    void paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem);
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 signals:
     void headlineDoubleClicked(bool isFormHeadline);
 
 private:
     QList<ResizerItem*> m_resizers;
-    HeadlineItem* m_headlineItem;
     HeadlineItem* m_formHeadlineItem;
+    HeadlineItem* m_headlineItem;
 };
 
 #endif // GADGETLAYER_H

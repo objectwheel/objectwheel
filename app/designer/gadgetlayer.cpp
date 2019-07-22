@@ -2,11 +2,10 @@
 #include <designerscene.h>
 #include <headlineitem.h>
 #include <resizeritem.h>
-#include <QPainter>
 
 GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
-  , m_headlineItem(new HeadlineItem(this))
   , m_formHeadlineItem(new HeadlineItem(this))
+  , m_headlineItem(new HeadlineItem(this))
 {
     for (int i = 0; i < 8; ++i) {
         auto resizer = new ResizerItem(ResizerItem::Placement(i), this);
@@ -85,15 +84,7 @@ void GadgetLayer::onSceneCurrentFormChange(DesignerItem* formItem)
     }
 }
 
-void GadgetLayer::paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem)
+QList<ResizerItem*> GadgetLayer::resizers() const
 {
-    painter->setPen(scene()->pen(scene()->outlineColor(), 2));
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(selectedItem->mapRectToScene(selectedItem->rect()));
-}
-
-void GadgetLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
-{
-    for (DesignerItem* selectedItem : scene()->selectedItems())
-        paintSelectionOutline(painter, selectedItem);
+    return m_resizers;
 }

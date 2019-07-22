@@ -40,7 +40,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     });
 
     connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
-        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
+        WindowManager::mainWindow()->centralWidget()->designerView()->
+                onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
     });
 }
 
@@ -121,9 +122,12 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
 {
     if (item == 0)
         return;
-    if (const DesignerItem* targetItem = item->parentItem()) {
-        m_dragLayer->setSize(targetItem->size());
-        m_dragLayer->setPos(targetItem->scenePos());
+
+    m_siblingsBeforeDrag = item->siblingItems();
+
+    if (const DesignerItem* parentItem = item->parentItem()) {
+        m_dragLayer->setSize(parentItem->size());
+        m_dragLayer->setPos(parentItem->scenePos());
     }
 }
 
@@ -208,6 +212,9 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
 
+    for (DesignerItem* selectedItem : selectedItems())
+        paintSelectionOutline(painter, selectedItem);
+
     const QList<DesignerItem*>& items = draggedResizedSelectedItems();
     if (items.size() > 1) { // Multiple items moving
         const QRectF& itemsBoundingRect = boundingRect(items);
@@ -222,10 +229,8 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
         painter->drawLines(lines);
         for (const QLineF& line : lines) {
             painter->setBrush(outlineColor());
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5),
-                                            QSizeF(3.0, 3.0)), 1.5, 1.5);
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5),
-                                            QSizeF(3.0, 3.0)), 1.5, 1.5);
+            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
         }
     }
 }
@@ -246,6 +251,23 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
 
     painter->setPen(linePen);
     painter->drawRect(rect);
+}
+
+void DesignerScene::paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem)
+{
+    const QRectF& rect = selectedItem->mapRectToScene(selectedItem->rect());
+    const qreal m = 0.5 / zoomLevel();
+    QPainterPath path;
+    path.addRect(rect.adjusted(-m, -m, m, m));
+    path.addRect(rect.adjusted(m, m, -m, -m));
+    QPainterPath path2;
+    for (ResizerItem* resizer : gadgetLayer()->resizers()) {
+        if (resizer->isVisible())
+            path2.addRect(QRectF(resizer->pos() + resizer->rect().topLeft() / zoomLevel(), resizer->size() / zoomLevel()));
+    }
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(outlineColor());
+    painter->drawPath(path.subtracted(path2));
 }
 
 QVector<QLineF> DesignerScene::guidelines() const
@@ -319,11 +341,11 @@ QVector<QLineF> DesignerScene::guidelines() const
         lines << QLineF(parent->mapToScene(QPointF(0, parent->height())),
                         parent->mapToScene(QPointF(parent->width(), parent->height())));
 
-    for (auto childControl : parent->childItems(false)) {
-        if (items.contains(childControl))
-            continue;
+    if (items.size() != 1)
+        return lines;
 
-        auto cgeometry = childControl->geometry();
+    for (const DesignerItem* siblingItem : m_siblingsBeforeDrag) {
+        auto cgeometry = siblingItem->geometry();
         auto ccenter = cgeometry.center();
 
         /* Item1 center <-> Item2 center */

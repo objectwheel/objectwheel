@@ -39,13 +39,6 @@ void Form::paintGridViewDots(QPainter* painter, int gridSize)
     painter->restore();
 }
 
-void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
-{
-    // We don't propagate the mouse press event in order to block selection on form.
-    // Hence rubber band is activated on form.
-    event->ignore();
-}
-
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
