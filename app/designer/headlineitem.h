@@ -2,6 +2,7 @@
 #define HEADLINEITEM_H
 
 #include <gadgetitem.h>
+#include <QPointer>
 
 class HeadlineItem final : public GadgetItem
 {
@@ -17,10 +18,13 @@ public:
     QString text() const;
     void setText(const QString& text);
 
-    void scheduleSizeUpdate();
+    DesignerItem* targetItem() const;
+    void setTargetItem(DesignerItem* targetItem);
+
+public slots:
+    void updateGeometry();
 
 private:
-    void updateSize();
     QFont dimensionsFont() const;
     QString dimensionsText(qreal width, qreal height) const;
     QSizeF calculateTextSize() const;
@@ -33,7 +37,8 @@ private:
 private:
     QString m_text;
     QSizeF m_dimensions;
-    bool m_sizeUpdateScheduled;
+    QPointer<DesignerItem> m_targetItem;
+    bool m_geometryUpdateScheduled;
 };
 
 #endif // HEADLINEITEM_H

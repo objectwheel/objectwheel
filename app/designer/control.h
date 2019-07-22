@@ -6,7 +6,6 @@
 
 class ResizerItem;
 class DesignerScene;
-class HeadlineItem;
 
 class Control : public DesignerItem
 {
@@ -41,7 +40,6 @@ public:
     QImage image() const;
 
     Control* parentControl() const;
-    HeadlineItem* headlineItem() const;
 
     QVector<QmlError> errors() const;
     QVector<QString> events() const;
@@ -108,7 +106,6 @@ private:
     QRectF m_cachedGeometry;
     QVector<QString> m_blockedPropertyChanges;
 
-    HeadlineItem* m_headlineItem;
     QVector<QmlError> m_errors;
     QVector<ResizerItem*> m_resizers;
     QVector<QString> m_events;

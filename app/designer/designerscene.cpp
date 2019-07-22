@@ -6,6 +6,10 @@
 #include <scenesettings.h>
 #include <headlineitem.h>
 #include <gadgetlayer.h>
+#include <windowmanager.h>
+#include <centralwidget.h>
+#include <designerview.h>
+#include <mainwindow.h>
 
 #include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
@@ -18,7 +22,7 @@
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_currentForm(nullptr)
   , m_dragLayer(new DesignerItem)
-  , m_gadgetLayer(new GadgetLayer)
+  , m_gadgetLayer(new GadgetLayer(this))
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -31,25 +35,12 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_gadgetLayer);
 
-    connect(this, &DesignerScene::sceneRectChanged, this, [=] {
-        m_gadgetLayer->setGeometry(sceneRect());
-    });
-
     connect(this, &DesignerScene::changed, this, [=] {
         setSceneRect(sceneRect() | itemsBoundingRect());
     });
 
-    connect(this, &DesignerScene::selectionChanged, this, [=]{
-        QList<Control*> sc = selectedControls();
-        sc.removeOne(currentForm());
-        if (sc.isEmpty())
-            return;
-        if (sc.size() > 1) {
-            for (Control* c : sc)
-                c->headlineItem()->setVisible(false);
-        } else {
-            sc.first()->headlineItem()->setVisible(true);
-        }
+    connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
+        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
     });
 }
 

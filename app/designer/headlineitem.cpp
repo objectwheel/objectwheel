@@ -7,7 +7,8 @@
 enum { MARGIN = 10 };
 
 HeadlineItem::HeadlineItem(DesignerItem* parent) : GadgetItem(parent)
-  , m_sizeUpdateScheduled(false)
+  , m_targetItem(nullptr)
+  , m_geometryUpdateScheduled(false)
 {
     setCursor(Qt::OpenHandCursor);
 }
@@ -21,7 +22,7 @@ void HeadlineItem::setDimensions(const QSizeF& dimensions)
 {
     if (m_dimensions != dimensions) {
         m_dimensions = dimensions;
-        updateSize();
+        updateGeometry();
         update();
     }
 }
@@ -36,34 +37,46 @@ void HeadlineItem::setText(const QString& text)
     if (m_text != text) {
         m_text = text;
         setToolTip(text);
-        updateSize();
+        updateGeometry();
         update();
     }
 }
 
-void HeadlineItem::scheduleSizeUpdate()
+DesignerItem* HeadlineItem::targetItem() const
 {
-    if (m_sizeUpdateScheduled)
-        return;
-    m_sizeUpdateScheduled = true;
-    QMetaObject::invokeMethod(this, &HeadlineItem::updateSize, Qt::QueuedConnection);
+    return m_targetItem;
 }
 
-void HeadlineItem::updateSize()
+void HeadlineItem::setTargetItem(DesignerItem* targetItem)
 {
-    const QSizeF& ts = calculateTextSize();
-    const QSizeF& ps = parentItem() ? parentItem()->size() : QSizeF();
-    qreal width = ts.width();
-    if (m_dimensions.isValid()) {
-        const QFontMetrics fm(dimensionsFont());
-        QString wstr = QString::number(m_dimensions.width());
-        QString hstr = QString::number(m_dimensions.height());
-        wstr.replace(QRegularExpression("\\d"), "9");
-        hstr.replace(QRegularExpression("\\d"), "9");
-        width += fm.horizontalAdvance(dimensionsText(wstr.toDouble(), hstr.toDouble()));
+    if (m_targetItem != targetItem) {
+        m_targetItem = targetItem;
+        updateGeometry();
+        update();
     }
-    setRect(-0.5, -ts.height(), qMin(ps.width(), width + MARGIN), ts.height());
-    m_sizeUpdateScheduled = false;
+}
+
+void HeadlineItem::updateGeometry()
+{
+    if (m_geometryUpdateScheduled)
+        return;
+    m_geometryUpdateScheduled = true;
+    QMetaObject::invokeMethod(this, [=] {
+        const QSizeF& ts = calculateTextSize();
+        const QSizeF& ps = targetItem() ? targetItem()->size() : QSizeF();
+        qreal width = ts.width();
+        if (m_dimensions.isValid()) {
+            const QFontMetrics fm(dimensionsFont());
+            QString wstr = QString::number(m_dimensions.width());
+            QString hstr = QString::number(m_dimensions.height());
+            wstr.replace(QRegularExpression("\\d"), "9");
+            hstr.replace(QRegularExpression("\\d"), "9");
+            width += fm.horizontalAdvance(dimensionsText(wstr.toDouble(), hstr.toDouble()));
+        }
+        setPos(targetItem() ? targetItem()->scenePos() : QPointF());
+        setRect(-0.5, -ts.height(), qMin(ps.width(), width + MARGIN), ts.height());
+        m_geometryUpdateScheduled = false;
+    }, Qt::QueuedConnection);
 }
 
 QFont HeadlineItem::dimensionsFont() const
@@ -89,18 +102,18 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     GadgetItem::mouseMoveEvent(event);
 
-    if (parentItem() && dragAccepted()) {
+    if (targetItem() && dragAccepted()) {
         scene()->setCursor(Qt::ClosedHandCursor);
-        parentItem()->setBeingDragged(true);
-        parentItem()->setPos(parentItem()->mapToParent(mapToParent(dragDistanceVector())));
+        targetItem()->setBeingDragged(true);
+        targetItem()->setPos(targetItem()->pos() + dragDistanceVector());
     }
 }
 
 void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (parentItem() && dragAccepted()) {
+    if (targetItem() && dragAccepted()) {
         scene()->unsetCursor();
-        parentItem()->setBeingDragged(false);
+        targetItem()->setBeingDragged(false);
     }
 
     GadgetItem::mouseReleaseEvent(event); // Clears dragAccepted state
@@ -115,7 +128,7 @@ void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     painter->setPen(pen());
     const qreal textWidth = calculateTextSize().width();
     QRectF r = rect().adjusted(MARGIN / 2, 0, -MARGIN / 2, -1);
-    if (parentItem() && m_dimensions.isValid() && r.width() >= textWidth) {
+    if (m_dimensions.isValid() && r.width() >= textWidth) {
         const qreal availableWidth = r.width() - textWidth;
         r.adjust(0, 0, -availableWidth, 0);
         painter->drawText(r, m_text, QTextOption(Qt::AlignLeft));

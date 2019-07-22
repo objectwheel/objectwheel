@@ -2,7 +2,6 @@
 #include <designerscene.h>
 #include <designersettings.h>
 #include <scenesettings.h>
-#include <headlineitem.h>
 
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -12,22 +11,11 @@ Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
     setCursor(Qt::ArrowCursor);
     setFlag(ItemIsMovable, false);
-    headlineItem()->setVisible(true);
-    headlineItem()->setBrush(Qt::darkGray);
 }
 
 int Form::type() const
 {
     return Type;
-}
-
-QVariant Form::itemChange(int change, const QVariant& value)
-{
-    if (change == ItemSelectedHasChanged)
-        headlineItem()->setBrush(isSelected() ? scene()->outlineColor() : Qt::darkGray);
-    if (change == ItemSizeHasChanged)
-        headlineItem()->setDimensions(size());
-    return Control::itemChange(change, value);
 }
 
 void Form::paintFormFrame(QPainter* painter)

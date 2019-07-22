@@ -18,8 +18,10 @@ QPen GadgetItem::pen() const
 
 void GadgetItem::setPen(const QPen& pen)
 {
-    m_pen = pen;
-    update();
+    if (m_pen != pen) {
+        m_pen = pen;
+        update();
+    }
 }
 
 QBrush GadgetItem::brush() const
@@ -29,8 +31,10 @@ QBrush GadgetItem::brush() const
 
 void GadgetItem::setBrush(const QBrush& brush)
 {
-    m_brush = brush;
-    update();
+    if (m_brush != brush) {
+        m_brush = brush;
+        update();
+    }
 }
 
 QPointF GadgetItem::dragDistanceVector() const

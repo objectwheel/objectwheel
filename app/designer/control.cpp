@@ -9,13 +9,12 @@
 #include <parserutils.h>
 #include <utilityfunctions.h>
 #include <toolutils.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 #include <windowmanager.h>
 #include <centralwidget.h>
 #include <designerview.h>
 #include <mainwindow.h>
-#include <designersettings.h>
-#include <scenesettings.h>
-#include <headlineitem.h>
 
 #include <QCursor>
 #include <QPainter>
@@ -36,7 +35,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
   , m_snapMargin(QSizeF(0, 0))
-  , m_headlineItem(new HeadlineItem(this))
 {
     m_controls.append(this);
 
@@ -48,8 +46,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setFlag(ItemSendsGeometryChanges);
 
     initResizers();
-    headlineItem()->setPen(QPen(Qt::white));
-    headlineItem()->setBrush(DesignerScene::outlineColor());
 
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
@@ -63,10 +59,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::updateImage);
     connect(this, &Control::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
-    connect(headlineItem(), &HeadlineItem::doubleClicked,
-            this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
-    connect(this, &Control::geometryChanged,
-            headlineItem(), &HeadlineItem::scheduleSizeUpdate);
     connect(this, &Control::geometryChanged,
             this, [=] {
         for (ResizerItem* resizer : m_resizers)
@@ -179,11 +171,6 @@ Control* Control::parentControl() const
     return static_cast<Control*>(parentItem());
 }
 
-HeadlineItem* Control::headlineItem() const
-{
-    return m_headlineItem;
-}
-
 QVector<QmlError> Control::errors() const
 {
     return m_errors;
@@ -254,9 +241,11 @@ void Control::setClip(bool clip)
 
 void Control::setId(const QString& id)
 {
-    m_id = id;
-    m_headlineItem->setText(id);
-    setToolTip(id);
+    if (m_id != id) {
+        m_id = id;
+        setToolTip(id);
+        setObjectName(id);
+    }
 }
 
 void Control::setDir(const QString& dir)
@@ -402,8 +391,6 @@ QVariant Control::itemChange(int change, const QVariant& value)
         bool selected = value.toBool();
         for (ResizerItem* resizer : m_resizers)
             resizer->setVisible(selected);
-        if (type() == Control::Type && !selected)
-            m_headlineItem->setVisible(false);
     } else if (change == ItemPositionChange && beingDragged()) {
         const QPointF& snapPos = scene()->snapPosition(value.toPointF());
         const QPointF& snapMargin = value.toPointF() - snapPos;
