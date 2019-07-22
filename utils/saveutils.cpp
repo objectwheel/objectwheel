@@ -59,10 +59,12 @@
 #include <QDateTime>
 #include <QDataStream>
 #include <QVector>
+#include <QPointF>
 
 namespace SaveUtils {
 
 using ControlMetaHash = QHash<ControlProperties, QVariant>;
+using DesignMetaHash = QHash<DesignProperties, QVariant>;
 using ProjectMetaHash = QHash<ProjectProperties, QVariant>;
 using UserMetaHash = QHash<UserProperties, QVariant>;
 
@@ -140,6 +142,11 @@ QString controlSignature()
     return QStringLiteral("b3djdHJs");
 }
 
+QString designSignature()
+{
+    return QStringLiteral("b3dkc2du");
+}
+
 QString projectSignature()
 {
     return QStringLiteral("b3dwcmp0");
@@ -153,6 +160,11 @@ QString userSignature()
 QString controlMetaFileName()
 {
     return QStringLiteral("control.meta");
+}
+
+QString designMetaFileName()
+{
+    return QStringLiteral("design.meta");
 }
 
 QString projectMetaFileName()
@@ -190,6 +202,11 @@ QString toControlMetaFile(const QString& controlDir)
     return toControlMetaDir(controlDir) + '/' + controlMetaFileName();
 }
 
+QString toDesignMetaFile(const QString& controlDir)
+{
+    return toControlMetaDir(controlDir) + '/' + designMetaFileName();
+}
+
 QString toProjectMetaFile(const QString& projectDir)
 {
     return toProjectMetaDir(projectDir) + '/' + projectMetaFileName();
@@ -210,6 +227,11 @@ ControlMetaHash controlMetaHash(const QString& controlDir)
     return readMetaHash<ControlMetaHash>(toControlMetaFile(controlDir));
 }
 
+DesignMetaHash designMetaHash(const QString& controlDir)
+{
+    return readMetaHash<DesignMetaHash>(toDesignMetaFile(controlDir));
+}
+
 ProjectMetaHash projectMetaHash(const QString& projectDir)
 {
     return readMetaHash<ProjectMetaHash>(toProjectMetaFile(projectDir));
@@ -223,6 +245,11 @@ UserMetaHash userMetaHash(const QString& userDir)
 QVariant property(const QString& controlDir, ControlProperties property)
 {
     return controlMetaHash(controlDir).value(property);
+}
+
+QVariant property(const QString& controlDir, DesignProperties property)
+{
+    return designMetaHash(controlDir).value(property);
 }
 
 QVariant property(const QString& projectDir, ProjectProperties property)
@@ -301,6 +328,11 @@ bool isControlValid(const QString& controlDir)
             && !controlUid(controlDir).isEmpty();
 }
 
+bool isDesignValid(const QString& controlDir)
+{
+    return Internal::property(controlDir, DesignSignature).toString() == Internal::designSignature();
+}
+
 bool isProjectValid(const QString& projectDir)
 {
     return Internal::property(projectDir, ProjectSignature).toString() == Internal::projectSignature()
@@ -325,6 +357,11 @@ QString controlId(const QString& controlDir)
 QString controlUid(const QString& controlDir)
 {
     return Internal::property(controlDir, ControlUid).value<QString>();
+}
+
+QPointF designPosition(const QString& controlDir)
+{
+    return Internal::property(controlDir, DesignPosition).value<QPointF>();
 }
 
 bool projectHdpiScaling(const QString& projectDir)
@@ -434,6 +471,13 @@ bool setProperty(const QString& controlDir, ControlProperties property, const QV
     return Internal::saveMetaHash(hash, Internal::toControlMetaFile(controlDir));
 }
 
+bool setProperty(const QString& controlDir, DesignProperties property, const QVariant& value)
+{
+    DesignMetaHash hash(Internal::designMetaHash(controlDir));
+    hash.insert(property, value);
+    return Internal::saveMetaHash(hash, Internal::toDesignMetaFile(controlDir));
+}
+
 bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value)
 {
     ProjectMetaHash hash(Internal::projectMetaHash(projectDir));
@@ -470,6 +514,21 @@ bool initControlMeta(const QString& controlDir)
     hash.insert(ControlUid, HashFactory::generate());
 
     return Internal::saveMetaHash(hash, Internal::toControlMetaFile(controlDir));
+}
+
+bool initDesignMeta(const QString& controlDir)
+{
+    if (QFileInfo::exists(Internal::toDesignMetaFile(controlDir)))
+        return true;
+
+    if (!QDir(Internal::toControlMetaDir(controlDir)).mkpath(QStringLiteral(".")))
+        return false;
+
+    DesignMetaHash hash;
+    hash.insert(DesignSignature, Internal::designSignature());
+    hash.insert(DesignVersion, Internal::version());
+
+    return Internal::saveMetaHash(hash, Internal::toDesignMetaFile(controlDir));
 }
 
 bool initProjectMeta(const QString& projectDir)
@@ -537,7 +596,6 @@ QVector<QString> formPaths(const QString& projectDir)
     return paths;
 }
 
-// FIXME: Do we need recursive after all?
 QVector<QString> childrenPaths(const QString& controlDir, bool recursive)
 {
     if (!isControlValid(controlDir)) {

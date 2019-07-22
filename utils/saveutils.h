@@ -3,8 +3,6 @@
 
 #include <QVariant>
 
-// ### TODO: Finish the mess below
-
 namespace SaveUtils {
 
 enum ControlProperties : quint32 { // ### Application related properties
@@ -15,10 +13,10 @@ enum ControlProperties : quint32 { // ### Application related properties
     ControlIndex
 };
 
-enum DesignerProperties : quint32 { // ### Designer related properties
-    DesignerSignature = 0x1000,
-    DesignerVersion,
-    DesignerPosition
+enum DesignProperties : quint32 { // ### Designer related properties
+    DesignSignature = 0x4000,
+    DesignVersion,
+    DesignPosition
 };
 
 enum ProjectProperties : quint32 { // ### Designer related properties
@@ -63,12 +61,14 @@ QString toDoubleUp(const QString& path);
 
 bool isForm(const QString& controlDir);
 bool isControlValid(const QString& controlDir);
+bool isDesignValid(const QString& controlDir);
 bool isProjectValid(const QString& projectDir);
 bool isUserValid(const QString& userDir);
 
 quint32 controlIndex(const QString& controlDir);
 QString controlId(const QString& controlDir);
 QString controlUid(const QString& controlDir);
+QPointF designPosition(const QString& controlDir);
 
 bool projectHdpiScaling(const QString& projectDir);
 qint64 projectSize(const QString& projectDir);
@@ -93,10 +93,12 @@ QByteArray userPassword(const QString& userDir);
 QByteArray userIcon(const QString& userDir);
 
 bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
+bool setProperty(const QString& controlDir, DesignProperties property, const QVariant& value);
 bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
 bool setProperty(const QString& userDir, UserProperties property, const QVariant& value);
 
 bool initControlMeta(const QString& controlDir);
+bool initDesignMeta(const QString& controlDir);
 bool initProjectMeta(const QString& projectDir);
 bool initUserMeta(const QString& userDir);
 void regenerateUids(const QString& topPath);
