@@ -51,6 +51,9 @@ public:
 
     QRectF boundingRect() const override;
 
+    bool resizable() const;
+    void setResizable(bool resizable);
+
 protected:
     bool dragAccepted() const;
     QPointF mousePressPoint() const;
@@ -80,6 +83,7 @@ signals:
     void geometryChanged();
     void beingDraggedChanged();
     void beingResizedChanged();
+    void resizableChanged();
 
 private:
     bool m_inSetGeometry;
@@ -87,6 +91,7 @@ private:
     bool m_beingResized;
     bool m_dragAccepted;
     bool m_raised;
+    bool m_resizable;
     QRectF m_rect;
     QPointF m_mousePressPoint;
     DesignerItem* m_parentItemBeforeRaise;

@@ -3,6 +3,7 @@
 
 #include <QPainter>
 #include <QStyleOption>
+#include <QGraphicsSceneMouseEvent>
 
 enum { MARGIN = 10 };
 
@@ -10,7 +11,6 @@ HeadlineItem::HeadlineItem(DesignerItem* parent) : GadgetItem(parent)
   , m_targetItem(nullptr)
   , m_geometryUpdateScheduled(false)
 {
-    setCursor(Qt::OpenHandCursor);
 }
 
 QSizeF HeadlineItem::dimensions() const
@@ -98,11 +98,28 @@ QSizeF HeadlineItem::calculateTextSize() const
     return QSizeF(fm.horizontalAdvance(m_text), fm.height());
 }
 
+void HeadlineItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    GadgetItem::mousePressEvent(event);
+
+    if (event->button() == Qt::LeftButton && targetItem() && (targetItem()->flags() & ItemIsSelectable)) {
+        bool multiSelect = (event->modifiers() & Qt::ControlModifier) != 0;
+        if (multiSelect) {
+            targetItem()->setSelected(!targetItem()->isSelected());
+        } else if (!multiSelect) {
+            if (!targetItem()->isSelected()) {
+                scene()->clearSelection();
+                targetItem()->setSelected(true);
+            }
+        }
+    }
+}
+
 void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     GadgetItem::mouseMoveEvent(event);
 
-    if (dragAccepted() && targetItem()) {
+    if (dragAccepted() && targetItem() && (targetItem()->flags() & ItemIsMovable)) {
         if (!targetItem()->beingDragged()) {
             scene()->setCursor(Qt::ClosedHandCursor);
             scene()->prepareDragLayer(targetItem());

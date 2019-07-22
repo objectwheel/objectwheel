@@ -483,6 +483,8 @@ void Control::updateImage(const RenderResult& result)
     m_visible = result.visible;
     m_events = result.events;
     m_properties = result.properties;
+
+    setResizable(gui());
     setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
 
     if (result.codeChanged)
@@ -505,9 +507,6 @@ void Control::updateImage(const RenderResult& result)
                     ToolUtils::toolIconPath(m_dir), size(),
                     ControlRenderingManager::devicePixelRatio());
     }
-
-//    for (auto resizer : m_resizers)
-//        resizer->setEnabled(gui());
 
     update();
 

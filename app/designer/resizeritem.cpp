@@ -17,7 +17,13 @@ DesignerItem* ResizerItem::targetItem() const
 void ResizerItem::setTargetItem(DesignerItem* targetItem)
 {
     if (m_targetItem != targetItem) {
+        if (m_targetItem)
+            m_targetItem->disconnect(this);
         m_targetItem = targetItem;
+        if (m_targetItem) {
+            connect(m_targetItem, &DesignerItem::resizableChanged,
+                    this, [=] { if (dragAccepted() && !m_targetItem->resizable()) ungrabMouse(); });
+        }
         updatePosition();
     }
 }
@@ -130,9 +136,11 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     GadgetItem::mouseMoveEvent(event);
 
-    if (targetItem() && dragAccepted()) {
-        targetItem()->setBeingDragged(true);
-        targetItem()->setBeingResized(true);
+    if (dragAccepted() && targetItem() && targetItem()->resizable()) {
+        if (!beingResized()) {
+            targetItem()->setBeingDragged(true); // Because pos() may also change
+            targetItem()->setBeingResized(true);
+        }
         updateTargetGeometry();
     }
 }

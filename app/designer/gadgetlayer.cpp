@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <headlineitem.h>
 #include <resizeritem.h>
+#include <QCursor>
 
 GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
   , m_formHeadlineItem(new HeadlineItem(this))
@@ -15,6 +16,7 @@ GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
 
     m_headlineItem->setPen(QPen(Qt::white));
     m_headlineItem->setBrush(DesignerScene::outlineColor());
+    m_headlineItem->setCursor(Qt::OpenHandCursor);
     m_formHeadlineItem->setVisible(true);
     m_formHeadlineItem->setPen(QPen(Qt::white));
     m_formHeadlineItem->setBrush(Qt::darkGray);
@@ -36,16 +38,21 @@ void GadgetLayer::onSceneSelectionChange()
         m_formHeadlineItem->setBrush(currentFormItem->isSelected() ? scene()->outlineColor() : Qt::darkGray);
     QList<DesignerItem*> selectedItems = scene()->selectedItems();
     for (ResizerItem* resizer : m_resizers) {
+        DesignerItem* selectedItem = nullptr;
+        bool singleSelection = selectedItems.size() == 1;
         if (resizer->targetItem())
             resizer->targetItem()->disconnect(resizer);
-        if (selectedItems.size() == 1) {
-            DesignerItem* selectedItem = selectedItems.first();
+        if (!selectedItems.isEmpty())
+            selectedItem = selectedItems.first();
+        if (singleSelection) {
             connect(selectedItem, &DesignerItem::geometryChanged,
                     resizer, &ResizerItem::updatePosition);
+            connect(selectedItem, &DesignerItem::resizableChanged,
+                    resizer, [=] { resizer->setVisible(selectedItem->resizable()); });
             resizer->setTargetItem(selectedItem);
             resizer->updatePosition();
         }
-        resizer->setVisible(selectedItems.size() == 1);
+        resizer->setVisible(singleSelection && selectedItem->resizable());
     }
     if (currentFormItem && currentFormItem->isSelected())
         selectedItems.removeOne(currentFormItem);

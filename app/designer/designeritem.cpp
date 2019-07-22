@@ -9,6 +9,7 @@ DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_beingResized(false)
   , m_dragAccepted(false)
   , m_raised(false)
+  , m_resizable(false)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
 }
@@ -153,6 +154,19 @@ void DesignerItem::setGeometry(qreal x, qreal y, qreal w, qreal h)
 QRectF DesignerItem::boundingRect() const
 {
     return m_rect;
+}
+
+bool DesignerItem::resizable() const
+{
+    return m_resizable;
+}
+
+void DesignerItem::setResizable(bool resizable)
+{
+    if (m_resizable != resizable) {
+        m_resizable = resizable;
+        emit resizableChanged();
+    }
 }
 
 bool DesignerItem::dragAccepted() const
