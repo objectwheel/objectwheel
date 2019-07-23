@@ -15,6 +15,7 @@ struct SceneSettings final : public Settings
     QBrush toBackgroundBrush() const;
 
     bool showGuideLines;
+    int dragStartDistance;
     int sceneBackgroundColor;
     qreal sceneZoomLevel;
     /****/

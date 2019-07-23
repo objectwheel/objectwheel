@@ -17,9 +17,11 @@
 SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_designGroup(new QGroupBox(contentWidget()))
   , m_showGuideLinesLabel(new QLabel(m_designGroup))
+  , m_dragStartDistanceLabel(new QLabel(m_designGroup))
   , m_sceneBackgroundColorLabel(new QLabel(m_designGroup))
   , m_sceneZoomLevelLabel(new QLabel(m_designGroup))
   , m_showGuideLinesCheckBox(new QCheckBox(m_designGroup))
+  , m_dragStartDistanceSpinBox(new QSpinBox(m_designGroup))
   , m_sceneBackgroundColorBox(new QComboBox(m_designGroup))
   , m_sceneZoomLevelBox(new QComboBox(m_designGroup))
   /****/
@@ -53,28 +55,34 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     designLayout->setContentsMargins(6, 6, 6, 6);
     designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     designLayout->addWidget(m_showGuideLinesLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneBackgroundColorLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneZoomLevelLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_dragStartDistanceLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundColorLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneZoomLevelLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_showGuideLinesCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneBackgroundColorBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneZoomLevelBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_dragStartDistanceSpinBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundColorBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneZoomLevelBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->setColumnStretch(3, 1);
     designLayout->setColumnMinimumWidth(1, 20);
 
     m_designGroup->setTitle(tr("Design"));
     m_showGuideLinesLabel->setText(tr("Guide lines") + ":");
+    m_dragStartDistanceLabel->setText(tr("Drag start distance") + ":");
     m_sceneBackgroundColorLabel->setText(tr("Background color") + ":");
     m_sceneZoomLevelLabel->setText(tr("Zoom level") + ":");
     m_showGuideLinesCheckBox->setText(tr("Show guide lines"));
 
     m_showGuideLinesCheckBox->setToolTip(tr("Show guide lines while moving controls"));
+    m_dragStartDistanceSpinBox->setToolTip(tr("Change the blocking drag start distace"));
     m_sceneBackgroundColorBox->setToolTip(tr("Change background color of the scene"));
     m_sceneZoomLevelBox->setToolTip(tr("Change zoom level of the scene"));
 
     m_showGuideLinesCheckBox->setCursor(Qt::PointingHandCursor);
+    m_dragStartDistanceSpinBox->setCursor(Qt::PointingHandCursor);
     m_sceneBackgroundColorBox->setCursor(Qt::PointingHandCursor);
     m_sceneZoomLevelBox->setCursor(Qt::PointingHandCursor);
 
+    m_dragStartDistanceSpinBox->setRange(0, 100);
     m_sceneBackgroundColorBox->setIconSize({13, 13});
 
     /****/
@@ -179,6 +187,7 @@ void SceneSettingsWidget::apply()
     SceneSettings* settings = DesignerSettings::sceneSettings();
     /****/
     settings->showGuideLines = m_showGuideLinesCheckBox->isChecked();
+    settings->dragStartDistance = m_dragStartDistanceSpinBox->value();
     settings->sceneBackgroundColor = m_sceneBackgroundColorBox->currentIndex();
     settings->sceneZoomLevel = UtilityFunctions::textToZoomLevel(m_sceneZoomLevelBox->currentText());
     /****/
@@ -202,6 +211,7 @@ void SceneSettingsWidget::revert()
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     /****/
     m_showGuideLinesCheckBox->setChecked(settings->showGuideLines);
+    m_dragStartDistanceSpinBox->setValue(settings->dragStartDistance);
     m_sceneBackgroundColorBox->setCurrentIndex(settings->sceneBackgroundColor);
     m_sceneZoomLevelBox->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
     /****/
@@ -239,6 +249,7 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_gridViewGroup->title().contains(word, Qt::CaseInsensitive)
             || m_controlsGroup->title().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_dragStartDistanceLabel->text().contains(word, Qt::CaseInsensitive)
             || m_sceneBackgroundColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_sceneZoomLevelLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsLabel->text().contains(word, Qt::CaseInsensitive)

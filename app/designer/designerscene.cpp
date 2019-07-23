@@ -95,7 +95,8 @@ qreal DesignerScene::zoomLevel() const
 
 int DesignerScene::startDragDistance()
 {
-    return QApplication::startDragDistance();
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    return settings->dragStartDistance;
 }
 
 QList<DesignerItem*> DesignerScene::selectedItems() const

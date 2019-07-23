@@ -3,6 +3,7 @@
 #include <QBrush>
 
 static const char g_showGuideLines[] = "ShowGuideLines";
+static const char g_dragStartDistance[] = "DragStartDistance";
 static const char g_sceneBackgroundColor[] = "SceneBackgroundColor";
 static const char g_sceneZoomLevel[] = "SceneZoomLevel";
 static const char g_showGridViewDots[] = "ShowGridViewDots";
@@ -23,6 +24,7 @@ void SceneSettings::read()
 
     begin();
     showGuideLines = value<bool>(g_showGuideLines, showGuideLines);
+    dragStartDistance = value<int>(g_dragStartDistance, dragStartDistance);
     sceneBackgroundColor = value<int>(g_sceneBackgroundColor, sceneBackgroundColor);
     sceneZoomLevel = value<qreal>(g_sceneZoomLevel, sceneZoomLevel);
     /****/
@@ -40,6 +42,7 @@ void SceneSettings::write()
 {
     begin();
     setValue(g_showGuideLines, showGuideLines);
+    setValue(g_dragStartDistance, dragStartDistance);
     setValue(g_sceneBackgroundColor, sceneBackgroundColor);
     setValue(g_sceneZoomLevel, sceneZoomLevel);
     /****/
@@ -58,6 +61,7 @@ void SceneSettings::write()
 void SceneSettings::reset()
 {
     showGuideLines = true;
+    dragStartDistance = 8;
     sceneBackgroundColor = 4;
     sceneZoomLevel = 1.0;
     /****/
