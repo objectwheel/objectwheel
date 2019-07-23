@@ -386,6 +386,12 @@ void SaveManager::setProperty(Control* control, const QString& property, const Q
         copy = ParserUtils::id(control->dir());
         control->setId(copy);
         Q_ASSERT(!copy.isEmpty());
+    } else if (property == "x" && !control->gui()) {
+        SaveUtils::setProperty(control->dir(), SaveUtils::DesignPosition,
+                               QPointF(value.toDouble(), control->y()));
+    } else if (property == "y" && !control->gui()) {
+        SaveUtils::setProperty(control->dir(), SaveUtils::DesignPosition,
+                               QPointF(control->x(), value.toDouble()));
     } else {
         ParserUtils::setProperty(control->dir(), property, copy);
     }

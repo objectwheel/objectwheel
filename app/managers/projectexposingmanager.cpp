@@ -46,7 +46,12 @@ void ProjectExposingManager::exposeProject()
             Q_ASSERT(parentControl);
 
             auto control = new Control(childPath);
-            ControlPropertyManager::setPos(control, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
+            // For non-gui items; others aren't affected, since
+            // render info update is going to happen and set position,
+            // but that doesn't happen for non-gui controls, in this
+            // way we expose non-gui items into right positions
+            ControlPropertyManager::setPos(control, SaveUtils::designPosition(childPath),
+                                           ControlPropertyManager::NoOption);
 
             // Since SaveUtils::childrenPaths sorts out the siblings based
             // on indexes, thus the first control is the one with lower index

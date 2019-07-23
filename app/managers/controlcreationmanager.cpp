@@ -66,6 +66,11 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
 
         auto childControl = new Control(childPath);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
+        // For non-gui items; others aren't affected, since
+        // render info update is going to happen and set position,
+        // but that doesn't happen for non-gui controls, in this
+        // way we expose non-gui items into right positions
+        ControlPropertyManager::setPos(control, SaveUtils::designPosition(childPath), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
         ControlRenderingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         controlTree.insert(childPath, childControl);

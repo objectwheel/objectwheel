@@ -73,6 +73,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     m_qmlCodeEditorWidget->addSaveFilter(new ControlSaveFilter(this)); // Changes made in code editor
     connect(SaveManager::instance(), &SaveManager::propertyChanged,    // Changes made out of code editor
             this, [=] (Control* control, const QString& property, const QString& value) {
+        if (!control->gui() && (property == "x" || property == "y"))
+            return;
         QmlCodeEditorWidget::DesignsDocument* document = qmlCodeEditorWidget()->getDesigns(control, SaveUtils::controlMainQmlFileName());
         if (document)
             ParserUtils::setProperty(document->document, control->dir(), property, value);

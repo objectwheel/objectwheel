@@ -104,7 +104,9 @@ MetaHash readMetaHash(const QString& metaFilePath)
     MetaHash hash;
     QFile file(metaFilePath);
     if (!file.open(QFile::ReadOnly)) {
+#if defined(VERBOSE_READ)
         qWarning("SaveUtils: Failed to read meta file, %s", metaFilePath.toUtf8().constData());
+#endif
         return hash;
     }
     QDataStream in(&file);

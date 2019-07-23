@@ -271,15 +271,17 @@ void Control::dropControl(Control* control)
 {
     Q_ASSERT(!control->form());
 
-    // NOTE: Do not move this assignment below setParent, because parent change effects the newPos result
+    // NOTE: Do not move this assignment below setParent,
+    // because parent change effects the newPos result
     const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
     ControlPropertyManager::setPos(control, newPos, ControlPropertyManager::SaveChanges
                                    | ControlPropertyManager::UpdateRenderer
                                    | ControlPropertyManager::CompressedCall);
-    // NOTE: We compress setPos because there might be some other compressed setPos'es in the list
-    // We want the setPos that happens after reparent operation to take place at the very last
+    // NOTE: We compress setPos because there might be some other
+    // compressed setPos'es in the list, We want the setPos that
+    // happens after reparent operation to take place at the very last
 
     update();
 }
@@ -378,11 +380,13 @@ QVariant Control::itemChange(int change, const QVariant& value)
         const QPointF& snapPos = scene()->snapPosition(value.toPointF());
         const QPointF& snapMargin = value.toPointF() - snapPos;
         m_snapMargin = QSizeF(snapMargin.x(), snapMargin.y());
-        if (gui() && !form()) {
-            ControlPropertyManager::setPos(this, snapPos, ControlPropertyManager::SaveChanges
-                                           | ControlPropertyManager::UpdateRenderer
-                                           | ControlPropertyManager::CompressedCall
-                                           | ControlPropertyManager::DontApplyDesigner);
+        if (!form()) {
+            ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+                    | ControlPropertyManager::CompressedCall
+                    | ControlPropertyManager::DontApplyDesigner;
+            if (gui())
+                options |= ControlPropertyManager::UpdateRenderer;
+            ControlPropertyManager::setPos(this, snapPos, options);
         }
         return snapPos;
     } else if (change == ItemSizeChange && beingResized()) {
@@ -487,6 +491,21 @@ void Control::updateImage(const RenderResult& result)
     m_properties = result.properties;
     m_blockedPropertyChanges = result.blockedPropertyChanges;
     m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
+
+    if (result.codeChanged)
+        m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
+
+    if (!gui() && !hasErrors() && size() != QSizeF(40, 40)) {
+        ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
+        m_frame = QRectF(0, 0, 40, 40);
+    }
+
+    setResizable(gui());
+    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
+
+    if (!beingDragged() && !beingResized())
+        updateGeometry();
+
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_image = hasErrors()
             ? PaintUtils::renderErrorControlImage(size(), ControlRenderingManager::devicePixelRatio())
@@ -496,14 +515,6 @@ void Control::updateImage(const RenderResult& result)
         m_image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(),
                                                        ControlRenderingManager::devicePixelRatio());
     }
-    if (result.codeChanged)
-        m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
-
-    setResizable(gui());
-    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
-
-    if (!beingDragged() && !beingResized())
-        updateGeometry();
 
     update();
 

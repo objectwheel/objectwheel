@@ -46,8 +46,10 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
     if (!control)
         return;
 
-    if (control->hasErrors())
-        return;
+    // Not needeed since non-gui covers up error
+    // state, and non-gui state is handled below
+    //    if (control->hasErrors())
+    //        return;
 
     bool isInt = control->propertyType("x") == QVariant::Int;
 
@@ -89,8 +91,10 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
     if (!control)
         return;
 
-    if (control->hasErrors())
-        return;
+    // Not needeed since non-gui covers up error
+    // state, and non-gui state is handled below
+    //    if (control->hasErrors())
+    //        return;
 
     bool isInt = control->propertyType("y") == QVariant::Int;
 
@@ -248,8 +252,10 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
     if (!control)
         return;
 
-    if (control->hasErrors())
-        return;
+    // Not needeed since non-gui covers up error
+    // state, and non-gui state is handled below
+    //    if (control->hasErrors())
+    //        return;
 
     bool isInt = control->propertyType("x") == QVariant::Int;
 
@@ -348,6 +354,8 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
     if (!control)
         return;
 
+    // NOTE: Becareful using this on errorneus controls
+    // if you want to save position information
     if (control->hasErrors())
         return;
 
