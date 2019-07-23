@@ -106,7 +106,7 @@ void HeadlineItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
         bool multiSelect = (event->modifiers() & Qt::ControlModifier) != 0;
         if (multiSelect) {
             targetItem()->setSelected(!targetItem()->isSelected());
-        } else if (!multiSelect) {
+        } else {
             if (!targetItem()->isSelected()) {
                 scene()->clearSelection();
                 targetItem()->setSelected(true);

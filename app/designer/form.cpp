@@ -18,6 +18,27 @@ int Form::type() const
     return Type;
 }
 
+void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
+{
+    if (event->button() == Qt::LeftButton && (flags() & ItemIsSelectable)) {
+        bool select = true;
+        if (event->modifiers() & Qt::ControlModifier) { // multi selection
+            select = !isSelected();
+        } else {
+            if (!isSelected())
+                scene()->clearSelection();
+        }
+        QMetaObject::invokeMethod(this, std::bind(&Form::setSelected, this, select),
+                                  Qt::QueuedConnection);
+    }
+    // We block the event, thus it can go up to QGraphicsView
+    // and draw rubber band, but the view deselects the form
+    // So we also make QueuedConnection call to the setSelected
+    // In this way, the setSelected function is called after view
+    // handles the mousePressEvent and clears selection
+    event->ignore();
+}
+
 void Form::paintFormFrame(QPainter* painter)
 {
     painter->setPen(scene()->pen(Qt::darkGray));
