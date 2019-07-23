@@ -303,7 +303,6 @@ QVariant DesignerItem::itemChange(int change, const QVariant& value)
 
 void DesignerItem::setRaised(bool raised)
 {
-    Q_ASSERT(parentItem() && scene());
     if (m_raised != raised) {
         m_raised = raised;
         if (m_raised) {

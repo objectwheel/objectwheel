@@ -20,6 +20,7 @@ GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
     m_formHeadlineItem->setVisible(true);
     m_formHeadlineItem->setPen(QPen(Qt::white));
     m_formHeadlineItem->setBrush(Qt::darkGray);
+    m_formHeadlineItem->setCursor(Qt::OpenHandCursor);
 
     connect(m_headlineItem, &HeadlineItem::doubleClicked,
             this, [=] { emit headlineDoubleClicked(false); });

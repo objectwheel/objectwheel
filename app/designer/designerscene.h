@@ -27,6 +27,7 @@ public:
     void unsetCursor();
     void setCursor(Qt::CursorShape cursor);
     void prepareDragLayer(DesignerItem* item);
+    void shrinkSceneRect();
 
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
@@ -37,7 +38,7 @@ public:
     QList<Control*> selectedControls() const;
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
-    QRectF itemsBoundingRect() const;
+    QRectF itemsExtendedBoundingRect() const;
     QRectF outerRect(const QRectF& rect);
 
     static int startDragDistance();

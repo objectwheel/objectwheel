@@ -74,4 +74,14 @@ void ProjectExposingManager::exposeProject()
     ControlPropertyManager::setIndex(firstForm, 0, ControlPropertyManager::SaveChanges);
     for (Control* firstChild : firstChilds)
         ControlPropertyManager::setIndex(firstChild, 0, ControlPropertyManager::SaveChanges);
+
+    auto conn = new QMetaObject::Connection;
+    *conn = connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+                    ControlPropertyManager::instance(), [conn] (Control* ctrl, bool) {
+        if (ctrl == s_designerScene->currentForm()) {
+            QObject::disconnect(*conn);
+            delete conn;
+            s_designerScene->shrinkSceneRect();
+        }
+    }, Qt::QueuedConnection);
 }

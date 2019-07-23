@@ -119,7 +119,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     GadgetItem::mouseMoveEvent(event);
 
-    if (dragAccepted() && targetItem() && (targetItem()->flags() & ItemIsMovable)) {
+    if (dragAccepted() && targetItem()) {
         if (!targetItem()->beingDragged()) {
             scene()->setCursor(Qt::ClosedHandCursor);
             scene()->prepareDragLayer(targetItem());

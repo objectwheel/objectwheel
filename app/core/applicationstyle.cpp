@@ -718,9 +718,11 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_RubberBand:
         if (qstyleoption_cast<const QStyleOptionRubberBand *>(option)) {
             painter->save();
-            painter->setClipRect(option->rect);
-            painter->setPen(QColor(0, 0, 0, 100));
-            painter->setBrush(QColor(0, 0, 0, 25));
+            painter->setRenderHint(QPainter::Antialiasing, false);
+            QPen pen(QColor(0, 0, 0, 200), 2, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+            pen.setCosmetic(true);
+            painter->setPen(pen);
+            painter->setBrush(QColor(0, 0, 0, 30));
             painter->drawRect(option->rect);
             painter->restore();
         } break;

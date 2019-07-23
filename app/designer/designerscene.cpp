@@ -36,7 +36,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     addItem(m_gadgetLayer);
 
     connect(this, &DesignerScene::changed, this, [=] {
-        setSceneRect(sceneRect() | itemsBoundingRect());
+        setSceneRect(sceneRect() | itemsExtendedBoundingRect());
     });
 
     connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
@@ -131,6 +131,13 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
     }
 }
 
+void DesignerScene::shrinkSceneRect()
+{
+    // 10 margin is a protection against the unexpected
+    // form movement that happens when a form is selected
+    setSceneRect(itemsExtendedBoundingRect().adjusted(-10, -10, 10, 10));
+}
+
 QPointF DesignerScene::snapPosition(qreal x, qreal y)
 {
     return snapPosition(QPointF(x, y));
@@ -203,14 +210,15 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
     return items;
 }
 
-QRectF DesignerScene::itemsBoundingRect() const
+QRectF DesignerScene::itemsExtendedBoundingRect() const
 {
-    return QGraphicsScene::itemsBoundingRect().adjusted(-20, -25, 20, 20);
+    return itemsBoundingRect().adjusted(-20, -25, 20, 20);
 }
 
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
+    painter->drawRect(sceneRect());
 
     for (DesignerItem* selectedItem : selectedItems())
         paintSelectionOutline(painter, selectedItem);
@@ -475,7 +483,7 @@ void DesignerScene::setCurrentForm(Form* currentForm)
     if (m_currentForm) {
         addItem(m_currentForm);
         m_currentForm->setVisible(true);
-        setSceneRect(itemsBoundingRect());
+        shrinkSceneRect();
     }
 }
 

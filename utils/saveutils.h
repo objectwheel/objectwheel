@@ -28,8 +28,8 @@ enum ProjectProperties : quint32 { // ### Designer related properties
     ProjectCreationDate,
     ProjectModificationDate,
     ProjectSize,
-    ProjectTheme,      // ### Marked for removal, qtquickcontrols2.conf takes place
-    ProjectHdpiScaling // ### Marked for removal, move it to qtquickcontrols2.conf, it is a QSettings ini, right? then we should be able to add custom values right?
+    ProjectTheme,      // ### TODO: Marked for removal, qtquickcontrols2.conf takes place
+    ProjectHdpiScaling // ### TODO: Marked for removal, move it to qtquickcontrols2.conf, it is a QSettings ini, right? then we should be able to add custom values right?
 };
 
 enum UserProperties : quint32 { // ### Designer related properties

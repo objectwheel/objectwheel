@@ -2,7 +2,7 @@
 #define FORM_H
 
 #include <control.h>
-
+#include <QGraphicsSceneMouseEvent>
 class Form final : public Control
 {
     Q_OBJECT
@@ -16,6 +16,10 @@ public:
     int type() const override;
 
 private:
+    void mousePressEvent(QGraphicsSceneMouseEvent *event) override {
+        event->ignore();
+        setSelected(!isSelected());
+    }
     void paintFormFrame(QPainter* painter);
     void paintGridViewDots(QPainter* painter, int gridSize);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;

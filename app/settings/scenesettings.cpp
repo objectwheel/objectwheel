@@ -58,7 +58,7 @@ void SceneSettings::write()
 void SceneSettings::reset()
 {
     showGuideLines = true;
-    sceneBackgroundColor = 0;
+    sceneBackgroundColor = 4;
     sceneZoomLevel = 1.0;
     /****/
     showGridViewDots = true;
