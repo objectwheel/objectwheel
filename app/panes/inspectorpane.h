@@ -31,11 +31,11 @@ public slots:
     void onControlParentChange(Control* control);
     void onControlIndexChange(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);
-    void onControlImageChange(Control* control, bool codeChanged);
+    void onControlRenderInfoChange(Control* control, bool codeChanged);
 
 private slots:
     void onProjectStart();
-    void onSelectionChange();
+    void onSceneSelectionChange();
     void onControlCreation(Control* control);
     void onControlRemove(Control* control);
     void onFormRemove(Form* form);

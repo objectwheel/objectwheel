@@ -475,7 +475,7 @@ void DesignerView::onControlDrop(Control* targetParentControl, const QString& co
 {
     scene()->clearSelection();
     // NOTE: Use actual Control position for scene, since createControl deals with margins
-    auto newControl = ControlCreationManager::createControl(targetParentControl, controlRootPath, pos);
+    auto newControl = ControlCreationManager::createControl(targetParentControl, controlRootPath, scene()->snapPosition(pos));
     if (newControl) {
         newControl->setSelected(true);
     } else {
@@ -599,7 +599,7 @@ void DesignerView::onPasteAction()
         } else {
             newControl = ControlCreationManager::createControl(scene()->currentForm(),
                                                                control->dir(),
-                                                               control->pos() + QPointF(5, 5));
+                                                               scene()->snapPosition(control->pos() + QPointF(10, 10)));
         }
 
         if (newControl)

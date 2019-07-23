@@ -74,7 +74,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
 
     QPointer<Control> ptr(control);
     auto conn = new QMetaObject::Connection;
-    *conn = QObject::connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
+    *conn = QObject::connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
                              [ptr, conn, pos] (Control* ctrl, bool) {
         if (ctrl == ptr.data() || ptr.isNull()) {
             QObject::disconnect(*conn);

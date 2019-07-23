@@ -305,9 +305,9 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &InspectorPane::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
-            this, &InspectorPane::onSelectionChange);
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
-            this, &InspectorPane::onControlImageChange);
+            this, &InspectorPane::onSceneSelectionChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+            this, &InspectorPane::onControlRenderInfoChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &InspectorPane::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
@@ -567,7 +567,7 @@ void InspectorPane::onControlParentChange(Control* control)
     }
 }
 
-void InspectorPane::onControlImageChange(Control* control, bool codeChanged)
+void InspectorPane::onControlRenderInfoChange(Control* control, bool codeChanged)
 {
     if (!isProjectStarted)
         return;
@@ -680,7 +680,7 @@ void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)
     emit controlDoubleClicked(control);
 }
 
-void InspectorPane::onSelectionChange()
+void InspectorPane::onSceneSelectionChange()
 {
     if (!isProjectStarted)
         return;

@@ -80,7 +80,7 @@ protected:
 
 private slots:
     void updateGeometry();
-    void updateImage(const RenderResult& result);
+    void updateRenderInfo(const RenderResult& result);
 
 private:
     bool m_gui;

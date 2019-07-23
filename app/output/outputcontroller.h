@@ -25,7 +25,7 @@ private slots:
     void onApplicationReadyOutput(const QString& output);
     void onApplicationFinish(int exitCode, QProcess::ExitStatus exitStatus);
     void onApplicationErrorOccur(QProcess::ProcessError error, const QString& errorString);
-    void onControlImageChange(Control* control, int codeChanged);
+    void onControlRenderInfoChange(Control* control, int codeChanged);
 
 private:
     void setCurrentWidget(QWidget* widget);

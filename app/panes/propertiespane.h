@@ -20,13 +20,13 @@ public slots:
     void discharge();
 
 private slots:
-    void onSelectionChange();
-    void onZChange(Control*);
-    void onImageChange(Control*, bool codeChanged);
-    void onGeometryChange(const Control*);
-    void onIndexChange(Control*);
-    void onIdChange(Control*, const QString& previousId);
-    void onPropertyChange();
+    void onSceneSelectionChange();
+    void onControlZChange(Control*);
+    void onControlRenderInfoChange(Control*, bool codeChanged);
+    void onControlGeometryChange(const Control*);
+    void onControlIndexChange(Control*);
+    void onControlIdChange(Control*, const QString& previousId);
+    void onControlPropertyChange();
 
 private:
     void filterList(const QString& filter);

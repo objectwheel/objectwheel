@@ -1030,21 +1030,21 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     });
 
     connect(m_designerScene, &DesignerScene::currentFormChanged,
-            this, &PropertiesPane::onSelectionChange);
+            this, &PropertiesPane::onSceneSelectionChange);
     connect(m_designerScene, &DesignerScene::selectionChanged,
-            this, &PropertiesPane::onSelectionChange);
+            this, &PropertiesPane::onSceneSelectionChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::zChanged,
-            this, &PropertiesPane::onZChange);
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
-            this, &PropertiesPane::onImageChange);
+            this, &PropertiesPane::onControlZChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+            this, &PropertiesPane::onControlRenderInfoChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
-            this, &PropertiesPane::onGeometryChange);
+            this, &PropertiesPane::onControlGeometryChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::propertyChanged,
-            this, &PropertiesPane::onPropertyChange);
+            this, &PropertiesPane::onControlPropertyChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
-            this, &PropertiesPane::onIdChange);
+            this, &PropertiesPane::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
-            this, &PropertiesPane::onIndexChange);
+            this, &PropertiesPane::onControlIndexChange);
 }
 
 void PropertiesPane::discharge()
@@ -1056,7 +1056,7 @@ void PropertiesPane::discharge()
 }
 
 // FIXME: This function has severe performance issues.
-void PropertiesPane::onSelectionChange()
+void PropertiesPane::onSceneSelectionChange()
 {
     return; // FIXME
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;
@@ -1105,7 +1105,6 @@ void PropertiesPane::onSelectionChange()
     indexItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     addTopLevelItem(indexItem);
     setItemWidget(indexItem, 1, createIndexHandlerWidget(selectedControl));
-
 
     for (const PropertyNode& propertyNode : properties) {
         const QVector<Enum>& enumList = propertyNode.enums;
@@ -1241,7 +1240,7 @@ void PropertiesPane::onSelectionChange()
                                              - horizontalScrollBarPosition);
 }
 
-void PropertiesPane::onZChange(Control* control)
+void PropertiesPane::onControlZChange(Control* control)
 {
     if (topLevelItemCount() <= 0)
         return;
@@ -1280,7 +1279,7 @@ void PropertiesPane::onZChange(Control* control)
     }
 }
 
-void PropertiesPane::onImageChange(Control* control, bool codeChanged)
+void PropertiesPane::onControlRenderInfoChange(Control* control, bool codeChanged)
 {
     if (m_designerScene->selectedControls().size() != 1)
         return;
@@ -1290,15 +1289,15 @@ void PropertiesPane::onImageChange(Control* control, bool codeChanged)
         return;
 
     if (topLevelItemCount() <= 0)
-        return onSelectionChange();
+        return onSceneSelectionChange();
 
     if (codeChanged)
-        return onSelectionChange();
+        return onSceneSelectionChange();
     else
-        return onGeometryChange(control);
+        return onControlGeometryChange(control);
 }
 
-void PropertiesPane::onGeometryChange(const Control* control)
+void PropertiesPane::onControlGeometryChange(const Control* control)
 {
     if (topLevelItemCount() <= 0)
         return;
@@ -1392,7 +1391,7 @@ void PropertiesPane::onGeometryChange(const Control* control)
     }
 }
 
-void PropertiesPane::onIndexChange(Control* control)
+void PropertiesPane::onControlIndexChange(Control* control)
 {
     if (topLevelItemCount() <= 0)
         return;
@@ -1430,7 +1429,7 @@ void PropertiesPane::onIndexChange(Control* control)
     }
 }
 
-void PropertiesPane::onIdChange(Control* control, const QString& /*previousId*/)
+void PropertiesPane::onControlIdChange(Control* control, const QString& /*previousId*/)
 {
     if (topLevelItemCount() <= 0)
         return;
@@ -1457,7 +1456,7 @@ void PropertiesPane::onIdChange(Control* control, const QString& /*previousId*/)
     }
 }
 
-void PropertiesPane::onPropertyChange()
+void PropertiesPane::onControlPropertyChange()
 {
     Q_UNUSED(0)
     /*

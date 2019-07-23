@@ -21,8 +21,8 @@ OutputController::OutputController(OutputPane* outputPane, QObject* parent) : QO
             this, &OutputController::onBarButtonClick);
     connect(m_outputPane->consoleButton(), &QAbstractButton::clicked,
             this, &OutputController::onBarButtonClick);
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::imageChanged,
-            this, &OutputController::onControlImageChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+            this, &OutputController::onControlRenderInfoChange);
     connect(m_outputPane->issuesWidget(), &IssuesWidget::titleChanged,
             m_outputPane->issuesButton(), &QAbstractButton::setText);
     connect(m_outputPane->issuesWidget(), &IssuesWidget::flash,
@@ -129,7 +129,7 @@ void OutputController::onApplicationErrorOccur(QProcess::ProcessError error, con
     }
 }
 
-void OutputController::onControlImageChange(Control* control, int codeChanged)
+void OutputController::onControlRenderInfoChange(Control* control, int codeChanged)
 {
     if (codeChanged)
         m_outputPane->issuesWidget()->refresh(control);

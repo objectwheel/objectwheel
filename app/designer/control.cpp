@@ -53,7 +53,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     connect(this, &Control::beingResizedChanged,
             this, &Control::updateGeometry);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
-            this, &Control::updateImage);
+            this, &Control::updateRenderInfo);
     connect(this, &Control::doubleClicked,
             this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
 }
@@ -277,7 +277,7 @@ void Control::dropControl(Control* control)
             | ControlPropertyManager::CompressedCall;
     if (control->gui())
         options |= ControlPropertyManager::UpdateRenderer;
-    const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
+    const QPointF& newPos = scene()->snapPosition(mapFromItem(control->parentItem(), control->pos()));
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
     ControlPropertyManager::setPos(control, newPos, options);
@@ -479,7 +479,7 @@ void Control::updateGeometry()
     }
 }
 
-void Control::updateImage(const RenderResult& result)
+void Control::updateRenderInfo(const RenderResult& result)
 {
     if (result.uid != uid())
         return;
@@ -520,7 +520,7 @@ void Control::updateImage(const RenderResult& result)
 
     update();
 
-    ControlPropertyManager::instance()->imageChanged(this, result.codeChanged);
+    ControlPropertyManager::instance()->renderInfoChanged(this, result.codeChanged);
 }
 
 QRectF Control::frame() const
