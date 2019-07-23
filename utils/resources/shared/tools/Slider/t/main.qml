@@ -1,11 +1,6 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 Slider {
     id: slider
-    width: 80
-    height: 32
-    from: 1
-    value: 25
-    to: 100
 }

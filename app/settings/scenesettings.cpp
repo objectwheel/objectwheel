@@ -71,7 +71,7 @@ void SceneSettings::reset()
     /****/
     showMouseoverOutline = true;
     controlOutline = 0;
-    outlineColor = "#4ba2ff";
+    outlineColor = "#2483ec";
 }
 
 const char* SceneSettings::category() const

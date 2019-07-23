@@ -1,8 +1,6 @@
-import QtQuick 2.7
+import QtQuick 2.12
 
 Image {
     id: image
-    width: 48
-    height: 48
     source: "image.png"
 }

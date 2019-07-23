@@ -1,10 +1,8 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 CheckBox {
     id: checkBox
-    width: 120
-    height: 32
     checked: true
-    text: "Check Box"
+    text: qsTr("Check Box")
 }

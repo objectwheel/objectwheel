@@ -1,9 +1,7 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 DelayButton {
     id: delayButton
-    width: 96
-    height: 32
-    text: "Delay Button"
+    text: qsTr("Delay Button")
 }

@@ -1,8 +1,7 @@
-import QtQuick 2.0
+import QtQuick 2.12
 
 Rectangle {
     id: rectangle
-    width: 48
-    height: 48
-    border.color: "darkGray"
+    width: 64
+    height: 64
 }

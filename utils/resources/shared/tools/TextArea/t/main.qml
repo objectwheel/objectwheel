@@ -1,9 +1,7 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 TextArea {
     id: textArea
-    width: 96
-    height: 96
-    placeholderText: "Enter description"
+    placeholderText: qsTr("Text Area")
 }

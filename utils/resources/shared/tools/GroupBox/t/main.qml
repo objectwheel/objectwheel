@@ -1,9 +1,7 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 GroupBox {
     id: groupBox
-    width: 144
-    height: 144
-    title: "GroupBox"
+    title: qsTr("GroupBox")
 }

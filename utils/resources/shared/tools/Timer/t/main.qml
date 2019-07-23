@@ -1,9 +1,5 @@
-import QtQuick 2.0
+import QtQuick 2.12
 
 Timer {
     id: timer
-    running: true
-    onTriggered: {
-        console.log("Timer triggered!")
-    }
 }

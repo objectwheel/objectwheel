@@ -1,9 +1,7 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 RoundButton {
     id: roundButton
-    width: 40
-    height: 40
-    text: "\u2713"
+    text: qsTr("Click")
 }

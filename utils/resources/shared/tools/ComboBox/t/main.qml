@@ -1,9 +1,11 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 ComboBox {
     id: comboBox
-    width: 80
-    height: 32
-    model: ["One", "Two", "Three"]
+    model: [
+        qsTr("One"),
+        qsTr("Two"),
+        qsTr("Three")
+    ]
 }

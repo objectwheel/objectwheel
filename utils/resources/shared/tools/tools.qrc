@@ -64,5 +64,7 @@
         <file>Tumbler/t/main.qml</file>
         <file>Tumbler2/m/control.meta</file>
         <file>Tumbler2/t/main.qml</file>
+        <file>AnimatedImage/t/animation@2x.gif</file>
+        <file>Image/t/image@2x.png</file>
     </qresource>
 </RCC>

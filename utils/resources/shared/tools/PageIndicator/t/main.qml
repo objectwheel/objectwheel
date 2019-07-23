@@ -1,9 +1,7 @@
-import QtQuick 2.7
-import QtQuick.Controls 2.2
+import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 PageIndicator {
     id: pageIndicator
     count: 3
-    width: 48
-    height: 16
 }
