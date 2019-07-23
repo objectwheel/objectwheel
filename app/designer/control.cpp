@@ -273,12 +273,14 @@ void Control::dropControl(Control* control)
 
     // NOTE: Do not move this assignment below setParent,
     // because parent change effects the newPos result
+    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+            | ControlPropertyManager::CompressedCall;
+    if (control->gui())
+        options |= ControlPropertyManager::UpdateRenderer;
     const QPointF& newPos = mapFromItem(control->parentItem(), control->pos());
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
-    ControlPropertyManager::setPos(control, newPos, ControlPropertyManager::SaveChanges
-                                   | ControlPropertyManager::UpdateRenderer
-                                   | ControlPropertyManager::CompressedCall);
+    ControlPropertyManager::setPos(control, newPos, options);
     // NOTE: We compress setPos because there might be some other
     // compressed setPos'es in the list, We want the setPos that
     // happens after reparent operation to take place at the very last
