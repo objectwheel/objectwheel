@@ -41,6 +41,16 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     // NOTE: We don't have to worry about possible child controls since createForm is only
     // called from FormsPane
 
+    auto conn = new QMetaObject::Connection;
+    *conn = connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+                    ControlPropertyManager::instance(), [conn] (Control* ctrl, bool) {
+        if (ctrl == s_designerScene->currentForm()) {
+            QObject::disconnect(*conn);
+            delete conn;
+            s_designerScene->shrinkSceneRect();
+        }
+    }, Qt::QueuedConnection);
+
     return form;
 }
 

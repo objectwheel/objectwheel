@@ -3,6 +3,6 @@ import QtQuick.Controls 2.2
 
 SpinBox {
     id: spinBox
-    height: 30
     width: 120
+    height: 32
 }

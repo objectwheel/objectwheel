@@ -3,6 +3,6 @@ import QtQuick.Extras 1.4
 
 Dial {
     id: dial
-    height: 55
-    width: 55
+    width: 56
+    height: 56
 }

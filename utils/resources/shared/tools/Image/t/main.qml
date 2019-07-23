@@ -2,7 +2,7 @@ import QtQuick 2.7
 
 Image {
     id: image
-    height: 50
-    width: 50
+    width: 48
+    height: 48
     source: "image.png"
 }

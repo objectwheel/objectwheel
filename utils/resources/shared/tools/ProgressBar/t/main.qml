@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 
 ProgressBar {
     id: progressBar
-    height: 15
-    width: 60
+    width: 64
+    height: 16
     value: 0.6
 }

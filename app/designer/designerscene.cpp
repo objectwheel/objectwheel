@@ -213,13 +213,12 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
 
 QRectF DesignerScene::itemsExtendedBoundingRect() const
 {
-    return itemsBoundingRect().adjusted(-20, -25, 20, 20);
+    return itemsBoundingRect().adjusted(-10, -15, 10, 10);
 }
 
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
-    painter->drawRect(sceneRect());
 
     for (DesignerItem* selectedItem : selectedItems())
         paintSelectionOutline(painter, selectedItem);

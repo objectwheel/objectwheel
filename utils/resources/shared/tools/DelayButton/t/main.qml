@@ -3,8 +3,8 @@ import QtQuick.Extras 1.4
 
 DelayButton {
     id: delayButton
-    height: 55
-    width: 55
+    width: 56
+    height: 56
     delay: 600
     text: "Hold"
 }

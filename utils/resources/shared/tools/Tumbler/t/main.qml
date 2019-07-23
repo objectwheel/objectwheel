@@ -3,9 +3,8 @@ import QtQuick.Extras 1.4
 
 Tumbler {
     id: tumbler
-    height: 50
     width: 160
-    clip: true
+    height: 48
     TumblerColumn {
         model: [0, 1, 2, 3, 4]
     }

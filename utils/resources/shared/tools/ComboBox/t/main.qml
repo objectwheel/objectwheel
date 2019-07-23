@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 
 ComboBox {
     id: comboBox
-    height: 30
     width: 80
-    model: ["First", "Second", "Third"]
+    height: 32
+    model: ["One", "Two", "Three"]
 }

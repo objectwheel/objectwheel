@@ -416,7 +416,10 @@ void Control::restrainPaintRegion(QPainter* painter)
 
 void Control::paintImage(QPainter* painter)
 {
+    if (beingResized())
+        painter->setClipRect(rect());
     painter->drawImage(m_frame.toRect(), m_image);
+    painter->setClipping(false);
 }
 
 void Control::paintHighlight(QPainter* painter)

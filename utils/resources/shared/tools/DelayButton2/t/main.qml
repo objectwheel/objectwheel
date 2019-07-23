@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 
 DelayButton {
     id: delayButton
-    height: 30
-    width: 95
+    width: 96
+    height: 32
     text: "Delay Button"
 }

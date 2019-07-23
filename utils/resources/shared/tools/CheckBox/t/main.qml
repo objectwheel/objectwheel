@@ -3,8 +3,8 @@ import QtQuick.Controls 2.2
 
 CheckBox {
     id: checkBox
-    height: 32
     width: 120
-    text: "Check Box"
+    height: 32
     checked: true
+    text: "Check Box"
 }

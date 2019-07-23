@@ -2,7 +2,7 @@ import QtQuick 2.0
 
 AnimatedImage {
     id: animatedImage
-    height: 50
-    width: 50
+    width: 48
+    height: 48
     source: "animation.gif"
 }

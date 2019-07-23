@@ -4,8 +4,8 @@ import QtQuick.Controls.Styles 1.4
 
 Gauge {
     id: gauge
+    width: 40
     height: 200
-    width: 38
     value: 6
     clip: true
     maximumValue: 10

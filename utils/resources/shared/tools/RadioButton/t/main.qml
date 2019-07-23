@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 
 RadioButton {
     id: radioButton
-    height: 30
-    width: 135
+    width: 136
+    height: 32
     text: "Radio button"
 }

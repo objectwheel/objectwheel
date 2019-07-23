@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 
 TextField {
     id: textField
-    height: 30
-    width: 80
+    height: 32
+    width: 88
     placeholderText: "Text field"
 }

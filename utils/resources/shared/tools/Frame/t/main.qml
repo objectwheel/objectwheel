@@ -3,6 +3,6 @@ import QtQuick.Controls 2.2
 
 Frame {
     id: frame
-    height: 150
-    width: 150
+    width: 120
+    height: 120
 }

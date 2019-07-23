@@ -3,8 +3,8 @@ import QtQuick.Controls 2.2
 
 RangeSlider {
     id: rangeSlider
-    height: 30
-    width: 100
+    width: 112
+    height: 32
     from: 1
     to: 100
     first.value: 8

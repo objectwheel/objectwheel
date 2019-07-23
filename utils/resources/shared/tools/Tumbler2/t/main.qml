@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 
 Tumbler {
     id: tumbler
-    height: 100
-    width: 100
+    width: 96
+    height: 96
     model: 5
 }

@@ -3,7 +3,7 @@ import QtQuick.Controls 2.2
 
 GroupBox {
     id: groupBox
-    height: 150
-    width: 150
+    width: 144
+    height: 144
     title: "GroupBox"
 }
