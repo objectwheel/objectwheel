@@ -36,7 +36,7 @@ void ControlRemovingManager::removeForm(Form* form)
     for (Control* childControl : form->childControls())
         emit instance()->controlAboutToBeRemoved(childControl);
 
-    emit instance()->formAboutToBeRemoved(form);
+    emit instance()->controlAboutToBeRemoved(form);
 
     ControlRenderingManager::scheduleFormDeletion(form->uid());
 
@@ -49,6 +49,9 @@ void ControlRemovingManager::removeControl(Control* control)
     if (!control || control->form())
         return;
 
+    DesignerScene* scene = control->scene();
+    Q_ASSERT(scene);
+
     for (Control* childControl : control->childControls())
         emit instance()->controlAboutToBeRemoved(childControl);
 
@@ -57,8 +60,7 @@ void ControlRemovingManager::removeControl(Control* control)
     ControlRenderingManager::scheduleControlDeletion(control->uid());
 
     SaveManager::removeControl(control->dir());
-    DesignerScene* scene = control->scene();
-    Q_ASSERT(scene);
+
     scene->removeControl(control);
 }
 

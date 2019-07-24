@@ -17,14 +17,22 @@ class ControlCreationManager final : public QObject
     friend class FormsPane; // For createForm
     friend class DesignerView; // For createControl
 
+public:
+    static ControlCreationManager* instance();
+
 private:
     explicit ControlCreationManager(QObject* parent = nullptr);
+    ~ControlCreationManager() override;
 
     static void init(DesignerScene* designerScene);
     static Form* createForm(const QString& formRootPath); // FormsPane dependency: Should be a private member
     static Control* createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos); // NOTE: Sets pos, based on scene coord jargon
 
+signals:
+    void controlCreated(Control* control);
+
 private:
+    static ControlCreationManager* s_instance;
     static DesignerScene* s_designerScene;
 };
 

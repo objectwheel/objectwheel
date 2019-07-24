@@ -6,10 +6,22 @@
 #include <designerscene.h>
 #include <controlpropertymanager.h>
 
+ProjectExposingManager* ProjectExposingManager::s_instance = nullptr;
 DesignerScene* ProjectExposingManager::s_designerScene = nullptr;
 
 ProjectExposingManager::ProjectExposingManager(QObject* parent) : QObject(parent)
 {
+    s_instance = this;
+}
+
+ProjectExposingManager::~ProjectExposingManager()
+{
+    s_instance = nullptr;
+}
+
+ProjectExposingManager* ProjectExposingManager::instance()
+{
+    return s_instance;
 }
 
 void ProjectExposingManager::init(DesignerScene* designerScene)
@@ -40,6 +52,7 @@ void ProjectExposingManager::exposeProject()
 
         QMap<QString, Control*> controlTree;
         controlTree.insert(formPath, form);
+        emit instance()->controlExposed(form);
 
         for (const QString& childPath : SaveUtils::childrenPaths(formPath)) {
             Control* parentControl = controlTree.value(SaveUtils::toDoubleUp(childPath));
@@ -65,7 +78,10 @@ void ProjectExposingManager::exposeProject()
                 SaveUtils::setProperty(control->dir(), SaveUtils::ControlId, control->id());
 
             ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
+
             controlTree.insert(childPath, control);
+
+            emit instance()->controlExposed(control);
         }
     }
 

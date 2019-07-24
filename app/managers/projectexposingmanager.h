@@ -4,6 +4,7 @@
 #include <QObject>
 
 class DesignerScene;
+class Control;
 
 class ProjectExposingManager final : public QObject
 {
@@ -13,12 +14,20 @@ class ProjectExposingManager final : public QObject
     friend class ApplicationCore; // For constructor, init
     friend class ProjectManager; // For exposeProject()
 
+public:
+    static ProjectExposingManager* instance();
+
 private:
     explicit ProjectExposingManager(QObject* parent = nullptr);
+    ~ProjectExposingManager() override;
     static void init(DesignerScene* designerScene);
     static void exposeProject();
 
+signals:
+    void controlExposed(Control* control);
+
 private:
+    static ProjectExposingManager* s_instance;
     static DesignerScene* s_designerScene;
 };
 

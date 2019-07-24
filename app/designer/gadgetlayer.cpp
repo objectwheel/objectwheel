@@ -8,12 +8,6 @@ GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
   , m_formHeadlineItem(new HeadlineItem(this))
   , m_headlineItem(new HeadlineItem(this))
 {
-    for (int i = 0; i < 8; ++i) {
-        auto resizer = new ResizerItem(ResizerItem::Placement(i), this);
-        resizer->setPen(DesignerScene::pen());
-        m_resizers.append(resizer);
-    }
-
     m_headlineItem->setPen(QPen(Qt::white));
     m_headlineItem->setBrush(DesignerScene::outlineColor());
     m_headlineItem->setCursor(Qt::OpenHandCursor);
@@ -32,29 +26,55 @@ GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
             this, &GadgetLayer::onSceneCurrentFormChange);
 }
 
+void GadgetLayer::clearResizers()
+{
+    QList<DesignerItem*> itemList(m_resizerHash.keys());
+    for (DesignerItem* item : itemList)
+        removeResizers(item);
+}
+
+void GadgetLayer::addResizers(DesignerItem* item)
+{
+    QList<ResizerItem*> resizers;
+    for (int i = 0; i < 8; ++i) {
+        auto resizer = new ResizerItem(ResizerItem::Placement(i), this);
+        resizer->setPen(DesignerScene::pen());
+        resizer->setTargetItem(item);
+        resizer->setVisible(item->isSelected() && item->resizable());
+        resizer->updatePosition();
+        connect(item, &DesignerItem::geometryChanged,
+                resizer, &ResizerItem::updatePosition);
+        connect(item, &DesignerItem::resizableChanged,
+                resizer, [=] { resizer->setVisible(item->isSelected() && item->resizable()); });
+        resizers.append(resizer);
+    }
+    m_resizerHash.insert(item, resizers);
+}
+
+void GadgetLayer::removeResizers(DesignerItem* item)
+{
+    for (ResizerItem* resizer : resizers(item))
+        delete resizer;
+    m_resizerHash.remove(item);
+}
+
+QList<ResizerItem*> GadgetLayer::resizers(DesignerItem* item) const
+{
+    return m_resizerHash.value(item);
+}
+
 void GadgetLayer::onSceneSelectionChange()
 {
     DesignerItem* currentFormItem = scene()->currentForm();
     if (currentFormItem)
         m_formHeadlineItem->setBrush(currentFormItem->isSelected() ? scene()->outlineColor() : Qt::darkGray);
-    QList<DesignerItem*> selectedItems = scene()->selectedItems();
-    for (ResizerItem* resizer : m_resizers) {
-        DesignerItem* selectedItem = nullptr;
-        bool singleSelection = selectedItems.size() == 1;
-        if (resizer->targetItem())
-            resizer->targetItem()->disconnect(resizer);
-        if (!selectedItems.isEmpty())
-            selectedItem = selectedItems.first();
-        if (singleSelection) {
-            connect(selectedItem, &DesignerItem::geometryChanged,
-                    resizer, &ResizerItem::updatePosition);
-            connect(selectedItem, &DesignerItem::resizableChanged,
-                    resizer, [=] { resizer->setVisible(selectedItem->resizable()); });
-            resizer->setTargetItem(selectedItem);
-            resizer->updatePosition();
+    for (DesignerItem* item : m_resizerHash.keys()) {
+        for (ResizerItem* resizer : resizers(item)) {
+            if (item->isVisible())
+                resizer->setVisible(item->isSelected() && item->resizable());
         }
-        resizer->setVisible(singleSelection && selectedItem->resizable());
     }
+    QList<DesignerItem*> selectedItems = scene()->selectedItems();
     if (currentFormItem && currentFormItem->isSelected())
         selectedItems.removeOne(currentFormItem);
     if (m_headlineItem->targetItem())
@@ -90,9 +110,4 @@ void GadgetLayer::onSceneCurrentFormChange(DesignerItem* formItem)
         m_formHeadlineItem->setDimensions(formItem->size());
         m_formHeadlineItem->updateGeometry();
     }
-}
-
-QList<ResizerItem*> GadgetLayer::resizers() const
-{
-    return m_resizers;
 }

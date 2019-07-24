@@ -69,6 +69,10 @@ Controller ->
  * Bununla birlikte kontroller toolbox'dan dashboard'a sürüklenirken, fare işaretçisinin üzerine
    geldiği kontrol kararmamalı, bunun yerine etrafına ince bir renkli çerçeve çizilmeli
 
+z değeri büyük olanlar hariç, ve bir kontrolün taşınması esnası hariç, diğer tüm durumlar için (z si eşit sibling)
+    kontroller index'e göre, Qt creatöredeki creation order mantığı dikkate alınarak z-stack'da
+    dizilecek, sanırım QgraphicsItem::stackBefore iş görür, ayrıca muhtemelen indexi küçün olan
+    en altta, yüksek olan en üstte görükecek z olarak
 
 SaveUtils'deki FIXME'yi düzelt
 Previewer.cpp'de updateParent kodunda sadece parent'i değişen kontrolun dir'i değişiyor, peki ya o

@@ -6,10 +6,22 @@
 #include <controlrenderingmanager.h>
 #include <controlpropertymanager.h>
 
+ControlCreationManager* ControlCreationManager::s_instance = nullptr;
 DesignerScene* ControlCreationManager::s_designerScene = nullptr;
 
 ControlCreationManager::ControlCreationManager(QObject* parent) : QObject(parent)
 {
+    s_instance = this;
+}
+
+ControlCreationManager::~ControlCreationManager()
+{
+    s_instance = nullptr;
+}
+
+ControlCreationManager* ControlCreationManager::instance()
+{
+    return s_instance;
 }
 
 void ControlCreationManager::init(DesignerScene* designerScene)
@@ -50,6 +62,8 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
             s_designerScene->shrinkSceneRect();
         }
     }, Qt::QueuedConnection);
+
+    emit instance()->controlCreated(form);
 
     return form;
 }
@@ -99,6 +113,8 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
 
     QMap<QString, Control*> controlTree;
     controlTree.insert(control->dir(), control);
+    emit instance()->controlCreated(control);
+
     for (const QString& childPath : SaveUtils::childrenPaths(control->dir())) {
         Control* parentControl = controlTree.value(SaveUtils::toDoubleUp(childPath));
         Q_ASSERT(parentControl);
@@ -113,6 +129,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
         ControlRenderingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         controlTree.insert(childPath, childControl);
+        emit instance()->controlCreated(childControl);
     }
 
     return control;

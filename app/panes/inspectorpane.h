@@ -38,7 +38,7 @@ private slots:
     void onSceneSelectionChange();
     void onControlCreation(Control* control);
     void onControlRemove(Control* control);
-    void onFormRemove(Form* form);
+    void onFormRemove(Control* control);
     void onCurrentFormChange(Form* currentForm);
     void onItemSelectionChange();
     void onItemDoubleClick(QTreeWidgetItem* item, int column);

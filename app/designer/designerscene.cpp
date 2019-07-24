@@ -2,6 +2,9 @@
 #include <suppressor.h>
 #include <resizeritem.h>
 #include <controlpropertymanager.h>
+#include <projectexposingmanager.h>
+#include <controlcreationmanager.h>
+#include <controlremovingmanager.h>
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <headlineitem.h>
@@ -43,6 +46,13 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
         WindowManager::mainWindow()->centralWidget()->designerView()->
                 onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
     });
+
+    connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
+            m_gadgetLayer, &GadgetLayer::addResizers);
+    connect(ProjectExposingManager::instance(), &ProjectExposingManager::controlExposed,
+            m_gadgetLayer, &GadgetLayer::addResizers);
+    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
+            m_gadgetLayer, &GadgetLayer::removeResizers);
 }
 
 void DesignerScene::addForm(Form* form)
@@ -73,7 +83,7 @@ void DesignerScene::removeForm(Form* form)
 
     m_forms.removeAll(form);
 
-    if (currentFormRemoved)
+    if (currentFormRemoved && !m_forms.isEmpty())
         setCurrentForm(m_forms.first());
 }
 
@@ -269,7 +279,7 @@ void DesignerScene::paintSelectionOutline(QPainter* painter, DesignerItem* selec
     path.addRect(rect.adjusted(-m, -m, m, m));
     path.addRect(rect.adjusted(m, m, -m, -m));
     QPainterPath path2;
-    for (ResizerItem* resizer : gadgetLayer()->resizers()) {
+    for (ResizerItem* resizer : gadgetLayer()->resizers(selectedItem)) {
         if (resizer->isVisible())
             path2.addRect(QRectF(resizer->pos() + resizer->rect().topLeft() / zoomLevel(), resizer->size() / zoomLevel()));
     }
@@ -453,6 +463,7 @@ void DesignerScene::discharge()
     if (m_currentForm)
         removeForm(m_currentForm);
 
+    m_gadgetLayer->clearResizers();
     m_forms.clear();
     m_currentForm.clear();
 }

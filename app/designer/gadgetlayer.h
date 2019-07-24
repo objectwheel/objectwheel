@@ -13,7 +13,10 @@ class GadgetLayer final : public DesignerItem
 
 public:
     explicit GadgetLayer(DesignerScene* scene);
-    QList<ResizerItem*> resizers() const;
+    void clearResizers();
+    void addResizers(DesignerItem* item);
+    void removeResizers(DesignerItem* item);
+    QList<ResizerItem*> resizers(DesignerItem* item) const;
 
 private slots:
     void onSceneSelectionChange();
@@ -23,9 +26,9 @@ signals:
     void headlineDoubleClicked(bool isFormHeadline);
 
 private:
-    QList<ResizerItem*> m_resizers;
     HeadlineItem* m_formHeadlineItem;
     HeadlineItem* m_headlineItem;
+    QHash<DesignerItem*, QList<ResizerItem*>> m_resizerHash;
 };
 
 #endif // GADGETLAYER_H

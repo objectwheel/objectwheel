@@ -20,7 +20,6 @@ public:
     static void removeControls(const QList<Control*>& controls);
 
 signals:
-    void formAboutToBeRemoved(Form* form);
     void controlAboutToBeRemoved(Control* control);
 
 private:

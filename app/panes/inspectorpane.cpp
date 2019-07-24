@@ -299,7 +299,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &InspectorPane::onControlRemove);
-    connect(ControlRemovingManager::instance(), &ControlRemovingManager::formAboutToBeRemoved,
+    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &InspectorPane::onFormRemove);
     connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
     connect(ProjectManager::instance(), &ProjectManager::started,
@@ -483,12 +483,15 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     horizontalScrollBar()->setSliderPosition(state.horizontalScrollBarPosition);
 }
 
-void InspectorPane::onFormRemove(Form* form)
+void InspectorPane::onFormRemove(Control* control)
 {
     if (!isProjectStarted)
         return;
 
-    m_formStates.remove(form);
+    if (!control->form())
+        return;
+
+    m_formStates.remove(static_cast<Form*>(control));
 }
 
 // FIXME: FFFF
@@ -513,6 +516,9 @@ void InspectorPane::onControlCreation(Control* control)
 void InspectorPane::onControlRemove(Control* control)
 {
     if (!isProjectStarted)
+        return;
+
+    if (control->form())
         return;
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
