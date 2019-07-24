@@ -102,7 +102,7 @@ private:
 signals:
     void initializationProgressChanged(int progress);
     void renderDone(const QList<RenderResult>& results);
-    void previewDone(const QImage& preview);
+    void previewDone(const RenderResult& result);
 
 private:
     bool m_initialized;

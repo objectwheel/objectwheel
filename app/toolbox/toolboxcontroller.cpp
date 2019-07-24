@@ -60,15 +60,20 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
 
     auto conn = new QMetaObject::Connection;
     *conn = connect(ControlRenderingManager::instance(), &ControlRenderingManager::previewDone,
-                    [=] (const QImage& preview) {
+                    [=] (const RenderResult& result) {
         if (locked) {
             disconnect(*conn);
             delete conn;
             QDrag* drag = establishDrag(item);
-            if (!PaintUtils::isBlankImage(preview)) {
-                QPixmap pixmap(QPixmap::fromImage(preview));
+            if (!PaintUtils::isBlankImage(result.image)) {
+                QPixmap pixmap(QPixmap::fromImage(result.image));
                 pixmap.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
                 drag->setPixmap(pixmap);
+            } else if (result.gui && result.visible && PaintUtils::isBlankImage(result.image)) {
+                drag->setPixmap(QPixmap::fromImage(PaintUtils::renderBlankControlImage(
+                                    result.boundingRect, result.boundingRect,
+                                    m_toolboxPane->toolboxTree()->currentItem()->text(0),
+                                    m_toolboxPane->devicePixelRatioF())));
             }
             locked = false;
             drag->exec(Qt::CopyAction);

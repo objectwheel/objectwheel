@@ -2,7 +2,9 @@
 #include <designerscene.h>
 #include <headlineitem.h>
 #include <resizeritem.h>
+
 #include <QCursor>
+#include <QTimer>
 
 GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
   , m_formHeadlineItem(new HeadlineItem(this))
@@ -88,7 +90,7 @@ void GadgetLayer::onSceneSelectionChange()
         m_headlineItem->setTargetItem(selectedItem);
         m_headlineItem->setText(selectedItem->objectName()); // id
         m_headlineItem->updateGeometry(); // Schedules an update, so prevent flicker below
-        QMetaObject::invokeMethod(m_headlineItem, std::bind(&HeadlineItem::setVisible, m_headlineItem, true));
+        QTimer::singleShot(10, std::bind(&HeadlineItem::setVisible, m_headlineItem, true));
     } else {
         m_headlineItem->setVisible(false);
     }

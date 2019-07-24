@@ -26,9 +26,9 @@ void CommandDispatcher::scheduleRenderDone(const QList<RenderResult>& results)
     send(m_socket, RendererCommands::RenderDone, push(results));
 }
 
-void CommandDispatcher::schedulePreviewDone(const QImage& preview)
+void CommandDispatcher::schedulePreviewDone(const RenderResult& result)
 {
-    send(m_socket, RendererCommands::PreviewDone, push(preview));
+    send(m_socket, RendererCommands::PreviewDone, push(result));
 }
 
 void CommandDispatcher::onDataReceived(const RendererCommands& command, const QByteArray& data)

@@ -304,9 +304,10 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         update();
     }
 }
-
+#include <QDebug>
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
+    qDebug() << "zazazaaz";
     if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
         m_dragIn = true;
         event->accept();
@@ -487,6 +488,7 @@ void Control::updateRenderInfo(const RenderResult& result)
     if (result.uid != uid())
         return;
 
+    const qreal dpr = ControlRenderingManager::devicePixelRatio();
     m_gui = result.gui;
     m_popup = result.popup;
     m_window = result.window;
@@ -512,14 +514,12 @@ void Control::updateRenderInfo(const RenderResult& result)
         updateGeometry();
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
-    m_image = hasErrors()
-            ? PaintUtils::renderErrorControlImage(size(), ControlRenderingManager::devicePixelRatio())
-            : result.image;
-    m_image.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
-    if (m_image.isNull() && !m_gui) {
-        m_image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(),
-                                                       ControlRenderingManager::devicePixelRatio());
-    }
+    m_image = hasErrors() ? PaintUtils::renderErrorControlImage(size(), dpr) : result.image;
+    if (m_image.isNull() && !m_gui)
+        m_image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), dpr);
+    if (visible() && gui() && PaintUtils::isBlankImage(m_image))
+        m_image = PaintUtils::renderBlankControlImage(frame(), rect(), id(), dpr);
+    m_image.setDevicePixelRatio(dpr);
 
     update();
 

@@ -372,9 +372,21 @@ void RenderEngine::preview(const QString& url)
                 DesignerSupport::updateDirtyNode(item);
         }
 
-        QRectF boundingRect;
         instance->preview = true;
-        emit previewDone(grabImage(instance, boundingRect));
+
+        RenderResult result;
+        result.uid = instance->uid;
+        result.gui = instance->gui;
+        result.popup = instance->popup;
+        result.window = instance->window;
+        result.visible = instance->visible;
+        result.codeChanged = instance->codeChanged;
+        result.properties = RenderUtils::properties(instance);
+        result.events = RenderUtils::events(instance);
+        instance->codeChanged = false;
+        result.errors = instance->errors;
+        result.image = grabImage(instance, result.boundingRect);
+        emit previewDone(result);
 
         auto ctx = instance->context;
         RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);

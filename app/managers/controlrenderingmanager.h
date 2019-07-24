@@ -45,7 +45,7 @@ private slots:
 
 signals:
     void renderDone(const RenderResult& result);
-    void previewDone(const QImage& preview);
+    void previewDone(const RenderResult& result);
     void initializationProgressChanged(int progress);
 
 private:

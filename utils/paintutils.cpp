@@ -277,9 +277,9 @@ bool PaintUtils::isBlankImage(const QImage& image)
     if (image.isNull())
         return true;
 
-    int totalAlpha = 150 * 8;
-    const int hspacing = 8;
-    const int wspacing = qRound(qMax(hspacing * qreal(image.width()) / image.height(), 1.0));
+    int totalAlpha = 100 * 8;
+    const int hspacing = image.height() > 200 ? 8 : 1;
+    const int wspacing = image.width() > 200 ? qRound(qMax(hspacing * qreal(image.width()) / image.height(), 1.0)) : 1;
 
     for (int w = 0, h = image.height() / 2.0; w < image.width(); w += wspacing)
         totalAlpha -= qAlpha(image.pixel(w, h));
@@ -297,4 +297,64 @@ bool PaintUtils::isBlankImage(const QImage& image)
         totalAlpha -= qAlpha(image.pixel(w, h));
 
     return totalAlpha > 0;
+}
+
+static void paintTextInPlaceHolderForInvisbleItem(QPainter* painter, const QString& id,
+                                                  const QRectF& boundingRect)
+{
+    QTextOption textOption;
+    textOption.setAlignment(Qt::AlignTop);
+    textOption.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
+    QString displayText(id);
+    if (boundingRect.height() > 24) {
+        QFont font;
+        font.setStyleHint(QFont::SansSerif);
+        font.setBold(true);
+        font.setPixelSize(12);
+        painter->setFont(font);
+
+        QFontMetrics fm(font);
+        painter->rotate(90);
+        if (fm.horizontalAdvance(displayText) > (boundingRect.height() - 32) && displayText.length() > 4) {
+
+            displayText = fm.elidedText(displayText, Qt::ElideRight, boundingRect.height() - 32, Qt::TextShowMnemonic);
+        }
+
+        QRectF rotatedBoundingBox;
+        rotatedBoundingBox.setWidth(boundingRect.height());
+        rotatedBoundingBox.setHeight(12);
+        rotatedBoundingBox.setY(-boundingRect.width() + 12);
+        rotatedBoundingBox.setX(20);
+
+        painter->setFont(font);
+        painter->setPen(QColor(48, 48, 96, 255));
+        painter->setClipping(false);
+        painter->drawText(rotatedBoundingBox, displayText, textOption);
+    }
+}
+
+static void paintDecorationInPlaceHolderForInvisbleItem(QPainter* painter, const QRectF& boundingRect)
+{
+    static const qreal width = 12;
+    QPainterPath path;
+    path.addRect(boundingRect);
+    path.addRect(boundingRect.adjusted(width, width, -width, -width));
+    painter->setClipPath(path);
+    painter->setClipping(true);
+    painter->fillRect(boundingRect.adjusted(1, 1, -1, -1), Qt::BDiagPattern);
+}
+
+QImage PaintUtils::renderBlankControlImage(const QRectF& frame, const QRectF& rect,
+                                           const QString& id, qreal dpr)
+{
+    QImage dest = renderTransparentImage(frame.size(), dpr);
+    dest.setDevicePixelRatio(dpr);
+
+    QPainter p(&dest);
+    p.translate(frame.topLeft());
+    paintDecorationInPlaceHolderForInvisbleItem(&p, rect);
+    paintTextInPlaceHolderForInvisbleItem(&p, id, rect);
+    p.end();
+
+    return dest;
 }

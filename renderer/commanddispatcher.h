@@ -18,7 +18,7 @@ public:
 public slots:
     void scheduleInitializationProgress(int progress);
     void scheduleRenderDone(const QList<RenderResult>& results);
-    void schedulePreviewDone(const QImage& preview);
+    void schedulePreviewDone(const RenderResult& result);
     void onDataReceived(const RendererCommands& command, const QByteArray& data);
 
 private:

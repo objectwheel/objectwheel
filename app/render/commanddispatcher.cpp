@@ -109,9 +109,9 @@ void CommandDispatcher::onDataReceived(const RendererCommands& command, const QB
     }
 
     case PreviewDone: {
-        QImage preview;
-        pull(data, preview);
-        emit previewDone(preview);
+        RenderResult result;
+        pull(data, result);
+        emit previewDone(result);
         break;
     }
 

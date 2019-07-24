@@ -18,6 +18,7 @@ class QPointF;
 class QIcon;
 class QPalette;
 class QByteArray;
+class QRectF;
 
 namespace PaintUtils {
 
@@ -26,6 +27,7 @@ QImage renderTransparentImage(const QSizeF& size, qreal dpr);
 QImage renderInitialControlImage(const QSizeF& size, qreal dpr);
 QImage renderErrorControlImage(const QSizeF& size, qreal dpr);
 QImage renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, qreal dpr);
+QImage renderBlankControlImage(const QRectF& frame, const QRectF& rect, const QString& id, qreal dpr);
 QIcon renderItemIcon(const QString& fileName, const QPalette& palette);
 QIcon renderButtonIcon(const QString& fileName, const QPalette& palette);
 QIcon renderModeButtonIcon(const QString& fileName);

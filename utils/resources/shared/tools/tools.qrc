@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/tools">
         <file>AnimatedImage/m/control.meta</file>
-        <file>AnimatedImage/t/animation.gif</file>
         <file>AnimatedImage/t/main.qml</file>
         <file>BusyIndicator/t/main.qml</file>
         <file>BusyIndicator/m/control.meta</file>
@@ -28,7 +27,6 @@
         <file>GroupBox/m/control.meta</file>
         <file>GroupBox/t/main.qml</file>
         <file>Image/m/control.meta</file>
-        <file>Image/t/image.png</file>
         <file>Image/t/main.qml</file>
         <file>Label/m/control.meta</file>
         <file>Label/t/main.qml</file>
@@ -64,7 +62,5 @@
         <file>Tumbler/t/main.qml</file>
         <file>Tumbler2/m/control.meta</file>
         <file>Tumbler2/t/main.qml</file>
-        <file>AnimatedImage/t/animation@2x.gif</file>
-        <file>Image/t/image@2x.png</file>
     </qresource>
 </RCC>

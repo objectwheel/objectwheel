@@ -2,5 +2,6 @@ import QtQuick 2.12
 
 AnimatedImage {
     id: animatedImage
-    source: "animation.gif"
+    width: 128
+    height: 128
 }
