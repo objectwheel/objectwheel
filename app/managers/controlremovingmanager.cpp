@@ -41,7 +41,10 @@ void ControlRemovingManager::removeForm(Form* form)
     ControlRenderingManager::scheduleFormDeletion(form->uid());
 
     SaveManager::removeForm(form->dir());
+    bool wasItInUse = form == scene->currentForm();
     scene->removeForm(form);
+    if (wasItInUse && !scene->forms().isEmpty())
+        scene->setCurrentForm(scene->forms().first());
 }
 
 void ControlRemovingManager::removeControl(Control* control)

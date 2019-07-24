@@ -85,6 +85,8 @@ void ProjectExposingManager::exposeProject()
         }
     }
 
+    s_designerScene->setCurrentForm(firstForm);
+
     // Let the SaveManager fix (rebuild) indexes
     // Make sure setIndex is called after controls put upon DesignerScene
     ControlPropertyManager::setIndex(firstForm, 0, ControlPropertyManager::SaveChanges);

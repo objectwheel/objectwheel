@@ -67,24 +67,16 @@ void DesignerScene::addForm(Form* form)
     form->setVisible(false);
 
     m_forms.append(form);
-
-    if (!m_currentForm)
-        setCurrentForm(form);
 }
 
 void DesignerScene::removeForm(Form* form)
 {
-    bool currentFormRemoved = m_currentForm.data() == form;
-
     // NOTE: If the given form address is the current form,
     // then if this line runs, QPointer clears the address
     // within m_currentForm, because its object is "delete"d
     removeControl(form);
 
     m_forms.removeAll(form);
-
-    if (currentFormRemoved && !m_forms.isEmpty())
-        setCurrentForm(m_forms.first());
 }
 
 void DesignerScene::removeControl(Control* control)
