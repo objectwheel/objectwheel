@@ -42,6 +42,12 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
         setSceneRect(sceneRect() | itemsExtendedBoundingRect());
     });
 
+    // This contructor is called from MainWindow -> CentralWidget -> DesignerView -> DesignerScene
+    // So WindowManager::mainWindow()->centralWidget() is invalid right here
+    QMetaObject::invokeMethod(this, [=] {
+        connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
+                WindowManager::mainWindow()->centralWidget()->designerView(), &DesignerView::onControlDoubleClick);
+    }, Qt::QueuedConnection);
     connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
         WindowManager::mainWindow()->centralWidget()->designerView()->
                 onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
@@ -249,6 +255,8 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
 {
     QPen linePen(QColor(0, 0, 0, 200));
     linePen.setCosmetic(true);
+    linePen.setCapStyle(Qt::FlatCap);
+    linePen.setJoinStyle(Qt::MiterJoin);
     linePen.setDashPattern({2., 1.});
 
     painter->setPen(linePen);
@@ -261,6 +269,14 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
 
     painter->setPen(linePen);
     painter->drawRect(rect);
+
+    linePen.setColor(QColor(0, 0, 0, 200));
+    linePen.setStyle(Qt::SolidLine);
+    painter->setPen(linePen);
+    painter->drawPoint(rect.topLeft());
+    painter->drawPoint(rect.topRight() - QPointF(0.25, 0.0));
+    painter->drawPoint(rect.bottomLeft());
+    painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
 }
 
 void DesignerScene::paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem)

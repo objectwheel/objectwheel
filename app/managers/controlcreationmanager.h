@@ -2,6 +2,10 @@
 #define CONTROLCREATIONMANAGER_H
 
 #include <QObject>
+#include <QImage>
+
+#include <paintutils.h>
+#include <controlrenderingmanager.h>
 
 class Form;
 class QPointF;
@@ -16,6 +20,7 @@ class ControlCreationManager final : public QObject
     friend class ApplicationCore; // For construction
     friend class FormsPane; // For createForm
     friend class DesignerView; // For createControl
+    friend class Control; // For createControl
 
 public:
     static ControlCreationManager* instance();
@@ -26,7 +31,13 @@ private:
 
     static void init(DesignerScene* designerScene);
     static Form* createForm(const QString& formRootPath); // FormsPane dependency: Should be a private member
-    static Control* createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos); // NOTE: Sets pos, based on scene coord jargon
+    static Control* createControl(Control* targetParentControl,
+                                  const QString& controlRootPath,
+                                  const QPointF& pos,
+                                  const QSizeF& initialSize = QSizeF(40, 40),
+                                  const QImage& initialImage =
+            PaintUtils::renderInitialControlImage({40, 40},
+            ControlRenderingManager::devicePixelRatio()));
 
 signals:
     void controlCreated(Control* control);

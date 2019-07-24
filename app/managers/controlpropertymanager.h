@@ -59,6 +59,7 @@ signals:
     void zChanged(Control*);
     void parentChanged(Control*);
     void geometryChanged(Control*);
+    void doubleClicked(Control*);
     void renderInfoChanged(Control*, bool codeChanged);
     void indexChanged(Control*);
     void idChanged(Control*, const QString& previousId);

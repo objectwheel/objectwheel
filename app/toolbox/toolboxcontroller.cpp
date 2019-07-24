@@ -75,6 +75,8 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                                     m_toolboxPane->toolboxTree()->currentItem()->text(0),
                                     m_toolboxPane->devicePixelRatioF())));
             }
+            drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-result"),
+                                      UtilityFunctions::push(result));
             locked = false;
             drag->exec(Qt::CopyAction);
             processLocked = false;

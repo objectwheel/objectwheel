@@ -4,16 +4,13 @@
 #include <designerscene.h>
 #include <controlrenderingmanager.h>
 #include <controlpropertymanager.h>
+#include <controlcreationmanager.h>
 #include <paintutils.h>
 #include <parserutils.h>
 #include <utilityfunctions.h>
 #include <toolutils.h>
 #include <designersettings.h>
 #include <scenesettings.h>
-#include <windowmanager.h>
-#include <centralwidget.h>
-#include <designerview.h>
-#include <mainwindow.h>
 
 #include <QCursor>
 #include <QPainter>
@@ -32,7 +29,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_visible(true)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
-  , m_image(PaintUtils::renderInitialControlImage({40, 40}, ControlRenderingManager::devicePixelRatio()))
   , m_snapMargin(QSizeF(0, 0))
 {
     m_controls.append(this);
@@ -46,7 +42,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
 
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
-    ControlPropertyManager::setSize(this, {40, 40}, ControlPropertyManager::NoOption);
 
     connect(this, &Control::beingDraggedChanged,
             this, &Control::updateGeometry);
@@ -55,7 +50,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateRenderInfo);
     connect(this, &Control::doubleClicked,
-            this, [=] { WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(this); });
+            this, [=] { ControlPropertyManager::instance()->doubleClicked(this); });
 }
 
 Control::~Control()
@@ -297,17 +292,28 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         m_dragIn = false;
         event->acceptProposedAction();
         QString dir;
+        RenderResult result;
         UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
-        Q_ASSERT(!dir.isEmpty());
-        WindowManager::mainWindow()->centralWidget()->designerView()->onControlDrop(
-                    this, dir, event->pos() - QPointF(5, 5));
+        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-render-result")), result);
+
+        scene()->clearSelection();
+        // NOTE: Use actual Control position for scene, since createControl deals with margins
+        auto newControl = ControlCreationManager::createControl(
+                    this, dir, scene()->snapPosition(event->pos() - QPointF(5, 5)),
+                    result.boundingRect.size(), result.image);
+        if (newControl) {
+            newControl->setSelected(true);
+        } else {
+            UtilityFunctions::showMessage(0, tr("Oops"),
+                                          tr("Operation failed, control has got problems."),
+                                          QMessageBox::Critical);
+        }
         update();
     }
 }
-#include <QDebug>
+
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
-    qDebug() << "zazazaaz";
     if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
         m_dragIn = true;
         event->accept();
@@ -524,6 +530,18 @@ void Control::updateRenderInfo(const RenderResult& result)
     update();
 
     ControlPropertyManager::instance()->renderInfoChanged(this, result.codeChanged);
+}
+
+void Control::setFrame(const QRectF& frame)
+{
+    m_frame = frame;
+    update();
+}
+
+void Control::setImage(const QImage& image)
+{
+    m_image = image;
+    update();
 }
 
 QRectF Control::frame() const

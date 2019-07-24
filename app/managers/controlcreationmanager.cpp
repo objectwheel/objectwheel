@@ -68,7 +68,11 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     return form;
 }
 
-Control* ControlCreationManager::createControl(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
+Control* ControlCreationManager::createControl(Control* targetParentControl,
+                                               const QString& controlRootPath,
+                                               const QPointF& pos,
+                                               const QSizeF& initialSize,
+                                               const QImage& initialImage)
 {
     const QString& newControlRootPath = SaveManager::addControl(controlRootPath, targetParentControl->dir());
     if (newControlRootPath.isEmpty()) {
@@ -92,7 +96,10 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
     // main.qml file and also correct render engine position,
     // and correct actual designer position of the control because
     // it is corrupted by the render engine lately.
+    control->setImage(initialImage);
+    control->setFrame(QRectF(QPointF(), initialSize));
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
+    ControlPropertyManager::setSize(control, initialSize, ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);
     ControlRenderingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
 
@@ -125,7 +132,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl, con
         // render info update is going to happen and set position,
         // but that doesn't happen for non-gui controls, in this
         // way we expose non-gui items into right positions
-        ControlPropertyManager::setPos(control, SaveUtils::designPosition(childPath), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setPos(childControl, SaveUtils::designPosition(childPath), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
         ControlRenderingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
         controlTree.insert(childPath, childControl);

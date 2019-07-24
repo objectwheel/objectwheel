@@ -37,6 +37,7 @@ public:
     QString dir() const;
     QMarginsF margins() const;
     QImage image() const;
+    QRectF frame() const;
 
     Control* parentControl() const;
 
@@ -55,8 +56,8 @@ public:
     void setDir(const QString& dir);
     void setDragIn(bool dragIn);
     void setIndex(quint32 index);
-
-    QRectF frame() const;
+    void setImage(const QImage& image);
+    void setFrame(const QRectF& frame);
 
 protected:
     void dropControl(Control* control);

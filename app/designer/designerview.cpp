@@ -471,20 +471,6 @@ void DesignerView::onDesignsFileOpen(Control* control, const QString& relativePa
     m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
 }
 
-void DesignerView::onControlDrop(Control* targetParentControl, const QString& controlRootPath, const QPointF& pos)
-{
-    scene()->clearSelection();
-    // NOTE: Use actual Control position for scene, since createControl deals with margins
-    auto newControl = ControlCreationManager::createControl(targetParentControl, controlRootPath, scene()->snapPosition(pos));
-    if (newControl) {
-        newControl->setSelected(true);
-    } else {
-        UtilityFunctions::showMessage(this, tr("Oops"),
-                                      tr("Operation failed, control has got problems."),
-                                      QMessageBox::Critical);
-    }
-}
-
 void DesignerView::onControlSelectionChange(const QList<Control*>& selectedControls)
 {
     scene()->clearSelection();
@@ -597,9 +583,9 @@ void DesignerView::onPasteAction()
                                               | ControlPropertyManager::UpdateRenderer);
             ControlRenderingManager::scheduleRefresh(scene()->currentForm()->uid());
         } else {
-            newControl = ControlCreationManager::createControl(scene()->currentForm(),
-                                                               control->dir(),
-                                                               scene()->snapPosition(control->pos() + QPointF(10, 10)));
+            newControl = ControlCreationManager::createControl(
+                        scene()->currentForm(), control->dir(),
+                        scene()->snapPosition(control->pos() + QPointF(10, 10)));
         }
 
         if (newControl)
