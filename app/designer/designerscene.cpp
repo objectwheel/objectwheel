@@ -253,7 +253,7 @@ void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 
 void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
 {
-    QPen linePen(QColor(0, 0, 0, 200));
+    QPen linePen(QColor(0, 0, 0, 150));
     linePen.setCosmetic(true);
     linePen.setCapStyle(Qt::FlatCap);
     linePen.setJoinStyle(Qt::MiterJoin);
@@ -263,14 +263,14 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(rect);
 
-    linePen.setColor(QColor(255, 255, 255, 200));
+    linePen.setColor(QColor(255, 255, 255, 150));
     linePen.setDashPattern({1., 2.});
     linePen.setDashOffset(2.);
 
     painter->setPen(linePen);
     painter->drawRect(rect);
 
-    linePen.setColor(QColor(0, 0, 0, 200));
+    linePen.setColor(QColor(0, 0, 0, 150));
     linePen.setStyle(Qt::SolidLine);
     painter->setPen(linePen);
     painter->drawPoint(rect.topLeft());

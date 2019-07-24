@@ -60,7 +60,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
 
     auto conn = new QMetaObject::Connection;
     *conn = connect(ControlRenderingManager::instance(), &ControlRenderingManager::previewDone,
-                    [=] (const RenderResult& result) {
+                    [=] (RenderResult result) {
         if (locked) {
             disconnect(*conn);
             delete conn;
@@ -75,6 +75,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                                     m_toolboxPane->toolboxTree()->currentItem()->text(0),
                                     m_toolboxPane->devicePixelRatioF())));
             }
+            result.image = drag->pixmap().toImage();
             drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-result"),
                                       UtilityFunctions::push(result));
             locked = false;
