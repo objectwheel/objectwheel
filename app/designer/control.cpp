@@ -502,8 +502,16 @@ void Control::updateRenderInfo(const RenderResult& result)
     m_errors = result.errors;
     m_events = result.events;
     m_properties = result.properties;
-    m_blockedPropertyChanges = result.blockedPropertyChanges;
-    m_cachedGeometry = UtilityFunctions::getGeometryFromProperties(result.properties);
+
+    auto g = UtilityFunctions::getGeometryFromProperties(result.properties);
+    if (!m_blockedPropertyChanges.contains("x"))
+        m_cachedGeometry.moveLeft(g.x());
+    if (!m_blockedPropertyChanges.contains("y"))
+        m_cachedGeometry.moveTop(g.y());
+    if (!m_blockedPropertyChanges.contains("width"))
+        m_cachedGeometry.setWidth(g.width());
+    if (!m_blockedPropertyChanges.contains("height"))
+        m_cachedGeometry.setHeight(g.height());
 
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
@@ -515,9 +523,7 @@ void Control::updateRenderInfo(const RenderResult& result)
 
     setResizable(gui());
     setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
-
-    if (!beingDragged() && !beingResized())
-        updateGeometry();
+    updateGeometry();
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_image = hasErrors() ? PaintUtils::renderErrorControlImage(size(), dpr) : result.image;

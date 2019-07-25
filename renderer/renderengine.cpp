@@ -25,11 +25,6 @@ const int g_progress_1 = 2;
 const int g_progress_2 = 6;
 const int g_progress_3 = 10;
 const int g_progress_4 = 100;
-
-static inline bool isRectangleSane(const QRectF &rect)
-{
-    return rect.isValid() && (rect.width() < 10000) && (rect.height() < 10000);
-}
 }
 
 RenderEngine::RenderEngine(QObject* parent) : QObject(parent)
@@ -616,32 +611,49 @@ RenderEngine::ControlInstance* RenderEngine::findNodeInstanceForItem(QQuickItem*
 
 void RenderEngine::scheduleRender(ControlInstance* formInstance, int msecLater)
 {
-    QTimer::singleShot(msecLater, std::bind(&RenderEngine::render, this, formInstance));
+    if (formInstance->renderScheduled)
+        return;
+    formInstance->renderScheduled = true;
+    QTimer::singleShot(msecLater, this, [=] {
+        if (m_formInstances.contains(formInstance)) { // Guard against control's deletion
+            render(formInstance);
+            formInstance->renderScheduled = false;
+        }
+    });
 }
 
 void RenderEngine::scheduleRerenderForInvisibleInstances(RenderEngine::ControlInstance* formInstance, int msecLater)
 {
+    if (formInstance->renderScheduled)
+        return;
+    formInstance->renderScheduled = true;
     QTimer::singleShot(msecLater, this, [=] {
-        QList<ControlInstance*> rerenderInstances;
-        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
-            if (!instance->needsRerender)
-                continue;
+        if (m_formInstances.contains(formInstance)) { // Guard against control's deletion
+            QList<ControlInstance*> rerenderInstances;
+            for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+                if (!instance->needsRerender)
+                    continue;
 
-            if (!instance->errors.isEmpty())
-                continue;
+                if (!instance->errors.isEmpty())
+                    continue;
 
-            if (!instance->gui)
-                continue;
+                if (!instance->gui)
+                    continue;
 
-            QQuickItem* item = RenderUtils::guiItem(instance);
+                QQuickItem* item = RenderUtils::guiItem(instance);
 
-            DesignerSupport::addDirty(item, DesignerSupport::AllMask);
+                DesignerSupport::addDirty(item, DesignerSupport::AllMask);
 
-            rerenderInstances.append(instance);
+                rerenderInstances.append(instance);
+            }
+
+            refreshBindings(formInstance->context);
+            emit renderDone(renderDirtyInstances(rerenderInstances));
+
+            for (ControlInstance* rerenderInstance : rerenderInstances)
+                rerenderInstance->needsRerender = false;
+            formInstance->renderScheduled = false;
         }
-
-        refreshBindings(formInstance->context);
-        emit renderDone(renderDirtyInstances(rerenderInstances));
     });
 }
 
@@ -707,7 +719,6 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         result.window = instance->window;
         result.visible = instance->visible;
         result.codeChanged = instance->codeChanged;
-        result.blockedPropertyChanges = RenderUtils::blockedPropertyChanges(instance);
         result.properties = RenderUtils::properties(instance);
         result.events = RenderUtils::events(instance);
         instance->codeChanged = false;
@@ -735,7 +746,7 @@ QRectF RenderEngine::boundingRectWithStepChilds(QQuickItem* item)
     foreach (QQuickItem *childItem, item->childItems()) {
         if (!hasInstanceForObject(childItem)) {
             QRectF transformedRect = childItem->mapRectToItem(item, boundingRectWithStepChilds(childItem));
-            if (isRectangleSane(transformedRect))
+            if (RenderUtils::isRectangleSane(transformedRect))
                 boundingRect = boundingRect.united(transformedRect);
         }
     }

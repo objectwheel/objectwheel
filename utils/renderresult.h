@@ -33,7 +33,6 @@ struct RenderResult {
     QVector<QmlError> errors;
     QVector<QString> events;
     QVector<PropertyNode> properties;
-    QVector<QString> blockedPropertyChanges;
 };
 
 inline QDataStream& operator>> (QDataStream& in, QmlError& error)
@@ -95,7 +94,6 @@ inline QDataStream& operator>> (QDataStream& in, RenderResult& result)
     in >> result.errors;
     in >> result.events;
     in >> result.properties;
-    in >> result.blockedPropertyChanges;
     return in;
 }
 
@@ -112,7 +110,6 @@ inline QDataStream& operator<< (QDataStream& out, const RenderResult& result)
     out << result.errors;
     out << result.events;
     out << result.properties;
-    out << result.blockedPropertyChanges;
     return out;
 }
 

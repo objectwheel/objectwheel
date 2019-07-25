@@ -13,11 +13,11 @@ struct RenderResult;
 // Due to possible margins on an ApplicationWindow the rendering order is important
 // And a parent must always be rendered first.
 template <typename T>
-class OnlyOneInstanceList : public QList<T>
+class OnlyOneInstanceList final : public QList<T>
 {
 public:
-    inline void insert(const T& t) { if (!this->contains(t)) this->append(t); }
-    inline void remove(const T& t) { this->removeOne(t); }
+    void insert(const T& t) { if (!QList<T>::contains(t)) this->append(t); }
+    void remove(const T& t) { QList<T>::removeOne(t); }
 };
 
 class RenderEngine final : public QObject
@@ -29,6 +29,7 @@ class RenderEngine final : public QObject
 
 public:
     struct ControlInstance {
+        bool renderScheduled = false;
         bool gui;
         bool popup;
         bool window;
@@ -43,7 +44,6 @@ public:
         QObject* object;
         QQmlContext* context;
         QVector<QmlError> errors;
-        QHash<QString, QVariant> propertyChanges;
 
         ControlInstance* parent = nullptr;
         QVector<ControlInstance*> children;

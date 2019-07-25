@@ -434,26 +434,6 @@ QVector<QString> RenderUtils::events(const RenderEngine::ControlInstance* instan
     return events;
 }
 
-QVector<QString> RenderUtils::blockedPropertyChanges(RenderEngine::ControlInstance* instance)
-{
-    QVector<QString> blockedPropertyNames;
-
-    if (instance == 0)
-        return blockedPropertyNames;
-
-    if (instance->object == 0)
-        return blockedPropertyNames;
-
-    for (const QString& propertyName : instance->propertyChanges.keys()) {
-        if (instance->propertyChanges.value(propertyName) == instance->object->property(propertyName.toUtf8()))
-            blockedPropertyNames.append(propertyName);
-    }
-
-    instance->propertyChanges.clear();
-
-    return blockedPropertyNames;
-}
-
 QList<RenderEngine::ControlInstance*> RenderUtils::allSubInstance(RenderEngine::ControlInstance* parentInstance)
 {
     QList<RenderEngine::ControlInstance*> instances;
@@ -502,6 +482,11 @@ bool RenderUtils::isVisible(const RenderEngine::ControlInstance* instance)
         return visible;
     }
     return false;
+}
+
+bool RenderUtils::isRectangleSane(const QRectF& rect)
+{
+    return rect.isValid() && (rect.width() < 10000) && (rect.height() < 10000);
 }
 
 void RenderUtils::refreshLayoutable(RenderEngine::ControlInstance* instance)
@@ -619,7 +604,6 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     }
 
     property.write(propertyValue);
-    instance->propertyChanges.insert(propertyName, propertyValue);
 
     DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
     if (instance->parent && instance->parent->object) {

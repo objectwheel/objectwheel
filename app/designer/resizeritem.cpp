@@ -137,7 +137,7 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     GadgetItem::mouseMoveEvent(event);
 
     if (dragAccepted() && targetItem() && targetItem()->resizable()) {
-        if (!beingResized()) {
+        if (!targetItem()->beingResized()) {
             targetItem()->setBeingDragged(true); // Because pos() may also change
             targetItem()->setBeingResized(true);
         }

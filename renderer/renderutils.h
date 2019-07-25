@@ -21,11 +21,11 @@ public:
     static QVariant evaluate(const RenderEngine::ControlInstance* instance, const QString& binding);
     static QList<QQuickItem*> allItems(RenderEngine::ControlInstance* formInstance);
     static QVector<QString> events(const RenderEngine::ControlInstance* instance);
-    static QVector<QString> blockedPropertyChanges(RenderEngine::ControlInstance* instance);
     static QVector<PropertyNode> properties(const RenderEngine::ControlInstance* instance);
     static QList<RenderEngine::ControlInstance*> allSubInstance(RenderEngine::ControlInstance* parentInstance);
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
     static bool isVisible(const RenderEngine::ControlInstance* instance);
+    static bool isRectangleSane(const QRectF& rect);
 
     static void refreshLayoutable(RenderEngine::ControlInstance* instance);
     static void updateDirtyNodesRecursive(QQuickItem* parentItem, RenderEngine* engine);
