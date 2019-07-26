@@ -135,8 +135,8 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
     m_siblingsBeforeDrag = item->siblingItems();
 
     if (const DesignerItem* parentItem = item->parentItem()) {
-        m_dragLayer->setSize(parentItem->size());
-        m_dragLayer->setPos(parentItem->scenePos());
+        m_dragLayer->setTransform(QTransform::fromTranslate(parentItem->scenePos().x(),
+                                                            parentItem->scenePos().y()));
     }
 }
 

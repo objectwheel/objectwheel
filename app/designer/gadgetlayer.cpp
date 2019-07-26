@@ -72,8 +72,12 @@ void GadgetLayer::onSceneSelectionChange()
         m_formHeadlineItem->setBrush(currentFormItem->isSelected() ? scene()->outlineColor() : Qt::darkGray);
     for (DesignerItem* item : m_resizerHash.keys()) {
         for (ResizerItem* resizer : resizers(item)) {
-            if (item->isVisible())
-                resizer->setVisible(item->isSelected() && item->resizable());
+            if (item->isVisible()) {
+                bool show = item->isSelected() && item->resizable();
+                resizer->setVisible(show);
+                if (show)
+                    resizer->updatePosition();
+            }
         }
     }
     QList<DesignerItem*> selectedItems = scene()->selectedItems();
@@ -92,7 +96,14 @@ void GadgetLayer::onSceneSelectionChange()
         m_headlineItem->updateGeometry(); // Schedules an update, so prevent flicker below
         QTimer::singleShot(10, std::bind(&HeadlineItem::setVisible, m_headlineItem, true));
     } else {
-        m_headlineItem->setVisible(false);
+        // Must also be a singleShot, otherwise If user
+        // selects all the controls on the scene with
+        // CMD + A shortcut, both upper and below "setVisible"
+        // functions are called, and upper one kicks in before
+        // the below one, but still, due to 10ms delay, upper
+        // one is called later. And this leads to visible
+        // headline for multiple control selection state.
+        QTimer::singleShot(10, std::bind(&HeadlineItem::setVisible, m_headlineItem, false));
     }
 }
 
