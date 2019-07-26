@@ -36,10 +36,10 @@ public:
         bool needsRerender = false;
         bool codeChanged = false;
         bool preview = false;
-        bool geometryLocked = false;
         QString id;
         QString uid;
         QString dir;
+        QString geometryHash;
         QObject* object;
         QQmlContext* context;
         QVector<QmlError> errors;
@@ -67,7 +67,6 @@ public:
 public slots:
     void init();
     void refresh(const QString& formUid);
-    void lockGeometry(const QString& uid, bool locked);
     void deleteForm(const QString& uid); // NOTE: Deletes form and its children
     void deleteControl(const QString& uid); // NOTE: Deletes control and its children
     void createForm(const QString& dir); // NOTE: It doesn't create children

@@ -17,7 +17,6 @@ class ControlRenderingManager final : public QObject
 public:
     static ControlRenderingManager* instance();
 
-    static void scheduleGeometryLock(const QString& uid, bool locked);
     static void scheduleControlCodeUpdate(const QString& uid);
     static void scheduleFormCodeUpdate(const QString& uid);
     static void scheduleFormDeletion(const QString& uid);

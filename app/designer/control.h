@@ -80,7 +80,6 @@ protected:
     ~Control() override;
 
 private slots:
-    void lockGeometry();
     void updateRenderInfo(const RenderResult& result);
 
 private:
@@ -99,7 +98,7 @@ private:
     QImage m_image;
     QSizeF m_snapMargin;
     QMarginsF m_margins;
-    QVector<QString> m_blockedPropertyChanges;
+    QString m_geometryHash;
 
     QVector<QmlError> m_errors;
     QVector<QString> m_events;

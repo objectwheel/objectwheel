@@ -11,6 +11,7 @@
 #include <toolutils.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <hashfactory.h>
 
 #include <QCursor>
 #include <QPainter>
@@ -43,10 +44,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
 
-    connect(this, &Control::beingDraggedChanged,
-            this, &Control::lockGeometry);
-    connect(this, &Control::beingResizedChanged,
-            this, &Control::lockGeometry);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateRenderInfo);
     connect(this, &Control::doubleClicked,
@@ -58,21 +55,6 @@ Control::~Control()
     // In order to prevent any kind of signals being emitted while deletion in progress
     blockSignals(true);
     m_controls.removeOne(this);
-}
-
-void Control::lockGeometry()
-{
-    bool lock = beingDragged() || beingResized();
-    ControlRenderingManager::scheduleGeometryLock(uid(), lock);
-    if (!lock) {
-        auto options = ControlPropertyManager::UpdateRenderer
-                | ControlPropertyManager::CompressedCall
-                | ControlPropertyManager::DontApplyDesigner;
-        if (form())
-            ControlPropertyManager::setSize(this, size(), options);
-        else
-            ControlPropertyManager::setGeometry(this, geometry(), options);
-    }
 }
 
 bool Control::gui() const
@@ -408,19 +390,22 @@ QVariant Control::itemChange(int change, const QVariant& value)
             ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
                     | ControlPropertyManager::CompressedCall
                     | ControlPropertyManager::DontApplyDesigner;
-            if (gui())
+            if (gui()) {
+                m_geometryHash = HashFactory::generate();
                 options |= ControlPropertyManager::UpdateRenderer;
-            ControlPropertyManager::setPos(this, snapPos, options);
+            }
+            ControlPropertyManager::setPos(this, snapPos, options, m_geometryHash);
         }
         return snapPos;
     } else if (change == ItemSizeChange && beingResized()) {
         const QSizeF snapSize = scene()->snapSize(pos(), value.toSizeF() + m_snapMargin);
         m_snapMargin = QSizeF(0, 0);
         if (gui()) {
+            m_geometryHash = HashFactory::generate();
             ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdateRenderer
                                             | ControlPropertyManager::CompressedCall
-                                            | ControlPropertyManager::DontApplyDesigner);
+                                            | ControlPropertyManager::DontApplyDesigner, m_geometryHash);
         }
         return snapSize;
     }
@@ -498,7 +483,8 @@ void Control::updateRenderInfo(const RenderResult& result)
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
 
-    if (!result.geometryLocked) {
+    if (m_geometryHash.isEmpty() || result.geometryHash == m_geometryHash) {
+        m_geometryHash.clear();
         const QRectF& geo = UtilityFunctions::getGeometryFromProperties(result.properties);
         ControlPropertyManager::setSize(this, geo.size(), ControlPropertyManager::NoOption);
 

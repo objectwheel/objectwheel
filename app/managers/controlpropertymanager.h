@@ -33,14 +33,14 @@ public:
 
 public:
     static ControlPropertyManager* instance();
-    static void setX(Control* control, qreal x, Options options); // Set x, based on scene coord jargon
-    static void setY(Control* control, qreal y, Options options); // Set y, based on scene coord jargon
+    static void setX(Control* control, qreal x, Options options, const QString& geometryHash = QString()); // Set x, based on scene coord jargon
+    static void setY(Control* control, qreal y, Options options, const QString& geometryHash = QString()); // Set y, based on scene coord jargon
     static void setZ(Control* control, qreal z, Options options);
-    static void setWidth(Control* control, qreal width, Options options);
-    static void setHeight(Control* control, qreal height, Options options);
-    static void setPos(Control* control, const QPointF& pos, Options options); // Set pos, based on scene coord jargon
-    static void setSize(Control* control, const QSizeF& size, Options options);
-    static void setGeometry(Control* control, const QRectF& geometry, Options options); // Set geometry, based on scene coord jargon
+    static void setWidth(Control* control, qreal width, Options options, const QString& geometryHash = QString());
+    static void setHeight(Control* control, qreal height, Options options, const QString& geometryHash = QString());
+    static void setPos(Control* control, const QPointF& pos, Options options, const QString& geometryHash = QString()); // Set pos, based on scene coord jargon
+    static void setSize(Control* control, const QSizeF& size, Options options, const QString& geometryHash = QString());
+    static void setGeometry(Control* control, const QRectF& geometry, Options options, const QString& geometryHash = QString()); // Set geometry, based on scene coord jargon
     static void setParent(Control* control, Control* parentControl, Options options);
     static void setId(Control* control, const QString& id, Options options);
     static void setIndex(Control* control, quint32 index, Options options);
@@ -54,6 +54,9 @@ public:
 
 private slots:
     void handleDirtyProperties();
+
+private:
+    static QVariant geometryHashedValue(const QVariant& value, const QString& hash = QString());
 
 signals:
     void zChanged(Control*);

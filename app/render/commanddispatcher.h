@@ -31,7 +31,6 @@ public slots:
     void scheduleFormDeletion(const QString& uid);
     void scheduleControlCodeUpdate(const QString& uid);
     void scheduleFormCodeUpdate(const QString& uid);
-    void scheduleGeometryLock(const QString& uid, bool locked);
     void onDataReceived(const RendererCommands& command, const QByteArray& data);
 
 private:

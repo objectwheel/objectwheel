@@ -212,7 +212,7 @@ void RenderEngine::updateControlCode(const QString& uid)
     oldInstance->window = instance->window;
     oldInstance->visible = instance->visible;
     oldInstance->codeChanged = instance->codeChanged;
-    oldInstance->geometryLocked = instance->geometryLocked;
+    oldInstance->geometryHash = instance->geometryHash;
     oldInstance->id = instance->id;
     oldInstance->object = instance->object;
     oldInstance->errors = instance->errors;
@@ -305,7 +305,7 @@ void RenderEngine::updateFormCode(const QString& uid)
     oldFormInstance->window = instance->window;
     oldFormInstance->visible = instance->visible;
     oldFormInstance->codeChanged = instance->codeChanged;
-    oldFormInstance->geometryLocked = instance->geometryLocked;
+    oldFormInstance->geometryHash = instance->geometryHash;
     oldFormInstance->id = instance->id;
     oldFormInstance->object = instance->object;
     oldFormInstance->errors = instance->errors;
@@ -392,7 +392,7 @@ void RenderEngine::preview(const QString& url)
         result.window = instance->window;
         result.visible = instance->visible;
         result.codeChanged = instance->codeChanged;
-        result.geometryLocked = instance->geometryLocked;
+        result.geometryHash = instance->geometryHash;
         result.properties = RenderUtils::properties(instance);
         result.events = RenderUtils::events(instance);
         instance->codeChanged = false;
@@ -543,20 +543,6 @@ void RenderEngine::refresh(const QString& formUid)
         refreshBindings(formInstance->context);
         scheduleRender(formInstance);
     }
-}
-
-void RenderEngine::lockGeometry(const QString& uid, bool locked)
-{
-    Q_ASSERT(!uid.isEmpty());
-    ControlInstance* instance = instanceForUid(uid);
-    Q_ASSERT(instance);
-
-    // Stop render timer, process and send
-    // pending renders and clear the render list
-    flushRenders();
-    flushReRenders();
-
-    instance->geometryLocked = locked;
 }
 
 bool RenderEngine::hasInstanceForObject(const QObject* object) const
@@ -755,7 +741,7 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         result.window = instance->window;
         result.visible = instance->visible;
         result.codeChanged = instance->codeChanged;
-        result.geometryLocked = instance->geometryLocked;
+        result.geometryHash = instance->geometryHash;
         result.properties = RenderUtils::properties(instance);
         result.events = RenderUtils::events(instance);
         instance->codeChanged = false;

@@ -603,7 +603,18 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
         return;
     }
 
-    property.write(propertyValue);
+    if (propertyName == "x"
+            || propertyName == "y"
+            || propertyName == "width"
+            || propertyName == "height") {
+        QString hash;
+        QVariant actualValue(propertyValue);
+        valueFromGeometryHash(&actualValue, &hash);
+        property.write(actualValue);
+        instance->geometryHash = hash;
+    } else {
+        property.write(propertyValue);
+    }
 
     DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
     if (instance->parent && instance->parent->object) {
@@ -703,6 +714,11 @@ QQuickItem* RenderUtils::createDummyItem(QQmlEngine* engine)
     Q_ASSERT(item);
     item->setFlag(QQuickItem::ItemHasContents, true);
     return item;
+}
+
+void RenderUtils::valueFromGeometryHash(QVariant* value, QString* hash)
+{
+    UtilityFunctions::pull(value->toByteArray(), *value, *hash) ;
 }
 
 QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstance* instance)

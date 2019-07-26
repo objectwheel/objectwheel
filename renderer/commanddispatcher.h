@@ -27,7 +27,6 @@ private:
 signals:
     void init();
     void terminate();
-    void lockGeometry(const QString& uid, bool locked);
     void propertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void formCreation(const QString& dir);
     void preview(const QString& url);

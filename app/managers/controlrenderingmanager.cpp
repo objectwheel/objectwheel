@@ -78,11 +78,6 @@ ControlRenderingManager* ControlRenderingManager::instance()
     return s_instance;
 }
 
-void ControlRenderingManager::scheduleGeometryLock(const QString& uid, bool locked)
-{
-    s_commandDispatcher->scheduleGeometryLock(uid, locked);
-}
-
 void ControlRenderingManager::scheduleControlCodeUpdate(const QString& uid)
 {
     s_commandDispatcher->scheduleControlCodeUpdate(uid);

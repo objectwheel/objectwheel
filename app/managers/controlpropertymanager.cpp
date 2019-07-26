@@ -4,6 +4,7 @@
 #include <saveutils.h>
 #include <controlrenderingmanager.h>
 #include <designerscene.h>
+#include <utilityfunctions.h>
 
 #include <QTimer>
 #include <QPointer>
@@ -41,7 +42,12 @@ void ControlPropertyManager::handleDirtyProperties()
     s_dirtyPropertyProcessingTimer->stop();
 }
 
-void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyManager::Options options)
+QVariant ControlPropertyManager::geometryHashedValue(const QVariant& value, const QString& hash)
+{
+    return UtilityFunctions::push(value, hash);
+}
+
+void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyManager::Options options, const QString& geometryHash)
 {
     if (!control)
         return;
@@ -60,7 +66,7 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setX";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setX, QPointer<Control>(control),
-                                           x, (options & ~CompressedCall) | DontApplyDesigner);
+                                           x, (options & ~CompressedCall) | DontApplyDesigner, geometryHash);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -77,16 +83,16 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
 
         if (options & UpdateRenderer) {
             if (isInt)
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", int(newX));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(newX), geometryHash));
             else
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", newX);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(newX, geometryHash));
         }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyManager::Options options)
+void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyManager::Options options, const QString& geometryHash)
 {
     if (!control)
         return;
@@ -105,7 +111,7 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setY";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setY, QPointer<Control>(control),
-                                           y, (options & ~CompressedCall) | DontApplyDesigner);
+                                           y, (options & ~CompressedCall) | DontApplyDesigner, geometryHash);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -122,9 +128,9 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
 
         if (options & UpdateRenderer) {
             if (isInt)
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", int(newY));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(newY), geometryHash));
             else
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", newY);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(newY, geometryHash));
         }
 
         emit instance()->geometryChanged(control);
@@ -163,7 +169,7 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
     }
 }
 
-void ControlPropertyManager::setWidth(Control* control, qreal width, Options options)
+void ControlPropertyManager::setWidth(Control* control, qreal width, Options options, const QString& geometryHash)
 {
     if (!control)
         return;
@@ -180,7 +186,7 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setWidth";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setWidth, QPointer<Control>(control),
-                                           width, (options & ~CompressedCall) | DontApplyDesigner);
+                                           width, (options & ~CompressedCall) | DontApplyDesigner, geometryHash);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -196,16 +202,16 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
 
         if (options & UpdateRenderer) {
             if (isInt)
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", int(width));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(int(width), geometryHash));
             else
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", width);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(width, geometryHash));
         }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setHeight(Control* control, qreal height, Options options)
+void ControlPropertyManager::setHeight(Control* control, qreal height, Options options, const QString& geometryHash)
 {
     if (!control)
         return;
@@ -222,7 +228,7 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setHeight";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setHeight, QPointer<Control>(control),
-                                           height, (options & ~CompressedCall) | DontApplyDesigner);
+                                           height, (options & ~CompressedCall) | DontApplyDesigner, geometryHash);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -238,16 +244,18 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
 
         if (options & UpdateRenderer) {
             if (isInt)
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", int(height));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(int(height), geometryHash));
             else
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", height);
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(height, geometryHash));
         }
 
         emit instance()->geometryChanged(control);
     }
 }
 
-void ControlPropertyManager::setPos(Control* control, const QPointF& pos, ControlPropertyManager::Options options)
+void ControlPropertyManager::setPos(Control* control, const QPointF& pos,
+                                    ControlPropertyManager::Options options,
+                                    const QString& geometryHash)
 {
     if (!control)
         return;
@@ -266,7 +274,7 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setPos";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setPos, QPointer<Control>(control),
-                                           pos, (options & ~CompressedCall) | DontApplyDesigner);
+                                           pos, (options & ~CompressedCall) | DontApplyDesigner, geometryHash);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -286,11 +294,11 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
 
         if (options & UpdateRenderer) {
             if (isInt) {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", int(newPos.x()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", int(newPos.y()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(newPos.x())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(newPos.y()), geometryHash));
             } else {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", newPos.x());
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", newPos.y());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(newPos.x()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(newPos.y(), geometryHash));
             }
         }
 
@@ -298,7 +306,9 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos, Contro
     }
 }
 
-void ControlPropertyManager::setSize(Control* control, const QSizeF& size, ControlPropertyManager::Options options)
+void ControlPropertyManager::setSize(Control* control, const QSizeF& size,
+                                     ControlPropertyManager::Options options,
+                                     const QString& geometryHash)
 {
     if (!control)
         return;
@@ -318,7 +328,7 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setSize";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setSize, QPointer<Control>(control),
-                                           size, (options & ~CompressedCall) | DontApplyDesigner);
+                                           size, (options & ~CompressedCall) | DontApplyDesigner, geometryHash);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -337,11 +347,11 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
 
         if (options & UpdateRenderer) {
             if (isInt) {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", int(size.width()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", int(size.height()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(int(size.width())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(int(size.height()), geometryHash));
             } else {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", size.width());
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", size.height());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(size.width()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(size.height(), geometryHash));
             }
         }
 
@@ -349,7 +359,7 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size, Contr
     }
 }
 
-void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometry, ControlPropertyManager::Options options)
+void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometry, ControlPropertyManager::Options options, const QString& geometryHash)
 {
     if (!control)
         return;
@@ -371,7 +381,7 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
         DirtyProperty dirtyProperty;
         dirtyProperty.key = control->uid() + "setGeometry";
         dirtyProperty.function = std::bind(&ControlPropertyManager::setGeometry, QPointer<Control>(control),
-                                           geometry, (options & ~CompressedCall) | DontApplyDesigner);
+                                           geometry, (options & ~CompressedCall) | DontApplyDesigner, geometryHash);
         s_dirtyProperties.removeAll(dirtyProperty);
         s_dirtyProperties.append(dirtyProperty);
 
@@ -395,15 +405,15 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
 
         if (options & UpdateRenderer) {
             if (isInt) {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", int(newGoe.x()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", int(newGoe.y()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", int(newGoe.width()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", int(newGoe.height()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(newGoe.x())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(newGoe.y())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(int(newGoe.width())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(int(newGoe.height()), geometryHash));
             } else {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", newGoe.x());
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", newGoe.y());
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", newGoe.width());
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", newGoe.height());
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(newGoe.x()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(newGoe.y()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(newGoe.width()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(newGoe.height(), geometryHash));
             }
         }
 

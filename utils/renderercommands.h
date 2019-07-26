@@ -22,8 +22,7 @@ enum RendererCommands : quint32 {
     PropertyUpdate,
     DevicePixelRatioUpdate,
     Refresh,
-    Terminate,
-    GeometryLock
+    Terminate
 };
 
 #endif // RENDERERCOMMANDS_H
