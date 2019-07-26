@@ -50,6 +50,13 @@ void GadgetLayer::addResizers(DesignerItem* item)
                 resizer, [=] { resizer->setVisible(item->isSelected() && item->resizable()); });
         resizers.append(resizer);
     }
+    connect(item, &DesignerItem::geometryChanged,
+            this, [=] {
+        for (DesignerItem* childItem : item->childItems()) {
+            for (ResizerItem* resizer : this->resizers(childItem))
+                resizer->updatePosition();
+        }
+    });
     m_resizerHash.insert(item, resizers);
 }
 
@@ -57,6 +64,7 @@ void GadgetLayer::removeResizers(DesignerItem* item)
 {
     for (ResizerItem* resizer : resizers(item))
         delete resizer;
+    item->disconnect(this);
     m_resizerHash.remove(item);
 }
 
