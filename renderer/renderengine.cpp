@@ -27,15 +27,29 @@ const int g_progress_3 = 10;
 const int g_progress_4 = 100;
 }
 
+enum {
+    RENDER_TIMEOUT = 50,
+    RERENDER_TIMEOUT = 400
+};
+
 RenderEngine::RenderEngine(QObject* parent) : QObject(parent)
   , m_initialized(false)
   , m_devicePixelRatio(qgetenv("RENDERER_DEVICE_PIXEL_RATIO").toDouble())
   , m_view(new QQuickView)
+  , m_renderTimer(new QTimer(this))
+  , m_reRenderTimer(new QTimer(this))
 {
     DesignerSupport::createOpenGLContext(m_view);
     DesignerSupport::setRootItem(m_view, RenderUtils::createDummyItem(m_view->engine()));
+
     m_view->engine()->setOutputWarningsToStandardError(false);
     m_view->engine()->addImportPath(SaveUtils::toProjectImportsDir(CommandlineParser::projectDirectory()));
+
+    m_renderTimer->setInterval(RENDER_TIMEOUT);
+    connect(m_renderTimer, &QTimer::timeout, this, &RenderEngine::flushRenders);
+
+    m_reRenderTimer->setInterval(RERENDER_TIMEOUT);
+    connect(m_reRenderTimer, &QTimer::timeout, this, &RenderEngine::flushReRenders);
 }
 
 RenderEngine::~RenderEngine()
@@ -198,6 +212,7 @@ void RenderEngine::updateControlCode(const QString& uid)
     oldInstance->window = instance->window;
     oldInstance->visible = instance->visible;
     oldInstance->codeChanged = instance->codeChanged;
+    oldInstance->geometryLocked = instance->geometryLocked;
     oldInstance->id = instance->id;
     oldInstance->object = instance->object;
     oldInstance->errors = instance->errors;
@@ -290,6 +305,7 @@ void RenderEngine::updateFormCode(const QString& uid)
     oldFormInstance->window = instance->window;
     oldFormInstance->visible = instance->visible;
     oldFormInstance->codeChanged = instance->codeChanged;
+    oldFormInstance->geometryLocked = instance->geometryLocked;
     oldFormInstance->id = instance->id;
     oldFormInstance->object = instance->object;
     oldFormInstance->errors = instance->errors;
@@ -359,7 +375,7 @@ void RenderEngine::preview(const QString& url)
 
     refreshBindings(instance->context);
 
-    QTimer::singleShot(TIMEOUT, [=] {
+    QTimer::singleShot(RENDER_TIMEOUT, [=] {
         DesignerSupport::polishItems(m_view);
 
         for (QQuickItem* item : RenderUtils::allItems(instance)) {
@@ -376,6 +392,7 @@ void RenderEngine::preview(const QString& url)
         result.window = instance->window;
         result.visible = instance->visible;
         result.codeChanged = instance->codeChanged;
+        result.geometryLocked = instance->geometryLocked;
         result.properties = RenderUtils::properties(instance);
         result.events = RenderUtils::events(instance);
         instance->codeChanged = false;
@@ -528,6 +545,20 @@ void RenderEngine::refresh(const QString& formUid)
     }
 }
 
+void RenderEngine::lockGeometry(const QString& uid, bool locked)
+{
+    Q_ASSERT(!uid.isEmpty());
+    ControlInstance* instance = instanceForUid(uid);
+    Q_ASSERT(instance);
+
+    // Stop render timer, process and send
+    // pending renders and clear the render list
+    flushRenders();
+    flushReRenders();
+
+    instance->geometryLocked = locked;
+}
+
 bool RenderEngine::hasInstanceForObject(const QObject* object) const
 {
     Q_ASSERT(object);
@@ -609,101 +640,106 @@ RenderEngine::ControlInstance* RenderEngine::findNodeInstanceForItem(QQuickItem*
     return nullptr;
 }
 
-void RenderEngine::scheduleRender(ControlInstance* formInstance, int msecLater)
+void RenderEngine::scheduleRender(ControlInstance* formInstance)
 {
-    if (formInstance->renderScheduled)
-        return;
-    formInstance->renderScheduled = true;
-    QTimer::singleShot(msecLater, this, [=] {
-        if (m_formInstances.contains(formInstance)) { // Guard against control's deletion
-            render(formInstance);
-            formInstance->renderScheduled = false;
-        }
-    });
+    m_formInstanceSetForRender.insert(formInstance);
+    if (!m_renderTimer->isActive())
+        m_renderTimer->start();
 }
 
-void RenderEngine::scheduleRerenderForInvisibleInstances(RenderEngine::ControlInstance* formInstance, int msecLater)
+void RenderEngine::scheduleRerenderForInvisibleInstances(RenderEngine::ControlInstance* formInstance)
 {
-    if (formInstance->renderScheduled)
-        return;
-    formInstance->renderScheduled = true;
-    QTimer::singleShot(msecLater, this, [=] {
-        if (m_formInstances.contains(formInstance)) { // Guard against control's deletion
-            QList<ControlInstance*> rerenderInstances;
-            for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
-                if (!instance->needsRerender)
-                    continue;
-
-                if (!instance->errors.isEmpty())
-                    continue;
-
-                if (!instance->gui)
-                    continue;
-
-                QQuickItem* item = RenderUtils::guiItem(instance);
-
-                DesignerSupport::addDirty(item, DesignerSupport::AllMask);
-
-                rerenderInstances.append(instance);
-            }
-
-            refreshBindings(formInstance->context);
-            emit renderDone(renderDirtyInstances(rerenderInstances));
-
-            for (ControlInstance* rerenderInstance : rerenderInstances)
-                rerenderInstance->needsRerender = false;
-            formInstance->renderScheduled = false;
-        }
-    });
+    m_formInstanceSetForReRender.insert(formInstance);
+    if (!m_reRenderTimer->isActive())
+        m_reRenderTimer->start();
 }
 
-void RenderEngine::render(ControlInstance* formInstance)
+void RenderEngine::flushRenders()
 {
-    Q_ASSERT(formInstance);
+    m_renderTimer->stop();
+    for (ControlInstance* formInstance : m_formInstanceSetForRender) {
+        if (!m_formInstances.contains(formInstance))
+            continue; // Skip possible deleted forms
 
-    DesignerSupport::polishItems(m_view);
+        DesignerSupport::polishItems(m_view);
 
-    static DesignerSupport::DirtyType dirty = DesignerSupport::DirtyType(
-                DesignerSupport::TransformUpdateMask
-                | DesignerSupport::ContentUpdateMask
-                | DesignerSupport::Visible
-                | DesignerSupport::ZValue
-                | DesignerSupport::OpacityValue
-                | DesignerSupport::AllMask);
+        static DesignerSupport::DirtyType dirty = DesignerSupport::DirtyType(
+                    DesignerSupport::TransformUpdateMask
+                    | DesignerSupport::ContentUpdateMask
+                    | DesignerSupport::Visible
+                    | DesignerSupport::ZValue
+                    | DesignerSupport::OpacityValue
+                    | DesignerSupport::AllMask);
 
-    for (QQuickItem* item : RenderUtils::allItems(formInstance)) {
-        if (item) {
-            if (hasInstanceForObject(item)) {
-                if (DesignerSupport::isDirty(item, dirty))
-                    m_dirtyInstanceSet.insert(instanceForObject(item));
-            } else if (DesignerSupport::isDirty(item, dirty)) {
-                ControlInstance* ancestorInstance = findNodeInstanceForItem(item->parentItem());
-                if (ancestorInstance)
-                    m_dirtyInstanceSet.insert(ancestorInstance);
+        for (QQuickItem* item : RenderUtils::allItems(formInstance)) {
+            if (item) {
+                if (hasInstanceForObject(item)) {
+                    if (DesignerSupport::isDirty(item, dirty))
+                        m_dirtyInstanceSet.insert(instanceForObject(item));
+                } else if (DesignerSupport::isDirty(item, dirty)) {
+                    ControlInstance* ancestorInstance = findNodeInstanceForItem(item->parentItem());
+                    if (ancestorInstance)
+                        m_dirtyInstanceSet.insert(ancestorInstance);
+                }
+                DesignerSupport::updateDirtyNode(item);
             }
-            DesignerSupport::updateDirtyNode(item);
         }
-    }
 
-    if (!m_dirtyInstanceSet.isEmpty()) {
-        emit renderDone(renderDirtyInstances(m_dirtyInstanceSet));
-        if (m_initialized)
-            scheduleRerenderForInvisibleInstances(formInstance);
-        m_dirtyInstanceSet.clear();
-    }
-
-    RenderUtils::resetAllItems(formInstance);
-
-    if (!m_initialized) {
-        static QList<ControlInstance*> initializedInstances;
-        initializedInstances.append(formInstance);
-        if (initializedInstances.size() == m_formInstances.size()) {
-            emit initializationProgressChanged(g_progress_4);
-            m_initialized = true;
-            for (ControlInstance* formInstance : m_formInstances)
+        if (!m_dirtyInstanceSet.isEmpty()) {
+            emit renderDone(renderDirtyInstances(m_dirtyInstanceSet));
+            if (m_initialized)
                 scheduleRerenderForInvisibleInstances(formInstance);
+            m_dirtyInstanceSet.clear();
+        }
+
+        RenderUtils::resetAllItems(formInstance);
+
+        if (!m_initialized) {
+            static QList<ControlInstance*> initializedInstances;
+            initializedInstances.append(formInstance);
+            if (initializedInstances.size() == m_formInstances.size()) {
+                emit initializationProgressChanged(g_progress_4);
+                m_initialized = true;
+                for (ControlInstance* formInstance : m_formInstances)
+                    scheduleRerenderForInvisibleInstances(formInstance);
+            }
         }
     }
+    m_formInstanceSetForRender.clear();
+}
+
+void RenderEngine::flushReRenders()
+{
+    m_reRenderTimer->stop();
+    for (ControlInstance* formInstance : m_formInstanceSetForReRender) {
+        if (!m_formInstances.contains(formInstance))
+            continue; // Skip possible deleted forms
+
+        OnlyOneInstanceList<ControlInstance*> rerenderDirtyInstanceSet;
+        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+            if (!instance->errors.isEmpty())
+                continue;
+
+            if (!instance->gui)
+                continue;
+
+            if (!instance->needsRerender)
+                continue;
+
+            QQuickItem* item = RenderUtils::guiItem(instance);
+
+            DesignerSupport::addDirty(item, DesignerSupport::AllMask);
+
+            rerenderDirtyInstanceSet.insert(instance);
+        }
+
+        refreshBindings(formInstance->context);
+        emit renderDone(renderDirtyInstances(rerenderDirtyInstanceSet));
+
+        for (ControlInstance* rerenderInstance : rerenderDirtyInstanceSet)
+            rerenderInstance->needsRerender = false;
+    }
+    m_formInstanceSetForReRender.clear();
 }
 
 QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine::ControlInstance*>& instances)
@@ -719,6 +755,7 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         result.window = instance->window;
         result.visible = instance->visible;
         result.codeChanged = instance->codeChanged;
+        result.geometryLocked = instance->geometryLocked;
         result.properties = RenderUtils::properties(instance);
         result.events = RenderUtils::events(instance);
         instance->codeChanged = false;

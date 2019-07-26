@@ -44,9 +44,9 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
 
     connect(this, &Control::beingDraggedChanged,
-            this, &Control::updateGeometry);
+            this, &Control::lockGeometry);
     connect(this, &Control::beingResizedChanged,
-            this, &Control::updateGeometry);
+            this, &Control::lockGeometry);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateRenderInfo);
     connect(this, &Control::doubleClicked,
@@ -58,6 +58,21 @@ Control::~Control()
     // In order to prevent any kind of signals being emitted while deletion in progress
     blockSignals(true);
     m_controls.removeOne(this);
+}
+
+void Control::lockGeometry()
+{
+    bool lock = beingDragged() || beingResized();
+    ControlRenderingManager::scheduleGeometryLock(uid(), lock);
+    if (!lock) {
+        auto options = ControlPropertyManager::UpdateRenderer
+                | ControlPropertyManager::CompressedCall
+                | ControlPropertyManager::DontApplyDesigner;
+        if (form())
+            ControlPropertyManager::setSize(this, size(), options);
+        else
+            ControlPropertyManager::setGeometry(this, geometry(), options);
+    }
 }
 
 bool Control::gui() const
@@ -463,32 +478,6 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         paintHighlight(painter);
 }
 
-void Control::updateGeometry()
-{
-    if (beingDragged() || beingResized() || !gui())
-        return;
-
-    if (!m_blockedPropertyChanges.contains("width"))
-        ControlPropertyManager::setWidth(this, m_cachedGeometry.width(),
-                                         ControlPropertyManager::NoOption);
-
-    if (!m_blockedPropertyChanges.contains("height"))
-        ControlPropertyManager::setHeight(this, m_cachedGeometry.height(),
-                                          ControlPropertyManager::NoOption);
-
-    if (!form()) {
-        if (!m_blockedPropertyChanges.contains("x"))
-            ControlPropertyManager::setX(
-                        this, ControlPropertyManager::xWithMargin(this, m_cachedGeometry.x(), true),
-                        ControlPropertyManager::NoOption);
-
-        if (!m_blockedPropertyChanges.contains("y"))
-            ControlPropertyManager::setY(
-                        this, ControlPropertyManager::yWithMargin(this, m_cachedGeometry.y(), true),
-                        ControlPropertyManager::NoOption);
-    }
-}
-
 void Control::updateRenderInfo(const RenderResult& result)
 {
     if (result.uid != uid())
@@ -503,27 +492,27 @@ void Control::updateRenderInfo(const RenderResult& result)
     m_events = result.events;
     m_properties = result.properties;
 
-    auto g = UtilityFunctions::getGeometryFromProperties(result.properties);
-    if (!m_blockedPropertyChanges.contains("x"))
-        m_cachedGeometry.moveLeft(g.x());
-    if (!m_blockedPropertyChanges.contains("y"))
-        m_cachedGeometry.moveTop(g.y());
-    if (!m_blockedPropertyChanges.contains("width"))
-        m_cachedGeometry.setWidth(g.width());
-    if (!m_blockedPropertyChanges.contains("height"))
-        m_cachedGeometry.setHeight(g.height());
+    setResizable(gui());
+    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
 
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
+
+    if (!result.geometryLocked) {
+        const QRectF& geo = UtilityFunctions::getGeometryFromProperties(result.properties);
+        ControlPropertyManager::setSize(this, geo.size(), ControlPropertyManager::NoOption);
+
+        if (!form()) {
+            ControlPropertyManager::setPos(
+                        this, ControlPropertyManager::posWithMargin(this, geo.topLeft(), true),
+                        ControlPropertyManager::NoOption);
+        }
+    }
 
     if (!gui() && !hasErrors() && size() != QSizeF(40, 40)) {
         ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
         m_frame = QRectF(0, 0, 40, 40);
     }
-
-    setResizable(gui());
-    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
-    updateGeometry();
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
     m_image = hasErrors() ? PaintUtils::renderErrorControlImage(size(), dpr) : result.image;

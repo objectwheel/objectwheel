@@ -8,6 +8,7 @@
 class QQuickView;
 class QmlError;
 class QQuickWindow;
+class QTimer;
 struct RenderResult;
 
 // Due to possible margins on an ApplicationWindow the rendering order is important
@@ -25,11 +26,8 @@ class RenderEngine final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(RenderEngine)
 
-    enum { TIMEOUT = 10 };
-
 public:
     struct ControlInstance {
-        bool renderScheduled = false;
         bool gui;
         bool popup;
         bool window;
@@ -38,6 +36,7 @@ public:
         bool needsRerender = false;
         bool codeChanged = false;
         bool preview = false;
+        bool geometryLocked = false;
         QString id;
         QString uid;
         QString dir;
@@ -68,6 +67,7 @@ public:
 public slots:
     void init();
     void refresh(const QString& formUid);
+    void lockGeometry(const QString& uid, bool locked);
     void deleteForm(const QString& uid); // NOTE: Deletes form and its children
     void deleteControl(const QString& uid); // NOTE: Deletes control and its children
     void createForm(const QString& dir); // NOTE: It doesn't create children
@@ -80,13 +80,16 @@ public slots:
     void updateFormCode(const QString& uid);
     void preview(const QString& url);
 
+private slots:
+    void flushRenders();
+    void flushReRenders();
+
 private:
     void refreshAllBindings();
     void refreshBindings(QQmlContext* context);
     void repairIndexes(ControlInstance* parentInstance);
-    void render(ControlInstance* formInstance);
-    void scheduleRender(ControlInstance* formInstance, int msecLater = TIMEOUT);
-    void scheduleRerenderForInvisibleInstances(ControlInstance* formInstance, int msecLater = 500);
+    void scheduleRender(ControlInstance* formInstance);
+    void scheduleRerenderForInvisibleInstances(ControlInstance* formInstance);
 
     QRectF boundingRectWithStepChilds(QQuickItem* item);
     QRectF boundingRect(QQuickItem* item);
@@ -110,7 +113,11 @@ private:
     DesignerSupport m_designerSupport;
     QList<ControlInstance*> m_formInstances;
     OnlyOneInstanceList<ControlInstance*> m_dirtyInstanceSet;
+    OnlyOneInstanceList<ControlInstance*> m_formInstanceSetForRender;
+    OnlyOneInstanceList<ControlInstance*> m_formInstanceSetForReRender;
     QQuickView* m_view;
+    QTimer* m_renderTimer;
+    QTimer* m_reRenderTimer;
 };
 
 #endif // RENDERENGINE_H

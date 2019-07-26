@@ -42,6 +42,14 @@ void CommandDispatcher::onDataReceived(const RendererCommands& command, const QB
         emit init();
         break;
 
+    case GeometryLock: {
+        bool locked;
+        QString uid;
+        pull(data, uid, locked);
+        emit lockGeometry(uid, locked);
+        break;
+    }
+
     case FormCodeUpdate: {
         QString uid;
         pull(data, uid);

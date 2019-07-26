@@ -27,6 +27,7 @@ struct RenderResult {
     bool window;
     bool visible;
     bool codeChanged;
+    bool geometryLocked;
     QString uid;
     QImage image;
     QRectF boundingRect;
@@ -91,6 +92,7 @@ inline QDataStream& operator>> (QDataStream& in, RenderResult& result)
     in >> result.window;
     in >> result.visible;
     in >> result.codeChanged;
+    in >> result.geometryLocked;
     in >> result.errors;
     in >> result.events;
     in >> result.properties;
@@ -107,6 +109,7 @@ inline QDataStream& operator<< (QDataStream& out, const RenderResult& result)
     out << result.window;
     out << result.visible;
     out << result.codeChanged;
+    out << result.geometryLocked;
     out << result.errors;
     out << result.events;
     out << result.properties;

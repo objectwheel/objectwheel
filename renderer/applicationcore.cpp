@@ -71,6 +71,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             s_renderEngine, &RenderEngine::updateParent);
     connect(s_commandDispatcher, &CommandDispatcher::indexUpdate,
             s_renderEngine, &RenderEngine::updateIndex);
+    connect(s_commandDispatcher, &CommandDispatcher::lockGeometry,
+            s_renderEngine, &RenderEngine::lockGeometry);
     connect(s_commandDispatcher, &CommandDispatcher::idUpdate,
             s_renderEngine, &RenderEngine::updateId);
     connect(s_commandDispatcher, &CommandDispatcher::controlDeletion,

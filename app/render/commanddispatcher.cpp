@@ -91,6 +91,11 @@ void CommandDispatcher::scheduleFormCodeUpdate(const QString& uid)
     send(m_server, RendererCommands::FormCodeUpdate, push(uid));
 }
 
+void CommandDispatcher::scheduleGeometryLock(const QString& uid, bool locked)
+{
+    send(m_server, RendererCommands::GeometryLock, push(uid, locked));
+}
+
 void CommandDispatcher::onDataReceived(const RendererCommands& command, const QByteArray& data)
 {
     switch (command) {
