@@ -71,7 +71,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                 drag->setPixmap(pixmap);
             } else if (result.gui && result.visible && PaintUtils::isBlankImage(result.image)) {
                 drag->setPixmap(QPixmap::fromImage(PaintUtils::renderBlankControlImage(
-                                    result.boundingRect, result.boundingRect,
+                                    result.boundingRect,
                                     m_toolboxPane->toolboxTree()->currentItem()->text(0),
                                     m_toolboxPane->devicePixelRatioF())));
             }

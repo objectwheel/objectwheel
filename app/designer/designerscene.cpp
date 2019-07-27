@@ -227,6 +227,7 @@ QRectF DesignerScene::itemsExtendedBoundingRect() const
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
+    painter->drawRect(sceneRect());
 
     for (DesignerItem* selectedItem : selectedItems())
         paintSelectionOutline(painter, selectedItem);
@@ -502,6 +503,7 @@ void DesignerScene::setCurrentForm(Form* currentForm)
     if (m_currentForm) {
         addItem(m_currentForm);
         m_currentForm->setVisible(true);
+        m_currentForm->setPos(0, 0);
         shrinkSceneRect();
     }
 }

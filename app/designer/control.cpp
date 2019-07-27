@@ -483,7 +483,9 @@ void Control::updateRenderInfo(const RenderResult& result)
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
 
-    if (m_geometryHash.isEmpty() || result.geometryHash == m_geometryHash) {
+    if (!gui() || hasErrors())
+        m_geometryHash.clear();
+    if (gui() && (m_geometryHash.isEmpty() || result.geometryHash == m_geometryHash)) {
         m_geometryHash.clear();
         const QRectF& geo = UtilityFunctions::getGeometryFromProperties(result.properties);
         ControlPropertyManager::setSize(this, geo.size(), ControlPropertyManager::NoOption);
@@ -495,17 +497,22 @@ void Control::updateRenderInfo(const RenderResult& result)
         }
     }
 
-    if (!gui() && !hasErrors() && size() != QSizeF(40, 40)) {
-        ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
-        m_frame = QRectF(0, 0, 40, 40);
+    m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
+
+    if (!gui() && size() != QSizeF(40, 40)) {
+        if (!hasErrors() || size().isEmpty()) {
+            ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
+            m_frame = QRectF(0, 0, 40, 40);
+        }
     }
 
-    m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
-    m_image = hasErrors() ? PaintUtils::renderErrorControlImage(size(), dpr) : result.image;
-    if (m_image.isNull() && !m_gui)
+    m_image = hasErrors() ? PaintUtils::renderErrorControlImage(size(), id(), dpr) : result.image;
+    if (m_image.isNull() && !gui())
         m_image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), dpr);
-    if (visible() && gui() && PaintUtils::isBlankImage(m_image))
-        m_image = PaintUtils::renderBlankControlImage(frame(), rect(), id(), dpr);
+    if (visible() && gui() && PaintUtils::isBlankImage(m_image)) {
+        m_frame = rect();
+        m_image = PaintUtils::renderBlankControlImage(rect(), id(), dpr);
+    }
     m_image.setDevicePixelRatio(dpr);
 
     update();

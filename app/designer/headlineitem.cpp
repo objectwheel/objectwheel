@@ -135,6 +135,7 @@ void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     if (targetItem() && dragAccepted()) {
         scene()->unsetCursor();
+        targetItem()->setRaised(false);
         targetItem()->setBeingDragged(false);
     }
 

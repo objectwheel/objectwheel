@@ -43,9 +43,11 @@ QImage PaintUtils::renderInitialControlImage(const QSizeF& size, qreal dpr)
     return dest;
 }
 
-QImage PaintUtils::renderErrorControlImage(const QSizeF& size, qreal dpr)
+QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id, qreal dpr)
 {
-    QImage dest = renderTransparentImage(size, dpr);
+    QBrush brush("#cb363b");
+    brush.setStyle(Qt::BDiagPattern);
+    QImage dest = renderBlankControlImage(QRectF(QPointF(), size), id, dpr, brush, brush.color());
 
     QImage source(":/images/error.png");
     source.setDevicePixelRatio(dpr);
@@ -300,7 +302,7 @@ bool PaintUtils::isBlankImage(const QImage& image)
 }
 
 static void paintTextInPlaceHolderForInvisbleItem(QPainter* painter, const QString& id,
-                                                  const QRectF& boundingRect)
+                                                  const QRectF& boundingRect, const QPen& pen)
 {
     QTextOption textOption;
     textOption.setAlignment(Qt::AlignTop);
@@ -327,13 +329,15 @@ static void paintTextInPlaceHolderForInvisbleItem(QPainter* painter, const QStri
         rotatedBoundingBox.setX(20);
 
         painter->setFont(font);
-        painter->setPen(QColor(48, 48, 96, 255));
+        painter->setPen(pen);
         painter->setClipping(false);
         painter->drawText(rotatedBoundingBox, displayText, textOption);
     }
 }
 
-static void paintDecorationInPlaceHolderForInvisbleItem(QPainter* painter, const QRectF& boundingRect)
+static void paintDecorationInPlaceHolderForInvisbleItem(QPainter* painter,
+                                                        const QRectF& boundingRect,
+                                                        const QBrush& brush)
 {
     static const qreal width = 12;
     QPainterPath path;
@@ -341,19 +345,18 @@ static void paintDecorationInPlaceHolderForInvisbleItem(QPainter* painter, const
     path.addRect(boundingRect.adjusted(width, width, -width, -width));
     painter->setClipPath(path);
     painter->setClipping(true);
-    painter->fillRect(boundingRect.adjusted(1, 1, -1, -1), Qt::BDiagPattern);
+    painter->fillRect(boundingRect.adjusted(1, 1, -1, -1), brush);
 }
 
-QImage PaintUtils::renderBlankControlImage(const QRectF& frame, const QRectF& rect,
-                                           const QString& id, qreal dpr)
+QImage PaintUtils::renderBlankControlImage(const QRectF& rect, const QString& id, qreal dpr,
+                                           const QBrush& brush, const QPen& pen)
 {
-    QImage dest = renderTransparentImage(frame.size(), dpr);
+    QImage dest = renderTransparentImage(rect.size(), dpr);
     dest.setDevicePixelRatio(dpr);
 
     QPainter p(&dest);
-    p.translate(frame.topLeft());
-    paintDecorationInPlaceHolderForInvisbleItem(&p, rect);
-    paintTextInPlaceHolderForInvisbleItem(&p, id, rect);
+    paintDecorationInPlaceHolderForInvisbleItem(&p, rect, brush);
+    paintTextInPlaceHolderForInvisbleItem(&p, id, rect, pen);
     p.end();
 
     return dest;

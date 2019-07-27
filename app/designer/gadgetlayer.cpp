@@ -13,6 +13,7 @@ GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
     m_headlineItem->setPen(QPen(Qt::white));
     m_headlineItem->setBrush(DesignerScene::outlineColor());
     m_headlineItem->setCursor(Qt::OpenHandCursor);
+
     m_formHeadlineItem->setVisible(true);
     m_formHeadlineItem->setPen(QPen(Qt::white));
     m_formHeadlineItem->setBrush(Qt::darkGray);
