@@ -98,6 +98,9 @@ void GadgetLayer::onSceneSelectionChange()
         DesignerItem* selectedItem = selectedItems.first();
         connect(selectedItem, &DesignerItem::geometryChanged,
                 m_headlineItem, &HeadlineItem::updateGeometry);
+        // Move headline even if the form of the selected item moves
+        connect(selectedItem->topLevelItem(), &DesignerItem::geometryChanged,
+                m_headlineItem, &HeadlineItem::updateGeometry);
         connect(selectedItem, &DesignerItem::objectNameChanged,
                 m_headlineItem, &HeadlineItem::setText);
         m_headlineItem->setTargetItem(selectedItem);

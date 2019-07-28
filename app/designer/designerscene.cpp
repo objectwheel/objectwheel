@@ -234,7 +234,6 @@ QRectF DesignerScene::visibleItemsBoundingRect() const
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     QGraphicsScene::drawForeground(painter, rect);
-    painter->drawRect(sceneRect());
 
     for (DesignerItem* selectedItem : selectedItems())
         paintSelectionOutline(painter, selectedItem);

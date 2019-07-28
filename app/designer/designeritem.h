@@ -30,6 +30,7 @@ public:
 
     DesignerScene* scene() const;
     DesignerItem* parentItem() const;
+    DesignerItem* topLevelItem() const;
 
     QList<DesignerItem*> siblingItems() const;
     QList<DesignerItem*> childItems(bool recursive = true) const;

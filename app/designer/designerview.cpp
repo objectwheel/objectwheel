@@ -230,7 +230,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
 
     TransparentStyle::attach(m_toolBar);
 
-    setViewportMargins(0, 24, 0, 0);
+//  FIXME  setViewportMargins(0, 24, 0, 0);
 
     m_sendBackAct->setText(tr("Send to Back"));
     m_bringFrontAct->setText(tr("Bring to Front"));

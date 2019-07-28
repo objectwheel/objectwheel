@@ -39,6 +39,14 @@ DesignerItem* DesignerItem::parentItem() const
     return static_cast<DesignerItem*>(QGraphicsObject::parentItem());
 }
 
+DesignerItem* DesignerItem::topLevelItem() const
+{
+    DesignerItem* parent = const_cast<DesignerItem*>(this);
+    while (DesignerItem* grandPa = parent->parentItem())
+        parent = grandPa;
+    return parent;
+}
+
 QList<DesignerItem*> DesignerItem::siblingItems() const
 {
     QList<DesignerItem*> siblings;
