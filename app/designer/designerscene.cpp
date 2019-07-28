@@ -42,8 +42,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
         setSceneRect(sceneRect() | visibleItemsBoundingRect());
     });
 
-    // This contructor is called from MainWindow -> CentralWidget -> DesignerView -> DesignerScene
-    // So WindowManager::mainWindow()->centralWidget() is invalid right here
+    // This contructor is called from MainWindow ->
+    // CentralWidget -> DesignerView -> DesignerScene
+    // So WindowManager::mainWindow()->centralWidget()
+    // is invalid right here
     QMetaObject::invokeMethod(this, [=] {
         connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
                 WindowManager::mainWindow()->centralWidget()->designerView(), &DesignerView::onControlDoubleClick);

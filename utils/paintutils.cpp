@@ -304,34 +304,26 @@ bool PaintUtils::isBlankImage(const QImage& image)
 static void paintTextInPlaceHolderForInvisbleItem(QPainter* painter, const QString& id,
                                                   const QRectF& boundingRect, const QPen& pen)
 {
-    QTextOption textOption;
-    textOption.setAlignment(Qt::AlignTop);
-    textOption.setWrapMode(QTextOption::WrapAtWordBoundaryOrAnywhere);
-    QString displayText(id);
-    if (boundingRect.height() > 24) {
+    static const qreal width = 12;
+    if (boundingRect.height() > 2 * width) {
         QFont font;
         font.setStyleHint(QFont::SansSerif);
         font.setBold(true);
         font.setPixelSize(12);
-        painter->setFont(font);
-
-        QFontMetrics fm(font);
-        painter->rotate(90);
-        if (fm.horizontalAdvance(displayText) > (boundingRect.height() - 32) && displayText.length() > 4) {
-
-            displayText = fm.elidedText(displayText, Qt::ElideRight, boundingRect.height() - 32, Qt::TextShowMnemonic);
-        }
 
         QRectF rotatedBoundingBox;
-        rotatedBoundingBox.setWidth(boundingRect.height());
-        rotatedBoundingBox.setHeight(12);
-        rotatedBoundingBox.setY(-boundingRect.width() + 12);
-        rotatedBoundingBox.setX(20);
+        rotatedBoundingBox.setTopLeft({width + 4, - boundingRect.width() + width});
+        rotatedBoundingBox.setWidth(boundingRect.height() - 2 * width - 8);
+        rotatedBoundingBox.setHeight(boundingRect.width() - 2 * width);
 
+        QFontMetrics fm(font);
+        const QString& displayText = fm.elidedText(id, Qt::ElideRight, rotatedBoundingBox.width() + 1);
+
+        painter->rotate(90);
         painter->setFont(font);
         painter->setPen(pen);
         painter->setClipping(false);
-        painter->drawText(rotatedBoundingBox, displayText, textOption);
+        painter->drawText(rotatedBoundingBox, displayText, QTextOption(Qt::AlignTop));
     }
 }
 

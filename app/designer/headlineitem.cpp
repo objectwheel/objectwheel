@@ -55,10 +55,9 @@ void HeadlineItem::setTargetItem(DesignerItem* targetItem)
         update();
     }
 }
-#include <QDebug>
+
 void HeadlineItem::updateGeometry()
 {
-    qDebug() << targetItem();
     if (m_geometryUpdateScheduled)
         return;
     m_geometryUpdateScheduled = true;

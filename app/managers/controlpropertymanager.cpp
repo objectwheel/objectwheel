@@ -52,11 +52,6 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
     if (!control)
         return;
 
-    // Not needeed since non-gui covers up error
-    // state, and non-gui state is handled below
-    //    if (control->hasErrors())
-    //        return;
-
     bool isInt = control->propertyType("x") == QVariant::Int;
 
     if (!(options & DontApplyDesigner))
@@ -96,11 +91,6 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
 {
     if (!control)
         return;
-
-    // Not needeed since non-gui covers up error
-    // state, and non-gui state is handled below
-    //    if (control->hasErrors())
-    //        return;
 
     bool isInt = control->propertyType("y") == QVariant::Int;
 
@@ -142,9 +132,6 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
     if (!control)
         return;
 
-    if (control->hasErrors())
-        return;
-
     if (!(options & DontApplyDesigner))
         control->setZValue(z);
 
@@ -172,9 +159,6 @@ void ControlPropertyManager::setZ(Control* control, qreal z, ControlPropertyMana
 void ControlPropertyManager::setWidth(Control* control, qreal width, Options options, const QString& geometryHash)
 {
     if (!control)
-        return;
-
-    if (control->hasErrors())
         return;
 
     bool isInt = control->propertyType("width") == QVariant::Int;
@@ -214,9 +198,6 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
 void ControlPropertyManager::setHeight(Control* control, qreal height, Options options, const QString& geometryHash)
 {
     if (!control)
-        return;
-
-    if (control->hasErrors())
         return;
 
     bool isInt = control->propertyType("height") == QVariant::Int;
@@ -259,11 +240,6 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos,
 {
     if (!control)
         return;
-
-    // Not needeed since non-gui covers up error
-    // state, and non-gui state is handled below
-    //    if (control->hasErrors())
-    //        return;
 
     bool isInt = control->propertyType("x") == QVariant::Int;
 
@@ -313,9 +289,6 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size,
     if (!control)
         return;
 
-    if (control->hasErrors())
-        return;
-
     if (!size.isValid())
         return;
 
@@ -362,11 +335,6 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size,
 void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometry, ControlPropertyManager::Options options, const QString& geometryHash)
 {
     if (!control)
-        return;
-
-    // NOTE: Becareful using this on errorneus controls
-    // if you want to save position information
-    if (control->hasErrors())
         return;
 
     if (!geometry.isValid())

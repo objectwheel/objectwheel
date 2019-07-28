@@ -483,6 +483,7 @@ void Control::updateRenderInfo(const RenderResult& result)
 
     if (!gui() || hasErrors())
         m_geometryHash.clear();
+
     if (gui() && (m_geometryHash.isEmpty() || result.geometryHash == m_geometryHash)) {
         m_geometryHash.clear();
         const QRectF& geo = UtilityFunctions::getGeometryFromProperties(result.properties);
