@@ -39,7 +39,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     addItem(m_gadgetLayer);
 
     connect(this, &DesignerScene::changed, this, [=] {
-        setSceneRect(sceneRect() | itemsExtendedBoundingRect());
+        setSceneRect(sceneRect() | visibleItemsBoundingRect());
     });
 
     // This contructor is called from MainWindow -> CentralWidget -> DesignerView -> DesignerScene
@@ -69,8 +69,6 @@ void DesignerScene::addForm(Form* form)
     // NOTE: We don't have to call ControlPropertyManager::setParent,
     // since there is no valid parent concept for forms in Designer;
     // fors are directly put into DesignerScene
-
-    form->setVisible(false);
 
     m_forms.append(form);
 }
@@ -144,7 +142,7 @@ void DesignerScene::shrinkSceneRect()
 {
     // 10 margin is a protection against the unexpected
     // form movement that happens when a form is selected
-    setSceneRect(itemsExtendedBoundingRect().adjusted(-10, -10, 10, 10));
+    setSceneRect(visibleItemsBoundingRect().adjusted(-10, -10, 10, 10));
 }
 
 QPointF DesignerScene::snapPosition(qreal x, qreal y)
@@ -219,9 +217,16 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
     return items;
 }
 
-QRectF DesignerScene::itemsExtendedBoundingRect() const
+QRectF DesignerScene::visibleItemsBoundingRect() const
 {
-    return itemsBoundingRect().adjusted(-10, -15, 10, 10);
+    // Does not take untransformable items into account.
+    QRectF boundingRect;
+    const QList<QGraphicsItem*>& items_ = items();
+    for (QGraphicsItem *item : items_) {
+        if (item->isVisible())
+            boundingRect |= item->sceneBoundingRect();
+    }
+    return boundingRect.adjusted(-10, -15, 10, 10);
 }
 
 void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -469,9 +474,6 @@ QRectF DesignerScene::boundingRect(const QList<DesignerItem*>& items)
 void DesignerScene::discharge()
 {
     clearSelection();
-    if (m_currentForm)
-        removeForm(m_currentForm);
-
     m_gadgetLayer->clearResizers();
     m_forms.clear();
     m_currentForm.clear();
@@ -502,7 +504,6 @@ void DesignerScene::setCurrentForm(Form* currentForm)
 
     if (m_currentForm) {
         addItem(m_currentForm);
-        m_currentForm->setVisible(true);
         m_currentForm->setPos(0, 0);
         shrinkSceneRect();
     }

@@ -251,6 +251,7 @@ bool ProjectManager::start(const QString& uid)
 void ProjectManager::stop()
 {
     ControlRenderingManager::scheduleTerminate();
+    ProjectExposingManager::removeProject();
     updateSize(s_uid);
     s_uid = "";
     emit instance()->stopped();

@@ -1,11 +1,11 @@
 #include <controlremovingmanager.h>
-#include <form.h>
 #include <designerscene.h>
 #include <savemanager.h>
 #include <controlrenderingmanager.h>
 #include <QDebug>
 
 ControlRemovingManager* ControlRemovingManager::s_instance = nullptr;
+DesignerScene* ControlRemovingManager::s_designerScene = nullptr;
 
 ControlRemovingManager::ControlRemovingManager(QObject* parent) : QObject(parent)
 {
@@ -22,52 +22,38 @@ ControlRemovingManager* ControlRemovingManager::instance()
     return s_instance;
 }
 
-void ControlRemovingManager::removeForm(Form* form)
+void ControlRemovingManager::init(DesignerScene* scene)
 {
-    if (!form || !form->form())
-        return;
-
-    DesignerScene* scene = form->scene();
-    Q_ASSERT(scene);
-
-    if (!scene->forms().contains(form))
-        return;
-
-    for (Control* childControl : form->childControls())
-        emit instance()->controlAboutToBeRemoved(childControl);
-
-    emit instance()->controlAboutToBeRemoved(form);
-
-    ControlRenderingManager::scheduleFormDeletion(form->uid());
-
-    SaveManager::removeForm(form->dir());
-    bool wasItInUse = form == scene->currentForm();
-    scene->removeForm(form);
-    if (wasItInUse && !scene->forms().isEmpty())
-        scene->setCurrentForm(scene->forms().first());
+    s_designerScene = scene;
 }
 
-void ControlRemovingManager::removeControl(Control* control)
+void ControlRemovingManager::removeControl(Control* control, bool removeFromDatabaseAlso)
 {
-    if (!control || control->form())
+    if (control == 0)
         return;
-
-    DesignerScene* scene = control->scene();
-    Q_ASSERT(scene);
 
     for (Control* childControl : control->childControls())
         emit instance()->controlAboutToBeRemoved(childControl);
 
     emit instance()->controlAboutToBeRemoved(control);
 
-    ControlRenderingManager::scheduleControlDeletion(control->uid());
-
-    SaveManager::removeControl(control->dir());
-
-    scene->removeControl(control);
+    if (control->form()) {
+        ControlRenderingManager::scheduleFormDeletion(control->uid());
+        bool inUse = control == s_designerScene->currentForm();
+        s_designerScene->removeForm(static_cast<Form*>(control));
+        if (inUse && !s_designerScene->forms().isEmpty())
+            s_designerScene->setCurrentForm(s_designerScene->forms().first());
+        if (removeFromDatabaseAlso)
+            SaveManager::removeForm(control->dir());
+    } else {
+        ControlRenderingManager::scheduleControlDeletion(control->uid());
+        s_designerScene->removeControl(control);
+        if (removeFromDatabaseAlso)
+            SaveManager::removeControl(control->dir());
+    }
 }
 
-void ControlRemovingManager::removeControls(const QList<Control*>& controls)
+void ControlRemovingManager::removeControls(const QList<Control*>& controls, bool removeFromDatabaseAlso)
 {
     for (const Control* control : controls) {
         if (control->form()) {
@@ -83,5 +69,5 @@ void ControlRemovingManager::removeControls(const QList<Control*>& controls)
     }
 
     for (Control* control : finalList)
-        removeControl(control);
+        removeControl(control, removeFromDatabaseAlso);
 }

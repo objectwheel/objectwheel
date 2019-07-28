@@ -146,6 +146,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerView()->scene();
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
+    s_controlRemovingManager->init(scene);
     s_controlRenderingManager->setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
 
     auto conn = new QMetaObject::Connection;

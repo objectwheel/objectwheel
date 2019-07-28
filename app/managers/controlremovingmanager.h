@@ -3,8 +3,8 @@
 
 #include <QObject>
 
-class Form;
 class Control;
+class DesignerScene;
 
 class ControlRemovingManager final : public QObject
 {
@@ -12,12 +12,11 @@ class ControlRemovingManager final : public QObject
     Q_DISABLE_COPY(ControlRemovingManager)
 
     friend class ApplicationCore; // For construction
-    friend class FormsPane; // For removeForm
 
 public:
     static ControlRemovingManager* instance();
-    static void removeControl(Control* control);
-    static void removeControls(const QList<Control*>& controls);
+    static void removeControl(Control* control, bool removeFromDatabaseAlso);
+    static void removeControls(const QList<Control*>& controls, bool removeFromDatabaseAlso);
 
 signals:
     void controlAboutToBeRemoved(Control* control);
@@ -25,12 +24,11 @@ signals:
 private:
     explicit ControlRemovingManager(QObject* parent = nullptr);
     ~ControlRemovingManager() override;
-
-    static void removeForm(Form* form);  // FormsPane dependency: Should be a private member
+    static void init(DesignerScene* scene);
 
 private:
     static ControlRemovingManager* s_instance;
+    static DesignerScene* s_designerScene;
 };
-
 
 #endif // CONTROLREMOVINGMANAGER_H

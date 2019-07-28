@@ -1,10 +1,11 @@
 #include <projectexposingmanager.h>
+#include <controlpropertymanager.h>
+#include <controlremovingmanager.h>
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <control.h>
 #include <form.h>
 #include <designerscene.h>
-#include <controlpropertymanager.h>
 
 ProjectExposingManager* ProjectExposingManager::s_instance = nullptr;
 DesignerScene* ProjectExposingManager::s_designerScene = nullptr;
@@ -101,5 +102,11 @@ void ProjectExposingManager::exposeProject()
             delete conn;
             s_designerScene->shrinkSceneRect();
         }
-    }, Qt::QueuedConnection);
+}, Qt::QueuedConnection);
+}
+
+void ProjectExposingManager::removeProject()
+{
+    for (Form* form : s_designerScene->forms())
+        ControlRemovingManager::removeControl(form, false);
 }

@@ -76,9 +76,9 @@ QList<ResizerItem*> GadgetLayer::resizers(DesignerItem* item) const
 
 void GadgetLayer::onSceneSelectionChange()
 {
-    DesignerItem* currentFormItem = scene()->currentForm();
-    if (currentFormItem)
-        m_formHeadlineItem->setBrush(currentFormItem->isSelected() ? scene()->outlineColor() : Qt::darkGray);
+    DesignerItem* currentForm = scene()->currentForm();
+    if (currentForm)
+        m_formHeadlineItem->setBrush(currentForm->isSelected() ? scene()->outlineColor() : Qt::darkGray);
     for (DesignerItem* item : m_resizerHash.keys()) {
         for (ResizerItem* resizer : resizers(item)) {
             if (item->isVisible()) {
@@ -90,8 +90,8 @@ void GadgetLayer::onSceneSelectionChange()
         }
     }
     QList<DesignerItem*> selectedItems = scene()->selectedItems();
-    if (currentFormItem && currentFormItem->isSelected())
-        selectedItems.removeOne(currentFormItem);
+    if (currentForm && currentForm->isSelected())
+        selectedItems.removeOne(currentForm);
     if (m_headlineItem->targetItem())
         m_headlineItem->targetItem()->disconnect(m_headlineItem);
     if (selectedItems.size() == 1) {
@@ -102,17 +102,10 @@ void GadgetLayer::onSceneSelectionChange()
                 m_headlineItem, &HeadlineItem::setText);
         m_headlineItem->setTargetItem(selectedItem);
         m_headlineItem->setText(selectedItem->objectName()); // id
-        m_headlineItem->updateGeometry(); // Schedules an update, so prevent flicker below
-        QTimer::singleShot(10, std::bind(&HeadlineItem::setVisible, m_headlineItem, true));
+        m_headlineItem->updateGeometry();
+        m_headlineItem->setVisible(true);
     } else {
-        // Must also be a singleShot, otherwise If user
-        // selects all the controls on the scene with
-        // CMD + A shortcut, both upper and below "setVisible"
-        // functions are called, and upper one kicks in before
-        // the below one, but still, due to 10ms delay, upper
-        // one is called later. And this leads to visible
-        // headline for multiple control selection state.
-        QTimer::singleShot(10, std::bind(&HeadlineItem::setVisible, m_headlineItem, false));
+        m_headlineItem->setVisible(false);
     }
 }
 

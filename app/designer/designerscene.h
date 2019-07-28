@@ -38,7 +38,7 @@ public:
     QList<Control*> selectedControls() const;
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
-    QRectF itemsExtendedBoundingRect() const;
+    QRectF visibleItemsBoundingRect() const;
     QRectF outerRect(const QRectF& rect);
 
     static int startDragDistance();

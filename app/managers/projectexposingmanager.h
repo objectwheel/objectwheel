@@ -22,6 +22,7 @@ private:
     ~ProjectExposingManager() override;
     static void init(DesignerScene* designerScene);
     static void exposeProject();
+    static void removeProject();
 
 signals:
     void controlExposed(Control* control);
