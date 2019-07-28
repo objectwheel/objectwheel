@@ -131,7 +131,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void HeadlineItem::ungrabMouseEvent(QEvent* event)
 {
     if (targetItem() && dragAccepted()) {
         scene()->unsetCursor();
@@ -139,7 +139,7 @@ void HeadlineItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         targetItem()->setBeingDragged(false);
     }
 
-    GadgetItem::mouseReleaseEvent(event); // Clears dragAccepted state
+    GadgetItem::ungrabMouseEvent(event); // Clears dragAccepted state
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)

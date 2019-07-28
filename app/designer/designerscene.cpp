@@ -21,6 +21,7 @@
 #include <QPen>
 #include <QtMath>
 #include <QApplication>
+#include <QTimer>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_currentForm(nullptr)
@@ -47,13 +48,18 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     // So WindowManager::mainWindow()->centralWidget()
     // is invalid right here
     QMetaObject::invokeMethod(this, [=] {
-        connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
-                WindowManager::mainWindow()->centralWidget()->designerView(), &DesignerView::onControlDoubleClick);
+        connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked, this, [=] (Control* i) {
+            QTimer::singleShot(100, [=] {
+                WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(i);
+            });
+        }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
     connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
-        WindowManager::mainWindow()->centralWidget()->designerView()->
-                onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
-    });
+        QTimer::singleShot(100, [=] {
+            WindowManager::mainWindow()->centralWidget()->designerView()->
+                    onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
+        });
+    }, Qt::QueuedConnection);
 
     connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
             m_gadgetLayer, &GadgetLayer::addResizers);
@@ -223,8 +229,7 @@ QRectF DesignerScene::visibleItemsBoundingRect() const
 {
     // Does not take untransformable items into account.
     QRectF boundingRect;
-    const QList<QGraphicsItem*>& items_ = items();
-    for (QGraphicsItem *item : items_) {
+    for (QGraphicsItem *item : items()) {
         if (item->isVisible())
             boundingRect |= item->sceneBoundingRect();
     }

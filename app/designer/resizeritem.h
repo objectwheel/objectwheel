@@ -27,7 +27,7 @@ public:
 
 private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void ungrabMouseEvent(QEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:

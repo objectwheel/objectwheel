@@ -261,12 +261,12 @@ void Control::dropControl(Control* control)
 {
     Q_ASSERT(!control->form());
 
-    // NOTE: Do not move this assignment below setParent,
-    // because parent change effects the newPos result
     ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::CompressedCall;
     if (control->gui())
         options |= ControlPropertyManager::UpdateRenderer;
+    // NOTE: Do not move this assignment below setParent,
+    // because parent change effects the newPos result
     const QPointF& newPos = scene()->snapPosition(mapFromItem(control->parentItem(), control->pos()));
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
@@ -350,18 +350,16 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void Control::ungrabMouseEvent(QEvent* event)
 {
-    DesignerItem::mouseReleaseEvent(event);
-
-    auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->currentForm());
+    const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
+    DesignerItem::ungrabMouseEvent(event); // Clears beingDragged state
 
     for (auto control : scene()->currentForm()->childControls()) {
-        if (control->dragIn() && beingDragged() && parentControl() != control) {
-            for (auto sc : selectedControls) {
-                if (sc->beingDragged())
-                    control->dropControl(sc);
+        if (control->dragIn() && parentControl() != control) {
+            for (auto sc : items) {
+                if (sc->parentItem() != control)
+                    control->dropControl((Control*)sc);
             }
             scene()->clearSelection();
             control->setSelected(true);
@@ -369,8 +367,7 @@ void Control::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         control->setDragIn(false);
     }
 
-    if (scene()->currentForm()->dragIn() && beingDragged() &&
-            parentControl() != scene()->currentForm()) {
+    if (scene()->currentForm()->dragIn() && parentItem() != scene()->currentForm()) {
         scene()->currentForm()->dropControl(this);
         scene()->clearSelection();
         scene()->currentForm()->setSelected(true);

@@ -201,7 +201,7 @@ bool DesignerItem::event(QEvent* event)
 
 void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
-    event->ignore();
+    QGraphicsItem::mouseDoubleClickEvent(event);
     emit doubleClicked();
 }
 
@@ -262,10 +262,16 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     QGraphicsObject::mouseMoveEvent(event);
 }
 
-void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+void DesignerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    QGraphicsObject::mouseReleaseEvent(event);
+    Q_UNUSED(painter)
+    Q_UNUSED(option)
+    Q_UNUSED(widget)
+}
 
+void DesignerItem::ungrabMouseEvent(QEvent* event)
+{
+    Q_UNUSED(event)
     if ((flags() & ItemIsMovable) && m_dragAccepted) {
         scene()->unsetCursor();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
@@ -275,20 +281,6 @@ void DesignerItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         m_movableSelectedAncestorItems.clear();
     }
     m_dragAccepted = false;
-}
-
-void DesignerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
-{
-    Q_UNUSED(painter)
-    Q_UNUSED(option)
-    Q_UNUSED(widget)
-}
-
-void DesignerItem::ungrabMouseEvent(QEvent*)
-{
-    QGraphicsSceneMouseEvent release;
-    release.setButtons(acceptedMouseButtons());
-    mouseReleaseEvent(&release);
 }
 
 QVariant DesignerItem::itemChange(int change, const QVariant& value)

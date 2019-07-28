@@ -65,7 +65,7 @@ protected:
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void ungrabMouseEvent(QEvent* event) override;
     QVariant itemChange(int change, const QVariant& value) override;
 
 protected:

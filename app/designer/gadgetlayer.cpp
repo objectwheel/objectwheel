@@ -2,9 +2,7 @@
 #include <designerscene.h>
 #include <headlineitem.h>
 #include <resizeritem.h>
-
 #include <QCursor>
-#include <QTimer>
 
 GadgetLayer::GadgetLayer(DesignerScene* scene) : DesignerItem()
   , m_formHeadlineItem(new HeadlineItem(this))
@@ -51,8 +49,7 @@ void GadgetLayer::addResizers(DesignerItem* item)
                 resizer, [=] { resizer->setVisible(item->isSelected() && item->resizable()); });
         resizers.append(resizer);
     }
-    connect(item, &DesignerItem::geometryChanged,
-            this, [=] {
+    connect(item, &DesignerItem::geometryChanged, this, [=] {
         for (DesignerItem* childItem : item->childItems()) {
             for (ResizerItem* resizer : this->resizers(childItem))
                 resizer->updatePosition();
@@ -126,6 +123,10 @@ void GadgetLayer::onSceneCurrentFormChange(DesignerItem* formItem)
         m_formHeadlineItem->setTargetItem(formItem);
         m_formHeadlineItem->setText(formItem->objectName()); // id
         m_formHeadlineItem->setDimensions(formItem->size());
+        // Needed, since updateGeometry takes place later
+        // We need to set pos to 0,0 in order to correctly
+        // calculate visibleItemsBoundingRect in scene
+        m_formHeadlineItem->setPos(0, 0);
         m_formHeadlineItem->updateGeometry();
     }
 }

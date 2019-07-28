@@ -132,7 +132,6 @@ void RenderEngine::updateProperty(const QString& uid, const QString& propertyNam
 void RenderEngine::updateParent(const QString& newDir, const QString& uid, const QString& parentUid)
 {
     Q_ASSERT_X(!SaveUtils::isForm(newDir), "parentUpdate", "You can't change parent of a form.");
-
     ControlInstance* instance = instanceForUid(uid);
     ControlInstance* parentInstance = instanceForUid(parentUid);
 
@@ -144,11 +143,12 @@ void RenderEngine::updateParent(const QString& newDir, const QString& uid, const
 
     Q_ASSERT(formInstance);
     Q_ASSERT(previousParentInstance);
+    Q_ASSERT(previousParentInstance != parentInstance);
 
     instance->dir = newDir;
     instance->parent = parentInstance;
-    parentInstance->children.append(instance);
     previousParentInstance->children.removeAll(instance);
+    parentInstance->children.append(instance);
 
     if (!instance->errors.isEmpty())
         return;
