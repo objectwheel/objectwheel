@@ -154,6 +154,11 @@ void DesignerItem::setGeometry(const QRectF& geometry)
     }
 }
 
+void DesignerItem::setGeometry(const QPointF& pos, const QSizeF& size)
+{
+    setGeometry(QRectF(pos, size));
+}
+
 void DesignerItem::setGeometry(qreal x, qreal y, qreal w, qreal h)
 {
     setGeometry(QRectF(x, y, w, h));

@@ -2,10 +2,11 @@
 #define FORMSCENE_H
 
 #include <form.h>
-#include <gadgetlayer.h>
-
 #include <QPointer>
 #include <QGraphicsScene>
+
+class GadgetLayer;
+class PaintLayer;
 
 class DesignerScene final : public QGraphicsScene
 {
@@ -31,6 +32,7 @@ public:
 
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
+    PaintLayer* paintLayer() const;
 
     QList<Form*> forms() const;
     QVector<QLineF> guidelines() const;
@@ -47,7 +49,7 @@ public:
     static QPointF snapPosition(const QPointF& pos);
     static QSizeF snapSize(qreal x, qreal y, qreal w, qreal h);
     static QSizeF snapSize(const QPointF& pos,const QSizeF& size);
-    static QRectF boundingRect(const QList<DesignerItem*>& items);
+    static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
     static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
 
     void paintOutline(QPainter* painter, const QRectF& rect);
@@ -61,9 +63,6 @@ private:
     void removeForm(Form* form);
     void removeControl(Control* control);
 
-private:
-    void drawForeground(QPainter* painter, const QRectF& rect) override;
-
 signals:
     void currentFormChanged(Form* currentForm);
 
@@ -73,6 +72,7 @@ private:
     QList<DesignerItem*> m_siblingsBeforeDrag;
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
+    PaintLayer* m_paintLayer;
 };
 
 #endif // FORMSCENE_H

@@ -48,6 +48,7 @@ public:
 
     QRectF geometry() const;
     void setGeometry(const QRectF& geometry);
+    void setGeometry(const QPointF& pos, const QSizeF& size);
     void setGeometry(qreal x, qreal y, qreal w, qreal h);
 
     QRectF boundingRect() const override;

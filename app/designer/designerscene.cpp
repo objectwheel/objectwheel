@@ -9,6 +9,7 @@
 #include <scenesettings.h>
 #include <headlineitem.h>
 #include <gadgetlayer.h>
+#include <paintlayer.h>
 #include <windowmanager.h>
 #include <centralwidget.h>
 #include <designerview.h>
@@ -27,6 +28,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_currentForm(nullptr)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer(this))
+  , m_paintLayer(new PaintLayer)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -38,6 +40,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_gadgetLayer->setAcceptedMouseButtons(Qt::NoButton);
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_gadgetLayer);
+
+    m_paintLayer->setAcceptedMouseButtons(Qt::NoButton);
+    m_paintLayer->setZValue(std::numeric_limits<int>::max());
+    addItem(m_paintLayer);
 
     connect(this, &DesignerScene::changed, this, [=] {
         setSceneRect(sceneRect() | visibleItemsBoundingRect());
@@ -54,6 +60,15 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             });
         }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [=] {
+        connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged, this, [=] {
+            paintLayer()->updateGeometry();
+            paintLayer()->update();
+        });
+    }, Qt::QueuedConnection);
+    connect(this, &DesignerScene::selectionChanged, this, [=] {
+        paintLayer()->update();
+    });
     connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
         QTimer::singleShot(100, [=] {
             WindowManager::mainWindow()->centralWidget()->designerView()->
@@ -148,8 +163,8 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
 
 void DesignerScene::shrinkSceneRect()
 {
-    // 10 margin is a protection against the unexpected
-    // form movement that happens when a form is selected
+    // 10 margin is a protection against a bug that
+    // form moves unexpectedly when a it is selected
     setSceneRect(visibleItemsBoundingRect().adjusted(-10, -10, 10, 10));
 }
 
@@ -230,37 +245,16 @@ QRectF DesignerScene::visibleItemsBoundingRect() const
     // Does not take untransformable items into account.
     QRectF boundingRect;
     for (QGraphicsItem *item : items()) {
+        if (item == dragLayer())
+            continue;
+        if (item == gadgetLayer())
+            continue;
+        if (item == paintLayer())
+            continue;
         if (item->isVisible())
             boundingRect |= item->sceneBoundingRect();
     }
     return boundingRect.adjusted(-10, -15, 10, 10);
-}
-
-void DesignerScene::drawForeground(QPainter* painter, const QRectF& rect)
-{
-    QGraphicsScene::drawForeground(painter, rect);
-
-    for (DesignerItem* selectedItem : selectedItems())
-        paintSelectionOutline(painter, selectedItem);
-
-    const QList<DesignerItem*>& items = draggedResizedSelectedItems();
-    if (items.size() > 1) { // Multiple items moving
-        const QRectF& itemsBoundingRect = boundingRect(items);
-        const QRectF& outlineRect = QRectF(items.first()->parentItem()->mapToScene(itemsBoundingRect.topLeft()),
-                                           itemsBoundingRect.size());
-        paintOutline(painter, outlineRect);
-    }
-
-    const QVector<QLineF>& lines = guidelines();
-    if (!lines.isEmpty()) {
-        painter->setPen(pen());
-        painter->drawLines(lines);
-        for (const QLineF& line : lines) {
-            painter->setBrush(outlineColor());
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
-        }
-    }
 }
 
 void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
@@ -291,33 +285,10 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
     painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
 }
 
-void DesignerScene::paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem)
-{
-    const QRectF& rect = selectedItem->mapRectToScene(selectedItem->rect());
-    const qreal m = 0.5 / zoomLevel();
-    QPainterPath path;
-    path.addRect(rect.adjusted(-m, -m, m, m));
-    path.addRect(rect.adjusted(m, m, -m, -m));
-    QPainterPath path2;
-    for (ResizerItem* resizer : gadgetLayer()->resizers(selectedItem)) {
-        if (resizer->isVisible())
-            path2.addRect(QRectF(resizer->pos() + resizer->rect().topLeft() / zoomLevel(), resizer->size() / zoomLevel()));
-    }
-    painter->setPen(Qt::NoPen);
-    painter->setBrush(outlineColor());
-    painter->drawPath(path.subtracted(path2));
-}
-
 QVector<QLineF> DesignerScene::guidelines() const
 {
     QVector<QLineF> lines;
-    QList<DesignerItem*> items(selectedItems());
-
-    for (int i = items.size() - 1; i >= 0; --i) {
-        DesignerItem* item = items.at(i);
-        if (!item->beingDragged() && !item->beingResized())
-            items.removeAt(i);
-    }
+    QList<DesignerItem*> items(draggedResizedSelectedItems());
 
     // May contain it since we can resize the form
     if (items.contains(m_currentForm))
@@ -326,7 +297,7 @@ QVector<QLineF> DesignerScene::guidelines() const
     if (items.isEmpty())
         return lines;
 
-    const QRectF& geometry = boundingRect(items);
+    const QRectF& geometry = itemsBoundingRect(items);
     const QPointF& center = geometry.center();
     const DesignerItem* parent = items.first()->parentItem();
 
@@ -456,6 +427,11 @@ GadgetLayer* DesignerScene::gadgetLayer() const
     return m_gadgetLayer;
 }
 
+PaintLayer* DesignerScene::paintLayer() const
+{
+    return m_paintLayer;
+}
+
 QColor DesignerScene::outlineColor()
 {
     return DesignerSettings::sceneSettings()->outlineColor;
@@ -468,13 +444,12 @@ QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
     return pen;
 }
 
-QRectF DesignerScene::boundingRect(const QList<DesignerItem*>& items)
+QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
 {
-    QRectF rect = items.first()->geometry();
-    for (const DesignerItem* item : items)
-        if (items.first() != item)
-            rect |= QRectF(items.first()->parentItem()->mapFromItem(item->parentItem(), item->pos()), item->size());
-    return rect;
+    QRectF boundingRect;
+    for (DesignerItem* item : items)
+        boundingRect |= item->sceneBoundingRect();
+    return boundingRect;
 }
 
 void DesignerScene::discharge()

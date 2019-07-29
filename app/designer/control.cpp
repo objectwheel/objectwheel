@@ -239,6 +239,7 @@ void Control::setId(const QString& id)
         m_id = id;
         setToolTip(id);
         setObjectName(id);
+        update();
     }
 }
 

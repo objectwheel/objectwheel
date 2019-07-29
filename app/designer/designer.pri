@@ -9,6 +9,7 @@ HEADERS += $$PWD/control.h \
            $$PWD/form.h \
            $$PWD/gadgetlayer.h \
            $$PWD/headlineitem.h \
+           $$PWD/paintlayer.h \
            $$PWD/resizeritem.h \
            $$PWD/signalchooserdialog.h \
            $$PWD/gadgetitem.h
@@ -21,6 +22,7 @@ SOURCES += $$PWD/control.cpp \
            $$PWD/form.cpp \
            $$PWD/gadgetlayer.cpp \
            $$PWD/headlineitem.cpp \
+           $$PWD/paintlayer.cpp \
            $$PWD/resizeritem.cpp \
            $$PWD/signalchooserdialog.cpp \
            $$PWD/gadgetitem.cpp
