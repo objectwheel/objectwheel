@@ -117,9 +117,6 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
 {
     setAlignment(Qt::AlignCenter);
     setResizeAnchor(QGraphicsView::AnchorViewCenter);
-    setCacheMode(QGraphicsView::CacheNone);
-    setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
-
     setRubberBandSelectionMode(Qt::IntersectsItemBoundingRect);
     setDragMode(QGraphicsView::RubberBandDrag);
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);

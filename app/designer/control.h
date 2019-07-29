@@ -80,6 +80,7 @@ protected:
     ~Control() override;
 
 private slots:
+    void applyGeometryCorrection();
     void updateRenderInfo(const RenderResult& result);
 
 private:
@@ -99,6 +100,7 @@ private:
     QSizeF m_snapMargin;
     QMarginsF m_margins;
     QString m_geometryHash;
+    QRectF m_geometryCorrection;
 
     QVector<QmlError> m_errors;
     QVector<QString> m_events;

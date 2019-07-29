@@ -44,6 +44,18 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
 
+    // Made it Qt::QueuedConnection in order to prevent
+    // ungrabMouseEvent to call beingDraggedChanged or
+    // beingResizedChanged, thus preventing
+    // applyGeometryCorrection to be called before
+    // dropControl called, since it resets geometry correction
+    // otherwise may setSceneRect() in DesignerScene
+    // triggers and extends scene rect
+    connect(this, &Control::beingDraggedChanged,
+            this, &Control::applyGeometryCorrection, Qt::QueuedConnection);
+    connect(this, &Control::beingResizedChanged,
+            this, &Control::applyGeometryCorrection, Qt::QueuedConnection);
+
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             this, &Control::updateRenderInfo);
     connect(this, &Control::doubleClicked,
@@ -238,6 +250,7 @@ void Control::setDir(const QString& dir)
 void Control::setDragIn(bool dragIn)
 {
     m_dragIn = dragIn;
+    update();
 }
 
 void Control::setIndex(quint32 index)
@@ -263,19 +276,20 @@ void Control::dropControl(Control* control)
 
     ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::CompressedCall;
+
     if (control->gui())
         options |= ControlPropertyManager::UpdateRenderer;
     // NOTE: Do not move this assignment below setParent,
     // because parent change effects the newPos result
+    control->m_geometryCorrection = QRectF();
+    control->m_geometryHash = HashFactory::generate();
     const QPointF& newPos = scene()->snapPosition(mapFromItem(control->parentItem(), control->pos()));
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
-    ControlPropertyManager::setPos(control, newPos, options);
+    ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
     // NOTE: We compress setPos because there might be some other
     // compressed setPos'es in the list, We want the setPos that
     // happens after reparent operation to take place at the very last
-
-    update();
 }
 
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
@@ -386,6 +400,7 @@ QVariant Control::itemChange(int change, const QVariant& value)
                     | ControlPropertyManager::CompressedCall
                     | ControlPropertyManager::DontApplyDesigner;
             if (gui()) {
+                m_geometryCorrection = QRectF();
                 m_geometryHash = HashFactory::generate();
                 options |= ControlPropertyManager::UpdateRenderer;
             }
@@ -396,6 +411,7 @@ QVariant Control::itemChange(int change, const QVariant& value)
         const QSizeF snapSize = scene()->snapSize(pos(), value.toSizeF() + m_snapMargin);
         m_snapMargin = QSizeF(0, 0);
         if (gui()) {
+            m_geometryCorrection = QRectF();
             m_geometryHash = HashFactory::generate();
             ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdateRenderer
@@ -478,19 +494,16 @@ void Control::updateRenderInfo(const RenderResult& result)
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
 
-    if (!gui() || hasErrors())
+    if (!gui() || hasErrors()) {
+        m_geometryCorrection = QRectF();
         m_geometryHash.clear();
+    }
 
     if (gui() && (m_geometryHash.isEmpty() || result.geometryHash == m_geometryHash)) {
         m_geometryHash.clear();
-        const QRectF& geo = UtilityFunctions::getGeometryFromProperties(result.properties);
-        ControlPropertyManager::setSize(this, geo.size(), ControlPropertyManager::NoOption);
-
-        if (!form()) {
-            ControlPropertyManager::setPos(
-                        this, ControlPropertyManager::posWithMargin(this, geo.topLeft(), true),
-                        ControlPropertyManager::NoOption);
-        }
+        m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(result.properties);
+        if (!beingDragged() && !beingResized())
+            applyGeometryCorrection();
     }
 
     m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
@@ -515,6 +528,23 @@ void Control::updateRenderInfo(const RenderResult& result)
 
     ControlPropertyManager::instance()->renderInfoChanged(this, result.codeChanged);
 }
+
+void Control::applyGeometryCorrection()
+{
+    if (m_geometryCorrection.isNull() || !gui() || beingDragged() || beingResized())
+        return;
+
+    ControlPropertyManager::setSize(this, m_geometryCorrection.size(), ControlPropertyManager::NoOption);
+
+    if (!form()) {
+        ControlPropertyManager::setPos(
+                    this, ControlPropertyManager::posWithMargin(this, m_geometryCorrection.topLeft(), true),
+                    ControlPropertyManager::NoOption);
+    }
+
+    m_geometryCorrection = QRectF();
+}
+
 
 void Control::setFrame(const QRectF& frame)
 {

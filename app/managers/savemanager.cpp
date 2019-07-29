@@ -299,7 +299,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
 
     for (Control* child : control->childControls()) {
         child->setDir(child->dir().replace(control->dir(), newControlRootPath, Qt::CaseInsensitive));
-        const QString& childId = ParserUtils::id(control->dir());
+        const QString& childId = ParserUtils::id(child->dir());
         Q_ASSERT(!childId.isEmpty());
         child->setId(childId);
     }
