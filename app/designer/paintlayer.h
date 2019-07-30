@@ -15,7 +15,8 @@ public slots:
     void updateGeometry();
 
 private:
-    void paintSelectionOutline(QPainter* painter);
+    void paintGuidelines(QPainter* painter);
+    void paintSelectionOutlines(QPainter* painter);
     void paintSelectionSurroundingOutline(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 

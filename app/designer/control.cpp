@@ -361,6 +361,7 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::ungrabMouseEvent(QEvent* event)
 {
+    // FIXME: items may also contain a form
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     DesignerItem::ungrabMouseEvent(event); // Clears beingDragged state
 

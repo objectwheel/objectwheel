@@ -116,14 +116,15 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     , m_moveLeftAct(new QAction(this))
 {
     setAlignment(Qt::AlignCenter);
-    setResizeAnchor(QGraphicsView::AnchorViewCenter);
+    setResizeAnchor(AnchorViewCenter);
     setRubberBandSelectionMode(Qt::IntersectsItemBoundingRect);
-    setDragMode(QGraphicsView::RubberBandDrag);
-    setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    setDragMode(RubberBandDrag);
+    setTransformationAnchor(AnchorUnderMouse);
     setFrameShape(QFrame::NoFrame);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAutoFillBackground(true);
     setBackgroundRole(QPalette::Window);
+    setViewportUpdateMode(FullViewportUpdate);
 
     // as mousetracking only works for mouse key it is better to handle it in the
     // eventFilter method so it works also for the space scrolling case as expected

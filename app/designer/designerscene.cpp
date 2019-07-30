@@ -61,22 +61,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
         }, Qt::QueuedConnection);
     }, Qt::QueuedConnection);
     QMetaObject::invokeMethod(this, [=] {
-        connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged, this, [=] {
-            paintLayer()->updateGeometry();
-            paintLayer()->update();
-        });
+        connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
+                paintLayer(), &PaintLayer::updateGeometry);
     }, Qt::QueuedConnection);
-    connect(this, &DesignerScene::currentFormChanged, this, [=] {
-        paintLayer()->updateGeometry();
-        paintLayer()->update();
-    });
-    connect(this, &DesignerScene::selectionChanged, this, [=] {
-        paintLayer()->updateGeometry();
-        paintLayer()->update();
-    });
-    connect(this, &DesignerScene::selectionChanged, this, [=] {
-        paintLayer()->update();
-    });
+    connect(this, &DesignerScene::currentFormChanged, paintLayer(), &PaintLayer::updateGeometry);
     connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
         QTimer::singleShot(100, [=] {
             WindowManager::mainWindow()->centralWidget()->designerView()->
@@ -295,6 +283,7 @@ void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
 
 QVector<QLineF> DesignerScene::guidelines() const
 {
+    // FIXME: doesn't correctly work for items within a parent
     QVector<QLineF> lines;
     QList<DesignerItem*> items(draggedResizedSelectedItems());
 

@@ -20,7 +20,21 @@ void PaintLayer::updateGeometry()
     }, Qt::QueuedConnection);
 }
 
-void PaintLayer::paintSelectionOutline(QPainter* painter)
+void PaintLayer::paintGuidelines(QPainter* painter)
+{
+    const QVector<QLineF>& lines = scene()->guidelines();
+    if (!lines.isEmpty()) {
+        painter->setPen(scene()->pen());
+        painter->drawLines(lines);
+        for (const QLineF& line : lines) {
+            painter->setBrush(scene()->outlineColor());
+            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+        }
+    }
+}
+
+void PaintLayer::paintSelectionOutlines(QPainter* painter)
 {
     const qreal m = 0.5 / scene()->zoomLevel();
     QPainterPath path;
@@ -45,24 +59,19 @@ void PaintLayer::paintSelectionOutline(QPainter* painter)
 
 void PaintLayer::paintSelectionSurroundingOutline(QPainter* painter)
 {
+    // Only one item can be resized at a time, so this piece of code
+    // wouldn't be triggered for resize operations, also a form could
+    // only be included when the form is resized, forms don't move. So
+    // we don't have to remove form instances from the list either.
+    // In short, this piece of code is only triggered for dragged childs.
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
-        scene()->paintOutline(painter, scene()->itemsBoundingRect(items));
+        scene()->paintOutline(painter, scene()->outerRect(scene()->itemsBoundingRect(items)));
 }
 
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
-    paintSelectionOutline(painter);
+    paintSelectionOutlines(painter);
     paintSelectionSurroundingOutline(painter);
-
-    const QVector<QLineF>& lines = scene()->guidelines();
-    if (!lines.isEmpty()) {
-        painter->setPen(scene()->pen());
-        painter->drawLines(lines);
-        for (const QLineF& line : lines) {
-            painter->setBrush(scene()->outlineColor());
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
-        }
-    }
+    paintGuidelines(painter);
 }
