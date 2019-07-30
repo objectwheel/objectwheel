@@ -18,7 +18,6 @@ class Control : public DesignerItem
 public:
     bool gui() const;
     bool form() const;
-    bool clip() const;
     bool popup() const;
     bool window() const;
     bool dragIn() const;
@@ -46,12 +45,12 @@ public:
     QVector<PropertyNode> properties() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
+    QVariant property(const QString& propertyName) const;
     QVariant::Type propertyType(const QString& propertyName) const;
 
     static QVector<Control*> controls();
 
 public:
-    void setClip(bool clip);
     void setId(const QString& id);
     void setDir(const QString& dir);
     void setDragIn(bool dragIn);
@@ -69,7 +68,6 @@ protected:
     QVariant itemChange(int change, const QVariant& value) override;
 
 protected:
-    virtual void restrainPaintRegion(QPainter* painter);
     virtual void paintImage(QPainter* painter);
     virtual void paintHighlight(QPainter* painter);
     virtual void paintHoverOutline(QPainter* painter);
@@ -85,7 +83,6 @@ private slots:
 
 private:
     bool m_gui;
-    bool m_clip;
     bool m_popup;
     bool m_window;
     bool m_dragIn;

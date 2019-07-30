@@ -23,7 +23,6 @@ QVector<Control*> Control::m_controls;
 
 Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_gui(false)
-  , m_clip(false)
   , m_popup(false)
   , m_window(false)
   , m_dragIn(false)
@@ -40,6 +39,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
+    setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent, true);
 
     ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
@@ -75,11 +75,6 @@ bool Control::gui() const
 bool Control::form() const
 {
     return type() == Form::Type;
-}
-
-bool Control::clip() const
-{
-    return m_clip;
 }
 
 bool Control::popup() const
@@ -222,15 +217,14 @@ QList<Control*> Control::childControls(bool recursive) const
     return controls;
 }
 
+QVariant Control::property(const QString& propertyName) const
+{
+    return UtilityFunctions::getProperty(propertyName, m_properties);
+}
+
 QVector<Control*> Control::controls()
 {
     return m_controls;
-}
-
-void Control::setClip(bool clip)
-{
-    m_clip = clip;
-    update();
 }
 
 void Control::setId(const QString& id)
@@ -425,14 +419,6 @@ QVariant Control::itemChange(int change, const QVariant& value)
     return DesignerItem::itemChange(change, value);
 }
 
-void Control::restrainPaintRegion(QPainter* painter)
-{
-    const QRectF& boundingRect = m_frame.adjusted(-1, -1, 1, 1);
-    const QRectF& parentRect = parentControl()->rect().adjusted(1, 1, -1, -1);
-    const QRectF& parentGeometry = parentControl()->mapToItem(this, parentRect).boundingRect();
-    painter->setClipRect(boundingRect.intersected(parentGeometry));
-}
-
 void Control::paintImage(QPainter* painter)
 {
     if (beingResized())
@@ -458,9 +444,6 @@ void Control::paintHoverOutline(QPainter* painter)
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
-
-    if (parentControl() && parentControl()->clip() && !beingDragged())
-        restrainPaintRegion(painter);
 
     if (!image().isNull())
         paintImage(painter);
@@ -490,7 +473,12 @@ void Control::updateRenderInfo(const RenderResult& result)
     m_properties = result.properties;
 
     setResizable(gui());
-    setClip(UtilityFunctions::getProperty("clip", result.properties).toBool());
+    setZValue(property("z").toDouble());
+    setFlag(QGraphicsItem::ItemClipsChildrenToShape, property("clip").toBool());
+    if (property("opacity").isValid())
+        setOpacity(property("opacity").toDouble());
+    else
+        setOpacity(1.0);
 
     if (result.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);

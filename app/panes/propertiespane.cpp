@@ -497,14 +497,14 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     if (integer) {
         QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
         spinBox->setMaximum(std::numeric_limits<int>::max());
-        spinBox->setMinimum(std::numeric_limits<int>::min());
+        spinBox->setMinimum(std::numeric_limits<int>::lowest());
         spinBox->setValue(number);
         fixPosForForm(control, propertyName, spinBox);
         QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), updateFunction);
     } else {
         QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
         spinBox->setMaximum(std::numeric_limits<double>::max());
-        spinBox->setMinimum(std::numeric_limits<double>::min());
+        spinBox->setMinimum(std::numeric_limits<double>::lowest());
         spinBox->setValue(number);
         fixPosForForm(control, propertyName, spinBox);
         QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), updateFunction);
@@ -523,7 +523,7 @@ QWidget* createIndexHandlerWidget(Control* control)
     spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
     spinBox->setMinimumWidth(1);
     spinBox->setMaximum(std::numeric_limits<int>::max());
-    spinBox->setMinimum(std::numeric_limits<int>::min());
+    spinBox->setMinimum(std::numeric_limits<int>::lowest());
     spinBox->setValue(control->index());
     initPalette(spinBox);
 
@@ -1058,7 +1058,7 @@ void PropertiesPane::discharge()
 // FIXME: This function has severe performance issues.
 void PropertiesPane::onSceneSelectionChange()
 {
-    return; // FIXME
+//    return; // FIXME
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;
     const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
 

@@ -66,6 +66,14 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             paintLayer()->update();
         });
     }, Qt::QueuedConnection);
+    connect(this, &DesignerScene::currentFormChanged, this, [=] {
+        paintLayer()->updateGeometry();
+        paintLayer()->update();
+    });
+    connect(this, &DesignerScene::selectionChanged, this, [=] {
+        paintLayer()->updateGeometry();
+        paintLayer()->update();
+    });
     connect(this, &DesignerScene::selectionChanged, this, [=] {
         paintLayer()->update();
     });

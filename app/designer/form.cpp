@@ -67,9 +67,6 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     // Background
     painter->fillRect(rect(), settings->toBackgroundBrush());
 
-    if (parentControl() && parentControl()->clip() && !beingDragged())
-        restrainPaintRegion(painter);
-
     if (!image().isNull())
         paintImage(painter);
 

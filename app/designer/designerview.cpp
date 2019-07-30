@@ -122,7 +122,6 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     setFrameShape(QFrame::NoFrame);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
     setAutoFillBackground(true);
     setBackgroundRole(QPalette::Window);
 

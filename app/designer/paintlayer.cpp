@@ -15,7 +15,7 @@ void PaintLayer::updateGeometry()
         return;
     m_updateGeometryScheduled = true;
     QMetaObject::invokeMethod(this, [=] {
-        setGeometry({0, 0}, scene()->sceneRect().size());
+        setGeometry(QPointF(), scene()->sceneRect().size());
         m_updateGeometryScheduled = false;
     }, Qt::QueuedConnection);
 }
