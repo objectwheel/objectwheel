@@ -27,7 +27,7 @@
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_currentForm(nullptr)
   , m_dragLayer(new DesignerItem)
-  , m_gadgetLayer(new GadgetLayer(this))
+  , m_gadgetLayer(new GadgetLayer)
   , m_paintLayer(new PaintLayer)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
@@ -39,6 +39,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
 
     m_gadgetLayer->setAcceptedMouseButtons(Qt::NoButton);
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
+    connect(this, &DesignerScene::selectionChanged,
+            m_gadgetLayer, &GadgetLayer::handleSceneSelectionChange);
+    connect(this, &DesignerScene::currentFormChanged,
+            m_gadgetLayer, &GadgetLayer::handleSceneCurrentFormChange);
     addItem(m_gadgetLayer);
 
     m_paintLayer->setAcceptedMouseButtons(Qt::NoButton);
@@ -451,8 +455,8 @@ QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
 
 void DesignerScene::discharge()
 {
+    Q_ASSERT(m_gadgetLayer->m_resizerHash.isEmpty());
     clearSelection();
-    m_gadgetLayer->clearResizers();
     m_forms.clear();
     m_currentForm.clear();
 }

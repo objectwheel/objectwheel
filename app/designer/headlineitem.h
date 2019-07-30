@@ -22,9 +22,10 @@ public:
     void setTargetItem(DesignerItem* targetItem);
 
 public slots:
-    void updateGeometry();
+    void updateGeometry(bool callLater = true);
 
 private:
+    void updateGeometryNow();
     QFont dimensionsFont() const;
     QString dimensionsText(qreal width, qreal height) const;
     QSizeF calculateTextSize() const;

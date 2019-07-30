@@ -259,7 +259,7 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     const QPointF& dragDistance = event->pos() - m_mousePressPoint;
 
-    if (!m_dragAccepted && dragDistance.manhattanLength() < scene()->startDragDistance())
+    if (!m_dragAccepted && dragDistance.manhattanLength() < DesignerScene::startDragDistance())
         return;
 
     m_dragAccepted = true;

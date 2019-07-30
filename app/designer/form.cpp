@@ -40,7 +40,7 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Form::paintFormFrame(QPainter* painter)
 {
-    painter->setPen(scene()->pen(Qt::darkGray));
+    painter->setPen(DesignerScene::pen(Qt::darkGray));
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(scene()->outerRect(rect()));
 }
@@ -54,7 +54,7 @@ void Form::paintGridViewDots(QPainter* painter, int gridSize)
             points.append(QPointF(x, y));
     }
     painter->setClipRect(rect());
-    painter->setPen(scene()->pen("#505050", 1, false));
+    painter->setPen(DesignerScene::pen("#505050", 1, false));
     painter->drawPoints(points.data(), points.size());
     painter->restore();
 }

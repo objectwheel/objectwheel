@@ -582,7 +582,7 @@ void DesignerView::onPasteAction()
         } else {
             newControl = ControlCreationManager::createControl(
                         scene()->currentForm(), control->dir(),
-                        scene()->snapPosition(control->pos() + QPointF(10, 10)));
+                        DesignerScene::snapPosition(control->pos() + QPointF(10, 10)));
         }
 
         if (newControl)

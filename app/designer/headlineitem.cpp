@@ -55,27 +55,34 @@ void HeadlineItem::setTargetItem(DesignerItem* targetItem)
     }
 }
 
-void HeadlineItem::updateGeometry()
+void HeadlineItem::updateGeometry(bool callLater)
 {
-    if (m_geometryUpdateScheduled)
-        return;
-    m_geometryUpdateScheduled = true;
-    QMetaObject::invokeMethod(this, [=] {
-        const QSizeF& ts = calculateTextSize();
-        const QSizeF& ps = targetItem() ? targetItem()->size() : QSizeF();
-        qreal width = ts.width();
-        if (m_dimensions.isValid()) {
-            const QFontMetrics fm(dimensionsFont());
-            QString wstr = QString::number(m_dimensions.width());
-            QString hstr = QString::number(m_dimensions.height());
-            wstr.replace(QRegularExpression("\\d"), "9");
-            hstr.replace(QRegularExpression("\\d"), "9");
-            width += fm.horizontalAdvance(dimensionsText(wstr.toDouble(), hstr.toDouble()));
-        }
-        setPos(targetItem() ? targetItem()->scenePos() : QPointF());
-        setRect(-0.5, -ts.height(), qMin(ps.width(), width + MARGIN), ts.height());
-        m_geometryUpdateScheduled = false;
-    }, Qt::QueuedConnection);
+    if (callLater) {
+        if (m_geometryUpdateScheduled)
+            return;
+        m_geometryUpdateScheduled = true;
+        QMetaObject::invokeMethod(this, &HeadlineItem::updateGeometryNow, Qt::QueuedConnection);
+    } else {
+        updateGeometryNow();
+    }
+}
+
+void HeadlineItem::updateGeometryNow()
+{
+    const QSizeF& ts = calculateTextSize();
+    const QSizeF& ps = targetItem() ? targetItem()->size() : QSizeF();
+    qreal width = ts.width();
+    if (m_dimensions.isValid()) {
+        const QFontMetrics fm(dimensionsFont());
+        QString wstr = QString::number(m_dimensions.width());
+        QString hstr = QString::number(m_dimensions.height());
+        wstr.replace(QRegularExpression("\\d"), "9");
+        hstr.replace(QRegularExpression("\\d"), "9");
+        width += fm.horizontalAdvance(dimensionsText(wstr.toDouble(), hstr.toDouble()));
+    }
+    setPos(targetItem() ? targetItem()->scenePos() : QPointF());
+    setRect(-0.5, -ts.height(), qMin(ps.width(), width + MARGIN), ts.height());
+    m_geometryUpdateScheduled = false;
 }
 
 QFont HeadlineItem::dimensionsFont() const

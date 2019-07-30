@@ -278,7 +278,7 @@ void Control::dropControl(Control* control)
     // because parent change effects the newPos result
     control->m_geometryCorrection = QRectF();
     control->m_geometryHash = HashFactory::generate();
-    const QPointF& newPos = scene()->snapPosition(mapFromItem(control->parentItem(), control->pos()));
+    const QPointF& newPos = DesignerScene::snapPosition(mapFromItem(control->parentItem(), control->pos()));
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
     ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
@@ -303,7 +303,7 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         scene()->clearSelection();
         // NOTE: Use actual Control position for scene, since createControl deals with margins
         auto newControl = ControlCreationManager::createControl(
-                    this, dir, scene()->snapPosition(event->pos() - QPointF(5, 5)),
+                    this, dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
                     result.boundingRect.size(), result.image);
         if (newControl) {
             newControl->setSelected(true);
@@ -388,7 +388,7 @@ void Control::ungrabMouseEvent(QEvent* event)
 QVariant Control::itemChange(int change, const QVariant& value)
 {    
     if (change == ItemPositionChange && beingDragged()) {
-        const QPointF& snapPos = scene()->snapPosition(value.toPointF());
+        const QPointF& snapPos = DesignerScene::snapPosition(value.toPointF());
         const QPointF& snapMargin = value.toPointF() - snapPos;
         m_snapMargin = QSizeF(snapMargin.x(), snapMargin.y());
         if (!form()) {
@@ -404,7 +404,7 @@ QVariant Control::itemChange(int change, const QVariant& value)
         }
         return snapPos;
     } else if (change == ItemSizeChange && beingResized()) {
-        const QSizeF snapSize = scene()->snapSize(pos(), value.toSizeF() + m_snapMargin);
+        const QSizeF snapSize = DesignerScene::snapSize(pos(), value.toSizeF() + m_snapMargin);
         m_snapMargin = QSizeF(0, 0);
         if (gui()) {
             m_geometryCorrection = QRectF();
@@ -438,7 +438,7 @@ void Control::paintHighlight(QPainter* painter)
 void Control::paintHoverOutline(QPainter* painter)
 {
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(scene()->pen());
+    painter->setPen(DesignerScene::pen());
     painter->drawRect(scene()->outerRect(rect()));
 }
 

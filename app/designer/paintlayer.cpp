@@ -24,8 +24,8 @@ void PaintLayer::paintGuidelines(QPainter* painter)
 {
     const QVector<QLineF>& lines = scene()->guidelines();
     if (!lines.isEmpty()) {
-        painter->setBrush(scene()->outlineColor());
-        painter->setPen(scene()->pen());
+        painter->setBrush(DesignerScene::outlineColor());
+        painter->setPen(DesignerScene::pen());
         painter->drawLines(lines);
         for (const QLineF& line : lines) {
             painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
@@ -54,7 +54,7 @@ void PaintLayer::paintSelectionOutlines(QPainter* painter)
         }
     }
     painter->setPen(Qt::NoPen);
-    painter->setBrush(scene()->outlineColor());
+    painter->setBrush(DesignerScene::outlineColor());
     painter->drawPath(outlinesPath.subtracted(resizersPath));
 }
 
@@ -67,7 +67,7 @@ void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
     // In short, this piece of code is only triggered for dragged childs.
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
-        scene()->paintOutline(painter, scene()->outerRect(scene()->itemsBoundingRect(items)));
+        scene()->paintOutline(painter, scene()->outerRect(DesignerScene::itemsBoundingRect(items)));
 }
 
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
