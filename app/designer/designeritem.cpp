@@ -4,12 +4,12 @@
 #include <QGraphicsSceneMouseEvent>
 
 DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
-  , m_inSetGeometry(false)
+  , m_raised(false)
+  , m_resizable(false)
   , m_beingDragged(false)
   , m_beingResized(false)
   , m_dragAccepted(false)
-  , m_raised(false)
-  , m_resizable(false)
+  , m_inSetGeometry(false)
 {
     setAcceptedMouseButtons(Qt::LeftButton);
 }
@@ -17,6 +17,16 @@ DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
 int DesignerItem::type() const
 {
     return Type;
+}
+
+bool DesignerItem::raised() const
+{
+    return m_raised;
+}
+
+bool DesignerItem::resizable() const
+{
+    return m_resizable;
 }
 
 bool DesignerItem::beingDragged() const
@@ -27,6 +37,113 @@ bool DesignerItem::beingDragged() const
 bool DesignerItem::beingResized() const
 {
     return m_beingResized;
+}
+
+bool DesignerItem::dragAccepted() const
+{
+    return m_dragAccepted;
+}
+
+qreal DesignerItem::width() const
+{
+    return size().width();
+}
+
+qreal DesignerItem::height() const
+{
+    return size().height();
+}
+
+QSizeF DesignerItem::size() const
+{
+    return m_rect.size();
+}
+
+void DesignerItem::setSize(qreal width, qreal height)
+{
+    setSize(QSizeF(width, height));
+}
+
+void DesignerItem::setSize(const QSizeF& size)
+{
+    if (m_rect.size() != size) {
+        if (flags() & ItemSendsGeometryChanges) {
+            const QVariant newSizeVariant(itemChange(ItemSizeChange, QVariant::fromValue<QSizeF>(size)));
+            QSizeF newSize = newSizeVariant.toSizeF();
+            if (newSize == m_rect.size())
+                return;
+            prepareGeometryChange();
+            m_rect.setSize(newSize);
+            update();
+            itemChange(ItemSizeHasChanged, newSizeVariant);
+            emit geometryChanged();
+        } else {
+            prepareGeometryChange();
+            m_rect.setSize(size);
+            update();
+        }
+    }
+}
+
+QRectF DesignerItem::boundingRect() const
+{
+    return m_rect;
+}
+
+QRectF DesignerItem::rect() const
+{
+    return m_rect;
+}
+
+void DesignerItem::setRect(qreal x, qreal y, qreal w, qreal h)
+{
+    setRect(QRectF(x, y, w, h));
+}
+
+void DesignerItem::setRect(const QPointF& topLeft, const QSizeF& size)
+{
+    setRect(QRectF(topLeft, size));
+}
+
+void DesignerItem::setRect(const QRectF& rect)
+{
+    if (m_rect != rect) {
+        if (m_rect.topLeft() != rect.topLeft()) {
+            prepareGeometryChange();
+            m_rect.moveTopLeft(rect.topLeft());
+            update();
+        }
+        setSize(rect.size());
+    }
+}
+
+QRectF DesignerItem::geometry() const
+{
+    return QRectF(pos(), size());
+}
+
+void DesignerItem::setGeometry(qreal x, qreal y, qreal w, qreal h)
+{
+    setGeometry(QRectF(x, y, w, h));
+}
+
+void DesignerItem::setGeometry(const QPointF& pos, const QSizeF& size)
+{
+    setGeometry(QRectF(pos, size));
+}
+
+void DesignerItem::setGeometry(const QRectF& geometry)
+{
+    const QRectF& oldGeometry = this->geometry();
+    m_inSetGeometry = true;
+    setPos(geometry.topLeft());
+    m_inSetGeometry = false;
+    setSize(geometry.size());
+    if ((flags() & ItemSendsGeometryChanges)
+            && oldGeometry.topLeft() != pos()
+            && oldGeometry.size() == size()) {
+        emit geometryChanged();
+    }
 }
 
 DesignerScene* DesignerItem::scene() const
@@ -72,106 +189,22 @@ QList<DesignerItem*> DesignerItem::childItems(bool recursive) const
     return childs;
 }
 
-qreal DesignerItem::width() const
+QPointF DesignerItem::mousePressPoint() const
 {
-    return size().width();
+    return m_mousePressPoint;
 }
 
-qreal DesignerItem::height() const
+void DesignerItem::setRaised(bool raised)
 {
-    return size().height();
-}
-
-QSizeF DesignerItem::size() const
-{
-    return m_rect.size();
-}
-
-void DesignerItem::setSize(const QSizeF& size)
-{
-    if (m_rect.size() != size) {
-        if (flags() & ItemSendsGeometryChanges) {
-            const QVariant newSizeVariant(itemChange(ItemSizeChange, QVariant::fromValue<QSizeF>(size)));
-            QSizeF newSize = newSizeVariant.toSizeF();
-            if (newSize == m_rect.size())
-                return;
-            prepareGeometryChange();
-            m_rect.setSize(newSize);
-            update();
-            itemChange(ItemSizeHasChanged, newSizeVariant);
-            emit geometryChanged();
+    if (m_raised != raised) {
+        m_raised = raised;
+        if (m_raised) {
+            m_parentItemBeforeRaise = parentItem();
+            setParentItem(scene()->dragLayer());
         } else {
-            prepareGeometryChange();
-            m_rect.setSize(size);
-            update();
+            setParentItem(m_parentItemBeforeRaise);
         }
     }
-}
-
-void DesignerItem::setSize(qreal width, qreal height)
-{
-    setSize(QSizeF(width, height));
-}
-
-QRectF DesignerItem::rect() const
-{
-    return m_rect;
-}
-
-void DesignerItem::setRect(const QRectF& rect)
-{
-    if (m_rect != rect) {
-        if (m_rect.topLeft() != rect.topLeft()) {
-            prepareGeometryChange();
-            m_rect.moveTopLeft(rect.topLeft());
-            update();
-        }
-        setSize(rect.size());
-    }
-}
-
-void DesignerItem::setRect(qreal x, qreal y, qreal w, qreal h)
-{
-    setRect(QRectF(x, y, w, h));
-}
-
-QRectF DesignerItem::geometry() const
-{
-    return QRectF(pos(), size());
-}
-
-void DesignerItem::setGeometry(const QRectF& geometry)
-{
-    const QRectF& oldGeometry = this->geometry();
-    m_inSetGeometry = true;
-    setPos(geometry.topLeft());
-    m_inSetGeometry = false;
-    setSize(geometry.size());
-    if ((flags() & ItemSendsGeometryChanges)
-            && oldGeometry.topLeft() != pos()
-            && oldGeometry.size() == size()) {
-        emit geometryChanged();
-    }
-}
-
-void DesignerItem::setGeometry(const QPointF& pos, const QSizeF& size)
-{
-    setGeometry(QRectF(pos, size));
-}
-
-void DesignerItem::setGeometry(qreal x, qreal y, qreal w, qreal h)
-{
-    setGeometry(QRectF(x, y, w, h));
-}
-
-QRectF DesignerItem::boundingRect() const
-{
-    return m_rect;
-}
-
-bool DesignerItem::resizable() const
-{
-    return m_resizable;
 }
 
 void DesignerItem::setResizable(bool resizable)
@@ -182,14 +215,20 @@ void DesignerItem::setResizable(bool resizable)
     }
 }
 
-bool DesignerItem::dragAccepted() const
+void DesignerItem::setBeingDragged(bool beingDragged)
 {
-    return m_dragAccepted;
+    if (m_beingDragged != beingDragged) {
+        m_beingDragged = beingDragged;
+        emit beingDraggedChanged();
+    }
 }
 
-QPointF DesignerItem::mousePressPoint() const
+void DesignerItem::setBeingResized(bool beingResized)
 {
-    return m_mousePressPoint;
+    if (m_beingResized != beingResized) {
+        m_beingResized = beingResized;
+        emit beingResizedChanged();
+    }
 }
 
 bool DesignerItem::event(QEvent* event)
@@ -295,7 +334,6 @@ QVariant DesignerItem::itemChange(int change, const QVariant& value)
         if (!m_inSetGeometry)
             emit geometryChanged();
         break;
-
     default:
         break;
     }
@@ -304,35 +342,6 @@ QVariant DesignerItem::itemChange(int change, const QVariant& value)
         return QGraphicsObject::itemChange(GraphicsItemChange(change), value);
 
     return value;
-}
-
-void DesignerItem::setRaised(bool raised)
-{
-    if (m_raised != raised) {
-        m_raised = raised;
-        if (m_raised) {
-            m_parentItemBeforeRaise = parentItem();
-            setParentItem(scene()->dragLayer());
-        } else {
-            setParentItem(m_parentItemBeforeRaise);
-        }
-    }
-}
-
-void DesignerItem::setBeingDragged(bool beingDragged)
-{
-    if (m_beingDragged != beingDragged) {
-        m_beingDragged = beingDragged;
-        emit beingDraggedChanged();
-    }
-}
-
-void DesignerItem::setBeingResized(bool beingResized)
-{
-    if (m_beingResized != beingResized) {
-        m_beingResized = beingResized;
-        emit beingResizedChanged();
-    }
 }
 
 QVariant DesignerItem::itemChange(DesignerItem::GraphicsItemChange change, const QVariant& value)

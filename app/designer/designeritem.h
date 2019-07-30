@@ -25,40 +25,42 @@ public:
     enum { Type = UserType + 1 };
     int type() const override;
 
+    bool raised() const;
+    bool resizable() const;
     bool beingDragged() const;
     bool beingResized() const;
-
-    DesignerScene* scene() const;
-    DesignerItem* parentItem() const;
-    DesignerItem* topLevelItem() const;
-
-    QList<DesignerItem*> siblingItems() const;
-    QList<DesignerItem*> childItems(bool recursive = true) const;
+    bool dragAccepted() const;
 
     qreal width() const;
     qreal height() const;
 
     QSizeF size() const;
-    void setSize(const QSizeF& size);
     void setSize(qreal width, qreal height);
-
-    QRectF rect() const;
-    void setRect(const QRectF& rect);
-    void setRect(qreal x, qreal y, qreal w, qreal h);
-
-    QRectF geometry() const;
-    void setGeometry(const QRectF& geometry);
-    void setGeometry(const QPointF& pos, const QSizeF& size);
-    void setGeometry(qreal x, qreal y, qreal w, qreal h);
+    void setSize(const QSizeF& size);
 
     QRectF boundingRect() const override;
+    QRectF rect() const;
+    void setRect(qreal x, qreal y, qreal w, qreal h);
+    void setRect(const QPointF& topLeft, const QSizeF& size);
+    void setRect(const QRectF& rect);
 
-    bool resizable() const;
-    void setResizable(bool resizable);
+    QRectF geometry() const;
+    void setGeometry(qreal x, qreal y, qreal w, qreal h);
+    void setGeometry(const QPointF& pos, const QSizeF& size);
+    void setGeometry(const QRectF& geometry);
+
+    DesignerScene* scene() const;
+    DesignerItem* parentItem() const;
+    DesignerItem* topLevelItem() const;
+    QList<DesignerItem*> siblingItems() const;
+    QList<DesignerItem*> childItems(bool recursive = true) const;
 
 protected:
-    bool dragAccepted() const;
     QPointF mousePressPoint() const;
+    void setRaised(bool raised);
+    void setResizable(bool resizable);
+    void setBeingDragged(bool beingDragged);
+    void setBeingResized(bool beingResized);
 
 protected:
     bool event(QEvent* event) override;
@@ -72,11 +74,6 @@ protected:
     virtual QVariant itemChange(int change, const QVariant& value);
 
 private:
-    void setRaised(bool raised);
-    void setBeingDragged(bool beingDragged);
-    void setBeingResized(bool beingResized);
-
-private:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 signals:
@@ -87,12 +84,12 @@ signals:
     void resizableChanged();
 
 private:
-    bool m_inSetGeometry;
+    bool m_raised;
+    bool m_resizable;
     bool m_beingDragged;
     bool m_beingResized;
     bool m_dragAccepted;
-    bool m_raised;
-    bool m_resizable;
+    bool m_inSetGeometry;
     QRectF m_rect;
     QPointF m_mousePressPoint;
     DesignerItem* m_parentItemBeforeRaise;
