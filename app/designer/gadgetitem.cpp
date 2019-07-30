@@ -2,11 +2,11 @@
 #include <QGraphicsSceneMouseEvent>
 
 GadgetItem::GadgetItem(DesignerItem* parent) : DesignerItem(parent)
-  , m_brush(Qt::white)
 {
     QPen pen(Qt::black, 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     pen.setCosmetic(true);
     setPen(pen);
+    setBrush(Qt::white);
     setVisible(false);
     setFlag(ItemIgnoresTransformations);
 }

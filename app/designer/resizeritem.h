@@ -21,6 +21,7 @@ public:
     DesignerItem* targetItem() const;
     void setTargetItem(DesignerItem* targetItem);
 
+public slots:
     void updateCursor();
     void updatePosition();
     void updateTargetGeometry();
@@ -31,7 +32,7 @@ private:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
-    Placement m_placement;
+    const Placement m_placement;
     QPointer<DesignerItem> m_targetItem;
 };
 

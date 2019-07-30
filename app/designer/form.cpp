@@ -22,11 +22,10 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton && (flags() & ItemIsSelectable)) {
         bool select = true;
-        if (event->modifiers() & Qt::ControlModifier) { // multi selection
+        if (event->modifiers() & Qt::ControlModifier) { // Multiple-selection
             select = !isSelected();
-        } else {
-            if (!isSelected())
-                scene()->clearSelection();
+        } else if (!isSelected()) {
+            scene()->clearSelection();
         }
         QMetaObject::invokeMethod(this, std::bind(&Form::setSelected, this, select),
                                   Qt::QueuedConnection);

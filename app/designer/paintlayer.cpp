@@ -5,18 +5,18 @@
 #include <QPainter>
 
 PaintLayer::PaintLayer(DesignerItem* parent) : DesignerItem(parent)
-  , m_updateGeometryScheduled(false)
+  , m_geometryUpdateScheduled(false)
 {
 }
 
 void PaintLayer::updateGeometry()
 {
-    if (m_updateGeometryScheduled)
+    if (m_geometryUpdateScheduled)
         return;
-    m_updateGeometryScheduled = true;
+    m_geometryUpdateScheduled = true;
     QMetaObject::invokeMethod(this, [=] {
         setGeometry(QPointF(), scene()->sceneRect().size());
-        m_updateGeometryScheduled = false;
+        m_geometryUpdateScheduled = false;
     }, Qt::QueuedConnection);
 }
 

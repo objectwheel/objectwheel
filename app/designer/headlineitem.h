@@ -12,11 +12,11 @@ class HeadlineItem final : public GadgetItem
 public:
     explicit HeadlineItem(DesignerItem* parent = nullptr);
 
-    QSizeF dimensions() const;
-    void setDimensions(const QSizeF& dimensions);
-
     QString text() const;
     void setText(const QString& text);
+
+    QSizeF dimensions() const;
+    void setDimensions(const QSizeF& dimensions);
 
     DesignerItem* targetItem() const;
     void setTargetItem(DesignerItem* targetItem);

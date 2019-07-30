@@ -21,7 +21,7 @@ private:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
-    bool m_updateGeometryScheduled;
+    bool m_geometryUpdateScheduled;
 };
 
 #endif // PAINTLAYER_H

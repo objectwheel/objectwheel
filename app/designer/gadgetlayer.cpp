@@ -36,6 +36,8 @@ void GadgetLayer::clearResizers()
 
 void GadgetLayer::addResizers(DesignerItem* item)
 {
+    // FIXME: Don't add new one if one already exists (resizer)
+    // Also make sure all the connections are disconnected at the end
     QList<ResizerItem*> resizers;
     for (int i = 0; i < 8; ++i) {
         auto resizer = new ResizerItem(ResizerItem::Placement(i), this);

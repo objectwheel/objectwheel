@@ -5,26 +5,11 @@
 #include <QStyleOption>
 #include <QGraphicsSceneMouseEvent>
 
-enum { MARGIN = 10 };
+enum { MARGIN = 10 }; // Left + Right
 
 HeadlineItem::HeadlineItem(DesignerItem* parent) : GadgetItem(parent)
-  , m_targetItem(nullptr)
   , m_geometryUpdateScheduled(false)
 {
-}
-
-QSizeF HeadlineItem::dimensions() const
-{
-    return m_dimensions;
-}
-
-void HeadlineItem::setDimensions(const QSizeF& dimensions)
-{
-    if (m_dimensions != dimensions) {
-        m_dimensions = dimensions;
-        updateGeometry();
-        update();
-    }
 }
 
 QString HeadlineItem::text() const
@@ -37,6 +22,20 @@ void HeadlineItem::setText(const QString& text)
     if (m_text != text) {
         m_text = text;
         setToolTip(text);
+        updateGeometry();
+        update();
+    }
+}
+
+QSizeF HeadlineItem::dimensions() const
+{
+    return m_dimensions;
+}
+
+void HeadlineItem::setDimensions(const QSizeF& dimensions)
+{
+    if (m_dimensions != dimensions) {
+        m_dimensions = dimensions;
         updateGeometry();
         update();
     }
@@ -81,9 +80,9 @@ void HeadlineItem::updateGeometry()
 
 QFont HeadlineItem::dimensionsFont() const
 {
-    QFont f; // App default font
-    f.setPixelSize(f.pixelSize() - 3);
-    return f;
+    QFont font; // App default font
+    font.setPixelSize(font.pixelSize() - 3);
+    return font;
 }
 
 QString HeadlineItem::dimensionsText(qreal width, qreal height) const
@@ -103,14 +102,11 @@ void HeadlineItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
     GadgetItem::mousePressEvent(event);
 
     if (event->button() == Qt::LeftButton && targetItem() && (targetItem()->flags() & ItemIsSelectable)) {
-        bool multiSelect = (event->modifiers() & Qt::ControlModifier) != 0;
-        if (multiSelect) {
+        if (event->modifiers() & Qt::ControlModifier) { // Multiple-selection
             targetItem()->setSelected(!targetItem()->isSelected());
-        } else {
-            if (!targetItem()->isSelected()) {
-                scene()->clearSelection();
-                targetItem()->setSelected(true);
-            }
+        } else if (!targetItem()->isSelected()) {
+            scene()->clearSelection();
+            targetItem()->setSelected(true);
         }
     }
 }
@@ -120,10 +116,9 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     GadgetItem::mouseMoveEvent(event);
 
     if (dragAccepted() && targetItem()) {
-        if (!targetItem()->beingDragged()) {
+        if (!targetItem()->raised()) {
             scene()->setCursor(Qt::ClosedHandCursor);
             scene()->prepareDragLayer(targetItem());
-
             targetItem()->setBeingDragged(true);
             targetItem()->setRaised(true);
         }
@@ -133,7 +128,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void HeadlineItem::ungrabMouseEvent(QEvent* event)
 {
-    if (targetItem() && dragAccepted()) {
+    if (dragAccepted() && targetItem() && targetItem()->raised()) {
         scene()->unsetCursor();
         targetItem()->setRaised(false);
         targetItem()->setBeingDragged(false);

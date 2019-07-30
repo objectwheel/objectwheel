@@ -138,8 +138,8 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     if (dragAccepted() && targetItem() && targetItem()->resizable()) {
         if (!targetItem()->beingResized()) {
-            targetItem()->setBeingDragged(true); // Because pos() may also change
             targetItem()->setBeingResized(true);
+            targetItem()->setBeingDragged(true); // Because pos() may also change
         }
         updateTargetGeometry();
     }
@@ -147,7 +147,7 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void ResizerItem::ungrabMouseEvent(QEvent* event)
 {
-    if (targetItem() && dragAccepted()) {
+    if (dragAccepted() && targetItem() && targetItem()->beingResized()) {
         targetItem()->setBeingDragged(false);
         targetItem()->setBeingResized(false);
     }
