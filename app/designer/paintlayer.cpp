@@ -24,10 +24,10 @@ void PaintLayer::paintGuidelines(QPainter* painter)
 {
     const QVector<QLineF>& lines = scene()->guidelines();
     if (!lines.isEmpty()) {
+        painter->setBrush(scene()->outlineColor());
         painter->setPen(scene()->pen());
         painter->drawLines(lines);
         for (const QLineF& line : lines) {
-            painter->setBrush(scene()->outlineColor());
             painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
             painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
         }
@@ -36,28 +36,29 @@ void PaintLayer::paintGuidelines(QPainter* painter)
 
 void PaintLayer::paintSelectionOutlines(QPainter* painter)
 {
-    const qreal m = 0.5 / scene()->zoomLevel();
-    QPainterPath path;
-    QPainterPath path2;
-    path2.setFillRule(Qt::WindingFill);
+    const qreal z = scene()->zoomLevel();
+    const qreal m = 0.5 / z;
+    QPainterPath outlinesPath, resizersPath;
+    resizersPath.setFillRule(Qt::WindingFill);
     for (DesignerItem* selectedItem : scene()->selectedItems()) {
         const QRectF& rect = selectedItem->mapRectToScene(selectedItem->rect());
-        QPainterPath path3;
-        path3.addRect(rect.adjusted(-m, -m, m, m));
-        path3.addRect(rect.adjusted(m, m, -m, -m));
-        path |= path3;
+        QPainterPath outlinePath;
+        outlinePath.addRect(rect.adjusted(-m, -m, m, m));
+        outlinePath.addRect(rect.adjusted(m, m, -m, -m));
+        outlinesPath |= outlinePath;
         for (ResizerItem* resizer : scene()->gadgetLayer()->resizers(selectedItem)) {
-            if (resizer->isVisible())
-                path2.addRect(QRectF(resizer->pos() + resizer->rect().topLeft() / scene()->zoomLevel(),
-                                     resizer->size() / scene()->zoomLevel()));
+            if (resizer->isVisible()) {
+                resizersPath.addRect(QRectF(resizer->scenePos() + resizer->rect().topLeft() / z,
+                                            resizer->size() / z));
+            }
         }
     }
     painter->setPen(Qt::NoPen);
     painter->setBrush(scene()->outlineColor());
-    painter->drawPath(path.subtracted(path2));
+    painter->drawPath(outlinesPath.subtracted(resizersPath));
 }
 
-void PaintLayer::paintSelectionSurroundingOutline(QPainter* painter)
+void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
 {
     // Only one item can be resized at a time, so this piece of code
     // wouldn't be triggered for resize operations, also a form could
@@ -72,6 +73,6 @@ void PaintLayer::paintSelectionSurroundingOutline(QPainter* painter)
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     paintSelectionOutlines(painter);
-    paintSelectionSurroundingOutline(painter);
+    paintMovingSelectionOutline(painter);
     paintGuidelines(painter);
 }

@@ -17,7 +17,7 @@ public slots:
 private:
     void paintGuidelines(QPainter* painter);
     void paintSelectionOutlines(QPainter* painter);
-    void paintSelectionSurroundingOutline(QPainter* painter);
+    void paintMovingSelectionOutline(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:
