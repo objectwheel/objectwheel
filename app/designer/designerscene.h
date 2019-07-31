@@ -18,9 +18,16 @@ class DesignerScene final : public QGraphicsScene
     friend class ProjectExposingManager; // For addForm(), addControl()
 
 public:
-    explicit DesignerScene(QObject* parent = nullptr);
+    enum OutlineMode {
+        NoOutline,
+        ClippingDashLine,
+        BoundingDashLine,
+        ClippingSolidLine,
+        BoundingSolidLine
+    };
 
-    qreal zoomLevel() const;
+public:
+    explicit DesignerScene(QObject* parent = nullptr);
 
     Form* currentForm() const;
     void setCurrentForm(Form* currentForm);
@@ -41,16 +48,22 @@ public:
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
     QRectF visibleItemsBoundingRect() const;
-    QRectF outerRect(const QRectF& rect);
 
     static int startDragDistance();
+    static int gridSize();
+    static qreal zoomLevel();
+    static qreal lowerZ(DesignerItem* parentItem);
+    static qreal higherZ(DesignerItem* parentItem);
     static QColor outlineColor();
     static QPointF snapPosition(qreal x, qreal y);
     static QPointF snapPosition(const QPointF& pos);
     static QSizeF snapSize(qreal x, qreal y, qreal w, qreal h);
     static QSizeF snapSize(const QPointF& pos,const QSizeF& size);
     static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
+    static QRectF outerRect(const QRectF& rect);
     static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
+    static QBrush backgroundTexture();
+    static OutlineMode outlineMode();
 
     void paintOutline(QPainter* painter, const QRectF& rect);
     void paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem);

@@ -4,7 +4,7 @@
 
 static const char g_showGuideLines[] = "ShowGuideLines";
 static const char g_dragStartDistance[] = "DragStartDistance";
-static const char g_sceneBackgroundColor[] = "SceneBackgroundColor";
+static const char g_sceneBackgroundTexture[] = "SceneBackgroundTexture";
 static const char g_sceneZoomLevel[] = "SceneZoomLevel";
 static const char g_showGridViewDots[] = "ShowGridViewDots";
 static const char g_snappingEnabled[] = "SnappingEnabled";
@@ -25,7 +25,7 @@ void SceneSettings::read()
     begin();
     showGuideLines = value<bool>(g_showGuideLines, showGuideLines);
     dragStartDistance = value<int>(g_dragStartDistance, dragStartDistance);
-    sceneBackgroundColor = value<int>(g_sceneBackgroundColor, sceneBackgroundColor);
+    sceneBackgroundTexture = value<int>(g_sceneBackgroundTexture, sceneBackgroundTexture);
     sceneZoomLevel = value<qreal>(g_sceneZoomLevel, sceneZoomLevel);
     /****/
     showGridViewDots = value<bool>(g_showGridViewDots, showGridViewDots);
@@ -43,7 +43,7 @@ void SceneSettings::write()
     begin();
     setValue(g_showGuideLines, showGuideLines);
     setValue(g_dragStartDistance, dragStartDistance);
-    setValue(g_sceneBackgroundColor, sceneBackgroundColor);
+    setValue(g_sceneBackgroundTexture, sceneBackgroundTexture);
     setValue(g_sceneZoomLevel, sceneZoomLevel);
     /****/
     setValue(g_showGridViewDots, showGridViewDots);
@@ -62,7 +62,7 @@ void SceneSettings::reset()
 {
     showGuideLines = true;
     dragStartDistance = 8;
-    sceneBackgroundColor = 4;
+    sceneBackgroundTexture = 4;
     sceneZoomLevel = 1.0;
     /****/
     showGridViewDots = true;
@@ -82,15 +82,15 @@ const char* SceneSettings::category() const
 QBrush SceneSettings::toBackgroundBrush() const
 {
     QBrush brush(Qt::SolidPattern);
-    if (sceneBackgroundColor == 0)
+    if (sceneBackgroundTexture == 0)
         brush.setTexture(QPixmap(":/images/texture.svg"));
-    else if (sceneBackgroundColor == 1)
+    else if (sceneBackgroundTexture == 1)
         brush.setColor(Qt::black);
-    else if (sceneBackgroundColor == 2)
+    else if (sceneBackgroundTexture == 2)
         brush.setColor(Qt::darkGray);
-    else if (sceneBackgroundColor == 3)
+    else if (sceneBackgroundTexture == 3)
         brush.setColor(Qt::lightGray);
-    else if (sceneBackgroundColor == 4)
+    else if (sceneBackgroundTexture == 4)
         brush.setColor(Qt::white);
     return brush;
 }

@@ -17,8 +17,8 @@ public:
 
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
-    void paintFormFrame(QPainter* painter);
-    void paintGridViewDots(QPainter* painter, int gridSize);
+    void paintBackground(QPainter* painter);
+    void paintForeground(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
 private:

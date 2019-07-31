@@ -16,7 +16,7 @@ struct SceneSettings final : public Settings
 
     bool showGuideLines;
     int dragStartDistance;
-    int sceneBackgroundColor;
+    int sceneBackgroundTexture;
     qreal sceneZoomLevel;
     /****/
     bool showGridViewDots;

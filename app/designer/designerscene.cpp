@@ -117,15 +117,39 @@ Form* DesignerScene::currentForm() const
     return m_currentForm.data();
 }
 
-qreal DesignerScene::zoomLevel() const
+qreal DesignerScene::zoomLevel()
 {
-    return views().first()->transform().m11();
+    return DesignerSettings::sceneSettings()->sceneZoomLevel;
 }
 
 int DesignerScene::startDragDistance()
 {
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
-    return settings->dragStartDistance;
+    return DesignerSettings::sceneSettings()->dragStartDistance;
+}
+
+int DesignerScene::gridSize()
+{
+    return DesignerSettings::sceneSettings()->gridSize;
+}
+
+qreal DesignerScene::lowerZ(DesignerItem* parentItem)
+{
+    qreal z = 0;
+    for (DesignerItem* childItem : parentItem->childItems(false)) {
+        if (childItem->zValue() < z)
+            z = childItem->zValue();
+    }
+    return z;
+}
+
+qreal DesignerScene::higherZ(DesignerItem* parentItem)
+{
+    qreal z = 0;
+    for (DesignerItem* childItem : parentItem->childItems(false)) {
+        if (childItem->zValue() > z)
+            z = childItem->zValue();
+    }
+    return z;
 }
 
 QList<DesignerItem*> DesignerScene::selectedItems() const
@@ -201,6 +225,7 @@ QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
     return size;
 }
 
+// Use on rectangular drawings where the item is transformable but the pen is cosmetic
 QRectF DesignerScene::outerRect(const QRectF& rect)
 {
     return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
@@ -444,6 +469,16 @@ QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
     QPen pen(color, width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     pen.setCosmetic(cosmetic);
     return pen;
+}
+
+QBrush DesignerScene::backgroundTexture()
+{
+    return DesignerSettings::sceneSettings()->toBackgroundBrush();
+}
+
+DesignerScene::OutlineMode DesignerScene::outlineMode()
+{
+    return OutlineMode(DesignerSettings::sceneSettings()->controlOutline);
 }
 
 QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)

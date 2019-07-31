@@ -1,6 +1,5 @@
 #include <form.h>
 #include <designerscene.h>
-#include <designersettings.h>
 #include <scenesettings.h>
 
 #include <QGraphicsSceneMouseEvent>
@@ -38,50 +37,29 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
     event->ignore();
 }
 
-void Form::paintFormFrame(QPainter* painter)
+void Form::paintBackground(QPainter* painter)
 {
-    if (scene()) {
-        painter->setPen(DesignerScene::pen(Qt::darkGray));
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRect(scene()->outerRect(rect()));
-    }
+    painter->fillRect(rect(), DesignerScene::backgroundTexture());
 }
 
-void Form::paintGridViewDots(QPainter* painter, int gridSize)
+void Form::paintForeground(QPainter* painter)
 {
-    painter->save();
     QVector<QPointF> points;
-    for (qreal x = 0; x <= rect().right(); x += gridSize) {
-        for (qreal y = 0; y <= rect().bottom(); y += gridSize)
+    for (qreal x = 0; x <= rect().right(); x += DesignerScene::gridSize()) {
+        for (qreal y = 0; y <= rect().bottom(); y += DesignerScene::gridSize())
             points.append(QPointF(x, y));
     }
-    painter->setClipRect(rect());
-    painter->setPen(DesignerScene::pen("#505050", 1, false));
+    painter->setPen(DesignerScene::pen(Qt::darkGray, 1, false));
     painter->drawPoints(points.data(), points.size());
-    painter->restore();
+
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::pen(Qt::darkGray));
+    painter->drawRect(DesignerScene::outerRect(rect()));
 }
 
-void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
+void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
-
-    // Background
-    painter->fillRect(rect(), settings->toBackgroundBrush());
-
-    if (!image().isNull())
-        paintImage(painter);
-
-    if (settings->showGridViewDots)
-        paintGridViewDots(painter, settings->gridSize);
-
-    if (settings->controlOutline != 0 && scene())
-        scene()->paintOutline(painter, scene()->outerRect(settings->controlOutline == 1 ? rect() : frame()));
-
-    paintFormFrame(painter);
-
-    if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
-        paintHoverOutline(painter);
-
-    if (dragIn())
-        paintHighlight(painter);
+    paintBackground(painter);
+    Control::paint(painter, option, widget);
+    paintForeground(painter);
 }

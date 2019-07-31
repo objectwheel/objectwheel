@@ -39,7 +39,7 @@ void PaintLayer::paintGuidelines(QPainter* painter)
 void PaintLayer::paintSelectionOutlines(QPainter* painter)
 {
     Q_ASSERT(scene());
-    const qreal z = scene()->zoomLevel();
+    const qreal z = DesignerScene::zoomLevel();
     const qreal m = 0.5 / z;
     QPainterPath outlinesPath, resizersPath;
     resizersPath.setFillRule(Qt::WindingFill);
@@ -71,7 +71,7 @@ void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
     // In short, this piece of code is only triggered for dragged childs.
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
-        scene()->paintOutline(painter, scene()->outerRect(DesignerScene::itemsBoundingRect(items)));
+        scene()->paintOutline(painter, DesignerScene::outerRect(DesignerScene::itemsBoundingRect(items)));
 }
 
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

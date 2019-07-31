@@ -16,6 +16,9 @@ class Control : public DesignerItem
     friend class DesignerScene; // For destructor (delete operator)
 
 public:
+    enum { Type = UserType + 2 };
+    int type() const override;
+
     bool gui() const;
     bool form() const;
     bool popup() const;
@@ -25,30 +28,21 @@ public:
     bool visible() const;
 
     quint32 index() const;
-    int higherZValue() const;
-    int lowerZValue() const;
-
-    enum { Type = UserType + 2 };
-    int type() const override;
-
     QString id() const;
     QString uid() const;
     QString dir() const;
-    QMarginsF margins() const;
     QImage image() const;
     QRectF frame() const;
+    QMarginsF margins() const;
 
     Control* parentControl() const;
 
-    QVector<QmlError> errors() const;
     QVector<QString> events() const;
+    QVector<QmlError> errors() const;
     QVector<PropertyNode> properties() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
     QVariant property(const QString& propertyName) const;
-    QVariant::Type propertyType(const QString& propertyName) const;
-
-    static QVector<Control*> controls();
 
 public:
     void setId(const QString& id);
@@ -68,14 +62,13 @@ protected:
     QVariant itemChange(int change, const QVariant& value) override;
 
 protected:
-    virtual void paintImage(QPainter* painter);
-    virtual void paintHighlight(QPainter* painter);
-    virtual void paintHoverOutline(QPainter* painter);
+    void paintImage(QPainter* painter);
+    void paintHighlight(QPainter* painter);
+    void paintHoverOutline(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
 protected:
     explicit Control(const QString& dir, Control* parent = nullptr);
-    ~Control() override;
 
 private slots:
     void applyGeometryCorrection();
@@ -99,12 +92,9 @@ private:
     QString m_geometryHash;
     QRectF m_geometryCorrection;
 
-    QVector<QmlError> m_errors;
     QVector<QString> m_events;
+    QVector<QmlError> m_errors;
     QVector<PropertyNode> m_properties;
-
-private:
-    static QVector<Control*> m_controls;
 };
 
 #endif // CONTROL_H

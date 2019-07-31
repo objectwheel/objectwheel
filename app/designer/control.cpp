@@ -9,7 +9,6 @@
 #include <parserutils.h>
 #include <utilityfunctions.h>
 #include <toolutils.h>
-#include <designersettings.h>
 #include <scenesettings.h>
 #include <hashfactory.h>
 
@@ -18,8 +17,6 @@
 #include <QMimeData>
 #include <QGraphicsSceneDragDropEvent>
 #include <QStyleOption>
-
-QVector<Control*> Control::m_controls;
 
 Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_gui(false)
@@ -31,8 +28,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_uid(SaveUtils::controlUid(m_dir))
   , m_snapMargin(QSizeF(0, 0))
 {
-    m_controls.append(this);
-
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
     setCursor(Qt::OpenHandCursor);
@@ -60,11 +55,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::updateRenderInfo);
     connect(this, &Control::doubleClicked,
             this, [=] { ControlPropertyManager::instance()->doubleClicked(this); });
-}
-
-Control::~Control()
-{
-    m_controls.removeOne(this);
 }
 
 bool Control::gui() const
@@ -110,24 +100,6 @@ quint32 Control::index() const
 int Control::type() const
 {
     return Type;
-}
-
-int Control::higherZValue() const
-{
-    int z = 0;
-    for (const auto& control : childControls())
-        if (control->zValue() > z)
-            z = control->zValue();
-    return z;
-}
-
-int Control::lowerZValue() const
-{
-    int z = 0;
-    for (const auto& control : childControls())
-        if (control->zValue() < z)
-            z = control->zValue();
-    return z;
 }
 
 QString Control::id() const
@@ -222,11 +194,6 @@ QVariant Control::property(const QString& propertyName) const
     return UtilityFunctions::getProperty(propertyName, m_properties);
 }
 
-QVector<Control*> Control::controls()
-{
-    return m_controls;
-}
-
 void Control::setId(const QString& id)
 {
     if (m_id != id) {
@@ -251,18 +218,6 @@ void Control::setDragIn(bool dragIn)
 void Control::setIndex(quint32 index)
 {
     m_index = index;
-}
-
-QVariant::Type Control::propertyType(const QString& propertyName) const
-{
-    for (const PropertyNode& propertyNode : m_properties) {
-        for (const QString& property : propertyNode.properties.keys()) {
-            const QVariant& propertyValue = propertyNode.properties.value(property);
-            if (property == propertyName)
-                return propertyValue.type();
-        }
-    }
-    return QVariant::Invalid;
 }
 
 void Control::dropControl(Control* control)
@@ -444,22 +399,26 @@ void Control::paintHighlight(QPainter* painter)
 
 void Control::paintHoverOutline(QPainter* painter)
 {
-    if (scene()) {
-        painter->setBrush(Qt::NoBrush);
-        painter->setPen(DesignerScene::pen());
-        painter->drawRect(scene()->outerRect(rect()));
-    }
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::pen());
+    painter->drawRect(DesignerScene::outerRect(rect()));
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
+
+    //    painter->fillRect(rect(), settings->toBackgroundBrush());
 
     if (!image().isNull())
         paintImage(painter);
 
-    if (settings->controlOutline != 0 && scene())
-        scene()->paintOutline(painter, scene()->outerRect(settings->controlOutline == 1 ? rect() : frame()));
+    //    if (settings->showGridViewDots)
+    //        paintGridViewDots(painter, settings->gridSize);
+
+    if (settings->controlOutline != 0)
+        scene()->paintOutline(painter, DesignerScene::outerRect(settings->controlOutline == 1 ? rect() : frame()));
+
+    //    paintFormFrame(painter);
 
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
         paintHoverOutline(painter);
