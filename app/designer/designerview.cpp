@@ -477,6 +477,7 @@ void DesignerView::onControlSelectionChange(const QList<Control*>& selectedContr
 
 DesignerScene* DesignerView::scene() const
 {
+    Q_ASSERT(QGraphicsView::scene());
     return static_cast<DesignerScene*>(QGraphicsView::scene());
 }
 

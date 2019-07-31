@@ -500,14 +500,15 @@ void InspectorPane::onControlCreation(Control* control)
     if (!isProjectStarted)
         return;
 
-    const Control* parentControl = control->parentControl();
-    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
-            if (parentControl->id() == childItem->text(0)) {
-                addChildrenIntoItem(childItem, QList<Control*>() << control);
-                expandAllChildren(this, childItem);
-                sortItems(0, Qt::AscendingOrder);
-                return;
+    if (const Control* parentControl = control->parentControl()) {
+        for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+            for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+                if (parentControl->id() == childItem->text(0)) {
+                    addChildrenIntoItem(childItem, QList<Control*>() << control);
+                    expandAllChildren(this, childItem);
+                    sortItems(0, Qt::AscendingOrder);
+                    return;
+                }
             }
         }
     }
@@ -538,6 +539,9 @@ void InspectorPane::onControlRemove(Control* control)
 void InspectorPane::onControlParentChange(Control* control)
 {
     if (!isProjectStarted)
+        return;
+
+    if (!control->parentControl())
         return;
 
     // Check if already exists, if not --reparented from another form-- add it to the list

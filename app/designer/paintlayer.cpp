@@ -15,6 +15,7 @@ void PaintLayer::updateGeometry()
         return;
     m_geometryUpdateScheduled = true;
     QMetaObject::invokeMethod(this, [=] {
+        Q_ASSERT(scene());
         setGeometry(QPointF(), scene()->sceneRect().size());
         m_geometryUpdateScheduled = false;
     }, Qt::QueuedConnection);
@@ -22,6 +23,7 @@ void PaintLayer::updateGeometry()
 
 void PaintLayer::paintGuidelines(QPainter* painter)
 {
+    Q_ASSERT(scene());
     const QVector<QLineF>& lines = scene()->guidelines();
     if (!lines.isEmpty()) {
         painter->setBrush(DesignerScene::outlineColor());
@@ -36,6 +38,7 @@ void PaintLayer::paintGuidelines(QPainter* painter)
 
 void PaintLayer::paintSelectionOutlines(QPainter* painter)
 {
+    Q_ASSERT(scene());
     const qreal z = scene()->zoomLevel();
     const qreal m = 0.5 / z;
     QPainterPath outlinesPath, resizersPath;
@@ -60,6 +63,7 @@ void PaintLayer::paintSelectionOutlines(QPainter* painter)
 
 void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
 {
+    Q_ASSERT(scene());
     // Only one item can be resized at a time, so this piece of code
     // wouldn't be triggered for resize operations, also a form could
     // only be included when the form is resized, forms don't move. So

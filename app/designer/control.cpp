@@ -278,7 +278,7 @@ void Control::dropControl(Control* control)
     // because parent change effects the newPos result
     control->m_geometryCorrection = QRectF();
     control->m_geometryHash = HashFactory::generate();
-    const QPointF& newPos = DesignerScene::snapPosition(mapFromItem(control->parentItem(), control->pos()));
+    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(this, QPointF()));
     ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
     ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
@@ -300,7 +300,8 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
         UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
         UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-render-result")), result);
 
-        scene()->clearSelection();
+        if (scene())
+            scene()->clearSelection();
         // NOTE: Use actual Control position for scene, since createControl deals with margins
         auto newControl = ControlCreationManager::createControl(
                     this, dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
@@ -341,6 +342,9 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (!dragAccepted())
         return;
 
+    if (!scene())
+        return;
+
     Control* control = nullptr;
     const QList<Control*>& controlsUnderCursor = scene()->controlsAt(event->scenePos());
 
@@ -361,6 +365,9 @@ void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Control::ungrabMouseEvent(QEvent* event)
 {
+    if (!scene())
+        return DesignerItem::ungrabMouseEvent(event);
+
     // FIXME: items may also contain a form
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     DesignerItem::ungrabMouseEvent(event); // Clears beingDragged state
@@ -437,9 +444,11 @@ void Control::paintHighlight(QPainter* painter)
 
 void Control::paintHoverOutline(QPainter* painter)
 {
-    painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen());
-    painter->drawRect(scene()->outerRect(rect()));
+    if (scene()) {
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(DesignerScene::pen());
+        painter->drawRect(scene()->outerRect(rect()));
+    }
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
@@ -449,7 +458,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     if (!image().isNull())
         paintImage(painter);
 
-    if (settings->controlOutline != 0)
+    if (settings->controlOutline != 0 && scene())
         scene()->paintOutline(painter, scene()->outerRect(settings->controlOutline == 1 ? rect() : frame()));
 
     if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)

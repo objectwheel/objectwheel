@@ -663,8 +663,7 @@ void RenderEngine::flushRenders()
                     if (DesignerSupport::isDirty(item, dirty))
                         m_dirtyInstanceSet.insert(instanceForObject(item));
                 } else if (DesignerSupport::isDirty(item, dirty)) {
-                    ControlInstance* ancestorInstance = findNodeInstanceForItem(item->parentItem());
-                    if (ancestorInstance)
+                    if (ControlInstance* ancestorInstance = findNodeInstanceForItem(item->parentItem()))
                         m_dirtyInstanceSet.insert(ancestorInstance);
                 }
                 DesignerSupport::updateDirtyNode(item);

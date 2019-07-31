@@ -24,7 +24,7 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
         bool select = true;
         if (event->modifiers() & Qt::ControlModifier) { // Multiple-selection
             select = !isSelected();
-        } else if (!isSelected()) {
+        } else if (!isSelected() && scene()) {
             scene()->clearSelection();
         }
         QMetaObject::invokeMethod(this, std::bind(&Form::setSelected, this, select),
@@ -40,9 +40,11 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Form::paintFormFrame(QPainter* painter)
 {
-    painter->setPen(DesignerScene::pen(Qt::darkGray));
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(scene()->outerRect(rect()));
+    if (scene()) {
+        painter->setPen(DesignerScene::pen(Qt::darkGray));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRect(scene()->outerRect(rect()));
+    }
 }
 
 void Form::paintGridViewDots(QPainter* painter, int gridSize)
@@ -72,7 +74,7 @@ void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWid
     if (settings->showGridViewDots)
         paintGridViewDots(painter, settings->gridSize);
 
-    if (settings->controlOutline != 0)
+    if (settings->controlOutline != 0 && scene())
         scene()->paintOutline(painter, scene()->outerRect(settings->controlOutline == 1 ? rect() : frame()));
 
     paintFormFrame(painter);

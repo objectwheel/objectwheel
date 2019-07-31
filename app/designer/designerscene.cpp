@@ -301,6 +301,7 @@ QVector<QLineF> DesignerScene::guidelines() const
     const QRectF& geometry = itemsBoundingRect(items);
     const QPointF& center = geometry.center();
     const DesignerItem* parent = items.first()->parentItem();
+    Q_ASSERT(parent);
 
     /* Child center <-> Parent center */
     if (int(center.y()) == int(parent->height() / 2.0))

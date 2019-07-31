@@ -61,6 +61,7 @@ QList<ResizerItem*> GadgetLayer::resizers(DesignerItem* item) const
 
 void GadgetLayer::handleSceneSelectionChange()
 {
+    Q_ASSERT(scene());
     DesignerItem* currentForm = scene()->currentForm();
     if (currentForm)
         m_formHeadlineItem->setBrush(currentForm->isSelected() ? DesignerScene::outlineColor() : Qt::darkGray);

@@ -112,7 +112,8 @@ void HeadlineItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
         if (event->modifiers() & Qt::ControlModifier) { // Multiple-selection
             targetItem()->setSelected(!targetItem()->isSelected());
         } else if (!targetItem()->isSelected()) {
-            scene()->clearSelection();
+            if (scene())
+                scene()->clearSelection();
             targetItem()->setSelected(true);
         }
     }
@@ -124,8 +125,10 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     if (dragAccepted() && targetItem()) {
         if (!targetItem()->raised()) {
-            scene()->setCursor(Qt::ClosedHandCursor);
-            scene()->prepareDragLayer(targetItem());
+            if (scene()) {
+                scene()->setCursor(Qt::ClosedHandCursor);
+                scene()->prepareDragLayer(targetItem());
+            }
             targetItem()->setBeingDragged(true);
             targetItem()->setRaised(true);
         }
@@ -136,7 +139,8 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 void HeadlineItem::ungrabMouseEvent(QEvent* event)
 {
     if (dragAccepted() && targetItem() && targetItem()->raised()) {
-        scene()->unsetCursor();
+        if (scene())
+            scene()->unsetCursor();
         targetItem()->setRaised(false);
         targetItem()->setBeingDragged(false);
     }

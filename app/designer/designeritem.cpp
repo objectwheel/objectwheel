@@ -200,7 +200,8 @@ void DesignerItem::setRaised(bool raised)
         m_raised = raised;
         if (m_raised) {
             m_parentItemBeforeRaise = parentItem();
-            setParentItem(scene()->dragLayer());
+            if (scene())
+                setParentItem(scene()->dragLayer());
         } else {
             setParentItem(m_parentItemBeforeRaise);
         }
@@ -264,7 +265,7 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     m_dragAccepted = true;
 
-    if ((flags() & ItemIsMovable) && m_movableSelectedAncestorItems.isEmpty()) {
+    if (scene() && (flags() & ItemIsMovable) && m_movableSelectedAncestorItems.isEmpty()) {
         DesignerItem* ancestor = this;
         DesignerItem* myMovableSelectedAncestorItem = ancestor;
         while (DesignerItem* parent = ancestor->parentItem()) {
@@ -317,7 +318,8 @@ void DesignerItem::ungrabMouseEvent(QEvent* event)
 {
     Q_UNUSED(event)
     if ((flags() & ItemIsMovable) && m_dragAccepted) {
-        scene()->unsetCursor();
+        if (scene())
+            scene()->unsetCursor();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
             movableSelectedAncestorItem->setBeingDragged(false);
             movableSelectedAncestorItem->setRaised(false);
