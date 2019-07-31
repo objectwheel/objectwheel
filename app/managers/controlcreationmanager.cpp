@@ -2,6 +2,7 @@
 #include <form.h>
 #include <designerscene.h>
 #include <saveutils.h>
+#include <parserutils.h>
 #include <savemanager.h>
 #include <controlrenderingmanager.h>
 #include <controlpropertymanager.h>
@@ -38,6 +39,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     }
 
     auto form = new Form(newFormRootPath);
+    ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
 
     s_designerScene->addForm(form);
     s_designerScene->setCurrentForm(form);
@@ -48,6 +50,12 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     // parent concept for forms in Designer; forms are directly put into DesignerScene
 
     ControlPropertyManager::setIndex(form, form->siblings().size(), ControlPropertyManager::SaveChanges);
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
+            form, &Control::updateRenderInfo);
+    connect(form, &Control::doubleClicked,
+            form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
+    connect(form, &Control::renderInfoChanged,
+            form, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(form, c); });
     ControlRenderingManager::scheduleFormCreation(form->dir());
 
     // NOTE: We don't have to worry about possible child controls since createForm is only
@@ -81,6 +89,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     }
 
     auto control = new Control(newControlRootPath);
+    ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     // Since all the controls are "non-gui" at first, this
     // will only set DesignPosition property in design.meta
@@ -101,6 +110,12 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPropertyManager::setSize(control, initialSize, ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
+            control, &Control::updateRenderInfo);
+    connect(control, &Control::doubleClicked,
+            control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
+    connect(control, &Control::renderInfoChanged,
+            control, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(control, c); });
     ControlRenderingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
 
     QPointer<Control> ptr(control);
@@ -127,6 +142,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         Q_ASSERT(parentControl);
 
         auto childControl = new Control(childPath);
+        ControlPropertyManager::setId(childControl, ParserUtils::id(childControl->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         // For non-gui items; others aren't affected, since
         // render info update is going to happen and set position,
@@ -134,8 +150,16 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         // way we expose non-gui items into right positions
         ControlPropertyManager::setPos(childControl, SaveUtils::designPosition(childPath), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
+        connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
+                childControl, &Control::updateRenderInfo);
+        connect(childControl, &Control::doubleClicked,
+                childControl, [=] { ControlPropertyManager::instance()->doubleClicked(childControl); });
+        connect(childControl, &Control::renderInfoChanged,
+                childControl, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(childControl, c); });
         ControlRenderingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
+
         controlTree.insert(childPath, childControl);
+
         emit instance()->controlCreated(childControl);
     }
 

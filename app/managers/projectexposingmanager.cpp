@@ -1,7 +1,9 @@
 #include <projectexposingmanager.h>
 #include <controlpropertymanager.h>
 #include <controlremovingmanager.h>
+#include <controlrenderingmanager.h>
 #include <saveutils.h>
+#include <parserutils.h>
 #include <projectmanager.h>
 #include <control.h>
 #include <form.h>
@@ -37,6 +39,8 @@ void ProjectExposingManager::exposeProject()
 
     for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
         auto form = new Form(formPath);
+        ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setIndex(form, SaveUtils::controlIndex(form->dir()), ControlPropertyManager::NoOption);
 
         // Since SaveUtils::formPaths sorts out the form paths based
         // on indexes, thus the first form is the one with lower index
@@ -51,6 +55,13 @@ void ProjectExposingManager::exposeProject()
 
         s_designerScene->addForm(form);
 
+        connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
+                form, &Control::updateRenderInfo);
+        connect(form, &Control::doubleClicked,
+                form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
+        connect(form, &Control::renderInfoChanged,
+                form, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(form, c); });
+
         QMap<QString, Control*> controlTree;
         controlTree.insert(formPath, form);
         emit instance()->controlExposed(form);
@@ -60,6 +71,9 @@ void ProjectExposingManager::exposeProject()
             Q_ASSERT(parentControl);
 
             auto control = new Control(childPath);
+            ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
+            ControlPropertyManager::setIndex(control, SaveUtils::controlIndex(control->dir()), ControlPropertyManager::NoOption);
+
             // For non-gui items; others aren't affected, since
             // render info update is going to happen and set position,
             // but that doesn't happen for non-gui controls, in this
@@ -80,6 +94,13 @@ void ProjectExposingManager::exposeProject()
 
             ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
 
+            connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
+                    control, &Control::updateRenderInfo);
+            connect(control, &Control::doubleClicked,
+                    control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
+            connect(control, &Control::renderInfoChanged,
+                    control, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(control, c); });
+
             controlTree.insert(childPath, control);
 
             emit instance()->controlExposed(control);
@@ -97,11 +118,11 @@ void ProjectExposingManager::exposeProject()
     auto conn = new QMetaObject::Connection;
     *conn = connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
                     ControlPropertyManager::instance(), [conn] (Control* ctrl, bool) {
-        if (ctrl == s_designerScene->currentForm()) {
+            if (ctrl == s_designerScene->currentForm()) {
             QObject::disconnect(*conn);
             delete conn;
             s_designerScene->shrinkSceneRect();
-        }
+}
 }, Qt::QueuedConnection);
 }
 

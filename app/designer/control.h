@@ -74,6 +74,9 @@ private slots:
     void applyGeometryCorrection();
     void updateRenderInfo(const RenderResult& result);
 
+signals:
+    void renderInfoChanged(bool codeChanged);
+
 private:
     bool m_gui;
     bool m_popup;

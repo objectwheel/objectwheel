@@ -34,10 +34,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
-    setFlag(QGraphicsItem::ItemNegativeZStacksBehindParent, true);
-
-    ControlPropertyManager::setId(this, ParserUtils::id(m_dir), ControlPropertyManager::NoOption);
-    ControlPropertyManager::setIndex(this, SaveUtils::controlIndex(m_dir), ControlPropertyManager::NoOption);
+    setFlag(ItemNegativeZStacksBehindParent);
 
     // Made it Qt::QueuedConnection in order to prevent
     // ungrabMouseEvent to call beingDraggedChanged or
@@ -50,11 +47,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
             this, &Control::applyGeometryCorrection, Qt::QueuedConnection);
     connect(this, &Control::beingResizedChanged,
             this, &Control::applyGeometryCorrection, Qt::QueuedConnection);
-
-    connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
-            this, &Control::updateRenderInfo);
-    connect(this, &Control::doubleClicked,
-            this, [=] { ControlPropertyManager::instance()->doubleClicked(this); });
 }
 
 bool Control::gui() const
@@ -493,7 +485,7 @@ void Control::updateRenderInfo(const RenderResult& result)
 
     update();
 
-    ControlPropertyManager::instance()->renderInfoChanged(this, result.codeChanged);
+    emit renderInfoChanged(result.codeChanged);
 }
 
 void Control::applyGeometryCorrection()
