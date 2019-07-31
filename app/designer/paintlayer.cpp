@@ -71,7 +71,7 @@ void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
     // In short, this piece of code is only triggered for dragged childs.
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
-        scene()->paintOutline(painter, DesignerScene::outerRect(DesignerScene::itemsBoundingRect(items)));
+        DesignerScene::drawDashRect(painter, DesignerScene::outerRect(DesignerScene::itemsBoundingRect(items)));
 }
 
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

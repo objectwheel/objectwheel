@@ -24,8 +24,8 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_window(false)
   , m_dragIn(false)
   , m_visible(true)
-  , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
+  , m_dir(dir)
   , m_snapMargin(QSizeF(0, 0))
 {
     setAcceptDrops(true);
@@ -384,47 +384,56 @@ QVariant Control::itemChange(int change, const QVariant& value)
 
 void Control::paintImage(QPainter* painter)
 {
+    if (m_image.isNull())
+        return;
     if (beingResized())
         painter->setClipRect(rect());
-    painter->drawImage(m_frame.toRect(), m_image);
+    painter->drawImage(m_outerRect, m_image);
     painter->setClipping(false);
 }
 
 void Control::paintHighlight(QPainter* painter)
 {
-    painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    painter->fillRect(rect(), QColor(0, 0, 0, 15));
-    painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+    if (m_dragIn) {
+        painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
+        painter->fillRect(rect(), QColor(0, 0, 0, 20));
+        painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+    }
 }
 
-void Control::paintHoverOutline(QPainter* painter)
+void Control::paintOutline(QPainter* painter)
 {
+    if (DesignerScene::outlineMode() == DesignerScene::NoOutline)
+        return;
+    if (DesignerScene::outlineMode() == DesignerScene::ClippingDashLine)
+        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(rect()));
+    if (DesignerScene::outlineMode() == DesignerScene::BoundingDashLine)
+        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(outerRect()));
+
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen());
-    painter->drawRect(DesignerScene::outerRect(rect()));
+    painter->setPen(DesignerScene::pen(Qt::darkGray));
+
+    if (DesignerScene::outlineMode() == DesignerScene::ClippingSolidLine)
+        return painter->drawRect(DesignerScene::outerRect(rect()));
+    if (DesignerScene::outlineMode() == DesignerScene::BoundingSolidLine)
+        return painter->drawRect(DesignerScene::outerRect(outerRect()));
+}
+
+void Control::paintHoverOutline(QPainter* painter, bool hovered)
+{
+    if (DesignerScene::showMouseoverOutline() && hovered) {
+        painter->setBrush(Qt::NoBrush);
+        painter->setPen(DesignerScene::pen());
+        painter->drawRect(DesignerScene::outerRect(rect()));
+    }
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
-
-    //    painter->fillRect(rect(), settings->toBackgroundBrush());
-
-    if (!image().isNull())
-        paintImage(painter);
-
-    //    if (settings->showGridViewDots)
-    //        paintGridViewDots(painter, settings->gridSize);
-
-    if (settings->controlOutline != 0)
-        scene()->paintOutline(painter, DesignerScene::outerRect(settings->controlOutline == 1 ? rect() : frame()));
-
-    //    paintFormFrame(painter);
-
-    if (settings->showMouseoverOutline && option->state & QStyle::State_MouseOver)
-        paintHoverOutline(painter);
-
-    if (dragIn())
-        paintHighlight(painter);
+    paintImage(painter);
+    paintOutline(painter);
+    paintHoverOutline(painter, option->state & QStyle::State_MouseOver);
+    paintHighlight(painter);
 }
 
 void Control::updateRenderInfo(const RenderResult& result)
@@ -464,12 +473,12 @@ void Control::updateRenderInfo(const RenderResult& result)
             applyGeometryCorrection();
     }
 
-    m_frame = result.boundingRect.isNull() ? rect() : result.boundingRect;
+    m_outerRect = result.boundingRect.isNull() ? rect() : result.boundingRect;
 
     if (!gui() && size() != QSizeF(40, 40)) {
         if (!hasErrors() || size().isEmpty()) {
             ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
-            m_frame = QRectF(0, 0, 40, 40);
+            m_outerRect = QRectF(0, 0, 40, 40);
         }
     }
 
@@ -477,7 +486,7 @@ void Control::updateRenderInfo(const RenderResult& result)
     if (m_image.isNull() && !gui())
         m_image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), dpr);
     if (visible() && gui() && PaintUtils::isBlankImage(m_image)) {
-        m_frame = rect();
+        m_outerRect = rect();
         m_image = PaintUtils::renderBlankControlImage(rect(), id(), dpr);
     }
     m_image.setDevicePixelRatio(dpr);
@@ -504,9 +513,9 @@ void Control::applyGeometryCorrection()
 }
 
 
-void Control::setFrame(const QRectF& frame)
+void Control::setOuterRect(const QRectF& outerRect)
 {
-    m_frame = frame;
+    m_outerRect = outerRect;
     update();
 }
 
@@ -516,7 +525,7 @@ void Control::setImage(const QImage& image)
     update();
 }
 
-QRectF Control::frame() const
+QRectF Control::outerRect() const
 {
-    return m_frame;
+    return m_outerRect;
 }

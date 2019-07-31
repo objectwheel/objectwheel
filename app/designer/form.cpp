@@ -50,11 +50,11 @@ void Form::paintForeground(QPainter* painter)
             points.append(QPointF(x, y));
     }
     painter->setPen(DesignerScene::pen(Qt::darkGray, 1, false));
-    painter->drawPoints(points.data(), points.size());
+    painter->drawPoints(points.data(), points.size()); // Grid view dots
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(Qt::darkGray));
-    painter->drawRect(DesignerScene::outerRect(rect()));
+    painter->drawRect(DesignerScene::outerRect(rect())); // Form frame
 }
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)

@@ -13,7 +13,6 @@ class Control : public DesignerItem
 
     friend class ControlCreationManager; // For constructor
     friend class ProjectExposingManager; // For constructor
-    friend class DesignerScene; // For destructor (delete operator)
 
 public:
     enum { Type = UserType + 2 };
@@ -24,25 +23,25 @@ public:
     bool popup() const;
     bool window() const;
     bool dragIn() const;
-    bool hasErrors() const;
     bool visible() const;
+    bool hasErrors() const;
 
     quint32 index() const;
     QString id() const;
     QString uid() const;
     QString dir() const;
     QImage image() const;
-    QRectF frame() const;
+    QRectF outerRect() const;
     QMarginsF margins() const;
-
-    Control* parentControl() const;
 
     QVector<QString> events() const;
     QVector<QmlError> errors() const;
     QVector<PropertyNode> properties() const;
+    QVariant property(const QString& propertyName) const;
+
+    Control* parentControl() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
-    QVariant property(const QString& propertyName) const;
 
 public:
     void setId(const QString& id);
@@ -50,7 +49,7 @@ public:
     void setDragIn(bool dragIn);
     void setIndex(quint32 index);
     void setImage(const QImage& image);
-    void setFrame(const QRectF& frame);
+    void setOuterRect(const QRectF& outerRect);
 
 protected:
     void dropControl(Control* control);
@@ -64,7 +63,8 @@ protected:
 protected:
     void paintImage(QPainter* painter);
     void paintHighlight(QPainter* painter);
-    void paintHoverOutline(QPainter* painter);
+    void paintOutline(QPainter* painter);
+    void paintHoverOutline(QPainter* painter, bool hovered);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
 protected:
@@ -82,11 +82,11 @@ private:
     bool m_visible;
 
     quint32 m_index;
-    QString m_dir;
-    QString m_uid;
     QString m_id;
-    QRectF m_frame;
+    QString m_uid;
+    QString m_dir;
     QImage m_image;
+    QRectF m_outerRect;
     QSizeF m_snapMargin;
     QMarginsF m_margins;
     QString m_geometryHash;

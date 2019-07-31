@@ -49,6 +49,7 @@ public:
     QList<DesignerItem*> draggedResizedSelectedItems() const;
     QRectF visibleItemsBoundingRect() const;
 
+    static bool showMouseoverOutline();
     static int startDragDistance();
     static int gridSize();
     static qreal zoomLevel();
@@ -64,9 +65,8 @@ public:
     static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
     static QBrush backgroundTexture();
     static OutlineMode outlineMode();
-
-    void paintOutline(QPainter* painter, const QRectF& rect);
-    void paintSelectionOutline(QPainter* painter, DesignerItem* selectedItem);
+    static void drawDashLine(QPainter* painter, const QLineF& line);
+    static void drawDashRect(QPainter* painter, const QRectF& rect);
 
 public slots:
     void discharge();

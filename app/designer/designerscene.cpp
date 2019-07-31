@@ -282,32 +282,9 @@ QRectF DesignerScene::visibleItemsBoundingRect() const
     return boundingRect.adjusted(-10, -15, 10, 10);
 }
 
-void DesignerScene::paintOutline(QPainter* painter, const QRectF& rect)
+bool DesignerScene::showMouseoverOutline()
 {
-    QPen linePen(QColor(0, 0, 0, 150));
-    linePen.setCosmetic(true);
-    linePen.setCapStyle(Qt::FlatCap);
-    linePen.setJoinStyle(Qt::MiterJoin);
-    linePen.setDashPattern({2., 1.});
-
-    painter->setPen(linePen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(rect);
-
-    linePen.setColor(QColor(255, 255, 255, 150));
-    linePen.setDashPattern({1., 2.});
-    linePen.setDashOffset(2.);
-
-    painter->setPen(linePen);
-    painter->drawRect(rect);
-
-    linePen.setColor(QColor(0, 0, 0, 150));
-    linePen.setStyle(Qt::SolidLine);
-    painter->setPen(linePen);
-    painter->drawPoint(rect.topLeft());
-    painter->drawPoint(rect.topRight() - QPointF(0.25, 0.0));
-    painter->drawPoint(rect.bottomLeft());
-    painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
+    return DesignerSettings::sceneSettings()->showMouseoverOutline;
 }
 
 QVector<QLineF> DesignerScene::guidelines() const
@@ -479,6 +456,55 @@ QBrush DesignerScene::backgroundTexture()
 DesignerScene::OutlineMode DesignerScene::outlineMode()
 {
     return OutlineMode(DesignerSettings::sceneSettings()->controlOutline);
+}
+
+void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
+{
+    QPen linePen(QColor(0, 0, 0, 150));
+    linePen.setCosmetic(true);
+    linePen.setCapStyle(Qt::FlatCap);
+    linePen.setJoinStyle(Qt::MiterJoin);
+    linePen.setDashPattern({3., 2.});
+
+    painter->setPen(linePen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(rect);
+
+    linePen.setColor(QColor(255, 255, 255, 150));
+    linePen.setDashPattern({2., 3.});
+    linePen.setDashOffset(3.);
+
+    painter->setPen(linePen);
+    painter->drawRect(rect);
+
+    linePen.setColor(QColor(0, 0, 0, 150));
+    linePen.setStyle(Qt::SolidLine);
+
+    painter->setPen(linePen);
+    painter->drawPoint(rect.topLeft());
+    painter->drawPoint(rect.topRight() - QPointF(0.25, 0.0));
+    painter->drawPoint(rect.bottomLeft());
+    painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
+}
+
+void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
+{
+    QPen linePen(QColor(0, 0, 0, 150));
+    linePen.setCosmetic(true);
+    linePen.setCapStyle(Qt::FlatCap);
+    linePen.setJoinStyle(Qt::MiterJoin);
+    linePen.setDashPattern({3., 2.});
+
+    painter->setPen(linePen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawLine(line);
+
+    linePen.setColor(QColor(255, 255, 255, 150));
+    linePen.setDashPattern({2., 3.});
+    linePen.setDashOffset(3.);
+
+    painter->setPen(linePen);
+    painter->drawLine(line);
 }
 
 QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)

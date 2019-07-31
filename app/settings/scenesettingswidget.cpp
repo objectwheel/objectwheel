@@ -279,8 +279,10 @@ void SceneSettingsWidget::fill()
     m_sceneZoomLevelBox->addItems(UtilityFunctions::zoomTexts());
 
     m_controlOutlineBox->addItem(QIcon(":/images/nooutline.svg"), tr("No outline"));
-    m_controlOutlineBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping rect outline"));
-    m_controlOutlineBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding rect outline"));
+    m_controlOutlineBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping dash line"));
+    m_controlOutlineBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding dash line"));
+    m_controlOutlineBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping solid line"));
+    m_controlOutlineBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding solid line"));
 
     m_sceneBackgroundTextureBox->addItem(
     {renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)}, tr("Checkered"));
