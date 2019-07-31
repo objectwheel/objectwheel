@@ -460,26 +460,19 @@ DesignerScene::OutlineMode DesignerScene::outlineMode()
 
 void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
 {
-    QPen linePen(QColor(0, 0, 0, 150));
-    linePen.setCosmetic(true);
-    linePen.setCapStyle(Qt::FlatCap);
-    linePen.setJoinStyle(Qt::MiterJoin);
-    linePen.setDashPattern({3., 2.});
-
+    QPen linePen(pen(QColor(255, 255, 255, 150)));
+    linePen.setDashPattern({1, 2});
     painter->setPen(linePen);
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(rect);
 
-    linePen.setColor(QColor(255, 255, 255, 150));
-    linePen.setDashPattern({2., 3.});
-    linePen.setDashOffset(3.);
-
+    linePen.setColor(QColor(0, 0, 0, 150));
+    linePen.setDashPattern({2, 1});
+    linePen.setDashOffset(2);
     painter->setPen(linePen);
     painter->drawRect(rect);
 
-    linePen.setColor(QColor(0, 0, 0, 150));
     linePen.setStyle(Qt::SolidLine);
-
     painter->setPen(linePen);
     painter->drawPoint(rect.topLeft());
     painter->drawPoint(rect.topRight() - QPointF(0.25, 0.0));
@@ -489,20 +482,15 @@ void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
 
 void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
 {
-    QPen linePen(QColor(0, 0, 0, 150));
-    linePen.setCosmetic(true);
-    linePen.setCapStyle(Qt::FlatCap);
-    linePen.setJoinStyle(Qt::MiterJoin);
-    linePen.setDashPattern({3., 2.});
-
+    QPen linePen(pen(QColor(0, 0, 0, 150)));
+    linePen.setDashPattern({3, 2});
     painter->setPen(linePen);
     painter->setBrush(Qt::NoBrush);
     painter->drawLine(line);
 
     linePen.setColor(QColor(255, 255, 255, 150));
-    linePen.setDashPattern({2., 3.});
-    linePen.setDashOffset(3.);
-
+    linePen.setDashPattern({2, 3});
+    linePen.setDashOffset(3);
     painter->setPen(linePen);
     painter->drawLine(line);
 }

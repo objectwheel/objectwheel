@@ -1,10 +1,9 @@
 #include <form.h>
 #include <designerscene.h>
-#include <scenesettings.h>
 
-#include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <QStyleOption>
+#include <QCursor>
+#include <QGraphicsSceneMouseEvent>
 
 Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
 {
@@ -26,8 +25,7 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
         } else if (!isSelected() && scene()) {
             scene()->clearSelection();
         }
-        QMetaObject::invokeMethod(this, std::bind(&Form::setSelected, this, select),
-                                  Qt::QueuedConnection);
+        QMetaObject::invokeMethod(this, std::bind(&Form::setSelected, this, select), Qt::QueuedConnection);
     }
     // We block the event, thus it can go up to QGraphicsView
     // and draw rubber band, but the view deselects the form

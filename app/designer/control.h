@@ -82,9 +82,9 @@ private:
     bool m_visible;
 
     quint32 m_index;
+    QString m_dir;
     QString m_id;
     QString m_uid;
-    QString m_dir;
     QImage m_image;
     QRectF m_outerRect;
     QSizeF m_snapMargin;

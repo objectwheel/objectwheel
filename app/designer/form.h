@@ -16,7 +16,7 @@ public:
     int type() const override;
 
 private:
-    void mousePressEvent(QGraphicsSceneMouseEvent *event) override;
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void paintBackground(QPainter* painter);
     void paintForeground(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
@@ -24,6 +24,5 @@ private:
 private:
     explicit Form(const QString& dir, Form* parent = nullptr);
 };
-
 
 #endif // FORM_H

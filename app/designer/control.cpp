@@ -24,8 +24,8 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_window(false)
   , m_dragIn(false)
   , m_visible(true)
-  , m_uid(SaveUtils::controlUid(m_dir))
   , m_dir(dir)
+  , m_uid(SaveUtils::controlUid(m_dir))
   , m_snapMargin(QSizeF(0, 0))
 {
     setAcceptDrops(true);
