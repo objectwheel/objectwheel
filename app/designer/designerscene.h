@@ -33,10 +33,10 @@ public:
     Form* currentForm() const;
     void setCurrentForm(Form* currentForm);
 
+    void shrinkSceneRect();
     void unsetCursor();
     void setCursor(Qt::CursorShape cursor);
     void prepareDragLayer(DesignerItem* item);
-    void shrinkSceneRect();
     bool isLayerItem(DesignerItem* item) const;
 
     DesignerItem* dragLayer() const;
@@ -92,6 +92,8 @@ private:
 private:
     DesignerItem* dropItem(const QPointF& pos) const;
     DesignerItem* highlightItem(const QPointF& pos) const;
+
+    void handleToolDrop(QGraphicsSceneDragDropEvent* event);
     void reparentControl(Control* control, Control* parentControl) const;
 
 private:

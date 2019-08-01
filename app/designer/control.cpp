@@ -30,6 +30,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setAcceptDrops(true);
     setAcceptHoverEvents(true);
     setCursor(Qt::OpenHandCursor);
+
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);

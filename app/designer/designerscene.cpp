@@ -156,40 +156,66 @@ DesignerItem* DesignerScene::highlightItem(const QPointF& pos) const
 
 void DesignerScene::reparentControl(Control* control, Control* parentControl) const
 {
+    // NOTE: We compress setPos because there might be some other
+    // compressed setPos'es in the list, We want the setPos that
+    // happens after reparent operation to take place at the very last
     ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
             | ControlPropertyManager::CompressedCall;
 
     if (control->gui())
         options |= ControlPropertyManager::UpdateRenderer;
-    // NOTE: Do not move this assignment below setParent,
-    // because parent change effects the newPos result
+
     control->m_geometryCorrection = QRectF();
     control->m_geometryHash = HashFactory::generate();
+
+    // NOTE: Do not move this assignment below setParent,
+    // because parent change effects the newPos result
     const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, QPointF()));
     ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
     ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
-    // NOTE: We compress setPos because there might be some other
-    // compressed setPos'es in the list, We want the setPos that
-    // happens after reparent operation to take place at the very last
 }
-#include <QDebug>
+
+void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
+{
+    QString dir;
+    RenderResult result;
+    UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-tool")), dir);
+    UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-render-result")), result);
+
+    clearSelection();
+    // NOTE: Use actual Control position for scene, since createControl deals with margins
+    Control* newControl = ControlCreationManager::createControl(
+                static_cast<Control*>(m_recentHighlightedItem.data()),
+                dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
+                result.boundingRect.size(), result.image);
+    if (newControl) {
+        newControl->setSelected(true);
+    } else {
+        UtilityFunctions::showMessage(nullptr,
+                                      tr("Oops"),
+                                      tr("Operation failed, control has got problems."),
+                                      QMessageBox::Critical);
+    }
+}
+
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
-    qDebug() << "moveee";
-    if (m_recentHighlightedItem)
-        m_recentHighlightedItem->setBeingHighlighted(false);
-    if ((m_recentHighlightedItem = highlightItem(event->scenePos())))
-        m_recentHighlightedItem->setBeingHighlighted(true);
+    if (mouseGrabberItem()) {
+        if (m_recentHighlightedItem)
+            m_recentHighlightedItem->setBeingHighlighted(false);
+        if ((m_recentHighlightedItem = highlightItem(event->scenePos())))
+            m_recentHighlightedItem->setBeingHighlighted(true);
+    }
 }
 
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     const QList<DesignerItem*>& draggedItems = draggedResizedSelectedItems();
 
-    QGraphicsScene::mouseReleaseEvent(event); // Clears beingResized and beingDragged states etc
+    QGraphicsScene::mouseReleaseEvent(event); // Clears beingResized and beingDragged states
 
     if (m_recentHighlightedItem) {
         if (!draggedItems.isEmpty() && draggedItems.first()->parentItem() != m_recentHighlightedItem) {
@@ -207,16 +233,14 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerScene::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
 {
-    QGraphicsScene::dragMoveEvent(event);
-
-    bool mimeOk = event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"));
-    if (mimeOk) {
-        if ((m_recentHighlightedItem = highlightItem(event->scenePos()))) {
+    if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
+        if (m_recentHighlightedItem)
+            m_recentHighlightedItem->setBeingHighlighted(false);
+        if ((m_recentHighlightedItem = dropItem(event->scenePos())))
             m_recentHighlightedItem->setBeingHighlighted(true);
-            event->setAccepted(true);
-        }
+        event->setAccepted(m_recentHighlightedItem);
     } else {
-        event->setAccepted(false);
+        QGraphicsScene::dragMoveEvent(event);
     }
 }
 
@@ -232,33 +256,14 @@ void DesignerScene::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
 
 void DesignerScene::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
-    QGraphicsScene::dropEvent(event);
-
-    const QMimeData* mimeData = event->mimeData();
-    const bool mimeOk = mimeData->hasFormat(QStringLiteral("application/x-objectwheel-tool"));
-    if (mimeOk && m_recentHighlightedItem) {
-        event->acceptProposedAction();
-        QString dir;
-        RenderResult result;
-        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
-        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-render-result")), result);
-
-        clearSelection();
-        // NOTE: Use actual Control position for scene, since createControl deals with margins
-        auto newControl = ControlCreationManager::createControl(
-                    static_cast<Control*>(m_recentHighlightedItem.data()),
-                    dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
-                    result.boundingRect.size(), result.image);
-        if (newControl) {
-            newControl->setSelected(true);
-        } else {
-            UtilityFunctions::showMessage(0, tr("Oops"),
-                                          tr("Operation failed, control has got problems."),
-                                          QMessageBox::Critical);
-        }
-
+    if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))
+            && m_recentHighlightedItem) {
+        handleToolDrop(event);
         m_recentHighlightedItem->setBeingHighlighted(false);
         m_recentHighlightedItem.clear();
+        event->acceptProposedAction();
+    } else {
+        QGraphicsScene::dropEvent(event);
     }
 }
 
