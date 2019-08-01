@@ -5,7 +5,7 @@
 
 class RenderServer;
 class CommandDispatcher;
-struct RenderResult;
+struct RenderInfo;
 
 class ControlRenderingManager final : public QObject
 {
@@ -39,11 +39,11 @@ private slots:
     void onConnected();
     void onDisconnected();
     void onConnectionTimeout();
-    void onRenderResultsReady(const QList<RenderResult>& results);
+    void onRenderInfosReady(const QList<RenderInfo>& infos);
 
 signals:
-    void renderDone(const RenderResult& result);
-    void previewDone(const RenderResult& result);
+    void renderDone(const RenderInfo& info);
+    void previewDone(const RenderInfo& info);
     void initializationProgressChanged(int progress);
 
 private:

@@ -102,16 +102,16 @@ void CommandDispatcher::onDataReceived(const RendererCommands& command, const QB
     }
 
     case RenderDone: {
-        QList<RenderResult> results;
-        pull(data, results);
-        emit renderDone(results);
+        QList<RenderInfo> infos;
+        pull(data, infos);
+        emit renderDone(infos);
         break;
     }
 
     case PreviewDone: {
-        RenderResult result;
-        pull(data, result);
-        emit previewDone(result);
+        RenderInfo info;
+        pull(data, info);
+        emit previewDone(info);
         break;
     }
 

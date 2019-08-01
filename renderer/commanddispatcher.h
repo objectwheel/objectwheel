@@ -4,7 +4,7 @@
 #include <QObject>
 #include <renderercommands.h>
 
-struct RenderResult;
+struct RenderInfo;
 class RenderSocket;
 
 class CommandDispatcher final : public QObject
@@ -17,8 +17,8 @@ public:
 
 public slots:
     void scheduleInitializationProgress(int progress);
-    void scheduleRenderDone(const QList<RenderResult>& results);
-    void schedulePreviewDone(const RenderResult& result);
+    void scheduleRenderDone(const QList<RenderInfo>& infos);
+    void schedulePreviewDone(const RenderInfo& info);
     void onDataReceived(const RendererCommands& command, const QByteArray& data);
 
 private:

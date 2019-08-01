@@ -60,24 +60,24 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
 
     auto conn = new QMetaObject::Connection;
     *conn = connect(ControlRenderingManager::instance(), &ControlRenderingManager::previewDone,
-                    [=] (RenderResult result) {
+                    [=] (RenderInfo info) {
         if (locked) {
             disconnect(*conn);
             delete conn;
             QDrag* drag = establishDrag(item);
-            if (!PaintUtils::isBlankImage(result.image)) {
-                QPixmap pixmap(QPixmap::fromImage(result.image));
+            if (!PaintUtils::isBlankImage(info.image)) {
+                QPixmap pixmap(QPixmap::fromImage(info.image));
                 pixmap.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
                 drag->setPixmap(pixmap);
-            } else if (result.gui && result.visible && PaintUtils::isBlankImage(result.image)) {
+            } else if (info.gui && info.visible && PaintUtils::isBlankImage(info.image)) {
                 drag->setPixmap(QPixmap::fromImage(PaintUtils::renderBlankControlImage(
-                                    result.boundingRect,
+                                    info.boundingRect,
                                     m_toolboxPane->toolboxTree()->currentItem()->text(0),
                                     m_toolboxPane->devicePixelRatioF())));
             }
-            result.image = drag->pixmap().toImage();
-            drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-result"),
-                                      UtilityFunctions::push(result));
+            info.image = drag->pixmap().toImage();
+            drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-info"),
+                                      UtilityFunctions::push(info));
             locked = false;
             drag->exec(Qt::CopyAction);
             processLocked = false;

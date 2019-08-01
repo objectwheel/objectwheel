@@ -63,31 +63,21 @@ protected:
 
 private slots:
     void applyGeometryCorrection();
-    void updateRenderInfo(const RenderResult& result);
+    void setRenderInfo(const RenderInfo& info);
 
 signals:
     void renderInfoChanged(bool codeChanged);
 
 private:
-    bool m_gui;
-    bool m_popup;
-    bool m_window;
-    bool m_visible;
-
     quint32 m_index;
     QString m_dir;
     QString m_id;
     QString m_uid;
-    QImage m_image;
-    QRectF m_outerRect;
     QSizeF m_snapMargin;
     QMarginsF m_margins;
     QString m_geometryHash;
     QRectF m_geometryCorrection;
-
-    QVector<QString> m_events;
-    QVector<QmlError> m_errors;
-    QVector<PropertyNode> m_properties;
+    RenderInfo m_renderInfo;
 };
 
 #endif // CONTROL_H

@@ -9,7 +9,7 @@ class QQuickView;
 class QmlError;
 class QQuickWindow;
 class QTimer;
-struct RenderResult;
+struct RenderInfo;
 
 // Due to possible margins on an ApplicationWindow the rendering order is important
 // And a parent must always be rendered first.
@@ -96,15 +96,15 @@ private:
     QImage grabImage(const ControlInstance* instance, QRectF& boundingRect);
     QImage renderItem(QQuickItem* item, QRectF& boundingRect, bool preview, const QColor& bgColor);
 
-    QList<RenderResult> renderDirtyInstances(const QList<ControlInstance*>& instances);
+    QList<RenderInfo> renderDirtyInstances(const QList<ControlInstance*>& instances);
     RenderEngine::ControlInstance* createInstance(const QString& url);
     RenderEngine::ControlInstance* createInstance(const QString& dir, ControlInstance* parentInstance,
                                                   QQmlContext* oldFormContext = nullptr);
 
 signals:
     void initializationProgressChanged(int progress);
-    void renderDone(const QList<RenderResult>& results);
-    void previewDone(const RenderResult& result);
+    void renderDone(const QList<RenderInfo>& infos);
+    void previewDone(const RenderInfo& info);
 
 private:
     bool m_initialized;

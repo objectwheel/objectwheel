@@ -385,20 +385,20 @@ void RenderEngine::preview(const QString& url)
 
         instance->preview = true;
 
-        RenderResult result;
-        result.uid = instance->uid;
-        result.gui = instance->gui;
-        result.popup = instance->popup;
-        result.window = instance->window;
-        result.visible = instance->visible;
-        result.codeChanged = instance->codeChanged;
-        result.geometryHash = instance->geometryHash;
-        result.properties = RenderUtils::properties(instance);
-        result.events = RenderUtils::events(instance);
+        RenderInfo info;
+        info.uid = instance->uid;
+        info.gui = instance->gui;
+        info.popup = instance->popup;
+        info.window = instance->window;
+        info.visible = instance->visible;
+        info.codeChanged = instance->codeChanged;
+        info.geometryHash = instance->geometryHash;
+        info.properties = RenderUtils::properties(instance);
+        info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
-        result.errors = instance->errors;
-        result.image = grabImage(instance, result.boundingRect);
-        emit previewDone(result);
+        info.errors = instance->errors;
+        info.image = grabImage(instance, info.boundingRect);
+        emit previewDone(info);
 
         auto ctx = instance->context;
         RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
@@ -727,29 +727,29 @@ void RenderEngine::flushReRenders()
     m_formInstanceSetForReRender.clear();
 }
 
-QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine::ControlInstance*>& instances)
+QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::ControlInstance*>& instances)
 {
-    QList<RenderResult> results;
+    QList<RenderInfo> infos;
     for (int i = 0; i < instances.size(); ++i) {
         ControlInstance* instance = instances.at(i);
         Q_ASSERT(instance);
-        RenderResult result;
-        result.uid = instance->uid;
-        result.gui = instance->gui;
-        result.popup = instance->popup;
-        result.window = instance->window;
-        result.visible = instance->visible;
-        result.codeChanged = instance->codeChanged;
-        result.geometryHash = instance->geometryHash;
-        result.properties = RenderUtils::properties(instance);
-        result.events = RenderUtils::events(instance);
+        RenderInfo info;
+        info.uid = instance->uid;
+        info.gui = instance->gui;
+        info.popup = instance->popup;
+        info.window = instance->window;
+        info.visible = instance->visible;
+        info.codeChanged = instance->codeChanged;
+        info.geometryHash = instance->geometryHash;
+        info.properties = RenderUtils::properties(instance);
+        info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
-        result.errors = instance->errors;
-        result.image = grabImage(instance, result.boundingRect);
-        results.append(result);
+        info.errors = instance->errors;
+        info.image = grabImage(instance, info.boundingRect);
+        infos.append(info);
 
         if (instance->errors.isEmpty() && instance->gui)
-            instance->needsRerender = PaintUtils::isBlankImage(result.image);
+            instance->needsRerender = PaintUtils::isBlankImage(info.image);
 
         if (!m_initialized) {
             g_progress += g_progressPerInstance;
@@ -758,7 +758,7 @@ QList<RenderResult> RenderEngine::renderDirtyInstances(const QList<RenderEngine:
         }
     }
 
-    return results;
+    return infos;
 }
 
 QRectF RenderEngine::boundingRectWithStepChilds(QQuickItem* item)

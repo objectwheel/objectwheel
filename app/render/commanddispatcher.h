@@ -4,7 +4,7 @@
 #include <QObject>
 #include <renderercommands.h>
 
-struct RenderResult;
+struct RenderInfo;
 class RenderServer;
 
 class CommandDispatcher final : public QObject
@@ -38,8 +38,8 @@ private:
 
 signals:
     void initializationProgressChanged(int progress);
-    void renderDone(const QList<RenderResult>& results);
-    void previewDone(const RenderResult& result);
+    void renderDone(const QList<RenderInfo>& infos);
+    void previewDone(const RenderInfo& infos);
 
 private:
     RenderServer* m_server;

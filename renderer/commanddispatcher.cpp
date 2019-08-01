@@ -21,14 +21,14 @@ void CommandDispatcher::scheduleInitializationProgress(int progress)
     send(m_socket, RendererCommands::InitializationProgress, push(progress));
 }
 
-void CommandDispatcher::scheduleRenderDone(const QList<RenderResult>& results)
+void CommandDispatcher::scheduleRenderDone(const QList<RenderInfo>& infos)
 {
-    send(m_socket, RendererCommands::RenderDone, push(results));
+    send(m_socket, RendererCommands::RenderDone, push(infos));
 }
 
-void CommandDispatcher::schedulePreviewDone(const RenderResult& result)
+void CommandDispatcher::schedulePreviewDone(const RenderInfo& info)
 {
-    send(m_socket, RendererCommands::PreviewDone, push(result));
+    send(m_socket, RendererCommands::PreviewDone, push(info));
 }
 
 void CommandDispatcher::onDataReceived(const RendererCommands& command, const QByteArray& data)

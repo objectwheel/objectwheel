@@ -12,13 +12,13 @@
 #include <QStyleOption>
 
 Control::Control(Control* parent) : DesignerItem(parent)
-  , m_gui(false)
-  , m_popup(false)
-  , m_window(false)
-  , m_visible(true)
   , m_snapMargin(QSizeF(0, 0))
 {
-    setAcceptDrops(true);
+    m_renderInfo.gui = false;
+    m_renderInfo.popup = false;
+    m_renderInfo.window = false;
+    m_renderInfo.visible = true;
+
     setAcceptHoverEvents(true);
     setCursor(Qt::OpenHandCursor);
 
@@ -42,7 +42,7 @@ Control::Control(Control* parent) : DesignerItem(parent)
 
 bool Control::gui() const
 {
-    return m_gui;
+    return m_renderInfo.gui;
 }
 
 bool Control::form() const
@@ -52,22 +52,22 @@ bool Control::form() const
 
 bool Control::popup() const
 {
-    return m_popup;
+    return m_renderInfo.popup;
 }
 
 bool Control::window() const
 {
-    return m_window;
+    return m_renderInfo.window;
 }
 
 bool Control::hasErrors() const
 {
-    return !m_errors.isEmpty();
+    return !m_renderInfo.errors.isEmpty();
 }
 
 bool Control::visible() const
 {
-    return m_visible;
+    return m_renderInfo.visible;
 }
 
 quint32 Control::index() const
@@ -102,7 +102,7 @@ QMarginsF Control::margins() const
 
 QImage Control::image() const
 {
-    return m_image;
+    return m_renderInfo.image;
 }
 
 Control* Control::parentControl() const
@@ -112,17 +112,17 @@ Control* Control::parentControl() const
 
 QVector<QmlError> Control::errors() const
 {
-    return m_errors;
+    return m_renderInfo.errors;
 }
 
 QVector<QString> Control::events() const
 {
-    return m_events;
+    return m_renderInfo.events;
 }
 
 QVector<PropertyNode> Control::properties() const
 {
-    return m_properties;
+    return m_renderInfo.properties;
 }
 
 QList<Control*> Control::siblings() const
@@ -169,7 +169,7 @@ QList<Control*> Control::childControls(bool recursive) const
 
 QVariant Control::property(const QString& propertyName) const
 {
-    return UtilityFunctions::getProperty(propertyName, m_properties);
+    return UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);
 }
 
 void Control::setId(const QString& id)
@@ -229,11 +229,11 @@ QVariant Control::itemChange(int change, const QVariant& value)
 
 void Control::paintImage(QPainter* painter)
 {
-    if (m_image.isNull())
+    if (m_renderInfo.image.isNull())
         return;
     if (beingResized())
         painter->setClipRect(rect());
-    painter->drawImage(m_outerRect, m_image);
+    painter->drawImage(m_renderInfo.boundingRect, m_renderInfo.image);
     painter->setClipping(false);
 }
 
@@ -281,19 +281,13 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     paintHoverOutline(painter, option->state & QStyle::State_MouseOver);
 }
 
-void Control::updateRenderInfo(const RenderResult& result)
+void Control::setRenderInfo(const RenderInfo& info)
 {
-    if (result.uid != uid())
+    if (info.uid != uid())
         return;
 
     const qreal dpr = ControlRenderingManager::devicePixelRatio();
-    m_gui = result.gui;
-    m_popup = result.popup;
-    m_window = result.window;
-    m_visible = result.visible;
-    m_errors = result.errors;
-    m_events = result.events;
-    m_properties = result.properties;
+    m_renderInfo = info;
 
     setResizable(gui());
     setZValue(property("z").toDouble());
@@ -303,42 +297,44 @@ void Control::updateRenderInfo(const RenderResult& result)
     else
         setOpacity(1.0);
 
-    if (result.codeChanged)
-        m_margins = UtilityFunctions::getMarginsFromProperties(result.properties);
+    if (info.codeChanged)
+        m_margins = UtilityFunctions::getMarginsFromProperties(info.properties);
 
     if (!gui() || hasErrors()) {
         m_geometryCorrection = QRectF();
         m_geometryHash.clear();
     }
 
-    if (gui() && (m_geometryHash.isEmpty() || result.geometryHash == m_geometryHash)) {
+    if (gui() && (m_geometryHash.isEmpty() || info.geometryHash == m_geometryHash)) {
         m_geometryHash.clear();
-        m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(result.properties);
+        m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(info.properties);
         if (!beingDragged() && !beingResized())
             applyGeometryCorrection();
     }
 
-    m_outerRect = result.boundingRect.isNull() ? rect() : result.boundingRect;
+    if (m_renderInfo.boundingRect.isNull())
+        m_renderInfo.boundingRect = rect();
 
     if (!gui() && size() != QSizeF(40, 40)) {
         if (!hasErrors() || size().isEmpty()) {
             ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
-            m_outerRect = QRectF(0, 0, 40, 40);
+            m_renderInfo.boundingRect = QRectF(0, 0, 40, 40);
         }
     }
 
-    m_image = hasErrors() ? PaintUtils::renderErrorControlImage(size(), id(), dpr) : result.image;
-    if (m_image.isNull() && !gui())
-        m_image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), dpr);
-    if (visible() && gui() && PaintUtils::isBlankImage(m_image)) {
-        m_outerRect = rect();
-        m_image = PaintUtils::renderBlankControlImage(rect(), id(), dpr);
+    if (hasErrors())
+        m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), dpr);
+    if (m_renderInfo.image.isNull() && !gui())
+        m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), dpr);
+    if (visible() && gui() && PaintUtils::isBlankImage(m_renderInfo.image)) {
+        m_renderInfo.boundingRect = rect();
+        m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), dpr);
     }
-    m_image.setDevicePixelRatio(dpr);
+    m_renderInfo.image.setDevicePixelRatio(dpr);
 
-    setImage(m_image); // FIXME
+    setImage(m_renderInfo.image); // FIXME
 
-    emit renderInfoChanged(result.codeChanged);
+    emit renderInfoChanged(info.codeChanged);
 }
 
 void Control::setUid(const QString& uid)
@@ -362,22 +358,21 @@ void Control::applyGeometryCorrection()
     m_geometryCorrection = QRectF();
 }
 
-
 void Control::setOuterRect(const QRectF& outerRect)
 {
-    if (m_outerRect != outerRect) {
-        m_outerRect = outerRect;
+    if (m_renderInfo.boundingRect != outerRect) {
+        m_renderInfo.boundingRect = outerRect;
         update();
     }
 }
 
 void Control::setImage(const QImage& image)
 {
-    m_image = image;
+    m_renderInfo.image = image;
     update();
 }
 
 QRectF Control::outerRect() const
 {
-    return m_outerRect;
+    return m_renderInfo.boundingRect;
 }

@@ -53,7 +53,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
 
     ControlPropertyManager::setIndex(form, form->siblings().size(), ControlPropertyManager::SaveChanges);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
-            form, &Control::updateRenderInfo);
+            form, &Control::setRenderInfo);
     connect(form, &Control::doubleClicked,
             form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
     connect(form, &Control::renderInfoChanged,
@@ -115,7 +115,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     ControlPropertyManager::setSize(control, initialSize, ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
-            control, &Control::updateRenderInfo);
+            control, &Control::setRenderInfo);
     connect(control, &Control::doubleClicked,
             control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
     connect(control, &Control::renderInfoChanged,
@@ -157,7 +157,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         ControlPropertyManager::setPos(childControl, SaveUtils::designPosition(childPath), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
         connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
-                childControl, &Control::updateRenderInfo);
+                childControl, &Control::setRenderInfo);
         connect(childControl, &Control::doubleClicked,
                 childControl, [=] { ControlPropertyManager::instance()->doubleClicked(childControl); });
         connect(childControl, &Control::renderInfoChanged,

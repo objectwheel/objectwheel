@@ -1,5 +1,4 @@
 #include <designerscene.h>
-#include <suppressor.h>
 #include <resizeritem.h>
 #include <controlpropertymanager.h>
 #include <projectexposingmanager.h>
@@ -179,16 +178,16 @@ void DesignerScene::reparentControl(Control* control, Control* parentControl) co
 void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
 {
     QString dir;
-    RenderResult result;
+    RenderInfo info;
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-tool")), dir);
-    UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-render-result")), result);
+    UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-render-info")), info);
 
     clearSelection();
     // NOTE: Use actual Control position for scene, since createControl deals with margins
     Control* newControl = ControlCreationManager::createControl(
                 static_cast<Control*>(m_recentHighlightedItem.data()),
                 dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
-                result.boundingRect.size(), result.image);
+                info.boundingRect.size(), info.image);
     if (newControl) {
         newControl->setSelected(true);
     } else {

@@ -58,7 +58,7 @@ void ProjectExposingManager::exposeProject()
         s_designerScene->addForm(form);
 
         connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
-                form, &Control::updateRenderInfo);
+                form, &Control::setRenderInfo);
         connect(form, &Control::doubleClicked,
                 form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
         connect(form, &Control::renderInfoChanged,
@@ -99,7 +99,7 @@ void ProjectExposingManager::exposeProject()
             ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::NoOption);
 
             connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
-                    control, &Control::updateRenderInfo);
+                    control, &Control::setRenderInfo);
             connect(control, &Control::doubleClicked,
                     control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
             connect(control, &Control::renderInfoChanged,

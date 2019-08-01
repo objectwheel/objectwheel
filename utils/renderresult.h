@@ -21,7 +21,7 @@ struct PropertyNode {
     QMap<QString, QVariant> properties;
 };
 
-struct RenderResult {
+struct RenderInfo {
     bool gui;
     bool popup;
     bool window;
@@ -82,37 +82,37 @@ inline QDataStream& operator<< (QDataStream& out, const PropertyNode& node)
     return out;
 }
 
-inline QDataStream& operator>> (QDataStream& in, RenderResult& result)
+inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
 {
-    in >> result.gui;
-    in >> result.uid;
-    in >> result.image;
-    in >> result.boundingRect;
-    in >> result.popup;
-    in >> result.window;
-    in >> result.visible;
-    in >> result.codeChanged;
-    in >> result.geometryHash;
-    in >> result.errors;
-    in >> result.events;
-    in >> result.properties;
+    in >> info.gui;
+    in >> info.uid;
+    in >> info.image;
+    in >> info.boundingRect;
+    in >> info.popup;
+    in >> info.window;
+    in >> info.visible;
+    in >> info.codeChanged;
+    in >> info.geometryHash;
+    in >> info.errors;
+    in >> info.events;
+    in >> info.properties;
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const RenderResult& result)
+inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
 {
-    out << result.gui;
-    out << result.uid;
-    out << result.image;
-    out << result.boundingRect;
-    out << result.popup;
-    out << result.window;
-    out << result.visible;
-    out << result.codeChanged;
-    out << result.geometryHash;
-    out << result.errors;
-    out << result.events;
-    out << result.properties;
+    out << info.gui;
+    out << info.uid;
+    out << info.image;
+    out << info.boundingRect;
+    out << info.popup;
+    out << info.window;
+    out << info.visible;
+    out << info.codeChanged;
+    out << info.geometryHash;
+    out << info.errors;
+    out << info.events;
+    out << info.properties;
     return out;
 }
 

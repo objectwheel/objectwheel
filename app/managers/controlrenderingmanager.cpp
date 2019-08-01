@@ -44,7 +44,7 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
     connect(s_commandDispatcher, &CommandDispatcher::initializationProgressChanged,
             this, &ControlRenderingManager::initializationProgressChanged);
     connect(s_commandDispatcher, &CommandDispatcher::renderDone,
-            this, &ControlRenderingManager::onRenderResultsReady);
+            this, &ControlRenderingManager::onRenderInfosReady);
     connect(s_commandDispatcher, &CommandDispatcher::previewDone,
             this, &ControlRenderingManager::previewDone);
 
@@ -212,10 +212,10 @@ void ControlRenderingManager::onConnectionTimeout()
     qWarning() << "Connection timeout, in" << __FILE__ << ":" << __LINE__;
 }
 
-void ControlRenderingManager::onRenderResultsReady(const QList<RenderResult>& results)
+void ControlRenderingManager::onRenderInfosReady(const QList<RenderInfo>& infos)
 {
-    for (const RenderResult& result : results)
-        emit renderDone(result);
+    for (const RenderInfo& info : infos)
+        emit renderDone(info);
 
     if (g_initScheduled)
         g_initScheduled = false;
