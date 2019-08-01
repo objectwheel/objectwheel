@@ -22,7 +22,6 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
   , m_gui(false)
   , m_popup(false)
   , m_window(false)
-  , m_dragIn(false)
   , m_visible(true)
   , m_dir(dir)
   , m_uid(SaveUtils::controlUid(m_dir))
@@ -67,11 +66,6 @@ bool Control::popup() const
 bool Control::window() const
 {
     return m_window;
-}
-
-bool Control::dragIn() const
-{
-    return m_dragIn;
 }
 
 bool Control::hasErrors() const
@@ -201,12 +195,6 @@ void Control::setDir(const QString& dir)
     m_dir = dir;
 }
 
-void Control::setDragIn(bool dragIn)
-{
-    m_dragIn = dragIn;
-    update();
-}
-
 void Control::setIndex(quint32 index)
 {
     m_index = index;
@@ -234,13 +222,26 @@ void Control::dropControl(Control* control)
     // happens after reparent operation to take place at the very last
 }
 
+void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
+{
+    bool accepted = event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"));
+    event->setAccepted(accepted);
+//    setBeingHighlighted(accepted);
+}
+
+void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
+{
+    Q_UNUSED(event)
+//    setBeingHighlighted(false);
+}
+
 void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
 {
     // FIXME: Move this out of Control.cpp. Move everything unrelated with a Control
     // to DesignerView or DesignerScene or somewhere else that is related to.
     const QMimeData* mimeData = event->mimeData();
     if (mimeData->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
-        m_dragIn = false;
+//        setBeingHighlighted(false);
         event->acceptProposedAction();
         QString dir;
         RenderResult result;
@@ -260,83 +261,36 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
                                           tr("Operation failed, control has got problems."),
                                           QMessageBox::Critical);
         }
-        update();
-    }
-}
-
-void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
-{
-    if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
-        m_dragIn = true;
-        event->accept();
-    } else {
-        event->ignore();
-    }
-    update();
-}
-
-void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
-{
-    Q_UNUSED(event)
-    m_dragIn = false;
-    update();
-}
-
-void Control::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    DesignerItem::mouseMoveEvent(event);
-
-    if (!dragAccepted())
-        return;
-
-    if (!scene())
-        return;
-
-    Control* control = nullptr;
-    const QList<Control*>& controlsUnderCursor = scene()->controlsAt(event->scenePos());
-
-    if (controlsUnderCursor.size() > 1)
-        control = controlsUnderCursor.at(1);
-
-    if (control && control != this && !control->dragIn() && beingDragged()) {
-        control->setDragIn(true);
-
-        for (Control* childControls : scene()->currentForm()->childControls())
-            if (childControls != control)
-                childControls->setDragIn(false);
-
-        if (scene()->currentForm() != control)
-            scene()->currentForm()->setDragIn(false);
     }
 }
 
 void Control::ungrabMouseEvent(QEvent* event)
 {
-    if (!scene())
+//    if (!scene())
         return DesignerItem::ungrabMouseEvent(event);
 
-    // FIXME: items may also contain a form
-    const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
-    DesignerItem::ungrabMouseEvent(event); // Clears beingDragged state
+//    // FIXME: items may also contain a form
+//    const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
+//    DesignerItem::ungrabMouseEvent(event); // Clears beingDragged state
 
-    for (auto control : scene()->currentForm()->childControls()) {
-        if (control->dragIn() && parentControl() != control) {
-            for (auto sc : items) {
-                if (sc->parentItem() != control)
-                    control->dropControl((Control*)sc);
-            }
-            scene()->clearSelection();
-            control->setSelected(true);
-        }
-        control->setDragIn(false);
-    }
+//    for (auto control : scene()->currentForm()->childControls()) {
+//        if (control->dragIn() && parentControl() != control) {
+//            for (auto sc : items) {
+//                if (sc->parentItem() != control)
+//                    control->dropControl((Control*)sc);
+//            }
+//            scene()->clearSelection();
+//            control->setSelected(true);
+//        }
+//        control->setDragIn(false);
+//    }
 
-    if (scene()->currentForm()->dragIn() && parentItem() != scene()->currentForm()) {
-        scene()->currentForm()->dropControl(this);
-        scene()->clearSelection();
-        scene()->currentForm()->setSelected(true);
-    }
-    scene()->currentForm()->setDragIn(false);
+//    if (scene()->currentForm()->dragIn() && parentItem() != scene()->currentForm()) {
+//        scene()->currentForm()->dropControl(this);
+//        scene()->clearSelection();
+//        scene()->currentForm()->setSelected(true);
+//    }
+//    scene()->currentForm()->setDragIn(false);
 }
 
 QVariant Control::itemChange(int change, const QVariant& value)
@@ -386,7 +340,7 @@ void Control::paintImage(QPainter* painter)
 
 void Control::paintHighlight(QPainter* painter)
 {
-    if (m_dragIn) {
+    if (beingHighlighted()) {
         painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
         painter->fillRect(rect(), QColor(0, 0, 0, 20));
         painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
@@ -424,8 +378,8 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
 {
     paintImage(painter);
     paintOutline(painter);
-    paintHoverOutline(painter, option->state & QStyle::State_MouseOver);
     paintHighlight(painter);
+    paintHoverOutline(painter, option->state & QStyle::State_MouseOver);
 }
 
 void Control::updateRenderInfo(const RenderResult& result)
@@ -483,7 +437,7 @@ void Control::updateRenderInfo(const RenderResult& result)
     }
     m_image.setDevicePixelRatio(dpr);
 
-    update();
+    setImage(m_image); // FIXME
 
     emit renderInfoChanged(result.codeChanged);
 }
@@ -507,8 +461,10 @@ void Control::applyGeometryCorrection()
 
 void Control::setOuterRect(const QRectF& outerRect)
 {
-    m_outerRect = outerRect;
-    update();
+    if (m_outerRect != outerRect) {
+        m_outerRect = outerRect;
+        update();
+    }
 }
 
 void Control::setImage(const QImage& image)

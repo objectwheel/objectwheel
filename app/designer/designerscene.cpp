@@ -25,10 +25,10 @@
 #include <QTimer>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
-  , m_currentForm(nullptr)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
   , m_paintLayer(new PaintLayer)
+  , m_currentForm(nullptr)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -109,7 +109,46 @@ void DesignerScene::removeForm(Form* form)
 void DesignerScene::removeControl(Control* control)
 {
     removeItem(control);
-    delete control;
+    delete control; // Deletes its children too
+}
+
+DesignerItem* DesignerScene::highlightItem(const QPointF& pos) const
+{
+    QList<DesignerItem*> draggedItems = draggedResizedSelectedItems();
+    for (int i = draggedItems.size() - 1; i >= 0; --i) {
+        DesignerItem* item = draggedItems.at(i);
+        if (item->beingResized())
+            return nullptr;
+        draggedItems.append(item->childItems());
+    }
+
+    if (draggedItems.isEmpty())
+        return nullptr;
+
+    QList<DesignerItem*> itemsAtPos = items(pos);
+    for (int i = itemsAtPos.size() - 1; i >= 0; --i) {
+        DesignerItem* item = itemsAtPos.at(i);
+        if (draggedItems.contains(item))
+            itemsAtPos.removeAt(i);
+    }
+
+    // Ordered based on stacking order, higher first
+    for (DesignerItem* item : itemsAtPos) {
+        if (item->type() >= Control::Type)
+            return item;
+    }
+
+    return nullptr;
+}
+
+void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsScene::mouseMoveEvent(event);
+
+    if (m_recentHighlightedItem)
+        m_recentHighlightedItem->setBeingHighlighted(false);
+    if ((m_recentHighlightedItem = highlightItem(event->scenePos())))
+        m_recentHighlightedItem->setBeingHighlighted(true);
 }
 
 Form* DesignerScene::currentForm() const
@@ -188,8 +227,13 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
 void DesignerScene::shrinkSceneRect()
 {
     // 10 margin is a protection against a bug that
-    // form moves unexpectedly when a it is selected
+    // moves forms unexpectedly when they are selected
     setSceneRect(visibleItemsBoundingRect().adjusted(-10, -10, 10, 10));
+}
+
+bool DesignerScene::isLayerItem(DesignerItem* item) const
+{
+    return item == m_dragLayer || item == m_gadgetLayer || item == m_paintLayer;
 }
 
 QPointF DesignerScene::snapPosition(qreal x, qreal y)
@@ -231,19 +275,6 @@ QRectF DesignerScene::outerRect(const QRectF& rect)
     return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
 }
 
-QList<Control*> DesignerScene::controlsAt(const QPointF& pos) const
-{
-    QList<Control*> controls;
-
-    const QList<QGraphicsItem*>& itemsUnderPos = items(pos);
-    for (QGraphicsItem* item : itemsUnderPos) {
-        if (item->type() == Control::Type || item->type() == Form::Type)
-            controls.append(static_cast<Control*>(item));
-    }
-
-    return controls;
-}
-
 QList<Control*> DesignerScene::selectedControls() const
 {
     QList<Control*> selectedControls;
@@ -269,12 +300,8 @@ QRectF DesignerScene::visibleItemsBoundingRect() const
 {
     // Does not take untransformable items into account.
     QRectF boundingRect;
-    for (QGraphicsItem *item : items()) {
-        if (item == dragLayer())
-            continue;
-        if (item == gadgetLayer())
-            continue;
-        if (item == paintLayer())
+    for (DesignerItem *item : items()) {
+        if (isLayerItem(item))
             continue;
         if (item->isVisible())
             boundingRect |= item->sceneBoundingRect();

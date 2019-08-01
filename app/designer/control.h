@@ -5,7 +5,6 @@
 #include <designeritem.h>
 
 class DesignerScene;
-
 class Control : public DesignerItem
 {
     Q_OBJECT
@@ -22,7 +21,6 @@ public:
     bool form() const;
     bool popup() const;
     bool window() const;
-    bool dragIn() const;
     bool visible() const;
     bool hasErrors() const;
 
@@ -46,7 +44,6 @@ public:
 public:
     void setId(const QString& id);
     void setDir(const QString& dir);
-    void setDragIn(bool dragIn);
     void setIndex(quint32 index);
     void setImage(const QImage& image);
     void setOuterRect(const QRectF& outerRect);
@@ -56,7 +53,6 @@ protected:
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void ungrabMouseEvent(QEvent* event) override;
     QVariant itemChange(int change, const QVariant& value) override;
 
@@ -81,7 +77,6 @@ private:
     bool m_gui;
     bool m_popup;
     bool m_window;
-    bool m_dragIn;
     bool m_visible;
 
     quint32 m_index;

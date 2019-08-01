@@ -18,13 +18,14 @@ int Form::type() const
 
 void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
+    Control::mousePressEvent(event);
+
     if (event->button() == Qt::LeftButton && (flags() & ItemIsSelectable)) {
         bool select = true;
-        if (event->modifiers() & Qt::ControlModifier) { // Multiple-selection
+        if (event->modifiers() & Qt::ControlModifier) // Multiple-selection
             select = !isSelected();
-        } else if (!isSelected() && scene()) {
+        else if (!isSelected() && scene())
             scene()->clearSelection();
-        }
         QMetaObject::invokeMethod(this, std::bind(&Form::setSelected, this, select), Qt::QueuedConnection);
     }
     // We block the event, thus it can go up to QGraphicsView
@@ -42,17 +43,19 @@ void Form::paintBackground(QPainter* painter)
 
 void Form::paintForeground(QPainter* painter)
 {
+    // Draw grid view dots
     QVector<QPointF> points;
     for (qreal x = 0; x <= rect().right(); x += DesignerScene::gridSize()) {
         for (qreal y = 0; y <= rect().bottom(); y += DesignerScene::gridSize())
             points.append(QPointF(x, y));
     }
-    painter->setPen(DesignerScene::pen(Qt::darkGray, 1, false));
-    painter->drawPoints(points.data(), points.size()); // Grid view dots
-
     painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::pen(Qt::darkGray, 1, false));
+    painter->drawPoints(points.data(), points.size());
+
+    // Draw form frame
     painter->setPen(DesignerScene::pen(Qt::darkGray));
-    painter->drawRect(DesignerScene::outerRect(rect())); // Form frame
+    painter->drawRect(DesignerScene::outerRect(rect()));
 }
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)

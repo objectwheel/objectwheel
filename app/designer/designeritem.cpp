@@ -8,6 +8,7 @@ DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_resizable(false)
   , m_beingDragged(false)
   , m_beingResized(false)
+  , m_beingHighlighted(false)
   , m_dragAccepted(false)
   , m_inSetGeometry(false)
 {
@@ -19,9 +20,28 @@ int DesignerItem::type() const
     return Type;
 }
 
+bool DesignerItem::dragAccepted() const
+{
+    return m_dragAccepted;
+}
+
 bool DesignerItem::raised() const
 {
     return m_raised;
+}
+
+void DesignerItem::setRaised(bool raised)
+{
+    if (m_raised != raised) {
+        m_raised = raised;
+        if (m_raised) {
+            m_parentItemBeforeRaise = parentItem();
+            if (scene())
+                setParentItem(scene()->dragLayer());
+        } else {
+            setParentItem(m_parentItemBeforeRaise);
+        }
+    }
 }
 
 bool DesignerItem::resizable() const
@@ -29,9 +49,25 @@ bool DesignerItem::resizable() const
     return m_resizable;
 }
 
+void DesignerItem::setResizable(bool resizable)
+{
+    if (m_resizable != resizable) {
+        m_resizable = resizable;
+        emit resizableChanged();
+    }
+}
+
 bool DesignerItem::beingDragged() const
 {
     return m_beingDragged;
+}
+
+void DesignerItem::setBeingDragged(bool beingDragged)
+{
+    if (m_beingDragged != beingDragged) {
+        m_beingDragged = beingDragged;
+        emit beingDraggedChanged();
+    }
 }
 
 bool DesignerItem::beingResized() const
@@ -39,9 +75,26 @@ bool DesignerItem::beingResized() const
     return m_beingResized;
 }
 
-bool DesignerItem::dragAccepted() const
+void DesignerItem::setBeingResized(bool beingResized)
 {
-    return m_dragAccepted;
+    if (m_beingResized != beingResized) {
+        m_beingResized = beingResized;
+        emit beingResizedChanged();
+    }
+}
+
+bool DesignerItem::beingHighlighted() const
+{
+    return m_beingHighlighted;
+}
+
+void DesignerItem::setBeingHighlighted(bool beingHighlighted)
+{
+    if (m_beingHighlighted != beingHighlighted) {
+        m_beingHighlighted = beingHighlighted;
+        update();
+        emit beingHighlightedChanged();
+    }
 }
 
 qreal DesignerItem::width() const
@@ -192,44 +245,6 @@ QList<DesignerItem*> DesignerItem::childItems(bool recursive) const
 QPointF DesignerItem::mousePressPoint() const
 {
     return m_mousePressPoint;
-}
-
-void DesignerItem::setRaised(bool raised)
-{
-    if (m_raised != raised) {
-        m_raised = raised;
-        if (m_raised) {
-            m_parentItemBeforeRaise = parentItem();
-            if (scene())
-                setParentItem(scene()->dragLayer());
-        } else {
-            setParentItem(m_parentItemBeforeRaise);
-        }
-    }
-}
-
-void DesignerItem::setResizable(bool resizable)
-{
-    if (m_resizable != resizable) {
-        m_resizable = resizable;
-        emit resizableChanged();
-    }
-}
-
-void DesignerItem::setBeingDragged(bool beingDragged)
-{
-    if (m_beingDragged != beingDragged) {
-        m_beingDragged = beingDragged;
-        emit beingDraggedChanged();
-    }
-}
-
-void DesignerItem::setBeingResized(bool beingResized)
-{
-    if (m_beingResized != beingResized) {
-        m_beingResized = beingResized;
-        emit beingResizedChanged();
-    }
 }
 
 bool DesignerItem::event(QEvent* event)

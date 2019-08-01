@@ -25,11 +25,22 @@ public:
     enum { Type = UserType + 1 };
     int type() const override;
 
-    bool raised() const;
-    bool resizable() const;
-    bool beingDragged() const;
-    bool beingResized() const;
     bool dragAccepted() const;
+
+    bool raised() const;
+    void setRaised(bool raised);
+
+    bool resizable() const;
+    void setResizable(bool resizable);
+
+    bool beingDragged() const;
+    void setBeingDragged(bool beingDragged);
+
+    bool beingResized() const;
+    void setBeingResized(bool beingResized);
+
+    bool beingHighlighted() const;
+    void setBeingHighlighted(bool beingHighlighted);
 
     qreal width() const;
     qreal height() const;
@@ -57,10 +68,6 @@ public:
 
 protected:
     QPointF mousePressPoint() const;
-    void setRaised(bool raised);
-    void setResizable(bool resizable);
-    void setBeingDragged(bool beingDragged);
-    void setBeingResized(bool beingResized);
 
 protected:
     bool event(QEvent* event) override;
@@ -79,15 +86,17 @@ private:
 signals:
     void doubleClicked();
     void geometryChanged();
+    void resizableChanged();
     void beingDraggedChanged();
     void beingResizedChanged();
-    void resizableChanged();
+    void beingHighlightedChanged();
 
 private:
     bool m_raised;
     bool m_resizable;
     bool m_beingDragged;
     bool m_beingResized;
+    bool m_beingHighlighted;
     bool m_dragAccepted;
     bool m_inSetGeometry;
     QRectF m_rect;

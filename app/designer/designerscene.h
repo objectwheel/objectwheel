@@ -36,18 +36,30 @@ public:
     void setCursor(Qt::CursorShape cursor);
     void prepareDragLayer(DesignerItem* item);
     void shrinkSceneRect();
+    bool isLayerItem(DesignerItem* item) const;
 
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
     PaintLayer* paintLayer() const;
 
     QList<Form*> forms() const;
+    QRectF visibleItemsBoundingRect() const;
     QVector<QLineF> guidelines() const;
-    QList<Control*> controlsAt(const QPointF& pos) const;
     QList<Control*> selectedControls() const;
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
-    QRectF visibleItemsBoundingRect() const;
+
+    template <typename... Args>
+    QList<DesignerItem*> items(Args&&... args) const
+    {
+        QList<DesignerItem*> items;
+        for (QGraphicsItem* item : QGraphicsScene::items(std::forward<Args>(args)...)) {
+            if (item->type() >= DesignerItem::Type)
+                items.append(static_cast<DesignerItem*>(item));
+        }
+        return items;
+
+    }
 
     static bool showMouseoverOutline();
     static int startDragDistance();
@@ -76,16 +88,23 @@ private:
     void removeForm(Form* form);
     void removeControl(Control* control);
 
+private:
+    DesignerItem* highlightItem(const QPointF& pos) const;
+
+private:
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+
 signals:
     void currentFormChanged(Form* currentForm);
 
 private:
-    QList<Form*> m_forms;
-    QPointer<Form> m_currentForm;
-    QList<DesignerItem*> m_siblingsBeforeDrag;
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
     PaintLayer* m_paintLayer;
+    QPointer<Form> m_currentForm;
+    QList<Form*> m_forms;
+    QPointer<DesignerItem> m_recentHighlightedItem;
+    QList<DesignerItem*> m_siblingsBeforeDrag;
 };
 
 #endif // FORMSCENE_H
