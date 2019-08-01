@@ -24,7 +24,7 @@ protected:
 protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void ungrabMouseEvent(QEvent* event) override;
+    void mouseUngrabEvent(QEvent* event) override;
 
 private:
     QPen m_pen;

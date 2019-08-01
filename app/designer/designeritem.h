@@ -77,7 +77,7 @@ protected:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 protected:
-    virtual void ungrabMouseEvent(QEvent* event);
+    virtual void mouseUngrabEvent(QEvent* event);
     virtual QVariant itemChange(int change, const QVariant& value);
 
 private:

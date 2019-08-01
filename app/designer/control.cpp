@@ -36,7 +36,7 @@ Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
     setFlag(ItemNegativeZStacksBehindParent);
 
     // Made it Qt::QueuedConnection in order to prevent
-    // ungrabMouseEvent to call beingDraggedChanged or
+    // mouseUngrabEvent to call beingDraggedChanged or
     // beingResizedChanged, thus preventing
     // applyGeometryCorrection to be called before
     // dropControl called, since it resets geometry correction
@@ -262,35 +262,6 @@ void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
                                           QMessageBox::Critical);
         }
     }
-}
-
-void Control::ungrabMouseEvent(QEvent* event)
-{
-//    if (!scene())
-        return DesignerItem::ungrabMouseEvent(event);
-
-//    // FIXME: items may also contain a form
-//    const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
-//    DesignerItem::ungrabMouseEvent(event); // Clears beingDragged state
-
-//    for (auto control : scene()->currentForm()->childControls()) {
-//        if (control->dragIn() && parentControl() != control) {
-//            for (auto sc : items) {
-//                if (sc->parentItem() != control)
-//                    control->dropControl((Control*)sc);
-//            }
-//            scene()->clearSelection();
-//            control->setSelected(true);
-//        }
-//        control->setDragIn(false);
-//    }
-
-//    if (scene()->currentForm()->dragIn() && parentItem() != scene()->currentForm()) {
-//        scene()->currentForm()->dropControl(this);
-//        scene()->clearSelection();
-//        scene()->currentForm()->setSelected(true);
-//    }
-//    scene()->currentForm()->setDragIn(false);
 }
 
 QVariant Control::itemChange(int change, const QVariant& value)

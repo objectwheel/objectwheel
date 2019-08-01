@@ -251,7 +251,7 @@ bool DesignerItem::event(QEvent* event)
 {
     switch (event->type()) {
     case QEvent::UngrabMouse:
-        ungrabMouseEvent(event);
+        mouseUngrabEvent(event);
         break;
     default:
         break;
@@ -329,7 +329,7 @@ void DesignerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
     Q_UNUSED(widget)
 }
 
-void DesignerItem::ungrabMouseEvent(QEvent* event)
+void DesignerItem::mouseUngrabEvent(QEvent* event)
 {
     Q_UNUSED(event)
     if ((flags() & ItemIsMovable) && m_dragAccepted) {

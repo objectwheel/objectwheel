@@ -33,7 +33,7 @@ private:
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void ungrabMouseEvent(QEvent* event) override;
+    void mouseUngrabEvent(QEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:

@@ -145,14 +145,14 @@ void ResizerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void ResizerItem::ungrabMouseEvent(QEvent* event)
+void ResizerItem::mouseUngrabEvent(QEvent* event)
 {
     if (dragAccepted() && targetItem() && targetItem()->beingResized()) {
         targetItem()->setBeingDragged(false);
         targetItem()->setBeingResized(false);
     }
 
-    GadgetItem::ungrabMouseEvent(event); // Clears dragAccepted state
+    GadgetItem::mouseUngrabEvent(event); // Clears dragAccepted state
 }
 
 void ResizerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

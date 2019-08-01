@@ -93,6 +93,7 @@ private:
 
 private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 signals:
     void currentFormChanged(Form* currentForm);

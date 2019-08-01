@@ -136,7 +136,7 @@ void HeadlineItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
 }
 
-void HeadlineItem::ungrabMouseEvent(QEvent* event)
+void HeadlineItem::mouseUngrabEvent(QEvent* event)
 {
     if (dragAccepted() && targetItem() && targetItem()->raised()) {
         if (scene())
@@ -145,7 +145,7 @@ void HeadlineItem::ungrabMouseEvent(QEvent* event)
         targetItem()->setBeingDragged(false);
     }
 
-    GadgetItem::ungrabMouseEvent(event); // Clears dragAccepted state
+    GadgetItem::mouseUngrabEvent(event); // Clears dragAccepted state
 }
 
 void HeadlineItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)

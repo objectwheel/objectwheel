@@ -151,6 +151,34 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         m_recentHighlightedItem->setBeingHighlighted(true);
 }
 
+void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    QGraphicsScene::mouseReleaseEvent(event);
+
+    // FIXME: items may also contain a form
+//    const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
+//    DesignerItem::mouseUngrabEvent(event); // Clears beingDragged state
+
+//    for (auto control : scene()->currentForm()->childControls()) {
+//        if (control->dragIn() && parentControl() != control) {
+//            for (auto sc : items) {
+//                if (sc->parentItem() != control)
+//                    control->dropControl((Control*)sc);
+//            }
+//            scene()->clearSelection();
+//            control->setSelected(true);
+//        }
+//        control->setDragIn(false);
+//    }
+
+//    if (scene()->currentForm()->dragIn() && parentItem() != scene()->currentForm()) {
+//        scene()->currentForm()->dropControl(this);
+//        scene()->clearSelection();
+//        scene()->currentForm()->setSelected(true);
+//    }
+//    scene()->currentForm()->setDragIn(false);
+}
+
 Form* DesignerScene::currentForm() const
 {
     return m_currentForm.data();
