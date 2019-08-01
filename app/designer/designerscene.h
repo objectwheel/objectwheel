@@ -7,6 +7,7 @@
 
 class GadgetLayer;
 class PaintLayer;
+class QMimeData;
 
 class DesignerScene final : public QGraphicsScene
 {
@@ -89,12 +90,16 @@ private:
     void removeControl(Control* control);
 
 private:
+    DesignerItem* dropItem(const QPointF& pos) const;
     DesignerItem* highlightItem(const QPointF& pos) const;
     void reparentControl(Control* control, Control* parentControl) const;
 
 private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
+    void dragMoveEvent(QGraphicsSceneDragDropEvent* event) override;
+    void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
+    void dropEvent(QGraphicsSceneDragDropEvent* event) override;
 
 signals:
     void currentFormChanged(Form* currentForm);

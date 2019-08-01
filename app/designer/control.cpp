@@ -200,48 +200,6 @@ void Control::setIndex(quint32 index)
     m_index = index;
 }
 
-void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
-{
-    bool accepted = event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"));
-    event->setAccepted(accepted);
-//    setBeingHighlighted(accepted);
-}
-
-void Control::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
-{
-    Q_UNUSED(event)
-//    setBeingHighlighted(false);
-}
-
-void Control::dropEvent(QGraphicsSceneDragDropEvent* event)
-{
-    // FIXME: Move this out of Control.cpp. Move everything unrelated with a Control
-    // to DesignerView or DesignerScene or somewhere else that is related to.
-    const QMimeData* mimeData = event->mimeData();
-    if (mimeData->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
-//        setBeingHighlighted(false);
-        event->acceptProposedAction();
-        QString dir;
-        RenderResult result;
-        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
-        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-render-result")), result);
-
-        if (scene())
-            scene()->clearSelection();
-        // NOTE: Use actual Control position for scene, since createControl deals with margins
-        auto newControl = ControlCreationManager::createControl(
-                    this, dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
-                    result.boundingRect.size(), result.image);
-        if (newControl) {
-            newControl->setSelected(true);
-        } else {
-            UtilityFunctions::showMessage(0, tr("Oops"),
-                                          tr("Operation failed, control has got problems."),
-                                          QMessageBox::Critical);
-        }
-    }
-}
-
 QVariant Control::itemChange(int change, const QVariant& value)
 {    
     if (change == ItemPositionChange && beingDragged()) {

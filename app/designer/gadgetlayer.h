@@ -11,8 +11,6 @@ class GadgetLayer final : public DesignerItem
     Q_OBJECT
     Q_DISABLE_COPY(GadgetLayer)
 
-    friend class DesignerScene; // TODO: Remove me later with the assert
-
 public:
     explicit GadgetLayer(DesignerItem* parent = nullptr);
     void addResizers(DesignerItem* item);

@@ -15,7 +15,9 @@
 #include <designerview.h>
 #include <mainwindow.h>
 #include <hashfactory.h>
+#include <utilityfunctions.h>
 
+#include <QMimeData>
 #include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -113,6 +115,16 @@ void DesignerScene::removeControl(Control* control)
     delete control; // Deletes its children too
 }
 
+DesignerItem* DesignerScene::dropItem(const QPointF& pos) const
+{
+    // Ordered based on stacking order, higher first
+    for (DesignerItem* item : items(pos)) {
+        if (item->type() >= Control::Type)
+            return item;
+    }
+    return nullptr;
+}
+
 DesignerItem* DesignerScene::highlightItem(const QPointF& pos) const
 {
     QList<DesignerItem*> draggedItems = draggedResizedSelectedItems();
@@ -161,11 +173,12 @@ void DesignerScene::reparentControl(Control* control, Control* parentControl) co
     // compressed setPos'es in the list, We want the setPos that
     // happens after reparent operation to take place at the very last
 }
-
+#include <QDebug>
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
 
+    qDebug() << "moveee";
     if (m_recentHighlightedItem)
         m_recentHighlightedItem->setBeingHighlighted(false);
     if ((m_recentHighlightedItem = highlightItem(event->scenePos())))
@@ -176,7 +189,7 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     const QList<DesignerItem*>& draggedItems = draggedResizedSelectedItems();
 
-    QGraphicsScene::mouseReleaseEvent(event);
+    QGraphicsScene::mouseReleaseEvent(event); // Clears beingResized and beingDragged states etc
 
     if (m_recentHighlightedItem) {
         if (!draggedItems.isEmpty() && draggedItems.first()->parentItem() != m_recentHighlightedItem) {
@@ -187,6 +200,63 @@ void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
             clearSelection();
             m_recentHighlightedItem->setSelected(true);
         }
+        m_recentHighlightedItem->setBeingHighlighted(false);
+        m_recentHighlightedItem.clear();
+    }
+}
+
+void DesignerScene::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
+{
+    QGraphicsScene::dragMoveEvent(event);
+
+    bool mimeOk = event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"));
+    if (mimeOk) {
+        if ((m_recentHighlightedItem = highlightItem(event->scenePos()))) {
+            m_recentHighlightedItem->setBeingHighlighted(true);
+            event->setAccepted(true);
+        }
+    } else {
+        event->setAccepted(false);
+    }
+}
+
+void DesignerScene::dragLeaveEvent(QGraphicsSceneDragDropEvent* event)
+{
+    QGraphicsScene::dragLeaveEvent(event);
+
+    if (m_recentHighlightedItem) {
+        m_recentHighlightedItem->setBeingHighlighted(false);
+        m_recentHighlightedItem.clear();
+    }
+}
+
+void DesignerScene::dropEvent(QGraphicsSceneDragDropEvent* event)
+{
+    QGraphicsScene::dropEvent(event);
+
+    const QMimeData* mimeData = event->mimeData();
+    const bool mimeOk = mimeData->hasFormat(QStringLiteral("application/x-objectwheel-tool"));
+    if (mimeOk && m_recentHighlightedItem) {
+        event->acceptProposedAction();
+        QString dir;
+        RenderResult result;
+        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-tool")), dir);
+        UtilityFunctions::pull(mimeData->data(QStringLiteral("application/x-objectwheel-render-result")), result);
+
+        clearSelection();
+        // NOTE: Use actual Control position for scene, since createControl deals with margins
+        auto newControl = ControlCreationManager::createControl(
+                    static_cast<Control*>(m_recentHighlightedItem.data()),
+                    dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
+                    result.boundingRect.size(), result.image);
+        if (newControl) {
+            newControl->setSelected(true);
+        } else {
+            UtilityFunctions::showMessage(0, tr("Oops"),
+                                          tr("Operation failed, control has got problems."),
+                                          QMessageBox::Critical);
+        }
+
         m_recentHighlightedItem->setBeingHighlighted(false);
         m_recentHighlightedItem.clear();
     }
@@ -254,11 +324,7 @@ void DesignerScene::setCursor(Qt::CursorShape cursor)
 
 void DesignerScene::prepareDragLayer(DesignerItem* item)
 {
-    if (item == 0)
-        return;
-
     m_siblingsBeforeDrag = item->siblingItems();
-
     if (const DesignerItem* parentItem = item->parentItem()) {
         m_dragLayer->setTransform(QTransform::fromTranslate(parentItem->scenePos().x(),
                                                             parentItem->scenePos().y()));
@@ -342,9 +408,7 @@ QRectF DesignerScene::visibleItemsBoundingRect() const
     // Does not take untransformable items into account.
     QRectF boundingRect;
     for (DesignerItem *item : items()) {
-        if (isLayerItem(item))
-            continue;
-        if (item->isVisible())
+        if (item->isVisible() && !isLayerItem(item))
             boundingRect |= item->sceneBoundingRect();
     }
     return boundingRect.adjusted(-10, -15, 10, 10);
@@ -573,7 +637,6 @@ QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
 
 void DesignerScene::discharge()
 {
-    Q_ASSERT(m_gadgetLayer->m_resizerHash.isEmpty());
     clearSelection();
     m_forms.clear();
     m_currentForm.clear();

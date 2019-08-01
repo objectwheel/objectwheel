@@ -50,12 +50,7 @@ public:
     void setOuterRect(const QRectF& outerRect);
 
 protected:
-    void dropEvent(QGraphicsSceneDragDropEvent* event) override;
-    void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
-    void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;
     QVariant itemChange(int change, const QVariant& value) override;
-
-protected:
     void paintImage(QPainter* painter);
     void paintHighlight(QPainter* painter);
     void paintOutline(QPainter* painter);
