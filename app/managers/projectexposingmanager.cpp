@@ -41,6 +41,7 @@ void ProjectExposingManager::exposeProject()
         auto form = new Form;
         form->setDir(formPath);
         form->setUid(SaveUtils::controlUid(form->dir()));
+        form->setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
         ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(form, SaveUtils::controlIndex(form->dir()), ControlPropertyManager::NoOption);
 
@@ -59,6 +60,8 @@ void ProjectExposingManager::exposeProject()
 
         connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
                 form, &Control::setRenderInfo);
+        connect(ControlRenderingManager::instance(), &ControlRenderingManager::devicePixelRatioChanged,
+                form, &Control::setDevicePixelRatio);
         connect(form, &Control::doubleClicked,
                 form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
         connect(form, &Control::renderInfoChanged,
@@ -75,6 +78,7 @@ void ProjectExposingManager::exposeProject()
             auto control = new Control;
             control->setDir(childPath);
             control->setUid(SaveUtils::controlUid(control->dir()));
+            control->setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
             ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
             ControlPropertyManager::setIndex(control, SaveUtils::controlIndex(control->dir()), ControlPropertyManager::NoOption);
 
@@ -100,6 +104,8 @@ void ProjectExposingManager::exposeProject()
 
             connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
                     control, &Control::setRenderInfo);
+            connect(ControlRenderingManager::instance(), &ControlRenderingManager::devicePixelRatioChanged,
+                    control, &Control::setDevicePixelRatio);
             connect(control, &Control::doubleClicked,
                     control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
             connect(control, &Control::renderInfoChanged,

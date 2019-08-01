@@ -50,6 +50,9 @@ public:
     void setImage(const QImage& image);
     void setOuterRect(const QRectF& outerRect);
 
+    qreal devicePixelRatio() const;
+    void setDevicePixelRatio(const qreal& devicePixelRatio);
+
 protected:
     QVariant itemChange(int change, const QVariant& value) override;
     void paintImage(QPainter* painter);
@@ -69,6 +72,7 @@ signals:
     void renderInfoChanged(bool codeChanged);
 
 private:
+    qreal m_devicePixelRatio;
     quint32 m_index;
     QString m_dir;
     QString m_id;

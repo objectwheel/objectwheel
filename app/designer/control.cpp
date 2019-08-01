@@ -5,13 +5,13 @@
 #include <hashfactory.h>
 #include <paintutils.h>
 #include <toolutils.h>
-#include <controlrenderingmanager.h>
 
 #include <QCursor>
 #include <QPainter>
 #include <QStyleOption>
 
 Control::Control(Control* parent) : DesignerItem(parent)
+  , m_devicePixelRatio(1)
   , m_snapMargin(QSizeF(0, 0))
 {
     m_renderInfo.gui = false;
@@ -286,7 +286,6 @@ void Control::setRenderInfo(const RenderInfo& info)
     if (info.uid != uid())
         return;
 
-    const qreal dpr = ControlRenderingManager::devicePixelRatio();
     m_renderInfo = info;
 
     setResizable(gui());
@@ -323,18 +322,28 @@ void Control::setRenderInfo(const RenderInfo& info)
     }
 
     if (hasErrors())
-        m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), dpr);
+        m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), devicePixelRatio());
     if (m_renderInfo.image.isNull() && !gui())
-        m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), dpr);
+        m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), devicePixelRatio());
     if (visible() && gui() && PaintUtils::isBlankImage(m_renderInfo.image)) {
         m_renderInfo.boundingRect = rect();
-        m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), dpr);
+        m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
     }
-    m_renderInfo.image.setDevicePixelRatio(dpr);
+    m_renderInfo.image.setDevicePixelRatio(devicePixelRatio());
 
     setImage(m_renderInfo.image); // FIXME
 
     emit renderInfoChanged(info.codeChanged);
+}
+
+qreal Control::devicePixelRatio() const
+{
+    return m_devicePixelRatio;
+}
+
+void Control::setDevicePixelRatio(const qreal& devicePixelRatio)
+{
+    m_devicePixelRatio = devicePixelRatio;
 }
 
 void Control::setUid(const QString& uid)

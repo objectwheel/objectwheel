@@ -45,6 +45,7 @@ signals:
     void renderDone(const RenderInfo& info);
     void previewDone(const RenderInfo& info);
     void initializationProgressChanged(int progress);
+    void devicePixelRatioChanged(qreal devicePixelRatio);
 
 private:
     explicit ControlRenderingManager(QObject* parent = nullptr);

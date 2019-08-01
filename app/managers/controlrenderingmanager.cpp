@@ -178,6 +178,7 @@ void ControlRenderingManager::setDevicePixelRatio(const qreal& value)
     s_devicePixelRatio = value;
     s_commandDispatcher->scheduleDevicePixelRatioUpdate(value);
     qputenv("RENDERER_DEVICE_PIXEL_RATIO", QByteArray::number(value));
+    emit instance()->devicePixelRatioChanged(s_devicePixelRatio);
 }
 
 void ControlRenderingManager::scheduleTerminate()

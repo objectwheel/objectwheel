@@ -41,6 +41,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     auto form = new Form;
     form->setDir(newFormRootPath);
     form->setUid(SaveUtils::controlUid(form->dir()));
+    form->setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
     ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
 
     s_designerScene->addForm(form);
@@ -54,6 +55,8 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     ControlPropertyManager::setIndex(form, form->siblings().size(), ControlPropertyManager::SaveChanges);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             form, &Control::setRenderInfo);
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::devicePixelRatioChanged,
+            form, &Control::setDevicePixelRatio);
     connect(form, &Control::doubleClicked,
             form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
     connect(form, &Control::renderInfoChanged,
@@ -93,6 +96,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     auto control = new Control;
     control->setDir(newControlRootPath);
     control->setUid(SaveUtils::controlUid(control->dir()));
+    control->setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
     ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     // Since all the controls are "non-gui" at first, this
@@ -116,6 +120,8 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             control, &Control::setRenderInfo);
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::devicePixelRatioChanged,
+            control, &Control::setDevicePixelRatio);
     connect(control, &Control::doubleClicked,
             control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
     connect(control, &Control::renderInfoChanged,
@@ -148,6 +154,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         auto childControl = new Control;
         childControl->setDir(childPath);
         childControl->setUid(SaveUtils::controlUid(childControl->dir()));
+        childControl->setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
         ControlPropertyManager::setId(childControl, ParserUtils::id(childControl->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         // For non-gui items; others aren't affected, since
@@ -158,6 +165,8 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
         connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
                 childControl, &Control::setRenderInfo);
+        connect(ControlRenderingManager::instance(), &ControlRenderingManager::devicePixelRatioChanged,
+                childControl, &Control::setDevicePixelRatio);
         connect(childControl, &Control::doubleClicked,
                 childControl, [=] { ControlPropertyManager::instance()->doubleClicked(childControl); });
         connect(childControl, &Control::renderInfoChanged,

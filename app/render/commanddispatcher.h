@@ -39,7 +39,7 @@ private:
 signals:
     void initializationProgressChanged(int progress);
     void renderDone(const QList<RenderInfo>& infos);
-    void previewDone(const RenderInfo& infos);
+    void previewDone(const RenderInfo& info);
 
 private:
     RenderServer* m_server;
