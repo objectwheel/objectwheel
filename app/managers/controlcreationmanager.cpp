@@ -38,7 +38,9 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
         return nullptr;
     }
 
-    auto form = new Form(newFormRootPath);
+    auto form = new Form;
+    form->setDir(newFormRootPath);
+    form->setUid(SaveUtils::controlUid(form->dir()));
     ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
 
     s_designerScene->addForm(form);
@@ -88,7 +90,9 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         return nullptr;
     }
 
-    auto control = new Control(newControlRootPath);
+    auto control = new Control;
+    control->setDir(newControlRootPath);
+    control->setUid(SaveUtils::controlUid(control->dir()));
     ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
     // Since all the controls are "non-gui" at first, this
@@ -141,7 +145,9 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         Control* parentControl = controlTree.value(SaveUtils::toDoubleUp(childPath));
         Q_ASSERT(parentControl);
 
-        auto childControl = new Control(childPath);
+        auto childControl = new Control;
+        childControl->setDir(childPath);
+        childControl->setUid(SaveUtils::controlUid(childControl->dir()));
         ControlPropertyManager::setId(childControl, ParserUtils::id(childControl->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
         // For non-gui items; others aren't affected, since

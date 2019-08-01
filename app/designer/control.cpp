@@ -1,30 +1,21 @@
 #include <form.h>
-#include <saveutils.h>
-#include <suppressor.h>
 #include <designerscene.h>
-#include <controlrenderingmanager.h>
-#include <controlpropertymanager.h>
-#include <controlcreationmanager.h>
-#include <paintutils.h>
-#include <parserutils.h>
 #include <utilityfunctions.h>
-#include <toolutils.h>
-#include <scenesettings.h>
+#include <controlpropertymanager.h>
 #include <hashfactory.h>
+#include <paintutils.h>
+#include <toolutils.h>
+#include <controlrenderingmanager.h>
 
 #include <QCursor>
 #include <QPainter>
-#include <QMimeData>
-#include <QGraphicsSceneDragDropEvent>
 #include <QStyleOption>
 
-Control::Control(const QString& dir, Control* parent) : DesignerItem(parent)
+Control::Control(Control* parent) : DesignerItem(parent)
   , m_gui(false)
   , m_popup(false)
   , m_window(false)
   , m_visible(true)
-  , m_dir(dir)
-  , m_uid(SaveUtils::controlUid(m_dir))
   , m_snapMargin(QSizeF(0, 0))
 {
     setAcceptDrops(true);
@@ -348,6 +339,11 @@ void Control::updateRenderInfo(const RenderResult& result)
     setImage(m_image); // FIXME
 
     emit renderInfoChanged(result.codeChanged);
+}
+
+void Control::setUid(const QString& uid)
+{
+    m_uid = uid;
 }
 
 void Control::applyGeometryCorrection()

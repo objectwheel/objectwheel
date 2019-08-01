@@ -38,7 +38,9 @@ void ProjectExposingManager::exposeProject()
     QMap<Control*, Control*> firstChilds;
 
     for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
-        auto form = new Form(formPath);
+        auto form = new Form;
+        form->setDir(formPath);
+        form->setUid(SaveUtils::controlUid(form->dir()));
         ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(form, SaveUtils::controlIndex(form->dir()), ControlPropertyManager::NoOption);
 
@@ -70,7 +72,9 @@ void ProjectExposingManager::exposeProject()
             Control* parentControl = controlTree.value(SaveUtils::toDoubleUp(childPath));
             Q_ASSERT(parentControl);
 
-            auto control = new Control(childPath);
+            auto control = new Control;
+            control->setDir(childPath);
+            control->setUid(SaveUtils::controlUid(control->dir()));
             ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
             ControlPropertyManager::setIndex(control, SaveUtils::controlIndex(control->dir()), ControlPropertyManager::NoOption);
 

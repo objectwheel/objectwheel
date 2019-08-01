@@ -43,9 +43,10 @@ public:
     QList<Control*> childControls(bool recursive = true) const;
 
 public:
-    void setId(const QString& id);
-    void setDir(const QString& dir);
     void setIndex(quint32 index);
+    void setId(const QString& id);
+    void setUid(const QString& uid);
+    void setDir(const QString& dir);
     void setImage(const QImage& image);
     void setOuterRect(const QRectF& outerRect);
 
@@ -58,7 +59,7 @@ protected:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
 
 protected:
-    explicit Control(const QString& dir, Control* parent = nullptr);
+    explicit Control(Control* parent = nullptr);
 
 private slots:
     void applyGeometryCorrection();

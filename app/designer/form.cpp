@@ -5,7 +5,7 @@
 #include <QCursor>
 #include <QGraphicsSceneMouseEvent>
 
-Form::Form(const QString& dir, Form* parent) : Control(dir, parent)
+Form::Form(Control* parent) : Control(parent)
 {
     setCursor(Qt::ArrowCursor);
     setFlag(ItemIsMovable, false);
