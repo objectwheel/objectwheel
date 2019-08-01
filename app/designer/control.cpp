@@ -200,28 +200,6 @@ void Control::setIndex(quint32 index)
     m_index = index;
 }
 
-void Control::dropControl(Control* control)
-{
-    Q_ASSERT(!control->form());
-
-    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
-            | ControlPropertyManager::CompressedCall;
-
-    if (control->gui())
-        options |= ControlPropertyManager::UpdateRenderer;
-    // NOTE: Do not move this assignment below setParent,
-    // because parent change effects the newPos result
-    control->m_geometryCorrection = QRectF();
-    control->m_geometryHash = HashFactory::generate();
-    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(this, QPointF()));
-    ControlPropertyManager::setParent(control, this, ControlPropertyManager::SaveChanges
-                                      | ControlPropertyManager::UpdateRenderer);
-    ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
-    // NOTE: We compress setPos because there might be some other
-    // compressed setPos'es in the list, We want the setPos that
-    // happens after reparent operation to take place at the very last
-}
-
 void Control::dragEnterEvent(QGraphicsSceneDragDropEvent* event)
 {
     bool accepted = event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"));

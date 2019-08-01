@@ -12,6 +12,7 @@ class Control : public DesignerItem
 
     friend class ControlCreationManager; // For constructor
     friend class ProjectExposingManager; // For constructor
+    friend class DesignerScene; // For m_geometryCorrection and m_geometryHash
 
 public:
     enum { Type = UserType + 2 };
@@ -49,7 +50,6 @@ public:
     void setOuterRect(const QRectF& outerRect);
 
 protected:
-    void dropControl(Control* control);
     void dropEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragEnterEvent(QGraphicsSceneDragDropEvent* event) override;
     void dragLeaveEvent(QGraphicsSceneDragDropEvent* event) override;

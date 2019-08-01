@@ -14,6 +14,7 @@
 #include <centralwidget.h>
 #include <designerview.h>
 #include <mainwindow.h>
+#include <hashfactory.h>
 
 #include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
@@ -141,6 +142,26 @@ DesignerItem* DesignerScene::highlightItem(const QPointF& pos) const
     return nullptr;
 }
 
+void DesignerScene::reparentControl(Control* control, Control* parentControl) const
+{
+    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+            | ControlPropertyManager::CompressedCall;
+
+    if (control->gui())
+        options |= ControlPropertyManager::UpdateRenderer;
+    // NOTE: Do not move this assignment below setParent,
+    // because parent change effects the newPos result
+    control->m_geometryCorrection = QRectF();
+    control->m_geometryHash = HashFactory::generate();
+    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, QPointF()));
+    ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges
+                                      | ControlPropertyManager::UpdateRenderer);
+    ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
+    // NOTE: We compress setPos because there might be some other
+    // compressed setPos'es in the list, We want the setPos that
+    // happens after reparent operation to take place at the very last
+}
+
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsScene::mouseMoveEvent(event);
@@ -153,30 +174,22 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
+    const QList<DesignerItem*>& draggedItems = draggedResizedSelectedItems();
+
     QGraphicsScene::mouseReleaseEvent(event);
 
-    // FIXME: items may also contain a form
-//    const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
-//    DesignerItem::mouseUngrabEvent(event); // Clears beingDragged state
-
-//    for (auto control : scene()->currentForm()->childControls()) {
-//        if (control->dragIn() && parentControl() != control) {
-//            for (auto sc : items) {
-//                if (sc->parentItem() != control)
-//                    control->dropControl((Control*)sc);
-//            }
-//            scene()->clearSelection();
-//            control->setSelected(true);
-//        }
-//        control->setDragIn(false);
-//    }
-
-//    if (scene()->currentForm()->dragIn() && parentItem() != scene()->currentForm()) {
-//        scene()->currentForm()->dropControl(this);
-//        scene()->clearSelection();
-//        scene()->currentForm()->setSelected(true);
-//    }
-//    scene()->currentForm()->setDragIn(false);
+    if (m_recentHighlightedItem) {
+        if (!draggedItems.isEmpty() && draggedItems.first()->parentItem() != m_recentHighlightedItem) {
+            for (DesignerItem* draggedItem : draggedItems) {
+                reparentControl(static_cast<Control*>(draggedItem),
+                                static_cast<Control*>(m_recentHighlightedItem.data()));
+            }
+            clearSelection();
+            m_recentHighlightedItem->setSelected(true);
+        }
+        m_recentHighlightedItem->setBeingHighlighted(false);
+        m_recentHighlightedItem.clear();
+    }
 }
 
 Form* DesignerScene::currentForm() const
