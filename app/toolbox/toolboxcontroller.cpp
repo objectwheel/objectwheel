@@ -76,6 +76,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                                     m_toolboxPane->devicePixelRatioF())));
             }
             info.image = drag->pixmap().toImage();
+            info.image.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
             drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-info"),
                                       UtilityFunctions::push(info));
             locked = false;

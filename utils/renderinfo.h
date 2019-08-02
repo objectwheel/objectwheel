@@ -1,5 +1,5 @@
-#ifndef RENDERRESULT_H
-#define RENDERRESULT_H
+#ifndef RENDERINFO_H
+#define RENDERINFO_H
 
 #include <QMap>
 #include <QHash>
@@ -134,4 +134,4 @@ inline QDataStream& operator<< (QDataStream& out, const Enum& e)
     return out;
 }
 
-#endif // RENDERRESULT_H
+#endif // RENDERINFO_H

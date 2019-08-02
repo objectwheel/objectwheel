@@ -1,6 +1,6 @@
 #include <commanddispatcher.h>
 #include <rendersocket.h>
-#include <renderresult.h>
+#include <renderinfo.h>
 #include <utilityfunctions.h>
 
 using namespace UtilityFunctions;

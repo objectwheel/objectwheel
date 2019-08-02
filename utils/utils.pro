@@ -16,7 +16,7 @@ HEADERS += \
     $$PWD/saveutils.h \
     $$PWD/parserutils.h \
     $$PWD/qmlformatter.h \
-    $$PWD/renderresult.h \
+    $$PWD/renderinfo.h \
     $$PWD/hashfactory.h \
     $$PWD/utils_global.h \
     $$PWD/quicktheme.h \

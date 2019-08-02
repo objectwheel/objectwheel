@@ -24,25 +24,6 @@ QImage PaintUtils::renderTransparentImage(const QSizeF& size, qreal dpr)
     return renderFilledImage(size, Qt::transparent, dpr);
 }
 
-QImage PaintUtils::renderInitialControlImage(const QSizeF& size, qreal dpr)
-{
-    QImage dest = renderTransparentImage(size, dpr);
-
-    QImage source(":/images/wait.png");
-    source.setDevicePixelRatio(dpr);
-
-    QRectF destRect{{}, size};
-    QRectF sourceRect{{}, QSizeF{24, 24}};
-    sourceRect.moveCenter(destRect.center());
-
-    QPainter p(&dest);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.drawImage(sourceRect, source, source.rect());
-    p.end();
-
-    return dest;
-}
-
 QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id, qreal dpr)
 {
     QBrush brush("#cb363b");

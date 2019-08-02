@@ -1,6 +1,6 @@
 #include <renderutils.h>
 #include <saveutils.h>
-#include <renderresult.h>
+#include <renderinfo.h>
 #include <utilityfunctions.h>
 #include <parserutils.h>
 
@@ -152,6 +152,8 @@ void doComponentCompleteRecursive(QObject* object, const RenderEngine* engine)
         if (item && DesignerSupport::isComponentComplete(item))
             return;
 
+        DesignerSupport::emitComponentCompleteSignalForAttachedProperty(object);
+
         QList<QObject*> childList = object->children();
 
         if (item) {
@@ -169,7 +171,7 @@ void doComponentCompleteRecursive(QObject* object, const RenderEngine* engine)
         if (item) {
             static_cast<QQmlParserStatus*>(item)->componentComplete();
         } else {
-            QQmlParserStatus *qmlParserStatus = dynamic_cast< QQmlParserStatus*>(object);
+            QQmlParserStatus *qmlParserStatus = dynamic_cast<QQmlParserStatus*>(object);
             if (qmlParserStatus)
                 qmlParserStatus->componentComplete();
         }
@@ -519,7 +521,6 @@ void RenderUtils::doComplete(RenderEngine::ControlInstance* instance, const Rend
         QQuickItem* item = RenderUtils::guiItem(instance->object);
         Q_ASSERT(item);
         disableTextCursor(item);
-        DesignerSupport::emitComponentCompleteSignalForAttachedProperty(item);
         item->update();
     }
 }

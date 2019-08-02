@@ -3,7 +3,7 @@
 #include <renderserver.h>
 #include <commanddispatcher.h>
 #include <hashfactory.h>
-#include <renderresult.h>
+#include <renderinfo.h>
 #include <utilityfunctions.h>
 
 #include <QThread>

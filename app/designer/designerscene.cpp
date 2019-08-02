@@ -186,8 +186,8 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     // NOTE: Use actual Control position for scene, since createControl deals with margins
     Control* newControl = ControlCreationManager::createControl(
                 static_cast<Control*>(m_recentHighlightedItem.data()),
-                dir, DesignerScene::snapPosition(event->pos() - QPointF(5, 5)),
-                info.boundingRect.size(), info.image);
+                dir, DesignerScene::snapPosition(event->scenePos() - QPointF(5, 5)),
+                info.boundingRect.size(), QPixmap::fromImage(info.image));
     if (newControl) {
         newControl->setSelected(true);
     } else {

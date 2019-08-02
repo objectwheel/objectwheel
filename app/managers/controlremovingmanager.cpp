@@ -39,17 +39,17 @@ void ControlRemovingManager::removeControl(Control* control, bool removeFromData
 
     if (control->form()) {
         ControlRenderingManager::scheduleFormDeletion(control->uid());
-        bool inUse = control == s_designerScene->currentForm();
-        s_designerScene->removeForm(static_cast<Form*>(control));
-        if (inUse && !s_designerScene->forms().isEmpty())
-            s_designerScene->setCurrentForm(s_designerScene->forms().first());
         if (removeFromDatabaseAlso)
             SaveManager::removeForm(control->dir());
+        bool inUse = control == s_designerScene->currentForm();
+        s_designerScene->removeForm(static_cast<Form*>(control)); // deletes control
+        if (inUse && !s_designerScene->forms().isEmpty())
+            s_designerScene->setCurrentForm(s_designerScene->forms().first());
     } else {
         ControlRenderingManager::scheduleControlDeletion(control->uid());
-        s_designerScene->removeControl(control);
         if (removeFromDatabaseAlso)
             SaveManager::removeControl(control->dir());
+        s_designerScene->removeControl(control); // deletes control
     }
 }
 

@@ -100,11 +100,6 @@ QMarginsF Control::margins() const
     return m_margins;
 }
 
-QImage Control::image() const
-{
-    return m_renderInfo.image;
-}
-
 Control* Control::parentControl() const
 {
     return static_cast<Control*>(parentItem());
@@ -187,6 +182,15 @@ void Control::setDir(const QString& dir)
     m_dir = dir;
 }
 
+void Control::setPixmap(const QPixmap& pixmap)
+{
+    if (m_pixmap.cacheKey() != pixmap.cacheKey()) {
+        m_pixmap = pixmap;
+        m_pixmap.setDevicePixelRatio(devicePixelRatio());
+        update();
+    }
+}
+
 void Control::setIndex(quint32 index)
 {
     m_index = index;
@@ -227,13 +231,14 @@ QVariant Control::itemChange(int change, const QVariant& value)
     return DesignerItem::itemChange(change, value);
 }
 
-void Control::paintImage(QPainter* painter)
+void Control::paintContent(QPainter* painter)
 {
-    if (m_renderInfo.image.isNull())
+    if (m_pixmap.isNull())
         return;
     if (beingResized())
         painter->setClipRect(rect());
-    painter->drawImage(m_renderInfo.boundingRect, m_renderInfo.image);
+    QRectF r(m_renderInfo.boundingRect.topLeft(), QSizeF(m_pixmap.size()) / m_pixmap.devicePixelRatioF());
+    painter->drawPixmap(r, m_pixmap, m_pixmap.rect());
     painter->setClipping(false);
 }
 
@@ -253,7 +258,7 @@ void Control::paintOutline(QPainter* painter)
     if (DesignerScene::outlineMode() == DesignerScene::ClippingDashLine)
         return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(rect()));
     if (DesignerScene::outlineMode() == DesignerScene::BoundingDashLine)
-        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(outerRect()));
+        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(m_renderInfo.boundingRect));
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(Qt::darkGray));
@@ -261,7 +266,7 @@ void Control::paintOutline(QPainter* painter)
     if (DesignerScene::outlineMode() == DesignerScene::ClippingSolidLine)
         return painter->drawRect(DesignerScene::outerRect(rect()));
     if (DesignerScene::outlineMode() == DesignerScene::BoundingSolidLine)
-        return painter->drawRect(DesignerScene::outerRect(outerRect()));
+        return painter->drawRect(DesignerScene::outerRect(m_renderInfo.boundingRect));
 }
 
 void Control::paintHoverOutline(QPainter* painter, bool hovered)
@@ -275,7 +280,7 @@ void Control::paintHoverOutline(QPainter* painter, bool hovered)
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
-    paintImage(painter);
+    paintContent(painter);
     paintOutline(painter);
     paintHighlight(painter);
     paintHoverOutline(painter, option->state & QStyle::State_MouseOver);
@@ -291,10 +296,7 @@ void Control::setRenderInfo(const RenderInfo& info)
     setResizable(gui());
     setZValue(property("z").toDouble());
     setFlag(QGraphicsItem::ItemClipsChildrenToShape, property("clip").toBool());
-    if (property("opacity").isValid())
-        setOpacity(property("opacity").toDouble());
-    else
-        setOpacity(1.0);
+    setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
 
     if (info.codeChanged)
         m_margins = UtilityFunctions::getMarginsFromProperties(info.properties);
@@ -329,11 +331,15 @@ void Control::setRenderInfo(const RenderInfo& info)
         m_renderInfo.boundingRect = rect();
         m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
     }
-    m_renderInfo.image.setDevicePixelRatio(devicePixelRatio());
 
-    setImage(m_renderInfo.image); // FIXME
+    setPixmap(QPixmap::fromImage(m_renderInfo.image));
 
     emit renderInfoChanged(info.codeChanged);
+}
+
+QPixmap Control::pixmap() const
+{
+    return m_pixmap;
 }
 
 qreal Control::devicePixelRatio() const
@@ -344,6 +350,7 @@ qreal Control::devicePixelRatio() const
 void Control::setDevicePixelRatio(const qreal& devicePixelRatio)
 {
     m_devicePixelRatio = devicePixelRatio;
+    update();
 }
 
 void Control::setUid(const QString& uid)
@@ -367,21 +374,10 @@ void Control::applyGeometryCorrection()
     m_geometryCorrection = QRectF();
 }
 
-void Control::setOuterRect(const QRectF& outerRect)
+void Control::setBoundingRect(const QRectF& boundingRect)
 {
-    if (m_renderInfo.boundingRect != outerRect) {
-        m_renderInfo.boundingRect = outerRect;
+    if (m_renderInfo.boundingRect != boundingRect) {
+        m_renderInfo.boundingRect = boundingRect;
         update();
     }
-}
-
-void Control::setImage(const QImage& image)
-{
-    m_renderInfo.image = image;
-    update();
-}
-
-QRectF Control::outerRect() const
-{
-    return m_renderInfo.boundingRect;
 }

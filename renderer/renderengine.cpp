@@ -2,7 +2,7 @@
 #include <commandlineparser.h>
 #include <saveutils.h>
 #include <renderutils.h>
-#include <renderresult.h>
+#include <renderinfo.h>
 #include <utilityfunctions.h>
 #include <components.h>
 #include <paintutils.h>
@@ -810,23 +810,21 @@ QImage RenderEngine::renderItem(QQuickItem* item, QRectF& boundingRect, bool pre
     RenderUtils::updateDirtyNodesRecursive(item, this);
 
     boundingRect = preview ? QRectF(QPointF(), item->size()) : this->boundingRect(item);
-    QSize size = boundingRect.size().toSize();
-    size *= devicePixelRatio();
+    const QSize& size = (boundingRect.size() * devicePixelRatio()).toSize();
 
-    QImage renderImage(size, QImage::Format_ARGB32_Premultiplied);
-    renderImage.setDevicePixelRatio(devicePixelRatio());
-
-    if (bgColor.isValid())
-        renderImage.fill(bgColor);
-    else
-        renderImage.fill(Qt::transparent);
-
-    QPainter painter(&renderImage);
-    painter.drawImage(QRect({0, 0}, size / devicePixelRatio()),
-                      m_designerSupport.renderImageForItem(item, boundingRect, size),
-                      QRect({0, 0}, size));
-
-    return renderImage;
+    if (bgColor.isValid()) {
+        QImage original = m_designerSupport.renderImageForItem(item, boundingRect, size);
+        original.setDevicePixelRatio(devicePixelRatio());
+        QImage modified(original.size(), QImage::Format_ARGB32_Premultiplied);
+        modified.setDevicePixelRatio(devicePixelRatio());
+        modified.fill(bgColor);
+        QPainter painter(&modified);
+        painter.drawImage(QRectF(QPointF(), QSizeF(original.size()) / devicePixelRatio()),
+                          original, original.rect());
+        return modified;
+    } else {
+        return m_designerSupport.renderImageForItem(item, boundingRect, size);
+    }
 }
 
 void RenderEngine::refreshBindings(QQmlContext* context)
@@ -924,7 +922,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     if (instance->gui) {
         QQuickItem* item = RenderUtils::guiItem(instance->object);
         item->setFlag(QQuickItem::ItemHasContents, true);
-        static_cast<QQmlParserStatus*>(item)->classBegin();
+        if (auto qml = dynamic_cast<QQmlParserStatus*>(instance->object))
+            qml->classBegin();
     }
 
     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
@@ -1036,7 +1035,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     if (SaveUtils::isForm(dir)) {
         QQuickItem* formItem = RenderUtils::guiItem(instance);
         formItem->setFlag(QQuickItem::ItemHasContents, true);
-        static_cast<QQmlParserStatus*>(formItem)->classBegin();
+        if (auto qml = dynamic_cast<QQmlParserStatus*>(instance->object))
+            qml->classBegin();
         formItem->setParentItem(m_view->rootObject());
         m_designerSupport.refFromEffectItem(formItem);
         formItem->update();
@@ -1057,7 +1057,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
         if (instance->gui) {
             QQuickItem* item = RenderUtils::guiItem(instance->object);
             item->setFlag(QQuickItem::ItemHasContents, true);
-            static_cast<QQmlParserStatus*>(item)->classBegin();
+            if (auto qml = dynamic_cast<QQmlParserStatus*>(instance->object))
+                qml->classBegin();
         }
 
         QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();

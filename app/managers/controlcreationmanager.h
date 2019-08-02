@@ -34,10 +34,8 @@ private:
     static Control* createControl(Control* targetParentControl,
                                   const QString& controlRootPath,
                                   const QPointF& pos,
-                                  const QSizeF& initialSize = QSizeF(40, 40),
-                                  const QImage& initialImage =
-            PaintUtils::renderInitialControlImage({40, 40},
-            ControlRenderingManager::devicePixelRatio()));
+                                  const QSizeF& initialSize,
+                                  const QPixmap& initialPixmap);
 
 signals:
     void controlCreated(Control* control);

@@ -1,7 +1,7 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
-#include <renderresult.h>
+#include <renderinfo.h>
 #include <designeritem.h>
 
 class DesignerScene;
@@ -29,9 +29,8 @@ public:
     QString id() const;
     QString uid() const;
     QString dir() const;
-    QImage image() const;
-    QRectF outerRect() const;
     QMarginsF margins() const;
+    QPixmap pixmap() const;
 
     QVector<QString> events() const;
     QVector<QmlError> errors() const;
@@ -47,15 +46,15 @@ public:
     void setId(const QString& id);
     void setUid(const QString& uid);
     void setDir(const QString& dir);
-    void setImage(const QImage& image);
-    void setOuterRect(const QRectF& outerRect);
+    void setPixmap(const QPixmap& pixmap);
+    void setBoundingRect(const QRectF& outerRect);
 
     qreal devicePixelRatio() const;
     void setDevicePixelRatio(const qreal& devicePixelRatio);
 
 protected:
     QVariant itemChange(int change, const QVariant& value) override;
-    void paintImage(QPainter* painter);
+    void paintContent(QPainter* painter);
     void paintHighlight(QPainter* painter);
     void paintOutline(QPainter* painter);
     void paintHoverOutline(QPainter* painter, bool hovered);
@@ -77,6 +76,7 @@ private:
     QString m_dir;
     QString m_id;
     QString m_uid;
+    QPixmap m_pixmap;
     QSizeF m_snapMargin;
     QMarginsF m_margins;
     QString m_geometryHash;

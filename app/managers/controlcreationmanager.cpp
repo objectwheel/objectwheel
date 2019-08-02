@@ -85,7 +85,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
                                                const QString& controlRootPath,
                                                const QPointF& pos,
                                                const QSizeF& initialSize,
-                                               const QImage& initialImage)
+                                               const QPixmap& initialPixmap)
 {
     const QString& newControlRootPath = SaveManager::addControl(controlRootPath, targetParentControl->dir());
     if (newControlRootPath.isEmpty()) {
@@ -113,8 +113,8 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     // main.qml file and also correct render engine position,
     // and correct actual designer position of the control because
     // it is corrupted by the render engine lately.
-    control->setImage(initialImage);
-    control->setOuterRect(QRectF(QPointF(), initialSize));
+    control->setPixmap(initialPixmap);
+    control->setBoundingRect(QRectF(QPointF(), initialSize));
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPropertyManager::setSize(control, initialSize, ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);
