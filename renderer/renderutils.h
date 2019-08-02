@@ -23,6 +23,7 @@ public:
     static QList<QQuickItem*> allItems(RenderEngine::ControlInstance* formInstance);
     static QVector<QString> events(const RenderEngine::ControlInstance* instance);
     static QVector<PropertyNode> properties(const RenderEngine::ControlInstance* instance);
+    static QMarginsF margins(const RenderEngine::ControlInstance* instance);
     static QList<RenderEngine::ControlInstance*> allSubInstance(RenderEngine::ControlInstance* parentInstance);
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
     static bool isVisible(const RenderEngine::ControlInstance* instance);

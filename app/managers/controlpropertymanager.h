@@ -47,11 +47,6 @@ public:
     static void setProperty(Control* control, const QString& propertyName, const QString& parserValue,
                             const QVariant& propertyValue, Options options);
 
-    static qreal xWithMargin(const Control* control, qreal x, bool add);
-    static qreal yWithMargin(const Control* control, qreal y, bool add);
-    static QPointF posWithMargin(const Control* control, const QPointF& pos, bool add);
-    static QRectF geoWithMargin(const Control* control, const QRectF& geo, bool add);
-
 private slots:
     void handleDirtyProperties();
 

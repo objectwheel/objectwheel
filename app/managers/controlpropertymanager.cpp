@@ -68,19 +68,18 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        qreal newX = xWithMargin(control, x, false);
         if (options & SaveChanges) {
             if (isInt)
-                SaveManager::setProperty(control, "x", QString::number(int(newX)));
+                SaveManager::setProperty(control, "x", QString::number(int(x)));
             else
-                SaveManager::setProperty(control, "x", QString::number(newX));
+                SaveManager::setProperty(control, "x", QString::number(x));
         }
 
         if (options & UpdateRenderer) {
             if (isInt)
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(newX), geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(x), geometryHash));
             else
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(newX, geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(x, geometryHash));
         }
 
         emit instance()->geometryChanged(control);
@@ -108,19 +107,18 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        qreal newY = yWithMargin(control, y, false);
         if (options & SaveChanges) {
             if (isInt)
-                SaveManager::setProperty(control, "y", QString::number(int(newY)));
+                SaveManager::setProperty(control, "y", QString::number(int(y)));
             else
-                SaveManager::setProperty(control, "y", QString::number(newY));
+                SaveManager::setProperty(control, "y", QString::number(y));
         }
 
         if (options & UpdateRenderer) {
             if (isInt)
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(newY), geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(y), geometryHash));
             else
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(newY, geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(y, geometryHash));
         }
 
         emit instance()->geometryChanged(control);
@@ -257,24 +255,23 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos,
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        const QPointF& newPos = posWithMargin(control, pos, false);
         if (options & SaveChanges) {
             if (isInt) {
-                SaveManager::setProperty(control, "x", QString::number(int(newPos.x())));
-                SaveManager::setProperty(control, "y", QString::number(int(newPos.y())));
+                SaveManager::setProperty(control, "x", QString::number(int(pos.x())));
+                SaveManager::setProperty(control, "y", QString::number(int(pos.y())));
             } else {
-                SaveManager::setProperty(control, "x", QString::number(newPos.x()));
-                SaveManager::setProperty(control, "y", QString::number(newPos.y()));
+                SaveManager::setProperty(control, "x", QString::number(pos.x()));
+                SaveManager::setProperty(control, "y", QString::number(pos.y()));
             }
         }
 
         if (options & UpdateRenderer) {
             if (isInt) {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(newPos.x())));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(newPos.y()), geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(pos.x())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(pos.y()), geometryHash));
             } else {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(newPos.x()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(newPos.y(), geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(pos.x()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(pos.y(), geometryHash));
             }
         }
 
@@ -356,32 +353,31 @@ void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometr
         if (!s_dirtyPropertyProcessingTimer->isActive())
             s_dirtyPropertyProcessingTimer->start();
     } else {
-        const QRectF& newGoe = geoWithMargin(control, geometry, false);
         if (options & SaveChanges) {
             if (isInt) {
-                SaveManager::setProperty(control, "x", QString::number(int(newGoe.x())));
-                SaveManager::setProperty(control, "y", QString::number(int(newGoe.y())));
-                SaveManager::setProperty(control, "width", QString::number(int(newGoe.width())));
-                SaveManager::setProperty(control, "height", QString::number(int(newGoe.height())));
+                SaveManager::setProperty(control, "x", QString::number(int(geometry.x())));
+                SaveManager::setProperty(control, "y", QString::number(int(geometry.y())));
+                SaveManager::setProperty(control, "width", QString::number(int(geometry.width())));
+                SaveManager::setProperty(control, "height", QString::number(int(geometry.height())));
             } else {
-                SaveManager::setProperty(control, "x", QString::number(newGoe.x()));
-                SaveManager::setProperty(control, "y", QString::number(newGoe.y()));
-                SaveManager::setProperty(control, "width", QString::number(newGoe.width()));
-                SaveManager::setProperty(control, "height", QString::number(newGoe.height()));
+                SaveManager::setProperty(control, "x", QString::number(geometry.x()));
+                SaveManager::setProperty(control, "y", QString::number(geometry.y()));
+                SaveManager::setProperty(control, "width", QString::number(geometry.width()));
+                SaveManager::setProperty(control, "height", QString::number(geometry.height()));
             }
         }
 
         if (options & UpdateRenderer) {
             if (isInt) {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(newGoe.x())));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(newGoe.y())));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(int(newGoe.width())));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(int(newGoe.height()), geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(int(geometry.x())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(int(geometry.y())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(int(geometry.width())));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(int(geometry.height()), geometryHash));
             } else {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(newGoe.x()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(newGoe.y()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(newGoe.width()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(newGoe.height(), geometryHash));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometryHashedValue(geometry.x()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometryHashedValue(geometry.y()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometryHashedValue(geometry.width()));
+                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometryHashedValue(geometry.height(), geometryHash));
             }
         }
 
@@ -405,8 +401,11 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         // FIXME: Should we also add UpdateRenderer here?
         setIndex(control, std::numeric_limits<quint32>::max(), SaveChanges);
 
-    if (!(options & DontApplyDesigner))
+    if (!(options & DontApplyDesigner)) {
         control->setParentItem(parentControl);
+        control->setTransform(QTransform::fromTranslate(parentControl->margins().left(),
+                                                        parentControl->margins().top()));
+    }
 
     if (options & CompressedCall) {
         DirtyProperty dirtyProperty;
@@ -502,30 +501,4 @@ void ControlPropertyManager::setProperty(Control* control, const QString& proper
         ControlRenderingManager::schedulePropertyUpdate(control->uid(), propertyName, propertyValue);
 
     emit instance()->propertyChanged(control, propertyName);
-}
-
-qreal ControlPropertyManager::xWithMargin(const Control* control, qreal x, bool add)
-{
-    qreal leftMargin = 0;
-    if (control->parentControl())
-        leftMargin = control->parentControl()->margins().left();
-    return add ? x + leftMargin : x - leftMargin;
-}
-
-qreal ControlPropertyManager::yWithMargin(const Control* control, qreal y, bool add)
-{
-    qreal topMargin = 0;
-    if (control->parentControl())
-        topMargin = control->parentControl()->margins().top();
-    return add ? y + topMargin : y - topMargin;
-}
-
-QPointF ControlPropertyManager::posWithMargin(const Control* control, const QPointF& pos, bool add)
-{
-    return QPointF(xWithMargin(control, pos.x(), add), yWithMargin(control, pos.y(), add));
-}
-
-QRectF ControlPropertyManager::geoWithMargin(const Control* control, const QRectF& geo, bool add)
-{
-    return QRectF(posWithMargin(control, geo.topLeft(), add), geo.size());
 }

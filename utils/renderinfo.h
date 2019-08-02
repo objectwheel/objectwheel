@@ -30,6 +30,7 @@ struct RenderInfo {
     QString geometryHash;
     QString uid;
     QImage image;
+    QMarginsF margins;
     QRectF boundingRect;
     QVector<QmlError> errors;
     QVector<QString> events;
@@ -87,6 +88,7 @@ inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
     in >> info.gui;
     in >> info.uid;
     in >> info.image;
+    in >> info.margins;
     in >> info.boundingRect;
     in >> info.popup;
     in >> info.window;
@@ -104,6 +106,7 @@ inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
     out << info.gui;
     out << info.uid;
     out << info.image;
+    out << info.margins;
     out << info.boundingRect;
     out << info.popup;
     out << info.window;

@@ -583,7 +583,7 @@ void DesignerView::onPasteAction()
         } else {
             newControl = ControlCreationManager::createControl(
                         scene()->currentForm(), control->dir(),
-                        DesignerScene::snapPosition(control->pos() + QPointF(10, 10)),
+                        DesignerScene::snapPosition(control->mapToItem(scene()->currentForm(), QPointF(10, 10))),
                         control->size(), control->pixmap());
         }
 
@@ -611,7 +611,10 @@ void DesignerView::onMoveUpAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        control->moveBy(0, - 1);
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(0, -scene()->gridSize()),
+                                       ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
+                                       |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
+
 }
 
 void DesignerView::onMoveDownAction()
@@ -619,7 +622,10 @@ void DesignerView::onMoveDownAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        control->moveBy(0, 1);
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(0, scene()->gridSize()),
+                                       ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
+                                       |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
+
 }
 
 void DesignerView::onMoveRightAction()
@@ -627,7 +633,9 @@ void DesignerView::onMoveRightAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        control->moveBy(1, 0);
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(scene()->gridSize(), 0),
+                                       ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
+                                       |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
 }
 
 void DesignerView::onMoveLeftAction()
@@ -635,7 +643,10 @@ void DesignerView::onMoveLeftAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        control->moveBy(- 1, 0);
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(-scene()->gridSize(), 0),
+                                       ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
+                                       |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
+
 }
 
 void DesignerView::onSendBackAction()

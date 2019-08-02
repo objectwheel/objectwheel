@@ -78,7 +78,6 @@ private:
     QString m_uid;
     QPixmap m_pixmap;
     QSizeF m_snapMargin;
-    QMarginsF m_margins;
     QString m_geometryHash;
     QRectF m_geometryCorrection;
     RenderInfo m_renderInfo;

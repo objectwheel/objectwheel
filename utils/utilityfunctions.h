@@ -86,8 +86,6 @@ QString toPrettyBytesString(qint64 bytes);
 QString toToolTip(const QString& str);
 bool comboContainsWord(QComboBox* comboBox, const QString& word);
 QRectF getGeometryFromProperties(const QVector<PropertyNode>& properties);
-QMarginsF getMarginsFromProperties(const QVector<PropertyNode>& properties);
-void putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins);
 QVariant getProperty(const QString& property, const QVector<PropertyNode>& properties);
 Enum getEnum(const QString& name, const QVector<PropertyNode>& properties);
 QVariantMap localDeviceInfo();

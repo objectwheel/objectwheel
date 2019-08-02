@@ -19,6 +19,7 @@ Control::Control(Control* parent) : DesignerItem(parent)
     m_renderInfo.window = false;
     m_renderInfo.visible = true;
 
+    setResizable(true);
     setAcceptHoverEvents(true);
     setCursor(Qt::OpenHandCursor);
 
@@ -97,7 +98,7 @@ QString Control::dir() const
 
 QMarginsF Control::margins() const
 {
-    return m_margins;
+    return m_renderInfo.margins;
 }
 
 Control* Control::parentControl() const
@@ -297,9 +298,8 @@ void Control::setRenderInfo(const RenderInfo& info)
     setZValue(property("z").toDouble());
     setFlag(QGraphicsItem::ItemClipsChildrenToShape, property("clip").toBool());
     setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
-
-    if (info.codeChanged)
-        m_margins = UtilityFunctions::getMarginsFromProperties(info.properties);
+    for (Control* childControl : childControls(false))
+        childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
 
     if (!gui() || hasErrors()) {
         m_geometryCorrection = QRectF();
@@ -363,12 +363,12 @@ void Control::applyGeometryCorrection()
     if (m_geometryCorrection.isNull() || !gui() || beingDragged() || beingResized())
         return;
 
-    ControlPropertyManager::setSize(this, m_geometryCorrection.size(), ControlPropertyManager::NoOption);
+    ControlPropertyManager::setSize(this, m_geometryCorrection.size(),
+                                    ControlPropertyManager::NoOption);
 
     if (!form()) {
-        ControlPropertyManager::setPos(
-                    this, ControlPropertyManager::posWithMargin(this, m_geometryCorrection.topLeft(), true),
-                    ControlPropertyManager::NoOption);
+        ControlPropertyManager::setPos(this, m_geometryCorrection.topLeft(),
+                                       ControlPropertyManager::NoOption);
     }
 
     m_geometryCorrection = QRectF();

@@ -182,13 +182,13 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-tool")), dir);
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-render-info")), info);
 
-    clearSelection();
     // NOTE: Use actual Control position for scene, since createControl deals with margins
     Control* newControl = ControlCreationManager::createControl(
                 static_cast<Control*>(m_recentHighlightedItem.data()),
-                dir, DesignerScene::snapPosition(event->scenePos() - QPointF(5, 5)),
+                dir, DesignerScene::snapPosition(m_recentHighlightedItem->mapFromScene(event->scenePos() - QPointF(5, 5))),
                 info.boundingRect.size(), QPixmap::fromImage(info.image));
     if (newControl) {
+        clearSelection();
         newControl->setSelected(true);
     } else {
         UtilityFunctions::showMessage(nullptr,

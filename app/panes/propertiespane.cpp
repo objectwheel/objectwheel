@@ -479,9 +479,9 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
             options |= ControlPropertyManager::DontApplyDesigner;
 
         if (propertyName == "x") {
-            ControlPropertyManager::setX(control, ControlPropertyManager::xWithMargin(control, value, true), options);
+            ControlPropertyManager::setX(control, value, options);
         } else if (propertyName == "y") {
-            ControlPropertyManager::setY(control, ControlPropertyManager::yWithMargin(control, value, true), options);
+            ControlPropertyManager::setY(control, value, options);
         } else if (propertyName == "z") {
             ControlPropertyManager::setZ(control, value, options);
         } else if (propertyName == "width") {
@@ -1058,7 +1058,7 @@ void PropertiesPane::discharge()
 // FIXME: This function has severe performance issues.
 void PropertiesPane::onSceneSelectionChange()
 {
-//    return; // FIXME
+    return; // FIXME
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;
     const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
 
@@ -1309,7 +1309,7 @@ void PropertiesPane::onControlGeometryChange(const Control* control)
     if (selectedControl != control)
         return;
 
-    const QRectF& geometry = ControlPropertyManager::geoWithMargin(control, control->geometry(), false);
+    const QRectF& geometry = control->geometry();
 
     bool xUnknown = false, yUnknown = false;
     if (control->form()) {

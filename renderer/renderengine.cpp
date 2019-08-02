@@ -212,6 +212,7 @@ void RenderEngine::updateControlCode(const QString& uid)
     oldInstance->window = instance->window;
     oldInstance->visible = instance->visible;
     oldInstance->codeChanged = instance->codeChanged;
+    oldInstance->margins = instance->margins;
     oldInstance->geometryHash = instance->geometryHash;
     oldInstance->id = instance->id;
     oldInstance->object = instance->object;
@@ -305,6 +306,7 @@ void RenderEngine::updateFormCode(const QString& uid)
     oldFormInstance->window = instance->window;
     oldFormInstance->visible = instance->visible;
     oldFormInstance->codeChanged = instance->codeChanged;
+    oldFormInstance->margins = instance->margins;
     oldFormInstance->geometryHash = instance->geometryHash;
     oldFormInstance->id = instance->id;
     oldFormInstance->object = instance->object;
@@ -393,6 +395,7 @@ void RenderEngine::preview(const QString& url)
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
         info.geometryHash = instance->geometryHash;
+        info.margins = instance->margins;
         info.properties = RenderUtils::properties(instance);
         info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
@@ -740,7 +743,9 @@ QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::C
         info.window = instance->window;
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
+        info.margins = instance->margins;
         info.geometryHash = instance->geometryHash;
+        info.margins = RenderUtils::margins(instance);
         info.properties = RenderUtils::properties(instance);
         info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
@@ -946,6 +951,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
         item->update();
     }
 
+    instance->margins = RenderUtils::margins(instance);
+
     return instance;
 }
 
@@ -1081,6 +1088,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
         item->setVisible(true); // Especially important for popup
         item->update();
     }
+
+    instance->margins = RenderUtils::margins(instance);
 
     return instance;
 }

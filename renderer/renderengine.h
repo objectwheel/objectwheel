@@ -40,6 +40,7 @@ public:
         QString uid;
         QString dir;
         QString geometryHash;
+        QMarginsF margins;
         QObject* object;
         QQmlContext* context;
         QVector<QmlError> errors;

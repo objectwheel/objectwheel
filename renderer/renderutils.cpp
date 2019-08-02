@@ -734,25 +734,6 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
 
     QVector<Enum> enums;
     QMap<QString, QVariant> properties;
-
-    if (instance->gui && instance->codeChanged) {
-        QQuickItem* parentItem = RenderUtils::guiItem(object);
-        Q_ASSERT(parentItem);
-        QQmlComponent com(qmlEngine(object));
-        com.setData("import QtQuick 2.7;Item{anchors.fill:parent}", QUrl());
-        QQuickItem* item = qobject_cast<QQuickItem*>(com.create(qmlContext(object)));
-        Q_ASSERT(item);
-        QQmlProperty defaultProperty(object);
-        Q_ASSERT(defaultProperty.isValid());
-        QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-        childList.append(item);
-        const QRectF rect(item->mapToItem(parentItem, {0, 0}), item->size());
-        QMarginsF margins(rect.left(), rect.top(), parentItem->width() - rect.right(),
-                          parentItem->height() - rect.bottom());
-        UtilityFunctions::putMarginsToProperties(properties, margins);
-        item->deleteLater();
-    }
-
     auto metaObject = object->metaObject();
     while (metaObject) {
         if (metaObject->propertyOffset() - metaObject->propertyCount() == 0) {
@@ -803,4 +784,26 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
     }
 
     return propertyNodes;
+}
+
+QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
+{
+    if (instance->gui) {
+        QQuickItem* parentItem = RenderUtils::guiItem(instance->object);
+        Q_ASSERT(parentItem);
+        QQmlComponent com(qmlEngine(instance->object));
+        com.setData("import QtQuick 2.7;Item{anchors.fill:parent}", QUrl());
+        QQuickItem* item = qobject_cast<QQuickItem*>(com.create(qmlContext(instance->object)));
+        Q_ASSERT(item);
+        QQmlProperty defaultProperty(instance->object);
+        Q_ASSERT(defaultProperty.isValid());
+        QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+        childList.append(item);
+        const QRectF rect(item->mapToItem(parentItem, QPointF()), item->size());
+        QMarginsF margins(rect.left(), rect.top(), parentItem->width() - rect.right(),
+                          parentItem->height() - rect.bottom());
+        item->deleteLater();
+        return margins;
+    }
+    return QMarginsF();
 }

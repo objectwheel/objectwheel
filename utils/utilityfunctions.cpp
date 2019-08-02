@@ -364,32 +364,6 @@ QRectF getGeometryFromProperties(const QVector<PropertyNode>& properties)
     return geometry;
 }
 
-QMarginsF getMarginsFromProperties(const QVector<PropertyNode>& properties)
-{
-    QMarginsF margins;
-    for (const PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName == "__ow_margins_left")
-                margins.setLeft(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "__ow_margins_top")
-                margins.setTop(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "__ow_margins_right")
-                margins.setRight(propertyNode.properties.value(propertyName).toReal());
-            else if (propertyName == "__ow_margins_bottom")
-                margins.setBottom(propertyNode.properties.value(propertyName).toReal());
-        }
-    }
-    return margins;
-}
-
-void putMarginsToProperties(QMap<QString, QVariant>& properties, const QMarginsF& margins)
-{
-    properties["__ow_margins_left"] = margins.left();
-    properties["__ow_margins_top"] = margins.top();
-    properties["__ow_margins_right"] = margins.right();
-    properties["__ow_margins_bottom"] = margins.bottom();
-}
-
 QVariant getProperty(const QString& property, const QVector<PropertyNode>& properties)
 {
     for (const PropertyNode& propertyNode : properties) {
