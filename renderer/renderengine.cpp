@@ -822,8 +822,10 @@ QImage RenderEngine::renderItem(QQuickItem* item, QRectF& boundingRect, bool pre
         original.setDevicePixelRatio(devicePixelRatio());
         QImage modified(original.size(), QImage::Format_ARGB32_Premultiplied);
         modified.setDevicePixelRatio(devicePixelRatio());
-        modified.fill(bgColor);
         QPainter painter(&modified);
+        painter.translate(-boundingRect.topLeft());
+        painter.fillRect(QRectF(QPointF(), item->size()), bgColor);
+        painter.translate(boundingRect.topLeft());
         painter.drawImage(QRectF(QPointF(), QSizeF(original.size()) / devicePixelRatio()),
                           original, original.rect());
         return modified;

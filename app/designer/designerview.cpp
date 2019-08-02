@@ -581,9 +581,11 @@ void DesignerView::onPasteAction()
                                               | ControlPropertyManager::UpdateRenderer);
             ControlRenderingManager::scheduleRefresh(scene()->currentForm()->uid());
         } else {
+            const QPointF margins(scene()->currentForm()->margins().left(),
+                                  scene()->currentForm()->margins().top());
             newControl = ControlCreationManager::createControl(
                         scene()->currentForm(), control->dir(),
-                        DesignerScene::snapPosition(control->mapToItem(scene()->currentForm(), QPointF(10, 10))),
+                        DesignerScene::snapPosition(control->mapToItem(scene()->currentForm(), QPointF(10, 10) - margins)),
                         control->size(), control->pixmap());
         }
 

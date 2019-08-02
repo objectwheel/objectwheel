@@ -169,7 +169,8 @@ void DesignerScene::reparentControl(Control* control, Control* parentControl) co
 
     // NOTE: Do not move this assignment below setParent,
     // because parent change effects the newPos result
-    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, QPointF()));
+    const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
+    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, -margins));
     ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
     ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
@@ -183,9 +184,11 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-render-info")), info);
 
     // NOTE: Use actual Control position for scene, since createControl deals with margins
+    Control* parentControl = static_cast<Control*>(m_recentHighlightedItem.data());
+    const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
     Control* newControl = ControlCreationManager::createControl(
-                static_cast<Control*>(m_recentHighlightedItem.data()),
-                dir, DesignerScene::snapPosition(m_recentHighlightedItem->mapFromScene(event->scenePos() - QPointF(5, 5))),
+                parentControl,
+                dir, DesignerScene::snapPosition(parentControl->mapFromScene(event->scenePos() - QPointF(5, 5) - margins)),
                 info.boundingRect.size(), QPixmap::fromImage(info.image));
     if (newControl) {
         clearSelection();
