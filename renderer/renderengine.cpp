@@ -400,7 +400,7 @@ void RenderEngine::preview(const QString& url)
         info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
         info.errors = instance->errors;
-        info.image = grabImage(instance, info.boundingRect);
+        info.image = grabImage(instance, info.surroundingRect);
         emit previewDone(info);
 
         auto ctx = instance->context;
@@ -750,7 +750,7 @@ QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::C
         info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
         info.errors = instance->errors;
-        info.image = grabImage(instance, info.boundingRect);
+        info.image = grabImage(instance, info.surroundingRect);
         infos.append(info);
 
         if (instance->errors.isEmpty() && instance->gui)

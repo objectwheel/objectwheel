@@ -50,14 +50,13 @@ public:
     RenderInfo renderInfo() const;
     void setRenderInfo(const RenderInfo& info);
 
-    void setBoundingRect(const QRectF& boundingRect);
-
     QVariant property(const QString& propertyName) const;
     Control* parentControl() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
 
 protected:
+    QRectF paintRect() const;
     void paintContent(QPainter* painter);
     void paintHighlight(QPainter* painter);
     void paintOutline(QPainter* painter);

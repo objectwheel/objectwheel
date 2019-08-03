@@ -194,7 +194,7 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     Control* newControl = ControlCreationManager::createControl(
                 parentControl,
                 dir, DesignerScene::snapPosition(parentControl->mapFromScene(event->scenePos() - QPointF(5, 5) - margins)),
-                info.boundingRect.size(), QPixmap::fromImage(info.image));
+                info.surroundingRect.size(), QPixmap::fromImage(info.image));
     if (newControl) {
         clearSelection();
         newControl->setSelected(true);

@@ -114,7 +114,6 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     // and correct actual designer position of the control because
     // it is corrupted by the render engine lately.
     control->setPixmap(initialPixmap);
-    control->setBoundingRect(QRectF(QPointF(), initialSize));
     ControlPropertyManager::setPos(control, pos, ControlPropertyManager::SaveChanges);
     ControlPropertyManager::setSize(control, initialSize, ControlPropertyManager::NoOption);
     ControlPropertyManager::setIndex(control, control->siblings().size(), ControlPropertyManager::SaveChanges);

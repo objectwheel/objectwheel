@@ -61,34 +61,14 @@ bool Control::window() const
     return m_renderInfo.window;
 }
 
-bool Control::hasErrors() const
-{
-    return !m_renderInfo.errors.isEmpty();
-}
-
 bool Control::visible() const
 {
     return m_renderInfo.visible;
 }
 
-quint32 Control::index() const
+bool Control::hasErrors() const
 {
-    return m_index;
-}
-
-QString Control::id() const
-{
-    return m_id;
-}
-
-QString Control::uid() const
-{
-    return m_uid;
-}
-
-QString Control::dir() const
-{
-    return m_dir;
+    return !m_renderInfo.errors.isEmpty();
 }
 
 QMarginsF Control::margins() const
@@ -96,9 +76,9 @@ QMarginsF Control::margins() const
     return m_renderInfo.margins;
 }
 
-Control* Control::parentControl() const
+QVector<QString> Control::events() const
 {
-    return static_cast<Control*>(parentItem());
+    return m_renderInfo.events;
 }
 
 QVector<QmlError> Control::errors() const
@@ -106,14 +86,131 @@ QVector<QmlError> Control::errors() const
     return m_renderInfo.errors;
 }
 
-QVector<QString> Control::events() const
-{
-    return m_renderInfo.events;
-}
-
 QVector<PropertyNode> Control::properties() const
 {
     return m_renderInfo.properties;
+}
+
+quint32 Control::index() const
+{
+    return m_index;
+}
+
+void Control::setIndex(quint32 index)
+{
+    m_index = index;
+}
+
+QString Control::id() const
+{
+    return m_id;
+}
+
+void Control::setId(const QString& id)
+{
+    if (m_id != id) {
+        m_id = id;
+        setToolTip(id);
+        setObjectName(id);
+        update();
+    }
+}
+
+QString Control::uid() const
+{
+    return m_uid;
+}
+
+void Control::setUid(const QString& uid)
+{
+    m_uid = uid;
+}
+
+QString Control::dir() const
+{
+    return m_dir;
+}
+
+void Control::setDir(const QString& dir)
+{
+    m_dir = dir;
+}
+
+QPixmap Control::pixmap() const
+{
+    return m_pixmap;
+}
+
+void Control::setPixmap(const QPixmap& pixmap)
+{
+    if (m_pixmap.cacheKey() != pixmap.cacheKey()) {
+        m_pixmap = pixmap;
+        m_pixmap.setDevicePixelRatio(devicePixelRatio());
+        update();
+    }
+}
+
+qreal Control::devicePixelRatio() const
+{
+    return m_devicePixelRatio;
+}
+
+void Control::setDevicePixelRatio(const qreal& devicePixelRatio)
+{
+    if (m_devicePixelRatio != devicePixelRatio) {
+        m_devicePixelRatio = devicePixelRatio;
+        m_pixmap.setDevicePixelRatio(devicePixelRatio);
+        update();
+    }
+}
+
+RenderInfo Control::renderInfo() const
+{
+    return m_renderInfo;
+}
+
+void Control::setRenderInfo(const RenderInfo& info)
+{
+    if (m_uid != info.uid)
+        return;
+
+    m_renderInfo = info;
+
+    setResizable(gui());
+    setZValue(property("z").toDouble());
+    setFlag(ItemClipsChildrenToShape, property("clip").toBool());
+    setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
+
+    for (Control* childControl : childControls(false))
+        childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
+
+    if (!gui() || hasErrors()) {
+        m_geometryCorrection = QRectF();
+        m_geometryHash.clear();
+    }
+
+    if (gui() && (m_geometryHash.isEmpty() || info.geometryHash == m_geometryHash)) {
+        m_geometryHash.clear();
+        m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(info.properties);
+        if (!beingDragged() && !beingResized())
+            applyGeometryCorrection();
+    }
+
+    if (!gui() && size() != QSizeF(40, 40)) {
+        if (!hasErrors() || size().isEmpty())
+            ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
+    }
+
+    if (hasErrors())
+        m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), devicePixelRatio());
+    if (m_renderInfo.image.isNull() && !gui())
+        m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), devicePixelRatio());
+    if (visible() && gui() && PaintUtils::isBlankImage(m_renderInfo.image))
+        m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
+
+    setPixmap(QPixmap::fromImage(m_renderInfo.image));
+
+    emit renderInfoChanged(info.codeChanged);
 }
 
 QList<Control*> Control::siblings() const
@@ -163,35 +260,6 @@ QVariant Control::property(const QString& propertyName) const
     return UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);
 }
 
-void Control::setId(const QString& id)
-{
-    if (m_id != id) {
-        m_id = id;
-        setToolTip(id);
-        setObjectName(id);
-        update();
-    }
-}
-
-void Control::setDir(const QString& dir)
-{
-    m_dir = dir;
-}
-
-void Control::setPixmap(const QPixmap& pixmap)
-{
-    if (m_pixmap.cacheKey() != pixmap.cacheKey()) {
-        m_pixmap = pixmap;
-        m_pixmap.setDevicePixelRatio(devicePixelRatio());
-        update();
-    }
-}
-
-void Control::setIndex(quint32 index)
-{
-    m_index = index;
-}
-
 QVariant Control::itemChange(int change, const QVariant& value)
 {    
     if (change == ItemPositionChange && beingDragged()) {
@@ -233,7 +301,7 @@ void Control::paintContent(QPainter* painter)
         return;
     if (beingResized())
         painter->setClipRect(rect());
-    QRectF r(m_renderInfo.boundingRect.topLeft(), QSizeF(m_pixmap.size()) / m_pixmap.devicePixelRatioF());
+    QRectF r(paintRect().topLeft(), QSizeF(m_pixmap.size()) / m_pixmap.devicePixelRatioF());
     painter->drawPixmap(r, m_pixmap, m_pixmap.rect());
     painter->setClipping(false);
 }
@@ -254,7 +322,7 @@ void Control::paintOutline(QPainter* painter)
     if (DesignerScene::outlineMode() == DesignerScene::ClippingDashLine)
         return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(rect()));
     if (DesignerScene::outlineMode() == DesignerScene::BoundingDashLine)
-        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(m_renderInfo.boundingRect));
+        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(paintRect()));
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(Qt::darkGray));
@@ -262,7 +330,7 @@ void Control::paintOutline(QPainter* painter)
     if (DesignerScene::outlineMode() == DesignerScene::ClippingSolidLine)
         return painter->drawRect(DesignerScene::outerRect(rect()));
     if (DesignerScene::outlineMode() == DesignerScene::BoundingSolidLine)
-        return painter->drawRect(DesignerScene::outerRect(m_renderInfo.boundingRect));
+        return painter->drawRect(DesignerScene::outerRect(paintRect()));
 }
 
 void Control::paintHoverOutline(QPainter* painter, bool hovered)
@@ -282,77 +350,6 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     paintHoverOutline(painter, option->state & QStyle::State_MouseOver);
 }
 
-void Control::setRenderInfo(const RenderInfo& info)
-{
-    if (info.uid != uid())
-        return;
-
-    m_renderInfo = info;
-
-    setResizable(gui());
-    setZValue(property("z").toDouble());
-    setFlag(QGraphicsItem::ItemClipsChildrenToShape, property("clip").toBool());
-    setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
-    for (Control* childControl : childControls(false))
-        childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
-
-    if (!gui() || hasErrors()) {
-        m_geometryCorrection = QRectF();
-        m_geometryHash.clear();
-    }
-
-    if (gui() && (m_geometryHash.isEmpty() || info.geometryHash == m_geometryHash)) {
-        m_geometryHash.clear();
-        m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(info.properties);
-        if (!beingDragged() && !beingResized())
-            applyGeometryCorrection();
-    }
-
-    if (m_renderInfo.boundingRect.isNull())
-        m_renderInfo.boundingRect = rect();
-
-    if (!gui() && size() != QSizeF(40, 40)) {
-        if (!hasErrors() || size().isEmpty()) {
-            ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
-            m_renderInfo.boundingRect = QRectF(0, 0, 40, 40);
-        }
-    }
-
-    if (hasErrors())
-        m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), devicePixelRatio());
-    if (m_renderInfo.image.isNull() && !gui())
-        m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), devicePixelRatio());
-    if (visible() && gui() && PaintUtils::isBlankImage(m_renderInfo.image)) {
-        m_renderInfo.boundingRect = rect();
-        m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
-    }
-
-    setPixmap(QPixmap::fromImage(m_renderInfo.image));
-
-    emit renderInfoChanged(info.codeChanged);
-}
-
-QPixmap Control::pixmap() const
-{
-    return m_pixmap;
-}
-
-qreal Control::devicePixelRatio() const
-{
-    return m_devicePixelRatio;
-}
-
-void Control::setDevicePixelRatio(const qreal& devicePixelRatio)
-{
-    m_devicePixelRatio = devicePixelRatio;
-    update();
-}
-
-void Control::setUid(const QString& uid)
-{
-    m_uid = uid;
-}
-
 void Control::applyGeometryCorrection()
 {
     if (m_geometryCorrection.isNull() || !gui() || beingDragged() || beingResized())
@@ -369,15 +366,14 @@ void Control::applyGeometryCorrection()
     m_geometryCorrection = QRectF();
 }
 
-RenderInfo Control::renderInfo() const
+QRectF Control::paintRect() const
 {
-    return m_renderInfo;
+    if (m_renderInfo.surroundingRect.isNull())
+        return rect();
+    return m_renderInfo.surroundingRect;
 }
 
-void Control::setBoundingRect(const QRectF& boundingRect)
+Control* Control::parentControl() const
 {
-    if (m_renderInfo.boundingRect != boundingRect) {
-        m_renderInfo.boundingRect = boundingRect;
-        update();
-    }
+    return static_cast<Control*>(parentItem());
 }
