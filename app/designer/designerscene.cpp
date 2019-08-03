@@ -164,7 +164,7 @@ void DesignerScene::reparentControl(Control* control, Control* parentControl) co
     if (control->gui())
         options |= ControlPropertyManager::UpdateRenderer;
 
-    control->m_geometryCorrection = QRectF();
+    control->m_geometryCorrection = {};
     control->m_geometryHash = HashFactory::generate();
 
     // NOTE: Do not move this assignment below setParent,

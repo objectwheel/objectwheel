@@ -1013,6 +1013,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     }
 
     Q_ASSERT(object);
+    Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
     // Hides windows anyway, since we only need their contentItem to be visible

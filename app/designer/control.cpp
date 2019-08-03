@@ -184,29 +184,32 @@ void Control::setRenderInfo(const RenderInfo& info)
     for (Control* childControl : childControls(false))
         childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
 
-    if (!gui() || hasErrors()) {
-        m_geometryCorrection = QRectF();
+    if (gui()) {
+        if (m_geometryHash.isEmpty() || m_geometryHash == info.geometryHash) {
+            m_geometryHash.clear();
+            m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(info.properties);
+            if (!beingDragged() && !beingResized())
+                applyGeometryCorrection();
+        }
+
+        if (visible() && PaintUtils::isBlankImage(m_renderInfo.image))
+            m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
+    } else {
+        m_geometryCorrection = {};
         m_geometryHash.clear();
-    }
 
-    if (gui() && (m_geometryHash.isEmpty() || info.geometryHash == m_geometryHash)) {
-        m_geometryHash.clear();
-        m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(info.properties);
-        if (!beingDragged() && !beingResized())
-            applyGeometryCorrection();
-    }
+        if (size() != QSizeF(40, 40)) {
+            if (!hasErrors() || size().isEmpty())
+                ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
+        }
 
-    if (!gui() && size() != QSizeF(40, 40)) {
-        if (!hasErrors() || size().isEmpty())
-            ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
-    }
+        if (hasErrors())
+            m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), devicePixelRatio());
 
-    if (hasErrors())
-        m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), devicePixelRatio());
-    if (m_renderInfo.image.isNull() && !gui())
-        m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), devicePixelRatio());
-    if (visible() && gui() && PaintUtils::isBlankImage(m_renderInfo.image))
-        m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
+        if (m_renderInfo.image.isNull())
+            m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), devicePixelRatio());
+
+    }
 
     setPixmap(QPixmap::fromImage(m_renderInfo.image));
 
@@ -271,7 +274,7 @@ QVariant Control::itemChange(int change, const QVariant& value)
                     | ControlPropertyManager::CompressedCall
                     | ControlPropertyManager::DontApplyDesigner;
             if (gui()) {
-                m_geometryCorrection = QRectF();
+                m_geometryCorrection = {};
                 m_geometryHash = HashFactory::generate();
                 options |= ControlPropertyManager::UpdateRenderer;
             }
@@ -282,7 +285,7 @@ QVariant Control::itemChange(int change, const QVariant& value)
         const QSizeF snapSize = DesignerScene::snapSize(pos(), value.toSizeF() + m_snapMargin);
         m_snapMargin = QSizeF(0, 0);
         if (gui()) {
-            m_geometryCorrection = QRectF();
+            m_geometryCorrection = {};
             m_geometryHash = HashFactory::generate();
             ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdateRenderer
@@ -299,20 +302,15 @@ void Control::paintContent(QPainter* painter)
 {
     if (m_pixmap.isNull())
         return;
-    if (beingResized())
-        painter->setClipRect(rect());
     QRectF r(paintRect().topLeft(), QSizeF(m_pixmap.size()) / m_pixmap.devicePixelRatioF());
     painter->drawPixmap(r, m_pixmap, m_pixmap.rect());
-    painter->setClipping(false);
 }
 
 void Control::paintHighlight(QPainter* painter)
 {
-    if (beingHighlighted()) {
-        painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
-        painter->fillRect(rect(), QColor(0, 0, 0, 20));
-        painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
-    }
+    painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
+    painter->fillRect(rect(), QColor(0, 0, 0, 20));
+    painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
 }
 
 void Control::paintOutline(QPainter* painter)
@@ -333,37 +331,48 @@ void Control::paintOutline(QPainter* painter)
         return painter->drawRect(DesignerScene::outerRect(paintRect()));
 }
 
-void Control::paintHoverOutline(QPainter* painter, bool hovered)
+void Control::paintHoverOutline(QPainter* painter)
 {
-    if (DesignerScene::showMouseoverOutline() && hovered) {
-        painter->setBrush(Qt::NoBrush);
-        painter->setPen(DesignerScene::pen());
-        painter->drawRect(DesignerScene::outerRect(rect()));
-    }
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::pen());
+    painter->drawRect(DesignerScene::outerRect(rect()));
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
 {
+    if (beingResized())
+        painter->setClipRect(rect());
     paintContent(painter);
+    painter->setClipping(false);
+
     paintOutline(painter);
-    paintHighlight(painter);
-    paintHoverOutline(painter, option->state & QStyle::State_MouseOver);
+
+    if (beingHighlighted())
+        paintHighlight(painter);
+    if (DesignerScene::showMouseoverOutline() && option->state & QStyle::State_MouseOver)
+        paintHoverOutline(painter);
 }
 
 void Control::applyGeometryCorrection()
 {
-    if (m_geometryCorrection.isNull() || !gui() || beingDragged() || beingResized())
+    if (!gui())
         return;
 
-    ControlPropertyManager::setSize(this, m_geometryCorrection.size(),
-                                    ControlPropertyManager::NoOption);
+    if (beingDragged())
+        return;
 
-    if (type() != Form::Type) {
-        ControlPropertyManager::setPos(this, m_geometryCorrection.topLeft(),
-                                       ControlPropertyManager::NoOption);
-    }
+    if (beingResized())
+        return;
 
-    m_geometryCorrection = QRectF();
+    if (m_geometryCorrection.isNull())
+        return;
+
+    ControlPropertyManager::setSize(this, m_geometryCorrection.size(), ControlPropertyManager::NoOption);
+
+    if (type() != Form::Type)
+        ControlPropertyManager::setPos(this, m_geometryCorrection.topLeft(), ControlPropertyManager::NoOption);
+
+    m_geometryCorrection = {};
 }
 
 QRectF Control::paintRect() const

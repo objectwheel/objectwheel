@@ -60,7 +60,7 @@ protected:
     void paintContent(QPainter* painter);
     void paintHighlight(QPainter* painter);
     void paintOutline(QPainter* painter);
-    void paintHoverOutline(QPainter* painter, bool hovered);
+    void paintHoverOutline(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
     QVariant itemChange(int change, const QVariant& value) override;
 
