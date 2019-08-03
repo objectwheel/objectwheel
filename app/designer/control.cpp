@@ -41,14 +41,14 @@ Control::Control(Control* parent) : DesignerItem(parent)
             this, &Control::applyGeometryCorrection, Qt::QueuedConnection);
 }
 
+int Control::type() const
+{
+    return Type;
+}
+
 bool Control::gui() const
 {
     return m_renderInfo.gui;
-}
-
-bool Control::form() const
-{
-    return type() == Form::Type;
 }
 
 bool Control::popup() const
@@ -74,11 +74,6 @@ bool Control::visible() const
 quint32 Control::index() const
 {
     return m_index;
-}
-
-int Control::type() const
-{
-    return Type;
 }
 
 QString Control::id() const
@@ -124,7 +119,7 @@ QVector<PropertyNode> Control::properties() const
 QList<Control*> Control::siblings() const
 {
     QList<Control*> siblings;
-    if (form()) {
+    if (type() == Form::Type) {
         if (const DesignerScene* scene = this->scene()) {
             for (Form* form : scene->forms())
                 siblings.append(form);
@@ -203,7 +198,7 @@ QVariant Control::itemChange(int change, const QVariant& value)
         const QPointF& snapPos = DesignerScene::snapPosition(value.toPointF());
         const QPointF& snapMargin = value.toPointF() - snapPos;
         m_snapMargin = QSizeF(snapMargin.x(), snapMargin.y());
-        if (!form()) {
+        if (type() != Form::Type) {
             ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
                     | ControlPropertyManager::CompressedCall
                     | ControlPropertyManager::DontApplyDesigner;
@@ -366,12 +361,17 @@ void Control::applyGeometryCorrection()
     ControlPropertyManager::setSize(this, m_geometryCorrection.size(),
                                     ControlPropertyManager::NoOption);
 
-    if (!form()) {
+    if (type() != Form::Type) {
         ControlPropertyManager::setPos(this, m_geometryCorrection.topLeft(),
                                        ControlPropertyManager::NoOption);
     }
 
     m_geometryCorrection = QRectF();
+}
+
+RenderInfo Control::renderInfo() const
+{
+    return m_renderInfo;
 }
 
 void Control::setBoundingRect(const QRectF& boundingRect)

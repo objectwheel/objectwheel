@@ -37,7 +37,7 @@ void ControlRemovingManager::removeControl(Control* control, bool removeFromData
 
     emit instance()->controlAboutToBeRemoved(control);
 
-    if (control->form()) {
+    if (control->type() == Form::Type) {
         ControlRenderingManager::scheduleFormDeletion(control->uid());
         if (removeFromDatabaseAlso)
             SaveManager::removeForm(control->dir());
@@ -56,7 +56,7 @@ void ControlRemovingManager::removeControl(Control* control, bool removeFromData
 void ControlRemovingManager::removeControls(const QList<Control*>& controls, bool removeFromDatabaseAlso)
 {
     for (const Control* control : controls) {
-        if (control->form()) {
+        if (control->type() == Form::Type) {
             qWarning() << "ControlRemovingManager::removeControls() can't remove forms.";
             return;
         }

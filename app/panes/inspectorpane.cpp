@@ -488,7 +488,7 @@ void InspectorPane::onFormRemove(Control* control)
     if (!isProjectStarted)
         return;
 
-    if (!control->form())
+    if (control->type() != Form::Type)
         return;
 
     m_formStates.remove(static_cast<Form*>(control));
@@ -519,7 +519,7 @@ void InspectorPane::onControlRemove(Control* control)
     if (!isProjectStarted)
         return;
 
-    if (control->form())
+    if (control->type() == Form::Type)
         return;
 
     for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
@@ -585,7 +585,7 @@ void InspectorPane::onControlRenderInfoChange(Control* control, bool codeChanged
     if (!codeChanged)
         return;
 
-    if (control->form() && m_designerScene->currentForm() != control)
+    if (control->type() == Form::Type && m_designerScene->currentForm() != control)
         return;
 
     if (m_designerScene->currentForm() != control
@@ -608,8 +608,9 @@ void InspectorPane::onControlRenderInfoChange(Control* control, bool codeChanged
                     childItem->setText(1, tr("No"));
 
                 childItem->setIcon(0, PaintUtils::renderItemIcon(
-                                       control->form() ? ":/images/form.png"
-                                                       : ToolUtils::toolIconPath(control->dir()),
+                                       control->type() == Form::Type
+                                       ? ":/images/form.png"
+                                       : ToolUtils::toolIconPath(control->dir()),
                                        palette()));
                 return;
             }
@@ -662,7 +663,7 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
     if (control->id() == previousId)
         return;
 
-    if (control->form() && m_designerScene->currentForm() != control)
+    if (control->type() == Form::Type && m_designerScene->currentForm() != control)
         return;
 
     if (m_designerScene->currentForm() != control

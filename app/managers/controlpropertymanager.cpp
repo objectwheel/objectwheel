@@ -390,7 +390,7 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     if (!control)
         return;
 
-    Q_ASSERT(!control->form());
+    Q_ASSERT(control->type() != Form::Type);
 
     if (!parentControl)
         return;

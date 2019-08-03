@@ -1,7 +1,7 @@
 #include <controlsavefilter.h>
 #include <saveutils.h>
 #include <parserutils.h>
-#include <control.h>
+#include <form.h>
 #include <controlpropertymanager.h>
 #include <controlrenderingmanager.h>
 #include <qmlcodedocument.h>
@@ -43,7 +43,7 @@ void ControlSaveFilter::afterSave(QmlCodeEditorWidget::Document* document)
             ControlPropertyManager::setId(control, m_id, ControlPropertyManager::SaveChanges); // For refactorId
     }
 
-    if (control->form())
+    if (control->type() == Form::Type)
         ControlRenderingManager::scheduleFormCodeUpdate(control->uid());
     else
         ControlRenderingManager::scheduleControlCodeUpdate(control->uid());

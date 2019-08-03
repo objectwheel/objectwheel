@@ -64,7 +64,7 @@ bool isGeometryProperty(const QString& propertyName)
 template<typename SpinBox>
 void fixPosForForm(const Control* control, const QString& propertyName, SpinBox spinBox)
 {
-    if (control->form()) {
+    if (control->type() == Form::Type) {
         if ((propertyName == "x" || propertyName == "y")
                 && !ParserUtils::exists(control->dir(), propertyName)) {
             spinBox->setValue(0);
@@ -475,7 +475,7 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
         ControlPropertyManager::Options options =
                 ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
 
-        if (control->form() && (propertyName == "x" || propertyName == "y"))
+        if (control->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
             options |= ControlPropertyManager::DontApplyDesigner;
 
         if (propertyName == "x") {
@@ -707,7 +707,7 @@ void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
     const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
 
     bool xUnknown = false, yUnknown = false;
-    if (control->form()) {
+    if (control->type() == Form::Type) {
         xUnknown = !ParserUtils::exists(control->dir(), "x");
         yUnknown = !ParserUtils::exists(control->dir(), "y");
     }
@@ -1312,7 +1312,7 @@ void PropertiesPane::onControlGeometryChange(const Control* control)
     const QRectF& geometry = control->geometry();
 
     bool xUnknown = false, yUnknown = false;
-    if (control->form()) {
+    if (control->type() == Form::Type) {
         xUnknown = !ParserUtils::exists(control->dir(), "x");
         yUnknown = !ParserUtils::exists(control->dir(), "y");
     }

@@ -572,7 +572,7 @@ void DesignerView::onPasteAction()
     for (const QPointer<Control>& control : controls) {
         if (control.isNull())
             continue;
-        Q_ASSERT(!control->form());
+        Q_ASSERT(control->type() != Form::Type);
 
         Control* newControl = nullptr;
         if (actionType == CopyPaste::Cut) {
@@ -581,6 +581,9 @@ void DesignerView::onPasteAction()
                                               | ControlPropertyManager::UpdateRenderer);
             ControlRenderingManager::scheduleRefresh(scene()->currentForm()->uid());
         } else {
+            // NOTE: Move the item position backwards as much as next parent margins are
+            // Because it will be followed by a ControlPropertyManager::setParent call and it
+            // will move the item by setting a transform on it according to its parent margin
             const QPointF margins(scene()->currentForm()->margins().left(),
                                   scene()->currentForm()->margins().top());
             newControl = ControlCreationManager::createControl(
