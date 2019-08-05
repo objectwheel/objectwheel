@@ -61,6 +61,17 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
             form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
     connect(form, &Control::renderInfoChanged,
             form, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(form, c); });
+    // Made it Qt::QueuedConnection in order to prevent
+    // mouseUngrabEvent to call beingDraggedChanged or
+    // beingResizedChanged, thus preventing
+    // applyGeometryCorrection to be called before
+    // dropControl called, since it resets geometry correction
+    // otherwise may setSceneRect() in DesignerScene
+    // triggers and extends scene rect
+    connect(form, &Control::beingDraggedChanged,
+            form, &Control::syncGeometry, Qt::QueuedConnection);
+    connect(form, &Control::beingResizedChanged,
+            form, &Control::syncGeometry, Qt::QueuedConnection);
     ControlRenderingManager::scheduleFormCreation(form->dir());
 
     // NOTE: We don't have to worry about possible child controls since createForm is only
@@ -125,6 +136,18 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
             control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
     connect(control, &Control::renderInfoChanged,
             control, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(control, c); });
+    // Made it Qt::QueuedConnection in order to prevent
+    // mouseUngrabEvent to call beingDraggedChanged or
+    // beingResizedChanged, thus preventing
+    // applyGeometryCorrection to be called before
+    // dropControl called, since it resets geometry correction
+    // otherwise may setSceneRect() in DesignerScene
+    // triggers and extends scene rect
+    connect(control, &Control::beingDraggedChanged,
+            control, &Control::syncGeometry, Qt::QueuedConnection);
+    connect(control, &Control::beingResizedChanged,
+            control, &Control::syncGeometry, Qt::QueuedConnection);
+
     ControlRenderingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
 
     QPointer<Control> ptr(control);
@@ -170,6 +193,18 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
                 childControl, [=] { ControlPropertyManager::instance()->doubleClicked(childControl); });
         connect(childControl, &Control::renderInfoChanged,
                 childControl, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(childControl, c); });
+        // Made it Qt::QueuedConnection in order to prevent
+        // mouseUngrabEvent to call beingDraggedChanged or
+        // beingResizedChanged, thus preventing
+        // applyGeometryCorrection to be called before
+        // dropControl called, since it resets geometry correction
+        // otherwise may setSceneRect() in DesignerScene
+        // triggers and extends scene rect
+        connect(childControl, &Control::beingDraggedChanged,
+                childControl, &Control::syncGeometry, Qt::QueuedConnection);
+        connect(childControl, &Control::beingResizedChanged,
+                childControl, &Control::syncGeometry, Qt::QueuedConnection);
+
         ControlRenderingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
 
         controlTree.insert(childPath, childControl);

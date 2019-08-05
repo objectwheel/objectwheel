@@ -66,6 +66,17 @@ void ProjectExposingManager::exposeProject()
                 form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
         connect(form, &Control::renderInfoChanged,
                 form, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(form, c); });
+        // Made it Qt::QueuedConnection in order to prevent
+        // mouseUngrabEvent to call beingDraggedChanged or
+        // beingResizedChanged, thus preventing
+        // applyGeometryCorrection to be called before
+        // dropControl called, since it resets geometry correction
+        // otherwise may setSceneRect() in DesignerScene
+        // triggers and extends scene rect
+        connect(form, &Control::beingDraggedChanged,
+                form, &Control::syncGeometry, Qt::QueuedConnection);
+        connect(form, &Control::beingResizedChanged,
+                form, &Control::syncGeometry, Qt::QueuedConnection);
 
         QMap<QString, Control*> controlTree;
         controlTree.insert(formPath, form);
@@ -110,6 +121,17 @@ void ProjectExposingManager::exposeProject()
                     control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
             connect(control, &Control::renderInfoChanged,
                     control, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(control, c); });
+            // Made it Qt::QueuedConnection in order to prevent
+            // mouseUngrabEvent to call beingDraggedChanged or
+            // beingResizedChanged, thus preventing
+            // applyGeometryCorrection to be called before
+            // dropControl called, since it resets geometry correction
+            // otherwise may setSceneRect() in DesignerScene
+            // triggers and extends scene rect
+            connect(control, &Control::beingDraggedChanged,
+                    control, &Control::syncGeometry, Qt::QueuedConnection);
+            connect(control, &Control::beingResizedChanged,
+                    control, &Control::syncGeometry, Qt::QueuedConnection);
 
             controlTree.insert(childPath, control);
 

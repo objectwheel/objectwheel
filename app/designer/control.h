@@ -9,7 +9,7 @@ class Control : public DesignerItem
     Q_OBJECT
     Q_DISABLE_COPY(Control)
 
-    friend class DesignerScene; // For m_geometryCorrection and m_geometryHash
+    friend class DesignerScene;
 
 public:
     enum { Type = UserType + 2 };
@@ -55,6 +55,10 @@ public:
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
 
+    void syncGeometry();
+    bool geometrySyncEnabled() const;
+    void setGeometrySyncEnabled(bool geometrySyncEnabled);
+
 protected:
     QRectF paintRect() const;
     void paintContent(QPainter* painter);
@@ -63,9 +67,6 @@ protected:
     void paintHoverOutline(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
     QVariant itemChange(int change, const QVariant& value) override;
-
-private slots:
-    void applyGeometryCorrection();
 
 signals:
     void renderInfoChanged(bool codeChanged);
@@ -79,8 +80,8 @@ private:
     qreal m_devicePixelRatio;
     RenderInfo m_renderInfo;
     QSizeF m_snapMargin;
-    QString m_geometryHash;
-    QRectF m_geometryCorrection;
+    QString m_geometrySyncKey;
+    bool m_geometrySyncEnabled;
 };
 
 #endif // CONTROL_H

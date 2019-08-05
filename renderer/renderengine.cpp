@@ -213,7 +213,7 @@ void RenderEngine::updateControlCode(const QString& uid)
     oldInstance->visible = instance->visible;
     oldInstance->codeChanged = instance->codeChanged;
     oldInstance->margins = instance->margins;
-    oldInstance->geometryHash = instance->geometryHash;
+    oldInstance->geometrySyncKey = instance->geometrySyncKey;
     oldInstance->id = instance->id;
     oldInstance->object = instance->object;
     oldInstance->errors = instance->errors;
@@ -307,7 +307,7 @@ void RenderEngine::updateFormCode(const QString& uid)
     oldFormInstance->visible = instance->visible;
     oldFormInstance->codeChanged = instance->codeChanged;
     oldFormInstance->margins = instance->margins;
-    oldFormInstance->geometryHash = instance->geometryHash;
+    oldFormInstance->geometrySyncKey = instance->geometrySyncKey;
     oldFormInstance->id = instance->id;
     oldFormInstance->object = instance->object;
     oldFormInstance->errors = instance->errors;
@@ -394,7 +394,7 @@ void RenderEngine::preview(const QString& url)
         info.window = instance->window;
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
-        info.geometryHash = instance->geometryHash;
+        info.geometrySyncKey = instance->geometrySyncKey;
         info.margins = instance->margins;
         info.properties = RenderUtils::properties(instance);
         info.events = RenderUtils::events(instance);
@@ -744,7 +744,7 @@ QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::C
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
         info.margins = instance->margins;
-        info.geometryHash = instance->geometryHash;
+        info.geometrySyncKey = instance->geometrySyncKey;
         info.margins = RenderUtils::margins(instance);
         info.properties = RenderUtils::properties(instance);
         info.events = RenderUtils::events(instance);

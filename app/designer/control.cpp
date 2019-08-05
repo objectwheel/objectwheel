@@ -13,6 +13,7 @@
 Control::Control(Control* parent) : DesignerItem(parent)
   , m_devicePixelRatio(1)
   , m_snapMargin(QSizeF(0, 0))
+  , m_geometrySyncEnabled(false)
 {
     m_renderInfo.gui = false;
     m_renderInfo.popup = false;
@@ -27,18 +28,6 @@ Control::Control(Control* parent) : DesignerItem(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
     setFlag(ItemNegativeZStacksBehindParent);
-
-    // Made it Qt::QueuedConnection in order to prevent
-    // mouseUngrabEvent to call beingDraggedChanged or
-    // beingResizedChanged, thus preventing
-    // applyGeometryCorrection to be called before
-    // dropControl called, since it resets geometry correction
-    // otherwise may setSceneRect() in DesignerScene
-    // triggers and extends scene rect
-    connect(this, &Control::beingDraggedChanged,
-            this, &Control::applyGeometryCorrection, Qt::QueuedConnection);
-    connect(this, &Control::beingResizedChanged,
-            this, &Control::applyGeometryCorrection, Qt::QueuedConnection);
 }
 
 int Control::type() const
@@ -185,18 +174,17 @@ void Control::setRenderInfo(const RenderInfo& info)
         childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
 
     if (gui()) {
-        if (m_geometryHash.isEmpty() || m_geometryHash == info.geometryHash) {
-            m_geometryHash.clear();
-            m_geometryCorrection = UtilityFunctions::getGeometryFromProperties(info.properties);
-            if (!beingDragged() && !beingResized())
-                applyGeometryCorrection();
+        if (m_geometrySyncKey.isEmpty() || m_geometrySyncKey == info.geometrySyncKey) {
+            m_geometrySyncKey.clear();
+            setGeometrySyncEnabled(true);
+            syncGeometry();
         }
 
         if (visible() && PaintUtils::isBlankImage(m_renderInfo.image))
             m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
     } else {
-        m_geometryCorrection = {};
-        m_geometryHash.clear();
+        setGeometrySyncEnabled(false);
+        m_geometrySyncKey.clear();
 
         if (size() != QSizeF(40, 40)) {
             if (!hasErrors() || size().isEmpty())
@@ -208,7 +196,6 @@ void Control::setRenderInfo(const RenderInfo& info)
 
         if (m_renderInfo.image.isNull())
             m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), devicePixelRatio());
-
     }
 
     setPixmap(QPixmap::fromImage(m_renderInfo.image));
@@ -274,28 +261,38 @@ QVariant Control::itemChange(int change, const QVariant& value)
                     | ControlPropertyManager::CompressedCall
                     | ControlPropertyManager::DontApplyDesigner;
             if (gui()) {
-                m_geometryCorrection = {};
-                m_geometryHash = HashFactory::generate();
+                setGeometrySyncEnabled(false);
+                m_geometrySyncKey = HashFactory::generate();
                 options |= ControlPropertyManager::UpdateRenderer;
             }
-            ControlPropertyManager::setPos(this, snapPos, options, m_geometryHash);
+            ControlPropertyManager::setPos(this, snapPos, options, m_geometrySyncKey);
         }
         return snapPos;
     } else if (change == ItemSizeChange && beingResized()) {
         const QSizeF snapSize = DesignerScene::snapSize(pos(), value.toSizeF() + m_snapMargin);
         m_snapMargin = QSizeF(0, 0);
         if (gui()) {
-            m_geometryCorrection = {};
-            m_geometryHash = HashFactory::generate();
+            setGeometrySyncEnabled(false);
+            m_geometrySyncKey = HashFactory::generate();
             ControlPropertyManager::setSize(this, snapSize, ControlPropertyManager::SaveChanges
                                             | ControlPropertyManager::UpdateRenderer
                                             | ControlPropertyManager::CompressedCall
-                                            | ControlPropertyManager::DontApplyDesigner, m_geometryHash);
+                                            | ControlPropertyManager::DontApplyDesigner, m_geometrySyncKey);
         }
         return snapSize;
     }
 
     return DesignerItem::itemChange(change, value);
+}
+
+bool Control::geometrySyncEnabled() const
+{
+    return m_geometrySyncEnabled;
+}
+
+void Control::setGeometrySyncEnabled(bool geometrySyncEnabled)
+{
+    m_geometrySyncEnabled = geometrySyncEnabled;
 }
 
 void Control::paintContent(QPainter* painter)
@@ -353,7 +350,7 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         paintHoverOutline(painter);
 }
 
-void Control::applyGeometryCorrection()
+void Control::syncGeometry()
 {
     if (!gui())
         return;
@@ -364,15 +361,17 @@ void Control::applyGeometryCorrection()
     if (beingResized())
         return;
 
-    if (m_geometryCorrection.isNull())
+    if (!geometrySyncEnabled())
         return;
 
-    ControlPropertyManager::setSize(this, m_geometryCorrection.size(), ControlPropertyManager::NoOption);
+    const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(m_renderInfo.properties);
+    if (geometry.isValid()) {
+        if (type() != Form::Type)
+            ControlPropertyManager::setPos(this, geometry.topLeft(), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
+    }
 
-    if (type() != Form::Type)
-        ControlPropertyManager::setPos(this, m_geometryCorrection.topLeft(), ControlPropertyManager::NoOption);
-
-    m_geometryCorrection = {};
+    setGeometrySyncEnabled(false);
 }
 
 QRectF Control::paintRect() const

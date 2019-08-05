@@ -39,7 +39,7 @@ public:
         QString id;
         QString uid;
         QString dir;
-        QString geometryHash;
+        QString geometrySyncKey;
         QMarginsF margins;
         QObject* object;
         QQmlContext* context;

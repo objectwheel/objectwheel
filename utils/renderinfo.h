@@ -27,7 +27,7 @@ struct RenderInfo {
     bool window;
     bool visible;
     bool codeChanged;
-    QString geometryHash;
+    QString geometrySyncKey;
     QString uid;
     QImage image;
     QMarginsF margins;
@@ -94,7 +94,7 @@ inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
     in >> info.window;
     in >> info.visible;
     in >> info.codeChanged;
-    in >> info.geometryHash;
+    in >> info.geometrySyncKey;
     in >> info.errors;
     in >> info.events;
     in >> info.properties;
@@ -112,7 +112,7 @@ inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
     out << info.window;
     out << info.visible;
     out << info.codeChanged;
-    out << info.geometryHash;
+    out << info.geometrySyncKey;
     out << info.errors;
     out << info.events;
     out << info.properties;

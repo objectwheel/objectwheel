@@ -610,9 +610,9 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
             || propertyName == "height") {
         QString hash;
         QVariant actualValue(propertyValue);
-        valueFromGeometryHash(&actualValue, &hash);
+        valueFromGeometrySyncKey(&actualValue, &hash);
         property.write(actualValue);
-        instance->geometryHash = hash;
+        instance->geometrySyncKey = hash;
     } else {
         property.write(propertyValue);
     }
@@ -717,7 +717,7 @@ QQuickItem* RenderUtils::createDummyItem(QQmlEngine* engine)
     return item;
 }
 
-void RenderUtils::valueFromGeometryHash(QVariant* value, QString* hash)
+void RenderUtils::valueFromGeometrySyncKey(QVariant* value, QString* hash)
 {
     UtilityFunctions::pull(value->toByteArray(), *value, *hash) ;
 }

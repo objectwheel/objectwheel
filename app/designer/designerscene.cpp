@@ -164,8 +164,8 @@ void DesignerScene::reparentControl(Control* control, Control* parentControl) co
     if (control->gui())
         options |= ControlPropertyManager::UpdateRenderer;
 
-    control->m_geometryCorrection = {};
-    control->m_geometryHash = HashFactory::generate();
+    control->setGeometrySyncEnabled(false);
+    control->m_geometrySyncKey = HashFactory::generate();
 
     // NOTE: Do not move this assignment below setParent,
     // because parent change effects the newPos result
@@ -176,7 +176,7 @@ void DesignerScene::reparentControl(Control* control, Control* parentControl) co
     const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, -margins));
     ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges
                                       | ControlPropertyManager::UpdateRenderer);
-    ControlPropertyManager::setPos(control, newPos, options, control->m_geometryHash);
+    ControlPropertyManager::setPos(control, newPos, options, control->m_geometrySyncKey);
 }
 
 void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
