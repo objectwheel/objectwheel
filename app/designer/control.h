@@ -50,17 +50,17 @@ public:
     RenderInfo renderInfo() const;
     void setRenderInfo(const RenderInfo& info);
 
+    void syncGeometry();
+    bool geometrySyncEnabled() const;
+    void setGeometrySyncEnabled(bool geometrySyncEnabled);
+
     QVariant property(const QString& propertyName) const;
     Control* parentControl() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
 
-    void syncGeometry();
-    bool geometrySyncEnabled() const;
-    void setGeometrySyncEnabled(bool geometrySyncEnabled);
-
 protected:
-    QRectF paintRect() const;
+    QRectF contentRect() const;
     void paintContent(QPainter* painter);
     void paintHighlight(QPainter* painter);
     void paintOutline(QPainter* painter);

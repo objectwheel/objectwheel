@@ -6,7 +6,6 @@
 #include <paintutils.h>
 #include <toolutils.h>
 
-#include <QCursor>
 #include <QPainter>
 #include <QStyleOption>
 
@@ -195,12 +194,56 @@ void Control::setRenderInfo(const RenderInfo& info)
             m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), devicePixelRatio());
 
         if (m_renderInfo.image.isNull())
-            m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(m_dir), size(), devicePixelRatio());
+            m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(dir()), size(), devicePixelRatio());
     }
 
     setPixmap(QPixmap::fromImage(m_renderInfo.image));
 
     emit renderInfoChanged(info.codeChanged);
+}
+
+void Control::syncGeometry()
+{
+    if (!gui())
+        return;
+
+    if (beingDragged())
+        return;
+
+    if (beingResized())
+        return;
+
+    if (!geometrySyncEnabled())
+        return;
+
+    const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(m_renderInfo.properties);
+    if (geometry.isValid()) {
+        if (type() != Form::Type)
+            ControlPropertyManager::setPos(this, geometry.topLeft(), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
+    }
+
+    setGeometrySyncEnabled(false);
+}
+
+bool Control::geometrySyncEnabled() const
+{
+    return m_geometrySyncEnabled;
+}
+
+void Control::setGeometrySyncEnabled(bool geometrySyncEnabled)
+{
+    m_geometrySyncEnabled = geometrySyncEnabled;
+}
+
+QVariant Control::property(const QString& propertyName) const
+{
+    return UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);
+}
+
+Control* Control::parentControl() const
+{
+    return static_cast<Control*>(parentItem());
 }
 
 QList<Control*> Control::siblings() const
@@ -245,13 +288,68 @@ QList<Control*> Control::childControls(bool recursive) const
     return controls;
 }
 
-QVariant Control::property(const QString& propertyName) const
+QRectF Control::contentRect() const
 {
-    return UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);
+    if (m_renderInfo.surroundingRect.isNull())
+        return rect();
+    return m_renderInfo.surroundingRect;
+}
+
+void Control::paintContent(QPainter* painter)
+{
+    if (m_pixmap.isNull())
+        return;
+    QRectF r(contentRect().topLeft(), QSizeF(m_pixmap.size()) / m_pixmap.devicePixelRatioF());
+    painter->drawPixmap(r, m_pixmap, m_pixmap.rect());
+}
+
+void Control::paintHighlight(QPainter* painter)
+{
+    painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
+    painter->fillRect(rect(), QColor(0, 0, 0, 20));
+    painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
+}
+
+void Control::paintOutline(QPainter* painter)
+{
+    if (DesignerScene::outlineMode() == DesignerScene::NoOutline)
+        return;
+    if (DesignerScene::outlineMode() == DesignerScene::ClippingDashLine)
+        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(rect()));
+    if (DesignerScene::outlineMode() == DesignerScene::BoundingDashLine)
+        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(contentRect()));
+
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::pen(Qt::darkGray));
+
+    if (DesignerScene::outlineMode() == DesignerScene::ClippingSolidLine)
+        return painter->drawRect(DesignerScene::outerRect(rect()));
+    if (DesignerScene::outlineMode() == DesignerScene::BoundingSolidLine)
+        return painter->drawRect(DesignerScene::outerRect(contentRect()));
+}
+
+void Control::paintHoverOutline(QPainter* painter)
+{
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::pen());
+    painter->drawRect(DesignerScene::outerRect(rect()));
+}
+
+void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
+{
+    if (beingResized())
+        painter->setClipRect(rect());
+    paintContent(painter);
+    painter->setClipping(false);
+    paintOutline(painter);
+    if (beingHighlighted())
+        paintHighlight(painter);
+    if (DesignerScene::showMouseoverOutline() && option->state & QStyle::State_MouseOver)
+        paintHoverOutline(painter);
 }
 
 QVariant Control::itemChange(int change, const QVariant& value)
-{    
+{
     if (change == ItemPositionChange && beingDragged()) {
         const QPointF& snapPos = DesignerScene::snapPosition(value.toPointF());
         const QPointF& snapMargin = value.toPointF() - snapPos;
@@ -283,105 +381,4 @@ QVariant Control::itemChange(int change, const QVariant& value)
     }
 
     return DesignerItem::itemChange(change, value);
-}
-
-bool Control::geometrySyncEnabled() const
-{
-    return m_geometrySyncEnabled;
-}
-
-void Control::setGeometrySyncEnabled(bool geometrySyncEnabled)
-{
-    m_geometrySyncEnabled = geometrySyncEnabled;
-}
-
-void Control::paintContent(QPainter* painter)
-{
-    if (m_pixmap.isNull())
-        return;
-    QRectF r(paintRect().topLeft(), QSizeF(m_pixmap.size()) / m_pixmap.devicePixelRatioF());
-    painter->drawPixmap(r, m_pixmap, m_pixmap.rect());
-}
-
-void Control::paintHighlight(QPainter* painter)
-{
-    painter->setCompositionMode(QPainter::CompositionMode_SourceAtop);
-    painter->fillRect(rect(), QColor(0, 0, 0, 20));
-    painter->setCompositionMode(QPainter::CompositionMode_SourceOver);
-}
-
-void Control::paintOutline(QPainter* painter)
-{
-    if (DesignerScene::outlineMode() == DesignerScene::NoOutline)
-        return;
-    if (DesignerScene::outlineMode() == DesignerScene::ClippingDashLine)
-        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(rect()));
-    if (DesignerScene::outlineMode() == DesignerScene::BoundingDashLine)
-        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(paintRect()));
-
-    painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen(Qt::darkGray));
-
-    if (DesignerScene::outlineMode() == DesignerScene::ClippingSolidLine)
-        return painter->drawRect(DesignerScene::outerRect(rect()));
-    if (DesignerScene::outlineMode() == DesignerScene::BoundingSolidLine)
-        return painter->drawRect(DesignerScene::outerRect(paintRect()));
-}
-
-void Control::paintHoverOutline(QPainter* painter)
-{
-    painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen());
-    painter->drawRect(DesignerScene::outerRect(rect()));
-}
-
-void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
-{
-    if (beingResized())
-        painter->setClipRect(rect());
-    paintContent(painter);
-    painter->setClipping(false);
-
-    paintOutline(painter);
-
-    if (beingHighlighted())
-        paintHighlight(painter);
-    if (DesignerScene::showMouseoverOutline() && option->state & QStyle::State_MouseOver)
-        paintHoverOutline(painter);
-}
-
-void Control::syncGeometry()
-{
-    if (!gui())
-        return;
-
-    if (beingDragged())
-        return;
-
-    if (beingResized())
-        return;
-
-    if (!geometrySyncEnabled())
-        return;
-
-    const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(m_renderInfo.properties);
-    if (geometry.isValid()) {
-        if (type() != Form::Type)
-            ControlPropertyManager::setPos(this, geometry.topLeft(), ControlPropertyManager::NoOption);
-        ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
-    }
-
-    setGeometrySyncEnabled(false);
-}
-
-QRectF Control::paintRect() const
-{
-    if (m_renderInfo.surroundingRect.isNull())
-        return rect();
-    return m_renderInfo.surroundingRect;
-}
-
-Control* Control::parentControl() const
-{
-    return static_cast<Control*>(parentItem());
 }
