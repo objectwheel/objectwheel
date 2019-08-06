@@ -14,10 +14,10 @@ class RenderUtils final
     Q_DISABLE_COPY(RenderUtils)
 
 public:
-    static QQuickItem* guiItem(RenderEngine::ControlInstance* instance);
+    static QObject* parentObject(const RenderEngine::ControlInstance* parentInstance, const QQuickView* m_view);
+    static QQuickItem* guiItem(const RenderEngine::ControlInstance* instance);
     static QQuickItem* guiItem(QObject* object);
     static QQuickItem* createDummyItem(QQmlEngine* engine);
-
     static void valueFromGeometrySyncKey(QVariant* value, QString* hash);
     static QVariant evaluate(const RenderEngine::ControlInstance* instance, const QString& binding);
     static QList<QQuickItem*> allItems(RenderEngine::ControlInstance* formInstance);
@@ -28,7 +28,9 @@ public:
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
     static bool isVisible(const RenderEngine::ControlInstance* instance);
     static bool isRectangleSane(const QRectF& rect);
-
+    static void setInstanceParent(const RenderEngine::ControlInstance* instance,
+                                  QObject* parentObject,
+                                  QQuickView* view);
     static void refreshLayoutable(RenderEngine::ControlInstance* instance);
     static void updateDirtyNodesRecursive(QQuickItem* parentItem, RenderEngine* engine);
     static void doComplete(RenderEngine::ControlInstance* instance, const RenderEngine* engine);

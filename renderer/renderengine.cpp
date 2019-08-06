@@ -153,27 +153,7 @@ void RenderEngine::updateParent(const QString& newDir, const QString& uid, const
     if (!instance->errors.isEmpty())
         return;
 
-    QObject* parentObject;
-    if (parentInstance->errors.isEmpty()) {
-        if (parentInstance->gui)
-            parentObject = parentInstance->object;
-        else
-            parentObject = m_view->rootObject();
-    } else {
-        parentObject = m_view->rootObject();
-    }
-
-    QQmlProperty defaultProperty(parentObject);
-    Q_ASSERT(defaultProperty.isValid());
-
-    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-    childList.append(instance->object);
-
-    if (instance->window || instance->popup) { // We still reparent it anyway, may a window comes
-        QQuickItem* item = RenderUtils::guiItem(instance->object);
-        item->setParentItem(RenderUtils::guiItem(parentObject));
-    }
-
+    RenderUtils::setInstanceParent(instance, RenderUtils::parentObject(parentInstance, m_view), m_view);
     RenderUtils::refreshLayoutable(previousParentInstance);
     RenderUtils::refreshLayoutable(parentInstance);
 
@@ -225,48 +205,9 @@ void RenderEngine::updateControlCode(const QString& uid)
     delete instance;
 
     for (ControlInstance* childInstance : oldInstance->children) {
-        if (oldInstance->errors.isEmpty()) {
-            if (oldInstance->gui) {
-                if (childInstance->errors.isEmpty()) {
-                    QQmlProperty defaultProperty(oldInstance->object);
-                    Q_ASSERT(defaultProperty.isValid());
-
-                    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-                    childList.append(childInstance->object);
-
-                    if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                        QQuickItem* item = RenderUtils::guiItem(childInstance->object);
-                        item->setParentItem(RenderUtils::guiItem(oldInstance->object));
-                    }
-                }
-            } else {
-                if (childInstance->errors.isEmpty()) {
-                    QQmlProperty defaultProperty(m_view->rootObject());
-                    Q_ASSERT(defaultProperty.isValid());
-
-                    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-                    childList.append(childInstance->object);
-
-                    if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                        QQuickItem* item = RenderUtils::guiItem(childInstance->object);
-                        item->setParentItem(RenderUtils::guiItem(m_view->rootObject()));
-                    }
-                }
-            }
-        } else {
-            if (childInstance->errors.isEmpty()) {
-                QQmlProperty defaultProperty(m_view->rootObject());
-                Q_ASSERT(defaultProperty.isValid());
-
-                QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-                childList.append(childInstance->object);
-
-                if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                    QQuickItem* item = RenderUtils::guiItem(childInstance->object);
-                    item->setParentItem(RenderUtils::guiItem(m_view->rootObject()));
-                }
-            }
-        }
+        if (!childInstance->errors.isEmpty())
+            continue;
+        RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldInstance, m_view), m_view);
     }
 
     // We delete previous instance object after we reparent all of its children into the new instance
@@ -317,35 +258,12 @@ void RenderEngine::updateFormCode(const QString& uid)
     }
     delete instance;
 
+    Q_ASSERT(!oldFormInstance->errors.isEmpty() || oldFormInstance->gui);
+
     for (ControlInstance* childInstance : oldFormInstance->children) {
-        if (oldFormInstance->errors.isEmpty()) {
-            Q_ASSERT(oldFormInstance->gui);
-            if (childInstance->errors.isEmpty()) {
-                QQmlProperty defaultProperty(oldFormInstance->object);
-                Q_ASSERT(defaultProperty.isValid());
-
-                QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-                childList.append(childInstance->object);
-
-                if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                    QQuickItem* item = RenderUtils::guiItem(childInstance->object);
-                    item->setParentItem(RenderUtils::guiItem(oldFormInstance->object));
-                }
-            }
-        } else {
-            if (childInstance->errors.isEmpty()) {
-                QQmlProperty defaultProperty(m_view->rootObject());
-                Q_ASSERT(defaultProperty.isValid());
-
-                QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-                childList.append(childInstance->object);
-
-                if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                    QQuickItem* item = RenderUtils::guiItem(childInstance->object);
-                    item->setParentItem(RenderUtils::guiItem(m_view->rootObject()));
-                }
-            }
-        }
+        if (!childInstance->errors.isEmpty())
+            continue;
+        RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldFormInstance, m_view), m_view);
     }
 
     if (oldObject)
@@ -745,7 +663,6 @@ QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::C
         info.codeChanged = instance->codeChanged;
         info.margins = instance->margins;
         info.geometrySyncKey = instance->geometrySyncKey;
-        info.margins = RenderUtils::margins(instance);
         info.properties = RenderUtils::properties(instance);
         info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
@@ -770,7 +687,7 @@ QRectF RenderEngine::boundingRectWithStepChilds(QQuickItem* item)
 {
     QRectF boundingRect = item->clipRect();
 
-    foreach (QQuickItem *childItem, item->childItems()) {
+    for (QQuickItem *childItem : item->childItems()) {
         if (!hasInstanceForObject(childItem)) {
             QRectF transformedRect = childItem->mapRectToItem(item, boundingRectWithStepChilds(childItem));
             if (RenderUtils::isRectangleSane(transformedRect))
@@ -820,6 +737,8 @@ QImage RenderEngine::renderItem(QQuickItem* item, QRectF& boundingRect, bool pre
     if (bgColor.isValid()) {
         QImage original = m_designerSupport.renderImageForItem(item, boundingRect, size);
         original.setDevicePixelRatio(devicePixelRatio());
+        if (original.isNull())
+            return QImage();
         QImage modified(original.size(), QImage::Format_ARGB32_Premultiplied);
         modified.setDevicePixelRatio(devicePixelRatio());
         QPainter painter(&modified);
@@ -923,9 +842,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");
     instance->visible = RenderUtils::isVisible(instance);
 
-    QQmlProperty defaultProperty(m_view->rootObject());
-    Q_ASSERT(defaultProperty.isValid());
-
     if (instance->gui) {
         QQuickItem* item = RenderUtils::guiItem(instance->object);
         item->setFlag(QQuickItem::ItemHasContents, true);
@@ -933,13 +849,10 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
             qml->classBegin();
     }
 
-    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-    childList.append(instance->object);
+    RenderUtils::setInstanceParent(instance, m_view->rootObject(), m_view);
 
     if (instance->gui) {
         QQuickItem* item = RenderUtils::guiItem(instance->object);
-        if (instance->window || instance->popup)
-            item->setParentItem(RenderUtils::guiItem(m_view->rootObject())); // We still reparent it anyway, may a window comes
         m_designerSupport.refFromEffectItem(item);
         item->update();
     }
@@ -1051,19 +964,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
         m_designerSupport.refFromEffectItem(formItem);
         formItem->update();
     } else {
-        QObject* parentObject;
-        if (parentInstance->errors.isEmpty()) {
-            if (parentInstance->gui)
-                parentObject = parentInstance->object;
-            else
-                parentObject = m_view->rootObject();
-        } else {
-            parentObject = m_view->rootObject();
-        }
-
-        QQmlProperty defaultProperty(parentObject);
-        Q_ASSERT(defaultProperty.isValid());
-
         if (instance->gui) {
             QQuickItem* item = RenderUtils::guiItem(instance->object);
             item->setFlag(QQuickItem::ItemHasContents, true);
@@ -1071,13 +971,10 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
                 qml->classBegin();
         }
 
-        QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-        childList.append(instance->object);
+        RenderUtils::setInstanceParent(instance, RenderUtils::parentObject(parentInstance, m_view), m_view);
 
         if (instance->gui) {
             QQuickItem* item = RenderUtils::guiItem(instance->object);
-            if (instance->window || instance->popup)
-                item->setParentItem(RenderUtils::guiItem(parentObject)); // We still reparent it anyway, may a window comes
             m_designerSupport.refFromEffectItem(item);
             item->update();
         }

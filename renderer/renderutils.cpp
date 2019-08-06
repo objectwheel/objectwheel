@@ -5,7 +5,7 @@
 #include <parserutils.h>
 
 #include <QAnimationDriver>
-#include <QQuickWindow>
+#include <QQuickView>
 #include <QQmlContext>
 
 #include <private/qqmltimer_p.h>
@@ -70,7 +70,7 @@ void stopAnimation(QObject *object)
 
 void disableTextCursor(QQuickItem* item)
 {
-    foreach (QQuickItem* childItem, item->childItems())
+    for (QQuickItem* childItem : item->childItems())
         disableTextCursor(childItem);
 
     QQuickTextInput* textInput = qobject_cast<QQuickTextInput*>(item);
@@ -118,13 +118,13 @@ void allSubObject(QObject* object, QObjectList& objectList)
     }
 
     // search recursive in object children list
-    foreach (QObject *childObject, object->children())
+    for (QObject *childObject : object->children())
         allSubObject(childObject, objectList);
 
     // search recursive in quick item childItems list
     QQuickItem *quickItem = qobject_cast<QQuickItem*>(object);
     if (quickItem) {
-        foreach (QQuickItem *childItem, quickItem->childItems()) {
+        for (QQuickItem *childItem : quickItem->childItems()) {
             allSubObject(childItem, objectList);
         }
     }
@@ -155,15 +155,16 @@ void doComponentCompleteRecursive(QObject* object, const RenderEngine* engine)
         DesignerSupport::emitComponentCompleteSignalForAttachedProperty(object);
 
         QList<QObject*> childList = object->children();
+        // TODO: Do we need that? allSubObject(object, childList);
 
         if (item) {
-            foreach (QQuickItem *childItem, item->childItems()) {
+            for (QQuickItem *childItem : item->childItems()) {
                 if (!childList.contains(childItem))
                     childList.append(childItem);
             }
         }
 
-        foreach (QObject *child, childList) {
+        for (QObject *child : childList) {
             if (!engine->hasInstanceForObject(child))
                 doComponentCompleteRecursive(child, engine);
         }
@@ -491,6 +492,37 @@ bool RenderUtils::isRectangleSane(const QRectF& rect)
     return rect.isValid() && (rect.width() < 10000) && (rect.height() < 10000);
 }
 
+void RenderUtils::setInstanceParent(const RenderEngine::ControlInstance* instance,
+                                    QObject* parentObject,
+                                    QQuickView* view)
+{
+    Q_ASSERT(parentObject);
+    Q_ASSERT(instance->object);
+
+    QQmlProperty defaultProperty(parentObject);
+    Q_ASSERT(defaultProperty.isValid());
+
+    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+    Q_ASSERT(!instance->gui || childList.canAppend());
+
+    if (childList.canAppend())
+        childList.append(instance->object);
+    instance->object->setParent(parentObject);
+
+    if (instance->gui) {
+        QQuickItem* item = RenderUtils::guiItem(instance->object);
+        if (instance->window || instance->popup) // We still reparent it anyway, may a window comes
+            item->setParentItem(RenderUtils::guiItem(parentObject));
+        if (item->parentItem() == 0) { // Happens for parents derivered from Container qml type
+            item->setParentItem(RenderUtils::guiItem(view->rootObject()));
+            QTimer::singleShot(0, [=] {
+                item->setParentItem(nullptr);
+                childList.append(item);
+            });
+        }
+    }
+}
+
 void RenderUtils::refreshLayoutable(RenderEngine::ControlInstance* instance)
 {
     if (instance->layout == false)
@@ -543,7 +575,7 @@ void RenderUtils::updateDirtyNodesRecursive(QQuickItem* parentItem, RenderEngine
     Q_ASSERT(engine);
     Q_ASSERT(parentItem);
 
-    foreach (QQuickItem *childItem, parentItem->childItems()) {
+    for (QQuickItem *childItem : parentItem->childItems()) {
         if (!engine->hasInstanceForObject(childItem))
             updateDirtyNodesRecursive(childItem, engine);
     }
@@ -680,7 +712,22 @@ void RenderUtils::setId(QQmlContext* context, QObject* object, const QString& ol
         context->setContextProperty(newId, object);
 }
 
-QQuickItem* RenderUtils::guiItem(RenderEngine::ControlInstance* instance)
+QObject* RenderUtils::parentObject(const RenderEngine::ControlInstance* parentInstance,
+                                   const QQuickView* m_view)
+{
+    QObject* parentObject;
+    if (parentInstance->errors.isEmpty()) {
+        if (parentInstance->gui)
+            parentObject = parentInstance->object;
+        else
+            parentObject = m_view->rootObject();
+    } else {
+        parentObject = m_view->rootObject();
+    }
+    return parentObject;
+}
+
+QQuickItem* RenderUtils::guiItem(const RenderEngine::ControlInstance* instance)
 {
     Q_ASSERT(instance);
 
