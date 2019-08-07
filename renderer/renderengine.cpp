@@ -792,12 +792,6 @@ void RenderEngine::repairIndexes(ControlInstance* parentInstance)
         return SaveUtils::controlIndex(left->dir) < SaveUtils::controlIndex(right->dir);
     });
 
-    QQmlProperty defaultProperty(parentInstance->object);
-    Q_ASSERT(defaultProperty.isValid());
-    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-    Q_ASSERT(childList.canClear());
-    childList.clear();
-
     for (ControlInstance* childInstance : parentInstance->children) {
         if (parentInstance->object && childInstance->object)
             RenderUtils::setInstanceParent(childInstance, parentInstance->object);
