@@ -13,6 +13,7 @@ struct SceneSettings final : public Settings
     void reset() override;
     const char* category() const override;
     QBrush toBackgroundBrush() const;
+    QBrush toBlankControlDecorationBrush() const;
 
     bool showGuideLines;
     int dragStartDistance;
@@ -24,7 +25,9 @@ struct SceneSettings final : public Settings
     int gridSize;
     /****/
     bool showMouseoverOutline;
-    int controlOutline;
+    bool showClippedControls;
+    int blankControlDecoration;
+    int controlOutlineDecoration;
     QColor outlineColor;
 };
 

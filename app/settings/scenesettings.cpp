@@ -10,7 +10,9 @@ static const char g_showGridViewDots[] = "ShowGridViewDots";
 static const char g_snappingEnabled[] = "SnappingEnabled";
 static const char g_gridSize[] = "GridSize";
 static const char g_showMouseoverOutline[] = "ShowMouseoverOutline";
-static const char g_controlOutline[] = "ControlOutline";
+static const char g_showClippedControls[] = "ShowClippedControls";
+static const char g_blankControlDecoration[] = "BlankControlDecoration";
+static const char g_controlOutlineDecoration[] = "ControlOutlineDecoration";
 static const char g_outlineColor[] = "OutlineColor";
 
 SceneSettings::SceneSettings(DesignerSettings* designerSettings) : Settings(designerSettings)
@@ -33,7 +35,9 @@ void SceneSettings::read()
     gridSize = value<int>(g_gridSize, gridSize);
     /****/
     showMouseoverOutline = value<bool>(g_showMouseoverOutline, showMouseoverOutline);
-    controlOutline = value<int>(g_controlOutline, controlOutline);
+    showClippedControls = value<bool>(g_showClippedControls, showClippedControls);
+    blankControlDecoration = value<int>(g_blankControlDecoration, blankControlDecoration);
+    controlOutlineDecoration = value<int>(g_controlOutlineDecoration, controlOutlineDecoration);
     outlineColor = value<QColor>(g_outlineColor, outlineColor);
     end();
 }
@@ -51,7 +55,9 @@ void SceneSettings::write()
     setValue(g_gridSize, gridSize);
     /****/
     setValue(g_showMouseoverOutline, showMouseoverOutline);
-    setValue(g_controlOutline, controlOutline);
+    setValue(g_showClippedControls, showClippedControls);
+    setValue(g_blankControlDecoration, blankControlDecoration);
+    setValue(g_controlOutlineDecoration, controlOutlineDecoration);
     setValue(g_outlineColor, outlineColor);
     end();
 
@@ -70,7 +76,9 @@ void SceneSettings::reset()
     gridSize = 8;
     /****/
     showMouseoverOutline = true;
-    controlOutline = 0;
+    showClippedControls = false;
+    blankControlDecoration = 0;
+    controlOutlineDecoration = 0;
     outlineColor = "#2483ec";
 }
 
@@ -93,4 +101,14 @@ QBrush SceneSettings::toBackgroundBrush() const
     else if (sceneBackgroundTexture == 4)
         brush.setColor(Qt::white);
     return brush;
+}
+
+QBrush SceneSettings::toBlankControlDecorationBrush() const
+{
+    Qt::BrushStyle style = Qt::NoBrush;
+    if (blankControlDecoration == 2)
+        style = Qt::BDiagPattern;
+    else if (blankControlDecoration == 3)
+        style = Qt::Dense5Pattern;
+    return QBrush(Qt::darkGray, style);
 }

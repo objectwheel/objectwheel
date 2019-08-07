@@ -185,8 +185,10 @@ void Control::setRenderInfo(const RenderInfo& info)
             syncGeometry();
         }
 
-        if (visible() && PaintUtils::isBlankImage(m_renderInfo.image))
-            m_renderInfo.image = PaintUtils::renderBlankControlImage(rect(), id(), devicePixelRatio());
+        if (visible() && PaintUtils::isBlankImage(m_renderInfo.image)) {
+            m_renderInfo.image = PaintUtils::renderBlankControlImage(
+                        rect(), id(), devicePixelRatio(), DesignerScene::blankControlDecorationBrush());
+        }
     } else {
         setGeometrySyncEnabled(false);
         m_geometrySyncKey.clear();
@@ -196,11 +198,15 @@ void Control::setRenderInfo(const RenderInfo& info)
                 ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
         }
 
-        if (hasErrors())
-            m_renderInfo.image = PaintUtils::renderErrorControlImage(size(), id(), devicePixelRatio());
+        if (hasErrors()) {
+            m_renderInfo.image = PaintUtils::renderErrorControlImage(
+                        size(), id(), devicePixelRatio(), DesignerScene::blankControlDecorationBrush());
+        }
 
-        if (m_renderInfo.image.isNull())
-            m_renderInfo.image = PaintUtils::renderNonGuiControlImage(ToolUtils::toolIconPath(dir()), size(), devicePixelRatio());
+        if (m_renderInfo.image.isNull()) {
+            m_renderInfo.image = PaintUtils::renderNonGuiControlImage(
+                        ToolUtils::toolIconPath(dir()), size(), devicePixelRatio());
+        }
     }
 
     setPixmap(QPixmap::fromImage(m_renderInfo.image));

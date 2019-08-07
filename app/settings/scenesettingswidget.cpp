@@ -36,10 +36,14 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
   /****/
   , m_controlsGroup(new QGroupBox(contentWidget()))
   , m_showMouseoverOutlineLabel(new QLabel(m_controlsGroup))
-  , m_controlOutlineLabel(new QLabel(m_controlsGroup))
+  , m_showClippedControlsLabel(new QLabel(m_controlsGroup))
+  , m_blankControlDecorationLabel(new QLabel(m_controlsGroup))
+  , m_controlOutlineDecorationLabel(new QLabel(m_controlsGroup))
   , m_outlineColorLabel(new QLabel(m_controlsGroup))
   , m_showMouseoverOutlineCheckBox(new QCheckBox(m_controlsGroup))
-  , m_controlOutlineBox(new QComboBox(m_controlsGroup))
+  , m_showClippedControlsCheckBox(new QCheckBox(m_controlsGroup))
+  , m_blankControlDecorationBox(new QComboBox(m_controlsGroup))
+  , m_controlOutlineDecorationBox(new QComboBox(m_controlsGroup))
   , m_outlineColorButton(new Utils::QtColorButton(m_controlsGroup))
   , m_outlineColorResetButton(new QPushButton(m_controlsGroup))
 {
@@ -129,33 +133,44 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     controlsLayout->setContentsMargins(6, 6, 6, 6);
     controlsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     controlsLayout->addWidget(m_showMouseoverOutlineLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_controlOutlineLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_outlineColorLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_showClippedControlsLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_blankControlDecorationLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_controlOutlineDecorationLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_outlineColorLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_showMouseoverOutlineCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_controlOutlineBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_outlineColorButton, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_outlineColorResetButton, 2, 2, Qt::AlignRight | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_showClippedControlsCheckBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_blankControlDecorationBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_controlOutlineDecorationBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_outlineColorButton, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    controlsLayout->addWidget(m_outlineColorResetButton, 4, 2, Qt::AlignRight | Qt::AlignVCenter);
     controlsLayout->setColumnStretch(3, 1);
     controlsLayout->setColumnMinimumWidth(1, 20);
 
     m_controlsGroup->setTitle(tr("Controls") + ":");
     m_showMouseoverOutlineLabel->setText(tr("Mouseover outline") + ":");
-    m_controlOutlineLabel->setText(tr("Control outline") + ":");
+    m_showClippedControlsLabel->setText(tr("Control clipping") + ":");
+    m_blankControlDecorationLabel->setText(tr("Blank control decoration") + ":");
+    m_controlOutlineDecorationLabel->setText(tr("Control outline decoration") + ":");
     m_outlineColorLabel->setText(tr("Outline color") + ":");
     m_showMouseoverOutlineCheckBox->setText(tr("Show mouseover outline"));
+    m_showClippedControlsCheckBox->setText(tr("Show controls even if they are clipped"));
     m_outlineColorResetButton->setText(tr("Reset"));
 
     m_showMouseoverOutlineCheckBox->setToolTip(tr("Show an outline around controls when moving mouse cursor over them"));
-    m_controlOutlineBox->setToolTip(tr("Change outline mode for controls"));
+    m_showClippedControlsCheckBox->setToolTip(tr("Show controls even if they are clipped out by their parent control"));
+    m_blankControlDecorationBox->setToolTip(tr("Change decoration mode for blank controls with transparent content"));
+    m_controlOutlineDecorationBox->setToolTip(tr("Change outline decoration mode for controls"));
     m_outlineColorButton->setToolTip(tr("Change outline color of controls"));
     m_outlineColorResetButton->setToolTip(tr("Reset outline color to default"));
 
     m_showMouseoverOutlineCheckBox->setCursor(Qt::PointingHandCursor);
-    m_controlOutlineBox->setCursor(Qt::PointingHandCursor);
+    m_showClippedControlsCheckBox->setCursor(Qt::PointingHandCursor);
+    m_blankControlDecorationBox->setCursor(Qt::PointingHandCursor);
+    m_controlOutlineDecorationBox->setCursor(Qt::PointingHandCursor);
     m_outlineColorButton->setCursor(Qt::PointingHandCursor);
     m_outlineColorResetButton->setCursor(Qt::PointingHandCursor);
 
-    m_controlOutlineBox->setIconSize({14, 14});
+    m_controlOutlineDecorationBox->setIconSize({14, 14});
     m_outlineColorButton->setFixedWidth(64);
 
     /****/
@@ -196,7 +211,9 @@ void SceneSettingsWidget::apply()
     settings->gridSize = m_gridSizeSpinBox->value();
     /****/
     settings->showMouseoverOutline = m_showMouseoverOutlineCheckBox->isChecked();
-    settings->controlOutline = m_controlOutlineBox->currentIndex();
+    settings->showClippedControls = m_showClippedControlsCheckBox->isChecked();
+    settings->blankControlDecoration = m_blankControlDecorationBox->currentIndex();
+    settings->controlOutlineDecoration = m_controlOutlineDecorationBox->currentIndex();
     settings->outlineColor = m_outlineColorButton->color();
     settings->write();
 }
@@ -220,7 +237,9 @@ void SceneSettingsWidget::revert()
     m_gridSizeSpinBox->setValue(settings->gridSize);
     /****/
     m_showMouseoverOutlineCheckBox->setChecked(settings->showMouseoverOutline);
-    m_controlOutlineBox->setCurrentIndex(settings->controlOutline);
+    m_showClippedControlsCheckBox->setChecked(settings->showClippedControls);
+    m_blankControlDecorationBox->setCurrentIndex(settings->blankControlDecoration);
+    m_controlOutlineDecorationBox->setCurrentIndex(settings->controlOutlineDecoration);
     m_outlineColorButton->setColor(settings->outlineColor);
 }
 
@@ -256,17 +275,20 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_snappingEnabledLabel->text().contains(word, Qt::CaseInsensitive)
             || m_gridSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showMouseoverOutlineLabel->text().contains(word, Qt::CaseInsensitive)
-            || m_controlOutlineLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_showClippedControlsLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_blankControlDecorationLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_controlOutlineDecorationLabel->text().contains(word, Qt::CaseInsensitive)
             || m_outlineColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_snappingEnabledCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showMouseoverOutlineCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_showClippedControlsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_resetGridViewButton->text().contains(word, Qt::CaseInsensitive)
             || m_resetGridViewButton->toolTip().contains(word, Qt::CaseInsensitive)
             || UtilityFunctions::comboContainsWord(m_sceneBackgroundTextureBox, word)
             || UtilityFunctions::comboContainsWord(m_sceneZoomLevelBox, word)
-            || UtilityFunctions::comboContainsWord(m_controlOutlineBox, word);
+            || UtilityFunctions::comboContainsWord(m_controlOutlineDecorationBox, word);
 }
 
 void SceneSettingsWidget::fill()
@@ -278,11 +300,16 @@ void SceneSettingsWidget::fill()
 
     m_sceneZoomLevelBox->addItems(UtilityFunctions::zoomTexts());
 
-    m_controlOutlineBox->addItem(QIcon(":/images/nooutline.svg"), tr("No outline"));
-    m_controlOutlineBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping dash line"));
-    m_controlOutlineBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding dash line"));
-    m_controlOutlineBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping solid line"));
-    m_controlOutlineBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding solid line"));
+    m_controlOutlineDecorationBox->addItem(QIcon(":/images/nooutline.svg"), tr("No outline"));
+    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping dash line"));
+    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding dash line"));
+    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping solid line"));
+    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding solid line"));
+
+    m_blankControlDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("No decoration"));
+    m_blankControlDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("Id only"));
+    m_blankControlDecorationBox->addItem(QIcon(":/images/nooutline.svg"), tr("Diag pattern with id"));
+    m_blankControlDecorationBox->addItem(QIcon(":/images/nooutline.svg"), tr("Dense pattern width id"));
 
     m_sceneBackgroundTextureBox->addItem(
     {renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)}, tr("Checkered"));

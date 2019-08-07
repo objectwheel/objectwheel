@@ -50,10 +50,14 @@ private:
     /****/
     QGroupBox* m_controlsGroup;
     QLabel* m_showMouseoverOutlineLabel;
-    QLabel* m_controlOutlineLabel;
+    QLabel* m_showClippedControlsLabel;
+    QLabel* m_blankControlDecorationLabel;
+    QLabel* m_controlOutlineDecorationLabel;
     QLabel* m_outlineColorLabel;
     QCheckBox* m_showMouseoverOutlineCheckBox;
-    QComboBox* m_controlOutlineBox;
+    QCheckBox* m_showClippedControlsCheckBox;
+    QComboBox* m_blankControlDecorationBox;
+    QComboBox* m_controlOutlineDecorationBox;
     Utils::QtColorButton* m_outlineColorButton;
     QPushButton* m_outlineColorResetButton;
 };

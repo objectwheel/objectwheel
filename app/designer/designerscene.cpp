@@ -597,9 +597,14 @@ QBrush DesignerScene::backgroundTexture()
     return DesignerSettings::sceneSettings()->toBackgroundBrush();
 }
 
+QBrush DesignerScene::blankControlDecorationBrush()
+{
+    return DesignerSettings::sceneSettings()->toBlankControlDecorationBrush();
+}
+
 DesignerScene::OutlineMode DesignerScene::outlineMode()
 {
-    return OutlineMode(DesignerSettings::sceneSettings()->controlOutline);
+    return OutlineMode(DesignerSettings::sceneSettings()->controlOutlineDecoration);
 }
 
 void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)

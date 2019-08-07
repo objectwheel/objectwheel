@@ -24,27 +24,6 @@ QImage PaintUtils::renderTransparentImage(const QSizeF& size, qreal dpr)
     return renderFilledImage(size, Qt::transparent, dpr);
 }
 
-QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id, qreal dpr)
-{
-    QBrush brush("#cb363b");
-    brush.setStyle(Qt::BDiagPattern);
-    QImage dest = renderBlankControlImage(QRectF(QPointF(), size), id, dpr, brush, brush.color());
-
-    QImage source(":/images/error.png");
-    source.setDevicePixelRatio(dpr);
-
-    QRectF destRect{{}, size};
-    QRectF sourceRect{{}, QSizeF{24, 24}};
-    sourceRect.moveCenter(destRect.center());
-
-    QPainter p(&dest);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.drawImage(sourceRect, source, source.rect());
-    p.end();
-
-    return dest;
-}
-
 QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, qreal dpr)
 {
     QImage dest = renderTransparentImage(size, dpr);
@@ -261,8 +240,8 @@ bool PaintUtils::isBlankImage(const QImage& image)
         return true;
 
     int totalAlpha = 100 * 8;
-    const int hspacing = image.height() > 200 ? 8 : 1;
-    const int wspacing = image.width() > 200 ? qRound(qMax(hspacing * qreal(image.width()) / image.height(), 1.0)) : 1;
+    const int hspacing = 6 * image.devicePixelRatioF();
+    const int wspacing = qRound(qMax(hspacing * qreal(image.width()) / image.height(), 1.0));
 
     for (int w = 0, h = image.height() / 2.0; w < image.width(); w += wspacing)
         totalAlpha -= qAlpha(image.pixel(w, h));
@@ -279,13 +258,25 @@ bool PaintUtils::isBlankImage(const QImage& image)
     for (int w = image.width() - 1, h = 0; w >= 0 && h < image.height(); w -= wspacing, h += hspacing)
         totalAlpha -= qAlpha(image.pixel(w, h));
 
+    if (totalAlpha < 0)
+        return false;
+
+    if (image.width() * image.height() < 50000 * image.devicePixelRatioF()) {
+        for (int i = 0; i < image.width(); ++i) {
+            for (int j = 0; j < image.height(); ++j)
+                totalAlpha -= qAlpha(image.pixel(i, j));
+            if (totalAlpha < 0)
+                return false;
+        }
+    }
+
     return totalAlpha > 0;
 }
 
 static void paintTextInPlaceHolderForInvisbleItem(QPainter* painter, const QString& id,
                                                   const QRectF& boundingRect, const QPen& pen)
 {
-    static const qreal width = 12;
+    static const qreal width = 8;
     if (boundingRect.height() > 2 * width) {
         QFont font;
         font.setStyleHint(QFont::SansSerif);
@@ -312,13 +303,33 @@ static void paintDecorationInPlaceHolderForInvisbleItem(QPainter* painter,
                                                         const QRectF& boundingRect,
                                                         const QBrush& brush)
 {
-    static const qreal width = 12;
+    static const qreal width = 8;
     QPainterPath path;
     path.addRect(boundingRect);
     path.addRect(boundingRect.adjusted(width, width, -width, -width));
     painter->setClipPath(path);
     painter->setClipping(true);
     painter->fillRect(boundingRect.adjusted(1, 1, -1, -1), brush);
+}
+
+QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id, qreal dpr,
+                                           const QBrush& brush, const QPen& pen)
+{
+    QImage dest = renderBlankControlImage(QRectF(QPointF(), size), id, dpr, brush, pen);
+
+    QImage source(":/images/error.png");
+    source.setDevicePixelRatio(dpr);
+
+    QRectF destRect{{}, size};
+    QRectF sourceRect{{}, QSizeF{24, 24}};
+    sourceRect.moveCenter(destRect.center());
+
+    QPainter p(&dest);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.drawImage(sourceRect, source, source.rect());
+    p.end();
+
+    return dest;
 }
 
 QImage PaintUtils::renderBlankControlImage(const QRectF& rect, const QString& id, qreal dpr,

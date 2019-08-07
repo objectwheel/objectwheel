@@ -143,8 +143,8 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     ag->addAction(outlineMenu->addAction(QIcon(":/images/outerline.svg"), tr("Bounding rect outline")));
     for (QAction* a : ag->actions())
         a->setCheckable(true);
-    ag->actions().at(settings->controlOutline)->setChecked(true);
-    m_outlineButton->setIcon(ag->actions().at(settings->controlOutline)->icon());
+    ag->actions().at(settings->controlOutlineDecoration)->setChecked(true);
+    m_outlineButton->setIcon(ag->actions().at(settings->controlOutlineDecoration)->icon());
     m_outlineButton->setPopupMode(QToolButton::InstantPopup);
     m_outlineButton->setMenu(outlineMenu);
     m_hideDockWidgetTitleBarsButton->setCheckable(true);
