@@ -17,6 +17,7 @@
 #include <private/qquicktransition_p.h>
 #include <private/qquickdesignersupport_p.h>
 #include <private/qquickpopup_p.h>
+#include <private/qqmlvme_p.h>
 
 namespace {
 
@@ -492,12 +493,18 @@ bool RenderUtils::isRectangleSane(const QRectF& rect)
     return rect.isValid() && (rect.width() < 10000) && (rect.height() < 10000);
 }
 
-void RenderUtils::setInstanceParent(const RenderEngine::ControlInstance* instance,
-                                    QObject* parentObject,
-                                    QQuickView* view)
+void RenderUtils::setInstanceParent(RenderEngine::ControlInstance* instance, QObject* parentObject)
 {
     Q_ASSERT(parentObject);
     Q_ASSERT(instance->object);
+
+    if (instance->gui) {
+        QQuickItem* item = RenderUtils::guiItem(instance->object);
+        if (item->parentItem())
+            item->setParentItem(nullptr);
+    }
+
+    instance->object->setParent(parentObject);
 
     QQmlProperty defaultProperty(parentObject);
     Q_ASSERT(defaultProperty.isValid());
@@ -505,21 +512,21 @@ void RenderUtils::setInstanceParent(const RenderEngine::ControlInstance* instanc
     QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
     Q_ASSERT(!instance->gui || childList.canAppend());
 
-    if (childList.canAppend())
+    // Workaround against QQuickContainer's insertItem() bug
+    if (childList.canAppend()) {
+        const bool completeDisabled = !QQmlVME::componentCompleteEnabled();
+        if (completeDisabled)
+            QQmlVME::enableComponentComplete();
         childList.append(instance->object);
-    instance->object->setParent(parentObject);
+        if (completeDisabled)
+            QQmlVME::disableComponentComplete();
+    }
 
     if (instance->gui) {
         QQuickItem* item = RenderUtils::guiItem(instance->object);
         if (instance->window || instance->popup) // We still reparent it anyway, may a window comes
             item->setParentItem(RenderUtils::guiItem(parentObject));
-        if (item->parentItem() == 0) { // Happens for parents derivered from Container qml type
-            item->setParentItem(RenderUtils::guiItem(view->rootObject()));
-            QTimer::singleShot(0, [=] {
-                item->setParentItem(nullptr);
-                childList.append(item);
-            });
-        }
+        Q_ASSERT(item->parentItem());
     }
 }
 
@@ -650,10 +657,8 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     }
 
     DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
-    if (instance->parent && instance->parent->object) {
+    if (instance->parent && instance->parent->object)
         DesignerSupport::addDirty(RenderUtils::guiItem(instance->parent), DesignerSupport::ChildrenUpdateMask);
-        refreshLayoutable(instance->parent);
-    }
 }
 
 void RenderUtils::deleteInstancesRecursive(RenderEngine::ControlInstance* instance,
@@ -671,9 +676,11 @@ void RenderUtils::deleteInstancesRecursive(RenderEngine::ControlInstance* instan
     if (item)
         designerSupport.derefFromEffectItem(item);
 
-    if (instance->object)
+    if (instance->object) {
+        if (auto item = RenderUtils::guiItem(instance->object))
+            item->setParentItem(nullptr);
         delete instance->object;
-
+    }
     delete instance;
 }
 
@@ -694,8 +701,11 @@ void RenderUtils::cleanUpFormInstances(const QList<RenderEngine::ControlInstance
         if (item)
             designerSupport.derefFromEffectItem(item);
 
-        if (formInstance->object)
+        if (formInstance->object) {
+            if (auto item = RenderUtils::guiItem(formInstance->object))
+                item->setParentItem(nullptr);
             delete formInstance->object;
+        }
 
         delete formInstance->context;
         delete formInstance;
@@ -849,7 +859,8 @@ QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
         const QRectF rect(item->mapToItem(parentItem, QPointF()), item->size());
         QMarginsF margins(rect.left(), rect.top(), parentItem->width() - rect.right(),
                           parentItem->height() - rect.bottom());
-        item->deleteLater();
+        item->setParentItem(nullptr);
+        delete item;
         return margins;
     }
     return QMarginsF();

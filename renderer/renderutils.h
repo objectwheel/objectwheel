@@ -28,9 +28,7 @@ public:
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
     static bool isVisible(const RenderEngine::ControlInstance* instance);
     static bool isRectangleSane(const QRectF& rect);
-    static void setInstanceParent(const RenderEngine::ControlInstance* instance,
-                                  QObject* parentObject,
-                                  QQuickView* view);
+    static void setInstanceParent(RenderEngine::ControlInstance* instance, QObject* parentObject);
     static void refreshLayoutable(RenderEngine::ControlInstance* instance);
     static void updateDirtyNodesRecursive(QQuickItem* parentItem, RenderEngine* engine);
     static void doComplete(RenderEngine::ControlInstance* instance, const RenderEngine* engine);

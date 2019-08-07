@@ -122,6 +122,8 @@ void RenderEngine::updateProperty(const QString& uid, const QString& propertyNam
     Q_ASSERT(formInstance);
 
     RenderUtils::setInstancePropertyVariant(instance, propertyName, propertyValue);
+    if (instance->parent && instance->parent->object)
+        RenderUtils::refreshLayoutable(instance->parent);
 
     refreshBindings(formInstance->context);
     scheduleRender(formInstance);
@@ -147,17 +149,16 @@ void RenderEngine::updateParent(const QString& newDir, const QString& uid, const
 
     instance->dir = newDir;
     instance->parent = parentInstance;
-    previousParentInstance->children.removeAll(instance);
-    parentInstance->children.append(instance);
+    previousParentInstance->children.remove(instance);
+    parentInstance->children.insert(instance);
 
     if (!instance->errors.isEmpty())
         return;
 
-    RenderUtils::setInstanceParent(instance, RenderUtils::parentObject(parentInstance, m_view), m_view);
+    RenderUtils::setInstanceParent(instance, RenderUtils::parentObject(parentInstance, m_view));
     RenderUtils::refreshLayoutable(previousParentInstance);
     RenderUtils::refreshLayoutable(parentInstance);
 
-    repairIndexes(previousParentInstance);
     repairIndexes(parentInstance);
     refreshBindings(formInstance->context);
     scheduleRender(formInstance);
@@ -197,26 +198,33 @@ void RenderEngine::updateControlCode(const QString& uid)
     oldInstance->id = instance->id;
     oldInstance->object = instance->object;
     oldInstance->errors = instance->errors;
-    oldInstance->parent->children.removeAll(instance);
+    oldInstance->parent->children.remove(instance);
     if (!instance->gui) { // Error condition is also included
         m_dirtyInstanceSet.remove(instance);
         m_dirtyInstanceSet.insert(oldInstance);
     }
     delete instance;
 
+    std::sort(oldInstance->children.begin(), oldInstance->children.end(),
+              [] (const ControlInstance* left, const ControlInstance* right) {
+        return SaveUtils::controlIndex(left->dir) < SaveUtils::controlIndex(right->dir);
+    });
+
     for (ControlInstance* childInstance : oldInstance->children) {
         if (!childInstance->errors.isEmpty())
             continue;
-        RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldInstance, m_view), m_view);
+        RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldInstance, m_view));
     }
 
     // We delete previous instance object after we reparent all of its children into the new instance
-    if (oldObject)
+    if (oldObject) {
+        if (auto item = RenderUtils::guiItem(oldObject))
+            item->setParentItem(nullptr);
         delete oldObject;
+    }
 
     RenderUtils::doComplete(oldInstance, this);
 
-    repairIndexes(oldInstance);
     repairIndexes(oldInstance->parent);
     refreshBindings(formInstance->context);
     scheduleRender(formInstance);
@@ -260,14 +268,22 @@ void RenderEngine::updateFormCode(const QString& uid)
 
     Q_ASSERT(!oldFormInstance->errors.isEmpty() || oldFormInstance->gui);
 
+    std::sort(oldFormInstance->children.begin(), oldFormInstance->children.end(),
+              [] (const ControlInstance* left, const ControlInstance* right) {
+        return SaveUtils::controlIndex(left->dir) < SaveUtils::controlIndex(right->dir);
+    });
+
     for (ControlInstance* childInstance : oldFormInstance->children) {
         if (!childInstance->errors.isEmpty())
             continue;
-        RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldFormInstance, m_view), m_view);
+        RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldFormInstance, m_view));
     }
 
-    if (oldObject)
+    if (oldObject) {
+        if (auto item = RenderUtils::guiItem(oldObject))
+            item->setParentItem(nullptr);
         delete oldObject;
+    }
 
     RenderUtils::doComplete(oldFormInstance, this);
 
@@ -280,7 +296,6 @@ void RenderEngine::updateFormCode(const QString& uid)
 
     // Form indexes ignored, since they are put upon rootObject of the engine
     // So, no need this: repairIndexes(oldFormInstance->parent??);
-    repairIndexes(oldFormInstance);
     refreshAllBindings();
     scheduleRender(oldFormInstance);
 }
@@ -439,9 +454,8 @@ void RenderEngine::deleteControl(const QString& uid)
     Q_ASSERT(formInstance);
 
     RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
-    instance->parent->children.removeAll(instance);
+    instance->parent->children.remove(instance);
 
-    repairIndexes(instance->parent);
     refreshBindings(formInstance->context);
     scheduleRender(formInstance);
 }
@@ -787,13 +801,8 @@ void RenderEngine::repairIndexes(ControlInstance* parentInstance)
     childList.clear();
 
     for (ControlInstance* childInstance : parentInstance->children) {
-        if (childInstance->errors.isEmpty() && childInstance->object) {
-            childList.append(childInstance->object);
-            if (childInstance->window || childInstance->popup) { // We still reparent it anyway, may a window comes
-                QQuickItem* item = RenderUtils::guiItem(childInstance->object);
-                item->setParentItem(RenderUtils::guiItem(parentInstance->object));
-            }
-        }
+        if (parentInstance->object && childInstance->object)
+            RenderUtils::setInstanceParent(childInstance, parentInstance->object);
     }
 }
 
@@ -849,10 +858,11 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
             qml->classBegin();
     }
 
-    RenderUtils::setInstanceParent(instance, m_view->rootObject(), m_view);
+    RenderUtils::setInstanceParent(instance, m_view->rootObject());
 
     if (instance->gui) {
         QQuickItem* item = RenderUtils::guiItem(instance->object);
+        Q_ASSERT(item->window());
         m_designerSupport.refFromEffectItem(item);
         item->update();
     }
@@ -898,7 +908,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
             instance->context = new QQmlContext(m_view->engine());
     } else {
         Q_ASSERT(parentInstance);
-        parentInstance->children.append(instance);
+        parentInstance->children.insert(instance);
         instance->parent = parentInstance;
         instance->context = parentInstance->context;
     }
@@ -961,6 +971,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
         if (auto qml = dynamic_cast<QQmlParserStatus*>(instance->object))
             qml->classBegin();
         formItem->setParentItem(m_view->rootObject());
+        Q_ASSERT(formItem->window());
         m_designerSupport.refFromEffectItem(formItem);
         formItem->update();
     } else {
@@ -971,10 +982,11 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
                 qml->classBegin();
         }
 
-        RenderUtils::setInstanceParent(instance, RenderUtils::parentObject(parentInstance, m_view), m_view);
+        RenderUtils::setInstanceParent(instance, RenderUtils::parentObject(parentInstance, m_view));
 
         if (instance->gui) {
             QQuickItem* item = RenderUtils::guiItem(instance->object);
+            Q_ASSERT(item->window());
             m_designerSupport.refFromEffectItem(item);
             item->update();
         }

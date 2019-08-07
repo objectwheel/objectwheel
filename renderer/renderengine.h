@@ -46,7 +46,7 @@ public:
         QVector<QmlError> errors;
 
         ControlInstance* parent = nullptr;
-        QVector<ControlInstance*> children;
+        OnlyOneInstanceList<ControlInstance*> children;
     };
 
 public:
