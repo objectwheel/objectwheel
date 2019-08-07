@@ -139,8 +139,11 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     auto outlineMenu = new QMenu(m_outlineButton);
     auto ag = new QActionGroup(outlineMenu);
     ag->addAction(outlineMenu->addAction(QIcon(":/images/nooutline.svg"), tr("No outline")));
-    ag->addAction(outlineMenu->addAction(QIcon(":/images/outline.svg"), tr("Clipping rect outline")));
-    ag->addAction(outlineMenu->addAction(QIcon(":/images/outerline.svg"), tr("Bounding rect outline")));
+    ag->addAction(outlineMenu->addAction(QIcon(":/images/outline.svg"), tr("Clipping dash line")));
+    ag->addAction(outlineMenu->addAction(QIcon(":/images/outerline.svg"), tr("Bounding dash line")));
+    ag->addAction(outlineMenu->addAction(QIcon(":/images/outline.svg"), tr("Clipping solid line")));
+    ag->addAction(outlineMenu->addAction(QIcon(":/images/outerline.svg"), tr("Bounding solid line")));
+
     for (QAction* a : ag->actions())
         a->setCheckable(true);
     ag->actions().at(settings->controlOutlineDecoration)->setChecked(true);

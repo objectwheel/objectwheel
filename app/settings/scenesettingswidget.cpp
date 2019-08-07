@@ -153,13 +153,13 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     m_controlOutlineDecorationLabel->setText(tr("Control outline decoration") + ":");
     m_outlineColorLabel->setText(tr("Outline color") + ":");
     m_showMouseoverOutlineCheckBox->setText(tr("Show mouseover outline"));
-    m_showClippedControlsCheckBox->setText(tr("Show controls even if they are clipped"));
+    m_showClippedControlsCheckBox->setText(tr("Show clipped controls"));
     m_outlineColorResetButton->setText(tr("Reset"));
 
     m_showMouseoverOutlineCheckBox->setToolTip(tr("Show an outline around controls when moving mouse cursor over them"));
     m_showClippedControlsCheckBox->setToolTip(tr("Show controls even if they are clipped out by their parent control"));
-    m_blankControlDecorationBox->setToolTip(tr("Change decoration mode for blank controls with transparent content"));
-    m_controlOutlineDecorationBox->setToolTip(tr("Change outline decoration mode for controls"));
+    m_blankControlDecorationBox->setToolTip(tr("Change decoration for blank controls with transparent content"));
+    m_controlOutlineDecorationBox->setToolTip(tr("Change decoration for control outlines"));
     m_outlineColorButton->setToolTip(tr("Change outline color of controls"));
     m_outlineColorResetButton->setToolTip(tr("Reset outline color to default"));
 

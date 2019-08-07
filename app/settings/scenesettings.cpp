@@ -77,8 +77,8 @@ void SceneSettings::reset()
     /****/
     showMouseoverOutline = true;
     showClippedControls = false;
-    blankControlDecoration = 0;
-    controlOutlineDecoration = 0;
+    blankControlDecoration = 3;
+    controlOutlineDecoration = 2;
     outlineColor = "#2483ec";
 }
 
@@ -103,12 +103,12 @@ QBrush SceneSettings::toBackgroundBrush() const
     return brush;
 }
 
-QBrush SceneSettings::toBlankControlDecorationBrush() const
+QBrush SceneSettings::toBlankControlDecorationBrush(const QColor& color) const
 {
     Qt::BrushStyle style = Qt::NoBrush;
     if (blankControlDecoration == 2)
         style = Qt::BDiagPattern;
     else if (blankControlDecoration == 3)
         style = Qt::Dense5Pattern;
-    return QBrush(Qt::darkGray, style);
+    return QBrush(color, style);
 }

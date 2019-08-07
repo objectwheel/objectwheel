@@ -168,7 +168,7 @@ void Control::setRenderInfo(const RenderInfo& info)
 
     setResizable(gui());
     setZValue(property("z").toDouble());
-    setFlag(ItemClipsChildrenToShape, property("clip").toBool());
+    setFlag(ItemClipsChildrenToShape, !DesignerScene::showClippedControls() && property("clip").toBool());
     setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
 
     if (info.codeChanged) {
@@ -187,7 +187,7 @@ void Control::setRenderInfo(const RenderInfo& info)
 
         if (visible() && PaintUtils::isBlankImage(m_renderInfo.image)) {
             m_renderInfo.image = PaintUtils::renderBlankControlImage(
-                        rect(), id(), devicePixelRatio(), DesignerScene::blankControlDecorationBrush());
+                        rect(), id(), devicePixelRatio(), DesignerScene::blankControlDecorationBrush(Qt::darkGray));
         }
     } else {
         setGeometrySyncEnabled(false);
@@ -200,7 +200,8 @@ void Control::setRenderInfo(const RenderInfo& info)
 
         if (hasErrors()) {
             m_renderInfo.image = PaintUtils::renderErrorControlImage(
-                        size(), id(), devicePixelRatio(), DesignerScene::blankControlDecorationBrush());
+                        size(), id(), devicePixelRatio(),
+                        DesignerScene::blankControlDecorationBrush(QColor(203, 54, 59)));
         }
 
         if (m_renderInfo.image.isNull()) {

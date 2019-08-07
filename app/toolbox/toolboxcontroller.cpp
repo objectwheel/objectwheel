@@ -9,6 +9,8 @@
 #include <utilityfunctions.h>
 #include <controlrenderingmanager.h>
 #include <paintutils.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 #include <QDir>
 #include <QMimeData>
@@ -73,7 +75,8 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                 drag->setPixmap(QPixmap::fromImage(PaintUtils::renderBlankControlImage(
                                     info.surroundingRect,
                                     m_toolboxPane->toolboxTree()->currentItem()->text(0),
-                                    m_toolboxPane->devicePixelRatioF())));
+                                    m_toolboxPane->devicePixelRatioF(),
+                                    DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(Qt::darkGray))));
             }
             info.image = drag->pixmap().toImage();
             info.image.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());

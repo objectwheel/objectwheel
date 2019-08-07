@@ -13,7 +13,7 @@ struct SceneSettings final : public Settings
     void reset() override;
     const char* category() const override;
     QBrush toBackgroundBrush() const;
-    QBrush toBlankControlDecorationBrush() const;
+    QBrush toBlankControlDecorationBrush(const QColor& color) const;
 
     bool showGuideLines;
     int dragStartDistance;

@@ -77,8 +77,9 @@ public:
     static QRectF outerRect(const QRectF& rect);
     static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
     static QBrush backgroundTexture();
-    static QBrush blankControlDecorationBrush();
+    static QBrush blankControlDecorationBrush(const QColor& color);
     static OutlineMode outlineMode();
+    static bool showClippedControls();
     static void drawDashLine(QPainter* painter, const QLineF& line);
     static void drawDashRect(QPainter* painter, const QRectF& rect);
 
