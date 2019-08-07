@@ -576,11 +576,12 @@ void RenderEngine::scheduleRerenderForInvisibleInstances(RenderEngine::ControlIn
 void RenderEngine::flushRenders()
 {
     m_renderTimer->stop();
+
+    DesignerSupport::polishItems(m_view);
+
     for (ControlInstance* formInstance : m_formInstanceSetForRender) {
         if (!m_formInstances.contains(formInstance))
             continue; // Skip possible deleted forms
-
-        DesignerSupport::polishItems(m_view);
 
         static DesignerSupport::DirtyType dirty = DesignerSupport::DirtyType(
                     DesignerSupport::TransformUpdateMask
