@@ -28,7 +28,7 @@ const int g_progress_4 = 100;
 }
 
 enum {
-    RENDER_TIMEOUT = 40,
+    RENDER_TIMEOUT = 50,
     RERENDER_TIMEOUT = 400
 };
 
