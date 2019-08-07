@@ -162,6 +162,8 @@ void Control::setRenderInfo(const RenderInfo& info)
     if (m_uid != info.uid)
         return;
 
+    const QMarginsF previousMargins = m_renderInfo.margins;
+
     m_renderInfo = info;
 
     setResizable(gui());
@@ -169,8 +171,12 @@ void Control::setRenderInfo(const RenderInfo& info)
     setFlag(ItemClipsChildrenToShape, property("clip").toBool());
     setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
 
-    for (Control* childControl : childControls(false))
-        childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
+    if (info.codeChanged) {
+        for (Control* childControl : childControls(false))
+            childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
+    } else {
+        m_renderInfo.margins = previousMargins;
+    }
 
     if (gui()) {
         if (m_geometrySyncKey.isEmpty() || m_geometrySyncKey == info.geometrySyncKey) {
@@ -299,8 +305,13 @@ void Control::paintContent(QPainter* painter)
 {
     if (m_pixmap.isNull())
         return;
-    QRectF r(contentRect().topLeft(), QSizeF(m_pixmap.size()) / m_pixmap.devicePixelRatioF());
-    painter->drawPixmap(r, m_pixmap, m_pixmap.rect());
+    const QSizeF pixmapSize(m_pixmap.size() / m_pixmap.devicePixelRatioF());
+    QRectF rect(contentRect().topLeft(), pixmapSize);
+    if (qAbs(contentRect().width() - pixmapSize.width()) > 2
+            || qAbs(contentRect().height() - pixmapSize.height()) > 2) {
+        rect.moveTopLeft(QPointF());
+    }
+    painter->drawPixmap(rect, m_pixmap, m_pixmap.rect());
 }
 
 void Control::paintHighlight(QPainter* painter)

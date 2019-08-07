@@ -193,7 +193,6 @@ void RenderEngine::updateControlCode(const QString& uid)
     oldInstance->window = instance->window;
     oldInstance->visible = instance->visible;
     oldInstance->codeChanged = instance->codeChanged;
-    oldInstance->margins = instance->margins;
     oldInstance->geometrySyncKey = instance->geometrySyncKey;
     oldInstance->id = instance->id;
     oldInstance->object = instance->object;
@@ -255,7 +254,6 @@ void RenderEngine::updateFormCode(const QString& uid)
     oldFormInstance->window = instance->window;
     oldFormInstance->visible = instance->visible;
     oldFormInstance->codeChanged = instance->codeChanged;
-    oldFormInstance->margins = instance->margins;
     oldFormInstance->geometrySyncKey = instance->geometrySyncKey;
     oldFormInstance->id = instance->id;
     oldFormInstance->object = instance->object;
@@ -328,7 +326,7 @@ void RenderEngine::preview(const QString& url)
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
         info.geometrySyncKey = instance->geometrySyncKey;
-        info.margins = instance->margins;
+        info.margins = RenderUtils::margins(instance);
         info.properties = RenderUtils::properties(instance);
         info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
@@ -675,7 +673,7 @@ QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::C
         info.window = instance->window;
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
-        info.margins = instance->margins;
+        info.margins = RenderUtils::margins(instance);
         info.geometrySyncKey = instance->geometrySyncKey;
         info.properties = RenderUtils::properties(instance);
         info.events = RenderUtils::events(instance);
@@ -876,8 +874,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
         item->update();
     }
 
-    instance->margins = RenderUtils::margins(instance);
-
     return instance;
 }
 
@@ -886,9 +882,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
                                                             QQmlContext* oldFormContext)
 {
     Q_ASSERT_X(SaveUtils::isControlValid(dir), "createInstance", "Owctrl™ structure is corrupted.");
-
-    ComponentCompleteDisabler disabler;
-    Q_UNUSED(disabler)
 
     const QString& url = SaveUtils::toControlMainQmlFile(dir);
 
@@ -940,8 +933,10 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
     // Hides windows anyway, since we only need their contentItem to be visible
-    RenderUtils::tweakObjects(object);
     // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
+    ComponentCompleteDisabler disabler;
+    Q_UNUSED(disabler)
+    RenderUtils::tweakObjects(object);
     component.completeCreate();
 
     if (QQmlEngine::contextForObject(object) == nullptr)
@@ -1000,8 +995,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
         item->setVisible(true); // Especially important for popup
         item->update();
     }
-
-    instance->margins = RenderUtils::margins(instance);
 
     return instance;
 }

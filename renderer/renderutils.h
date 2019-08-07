@@ -29,7 +29,7 @@ public:
     static bool isVisible(const RenderEngine::ControlInstance* instance);
     static bool isRectangleSane(const QRectF& rect);
     static void setInstanceParent(RenderEngine::ControlInstance* instance, QObject* parentObject);
-    static void refreshLayoutable(RenderEngine::ControlInstance* instance);
+    static void refreshLayoutable(const RenderEngine::ControlInstance* instance);
     static void updateDirtyNodesRecursive(QQuickItem* parentItem, RenderEngine* engine);
     static void doComplete(RenderEngine::ControlInstance* instance, const RenderEngine* engine);
     static void tweakObjects(QObject* object);

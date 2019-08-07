@@ -18,6 +18,7 @@
 #include <private/qquickdesignersupport_p.h>
 #include <private/qquickpopup_p.h>
 #include <private/qqmlvme_p.h>
+#include <private/qquickitem_p.h>
 
 namespace {
 
@@ -499,9 +500,11 @@ void RenderUtils::setInstanceParent(RenderEngine::ControlInstance* instance, QOb
     Q_ASSERT(instance->object);
 
     if (instance->gui) {
-        QQuickItem* item = RenderUtils::guiItem(instance->object);
+        QQuickItem* item = guiItem(instance->object);
         if (item->parentItem())
             item->setParentItem(nullptr);
+        //        if (instance->window || instance->popup) // We still reparent it anyway, may a window comes
+        item->setParentItem(guiItem(parentObject));
     }
 
     instance->object->setParent(parentObject);
@@ -522,15 +525,10 @@ void RenderUtils::setInstanceParent(RenderEngine::ControlInstance* instance, QOb
             QQmlVME::disableComponentComplete();
     }
 
-    if (instance->gui) {
-        QQuickItem* item = RenderUtils::guiItem(instance->object);
-        if (instance->window || instance->popup) // We still reparent it anyway, may a window comes
-            item->setParentItem(RenderUtils::guiItem(parentObject));
-        Q_ASSERT(item->parentItem());
-    }
+    Q_ASSERT(!instance->gui || guiItem(instance->object)->parentItem());
 }
 
-void RenderUtils::refreshLayoutable(RenderEngine::ControlInstance* instance)
+void RenderUtils::refreshLayoutable(const RenderEngine::ControlInstance* instance)
 {
     if (instance->layout == false)
         return;
@@ -845,22 +843,30 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
 
 QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
 {
-    if (instance->gui) {
+    if (instance->gui && instance->codeChanged) {
+        const bool completeDisabled = !QQmlVME::componentCompleteEnabled();
+        if (completeDisabled)
+            QQmlVME::enableComponentComplete();
         QQuickItem* parentItem = RenderUtils::guiItem(instance->object);
         Q_ASSERT(parentItem);
         QQmlComponent com(qmlEngine(instance->object));
         com.setData("import QtQuick 2.7;Item{anchors.fill:parent}", QUrl());
         QQuickItem* item = qobject_cast<QQuickItem*>(com.create(qmlContext(instance->object)));
         Q_ASSERT(item);
+        // For calculating QQuickContainer margins right
+        QQuickItemPrivate::get(item)->setTransparentForPositioner(true);
         QQmlProperty defaultProperty(instance->object);
         Q_ASSERT(defaultProperty.isValid());
         QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+        Q_ASSERT(childList.isValid() && childList.canAppend());
         childList.append(item);
-        const QRectF rect(item->mapToItem(parentItem, QPointF()), item->size());
+        const QRectF rect(item->mapRectToItem(parentItem, QRectF(QPointF(), item->size())));
         QMarginsF margins(rect.left(), rect.top(), parentItem->width() - rect.right(),
                           parentItem->height() - rect.bottom());
         item->setParentItem(nullptr);
         delete item;
+        if (completeDisabled)
+            QQmlVME::disableComponentComplete();
         return margins;
     }
     return QMarginsF();
