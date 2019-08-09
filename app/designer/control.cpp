@@ -267,9 +267,8 @@ QList<Control*> Control::siblings() const
             for (Form* form : scene->forms())
                 siblings.append(form);
         }
-    } else {
-        if (const Control* parent = parentControl())
-            siblings = parent->childControls(false);
+    } else if (parentControl()) {
+        siblings = parentControl()->childControls(false);
     }
     Q_ASSERT(siblings.contains(const_cast<Control*>(this)));
     siblings.removeOne(const_cast<Control*>(this));

@@ -17,8 +17,8 @@
 #include <qmlcodedocument.h>
 #include <designersettings.h>
 #include <scenesettings.h>
-#include <QScrollBar>
 
+#include <QScrollBar>
 #include <QMenu>
 #include <QDir>
 #include <QToolBar>
@@ -307,6 +307,10 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     addAction(m_moveDownAct);
     addAction(m_moveRightAct);
     addAction(m_moveLeftAct);
+
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked, this, [=] (Control* i) {
+        onControlDoubleClick(i);
+    }, Qt::QueuedConnection);
 }
 
 void DesignerView::setZoomLevel(qreal zoomLevel)

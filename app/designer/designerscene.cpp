@@ -30,7 +30,6 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
   , m_paintLayer(new PaintLayer)
-  , m_currentForm(nullptr)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -41,61 +40,35 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
 
     m_gadgetLayer->setAcceptedMouseButtons(Qt::NoButton);
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
-    connect(this, &DesignerScene::selectionChanged,
-            m_gadgetLayer, &GadgetLayer::handleSceneSelectionChange);
-    connect(this, &DesignerScene::currentFormChanged,
-            m_gadgetLayer, &GadgetLayer::handleSceneCurrentFormChange);
     addItem(m_gadgetLayer);
 
     m_paintLayer->setAcceptedMouseButtons(Qt::NoButton);
     m_paintLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_paintLayer);
 
-    connect(this, &DesignerScene::changed, this, [=] {
-        setSceneRect(sceneRect() | visibleItemsBoundingRect());
-    });
-
-    // This contructor is called from MainWindow ->
-    // CentralWidget -> DesignerView -> DesignerScene
-    // So WindowManager::mainWindow()->centralWidget()
-    // is invalid right here
-    QMetaObject::invokeMethod(this, [=] {
-        connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked, this, [=] (Control* i) {
-            QTimer::singleShot(100, [=] {
-                WindowManager::mainWindow()->centralWidget()->designerView()->onControlDoubleClick(i);
-            });
-        }, Qt::QueuedConnection);
-    }, Qt::QueuedConnection);
-    QMetaObject::invokeMethod(this, [=] {
-        connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
-                paintLayer(), &PaintLayer::updateGeometry);
-    }, Qt::QueuedConnection);
-    connect(this, &DesignerScene::currentFormChanged, paintLayer(), &PaintLayer::updateGeometry);
-    connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked, this, [=] (bool isFormHeadline) {
-        QTimer::singleShot(100, [=] {
-            WindowManager::mainWindow()->centralWidget()->designerView()->
-                    onControlDoubleClick(isFormHeadline ? currentForm() : selectedControls().first());
-        });
-    }, Qt::QueuedConnection);
-
+    connect(this, &DesignerScene::changed,
+            this, &DesignerScene::onChange);
+    connect(this, &DesignerScene::selectionChanged,
+            m_gadgetLayer, &GadgetLayer::handleSceneSelectionChange);
+    connect(this, &DesignerScene::currentFormChanged,
+            m_gadgetLayer, &GadgetLayer::handleSceneCurrentFormChange);
+    connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked,
+            this, &DesignerScene::onHeadlineDoubleClick);
     connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
             m_gadgetLayer, &GadgetLayer::addResizers);
     connect(ProjectExposingManager::instance(), &ProjectExposingManager::controlExposed,
             m_gadgetLayer, &GadgetLayer::addResizers);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             m_gadgetLayer, &GadgetLayer::removeResizers);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
+            m_paintLayer, &PaintLayer::updateGeometry);
+    connect(this, &DesignerScene::currentFormChanged,
+            m_paintLayer, &PaintLayer::updateGeometry);
 }
 
 void DesignerScene::addForm(Form* form)
 {
-    if (m_forms.contains(form))
-        return;
-
-    // NOTE: We don't have to call ControlPropertyManager::setParent,
-    // since there is no valid parent concept for forms in Designer;
-    // fors are directly put into DesignerScene
-
-    m_forms.append(form);
+    m_forms.insert(form);
 }
 
 void DesignerScene::removeForm(Form* form)
@@ -105,7 +78,7 @@ void DesignerScene::removeForm(Form* form)
     // within m_currentForm, because its object is "delete"d
     removeControl(form);
 
-    m_forms.removeAll(form);
+    m_forms.remove(form);
 }
 
 void DesignerScene::removeControl(Control* control)
@@ -664,6 +637,18 @@ void DesignerScene::discharge()
     m_currentForm.clear();
 }
 
+void DesignerScene::onChange()
+{
+    setSceneRect(sceneRect() | visibleItemsBoundingRect());
+}
+
+void DesignerScene::onHeadlineDoubleClick(bool isFormHeadline)
+{
+    ControlPropertyManager::instance()->doubleClicked(isFormHeadline
+                                                      ? m_currentForm
+                                                      : selectedControls().first());
+}
+
 void DesignerScene::setCurrentForm(Form* currentForm)
 {
     if (m_currentForm == currentForm)
@@ -696,5 +681,5 @@ void DesignerScene::setCurrentForm(Form* currentForm)
 
 QList<Form*> DesignerScene::forms() const
 {
-    return m_forms;
+    return m_forms.toList();
 }

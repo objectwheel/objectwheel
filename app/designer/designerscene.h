@@ -14,10 +14,6 @@ class DesignerScene final : public QGraphicsScene
     Q_OBJECT
     Q_DISABLE_COPY(DesignerScene)
 
-    friend class ControlRemovingManager; // For removeControl(), removeForm()
-    friend class ControlCreationManager; // For addForm(), addControl()
-    friend class ProjectExposingManager; // For addForm(), addControl()
-
 public:
     enum OutlineMode {
         NoOutline,
@@ -33,6 +29,10 @@ public:
     Form* currentForm() const;
     void setCurrentForm(Form* currentForm);
 
+    void addForm(Form* form);
+    void removeForm(Form* form);
+    void removeControl(Control* control);
+
     void shrinkSceneRect();
     void unsetCursor();
     void setCursor(Qt::CursorShape cursor);
@@ -42,6 +42,9 @@ public:
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
     PaintLayer* paintLayer() const;
+
+    DesignerItem* dropItem(const QPointF& pos) const;
+    DesignerItem* highlightItem(const QPointF& pos) const;
 
     QList<Form*> forms() const;
     QRectF visibleItemsBoundingRect() const;
@@ -63,6 +66,7 @@ public:
     }
 
     static bool showMouseoverOutline();
+    static bool showClippedControls();
     static int startDragDistance();
     static int gridSize();
     static qreal zoomLevel();
@@ -79,22 +83,17 @@ public:
     static QBrush backgroundTexture();
     static QBrush blankControlDecorationBrush(const QColor& color);
     static OutlineMode outlineMode();
-    static bool showClippedControls();
     static void drawDashLine(QPainter* painter, const QLineF& line);
     static void drawDashRect(QPainter* painter, const QRectF& rect);
 
 public slots:
     void discharge();
 
-private:
-    void addForm(Form* form);
-    void removeForm(Form* form);
-    void removeControl(Control* control);
+private slots:
+    void onChange();
+    void onHeadlineDoubleClick(bool isFormHeadline);
 
 private:
-    DesignerItem* dropItem(const QPointF& pos) const;
-    DesignerItem* highlightItem(const QPointF& pos) const;
-
     void handleToolDrop(QGraphicsSceneDragDropEvent* event);
     void reparentControl(Control* control, Control* parentControl) const;
 
@@ -112,10 +111,10 @@ private:
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
     PaintLayer* m_paintLayer;
-    QPointer<Form> m_currentForm;
-    QList<Form*> m_forms;
-    QPointer<DesignerItem> m_recentHighlightedItem;
+    QSet<Form*> m_forms;
     QList<DesignerItem*> m_siblingsBeforeDrag;
+    QPointer<Form> m_currentForm;
+    QPointer<DesignerItem> m_recentHighlightedItem;
 };
 
 #endif // FORMSCENE_H
