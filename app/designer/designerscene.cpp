@@ -76,6 +76,7 @@ void DesignerScene::removeForm(Form* form)
     // NOTE: If the given form address is the current form,
     // then if this line runs, QPointer clears the address
     // within m_currentForm, because its object is "delete"d
+    // So no need to clear it again if it was the current form
     removeControl(form);
 
     m_forms.remove(form);
@@ -410,7 +411,7 @@ QVector<QLineF> DesignerScene::guidelines() const
     QVector<QLineF> lines;
     QList<DesignerItem*> items(draggedResizedSelectedItems());
 
-    // May contain it since we can resize the form
+    // May contain a form since we can resize a form
     if (items.contains(m_currentForm))
         items.removeOne(m_currentForm);
 
@@ -418,123 +419,124 @@ QVector<QLineF> DesignerScene::guidelines() const
         return lines;
 
     const QRectF& geometry = itemsBoundingRect(items);
-    const QPointF& center = geometry.center();
-    const DesignerItem* parent = items.first()->parentItem();
-    Q_ASSERT(parent);
+    const DesignerItem* parentItem = items.first()->parentItem();
+    const QRectF& parentGeometry = parentItem->mapRectToScene(parentItem->geometry());
 
     /* Child center <-> Parent center */
-    if (int(center.y()) == int(parent->height() / 2.0))
-        lines << QLineF(parent->mapToScene(center),
-                        parent->mapToScene(QPointF(parent->width() / 2.0, center.y())));
+    if (qRound64(geometry.center().y()) == qRound64(parentGeometry.center().y()))
+        lines.append({geometry.center(), parentGeometry.center()});
 
-    if (int(center.x()) == int(parent->width() / 2.0))
-        lines << QLineF(parent->mapToScene(center),
-                        parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)));
+    if (qRound64(geometry.center().x()) == qRound64(parentGeometry.center().x()))
+        lines.append({geometry.center(), parentGeometry.center()});
 
-    /* Child left <-> Parent center */
-    if (int(geometry.x()) == int(parent->width() / 2.0))
-        lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
-                        parent->mapToScene(QPointF(geometry.x(), parent->height() / 2.0)));
+//    if (int(center.x()) == int(parent->width() / 2.0))
+//        lines << QLineF(parent->mapToScene(center),
+//                        parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)));
 
-    /* Child left <-> Parent left */
-    if (int(geometry.x()) == 0)
-        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
-                        parent->mapToScene(parent->rect().bottomLeft()));
+//    /* Child left <-> Parent center */
+//    if (int(geometry.x()) == int(parent->width() / 2.0))
+//        lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
+//                        parent->mapToScene(QPointF(geometry.x(), parent->height() / 2.0)));
 
-    /* Child right <-> Parent center */
-    if (int(geometry.topRight().x()) == int(parent->width() / 2.0))
-        lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
-                        parent->mapToScene(QPointF(geometry.topRight().x(), parent->height() / 2.0)));
+//    /* Child left <-> Parent left */
+//    if (int(geometry.x()) == 0)
+//        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
+//                        parent->mapToScene(parent->rect().bottomLeft()));
 
-    /* Child right <-> Parent right */
-    if (int(geometry.topRight().x()) == int(parent->width()))
-        lines << QLineF(parent->mapToScene(QPointF(parent->width(), 0)),
-                        parent->mapToScene(QPointF(parent->width(), parent->height())));
+//    /* Child right <-> Parent center */
+//    if (int(geometry.topRight().x()) == int(parent->width() / 2.0))
+//        lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
+//                        parent->mapToScene(QPointF(geometry.topRight().x(), parent->height() / 2.0)));
 
-    /* Child top <-> Parent center */
-    if (int(geometry.y()) == int(parent->height() / 2.0))
-        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
-                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
+//    /* Child right <-> Parent right */
+//    if (int(geometry.topRight().x()) == int(parent->width()))
+//        lines << QLineF(parent->mapToScene(QPointF(parent->width(), 0)),
+//                        parent->mapToScene(QPointF(parent->width(), parent->height())));
 
-    /* Child top <-> Parent top */
-    if (int(geometry.y()) == 0)
-        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
-                        parent->mapToScene(QPointF(parent->width(), 0)));
+//    /* Child top <-> Parent center */
+//    if (int(geometry.y()) == int(parent->height() / 2.0))
+//        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
+//                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
 
-    /* Child bottom <-> Parent center */
-    if (int(geometry.bottomLeft().y()) == int(parent->height() / 2.0))
-        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
-                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
+//    /* Child top <-> Parent top */
+//    if (int(geometry.y()) == 0)
+//        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
+//                        parent->mapToScene(QPointF(parent->width(), 0)));
 
-    /* Child bottom <-> Parent bottom */
-    if (int(geometry.bottomLeft().y()) == int(parent->height()))
-        lines << QLineF(parent->mapToScene(QPointF(0, parent->height())),
-                        parent->mapToScene(QPointF(parent->width(), parent->height())));
+//    /* Child bottom <-> Parent center */
+//    if (int(geometry.bottomLeft().y()) == int(parent->height() / 2.0))
+//        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
+//                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
+
+//    /* Child bottom <-> Parent bottom */
+//    if (int(geometry.bottomLeft().y()) == int(parent->height()))
+//        lines << QLineF(parent->mapToScene(QPointF(0, parent->height())),
+//                        parent->mapToScene(QPointF(parent->width(), parent->height())));
 
     if (items.size() != 1)
         return lines;
 
-    for (const DesignerItem* siblingItem : m_siblingsBeforeDrag) {
-        auto cgeometry = siblingItem->geometry();
-        auto ccenter = cgeometry.center();
+//    for (const DesignerItem* siblingItem : m_siblingsBeforeDrag) {
+//        auto cgeometry = siblingItem->geometry();
+//        auto ccenter = cgeometry.center();
 
-        /* Item1 center <-> Item2 center */
-        if (int(center.x()) == int(ccenter.x()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
+//        /* Item1 center <-> Item2 center */
+//        if (int(center.x()) == int(ccenter.x()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+//                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
 
-        if (int(center.y()) == int(ccenter.y()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
+//        if (int(center.y()) == int(ccenter.y()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+//                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
 
-        /* Item1 center <-> Item2 left */
-        if (int(center.x()) == int(cgeometry.topLeft().x()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
+//        /* Item1 center <-> Item2 left */
+//        if (int(center.x()) == int(cgeometry.topLeft().x()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+//                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
 
-        /* Item1 center <-> Item2 top */
-        if (int(center.y()) == int(cgeometry.topLeft().y()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
+//        /* Item1 center <-> Item2 top */
+//        if (int(center.y()) == int(cgeometry.topLeft().y()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+//                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
 
-        /* Item1 center <-> Item2 right */
-        if (int(center.x()) == int(cgeometry.bottomRight().x()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
+//        /* Item1 center <-> Item2 right */
+//        if (int(center.x()) == int(cgeometry.bottomRight().x()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+//                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
 
-        /* Item1 center <-> Item2 bottom */
-        if (int(center.y()) == int(cgeometry.bottomRight().y()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
+//        /* Item1 center <-> Item2 bottom */
+//        if (int(center.y()) == int(cgeometry.bottomRight().y()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
+//                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
 
-        /* Item1 left <-> Item2 left/center/right */
-        if (int(geometry.x()) == int(cgeometry.x()) ||
-                int(geometry.x()) == int(ccenter.x()) ||
-                int(geometry.x()) == int(cgeometry.topRight().x()))
-            lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
-                            parent->mapToScene(QPointF(geometry.x(), ccenter.y())));
+//        /* Item1 left <-> Item2 left/center/right */
+//        if (int(geometry.x()) == int(cgeometry.x()) ||
+//                int(geometry.x()) == int(ccenter.x()) ||
+//                int(geometry.x()) == int(cgeometry.topRight().x()))
+//            lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
+//                            parent->mapToScene(QPointF(geometry.x(), ccenter.y())));
 
-        /* Item1 right <-> Item2 left/center/right */
-        if (int(geometry.topRight().x()) == int(cgeometry.x()) ||
-                int(geometry.topRight().x()) == int(ccenter.x()) ||
-                int(geometry.topRight().x()) == int(cgeometry.topRight().x()))
-            lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
-                            parent->mapToScene(QPointF(geometry.topRight().x(), ccenter.y())));
+//        /* Item1 right <-> Item2 left/center/right */
+//        if (int(geometry.topRight().x()) == int(cgeometry.x()) ||
+//                int(geometry.topRight().x()) == int(ccenter.x()) ||
+//                int(geometry.topRight().x()) == int(cgeometry.topRight().x()))
+//            lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
+//                            parent->mapToScene(QPointF(geometry.topRight().x(), ccenter.y())));
 
-        /* Item1 top <-> Item2 top/center/bottom */
-        if (int(geometry.y()) == int(cgeometry.y()) ||
-                int(geometry.y()) == int(ccenter.y()) ||
-                int(geometry.y()) == int(cgeometry.bottomLeft().y()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.y())),
-                            parent->mapToScene(QPointF(ccenter.x(), geometry.y())));
+//        /* Item1 top <-> Item2 top/center/bottom */
+//        if (int(geometry.y()) == int(cgeometry.y()) ||
+//                int(geometry.y()) == int(ccenter.y()) ||
+//                int(geometry.y()) == int(cgeometry.bottomLeft().y()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.y())),
+//                            parent->mapToScene(QPointF(ccenter.x(), geometry.y())));
 
-        /* Item1 bottom <-> Item2 top/center/bottom */
-        if (int(geometry.bottomLeft().y()) == int(cgeometry.y()) ||
-                int(geometry.bottomLeft().y()) == int(ccenter.y()) ||
-                int(geometry.bottomLeft().y()) == int(cgeometry.bottomLeft().y()))
-            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.bottomLeft().y())),
-                            parent->mapToScene(QPointF(ccenter.x(), geometry.bottomLeft().y())));
-    }
+//        /* Item1 bottom <-> Item2 top/center/bottom */
+//        if (int(geometry.bottomLeft().y()) == int(cgeometry.y()) ||
+//                int(geometry.bottomLeft().y()) == int(ccenter.y()) ||
+//                int(geometry.bottomLeft().y()) == int(cgeometry.bottomLeft().y()))
+//            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.bottomLeft().y())),
+//                            parent->mapToScene(QPointF(ccenter.x(), geometry.bottomLeft().y())));
+//    }
     return lines;
 }
 
@@ -658,10 +660,10 @@ void DesignerScene::setCurrentForm(Form* currentForm)
         return;
 
     /*
-        NOTE: InspectorPane dependency: We prevent "selectionChanged" signal being emitted here
-              Otherwise selectionChanged signal getting emitted before currentFormChanged signal,
-              hence InspectorPane clears the selection before saving selection state of a form in
-              currentFormChanged signal.
+        NOTE: InspectorPane dependency: We emit currentFormChanged signal before actually showing
+              it thus "selectionChanged" signal is being emitted afterwards. Otherwise selectionChanged
+              signal getting emitted before currentFormChanged signal, hence InspectorPane clears
+              the selection before saving selection state of a form in currentFormChanged signal.
     */
 
     Form* previous = m_currentForm;
