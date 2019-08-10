@@ -185,7 +185,7 @@ void Control::setRenderInfo(const RenderInfo& info)
             syncGeometry();
         }
 
-        if (visible() && PaintUtils::isBlankImage(m_renderInfo.image)) {
+        if (visible() && rect().isValid() && PaintUtils::isBlankImage(m_renderInfo.image)) {
             m_renderInfo.image = PaintUtils::renderBlankControlImage(
                         rect(), id(), devicePixelRatio(), DesignerScene::blankControlDecorationBrush(Qt::darkGray));
         }
@@ -198,13 +198,13 @@ void Control::setRenderInfo(const RenderInfo& info)
                 ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
         }
 
-        if (hasErrors()) {
+        if (hasErrors() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderErrorControlImage(
                         size(), id(), devicePixelRatio(),
                         DesignerScene::blankControlDecorationBrush(QColor(203, 54, 59)));
         }
 
-        if (m_renderInfo.image.isNull()) {
+        if (m_renderInfo.image.isNull() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderNonGuiControlImage(
                         ToolUtils::toolIconPath(dir()), size(), devicePixelRatio());
         }

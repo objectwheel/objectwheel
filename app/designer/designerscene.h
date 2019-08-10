@@ -53,16 +53,27 @@ public:
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
 
-    template <typename... Args>
-    QList<DesignerItem*> items(Args&&... args) const
-    {
-        QList<DesignerItem*> items;
-        for (QGraphicsItem* item : QGraphicsScene::items(std::forward<Args>(args)...)) {
-            if (item->type() >= DesignerItem::Type)
-                items.append(static_cast<DesignerItem*>(item));
-        }
-        return items;
+//    template <typename... Args>
+//    QList<DesignerItem*> items(Args&&... args) const
+//    {
+//        QList<DesignerItem*> items;
+//        for (QGraphicsItem* item : QGraphicsScene::items(std::forward<Args>(args)...)) {
+//            if (item->type() >= DesignerItem::Type)
+//                items.append(static_cast<DesignerItem*>(item));
+//        }
+//        return items;
 
+//    }
+
+    template <typename... Args>
+    QList<DesignerItem*> controls(Args&&... args) const
+    {
+        QList<Control*> controls;
+        for (QGraphicsItem* item : QGraphicsScene::items(std::forward<Args>(args)...)) {
+            if (item->type() >= Control::Type)
+                controls.append(static_cast<Control*>(item));
+        }
+        return controls;
     }
 
     static bool showMouseoverOutline();
@@ -112,6 +123,7 @@ private:
     GadgetLayer* m_gadgetLayer;
     PaintLayer* m_paintLayer;
     QSet<Form*> m_forms;
+    DesignerItem* m_parentBeforeDrag;
     QList<DesignerItem*> m_siblingsBeforeDrag;
     QPointer<Form> m_currentForm;
     QPointer<DesignerItem> m_recentHighlightedItem;

@@ -310,6 +310,7 @@ void DesignerScene::setCursor(Qt::CursorShape cursor)
 
 void DesignerScene::prepareDragLayer(DesignerItem* item)
 {
+    m_parentBeforeDrag = item->parentItem();
     m_siblingsBeforeDrag = item->siblingItems();
     if (const DesignerItem* parentItem = item->parentItem()) {
         m_dragLayer->setTransform(QTransform::fromTranslate(parentItem->scenePos().x(),
@@ -408,135 +409,63 @@ bool DesignerScene::showMouseoverOutline()
 QVector<QLineF> DesignerScene::guidelines() const
 {
     // FIXME: doesn't correctly work for items within a parent
+    using namespace UtilityFunctions;
+
     QVector<QLineF> lines;
-    QList<DesignerItem*> items(draggedResizedSelectedItems());
+    QList<Control*> stillControls = controls();
+    const QList<DesignerItem*>& movingControls = draggedResizedSelectedItems();
 
-    // May contain a form since we can resize a form
-    if (items.contains(m_currentForm))
-        items.removeOne(m_currentForm);
+    if (m_currentForm) {
+        stillItems.append(m_currentForm);
+        stillItems.append(m_currentForm->childControls());
+    }
 
-    if (items.isEmpty())
-        return lines;
+    for (const DesignerItem* movingItem : qAsConst(movingItems))
+        stillItems.removeOne(movingItems);
 
-    const QRectF& geometry = itemsBoundingRect(items);
-    const DesignerItem* parentItem = items.first()->parentItem();
-    const QRectF& parentGeometry = parentItem->mapRectToScene(parentItem->geometry());
+    for (DesignerItem* stillItem : qAsConst(stillItems)) {
+        const QRectF& geometry = itemsBoundingRect(movingItems);
+        const QRectF& otherGeometry = stillItem->sceneBoundingRect();
 
-    /* Child center <-> Parent center */
-    if (qRound64(geometry.center().y()) == qRound64(parentGeometry.center().y()))
-        lines.append({geometry.center(), parentGeometry.center()});
+        /* Child center <-> Parent center */
+        if (qRound64(geometry.center().x()) == qRound64(otherGeometry.center().x()))
+            lines.append({geometry.center(), otherGeometry.center()});
 
-    if (qRound64(geometry.center().x()) == qRound64(parentGeometry.center().x()))
-        lines.append({geometry.center(), parentGeometry.center()});
+        if (qRound64(geometry.center().y()) == qRound64(otherGeometry.center().y()))
+            lines.append({geometry.center(), otherGeometry.center()});
 
-//    if (int(center.x()) == int(parent->width() / 2.0))
-//        lines << QLineF(parent->mapToScene(center),
-//                        parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)));
+        /* Child left <-> Parent center */
+        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
+            lines.append({leftCenter(geometry), otherGeometry.center()});
 
-//    /* Child left <-> Parent center */
-//    if (int(geometry.x()) == int(parent->width() / 2.0))
-//        lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
-//                        parent->mapToScene(QPointF(geometry.x(), parent->height() / 2.0)));
+        /* Child left <-> Parent left */
+        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.x()))
+            lines.append({leftCenter(geometry), leftCenter(otherGeometry)});
 
-//    /* Child left <-> Parent left */
-//    if (int(geometry.x()) == 0)
-//        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
-//                        parent->mapToScene(parent->rect().bottomLeft()));
+        /* Child right <-> Parent center */
+        if (qRound64(rightCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
+            lines.append({rightCenter(geometry), otherGeometry.center()});
 
-//    /* Child right <-> Parent center */
-//    if (int(geometry.topRight().x()) == int(parent->width() / 2.0))
-//        lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
-//                        parent->mapToScene(QPointF(geometry.topRight().x(), parent->height() / 2.0)));
+        /* Child right <-> Parent right */
+        if (qRound64(rightCenter(geometry).x()) == qRound64(rightCenter(otherGeometry).x()))
+            lines.append({rightCenter(geometry), rightCenter(otherGeometry)});
 
-//    /* Child right <-> Parent right */
-//    if (int(geometry.topRight().x()) == int(parent->width()))
-//        lines << QLineF(parent->mapToScene(QPointF(parent->width(), 0)),
-//                        parent->mapToScene(QPointF(parent->width(), parent->height())));
+        /* Child top <-> Parent center */
+        if (qRound64(topCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
+            lines.append({topCenter(geometry), otherGeometry.center()});
 
-//    /* Child top <-> Parent center */
-//    if (int(geometry.y()) == int(parent->height() / 2.0))
-//        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
-//                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
+        /* Child top <-> Parent top */
+        if (qRound64(topCenter(geometry).y()) == qRound64(topCenter(otherGeometry).y()))
+            lines.append({topCenter(geometry), topCenter(otherGeometry)});
 
-//    /* Child top <-> Parent top */
-//    if (int(geometry.y()) == 0)
-//        lines << QLineF(parent->mapToScene(QPointF(0, 0)),
-//                        parent->mapToScene(QPointF(parent->width(), 0)));
+        /* Child bottom <-> Parent center */
+        if (qRound64(bottomCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
+            lines.append({bottomCenter(geometry), otherGeometry.center()});
 
-//    /* Child bottom <-> Parent center */
-//    if (int(geometry.bottomLeft().y()) == int(parent->height() / 2.0))
-//        lines << QLineF(parent->mapToScene(QPointF(center.x(), parent->height() / 2.0)),
-//                        parent->mapToScene(QPointF(parent->width() / 2.0, parent->height() / 2.0)));
-
-//    /* Child bottom <-> Parent bottom */
-//    if (int(geometry.bottomLeft().y()) == int(parent->height()))
-//        lines << QLineF(parent->mapToScene(QPointF(0, parent->height())),
-//                        parent->mapToScene(QPointF(parent->width(), parent->height())));
-
-    if (items.size() != 1)
-        return lines;
-
-//    for (const DesignerItem* siblingItem : m_siblingsBeforeDrag) {
-//        auto cgeometry = siblingItem->geometry();
-//        auto ccenter = cgeometry.center();
-
-//        /* Item1 center <-> Item2 center */
-//        if (int(center.x()) == int(ccenter.x()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-//                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
-
-//        if (int(center.y()) == int(ccenter.y()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-//                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
-
-//        /* Item1 center <-> Item2 left */
-//        if (int(center.x()) == int(cgeometry.topLeft().x()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-//                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
-
-//        /* Item1 center <-> Item2 top */
-//        if (int(center.y()) == int(cgeometry.topLeft().y()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-//                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
-
-//        /* Item1 center <-> Item2 right */
-//        if (int(center.x()) == int(cgeometry.bottomRight().x()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-//                            parent->mapToScene(QPointF(center.x(), ccenter.y())));
-
-//        /* Item1 center <-> Item2 bottom */
-//        if (int(center.y()) == int(cgeometry.bottomRight().y()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), center.y())),
-//                            parent->mapToScene(QPointF(ccenter.x(), center.y())));
-
-//        /* Item1 left <-> Item2 left/center/right */
-//        if (int(geometry.x()) == int(cgeometry.x()) ||
-//                int(geometry.x()) == int(ccenter.x()) ||
-//                int(geometry.x()) == int(cgeometry.topRight().x()))
-//            lines << QLineF(parent->mapToScene(QPointF(geometry.x(), center.y())),
-//                            parent->mapToScene(QPointF(geometry.x(), ccenter.y())));
-
-//        /* Item1 right <-> Item2 left/center/right */
-//        if (int(geometry.topRight().x()) == int(cgeometry.x()) ||
-//                int(geometry.topRight().x()) == int(ccenter.x()) ||
-//                int(geometry.topRight().x()) == int(cgeometry.topRight().x()))
-//            lines << QLineF(parent->mapToScene(QPointF(geometry.topRight().x(), center.y())),
-//                            parent->mapToScene(QPointF(geometry.topRight().x(), ccenter.y())));
-
-//        /* Item1 top <-> Item2 top/center/bottom */
-//        if (int(geometry.y()) == int(cgeometry.y()) ||
-//                int(geometry.y()) == int(ccenter.y()) ||
-//                int(geometry.y()) == int(cgeometry.bottomLeft().y()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.y())),
-//                            parent->mapToScene(QPointF(ccenter.x(), geometry.y())));
-
-//        /* Item1 bottom <-> Item2 top/center/bottom */
-//        if (int(geometry.bottomLeft().y()) == int(cgeometry.y()) ||
-//                int(geometry.bottomLeft().y()) == int(ccenter.y()) ||
-//                int(geometry.bottomLeft().y()) == int(cgeometry.bottomLeft().y()))
-//            lines << QLineF(parent->mapToScene(QPointF(center.x(), geometry.bottomLeft().y())),
-//                            parent->mapToScene(QPointF(ccenter.x(), geometry.bottomLeft().y())));
-//    }
+        /* Child bottom <-> Parent bottom */
+        if (qRound64(bottomCenter(geometry).y()) == qRound64(bottomCenter(otherGeometry).y()))
+            lines.append({bottomCenter(geometry), bottomCenter(otherGeometry)});
+    }
     return lines;
 }
 
