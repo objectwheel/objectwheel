@@ -77,6 +77,7 @@ void DesignerScene::removeForm(Form* form)
     // then if this line runs, QPointer clears the address
     // within m_currentForm, because its object is "delete"d
     // So no need to clear it again if it was the current form
+
     removeControl(form);
 
     m_forms.remove(form);
@@ -86,6 +87,133 @@ void DesignerScene::removeControl(Control* control)
 {
     removeItem(control);
     delete control; // Deletes its children too
+}
+
+void DesignerScene::setCurrentForm(Form* currentForm)
+{
+    if (m_currentForm == currentForm)
+        return;
+
+    if (!m_forms.contains(currentForm))
+        return;
+
+    /*
+        NOTE: InspectorPane dependency: We emit currentFormChanged signal before actually showing
+              it thus "selectionChanged" signal is being emitted afterwards. Otherwise selectionChanged
+              signal getting emitted before currentFormChanged signal, hence InspectorPane clears
+              the selection before saving selection state of a form in currentFormChanged signal.
+    */
+
+    Form* previous = m_currentForm;
+    m_currentForm = currentForm;
+
+    emit currentFormChanged(currentForm);
+
+    if (previous)
+        removeItem(previous);
+
+    if (m_currentForm) {
+        addItem(m_currentForm);
+        m_currentForm->setPos(0, 0);
+        shrinkSceneRect();
+    }
+}
+
+void DesignerScene::shrinkSceneRect()
+{
+    // 10 margin is a protection against a bug that
+    // moves forms unexpectedly when they are selected
+
+    setSceneRect(visibleItemsBoundingRect().adjusted(-10, -10, 10, 10));
+}
+
+void DesignerScene::unsetCursor() const
+{
+    Q_ASSERT(views().size() == 1);
+    views().first()->viewport()->unsetCursor();
+}
+
+void DesignerScene::setCursor(Qt::CursorShape cursor) const
+{
+    Q_ASSERT(views().size() == 1);
+    views().first()->viewport()->setCursor(cursor);
+}
+
+void DesignerScene::prepareDragLayer(DesignerItem* item)
+{
+    if (const DesignerItem* parentItem = item->parentItem()) {
+        m_dragLayer->setTransform(QTransform::fromTranslate(parentItem->scenePos().x(),
+                                                            parentItem->scenePos().y()));
+    }
+}
+
+bool DesignerScene::isLayerItem(DesignerItem* item) const
+{
+    return item == m_dragLayer || item == m_gadgetLayer || item == m_paintLayer;
+}
+
+Form* DesignerScene::currentForm() const
+{
+    return m_currentForm;
+}
+
+DesignerItem* DesignerScene::dragLayer() const
+{
+    return m_dragLayer;
+}
+
+GadgetLayer* DesignerScene::gadgetLayer() const
+{
+    return m_gadgetLayer;
+}
+
+PaintLayer* DesignerScene::paintLayer() const
+{
+    return m_paintLayer;
+}
+
+QList<Form*> DesignerScene::forms() const
+{
+    return m_forms.toList();
+}
+
+QList<Control*> DesignerScene::selectedControls() const
+{
+    QList<Control*> selectedControls;
+    for (DesignerItem* item : selectedItems()) {
+        if (item->type() >= Control::Type)
+            selectedControls.append(static_cast<Control*>(item));
+    }
+    return selectedControls;
+}
+
+QList<DesignerItem*> DesignerScene::selectedItems() const
+{
+    QList<DesignerItem*> selectedItems;
+    for (QGraphicsItem* selectedItem : QGraphicsScene::selectedItems()) {
+        if (selectedItem->type() >= DesignerItem::Type)
+            selectedItems.append(static_cast<DesignerItem*>(selectedItem));
+    }
+    return selectedItems;
+}
+
+QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
+{
+    QList<DesignerItem*> items(selectedItems());
+    for (int i = items.size() - 1; i >= 0; --i) {
+        DesignerItem* item = items.at(i);
+        if (!item->beingDragged() && !item->beingResized())
+            items.removeAt(i);
+    }
+    return items;
+}
+
+Control* DesignerScene::topLevelControl(const QPointF& pos) const
+{
+    const QList<Control*> allItems(items<Control>(pos));
+    if (allItems.isEmpty())
+        return nullptr;
+    return allItems.first();
 }
 
 Control* DesignerScene::highlightControl(const QPointF& pos) const
@@ -113,6 +241,80 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
 
     // Ordered based on stacking order, higher first
     return itemsAtPos.first();
+}
+
+QRectF DesignerScene::visibleItemsBoundingRect() const
+{
+    // Does not take untransformable items into account.
+    QRectF boundingRect;
+    for (DesignerItem *item : items()) {
+        if (item->isVisible() && !isLayerItem(item))
+            boundingRect |= item->sceneBoundingRect();
+    }
+    return boundingRect.adjusted(-10, -15, 10, 10);
+}
+
+QVector<QLineF> DesignerScene::guidelines() const
+{
+    // FIXME: doesn't correctly work for items within a parent
+    using namespace UtilityFunctions;
+
+    QVector<QLineF> lines;
+    QList<Control*> stillItems = items<Control>();
+    const QList<DesignerItem*>& movingItems = draggedResizedSelectedItems();
+
+    if (m_currentForm) {
+        stillItems.append(m_currentForm);
+        stillItems.append(m_currentForm->childControls());
+    }
+
+    for (DesignerItem* movingItem : movingItems)
+        stillItems.removeOne(static_cast<Control*>(movingItem));
+
+    for (DesignerItem* stillItem : qAsConst(stillItems)) {
+        const QRectF& geometry = itemsBoundingRect(movingItems);
+        const QRectF& otherGeometry = stillItem->sceneBoundingRect();
+
+        /* Child center <-> Parent center */
+        if (qRound64(geometry.center().x()) == qRound64(otherGeometry.center().x()))
+            lines.append({geometry.center(), otherGeometry.center()});
+
+        if (qRound64(geometry.center().y()) == qRound64(otherGeometry.center().y()))
+            lines.append({geometry.center(), otherGeometry.center()});
+
+        /* Child left <-> Parent center */
+        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
+            lines.append({leftCenter(geometry), otherGeometry.center()});
+
+        /* Child left <-> Parent left */
+        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.x()))
+            lines.append({leftCenter(geometry), leftCenter(otherGeometry)});
+
+        /* Child right <-> Parent center */
+        if (qRound64(rightCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
+            lines.append({rightCenter(geometry), otherGeometry.center()});
+
+        /* Child right <-> Parent right */
+        if (qRound64(rightCenter(geometry).x()) == qRound64(rightCenter(otherGeometry).x()))
+            lines.append({rightCenter(geometry), rightCenter(otherGeometry)});
+
+        /* Child top <-> Parent center */
+        if (qRound64(topCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
+            lines.append({topCenter(geometry), otherGeometry.center()});
+
+        /* Child top <-> Parent top */
+        if (qRound64(topCenter(geometry).y()) == qRound64(topCenter(otherGeometry).y()))
+            lines.append({topCenter(geometry), topCenter(otherGeometry)});
+
+        /* Child bottom <-> Parent center */
+        if (qRound64(bottomCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
+            lines.append({bottomCenter(geometry), otherGeometry.center()});
+
+        /* Child bottom <-> Parent bottom */
+        if (qRound64(bottomCenter(geometry).y()) == qRound64(bottomCenter(otherGeometry).y()))
+            lines.append({bottomCenter(geometry), bottomCenter(otherGeometry)});
+    }
+    return lines;
 }
 
 void DesignerScene::reparentControl(Control* control, Control* parentControl) const
@@ -236,11 +438,6 @@ void DesignerScene::dropEvent(QGraphicsSceneDragDropEvent* event)
     }
 }
 
-Form* DesignerScene::currentForm() const
-{
-    return m_currentForm.data();
-}
-
 qreal DesignerScene::zoomLevel()
 {
     return DesignerSettings::sceneSettings()->sceneZoomLevel;
@@ -274,46 +471,6 @@ qreal DesignerScene::higherZ(DesignerItem* parentItem)
             z = childItem->zValue();
     }
     return z;
-}
-
-QList<DesignerItem*> DesignerScene::selectedItems() const
-{
-    QList<DesignerItem*> selectedItems;
-    for (QGraphicsItem* selectedItem : QGraphicsScene::selectedItems()) {
-        if (selectedItem->type() >= DesignerItem::Type)
-            selectedItems.append(static_cast<DesignerItem*>(selectedItem));
-    }
-    return selectedItems;
-}
-
-void DesignerScene::unsetCursor()
-{
-    views().first()->viewport()->unsetCursor();
-}
-
-void DesignerScene::setCursor(Qt::CursorShape cursor)
-{
-    views().first()->viewport()->setCursor(cursor);
-}
-
-void DesignerScene::prepareDragLayer(DesignerItem* item)
-{
-    if (const DesignerItem* parentItem = item->parentItem()) {
-        m_dragLayer->setTransform(QTransform::fromTranslate(parentItem->scenePos().x(),
-                                                            parentItem->scenePos().y()));
-    }
-}
-
-void DesignerScene::shrinkSceneRect()
-{
-    // 10 margin is a protection against a bug that
-    // moves forms unexpectedly when they are selected
-    setSceneRect(visibleItemsBoundingRect().adjusted(-10, -10, 10, 10));
-}
-
-bool DesignerScene::isLayerItem(DesignerItem* item) const
-{
-    return item == m_dragLayer || item == m_gadgetLayer || item == m_paintLayer;
 }
 
 QPointF DesignerScene::snapPosition(qreal x, qreal y)
@@ -355,127 +512,9 @@ QRectF DesignerScene::outerRect(const QRectF& rect)
     return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
 }
 
-QList<Control*> DesignerScene::selectedControls() const
-{
-    QList<Control*> selectedControls;
-    for (DesignerItem* item : selectedItems()) {
-        if (item->type() >= Control::Type)
-            selectedControls.append(static_cast<Control*>(item));
-    }
-    return selectedControls;
-}
-
-QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
-{
-    QList<DesignerItem*> items(selectedItems());
-    for (int i = items.size() - 1; i >= 0; --i) {
-        DesignerItem* item = items.at(i);
-        if (!item->beingDragged() && !item->beingResized())
-            items.removeAt(i);
-    }
-    return items;
-}
-
-QRectF DesignerScene::visibleItemsBoundingRect() const
-{
-    // Does not take untransformable items into account.
-    QRectF boundingRect;
-    for (DesignerItem *item : items()) {
-        if (item->isVisible() && !isLayerItem(item))
-            boundingRect |= item->sceneBoundingRect();
-    }
-    return boundingRect.adjusted(-10, -15, 10, 10);
-}
-
 bool DesignerScene::showMouseoverOutline()
 {
     return DesignerSettings::sceneSettings()->showMouseoverOutline;
-}
-
-QVector<QLineF> DesignerScene::guidelines() const
-{
-    // FIXME: doesn't correctly work for items within a parent
-    using namespace UtilityFunctions;
-
-    QVector<QLineF> lines;
-    QList<Control*> stillItems = items<Control>();
-    const QList<DesignerItem*>& movingItems = draggedResizedSelectedItems();
-
-    if (m_currentForm) {
-        stillItems.append(m_currentForm);
-        stillItems.append(m_currentForm->childControls());
-    }
-
-    for (DesignerItem* movingItem : movingItems)
-        stillItems.removeOne(static_cast<Control*>(movingItem));
-
-    for (DesignerItem* stillItem : qAsConst(stillItems)) {
-        const QRectF& geometry = itemsBoundingRect(movingItems);
-        const QRectF& otherGeometry = stillItem->sceneBoundingRect();
-
-        /* Child center <-> Parent center */
-        if (qRound64(geometry.center().x()) == qRound64(otherGeometry.center().x()))
-            lines.append({geometry.center(), otherGeometry.center()});
-
-        if (qRound64(geometry.center().y()) == qRound64(otherGeometry.center().y()))
-            lines.append({geometry.center(), otherGeometry.center()});
-
-        /* Child left <-> Parent center */
-        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
-            lines.append({leftCenter(geometry), otherGeometry.center()});
-
-        /* Child left <-> Parent left */
-        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.x()))
-            lines.append({leftCenter(geometry), leftCenter(otherGeometry)});
-
-        /* Child right <-> Parent center */
-        if (qRound64(rightCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
-            lines.append({rightCenter(geometry), otherGeometry.center()});
-
-        /* Child right <-> Parent right */
-        if (qRound64(rightCenter(geometry).x()) == qRound64(rightCenter(otherGeometry).x()))
-            lines.append({rightCenter(geometry), rightCenter(otherGeometry)});
-
-        /* Child top <-> Parent center */
-        if (qRound64(topCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
-            lines.append({topCenter(geometry), otherGeometry.center()});
-
-        /* Child top <-> Parent top */
-        if (qRound64(topCenter(geometry).y()) == qRound64(topCenter(otherGeometry).y()))
-            lines.append({topCenter(geometry), topCenter(otherGeometry)});
-
-        /* Child bottom <-> Parent center */
-        if (qRound64(bottomCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
-            lines.append({bottomCenter(geometry), otherGeometry.center()});
-
-        /* Child bottom <-> Parent bottom */
-        if (qRound64(bottomCenter(geometry).y()) == qRound64(bottomCenter(otherGeometry).y()))
-            lines.append({bottomCenter(geometry), bottomCenter(otherGeometry)});
-    }
-    return lines;
-}
-
-DesignerItem* DesignerScene::dragLayer() const
-{
-    return m_dragLayer;
-}
-
-GadgetLayer* DesignerScene::gadgetLayer() const
-{
-    return m_gadgetLayer;
-}
-
-PaintLayer* DesignerScene::paintLayer() const
-{
-    return m_paintLayer;
-}
-
-Control* DesignerScene::topLevelControl(const QPointF& pos) const
-{
-    const QList<Control*> allItems(items<Control>(pos));
-    if (allItems.isEmpty())
-        return nullptr;
-    return allItems.first();
 }
 
 QColor DesignerScene::outlineColor()
@@ -572,39 +611,4 @@ void DesignerScene::onHeadlineDoubleClick(bool isFormHeadline)
     ControlPropertyManager::instance()->doubleClicked(isFormHeadline
                                                       ? m_currentForm
                                                       : selectedControls().first());
-}
-
-void DesignerScene::setCurrentForm(Form* currentForm)
-{
-    if (m_currentForm == currentForm)
-        return;
-
-    if (!m_forms.contains(currentForm))
-        return;
-
-    /*
-        NOTE: InspectorPane dependency: We emit currentFormChanged signal before actually showing
-              it thus "selectionChanged" signal is being emitted afterwards. Otherwise selectionChanged
-              signal getting emitted before currentFormChanged signal, hence InspectorPane clears
-              the selection before saving selection state of a form in currentFormChanged signal.
-    */
-
-    Form* previous = m_currentForm;
-    m_currentForm = currentForm;
-
-    emit currentFormChanged(currentForm);
-
-    if (previous)
-        removeItem(previous);
-
-    if (m_currentForm) {
-        addItem(m_currentForm);
-        m_currentForm->setPos(0, 0);
-        shrinkSceneRect();
-    }
-}
-
-QList<Form*> DesignerScene::forms() const
-{
-    return m_forms.toList();
 }

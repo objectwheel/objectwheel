@@ -26,26 +26,23 @@ public:
 public:
     explicit DesignerScene(QObject* parent = nullptr);
 
-    Form* currentForm() const;
-    void setCurrentForm(Form* currentForm);
-
     void addForm(Form* form);
     void removeForm(Form* form);
     void removeControl(Control* control);
+    void setCurrentForm(Form* currentForm);
 
     void shrinkSceneRect();
-    void unsetCursor();
-    void setCursor(Qt::CursorShape cursor);
+    void unsetCursor() const;
+    void setCursor(Qt::CursorShape cursor) const;
     void prepareDragLayer(DesignerItem* item);
     bool isLayerItem(DesignerItem* item) const;
 
+    Form* currentForm() const;
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
     PaintLayer* paintLayer() const;
 
     QList<Form*> forms() const;
-    QRectF visibleItemsBoundingRect() const;
-    QVector<QLineF> guidelines() const;
     QList<Control*> selectedControls() const;
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
@@ -53,36 +50,38 @@ public:
     Control* topLevelControl(const QPointF& pos) const;
     Control* highlightControl(const QPointF& pos) const;
 
+    QRectF visibleItemsBoundingRect() const;
+    QVector<QLineF> guidelines() const;
+
     template <typename T = DesignerItem, typename... Args>
-    QList<T*> items(Args&&... args) const
-    {
-        QList<T*> items;
-        for (QGraphicsItem* item : QGraphicsScene::items(std::forward<Args>(args)...)) {
-            if (item->type() >= T::Type)
-                items.append(static_cast<T*>(item));
-        }
-        return items;
-    }
+    QList<T*> items(Args&&... args) const;
 
 public:
-    static bool showMouseoverOutline();
     static bool showClippedControls();
-    static int startDragDistance();
+    static bool showMouseoverOutline();
+
     static int gridSize();
+    static int startDragDistance();
+
     static qreal zoomLevel();
-    static qreal lowerZ(DesignerItem* parentItem);
-    static qreal higherZ(DesignerItem* parentItem);
+    static OutlineMode outlineMode();
     static QColor outlineColor();
-    static QPointF snapPosition(qreal x, qreal y);
-    static QPointF snapPosition(const QPointF& pos);
-    static QSizeF snapSize(qreal x, qreal y, qreal w, qreal h);
-    static QSizeF snapSize(const QPointF& pos,const QSizeF& size);
-    static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
-    static QRectF outerRect(const QRectF& rect);
-    static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
     static QBrush backgroundTexture();
     static QBrush blankControlDecorationBrush(const QColor& color);
-    static OutlineMode outlineMode();
+    static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
+
+    static QPointF snapPosition(qreal x, qreal y);
+    static QPointF snapPosition(const QPointF& pos);
+
+    static QSizeF snapSize(qreal x, qreal y, qreal w, qreal h);
+    static QSizeF snapSize(const QPointF& pos,const QSizeF& size);
+
+    static QRectF outerRect(const QRectF& rect);
+    static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
+
+    static qreal lowerZ(DesignerItem* parentItem);
+    static qreal higherZ(DesignerItem* parentItem);
+
     static void drawDashLine(QPainter* painter, const QLineF& line);
     static void drawDashRect(QPainter* painter, const QRectF& rect);
 
@@ -115,5 +114,17 @@ private:
     QPointer<Form> m_currentForm;
     QPointer<DesignerItem> m_recentHighlightedItem;
 };
+
+template <typename T, typename... Args>
+inline QList<T*> DesignerScene::items(Args&&... args) const
+{
+    QList<T*> items;
+    const QList<QGraphicsItem*>& allItems = QGraphicsScene::items(std::forward<Args>(args)...);
+    for (QGraphicsItem* item : allItems) { // detaches allItems if it is not const
+        if (item->type() >= T::Type)
+            items.append(static_cast<T*>(item));
+    }
+    return items;
+}
 
 #endif // FORMSCENE_H
