@@ -317,6 +317,164 @@ QVector<QLineF> DesignerScene::guidelines() const
     return lines;
 }
 
+bool DesignerScene::showClippedControls()
+{
+    return DesignerSettings::sceneSettings()->showClippedControls;
+}
+
+bool DesignerScene::showMouseoverOutline()
+{
+    return DesignerSettings::sceneSettings()->showMouseoverOutline;
+}
+
+int DesignerScene::gridSize()
+{
+    return DesignerSettings::sceneSettings()->gridSize;
+}
+
+int DesignerScene::startDragDistance()
+{
+    return DesignerSettings::sceneSettings()->dragStartDistance;
+}
+
+qreal DesignerScene::zoomLevel()
+{
+    return DesignerSettings::sceneSettings()->sceneZoomLevel;
+}
+
+DesignerScene::OutlineMode DesignerScene::outlineMode()
+{
+    return OutlineMode(DesignerSettings::sceneSettings()->controlOutlineDecoration);
+}
+
+QColor DesignerScene::outlineColor()
+{
+    return DesignerSettings::sceneSettings()->outlineColor;
+}
+
+QBrush DesignerScene::backgroundTexture()
+{
+    return DesignerSettings::sceneSettings()->toBackgroundBrush();
+}
+
+QBrush DesignerScene::blankControlDecorationBrush(const QColor& color)
+{
+    return DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(color);
+}
+
+QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
+{
+    QPen pen(color, width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    pen.setCosmetic(cosmetic);
+    return pen;
+}
+
+QPointF DesignerScene::snapPosition(qreal x, qreal y)
+{
+    return snapPosition(QPointF(x, y));
+}
+
+QPointF DesignerScene::snapPosition(const QPointF& pos)
+{
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    if (settings->snappingEnabled) {
+        const qreal x = qFloor(pos.x() / settings->gridSize) * settings->gridSize;
+        const qreal y = qFloor(pos.y() / settings->gridSize) * settings->gridSize;
+        return QPointF(x, y);
+    }
+    return pos;
+}
+
+QSizeF DesignerScene::snapSize(qreal x, qreal y, qreal w, qreal h)
+{
+    return snapSize(QPointF(x, y), QSizeF(w, h));
+}
+
+QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
+{
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    if (settings->snappingEnabled) {
+        const qreal right = pos.x() + size.width();
+        const qreal bottom = pos.y() + size.height();
+        const QPointF& snapPos = snapPosition(right, bottom);
+        return QSizeF(snapPos.x() - pos.x(), snapPos.y() - pos.y());
+    }
+    return size;
+}
+
+QRectF DesignerScene::outerRect(const QRectF& rect)
+{
+    // Use on rectangular shapes where the item
+    // is transformable but the pen is cosmetic
+
+    return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
+}
+
+QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
+{
+    QRectF boundingRect;
+    for (DesignerItem* item : items)
+        boundingRect |= item->sceneBoundingRect();
+    return boundingRect;
+}
+
+qreal DesignerScene::lowerZ(DesignerItem* parentItem)
+{
+    qreal z = 0;
+    for (DesignerItem* childItem : parentItem->childItems(false)) {
+        if (childItem->zValue() < z)
+            z = childItem->zValue();
+    }
+    return z;
+}
+
+qreal DesignerScene::higherZ(DesignerItem* parentItem)
+{
+    qreal z = 0;
+    for (DesignerItem* childItem : parentItem->childItems(false)) {
+        if (childItem->zValue() > z)
+            z = childItem->zValue();
+    }
+    return z;
+}
+
+void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
+{
+    QPen linePen(pen(QColor(0, 0, 0, 150)));
+    linePen.setDashPattern({3, 2});
+    painter->setPen(linePen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawLine(line);
+
+    linePen.setColor(QColor(255, 255, 255, 150));
+    linePen.setDashPattern({2, 3});
+    linePen.setDashOffset(3);
+    painter->setPen(linePen);
+    painter->drawLine(line);
+}
+
+void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
+{
+    QPen linePen(pen(QColor(255, 255, 255, 150)));
+    linePen.setDashPattern({1, 2});
+    painter->setPen(linePen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(rect);
+
+    linePen.setColor(QColor(0, 0, 0, 150));
+    linePen.setDashPattern({2, 1});
+    linePen.setDashOffset(2);
+    painter->setPen(linePen);
+    painter->drawRect(rect);
+
+    linePen.setStyle(Qt::SolidLine);
+    painter->setPen(linePen);
+    painter->drawPoint(rect.topLeft());
+    painter->drawPoint(rect.topRight() - QPointF(0.25, 0.0));
+    painter->drawPoint(rect.bottomLeft());
+    painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
+}
+
 void DesignerScene::reparentControl(Control* control, Control* parentControl) const
 {
     // NOTE: We compress setPos because there might be some other
@@ -436,162 +594,6 @@ void DesignerScene::dropEvent(QGraphicsSceneDragDropEvent* event)
     } else {
         QGraphicsScene::dropEvent(event);
     }
-}
-
-qreal DesignerScene::zoomLevel()
-{
-    return DesignerSettings::sceneSettings()->sceneZoomLevel;
-}
-
-int DesignerScene::startDragDistance()
-{
-    return DesignerSettings::sceneSettings()->dragStartDistance;
-}
-
-int DesignerScene::gridSize()
-{
-    return DesignerSettings::sceneSettings()->gridSize;
-}
-
-qreal DesignerScene::lowerZ(DesignerItem* parentItem)
-{
-    qreal z = 0;
-    for (DesignerItem* childItem : parentItem->childItems(false)) {
-        if (childItem->zValue() < z)
-            z = childItem->zValue();
-    }
-    return z;
-}
-
-qreal DesignerScene::higherZ(DesignerItem* parentItem)
-{
-    qreal z = 0;
-    for (DesignerItem* childItem : parentItem->childItems(false)) {
-        if (childItem->zValue() > z)
-            z = childItem->zValue();
-    }
-    return z;
-}
-
-QPointF DesignerScene::snapPosition(qreal x, qreal y)
-{
-    return snapPosition(QPointF(x, y));
-}
-
-QPointF DesignerScene::snapPosition(const QPointF& pos)
-{
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
-    if (settings->snappingEnabled) {
-        const qreal x = qFloor(pos.x() / settings->gridSize) * settings->gridSize;
-        const qreal y = qFloor(pos.y() / settings->gridSize) * settings->gridSize;
-        return QPointF(x, y);
-    }
-    return pos;
-}
-
-QSizeF DesignerScene::snapSize(qreal x, qreal y, qreal w, qreal h)
-{
-    return snapSize(QPointF(x, y), QSizeF(w, h));
-}
-
-QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
-{
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
-    if (settings->snappingEnabled) {
-        const qreal right = pos.x() + size.width();
-        const qreal bottom = pos.y() + size.height();
-        const QPointF& snapPos = snapPosition(right, bottom);
-        return QSizeF(snapPos.x() - pos.x(), snapPos.y() - pos.y());
-    }
-    return size;
-}
-
-// Use on rectangular drawings where the item is transformable but the pen is cosmetic
-QRectF DesignerScene::outerRect(const QRectF& rect)
-{
-    return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
-}
-
-bool DesignerScene::showMouseoverOutline()
-{
-    return DesignerSettings::sceneSettings()->showMouseoverOutline;
-}
-
-QColor DesignerScene::outlineColor()
-{
-    return DesignerSettings::sceneSettings()->outlineColor;
-}
-
-QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
-{
-    QPen pen(color, width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
-    pen.setCosmetic(cosmetic);
-    return pen;
-}
-
-QBrush DesignerScene::backgroundTexture()
-{
-    return DesignerSettings::sceneSettings()->toBackgroundBrush();
-}
-
-QBrush DesignerScene::blankControlDecorationBrush(const QColor& color)
-{
-    return DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(color);
-}
-
-DesignerScene::OutlineMode DesignerScene::outlineMode()
-{
-    return OutlineMode(DesignerSettings::sceneSettings()->controlOutlineDecoration);
-}
-
-bool DesignerScene::showClippedControls()
-{
-    return DesignerSettings::sceneSettings()->showClippedControls;
-}
-
-void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
-{
-    QPen linePen(pen(QColor(255, 255, 255, 150)));
-    linePen.setDashPattern({1, 2});
-    painter->setPen(linePen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRect(rect);
-
-    linePen.setColor(QColor(0, 0, 0, 150));
-    linePen.setDashPattern({2, 1});
-    linePen.setDashOffset(2);
-    painter->setPen(linePen);
-    painter->drawRect(rect);
-
-    linePen.setStyle(Qt::SolidLine);
-    painter->setPen(linePen);
-    painter->drawPoint(rect.topLeft());
-    painter->drawPoint(rect.topRight() - QPointF(0.25, 0.0));
-    painter->drawPoint(rect.bottomLeft());
-    painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
-}
-
-void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
-{
-    QPen linePen(pen(QColor(0, 0, 0, 150)));
-    linePen.setDashPattern({3, 2});
-    painter->setPen(linePen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawLine(line);
-
-    linePen.setColor(QColor(255, 255, 255, 150));
-    linePen.setDashPattern({2, 3});
-    linePen.setDashOffset(3);
-    painter->setPen(linePen);
-    painter->drawLine(line);
-}
-
-QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
-{
-    QRectF boundingRect;
-    for (DesignerItem* item : items)
-        boundingRect |= item->sceneBoundingRect();
-    return boundingRect;
 }
 
 void DesignerScene::discharge()
