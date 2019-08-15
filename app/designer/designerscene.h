@@ -43,9 +43,6 @@ public:
     GadgetLayer* gadgetLayer() const;
     PaintLayer* paintLayer() const;
 
-    DesignerItem* dropItem(const QPointF& pos) const;
-    DesignerItem* highlightItem(const QPointF& pos) const;
-
     QList<Form*> forms() const;
     QRectF visibleItemsBoundingRect() const;
     QVector<QLineF> guidelines() const;
@@ -53,29 +50,21 @@ public:
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
 
-//    template <typename... Args>
-//    QList<DesignerItem*> items(Args&&... args) const
-//    {
-//        QList<DesignerItem*> items;
-//        for (QGraphicsItem* item : QGraphicsScene::items(std::forward<Args>(args)...)) {
-//            if (item->type() >= DesignerItem::Type)
-//                items.append(static_cast<DesignerItem*>(item));
-//        }
-//        return items;
+    Control* topLevelControl(const QPointF& pos) const;
+    Control* highlightControl(const QPointF& pos) const;
 
-//    }
-
-    template <typename... Args>
-    QList<DesignerItem*> controls(Args&&... args) const
+    template <typename T = DesignerItem, typename... Args>
+    QList<T*> items(Args&&... args) const
     {
-        QList<Control*> controls;
+        QList<T*> items;
         for (QGraphicsItem* item : QGraphicsScene::items(std::forward<Args>(args)...)) {
-            if (item->type() >= Control::Type)
-                controls.append(static_cast<Control*>(item));
+            if (item->type() >= T::Type)
+                items.append(static_cast<T*>(item));
         }
-        return controls;
+        return items;
     }
 
+public:
     static bool showMouseoverOutline();
     static bool showClippedControls();
     static int startDragDistance();
@@ -123,8 +112,6 @@ private:
     GadgetLayer* m_gadgetLayer;
     PaintLayer* m_paintLayer;
     QSet<Form*> m_forms;
-    DesignerItem* m_parentBeforeDrag;
-    QList<DesignerItem*> m_siblingsBeforeDrag;
     QPointer<Form> m_currentForm;
     QPointer<DesignerItem> m_recentHighlightedItem;
 };

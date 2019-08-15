@@ -88,17 +88,7 @@ void DesignerScene::removeControl(Control* control)
     delete control; // Deletes its children too
 }
 
-DesignerItem* DesignerScene::dropItem(const QPointF& pos) const
-{
-    // Ordered based on stacking order, higher first
-    for (DesignerItem* item : items(pos)) {
-        if (item->type() >= Control::Type)
-            return item;
-    }
-    return nullptr;
-}
-
-DesignerItem* DesignerScene::highlightItem(const QPointF& pos) const
+Control* DesignerScene::highlightControl(const QPointF& pos) const
 {
     QList<DesignerItem*> draggedItems = draggedResizedSelectedItems();
     for (int i = draggedItems.size() - 1; i >= 0; --i) {
@@ -111,20 +101,18 @@ DesignerItem* DesignerScene::highlightItem(const QPointF& pos) const
     if (draggedItems.isEmpty())
         return nullptr;
 
-    QList<DesignerItem*> itemsAtPos = items(pos);
+    QList<Control*> itemsAtPos = items<Control>(pos);
     for (int i = itemsAtPos.size() - 1; i >= 0; --i) {
         DesignerItem* item = itemsAtPos.at(i);
         if (draggedItems.contains(item))
             itemsAtPos.removeAt(i);
     }
 
-    // Ordered based on stacking order, higher first
-    for (DesignerItem* item : itemsAtPos) {
-        if (item->type() >= Control::Type)
-            return item;
-    }
+    if (itemsAtPos.isEmpty())
+        return nullptr;
 
-    return nullptr;
+    // Ordered based on stacking order, higher first
+    return itemsAtPos.first();
 }
 
 void DesignerScene::reparentControl(Control* control, Control* parentControl) const
@@ -187,7 +175,7 @@ void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     if (mouseGrabberItem()) {
         if (m_recentHighlightedItem)
             m_recentHighlightedItem->setBeingHighlighted(false);
-        if ((m_recentHighlightedItem = highlightItem(event->scenePos())))
+        if ((m_recentHighlightedItem = highlightControl(event->scenePos())))
             m_recentHighlightedItem->setBeingHighlighted(true);
     }
 }
@@ -217,7 +205,7 @@ void DesignerScene::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
     if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
         if (m_recentHighlightedItem)
             m_recentHighlightedItem->setBeingHighlighted(false);
-        if ((m_recentHighlightedItem = dropItem(event->scenePos())))
+        if ((m_recentHighlightedItem = topLevelControl(event->scenePos())))
             m_recentHighlightedItem->setBeingHighlighted(true);
         event->setAccepted(m_recentHighlightedItem);
     } else {
@@ -310,8 +298,6 @@ void DesignerScene::setCursor(Qt::CursorShape cursor)
 
 void DesignerScene::prepareDragLayer(DesignerItem* item)
 {
-    m_parentBeforeDrag = item->parentItem();
-    m_siblingsBeforeDrag = item->siblingItems();
     if (const DesignerItem* parentItem = item->parentItem()) {
         m_dragLayer->setTransform(QTransform::fromTranslate(parentItem->scenePos().x(),
                                                             parentItem->scenePos().y()));
@@ -412,16 +398,16 @@ QVector<QLineF> DesignerScene::guidelines() const
     using namespace UtilityFunctions;
 
     QVector<QLineF> lines;
-    QList<Control*> stillControls = controls();
-    const QList<DesignerItem*>& movingControls = draggedResizedSelectedItems();
+    QList<Control*> stillItems = items<Control>();
+    const QList<DesignerItem*>& movingItems = draggedResizedSelectedItems();
 
     if (m_currentForm) {
         stillItems.append(m_currentForm);
         stillItems.append(m_currentForm->childControls());
     }
 
-    for (const DesignerItem* movingItem : qAsConst(movingItems))
-        stillItems.removeOne(movingItems);
+    for (DesignerItem* movingItem : movingItems)
+        stillItems.removeOne(static_cast<Control*>(movingItem));
 
     for (DesignerItem* stillItem : qAsConst(stillItems)) {
         const QRectF& geometry = itemsBoundingRect(movingItems);
@@ -482,6 +468,14 @@ GadgetLayer* DesignerScene::gadgetLayer() const
 PaintLayer* DesignerScene::paintLayer() const
 {
     return m_paintLayer;
+}
+
+Control* DesignerScene::topLevelControl(const QPointF& pos) const
+{
+    const QList<Control*> allItems(items<Control>(pos));
+    if (allItems.isEmpty())
+        return nullptr;
+    return allItems.first();
 }
 
 QColor DesignerScene::outlineColor()
