@@ -871,3 +871,49 @@ QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
     }
     return QMarginsF();
 }
+
+QVariantMap RenderUtils::anchors(const RenderEngine::ControlInstance* instance, const RenderEngine* engine)
+{
+    static const QStringList anchorLineNames {
+        "anchors.top",
+        "anchors.bottom",
+        "anchors.left",
+        "anchors.right",
+        "anchors.horizontalCenter",
+        "anchors.verticalCenter",
+        "anchors.baseline",
+        "anchors.fill",
+        "anchors.centerIn"
+    };
+    static const QStringList anchorPropertyNames {
+        "anchors.margins",
+        "anchors.topMargin",
+        "anchors.bottomMargin",
+        "anchors.leftMargin",
+        "anchors.rightMargin",
+        "anchors.horizontalCenterOffset",
+        "anchors.verticalCenterOffset",
+        "anchors.baselineOffset",
+        "anchors.alignWhenCentered"
+    };
+    QVariantMap anchorMap;
+    if (instance->gui && !instance->popup && !instance->window) {
+        for (const QString& name : anchorLineNames)
+            anchorMap.insert(name, QVariant::fromValue(makeAnchorPair(instance, name, engine)));
+        for (const QString& name : anchorPropertyNames)
+            anchorMap.insert(name, QQmlProperty::read(instance->object, name, instance->context));
+    }
+    return anchorMap;
+}
+
+QPair<QString, QString> RenderUtils::makeAnchorPair(const RenderEngine::ControlInstance* instance, const QString& name, const RenderEngine* engine)
+{
+    QQmlContext* ctx = instance->context;
+    Q_ASSERT(ctx);
+    QQuickItem* item = qobject_cast<QQuickItem*>(instance->object);
+    Q_ASSERT(item);
+    const QPair<QString, QObject*>& pair = DesignerSupport::anchorLineTarget(item, name, ctx);
+    if (const RenderEngine::ControlInstance* targetInstance = engine->instanceForObject(pair.second))
+        return QPair<QString, QString>(pair.first, targetInstance->uid);
+    return QPair<QString, QString>();
+}

@@ -32,6 +32,7 @@ struct RenderInfo {
     QImage image;
     QMarginsF margins;
     QRectF surroundingRect;
+    QVariantMap anchors;
     QVector<QmlError> errors;
     QVector<QString> events;
     QVector<PropertyNode> properties;
@@ -95,6 +96,7 @@ inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
     in >> info.visible;
     in >> info.codeChanged;
     in >> info.geometrySyncKey;
+    in >> info.anchors;
     in >> info.errors;
     in >> info.events;
     in >> info.properties;
@@ -113,6 +115,7 @@ inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
     out << info.visible;
     out << info.codeChanged;
     out << info.geometrySyncKey;
+    out << info.anchors;
     out << info.errors;
     out << info.events;
     out << info.properties;

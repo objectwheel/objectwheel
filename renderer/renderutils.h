@@ -21,10 +21,14 @@ public:
     static void valueFromGeometrySyncKey(QVariant* value, QString* hash);
     static QVariant evaluate(const RenderEngine::ControlInstance* instance, const QString& binding);
     static QList<QQuickItem*> allItems(RenderEngine::ControlInstance* formInstance);
+    static QList<RenderEngine::ControlInstance*> allSubInstance(RenderEngine::ControlInstance* parentInstance);
     static QVector<QString> events(const RenderEngine::ControlInstance* instance);
     static QVector<PropertyNode> properties(const RenderEngine::ControlInstance* instance);
     static QMarginsF margins(const RenderEngine::ControlInstance* instance);
-    static QList<RenderEngine::ControlInstance*> allSubInstance(RenderEngine::ControlInstance* parentInstance);
+    static QVariantMap anchors(const RenderEngine::ControlInstance* instance, const RenderEngine* engine);
+    static QPair<QString, QString> makeAnchorPair(const RenderEngine::ControlInstance* instance,
+                                                  const QString& name, const RenderEngine* engine);
+
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
     static bool isVisible(const RenderEngine::ControlInstance* instance);
     static bool isRectangleSane(const QRectF& rect);

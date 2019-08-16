@@ -1058,7 +1058,7 @@ void PropertiesPane::discharge()
 // FIXME: This function has severe performance issues.
 void PropertiesPane::onSceneSelectionChange()
 {
-    return; // FIXME
+//    return; // FIXME
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;
     const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
 

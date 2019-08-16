@@ -64,6 +64,11 @@ QMarginsF Control::margins() const
     return m_renderInfo.margins;
 }
 
+QVariantMap Control::anchors() const
+{
+    return m_renderInfo.anchors;
+}
+
 QVector<QString> Control::events() const
 {
     return m_renderInfo.events;

@@ -21,6 +21,11 @@ void PaintLayer::updateGeometry()
     }, Qt::QueuedConnection);
 }
 
+void PaintLayer::paintAnchors(QPainter* painter)
+{
+
+}
+
 void PaintLayer::paintGuidelines(QPainter* painter)
 {
     Q_ASSERT(scene());

@@ -326,9 +326,10 @@ void RenderEngine::preview(const QString& url)
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
         info.geometrySyncKey = instance->geometrySyncKey;
-        info.margins = RenderUtils::margins(instance);
-        info.properties = RenderUtils::properties(instance);
-        info.events = RenderUtils::events(instance);
+        // info.margins = RenderUtils::margins(instance);
+        // info.properties = RenderUtils::properties(instance);
+        // info.events = RenderUtils::events(instance);
+        // info.anchors = RenderUtils::anchors(instance, this);
         instance->codeChanged = false;
         info.errors = instance->errors;
         info.image = grabImage(instance, info.surroundingRect);
@@ -508,7 +509,8 @@ bool RenderEngine::hasInstanceForUid(const QString& uid) const
 
 RenderEngine::ControlInstance* RenderEngine::instanceForObject(const QObject* object) const
 {
-    Q_ASSERT(object);
+    if (object == 0)
+        return nullptr;
     for (ControlInstance* formInstance : m_formInstances) {
         for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
             if (instance->object == object)
@@ -680,6 +682,7 @@ QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::C
         info.events = RenderUtils::events(instance);
         instance->codeChanged = false;
         info.errors = instance->errors;
+        info.anchors = RenderUtils::anchors(instance, this);
         info.image = grabImage(instance, info.surroundingRect);
         infos.append(info);
 

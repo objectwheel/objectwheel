@@ -25,6 +25,7 @@ public:
     bool hasErrors() const;
 
     QMarginsF margins() const;
+    QVariantMap anchors() const;
     QVector<QString> events() const;
     QVector<QmlError> errors() const;
     QVector<PropertyNode> properties() const;
