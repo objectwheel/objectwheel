@@ -16,9 +16,11 @@ public slots:
 
 private:
     void paintAnchors(QPainter* painter);
+    void paintAnchorConnector(QPainter* painter);
     void paintGuidelines(QPainter* painter);
     void paintSelectionOutlines(QPainter* painter);
     void paintMovingSelectionOutline(QPainter* painter);
+    void paintLabelOverLine(QPainter* painter, const QString& label, const QLineF& line);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:

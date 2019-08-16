@@ -42,6 +42,7 @@ public:
     AnchorLine();
     AnchorLine(Control* control, AnchorLineType type);
     AnchorLineType type() const;
+    qreal margin() const;
     bool isValid() const;
 
     static bool isHorizontalAnchorLine(AnchorLineType anchorline);
@@ -67,6 +68,28 @@ AnchorLine::AnchorLine(Control* control, AnchorLineType type)
 AnchorLineType AnchorLine::type() const
 {
     return m_type;
+}
+
+qreal AnchorLine::margin() const
+{
+    if (!isValid())
+        return 0;
+
+    qreal margin = 0;
+
+    if (m_type == AnchorLineTop)
+        margin = m_control->anchors().value("anchors.topMargin").toReal();
+    else if (m_type == AnchorLineBottom)
+        margin = m_control->anchors().value("anchors.bottomMargin").toReal();
+    else if (m_type == AnchorLineLeft)
+        margin = m_control->anchors().value("anchors.leftMargin").toReal();
+    else if (m_type == AnchorLineRight)
+        margin = m_control->anchors().value("anchors.rightMargin").toReal();
+
+    if (margin == 0)
+        return m_control->anchors().value("anchors.margins").toReal();
+
+    return margin;
 }
 
 bool AnchorLine::isValid() const
@@ -337,10 +360,12 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
                 DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-                painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
-                painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
+                painter->setPen(Qt::white);
+                painter->setBrush(DesignerScene::outlineColor());
+                paintLabelOverLine(painter, QString::number(sourceLine.margin()), {data.firstControlPoint, data.secondControlPoint});
 
                 bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
+                painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
                 painter->setBrush(painter->pen().color());
                 painter->setRenderHint(QPainter::Antialiasing, true);
                 painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
@@ -359,6 +384,11 @@ void PaintLayer::paintAnchors(QPainter* painter)
         }
     }
     painter->setClipping(false);
+}
+
+void PaintLayer::paintAnchorConnector(QPainter* painter)
+{
+//    FIXME: if ()
 }
 
 void PaintLayer::paintGuidelines(QPainter* painter)
@@ -412,6 +442,34 @@ void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
         DesignerScene::drawDashRect(painter, DesignerScene::outerRect(DesignerScene::itemsBoundingRect(items)));
+}
+
+void PaintLayer::paintLabelOverLine(QPainter* painter, const QString& label, const QLineF& line)
+{
+    QFont f;
+    f.setPixelSize(f.pixelSize() - 4);
+    const QFontMetrics fm(f); // App default font
+    qreal angle = 180 - line.angle();
+    if (qAbs(angle) == 180 || qAbs(angle) == 360)
+        angle = 0;
+    if (qAbs(angle) == 90 || qAbs(angle) == 270)
+        angle = 90;
+    QRectF rect(0, 0, fm.horizontalAdvance(label) + fm.height() / 2., fm.height());
+    rect.moveCenter(line.center());
+    const QPointF& tr = rect.center();
+    rect.moveTopLeft({-rect.width() * 0.5, -rect.height() * 0.5});
+    painter->setFont(f);
+    painter->translate(tr);
+    painter->rotate(angle);
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    auto p = painter->pen();
+    painter->setPen(Qt::NoPen);
+    painter->drawRoundedRect(rect, rect.height() / 2, rect.height() / 2);
+    painter->setPen(p);
+    painter->drawText(rect, label, QTextOption(Qt::AlignCenter));
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->rotate(-angle);
+    painter->translate(-tr);
 }
 
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

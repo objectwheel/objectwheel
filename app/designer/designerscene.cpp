@@ -323,6 +323,11 @@ QVector<QLineF> DesignerScene::guidelines() const
     return lines;
 }
 
+bool DesignerScene::showGridViewDots()
+{
+    return DesignerSettings::sceneSettings()->showGridViewDots;
+}
+
 bool DesignerScene::showClippedControls()
 {
     return DesignerSettings::sceneSettings()->showClippedControls;
@@ -446,13 +451,13 @@ qreal DesignerScene::higherZ(DesignerItem* parentItem)
 
 void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
 {
-    QPen linePen(pen(QColor(0, 0, 0, 180)));
+    QPen linePen(pen(QColor(0, 0, 0, 200)));
     linePen.setDashPattern({3, 2});
     painter->setPen(linePen);
     painter->setBrush(Qt::NoBrush);
     painter->drawLine(line);
 
-    linePen.setColor(QColor(255, 255, 255, 180));
+    linePen.setColor(QColor(255, 255, 255, 200));
     linePen.setDashPattern({2, 3});
     linePen.setDashOffset(3);
     painter->setPen(linePen);

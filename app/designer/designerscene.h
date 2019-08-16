@@ -58,6 +58,7 @@ public:
     QList<T*> items(Args&&... args) const;
 
 public:
+    static bool showGridViewDots();
     static bool showClippedControls();
     static bool showMouseoverOutline();
 
