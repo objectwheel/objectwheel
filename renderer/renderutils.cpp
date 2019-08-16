@@ -906,7 +906,7 @@ QVariantMap RenderUtils::anchors(const RenderEngine::ControlInstance* instance, 
     return anchorMap;
 }
 
-QPair<QString, QString> RenderUtils::makeAnchorPair(const RenderEngine::ControlInstance* instance, const QString& name, const RenderEngine* engine)
+QStringList RenderUtils::makeAnchorPair(const RenderEngine::ControlInstance* instance, const QString& name, const RenderEngine* engine)
 {
     QQmlContext* ctx = instance->context;
     Q_ASSERT(ctx);
@@ -914,6 +914,6 @@ QPair<QString, QString> RenderUtils::makeAnchorPair(const RenderEngine::ControlI
     Q_ASSERT(item);
     const QPair<QString, QObject*>& pair = DesignerSupport::anchorLineTarget(item, name, ctx);
     if (const RenderEngine::ControlInstance* targetInstance = engine->instanceForObject(pair.second))
-        return QPair<QString, QString>(pair.first, targetInstance->uid);
-    return QPair<QString, QString>();
+        return QStringList({"anchors." + pair.first, targetInstance->uid});
+    return QStringList();
 }

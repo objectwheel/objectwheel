@@ -26,8 +26,8 @@ public:
     static QVector<PropertyNode> properties(const RenderEngine::ControlInstance* instance);
     static QMarginsF margins(const RenderEngine::ControlInstance* instance);
     static QVariantMap anchors(const RenderEngine::ControlInstance* instance, const RenderEngine* engine);
-    static QPair<QString, QString> makeAnchorPair(const RenderEngine::ControlInstance* instance,
-                                                  const QString& name, const RenderEngine* engine);
+    static QStringList makeAnchorPair(const RenderEngine::ControlInstance* instance,
+                                      const QString& name, const RenderEngine* engine);
 
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
     static bool isVisible(const RenderEngine::ControlInstance* instance);

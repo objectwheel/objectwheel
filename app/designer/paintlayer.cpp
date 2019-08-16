@@ -4,6 +4,37 @@
 #include <gadgetlayer.h>
 #include <QPainter>
 
+enum { AngleDegree = 16 };
+enum AnchorLineType {
+    AnchorLineInvalid = 0x0,
+    AnchorLineNoAnchor = AnchorLineInvalid,
+    AnchorLineLeft = 0x01,
+    AnchorLineRight = 0x02,
+    AnchorLineTop = 0x04,
+    AnchorLineBottom = 0x08,
+    AnchorLineHorizontalCenter = 0x10,
+    AnchorLineVerticalCenter = 0x20,
+    AnchorLineBaseline = 0x40,
+
+    AnchorLineFill =  AnchorLineLeft | AnchorLineRight | AnchorLineTop | AnchorLineBottom,
+    AnchorLineCenter = AnchorLineVerticalCenter | AnchorLineHorizontalCenter,
+    AnchorLineHorizontalMask = AnchorLineLeft | AnchorLineRight | AnchorLineHorizontalCenter,
+    AnchorLineVerticalMask = AnchorLineTop | AnchorLineBottom | AnchorLineVerticalCenter | AnchorLineBaseline,
+    AnchorLineAllMask = AnchorLineVerticalMask | AnchorLineHorizontalMask
+};
+
+static const QStringList anchorLineNames {
+    "anchors.top",
+    "anchors.bottom",
+    "anchors.left",
+    "anchors.right",
+    "anchors.horizontalCenter",
+    "anchors.verticalCenter",
+    "anchors.baseline",
+    "anchors.fill",
+    "anchors.centerIn"
+};
+
 class AnchorLine
 {
 public:
@@ -18,10 +49,9 @@ public:
     Control* control() const;
 
 private:
-    Control m_control;
+    Control* m_control;
     AnchorLineType m_type;
 };
-
 
 AnchorLine::AnchorLine()
     : m_control(nullptr)
@@ -50,32 +80,13 @@ bool AnchorLine::isHorizontalAnchorLine(AnchorLineType anchorline)
 
 bool AnchorLine::isVerticalAnchorLine(AnchorLineType anchorline)
 {
-     return anchorline & AnchorLineVerticalMask;
+    return anchorline & AnchorLineVerticalMask;
 }
 
 Control* AnchorLine::control() const
 {
     return m_control;
 }
-
-enum { AngleDegree = 16 };
-enum AnchorLineType {
-    AnchorLineInvalid = 0x0,
-    AnchorLineNoAnchor = AnchorLineInvalid,
-    AnchorLineLeft = 0x01,
-    AnchorLineRight = 0x02,
-    AnchorLineTop = 0x04,
-    AnchorLineBottom = 0x08,
-    AnchorLineHorizontalCenter = 0x10,
-    AnchorLineVerticalCenter = 0x20,
-    AnchorLineBaseline = 0x40,
-
-    AnchorLineFill =  AnchorLineLeft | AnchorLineRight | AnchorLineTop | AnchorLineBottom,
-    AnchorLineCenter = AnchorLineVerticalCenter | AnchorLineHorizontalCenter,
-    AnchorLineHorizontalMask = AnchorLineLeft | AnchorLineRight | AnchorLineHorizontalCenter,
-    AnchorLineVerticalMask = AnchorLineTop | AnchorLineBottom | AnchorLineVerticalCenter | AnchorLineBaseline,
-    AnchorLineAllMask = AnchorLineVerticalMask | AnchorLineHorizontalMask
-};
 
 struct AnchorData {
     QPointF startPoint;
@@ -90,27 +101,123 @@ struct AnchorData {
     AnchorLineType targetAnchorLineType = AnchorLineInvalid;
 };
 
-void updateAnchorData(AnchorData& data, const AnchorLine& sourceAnchorLine, const AnchorLine& targetAnchorLine)
+static QPointF createParentAnchorPoint(const Control* parentControl, AnchorLineType anchorLineType, const Control* childControl)
+{
+    QRectF parentBoundingRect = parentControl->mapRectToScene(parentControl->rect());
+    QRectF childBoundingRect = childControl->mapRectToScene(childControl->rect());
+
+    QPointF anchorPoint;
+
+    switch (anchorLineType) {
+    case AnchorLineTop:
+        anchorPoint = QPointF(childBoundingRect.center().x(), parentBoundingRect.top());
+        break;
+    case AnchorLineBottom:
+        anchorPoint = QPointF(childBoundingRect.center().x(), parentBoundingRect.bottom());
+        break;
+    case AnchorLineLeft:
+        anchorPoint = QPointF(parentBoundingRect.left(), childBoundingRect.center().y());
+        break;
+    case AnchorLineRight:
+        anchorPoint = QPointF(parentBoundingRect.right(), childBoundingRect.center().y());
+        break;
+    default:
+        break;
+    }
+
+    return anchorPoint;
+}
+
+static QPointF createAnchorPoint(const Control* control, AnchorLineType anchorLineType)
+{
+    QRectF boundingRect = control->mapRectToScene(control->rect());
+
+    QPointF anchorPoint;
+
+    switch (anchorLineType) {
+    case AnchorLineTop:
+        anchorPoint = QPointF(boundingRect.center().x(), boundingRect.top());
+        break;
+    case AnchorLineBottom:
+        anchorPoint = QPointF(boundingRect.center().x(), boundingRect.bottom());
+        break;
+    case AnchorLineLeft:
+        anchorPoint = QPointF(boundingRect.left(), boundingRect.center().y());
+        break;
+    case AnchorLineRight:
+        anchorPoint = QPointF(boundingRect.right(), boundingRect.center().y());
+        break;
+    default:
+        break;
+    }
+
+    return anchorPoint;
+}
+
+static QPointF createControlPoint(const QPointF &firstEditPoint, AnchorLineType anchorLineType, const QPointF &secondEditPoint)
+{
+    QPointF controlPoint = firstEditPoint;
+
+    switch (anchorLineType) {
+    case AnchorLineTop:
+    case AnchorLineBottom:
+        controlPoint.ry() += (secondEditPoint.y() - firstEditPoint.y()) / 2.0;
+        break;
+    case AnchorLineLeft:
+    case AnchorLineRight:
+        controlPoint.rx() += (secondEditPoint.x() - firstEditPoint.x()) / 2.0;
+        break;
+    default:
+        break;
+    }
+
+    return controlPoint;
+}
+
+static void updateAnchorLinePoints(QPointF *firstPoint, QPointF *secondPoint, const AnchorLine &anchorLine)
+{
+    QRectF boundingRectangle = anchorLine.control()->mapRectToScene(anchorLine.control()->rect());
+
+    switch (anchorLine.type()) {
+    case AnchorLineTop:
+        *firstPoint = boundingRectangle.topLeft();
+        *secondPoint = boundingRectangle.topRight();
+        break;
+    case AnchorLineBottom:
+        *firstPoint = boundingRectangle.bottomLeft();
+        *secondPoint = boundingRectangle.bottomRight();
+        break;
+    case AnchorLineLeft:
+        *firstPoint = boundingRectangle.topLeft();
+        *secondPoint = boundingRectangle.bottomLeft();
+        break;
+    case AnchorLineRight:
+        *firstPoint = boundingRectangle.topRight();
+        *secondPoint = boundingRectangle.bottomRight();
+        break;
+    default:
+        break;
+    }
+}
+
+static void updateAnchorData(AnchorData& data, const AnchorLine& sourceAnchorLine, const AnchorLine& targetAnchorLine)
 {
     if (sourceAnchorLine.control() && targetAnchorLine.control()) {
-        m_sourceAnchorLineType = sourceAnchorLine.type();
-        m_targetAnchorLineType = targetAnchorLine.type();
+        data.sourceAnchorLineType = sourceAnchorLine.type();
+        data.targetAnchorLineType = targetAnchorLine.type();
 
-        m_startPoint = createAnchorPoint(sourceAnchorLine.control(), sourceAnchorLine.type());
+        data.startPoint = createAnchorPoint(sourceAnchorLine.control(), sourceAnchorLine.type());
 
         if (targetAnchorLine.control() == sourceAnchorLine.control()->parentControl())
-            m_endPoint = createParentAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type(), sourceAnchorLine.control());
+            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type(), sourceAnchorLine.control());
         else
-            m_endPoint = createAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type());
+            data.endPoint = createAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type());
 
-        m_firstControlPoint = createControlPoint(m_startPoint, sourceAnchorLine.type(), m_endPoint);
-        m_secondControlPoint = createControlPoint(m_endPoint, targetAnchorLine.type(), m_startPoint);
+        data.firstControlPoint = createControlPoint(data.startPoint, sourceAnchorLine.type(), data.endPoint);
+        data.secondControlPoint = createControlPoint(data.endPoint, targetAnchorLine.type(), data.startPoint);
 
-        updateAnchorLinePoints(&m_sourceAnchorLineFirstPoint, &m_sourceAnchorLineSecondPoint, sourceAnchorLine);
-        updateAnchorLinePoints(&m_targetAnchorLineFirstPoint, &m_targetAnchorLineSecondPoint, targetAnchorLine);
-
-        updateBoundingRect();
-        update();
+        updateAnchorLinePoints(&data.sourceAnchorLineFirstPoint, &data.sourceAnchorLineSecondPoint, sourceAnchorLine);
+        updateAnchorLinePoints(&data.targetAnchorLineFirstPoint, &data.targetAnchorLineSecondPoint, targetAnchorLine);
     }
 }
 
@@ -128,6 +235,37 @@ static int startAngleForAnchorLine(const AnchorLineType &anchorLineType)
     default:
         return 0;
     }
+}
+#include <QDebug>
+static AnchorLine makeAnchorLine(const QStringList& anchorPair, DesignerScene* scene)
+{
+    qDebug() << anchorPair;
+    if (anchorPair.size() != 2)
+        return AnchorLine();
+    AnchorLineType type;
+    if (anchorPair.first() == anchorLineNames.at(0))
+        type = AnchorLineTop;
+    else if (anchorPair.first() == anchorLineNames.at(1))
+        type = AnchorLineBottom;
+    else if (anchorPair.first() == anchorLineNames.at(2))
+        type = AnchorLineLeft;
+    else if (anchorPair.first() == anchorLineNames.at(3))
+        type = AnchorLineRight;
+    else if (anchorPair.first() == anchorLineNames.at(4))
+        type = AnchorLineHorizontalCenter;
+    else if (anchorPair.first() == anchorLineNames.at(5))
+        type = AnchorLineVerticalCenter;
+    else if (anchorPair.first() == anchorLineNames.at(6))
+        type = AnchorLineBaseline;
+    else if (anchorPair.first() == anchorLineNames.at(7))
+        type = AnchorLineFill;
+    else if (anchorPair.first() == anchorLineNames.at(8))
+        type = AnchorLineCenter;
+    for (Control* control : scene->items<Control>()) {
+        if (control->uid() == anchorPair.last())
+            return AnchorLine(control, type);
+    }
+    return AnchorLine();
 }
 
 PaintLayer::PaintLayer(DesignerItem* parent) : DesignerItem(parent)
@@ -151,37 +289,61 @@ void PaintLayer::paintAnchors(QPainter* painter)
 {
     Q_ASSERT(scene());
     const qreal z = DesignerScene::zoomLevel();
-    const qreal m = 8 / z;
-    const QRectF bumpRectangle(0, 0, m, m);
-    for (DesignerItem* selectedItem : scene()->selectedItems()) {
-        AnchorData data;
-        updateAnchorData(data, bum, bum);
+    const qreal m = 10 / z;
+    QRectF bumpRectangle(0, 0, m, m);
+    QPainterPath scenePath;
+    scenePath.addRect(rect());
+    for (Control* selectedControl : scene()->selectedControls()) {
+        QPainterPath resizersPath;
+        for (ResizerItem* resizer : scene()->gadgetLayer()->resizers(selectedControl)) {
+            if (resizer->isVisible()) {
+                resizersPath.addRect(QRectF(resizer->scenePos() + resizer->rect().topLeft() / z,
+                                            resizer->size() / z));
+            }
+        }
 
-        DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
-        DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
-        DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
+        for (const QString& sourceLineName : selectedControl->anchors().keys()) {
+            if (anchorLineNames.contains(sourceLineName)) {
+                AnchorData data;
+                AnchorLine sourceLine(makeAnchorLine({sourceLineName, selectedControl->uid()}, scene()));
+                AnchorLine targetLine(makeAnchorLine(selectedControl->anchors().value(sourceLineName).value<QStringList>(), scene()));
+                updateAnchorData(data, sourceLine, targetLine);
 
-        QPen greenPen(Qt::green, 2);
-        greenPen.setCosmetic(true);
-        painter->setPen(greenPen);
-        painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
+                for (ResizerItem* resizer : scene()->gadgetLayer()->resizers(targetLine.control())) {
+                    if (resizer->isVisible()) {
+                        resizersPath.addRect(QRectF(resizer->scenePos() + resizer->rect().topLeft() / z,
+                                                    resizer->size() / z));
+                    }
+                }
+                painter->setClipPath(scenePath.subtracted(resizersPath));
 
-        bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
-        painter->setBrush(painter->pen().color());
-        painter->setRenderHint(QPainter::Antialiasing, true);
-        painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
-        painter->setRenderHint(QPainter::Antialiasing, false);
+                DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
+                DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
+                DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-        QPen bluePen(Qt::blue, 2);
-        bluePen.setCosmetic(true);
-        painter->setPen(bluePen);
-        painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
+                QPen greenPen(QColor("#6fae3b"), 2);
+                greenPen.setCosmetic(true);
+                painter->setPen(greenPen);
+                painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
 
-        bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
-        painter->setBrush(painter->pen().color());
-        painter->setRenderHint(QPainter::Antialiasing, true);
-        painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.targetAnchorLineType), 180 * AngleDegree);
-        painter->setRenderHint(QPainter::Antialiasing, false);
+                bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
+                painter->setBrush(painter->pen().color());
+                painter->setRenderHint(QPainter::Antialiasing, true);
+                painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
+                painter->setRenderHint(QPainter::Antialiasing, false);
+
+                QPen bluePen(QColor("#a25db4"), 2);
+                bluePen.setCosmetic(true);
+                painter->setPen(bluePen);
+                painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
+
+                bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
+                painter->setBrush(painter->pen().color());
+                painter->setRenderHint(QPainter::Antialiasing, true);
+                painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.targetAnchorLineType), 180 * AngleDegree);
+                painter->setRenderHint(QPainter::Antialiasing, false);
+            }
+        }
     }
 }
 
@@ -242,5 +404,6 @@ void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidg
 {
     paintSelectionOutlines(painter);
     paintMovingSelectionOutline(painter);
+    paintAnchors(painter);
     paintGuidelines(painter);
 }
