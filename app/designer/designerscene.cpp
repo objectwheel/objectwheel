@@ -475,30 +475,23 @@ void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
     painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
 }
 
-void DesignerScene::reparentControl(Control* control, Control* parentControl) const
+void DesignerScene::discharge()
 {
-    // NOTE: We compress setPos because there might be some other
-    // compressed setPos'es in the list, We want the setPos that
-    // happens after reparent operation to take place at the very last
-    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
-            | ControlPropertyManager::CompressedCall;
+    clearSelection();
+    m_forms.clear();
+    m_currentForm.clear();
+}
 
-    if (control->gui())
-        options |= ControlPropertyManager::UpdateRenderer;
+void DesignerScene::onChange()
+{
+    setSceneRect(sceneRect() | visibleItemsBoundingRect());
+}
 
-    control->setGeometrySyncEnabled(false);
-    control->m_geometrySyncKey = HashFactory::generate();
-
-    // NOTE: Do not move this assignment below setParent,
-    // because parent change effects the newPos result
-    // NOTE: Move the item position backwards as much as next parent margins are
-    // Because it will be followed by a ControlPropertyManager::setParent call and it
-    // will move the item by setting a transform on it according to its parent margin
-    const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
-    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, -margins));
-    ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges
-                                      | ControlPropertyManager::UpdateRenderer);
-    ControlPropertyManager::setPos(control, newPos, options, control->m_geometrySyncKey);
+void DesignerScene::onHeadlineDoubleClick(bool isFormHeadline)
+{
+    ControlPropertyManager::instance()->doubleClicked(isFormHeadline
+                                                      ? m_currentForm
+                                                      : selectedControls().first());
 }
 
 void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
@@ -526,6 +519,32 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
                                       tr("Operation failed, control has got problems."),
                                       QMessageBox::Critical);
     }
+}
+
+void DesignerScene::reparentControl(Control* control, Control* parentControl) const
+{
+    // NOTE: We compress setPos because there might be some other
+    // compressed setPos'es in the list, We want the setPos that
+    // happens after reparent operation to take place at the very last
+    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+            | ControlPropertyManager::CompressedCall;
+
+    if (control->gui())
+        options |= ControlPropertyManager::UpdateRenderer;
+
+    control->setGeometrySyncEnabled(false);
+    control->m_geometrySyncKey = HashFactory::generate();
+
+    // NOTE: Do not move this assignment below setParent,
+    // because parent change effects the newPos result
+    // NOTE: Move the item position backwards as much as next parent margins are
+    // Because it will be followed by a ControlPropertyManager::setParent call and it
+    // will move the item by setting a transform on it according to its parent margin
+    const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
+    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, -margins));
+    ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges
+                                      | ControlPropertyManager::UpdateRenderer);
+    ControlPropertyManager::setPos(control, newPos, options, control->m_geometrySyncKey);
 }
 
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
@@ -594,23 +613,4 @@ void DesignerScene::dropEvent(QGraphicsSceneDragDropEvent* event)
     } else {
         QGraphicsScene::dropEvent(event);
     }
-}
-
-void DesignerScene::discharge()
-{
-    clearSelection();
-    m_forms.clear();
-    m_currentForm.clear();
-}
-
-void DesignerScene::onChange()
-{
-    setSceneRect(sceneRect() | visibleItemsBoundingRect());
-}
-
-void DesignerScene::onHeadlineDoubleClick(bool isFormHeadline)
-{
-    ControlPropertyManager::instance()->doubleClicked(isFormHeadline
-                                                      ? m_currentForm
-                                                      : selectedControls().first());
 }
