@@ -18,7 +18,6 @@ ControlRenderingManager* ControlRenderingManager::s_instance = nullptr;
 RenderServer* ControlRenderingManager::s_renderServer = nullptr;
 QThread* ControlRenderingManager::s_serverThread = nullptr;
 CommandDispatcher* ControlRenderingManager::s_commandDispatcher = nullptr;
-qreal ControlRenderingManager::s_devicePixelRatio = 1;
 
 ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(parent)
 {
@@ -76,6 +75,12 @@ ControlRenderingManager::~ControlRenderingManager()
 ControlRenderingManager* ControlRenderingManager::instance()
 {
     return s_instance;
+}
+
+void ControlRenderingManager::scheduleDevicePixelRatioUpdate(const qreal& value)
+{
+    s_commandDispatcher->scheduleDevicePixelRatioUpdate(value);
+    qputenv("RENDERER_DEVICE_PIXEL_RATIO", QByteArray::number(value));
 }
 
 void ControlRenderingManager::scheduleControlCodeUpdate(const QString& uid)
@@ -166,19 +171,6 @@ void ControlRenderingManager::scheduleInit()
 
         g_initScheduled = true;
     }
-}
-
-qreal ControlRenderingManager::devicePixelRatio()
-{
-    return s_devicePixelRatio;
-}
-
-void ControlRenderingManager::setDevicePixelRatio(const qreal& value)
-{
-    s_devicePixelRatio = value;
-    s_commandDispatcher->scheduleDevicePixelRatioUpdate(value);
-    qputenv("RENDERER_DEVICE_PIXEL_RATIO", QByteArray::number(value));
-    emit instance()->devicePixelRatioChanged(s_devicePixelRatio);
 }
 
 void ControlRenderingManager::scheduleTerminate()

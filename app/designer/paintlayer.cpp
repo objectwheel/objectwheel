@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <resizeritem.h>
 #include <gadgetlayer.h>
+#include <paintutils.h>
 #include <QPainter>
 
 enum { AngleDegree = 16 };
@@ -236,10 +237,25 @@ static int startAngleForAnchorLine(const AnchorLineType &anchorLineType)
         return 0;
     }
 }
-#include <QDebug>
+
+static int startAngleForAnchorLine2(const AnchorLineType &anchorLineType)
+{
+    switch (anchorLineType) {
+    case AnchorLineTop:
+        return 180;
+    case AnchorLineBottom:
+        return 0;
+    case AnchorLineLeft:
+        return 90 * AngleDegree;
+    case AnchorLineRight:
+        return 270 * AngleDegree;
+    default:
+        return 0;
+    }
+}
+
 static AnchorLine makeAnchorLine(const QStringList& anchorPair, DesignerScene* scene)
 {
-    qDebug() << anchorPair;
     if (anchorPair.size() != 2)
         return AnchorLine();
     AnchorLineType type;
@@ -321,9 +337,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
                 DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-                QPen greenPen(QColor("#6fae3b"), 2);
-                greenPen.setCosmetic(true);
-                painter->setPen(greenPen);
+                painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
                 painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
 
                 bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
@@ -332,19 +346,19 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
                 painter->setRenderHint(QPainter::Antialiasing, false);
 
-                QPen bluePen(QColor("#a25db4"), 2);
-                bluePen.setCosmetic(true);
-                painter->setPen(bluePen);
                 painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
 
                 bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
                 painter->setBrush(painter->pen().color());
                 painter->setRenderHint(QPainter::Antialiasing, true);
-                painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.targetAnchorLineType), 180 * AngleDegree);
+                painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+                QTransform t; t.rotate(startAngleForAnchorLine2(data.targetAnchorLineType) / AngleDegree);
+                painter->drawPixmap(bumpRectangle.toRect(), PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio()).transformed(t));
                 painter->setRenderHint(QPainter::Antialiasing, false);
             }
         }
     }
+    painter->setClipping(false);
 }
 
 void PaintLayer::paintGuidelines(QPainter* painter)

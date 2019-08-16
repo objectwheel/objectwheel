@@ -97,6 +97,13 @@ void DesignerItem::setBeingHighlighted(bool beingHighlighted)
     }
 }
 
+qreal DesignerItem::devicePixelRatio() const
+{
+    if (scene())
+        return scene()->devicePixelRatio();
+    return 1;
+}
+
 qreal DesignerItem::width() const
 {
     return size().width();

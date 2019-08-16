@@ -897,11 +897,32 @@ QVariantMap RenderUtils::anchors(const RenderEngine::ControlInstance* instance, 
         "anchors.alignWhenCentered"
     };
     QVariantMap anchorMap;
-    if (instance->gui && !instance->popup && !instance->window) {
-        for (const QString& name : anchorLineNames)
-            anchorMap.insert(name, QVariant::fromValue(makeAnchorPair(instance, name, engine)));
-        for (const QString& name : anchorPropertyNames)
-            anchorMap.insert(name, QQmlProperty::read(instance->object, name, instance->context));
+    if (instance->gui) {
+        if (instance->popup) { // Exception
+            const QQmlProperty prop(instance->object, "anchors.centerIn", instance->context);
+            if (prop.isValid()) {
+                if (const QObject* targetObject = prop.read().value<QObject*>()) {
+                    if (const RenderEngine::ControlInstance* targetInstance = engine->instanceForObject(targetObject)) {
+                        anchorMap.insert("anchors.centerIn", QStringList(targetInstance->uid));
+                    } else if (auto targetItem = qobject_cast<const QQuickItem*>(targetObject)) {
+                        if (const RenderEngine::ControlInstance* ancestorInstance = engine->findNodeInstanceForItem(targetItem->parentItem()))
+                            anchorMap.insert("anchors.centerIn", QStringList(ancestorInstance->uid));
+                    }
+                }
+            }
+        } else if (!instance->window) {
+            // Windows cannot have a anchors, but they can be targets for another anchors
+            for (const QString& name : anchorLineNames) {
+                const QStringList& anchorPair = makeAnchorPair(instance, name, engine);
+                if (!anchorPair.isEmpty())
+                    anchorMap.insert(name, anchorPair);
+            }
+            for (const QString& name : anchorPropertyNames) {
+                const QQmlProperty prop(instance->object, name, instance->context);
+                if (prop.isValid())
+                    anchorMap.insert(name, prop.read());
+            }
+        }
     }
     return anchorMap;
 }
@@ -911,9 +932,14 @@ QStringList RenderUtils::makeAnchorPair(const RenderEngine::ControlInstance* ins
     QQmlContext* ctx = instance->context;
     Q_ASSERT(ctx);
     QQuickItem* item = qobject_cast<QQuickItem*>(instance->object);
-    Q_ASSERT(item);
+    if (item == 0)
+        return QStringList();
     const QPair<QString, QObject*>& pair = DesignerSupport::anchorLineTarget(item, name, ctx);
-    if (const RenderEngine::ControlInstance* targetInstance = engine->instanceForObject(pair.second))
-        return QStringList({"anchors." + pair.first, targetInstance->uid});
+    if (const RenderEngine::ControlInstance* targetInstance = engine->instanceForObject(pair.second)) {
+        return QStringList({pair.first.isEmpty() ? "" : "anchors." + pair.first, targetInstance->uid});
+    } else if (auto targetItem = qobject_cast<const QQuickItem*>(pair.second)) {
+        if (const RenderEngine::ControlInstance* ancestorInstance = engine->findNodeInstanceForItem(targetItem->parentItem()))
+            return QStringList({pair.first.isEmpty() ? "" : "anchors." + pair.first, ancestorInstance->uid});
+    }
     return QStringList();
 }

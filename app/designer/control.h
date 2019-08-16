@@ -45,9 +45,6 @@ public:
     QPixmap pixmap() const;
     void setPixmap(const QPixmap& pixmap);
 
-    qreal devicePixelRatio() const;
-    void setDevicePixelRatio(const qreal& devicePixelRatio);
-
     RenderInfo renderInfo() const;
     void setRenderInfo(const RenderInfo& info);
 
@@ -78,7 +75,6 @@ private:
     QString m_uid;
     QString m_dir;
     QPixmap m_pixmap;
-    qreal m_devicePixelRatio;
     RenderInfo m_renderInfo;
     QSizeF m_snapMargin;
     QString m_geometrySyncKey;

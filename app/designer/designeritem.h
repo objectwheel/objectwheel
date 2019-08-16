@@ -42,6 +42,7 @@ public:
     bool beingHighlighted() const;
     void setBeingHighlighted(bool beingHighlighted);
 
+    qreal devicePixelRatio() const;
     qreal width() const;
     qreal height() const;
 

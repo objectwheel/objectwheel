@@ -549,7 +549,7 @@ RenderEngine::ControlInstance* RenderEngine::formInstanceFor(const RenderEngine:
     return nullptr;
 }
 
-RenderEngine::ControlInstance* RenderEngine::findNodeInstanceForItem(QQuickItem* item) const
+RenderEngine::ControlInstance* RenderEngine::findNodeInstanceForItem(const QQuickItem* item) const
 {
     if (item) {
         if (hasInstanceForObject(item))

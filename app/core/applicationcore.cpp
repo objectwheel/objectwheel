@@ -147,7 +147,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
     s_controlRemovingManager->init(scene);
-    s_controlRenderingManager->setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
+    s_controlRenderingManager->scheduleDevicePixelRatioUpdate(QApplication::primaryScreen()->devicePixelRatio());
 
     auto conn = new QMetaObject::Connection;
     *conn = QObject::connect(s_documentManager, &DocumentManager::projectInfoUpdated, [=] {

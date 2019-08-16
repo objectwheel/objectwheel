@@ -487,7 +487,8 @@ void MainWindow::onModeChange(ModeManager::Mode mode)
 
 void MainWindow::onScreenChange(QScreen* screen)
 {
-    ControlRenderingManager::setDevicePixelRatio(screen->devicePixelRatio());
+    // TODO: Do not unnecessarily update the dpr if it is not changed
+    ControlRenderingManager::scheduleDevicePixelRatioUpdate(screen->devicePixelRatio());
 }
 
 CentralWidget* MainWindow::centralWidget() const

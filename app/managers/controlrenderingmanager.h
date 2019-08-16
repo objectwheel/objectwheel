@@ -17,6 +17,7 @@ class ControlRenderingManager final : public QObject
 public:
     static ControlRenderingManager* instance();
 
+    static void scheduleDevicePixelRatioUpdate(const qreal& value);
     static void scheduleControlCodeUpdate(const QString& uid);
     static void scheduleFormCodeUpdate(const QString& uid);
     static void scheduleFormDeletion(const QString& uid);
@@ -32,9 +33,6 @@ public:
     static void scheduleTerminate();
     static void scheduleInit();
 
-    static qreal devicePixelRatio();
-    static void setDevicePixelRatio(const qreal& value);
-
 private slots:
     void onConnected();
     void onDisconnected();
@@ -45,7 +43,6 @@ signals:
     void renderDone(const RenderInfo& info);
     void previewDone(const RenderInfo& info);
     void initializationProgressChanged(int progress);
-    void devicePixelRatioChanged(qreal devicePixelRatio);
 
 private:
     explicit ControlRenderingManager(QObject* parent = nullptr);
@@ -56,7 +53,6 @@ private:
     static RenderServer* s_renderServer;
     static QThread* s_serverThread;
     static CommandDispatcher* s_commandDispatcher;
-    static qreal s_devicePixelRatio;
 };
 
 #endif // CONTROLRENDERINGMANAGER_H

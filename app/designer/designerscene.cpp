@@ -243,6 +243,12 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
     return itemsAtPos.first();
 }
 
+qreal DesignerScene::devicePixelRatio() const
+{
+    Q_ASSERT(views().size() == 1);
+    return views().first()->devicePixelRatioF();
+}
+
 QRectF DesignerScene::visibleItemsBoundingRect() const
 {
     // Does not take untransformable items into account.

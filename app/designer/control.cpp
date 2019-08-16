@@ -10,7 +10,6 @@
 #include <QStyleOption>
 
 Control::Control(Control* parent) : DesignerItem(parent)
-  , m_devicePixelRatio(1)
   , m_snapMargin(QSizeF(0, 0))
   , m_geometrySyncEnabled(false)
 {
@@ -139,20 +138,6 @@ void Control::setPixmap(const QPixmap& pixmap)
     if (m_pixmap.cacheKey() != pixmap.cacheKey()) {
         m_pixmap = pixmap;
         m_pixmap.setDevicePixelRatio(devicePixelRatio());
-        update();
-    }
-}
-
-qreal Control::devicePixelRatio() const
-{
-    return m_devicePixelRatio;
-}
-
-void Control::setDevicePixelRatio(const qreal& devicePixelRatio)
-{
-    if (m_devicePixelRatio != devicePixelRatio) {
-        m_devicePixelRatio = devicePixelRatio;
-        m_pixmap.setDevicePixelRatio(devicePixelRatio);
         update();
     }
 }

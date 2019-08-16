@@ -69,7 +69,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
             QDrag* drag = establishDrag(item);
             if (!PaintUtils::isBlankImage(info.image)) {
                 QPixmap pixmap(QPixmap::fromImage(info.image));
-                pixmap.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
+                pixmap.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
                 drag->setPixmap(pixmap);
             } else if (info.gui && info.visible && PaintUtils::isBlankImage(info.image)) {
                 drag->setPixmap(QPixmap::fromImage(PaintUtils::renderBlankControlImage(
@@ -79,7 +79,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                                     DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(Qt::darkGray))));
             }
             info.image = drag->pixmap().toImage();
-            info.image.setDevicePixelRatio(ControlRenderingManager::devicePixelRatio());
+            info.image.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
             drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-info"),
                                       UtilityFunctions::push(info));
             locked = false;

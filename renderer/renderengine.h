@@ -59,7 +59,7 @@ public:
     ControlInstance* instanceForObject(const QObject* object) const;
     ControlInstance* instanceForUid(const QString& uid) const;
     ControlInstance* formInstanceFor(const ControlInstance* instance);
-    ControlInstance* findNodeInstanceForItem(QQuickItem* item) const;
+    ControlInstance* findNodeInstanceForItem(const QQuickItem* item) const;
 
     qreal devicePixelRatio() const;
     void setDevicePixelRatio(qreal devicePixelRatio);

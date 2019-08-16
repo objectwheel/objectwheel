@@ -50,6 +50,7 @@ public:
     Control* topLevelControl(const QPointF& pos) const;
     Control* highlightControl(const QPointF& pos) const;
 
+    qreal devicePixelRatio() const;
     QRectF visibleItemsBoundingRect() const;
     QVector<QLineF> guidelines() const;
 
