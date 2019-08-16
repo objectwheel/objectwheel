@@ -19,8 +19,8 @@ enum AnchorLineType {
 
     AnchorLineFill =  AnchorLineLeft | AnchorLineRight | AnchorLineTop | AnchorLineBottom,
     AnchorLineCenter = AnchorLineVerticalCenter | AnchorLineHorizontalCenter,
-    AnchorLineHorizontalMask = AnchorLineLeft | AnchorLineRight | AnchorLineHorizontalCenter,
-    AnchorLineVerticalMask = AnchorLineTop | AnchorLineBottom | AnchorLineVerticalCenter | AnchorLineBaseline,
+    AnchorLineVerticalMask = AnchorLineLeft | AnchorLineRight | AnchorLineHorizontalCenter,
+    AnchorLineHorizontalMask = AnchorLineTop | AnchorLineBottom | AnchorLineVerticalCenter | AnchorLineBaseline,
     AnchorLineAllMask = AnchorLineVerticalMask | AnchorLineHorizontalMask
 };
 
@@ -261,18 +261,19 @@ static int startAngleForAnchorLine(const AnchorLineType &anchorLineType)
     }
 }
 
-static int startAngleForAnchorLine2(const AnchorLineType &anchorLineType)
+static int anchorPixmapAngle(const AnchorData& data)
 {
-    switch (anchorLineType) {
-    case AnchorLineTop:
-        return 180;
-    case AnchorLineBottom:
+    if (data.targetAnchorLineType == AnchorLineInvalid)
         return 0;
-    case AnchorLineLeft:
-        return 90 * AngleDegree;
-    case AnchorLineRight:
-        return 270 * AngleDegree;
-    default:
+
+    const QPointF& offset = data.endPoint - data.startPoint;
+    if (AnchorLine::isVerticalAnchorLine(data.targetAnchorLineType)) {
+        if (offset.x() < 0)
+            return 90;
+        return -90;
+    } else {
+        if (offset.y() < 0)
+            return 180;
         return 0;
     }
 }
@@ -377,8 +378,15 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 painter->setBrush(painter->pen().color());
                 painter->setRenderHint(QPainter::Antialiasing, true);
                 painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-                QTransform t; t.rotate(startAngleForAnchorLine2(data.targetAnchorLineType) / AngleDegree);
-                painter->drawPixmap(bumpRectangle.toRect(), PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio()).transformed(t));
+                const qreal angle = anchorPixmapAngle(data);
+                QPixmap p = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+                const QPointF& tr = bumpRectangle.center();
+                bumpRectangle.moveTopLeft({-bumpRectangle.width() * 0.5, -bumpRectangle.height() * 0.5});
+                painter->translate(tr);
+                painter->rotate(angle);
+                painter->drawPixmap(bumpRectangle.toRect(), p);
+                painter->rotate(-angle);
+                painter->translate(-tr);
                 painter->setRenderHint(QPainter::Antialiasing, false);
             }
         }
