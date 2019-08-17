@@ -16,7 +16,7 @@ bool AnchorLayer::activated() const
 void AnchorLayer::setActivated(bool activated)
 {
     if (m_activated != activated) {
-        m_activated = true;
+        m_activated = activated;
         emit activatedChanged();
     }
 }

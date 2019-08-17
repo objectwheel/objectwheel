@@ -5,6 +5,7 @@
 #include <anchorlayer.h>
 #include <paintutils.h>
 #include <QPainter>
+#include <QtMath>
 
 enum { AngleDegree = 16 };
 enum AnchorLineType {
@@ -398,7 +399,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
     }
     painter->setClipping(false);
 }
-#include <QDebug>
+
 void PaintLayer::paintAnchorConnector(QPainter* painter)
 {
     Q_ASSERT(scene());
@@ -415,7 +416,6 @@ void PaintLayer::paintAnchorConnector(QPainter* painter)
     painter->setPen(DesignerScene::pen());
 
     QPainterPath scenePath;
-    scenePath.setFillRule(Qt::WindingFill);
     scenePath.addRect(scene()->sceneRect());
     const Control* sourceControl = scene()->topLevelControl(line.p1());
     const Control* destinationControl = scene()->topLevelControl(line.p2());
@@ -424,8 +424,6 @@ void PaintLayer::paintAnchorConnector(QPainter* painter)
         QPainterPath p;
         p.addRect(r);
         scenePath = scenePath.subtracted(p);
-        for (const Control* childControl : sourceControl->childControls(false))
-            scenePath.addRect(DesignerScene::outerRect(childControl->mapRectToScene(childControl->rect())));
         painter->drawRect(r);
     }
     if (destinationControl) {
@@ -433,22 +431,23 @@ void PaintLayer::paintAnchorConnector(QPainter* painter)
         QPainterPath p;
         p.addRect(r);
         scenePath = scenePath.subtracted(p);
-        for (const Control* childControl : destinationControl->childControls(false)) {
-            if (childControl != sourceControl)
-                scenePath.addRect(DesignerScene::outerRect(childControl->mapRectToScene(childControl->rect())));
-        }
         painter->drawRect(r);
     }
-    painter->setBrush(QColor(0, 0, 0, 20));
-    painter->drawPath(scenePath);
-
+    painter->fillPath(scenePath, QColor(0, 0, 0, 20));
+    painter->drawRect(scene()->sceneRect());
 
     painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
 
+    bool twist = line.angle() < 90 || (line.angle() > 180 && line.angle() < 270);
+    auto normal = line.normalVector();
+    if (twist)
+        normal.setAngle(normal.angle() + 180);
+    normal.setLength(0.7 * normal.length() * qSin(M_PI * (int(line.angle()) % 90) / 90.));
+    normal.translate(line.center() - line.p1());
+    normal.translate(normal.p1() - normal.center());
     QPainterPath curve;
     curve.moveTo(line.p1());
-    curve.cubicTo(line.center() + QPointF(50, 50), line.center() - QPointF(50, 50), line.p2());
+    curve.cubicTo(normal.p2(), normal.p1(), line.p2());
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen("#555555", 1, false));
     painter->drawPath(curve);
@@ -463,7 +462,7 @@ void PaintLayer::paintAnchorConnector(QPainter* painter)
     bumpRectangle.moveTo(line.p2().x() - m / 2, line.p2().y() - m / 2);
     painter->setBrush(painter->pen().color());
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-    const qreal angle = -90 - line.angle();
+    const qreal angle = -90 - line.angle() - 45 * qSin(M_PI * (int(line.angle()) % 90) / 90.) * (twist ? -1 : 1);
     QPixmap p = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
     const QPointF& tr = bumpRectangle.center();
     bumpRectangle.moveTopLeft({-bumpRectangle.width() * 0.5, -bumpRectangle.height() * 0.5});
@@ -473,7 +472,6 @@ void PaintLayer::paintAnchorConnector(QPainter* painter)
     painter->rotate(-angle);
     painter->translate(-tr);
 
-    painter->setRenderHint(QPainter::SmoothPixmapTransform, false);
     painter->setRenderHint(QPainter::Antialiasing, false);
 }
 
