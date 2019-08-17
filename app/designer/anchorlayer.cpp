@@ -21,6 +21,11 @@ void AnchorLayer::setActivated(bool activated)
     }
 }
 
+QPointF AnchorLayer::mouseLastPoint() const
+{
+    return m_mouseLastPoint;
+}
+
 void AnchorLayer::updateGeometry()
 {
     if (m_geometryUpdateScheduled)
@@ -47,10 +52,13 @@ void AnchorLayer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     DesignerItem::mouseMoveEvent(event);
 
-    if (dragAccepted()) {
-        scene()->setCursor(Qt::CrossCursor);
+    if (dragAccepted() && !activated()) {
+        scene()->setCursor(Qt::BlankCursor);
         setActivated(true);
     }
+
+    m_mouseLastPoint = event->pos();
+    update();
 }
 
 void AnchorLayer::mouseUngrabEvent(QEvent* event)

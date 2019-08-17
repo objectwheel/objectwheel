@@ -292,7 +292,7 @@ QVector<QLineF> DesignerScene::guidelines() const
     // FIXME: doesn't correctly work for items within a parent
     using namespace UtilityFunctions;
 
-    QVector<QLineF> lines;
+    QVector<QLineF> lines; /*FIXME:*/ return lines;
     QList<Control*> stillItems = items<Control>();
     const QList<DesignerItem*>& movingItems = draggedResizedSelectedItems();
 

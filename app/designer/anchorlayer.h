@@ -20,6 +20,7 @@ public slots:
 
 private:
     void setActivated(bool activated);
+    QPointF mouseLastPoint() const;
 
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -32,6 +33,7 @@ signals:
 private:
     bool m_activated;
     bool m_geometryUpdateScheduled;
+    QPointF m_mouseLastPoint;
 };
 
 
