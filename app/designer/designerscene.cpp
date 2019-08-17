@@ -8,6 +8,7 @@
 #include <scenesettings.h>
 #include <headlineitem.h>
 #include <gadgetlayer.h>
+#include <anchorlayer.h>
 #include <paintlayer.h>
 #include <windowmanager.h>
 #include <centralwidget.h>
@@ -29,7 +30,9 @@
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
+  , m_anchorLayer(new AnchorLayer)
   , m_paintLayer(new PaintLayer)
+  , m_parentBeforeDrag(nullptr)
 {
     setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -41,6 +44,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_gadgetLayer->setAcceptedMouseButtons(Qt::NoButton);
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_gadgetLayer);
+
+    m_anchorLayer->setAcceptedMouseButtons(Qt::RightButton);
+    m_anchorLayer->setZValue(std::numeric_limits<int>::max());
+    addItem(m_anchorLayer);
 
     m_paintLayer->setAcceptedMouseButtons(Qt::NoButton);
     m_paintLayer->setZValue(std::numeric_limits<int>::max());
@@ -60,6 +67,12 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_gadgetLayer, &GadgetLayer::addResizers);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             m_gadgetLayer, &GadgetLayer::removeResizers);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
+            m_anchorLayer, &AnchorLayer::updateGeometry);
+    connect(this, &DesignerScene::currentFormChanged,
+            m_anchorLayer, &AnchorLayer::updateGeometry);
+    connect(m_anchorLayer, &AnchorLayer::activatedChanged,
+            m_paintLayer, [=] { m_paintLayer->update(); });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
             m_paintLayer, &PaintLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
@@ -141,6 +154,7 @@ void DesignerScene::setCursor(Qt::CursorShape cursor) const
 
 void DesignerScene::prepareDragLayer(DesignerItem* item)
 {
+    m_parentBeforeDrag = item->parentItem();
     if (const DesignerItem* parentItem = item->parentItem()) {
         m_dragLayer->setTransform(QTransform::fromTranslate(parentItem->scenePos().x(),
                                                             parentItem->scenePos().y()));
@@ -149,7 +163,10 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
 
 bool DesignerScene::isLayerItem(DesignerItem* item) const
 {
-    return item == m_dragLayer || item == m_gadgetLayer || item == m_paintLayer;
+    return item == m_dragLayer
+            || item == m_gadgetLayer
+            || item == m_anchorLayer
+            || item == m_paintLayer;
 }
 
 Form* DesignerScene::currentForm() const
@@ -167,9 +184,19 @@ GadgetLayer* DesignerScene::gadgetLayer() const
     return m_gadgetLayer;
 }
 
+AnchorLayer* DesignerScene::anchorLayer() const
+{
+    return m_anchorLayer;
+}
+
 PaintLayer* DesignerScene::paintLayer() const
 {
     return m_paintLayer;
+}
+
+DesignerItem* DesignerScene::parentBeforeDrag() const
+{
+    return m_parentBeforeDrag;
 }
 
 QList<Form*> DesignerScene::forms() const
@@ -451,7 +478,7 @@ qreal DesignerScene::higherZ(DesignerItem* parentItem)
 
 void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
 {
-    QPen linePen(pen(QColor(0, 0, 0, 200)));
+    QPen linePen(pen(QColor(0, 0, 0, 200), 2));
     linePen.setDashPattern({3, 2});
     painter->setPen(linePen);
     painter->setBrush(Qt::NoBrush);

@@ -6,6 +6,7 @@
 #include <QGraphicsScene>
 
 class GadgetLayer;
+class AnchorLayer;
 class PaintLayer;
 class QMimeData;
 
@@ -40,7 +41,9 @@ public:
     Form* currentForm() const;
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
+    AnchorLayer* anchorLayer() const;
     PaintLayer* paintLayer() const;
+    DesignerItem* parentBeforeDrag() const;
 
     QList<Form*> forms() const;
     QList<Control*> selectedControls() const;
@@ -87,6 +90,7 @@ public:
     static void drawDashLine(QPainter* painter, const QLineF& line);
     static void drawDashRect(QPainter* painter, const QRectF& rect);
 
+
 public slots:
     void discharge();
 
@@ -111,8 +115,10 @@ signals:
 private:
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
+    AnchorLayer* m_anchorLayer;
     PaintLayer* m_paintLayer;
     QSet<Form*> m_forms;
+    DesignerItem* m_parentBeforeDrag;
     QPointer<Form> m_currentForm;
     QPointer<DesignerItem> m_recentHighlightedItem;
 };

@@ -514,7 +514,7 @@ void DesignerView::contextMenuEvent(QContextMenuEvent* event)
         m_copyAct->setDisabled(false);
         m_deleteAct->setDisabled(false);
     }
-    m_menu->exec(event->globalPos());
+    // FIXME : m_menu->exec(event->globalPos());
 }
 
 void DesignerView::onUndoAction()
@@ -714,6 +714,7 @@ bool DesignerView::eventFilter(QObject *watched, QEvent *event)
 
 void DesignerView::wheelEvent(QWheelEvent *event)
 {
+    // TODO: Implement a wheel zoom in/out for scene
     if (event->modifiers().testFlag(Qt::ControlModifier))
         event->ignore();
     else

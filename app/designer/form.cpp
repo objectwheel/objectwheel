@@ -43,8 +43,8 @@ void Form::paintBackground(QPainter* painter)
 
 void Form::paintForeground(QPainter* painter)
 {
+    // Draw grid view dots
     if (DesignerScene::showGridViewDots()) {
-        // Draw grid view dots
         QVector<QPointF> points;
         for (qreal x = 0; x <= rect().right(); x += DesignerScene::gridSize()) {
             for (qreal y = 0; y <= rect().bottom(); y += DesignerScene::gridSize())

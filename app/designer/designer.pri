@@ -12,7 +12,8 @@ HEADERS += $$PWD/control.h \
            $$PWD/paintlayer.h \
            $$PWD/resizeritem.h \
            $$PWD/signalchooserdialog.h \
-           $$PWD/gadgetitem.h
+           $$PWD/gadgetitem.h \
+           $$PWD/anchorlayer.h
 
 SOURCES += $$PWD/control.cpp \
            $$PWD/controlsavefilter.cpp \
@@ -25,6 +26,7 @@ SOURCES += $$PWD/control.cpp \
            $$PWD/paintlayer.cpp \
            $$PWD/resizeritem.cpp \
            $$PWD/signalchooserdialog.cpp \
-           $$PWD/gadgetitem.cpp
+           $$PWD/gadgetitem.cpp \
+           $$PWD/anchorlayer.cpp
 
 FORMS += $$PWD/signalchooserdialog.ui

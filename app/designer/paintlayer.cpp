@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <resizeritem.h>
 #include <gadgetlayer.h>
+#include <anchorlayer.h>
 #include <paintutils.h>
 #include <QPainter>
 
@@ -125,10 +126,10 @@ struct AnchorData {
     AnchorLineType targetAnchorLineType = AnchorLineInvalid;
 };
 
-static QPointF createParentAnchorPoint(const Control* parentControl, AnchorLineType anchorLineType, const Control* childControl)
+static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLineType anchorLineType, const DesignerItem* childItem)
 {
-    QRectF parentBoundingRect = parentControl->mapRectToScene(parentControl->rect());
-    QRectF childBoundingRect = childControl->mapRectToScene(childControl->rect());
+    QRectF parentBoundingRect = parentItem->mapRectToScene(parentItem->rect());
+    QRectF childBoundingRect = childItem->mapRectToScene(childItem->rect());
 
     QPointF anchorPoint;
 
@@ -152,9 +153,9 @@ static QPointF createParentAnchorPoint(const Control* parentControl, AnchorLineT
     return anchorPoint;
 }
 
-static QPointF createAnchorPoint(const Control* control, AnchorLineType anchorLineType)
+static QPointF createAnchorPoint(const DesignerItem* item, AnchorLineType anchorLineType)
 {
-    QRectF boundingRect = control->mapRectToScene(control->rect());
+    QRectF boundingRect = item->mapRectToScene(item->rect());
 
     QPointF anchorPoint;
 
@@ -224,7 +225,7 @@ static void updateAnchorLinePoints(QPointF *firstPoint, QPointF *secondPoint, co
     }
 }
 
-static void updateAnchorData(AnchorData& data, const AnchorLine& sourceAnchorLine, const AnchorLine& targetAnchorLine)
+static void updateAnchorData(AnchorData& data, const AnchorLine& sourceAnchorLine, const AnchorLine& targetAnchorLine, DesignerScene* scene)
 {
     if (sourceAnchorLine.control() && targetAnchorLine.control()) {
         data.sourceAnchorLineType = sourceAnchorLine.type();
@@ -233,6 +234,8 @@ static void updateAnchorData(AnchorData& data, const AnchorLine& sourceAnchorLin
         data.startPoint = createAnchorPoint(sourceAnchorLine.control(), sourceAnchorLine.type());
 
         if (targetAnchorLine.control() == sourceAnchorLine.control()->parentControl())
+            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type(), sourceAnchorLine.control());
+        else if (sourceAnchorLine.control()->beingDragged() && scene && targetAnchorLine.control() == scene->parentBeforeDrag())
             data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type(), sourceAnchorLine.control());
         else
             data.endPoint = createAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type());
@@ -332,7 +335,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
     const qreal m = 10 / z;
     QRectF bumpRectangle(0, 0, m, m);
     QPainterPath scenePath;
-    scenePath.addRect(rect());
+    scenePath.addRect(scene()->sceneRect());
     for (Control* selectedControl : scene()->selectedControls()) {
         QPainterPath resizersPath;
         for (ResizerItem* resizer : scene()->gadgetLayer()->resizers(selectedControl)) {
@@ -347,7 +350,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 AnchorData data;
                 AnchorLine sourceLine(makeAnchorLine({sourceLineName, selectedControl->uid()}, scene()));
                 AnchorLine targetLine(makeAnchorLine(selectedControl->anchors().value(sourceLineName).value<QStringList>(), scene()));
-                updateAnchorData(data, sourceLine, targetLine);
+                updateAnchorData(data, sourceLine, targetLine, scene());
 
                 for (ResizerItem* resizer : scene()->gadgetLayer()->resizers(targetLine.control())) {
                     if (resizer->isVisible()) {
@@ -396,7 +399,34 @@ void PaintLayer::paintAnchors(QPainter* painter)
 
 void PaintLayer::paintAnchorConnector(QPainter* painter)
 {
-//    FIXME: if ()
+    Q_ASSERT(scene());
+
+    if (!scene()->anchorLayer()->activated())
+        return;
+
+    painter->fillRect(scene()->sceneRect(), QColor(0, 0, 0, 20));
+
+    QPainterPath curve;
+    curve.moveTo(scene()->anchorLayer()->mousePressPoint());
+//    curve.cubicTo(data.firstControlPoint, data.secondControlPoint, data.endPoint);
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::outlineColor());
+
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->drawPath(curve);
+    painter->setRenderHint(QPainter::Antialiasing, false);
+
+    QPen linePen(DesignerScene::pen(QColor(0, 0, 0, 180)));
+    linePen.setDashPattern({3, 2});
+    painter->setPen(linePen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawPath(curve);
+
+    linePen.setColor(QColor(255, 255, 255, 180));
+    linePen.setDashPattern({2, 3});
+    linePen.setDashOffset(3);
+    painter->setPen(linePen);
+    painter->drawPath(curve);
 }
 
 void PaintLayer::paintGuidelines(QPainter* painter)
@@ -486,4 +516,5 @@ void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidg
     paintMovingSelectionOutline(painter);
     paintAnchors(painter);
     paintGuidelines(painter);
+    paintAnchorConnector(painter);
 }
