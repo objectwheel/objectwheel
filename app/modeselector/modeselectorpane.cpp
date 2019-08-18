@@ -108,12 +108,12 @@ QSize ModeSelectorPane::minimumSizeHint() const
 void ModeSelectorPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_designerAction->setIcon(renderModeButtonIcon(":/images/modes/designer.svg"));
-    m_editorAction->setIcon(renderModeButtonIcon(":/images/modes/editor.svg"));
-    m_splitAction->setIcon(renderModeButtonIcon(":/images/modes/split.svg"));
-    m_optionsAction->setIcon(renderModeButtonIcon(":/images/modes/options.svg"));
-    m_buildsAction->setIcon(renderModeButtonIcon(":/images/modes/builds.svg"));
-    m_documentsAction->setIcon(renderModeButtonIcon(":/images/modes/documents.svg"));
+    m_designerAction->setIcon(QIcon(":/images/modes/designer.svg"));
+    m_editorAction->setIcon(QIcon(":/images/modes/editor.svg"));
+    m_splitAction->setIcon(QIcon(":/images/modes/split.svg"));
+    m_optionsAction->setIcon(QIcon(":/images/modes/options.svg"));
+    m_buildsAction->setIcon(QIcon(":/images/modes/builds.svg"));
+    m_documentsAction->setIcon(QIcon(":/images/modes/documents.svg"));
 }
 
 void ModeSelectorPane::paintEvent(QPaintEvent*)

@@ -82,12 +82,6 @@
         <file>images/modes/editor.svg</file>
         <file>images/modes/options.svg</file>
         <file>images/modes/split.svg</file>
-        <file>images/modes/builds-active.svg</file>
-        <file>images/modes/designer-active.svg</file>
-        <file>images/modes/documents-active.svg</file>
-        <file>images/modes/editor-active.svg</file>
-        <file>images/modes/options-active.svg</file>
-        <file>images/modes/split-active.svg</file>
         <file>images/stop.svg</file>
         <file>images/run.svg</file>
         <file>images/tools/AnimatedImage.png</file>

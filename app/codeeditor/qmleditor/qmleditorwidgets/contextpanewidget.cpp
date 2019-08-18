@@ -144,7 +144,7 @@ ContextPaneWidget::ContextPaneWidget(QWidget *parent) : DragWidget(parent), m_cu
     m_toolButton = new QToolButton(this);
     m_toolButton->setAutoRaise(false);
 
-    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
+    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton, 0, m_toolButton));
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_toolButton->setFixedSize(16, 16);
 
@@ -482,7 +482,7 @@ void ContextPaneWidget::setLineButton()
 {
     m_pinned = false;
     m_toolButton->setAutoRaise(true);
-    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
+    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton, 0, m_toolButton));
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_toolButton->setFixedSize(20, 20);
     m_toolButton->setToolTip(tr("Hides this toolbar. This toolbar can be"

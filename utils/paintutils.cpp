@@ -62,16 +62,6 @@ QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QPalette& pale
     return icon;
 }
 
-QIcon PaintUtils::renderModeButtonIcon(const QString& fileName)
-{
-    QFileInfo fileInfo(fileName);
-    QPixmap off(fileName), on(fileInfo.path() + '/' + fileInfo.baseName() + "-active." + fileInfo.suffix());
-    QIcon icon;
-    icon.addPixmap(off, QIcon::Normal, QIcon::Off);
-    icon.addPixmap(on, QIcon::Normal, QIcon::On);
-    return icon;
-}
-
 QPixmap PaintUtils::renderOverlaidPixmap(const QString& fileName, const QColor& color, qreal dpr)
 {
     QPixmap source(fileName);

@@ -11,7 +11,6 @@
 #include <QTimer>
 #include <QApplication>
 #include <QToolBar>
-#include <QToolButton>
 #include <QSplitter>
 #include <QLayout>
 #include <QMimeDatabase>

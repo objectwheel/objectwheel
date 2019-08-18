@@ -26,7 +26,6 @@ void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);
 bool isBlankImage(const QImage& image);
 QIcon renderItemIcon(const QString& fileName, const QPalette& palette);
 QIcon renderButtonIcon(const QString& fileName, const QPalette& palette);
-QIcon renderModeButtonIcon(const QString& fileName);
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, qreal dpr);
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QString& fileName, const QPen& pen, qreal dpr);

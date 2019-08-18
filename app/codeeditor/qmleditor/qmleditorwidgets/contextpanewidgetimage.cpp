@@ -888,7 +888,7 @@ PreviewDialog::PreviewDialog(QWidget *parent) : DragWidget(parent)
     layout->setContentsMargins(2, 2, 2, 16);
     layout->setSpacing(4);
     QToolButton *toolButton = new QToolButton(this);
-    QIcon icon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
+    QIcon icon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton, 0, toolButton));
     toolButton->setIcon(icon);
     toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     toolButton->setFixedSize(icon.availableSizes().value(0) + QSize(4, 4));
