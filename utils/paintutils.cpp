@@ -85,22 +85,22 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     QColor opaque(color);
     opaque.setAlphaF(1);
 
-    QImage overlay = renderFilledImage(pixmap.size() / pixmap.devicePixelRatioF(),
-                                       opaque, pixmap.devicePixelRatioF());
+    QImage overlay = renderFilledImage(pixmap.size() / pixmap.devicePixelRatio(),
+                                       opaque, pixmap.devicePixelRatio());
     {
         QPainter p(&overlay);
         p.setRenderHint(QPainter::Antialiasing);
         p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        p.drawPixmap(QRectF({}, pixmap.size() / pixmap.devicePixelRatioF()), pixmap, pixmap.rect());
+        p.drawPixmap(QRectF({}, pixmap.size() / pixmap.devicePixelRatio()), pixmap, pixmap.rect());
     }
 
     if (color.alphaF() == 1)
-        return QPixmap::fromImage(overlay);
+        return UtilityFunctions::imageToPixmap(overlay);
 
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
     p.setOpacity(color.alphaF());
-    p.drawImage(QRectF({}, dest.size() / pixmap.devicePixelRatioF()), overlay, overlay.rect());
+    p.drawImage(QRectF({}, dest.size() / pixmap.devicePixelRatio()), overlay, overlay.rect());
     p.end();
 
     return dest;
@@ -114,11 +114,11 @@ QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QString& 
     p.setRenderHint(QPainter::Antialiasing);
     p.setBrush(Qt::NoBrush);
     p.setPen(pen);
-    p.drawPixmap(QRect({}, dest.size() / dest.devicePixelRatioF()), QPixmap(fileName));
+    p.drawPixmap(QRect({}, dest.size() / dest.devicePixelRatio()), QPixmap(fileName));
     p.drawRect(QRectF{{}, size}.adjusted(0.5, 0.5, -0.5, -0.5));
     p.end();
 
-    return QPixmap::fromImage(dest);
+    return UtilityFunctions::imageToPixmap(dest);
 }
 
 QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, qreal dpr)
@@ -132,7 +132,7 @@ QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& c
     p.drawRect(QRectF{{}, size}.adjusted(0.5, 0.5, -0.5, -0.5));
     p.end();
 
-    return QPixmap::fromImage(dest);
+    return UtilityFunctions::imageToPixmap(dest);
 }
 
 void PaintUtils::drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option)
@@ -240,7 +240,7 @@ bool PaintUtils::isBlankImage(const QImage& image)
         return true;
 
     int totalAlpha = 100 * 8;
-    const int hspacing = 6 * image.devicePixelRatioF();
+    const int hspacing = 6 * image.devicePixelRatio();
     const int wspacing = qRound(qMax(hspacing * qreal(image.width()) / image.height(), 1.0));
 
     for (int w = 0, h = image.height() / 2.0; w < image.width(); w += wspacing)
@@ -261,7 +261,7 @@ bool PaintUtils::isBlankImage(const QImage& image)
     if (totalAlpha < 0)
         return false;
 
-    if (image.width() * image.height() < 50000 * image.devicePixelRatioF()) {
+    if (image.width() * image.height() < 50000 * image.devicePixelRatio()) {
         for (int i = 0; i < image.width(); ++i) {
             for (int j = 0; j < image.height(); ++j)
                 totalAlpha -= qAlpha(image.pixel(i, j));

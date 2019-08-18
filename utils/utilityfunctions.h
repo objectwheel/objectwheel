@@ -116,6 +116,7 @@ QPointF topCenter(const QRectF& rect);
 QPointF leftCenter(const QRectF& rect);
 QPointF rightCenter(const QRectF& rect);
 QPointF bottomCenter(const QRectF& rect);
+QPixmap imageToPixmap(const QImage& image);
 
 } // UtilityFunctions
 

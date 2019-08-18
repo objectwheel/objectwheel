@@ -24,6 +24,7 @@
 ****************************************************************************/
 
 #include "colorbox.h"
+#include <utilityfunctions.h>
 #include <QPainter>
 #include <QMouseEvent>
 
@@ -193,7 +194,7 @@ void ColorBox::paintEvent(QPaintEvent *event)
                 cache.setPixel(x, y, c.rgb());
             }
         }
-        m_cache = QPixmap::fromImage(cache);
+        m_cache = UtilityFunctions::imageToPixmap(cache);
     }
 
     p.drawPixmap(5, 5, m_cache);

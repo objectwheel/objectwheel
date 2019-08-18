@@ -149,8 +149,8 @@ void QuickToolBar::apply(QmlCodeEditor *editorWidget, Document::Ptr document, co
 
     setEnabled(document->isParsedCorrectly());
     m_editorWidget = editorWidget;
-    contextWidget()->setParent(editorWidget->parentWidget());
-    contextWidget()->colorDialog()->setParent(editorWidget->parentWidget());
+    contextWidget()->setParent(editorWidget->parentWidget()->parentWidget());
+    contextWidget()->colorDialog()->setParent(editorWidget->parentWidget()->parentWidget());
 
     if (cast<UiObjectDefinition*>(node) || cast<UiObjectBinding*>(node)) {
         UiObjectDefinition *objectDefinition = cast<UiObjectDefinition*>(node);

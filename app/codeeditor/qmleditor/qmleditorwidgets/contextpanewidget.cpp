@@ -43,30 +43,11 @@
 #include "customcolordialog.h"
 #include "colorbutton.h"
 #include <qmleditorwidgets/easingpane/easingcontextpane.h>
+#include <utilsicons.h>
 
 using namespace Utils;
 
 namespace QmlEditorWidgets {
-
-/* XPM */
-static const char * pin_xpm[] = {
-"12 9 7 1",
-" 	c None",
-".	c #000000",
-"+	c #515151",
-"@	c #A8A8A8",
-"#	c #A9A9A9",
-"$	c #999999",
-"%	c #696969",
-"     .      ",
-"     ......+",
-"     .@@@@@.",
-"     .#####.",
-"+.....$$$$$.",
-"     .%%%%%.",
-"     .......",
-"     ......+",
-"     .      "};
 
 DragWidget::DragWidget(QWidget *parent) : QFrame(parent)
 {
@@ -485,7 +466,7 @@ void ContextPaneWidget::setPinButton()
     m_toolButton->setAutoRaise(true);
     m_pinned = true;
 
-    m_toolButton->setIcon(QPixmap::fromImage(QImage(pin_xpm)));
+    m_toolButton->setIcon(Utils::Icons::PIN_TOOLBAR.icon());
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_toolButton->setFixedSize(20, 20);
     m_toolButton->setToolTip(tr("Unpins the toolbar and moves it to the default position."));

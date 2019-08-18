@@ -38,10 +38,12 @@ class CodeAssistant;
 class CompletionAssistProvider;
 class IAssistProvider;
 class ICodeStylePreferences;
+class RefactorOverlay;
+struct RefactorMarker;
+using RefactorMarkers = QList<RefactorMarker>;
 namespace Internal {
 class TextEditorOverlay;
-}
-}
+} }
 
 namespace QmlJSEditor {
 class QuickToolBar;
@@ -108,6 +110,7 @@ class QmlCodeEditor : public QPlainTextEdit
     friend class MarkBand;
     friend class BracketBand;
     friend class LineNumberBand;
+    friend class TextEditor::RefactorOverlay;
     friend class TextEditor::Internal::TextEditorOverlay;
 
 public:
@@ -125,6 +128,9 @@ public:
 
     RowBar* rowBar() const;
     QmlCodeEditorToolBar* toolBar() const;
+
+    TextEditor::RefactorMarkers refactorMarkers() const;
+    void setRefactorMarkers(const TextEditor::RefactorMarkers &markers);
 
     static TextEditor::CompletionAssistProvider* completionAssistProvider();
     static TextEditor::IAssistProvider* quickFixAssistProvider();
@@ -228,6 +234,7 @@ private:
     QColor replacementPenColor(int blockNumber) const;
     void clearVisibleFoldedBlock();
     QTextBlock foldedBlockAt(const QPoint& pos, QRect* box = nullptr) const;
+    void onRefactorMarkerClicked(const TextEditor::RefactorMarker& marker);
 
 signals:
     void requestBlockUpdate(const QTextBlock &);
@@ -293,6 +300,7 @@ private:
     QPointer<TextEditorAnimator> m_autocompleteAnimator;
     TextEditor::Internal::TextEditorOverlay *m_overlay;
     TextEditor::ICodeStylePreferences *m_codeStylePreferences = nullptr;
+    TextEditor::RefactorOverlay *m_refactorOverlay;
     TextEditor::Internal::TextEditorOverlay *m_searchResultOverlay;
     QHash<QString, QList<QTextEdit::ExtraSelection>> m_extraSelections;
     QScopedPointer<QmlJSEditor::Internal::AutoCompleter> m_autoCompleter;

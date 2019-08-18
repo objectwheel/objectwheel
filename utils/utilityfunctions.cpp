@@ -635,4 +635,11 @@ QPointF bottomCenter(const QRectF& rect)
     return {rect.center().x(), rect.bottom()};
 }
 
+QPixmap imageToPixmap(const QImage& image)
+{
+    QPixmap pixmap(QPixmap::fromImage(image));
+    pixmap.setDevicePixelRatio(image.devicePixelRatio());
+    return pixmap;
+}
+
 } // UtilityFunctions

@@ -68,18 +68,16 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
             delete conn;
             QDrag* drag = establishDrag(item);
             if (!PaintUtils::isBlankImage(info.image)) {
-                QPixmap pixmap(QPixmap::fromImage(info.image));
-                pixmap.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
-                drag->setPixmap(pixmap);
+                info.image.setDevicePixelRatio(m_toolboxPane->devicePixelRatio()); // QDataStream cannot write dpr
+                drag->setPixmap(UtilityFunctions::imageToPixmap(info.image));
             } else if (info.gui && info.visible && PaintUtils::isBlankImage(info.image)) {
-                drag->setPixmap(QPixmap::fromImage(PaintUtils::renderBlankControlImage(
+                drag->setPixmap(UtilityFunctions::imageToPixmap(PaintUtils::renderBlankControlImage(
                                     info.surroundingRect,
                                     m_toolboxPane->toolboxTree()->currentItem()->text(0),
                                     m_toolboxPane->devicePixelRatioF(),
                                     DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(Qt::darkGray))));
             }
             info.image = drag->pixmap().toImage();
-            info.image.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
             drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-info"),
                                       UtilityFunctions::push(info));
             locked = false;

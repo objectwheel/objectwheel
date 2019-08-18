@@ -28,6 +28,7 @@
 #include "qtcassert.h"
 #include "theme/theme.h"
 #include "stylehelper.h"
+#include <utilityfunctions.h>
 
 #include <QApplication>
 #include <QIcon>
@@ -55,7 +56,7 @@ static QPixmap maskToColorAndAlpha(const QPixmap &mask, const QColor &color)
         QRgb pixelAlpha = (((~*pixel) & 0xff) * alpha) >> 8;
         *pixel = (pixelAlpha << 24) | tint;
     }
-    return QPixmap::fromImage(result);
+    return UtilityFunctions::imageToPixmap(result);
 }
 
 typedef QPair<QPixmap, QColor> MaskAndColor;

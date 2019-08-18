@@ -101,7 +101,7 @@ qreal DesignerItem::devicePixelRatio() const
 {
     if (scene())
         return scene()->devicePixelRatio();
-    return 1;
+    return QApplication::primaryScreen()->devicePixelRatio();
 }
 
 qreal DesignerItem::width() const

@@ -539,6 +539,7 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-tool")), dir);
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-render-info")), info);
 
+    info.image.setDevicePixelRatio(devicePixelRatio()); // QDataStream cannot write dpr
     // NOTE: Move the item position backwards as much as next parent margins are
     // Because it will be followed by a ControlPropertyManager::setParent call and it
     // will move the item by setting a transform on it according to its parent margin
@@ -547,7 +548,7 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     Control* newControl = ControlCreationManager::createControl(
                 parentControl,
                 dir, DesignerScene::snapPosition(parentControl->mapFromScene(event->scenePos() - QPointF(5, 5) - margins)),
-                info.surroundingRect.size(), QPixmap::fromImage(info.image));
+                info.surroundingRect.size(), UtilityFunctions::imageToPixmap(info.image));
     if (newControl) {
         clearSelection();
         newControl->setSelected(true);

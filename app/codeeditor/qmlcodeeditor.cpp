@@ -17,6 +17,7 @@
 #include <qmljseditor/quicktoolbar.h>
 #include <qmljseditor/qmljscompletionassist.h>
 #include <qmljseditor/qmljshoverhandler.h>
+#include <qmljs/qmljsutils.h>
 #include <coreplugin/find/basetextfind.h>
 
 #include <utils/textutils.h>
@@ -28,6 +29,7 @@
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/icodestylepreferences.h>
 #include <texteditor/texteditoroverlay.h>
+#include <texteditor/refactoroverlay.h>
 
 #include <QFontDatabase>
 #include <QPainter>
@@ -48,6 +50,9 @@ using namespace QmlJS;
 using namespace QmlJS::AST;
 using namespace QmlJSTools;
 using namespace Core;
+
+class QtQuickToolbarMarker {};
+Q_DECLARE_METATYPE(QtQuickToolbarMarker)
 
 class HoverHandlerRunner
 {
@@ -354,6 +359,17 @@ static void appendExtraSelectionsForMessages(
     }
 }
 
+template <class T>
+static QList<RefactorMarker> removeMarkersOfType(const QList<RefactorMarker> &markers)
+{
+    QList<RefactorMarker> result;
+    foreach (const RefactorMarker &marker, markers) {
+        if (!marker.data.canConvert<T>())
+            result += marker;
+    }
+    return result;
+}
+
 CompletionAssistProvider* QmlCodeEditor::m_completionAssistProvider = nullptr;
 QmlJSHoverHandler* QmlCodeEditor::m_qmlJsHoverHandler = nullptr;
 ColorPreviewHoverHandler* QmlCodeEditor::m_colorPreviewHoverHandler = nullptr;
@@ -377,6 +393,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_bracketsAnimator(nullptr)
   , m_autocompleteAnimator(nullptr)
   , m_overlay(new TextEditor::Internal::TextEditorOverlay(this))
+  , m_refactorOverlay(new TextEditor::RefactorOverlay(this))
   , m_searchResultOverlay(new TextEditor::Internal::TextEditorOverlay(this))
   , m_autoCompleter(new QmlJSEditor::Internal::AutoCompleter)
 {
@@ -1235,8 +1252,8 @@ void QmlCodeEditor::paintOverlays(const PaintEventData& data, QPainter& painter)
         //        if (m_snippetOverlay->isVisible())
         //            m_snippetOverlay->paint(&painter, data.eventRect);
 
-        //        if (!m_refactorOverlay->isEmpty())
-        //            m_refactorOverlay->paint(&painter, data.eventRect);
+                if (!m_refactorOverlay->isEmpty())
+                    m_refactorOverlay->paint(&painter, data.eventRect);
     }
 
     if (!m_searchResultOverlay->isEmpty()) {
@@ -1276,12 +1293,12 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
         const QHelpEvent *he = static_cast<QHelpEvent*>(event);
         const QPoint &pos = he->pos();
 
-        //        RefactorMarker refactorMarker = m_refactorOverlay->markerAt(pos);
-        //        if (refactorMarker.isValid() && !refactorMarker.tooltip.isEmpty()) {
-        //            ToolTip::show(he->globalPos(), refactorMarker.tooltip,
-        //                          viewport(), QString(), refactorMarker.rect);
-        //            return true;
-        //        }
+        RefactorMarker refactorMarker = m_refactorOverlay->markerAt(pos);
+        if (refactorMarker.isValid() && !refactorMarker.tooltip.isEmpty()) {
+            ToolTip::show(he->globalPos(), refactorMarker.tooltip,
+                          viewport(), QString(), refactorMarker.rect);
+            return true;
+        }
 
         QTextCursor tc = cursorForPosition(pos);
         QTextBlock block = tc.block();
@@ -1305,7 +1322,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                                    && */m_linkPressed
+                                                                                                                                                            && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1355,15 +1372,15 @@ void QmlCodeEditor::mousePressEvent(QMouseEvent *e)
             if (m_mouseOnFoldedMarker && m_rowBar->bracketBand()->toggleFold(e->pos()))
                 viewport()->setCursor(Qt::IBeamCursor);
 
-            //            RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());
-            //            if (refactorMarker.isValid()) {
-            //                onRefactorMarkerClicked(refactorMarker);
-            //            } else {
-            requestUpdateLink(e, true);
+            RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());
+            if (refactorMarker.isValid()) {
+                onRefactorMarkerClicked(refactorMarker);
+            } else {
+                requestUpdateLink(e, true);
 
-            if (m_currentLink.hasValidLinkText())
-                m_linkPressed = true;
-            //            }
+                if (m_currentLink.hasValidLinkText())
+                    m_linkPressed = true;
+            }
         }
     } else if (e->button() == Qt::RightButton) {
         int eventCursorPosition = cursorForPosition(e->pos()).position();
@@ -1377,6 +1394,12 @@ void QmlCodeEditor::mousePressEvent(QMouseEvent *e)
         return;*/
 
     QPlainTextEdit::mousePressEvent(e);
+}
+
+void QmlCodeEditor::onRefactorMarkerClicked(const RefactorMarker &marker)
+{
+    if (marker.data.canConvert<QtQuickToolbarMarker>())
+        showContextPane();
 }
 
 void QmlCodeEditor::clearVisibleFoldedBlock()
@@ -1481,13 +1504,13 @@ void QmlCodeEditor::mouseMoveEvent(QMouseEvent *e)
             m_foldedBlockTimer.start(40, this);
         }
 
-        // const RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());
+         const RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());
 
         // Update the mouse cursor
-        if ((collapsedBlock.isValid() /*|| refactorMarker.isValid()*/) && !m_mouseOnFoldedMarker) {
+        if ((collapsedBlock.isValid() || refactorMarker.isValid()) && !m_mouseOnFoldedMarker) {
             m_mouseOnFoldedMarker = true;
             viewport()->setCursor(Qt::PointingHandCursor);
-        } else if (!collapsedBlock.isValid() /*&& !refactorMarker.isValid()*/ && m_mouseOnFoldedMarker) {
+        } else if (!collapsedBlock.isValid() && !refactorMarker.isValid() && m_mouseOnFoldedMarker) {
             m_mouseOnFoldedMarker = false;
             viewport()->setCursor(Qt::IBeamCursor);
         }
@@ -1850,6 +1873,20 @@ RowBar* QmlCodeEditor::rowBar() const
 QmlCodeEditorToolBar* QmlCodeEditor::toolBar() const
 {
     return m_toolBar;
+}
+
+RefactorMarkers QmlCodeEditor::refactorMarkers() const
+{
+    return m_refactorOverlay->markers();
+}
+
+void QmlCodeEditor::setRefactorMarkers(const RefactorMarkers &markers)
+{
+    foreach (const RefactorMarker &marker, m_refactorOverlay->markers())
+        emit requestBlockUpdate(marker.cursor.block());
+    m_refactorOverlay->setMarkers(markers);
+    foreach (const RefactorMarker &marker, markers)
+        emit requestBlockUpdate(marker.cursor.block());
 }
 
 void QmlCodeEditor::focusInEvent(QFocusEvent *e)
@@ -2732,33 +2769,33 @@ void QmlCodeEditor::updateContextPane()
         if (oldNode != newNode && m_oldCursorPosition != -1)
             m_contextPane->apply(this, info.document, 0, newNode, false);
 
-        //        if (m_contextPane->isAvailable(this, info.document, newNode) &&
-        //                !m_contextPane->widget()->isVisible()) {
-        //            QList<RefactorMarker> markers = removeMarkersOfType<QtQuickToolbarMarker>(refactorMarkers());
-        //            if (UiObjectMember *m = newNode->uiObjectMemberCast()) {
-        //                const int start = qualifiedTypeNameId(m)->identifierToken.begin();
-        //                for (UiQualifiedId *q = qualifiedTypeNameId(m); q; q = next) {
-        //                    if (! next) {
-        //                        const int end = identifierToken.end();
-        //                        if (position() >= start && position() <= end) {
-        //                            RefactorMarker marker;
-        //                            QTextCursor tc(document());
-        //                            tc.setPosition(end);
-        //                            marker.cursor = tc;
-        //                            marker.tooltip = tr("Show Qt Quick ToolBar");
-        //                            marker.data = QVariant::fromValue(QtQuickToolbarMarker());
-        //                            markers.append(marker);
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            setRefactorMarkers(markers);
-        //        } else if (oldNode != newNode) {
-        //            setRefactorMarkers(removeMarkersOfType<QtQuickToolbarMarker>(refactorMarkers()));
-        //        }
+        if (m_contextPane->isAvailable(this, info.document, newNode) &&
+                !m_contextPane->widget()->isVisible()) {
+            QList<RefactorMarker> markers = removeMarkersOfType<QtQuickToolbarMarker>(refactorMarkers());
+            if (UiObjectMember *m = newNode->uiObjectMemberCast()) {
+                const int start = qualifiedTypeNameId(m)->identifierToken.begin();
+                for (UiQualifiedId *q = qualifiedTypeNameId(m); q; q = q->next) {
+                    if (!q->next) {
+                        const int end = q->identifierToken.end();
+                        if (position() >= start && position() <= end) {
+                            RefactorMarker marker;
+                            QTextCursor tc(document());
+                            tc.setPosition(end);
+                            marker.cursor = tc;
+                            marker.tooltip = tr("Show Qt Quick ToolBar");
+                            marker.data = QVariant::fromValue(QtQuickToolbarMarker());
+                            markers.append(marker);
+                        }
+                    }
+                }
+            }
+            setRefactorMarkers(markers);
+        } else if (oldNode != newNode) {
+            setRefactorMarkers(removeMarkersOfType<QtQuickToolbarMarker>(refactorMarkers()));
+        }
         m_oldCursorPosition = position();
 
-        //        setSelectedElements();
+        //                setSelectedElements();
     }
 }
 
@@ -2780,7 +2817,7 @@ void QmlCodeEditor::showContextPane()
                              &scopeChain,
                              newNode, false, true);
         m_oldCursorPosition = position();
-        //        setRefactorMarkers(removeMarkersOfType<QtQuickToolbarMarker>(refactorMarkers()));
+        setRefactorMarkers(removeMarkersOfType<QtQuickToolbarMarker>(refactorMarkers()));
     }
 }
 
@@ -3238,7 +3275,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
     ToolTip::hide();
 
     //    d->m_moveLineUndoHack = false;
-    //    d->clearVisibleFoldedBlock();
+/*//        d->*/clearVisibleFoldedBlock();
 
     //    if (e->key() == Qt::Key_Alt
     //            && d->m_behaviorSettings.m_keyboardTooltips) {

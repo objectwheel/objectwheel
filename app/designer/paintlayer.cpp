@@ -335,17 +335,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
     const qreal z = DesignerScene::zoomLevel();
     const qreal m = 10 / z;
     QRectF bumpRectangle(0, 0, m, m);
-    QPainterPath scenePath;
-    scenePath.addRect(scene()->sceneRect());
     for (Control* selectedControl : scene()->selectedControls()) {
-        QPainterPath resizersPath;
-        for (ResizerItem* resizer : scene()->gadgetLayer()->resizers(selectedControl)) {
-            if (resizer->isVisible()) {
-                resizersPath.addRect(QRectF(resizer->scenePos() + resizer->rect().topLeft() / z,
-                                            resizer->size() / z));
-            }
-        }
-
         for (const QString& sourceLineName : selectedControl->anchors().keys()) {
             if (anchorLineNames.contains(sourceLineName)) {
                 AnchorData data;
@@ -353,21 +343,9 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 AnchorLine targetLine(makeAnchorLine(selectedControl->anchors().value(sourceLineName).value<QStringList>(), scene()));
                 updateAnchorData(data, sourceLine, targetLine, scene());
 
-                for (ResizerItem* resizer : scene()->gadgetLayer()->resizers(targetLine.control())) {
-                    if (resizer->isVisible()) {
-                        resizersPath.addRect(QRectF(resizer->scenePos() + resizer->rect().topLeft() / z,
-                                                    resizer->size() / z));
-                    }
-                }
-                painter->setClipPath(scenePath.subtracted(resizersPath));
-
                 DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
                 DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
                 DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
-
-                painter->setPen(Qt::white);
-                painter->setBrush(DesignerScene::outlineColor());
-                paintLabelOverLine(painter, QString::number(sourceLine.margin()), {data.firstControlPoint, data.secondControlPoint});
 
                 bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
                 painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
@@ -381,7 +359,6 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
                 painter->setBrush(painter->pen().color());
                 painter->setRenderHint(QPainter::Antialiasing, true);
-                painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
                 painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
                 const qreal angle = anchorPixmapAngle(data);
                 QPixmap p = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
@@ -392,8 +369,11 @@ void PaintLayer::paintAnchors(QPainter* painter)
                 painter->drawPixmap(bumpRectangle.toRect(), p, p.rect());
                 painter->rotate(-angle);
                 painter->translate(-tr);
-                painter->setRenderHint(QPainter::SmoothPixmapTransform, false);
                 painter->setRenderHint(QPainter::Antialiasing, false);
+
+                painter->setPen(Qt::white);
+                painter->setBrush(DesignerScene::outlineColor());
+                paintLabelOverLine(painter, QString::number(sourceLine.margin()), {data.firstControlPoint, data.secondControlPoint});
             }
         }
     }

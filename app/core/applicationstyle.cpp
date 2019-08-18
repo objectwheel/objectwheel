@@ -526,8 +526,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 if (widget)
                     window = UtilityFunctions::window(widget);
                 QPixmap pixmap = mi.icon.pixmap(window, iconSize, mode);
-                int pixw = pixmap.width() / pixmap.devicePixelRatioF();
-                int pixh = pixmap.height() / pixmap.devicePixelRatioF();
+                int pixw = pixmap.width() / pixmap.devicePixelRatio();
+                int pixh = pixmap.height() / pixmap.devicePixelRatio();
                 QRect cr(xpos, mi.rect.y(), checkcol, mi.rect.height());
                 QRect pmr(0, 0, pixw, pixh);
                 pmr.moveCenter(cr.center());

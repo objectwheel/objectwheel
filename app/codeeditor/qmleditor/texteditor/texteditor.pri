@@ -48,7 +48,8 @@ HEADERS += \
         $$PWD/circularclipboardassist.h \
         $$PWD/simplecodestylepreferences.h \
         $$PWD/icodestylepreferences.h \
-        $$PWD/simplecodestylepreferenceswidget.h
+        $$PWD/simplecodestylepreferenceswidget.h \
+        $$PWD/refactoroverlay.h
 
 SOURCES += \
         $$PWD/codeassist/assistinterface.cpp \
@@ -95,7 +96,8 @@ SOURCES += \
         $$PWD/circularclipboardassist.cpp \
         $$PWD/simplecodestylepreferences.cpp \
         $$PWD/icodestylepreferences.cpp \
-        $$PWD/simplecodestylepreferenceswidget.cpp
+        $$PWD/simplecodestylepreferenceswidget.cpp \
+        $$PWD/refactoroverlay.cpp
 
 FORMS += \
         $$PWD/colorschemeedit.ui \

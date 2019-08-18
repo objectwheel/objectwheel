@@ -136,8 +136,8 @@ QPixmap Control::pixmap() const
 void Control::setPixmap(const QPixmap& pixmap)
 {
     if (m_pixmap.cacheKey() != pixmap.cacheKey()) {
+        Q_ASSERT(devicePixelRatio() == pixmap.devicePixelRatio());
         m_pixmap = pixmap;
-        m_pixmap.setDevicePixelRatio(devicePixelRatio());
         update();
     }
 }
@@ -200,7 +200,8 @@ void Control::setRenderInfo(const RenderInfo& info)
         }
     }
 
-    setPixmap(QPixmap::fromImage(m_renderInfo.image));
+    m_renderInfo.image.setDevicePixelRatio(devicePixelRatio()); // QDataStream cannot write dpr
+    setPixmap(UtilityFunctions::imageToPixmap(m_renderInfo.image));
 
     emit renderInfoChanged(info.codeChanged);
 }
@@ -301,7 +302,7 @@ void Control::paintContent(QPainter* painter)
 {
     if (m_pixmap.isNull())
         return;
-    const QSizeF pixmapSize(m_pixmap.size() / m_pixmap.devicePixelRatioF());
+    const QSizeF pixmapSize(m_pixmap.size() / m_pixmap.devicePixelRatio());
     QRectF rect(contentRect().topLeft(), pixmapSize);
     if (qAbs(contentRect().width() - pixmapSize.width()) > 2
             || qAbs(contentRect().height() - pixmapSize.height()) > 2) {
