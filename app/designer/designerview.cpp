@@ -309,6 +309,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     addAction(m_moveLeftAct);
 
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked, this, [=] (Control* i) {
+        scene()->mouseGrabberItem()->ungrabMouse();
         onControlDoubleClick(i);
     }, Qt::QueuedConnection);
 }

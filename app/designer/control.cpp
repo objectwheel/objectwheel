@@ -177,7 +177,9 @@ void Control::setRenderInfo(const RenderInfo& info)
 
         if (visible() && rect().isValid() && PaintUtils::isBlankImage(m_renderInfo.image)) {
             m_renderInfo.image = PaintUtils::renderBlankControlImage(
-                        rect(), id(), devicePixelRatio(), DesignerScene::blankControlDecorationBrush(Qt::darkGray));
+                        rect(), id(), devicePixelRatio(),
+                        DesignerScene::blankControlDecorationBrush(Qt::darkGray),
+                        childControls(false).isEmpty() ? DesignerScene::outlineColor() : Qt::transparent);
         }
     } else {
         setGeometrySyncEnabled(false);
@@ -191,7 +193,8 @@ void Control::setRenderInfo(const RenderInfo& info)
         if (hasErrors() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderErrorControlImage(
                         size(), id(), devicePixelRatio(),
-                        DesignerScene::blankControlDecorationBrush(QColor(203, 54, 59)));
+                        DesignerScene::blankControlDecorationBrush(QColor(203, 54, 59)),
+                        QColor(203, 54, 59));
         }
 
         if (m_renderInfo.image.isNull() && size().isValid()) {
@@ -336,14 +339,7 @@ void Control::paintOutline(QPainter* painter)
         return painter->drawRect(DesignerScene::outerRect(contentRect()));
 }
 
-void Control::paintHoverOutline(QPainter* painter)
-{
-    painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen());
-    painter->drawRect(DesignerScene::outerRect(rect()));
-}
-
-void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*)
+void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     if (beingResized())
         painter->setClipRect(rect());
@@ -352,8 +348,6 @@ void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     paintOutline(painter);
     if (beingHighlighted())
         paintHighlight(painter);
-    if (DesignerScene::showMouseoverOutline() && option->state & QStyle::State_MouseOver)
-        paintHoverOutline(painter);
 }
 
 QVariant Control::itemChange(int change, const QVariant& value)

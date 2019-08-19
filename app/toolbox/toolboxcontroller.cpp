@@ -72,10 +72,11 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                 drag->setPixmap(UtilityFunctions::imageToPixmap(info.image));
             } else if (info.gui && info.visible && PaintUtils::isBlankImage(info.image)) {
                 drag->setPixmap(UtilityFunctions::imageToPixmap(PaintUtils::renderBlankControlImage(
-                                    info.surroundingRect,
-                                    m_toolboxPane->toolboxTree()->currentItem()->text(0),
-                                    m_toolboxPane->devicePixelRatioF(),
-                                    DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(Qt::darkGray))));
+                    info.surroundingRect,
+                    m_toolboxPane->toolboxTree()->currentItem()->text(0),
+                    m_toolboxPane->devicePixelRatioF(),
+                    DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(Qt::darkGray),
+                    DesignerSettings::sceneSettings()->outlineColor)));
             }
             info.image = drag->pixmap().toImage();
             drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-info"),

@@ -15,7 +15,7 @@ public:
     explicit GadgetLayer(DesignerItem* parent = nullptr);
     void addResizers(DesignerItem* item);
     void removeResizers(DesignerItem* item);
-    QList<ResizerItem*> resizers(DesignerItem* item) const;
+    QList<ResizerItem*> resizers(const DesignerItem* item) const;
 
 public slots:
     void handleSceneSelectionChange();

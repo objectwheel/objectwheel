@@ -536,8 +536,23 @@ void PaintLayer::paintLabelOverLine(QPainter* painter, const QString& label, con
     painter->translate(-tr);
 }
 
+void PaintLayer::paintHoverOutline(QPainter* painter)
+{
+    Q_ASSERT(scene());
+    if (DesignerScene::showMouseoverOutline()) {
+        if (const DesignerItem* item = scene()->topLevelControl(scene()->cursorPos())) {
+            if (!item->isSelected()) {
+                painter->setBrush(Qt::NoBrush);
+                painter->setPen(DesignerScene::pen());
+                painter->drawRect(DesignerScene::outerRect(item->mapRectToScene(item->rect())));
+            }
+        }
+    }
+}
+
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
+    paintHoverOutline(painter);
     paintSelectionOutlines(painter);
     paintMovingSelectionOutline(painter);
     paintAnchors(painter);

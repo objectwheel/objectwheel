@@ -17,6 +17,7 @@ public slots:
 private:
     void paintAnchors(QPainter* painter);
     void paintAnchorConnector(QPainter* painter);
+    void paintHoverOutline(QPainter* painter);
     void paintGuidelines(QPainter* painter);
     void paintSelectionOutlines(QPainter* painter);
     void paintMovingSelectionOutline(QPainter* painter);

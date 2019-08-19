@@ -78,7 +78,7 @@ void SceneSettings::reset()
     showMouseoverOutline = true;
     showClippedControls = false;
     blankControlDecoration = 3;
-    controlOutlineDecoration = 2;
+    controlOutlineDecoration = 1;
     outlineColor = "#2483ec";
 }
 

@@ -35,10 +35,10 @@ QImage renderTransparentImage(const QSizeF& size, qreal dpr);
 QImage renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, qreal dpr);
 QImage renderErrorControlImage(const QSizeF& size, const QString& id, qreal dpr,
                                const QBrush& brush,
-                               const QPen& pen = QColor(48, 48, 96));
+                               const QPen& pen);
 QImage renderBlankControlImage(const QRectF& rect, const QString& id, qreal dpr,
                                const QBrush& brush,
-                               const QPen& pen = QColor(48, 48, 96));
+                               const QPen& pen);
 } // PaintUtils
 
 #endif // PAINTUTILS_H

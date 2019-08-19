@@ -54,9 +54,9 @@ void GadgetLayer::removeResizers(DesignerItem* item)
     m_resizerHash.remove(item);
 }
 
-QList<ResizerItem*> GadgetLayer::resizers(DesignerItem* item) const
+QList<ResizerItem*> GadgetLayer::resizers(const DesignerItem* item) const
 {
-    return m_resizerHash.value(item);
+    return m_resizerHash.value(const_cast<DesignerItem*>(item));
 }
 
 void GadgetLayer::handleSceneSelectionChange()

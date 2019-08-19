@@ -276,6 +276,13 @@ qreal DesignerScene::devicePixelRatio() const
     return views().first()->devicePixelRatioF();
 }
 
+QPointF DesignerScene::cursorPos() const
+{
+    Q_ASSERT(views().size() == 1);
+    QGraphicsView* view = views().first();
+    return view->mapToScene(view->viewport()->mapFromGlobal(QCursor::pos()));
+}
+
 QRectF DesignerScene::visibleItemsBoundingRect() const
 {
     // Does not take untransformable items into account.
