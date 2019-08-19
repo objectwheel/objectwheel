@@ -41,6 +41,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
   , m_indexLayout(new QVBoxLayout(m_indexWidget))
   , m_indexFilterEdit(new LineEdit)
 {
+    setFocusPolicy(Qt::NoFocus);
+    m_typeCombo->setFocusPolicy(Qt::NoFocus);
+
     m_layout->setSpacing(0);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_toolBar);

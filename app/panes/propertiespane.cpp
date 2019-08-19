@@ -955,6 +955,7 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     setDropIndicatorShown(false);
     setExpandsOnDoubleClick(true);
     setItemDelegate(new PropertiesListDelegate(this));
+    setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::NoSelection);

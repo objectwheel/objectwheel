@@ -254,6 +254,7 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
     setDropIndicatorShown(false);
     setExpandsOnDoubleClick(false);
     setItemDelegate(new InspectorListDelegate(this));
+    setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::ExtendedSelection);

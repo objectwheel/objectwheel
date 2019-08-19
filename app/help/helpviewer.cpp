@@ -45,6 +45,7 @@ struct ExtensionMap {
 
 HelpViewer::HelpViewer(QWidget *parent) : QWidget(parent)
 {
+    setFocusPolicy(Qt::NoFocus);
 }
 
 void HelpViewer::setActionVisible(Action action, bool visible)

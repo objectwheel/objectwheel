@@ -11,6 +11,7 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
   , m_searchEdit(new LineEdit(this))
   , m_toolboxTree(new ToolboxTree(this))
 {
+    setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setAcceptDrops(true);
 

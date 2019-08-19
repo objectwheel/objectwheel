@@ -13,6 +13,7 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
   , m_buildsAction(new QAction(this))
   , m_documentsAction(new QAction(this))
 {
+    setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setIconSize({16, 16});
 

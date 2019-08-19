@@ -38,6 +38,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
   , m_searchLineEdit(new LineEdit(this))
   , m_dialogButtonBox(new QDialogButtonBox(this))
 {
+    setFocusPolicy(Qt::NoFocus);
     setWindowTitle(tr("Preferences"));
     setWindowModality(Qt::ApplicationModal);
     setAttribute(Qt::WA_QuitOnClose, false);

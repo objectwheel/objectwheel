@@ -111,6 +111,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
     setItemDelegate(new FileExplorerListDelegate(this));
+    setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeView::SelectRows);
     setDragDropMode(QAbstractItemView::NoDragDrop);

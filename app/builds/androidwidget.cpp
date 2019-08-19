@@ -11,6 +11,8 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     , _permissionsBoxLay(&_permissionsBox)
     , _signingBoxLay(&_signingBox)
 {
+    setFocusPolicy(Qt::NoFocus);
+
     auto buttonsLay = new QHBoxLayout;
 //    buttonsLay->addWidget(&_btnBack);
 //    buttonsLay->addWidget(&_btnBuild);
@@ -267,6 +269,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
     _cmbPermissions.setMaxVisibleItems(15);
     _cmbPermissions.setEditable(true);
 
+    _permissionList.setFocusPolicy(Qt::NoFocus);
     _permissionList.setFixedWidth(400);
     _permissionList.addItem("android.permission.WRITE_EXTERNAL_STORAGE");
     _permissionList.addItem("android.permission.READ_PHONE_STATE");

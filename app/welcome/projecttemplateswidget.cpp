@@ -107,6 +107,8 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
   , m_listWidget(new QListWidget)
   , m_buttons(new ButtonSlice)
 {
+    setFocusPolicy(Qt::NoFocus);
+
     m_layout->addStretch();
     m_layout->setSpacing(6);
     m_layout->setContentsMargins(0, 0, 0, 0);

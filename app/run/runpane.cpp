@@ -19,6 +19,7 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
   , m_runProgressBar(new RunProgressBar(this))
   , m_runDevicesButton(new RunDevicesButton(this))
 {
+    setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage

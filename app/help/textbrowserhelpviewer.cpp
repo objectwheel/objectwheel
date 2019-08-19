@@ -52,6 +52,7 @@ TextBrowserHelpViewer::TextBrowserHelpViewer(QWidget *parent)
     : HelpViewer(parent)
     , m_textBrowser(new TextBrowserHelpWidget(this))
 {
+    setFocusPolicy(Qt::NoFocus);
     m_textBrowser->setOpenLinks(false);
     QVBoxLayout *layout = new QVBoxLayout;
     setLayout(layout);

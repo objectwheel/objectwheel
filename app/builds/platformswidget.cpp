@@ -78,6 +78,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     : QWidget(parent)
     , _layout(this)
 {
+    setFocusPolicy(Qt::NoFocus);
     _layout.setContentsMargins(0, 20, 0, 20);
     _layout.setSpacing(10);
     _layout.addWidget(&_lblLogo);

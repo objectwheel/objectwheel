@@ -142,6 +142,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     setDropIndicatorShown(false);
     setExpandsOnDoubleClick(false);
     setItemDelegate(new FormsListDelegate(this));
+    setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::SingleSelection);
