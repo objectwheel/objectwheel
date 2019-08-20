@@ -4,27 +4,12 @@
 #include <gadgetlayer.h>
 #include <anchorlayer.h>
 #include <paintutils.h>
+#include <anchorline.h>
+
 #include <QPainter>
 #include <QtMath>
 
 enum { AngleDegree = 16 };
-enum AnchorLineType {
-    AnchorLineInvalid = 0x0,
-    AnchorLineNoAnchor = AnchorLineInvalid,
-    AnchorLineLeft = 0x01,
-    AnchorLineRight = 0x02,
-    AnchorLineTop = 0x04,
-    AnchorLineBottom = 0x08,
-    AnchorLineHorizontalCenter = 0x10,
-    AnchorLineVerticalCenter = 0x20,
-    AnchorLineBaseline = 0x40,
-
-    AnchorLineFill =  AnchorLineLeft | AnchorLineRight | AnchorLineTop | AnchorLineBottom,
-    AnchorLineCenter = AnchorLineVerticalCenter | AnchorLineHorizontalCenter,
-    AnchorLineVerticalMask = AnchorLineLeft | AnchorLineRight | AnchorLineHorizontalCenter,
-    AnchorLineHorizontalMask = AnchorLineTop | AnchorLineBottom | AnchorLineVerticalCenter | AnchorLineBaseline,
-    AnchorLineAllMask = AnchorLineVerticalMask | AnchorLineHorizontalMask
-};
 
 static const QStringList anchorLineNames {
     "anchors.top",
@@ -38,82 +23,6 @@ static const QStringList anchorLineNames {
     "anchors.centerIn"
 };
 
-class AnchorLine
-{
-public:
-    AnchorLine();
-    AnchorLine(Control* control, AnchorLineType type);
-    AnchorLineType type() const;
-    qreal margin() const;
-    bool isValid() const;
-
-    static bool isHorizontalAnchorLine(AnchorLineType anchorline);
-    static bool isVerticalAnchorLine(AnchorLineType anchorline);
-
-    Control* control() const;
-
-private:
-    Control* m_control;
-    AnchorLineType m_type;
-};
-
-AnchorLine::AnchorLine()
-    : m_control(nullptr)
-    , m_type(AnchorLineInvalid)
-{}
-
-AnchorLine::AnchorLine(Control* control, AnchorLineType type)
-    : m_control(control),
-      m_type(type)
-{}
-
-AnchorLineType AnchorLine::type() const
-{
-    return m_type;
-}
-
-qreal AnchorLine::margin() const
-{
-    if (!isValid())
-        return 0;
-
-    qreal margin = 0;
-
-    if (m_type == AnchorLineTop)
-        margin = m_control->anchors().value("anchors.topMargin").toReal();
-    else if (m_type == AnchorLineBottom)
-        margin = m_control->anchors().value("anchors.bottomMargin").toReal();
-    else if (m_type == AnchorLineLeft)
-        margin = m_control->anchors().value("anchors.leftMargin").toReal();
-    else if (m_type == AnchorLineRight)
-        margin = m_control->anchors().value("anchors.rightMargin").toReal();
-
-    if (margin == 0)
-        return m_control->anchors().value("anchors.margins").toReal();
-
-    return margin;
-}
-
-bool AnchorLine::isValid() const
-{
-    return m_type != AnchorLineInvalid && m_control;
-}
-
-bool AnchorLine::isHorizontalAnchorLine(AnchorLineType anchorline)
-{
-    return anchorline & AnchorLineHorizontalMask;
-}
-
-bool AnchorLine::isVerticalAnchorLine(AnchorLineType anchorline)
-{
-    return anchorline & AnchorLineVerticalMask;
-}
-
-Control* AnchorLine::control() const
-{
-    return m_control;
-}
-
 struct AnchorData {
     QPointF startPoint;
     QPointF firstControlPoint;
@@ -123,11 +32,11 @@ struct AnchorData {
     QPointF sourceAnchorLineSecondPoint;
     QPointF targetAnchorLineFirstPoint;
     QPointF targetAnchorLineSecondPoint;
-    AnchorLineType sourceAnchorLineType = AnchorLineInvalid;
-    AnchorLineType targetAnchorLineType = AnchorLineInvalid;
+    AnchorLine::Type sourceAnchorLineType = AnchorLine::Invalid;
+    AnchorLine::Type targetAnchorLineType = AnchorLine::Invalid;
 };
 
-static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLineType anchorLineType, const DesignerItem* childItem)
+static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLine::Type anchorLineType, const DesignerItem* childItem)
 {
     QRectF parentBoundingRect = parentItem->mapRectToScene(parentItem->rect());
     QRectF childBoundingRect = childItem->mapRectToScene(childItem->rect());
@@ -135,16 +44,16 @@ static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLin
     QPointF anchorPoint;
 
     switch (anchorLineType) {
-    case AnchorLineTop:
+    case AnchorLine::Top:
         anchorPoint = QPointF(childBoundingRect.center().x(), parentBoundingRect.top());
         break;
-    case AnchorLineBottom:
+    case AnchorLine::Bottom:
         anchorPoint = QPointF(childBoundingRect.center().x(), parentBoundingRect.bottom());
         break;
-    case AnchorLineLeft:
+    case AnchorLine::Left:
         anchorPoint = QPointF(parentBoundingRect.left(), childBoundingRect.center().y());
         break;
-    case AnchorLineRight:
+    case AnchorLine::Right:
         anchorPoint = QPointF(parentBoundingRect.right(), childBoundingRect.center().y());
         break;
     default:
@@ -154,23 +63,23 @@ static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLin
     return anchorPoint;
 }
 
-static QPointF createAnchorPoint(const DesignerItem* item, AnchorLineType anchorLineType)
+static QPointF createAnchorPoint(const DesignerItem* item, AnchorLine::Type anchorLineType)
 {
     QRectF boundingRect = item->mapRectToScene(item->rect());
 
     QPointF anchorPoint;
 
     switch (anchorLineType) {
-    case AnchorLineTop:
+    case AnchorLine::Top:
         anchorPoint = QPointF(boundingRect.center().x(), boundingRect.top());
         break;
-    case AnchorLineBottom:
+    case AnchorLine::Bottom:
         anchorPoint = QPointF(boundingRect.center().x(), boundingRect.bottom());
         break;
-    case AnchorLineLeft:
+    case AnchorLine::Left:
         anchorPoint = QPointF(boundingRect.left(), boundingRect.center().y());
         break;
-    case AnchorLineRight:
+    case AnchorLine::Right:
         anchorPoint = QPointF(boundingRect.right(), boundingRect.center().y());
         break;
     default:
@@ -180,17 +89,17 @@ static QPointF createAnchorPoint(const DesignerItem* item, AnchorLineType anchor
     return anchorPoint;
 }
 
-static QPointF createControlPoint(const QPointF &firstEditPoint, AnchorLineType anchorLineType, const QPointF &secondEditPoint)
+static QPointF createControlPoint(const QPointF &firstEditPoint, AnchorLine::Type anchorLineType, const QPointF &secondEditPoint)
 {
     QPointF controlPoint = firstEditPoint;
 
     switch (anchorLineType) {
-    case AnchorLineTop:
-    case AnchorLineBottom:
+    case AnchorLine::Top:
+    case AnchorLine::Bottom:
         controlPoint.ry() += (secondEditPoint.y() - firstEditPoint.y()) / 2.0;
         break;
-    case AnchorLineLeft:
-    case AnchorLineRight:
+    case AnchorLine::Left:
+    case AnchorLine::Right:
         controlPoint.rx() += (secondEditPoint.x() - firstEditPoint.x()) / 2.0;
         break;
     default:
@@ -205,19 +114,19 @@ static void updateAnchorLinePoints(QPointF *firstPoint, QPointF *secondPoint, co
     QRectF boundingRectangle = anchorLine.control()->mapRectToScene(anchorLine.control()->rect());
 
     switch (anchorLine.type()) {
-    case AnchorLineTop:
+    case AnchorLine::Top:
         *firstPoint = boundingRectangle.topLeft();
         *secondPoint = boundingRectangle.topRight();
         break;
-    case AnchorLineBottom:
+    case AnchorLine::Bottom:
         *firstPoint = boundingRectangle.bottomLeft();
         *secondPoint = boundingRectangle.bottomRight();
         break;
-    case AnchorLineLeft:
+    case AnchorLine::Left:
         *firstPoint = boundingRectangle.topLeft();
         *secondPoint = boundingRectangle.bottomLeft();
         break;
-    case AnchorLineRight:
+    case AnchorLine::Right:
         *firstPoint = boundingRectangle.topRight();
         *secondPoint = boundingRectangle.bottomRight();
         break;
@@ -249,16 +158,16 @@ static void updateAnchorData(AnchorData& data, const AnchorLine& sourceAnchorLin
     }
 }
 
-static int startAngleForAnchorLine(const AnchorLineType &anchorLineType)
+static int startAngleForAnchorLine(const AnchorLine::Type &anchorLineType)
 {
     switch (anchorLineType) {
-    case AnchorLineTop:
+    case AnchorLine::Top:
         return 0;
-    case AnchorLineBottom:
+    case AnchorLine::Bottom:
         return 180 * AngleDegree;
-    case AnchorLineLeft:
+    case AnchorLine::Left:
         return 90 * AngleDegree;
-    case AnchorLineRight:
+    case AnchorLine::Right:
         return 270 * AngleDegree;
     default:
         return 0;
@@ -267,11 +176,11 @@ static int startAngleForAnchorLine(const AnchorLineType &anchorLineType)
 
 static int anchorPixmapAngle(const AnchorData& data)
 {
-    if (data.targetAnchorLineType == AnchorLineInvalid)
+    if (data.targetAnchorLineType == AnchorLine::Invalid)
         return 0;
 
     const QPointF& offset = data.endPoint - data.startPoint;
-    if (AnchorLine::isVerticalAnchorLine(data.targetAnchorLineType)) {
+    if (AnchorLine::isVertical(data.targetAnchorLineType)) {
         if (offset.x() < 0)
             return 90;
         return -90;
@@ -286,25 +195,25 @@ static AnchorLine makeAnchorLine(const QStringList& anchorPair, DesignerScene* s
 {
     if (anchorPair.size() != 2)
         return AnchorLine();
-    AnchorLineType type;
+    AnchorLine::Type type;
     if (anchorPair.first() == anchorLineNames.at(0))
-        type = AnchorLineTop;
+        type = AnchorLine::Top;
     else if (anchorPair.first() == anchorLineNames.at(1))
-        type = AnchorLineBottom;
+        type = AnchorLine::Bottom;
     else if (anchorPair.first() == anchorLineNames.at(2))
-        type = AnchorLineLeft;
+        type = AnchorLine::Left;
     else if (anchorPair.first() == anchorLineNames.at(3))
-        type = AnchorLineRight;
+        type = AnchorLine::Right;
     else if (anchorPair.first() == anchorLineNames.at(4))
-        type = AnchorLineHorizontalCenter;
+        type = AnchorLine::HorizontalCenter;
     else if (anchorPair.first() == anchorLineNames.at(5))
-        type = AnchorLineVerticalCenter;
+        type = AnchorLine::VerticalCenter;
     else if (anchorPair.first() == anchorLineNames.at(6))
-        type = AnchorLineBaseline;
+        type = AnchorLine::Baseline;
     else if (anchorPair.first() == anchorLineNames.at(7))
-        type = AnchorLineFill;
+        type = AnchorLine::Fill;
     else if (anchorPair.first() == anchorLineNames.at(8))
-        type = AnchorLineCenter;
+        type = AnchorLine::Center;
     for (Control* control : scene->items<Control>()) {
         if (control->uid() == anchorPair.last())
             return AnchorLine(control, type);
@@ -413,7 +322,7 @@ void PaintLayer::paintAnchorConnector(QPainter* painter)
         scenePath = scenePath.subtracted(p);
         painter->drawRect(r);
     }
-    painter->fillPath(scenePath, QColor(0, 0, 0, 20));
+    painter->fillPath(scenePath, QColor(0, 0, 0, 50));
     painter->drawRect(scene()->sceneRect());
 
     painter->setRenderHint(QPainter::Antialiasing, true);

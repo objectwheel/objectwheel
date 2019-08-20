@@ -256,7 +256,8 @@ void LoginWidget::onLoginButtonClick()
             UtilityFunctions::showMessage(this,
                                           tr("Unable to connect to the Internet"),
                                           tr("We could not find any local data to enable offline "
-                                             "logging in, please checkout your internet connection."),
+                                             "login for the issued email address, please connect "
+                                             "to the internet."),
                                           QMessageBox::Information);
         }
     } else {
