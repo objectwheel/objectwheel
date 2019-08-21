@@ -11,8 +11,6 @@ class Anchors final : public QObject
 public:
     explicit Anchors(Control* control);
 
-    void clear();
-
     AnchorLine top() const;
     void setTop(const AnchorLine& edge);
 
@@ -66,8 +64,6 @@ public:
 
     bool alignWhenCentered() const;
     void setAlignWhenCentered(bool);
-
-    AnchorLine::Types usedAnchors() const;
 
 private:
     AnchorLine m_top;
