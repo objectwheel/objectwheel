@@ -11,31 +11,6 @@
 
 enum { AngleDegree = 16 };
 
-static const QStringList anchorLineNames {
-    "anchors.top",
-    "anchors.bottom",
-    "anchors.left",
-    "anchors.right",
-    "anchors.horizontalCenter",
-    "anchors.verticalCenter",
-    "anchors.baseline",
-    "anchors.fill",
-    "anchors.centerIn"
-};
-
-struct AnchorData {
-    QPointF startPoint;
-    QPointF firstControlPoint;
-    QPointF secondControlPoint;
-    QPointF endPoint;
-    QPointF sourceAnchorLineFirstPoint;
-    QPointF sourceAnchorLineSecondPoint;
-    QPointF targetAnchorLineFirstPoint;
-    QPointF targetAnchorLineSecondPoint;
-    AnchorLine::Type sourceAnchorLineType = AnchorLine::Invalid;
-    AnchorLine::Type targetAnchorLineType = AnchorLine::Invalid;
-};
-
 static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLine::Type anchorLineType, const DesignerItem* childItem)
 {
     QRectF parentBoundingRect = parentItem->mapRectToScene(parentItem->rect());
@@ -135,7 +110,7 @@ static void updateAnchorLinePoints(QPointF *firstPoint, QPointF *secondPoint, co
     }
 }
 
-static void updateAnchorData(AnchorData& data, const AnchorLine& sourceAnchorLine, const AnchorLine& targetAnchorLine, DesignerScene* scene)
+static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sourceAnchorLine, const AnchorLine& targetAnchorLine, DesignerScene* scene)
 {
     if (sourceAnchorLine.control() && targetAnchorLine.control()) {
         data.sourceAnchorLineType = sourceAnchorLine.type();
@@ -174,7 +149,7 @@ static int startAngleForAnchorLine(const AnchorLine::Type &anchorLineType)
     }
 }
 
-static int anchorPixmapAngle(const AnchorData& data)
+static int anchorPixmapAngle(const PaintLayer::AnchorData& data)
 {
     if (data.targetAnchorLineType == AnchorLine::Invalid)
         return 0;
@@ -208,53 +183,57 @@ void PaintLayer::updateGeometry()
     }, Qt::QueuedConnection);
 }
 
-void PaintLayer::paintAnchors(QPainter* painter)
+void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& data)
 {
     Q_ASSERT(scene());
+
     const qreal z = DesignerScene::zoomLevel();
     const qreal m = 10 / z;
     QRectF bumpRectangle(0, 0, m, m);
+
+    DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
+    DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
+    DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
+
+    bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
+    painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+    painter->setBrush(painter->pen().color());
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
+    painter->setRenderHint(QPainter::Antialiasing, false);
+
+    painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
+
+    bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
+    painter->setBrush(painter->pen().color());
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+    const qreal angle = anchorPixmapAngle(data);
+    QPixmap p = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+    const QPointF& tr = bumpRectangle.center();
+    bumpRectangle.moveTopLeft({-bumpRectangle.width() * 0.5, -bumpRectangle.height() * 0.5});
+    painter->translate(tr);
+    painter->rotate(angle);
+    painter->drawPixmap(bumpRectangle.toRect(), p, p.rect());
+    painter->rotate(-angle);
+    painter->translate(-tr);
+    painter->setRenderHint(QPainter::Antialiasing, false);
+
+    painter->setPen(Qt::white);
+    painter->setBrush(DesignerScene::outlineColor());
+// FIXME   paintLabelOverLine(painter, QString::number(sourceLine.margin()), {data.firstControlPoint, data.secondControlPoint});
+}
+
+void PaintLayer::paintAnchors(QPainter* painter)
+{
+    Q_ASSERT(scene());
     for (Control* selectedControl : scene()->selectedControls()) {
-        for (const QString& sourceLineName : selectedControl->anchors().keys()) {
-            if (anchorLineNames.contains(sourceLineName)) {
-                AnchorData data;
-                AnchorLine sourceLine(makeAnchorLine({sourceLineName, selectedControl->uid()}, scene()));
-                AnchorLine targetLine(makeAnchorLine(selectedControl->anchors().value(sourceLineName).value<QStringList>(), scene()));
-                updateAnchorData(data, sourceLine, targetLine, scene());
-
-                DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
-                DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
-                DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
-
-                bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
-                painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
-                painter->setBrush(painter->pen().color());
-                painter->setRenderHint(QPainter::Antialiasing, true);
-                painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
-                painter->setRenderHint(QPainter::Antialiasing, false);
-
-                painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
-
-                bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
-                painter->setBrush(painter->pen().color());
-                painter->setRenderHint(QPainter::Antialiasing, true);
-                painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-                const qreal angle = anchorPixmapAngle(data);
-                QPixmap p = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
-                const QPointF& tr = bumpRectangle.center();
-                bumpRectangle.moveTopLeft({-bumpRectangle.width() * 0.5, -bumpRectangle.height() * 0.5});
-                painter->translate(tr);
-                painter->rotate(angle);
-                painter->drawPixmap(bumpRectangle.toRect(), p, p.rect());
-                painter->rotate(-angle);
-                painter->translate(-tr);
-                painter->setRenderHint(QPainter::Antialiasing, false);
-
-                painter->setPen(Qt::white);
-                painter->setBrush(DesignerScene::outlineColor());
-                paintLabelOverLine(painter, QString::number(sourceLine.margin()), {data.firstControlPoint, data.secondControlPoint});
-            }
-        }
+        const Anchors* anchors = selectedControl->anchors();
+        AnchorLine sourceLine(AnchorLine::Top, selectedControl);
+        AnchorLine targetLine(anchors->top());
+        AnchorData data;
+        updateAnchorData(data, sourceLine, targetLine, scene());
+        paintAnchor(painter, data);
     }
     painter->setClipping(false);
 }

@@ -10,6 +10,7 @@
 #include <QStyleOption>
 
 Control::Control(Control* parent) : DesignerItem(parent)
+  , m_anchors(new Anchors(this))
   , m_snapMargin(QSizeF(0, 0))
   , m_geometrySyncEnabled(false)
 {
