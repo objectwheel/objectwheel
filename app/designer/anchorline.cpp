@@ -1,14 +1,6 @@
 #include <anchorline.h>
-#include <control.h>
 
-AnchorLine::AnchorLine()
-    : m_control(nullptr)
-    , m_type(Invalid)
-{}
-
-AnchorLine::AnchorLine(Control* control, Type type)
-    : m_control(control),
-      m_type(type)
+AnchorLine::AnchorLine() : m_type(Invalid)
 {}
 
 AnchorLine::Type AnchorLine::type() const
@@ -16,36 +8,34 @@ AnchorLine::Type AnchorLine::type() const
     return m_type;
 }
 
-qreal AnchorLine::margin() const
+void AnchorLine::setType(AnchorLine::Type type)
 {
-    if (!isValid())
-        return 0;
+    m_type = type;
+}
 
-    qreal margin = 0;
+DesignerItem* AnchorLine::item() const
+{
+    return m_item;
+}
 
-    if (m_type == Top)
-        margin = m_control->anchors().value("anchors.topMargin").toReal();
-    else if (m_type == Bottom)
-        margin = m_control->anchors().value("anchors.bottomMargin").toReal();
-    else if (m_type == Left)
-        margin = m_control->anchors().value("anchors.leftMargin").toReal();
-    else if (m_type == Right)
-        margin = m_control->anchors().value("anchors.rightMargin").toReal();
-
-    if (margin == 0)
-        return m_control->anchors().value("anchors.margins").toReal();
-
-    return margin;
+void AnchorLine::setItem(DesignerItem* item)
+{
+    m_item = item;
 }
 
 bool AnchorLine::isValid() const
 {
-    return m_type != Invalid && m_control;
+    return m_type != Invalid && m_item;
 }
 
-bool AnchorLine::isHorizontal(Type type)
+bool AnchorLine::isVertical() const
 {
-    return type & HorizontalMask;
+    return isVertical(m_type);
+}
+
+bool AnchorLine::isHorizontal() const
+{
+    return isHorizontal(m_type);
 }
 
 bool AnchorLine::isVertical(Type type)
@@ -53,7 +43,7 @@ bool AnchorLine::isVertical(Type type)
     return type & VerticalMask;
 }
 
-Control* AnchorLine::control() const
+bool AnchorLine::isHorizontal(Type type)
 {
-    return m_control;
+    return type & HorizontalMask;
 }

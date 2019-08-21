@@ -243,6 +243,36 @@ void Control::setGeometrySyncEnabled(bool geometrySyncEnabled)
     m_geometrySyncEnabled = geometrySyncEnabled;
 }
 
+AnchorLine Control::anchor(AnchorLine::Type type) const
+{
+    if (anchorPair.size() != 2)
+        return AnchorLine();
+    AnchorLine::Type type;
+    if (anchorPair.first() == anchorLineNames.at(0))
+        type = AnchorLine::Top;
+    else if (anchorPair.first() == anchorLineNames.at(1))
+        type = AnchorLine::Bottom;
+    else if (anchorPair.first() == anchorLineNames.at(2))
+        type = AnchorLine::Left;
+    else if (anchorPair.first() == anchorLineNames.at(3))
+        type = AnchorLine::Right;
+    else if (anchorPair.first() == anchorLineNames.at(4))
+        type = AnchorLine::HorizontalCenter;
+    else if (anchorPair.first() == anchorLineNames.at(5))
+        type = AnchorLine::VerticalCenter;
+    else if (anchorPair.first() == anchorLineNames.at(6))
+        type = AnchorLine::Baseline;
+    else if (anchorPair.first() == anchorLineNames.at(7))
+        type = AnchorLine::Fill;
+    else if (anchorPair.first() == anchorLineNames.at(8))
+        type = AnchorLine::Center;
+    for (Control* control : scene->items<Control>()) {
+        if (control->uid() == anchorPair.last())
+            return AnchorLine(control, type);
+    }
+    return AnchorLine();
+}
+
 QVariant Control::property(const QString& propertyName) const
 {
     return UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);

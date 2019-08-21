@@ -2,7 +2,7 @@
 #define CONTROL_H
 
 #include <renderinfo.h>
-#include <designeritem.h>
+#include <anchorline.h>
 
 class Control : public DesignerItem
 {
@@ -52,7 +52,9 @@ public:
     bool geometrySyncEnabled() const;
     void setGeometrySyncEnabled(bool geometrySyncEnabled);
 
+    AnchorLine anchor(AnchorLine::Type type) const;
     QVariant property(const QString& propertyName) const;
+
     Control* parentControl() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;

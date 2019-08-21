@@ -15,7 +15,8 @@ HEADERS += $$PWD/control.h \
            $$PWD/gadgetitem.h \
            $$PWD/anchorlayer.h \
            $$PWD/anchoreditor.h \
-           $$PWD/anchorline.h
+           $$PWD/anchorline.h \
+           $$PWD/anchors.h
 
 SOURCES += $$PWD/control.cpp \
            $$PWD/controlsavefilter.cpp \
@@ -31,6 +32,7 @@ SOURCES += $$PWD/control.cpp \
            $$PWD/gadgetitem.cpp \
            $$PWD/anchorlayer.cpp \
            $$PWD/anchoreditor.cpp \
-           $$PWD/anchorline.cpp
+           $$PWD/anchorline.cpp \
+           $$PWD/anchors.cpp
 
 FORMS += $$PWD/signalchooserdialog.ui
