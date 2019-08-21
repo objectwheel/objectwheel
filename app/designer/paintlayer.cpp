@@ -5,6 +5,7 @@
 #include <anchorlayer.h>
 #include <paintutils.h>
 #include <anchorline.h>
+#include <utilityfunctions.h>
 
 #include <QPainter>
 #include <QtMath>
@@ -19,6 +20,7 @@ static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLin
     QPointF anchorPoint;
 
     switch (anchorLineType) {
+    case AnchorLine::Baseline:
     case AnchorLine::Top:
         anchorPoint = QPointF(childBoundingRect.center().x(), parentBoundingRect.top());
         break;
@@ -30,6 +32,11 @@ static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLin
         break;
     case AnchorLine::Right:
         anchorPoint = QPointF(parentBoundingRect.right(), childBoundingRect.center().y());
+        break;
+    case AnchorLine::Center:
+    case AnchorLine::VerticalCenter:
+    case AnchorLine::HorizontalCenter:
+        anchorPoint = parentBoundingRect.center();
         break;
     default:
         break;
@@ -45,6 +52,7 @@ static QPointF createAnchorPoint(const DesignerItem* item, AnchorLine::Type anch
     QPointF anchorPoint;
 
     switch (anchorLineType) {
+    case AnchorLine::Baseline:
     case AnchorLine::Top:
         anchorPoint = QPointF(boundingRect.center().x(), boundingRect.top());
         break;
@@ -56,6 +64,11 @@ static QPointF createAnchorPoint(const DesignerItem* item, AnchorLine::Type anch
         break;
     case AnchorLine::Right:
         anchorPoint = QPointF(boundingRect.right(), boundingRect.center().y());
+        break;
+    case AnchorLine::Center:
+    case AnchorLine::VerticalCenter:
+    case AnchorLine::HorizontalCenter:
+        anchorPoint = boundingRect.center();
         break;
     default:
         break;
@@ -89,7 +102,16 @@ static void updateAnchorLinePoints(QPointF *firstPoint, QPointF *secondPoint, co
     QRectF boundingRectangle = anchorLine.control()->mapRectToScene(anchorLine.control()->rect());
 
     switch (anchorLine.type()) {
+    case AnchorLine::VerticalCenter:
+        *firstPoint = UtilityFunctions::leftCenter(boundingRectangle);
+        *secondPoint = UtilityFunctions::rightCenter(boundingRectangle);
+        break;
+    case AnchorLine::HorizontalCenter:
+        *firstPoint = UtilityFunctions::topCenter(boundingRectangle);
+        *secondPoint = UtilityFunctions::bottomCenter(boundingRectangle);
+        break;
     case AnchorLine::Top:
+    case AnchorLine::Baseline:
         *firstPoint = boundingRectangle.topLeft();
         *secondPoint = boundingRectangle.topRight();
         break;
@@ -136,10 +158,13 @@ static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sou
 static int startAngleForAnchorLine(const AnchorLine::Type &anchorLineType)
 {
     switch (anchorLineType) {
+    case AnchorLine::VerticalCenter:
+    case AnchorLine::Baseline:
     case AnchorLine::Top:
         return 0;
     case AnchorLine::Bottom:
         return 180 * AngleDegree;
+    case AnchorLine::HorizontalCenter:
     case AnchorLine::Left:
         return 90 * AngleDegree;
     case AnchorLine::Right:
@@ -191,6 +216,10 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     const qreal m = 10 / z;
     QRectF bumpRectangle(0, 0, m, m);
 
+    painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+    painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
+    painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
+
     DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
     DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
     DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
@@ -201,8 +230,6 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
     painter->setRenderHint(QPainter::Antialiasing, false);
-
-    painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
 
     bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
     painter->setBrush(painter->pen().color());
@@ -229,11 +256,25 @@ void PaintLayer::paintAnchors(QPainter* painter)
     Q_ASSERT(scene());
     for (Control* selectedControl : scene()->selectedControls()) {
         const Anchors* anchors = selectedControl->anchors();
-        AnchorLine sourceLine(AnchorLine::Top, selectedControl);
-        AnchorLine targetLine(anchors->top());
         AnchorData data;
-        updateAnchorData(data, sourceLine, targetLine, scene());
+        updateAnchorData(data, {AnchorLine::Top, selectedControl}, anchors->top(), scene());
         paintAnchor(painter, data);
+        updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, anchors->bottom(), scene());
+        paintAnchor(painter, data);
+        updateAnchorData(data, {AnchorLine::Right, selectedControl}, anchors->right(), scene());
+        paintAnchor(painter, data);
+        updateAnchorData(data, {AnchorLine::Left, selectedControl}, anchors->left(), scene());
+        paintAnchor(painter, data);
+        updateAnchorData(data, {AnchorLine::HorizontalCenter, selectedControl}, anchors->horizontalCenter(), scene());
+        paintAnchor(painter, data);
+        updateAnchorData(data, {AnchorLine::VerticalCenter, selectedControl}, anchors->verticalCenter(), scene());
+        paintAnchor(painter, data);
+        updateAnchorData(data, {AnchorLine::Baseline, selectedControl}, anchors->baseline(), scene());
+        paintAnchor(painter, data);
+//        updateAnchorData(data, {AnchorLine::Fill, selectedControl}, anchors->top(), scene());
+//        paintAnchor(painter, data);
+//        updateAnchorData(data, {AnchorLine::Center, selectedControl}, anchors->top(), scene());
+//        paintAnchor(painter, data);
     }
     painter->setClipping(false);
 }
