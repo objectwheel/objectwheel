@@ -3,6 +3,7 @@
 
 #include <anchors.h>
 #include <renderinfo.h>
+#include <designeritem.h>
 
 class Control : public DesignerItem
 {
@@ -52,6 +53,7 @@ public:
     bool geometrySyncEnabled() const;
     void setGeometrySyncEnabled(bool geometrySyncEnabled);
 
+    void updateAnchors();
     QVariant property(const QString& propertyName) const;
     Control* parentControl() const;
     QList<Control*> siblings() const;

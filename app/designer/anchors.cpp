@@ -1,6 +1,7 @@
 #include <anchors.h>
+#include <control.h>
 
-Anchors::Anchors(DesignerItem* item) : QObject(item)
+Anchors::Anchors(Control* control) : QObject(control)
   , m_margins(0)
   , m_topMargin(0)
   , m_bottomMargin(0)
@@ -105,22 +106,22 @@ void Anchors::setBaseline(const AnchorLine& edge)
     m_baseline = edge;
 }
 
-DesignerItem* Anchors::fill() const
+Control* Anchors::fill() const
 {
     return m_fill;
 }
 
-void Anchors::setFill(DesignerItem* fill)
+void Anchors::setFill(Control* fill)
 {
     m_fill = fill;
 }
 
-DesignerItem* Anchors::centerIn() const
+Control* Anchors::centerIn() const
 {
     return m_centerIn;
 }
 
-void Anchors::setCenterIn(DesignerItem* centerIn)
+void Anchors::setCenterIn(Control* centerIn)
 {
     m_centerIn = centerIn;
 }

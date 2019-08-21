@@ -1,12 +1,12 @@
 #include <anchorline.h>
+#include <control.h>
 
 AnchorLine::AnchorLine() : m_type(Invalid)
 {
 }
 
-AnchorLine::AnchorLine(AnchorLine::Type type, DesignerItem* item)
-    : m_type(type)
-    , m_item(item)
+AnchorLine::AnchorLine(AnchorLine::Type type, Control* control) : m_type(type)
+  , m_control(control)
 {
 }
 
@@ -20,25 +20,25 @@ void AnchorLine::setType(AnchorLine::Type type)
     m_type = type;
 }
 
-DesignerItem* AnchorLine::item() const
+Control* AnchorLine::control() const
 {
-    return m_item;
+    return m_control;
 }
 
-void AnchorLine::setItem(DesignerItem* item)
+void AnchorLine::setControl(Control* control)
 {
-    m_item = item;
+    m_control = control;
 }
 
 void AnchorLine::invalidate()
 {
     m_type = Invalid;
-    m_item.clear();
+    m_control.clear();
 }
 
 bool AnchorLine::isValid() const
 {
-    return m_type != Invalid && m_item;
+    return m_type != Invalid && m_control;
 }
 
 bool AnchorLine::isVertical() const

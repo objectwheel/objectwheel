@@ -9,7 +9,7 @@ class Anchors final : public QObject
     Q_DISABLE_COPY(Anchors)
 
 public:
-    explicit Anchors(DesignerItem* item);
+    explicit Anchors(Control* control);
 
     void clear();
 
@@ -34,11 +34,11 @@ public:
     AnchorLine baseline() const;
     void setBaseline(const AnchorLine& edge);
 
-    DesignerItem* fill() const;
-    void setFill(DesignerItem* fill);
+    Control* fill() const;
+    void setFill(Control* fill);
 
-    DesignerItem* centerIn() const;
-    void setCenterIn(DesignerItem* centerIn);
+    Control* centerIn() const;
+    void setCenterIn(Control* centerIn);
 
     qreal margins() const;
     void setMargins(qreal);
@@ -77,8 +77,8 @@ private:
     AnchorLine m_verticalCenter;
     AnchorLine m_horizontalCenter;
     AnchorLine m_baseline;
-    QPointer<DesignerItem> m_fill;
-    QPointer<DesignerItem> m_centerIn;
+    QPointer<Control> m_fill;
+    QPointer<Control> m_centerIn;
     qreal m_margins;
     qreal m_topMargin;
     qreal m_bottomMargin;

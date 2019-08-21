@@ -1,9 +1,9 @@
 #ifndef ANCHORLINE_H
 #define ANCHORLINE_H
 
-#include <designeritem.h>
 #include <QPointer>
 
+class Control;
 class AnchorLine final
 {
 public:
@@ -28,13 +28,13 @@ public:
 
 public:
     AnchorLine();
-    AnchorLine(Type type, DesignerItem* item);
+    AnchorLine(Type type, Control* control);
 
     Type type() const;
     void setType(Type type);
 
-    DesignerItem* item() const;
-    void setItem(DesignerItem* item);
+    Control* control() const;
+    void setControl(Control* control);
 
     void invalidate();
     bool isValid() const;
@@ -46,7 +46,7 @@ public:
 
 private:
     Type m_type;
-    QPointer<DesignerItem> m_item;
+    QPointer<Control> m_control;
 };
 
 Q_DECLARE_OPERATORS_FOR_FLAGS(AnchorLine::Types)
