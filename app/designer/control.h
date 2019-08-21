@@ -1,8 +1,8 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
+#include <anchors.h>
 #include <renderinfo.h>
-#include <anchorline.h>
 
 class Control : public DesignerItem
 {
@@ -24,8 +24,8 @@ public:
     bool visible() const;
     bool hasErrors() const;
 
+    Anchors* anchors() const;
     QMarginsF margins() const;
-    QVariantMap anchors() const;
     QVector<QString> events() const;
     QVector<QmlError> errors() const;
     QVector<PropertyNode> properties() const;
@@ -52,9 +52,7 @@ public:
     bool geometrySyncEnabled() const;
     void setGeometrySyncEnabled(bool geometrySyncEnabled);
 
-    AnchorLine anchor(AnchorLine::Type type) const;
     QVariant property(const QString& propertyName) const;
-
     Control* parentControl() const;
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
@@ -76,6 +74,7 @@ private:
     QString m_uid;
     QString m_dir;
     QPixmap m_pixmap;
+    Anchors* m_anchors;
     RenderInfo m_renderInfo;
     QSizeF m_snapMargin;
     QString m_geometrySyncKey;

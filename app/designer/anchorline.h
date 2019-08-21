@@ -7,8 +7,6 @@
 class AnchorLine final
 {
 public:
-    AnchorLine();
-
     enum Type {
         Invalid = 0x0,
         NoAnchor = Invalid,
@@ -28,12 +26,17 @@ public:
     };
     Q_DECLARE_FLAGS(Types, Type)
 
+public:
+    AnchorLine();
+    AnchorLine(Type type, DesignerItem* item);
+
     Type type() const;
     void setType(Type type);
 
     DesignerItem* item() const;
     void setItem(DesignerItem* item);
 
+    void invalidate();
     bool isValid() const;
     bool isVertical() const;
     bool isHorizontal() const;

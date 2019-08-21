@@ -58,14 +58,14 @@ bool Control::hasErrors() const
     return !m_renderInfo.errors.isEmpty();
 }
 
+Anchors* Control::anchors() const
+{
+    return m_anchors;
+}
+
 QMarginsF Control::margins() const
 {
     return m_renderInfo.margins;
-}
-
-QVariantMap Control::anchors() const
-{
-    return m_renderInfo.anchors;
 }
 
 QVector<QString> Control::events() const
@@ -147,6 +147,25 @@ RenderInfo Control::renderInfo() const
     return m_renderInfo;
 }
 
+static AnchorLine::Type anchorType(const QString& anchorName)
+{
+    if (anchorName == "top")
+        return AnchorLine::Top;
+    if (anchorName == "bottom")
+        return AnchorLine::Bottom;
+    if (anchorName == "left")
+        return AnchorLine::Left;
+    if (anchorName == "right")
+        return AnchorLine::Right;
+    if (anchorName == "horizontalCenter")
+        return AnchorLine::HorizontalCenter;
+    if (anchorName == "verticalCenter")
+        return AnchorLine::VerticalCenter;
+    if (anchorName == "baseline")
+        return AnchorLine::Baseline;
+    return AnchorLine::Invalid;
+}
+
 void Control::setRenderInfo(const RenderInfo& info)
 {
     if (m_uid != info.uid)
@@ -155,6 +174,93 @@ void Control::setRenderInfo(const RenderInfo& info)
     const QMarginsF previousMargins = m_renderInfo.margins;
 
     m_renderInfo = info;
+
+    m_anchors->clear();
+
+    for (const QString& name : m_renderInfo.anchors.keys()) {
+        if (name == "anchors.fill") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 1);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setFill(control);
+            }
+        } else if (name == "anchors.centerIn") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 1);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setCenterIn(control);
+            }
+        } else if (name == "anchors.top") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 2);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setTop(AnchorLine(anchorType(pair.first()), control));
+            }
+        } else if (name == "anchors.bottom") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 2);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setBottom(AnchorLine(anchorType(pair.first()), control));
+            }
+        } else if (name == "anchors.left") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 2);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setLeft(AnchorLine(anchorType(pair.first()), control));
+            }
+        } else if (name == "anchors.right") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 2);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setRight(AnchorLine(anchorType(pair.first()), control));
+            }
+        } else if (name == "anchors.horizontalCenter") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 2);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setHorizontalCenter(AnchorLine(anchorType(pair.first()), control));
+            }
+        } else if (name == "anchors.verticalCenter") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 2);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setVerticalCenter(AnchorLine(anchorType(pair.first()), control));
+            }
+        } else if (name == "anchors.baseline") {
+            const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
+            Q_ASSERT(pair.size() == 2);
+            for (Control* control : scene()->items<Control>()) {
+                if (pair.last() == control->uid())
+                    m_anchors->setBaseline(AnchorLine(anchorType(pair.first()), control));
+            }
+        } else if (name == "anchors.margins") {
+            m_anchors->setMargins(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.topMargin") {
+            m_anchors->setTopMargin(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.bottomMargin") {
+            m_anchors->setBottomMargin(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.leftMargin") {
+            m_anchors->setLeftMargin(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.rightMargin") {
+            m_anchors->setRightMargin(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.horizontalCenterOffset") {
+            m_anchors->setHorizontalCenterOffset(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.verticalCenterOffset") {
+            m_anchors->setVerticalCenterOffset(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.baselineOffset") {
+            m_anchors->setBaselineOffset(m_renderInfo.anchors.value(name).toReal());
+        } else if (name == "anchors.alignWhenCentered") {
+            m_anchors->setAlignWhenCentered(m_renderInfo.anchors.value(name).toReal());
+        }
+    }
 
     setResizable(gui());
     setZValue(property("z").toDouble());
@@ -241,36 +347,6 @@ bool Control::geometrySyncEnabled() const
 void Control::setGeometrySyncEnabled(bool geometrySyncEnabled)
 {
     m_geometrySyncEnabled = geometrySyncEnabled;
-}
-
-AnchorLine Control::anchor(AnchorLine::Type type) const
-{
-    if (anchorPair.size() != 2)
-        return AnchorLine();
-    AnchorLine::Type type;
-    if (anchorPair.first() == anchorLineNames.at(0))
-        type = AnchorLine::Top;
-    else if (anchorPair.first() == anchorLineNames.at(1))
-        type = AnchorLine::Bottom;
-    else if (anchorPair.first() == anchorLineNames.at(2))
-        type = AnchorLine::Left;
-    else if (anchorPair.first() == anchorLineNames.at(3))
-        type = AnchorLine::Right;
-    else if (anchorPair.first() == anchorLineNames.at(4))
-        type = AnchorLine::HorizontalCenter;
-    else if (anchorPair.first() == anchorLineNames.at(5))
-        type = AnchorLine::VerticalCenter;
-    else if (anchorPair.first() == anchorLineNames.at(6))
-        type = AnchorLine::Baseline;
-    else if (anchorPair.first() == anchorLineNames.at(7))
-        type = AnchorLine::Fill;
-    else if (anchorPair.first() == anchorLineNames.at(8))
-        type = AnchorLine::Center;
-    for (Control* control : scene->items<Control>()) {
-        if (control->uid() == anchorPair.last())
-            return AnchorLine(control, type);
-    }
-    return AnchorLine();
 }
 
 QVariant Control::property(const QString& propertyName) const

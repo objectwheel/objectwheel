@@ -13,6 +13,28 @@ Anchors::Anchors(DesignerItem* item) : QObject(item)
 {
 }
 
+void Anchors::clear()
+{
+    m_top.invalidate();
+    m_bottom.invalidate();
+    m_left.invalidate();
+    m_right.invalidate();
+    m_verticalCenter.invalidate();
+    m_horizontalCenter.invalidate();
+    m_baseline.invalidate();
+    m_fill.clear();
+    m_centerIn.clear();
+    m_margins = 0;
+    m_topMargin = 0;
+    m_bottomMargin = 0;
+    m_leftMargin = 0;
+    m_rightMargin = 0;
+    m_verticalCenterOffset = 0;
+    m_horizontalCenterOffset = 0;
+    m_baselineOffset = 0;
+    m_alignWhenCentered = true;
+}
+
 AnchorLine Anchors::top() const
 {
     return m_top;
@@ -195,5 +217,24 @@ void Anchors::setAlignWhenCentered(bool alignWhenCentered)
 
 AnchorLine::Types Anchors::usedAnchors() const
 {
-
+    AnchorLine::Types types = AnchorLine::NoAnchor;
+    if (m_left.isValid())
+        types |= AnchorLine::Left;
+    if (m_right.isValid())
+        types |= AnchorLine::Right;
+    if (m_top.isValid())
+        types |= AnchorLine::Top;
+    if (m_bottom.isValid())
+        types |= AnchorLine::Bottom;
+    if (m_horizontalCenter.isValid())
+        types |= AnchorLine::HorizontalCenter;
+    if (m_verticalCenter.isValid())
+        types |= AnchorLine::VerticalCenter;
+    if (m_baseline.isValid())
+        types |= AnchorLine::Baseline;
+    if (m_fill)
+        types |= AnchorLine::Fill;
+    if (m_centerIn)
+        types |= AnchorLine::Center;
+    return types;
 }

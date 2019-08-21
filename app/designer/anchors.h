@@ -11,6 +11,8 @@ class Anchors final : public QObject
 public:
     explicit Anchors(DesignerItem* item);
 
+    void clear();
+
     AnchorLine top() const;
     void setTop(const AnchorLine& edge);
 

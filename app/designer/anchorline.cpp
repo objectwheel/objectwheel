@@ -1,7 +1,14 @@
 #include <anchorline.h>
 
 AnchorLine::AnchorLine() : m_type(Invalid)
-{}
+{
+}
+
+AnchorLine::AnchorLine(AnchorLine::Type type, DesignerItem* item)
+    : m_type(type)
+    , m_item(item)
+{
+}
 
 AnchorLine::Type AnchorLine::type() const
 {
@@ -21,6 +28,12 @@ DesignerItem* AnchorLine::item() const
 void AnchorLine::setItem(DesignerItem* item)
 {
     m_item = item;
+}
+
+void AnchorLine::invalidate()
+{
+    m_type = Invalid;
+    m_item.clear();
 }
 
 bool AnchorLine::isValid() const

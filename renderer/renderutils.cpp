@@ -911,7 +911,7 @@ QVariantMap RenderUtils::anchors(const RenderEngine::ControlInstance* instance, 
                 }
             }
         } else if (!instance->window) {
-            // Windows cannot have a anchors, but they can be targets for another anchors
+            // Windows cannot have anchors, but they can be targets for other anchors
             for (const QString& name : anchorLineNames) {
                 const QStringList& anchorPair = makeAnchorPair(instance, name, engine);
                 if (!anchorPair.isEmpty())
@@ -936,10 +936,17 @@ QStringList RenderUtils::makeAnchorPair(const RenderEngine::ControlInstance* ins
         return QStringList();
     const QPair<QString, QObject*>& pair = DesignerSupport::anchorLineTarget(item, name, ctx);
     if (const RenderEngine::ControlInstance* targetInstance = engine->instanceForObject(pair.second)) {
-        return QStringList({pair.first.isEmpty() ? "" : "anchors." + pair.first, targetInstance->uid});
+        if (pair.first.isEmpty())
+            return QStringList(targetInstance->uid);
+        else
+            return QStringList({pair.first, targetInstance->uid});
     } else if (auto targetItem = qobject_cast<const QQuickItem*>(pair.second)) {
-        if (const RenderEngine::ControlInstance* ancestorInstance = engine->findNodeInstanceForItem(targetItem->parentItem()))
-            return QStringList({pair.first.isEmpty() ? "" : "anchors." + pair.first, ancestorInstance->uid});
+        if (const RenderEngine::ControlInstance* ancestorInstance = engine->findNodeInstanceForItem(targetItem->parentItem())) {
+            if (pair.first.isEmpty())
+                return QStringList(ancestorInstance->uid);
+            else
+                return QStringList({pair.first, ancestorInstance->uid});
+        }
     }
     return QStringList();
 }
