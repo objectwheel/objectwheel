@@ -9,7 +9,7 @@ class Anchors final : public QObject
     Q_DISABLE_COPY(Anchors)
 
 public:
-    explicit Anchors(Control* control);
+    explicit Anchors(Control* control = nullptr);
 
     AnchorLine top() const;
     void setTop(const AnchorLine& edge);

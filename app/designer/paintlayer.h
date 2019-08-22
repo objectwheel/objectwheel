@@ -19,9 +19,9 @@ public:
         QPointF sourceAnchorLineSecondPoint;
         QPointF targetAnchorLineFirstPoint;
         QPointF targetAnchorLineSecondPoint;
-        Anchors* anchors;
         AnchorLine::Type sourceAnchorLineType = AnchorLine::Invalid;
         AnchorLine::Type targetAnchorLineType = AnchorLine::Invalid;
+        Anchors* anchors;
     };
 
 public:

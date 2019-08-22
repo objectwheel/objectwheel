@@ -87,7 +87,8 @@ static qreal marginOffset(const PaintLayer::AnchorData& data)
     }
 }
 
-static QPointF createParentAnchorPoint(const DesignerItem* parentItem, const DesignerItem* childItem, AnchorLine::Type anchorLineType)
+static QPointF createParentAnchorPoint(const DesignerItem* childItem, const DesignerItem* parentItem,
+                                       AnchorLine::Type anchorLineType)
 {
     const QRectF& parentBoundingRect = parentItem->mapRectToScene(parentItem->rect());
     const QRectF& childBoundingRect = childItem->mapRectToScene(childItem->rect());
@@ -131,81 +132,71 @@ static QPointF createAnchorPoint(const DesignerItem* item, AnchorLine::Type anch
     }
 }
 
-static QPointF createControlPoint(const QPointF &firstEditPoint, AnchorLine::Type anchorLineType, const QPointF &secondEditPoint)
+static QPointF createControlPoint(const QPointF& firstEditPoint, AnchorLine::Type anchorLineType,
+                                  const QPointF& secondEditPoint)
 {
     QPointF controlPoint = firstEditPoint;
-
-    switch (anchorLineType) {
-    case AnchorLine::Top:
-    case AnchorLine::Bottom:
-        controlPoint.ry() += (secondEditPoint.y() - firstEditPoint.y()) / 2.0;
-        break;
-    case AnchorLine::Left:
-    case AnchorLine::Right:
+    if (AnchorLine::isVertical(anchorLineType))
         controlPoint.rx() += (secondEditPoint.x() - firstEditPoint.x()) / 2.0;
-        break;
-    default:
-        break;
-    }
-
+    else
+        controlPoint.ry() += (secondEditPoint.y() - firstEditPoint.y()) / 2.0;
     return controlPoint;
 }
 
-static void updateAnchorLinePoints(QPointF *firstPoint, QPointF *secondPoint, const AnchorLine &anchorLine)
+static void updateAnchorLinePoints(QPointF& firstPoint, QPointF& secondPoint, const AnchorLine& anchorLine)
 {
     QRectF boundingRectangle = anchorLine.control()->mapRectToScene(anchorLine.control()->rect());
-
     switch (anchorLine.type()) {
     case AnchorLine::VerticalCenter:
-        *firstPoint = UtilityFunctions::leftCenter(boundingRectangle);
-        *secondPoint = UtilityFunctions::rightCenter(boundingRectangle);
+        firstPoint = UtilityFunctions::leftCenter(boundingRectangle);
+        secondPoint = UtilityFunctions::rightCenter(boundingRectangle);
         break;
     case AnchorLine::HorizontalCenter:
-        *firstPoint = UtilityFunctions::topCenter(boundingRectangle);
-        *secondPoint = UtilityFunctions::bottomCenter(boundingRectangle);
+        firstPoint = UtilityFunctions::topCenter(boundingRectangle);
+        secondPoint = UtilityFunctions::bottomCenter(boundingRectangle);
         break;
     case AnchorLine::Top:
     case AnchorLine::Baseline:
-        *firstPoint = boundingRectangle.topLeft();
-        *secondPoint = boundingRectangle.topRight();
+        firstPoint = boundingRectangle.topLeft();
+        secondPoint = boundingRectangle.topRight();
         break;
     case AnchorLine::Bottom:
-        *firstPoint = boundingRectangle.bottomLeft();
-        *secondPoint = boundingRectangle.bottomRight();
+        firstPoint = boundingRectangle.bottomLeft();
+        secondPoint = boundingRectangle.bottomRight();
         break;
     case AnchorLine::Left:
-        *firstPoint = boundingRectangle.topLeft();
-        *secondPoint = boundingRectangle.bottomLeft();
+        firstPoint = boundingRectangle.topLeft();
+        secondPoint = boundingRectangle.bottomLeft();
         break;
     case AnchorLine::Right:
-        *firstPoint = boundingRectangle.topRight();
-        *secondPoint = boundingRectangle.bottomRight();
+        firstPoint = boundingRectangle.topRight();
+        secondPoint = boundingRectangle.bottomRight();
         break;
     default:
         break;
     }
 }
 
-static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sourceAnchorLine, const AnchorLine& targetAnchorLine, DesignerScene* scene)
+static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sourceAnchorLine,
+                             const AnchorLine& targetAnchorLine, DesignerScene* scene)
 {
-    if (sourceAnchorLine.control() && targetAnchorLine.control()) {
+    if (sourceAnchorLine.isValid() && targetAnchorLine.isValid()) {
         data.sourceAnchorLineType = sourceAnchorLine.type();
         data.targetAnchorLineType = targetAnchorLine.type();
-
         data.startPoint = createAnchorPoint(sourceAnchorLine.control(), sourceAnchorLine.type());
 
-        if (targetAnchorLine.control() == sourceAnchorLine.control()->parentControl())
-            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), sourceAnchorLine.control(), targetAnchorLine.type());
-        else if (sourceAnchorLine.control()->beingDragged() && scene && targetAnchorLine.control() == scene->parentBeforeDrag())
-            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), sourceAnchorLine.control(), targetAnchorLine.type());
-        else
+        if (targetAnchorLine.control() == sourceAnchorLine.control()->parentControl() ||
+                (scene && sourceAnchorLine.control()->beingDragged() && targetAnchorLine.control() == scene->parentBeforeDrag())) {
+            data.endPoint = createParentAnchorPoint(sourceAnchorLine.control(), targetAnchorLine.control(), targetAnchorLine.type());
+        } else {
             data.endPoint = createAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type());
+        }
 
         data.firstControlPoint = createControlPoint(data.startPoint, sourceAnchorLine.type(), data.endPoint);
         data.secondControlPoint = createControlPoint(data.endPoint, targetAnchorLine.type(), data.startPoint);
 
-        updateAnchorLinePoints(&data.sourceAnchorLineFirstPoint, &data.sourceAnchorLineSecondPoint, sourceAnchorLine);
-        updateAnchorLinePoints(&data.targetAnchorLineFirstPoint, &data.targetAnchorLineSecondPoint, targetAnchorLine);
+        updateAnchorLinePoints(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint, sourceAnchorLine);
+        updateAnchorLinePoints(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint, targetAnchorLine);
     }
 }
 
@@ -305,24 +296,87 @@ void PaintLayer::paintAnchors(QPainter* painter)
     for (Control* selectedControl : scene()->selectedControls()) {
         AnchorData data;
         data.anchors = selectedControl->anchors();
-        updateAnchorData(data, {AnchorLine::Top, selectedControl}, data.anchors->top(), scene());
-        paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, data.anchors->bottom(), scene());
-        paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Right, selectedControl}, data.anchors->right(), scene());
-        paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Left, selectedControl}, data.anchors->left(), scene());
-        paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::HorizontalCenter, selectedControl}, data.anchors->horizontalCenter(), scene());
-        paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::VerticalCenter, selectedControl}, data.anchors->verticalCenter(), scene());
-        paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Baseline, selectedControl}, data.anchors->baseline(), scene());
-        paintAnchor(painter, data);
-        //        updateAnchorData(data, {AnchorLine::Fill, selectedControl}, data.anchors->top(), scene());
-        //        paintAnchor(painter, data);
-        //        updateAnchorData(data, {AnchorLine::Center, selectedControl}, data.anchors->top(), scene());
-        //        paintAnchor(painter, data);
+        if (data.anchors->fill()) {
+            auto faked = new Anchors;
+            faked->setTop(AnchorLine(AnchorLine::Top, data.anchors->fill()));
+            faked->setBottom(AnchorLine(AnchorLine::Bottom, data.anchors->fill()));
+            faked->setLeft(AnchorLine(AnchorLine::Left, data.anchors->fill()));
+            faked->setRight(AnchorLine(AnchorLine::Right, data.anchors->fill()));
+            faked->setMargins(data.anchors->margins());
+            faked->setTopMargin(data.anchors->topMargin());
+            faked->setBottomMargin(data.anchors->bottomMargin());
+            faked->setLeftMargin(data.anchors->leftMargin());
+            faked->setRightMargin(data.anchors->rightMargin());
+            data.anchors = faked;
+            updateAnchorData(data, {AnchorLine::Top, selectedControl}, data.anchors->top(), scene());
+            paintAnchor(painter, data);
+            updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, data.anchors->bottom(), scene());
+            paintAnchor(painter, data);
+            updateAnchorData(data, {AnchorLine::Right, selectedControl}, data.anchors->right(), scene());
+            paintAnchor(painter, data);
+            updateAnchorData(data, {AnchorLine::Left, selectedControl}, data.anchors->left(), scene());
+            paintAnchor(painter, data);
+            delete faked;
+        } else if (data.anchors->centerIn()) {
+            const qreal z = DesignerScene::zoomLevel();
+            const qreal m = 10 / z;
+            QRectF bumpRectangle(0, 0, m, m);
+            data.startPoint = createAnchorPoint(selectedControl, AnchorLine::VerticalCenter);
+            data.endPoint = createAnchorPoint(data.anchors->centerIn(), AnchorLine::VerticalCenter);
+            data.firstControlPoint = createControlPoint(data.startPoint, AnchorLine::VerticalCenter, data.endPoint);
+            data.secondControlPoint = createControlPoint(data.endPoint, AnchorLine::VerticalCenter, data.startPoint);
+            painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+            painter->setBrush(painter->pen().color());
+            DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
+            DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
+            DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
+            bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+            bumpRectangle.adjust(2, 2, -2, -2);
+            painter->setPen(Qt::white);
+            painter->setBrush(Qt::NoBrush);
+            painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+            bumpRectangle.adjust(-2, -2, 2, 2);
+            painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+            painter->setBrush(painter->pen().color());
+            bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
+            painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+            bumpRectangle.adjust(2, 2, -2, -2);
+            painter->setPen(Qt::white);
+            painter->setBrush(Qt::NoBrush);
+            painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+            painter->setRenderHint(QPainter::Antialiasing, false);
+        } else {
+            if (data.anchors->baseline().isValid()) {
+                updateAnchorData(data, {AnchorLine::Baseline, selectedControl}, data.anchors->baseline(), scene());
+                paintAnchor(painter, data);
+            }
+            if (data.anchors->top().isValid()) {
+                updateAnchorData(data, {AnchorLine::Top, selectedControl}, data.anchors->top(), scene());
+                paintAnchor(painter, data);
+            }
+            if (data.anchors->bottom().isValid()) {
+                updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, data.anchors->bottom(), scene());
+                paintAnchor(painter, data);
+            }
+            if (data.anchors->right().isValid()) {
+                updateAnchorData(data, {AnchorLine::Right, selectedControl}, data.anchors->right(), scene());
+                paintAnchor(painter, data);
+            }
+            if (data.anchors->left().isValid()) {
+                updateAnchorData(data, {AnchorLine::Left, selectedControl}, data.anchors->left(), scene());
+                paintAnchor(painter, data);
+            }
+            if (data.anchors->horizontalCenter().isValid()) {
+                updateAnchorData(data, {AnchorLine::HorizontalCenter, selectedControl}, data.anchors->horizontalCenter(), scene());
+                paintAnchor(painter, data);
+            }
+            if (data.anchors->verticalCenter().isValid()) {
+                updateAnchorData(data, {AnchorLine::VerticalCenter, selectedControl}, data.anchors->verticalCenter(), scene());
+                paintAnchor(painter, data);
+            }
+        }
     }
     painter->setClipping(false);
 }
