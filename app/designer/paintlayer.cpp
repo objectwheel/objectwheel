@@ -10,71 +10,125 @@
 #include <QPainter>
 #include <QtMath>
 
+// FIXME: Do not treat "baseline" anchors as "top"
+
 enum { AngleDegree = 16 };
 
-static QPointF createParentAnchorPoint(const DesignerItem* parentItem, AnchorLine::Type anchorLineType, const DesignerItem* childItem)
+static int sourceAngle(const PaintLayer::AnchorData& data)
 {
-    QRectF parentBoundingRect = parentItem->mapRectToScene(parentItem->rect());
-    QRectF childBoundingRect = childItem->mapRectToScene(childItem->rect());
+    const QPointF& offset = data.endPoint - data.startPoint;
+    switch (data.sourceAnchorLineType) {
+    case AnchorLine::Baseline:
+    case AnchorLine::Top:
+        return 0;
+    case AnchorLine::Bottom:
+        return 180 * AngleDegree;
+    case AnchorLine::Left:
+        return 90 * AngleDegree;
+    case AnchorLine::Right:
+        return 270 * AngleDegree;
+    case AnchorLine::VerticalCenter:
+        if (offset.y() < 0)
+            return 180 * AngleDegree;
+        return 0;
+    case AnchorLine::HorizontalCenter:
+        if (offset.x() < 0)
+            return 270 * AngleDegree;
+        return 90 * AngleDegree;
+    default:
+        return 0;
+    }
+}
 
-    QPointF anchorPoint;
+static int targetAngle(const PaintLayer::AnchorData& data)
+{
+    if (data.targetAnchorLineType == AnchorLine::Invalid)
+        return 0;
 
+    const QPointF& offset = data.endPoint - data.startPoint;
+    if (AnchorLine::isVertical(data.targetAnchorLineType)) {
+        if (offset.x() < 0)
+            return 90;
+        return -90;
+    } else {
+        if (offset.y() < 0)
+            return 180;
+        return 0;
+    }
+}
+
+static qreal marginOffset(const PaintLayer::AnchorData& data)
+{
+    switch (data.sourceAnchorLineType) {
+    case AnchorLine::Top:
+        if (data.anchors->topMargin())
+            return data.anchors->topMargin();
+        return data.anchors->margins();
+    case AnchorLine::Bottom:
+        if (data.anchors->bottomMargin())
+            return data.anchors->bottomMargin();
+        return data.anchors->margins();
+    case AnchorLine::Left:
+        if (data.anchors->leftMargin())
+            return data.anchors->leftMargin();
+        return data.anchors->margins();
+    case AnchorLine::Right:
+        if (data.anchors->rightMargin())
+            return data.anchors->rightMargin();
+        return data.anchors->margins();
+    case AnchorLine::VerticalCenter:
+        return data.anchors->verticalCenterOffset();
+    case AnchorLine::HorizontalCenter:
+        return data.anchors->horizontalCenterOffset();
+    case AnchorLine::Baseline:
+        return data.anchors->baselineOffset();
+    default:
+        return 0;
+    }
+}
+
+static QPointF createParentAnchorPoint(const DesignerItem* parentItem, const DesignerItem* childItem, AnchorLine::Type anchorLineType)
+{
+    const QRectF& parentBoundingRect = parentItem->mapRectToScene(parentItem->rect());
+    const QRectF& childBoundingRect = childItem->mapRectToScene(childItem->rect());
     switch (anchorLineType) {
     case AnchorLine::Baseline:
     case AnchorLine::Top:
-        anchorPoint = QPointF(childBoundingRect.center().x(), parentBoundingRect.top());
-        break;
+        return QPointF(childBoundingRect.center().x(), parentBoundingRect.top());
     case AnchorLine::Bottom:
-        anchorPoint = QPointF(childBoundingRect.center().x(), parentBoundingRect.bottom());
-        break;
+        return QPointF(childBoundingRect.center().x(), parentBoundingRect.bottom());
     case AnchorLine::Left:
-        anchorPoint = QPointF(parentBoundingRect.left(), childBoundingRect.center().y());
-        break;
+        return QPointF(parentBoundingRect.left(), childBoundingRect.center().y());
     case AnchorLine::Right:
-        anchorPoint = QPointF(parentBoundingRect.right(), childBoundingRect.center().y());
-        break;
-    case AnchorLine::Center:
+        return QPointF(parentBoundingRect.right(), childBoundingRect.center().y());
     case AnchorLine::VerticalCenter:
+        return QPointF(childBoundingRect.center().x(), parentBoundingRect.center().y());
     case AnchorLine::HorizontalCenter:
-        anchorPoint = parentBoundingRect.center();
-        break;
+        return QPointF(parentBoundingRect.center().x(), childBoundingRect.center().y());
     default:
-        break;
+        return QPointF();
     }
-
-    return anchorPoint;
 }
 
 static QPointF createAnchorPoint(const DesignerItem* item, AnchorLine::Type anchorLineType)
 {
-    QRectF boundingRect = item->mapRectToScene(item->rect());
-
-    QPointF anchorPoint;
-
+    const QRectF& boundingRect = item->mapRectToScene(item->rect());
     switch (anchorLineType) {
     case AnchorLine::Baseline:
     case AnchorLine::Top:
-        anchorPoint = QPointF(boundingRect.center().x(), boundingRect.top());
-        break;
+        return UtilityFunctions::topCenter(boundingRect);
     case AnchorLine::Bottom:
-        anchorPoint = QPointF(boundingRect.center().x(), boundingRect.bottom());
-        break;
+        return UtilityFunctions::bottomCenter(boundingRect);
     case AnchorLine::Left:
-        anchorPoint = QPointF(boundingRect.left(), boundingRect.center().y());
-        break;
+        return UtilityFunctions::leftCenter(boundingRect);
     case AnchorLine::Right:
-        anchorPoint = QPointF(boundingRect.right(), boundingRect.center().y());
-        break;
-    case AnchorLine::Center:
+        return UtilityFunctions::rightCenter(boundingRect);
     case AnchorLine::VerticalCenter:
     case AnchorLine::HorizontalCenter:
-        anchorPoint = boundingRect.center();
-        break;
+        return boundingRect.center();
     default:
-        break;
+        return QPointF();
     }
-
-    return anchorPoint;
 }
 
 static QPointF createControlPoint(const QPointF &firstEditPoint, AnchorLine::Type anchorLineType, const QPointF &secondEditPoint)
@@ -141,9 +195,9 @@ static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sou
         data.startPoint = createAnchorPoint(sourceAnchorLine.control(), sourceAnchorLine.type());
 
         if (targetAnchorLine.control() == sourceAnchorLine.control()->parentControl())
-            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type(), sourceAnchorLine.control());
+            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), sourceAnchorLine.control(), targetAnchorLine.type());
         else if (sourceAnchorLine.control()->beingDragged() && scene && targetAnchorLine.control() == scene->parentBeforeDrag())
-            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type(), sourceAnchorLine.control());
+            data.endPoint = createParentAnchorPoint(targetAnchorLine.control(), sourceAnchorLine.control(), targetAnchorLine.type());
         else
             data.endPoint = createAnchorPoint(targetAnchorLine.control(), targetAnchorLine.type());
 
@@ -152,81 +206,6 @@ static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sou
 
         updateAnchorLinePoints(&data.sourceAnchorLineFirstPoint, &data.sourceAnchorLineSecondPoint, sourceAnchorLine);
         updateAnchorLinePoints(&data.targetAnchorLineFirstPoint, &data.targetAnchorLineSecondPoint, targetAnchorLine);
-    }
-}
-
-static int sourceAngle(const PaintLayer::AnchorData& data)
-{
-    const QPointF& offset = data.endPoint - data.startPoint;
-    switch (data.sourceAnchorLineType) {
-    case AnchorLine::Baseline:
-    case AnchorLine::Top:
-        return 0;
-    case AnchorLine::Bottom:
-        return 180 * AngleDegree;
-    case AnchorLine::Left:
-        return 90 * AngleDegree;
-    case AnchorLine::Right:
-        return 270 * AngleDegree;
-    case AnchorLine::VerticalCenter:
-        if (offset.y() < 0)
-            return 180 * AngleDegree;
-        else
-            return 0;
-    case AnchorLine::HorizontalCenter:
-        if (offset.x() < 0)
-            return 270 * AngleDegree;
-        else
-            return 90 * AngleDegree;
-    default:
-        return 0;
-    }
-}
-
-static int targetAngle(const PaintLayer::AnchorData& data)
-{
-    if (data.targetAnchorLineType == AnchorLine::Invalid)
-        return 0;
-
-    const QPointF& offset = data.endPoint - data.startPoint;
-    if (AnchorLine::isVertical(data.targetAnchorLineType)) {
-        if (offset.x() < 0)
-            return 90;
-        return -90;
-    } else {
-        if (offset.y() < 0)
-            return 180;
-        return 0;
-    }
-}
-
-static qreal marginOffset(const PaintLayer::AnchorData& data)
-{
-    switch (data.sourceAnchorLineType) {
-    case AnchorLine::Top:
-        if (data.anchors->topMargin())
-            return data.anchors->topMargin();
-        return data.anchors->margins();
-    case AnchorLine::Bottom:
-        if (data.anchors->bottomMargin())
-            return data.anchors->bottomMargin();
-        return data.anchors->margins();
-    case AnchorLine::Left:
-        if (data.anchors->leftMargin())
-            return data.anchors->leftMargin();
-        return data.anchors->margins();
-    case AnchorLine::Right:
-        if (data.anchors->rightMargin())
-            return data.anchors->rightMargin();
-        return data.anchors->margins();
-    case AnchorLine::VerticalCenter:
-        return data.anchors->verticalCenterOffset();
-    case AnchorLine::HorizontalCenter:
-        return data.anchors->horizontalCenterOffset();
-    case AnchorLine::Baseline:
-        return data.anchors->baselineOffset();
-    default:
-        return 0;
     }
 }
 
