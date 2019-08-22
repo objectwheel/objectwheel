@@ -155,26 +155,35 @@ static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sou
     }
 }
 
-static int startAngleForAnchorLine(const AnchorLine::Type &anchorLineType)
+static int sourceAngle(const PaintLayer::AnchorData& data)
 {
-    switch (anchorLineType) {
-    case AnchorLine::VerticalCenter:
+    const QPointF& offset = data.endPoint - data.startPoint;
+    switch (data.sourceAnchorLineType) {
     case AnchorLine::Baseline:
     case AnchorLine::Top:
         return 0;
     case AnchorLine::Bottom:
         return 180 * AngleDegree;
-    case AnchorLine::HorizontalCenter:
     case AnchorLine::Left:
         return 90 * AngleDegree;
     case AnchorLine::Right:
         return 270 * AngleDegree;
+    case AnchorLine::VerticalCenter:
+        if (offset.y() < 0)
+            return 180 * AngleDegree;
+        else
+            return 0;
+    case AnchorLine::HorizontalCenter:
+        if (offset.x() < 0)
+            return 270 * AngleDegree;
+        else
+            return 90 * AngleDegree;
     default:
         return 0;
     }
 }
 
-static int anchorPixmapAngle(const PaintLayer::AnchorData& data)
+static int targetAngle(const PaintLayer::AnchorData& data)
 {
     if (data.targetAnchorLineType == AnchorLine::Invalid)
         return 0;
@@ -187,6 +196,36 @@ static int anchorPixmapAngle(const PaintLayer::AnchorData& data)
     } else {
         if (offset.y() < 0)
             return 180;
+        return 0;
+    }
+}
+
+static qreal marginOffset(const PaintLayer::AnchorData& data)
+{
+    switch (data.sourceAnchorLineType) {
+    case AnchorLine::Top:
+        if (data.anchors->topMargin())
+            return data.anchors->topMargin();
+        return data.anchors->margins();
+    case AnchorLine::Bottom:
+        if (data.anchors->bottomMargin())
+            return data.anchors->bottomMargin();
+        return data.anchors->margins();
+    case AnchorLine::Left:
+        if (data.anchors->leftMargin())
+            return data.anchors->leftMargin();
+        return data.anchors->margins();
+    case AnchorLine::Right:
+        if (data.anchors->rightMargin())
+            return data.anchors->rightMargin();
+        return data.anchors->margins();
+    case AnchorLine::VerticalCenter:
+        return data.anchors->verticalCenterOffset();
+    case AnchorLine::HorizontalCenter:
+        return data.anchors->horizontalCenterOffset();
+    case AnchorLine::Baseline:
+        return data.anchors->baselineOffset();
+    default:
         return 0;
     }
 }
@@ -208,15 +247,49 @@ void PaintLayer::updateGeometry()
     }, Qt::QueuedConnection);
 }
 
+void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
+{
+    const QString& label = QString::number(marginOffset(data));
+    const QLineF line(data.firstControlPoint, data.secondControlPoint);
+
+    QFont f;
+    f.setPixelSize(f.pixelSize() - 4);
+    const QFontMetrics fm(f); // App default font
+    qreal angle = 180 - line.angle();
+    if (qAbs(angle) == 180 || qAbs(angle) == 360)
+        angle = 0;
+    if (qAbs(angle) == 90 || qAbs(angle) == 270)
+        angle = 90;
+    QRectF rect(0, 0, fm.horizontalAdvance(label) + fm.height() / 2., fm.height());
+    rect.moveCenter(line.center());
+    const QPointF& tr = rect.center();
+    rect.moveTopLeft({-rect.width() * 0.5, -rect.height() * 0.5});
+    painter->setFont(f);
+    painter->translate(tr);
+    painter->rotate(angle);
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    auto p = painter->pen();
+    painter->setPen(Qt::NoPen);
+    painter->drawRoundedRect(rect, rect.height() / 2, rect.height() / 2);
+    painter->setPen(p);
+    painter->drawText(rect, label, QTextOption(Qt::AlignCenter));
+    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->rotate(-angle);
+    painter->translate(-tr);
+}
+
 void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& data)
 {
     Q_ASSERT(scene());
 
+    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
     const qreal z = DesignerScene::zoomLevel();
     const qreal m = 10 / z;
     QRectF bumpRectangle(0, 0, m, m);
 
     painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+    painter->setBrush(painter->pen().color());
+
     painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
     painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
 
@@ -225,56 +298,52 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
     bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
-    painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
-    painter->setBrush(painter->pen().color());
     painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->drawChord(bumpRectangle, startAngleForAnchorLine(data.sourceAnchorLineType), 180 * AngleDegree);
+    painter->drawChord(bumpRectangle, sourceAngle(data), 180 * AngleDegree);
     painter->setRenderHint(QPainter::Antialiasing, false);
 
     bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
-    painter->setBrush(painter->pen().color());
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-    const qreal angle = anchorPixmapAngle(data);
-    QPixmap p = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+    const qreal angle = targetAngle(data);
     const QPointF& tr = bumpRectangle.center();
     bumpRectangle.moveTopLeft({-bumpRectangle.width() * 0.5, -bumpRectangle.height() * 0.5});
     painter->translate(tr);
     painter->rotate(angle);
-    painter->drawPixmap(bumpRectangle.toRect(), p, p.rect());
+    painter->drawPixmap(bumpRectangle.toRect(), anchorPixmap, anchorPixmap.rect());
     painter->rotate(-angle);
     painter->translate(-tr);
     painter->setRenderHint(QPainter::Antialiasing, false);
 
     painter->setPen(Qt::white);
     painter->setBrush(DesignerScene::outlineColor());
-// FIXME   paintLabelOverLine(painter, QString::number(sourceLine.margin()), {data.firstControlPoint, data.secondControlPoint});
+    paintMarginOffset(painter, data);
 }
 
 void PaintLayer::paintAnchors(QPainter* painter)
 {
     Q_ASSERT(scene());
     for (Control* selectedControl : scene()->selectedControls()) {
-        const Anchors* anchors = selectedControl->anchors();
         AnchorData data;
-        updateAnchorData(data, {AnchorLine::Top, selectedControl}, anchors->top(), scene());
+        data.anchors = selectedControl->anchors();
+        updateAnchorData(data, {AnchorLine::Top, selectedControl}, data.anchors->top(), scene());
         paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, anchors->bottom(), scene());
+        updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, data.anchors->bottom(), scene());
         paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Right, selectedControl}, anchors->right(), scene());
+        updateAnchorData(data, {AnchorLine::Right, selectedControl}, data.anchors->right(), scene());
         paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Left, selectedControl}, anchors->left(), scene());
+        updateAnchorData(data, {AnchorLine::Left, selectedControl}, data.anchors->left(), scene());
         paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::HorizontalCenter, selectedControl}, anchors->horizontalCenter(), scene());
+        updateAnchorData(data, {AnchorLine::HorizontalCenter, selectedControl}, data.anchors->horizontalCenter(), scene());
         paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::VerticalCenter, selectedControl}, anchors->verticalCenter(), scene());
+        updateAnchorData(data, {AnchorLine::VerticalCenter, selectedControl}, data.anchors->verticalCenter(), scene());
         paintAnchor(painter, data);
-        updateAnchorData(data, {AnchorLine::Baseline, selectedControl}, anchors->baseline(), scene());
+        updateAnchorData(data, {AnchorLine::Baseline, selectedControl}, data.anchors->baseline(), scene());
         paintAnchor(painter, data);
-//        updateAnchorData(data, {AnchorLine::Fill, selectedControl}, anchors->top(), scene());
-//        paintAnchor(painter, data);
-//        updateAnchorData(data, {AnchorLine::Center, selectedControl}, anchors->top(), scene());
-//        paintAnchor(painter, data);
+        //        updateAnchorData(data, {AnchorLine::Fill, selectedControl}, data.anchors->top(), scene());
+        //        paintAnchor(painter, data);
+        //        updateAnchorData(data, {AnchorLine::Center, selectedControl}, data.anchors->top(), scene());
+        //        paintAnchor(painter, data);
     }
     painter->setClipping(false);
 }
@@ -405,34 +474,6 @@ void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
         DesignerScene::drawDashRect(painter, DesignerScene::outerRect(DesignerScene::itemsBoundingRect(items)));
-}
-
-void PaintLayer::paintLabelOverLine(QPainter* painter, const QString& label, const QLineF& line)
-{
-    QFont f;
-    f.setPixelSize(f.pixelSize() - 4);
-    const QFontMetrics fm(f); // App default font
-    qreal angle = 180 - line.angle();
-    if (qAbs(angle) == 180 || qAbs(angle) == 360)
-        angle = 0;
-    if (qAbs(angle) == 90 || qAbs(angle) == 270)
-        angle = 90;
-    QRectF rect(0, 0, fm.horizontalAdvance(label) + fm.height() / 2., fm.height());
-    rect.moveCenter(line.center());
-    const QPointF& tr = rect.center();
-    rect.moveTopLeft({-rect.width() * 0.5, -rect.height() * 0.5});
-    painter->setFont(f);
-    painter->translate(tr);
-    painter->rotate(angle);
-    painter->setRenderHint(QPainter::Antialiasing, true);
-    auto p = painter->pen();
-    painter->setPen(Qt::NoPen);
-    painter->drawRoundedRect(rect, rect.height() / 2, rect.height() / 2);
-    painter->setPen(p);
-    painter->drawText(rect, label, QTextOption(Qt::AlignCenter));
-    painter->setRenderHint(QPainter::Antialiasing, false);
-    painter->rotate(-angle);
-    painter->translate(-tr);
 }
 
 void PaintLayer::paintHoverOutline(QPainter* painter)

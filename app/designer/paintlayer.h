@@ -2,7 +2,7 @@
 #define PAINTLAYER_H
 
 #include <designeritem.h>
-#include <anchorline.h>
+#include <anchors.h>
 
 class PaintLayer final : public DesignerItem
 {
@@ -19,6 +19,7 @@ public:
         QPointF sourceAnchorLineSecondPoint;
         QPointF targetAnchorLineFirstPoint;
         QPointF targetAnchorLineSecondPoint;
+        Anchors* anchors;
         AnchorLine::Type sourceAnchorLineType = AnchorLine::Invalid;
         AnchorLine::Type targetAnchorLineType = AnchorLine::Invalid;
     };
@@ -30,6 +31,7 @@ public slots:
     void updateGeometry();
 
 private:
+    void paintMarginOffset(QPainter* painter, const AnchorData& data);
     void paintAnchor(QPainter* painter, const AnchorData& data);
     void paintAnchors(QPainter* painter);
     void paintAnchorConnector(QPainter* painter);
@@ -37,7 +39,6 @@ private:
     void paintGuidelines(QPainter* painter);
     void paintSelectionOutlines(QPainter* painter);
     void paintMovingSelectionOutline(QPainter* painter);
-    void paintLabelOverLine(QPainter* painter, const QString& label, const QLineF& line);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:

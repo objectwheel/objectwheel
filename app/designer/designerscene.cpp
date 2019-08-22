@@ -485,6 +485,7 @@ qreal DesignerScene::higherZ(DesignerItem* parentItem)
 
 void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
 {
+    painter->save();
     QPen linePen(pen(QColor(0, 0, 0, 200), 2));
     linePen.setDashPattern({3, 2});
     painter->setPen(linePen);
@@ -496,10 +497,12 @@ void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
     linePen.setDashOffset(3);
     painter->setPen(linePen);
     painter->drawLine(line);
+    painter->restore();
 }
 
 void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
 {
+    painter->save();
     QPen linePen(pen(QColor(255, 255, 255, 150)));
     linePen.setDashPattern({1, 2});
     painter->setPen(linePen);
@@ -518,6 +521,7 @@ void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
     painter->drawPoint(rect.topRight() - QPointF(0.25, 0.0));
     painter->drawPoint(rect.bottomLeft());
     painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
+    painter->restore();
 }
 
 void DesignerScene::discharge()
