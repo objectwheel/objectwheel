@@ -87,6 +87,13 @@ static qreal marginOffset(const PaintLayer::AnchorData& data)
     }
 }
 
+static QFont marginOffsetFont()
+{
+    QFont font; // App default font
+    font.setPixelSize(font.pixelSize() - 4);
+    return font;
+}
+
 static QPointF createParentAnchorPoint(const DesignerItem* childItem, const DesignerItem* parentItem,
                                        AnchorLine::Type anchorLineType)
 {
@@ -220,15 +227,18 @@ void PaintLayer::updateGeometry()
 void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
 {
     painter->save();
-    QFont font; // App default font
-    font.setPixelSize(font.pixelSize() - 4);
 
-    const QFontMetrics fm(font);
+    const QFontMetrics fm(marginOffsetFont());
     const QString& label = QString::number(marginOffset(data));
     const QLineF line(data.firstControlPoint, data.secondControlPoint);
     const qreal z = DesignerScene::zoomLevel();
     const qreal w = fm.horizontalAdvance(label) + fm.height() / 2.0;
     const qreal h = fm.height();
+
+    if (label == "0") {
+        painter->restore();
+        return;
+    }
 
     qreal angle = 180 - line.angle();
     if (qAbs(angle) == 180 || qAbs(angle) == 360)
@@ -236,7 +246,7 @@ void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
     if (qAbs(angle) == 90 || qAbs(angle) == 270)
         angle = 90;
 
-    painter->setFont(font);
+    painter->setFont(marginOffsetFont());
     painter->setPen(Qt::NoPen);
     painter->setBrush(DesignerScene::anchorColor());
     painter->setRenderHint(QPainter::Antialiasing, true);
@@ -320,6 +330,7 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     data.endPoint = createAnchorPoint(control->anchors()->centerIn(), AnchorLine::VerticalCenter);
     data.firstControlPoint = createControlPoint(data.startPoint, AnchorLine::VerticalCenter, data.endPoint);
     data.secondControlPoint = createControlPoint(data.endPoint, AnchorLine::VerticalCenter, data.startPoint);
+    data.targetAnchorLineType = AnchorLine::VerticalCenter;
 
     DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
     DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
@@ -334,17 +345,21 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     painter->setBrush(DesignerScene::anchorColor());
     painter->setRenderHint(QPainter::Antialiasing, true);
     bumpRectangle.moveTo(data.startPoint.x() - m/2/z, data.startPoint.y() - m/2/z);
-    painter->drawRoundedRect(bumpRectangle, m/2/z, m/2/z);
+    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     bumpRectangle.adjust(2/z, 2/z, -2/z, -2/z);
-    painter->setPen(Qt::white);
+    painter->setPen(DesignerScene::pen(Qt::white, 2));
     painter->setBrush(Qt::NoBrush);
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-    bumpRectangle.adjust(-2/z, -2/z, 2/z, 2/z);
 
-    bumpRectangle.moveTo(data.endPoint.x() - m/2/z, data.endPoint.y() - m/2/z);
-    painter->setPen(DesignerScene::pen(DesignerScene::anchorColor(), 2));
+    painter->setPen(Qt::NoPen);
     painter->setBrush(DesignerScene::anchorColor());
-    painter->drawRoundedRect(bumpRectangle, m/2/z, m/2/z);
+    bumpRectangle.adjust(-4/z, -4/z, 4/z, 4/z);
+    bumpRectangle.moveTo(data.endPoint.x() - bumpRectangle.width() / 2, data.endPoint.y() - bumpRectangle.height() / 2);
+    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+    bumpRectangle.adjust(1/z, 1/z, -1/z, -1/z);
+    painter->setPen(DesignerScene::pen(Qt::white));
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     painter->translate(bumpRectangle.center());
     painter->rotate(targetAngle(data));
     painter->scale(1/z, 1/z);
@@ -352,10 +367,11 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     painter->restore();
 
     painter->save();
-    painter->translate(0, -5/z);
+    const QFontMetrics fm(marginOffsetFont());
+    painter->translate(0, -fm.height()/2/z);
     data.sourceAnchorLineType = AnchorLine::VerticalCenter;
     paintMarginOffset(painter, data);
-    painter->translate(0, 10/z);
+    painter->translate(0, fm.height()/z);
     data.sourceAnchorLineType = AnchorLine::HorizontalCenter;
     paintMarginOffset(painter, data);
     painter->restore();
@@ -364,7 +380,10 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
 void PaintLayer::paintAnchors(QPainter* painter)
 {
     Q_ASSERT(scene());
-    for (Control* selectedControl : (scene()->showAllAnchors() ? scene()->items<Control>() : scene()->selectedControls())) {
+    const QList<Control*>& anchorControls = scene()->showAllAnchors()
+            ? scene()->items<Control>()
+            : scene()->selectedControls();
+    for (Control* selectedControl : anchorControls) {
         if (selectedControl->anchors()->fill()) {
             paintFillAnchor(painter, selectedControl);
         } else if (selectedControl->anchors()->centerIn()) {
