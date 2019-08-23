@@ -53,6 +53,7 @@ public:
     Control* topLevelControl(const QPointF& pos) const;
     Control* highlightControl(const QPointF& pos) const;
 
+    bool showAllAnchors() const;
     qreal devicePixelRatio() const;
     QPointF cursorPos() const;
     QRectF visibleItemsBoundingRect() const;
@@ -71,6 +72,7 @@ public:
 
     static qreal zoomLevel();
     static OutlineMode outlineMode();
+    static QColor anchorColor();
     static QColor outlineColor();
     static QBrush backgroundTexture();
     static QBrush blankControlDecorationBrush(const QColor& color);

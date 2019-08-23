@@ -238,7 +238,7 @@ void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
 
     painter->setFont(font);
     painter->setPen(Qt::NoPen);
-    painter->setBrush(DesignerScene::outlineColor());
+    painter->setBrush(DesignerScene::anchorColor());
     painter->setRenderHint(QPainter::Antialiasing, true);
     painter->translate(line.center());
     painter->rotate(angle);
@@ -252,7 +252,7 @@ void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
 void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& data)
 {
     painter->save();
-    painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+    painter->setPen(DesignerScene::pen(DesignerScene::anchorColor(), 2));
     painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
     painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
 
@@ -266,12 +266,13 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     QRectF bumpRectangle(0, 0, m/z, m/z);
 
     painter->setPen(Qt::NoPen);
-    painter->setBrush(DesignerScene::outlineColor());
+    painter->setBrush(DesignerScene::anchorColor());
     painter->setRenderHint(QPainter::Antialiasing, true);
     bumpRectangle.moveTo(data.startPoint.x() - m/2/z, data.startPoint.y() - m/2/z);
     painter->drawChord(bumpRectangle, sourceAngle(data), 180 * AngleDegree);
 
     bumpRectangle.moveTo(data.endPoint.x() - m/2/z, data.endPoint.y() - m/2/z);
+    painter->setPen(DesignerScene::pen(DesignerScene::anchorColor(), 2));
     painter->drawRoundedRect(bumpRectangle, m/2/z, m/2/z);
     painter->translate(bumpRectangle.center());
     painter->rotate(targetAngle(data));
@@ -283,7 +284,7 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
 void PaintLayer::paintAnchors(QPainter* painter)
 {
     Q_ASSERT(scene());
-    for (Control* selectedControl : scene()->selectedControls()) {
+    for (Control* selectedControl : (scene()->showAllAnchors() ? scene()->items<Control>() : scene()->selectedControls())) {
         AnchorData data;
         data.anchors = selectedControl->anchors();
         if (data.anchors->fill()) {
@@ -319,7 +320,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
             data.endPoint = createAnchorPoint(data.anchors->centerIn(), AnchorLine::VerticalCenter);
             data.firstControlPoint = createControlPoint(data.startPoint, AnchorLine::VerticalCenter, data.endPoint);
             data.secondControlPoint = createControlPoint(data.endPoint, AnchorLine::VerticalCenter, data.startPoint);
-            painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+            painter->setPen(DesignerScene::pen(DesignerScene::anchorColor(), 2));
             painter->setBrush(painter->pen().color());
             DesignerScene::drawDashLine(painter, {data.startPoint, data.firstControlPoint});
             DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
@@ -332,7 +333,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
             painter->setBrush(Qt::NoBrush);
             painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
             bumpRectangle.adjust(-2 / z, -2 / z, 2 / z, 2 / z);
-            painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+            painter->setPen(DesignerScene::pen(DesignerScene::anchorColor(), 2));
             painter->setBrush(painter->pen().color());
             bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
             painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
@@ -394,7 +395,7 @@ void PaintLayer::paintAnchorConnector(QPainter* painter)
     QRectF bumpRectangle(0, 0, m, m);
 
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen());
+    painter->setPen(DesignerScene::pen(DesignerScene::anchorColor()));
 
     QPainterPath scenePath;
     scenePath.addRect(scene()->sceneRect());

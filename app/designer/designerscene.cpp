@@ -270,6 +270,12 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
     return itemsAtPos.first();
 }
 
+bool DesignerScene::showAllAnchors() const
+{
+    // TODO: Take that from view
+    return true;
+}
+
 qreal DesignerScene::devicePixelRatio() const
 {
     Q_ASSERT(views().size() == 1);
@@ -390,6 +396,11 @@ qreal DesignerScene::zoomLevel()
 DesignerScene::OutlineMode DesignerScene::outlineMode()
 {
     return OutlineMode(DesignerSettings::sceneSettings()->controlOutlineDecoration);
+}
+
+QColor DesignerScene::anchorColor()
+{
+    return DesignerSettings::sceneSettings()->anchorColor;
 }
 
 QColor DesignerScene::outlineColor()

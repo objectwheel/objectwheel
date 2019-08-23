@@ -19,6 +19,7 @@ struct SceneSettings final : public Settings
     int dragStartDistance;
     int sceneBackgroundTexture;
     qreal sceneZoomLevel;
+    QColor anchorColor;
     /****/
     bool showGridViewDots;
     bool snappingEnabled;

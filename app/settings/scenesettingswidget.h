@@ -34,10 +34,13 @@ private:
     QLabel* m_dragStartDistanceLabel;
     QLabel* m_sceneBackgroundTextureLabel;
     QLabel* m_sceneZoomLevelLabel;
+    QLabel* m_anchorColorLabel;
     QCheckBox* m_showGuideLinesCheckBox;
     QSpinBox* m_dragStartDistanceSpinBox;
     QComboBox* m_sceneBackgroundTextureBox;
     QComboBox* m_sceneZoomLevelBox;
+    Utils::QtColorButton* m_anchorColorButton;
+    QPushButton* m_anchorColorResetButton;
     /****/
     QGroupBox* m_gridViewGroup;
     QLabel* m_showGridViewDotsLabel;

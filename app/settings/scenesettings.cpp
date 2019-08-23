@@ -6,6 +6,7 @@ static const char g_showGuideLines[] = "ShowGuideLines";
 static const char g_dragStartDistance[] = "DragStartDistance";
 static const char g_sceneBackgroundTexture[] = "SceneBackgroundTexture";
 static const char g_sceneZoomLevel[] = "SceneZoomLevel";
+static const char g_anchorColor[] = "AnchorColor";
 static const char g_showGridViewDots[] = "ShowGridViewDots";
 static const char g_snappingEnabled[] = "SnappingEnabled";
 static const char g_gridSize[] = "GridSize";
@@ -29,6 +30,7 @@ void SceneSettings::read()
     dragStartDistance = value<int>(g_dragStartDistance, dragStartDistance);
     sceneBackgroundTexture = value<int>(g_sceneBackgroundTexture, sceneBackgroundTexture);
     sceneZoomLevel = value<qreal>(g_sceneZoomLevel, sceneZoomLevel);
+    anchorColor = value<QColor>(g_anchorColor, anchorColor);
     /****/
     showGridViewDots = value<bool>(g_showGridViewDots, showGridViewDots);
     snappingEnabled = value<bool>(g_snappingEnabled, snappingEnabled);
@@ -49,6 +51,7 @@ void SceneSettings::write()
     setValue(g_dragStartDistance, dragStartDistance);
     setValue(g_sceneBackgroundTexture, sceneBackgroundTexture);
     setValue(g_sceneZoomLevel, sceneZoomLevel);
+    setValue(g_anchorColor, anchorColor);
     /****/
     setValue(g_showGridViewDots, showGridViewDots);
     setValue(g_snappingEnabled, snappingEnabled);
@@ -70,6 +73,7 @@ void SceneSettings::reset()
     dragStartDistance = 8;
     sceneBackgroundTexture = 4;
     sceneZoomLevel = 1.0;
+    anchorColor = "#4FA211";
     /****/
     showGridViewDots = true;
     snappingEnabled = true;
