@@ -33,6 +33,8 @@ public slots:
 private:
     void paintMarginOffset(QPainter* painter, const AnchorData& data);
     void paintAnchor(QPainter* painter, const AnchorData& data);
+    void paintFillAnchor(QPainter* painter, Control* control);
+    void paintCenterAnchor(QPainter* painter, Control* control);
     void paintAnchors(QPainter* painter);
     void paintAnchorConnector(QPainter* painter);
     void paintHoverOutline(QPainter* painter);
