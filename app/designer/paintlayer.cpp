@@ -219,6 +219,7 @@ void PaintLayer::updateGeometry()
 
 void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
 {
+    painter->save();
     QFont font; // App default font
     font.setPixelSize(font.pixelSize() - 4);
 
@@ -235,7 +236,6 @@ void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
     if (qAbs(angle) == 90 || qAbs(angle) == 270)
         angle = 90;
 
-    painter->save();
     painter->setFont(font);
     painter->setPen(Qt::NoPen);
     painter->setBrush(DesignerScene::outlineColor());
@@ -243,7 +243,7 @@ void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
     painter->translate(line.center());
     painter->rotate(angle);
     painter->drawRoundedRect(QRectF(-w/2/z, -h/2/z, w/z, h/z), h/2/z, h/2/z);
-    painter->setPen(DesignerScene::pen(Qt::white));
+    painter->setPen(Qt::white);
     painter->scale(1/z, 1/z);
     painter->drawText(QRectF(-w/2, -h/2, w, h), label, QTextOption(Qt::AlignCenter));
     painter->restore();
@@ -251,16 +251,8 @@ void PaintLayer::paintMarginOffset(QPainter* painter, const AnchorData& data)
 
 void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& data)
 {
-    Q_ASSERT(scene());
-
-    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
-    const qreal z = DesignerScene::zoomLevel();
-    const qreal m = 10 / z;
-    QRectF bumpRectangle(0, 0, m, m);
-
+    painter->save();
     painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
-    painter->setBrush(painter->pen().color());
-
     painter->drawLine(data.sourceAnchorLineFirstPoint, data.sourceAnchorLineSecondPoint);
     painter->drawLine(data.targetAnchorLineFirstPoint, data.targetAnchorLineSecondPoint);
 
@@ -268,27 +260,24 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
     DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-    bumpRectangle.moveTo(data.startPoint.x() - m / 2, data.startPoint.y() - m / 2);
-    painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->drawChord(bumpRectangle, sourceAngle(data), 180 * AngleDegree);
-    painter->setRenderHint(QPainter::Antialiasing, false);
+    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+    const qreal z = DesignerScene::zoomLevel();
+    const qreal m = 10;
+    QRectF bumpRectangle(0, 0, m/z, m/z);
 
-    bumpRectangle.moveTo(data.endPoint.x() - m / 2, data.endPoint.y() - m / 2);
-    painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-    const qreal angle = targetAngle(data);
-    const QPointF& tr = bumpRectangle.center();
-    bumpRectangle.moveTopLeft({-bumpRectangle.width() * 0.5, -bumpRectangle.height() * 0.5});
-    painter->translate(tr);
-    painter->rotate(angle);
-    painter->drawPixmap(bumpRectangle.toRect(), anchorPixmap, anchorPixmap.rect());
-    painter->rotate(-angle);
-    painter->translate(-tr);
-    painter->setRenderHint(QPainter::Antialiasing, false);
-
-    painter->setPen(Qt::white);
+    painter->setPen(Qt::NoPen);
     painter->setBrush(DesignerScene::outlineColor());
-    paintMarginOffset(painter, data);
+    painter->setRenderHint(QPainter::Antialiasing, true);
+    bumpRectangle.moveTo(data.startPoint.x() - m/2/z, data.startPoint.y() - m/2/z);
+    painter->drawChord(bumpRectangle, sourceAngle(data), 180 * AngleDegree);
+
+    bumpRectangle.moveTo(data.endPoint.x() - m/2/z, data.endPoint.y() - m/2/z);
+    painter->drawRoundedRect(bumpRectangle, m/2/z, m/2/z);
+    painter->translate(bumpRectangle.center());
+    painter->rotate(targetAngle(data));
+    painter->scale(1/z, 1/z);
+    painter->drawPixmap(QRect(-m/2, -m/2, m, m), anchorPixmap, anchorPixmap.rect());
+    painter->restore();
 }
 
 void PaintLayer::paintAnchors(QPainter* painter)
@@ -311,12 +300,16 @@ void PaintLayer::paintAnchors(QPainter* painter)
             data.anchors = fill;
             updateAnchorData(data, {AnchorLine::Top, selectedControl}, data.anchors->top(), scene());
             paintAnchor(painter, data);
+            paintMarginOffset(painter, data);
             updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, data.anchors->bottom(), scene());
             paintAnchor(painter, data);
+            paintMarginOffset(painter, data);
             updateAnchorData(data, {AnchorLine::Right, selectedControl}, data.anchors->right(), scene());
             paintAnchor(painter, data);
+            paintMarginOffset(painter, data);
             updateAnchorData(data, {AnchorLine::Left, selectedControl}, data.anchors->left(), scene());
             paintAnchor(painter, data);
+            paintMarginOffset(painter, data);
             delete fill;
         } else if (data.anchors->centerIn()) {
             const qreal z = DesignerScene::zoomLevel();
@@ -352,30 +345,37 @@ void PaintLayer::paintAnchors(QPainter* painter)
             if (data.anchors->baseline().isValid()) {
                 updateAnchorData(data, {AnchorLine::Baseline, selectedControl}, data.anchors->baseline(), scene());
                 paintAnchor(painter, data);
+                paintMarginOffset(painter, data);
             }
             if (data.anchors->top().isValid()) {
                 updateAnchorData(data, {AnchorLine::Top, selectedControl}, data.anchors->top(), scene());
                 paintAnchor(painter, data);
+                paintMarginOffset(painter, data);
             }
             if (data.anchors->bottom().isValid()) {
                 updateAnchorData(data, {AnchorLine::Bottom, selectedControl}, data.anchors->bottom(), scene());
                 paintAnchor(painter, data);
+                paintMarginOffset(painter, data);
             }
             if (data.anchors->right().isValid()) {
                 updateAnchorData(data, {AnchorLine::Right, selectedControl}, data.anchors->right(), scene());
                 paintAnchor(painter, data);
+                paintMarginOffset(painter, data);
             }
             if (data.anchors->left().isValid()) {
                 updateAnchorData(data, {AnchorLine::Left, selectedControl}, data.anchors->left(), scene());
                 paintAnchor(painter, data);
+                paintMarginOffset(painter, data);
             }
             if (data.anchors->horizontalCenter().isValid()) {
                 updateAnchorData(data, {AnchorLine::HorizontalCenter, selectedControl}, data.anchors->horizontalCenter(), scene());
                 paintAnchor(painter, data);
+                paintMarginOffset(painter, data);
             }
             if (data.anchors->verticalCenter().isValid()) {
                 updateAnchorData(data, {AnchorLine::VerticalCenter, selectedControl}, data.anchors->verticalCenter(), scene());
                 paintAnchor(painter, data);
+                paintMarginOffset(painter, data);
             }
         }
     }
