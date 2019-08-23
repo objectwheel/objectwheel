@@ -277,7 +277,8 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(DesignerScene::anchorColor());
-    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform);
     bumpRectangle.moveTo(data.startPoint.x() - m/2/z, data.startPoint.y() - m/2/z);
     painter->drawChord(bumpRectangle, sourceAngle(data), 180 * AngleDegree);
 
@@ -343,7 +344,8 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(DesignerScene::anchorColor());
-    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setRenderHint(QPainter::SmoothPixmapTransform);
     bumpRectangle.moveTo(data.startPoint.x() - m/2/z, data.startPoint.y() - m/2/z);
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     bumpRectangle.adjust(2/z, 2/z, -2/z, -2/z);
@@ -357,7 +359,7 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     bumpRectangle.moveTo(data.endPoint.x() - bumpRectangle.width() / 2, data.endPoint.y() - bumpRectangle.height() / 2);
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     bumpRectangle.adjust(1/z, 1/z, -1/z, -1/z);
-    painter->setPen(DesignerScene::pen(Qt::white));
+    painter->setPen(DesignerScene::pen(Qt::white, 1.5));
     painter->setBrush(Qt::NoBrush);
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     painter->translate(bumpRectangle.center());
@@ -430,7 +432,7 @@ void PaintLayer::paintAnchors(QPainter* painter)
     }
 }
 
-void PaintLayer::paintAnchorConnector(QPainter* painter)
+void PaintLayer::paintAnchorConnection(QPainter* painter)
 {
     Q_ASSERT(scene());
 
@@ -579,5 +581,5 @@ void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidg
     paintMovingSelectionOutline(painter);
     paintGuidelines(painter);
     paintAnchors(painter);
-    paintAnchorConnector(painter);
+    paintAnchorConnection(painter);
 }

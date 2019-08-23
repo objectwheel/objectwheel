@@ -273,7 +273,7 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
 bool DesignerScene::showAllAnchors() const
 {
     // TODO: Take that from view
-    return true;
+    return false || anchorLayer()->activated();
 }
 
 qreal DesignerScene::devicePixelRatio() const

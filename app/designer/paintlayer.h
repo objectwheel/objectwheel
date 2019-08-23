@@ -36,7 +36,7 @@ private:
     void paintFillAnchor(QPainter* painter, Control* control);
     void paintCenterAnchor(QPainter* painter, Control* control);
     void paintAnchors(QPainter* painter);
-    void paintAnchorConnector(QPainter* painter);
+    void paintAnchorConnection(QPainter* painter);
     void paintHoverOutline(QPainter* painter);
     void paintGuidelines(QPainter* painter);
     void paintSelectionOutlines(QPainter* painter);
