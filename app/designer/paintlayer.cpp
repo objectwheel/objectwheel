@@ -452,26 +452,35 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
 
     painter->save();
 
-    const QLineF line(scene()->anchorLayer()->mousePressPoint(), scene()->anchorLayer()->mouseLastPoint());
+    const QLineF line(scene()->anchorLayer()->mapToScene(scene()->anchorLayer()->mousePressPoint()),
+                      scene()->anchorLayer()->mapToScene(scene()->anchorLayer()->mouseLastPoint()));
     const Control* sourceControl = scene()->topLevelControl(line.p1());
-    const Control* destinationControl = scene()->topLevelControl(line.p2());
+    const Control* targetControl = scene()->topLevelControl(line.p2());
+
+    if (sourceControl == 0)
+        targetControl = nullptr;
+
+    if (targetControl && sourceControl
+            && !sourceControl->siblings().contains(const_cast<Control*>(targetControl))
+            && sourceControl->parentControl() != targetControl) {
+        targetControl = nullptr;
+    }
 
     QPainterPath scenePath;
     scenePath.addRect(scene()->sceneRect());
     QPainterPath highlightedPath;
-    highlightedPath.setFillRule(Qt::WindingFill);
     if (sourceControl)
         highlightedPath += highlightPath(sourceControl);
-    if (destinationControl)
-        highlightedPath += highlightPath(destinationControl);
+    if (targetControl)
+        highlightedPath += highlightPath(targetControl);
     painter->fillPath(scenePath - highlightedPath, QColor(0, 0, 0, 50));
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(DesignerScene::outlineColor()));
     if (sourceControl)
         painter->drawRect(DesignerScene::outerRect(sourceControl->mapRectToScene(sourceControl->rect())));
-    if (destinationControl)
-        painter->drawRect(DesignerScene::outerRect(destinationControl->mapRectToScene(destinationControl->rect())));
+    if (targetControl)
+        painter->drawRect(DesignerScene::outerRect(targetControl->mapRectToScene(targetControl->rect())));
 
     bool twist = line.angle() < 90 || (line.angle() > 180 && line.angle() < 270);
     auto normal = line.normalVector();
@@ -506,9 +515,30 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     painter->translate(bumpRectangle.center());
     painter->rotate(angle);
-    painter->scale(1/z, 1/z);
-    painter->drawPixmap(QRect(-m/2, -m/2, m, m), anchorPixmap, anchorPixmap.rect());
+    if (targetControl) {
+        painter->scale(1/z, 1/z);
+        painter->drawPixmap(QRect(-m/2, -m/2, m, m), anchorPixmap, anchorPixmap.rect());
+    } else {
+        painter->setBrush(Qt::white);
+        painter->setPen(DesignerScene::pen("#c00000", 3));
+        painter->drawRoundedRect(QRect(-m/2/z, -m/2/z, m/z, m/z), m/2/z, m/2/z);
+        painter->drawLine(QPointF(-m/2/z + 2/z, -m/2/z + 2/z), QPointF(m/2/z - 2/z, m/2/z - 2/z));
+    }
     painter->restore();
+}
+
+void PaintLayer::paintHoverOutline(QPainter* painter)
+{
+    Q_ASSERT(scene());
+    if (DesignerScene::showMouseoverOutline()) {
+        if (const DesignerItem* item = scene()->topLevelControl(scene()->cursorPos())) {
+            if (!item->isSelected()) {
+                painter->setBrush(Qt::NoBrush);
+                painter->setPen(DesignerScene::pen());
+                painter->drawRect(DesignerScene::outerRect(item->mapRectToScene(item->rect())));
+            }
+        }
+    }
 }
 
 void PaintLayer::paintGuidelines(QPainter* painter)
@@ -562,20 +592,6 @@ void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
         DesignerScene::drawDashRect(painter, DesignerScene::outerRect(DesignerScene::itemsBoundingRect(items)));
-}
-
-void PaintLayer::paintHoverOutline(QPainter* painter)
-{
-    Q_ASSERT(scene());
-    if (DesignerScene::showMouseoverOutline()) {
-        if (const DesignerItem* item = scene()->topLevelControl(scene()->cursorPos())) {
-            if (!item->isSelected()) {
-                painter->setBrush(Qt::NoBrush);
-                painter->setPen(DesignerScene::pen());
-                painter->drawRect(DesignerScene::outerRect(item->mapRectToScene(item->rect())));
-            }
-        }
-    }
 }
 
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+class Control;
 class AnchorEditor final : public QWidget
 {
     Q_OBJECT
@@ -11,8 +12,15 @@ class AnchorEditor final : public QWidget
 public:
     explicit AnchorEditor(QWidget* parent = nullptr);
 
-signals:
+    Control* sourceControl() const;
+    void setSourceControl(Control* sourceControl);
 
+    Control* targetControl() const;
+    void setTargetControl(Control* targetControl);
+
+private:
+    Control* m_sourceControl;
+    Control* m_targetControl;
 };
 
 #endif // ANCHOREDITOR_H

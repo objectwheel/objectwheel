@@ -429,10 +429,12 @@ QList<Control*> Control::siblings() const
         siblings = parentControl()->childControls(false);
     }
     Q_ASSERT(siblings.contains(const_cast<Control*>(this)));
-    siblings.removeOne(const_cast<Control*>(this));
-    std::sort(siblings.begin(), siblings.end(), [] (const Control* left, const Control* right) {
-        return left->index() < right->index();
-    });
+    if (!siblings.isEmpty()) {
+        siblings.removeOne(const_cast<Control*>(this));
+        std::sort(siblings.begin(), siblings.end(), [] (const Control* left, const Control* right) {
+            return left->index() < right->index();
+        });
+    }
     return siblings;
 }
 
@@ -440,8 +442,8 @@ QList<Control*> Control::childControls(bool recursive) const
 {
     QList<Control*> controls;
 
-    for (DesignerItem* item : childItems()) {
-        if (item->type() == Form::Type || item->type() == Control::Type)
+    for (QGraphicsItem* item : QGraphicsObject::childItems()) {
+        if (item->type() >= Control::Type)
             controls.append(static_cast<Control*>(item));
     }
 
