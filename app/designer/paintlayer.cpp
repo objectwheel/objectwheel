@@ -207,6 +207,17 @@ static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sou
     }
 }
 
+static QPainterPath highlightPath(const Control* control)
+{
+    QPainterPath parentPath;
+    parentPath.addRect(DesignerScene::outerRect(control->mapRectToScene(control->rect())));
+    QPainterPath chilrenPath;
+    chilrenPath.setFillRule(Qt::WindingFill);
+    for (Control* childControl : control->childControls(false))
+        chilrenPath.addRect(DesignerScene::outerRect(childControl->mapRectToScene(childControl->rect())));
+    return parentPath - chilrenPath;
+}
+
 PaintLayer::PaintLayer(DesignerItem* parent) : DesignerItem(parent)
   , m_geometryUpdateScheduled(false)
 {
@@ -439,36 +450,28 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     if (!scene()->anchorLayer()->activated())
         return;
 
-    const QLineF line(scene()->anchorLayer()->mousePressPoint(), scene()->anchorLayer()->mouseLastPoint());
-    const qreal z = DesignerScene::zoomLevel();
-    const qreal m = 10 / z;
-    QRectF bumpRectangle(0, 0, m, m);
+    painter->save();
 
-    painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen(DesignerScene::anchorColor()));
+    const QLineF line(scene()->anchorLayer()->mousePressPoint(), scene()->anchorLayer()->mouseLastPoint());
+    const Control* sourceControl = scene()->topLevelControl(line.p1());
+    const Control* destinationControl = scene()->topLevelControl(line.p2());
 
     QPainterPath scenePath;
     scenePath.addRect(scene()->sceneRect());
-    const Control* sourceControl = scene()->topLevelControl(line.p1());
-    const Control* destinationControl = scene()->topLevelControl(line.p2());
-    if (sourceControl) {
-        const QRectF& r = DesignerScene::outerRect(sourceControl->mapRectToScene(sourceControl->rect()));
-        QPainterPath p;
-        p.addRect(r);
-        scenePath = scenePath.subtracted(p);
-        painter->drawRect(r);
-    }
-    if (destinationControl) {
-        const QRectF& r = DesignerScene::outerRect(destinationControl->mapRectToScene(destinationControl->rect()));
-        QPainterPath p;
-        p.addRect(r);
-        scenePath = scenePath.subtracted(p);
-        painter->drawRect(r);
-    }
-    painter->fillPath(scenePath, QColor(0, 0, 0, 40));
-    painter->drawRect(scene()->sceneRect());
+    QPainterPath highlightedPath;
+    highlightedPath.setFillRule(Qt::WindingFill);
+    if (sourceControl)
+        highlightedPath += highlightPath(sourceControl);
+    if (destinationControl)
+        highlightedPath += highlightPath(destinationControl);
+    painter->fillPath(scenePath - highlightedPath, QColor(0, 0, 0, 50));
 
-    painter->setRenderHint(QPainter::Antialiasing, true);
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(DesignerScene::pen(DesignerScene::outlineColor()));
+    if (sourceControl)
+        painter->drawRect(DesignerScene::outerRect(sourceControl->mapRectToScene(sourceControl->rect())));
+    if (destinationControl)
+        painter->drawRect(DesignerScene::outerRect(destinationControl->mapRectToScene(destinationControl->rect())));
 
     bool twist = line.angle() < 90 || (line.angle() > 180 && line.angle() < 270);
     auto normal = line.normalVector();
@@ -481,30 +484,31 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     curve.moveTo(line.p1());
     curve.cubicTo(normal.p2(), normal.p1(), line.p2());
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen("#555555", 1, false));
+    painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+    painter->setRenderHint(QPainter::Antialiasing); // No SmoothPixmapTransform
     painter->drawPath(curve);
 
-    bumpRectangle.moveTo(line.p1().x() - m / 2, line.p1().y() - m / 2);
-    painter->setPen(DesignerScene::pen("#555555", 1, false));
-    painter->setBrush(Qt::white);
-    bumpRectangle.adjust(2 / z, 2 / z, -2 / z, -2 / z);
-    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-    bumpRectangle.adjust(-2 / z, -2 / z, 2 / z, 2 / z);
+    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+    const qreal z = DesignerScene::zoomLevel();
+    const qreal m = 10;
+    const qreal angle = -90 - line.angle() - 45 * qSin(M_PI * (int(line.angle()) % 90) / 90.) * (twist ? -1 : 1);
+    QRectF bumpRectangle(0, 0, m/z, m/z);
 
-    bumpRectangle.moveTo(line.p2().x() - m / 2, line.p2().y() - m / 2);
+    bumpRectangle.moveTo(line.p1().x() - m/2/z, line.p1().y() - m/2/z);
+    painter->setPen(DesignerScene::pen(DesignerScene::outlineColor(), 2));
+    painter->setBrush(Qt::white);
+    bumpRectangle.adjust(2/z, 2/z, -2/z, -2/z);
+    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+    bumpRectangle.adjust(-2/z, -2/z, 2/z, 2/z);
+
+    bumpRectangle.moveTo(line.p2().x() - m/2/z, line.p2().y() - m/2/z);
     painter->setBrush(painter->pen().color());
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-    const qreal angle = -90 - line.angle() - 45 * qSin(M_PI * (int(line.angle()) % 90) / 90.) * (twist ? -1 : 1);
-    QPixmap p = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
-    const QPointF& tr = bumpRectangle.center();
-    bumpRectangle.moveTopLeft({-bumpRectangle.width() / 2, -bumpRectangle.height() / 2});
-    painter->translate(tr);
+    painter->translate(bumpRectangle.center());
     painter->rotate(angle);
-    painter->drawPixmap(bumpRectangle.toRect(), p, p.rect());
-    painter->rotate(-angle);
-    painter->translate(-tr);
-
-    painter->setRenderHint(QPainter::Antialiasing, false);
+    painter->scale(1/z, 1/z);
+    painter->drawPixmap(QRect(-m/2, -m/2, m, m), anchorPixmap, anchorPixmap.rect());
+    painter->restore();
 }
 
 void PaintLayer::paintGuidelines(QPainter* painter)
