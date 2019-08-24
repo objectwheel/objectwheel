@@ -1,11 +1,12 @@
 #include <anchorrow.h>
 #include <paintutils.h>
+#include <buttongroup.h>
+#include <control.h>
 
 #include <QBoxLayout>
 #include <QToolButton>
 #include <QComboBox>
 #include <QDoubleSpinBox>
-#include <QButtonGroup>
 
 static QString anchorLineText(AnchorLine::Type type)
 {
@@ -37,50 +38,48 @@ static QIcon anchorLineIcon(AnchorLine::Type type, QWidget* widget)
     const QColor& color = widget->palette().buttonText().color();
     switch (type) {
     case AnchorLine::Left:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/left.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/left.svg")), color));
     case AnchorLine::Right:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/right.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/right.svg")), color));
     case AnchorLine::Top:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/top.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/top.svg")), color));
     case AnchorLine::Bottom:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/bottom.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/bottom.svg")), color));
     case AnchorLine::HorizontalCenter:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/horizontal.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/horizontal.svg")), color));
     case AnchorLine::VerticalCenter:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/vertical.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/vertical.svg")), color));
     case AnchorLine::Fill:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/fill.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/fill.svg")), color));
     case AnchorLine::Center:
-        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/center.svg"), color));
+        return QIcon(renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/center.svg")), color));
     default:
         return QIcon();
     }
 }
 
-AnchorRow::AnchorRow(QWidget *parent) : QWidget(parent)
+AnchorRow::AnchorRow(QWidget* parent) : QWidget(parent)
+  , m_marginOffset(0)
   , m_sourceLineType(AnchorLine::Invalid)
+  , m_targetLineType(AnchorLine::Invalid)
   , m_layout(new QHBoxLayout(this))
   , m_sourceLineButton(new QToolButton(this))
+  , m_targetButtonGroup(new ButtonGroup(this))
   , m_targetLineButton1(new QToolButton(this))
   , m_targetLineButton2(new QToolButton(this))
   , m_targetLineButton3(new QToolButton(this))
   , m_marginOffsetSpinBox(new QDoubleSpinBox(this))
   , m_targetControlComboBox(new QComboBox(this))
 {
-    auto bgroup = new QButtonGroup(this);
-    bgroup->addButton(m_targetLineButton1);
-    bgroup->addButton(m_targetLineButton2);
-    bgroup->addButton(m_targetLineButton3);
-
     auto hbox = new QHBoxLayout;
-    hbox->setContentsMargins(0, 0, 0, 0);
     hbox->setSpacing(0);
+    hbox->setContentsMargins(0, 0, 0, 0);
     hbox->addWidget(m_targetLineButton1);
     hbox->addWidget(m_targetLineButton2);
     hbox->addWidget(m_targetLineButton3);
 
-    m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->setSpacing(4);
+    m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_sourceLineButton);
     m_layout->addSpacing(12);
     m_layout->addLayout(hbox);
@@ -116,12 +115,31 @@ AnchorRow::AnchorRow(QWidget *parent) : QWidget(parent)
     m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
     m_targetControlComboBox->setFixedSize(QSize(120, 24));
 
+    m_targetButtonGroup->addButton(m_targetLineButton1);
+    m_targetButtonGroup->addButton(m_targetLineButton2);
+    m_targetButtonGroup->addButton(m_targetLineButton3);
+
     connect(this, &AnchorRow::sourceLineTypeChanged,
             this, &AnchorRow::onSourceLineTypeChange);
+    connect(this, &AnchorRow::targetLineTypeChanged,
+            this, &AnchorRow::onTargetLineTypeChange);
     connect(m_sourceLineButton, &QToolButton::clicked,
             this, &AnchorRow::onSourceButtonCheckedChange);
 
     onSourceButtonCheckedChange();
+}
+
+qreal AnchorRow::marginOffset() const
+{
+    return m_marginOffset;
+}
+
+void AnchorRow::setMarginOffset(qreal marginOffset)
+{
+    if (m_marginOffset != marginOffset) {
+        m_marginOffset = marginOffset;
+        emit marginOffsetChanged();
+    }
 }
 
 AnchorLine::Type AnchorRow::sourceLineType() const
@@ -135,6 +153,48 @@ void AnchorRow::setSourceLineType(AnchorLine::Type sourceLineType)
         m_sourceLineType = sourceLineType;
         emit sourceLineTypeChanged();
     }
+}
+
+AnchorLine::Type AnchorRow::targetLineType() const
+{
+    return m_targetLineType;
+}
+
+void AnchorRow::setTargetLineType(AnchorLine::Type targetLineType)
+{
+    if (m_targetLineType != targetLineType) {
+        m_targetLineType = targetLineType;
+        emit targetLineTypeChanged();
+    }
+}
+
+Control* AnchorRow::currentTargetControl() const
+{
+    return m_targetControlComboBox->currentData().value<Control*>();
+}
+
+void AnchorRow::setCurrentTargetControl(const Control* control)
+{
+    for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
+        if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {
+            m_targetControlComboBox->setCurrentIndex(i);
+            break;
+        }
+    }
+}
+
+QList<Control*> AnchorRow::targetControlList() const
+{
+    QList<Control*> controls;
+    for (int i = 0; i < m_targetControlComboBox->count(); ++i)
+        controls.append(m_targetControlComboBox->itemData(i).value<Control*>());
+    return controls;
+}
+
+void AnchorRow::setTargetControlList(const QList<Control*>& targetControlList)
+{
+    for (Control* control : targetControlList)
+        m_targetControlComboBox->addItem(control->id(), QVariant::fromValue(control));
 }
 
 QSize AnchorRow::minimumSizeHint() const
@@ -176,6 +236,31 @@ void AnchorRow::onSourceLineTypeChange()
     m_targetLineButton3->setVisible(showTargetGadgets);
     m_marginOffsetSpinBox->setVisible(showTargetGadgets);
     m_targetControlComboBox->setVisible(showTargetGadgets);
+    onTargetLineTypeChange();
+}
+
+void AnchorRow::onTargetLineTypeChange()
+{
+    m_targetButtonGroup->uncheckAll();
+
+    if (AnchorLine::isVertical(m_sourceLineType) == AnchorLine::isVertical(m_targetLineType)) {
+        switch (m_targetLineType) {
+        case AnchorLine::Left:
+        case AnchorLine::Top:
+            m_targetLineButton1->setChecked(true);
+            break;
+        case AnchorLine::HorizontalCenter:
+        case AnchorLine::VerticalCenter:
+            m_targetLineButton2->setChecked(true);
+            break;
+        case AnchorLine::Right:
+        case AnchorLine::Bottom:
+            m_targetLineButton3->setChecked(true);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 void AnchorRow::onSourceButtonCheckedChange()
