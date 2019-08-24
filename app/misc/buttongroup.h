@@ -12,9 +12,15 @@ class ButtonGroup final : public QObject
 public:
     explicit ButtonGroup(QObject* parent = nullptr);
 
+    QAbstractButton* checkedButton() const;
+
     void addButton(QAbstractButton* button);
 
     void uncheckAll();
+
+signals:
+    void buttonClicked(QAbstractButton* button, bool checked);
+    void buttonToggled(QAbstractButton* button, bool checked);
 
 private:
     QList<QAbstractButton*> m_buttons;

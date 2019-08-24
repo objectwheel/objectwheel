@@ -59,7 +59,6 @@ static QIcon anchorLineIcon(AnchorLine::Type type, QWidget* widget)
 }
 
 AnchorRow::AnchorRow(QWidget* parent) : QWidget(parent)
-  , m_marginOffset(0)
   , m_sourceLineType(AnchorLine::Invalid)
   , m_targetLineType(AnchorLine::Invalid)
   , m_layout(new QHBoxLayout(this))
@@ -114,32 +113,26 @@ AnchorRow::AnchorRow(QWidget* parent) : QWidget(parent)
 
     m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
     m_targetControlComboBox->setFixedSize(QSize(120, 24));
+    m_targetControlComboBox->setToolTip(tr("Target control"));
 
     m_targetButtonGroup->addButton(m_targetLineButton1);
     m_targetButtonGroup->addButton(m_targetLineButton2);
     m_targetButtonGroup->addButton(m_targetLineButton3);
+
+    m_targetLineButton1->setEnabled(false);
+    m_targetLineButton2->setEnabled(false);
+    m_targetLineButton3->setEnabled(false);
+    m_marginOffsetSpinBox->setEnabled(false);
+    m_targetControlComboBox->setEnabled(false);
 
     connect(this, &AnchorRow::sourceLineTypeChanged,
             this, &AnchorRow::onSourceLineTypeChange);
     connect(this, &AnchorRow::targetLineTypeChanged,
             this, &AnchorRow::onTargetLineTypeChange);
     connect(m_sourceLineButton, &QToolButton::clicked,
-            this, &AnchorRow::onSourceButtonCheckedChange);
-
-    onSourceButtonCheckedChange();
-}
-
-qreal AnchorRow::marginOffset() const
-{
-    return m_marginOffset;
-}
-
-void AnchorRow::setMarginOffset(qreal marginOffset)
-{
-    if (m_marginOffset != marginOffset) {
-        m_marginOffset = marginOffset;
-        emit marginOffsetChanged();
-    }
+            this, &AnchorRow::onSourceButtonClick);
+    connect(m_targetButtonGroup, &ButtonGroup::buttonClicked,
+            this, &AnchorRow::onTargetButtonClick);
 }
 
 AnchorLine::Type AnchorRow::sourceLineType() const
@@ -168,18 +161,15 @@ void AnchorRow::setTargetLineType(AnchorLine::Type targetLineType)
     }
 }
 
-Control* AnchorRow::currentTargetControl() const
+qreal AnchorRow::marginOffset() const
 {
-    return m_targetControlComboBox->currentData().value<Control*>();
+    return m_marginOffsetSpinBox->value();
 }
 
-void AnchorRow::setCurrentTargetControl(const Control* control)
+void AnchorRow::setMarginOffset(qreal marginOffset)
 {
-    for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
-        if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {
-            m_targetControlComboBox->setCurrentIndex(i);
-            break;
-        }
+    if (m_marginOffsetSpinBox->value() != marginOffset) {
+        m_marginOffsetSpinBox->setValue(marginOffset);
     }
 }
 
@@ -197,6 +187,21 @@ void AnchorRow::setTargetControlList(const QList<Control*>& targetControlList)
         m_targetControlComboBox->addItem(control->id(), QVariant::fromValue(control));
 }
 
+Control* AnchorRow::currentTargetControl() const
+{
+    return m_targetControlComboBox->currentData().value<Control*>();
+}
+
+void AnchorRow::setCurrentTargetControl(const Control* control)
+{
+    for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
+        if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {
+            m_targetControlComboBox->setCurrentIndex(i);
+            break;
+        }
+    }
+}
+
 QSize AnchorRow::minimumSizeHint() const
 {
     return QWidget::minimumSizeHint() + QSize(4, -4);
@@ -211,64 +216,89 @@ void AnchorRow::onSourceLineTypeChange()
 {
     m_sourceLineButton->setIcon(anchorLineIcon(m_sourceLineType, this));
     m_sourceLineButton->setToolTip(anchorLineText(m_sourceLineType));
-    bool offset = m_sourceLineButton->toolTip().contains(QRegExp("vertical|horizontal", Qt::CaseInsensitive));
-    m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) + (offset ? " offset" : " margin"));
 
-    if (AnchorLine::isVertical(m_sourceLineType)) {
-        m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Left, this));
-        m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::HorizontalCenter, this));
-        m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Right, this));
-        m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::Left));
-        m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::HorizontalCenter));
-        m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::Right));
-    } else {
-        m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Top, this));
-        m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::VerticalCenter, this));
-        m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Bottom, this));
-        m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::Top));
-        m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::VerticalCenter));
-        m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::Bottom));
+    bool gadgetsVisible = m_sourceLineType != AnchorLine::Fill && m_sourceLineType != AnchorLine::Center;
+    m_targetLineButton1->setVisible(gadgetsVisible);
+    m_targetLineButton2->setVisible(gadgetsVisible);
+    m_targetLineButton3->setVisible(gadgetsVisible);
+    m_marginOffsetSpinBox->setVisible(gadgetsVisible);
+    m_targetControlComboBox->setVisible(gadgetsVisible);
+
+    if (gadgetsVisible) {
+        bool offset = m_sourceLineButton->toolTip().contains(QRegularExpression("Vertical|Horizontal"));
+        m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) + (offset ? " offset" : " margin"));
+        if (AnchorLine::isVertical(m_sourceLineType)) {
+            m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Left, this));
+            m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::HorizontalCenter, this));
+            m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Right, this));
+            m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::Left));
+            m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::HorizontalCenter));
+            m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::Right));
+        } else {
+            m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Top, this));
+            m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::VerticalCenter, this));
+            m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Bottom, this));
+            m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::Top));
+            m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::VerticalCenter));
+            m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::Bottom));
+        }
+        onTargetLineTypeChange();
     }
-
-    bool showTargetGadgets = m_sourceLineType != AnchorLine::Fill && m_sourceLineType != AnchorLine::Center;
-    m_targetLineButton1->setVisible(showTargetGadgets);
-    m_targetLineButton2->setVisible(showTargetGadgets);
-    m_targetLineButton3->setVisible(showTargetGadgets);
-    m_marginOffsetSpinBox->setVisible(showTargetGadgets);
-    m_targetControlComboBox->setVisible(showTargetGadgets);
-    onTargetLineTypeChange();
 }
 
 void AnchorRow::onTargetLineTypeChange()
 {
-    m_targetButtonGroup->uncheckAll();
-
     if (AnchorLine::isVertical(m_sourceLineType) == AnchorLine::isVertical(m_targetLineType)) {
         switch (m_targetLineType) {
         case AnchorLine::Left:
         case AnchorLine::Top:
             m_targetLineButton1->setChecked(true);
-            break;
+            m_marginOffsetSpinBox->setEnabled(true);
+            m_targetControlComboBox->setEnabled(true);
+            return;
         case AnchorLine::HorizontalCenter:
         case AnchorLine::VerticalCenter:
             m_targetLineButton2->setChecked(true);
-            break;
+            m_marginOffsetSpinBox->setEnabled(true);
+            m_targetControlComboBox->setEnabled(true);
+            return;
         case AnchorLine::Right:
         case AnchorLine::Bottom:
             m_targetLineButton3->setChecked(true);
-            break;
+            m_marginOffsetSpinBox->setEnabled(true);
+            m_targetControlComboBox->setEnabled(true);
+            return;
         default:
             break;
         }
     }
+    m_targetButtonGroup->uncheckAll();
+    m_marginOffsetSpinBox->setEnabled(false);
+    m_targetControlComboBox->setEnabled(false);
 }
 
-void AnchorRow::onSourceButtonCheckedChange()
+void AnchorRow::onSourceButtonClick()
 {
-    bool enableTargetGadgets = m_sourceLineButton->isChecked();
-    m_targetLineButton1->setEnabled(enableTargetGadgets);
-    m_targetLineButton2->setEnabled(enableTargetGadgets);
-    m_targetLineButton3->setEnabled(enableTargetGadgets);
-    m_marginOffsetSpinBox->setEnabled(enableTargetGadgets);
-    m_targetControlComboBox->setEnabled(enableTargetGadgets);
+    bool enableTargetButtons = m_sourceLineButton->isChecked();
+    bool targetLineValid = m_targetButtonGroup->checkedButton();
+    m_targetLineButton1->setEnabled(enableTargetButtons);
+    m_targetLineButton2->setEnabled(enableTargetButtons);
+    m_targetLineButton3->setEnabled(enableTargetButtons);
+    m_marginOffsetSpinBox->setEnabled(enableTargetButtons && targetLineValid);
+    m_targetControlComboBox->setEnabled(enableTargetButtons && targetLineValid);
+}
+
+void AnchorRow::onTargetButtonClick(QAbstractButton* button, bool checked)
+{
+    if (checked) {
+        bool vertical = AnchorLine::isVertical(m_sourceLineType);
+        if (button == m_targetLineButton1)
+            setTargetLineType(vertical ? AnchorLine::Left : AnchorLine::Top);
+        else if (button == m_targetLineButton2)
+            setTargetLineType(vertical ? AnchorLine::HorizontalCenter : AnchorLine::VerticalCenter);
+        else
+            setTargetLineType(vertical ? AnchorLine::Right : AnchorLine::Bottom);
+    } else {
+        setTargetLineType(AnchorLine::Invalid);
+    }
 }
