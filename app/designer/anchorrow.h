@@ -20,6 +20,9 @@ public:
     AnchorLine::Type sourceLineType() const;
     void setSourceLineType(AnchorLine::Type sourceLineType);
 
+    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+
 private slots:
     void onSourceLineTypeChange();
     void onSourceButtonCheckedChange();

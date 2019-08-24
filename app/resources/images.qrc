@@ -134,10 +134,10 @@
         <file>images/anchors/bottom.svg</file>
         <file>images/anchors/center.svg</file>
         <file>images/anchors/fill.svg</file>
-        <file>images/anchors/horizontalCenter.svg</file>
         <file>images/anchors/left.svg</file>
         <file>images/anchors/right.svg</file>
         <file>images/anchors/top.svg</file>
-        <file>images/anchors/verticalCenter.svg</file>
+        <file>images/anchors/horizontal.svg</file>
+        <file>images/anchors/vertical.svg</file>
     </qresource>
 </RCC>

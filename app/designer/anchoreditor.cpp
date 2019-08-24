@@ -14,21 +14,36 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
   , m_verticalCentrRow(new AnchorRow(this))
   , m_centerRow(new AnchorRow(this))
 {
+    setFocusPolicy(Qt::NoFocus);
     setWindowTitle(tr("Anchor Editor"));
-    setWindowFlags(Qt::Dialog
-                   | Qt::CustomizeWindowHint
-                   | Qt::WindowTitleHint
-                   | Qt::WindowCloseButtonHint);
+    setWindowModality(Qt::ApplicationModal);
+    setAttribute(Qt::WA_QuitOnClose, false);
+    setWindowFlags(Qt::Tool | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
 
     auto sourceLabel = new QLabel(tr("Source"), this);
     auto targetLabel = new QLabel(tr("Target"), this);
-    sourceLabel->setSizePolicy(QSizePolicy::Fixed, sourceLabel->sizePolicy().verticalPolicy());
+    auto marginLabel = new QLabel(tr("Margin/Offset"), this);
+    auto targetControlLabel = new QLabel(tr("Target control"), this);
+
+    QFont font(this->font());
+    font.setPixelSize(font.pixelSize() - 1);
+    sourceLabel->setFont(font);
+    targetLabel->setFont(font);
+    marginLabel->setFont(font);
+    targetControlLabel->setFont(font);
+    sourceLabel->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
     auto hbox = new QHBoxLayout;
     hbox->setContentsMargins(0, 0, 0, 0);
     hbox->setSpacing(0);
     hbox->addWidget(sourceLabel);
-    hbox->addSpacing(20);
+    hbox->addSpacing(5);
     hbox->addWidget(targetLabel);
+    hbox->addSpacing(44);
+    hbox->addWidget(marginLabel);
+    hbox->addSpacing(5);
+    hbox->addWidget(targetControlLabel);
+    hbox->addStretch();
 
     m_layout->setContentsMargins(6, 6, 6, 6);
     m_layout->setSpacing(1);
@@ -42,6 +57,7 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_verticalCentrRow);
     m_layout->addWidget(m_centerRow);
     m_layout->addStretch();
+    m_layout->setSizeConstraint(QLayout::SetFixedSize);
 
     m_leftRow->setSourceLineType(AnchorLine::Left);
     m_topRow->setSourceLineType(AnchorLine::Top);

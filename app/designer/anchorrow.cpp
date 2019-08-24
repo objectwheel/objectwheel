@@ -1,4 +1,6 @@
 #include <anchorrow.h>
+#include <paintutils.h>
+
 #include <QBoxLayout>
 #include <QToolButton>
 #include <QComboBox>
@@ -9,45 +11,47 @@ static QString anchorLineText(AnchorLine::Type type)
 {
     switch (type) {
     case AnchorLine::Left:
-        return QStringLiteral("Left");
+        return QObject::tr("Left");
     case AnchorLine::Right:
-        return QStringLiteral("Right");
+        return QObject::tr("Right");
     case AnchorLine::Top:
-        return QStringLiteral("Top");
+        return QObject::tr("Top");
     case AnchorLine::Bottom:
-        return QStringLiteral("Bottom");
+        return QObject::tr("Bottom");
     case AnchorLine::HorizontalCenter:
-        return QStringLiteral("Horizontal center");
+        return QObject::tr("Horizontal center");
     case AnchorLine::VerticalCenter:
-        return QStringLiteral("Vertical center");
+        return QObject::tr("Vertical center");
     case AnchorLine::Fill:
-        return QStringLiteral("Fill");
+        return QObject::tr("Fill");
     case AnchorLine::Center:
-        return QStringLiteral("Center in");
+        return QObject::tr("Center in");
     default:
         return QString();
     }
 }
 
-static QIcon anchorLineIcon(AnchorLine::Type type)
+static QIcon anchorLineIcon(AnchorLine::Type type, QWidget* widget)
 {
+    using namespace PaintUtils;
+    const QColor& color = widget->palette().buttonText().color();
     switch (type) {
     case AnchorLine::Left:
-        return QIcon(":/images/anchors/left.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/left.svg"), color));
     case AnchorLine::Right:
-        return QIcon(":/images/anchors/right.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/right.svg"), color));
     case AnchorLine::Top:
-        return QIcon(":/images/anchors/top.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/top.svg"), color));
     case AnchorLine::Bottom:
-        return QIcon(":/images/anchors/bottom.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/bottom.svg"), color));
     case AnchorLine::HorizontalCenter:
-        return QIcon(":/images/anchors/horizontalCenter.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/horizontal.svg"), color));
     case AnchorLine::VerticalCenter:
-        return QIcon(":/images/anchors/verticalCenter.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/vertical.svg"), color));
     case AnchorLine::Fill:
-        return QIcon(":/images/anchors/fill.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/fill.svg"), color));
     case AnchorLine::Center:
-        return QIcon(":/images/anchors/center.svg");
+        return QIcon(renderOverlaidPixmap(QPixmap(":/images/anchors/center.svg"), color));
     default:
         return QIcon();
     }
@@ -76,9 +80,9 @@ AnchorRow::AnchorRow(QWidget *parent) : QWidget(parent)
     hbox->addWidget(m_targetLineButton3);
 
     m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->setSpacing(6);
+    m_layout->setSpacing(4);
     m_layout->addWidget(m_sourceLineButton);
-    m_layout->addSpacing(30);
+    m_layout->addSpacing(12);
     m_layout->addLayout(hbox);
     m_layout->addWidget(m_marginOffsetSpinBox);
     m_layout->addWidget(m_targetControlComboBox);
@@ -105,7 +109,7 @@ AnchorRow::AnchorRow(QWidget *parent) : QWidget(parent)
     m_targetLineButton3->setCheckable(true);
 
     m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
-    m_marginOffsetSpinBox->setFixedSize(QSize(64, 24));
+    m_marginOffsetSpinBox->setFixedSize(QSize(72, 24));
     m_marginOffsetSpinBox->setRange(-999.99, 999.99);
     m_marginOffsetSpinBox->setDecimals(2);
 
@@ -133,19 +137,37 @@ void AnchorRow::setSourceLineType(AnchorLine::Type sourceLineType)
     }
 }
 
+QSize AnchorRow::minimumSizeHint() const
+{
+    return QWidget::minimumSizeHint() + QSize(4, -4);
+}
+
+QSize AnchorRow::sizeHint() const
+{
+    return minimumSizeHint();
+}
+
 void AnchorRow::onSourceLineTypeChange()
 {
+    m_sourceLineButton->setIcon(anchorLineIcon(m_sourceLineType, this));
     m_sourceLineButton->setToolTip(anchorLineText(m_sourceLineType));
-    m_sourceLineButton->setIcon(anchorLineIcon(m_sourceLineType));
+    bool offset = m_sourceLineButton->toolTip().contains(QRegExp("vertical|horizontal", Qt::CaseInsensitive));
+    m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) + (offset ? " offset" : " margin"));
 
     if (AnchorLine::isVertical(m_sourceLineType)) {
-        m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Left));
-        m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::HorizontalCenter));
-        m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Right));
+        m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Left, this));
+        m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::HorizontalCenter, this));
+        m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Right, this));
+        m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::Left));
+        m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::HorizontalCenter));
+        m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::Right));
     } else {
-        m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Top));
-        m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::VerticalCenter));
-        m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Bottom));
+        m_targetLineButton1->setIcon(anchorLineIcon(AnchorLine::Top, this));
+        m_targetLineButton2->setIcon(anchorLineIcon(AnchorLine::VerticalCenter, this));
+        m_targetLineButton3->setIcon(anchorLineIcon(AnchorLine::Bottom, this));
+        m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::Top));
+        m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::VerticalCenter));
+        m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::Bottom));
     }
 
     bool showTargetGadgets = m_sourceLineType != AnchorLine::Fill && m_sourceLineType != AnchorLine::Center;
