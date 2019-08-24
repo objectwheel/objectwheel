@@ -33,21 +33,21 @@ static QIcon anchorLineIcon(AnchorLine::Type type)
 {
     switch (type) {
     case AnchorLine::Left:
-        return QIcon(":/images/anchors/left.png");
+        return QIcon(":/images/anchors/left.svg");
     case AnchorLine::Right:
-        return QIcon(":/images/anchors/right.png");
+        return QIcon(":/images/anchors/right.svg");
     case AnchorLine::Top:
-        return QIcon(":/images/anchors/top.png");
+        return QIcon(":/images/anchors/top.svg");
     case AnchorLine::Bottom:
-        return QIcon(":/images/anchors/bottom.png");
+        return QIcon(":/images/anchors/bottom.svg");
     case AnchorLine::HorizontalCenter:
-        return QIcon(":/images/anchors/horizontalCenter.png");
+        return QIcon(":/images/anchors/horizontalCenter.svg");
     case AnchorLine::VerticalCenter:
-        return QIcon(":/images/anchors/verticalCenter.png");
+        return QIcon(":/images/anchors/verticalCenter.svg");
     case AnchorLine::Fill:
-        return QIcon(":/images/anchors/fill.png");
+        return QIcon(":/images/anchors/fill.svg");
     case AnchorLine::Center:
-        return QIcon(":/images/anchors/center.png");
+        return QIcon(":/images/anchors/center.svg");
     default:
         return QIcon();
     }
@@ -86,22 +86,22 @@ AnchorRow::AnchorRow(QWidget *parent) : QWidget(parent)
 
     m_sourceLineButton->setCursor(Qt::PointingHandCursor);
     m_sourceLineButton->setFixedSize(QSize(24, 24));
-    m_sourceLineButton->setIconSize({16, 16});
+    m_sourceLineButton->setIconSize({12, 12});
     m_sourceLineButton->setCheckable(true);
 
     m_targetLineButton1->setCursor(Qt::PointingHandCursor);
     m_targetLineButton1->setFixedSize(QSize(24, 24));
-    m_targetLineButton1->setIconSize({16, 16});
+    m_targetLineButton1->setIconSize({12, 12});
     m_targetLineButton1->setCheckable(true);
 
     m_targetLineButton2->setCursor(Qt::PointingHandCursor);
     m_targetLineButton2->setFixedSize(QSize(24, 24));
-    m_targetLineButton2->setIconSize({16, 16});
+    m_targetLineButton2->setIconSize({12, 12});
     m_targetLineButton2->setCheckable(true);
 
     m_targetLineButton3->setCursor(Qt::PointingHandCursor);
     m_targetLineButton3->setFixedSize(QSize(24, 24));
-    m_targetLineButton3->setIconSize({16, 16});
+    m_targetLineButton3->setIconSize({12, 12});
     m_targetLineButton3->setCheckable(true);
 
     m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
@@ -116,6 +116,8 @@ AnchorRow::AnchorRow(QWidget *parent) : QWidget(parent)
             this, &AnchorRow::onSourceLineTypeChange);
     connect(m_sourceLineButton, &QToolButton::clicked,
             this, &AnchorRow::onSourceButtonCheckedChange);
+
+    onSourceButtonCheckedChange();
 }
 
 AnchorLine::Type AnchorRow::sourceLineType() const

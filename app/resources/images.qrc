@@ -131,13 +131,13 @@
         <file>images/prohibited.svg</file>
         <file>images/extension.svg</file>
         <file>images/anchor.svg</file>
-        <file>images/anchors/bottom.png</file>
-        <file>images/anchors/center.png</file>
-        <file>images/anchors/fill.png</file>
-        <file>images/anchors/horizontalCenter.png</file>
-        <file>images/anchors/left.png</file>
-        <file>images/anchors/right.png</file>
-        <file>images/anchors/top.png</file>
-        <file>images/anchors/verticalCenter.png</file>
+        <file>images/anchors/bottom.svg</file>
+        <file>images/anchors/center.svg</file>
+        <file>images/anchors/fill.svg</file>
+        <file>images/anchors/horizontalCenter.svg</file>
+        <file>images/anchors/left.svg</file>
+        <file>images/anchors/right.svg</file>
+        <file>images/anchors/top.svg</file>
+        <file>images/anchors/verticalCenter.svg</file>
     </qresource>
 </RCC>
