@@ -133,6 +133,12 @@ AnchorRow::AnchorRow(QWidget* parent) : QWidget(parent)
             this, &AnchorRow::onSourceButtonClick);
     connect(m_targetButtonGroup, &ButtonGroup::buttonClicked,
             this, &AnchorRow::onTargetButtonClick);
+    connect(m_targetButtonGroup, &ButtonGroup::buttonClicked,
+            this, &AnchorRow::targetLineTypeActivated);
+    connect(m_marginOffsetSpinBox, &QDoubleSpinBox::editingFinished,
+            this, &AnchorRow::marginOffsetEditingFinished);
+    connect(m_targetControlComboBox, qOverload<int>(&QComboBox::activated),
+            this, &AnchorRow::targetControlActivated);
 }
 
 AnchorLine::Type AnchorRow::sourceLineType() const
@@ -168,9 +174,7 @@ qreal AnchorRow::marginOffset() const
 
 void AnchorRow::setMarginOffset(qreal marginOffset)
 {
-    if (m_marginOffsetSpinBox->value() != marginOffset) {
-        m_marginOffsetSpinBox->setValue(marginOffset);
-    }
+    m_marginOffsetSpinBox->setValue(marginOffset);
 }
 
 QList<Control*> AnchorRow::targetControlList() const
@@ -200,6 +204,17 @@ void AnchorRow::setCurrentTargetControl(const Control* control)
             break;
         }
     }
+}
+
+void AnchorRow::clear()
+{
+    m_sourceLineButton->setChecked(false);
+    setTargetLineType(AnchorLine::Invalid);
+    m_targetLineButton1->setEnabled(false);
+    m_targetLineButton2->setEnabled(false);
+    m_targetLineButton3->setEnabled(false);
+    m_marginOffsetSpinBox->setValue(0);
+    m_targetControlComboBox->clear();
 }
 
 QSize AnchorRow::minimumSizeHint() const

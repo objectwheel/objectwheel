@@ -34,6 +34,8 @@ public:
     Control* currentTargetControl() const;
     void setCurrentTargetControl(const Control* control);
 
+    void clear();
+
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
@@ -46,6 +48,9 @@ private slots:
 signals:
     void sourceLineTypeChanged();
     void targetLineTypeChanged();
+    void targetLineTypeActivated();
+    void marginOffsetEditingFinished();
+    void targetControlActivated();
 
 private:
     AnchorLine::Type m_sourceLineType;

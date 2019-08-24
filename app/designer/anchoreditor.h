@@ -5,6 +5,7 @@
 
 class QBoxLayout;
 class AnchorRow;
+class QPushButton;
 
 class AnchorEditor final : public QWidget
 {
@@ -24,6 +25,7 @@ private:
     AnchorRow* m_horizontalCenterRow;
     AnchorRow* m_verticalCentrRow;
     AnchorRow* m_centerRow;
+    QPushButton* m_closeButton;
 };
 
 #endif // ANCHOREDITOR_H

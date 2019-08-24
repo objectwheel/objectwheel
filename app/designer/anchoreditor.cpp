@@ -2,6 +2,7 @@
 #include <anchorrow.h>
 #include <QBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 
 AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
@@ -13,6 +14,7 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
   , m_horizontalCenterRow(new AnchorRow(this))
   , m_verticalCentrRow(new AnchorRow(this))
   , m_centerRow(new AnchorRow(this))
+  , m_closeButton(new QPushButton(this))
 {
     setFocusPolicy(Qt::NoFocus);
     setWindowTitle(tr("Anchor Editor"));
@@ -56,6 +58,7 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_horizontalCenterRow);
     m_layout->addWidget(m_verticalCentrRow);
     m_layout->addWidget(m_centerRow);
+    m_layout->addWidget(m_closeButton, 0, Qt::AlignVCenter | Qt::AlignRight);
     m_layout->addStretch();
     m_layout->setSizeConstraint(QLayout::SetFixedSize);
 
@@ -67,4 +70,10 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     m_verticalCentrRow->setSourceLineType(AnchorLine::VerticalCenter);
     m_fillRow->setSourceLineType(AnchorLine::Fill);
     m_centerRow->setSourceLineType(AnchorLine::Center);
+
+    m_closeButton->setFixedHeight(24);
+    m_closeButton->setText(tr("Close"));
+    m_closeButton->setToolTip(tr("Close the Anchor Editor"));
+    m_closeButton->setCursor(Qt::PointingHandCursor);
+    connect(m_closeButton, &QPushButton::clicked, this, &AnchorEditor::close);
 }
