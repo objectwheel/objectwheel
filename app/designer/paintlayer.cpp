@@ -473,7 +473,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
         highlightedPath += highlightPath(sourceControl);
     if (targetControl)
         highlightedPath += highlightPath(targetControl);
-    painter->fillPath(scenePath - highlightedPath, QColor(0, 0, 0, 50));
+    painter->fillPath(scenePath - highlightedPath, QColor(0, 0, 0, 35));
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(DesignerScene::outlineColor()));

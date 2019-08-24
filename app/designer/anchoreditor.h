@@ -3,7 +3,9 @@
 
 #include <QWidget>
 
-class Control;
+class QBoxLayout;
+class AnchorRow;
+
 class AnchorEditor final : public QWidget
 {
     Q_OBJECT
@@ -12,15 +14,16 @@ class AnchorEditor final : public QWidget
 public:
     explicit AnchorEditor(QWidget* parent = nullptr);
 
-    Control* sourceControl() const;
-    void setSourceControl(Control* sourceControl);
-
-    Control* targetControl() const;
-    void setTargetControl(Control* targetControl);
-
 private:
-    Control* m_sourceControl;
-    Control* m_targetControl;
+    QBoxLayout* m_layout;
+    AnchorRow* m_leftRow;
+    AnchorRow* m_rightRow;
+    AnchorRow* m_topRow;
+    AnchorRow* m_bottomRow;
+    AnchorRow* m_fillRow;
+    AnchorRow* m_horizontalCenterRow;
+    AnchorRow* m_verticalCentrRow;
+    AnchorRow* m_centerRow;
 };
 
 #endif // ANCHOREDITOR_H

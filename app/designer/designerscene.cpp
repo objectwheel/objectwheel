@@ -27,6 +27,7 @@
 #include <QApplication>
 #include <QTimer>
 
+#include <anchoreditor.h>
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
@@ -71,8 +72,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_anchorLayer, &AnchorLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
             m_anchorLayer, &AnchorLayer::updateGeometry);
-    connect(m_anchorLayer, &AnchorLayer::activatedChanged,
-            m_paintLayer, [=] { m_paintLayer->update(); });
+    connect(m_anchorLayer, &AnchorLayer::activatedChanged, // FIXME
+            m_paintLayer, [=] { m_paintLayer->update(); if (!m_anchorLayer->activated()) (new AnchorEditor(0))->show(); });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
             m_paintLayer, &PaintLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
