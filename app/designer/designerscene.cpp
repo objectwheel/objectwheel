@@ -80,9 +80,9 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                 auto e = new AnchorEditor(0);
                 connect(e, &AnchorEditor::anchored,
                         [=] (const AnchorLine& sourceLine, const AnchorLine& targetLine) {
-                    ControlRenderingManager::schedulePropertyUpdate(sourceLine.control()->uid(),
-                                                                    "anchors.left",
-                                                                    targetLine.control()->id() + ".right");
+                    ControlRenderingManager::scheduleBindingUpdate(sourceLine.control()->uid(),
+                                                                   "anchors.left",
+                                                                   targetLine.control()->id() + ".right");
                 });
                 return e;
             }();

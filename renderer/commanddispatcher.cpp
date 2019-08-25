@@ -112,6 +112,13 @@ void CommandDispatcher::onDataReceived(const RendererCommands& command, const QB
         break;
     }
 
+    case BindingUpdate: {
+        QString uid, bindingName, expression;
+        pull(data, uid, bindingName, expression);
+        emit bindingUpdate(uid, bindingName, expression);
+        break;
+    }
+
     case PropertyUpdate: {
         QVariant propertyValue;
         QString uid, propertyName;

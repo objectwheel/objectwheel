@@ -28,6 +28,7 @@ public:
     static void scheduleIndexUpdate(const QString& uid);
     static void scheduleIdUpdate(const QString& uid, const QString& newId);
     static void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
+    static void scheduleBindingUpdate(const QString& uid, const QString& bindingName, const QString& expression);
     static void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     static void scheduleRefresh(const QString& formUid);
     static void scheduleTerminate();

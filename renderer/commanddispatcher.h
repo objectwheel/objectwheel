@@ -27,6 +27,7 @@ private:
 signals:
     void init();
     void terminate();
+    void bindingUpdate(const QString& uid, const QString& bindingName, const QString& expression);
     void propertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void formCreation(const QString& dir);
     void preview(const QString& url);

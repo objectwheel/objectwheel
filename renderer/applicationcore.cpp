@@ -59,6 +59,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             this, &ApplicationCore::onTerminateCommand);
     connect(s_commandDispatcher, &CommandDispatcher::init,
             s_renderEngine, &RenderEngine::init);
+    connect(s_commandDispatcher, &CommandDispatcher::bindingUpdate,
+            s_renderEngine, &RenderEngine::updateBinding);
     connect(s_commandDispatcher, &CommandDispatcher::propertyUpdate,
             s_renderEngine, &RenderEngine::updateProperty);
     connect(s_commandDispatcher, &CommandDispatcher::controlCreation,

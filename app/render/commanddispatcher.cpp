@@ -31,6 +31,11 @@ void CommandDispatcher::scheduleDevicePixelRatioUpdate(qreal devicePixelRatio)
     send(m_server, RendererCommands::DevicePixelRatioUpdate, push(devicePixelRatio));
 }
 
+void CommandDispatcher::scheduleBindingUpdate(const QString& uid, const QString& bindingName, const QString& expression)
+{
+    send(m_server, RendererCommands::BindingUpdate, push(uid, bindingName, expression));
+}
+
 void CommandDispatcher::schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
 {
     send(m_server, RendererCommands::PropertyUpdate, push(uid, propertyName, propertyValue));

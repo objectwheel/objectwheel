@@ -7,7 +7,7 @@
 #include <components.h>
 #include <paintutils.h>
 #include <private/qquickdesignersupportmetainfo_p.h>
-
+#include <private/qquickdesignersupportproperties_p.h>
 #include <private/qqmlengine_p.h>
 
 #include <QQmlEngine>
@@ -107,6 +107,27 @@ void RenderEngine::init()
     g_progress = g_progress_3;
     for (ControlInstance* formInstance : m_formInstances)
         scheduleRender(formInstance);
+}
+
+void RenderEngine::updateBinding(const QString& uid, const QString& bindingName, const QString& expression)
+{
+    ControlInstance* instance = instanceForUid(uid);
+
+    Q_ASSERT(instance);
+    Q_ASSERT(instance->object);
+    Q_ASSERT(instance->errors.isEmpty());
+
+    ControlInstance* formInstance = formInstanceFor(instance);
+
+    Q_ASSERT(formInstance);
+
+    RenderUtils::setInstancePropertyBinding(instance, bindingName, expression);
+
+    if (instance->parent && instance->parent->object)
+        RenderUtils::refreshLayoutable(instance->parent);
+
+    refreshBindings(formInstance->context);
+    scheduleRender(formInstance);
 }
 
 void RenderEngine::updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
@@ -984,6 +1005,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
             item->update();
         }
     }
+
+    QQuickDesignerSupportProperties::registerCustomData(object); // Needed for setInstancePropertyBinding
 
     // Make sure everything is visible
     if (instance->gui) {

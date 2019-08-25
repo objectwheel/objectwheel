@@ -74,6 +74,7 @@ public slots:
     void updateIndex(const QString& uid);
     void updateId(const QString& uid, const QString& newId);
     void updateParent(const QString& newDir, const QString& uid, const QString& parentUid);
+    void updateBinding(const QString& uid, const QString& bindingName, const QString& expression);
     void updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void updateControlCode(const QString& uid);
     void updateFormCode(const QString& uid);

@@ -138,6 +138,11 @@ void ControlRenderingManager::scheduleControlCreation(const QString& dir, const 
     s_commandDispatcher->scheduleControlCreation(dir, parentUid);
 }
 
+void ControlRenderingManager::scheduleBindingUpdate(const QString& uid, const QString& bindingName, const QString& expression)
+{
+    s_commandDispatcher->scheduleBindingUpdate(uid, bindingName, expression);
+}
+
 void ControlRenderingManager::schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue)
 {
     s_commandDispatcher->schedulePropertyUpdate(uid, propertyName, propertyValue);

@@ -15,7 +15,7 @@
 #include <private/qquickanimation_p.h>
 #include <private/qquicktextinput_p.h>
 #include <private/qquicktransition_p.h>
-#include <private/qquickdesignersupport_p.h>
+#include <private/qquickdesignersupportproperties_p.h>
 #include <private/qquickpopup_p.h>
 #include <private/qqmlvme_p.h>
 #include <private/qquickitem_p.h>
@@ -619,6 +619,21 @@ void RenderUtils::makeDirtyRecursive(RenderEngine::ControlInstance* beginningIns
 
     for (RenderEngine::ControlInstance* childInstance : beginningInstance->children)
         makeDirtyRecursive(childInstance);
+}
+
+void RenderUtils::setInstancePropertyBinding(RenderEngine::ControlInstance* instance,
+                                             const QString& bindingName, const QString& expression)
+{
+    Q_ASSERT(instance);
+    Q_ASSERT(instance->errors.isEmpty());
+    Q_ASSERT(instance->object);
+    // WARNING: Don't use for visible, visibility, x, y, width, height properties,
+    // or implement it like how setInstancePropertyVariant does implement them
+    QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
+                                                        bindingName.toUtf8(), expression);
+    DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
+    if (instance->parent && instance->parent->object)
+        DesignerSupport::addDirty(RenderUtils::guiItem(instance->parent), DesignerSupport::ChildrenUpdateMask);
 }
 
 void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* instance,

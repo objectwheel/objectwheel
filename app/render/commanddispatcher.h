@@ -19,6 +19,7 @@ public slots:
     void scheduleInit();
     void scheduleTerminate();
     void scheduleDevicePixelRatioUpdate(qreal devicePixelRatio);
+    void scheduleBindingUpdate(const QString& uid, const QString& bindingName, const QString& expression);
     void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void scheduleFormCreation(const QString& dir);
     void scheduleControlCreation(const QString& dir, const QString& parentUid);

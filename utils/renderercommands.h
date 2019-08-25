@@ -19,6 +19,7 @@ enum RendererCommands : quint32 {
     RenderDone,
     Preview,
     PreviewDone,
+    BindingUpdate,
     PropertyUpdate,
     DevicePixelRatioUpdate,
     Refresh,
