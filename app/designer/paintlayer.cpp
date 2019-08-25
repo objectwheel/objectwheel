@@ -447,7 +447,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
 {
     Q_ASSERT(scene());
 
-    if (!scene()->anchorLayer()->activated())
+    if (!scene()->anchorLayer()->activated() || false) // FIXME: alo paint when anchor editor is open
         return;
 
     painter->save();

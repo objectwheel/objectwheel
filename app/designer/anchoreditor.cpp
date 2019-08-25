@@ -182,7 +182,7 @@ void AnchorEditor::activate(Control* source, Control* target)
 
 void AnchorEditor::onMarginOffsetEditingFinish(AnchorRow* row)
 {
-    emit marginOffsetEdited(AnchorLine(row->sourceLineType(), property(g_sourceProperty).value<Control*>()));
+    emit marginOffsetEdited(AnchorLine(row->sourceLineType(), property(g_sourceProperty).value<Control*>()), row->marginOffset());
 }
 
 void AnchorEditor::onTargetControlActivate(AnchorRow* row)

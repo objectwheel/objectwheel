@@ -25,7 +25,7 @@ public slots:
     void onTargetLineTypeActivate(AnchorRow* row);
 
 signals:
-    void marginOffsetEdited(const AnchorLine& sourceLine);
+    void marginOffsetEdited(const AnchorLine& sourceLine, qreal marginOffset);
     void anchored(const AnchorLine& sourceLine, const AnchorLine& targetLine);
 
 private:

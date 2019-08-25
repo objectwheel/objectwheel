@@ -28,6 +28,54 @@
 #include <QTimer>
 
 #include <anchoreditor.h>
+static QString anchorLineText(AnchorLine::Type type)
+{
+    switch (type) {
+    case AnchorLine::Left:
+        return QStringLiteral("left");
+    case AnchorLine::Right:
+        return QStringLiteral("right");
+    case AnchorLine::Top:
+        return QStringLiteral("top");
+    case AnchorLine::Bottom:
+        return QStringLiteral("bottom");
+    case AnchorLine::Baseline:
+        return QStringLiteral("baseline");
+    case AnchorLine::HorizontalCenter:
+        return QStringLiteral("horizontalCenter");
+    case AnchorLine::VerticalCenter:
+        return QStringLiteral("verticalCenter");
+    case AnchorLine::Fill:
+        return QStringLiteral("fill");
+    case AnchorLine::Center:
+        return QStringLiteral("centerIn");
+    default:
+        return QString();
+    }
+}
+
+static QString marginOffsetText(AnchorLine::Type type)
+{
+    switch (type) {
+    case AnchorLine::Left:
+        return QStringLiteral("leftMargin");
+    case AnchorLine::Right:
+        return QStringLiteral("rightMargin");
+    case AnchorLine::Top:
+        return QStringLiteral("topMargin");
+    case AnchorLine::Bottom:
+        return QStringLiteral("bottomMargin");
+    case AnchorLine::Baseline:
+        return QStringLiteral("baselineOffset");
+    case AnchorLine::HorizontalCenter:
+        return QStringLiteral("horizontalCenterOffset");
+    case AnchorLine::VerticalCenter:
+        return QStringLiteral("verticalCenterOffset");
+    default:
+        return QString();
+    }
+}
+
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
@@ -78,11 +126,18 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
         if (!m_anchorLayer->activated()) {
             static auto e = [] {
                 auto e = new AnchorEditor(0);
-                connect(e, &AnchorEditor::anchored,
-                        [=] (const AnchorLine& sourceLine, const AnchorLine& targetLine) {
+                connect(e, &AnchorEditor::anchored, [=] (const AnchorLine& sourceLine, const AnchorLine& targetLine) {
+                    QString targetId = targetLine.control()->type() == Form::Type ? "parent" : targetLine.control()->id();
                     ControlRenderingManager::scheduleBindingUpdate(sourceLine.control()->uid(),
-                                                                   "anchors.left",
-                                                                   targetLine.control()->id() + ".right");
+                                                                   "anchors." + anchorLineText(sourceLine.type()),
+                                                                   targetLine.isValid()
+                                                                   ? targetId + "." + anchorLineText(targetLine.type())
+                                                                   : "undefined");
+                });
+                connect(e, &AnchorEditor::marginOffsetEdited, [=] (const AnchorLine& sourceLine, qreal marginOffset) {
+                    ControlRenderingManager::schedulePropertyUpdate(sourceLine.control()->uid(),
+                                                                   "anchors." + marginOffsetText(sourceLine.type()),
+                                                                   marginOffset);
                 });
                 return e;
             }();
