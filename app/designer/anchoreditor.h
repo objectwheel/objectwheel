@@ -8,9 +8,9 @@ class QBoxLayout;
 class AnchorRow;
 class QDialogButtonBox;
 class Control;
-class QLabel;
 class QComboBox;
 class QDoubleSpinBox;
+class QCheckBox;
 
 class AnchorEditor final : public QWidget
 {
@@ -30,13 +30,12 @@ public slots:
 signals:
     void marginOffsetEdited(const AnchorLine& sourceLine, qreal marginOffset);
     void anchored(const AnchorLine& sourceLine, const AnchorLine& targetLine);
+    void reset();
 
 private:
     QBoxLayout* m_layout;
-    QLabel* m_sourceControlLabel;
-    QLabel* m_marginOffsetLabel;
     QComboBox* m_sourceControlComboBox;
-    QDoubleSpinBox* m_marginSpinBox;
+    QDoubleSpinBox* m_marginsSpinBox;
     AnchorRow* m_leftRow;
     AnchorRow* m_rightRow;
     AnchorRow* m_topRow;
@@ -45,6 +44,7 @@ private:
     AnchorRow* m_horizontalCenterRow;
     AnchorRow* m_verticalCenterRow;
     AnchorRow* m_centerInRow;
+    QCheckBox* m_alignWhenCenteredCheckBox;
     QDialogButtonBox* m_dialogButtonBox;
 };
 

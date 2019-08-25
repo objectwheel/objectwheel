@@ -50,6 +50,7 @@ private:
     const AnchorLine::Type m_sourceLineType;
     AnchorLine::Type m_targetLineType;
     QBoxLayout* m_layout;
+    QToolButton* m_fillCenterButton;
     QLabel* m_sourceIcon;
     QLabel* m_arrowIcon;
     QComboBox* m_targetControlComboBox;

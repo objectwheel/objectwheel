@@ -63,6 +63,7 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
   , m_sourceLineType(sourceLineType)
   , m_targetLineType(AnchorLine::Invalid)
   , m_layout(new QHBoxLayout(this))
+  , m_fillCenterButton(new QToolButton(this))
   , m_sourceIcon(new QLabel(this))
   , m_arrowIcon(new QLabel(this))
   , m_targetControlComboBox(new QComboBox(this))
@@ -73,6 +74,7 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
   , m_targetLineButton3(new QToolButton(this))
 {    
     bool vertical = AnchorLine::isVertical(m_sourceLineType);
+    bool fillCenter = m_sourceLineType == AnchorLine::Fill || m_sourceLineType == AnchorLine::Center;
     bool offset = m_sourceLineType == AnchorLine::HorizontalCenter || m_sourceLineType == AnchorLine::VerticalCenter;
     auto hbox = new QHBoxLayout;
     hbox->setSpacing(0);
@@ -83,10 +85,12 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
 
     m_layout->setSpacing(6);
     m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_sourceIcon, 0, Qt::AlignVCenter | Qt::AlignRight);
-    m_layout->addSpacing(7);
-    m_layout->addWidget(m_arrowIcon, 0, Qt::AlignVCenter | Qt::AlignRight);
-    m_layout->addSpacing(7);
+    if (!fillCenter)
+        m_layout->addSpacing(5);
+    m_layout->addWidget(fillCenter ? (QWidget*)m_fillCenterButton : (QWidget*)m_sourceIcon, 0, Qt::AlignCenter);
+    m_layout->addSpacing(fillCenter ? 1 : 8);
+    m_layout->addWidget(m_arrowIcon, 0, Qt::AlignCenter);
+    m_layout->addSpacing(6);
     m_layout->addWidget(m_targetControlComboBox);
     m_layout->addWidget(m_marginOffsetSpinBox);
     m_layout->addLayout(hbox);
@@ -97,13 +101,20 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_sourceIcon->setPixmap(anchorLinePixmap(m_sourceLineType, this));
     m_sourceIcon->setToolTip(anchorLineText(m_sourceLineType));
 
+    m_fillCenterButton->setCursor(Qt::PointingHandCursor);
+    m_fillCenterButton->setFixedSize(QSize(24, 24));
+    m_fillCenterButton->setIconSize({12, 12});
+    m_fillCenterButton->setCheckable(true);
+    m_fillCenterButton->setIcon(anchorLinePixmap(m_sourceLineType, this));
+    m_fillCenterButton->setToolTip(anchorLineText(m_sourceLineType));
+
     m_arrowIcon->setFixedSize(8, 8);
     m_arrowIcon->setScaledContents(true);
     m_arrowIcon->setPixmap(QPixmap(":/images/extension.svg"));
 
     m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) + (offset ? " offset" : " margin"));
     m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
-    m_marginOffsetSpinBox->setFixedSize(QSize(72, 24));
+    m_marginOffsetSpinBox->setFixedSize(QSize(80, 24));
     m_marginOffsetSpinBox->setRange(-999.99, 999.99);
     m_marginOffsetSpinBox->setDecimals(2);
     m_marginOffsetSpinBox->setEnabled(false);
@@ -137,6 +148,16 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_targetButtonGroup->addButton(m_targetLineButton1);
     m_targetButtonGroup->addButton(m_targetLineButton2);
     m_targetButtonGroup->addButton(m_targetLineButton3);
+
+    if (fillCenter) {
+        m_sourceIcon->setVisible(false);
+        m_marginOffsetSpinBox->setVisible(false);
+        m_targetLineButton1->setVisible(false);
+        m_targetLineButton2->setVisible(false);
+        m_targetLineButton3->setVisible(false);
+    } else {
+        m_fillCenterButton->setVisible(false);
+    }
 
     connect(this, &AnchorRow::targetLineTypeChanged,
             this, &AnchorRow::onTargetLineTypeChange);
