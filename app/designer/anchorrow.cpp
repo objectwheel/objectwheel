@@ -150,6 +150,11 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
             this, &AnchorRow::targetControlActivated);
 }
 
+AnchorLine::Type AnchorRow::sourceLineType() const
+{
+    return m_sourceLineType;
+}
+
 AnchorLine::Type AnchorRow::targetLineType() const
 {
     return m_targetLineType;
@@ -187,12 +192,12 @@ void AnchorRow::setTargetControlList(const QList<Control*>& targetControlList)
         m_targetControlComboBox->addItem(control->id(), QVariant::fromValue(control));
 }
 
-Control* AnchorRow::currentTargetControl() const
+Control* AnchorRow::targetControl() const
 {
     return m_targetControlComboBox->currentData().value<Control*>();
 }
 
-void AnchorRow::setCurrentTargetControl(const Control* control)
+void AnchorRow::setTargetControl(const Control* control)
 {
     for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
         if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {

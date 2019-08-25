@@ -76,7 +76,16 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_paintLayer, [=] {
         m_paintLayer->update();
         if (!m_anchorLayer->activated()) {
-            static auto e = new AnchorEditor(0);
+            static auto e = [] {
+                auto e = new AnchorEditor(0);
+                connect(e, &AnchorEditor::anchored,
+                        [=] (const AnchorLine& sourceLine, const AnchorLine& targetLine) {
+                    ControlRenderingManager::schedulePropertyUpdate(sourceLine.control()->uid(),
+                                                                    "anchors.left",
+                                                                    targetLine.control()->id() + ".right");
+                });
+                return e;
+            }();
             const QLineF line(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint()),
                               anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
             e->activate(topLevelControl(line.p1()), topLevelControl(line.p2()));

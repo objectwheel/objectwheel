@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QPushButton>
 
+static const char g_sourceProperty[] = "_q_AnchorEditor_sourceProperty";
+
 static QList<Control*> availableAnchorTargets(Control* source)
 {
     QList<Control*> controls(source->siblings());
@@ -62,7 +64,7 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_rightRow);
     m_layout->addWidget(m_topRow);
     m_layout->addWidget(m_bottomRow);
-//    m_layout->addWidget(m_fillRow);
+// FIXME   m_layout->addWidget(m_fillRow);
     m_layout->addWidget(m_horizontalCenterRow);
     m_layout->addWidget(m_verticalCenterRow);
 //    m_layout->addWidget(m_centerRow);
@@ -75,10 +77,49 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     m_closeButton->setToolTip(tr("Close the Anchor Editor"));
     m_closeButton->setCursor(Qt::PointingHandCursor);
     connect(m_closeButton, &QPushButton::clicked, this, &AnchorEditor::close);
+
+    connect(m_leftRow, &AnchorRow::marginOffsetEditingFinished,
+            this, [=] { onMarginOffsetEditingFinish(m_leftRow); });
+    connect(m_rightRow, &AnchorRow::marginOffsetEditingFinished,
+            this, [=] { onMarginOffsetEditingFinish(m_rightRow); });
+    connect(m_topRow, &AnchorRow::marginOffsetEditingFinished,
+            this, [=] { onMarginOffsetEditingFinish(m_topRow); });
+    connect(m_bottomRow, &AnchorRow::marginOffsetEditingFinished,
+            this, [=] { onMarginOffsetEditingFinish(m_bottomRow); });
+    connect(m_horizontalCenterRow, &AnchorRow::marginOffsetEditingFinished,
+            this, [=] { onMarginOffsetEditingFinish(m_horizontalCenterRow); });
+    connect(m_verticalCenterRow, &AnchorRow::marginOffsetEditingFinished,
+            this, [=] { onMarginOffsetEditingFinish(m_verticalCenterRow); });
+    connect(m_leftRow, &AnchorRow::targetControlActivated,
+            this, [=] { onTargetControlActivate(m_leftRow); });
+    connect(m_rightRow, &AnchorRow::targetControlActivated,
+            this, [=] { onTargetControlActivate(m_rightRow); });
+    connect(m_topRow, &AnchorRow::targetControlActivated,
+            this, [=] { onTargetControlActivate(m_topRow); });
+    connect(m_bottomRow, &AnchorRow::targetControlActivated,
+            this, [=] { onTargetControlActivate(m_bottomRow); });
+    connect(m_horizontalCenterRow, &AnchorRow::targetControlActivated,
+            this, [=] { onTargetControlActivate(m_horizontalCenterRow); });
+    connect(m_verticalCenterRow, &AnchorRow::targetControlActivated,
+            this, [=] { onTargetControlActivate(m_verticalCenterRow); });
+    connect(m_leftRow, &AnchorRow::targetLineTypeActivated,
+            this, [=] { onTargetLineTypeActivate(m_leftRow); });
+    connect(m_rightRow, &AnchorRow::targetLineTypeActivated,
+            this, [=] { onTargetLineTypeActivate(m_rightRow); });
+    connect(m_topRow, &AnchorRow::targetLineTypeActivated,
+            this, [=] { onTargetLineTypeActivate(m_topRow); });
+    connect(m_bottomRow, &AnchorRow::targetLineTypeActivated,
+            this, [=] { onTargetLineTypeActivate(m_bottomRow); });
+    connect(m_horizontalCenterRow, &AnchorRow::targetLineTypeActivated,
+            this, [=] { onTargetLineTypeActivate(m_horizontalCenterRow); });
+    connect(m_verticalCenterRow, &AnchorRow::targetLineTypeActivated,
+            this, [=] { onTargetLineTypeActivate(m_verticalCenterRow); });
 }
 
 void AnchorEditor::activate(Control* source, Control* target)
 {
+    setProperty(g_sourceProperty, QVariant::fromValue(source));
+
     m_leftRow->clear();
     m_rightRow->clear();
     m_topRow->clear();
@@ -93,48 +134,65 @@ void AnchorEditor::activate(Control* source, Control* target)
     m_horizontalCenterRow->setTargetControlList(availableAnchorTargets(source));
     m_verticalCenterRow->setTargetControlList(availableAnchorTargets(source));
 
-    m_leftRow->setCurrentTargetControl(target);
-    m_rightRow->setCurrentTargetControl(target);
-    m_topRow->setCurrentTargetControl(target);
-    m_bottomRow->setCurrentTargetControl(target);
-    m_horizontalCenterRow->setCurrentTargetControl(target);
-    m_verticalCenterRow->setCurrentTargetControl(target);
+    m_leftRow->setTargetControl(target);
+    m_rightRow->setTargetControl(target);
+    m_topRow->setTargetControl(target);
+    m_bottomRow->setTargetControl(target);
+    m_horizontalCenterRow->setTargetControl(target);
+    m_verticalCenterRow->setTargetControl(target);
 
     if (source->anchors()->left().isValid()) {
         m_leftRow->setTargetLineType(source->anchors()->left().type());
         m_leftRow->setMarginOffset(source->anchors()->leftMargin());
-        m_leftRow->setCurrentTargetControl(source->anchors()->left().control());
+        m_leftRow->setTargetControl(source->anchors()->left().control());
     }
 
     if (source->anchors()->right().isValid()) {
         m_rightRow->setTargetLineType(source->anchors()->right().type());
         m_rightRow->setMarginOffset(source->anchors()->rightMargin());
-        m_rightRow->setCurrentTargetControl(source->anchors()->right().control());
+        m_rightRow->setTargetControl(source->anchors()->right().control());
     }
 
     if (source->anchors()->top().isValid()) {
         m_topRow->setTargetLineType(source->anchors()->top().type());
         m_topRow->setMarginOffset(source->anchors()->topMargin());
-        m_topRow->setCurrentTargetControl(source->anchors()->top().control());
+        m_topRow->setTargetControl(source->anchors()->top().control());
     }
 
     if (source->anchors()->bottom().isValid()) {
         m_bottomRow->setTargetLineType(source->anchors()->bottom().type());
         m_bottomRow->setMarginOffset(source->anchors()->bottomMargin());
-        m_bottomRow->setCurrentTargetControl(source->anchors()->bottom().control());
+        m_bottomRow->setTargetControl(source->anchors()->bottom().control());
     }
 
     if (source->anchors()->horizontalCenter().isValid()) {
         m_horizontalCenterRow->setTargetLineType(source->anchors()->horizontalCenter().type());
         m_horizontalCenterRow->setMarginOffset(source->anchors()->horizontalCenterOffset());
-        m_horizontalCenterRow->setCurrentTargetControl(source->anchors()->horizontalCenter().control());
+        m_horizontalCenterRow->setTargetControl(source->anchors()->horizontalCenter().control());
     }
 
-    if (source->anchors()->left().isValid()) {
+    if (source->anchors()->verticalCenter().isValid()) {
         m_verticalCenterRow->setTargetLineType(source->anchors()->verticalCenter().type());
         m_verticalCenterRow->setMarginOffset(source->anchors()->verticalCenterOffset());
-        m_verticalCenterRow->setCurrentTargetControl(source->anchors()->verticalCenter().control());
+        m_verticalCenterRow->setTargetControl(source->anchors()->verticalCenter().control());
     }
 
     show();
+}
+
+void AnchorEditor::onMarginOffsetEditingFinish(AnchorRow* row)
+{
+    emit marginOffsetEdited(AnchorLine(row->sourceLineType(), property(g_sourceProperty).value<Control*>()));
+}
+
+void AnchorEditor::onTargetControlActivate(AnchorRow* row)
+{
+    emit anchored(AnchorLine(row->sourceLineType(), property(g_sourceProperty).value<Control*>()),
+                  AnchorLine(row->targetLineType(), row->targetControl()));
+}
+
+void AnchorEditor::onTargetLineTypeActivate(AnchorRow* row)
+{
+    emit anchored(AnchorLine(row->sourceLineType(), property(g_sourceProperty).value<Control*>()),
+                  AnchorLine(row->targetLineType(), row->targetControl()));
 }

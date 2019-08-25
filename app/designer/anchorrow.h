@@ -20,6 +20,8 @@ class AnchorRow final : public QWidget
 public:
     explicit AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent = nullptr);
 
+    AnchorLine::Type sourceLineType() const;
+
     AnchorLine::Type targetLineType() const;
     void setTargetLineType(AnchorLine::Type targetLineType);
 
@@ -29,8 +31,8 @@ public:
     QList<Control*> targetControlList() const;
     void setTargetControlList(const QList<Control*>& targetControlList);
 
-    Control* currentTargetControl() const;
-    void setCurrentTargetControl(const Control* control);
+    Control* targetControl() const;
+    void setTargetControl(const Control* control);
 
     void clear();
 

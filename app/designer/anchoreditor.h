@@ -19,8 +19,14 @@ public:
 
     void activate(Control* source, Control* target);
 
+public slots:
+    void onMarginOffsetEditingFinish(AnchorRow* row);
+    void onTargetControlActivate(AnchorRow* row);
+    void onTargetLineTypeActivate(AnchorRow* row);
+
 signals:
-    void anchored(Control* sourceControl, AnchorLine::Type sourceLineType, const AnchorLine& targetLine);
+    void marginOffsetEdited(const AnchorLine& sourceLine);
+    void anchored(const AnchorLine& sourceLine, const AnchorLine& targetLine);
 
 private:
     QBoxLayout* m_layout;
