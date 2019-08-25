@@ -9,6 +9,7 @@ class AnchorLayer final : public DesignerItem
     Q_DISABLE_COPY(AnchorLayer)
 
     friend class PaintLayer; // For mousePressPoint()
+    friend class DesignerScene; // FIXME: DELETE ME For mousePressPoint()
 
 public:
     explicit AnchorLayer(DesignerItem* parent = nullptr);
@@ -20,7 +21,7 @@ public slots:
 
 private:
     void setActivated(bool activated);
-    QPointF mouseLastPoint() const;
+    QPointF mouseMovePoint() const;
 
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -33,7 +34,7 @@ signals:
 private:
     bool m_activated;
     bool m_geometryUpdateScheduled;
-    QPointF m_mouseLastPoint;
+    QPointF m_mouseMovePoint;
 };
 
 

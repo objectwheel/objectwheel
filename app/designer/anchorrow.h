@@ -19,6 +19,9 @@ class AnchorRow final : public QWidget
 public:
     explicit AnchorRow(QWidget* parent = nullptr);
 
+    bool isActive() const;
+    void setActive(bool active);
+
     AnchorLine::Type sourceLineType() const;
     void setSourceLineType(AnchorLine::Type sourceLineType);
 

@@ -73,7 +73,15 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     connect(this, &DesignerScene::currentFormChanged,
             m_anchorLayer, &AnchorLayer::updateGeometry);
     connect(m_anchorLayer, &AnchorLayer::activatedChanged, // FIXME
-            m_paintLayer, [=] { m_paintLayer->update(); if (!m_anchorLayer->activated()) (new AnchorEditor(0))->show(); });
+            m_paintLayer, [=] {
+        m_paintLayer->update();
+        if (!m_anchorLayer->activated()) {
+            static auto e = new AnchorEditor(0);
+            const QLineF line(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint()),
+                              anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
+            e->activate(topLevelControl(line.p1()), topLevelControl(line.p2()));
+        }
+    });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
             m_paintLayer, &PaintLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
@@ -274,7 +282,8 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
 bool DesignerScene::showAllAnchors() const
 {
     // TODO: Take that from view
-    return false || anchorLayer()->activated();
+    // TODO: Make sure it returns true when anchor editor is open
+    return true || anchorLayer()->activated();
 }
 
 qreal DesignerScene::devicePixelRatio() const

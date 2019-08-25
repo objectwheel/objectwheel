@@ -21,9 +21,9 @@ void AnchorLayer::setActivated(bool activated)
     }
 }
 
-QPointF AnchorLayer::mouseLastPoint() const
+QPointF AnchorLayer::mouseMovePoint() const
 {
-    return m_mouseLastPoint;
+    return m_mouseMovePoint;
 }
 
 void AnchorLayer::updateGeometry()
@@ -57,7 +57,7 @@ void AnchorLayer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         setActivated(true);
     }
 
-    m_mouseLastPoint = event->pos();
+    m_mouseMovePoint = event->pos();
     update();
 }
 

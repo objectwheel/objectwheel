@@ -141,6 +141,17 @@ AnchorRow::AnchorRow(QWidget* parent) : QWidget(parent)
             this, &AnchorRow::targetControlActivated);
 }
 
+bool AnchorRow::isActive() const
+{
+    return m_sourceLineButton->isChecked();
+}
+
+void AnchorRow::setActive(bool active)
+{
+    if (m_sourceLineButton->isChecked() != active)
+        m_sourceLineButton->click();
+}
+
 AnchorLine::Type AnchorRow::sourceLineType() const
 {
     return m_sourceLineType;

@@ -453,7 +453,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->save();
 
     const QLineF line(scene()->anchorLayer()->mapToScene(scene()->anchorLayer()->mousePressPoint()),
-                      scene()->anchorLayer()->mapToScene(scene()->anchorLayer()->mouseLastPoint()));
+                      scene()->anchorLayer()->mapToScene(scene()->anchorLayer()->mouseMovePoint()));
     const Control* sourceControl = scene()->topLevelControl(line.p1());
     const Control* targetControl = scene()->topLevelControl(line.p2());
 
