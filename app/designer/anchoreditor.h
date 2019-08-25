@@ -6,8 +6,11 @@
 
 class QBoxLayout;
 class AnchorRow;
-class QPushButton;
+class QDialogButtonBox;
 class Control;
+class QLabel;
+class QComboBox;
+class QDoubleSpinBox;
 
 class AnchorEditor final : public QWidget
 {
@@ -30,13 +33,19 @@ signals:
 
 private:
     QBoxLayout* m_layout;
+    QLabel* m_sourceControlLabel;
+    QLabel* m_marginOffsetLabel;
+    QComboBox* m_sourceControlComboBox;
+    QDoubleSpinBox* m_marginSpinBox;
     AnchorRow* m_leftRow;
     AnchorRow* m_rightRow;
     AnchorRow* m_topRow;
     AnchorRow* m_bottomRow;
+    AnchorRow* m_fillRow;
     AnchorRow* m_horizontalCenterRow;
     AnchorRow* m_verticalCenterRow;
-    QPushButton* m_closeButton;
+    AnchorRow* m_centerInRow;
+    QDialogButtonBox* m_dialogButtonBox;
 };
 
 #endif // ANCHOREDITOR_H

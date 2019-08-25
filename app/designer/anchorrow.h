@@ -36,10 +36,6 @@ public:
 
     void clear();
 
-public:
-    QSize minimumSizeHint() const override;
-    QSize sizeHint() const override;
-
 private slots:
     void onTargetLineTypeChange();
     void onTargetButtonClick(QAbstractButton* button, bool checked);
@@ -56,12 +52,12 @@ private:
     QBoxLayout* m_layout;
     QLabel* m_sourceIcon;
     QLabel* m_arrowIcon;
+    QComboBox* m_targetControlComboBox;
+    QDoubleSpinBox* m_marginOffsetSpinBox;
     ButtonGroup* m_targetButtonGroup;
     QToolButton* m_targetLineButton1;
     QToolButton* m_targetLineButton2;
     QToolButton* m_targetLineButton3;
-    QDoubleSpinBox* m_marginOffsetSpinBox;
-    QComboBox* m_targetControlComboBox;
 };
 
 #endif // ANCHORROW_H

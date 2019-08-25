@@ -65,13 +65,13 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
   , m_layout(new QHBoxLayout(this))
   , m_sourceIcon(new QLabel(this))
   , m_arrowIcon(new QLabel(this))
+  , m_targetControlComboBox(new QComboBox(this))
+  , m_marginOffsetSpinBox(new QDoubleSpinBox(this))
   , m_targetButtonGroup(new ButtonGroup(this))
   , m_targetLineButton1(new QToolButton(this))
   , m_targetLineButton2(new QToolButton(this))
   , m_targetLineButton3(new QToolButton(this))
-  , m_marginOffsetSpinBox(new QDoubleSpinBox(this))
-  , m_targetControlComboBox(new QComboBox(this))
-{
+{    
     bool vertical = AnchorLine::isVertical(m_sourceLineType);
     bool offset = m_sourceLineType == AnchorLine::HorizontalCenter || m_sourceLineType == AnchorLine::VerticalCenter;
     auto hbox = new QHBoxLayout;
@@ -81,15 +81,15 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     hbox->addWidget(m_targetLineButton2);
     hbox->addWidget(m_targetLineButton3);
 
-    m_layout->setSpacing(4);
+    m_layout->setSpacing(6);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_sourceIcon, 0, Qt::AlignVCenter | Qt::AlignRight);
     m_layout->addSpacing(7);
     m_layout->addWidget(m_arrowIcon, 0, Qt::AlignVCenter | Qt::AlignRight);
     m_layout->addSpacing(7);
-    m_layout->addLayout(hbox);
-    m_layout->addWidget(m_marginOffsetSpinBox);
     m_layout->addWidget(m_targetControlComboBox);
+    m_layout->addWidget(m_marginOffsetSpinBox);
+    m_layout->addLayout(hbox);
     m_layout->addStretch();
 
     m_sourceIcon->setFixedSize(12, 12);
@@ -100,6 +100,18 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_arrowIcon->setFixedSize(8, 8);
     m_arrowIcon->setScaledContents(true);
     m_arrowIcon->setPixmap(QPixmap(":/images/extension.svg"));
+
+    m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) + (offset ? " offset" : " margin"));
+    m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
+    m_marginOffsetSpinBox->setFixedSize(QSize(72, 24));
+    m_marginOffsetSpinBox->setRange(-999.99, 999.99);
+    m_marginOffsetSpinBox->setDecimals(2);
+    m_marginOffsetSpinBox->setEnabled(false);
+
+    m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
+    m_targetControlComboBox->setFixedSize(QSize(140, 24));
+    m_targetControlComboBox->setToolTip(tr("Target control"));
+    m_targetControlComboBox->setEnabled(false);
 
     m_targetLineButton1->setCursor(Qt::PointingHandCursor);
     m_targetLineButton1->setFixedSize(QSize(24, 24));
@@ -121,18 +133,6 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_targetLineButton3->setCheckable(true);
     m_targetLineButton3->setIcon(anchorLinePixmap(vertical ? AnchorLine::Right : AnchorLine::Bottom, this));
     m_targetLineButton3->setToolTip(anchorLineText(vertical ? AnchorLine::Right : AnchorLine::Bottom));
-
-    m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) + (offset ? " offset" : " margin"));
-    m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
-    m_marginOffsetSpinBox->setFixedSize(QSize(72, 24));
-    m_marginOffsetSpinBox->setRange(-999.99, 999.99);
-    m_marginOffsetSpinBox->setDecimals(2);
-    m_marginOffsetSpinBox->setEnabled(false);
-
-    m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
-    m_targetControlComboBox->setFixedSize(QSize(120, 24));
-    m_targetControlComboBox->setToolTip(tr("Target control"));
-    m_targetControlComboBox->setEnabled(false);
 
     m_targetButtonGroup->addButton(m_targetLineButton1);
     m_targetButtonGroup->addButton(m_targetLineButton2);
@@ -212,16 +212,6 @@ void AnchorRow::clear()
     setTargetLineType(AnchorLine::Invalid);
     m_marginOffsetSpinBox->setValue(0);
     m_targetControlComboBox->clear();
-}
-
-QSize AnchorRow::minimumSizeHint() const
-{
-    return QWidget::minimumSizeHint() + QSize(4, -4);
-}
-
-QSize AnchorRow::sizeHint() const
-{
-    return minimumSizeHint();
 }
 
 void AnchorRow::onTargetLineTypeChange()

@@ -5,6 +5,9 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QDialogButtonBox>
+#include <QComboBox>
+#include <QDoubleSpinBox>
 
 static const char g_sourceProperty[] = "_q_AnchorEditor_sourceProperty";
 
@@ -18,13 +21,19 @@ static QList<Control*> availableAnchorTargets(Control* source)
 
 AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
+  , m_sourceControlLabel(new QLabel(this))
+  , m_marginOffsetLabel(new QLabel(this))
+  , m_sourceControlComboBox(new QComboBox(this))
+  , m_marginSpinBox(new QDoubleSpinBox(this))
   , m_leftRow(new AnchorRow(AnchorLine::Left, this))
   , m_rightRow(new AnchorRow(AnchorLine::Right, this))
   , m_topRow(new AnchorRow(AnchorLine::Top, this))
   , m_bottomRow(new AnchorRow(AnchorLine::Bottom, this))
+  , m_fillRow(new AnchorRow(AnchorLine::Fill, this))
   , m_horizontalCenterRow(new AnchorRow(AnchorLine::HorizontalCenter, this))
   , m_verticalCenterRow(new AnchorRow(AnchorLine::VerticalCenter, this))
-  , m_closeButton(new QPushButton(this))
+  , m_centerInRow(new AnchorRow(AnchorLine::Center, this))
+  , m_dialogButtonBox(new QDialogButtonBox(this))
 {
     setFocusPolicy(Qt::NoFocus);
     setWindowTitle(tr("Anchor Editor"));
@@ -64,19 +73,23 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_rightRow);
     m_layout->addWidget(m_topRow);
     m_layout->addWidget(m_bottomRow);
-// FIXME   m_layout->addWidget(m_fillRow);
+    m_layout->addWidget(m_fillRow);
     m_layout->addWidget(m_horizontalCenterRow);
     m_layout->addWidget(m_verticalCenterRow);
-//    m_layout->addWidget(m_centerRow);
-    m_layout->addWidget(m_closeButton, 0, Qt::AlignVCenter | Qt::AlignRight);
+    m_layout->addWidget(m_centerInRow);
+    m_layout->addWidget(m_dialogButtonBox, 0, Qt::AlignVCenter | Qt::AlignRight);
     m_layout->addStretch();
     m_layout->setSizeConstraint(QLayout::SetFixedSize);
 
-    m_closeButton->setFixedHeight(24);
-    m_closeButton->setText(tr("Close"));
-    m_closeButton->setToolTip(tr("Close the Anchor Editor"));
-    m_closeButton->setCursor(Qt::PointingHandCursor);
-    connect(m_closeButton, &QPushButton::clicked, this, &AnchorEditor::close);
+    m_dialogButtonBox->setFixedHeight(24);
+    auto closeButton = m_dialogButtonBox->addButton(QDialogButtonBox::Close);
+    closeButton->setToolTip(tr("Close the Anchor Editor"));
+    closeButton->setCursor(Qt::PointingHandCursor);
+    connect(closeButton, &QPushButton::clicked, this, &AnchorEditor::close);
+    auto resetButton = m_dialogButtonBox->addButton(QDialogButtonBox::Reset);
+    resetButton->setToolTip(tr("Reset anchors"));
+    resetButton->setCursor(Qt::PointingHandCursor);
+//    connect(resetButton, &QPushButton::clicked, this, &AnchorEditor::reset);
 
     connect(m_leftRow, &AnchorRow::marginOffsetEditingFinished,
             this, [=] { onMarginOffsetEditingFinish(m_leftRow); });
