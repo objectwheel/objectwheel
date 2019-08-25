@@ -16,14 +16,12 @@ static QList<Control*> availableAnchorTargets(Control* source)
 
 AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
-  , m_leftRow(new AnchorRow(this))
-  , m_rightRow(new AnchorRow(this))
-  , m_topRow(new AnchorRow(this))
-  , m_bottomRow(new AnchorRow(this))
-  , m_fillRow(new AnchorRow(this))
-  , m_horizontalCenterRow(new AnchorRow(this))
-  , m_verticalCenterRow(new AnchorRow(this))
-  , m_centerRow(new AnchorRow(this))
+  , m_leftRow(new AnchorRow(AnchorLine::Left, this))
+  , m_rightRow(new AnchorRow(AnchorLine::Right, this))
+  , m_topRow(new AnchorRow(AnchorLine::Top, this))
+  , m_bottomRow(new AnchorRow(AnchorLine::Bottom, this))
+  , m_horizontalCenterRow(new AnchorRow(AnchorLine::HorizontalCenter, this))
+  , m_verticalCenterRow(new AnchorRow(AnchorLine::VerticalCenter, this))
   , m_closeButton(new QPushButton(this))
 {
     setFocusPolicy(Qt::NoFocus);
@@ -64,22 +62,13 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_rightRow);
     m_layout->addWidget(m_topRow);
     m_layout->addWidget(m_bottomRow);
-    m_layout->addWidget(m_fillRow);
+//    m_layout->addWidget(m_fillRow);
     m_layout->addWidget(m_horizontalCenterRow);
     m_layout->addWidget(m_verticalCenterRow);
-    m_layout->addWidget(m_centerRow);
+//    m_layout->addWidget(m_centerRow);
     m_layout->addWidget(m_closeButton, 0, Qt::AlignVCenter | Qt::AlignRight);
     m_layout->addStretch();
     m_layout->setSizeConstraint(QLayout::SetFixedSize);
-
-    m_leftRow->setSourceLineType(AnchorLine::Left);
-    m_rightRow->setSourceLineType(AnchorLine::Right);
-    m_topRow->setSourceLineType(AnchorLine::Top);
-    m_bottomRow->setSourceLineType(AnchorLine::Bottom);
-    m_fillRow->setSourceLineType(AnchorLine::Fill);
-    m_horizontalCenterRow->setSourceLineType(AnchorLine::HorizontalCenter);
-    m_verticalCenterRow->setSourceLineType(AnchorLine::VerticalCenter);
-    m_centerRow->setSourceLineType(AnchorLine::Center);
 
     m_closeButton->setFixedHeight(24);
     m_closeButton->setText(tr("Close"));
@@ -94,10 +83,8 @@ void AnchorEditor::activate(Control* source, Control* target)
     m_rightRow->clear();
     m_topRow->clear();
     m_bottomRow->clear();
-    m_fillRow->clear();
     m_horizontalCenterRow->clear();
     m_verticalCenterRow->clear();
-    m_centerRow->clear();
 
     m_leftRow->setTargetControlList(availableAnchorTargets(source));
     m_rightRow->setTargetControlList(availableAnchorTargets(source));
@@ -114,42 +101,36 @@ void AnchorEditor::activate(Control* source, Control* target)
     m_verticalCenterRow->setCurrentTargetControl(target);
 
     if (source->anchors()->left().isValid()) {
-        m_leftRow->setActive(true);
         m_leftRow->setTargetLineType(source->anchors()->left().type());
         m_leftRow->setMarginOffset(source->anchors()->leftMargin());
         m_leftRow->setCurrentTargetControl(source->anchors()->left().control());
     }
 
     if (source->anchors()->right().isValid()) {
-        m_rightRow->setActive(true);
         m_rightRow->setTargetLineType(source->anchors()->right().type());
         m_rightRow->setMarginOffset(source->anchors()->rightMargin());
         m_rightRow->setCurrentTargetControl(source->anchors()->right().control());
     }
 
     if (source->anchors()->top().isValid()) {
-        m_topRow->setActive(true);
         m_topRow->setTargetLineType(source->anchors()->top().type());
         m_topRow->setMarginOffset(source->anchors()->topMargin());
         m_topRow->setCurrentTargetControl(source->anchors()->top().control());
     }
 
     if (source->anchors()->bottom().isValid()) {
-        m_bottomRow->setActive(true);
         m_bottomRow->setTargetLineType(source->anchors()->bottom().type());
         m_bottomRow->setMarginOffset(source->anchors()->bottomMargin());
         m_bottomRow->setCurrentTargetControl(source->anchors()->bottom().control());
     }
 
     if (source->anchors()->horizontalCenter().isValid()) {
-        m_horizontalCenterRow->setActive(true);
         m_horizontalCenterRow->setTargetLineType(source->anchors()->horizontalCenter().type());
         m_horizontalCenterRow->setMarginOffset(source->anchors()->horizontalCenterOffset());
         m_horizontalCenterRow->setCurrentTargetControl(source->anchors()->horizontalCenter().control());
     }
 
     if (source->anchors()->left().isValid()) {
-        m_verticalCenterRow->setActive(true);
         m_verticalCenterRow->setTargetLineType(source->anchors()->verticalCenter().type());
         m_verticalCenterRow->setMarginOffset(source->anchors()->verticalCenterOffset());
         m_verticalCenterRow->setCurrentTargetControl(source->anchors()->verticalCenter().control());

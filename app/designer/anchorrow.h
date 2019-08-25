@@ -10,6 +10,7 @@ class QComboBox;
 class QDoubleSpinBox;
 class ButtonGroup;
 class QAbstractButton;
+class QLabel;
 
 class AnchorRow final : public QWidget
 {
@@ -17,13 +18,7 @@ class AnchorRow final : public QWidget
     Q_DISABLE_COPY(AnchorRow)
 
 public:
-    explicit AnchorRow(QWidget* parent = nullptr);
-
-    bool isActive() const;
-    void setActive(bool active);
-
-    AnchorLine::Type sourceLineType() const;
-    void setSourceLineType(AnchorLine::Type sourceLineType);
+    explicit AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent = nullptr);
 
     AnchorLine::Type targetLineType() const;
     void setTargetLineType(AnchorLine::Type targetLineType);
@@ -39,27 +34,26 @@ public:
 
     void clear();
 
+public:
     QSize minimumSizeHint() const override;
     QSize sizeHint() const override;
 
 private slots:
-    void onSourceLineTypeChange();
     void onTargetLineTypeChange();
-    void onSourceButtonClick();
     void onTargetButtonClick(QAbstractButton* button, bool checked);
 
 signals:
-    void sourceLineTypeChanged();
     void targetLineTypeChanged();
     void targetLineTypeActivated();
     void marginOffsetEditingFinished();
     void targetControlActivated();
 
 private:
-    AnchorLine::Type m_sourceLineType;
+    const AnchorLine::Type m_sourceLineType;
     AnchorLine::Type m_targetLineType;
     QBoxLayout* m_layout;
-    QToolButton* m_sourceLineButton;
+    QLabel* m_sourceIcon;
+    QLabel* m_arrowIcon;
     ButtonGroup* m_targetButtonGroup;
     QToolButton* m_targetLineButton1;
     QToolButton* m_targetLineButton2;
