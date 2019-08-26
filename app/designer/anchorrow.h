@@ -56,6 +56,7 @@ private:
     AnchorLine::Type m_targetLineType;
     AnchorLine::Type m_targetLineTypeBackup;
     Control* m_targetControlBackup;
+    qreal m_marginBackup;
     bool m_fillCenterModeEnabled;
     QBoxLayout* m_layout;
     QPushButton* m_sourceButton;

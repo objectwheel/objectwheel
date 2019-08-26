@@ -38,8 +38,9 @@ private:
     void refreshNow();
 
 signals:
-    void marginOffsetEdited(const AnchorLine& sourceLine, qreal marginOffset);
-    void anchored(const AnchorLine& sourceLine, const AnchorLine& targetLine);
+    void marginOffsetEdited(AnchorLine::Type sourceLineType, qreal marginOffset);
+    void anchored(AnchorLine::Type sourceLineType, const AnchorLine& targetLine);
+    void fill(Control* control);
     void cleared();
 
 private:

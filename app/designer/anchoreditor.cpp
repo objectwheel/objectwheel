@@ -100,7 +100,8 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     marginsLayout->addWidget(m_marginsSpinBox);
     marginsLayout->addStretch();
 
-    m_marginsSpinBox->setToolTip(tr("Generic margins"));
+    m_marginsSpinBox->setToolTip(tr("Generic margins for left, right, top and bottom sides. It "
+                                    "can be overridden via setting individual margins from below."));
     m_marginsSpinBox->setCursor(Qt::PointingHandCursor);
     m_marginsSpinBox->setFixedSize(QSize(80, 24));
     m_marginsSpinBox->setRange(-999.99, 999.99);
@@ -220,6 +221,18 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
         m_rightRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_topRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_bottomRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
+        emit marginOffsetEdited(AnchorLine::Left, m_leftRow->marginOffset());
+        emit marginOffsetEdited(AnchorLine::Right, m_rightRow->marginOffset());
+        emit marginOffsetEdited(AnchorLine::Top, m_topRow->marginOffset());
+        emit marginOffsetEdited(AnchorLine::Bottom, m_bottomRow->marginOffset());
+        emit fill(checked ? m_fillRow->targetControl() : nullptr);
+    });
+    connect(m_fillRow, &AnchorRow::targetControlActivated, this, [=] {
+        m_leftRow->setTargetControl(m_fillRow->targetControl());
+        m_rightRow->setTargetControl(m_fillRow->targetControl());
+        m_topRow->setTargetControl(m_fillRow->targetControl());
+        m_bottomRow->setTargetControl(m_fillRow->targetControl());
+        emit fill(m_fillRow->targetControl());
     });
 }
 
@@ -247,19 +260,17 @@ void AnchorEditor::setPrimaryTargetControl(Control* primaryTargetControl)
 
 void AnchorEditor::onMarginOffsetEditingFinish(AnchorRow* row)
 {
-    emit marginOffsetEdited(AnchorLine(row->sourceLineType(), m_sourceControl), row->marginOffset());
+    emit marginOffsetEdited(row->sourceLineType(), row->marginOffset());
 }
 
 void AnchorEditor::onTargetControlActivate(AnchorRow* row)
 {
-    emit anchored(AnchorLine(row->sourceLineType(), m_sourceControl),
-                  AnchorLine(row->targetLineType(), row->targetControl()));
+    emit anchored(row->sourceLineType(), AnchorLine(row->targetLineType(), row->targetControl()));
 }
 
 void AnchorEditor::onTargetLineTypeActivate(AnchorRow* row)
 {
-    emit anchored(AnchorLine(row->sourceLineType(), m_sourceControl),
-                  AnchorLine(row->targetLineType(), row->targetControl()));
+    emit anchored(row->sourceLineType(), AnchorLine(row->targetLineType(), row->targetControl()));
 }
 
 void AnchorEditor::refresh(bool delayed)

@@ -226,7 +226,6 @@ Control* AnchorRow::targetControl() const
 
 void AnchorRow::setTargetControl(const Control* control)
 {
-    Q_ASSERT(!m_fillCenterModeEnabled);
     for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
         if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {
             m_targetControlComboBox->setCurrentIndex(i);
@@ -249,6 +248,7 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
 
     if (m_fillCenterModeEnabled != fillCenterModeEnabled) {
         if (fillCenterModeEnabled) {
+            m_marginBackup = marginOffset();
             m_targetLineTypeBackup = targetLineType();
             m_targetControlBackup = this->targetControl();
             setTargetControl(targetControl);
@@ -261,6 +261,7 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
         }
         m_fillCenterModeEnabled = fillCenterModeEnabled;
         if (!fillCenterModeEnabled) {
+            setMarginOffset(m_marginBackup);
             setTargetControl(m_targetControlBackup);
             setTargetLineType(m_targetLineTypeBackup);
             m_targetControlComboBox->setEnabled(m_targetButtonGroup->checkedButton());

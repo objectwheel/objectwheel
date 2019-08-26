@@ -126,18 +126,26 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
         if (!m_anchorLayer->activated()) {
             static auto e = [this] {
                 auto e = new AnchorEditor(this);
-                connect(e, &AnchorEditor::anchored, [=] (const AnchorLine& sourceLine, const AnchorLine& targetLine) {
+                connect(e, &AnchorEditor::anchored, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
                     QString targetId = targetLine.control()->type() == Form::Type ? "parent" : targetLine.control()->id();
-                    ControlRenderingManager::scheduleBindingUpdate(sourceLine.control()->uid(),
-                                                                   "anchors." + anchorLineText(sourceLine.type()),
+                    ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                   "anchors." + anchorLineText(sourceLineType),
                                                                    targetLine.isValid()
                                                                    ? targetId + "." + anchorLineText(targetLine.type())
                                                                    : "undefined");
                 });
-                connect(e, &AnchorEditor::marginOffsetEdited, [=] (const AnchorLine& sourceLine, qreal marginOffset) {
-                    ControlRenderingManager::schedulePropertyUpdate(sourceLine.control()->uid(),
-                                                                   "anchors." + marginOffsetText(sourceLine.type()),
+                connect(e, &AnchorEditor::marginOffsetEdited, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
+                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
+                                                                   "anchors." + marginOffsetText(sourceLineType),
                                                                    marginOffset);
+                });
+                connect(e, &AnchorEditor::fill, [=] (Control* control) {
+                    if (control)
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                        "anchors.fill", control->id());
+                    else
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                        "anchors.fill", "undefined");
                 });
                 return e;
             }();
