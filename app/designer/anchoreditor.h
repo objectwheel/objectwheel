@@ -21,12 +21,21 @@ class AnchorEditor final : public QWidget
 public:
     explicit AnchorEditor(DesignerScene* scene, QWidget* parent = nullptr);
 
-    void activate(Control* source, Control* target);
+    Control* sourceControl() const;
+    void setSourceControl(Control* sourceControl);
+
+    Control* primaryTargetControl() const;
+    void setPrimaryTargetControl(Control* primaryTargetControl);
+
+    void refresh(bool delayed = true);
 
 public slots:
     void onMarginOffsetEditingFinish(AnchorRow* row);
     void onTargetControlActivate(AnchorRow* row);
     void onTargetLineTypeActivate(AnchorRow* row);
+
+private:
+    void refreshNow();
 
 signals:
     void marginOffsetEdited(const AnchorLine& sourceLine, qreal marginOffset);
@@ -35,6 +44,9 @@ signals:
 
 private:
     const DesignerScene* m_scene;
+    bool m_refreshScheduled;
+    QPointer<Control> m_sourceControl;
+    QPointer<Control> m_primaryTargetControl;
     QBoxLayout* m_layout;
     QComboBox* m_sourceControlComboBox;
     QDoubleSpinBox* m_marginsSpinBox;

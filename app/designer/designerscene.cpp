@@ -143,7 +143,9 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             }();
             const QLineF line(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint()),
                               anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
-            e->activate(topLevelControl(line.p1()), topLevelControl(line.p2()));
+            e->setSourceControl(topLevelControl(line.p1()));
+            e->setPrimaryTargetControl(topLevelControl(line.p2()));
+            e->show();
         }
     });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
