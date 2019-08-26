@@ -5,12 +5,11 @@
 #include <anchorline.h>
 
 class QBoxLayout;
-class QToolButton;
 class QComboBox;
 class QDoubleSpinBox;
 class ButtonGroup;
 class QAbstractButton;
-class QLabel;
+class QPushButton;
 
 class AnchorRow final : public QWidget
 {
@@ -34,6 +33,10 @@ public:
     Control* targetControl() const;
     void setTargetControl(const Control* control);
 
+    bool fillCenterModeEnabled() const;
+    void setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* targetControl);
+
+    void setSourceButtonChecked(bool checked);
     void clear();
 
 private slots:
@@ -45,20 +48,20 @@ signals:
     void targetLineTypeActivated();
     void marginOffsetEditingFinished();
     void targetControlActivated();
+    void sourceButtonClicked(bool checked);
 
 private:
     const AnchorLine::Type m_sourceLineType;
     AnchorLine::Type m_targetLineType;
+    bool m_fillCenterModeEnabled;
     QBoxLayout* m_layout;
-    QToolButton* m_fillCenterButton;
-    QLabel* m_sourceIcon;
-    QLabel* m_arrowIcon;
+    QPushButton* m_sourceButton;
     QComboBox* m_targetControlComboBox;
     QDoubleSpinBox* m_marginOffsetSpinBox;
     ButtonGroup* m_targetButtonGroup;
-    QToolButton* m_targetLineButton1;
-    QToolButton* m_targetLineButton2;
-    QToolButton* m_targetLineButton3;
+    QPushButton* m_targetLineButton1;
+    QPushButton* m_targetLineButton2;
+    QPushButton* m_targetLineButton3;
 };
 
 #endif // ANCHORROW_H

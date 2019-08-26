@@ -157,10 +157,11 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     closeButton->setCursor(Qt::PointingHandCursor);
     closeButton->setFocus();
     connect(closeButton, &QPushButton::clicked, this, &AnchorEditor::close);
-    auto resetButton = m_dialogButtonBox->addButton(QDialogButtonBox::Reset);
-    resetButton->setToolTip(tr("Reset anchors"));
-    resetButton->setCursor(Qt::PointingHandCursor);
-    connect(resetButton, &QPushButton::clicked, this, &AnchorEditor::reset);
+    auto clearButton = m_dialogButtonBox->addButton(QDialogButtonBox::Reset);
+    clearButton->setText(tr("Clear"));
+    clearButton->setToolTip(tr("Clear anchors"));
+    clearButton->setCursor(Qt::PointingHandCursor);
+    connect(clearButton, &QPushButton::clicked, this, &AnchorEditor::cleared);
 
     connect(m_leftRow, &AnchorRow::marginOffsetEditingFinished,
             this, [=] { onMarginOffsetEditingFinish(m_leftRow); });
@@ -198,6 +199,13 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
             this, [=] { onTargetLineTypeActivate(m_horizontalCenterRow); });
     connect(m_verticalCenterRow, &AnchorRow::targetLineTypeActivated,
             this, [=] { onTargetLineTypeActivate(m_verticalCenterRow); });
+
+    connect(m_fillRow, &AnchorRow::sourceButtonClicked, this, [=] (bool checked) {
+        m_leftRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
+        m_rightRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
+        m_topRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
+        m_bottomRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
+    });
 }
 
 void AnchorEditor::activate(Control* source, Control* target)
@@ -210,6 +218,7 @@ void AnchorEditor::activate(Control* source, Control* target)
     m_bottomRow->clear();
     m_horizontalCenterRow->clear();
     m_verticalCenterRow->clear();
+    m_fillRow->clear();
 
     m_leftRow->setTargetControlList(availableAnchorTargets(source));
     m_rightRow->setTargetControlList(availableAnchorTargets(source));
@@ -217,6 +226,7 @@ void AnchorEditor::activate(Control* source, Control* target)
     m_bottomRow->setTargetControlList(availableAnchorTargets(source));
     m_horizontalCenterRow->setTargetControlList(availableAnchorTargets(source));
     m_verticalCenterRow->setTargetControlList(availableAnchorTargets(source));
+    m_fillRow->setTargetControlList(availableAnchorTargets(source));
 
     m_leftRow->setTargetControl(target);
     m_rightRow->setTargetControl(target);
@@ -224,6 +234,7 @@ void AnchorEditor::activate(Control* source, Control* target)
     m_bottomRow->setTargetControl(target);
     m_horizontalCenterRow->setTargetControl(target);
     m_verticalCenterRow->setTargetControl(target);
+    m_fillRow->setTargetControl(target);
 
     if (source->anchors()->left().isValid()) {
         m_leftRow->setTargetLineType(source->anchors()->left().type());
@@ -259,6 +270,15 @@ void AnchorEditor::activate(Control* source, Control* target)
         m_verticalCenterRow->setTargetLineType(source->anchors()->verticalCenter().type());
         m_verticalCenterRow->setMarginOffset(source->anchors()->verticalCenterOffset());
         m_verticalCenterRow->setTargetControl(source->anchors()->verticalCenter().control());
+    }
+
+    if (source->anchors()->fill()) {
+        m_fillRow->setSourceButtonChecked(true);
+        m_fillRow->setTargetControl(source->anchors()->fill());
+        m_leftRow->setFillCenterModeEnabled(true, source->anchors()->fill());
+        m_rightRow->setFillCenterModeEnabled(true, source->anchors()->fill());
+        m_topRow->setFillCenterModeEnabled(true, source->anchors()->fill());
+        m_bottomRow->setFillCenterModeEnabled(true, source->anchors()->fill());
     }
 
     show();

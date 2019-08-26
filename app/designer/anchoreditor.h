@@ -30,7 +30,7 @@ public slots:
 signals:
     void marginOffsetEdited(const AnchorLine& sourceLine, qreal marginOffset);
     void anchored(const AnchorLine& sourceLine, const AnchorLine& targetLine);
-    void reset();
+    void cleared();
 
 private:
     QBoxLayout* m_layout;
