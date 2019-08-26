@@ -306,28 +306,29 @@ void AnchorEditor::refreshNow()
     m_bottomRow->setTargetControl(m_primaryTargetControl);
     m_fillRow->setTargetControl(m_primaryTargetControl);
 
+    m_leftRow->setMarginOffset(m_sourceControl->anchors()->leftMargin());
+    m_rightRow->setMarginOffset(m_sourceControl->anchors()->rightMargin());
+    m_topRow->setMarginOffset(m_sourceControl->anchors()->topMargin());
+    m_bottomRow->setMarginOffset(m_sourceControl->anchors()->bottomMargin());
+
     if (m_sourceControl->anchors()->left().isValid()) {
-        m_leftRow->setTargetLineType(m_sourceControl->anchors()->left().type());
-        m_leftRow->setMarginOffset(m_sourceControl->anchors()->leftMargin());
         m_leftRow->setTargetControl(m_sourceControl->anchors()->left().control());
+        m_leftRow->setTargetLineType(m_sourceControl->anchors()->left().type());
     }
 
     if (m_sourceControl->anchors()->right().isValid()) {
-        m_rightRow->setTargetLineType(m_sourceControl->anchors()->right().type());
-        m_rightRow->setMarginOffset(m_sourceControl->anchors()->rightMargin());
         m_rightRow->setTargetControl(m_sourceControl->anchors()->right().control());
+        m_rightRow->setTargetLineType(m_sourceControl->anchors()->right().type());
     }
 
     if (m_sourceControl->anchors()->top().isValid()) {
-        m_topRow->setTargetLineType(m_sourceControl->anchors()->top().type());
-        m_topRow->setMarginOffset(m_sourceControl->anchors()->topMargin());
         m_topRow->setTargetControl(m_sourceControl->anchors()->top().control());
+        m_topRow->setTargetLineType(m_sourceControl->anchors()->top().type());
     }
 
     if (m_sourceControl->anchors()->bottom().isValid()) {
-        m_bottomRow->setTargetLineType(m_sourceControl->anchors()->bottom().type());
-        m_bottomRow->setMarginOffset(m_sourceControl->anchors()->bottomMargin());
         m_bottomRow->setTargetControl(m_sourceControl->anchors()->bottom().control());
+        m_bottomRow->setTargetLineType(m_sourceControl->anchors()->bottom().type());
     }
 
     if (m_sourceControl->anchors()->fill()) {
@@ -350,16 +351,16 @@ void AnchorEditor::refreshNow()
     m_verticalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
     m_horizontalCenterRow->setTargetControl(m_primaryTargetControl);
     m_verticalCenterRow->setTargetControl(m_primaryTargetControl);
+    m_horizontalCenterRow->setMarginOffset(m_sourceControl->anchors()->horizontalCenterOffset());
+    m_verticalCenterRow->setMarginOffset(m_sourceControl->anchors()->verticalCenterOffset());
 
     if (m_sourceControl->anchors()->horizontalCenter().isValid()) {
         m_horizontalCenterRow->setTargetLineType(m_sourceControl->anchors()->horizontalCenter().type());
-        m_horizontalCenterRow->setMarginOffset(m_sourceControl->anchors()->horizontalCenterOffset());
         m_horizontalCenterRow->setTargetControl(m_sourceControl->anchors()->horizontalCenter().control());
     }
 
     if (m_sourceControl->anchors()->verticalCenter().isValid()) {
         m_verticalCenterRow->setTargetLineType(m_sourceControl->anchors()->verticalCenter().type());
-        m_verticalCenterRow->setMarginOffset(m_sourceControl->anchors()->verticalCenterOffset());
         m_verticalCenterRow->setTargetControl(m_sourceControl->anchors()->verticalCenter().control());
     }
 }

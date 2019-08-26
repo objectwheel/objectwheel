@@ -34,7 +34,7 @@ public:
     void setTargetControl(const Control* control);
 
     bool fillCenterModeEnabled() const;
-    void setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* targetControl);
+    void setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* targetControl = nullptr);
 
     void setSourceButtonChecked(bool checked);
     void clear();
@@ -54,6 +54,8 @@ signals:
 private:
     const AnchorLine::Type m_sourceLineType;
     AnchorLine::Type m_targetLineType;
+    AnchorLine::Type m_targetLineTypeBackup;
+    Control* m_targetControlBackup;
     bool m_fillCenterModeEnabled;
     QBoxLayout* m_layout;
     QPushButton* m_sourceButton;

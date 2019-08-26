@@ -71,14 +71,9 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
   , m_targetLineButton1(new QPushButton(this))
   , m_targetLineButton2(new QPushButton(this))
   , m_targetLineButton3(new QPushButton(this))
-{    
-    auto arrowIcon= new QLabel(this);
-    auto hbox = new QHBoxLayout;
-    hbox->setSpacing(0);
-    hbox->setContentsMargins(0, 0, 0, 0);
-    hbox->addWidget(m_targetLineButton1);
-    hbox->addWidget(m_targetLineButton2);
-    hbox->addWidget(m_targetLineButton3);
+{
+    auto arrowIcon = new QLabel(this);
+    auto targetButtonLayout = new QHBoxLayout;
 
     m_layout->setSpacing(6);
     m_layout->setContentsMargins(0, 0, 0, 0);
@@ -88,7 +83,7 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_layout->addSpacing(6);
     m_layout->addWidget(m_targetControlComboBox);
     m_layout->addWidget(m_marginOffsetSpinBox);
-    m_layout->addLayout(hbox);
+    m_layout->addLayout(targetButtonLayout);
     m_layout->addStretch();
 
     m_sourceButton->setFixedSize(QSize(24, 24));
@@ -100,6 +95,11 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     arrowIcon->setScaledContents(true);
     arrowIcon->setPixmap(QPixmap(":/images/extension.svg"));
 
+    m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
+    m_targetControlComboBox->setFixedSize(QSize(140, 24));
+    m_targetControlComboBox->setToolTip(tr("Target control"));
+    m_targetControlComboBox->setEnabled(false);
+
     m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) +
                                       (AnchorLine::isOffset(m_sourceLineType) ? " offset" : " margin"));
     m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
@@ -108,10 +108,11 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_marginOffsetSpinBox->setDecimals(2);
     m_marginOffsetSpinBox->setEnabled(false);
 
-    m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
-    m_targetControlComboBox->setFixedSize(QSize(140, 24));
-    m_targetControlComboBox->setToolTip(tr("Target control"));
-    m_targetControlComboBox->setEnabled(false);
+    targetButtonLayout->setSpacing(0);
+    targetButtonLayout->setContentsMargins(0, 0, 0, 0);
+    targetButtonLayout->addWidget(m_targetLineButton1);
+    targetButtonLayout->addWidget(m_targetLineButton2);
+    targetButtonLayout->addWidget(m_targetLineButton3);
 
     m_targetLineButton1->setCursor(Qt::PointingHandCursor);
     m_targetLineButton1->setFixedSize(QSize(24, 24));
@@ -186,6 +187,7 @@ AnchorLine::Type AnchorRow::targetLineType() const
 void AnchorRow::setTargetLineType(AnchorLine::Type targetLineType)
 {
     Q_ASSERT(!AnchorLine::isFillCenter(m_sourceLineType));
+    Q_ASSERT(!m_fillCenterModeEnabled);
     if (m_targetLineType != targetLineType) {
         m_targetLineType = targetLineType;
         emit targetLineTypeChanged();
@@ -224,6 +226,7 @@ Control* AnchorRow::targetControl() const
 
 void AnchorRow::setTargetControl(const Control* control)
 {
+    Q_ASSERT(!m_fillCenterModeEnabled);
     for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
         if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {
             m_targetControlComboBox->setCurrentIndex(i);
@@ -245,8 +248,9 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
         return;
 
     if (m_fillCenterModeEnabled != fillCenterModeEnabled) {
-        m_fillCenterModeEnabled = fillCenterModeEnabled;
-        if (m_fillCenterModeEnabled) {
+        if (fillCenterModeEnabled) {
+            m_targetLineTypeBackup = targetLineType();
+            m_targetControlBackup = this->targetControl();
             setTargetControl(targetControl);
             setTargetLineType(m_sourceLineType);
             m_targetControlComboBox->setEnabled(false);
@@ -254,6 +258,16 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
             m_targetLineButton1->setEnabled(false);
             m_targetLineButton2->setEnabled(false);
             m_targetLineButton3->setEnabled(false);
+        }
+        m_fillCenterModeEnabled = fillCenterModeEnabled;
+        if (!fillCenterModeEnabled) {
+            setTargetControl(m_targetControlBackup);
+            setTargetLineType(m_targetLineTypeBackup);
+            m_targetControlComboBox->setEnabled(m_targetButtonGroup->checkedButton());
+            m_marginOffsetSpinBox->setEnabled(m_targetButtonGroup->checkedButton());
+            m_targetLineButton1->setEnabled(true);
+            m_targetLineButton2->setEnabled(true);
+            m_targetLineButton3->setEnabled(true);
         }
     }
 }
@@ -269,6 +283,7 @@ void AnchorRow::clear()
     if (AnchorLine::isFillCenter(m_sourceLineType)) {
         setSourceButtonChecked(false);
     } else {
+        setFillCenterModeEnabled(false);
         setTargetLineType(AnchorLine::Invalid);
         m_marginOffsetSpinBox->setValue(0);
     }
