@@ -72,9 +72,6 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
   , m_targetLineButton2(new QPushButton(this))
   , m_targetLineButton3(new QPushButton(this))
 {    
-    bool vertical = AnchorLine::isVertical(m_sourceLineType);
-    bool fillCenter = m_sourceLineType == AnchorLine::Fill || m_sourceLineType == AnchorLine::Center;
-    bool offset = m_sourceLineType == AnchorLine::HorizontalCenter || m_sourceLineType == AnchorLine::VerticalCenter;
     auto arrowIcon= new QLabel(this);
     auto hbox = new QHBoxLayout;
     hbox->setSpacing(0);
@@ -98,13 +95,13 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_sourceButton->setIconSize({12, 12});
     m_sourceButton->setIcon(anchorLinePixmap(m_sourceLineType, this));
     m_sourceButton->setToolTip(anchorLineText(m_sourceLineType));
-    m_sourceButton->setCheckable(true);
 
     arrowIcon->setFixedSize(8, 8);
     arrowIcon->setScaledContents(true);
     arrowIcon->setPixmap(QPixmap(":/images/extension.svg"));
 
-    m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) + (offset ? " offset" : " margin"));
+    m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) +
+                                      (AnchorLine::isOffset(m_sourceLineType) ? " offset" : " margin"));
     m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
     m_marginOffsetSpinBox->setFixedSize(QSize(80, 24));
     m_marginOffsetSpinBox->setRange(-999.99, 999.99);
@@ -120,28 +117,37 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_targetLineButton1->setFixedSize(QSize(24, 24));
     m_targetLineButton1->setIconSize({12, 12});
     m_targetLineButton1->setCheckable(true);
-    m_targetLineButton1->setIcon(anchorLinePixmap(vertical ? AnchorLine::Left : AnchorLine::Top, this));
-    m_targetLineButton1->setToolTip(anchorLineText(vertical ? AnchorLine::Left : AnchorLine::Top));
+    m_targetLineButton1->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
+                                                  ? AnchorLine::Left : AnchorLine::Top, this));
+    m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
+                                                   ? AnchorLine::Left : AnchorLine::Top));
 
     m_targetLineButton2->setCursor(Qt::PointingHandCursor);
     m_targetLineButton2->setFixedSize(QSize(24, 24));
     m_targetLineButton2->setIconSize({12, 12});
     m_targetLineButton2->setCheckable(true);
-    m_targetLineButton2->setIcon(anchorLinePixmap(vertical ? AnchorLine::HorizontalCenter : AnchorLine::VerticalCenter, this));
-    m_targetLineButton2->setToolTip(anchorLineText(vertical ? AnchorLine::HorizontalCenter : AnchorLine::VerticalCenter));
+    m_targetLineButton2->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
+                                                  ? AnchorLine::HorizontalCenter
+                                                  : AnchorLine::VerticalCenter, this));
+    m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
+                                                   ? AnchorLine::HorizontalCenter
+                                                   : AnchorLine::VerticalCenter));
 
     m_targetLineButton3->setCursor(Qt::PointingHandCursor);
     m_targetLineButton3->setFixedSize(QSize(24, 24));
     m_targetLineButton3->setIconSize({12, 12});
     m_targetLineButton3->setCheckable(true);
-    m_targetLineButton3->setIcon(anchorLinePixmap(vertical ? AnchorLine::Right : AnchorLine::Bottom, this));
-    m_targetLineButton3->setToolTip(anchorLineText(vertical ? AnchorLine::Right : AnchorLine::Bottom));
+    m_targetLineButton3->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
+                                                  ? AnchorLine::Right : AnchorLine::Bottom, this));
+    m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
+                                                   ? AnchorLine::Right : AnchorLine::Bottom));
 
     m_targetButtonGroup->addButton(m_targetLineButton1);
     m_targetButtonGroup->addButton(m_targetLineButton2);
     m_targetButtonGroup->addButton(m_targetLineButton3);
 
-    if (fillCenter) {
+    if (AnchorLine::isFillCenter(m_sourceLineType)) {
+        m_sourceButton->setCheckable(true);
         m_sourceButton->setCursor(Qt::PointingHandCursor);
         m_marginOffsetSpinBox->setVisible(false);
         m_targetLineButton1->setVisible(false);
@@ -151,6 +157,8 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
         m_sourceButton->setStyleSheet("border: none");
     }
 
+    connect(m_sourceButton, &QPushButton::toggled,
+            this, &AnchorRow::onSourceButtonCheckedChange);
     connect(m_sourceButton, &QPushButton::clicked,
             this, &AnchorRow::sourceButtonClicked);
     connect(this, &AnchorRow::targetLineTypeChanged,
@@ -177,6 +185,7 @@ AnchorLine::Type AnchorRow::targetLineType() const
 
 void AnchorRow::setTargetLineType(AnchorLine::Type targetLineType)
 {
+    Q_ASSERT(!AnchorLine::isFillCenter(m_sourceLineType));
     if (m_targetLineType != targetLineType) {
         m_targetLineType = targetLineType;
         emit targetLineTypeChanged();
@@ -190,6 +199,7 @@ qreal AnchorRow::marginOffset() const
 
 void AnchorRow::setMarginOffset(qreal marginOffset)
 {
+    Q_ASSERT(!AnchorLine::isFillCenter(m_sourceLineType));
     m_marginOffsetSpinBox->setValue(marginOffset);
 }
 
@@ -229,9 +239,7 @@ bool AnchorRow::fillCenterModeEnabled() const
 
 void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* targetControl)
 {
-    Q_ASSERT(m_sourceLineType != AnchorLine::Invalid
-            && m_sourceLineType != AnchorLine::Fill
-            && m_sourceLineType != AnchorLine::Center);
+    Q_ASSERT(!AnchorLine::isFillCenter(m_sourceLineType));
 
     if (fillCenterModeEnabled && targetControl == 0)
         return;
@@ -252,14 +260,18 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
 
 void AnchorRow::setSourceButtonChecked(bool checked)
 {
+    Q_ASSERT(AnchorLine::isFillCenter(m_sourceLineType));
     m_sourceButton->setChecked(checked);
 }
 
 void AnchorRow::clear()
 {
-    setTargetLineType(AnchorLine::Invalid);
-    setSourceButtonChecked(false);
-    m_marginOffsetSpinBox->setValue(0);
+    if (AnchorLine::isFillCenter(m_sourceLineType)) {
+        setSourceButtonChecked(false);
+    } else {
+        setTargetLineType(AnchorLine::Invalid);
+        m_marginOffsetSpinBox->setValue(0);
+    }
     m_targetControlComboBox->clear();
 }
 
@@ -294,16 +306,25 @@ void AnchorRow::onTargetLineTypeChange()
     m_targetControlComboBox->setEnabled(false);
 }
 
+void AnchorRow::onSourceButtonCheckedChange(bool checked)
+{
+    if (AnchorLine::isFillCenter(m_sourceLineType))
+        m_targetControlComboBox->setEnabled(checked);
+}
+
 void AnchorRow::onTargetButtonClick(QAbstractButton* button, bool checked)
 {
     if (checked) {
-        bool vertical = AnchorLine::isVertical(m_sourceLineType);
-        if (button == m_targetLineButton1)
-            setTargetLineType(vertical ? AnchorLine::Left : AnchorLine::Top);
-        else if (button == m_targetLineButton2)
-            setTargetLineType(vertical ? AnchorLine::HorizontalCenter : AnchorLine::VerticalCenter);
-        else
-            setTargetLineType(vertical ? AnchorLine::Right : AnchorLine::Bottom);
+        if (button == m_targetLineButton1) {
+            setTargetLineType(AnchorLine::isVertical(m_sourceLineType)
+                              ? AnchorLine::Left : AnchorLine::Top);
+        } else if (button == m_targetLineButton2) {
+            setTargetLineType(AnchorLine::isVertical(m_sourceLineType)
+                              ? AnchorLine::HorizontalCenter : AnchorLine::VerticalCenter);
+        } else {
+            setTargetLineType(AnchorLine::isVertical(m_sourceLineType)
+                              ? AnchorLine::Right : AnchorLine::Bottom);
+        }
     } else {
         setTargetLineType(AnchorLine::Invalid);
     }

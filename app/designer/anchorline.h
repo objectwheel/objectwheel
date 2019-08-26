@@ -40,9 +40,13 @@ public:
     bool isValid() const;
     bool isVertical() const;
     bool isHorizontal() const;
+    bool isOffset() const;
+    bool isFillCenter() const;
 
     static bool isVertical(Type type);
     static bool isHorizontal(Type type);
+    static bool isOffset(Type type);
+    static bool isFillCenter(Type type);
 
 private:
     Type m_type;

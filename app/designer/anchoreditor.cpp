@@ -78,6 +78,8 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     auto targetControlLabel2 = new QLabel(tr("Target control"), this);
     auto marginLabel2 = new QLabel(tr("Margin/Offset"), this);
     auto targetLabel2 = new QLabel(tr("Target"), this);
+    auto closeButton = m_dialogButtonBox->addButton(QDialogButtonBox::Close);
+    auto clearButton = m_dialogButtonBox->addButton(QDialogButtonBox::Reset);
 
     m_layout->setContentsMargins(8, 8, 8, 8);
     m_layout->setSpacing(8);
@@ -152,17 +154,19 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
                                                "center is rounded."));
 
     m_dialogButtonBox->setFixedHeight(24);
-    auto closeButton = m_dialogButtonBox->addButton(QDialogButtonBox::Close);
+
     closeButton->setToolTip(tr("Close the Anchor Editor"));
     closeButton->setCursor(Qt::PointingHandCursor);
     closeButton->setFocus();
-    connect(closeButton, &QPushButton::clicked, this, &AnchorEditor::close);
-    auto clearButton = m_dialogButtonBox->addButton(QDialogButtonBox::Reset);
+
     clearButton->setText(tr("Clear"));
     clearButton->setToolTip(tr("Clear anchors"));
     clearButton->setCursor(Qt::PointingHandCursor);
-    connect(clearButton, &QPushButton::clicked, this, &AnchorEditor::cleared);
 
+    connect(closeButton, &QPushButton::clicked,
+            this, &AnchorEditor::close);
+    connect(clearButton, &QPushButton::clicked,
+            this, &AnchorEditor::cleared);
     connect(m_leftRow, &AnchorRow::marginOffsetEditingFinished,
             this, [=] { onMarginOffsetEditingFinish(m_leftRow); });
     connect(m_rightRow, &AnchorRow::marginOffsetEditingFinished,

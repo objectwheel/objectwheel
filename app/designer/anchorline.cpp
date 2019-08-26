@@ -51,6 +51,16 @@ bool AnchorLine::isHorizontal() const
     return isHorizontal(m_type);
 }
 
+bool AnchorLine::isOffset() const
+{
+    return isOffset(m_type);
+}
+
+bool AnchorLine::isFillCenter() const
+{
+    return isFillCenter(m_type);
+}
+
 bool AnchorLine::isVertical(Type type)
 {
     return type & VerticalMask;
@@ -59,4 +69,14 @@ bool AnchorLine::isVertical(Type type)
 bool AnchorLine::isHorizontal(Type type)
 {
     return type & HorizontalMask;
+}
+
+bool AnchorLine::isOffset(AnchorLine::Type type)
+{
+    return type == VerticalCenter || type == HorizontalCenter;
+}
+
+bool AnchorLine::isFillCenter(AnchorLine::Type type)
+{
+    return type == Fill || type == Center;
 }
