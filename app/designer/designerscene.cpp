@@ -145,6 +145,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                               anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
             e->setSourceControl(topLevelControl(line.p1()));
             e->setPrimaryTargetControl(topLevelControl(line.p2()));
+            e->refresh();
             e->show();
         }
     });

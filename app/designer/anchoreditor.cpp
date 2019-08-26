@@ -230,10 +230,8 @@ Control* AnchorEditor::sourceControl() const
 
 void AnchorEditor::setSourceControl(Control* sourceControl)
 {
-    if (m_sourceControl != sourceControl) {
+    if (m_sourceControl != sourceControl)
         m_sourceControl = sourceControl;
-        refresh();
-    }
 }
 
 Control* AnchorEditor::primaryTargetControl() const
@@ -243,10 +241,8 @@ Control* AnchorEditor::primaryTargetControl() const
 
 void AnchorEditor::setPrimaryTargetControl(Control* primaryTargetControl)
 {
-    if (m_primaryTargetControl != primaryTargetControl) {
+    if (m_primaryTargetControl != primaryTargetControl)
         m_primaryTargetControl = primaryTargetControl;
-        refresh();
-    }
 }
 
 void AnchorEditor::onMarginOffsetEditingFinish(AnchorRow* row)
@@ -285,76 +281,85 @@ void AnchorEditor::refreshNow()
 {
     m_sourceControlComboBox->clear();
     for (Control* control : m_scene->items<Control>()) {
-        if (control->gui())
+        if (control->gui()) //FIXME: isAnchorable ekle
             m_sourceControlComboBox->addItem(control->id());
     }
+    m_sourceControlComboBox->setCurrentText(m_sourceControl->id());
+    m_marginsSpinBox->setValue(m_sourceControl->anchors()->margins());
+    m_alignWhenCenteredCheckBox->setChecked(m_sourceControl->anchors()->alignWhenCentered());
 
     m_leftRow->clear();
     m_rightRow->clear();
     m_topRow->clear();
     m_bottomRow->clear();
-    m_horizontalCenterRow->clear();
-    m_verticalCenterRow->clear();
     m_fillRow->clear();
 
-    m_leftRow->setTargetControlList(availableAnchorTargets(sourceControl));
-    m_rightRow->setTargetControlList(availableAnchorTargets(sourceControl));
-    m_topRow->setTargetControlList(availableAnchorTargets(sourceControl));
-    m_bottomRow->setTargetControlList(availableAnchorTargets(sourceControl));
-    m_horizontalCenterRow->setTargetControlList(availableAnchorTargets(sourceControl));
-    m_verticalCenterRow->setTargetControlList(availableAnchorTargets(sourceControl));
-    m_fillRow->setTargetControlList(availableAnchorTargets(sourceControl));
+    m_leftRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_rightRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_topRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_bottomRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_fillRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
 
     m_leftRow->setTargetControl(m_primaryTargetControl);
     m_rightRow->setTargetControl(m_primaryTargetControl);
     m_topRow->setTargetControl(m_primaryTargetControl);
     m_bottomRow->setTargetControl(m_primaryTargetControl);
-    m_horizontalCenterRow->setTargetControl(m_primaryTargetControl);
-    m_verticalCenterRow->setTargetControl(m_primaryTargetControl);
     m_fillRow->setTargetControl(m_primaryTargetControl);
 
-    if (sourceControl->anchors()->left().isValid()) {
-        m_leftRow->setTargetLineType(sourceControl->anchors()->left().type());
-        m_leftRow->setMarginOffset(sourceControl->anchors()->leftMargin());
-        m_leftRow->setTargetControl(sourceControl->anchors()->left().control());
+    if (m_sourceControl->anchors()->left().isValid()) {
+        m_leftRow->setTargetLineType(m_sourceControl->anchors()->left().type());
+        m_leftRow->setMarginOffset(m_sourceControl->anchors()->leftMargin());
+        m_leftRow->setTargetControl(m_sourceControl->anchors()->left().control());
     }
 
-    if (sourceControl->anchors()->right().isValid()) {
-        m_rightRow->setTargetLineType(sourceControl->anchors()->right().type());
-        m_rightRow->setMarginOffset(sourceControl->anchors()->rightMargin());
-        m_rightRow->setTargetControl(sourceControl->anchors()->right().control());
+    if (m_sourceControl->anchors()->right().isValid()) {
+        m_rightRow->setTargetLineType(m_sourceControl->anchors()->right().type());
+        m_rightRow->setMarginOffset(m_sourceControl->anchors()->rightMargin());
+        m_rightRow->setTargetControl(m_sourceControl->anchors()->right().control());
     }
 
-    if (sourceControl->anchors()->top().isValid()) {
-        m_topRow->setTargetLineType(sourceControl->anchors()->top().type());
-        m_topRow->setMarginOffset(sourceControl->anchors()->topMargin());
-        m_topRow->setTargetControl(sourceControl->anchors()->top().control());
+    if (m_sourceControl->anchors()->top().isValid()) {
+        m_topRow->setTargetLineType(m_sourceControl->anchors()->top().type());
+        m_topRow->setMarginOffset(m_sourceControl->anchors()->topMargin());
+        m_topRow->setTargetControl(m_sourceControl->anchors()->top().control());
     }
 
-    if (sourceControl->anchors()->bottom().isValid()) {
-        m_bottomRow->setTargetLineType(sourceControl->anchors()->bottom().type());
-        m_bottomRow->setMarginOffset(sourceControl->anchors()->bottomMargin());
-        m_bottomRow->setTargetControl(sourceControl->anchors()->bottom().control());
+    if (m_sourceControl->anchors()->bottom().isValid()) {
+        m_bottomRow->setTargetLineType(m_sourceControl->anchors()->bottom().type());
+        m_bottomRow->setMarginOffset(m_sourceControl->anchors()->bottomMargin());
+        m_bottomRow->setTargetControl(m_sourceControl->anchors()->bottom().control());
     }
 
-    if (sourceControl->anchors()->horizontalCenter().isValid()) {
-        m_horizontalCenterRow->setTargetLineType(sourceControl->anchors()->horizontalCenter().type());
-        m_horizontalCenterRow->setMarginOffset(sourceControl->anchors()->horizontalCenterOffset());
-        m_horizontalCenterRow->setTargetControl(sourceControl->anchors()->horizontalCenter().control());
-    }
-
-    if (sourceControl->anchors()->verticalCenter().isValid()) {
-        m_verticalCenterRow->setTargetLineType(sourceControl->anchors()->verticalCenter().type());
-        m_verticalCenterRow->setMarginOffset(sourceControl->anchors()->verticalCenterOffset());
-        m_verticalCenterRow->setTargetControl(sourceControl->anchors()->verticalCenter().control());
-    }
-
-    if (sourceControl->anchors()->fill()) {
+    if (m_sourceControl->anchors()->fill()) {
         m_fillRow->setSourceButtonChecked(true);
-        m_fillRow->setTargetControl(sourceControl->anchors()->fill());
-        m_leftRow->setFillCenterModeEnabled(true, sourceControl->anchors()->fill());
-        m_rightRow->setFillCenterModeEnabled(true, sourceControl->anchors()->fill());
-        m_topRow->setFillCenterModeEnabled(true, sourceControl->anchors()->fill());
-        m_bottomRow->setFillCenterModeEnabled(true, sourceControl->anchors()->fill());
+        m_fillRow->setTargetControl(m_sourceControl->anchors()->fill());
+        m_leftRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->fill());
+        m_rightRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->fill());
+        m_topRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->fill());
+        m_bottomRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->fill());
+    }
+
+
+
+
+
+
+    m_horizontalCenterRow->clear();
+    m_verticalCenterRow->clear();
+    m_horizontalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_verticalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_horizontalCenterRow->setTargetControl(m_primaryTargetControl);
+    m_verticalCenterRow->setTargetControl(m_primaryTargetControl);
+
+    if (m_sourceControl->anchors()->horizontalCenter().isValid()) {
+        m_horizontalCenterRow->setTargetLineType(m_sourceControl->anchors()->horizontalCenter().type());
+        m_horizontalCenterRow->setMarginOffset(m_sourceControl->anchors()->horizontalCenterOffset());
+        m_horizontalCenterRow->setTargetControl(m_sourceControl->anchors()->horizontalCenter().control());
+    }
+
+    if (m_sourceControl->anchors()->verticalCenter().isValid()) {
+        m_verticalCenterRow->setTargetLineType(m_sourceControl->anchors()->verticalCenter().type());
+        m_verticalCenterRow->setMarginOffset(m_sourceControl->anchors()->verticalCenterOffset());
+        m_verticalCenterRow->setTargetControl(m_sourceControl->anchors()->verticalCenter().control());
     }
 }
