@@ -124,8 +124,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_paintLayer, [=] {
         m_paintLayer->update();
         if (!m_anchorLayer->activated()) {
-            static auto e = [] {
-                auto e = new AnchorEditor(0);
+            static auto e = [this] {
+                auto e = new AnchorEditor(this);
                 connect(e, &AnchorEditor::anchored, [=] (const AnchorLine& sourceLine, const AnchorLine& targetLine) {
                     QString targetId = targetLine.control()->type() == Form::Type ? "parent" : targetLine.control()->id();
                     ControlRenderingManager::scheduleBindingUpdate(sourceLine.control()->uid(),

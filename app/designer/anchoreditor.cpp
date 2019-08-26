@@ -1,6 +1,7 @@
 #include <anchoreditor.h>
 #include <anchorrow.h>
 #include <control.h>
+#include <designerscene.h>
 
 #include <QBoxLayout>
 #include <QLabel>
@@ -21,9 +22,10 @@ static QList<Control*> availableAnchorTargets(Control* source)
     return controls;
 }
 
-AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
+AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(parent)
+  , m_scene(scene)
   , m_layout(new QVBoxLayout(this))
-//  , m_sourceControlComboBox(new QComboBox(this))
+  , m_sourceControlComboBox(new QComboBox(this))
   , m_marginsSpinBox(new QDoubleSpinBox(this))
   , m_leftRow(new AnchorRow(AnchorLine::Left, this))
   , m_rightRow(new AnchorRow(AnchorLine::Right, this))
@@ -42,38 +44,24 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     setAttribute(Qt::WA_QuitOnClose, false);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
 
-//    auto sourceControlLabel = new QLabel(tr("Source control"), this);
-//    auto hbox = new QHBoxLayout;
-//    hbox->setContentsMargins(0, 0, 0, 0);
-//    hbox->setSpacing(0);
-//    hbox->addWidget(sourceLabel);
-//    hbox->addSpacing(5);
-//    hbox->addWidget(targetLabel);
-//    hbox->addSpacing(44);
-//    hbox->addWidget(marginLabel);
-//    hbox->addSpacing(5);
-//    hbox->addWidget(targetControlLabel);
-//    hbox->addStretch();
-
-
-
-//    m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
-//    m_targetControlComboBox->setFixedSize(QSize(140, 24));
-//    m_targetControlComboBox->setToolTip(tr("Target control"));
-//    m_targetControlComboBox->setEnabled(false);
-
+    auto sourceGroup = new QGroupBox(tr("Source Control"), this);
+    auto sourceGroupLayout = new QVBoxLayout(sourceGroup);
+    auto sourceControlLayout = new QHBoxLayout;
+    auto marginsLayout = new QHBoxLayout;
+    auto alignmentLayout = new QHBoxLayout;
     auto sideGroup = new QGroupBox(tr("Side Anchors"), this);
     auto sideGroupLayout = new QVBoxLayout(sideGroup);
     auto categoriesLayout = new QHBoxLayout;
-    auto marginsLayout = new QHBoxLayout;
+    auto centerGroup = new QGroupBox(tr("Center Anchors"), this);
+    auto centerGroupLayout = new QVBoxLayout(centerGroup);
+    auto categoriesLayout2 = new QHBoxLayout;
+    auto sourceControlLabel = new QLabel(tr("Source control: "), this);
+    auto marginsLabel = new QLabel(tr("Margins:"), this);
+    auto alignmentLabel = new QLabel(tr("Pixel alignment: "), this);
     auto sourceLabel = new QLabel(tr("Source"), this);
     auto targetControlLabel = new QLabel(tr("Target control"), this);
     auto marginLabel = new QLabel(tr("Margin/Offset"), this);
     auto targetLabel = new QLabel(tr("Target"), this);
-    auto marginsLabel = new QLabel(tr("Margins:"), this);
-    auto centerGroup = new QGroupBox(tr("Center Anchors"), this);
-    auto centerGroupLayout = new QVBoxLayout(centerGroup);
-    auto categoriesLayout2 = new QHBoxLayout;
     auto sourceLabel2 = new QLabel(tr("Source"), this);
     auto targetControlLabel2 = new QLabel(tr("Target control"), this);
     auto marginLabel2 = new QLabel(tr("Margin/Offset"), this);
@@ -83,10 +71,61 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
 
     m_layout->setContentsMargins(8, 8, 8, 8);
     m_layout->setSpacing(8);
+    m_layout->addWidget(sourceGroup);
     m_layout->addWidget(sideGroup);
     m_layout->addWidget(centerGroup);
     m_layout->addWidget(m_dialogButtonBox, 0, Qt::AlignVCenter | Qt::AlignRight);
     m_layout->addStretch();
+
+    sourceGroupLayout->setContentsMargins(4, 4, 4, 4);
+    sourceGroupLayout->setSpacing(1);
+    sourceGroupLayout->addLayout(sourceControlLayout);
+    sourceGroupLayout->addLayout(marginsLayout);
+    sourceGroupLayout->addLayout(alignmentLayout);
+
+    sourceControlLayout->setContentsMargins(0, 0, 0, 0);
+    sourceControlLayout->setSpacing(2);
+    sourceControlLayout->addWidget(sourceControlLabel);
+    sourceControlLayout->addSpacing(10);
+    sourceControlLayout->addWidget(m_sourceControlComboBox);
+    sourceControlLayout->addStretch();
+
+    m_sourceControlComboBox->setCursor(Qt::PointingHandCursor);
+    m_sourceControlComboBox->setFixedSize(QSize(140, 24));
+    m_sourceControlComboBox->setToolTip(tr("Source control"));
+
+    marginsLayout->setContentsMargins(0, 0, 0, 0);
+    marginsLayout->setSpacing(2);
+    marginsLayout->addWidget(marginsLabel);
+    marginsLayout->addSpacing(46);
+    marginsLayout->addWidget(m_marginsSpinBox);
+    marginsLayout->addStretch();
+
+    m_marginsSpinBox->setToolTip(tr("Generic margins"));
+    m_marginsSpinBox->setCursor(Qt::PointingHandCursor);
+    m_marginsSpinBox->setFixedSize(QSize(80, 24));
+    m_marginsSpinBox->setRange(-999.99, 999.99);
+    m_marginsSpinBox->setDecimals(2);
+
+    alignmentLayout->setContentsMargins(0, 0, 0, 0);
+    alignmentLayout->setSpacing(2);
+    alignmentLayout->addWidget(alignmentLabel);
+    alignmentLayout->addSpacing(5);
+    alignmentLayout->addWidget(m_alignWhenCenteredCheckBox);
+    alignmentLayout->addStretch();
+
+    m_alignWhenCenteredCheckBox->setCursor(Qt::PointingHandCursor);
+    m_alignWhenCenteredCheckBox->setFixedHeight(24);
+    m_alignWhenCenteredCheckBox->setChecked(true);
+    m_alignWhenCenteredCheckBox->setText(tr("Align when centered"));
+    m_alignWhenCenteredCheckBox->setToolTip(tr("This forces centered anchors to align to a whole "
+                                               "pixel; (enabled by default) if the item being "
+                                               "centered has an odd width or height, the item will "
+                                               "be positioned on a whole pixel rather than being "
+                                               "placed on a half-pixel. This ensures the item is "
+                                               "painted crisply. There are cases where this is not "
+                                               "desirable, for example when rotating the item "
+                                               "jitters may be apparent as the center is rounded."));
 
     sideGroupLayout->setContentsMargins(4, 4, 4, 4);
     sideGroupLayout->setSpacing(0);
@@ -96,7 +135,6 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     sideGroupLayout->addWidget(m_topRow);
     sideGroupLayout->addWidget(m_bottomRow);
     sideGroupLayout->addWidget(m_fillRow);
-    sideGroupLayout->addLayout(marginsLayout);
 
     categoriesLayout->setContentsMargins(0, 0, 0, 0);
     categoriesLayout->setSpacing(0);
@@ -109,25 +147,12 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     categoriesLayout->addWidget(targetLabel);
     categoriesLayout->addStretch();
 
-    marginsLayout->setContentsMargins(0, 0, 0, 0);
-    marginsLayout->setSpacing(2);
-    marginsLayout->addWidget(marginsLabel);
-    marginsLayout->addWidget(m_marginsSpinBox);
-    marginsLayout->addStretch();
-
-    m_marginsSpinBox->setToolTip(tr("Generic margins"));
-    m_marginsSpinBox->setCursor(Qt::PointingHandCursor);
-    m_marginsSpinBox->setFixedSize(QSize(80, 24));
-    m_marginsSpinBox->setRange(-999.99, 999.99);
-    m_marginsSpinBox->setDecimals(2);
-
     centerGroupLayout->setContentsMargins(4, 4, 4, 4);
     centerGroupLayout->setSpacing(0);
     centerGroupLayout->addLayout(categoriesLayout2);
     centerGroupLayout->addWidget(m_horizontalCenterRow);
     centerGroupLayout->addWidget(m_verticalCenterRow);
     centerGroupLayout->addWidget(m_centerInRow);
-    centerGroupLayout->addWidget(m_alignWhenCenteredCheckBox);
 
     categoriesLayout2->setContentsMargins(0, 0, 0, 0);
     categoriesLayout2->setSpacing(0);
@@ -139,19 +164,6 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
     categoriesLayout2->addSpacing(7);
     categoriesLayout2->addWidget(targetLabel2);
     categoriesLayout2->addStretch();
-
-    m_alignWhenCenteredCheckBox->setCursor(Qt::PointingHandCursor);
-    m_alignWhenCenteredCheckBox->setFixedHeight(24);
-    m_alignWhenCenteredCheckBox->setChecked(true);
-    m_alignWhenCenteredCheckBox->setText(tr("Align when centered"));
-    m_alignWhenCenteredCheckBox->setToolTip(tr("This forces centered anchors to align to a whole "
-                                               "pixel; if the item being centered has an odd width "
-                                               "or height, the item will be positioned on a whole "
-                                               "pixel rather than being placed on a half-pixel. "
-                                               "This ensures the item is painted crisply. There are "
-                                               "cases where this is not desirable, for example when "
-                                               "rotating the item jitters may be apparent as the "
-                                               "center is rounded."));
 
     m_dialogButtonBox->setFixedHeight(24);
 
@@ -215,6 +227,12 @@ AnchorEditor::AnchorEditor(QWidget* parent) : QWidget(parent)
 void AnchorEditor::activate(Control* source, Control* target)
 {
     setProperty(g_sourceProperty, QVariant::fromValue(source));
+
+    m_sourceControlComboBox->clear();
+    for (Control* control : m_scene->items<Control>()) {
+        if (control->gui())
+            m_sourceControlComboBox->addItem(control->id());
+    }
 
     m_leftRow->clear();
     m_rightRow->clear();

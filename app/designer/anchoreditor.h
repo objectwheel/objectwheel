@@ -11,6 +11,7 @@ class Control;
 class QComboBox;
 class QDoubleSpinBox;
 class QCheckBox;
+class DesignerScene;
 
 class AnchorEditor final : public QWidget
 {
@@ -18,7 +19,7 @@ class AnchorEditor final : public QWidget
     Q_DISABLE_COPY(AnchorEditor)
 
 public:
-    explicit AnchorEditor(QWidget* parent = nullptr);
+    explicit AnchorEditor(DesignerScene* scene, QWidget* parent = nullptr);
 
     void activate(Control* source, Control* target);
 
@@ -33,6 +34,7 @@ signals:
     void cleared();
 
 private:
+    const DesignerScene* m_scene;
     QBoxLayout* m_layout;
     QComboBox* m_sourceControlComboBox;
     QDoubleSpinBox* m_marginsSpinBox;
