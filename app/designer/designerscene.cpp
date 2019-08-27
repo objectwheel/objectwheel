@@ -182,12 +182,24 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                     ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
                                                                     "anchors.alignWhenCentered", align);
                 });
+                connect(e, &AnchorEditor::sourceControlActivated, [=] {
+                    clearSelection();
+                    e->sourceControl()->setSelected(true);
+                });
                 return e;
             }();
-            e->setSourceControl(topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint())));
-            e->setPrimaryTargetControl(topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint())));
+            Control* sourceControl = topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint()));
+            Control* targetControl = topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
+            const QList<Control*>& selection = selectedControls();
+            clearSelection();
+            sourceControl->setSelected(true);
+            e->setSourceControl(sourceControl);
+            e->setPrimaryTargetControl(targetControl);
             e->refresh();
-            e->show();
+            e->exec();
+            clearSelection();
+            for (Control* control : selection)
+                control->setSelected(true);
         }
     });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,

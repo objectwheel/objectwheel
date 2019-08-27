@@ -20,7 +20,7 @@ static QList<Control*> availableAnchorTargets(Control* sourceControl)
     return controls;
 }
 
-AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(parent)
+AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint)
   , m_scene(scene)
   , m_refreshScheduled(false)
   , m_layout(new QVBoxLayout(this))
@@ -41,7 +41,6 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     setWindowTitle(tr("Anchor Editor"));
     setWindowModality(Qt::ApplicationModal);
     setAttribute(Qt::WA_QuitOnClose, false);
-    setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
 
     auto sourceGroup = new QGroupBox(tr("Source Control"), this);
     auto sourceGroupLayout = new QVBoxLayout(sourceGroup);
@@ -171,7 +170,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     closeButton->setCursor(Qt::PointingHandCursor);
     closeButton->setFocus();
 
-    clearButton->setText(tr("Clear all"));
+    clearButton->setText(tr("Clear"));
     clearButton->setToolTip(tr("Clear anchors"));
     clearButton->setCursor(Qt::PointingHandCursor);
 
@@ -179,6 +178,8 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
         setSourceControl(m_sourceControlComboBox->itemData(index).value<Control*>());
         refresh();
     });
+    connect(m_sourceControlComboBox, qOverload<int>(&QComboBox::activated),
+            this, &AnchorEditor::sourceControlActivated);
     connect(m_alignWhenCenteredCheckBox, &QCheckBox::clicked,
             this, &AnchorEditor::alignmentActivated);
     connect(m_marginsSpinBox, &QDoubleSpinBox::editingFinished,

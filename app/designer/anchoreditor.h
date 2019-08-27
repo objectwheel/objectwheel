@@ -1,7 +1,7 @@
 #ifndef ANCHOREDITOR_H
 #define ANCHOREDITOR_H
 
-#include <QWidget>
+#include <QDialog>
 #include <anchorline.h>
 
 class QBoxLayout;
@@ -13,7 +13,7 @@ class QDoubleSpinBox;
 class QCheckBox;
 class DesignerScene;
 
-class AnchorEditor final : public QWidget
+class AnchorEditor final : public QDialog
 {
     Q_OBJECT
     Q_DISABLE_COPY(AnchorEditor)
@@ -40,6 +40,7 @@ private:
     void refreshNow();
 
 signals:
+    void sourceControlActivated();
     void alignmentActivated(bool align);
     void marginsEdited(qreal marginOffset);
     void marginOffsetEdited(AnchorLine::Type sourceLineType, qreal marginOffset);
