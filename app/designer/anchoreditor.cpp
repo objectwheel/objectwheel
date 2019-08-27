@@ -175,12 +175,14 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     clearButton->setToolTip(tr("Clear anchors"));
     clearButton->setCursor(Qt::PointingHandCursor);
 
-    connect(closeButton, &QPushButton::clicked,
-            this, &AnchorEditor::close);
-    connect(clearButton, &QPushButton::clicked,
-            this, &AnchorEditor::clear);
-    connect(clearButton, &QPushButton::clicked,
-            this, &AnchorEditor::cleared);
+    connect(m_sourceControlComboBox, qOverload<int>(&QComboBox::activated), this, [=] (int index) {
+        setSourceControl(m_sourceControlComboBox->itemData(index).value<Control*>());
+        refresh();
+    });
+    connect(m_alignWhenCenteredCheckBox, &QCheckBox::clicked,
+            this, &AnchorEditor::alignmentActivated);
+    connect(m_marginsSpinBox, &QDoubleSpinBox::editingFinished,
+            this, [=] { emit marginsEdited(m_marginsSpinBox->value()); });
     connect(m_leftRow, &AnchorRow::marginOffsetEditingFinished,
             this, [=] { onMarginOffsetEditingFinish(m_leftRow); });
     connect(m_rightRow, &AnchorRow::marginOffsetEditingFinished,
@@ -216,10 +218,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     connect(m_horizontalCenterRow, &AnchorRow::targetLineTypeActivated,
             this, [=] { onTargetLineTypeActivate(m_horizontalCenterRow); });
     connect(m_verticalCenterRow, &AnchorRow::targetLineTypeActivated,
-            this, [=] { onTargetLineTypeActivate(m_verticalCenterRow); });
-
-    connect(m_marginsSpinBox, &QDoubleSpinBox::editingFinished,
-            this, [=] { emit marginsEdited(m_marginsSpinBox->value()); });
+            this, [=] { onTargetLineTypeActivate(m_verticalCenterRow); });    
     connect(m_fillRow, &AnchorRow::sourceButtonClicked, this, [=] (bool checked) {
         m_leftRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_rightRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
@@ -244,6 +243,12 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
         m_verticalCenterRow->setTargetControl(m_centerInRow->targetControl());
         emit centered(m_centerInRow->targetControl());
     });
+    connect(clearButton, &QPushButton::clicked,
+            this, &AnchorEditor::clear);
+    connect(clearButton, &QPushButton::clicked,
+            this, &AnchorEditor::cleared);
+    connect(closeButton, &QPushButton::clicked,
+            this, &AnchorEditor::close);
 }
 
 Control* AnchorEditor::sourceControl() const
@@ -302,7 +307,40 @@ void AnchorEditor::refresh(bool delayed)
 
 void AnchorEditor::clear()
 {
-    // TODO
+    m_marginsSpinBox->setValue(0);
+    m_alignWhenCenteredCheckBox->setChecked(true);
+
+    m_leftRow->clear();
+    m_rightRow->clear();
+    m_topRow->clear();
+    m_bottomRow->clear();
+    m_fillRow->clear();
+    m_horizontalCenterRow->clear();
+    m_verticalCenterRow->clear();
+    m_centerInRow->clear();
+
+    const QList<Control*>& anchorTargets = availableAnchorTargets(m_sourceControl);
+    m_leftRow->setTargetControlList(anchorTargets);
+    m_rightRow->setTargetControlList(anchorTargets);
+    m_topRow->setTargetControlList(anchorTargets);
+    m_bottomRow->setTargetControlList(anchorTargets);
+    m_fillRow->setTargetControlList(anchorTargets);
+    m_horizontalCenterRow->setTargetControlList(anchorTargets);
+    m_verticalCenterRow->setTargetControlList(anchorTargets);
+    m_centerInRow->setTargetControlList(anchorTargets);
+
+    Control* primaryTargetControl = m_primaryTargetControl;
+    if (!anchorTargets.contains(primaryTargetControl))
+        primaryTargetControl = m_sourceControl->parentControl();
+
+    m_leftRow->setTargetControl(primaryTargetControl);
+    m_rightRow->setTargetControl(primaryTargetControl);
+    m_topRow->setTargetControl(primaryTargetControl);
+    m_bottomRow->setTargetControl(primaryTargetControl);
+    m_fillRow->setTargetControl(primaryTargetControl);
+    m_horizontalCenterRow->setTargetControl(primaryTargetControl);
+    m_verticalCenterRow->setTargetControl(primaryTargetControl);
+    m_centerInRow->setTargetControl(primaryTargetControl);
 }
 
 void AnchorEditor::refreshNow()
@@ -310,7 +348,7 @@ void AnchorEditor::refreshNow()
     m_sourceControlComboBox->clear();
     for (Control* control : m_scene->items<Control>()) {
         if (control->gui()) //FIXME: isAnchorable ekle
-            m_sourceControlComboBox->addItem(control->id());
+            m_sourceControlComboBox->addItem(control->id(), QVariant::fromValue(control));
     }
     m_sourceControlComboBox->setCurrentText(m_sourceControl->id());
     m_marginsSpinBox->setValue(m_sourceControl->anchors()->margins());
@@ -325,23 +363,28 @@ void AnchorEditor::refreshNow()
     m_verticalCenterRow->clear();
     m_centerInRow->clear();
 
-    m_leftRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_rightRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_topRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_bottomRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_fillRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_horizontalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_verticalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_centerInRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    const QList<Control*>& anchorTargets = availableAnchorTargets(m_sourceControl);
+    m_leftRow->setTargetControlList(anchorTargets);
+    m_rightRow->setTargetControlList(anchorTargets);
+    m_topRow->setTargetControlList(anchorTargets);
+    m_bottomRow->setTargetControlList(anchorTargets);
+    m_fillRow->setTargetControlList(anchorTargets);
+    m_horizontalCenterRow->setTargetControlList(anchorTargets);
+    m_verticalCenterRow->setTargetControlList(anchorTargets);
+    m_centerInRow->setTargetControlList(anchorTargets);
 
-    m_leftRow->setTargetControl(m_primaryTargetControl);
-    m_rightRow->setTargetControl(m_primaryTargetControl);
-    m_topRow->setTargetControl(m_primaryTargetControl);
-    m_bottomRow->setTargetControl(m_primaryTargetControl);
-    m_fillRow->setTargetControl(m_primaryTargetControl);
-    m_horizontalCenterRow->setTargetControl(m_primaryTargetControl);
-    m_verticalCenterRow->setTargetControl(m_primaryTargetControl);
-    m_centerInRow->setTargetControl(m_primaryTargetControl);
+    Control* primaryTargetControl = m_primaryTargetControl;
+    if (!anchorTargets.contains(primaryTargetControl))
+        primaryTargetControl = m_sourceControl->parentControl();
+
+    m_leftRow->setTargetControl(primaryTargetControl);
+    m_rightRow->setTargetControl(primaryTargetControl);
+    m_topRow->setTargetControl(primaryTargetControl);
+    m_bottomRow->setTargetControl(primaryTargetControl);
+    m_fillRow->setTargetControl(primaryTargetControl);
+    m_horizontalCenterRow->setTargetControl(primaryTargetControl);
+    m_verticalCenterRow->setTargetControl(primaryTargetControl);
+    m_centerInRow->setTargetControl(primaryTargetControl);
 
     m_leftRow->setMarginOffset(m_sourceControl->anchors()->leftMargin());
     m_rightRow->setMarginOffset(m_sourceControl->anchors()->rightMargin());

@@ -40,6 +40,7 @@ private:
     void refreshNow();
 
 signals:
+    void alignmentActivated(bool align);
     void marginsEdited(qreal marginOffset);
     void marginOffsetEdited(AnchorLine::Type sourceLineType, qreal marginOffset);
     void anchored(AnchorLine::Type sourceLineType, const AnchorLine& targetLine);

@@ -178,6 +178,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                     ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
                                                                     "anchors.margins", margins);
                 });
+                connect(e, &AnchorEditor::alignmentActivated, [=] (bool align) {
+                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
+                                                                    "anchors.alignWhenCentered", align);
+                });
                 return e;
             }();
             e->setSourceControl(topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint())));

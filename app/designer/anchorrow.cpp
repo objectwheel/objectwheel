@@ -75,6 +75,12 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     auto arrowIcon = new QLabel(this);
     auto targetButtonLayout = new QHBoxLayout;
 
+    m_sourceButton->setFocusPolicy(Qt::NoFocus);
+    m_targetControlComboBox->setFocusPolicy(Qt::NoFocus);
+    m_targetLineButton1->setFocusPolicy(Qt::NoFocus);
+    m_targetLineButton2->setFocusPolicy(Qt::NoFocus);
+    m_targetLineButton3->setFocusPolicy(Qt::NoFocus);
+
     m_layout->setSpacing(6);
     m_layout->setContentsMargins(0, 0, 0, 0);
     m_layout->addWidget(m_sourceButton);
