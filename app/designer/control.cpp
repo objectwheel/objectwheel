@@ -147,7 +147,7 @@ RenderInfo Control::renderInfo() const
 {
     return m_renderInfo;
 }
-#include <QDebug>
+
 void Control::setRenderInfo(const RenderInfo& info)
 {
     if (m_uid != info.uid)
@@ -158,8 +158,6 @@ void Control::setRenderInfo(const RenderInfo& info)
     m_renderInfo = info;
 
     updateAnchors();
-    if (id() == "button3")
-        qDebug() << id() << m_renderInfo.anchors.value("anchors.margins") << m_anchors->margins();
     setResizable(gui());
     setZValue(property("z").toDouble());
     setFlag(ItemClipsChildrenToShape, !DesignerScene::showClippedControls() && property("clip").toBool());
@@ -290,7 +288,7 @@ void Control::updateAnchors()
             m_anchors->setAlignWhenCentered(m_renderInfo.anchors.contains(name) ? value : true);
     }
 
-    QHash<QString, QString> changedAnchors; // uid, anchors.name
+    QList<QPair<QString, QString>> changedAnchors; // anchors.name, uid
     for (const QString& name : UtilityFunctions::anchorLineNames()) {
         const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
         if (pair.isEmpty()) {
@@ -317,37 +315,37 @@ void Control::updateAnchors()
         const AnchorLine::Type type = anchorType(pair.first());
         if (name == "anchors.fill") {
             if (m_anchors->fill() == 0 || m_anchors->fill()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
         } else if (name == "anchors.centerIn") {
             if (m_anchors->centerIn() == 0 || m_anchors->centerIn()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
         } else if (name == "anchors.top") {
             if (!m_anchors->top().isValid() || m_anchors->top().control()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
             m_anchors->setTop(AnchorLine(type, m_anchors->top().control()));
         } else if (name == "anchors.bottom") {
             if (!m_anchors->bottom().isValid() || m_anchors->bottom().control()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
             m_anchors->setBottom(AnchorLine(type, m_anchors->bottom().control()));
         } else if (name == "anchors.left") {
             if (!m_anchors->left().isValid() || m_anchors->left().control()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
             m_anchors->setLeft(AnchorLine(type, m_anchors->left().control()));
         } else if (name == "anchors.right") {
             if (!m_anchors->right().isValid() || m_anchors->right().control()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
             m_anchors->setRight(AnchorLine(type, m_anchors->right().control()));
         } else if (name == "anchors.horizontalCenter") {
             if (!m_anchors->horizontalCenter().isValid() || m_anchors->horizontalCenter().control()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
             m_anchors->setHorizontalCenter(AnchorLine(type, m_anchors->horizontalCenter().control()));
         } else if (name == "anchors.verticalCenter") {
             if (!m_anchors->verticalCenter().isValid() || m_anchors->verticalCenter().control()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
             m_anchors->setVerticalCenter(AnchorLine(type, m_anchors->verticalCenter().control()));
         } else if (name == "anchors.baseline") {
             if (!m_anchors->baseline().isValid() || m_anchors->baseline().control()->uid() != pair.last())
-                changedAnchors.insert(pair.last(), name);
+                changedAnchors.append(QPair<QString, QString>(name, pair.last()));
             m_anchors->setBaseline(AnchorLine(type, m_anchors->baseline().control()));
         }
     }
@@ -355,15 +353,17 @@ void Control::updateAnchors()
     if (changedAnchors.isEmpty())
         return;
 
-    QHash<QString, Control*> changedControls; // anchors.name, Control*
+    QList<QPair<QString, Control*>> changedControls; // anchors.name, Control*
     for (Control* control : scene()->items<Control>()) {
-        const QString& name = changedAnchors.value(control->uid());
-        if (!name.isEmpty())
-            changedControls.insert(name, control);
+        for (const QPair<QString, QString>& pair : changedAnchors) {
+            if (pair.second == control->uid())
+                changedControls.append(QPair<QString, Control*>(pair.first, control));
+        }
     }
 
-    for (const QString& name : changedControls.keys()) {
-        Control* control = changedControls.value(name);
+    for (const QPair<QString, Control*>& pair : changedControls) {
+        const QString& name = pair.first;
+        Control* control = pair.second;
         if (name == "anchors.fill")
             m_anchors->setFill(control);
         else if (name == "anchors.centerIn")

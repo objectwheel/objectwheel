@@ -39,8 +39,6 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
 {
     setFocusPolicy(Qt::NoFocus);
     setWindowTitle(tr("Anchor Editor"));
-    setWindowModality(Qt::ApplicationModal);
-    setAttribute(Qt::WA_QuitOnClose, false);
 
     auto sourceGroup = new QGroupBox(tr("Source Control"), this);
     auto sourceGroupLayout = new QVBoxLayout(sourceGroup);
