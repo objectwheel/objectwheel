@@ -266,31 +266,7 @@ static AnchorLine::Type anchorType(const QString& anchorName)
 
 void Control::updateAnchors()
 {
-    static const QStringList anchorLineNames {
-        "anchors.top",
-        "anchors.bottom",
-        "anchors.left",
-        "anchors.right",
-        "anchors.horizontalCenter",
-        "anchors.verticalCenter",
-        "anchors.baseline",
-        "anchors.fill",
-        "anchors.centerIn"
-    };
-
-    static const QStringList anchorPropertyNames {
-        "anchors.margins",
-        "anchors.topMargin",
-        "anchors.bottomMargin",
-        "anchors.leftMargin",
-        "anchors.rightMargin",
-        "anchors.horizontalCenterOffset",
-        "anchors.verticalCenterOffset",
-        "anchors.baselineOffset",
-        "anchors.alignWhenCentered"
-    };
-
-    for (const QString& name : anchorPropertyNames) {
+    for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
         const qreal value = m_renderInfo.anchors.value(name).toReal();
         if (name == "anchors.margins")
             m_anchors->setMargins(value);
@@ -313,7 +289,7 @@ void Control::updateAnchors()
     }
 
     QHash<QString, QString> changedAnchors; // uid, anchors.name
-    for (const QString& name : anchorLineNames) {
+    for (const QString& name : UtilityFunctions::anchorLineNames()) {
         const QStringList& pair = m_renderInfo.anchors.value(name).toStringList();
         if (pair.isEmpty()) {
             if (name == "anchors.fill")

@@ -178,6 +178,8 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     connect(closeButton, &QPushButton::clicked,
             this, &AnchorEditor::close);
     connect(clearButton, &QPushButton::clicked,
+            this, &AnchorEditor::clear);
+    connect(clearButton, &QPushButton::clicked,
             this, &AnchorEditor::cleared);
     connect(m_leftRow, &AnchorRow::marginOffsetEditingFinished,
             this, [=] { onMarginOffsetEditingFinish(m_leftRow); });
@@ -215,24 +217,39 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
             this, [=] { onTargetLineTypeActivate(m_horizontalCenterRow); });
     connect(m_verticalCenterRow, &AnchorRow::targetLineTypeActivated,
             this, [=] { onTargetLineTypeActivate(m_verticalCenterRow); });
-
     connect(m_fillRow, &AnchorRow::sourceButtonClicked, this, [=] (bool checked) {
         m_leftRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_rightRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_topRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_bottomRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
-        emit marginOffsetEdited(AnchorLine::Left, m_leftRow->marginOffset());
-        emit marginOffsetEdited(AnchorLine::Right, m_rightRow->marginOffset());
-        emit marginOffsetEdited(AnchorLine::Top, m_topRow->marginOffset());
-        emit marginOffsetEdited(AnchorLine::Bottom, m_bottomRow->marginOffset());
-        emit fill(checked ? m_fillRow->targetControl() : nullptr);
+        emit filled(checked ? m_fillRow->targetControl() : nullptr);
+        if (!checked) {
+            emit marginOffsetEdited(AnchorLine::Left, m_leftRow->marginOffset());
+            emit marginOffsetEdited(AnchorLine::Right, m_rightRow->marginOffset());
+            emit marginOffsetEdited(AnchorLine::Top, m_topRow->marginOffset());
+            emit marginOffsetEdited(AnchorLine::Bottom, m_bottomRow->marginOffset());
+        }
     });
     connect(m_fillRow, &AnchorRow::targetControlActivated, this, [=] {
         m_leftRow->setTargetControl(m_fillRow->targetControl());
         m_rightRow->setTargetControl(m_fillRow->targetControl());
         m_topRow->setTargetControl(m_fillRow->targetControl());
         m_bottomRow->setTargetControl(m_fillRow->targetControl());
-        emit fill(m_fillRow->targetControl());
+        emit filled(m_fillRow->targetControl());
+    });
+    connect(m_centerInRow, &AnchorRow::sourceButtonClicked, this, [=] (bool checked) {
+        m_horizontalCenterRow->setFillCenterModeEnabled(checked, m_centerInRow->targetControl());
+        m_verticalCenterRow->setFillCenterModeEnabled(checked, m_centerInRow->targetControl());
+        emit centered(checked ? m_centerInRow->targetControl() : nullptr);
+        if (!checked) {
+            emit marginOffsetEdited(AnchorLine::HorizontalCenter, m_horizontalCenterRow->marginOffset());
+            emit marginOffsetEdited(AnchorLine::VerticalCenter, m_verticalCenterRow->marginOffset());
+        }
+    });
+    connect(m_centerInRow, &AnchorRow::targetControlActivated, this, [=] {
+        m_horizontalCenterRow->setTargetControl(m_centerInRow->targetControl());
+        m_verticalCenterRow->setTargetControl(m_centerInRow->targetControl());
+        emit centered(m_centerInRow->targetControl());
     });
 }
 
@@ -270,6 +287,8 @@ void AnchorEditor::onTargetControlActivate(AnchorRow* row)
 
 void AnchorEditor::onTargetLineTypeActivate(AnchorRow* row)
 {
+    if (row->targetLineType() == AnchorLine::Invalid)
+        emit marginOffsetEdited(row->sourceLineType(), row->marginOffset());
     emit anchored(row->sourceLineType(), AnchorLine(row->targetLineType(), row->targetControl()));
 }
 
@@ -288,6 +307,11 @@ void AnchorEditor::refresh(bool delayed)
     }
 }
 
+void AnchorEditor::clear()
+{
+    // TODO
+}
+
 void AnchorEditor::refreshNow()
 {
     m_sourceControlComboBox->clear();
@@ -304,23 +328,34 @@ void AnchorEditor::refreshNow()
     m_topRow->clear();
     m_bottomRow->clear();
     m_fillRow->clear();
+    m_horizontalCenterRow->clear();
+    m_verticalCenterRow->clear();
+    m_centerInRow->clear();
 
     m_leftRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
     m_rightRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
     m_topRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
     m_bottomRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
     m_fillRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_horizontalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_verticalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
+    m_centerInRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
 
     m_leftRow->setTargetControl(m_primaryTargetControl);
     m_rightRow->setTargetControl(m_primaryTargetControl);
     m_topRow->setTargetControl(m_primaryTargetControl);
     m_bottomRow->setTargetControl(m_primaryTargetControl);
     m_fillRow->setTargetControl(m_primaryTargetControl);
+    m_horizontalCenterRow->setTargetControl(m_primaryTargetControl);
+    m_verticalCenterRow->setTargetControl(m_primaryTargetControl);
+    m_centerInRow->setTargetControl(m_primaryTargetControl);
 
     m_leftRow->setMarginOffset(m_sourceControl->anchors()->leftMargin());
     m_rightRow->setMarginOffset(m_sourceControl->anchors()->rightMargin());
     m_topRow->setMarginOffset(m_sourceControl->anchors()->topMargin());
     m_bottomRow->setMarginOffset(m_sourceControl->anchors()->bottomMargin());
+    m_horizontalCenterRow->setMarginOffset(m_sourceControl->anchors()->horizontalCenterOffset());
+    m_verticalCenterRow->setMarginOffset(m_sourceControl->anchors()->verticalCenterOffset());
 
     if (m_sourceControl->anchors()->left().isValid()) {
         m_leftRow->setTargetControl(m_sourceControl->anchors()->left().control());
@@ -351,27 +386,20 @@ void AnchorEditor::refreshNow()
         m_bottomRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->fill());
     }
 
-
-
-
-
-
-    m_horizontalCenterRow->clear();
-    m_verticalCenterRow->clear();
-    m_horizontalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_verticalCenterRow->setTargetControlList(availableAnchorTargets(m_sourceControl));
-    m_horizontalCenterRow->setTargetControl(m_primaryTargetControl);
-    m_verticalCenterRow->setTargetControl(m_primaryTargetControl);
-    m_horizontalCenterRow->setMarginOffset(m_sourceControl->anchors()->horizontalCenterOffset());
-    m_verticalCenterRow->setMarginOffset(m_sourceControl->anchors()->verticalCenterOffset());
-
     if (m_sourceControl->anchors()->horizontalCenter().isValid()) {
-        m_horizontalCenterRow->setTargetLineType(m_sourceControl->anchors()->horizontalCenter().type());
         m_horizontalCenterRow->setTargetControl(m_sourceControl->anchors()->horizontalCenter().control());
+        m_horizontalCenterRow->setTargetLineType(m_sourceControl->anchors()->horizontalCenter().type());
     }
 
     if (m_sourceControl->anchors()->verticalCenter().isValid()) {
-        m_verticalCenterRow->setTargetLineType(m_sourceControl->anchors()->verticalCenter().type());
         m_verticalCenterRow->setTargetControl(m_sourceControl->anchors()->verticalCenter().control());
+        m_verticalCenterRow->setTargetLineType(m_sourceControl->anchors()->verticalCenter().type());
+    }
+
+    if (m_sourceControl->anchors()->centerIn()) {
+        m_centerInRow->setSourceButtonChecked(true);
+        m_centerInRow->setTargetControl(m_sourceControl->anchors()->centerIn());
+        m_horizontalCenterRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->centerIn());
+        m_verticalCenterRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->centerIn());
     }
 }

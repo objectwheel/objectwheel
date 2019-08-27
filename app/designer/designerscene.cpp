@@ -127,6 +127,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             static auto e = [this] {
                 auto e = new AnchorEditor(this);
                 connect(e, &AnchorEditor::anchored, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
+                    // FIXME : form type?? isAnchorable lazim
                     QString targetId = targetLine.control()->type() == Form::Type ? "parent" : targetLine.control()->id();
                     ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
                                                                    "anchors." + anchorLineText(sourceLineType),
@@ -135,17 +136,43 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                                                                    : "undefined");
                 });
                 connect(e, &AnchorEditor::marginOffsetEdited, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
-                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
-                                                                   "anchors." + marginOffsetText(sourceLineType),
-                                                                   marginOffset);
+                    if (marginOffset == 0) {
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                       "anchors." + marginOffsetText(sourceLineType),
+                                                                       "undefined");
+                    } else {
+                        ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
+                                                                        "anchors." + marginOffsetText(sourceLineType),
+                                                                        marginOffset);
+                    }
                 });
-                connect(e, &AnchorEditor::fill, [=] (Control* control) {
-                    if (control)
+                connect(e, &AnchorEditor::filled, [=] (Control* control) {
+                    // FIXME : form type?? isAnchorable lazim
+                    if (control) {
+                        QString targetId = control->type() == Form::Type ? "parent" : control->id();
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                        "anchors.fill", control->id());
-                    else
+                                                                       "anchors.fill", targetId);
+                    } else {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                        "anchors.fill", "undefined");
+                                                                       "anchors.fill", "undefined");
+                    }
+                });
+                connect(e, &AnchorEditor::centered, [=] (Control* control) {
+                    // FIXME : form type?? isAnchorable lazim
+                    if (control) {
+                        QString targetId = control->type() == Form::Type ? "parent" : control->id();
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                       "anchors.centerIn", targetId);
+                    } else {
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                       "anchors.centerIn", "undefined");
+                    }
+                });
+                connect(e, &AnchorEditor::cleared, [=] {
+                    for (const QString& name : UtilityFunctions::anchorPropertyNames())
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(), name, "undefined");
+                    for (const QString& name : UtilityFunctions::anchorLineNames())
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(), name, "undefined");
                 });
                 return e;
             }();

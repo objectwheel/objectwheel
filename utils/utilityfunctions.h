@@ -117,6 +117,8 @@ QPointF leftCenter(const QRectF& rect);
 QPointF rightCenter(const QRectF& rect);
 QPointF bottomCenter(const QRectF& rect);
 QPixmap imageToPixmap(const QImage& image);
+QStringList anchorLineNames();
+QStringList anchorPropertyNames();
 
 } // UtilityFunctions
 

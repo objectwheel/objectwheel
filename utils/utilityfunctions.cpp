@@ -642,4 +642,36 @@ QPixmap imageToPixmap(const QImage& image)
     return pixmap;
 }
 
+QStringList anchorLineNames()
+{
+    static const QStringList anchorLineNames {
+        "anchors.top",
+        "anchors.bottom",
+        "anchors.left",
+        "anchors.right",
+        "anchors.horizontalCenter",
+        "anchors.verticalCenter",
+        "anchors.baseline",
+        "anchors.fill",
+        "anchors.centerIn"
+    };
+    return anchorLineNames;
+}
+
+QStringList anchorPropertyNames()
+{
+    static const QStringList anchorPropertyNames {
+        "anchors.margins",
+        "anchors.topMargin",
+        "anchors.bottomMargin",
+        "anchors.leftMargin",
+        "anchors.rightMargin",
+        "anchors.horizontalCenterOffset",
+        "anchors.verticalCenterOffset",
+        "anchors.baselineOffset",
+        "anchors.alignWhenCentered"
+    };
+    return anchorPropertyNames;
+}
+
 } // UtilityFunctions

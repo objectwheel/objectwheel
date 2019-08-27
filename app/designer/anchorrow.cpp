@@ -317,6 +317,7 @@ void AnchorRow::onTargetLineTypeChange()
             break;
         }
     }
+    m_marginOffsetSpinBox->setValue(0);
     m_targetButtonGroup->uncheckAll();
     m_marginOffsetSpinBox->setEnabled(false);
     m_targetControlComboBox->setEnabled(false);

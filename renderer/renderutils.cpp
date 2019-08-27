@@ -889,28 +889,6 @@ QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
 
 QVariantMap RenderUtils::anchors(const RenderEngine::ControlInstance* instance, const RenderEngine* engine)
 {
-    static const QStringList anchorLineNames {
-        "anchors.top",
-        "anchors.bottom",
-        "anchors.left",
-        "anchors.right",
-        "anchors.horizontalCenter",
-        "anchors.verticalCenter",
-        "anchors.baseline",
-        "anchors.fill",
-        "anchors.centerIn"
-    };
-    static const QStringList anchorPropertyNames {
-        "anchors.margins",
-        "anchors.topMargin",
-        "anchors.bottomMargin",
-        "anchors.leftMargin",
-        "anchors.rightMargin",
-        "anchors.horizontalCenterOffset",
-        "anchors.verticalCenterOffset",
-        "anchors.baselineOffset",
-        "anchors.alignWhenCentered"
-    };
     QVariantMap anchorMap;
     if (instance->gui) {
         if (instance->popup) { // Exception
@@ -927,12 +905,12 @@ QVariantMap RenderUtils::anchors(const RenderEngine::ControlInstance* instance, 
             }
         } else if (!instance->window) {
             // Windows cannot have anchors, but they can be targets for other anchors
-            for (const QString& name : anchorLineNames) {
+            for (const QString& name : UtilityFunctions::anchorLineNames()) {
                 const QStringList& anchorPair = makeAnchorPair(instance, name, engine);
                 if (!anchorPair.isEmpty())
                     anchorMap.insert(name, anchorPair);
             }
-            for (const QString& name : anchorPropertyNames) {
+            for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
                 const QQmlProperty prop(instance->object, name, instance->context);
                 if (prop.isValid())
                     anchorMap.insert(name, prop.read());

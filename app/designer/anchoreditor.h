@@ -29,6 +29,8 @@ public:
 
     void refresh(bool delayed = true);
 
+    void clear();
+
 public slots:
     void onMarginOffsetEditingFinish(AnchorRow* row);
     void onTargetControlActivate(AnchorRow* row);
@@ -40,7 +42,8 @@ private:
 signals:
     void marginOffsetEdited(AnchorLine::Type sourceLineType, qreal marginOffset);
     void anchored(AnchorLine::Type sourceLineType, const AnchorLine& targetLine);
-    void fill(Control* control);
+    void filled(Control* control);
+    void centered(Control* control);
     void cleared();
 
 private:
