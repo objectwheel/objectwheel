@@ -166,11 +166,12 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
 
     closeButton->setToolTip(tr("Close the Anchor Editor"));
     closeButton->setCursor(Qt::PointingHandCursor);
-    closeButton->setFocus();
+    closeButton->setFocusPolicy(Qt::NoFocus);
 
     clearButton->setText(tr("Clear"));
     clearButton->setToolTip(tr("Clear anchors"));
     clearButton->setCursor(Qt::PointingHandCursor);
+    clearButton->setFocusPolicy(Qt::NoFocus);
 
     connect(m_sourceControlComboBox, qOverload<int>(&QComboBox::activated), this, [=] (int index) {
         setSourceControl(m_sourceControlComboBox->itemData(index).value<Control*>());

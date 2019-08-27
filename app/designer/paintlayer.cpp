@@ -94,11 +94,11 @@ static QFont marginOffsetFont()
     return font;
 }
 
-static QPointF createParentAnchorPoint(const DesignerItem* childItem, const DesignerItem* parentItem,
+static QPointF createParentAnchorPoint(const Control* childControl, const Control* parentControl,
                                        AnchorLine::Type anchorLineType)
 {
-    const QRectF& parentBoundingRect = parentItem->mapRectToScene(parentItem->rect());
-    const QRectF& childBoundingRect = childItem->mapRectToScene(childItem->rect());
+    const QRectF& parentBoundingRect = DesignerScene::contentSceneRect(parentControl);
+    const QRectF& childBoundingRect = DesignerScene::contentSceneRect(childControl);
     switch (anchorLineType) {
     case AnchorLine::Baseline:
     case AnchorLine::Top:
@@ -118,9 +118,9 @@ static QPointF createParentAnchorPoint(const DesignerItem* childItem, const Desi
     }
 }
 
-static QPointF createAnchorPoint(const DesignerItem* item, AnchorLine::Type anchorLineType)
+static QPointF createAnchorPoint(const Control* control, AnchorLine::Type anchorLineType)
 {
-    const QRectF& boundingRect = item->mapRectToScene(item->rect());
+    const QRectF& boundingRect = DesignerScene::contentSceneRect(control);
     switch (anchorLineType) {
     case AnchorLine::Baseline:
     case AnchorLine::Top:
@@ -152,7 +152,7 @@ static QPointF createControlPoint(const QPointF& firstEditPoint, AnchorLine::Typ
 
 static void updateAnchorLinePoints(QPointF& firstPoint, QPointF& secondPoint, const AnchorLine& anchorLine)
 {
-    QRectF boundingRectangle = anchorLine.control()->mapRectToScene(anchorLine.control()->rect());
+    QRectF boundingRectangle = DesignerScene::contentSceneRect(anchorLine.control());
     switch (anchorLine.type()) {
     case AnchorLine::VerticalCenter:
         firstPoint = UtilityFunctions::leftCenter(boundingRectangle);
@@ -210,11 +210,11 @@ static void updateAnchorData(PaintLayer::AnchorData& data, const AnchorLine& sou
 static QPainterPath highlightPath(const Control* control)
 {
     QPainterPath parentPath;
-    parentPath.addRect(DesignerScene::outerRect(control->mapRectToScene(control->rect())));
+    parentPath.addRect(DesignerScene::outerRect(DesignerScene::contentSceneRect(control)));
     QPainterPath chilrenPath;
     chilrenPath.setFillRule(Qt::WindingFill);
     for (Control* childControl : control->childControls(false))
-        chilrenPath.addRect(DesignerScene::outerRect(childControl->mapRectToScene(childControl->rect())));
+        chilrenPath.addRect(DesignerScene::outerRect(DesignerScene::contentSceneRect(childControl)));
     return parentPath - chilrenPath;
 }
 
@@ -478,9 +478,9 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(DesignerScene::outlineColor()));
     if (sourceControl)
-        painter->drawRect(DesignerScene::outerRect(sourceControl->mapRectToScene(sourceControl->rect())));
+        painter->drawRect(DesignerScene::outerRect(DesignerScene::contentSceneRect(sourceControl)));
     if (targetControl)
-        painter->drawRect(DesignerScene::outerRect(targetControl->mapRectToScene(targetControl->rect())));
+        painter->drawRect(DesignerScene::outerRect(DesignerScene::contentSceneRect(targetControl)));
 
     bool twist = line.angle() < 90 || (line.angle() > 180 && line.angle() < 270);
     auto normal = line.normalVector();
