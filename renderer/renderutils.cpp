@@ -627,10 +627,36 @@ void RenderUtils::setInstancePropertyBinding(RenderEngine::ControlInstance* inst
     Q_ASSERT(instance);
     Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(instance->object);
+
     // WARNING: Don't use for visible, visibility, x, y, width, height properties,
     // or implement it like how setInstancePropertyVariant does implement them
     QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
                                                         bindingName.toUtf8(), expression);
+
+    // TODO: Remove this. This is a workaround for a bug that an
+    // item persists on the bad position after fill -> undo-fill
+    if (UtilityFunctions::anchorLineNames().contains(bindingName)) {
+        if (QQuickItem* item = guiItem(instance->object)) {
+            bool conversationSuccessful = true;
+            qreal x = ParserUtils::property(instance->dir, "x").toDouble(&conversationSuccessful);
+            if (!conversationSuccessful)
+                x = item->x();
+            qreal y = ParserUtils::property(instance->dir, "y").toDouble(&conversationSuccessful);
+            if (!conversationSuccessful)
+                y = item->y();
+            qreal w = ParserUtils::property(instance->dir, "width").toDouble(&conversationSuccessful);
+            if (!conversationSuccessful)
+                w = item->implicitWidth();
+            qreal h = ParserUtils::property(instance->dir, "height").toDouble(&conversationSuccessful);
+            if (!conversationSuccessful)
+                h = item->implicitHeight();
+            item->setPosition(QPointF(x + 1, y + 1));
+            item->setPosition(QPointF(x - 1, y - 1));
+            item->setSize(QSizeF(w + 1, h + 1));
+            item->setSize(QSizeF(w - 1, h - 1));
+        }
+    }
+
     DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
     if (instance->parent && instance->parent->object)
         DesignerSupport::addDirty(RenderUtils::guiItem(instance->parent), DesignerSupport::ChildrenUpdateMask);

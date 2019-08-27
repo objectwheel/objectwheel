@@ -82,8 +82,8 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_layout->addWidget(arrowIcon, 0, Qt::AlignCenter);
     m_layout->addSpacing(6);
     m_layout->addWidget(m_targetControlComboBox);
-    m_layout->addWidget(m_marginOffsetSpinBox);
     m_layout->addLayout(targetButtonLayout);
+    m_layout->addWidget(m_marginOffsetSpinBox);
     m_layout->addStretch();
 
     m_sourceButton->setFixedSize(QSize(24, 24));
@@ -106,7 +106,6 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_marginOffsetSpinBox->setFixedSize(QSize(80, 24));
     m_marginOffsetSpinBox->setRange(-999.99, 999.99);
     m_marginOffsetSpinBox->setDecimals(2);
-    m_marginOffsetSpinBox->setEnabled(false);
 
     targetButtonLayout->setSpacing(0);
     targetButtonLayout->setContentsMargins(0, 0, 0, 0);
@@ -248,24 +247,20 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
 
     if (m_fillCenterModeEnabled != fillCenterModeEnabled) {
         if (fillCenterModeEnabled) {
-            m_marginBackup = marginOffset();
             m_targetLineTypeBackup = targetLineType();
             m_targetControlBackup = this->targetControl();
             setTargetControl(targetControl);
             setTargetLineType(m_sourceLineType);
             m_targetControlComboBox->setEnabled(false);
-            m_marginOffsetSpinBox->setEnabled(true);
             m_targetLineButton1->setEnabled(false);
             m_targetLineButton2->setEnabled(false);
             m_targetLineButton3->setEnabled(false);
         }
         m_fillCenterModeEnabled = fillCenterModeEnabled;
         if (!fillCenterModeEnabled) {
-            setMarginOffset(m_marginBackup);
             setTargetControl(m_targetControlBackup);
             setTargetLineType(m_targetLineTypeBackup);
             m_targetControlComboBox->setEnabled(m_targetButtonGroup->checkedButton());
-            m_marginOffsetSpinBox->setEnabled(m_targetButtonGroup->checkedButton());
             m_targetLineButton1->setEnabled(true);
             m_targetLineButton2->setEnabled(true);
             m_targetLineButton3->setEnabled(true);
@@ -298,28 +293,23 @@ void AnchorRow::onTargetLineTypeChange()
         case AnchorLine::Left:
         case AnchorLine::Top:
             m_targetLineButton1->setChecked(true);
-            m_marginOffsetSpinBox->setEnabled(true);
             m_targetControlComboBox->setEnabled(true);
             return;
         case AnchorLine::HorizontalCenter:
         case AnchorLine::VerticalCenter:
             m_targetLineButton2->setChecked(true);
-            m_marginOffsetSpinBox->setEnabled(true);
             m_targetControlComboBox->setEnabled(true);
             return;
         case AnchorLine::Right:
         case AnchorLine::Bottom:
             m_targetLineButton3->setChecked(true);
-            m_marginOffsetSpinBox->setEnabled(true);
             m_targetControlComboBox->setEnabled(true);
             return;
         default:
             break;
         }
     }
-    m_marginOffsetSpinBox->setValue(0);
     m_targetButtonGroup->uncheckAll();
-    m_marginOffsetSpinBox->setEnabled(false);
     m_targetControlComboBox->setEnabled(false);
 }
 

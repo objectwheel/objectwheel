@@ -141,10 +141,10 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     categoriesLayout->addWidget(sourceLineLabel);
     categoriesLayout->addSpacing(26);
     categoriesLayout->addWidget(targetControlLabel);
-    categoriesLayout->addSpacing(70);
-    categoriesLayout->addWidget(marginLabel);
-    categoriesLayout->addSpacing(7);
+    categoriesLayout->addSpacing(68);
     categoriesLayout->addWidget(targetLineLabel);
+    categoriesLayout->addSpacing(23);
+    categoriesLayout->addWidget(marginLabel);
     categoriesLayout->addStretch();
 
     centerGroupLayout->setContentsMargins(4, 4, 4, 4);
@@ -159,10 +159,10 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     categoriesLayout2->addWidget(sourceLineLabel2);
     categoriesLayout2->addSpacing(26);
     categoriesLayout2->addWidget(targetControlLabel2);
-    categoriesLayout2->addSpacing(70);
-    categoriesLayout2->addWidget(marginLabel2);
-    categoriesLayout2->addSpacing(7);
+    categoriesLayout2->addSpacing(68);
     categoriesLayout2->addWidget(targetLineLabel2);
+    categoriesLayout2->addSpacing(23);
+    categoriesLayout2->addWidget(marginLabel2);
     categoriesLayout2->addStretch();
 
     m_dialogButtonBox->setFixedHeight(24);
@@ -171,7 +171,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
     closeButton->setCursor(Qt::PointingHandCursor);
     closeButton->setFocus();
 
-    clearButton->setText(tr("Clear"));
+    clearButton->setText(tr("Clear all"));
     clearButton->setToolTip(tr("Clear anchors"));
     clearButton->setCursor(Qt::PointingHandCursor);
 
@@ -217,18 +217,15 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
             this, [=] { onTargetLineTypeActivate(m_horizontalCenterRow); });
     connect(m_verticalCenterRow, &AnchorRow::targetLineTypeActivated,
             this, [=] { onTargetLineTypeActivate(m_verticalCenterRow); });
+
+    connect(m_marginsSpinBox, &QDoubleSpinBox::editingFinished,
+            this, [=] { emit marginsEdited(m_marginsSpinBox->value()); });
     connect(m_fillRow, &AnchorRow::sourceButtonClicked, this, [=] (bool checked) {
         m_leftRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_rightRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_topRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         m_bottomRow->setFillCenterModeEnabled(checked, m_fillRow->targetControl());
         emit filled(checked ? m_fillRow->targetControl() : nullptr);
-        if (!checked) {
-            emit marginOffsetEdited(AnchorLine::Left, m_leftRow->marginOffset());
-            emit marginOffsetEdited(AnchorLine::Right, m_rightRow->marginOffset());
-            emit marginOffsetEdited(AnchorLine::Top, m_topRow->marginOffset());
-            emit marginOffsetEdited(AnchorLine::Bottom, m_bottomRow->marginOffset());
-        }
     });
     connect(m_fillRow, &AnchorRow::targetControlActivated, this, [=] {
         m_leftRow->setTargetControl(m_fillRow->targetControl());
@@ -241,10 +238,6 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QWidget(pare
         m_horizontalCenterRow->setFillCenterModeEnabled(checked, m_centerInRow->targetControl());
         m_verticalCenterRow->setFillCenterModeEnabled(checked, m_centerInRow->targetControl());
         emit centered(checked ? m_centerInRow->targetControl() : nullptr);
-        if (!checked) {
-            emit marginOffsetEdited(AnchorLine::HorizontalCenter, m_horizontalCenterRow->marginOffset());
-            emit marginOffsetEdited(AnchorLine::VerticalCenter, m_verticalCenterRow->marginOffset());
-        }
     });
     connect(m_centerInRow, &AnchorRow::targetControlActivated, this, [=] {
         m_horizontalCenterRow->setTargetControl(m_centerInRow->targetControl());

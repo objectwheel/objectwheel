@@ -128,22 +128,15 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                 auto e = new AnchorEditor(this);
                 connect(e, &AnchorEditor::anchored, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
                     // FIXME : form type?? isAnchorable lazim
-                    QString targetId = targetLine.control()->type() == Form::Type ? "parent" : targetLine.control()->id();
-                    ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                   "anchors." + anchorLineText(sourceLineType),
-                                                                   targetLine.isValid()
-                                                                   ? targetId + "." + anchorLineText(targetLine.type())
-                                                                   : "undefined");
-                });
-                connect(e, &AnchorEditor::marginOffsetEdited, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
-                    if (marginOffset == 0) {
+                    if (targetLine.isValid()) {
+                        QString targetId = targetLine.control()->type() == Form::Type ? "parent" : targetLine.control()->id();
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors." + marginOffsetText(sourceLineType),
-                                                                       "undefined");
+                                                                       "anchors." + anchorLineText(sourceLineType),
+                                                                       targetId + "." + anchorLineText(targetLine.type()));
                     } else {
-                        ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
-                                                                        "anchors." + marginOffsetText(sourceLineType),
-                                                                        marginOffset);
+                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                       "anchors." + anchorLineText(sourceLineType),
+                                                                       "undefined");
                     }
                 });
                 connect(e, &AnchorEditor::filled, [=] (Control* control) {
@@ -169,17 +162,26 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                     }
                 });
                 connect(e, &AnchorEditor::cleared, [=] {
-                    for (const QString& name : UtilityFunctions::anchorPropertyNames())
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(), name, "undefined");
                     for (const QString& name : UtilityFunctions::anchorLineNames())
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(), name, "undefined");
+                    for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
+                        ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(), name,
+                                                                        name.contains("alignWhenCentered") ? 1 : 0);
+                    }
+                });
+                connect(e, &AnchorEditor::marginOffsetEdited, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
+                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
+                                                                    "anchors." + marginOffsetText(sourceLineType),
+                                                                    marginOffset);
+                });
+                connect(e, &AnchorEditor::marginsEdited, [=] (qreal margins) {
+                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
+                                                                    "anchors.margins", margins);
                 });
                 return e;
             }();
-            const QLineF line(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint()),
-                              anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
-            e->setSourceControl(topLevelControl(line.p1()));
-            e->setPrimaryTargetControl(topLevelControl(line.p2()));
+            e->setSourceControl(topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint())));
+            e->setPrimaryTargetControl(topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint())));
             e->refresh();
             e->show();
         }

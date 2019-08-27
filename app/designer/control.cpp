@@ -147,7 +147,7 @@ RenderInfo Control::renderInfo() const
 {
     return m_renderInfo;
 }
-
+#include <QDebug>
 void Control::setRenderInfo(const RenderInfo& info)
 {
     if (m_uid != info.uid)
@@ -158,6 +158,8 @@ void Control::setRenderInfo(const RenderInfo& info)
     m_renderInfo = info;
 
     updateAnchors();
+    if (id() == "button3")
+        qDebug() << id() << m_renderInfo.anchors.value("anchors.margins") << m_anchors->margins();
     setResizable(gui());
     setZValue(property("z").toDouble());
     setFlag(ItemClipsChildrenToShape, !DesignerScene::showClippedControls() && property("clip").toBool());
