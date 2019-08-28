@@ -46,7 +46,7 @@ signals:
     void marginOffsetEdited(AnchorLine::Type sourceLineType, qreal marginOffset);
     void anchored(AnchorLine::Type sourceLineType, const AnchorLine& targetLine);
     void filled(Control* control);
-    void centered(Control* control);
+    void centered(Control* control, bool overlay);
     void cleared();
 
 private:

@@ -76,6 +76,13 @@ static QString marginOffsetText(AnchorLine::Type type)
     }
 }
 
+static QString fixedTargetId(const Control* targetControl)
+{
+    if (targetControl->window() || targetControl->popup())
+        return QStringLiteral("parent");
+    return targetControl->id();
+}
+
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
@@ -127,12 +134,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             static auto e = [this] {
                 auto e = new AnchorEditor(this);
                 connect(e, &AnchorEditor::anchored, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
-                    // FIXME : form type?? isAnchorable lazim
                     if (targetLine.isValid()) {
-                        QString targetId = targetLine.control()->type() == Form::Type ? "parent" : targetLine.control()->id();
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
                                                                        "anchors." + anchorLineText(sourceLineType),
-                                                                       targetId + "." + anchorLineText(targetLine.type()));
+                                                                       fixedTargetId(targetLine.control()) + "." + anchorLineText(targetLine.type()));
                     } else {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
                                                                        "anchors." + anchorLineText(sourceLineType),
@@ -140,25 +145,26 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                     }
                 });
                 connect(e, &AnchorEditor::filled, [=] (Control* control) {
-                    // FIXME : form type?? isAnchorable lazim
                     if (control) {
-                        QString targetId = control->type() == Form::Type ? "parent" : control->id();
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.fill", targetId);
+                                                                       "anchors.fill", fixedTargetId(control));
                     } else {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
                                                                        "anchors.fill", "undefined");
                     }
                 });
-                connect(e, &AnchorEditor::centered, [=] (Control* control) {
-                    // FIXME : form type?? isAnchorable lazim
+                connect(e, &AnchorEditor::centered, [=] (Control* control, bool overlay) {
                     if (control) {
-                        QString targetId = control->type() == Form::Type ? "parent" : control->id();
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.centerIn", targetId);
+                                                                       "anchors.centerIn", fixedTargetId(control));
                     } else {
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.centerIn", "undefined");
+                        if (e->sourceControl()->popup() && overlay) {
+                            ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                           "anchors.centerIn", "Overlay.overlay");
+                        } else {
+                            ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
+                                                                           "anchors.centerIn", "undefined");
+                        }
                     }
                 });
                 connect(e, &AnchorEditor::cleared, [=] {
@@ -506,6 +512,59 @@ bool DesignerScene::showClippedControls()
 bool DesignerScene::showMouseoverOutline()
 {
     return DesignerSettings::sceneSettings()->showMouseoverOutline;
+}
+
+bool DesignerScene::isInappropriateAnchorSource(const Control* control)
+{
+    if (control == 0)
+        return true;
+
+    if (!control->gui())
+        return true;
+
+    if (control->window())
+        return true;
+
+    return false;
+}
+
+bool DesignerScene::isInappropriateAnchorTarget(const Control* control)
+{
+    if (control == 0)
+        return true;
+
+    if (!control->gui())
+        return true;
+
+    return false;
+}
+
+bool DesignerScene::isAnchorViable(const Control* sourceControl, const Control* targetControl)
+{
+    if (isInappropriateAnchorSource(sourceControl))
+        return false;
+
+    if (isInappropriateAnchorTarget(targetControl))
+        return false;
+
+    // if (sourceControl->popup() && sourceControl.type() != AnchorLine::Center)
+    //    return false;
+
+    if (sourceControl->popup() && sourceControl->parentControl() != targetControl)
+        return false;
+
+    if (targetControl->window() && sourceControl->parentControl() != targetControl)
+        return false;
+
+    if (targetControl->popup() && sourceControl->parentControl() != targetControl)
+        return false;
+
+    if (!sourceControl->siblings().contains(const_cast<Control*>(targetControl)) &&
+            sourceControl->parentControl() != targetControl) {
+        return false;
+    }
+
+    return true;
 }
 
 int DesignerScene::gridSize()

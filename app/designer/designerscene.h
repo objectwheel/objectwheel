@@ -67,6 +67,10 @@ public:
     static bool showClippedControls();
     static bool showMouseoverOutline();
 
+    static bool isAnchorViable(const Control* sourceControl, const Control* targetControl);
+    static bool isInappropriateAnchorSource(const Control* control);
+    static bool isInappropriateAnchorTarget(const Control* control);
+
     static int gridSize();
     static int startDragDistance();
 

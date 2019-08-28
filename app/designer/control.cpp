@@ -18,6 +18,7 @@ Control::Control(Control* parent) : DesignerItem(parent)
     m_renderInfo.popup = false;
     m_renderInfo.window = false;
     m_renderInfo.visible = true;
+    m_renderInfo.overlayPopup = false;
 
     setResizable(true);
     setAcceptHoverEvents(true);
@@ -57,6 +58,11 @@ bool Control::visible() const
 bool Control::hasErrors() const
 {
     return !m_renderInfo.errors.isEmpty();
+}
+
+bool Control::overlayPopup() const
+{
+    return m_renderInfo.overlayPopup;
 }
 
 Anchors* Control::anchors() const
@@ -137,7 +143,6 @@ QPixmap Control::pixmap() const
 void Control::setPixmap(const QPixmap& pixmap)
 {
     if (m_pixmap.cacheKey() != pixmap.cacheKey()) {
-        Q_ASSERT(devicePixelRatio() == pixmap.devicePixelRatio());
         m_pixmap = pixmap;
         update();
     }
@@ -154,6 +159,7 @@ void Control::setRenderInfo(const RenderInfo& info)
         return;
 
     const QMarginsF previousMargins = m_renderInfo.margins;
+    const bool previouslyOverlayPopup = overlayPopup();
 
     m_renderInfo = info;
 
@@ -168,6 +174,13 @@ void Control::setRenderInfo(const RenderInfo& info)
             childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
     } else {
         m_renderInfo.margins = previousMargins;
+    }
+
+    if (overlayPopup() != previouslyOverlayPopup) {
+        if (overlayPopup())
+            resetTransform();
+        else
+            setTransform(QTransform::fromTranslate(parentControl()->margins().left(), parentControl()->margins().top()));
     }
 
     if (gui()) {

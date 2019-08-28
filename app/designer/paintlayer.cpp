@@ -339,7 +339,10 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     AnchorData data;
     data.anchors = control->anchors();
     data.startPoint = createAnchorPoint(control, AnchorLine::VerticalCenter);
-    data.endPoint = createAnchorPoint(control->anchors()->centerIn(), AnchorLine::VerticalCenter);
+    if (control->overlayPopup())
+        data.endPoint = data.startPoint;
+    else
+        data.endPoint = createAnchorPoint(control->anchors()->centerIn(), AnchorLine::VerticalCenter);
     data.firstControlPoint = createControlPoint(data.startPoint, AnchorLine::VerticalCenter, data.endPoint);
     data.secondControlPoint = createControlPoint(data.endPoint, AnchorLine::VerticalCenter, data.startPoint);
     data.targetAnchorLineType = AnchorLine::VerticalCenter;
@@ -457,14 +460,8 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     const Control* sourceControl = scene()->topLevelControl(line.p1());
     const Control* targetControl = scene()->topLevelControl(line.p2());
 
-    if (sourceControl == 0)
+    if (!DesignerScene::isAnchorViable(sourceControl, targetControl))
         targetControl = nullptr;
-
-    if (targetControl && sourceControl
-            && !sourceControl->siblings().contains(const_cast<Control*>(targetControl))
-            && sourceControl->parentControl() != targetControl) {
-        targetControl = nullptr;
-    }
 
     QPainterPath scenePath;
     scenePath.addRect(scene()->sceneRect());

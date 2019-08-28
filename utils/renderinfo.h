@@ -24,6 +24,7 @@ struct PropertyNode {
 struct RenderInfo {
     bool gui;
     bool popup;
+    bool overlayPopup;
     bool window;
     bool visible;
     bool codeChanged;
@@ -92,6 +93,7 @@ inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
     in >> info.margins;
     in >> info.surroundingRect;
     in >> info.popup;
+    in >> info.overlayPopup;
     in >> info.window;
     in >> info.visible;
     in >> info.codeChanged;
@@ -111,6 +113,7 @@ inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
     out << info.margins;
     out << info.surroundingRect;
     out << info.popup;
+    out << info.overlayPopup;
     out << info.window;
     out << info.visible;
     out << info.codeChanged;

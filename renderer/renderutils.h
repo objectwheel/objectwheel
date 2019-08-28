@@ -19,7 +19,7 @@ public:
     static QQuickItem* guiItem(QObject* object);
     static QQuickItem* createDummyItem(QQmlEngine* engine);
     static void valueFromGeometrySyncKey(QVariant* value, QString* hash);
-    static QVariant evaluate(const RenderEngine::ControlInstance* instance, const QString& binding);
+    static QVariant evaluate(const RenderEngine::ControlInstance* instance, const QString& expression);
     static QList<QQuickItem*> allItems(RenderEngine::ControlInstance* formInstance);
     static QList<RenderEngine::ControlInstance*> allSubInstance(RenderEngine::ControlInstance* parentInstance);
     static QVector<QString> events(const RenderEngine::ControlInstance* instance);
@@ -30,6 +30,7 @@ public:
                                       const QString& name, const RenderEngine* engine);
 
     static int countAllSubInstance(const RenderEngine::ControlInstance* parentInstance);
+    static bool isOverlayPopup(const RenderEngine::ControlInstance* instance);
     static bool isVisible(const RenderEngine::ControlInstance* instance);
     static bool isRectangleSane(const QRectF& rect);
     static void setInstanceParent(RenderEngine::ControlInstance* instance, QObject* parentObject);

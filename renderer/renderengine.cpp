@@ -343,6 +343,7 @@ void RenderEngine::preview(const QString& url)
         info.uid = instance->uid;
         info.gui = instance->gui;
         info.popup = instance->popup;
+        info.overlayPopup = RenderUtils::isOverlayPopup(instance);
         info.window = instance->window;
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;
@@ -694,6 +695,7 @@ QList<RenderInfo> RenderEngine::renderDirtyInstances(const QList<RenderEngine::C
         info.uid = instance->uid;
         info.gui = instance->gui;
         info.popup = instance->popup;
+        info.overlayPopup = RenderUtils::isOverlayPopup(instance);
         info.window = instance->window;
         info.visible = instance->visible;
         info.codeChanged = instance->codeChanged;

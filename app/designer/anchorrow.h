@@ -36,6 +36,9 @@ public:
     bool fillCenterModeEnabled() const;
     void setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* targetControl = nullptr);
 
+    bool overlayModeEnabled() const;
+    void setOverlayModeEnabled(bool overlayModeEnabled);
+
     void setSourceButtonChecked(bool checked);
     void clear();
 
@@ -57,6 +60,7 @@ private:
     AnchorLine::Type m_targetLineTypeBackup;
     Control* m_targetControlBackup;
     bool m_fillCenterModeEnabled;
+    bool m_overlayModeEnabled;
     QBoxLayout* m_layout;
     QPushButton* m_sourceButton;
     QComboBox* m_targetControlComboBox;

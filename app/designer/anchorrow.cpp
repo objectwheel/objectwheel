@@ -63,6 +63,7 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
   , m_sourceLineType(sourceLineType)
   , m_targetLineType(AnchorLine::Invalid)
   , m_fillCenterModeEnabled(false)
+  , m_overlayModeEnabled(false)
   , m_layout(new QHBoxLayout(this))
   , m_sourceButton(new QPushButton(this))
   , m_targetControlComboBox(new QComboBox(this))
@@ -274,6 +275,21 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
     }
 }
 
+bool AnchorRow::overlayModeEnabled() const
+{
+    return m_overlayModeEnabled;
+}
+
+void AnchorRow::setOverlayModeEnabled(bool overlayModeEnabled)
+{
+    Q_ASSERT(m_sourceLineType == AnchorLine::Center);
+    if (m_overlayModeEnabled != overlayModeEnabled) {
+        m_overlayModeEnabled = overlayModeEnabled;
+        if (m_overlayModeEnabled)
+            m_targetControlComboBox->addItem(QStringLiteral("Overlay.overlay"));
+    }
+}
+
 void AnchorRow::setSourceButtonChecked(bool checked)
 {
     Q_ASSERT(AnchorLine::isFillCenter(m_sourceLineType));
@@ -342,3 +358,4 @@ void AnchorRow::onTargetButtonClick(QAbstractButton* button, bool checked)
         setTargetLineType(AnchorLine::Invalid);
     }
 }
+

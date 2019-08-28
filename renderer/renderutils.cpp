@@ -19,6 +19,7 @@
 #include <private/qquickpopup_p.h>
 #include <private/qqmlvme_p.h>
 #include <private/qquickitem_p.h>
+#include <private/qquickoverlay_p.h>
 
 namespace {
 
@@ -468,9 +469,22 @@ int RenderUtils::countAllSubInstance(const RenderEngine::ControlInstance* parent
     return counter;
 }
 
-QVariant RenderUtils::evaluate(const RenderEngine::ControlInstance* instance, const QString& binding)
+bool RenderUtils::isOverlayPopup(const RenderEngine::ControlInstance* instance)
 {
-    QQmlExpression expr(instance->context, instance->object, binding);
+    if (!instance->popup)
+        return false;
+
+    const auto centerIn = QQmlProperty::read(instance->object, "anchors.centerIn", instance->context).value<QQuickItem*>();
+
+    if (centerIn == 0)
+        return false;
+
+    return centerIn->inherits("QQuickOverlay");
+}
+
+QVariant RenderUtils::evaluate(const RenderEngine::ControlInstance* instance, const QString& expression)
+{
+    QQmlExpression expr(instance->context, instance->object, expression);
     return expr.evaluate();
 }
 
@@ -478,11 +492,11 @@ bool RenderUtils::isVisible(const RenderEngine::ControlInstance* instance)
 {
     if (instance->gui) {
         bool visible;
-        if (instance->object->isWindowType())
+        if (instance->window || instance->popup)
             visible = evaluate(instance, ParserUtils::property(instance->dir, "visible")).toBool();
         else
             visible = QQmlProperty::read(instance->object, "visible").toBool();
-        if (instance->object->isWindowType())
+        if (instance->window)
             return visible && !ParserUtils::property(instance->dir, "visibility").contains("Hidden");
         return visible;
     }
@@ -628,10 +642,24 @@ void RenderUtils::setInstancePropertyBinding(RenderEngine::ControlInstance* inst
     Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(instance->object);
 
-    // WARNING: Don't use for visible, visibility, x, y, width, height properties,
-    // or implement it like how setInstancePropertyVariant does implement them
-    QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
-                                                        bindingName.toUtf8(), expression);
+    if (expression == "Overlay.overlay") {
+        QObject* parent = instance->object->parent();
+        while (parent) {
+            if (parent->inherits("QQuickWindow"))
+                break;
+            parent = parent->parent();
+        }
+        if (auto window = qobject_cast<QQuickWindow*>(parent)) {
+            QQmlProperty::write(instance->object, bindingName,
+                                QVariant::fromValue(QQuickOverlay::overlay(window)),
+                                instance->context);
+        }
+    } else {
+        // WARNING: Don't use for visible, visibility, x, y, width, height properties,
+        // or implement it like how setInstancePropertyVariant does implement them
+        QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
+                                                            bindingName.toUtf8(), expression);
+    }
 
     // TODO: Remove this. This is a workaround for a bug that an
     // item persists on the bad position after fill -> undo-fill

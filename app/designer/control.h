@@ -24,6 +24,7 @@ public:
     bool window() const;
     bool visible() const;
     bool hasErrors() const;
+    bool overlayPopup() const;
 
     Anchors* anchors() const;
     QMarginsF margins() const;

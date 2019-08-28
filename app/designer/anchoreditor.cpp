@@ -17,6 +17,10 @@ static QList<Control*> availableAnchorTargets(Control* sourceControl)
     QList<Control*> controls(sourceControl->siblings());
     if (sourceControl->parentControl())
         controls.append(sourceControl->parentControl());
+    for (int i = controls.size() - 1; i >= 0; --i) {
+        if (!DesignerScene::isAnchorViable(sourceControl, controls.at(i)))
+            controls.removeAt(i);
+    }
     return controls;
 }
 
@@ -236,12 +240,18 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
     connect(m_centerInRow, &AnchorRow::sourceButtonClicked, this, [=] (bool checked) {
         m_horizontalCenterRow->setFillCenterModeEnabled(checked, m_centerInRow->targetControl());
         m_verticalCenterRow->setFillCenterModeEnabled(checked, m_centerInRow->targetControl());
-        emit centered(checked ? m_centerInRow->targetControl() : nullptr);
+        if (checked) {
+            emit centered(m_centerInRow->targetControl(),
+                          m_centerInRow->overlayModeEnabled() && m_centerInRow->targetControl() == 0);
+        } else {
+            emit centered(nullptr, false);
+        }
     });
     connect(m_centerInRow, &AnchorRow::targetControlActivated, this, [=] {
         m_horizontalCenterRow->setTargetControl(m_centerInRow->targetControl());
         m_verticalCenterRow->setTargetControl(m_centerInRow->targetControl());
-        emit centered(m_centerInRow->targetControl());
+        emit centered(m_centerInRow->targetControl(),
+                      m_centerInRow->overlayModeEnabled() && m_centerInRow->targetControl() == 0);
     });
     connect(clearButton, &QPushButton::clicked,
             this, &AnchorEditor::clear);
@@ -341,13 +351,15 @@ void AnchorEditor::clear()
     m_horizontalCenterRow->setTargetControl(primaryTargetControl);
     m_verticalCenterRow->setTargetControl(primaryTargetControl);
     m_centerInRow->setTargetControl(primaryTargetControl);
+    m_centerInRow->setOverlayModeEnabled(false); // needed
+    m_centerInRow->setOverlayModeEnabled(m_sourceControl->popup());
 }
 
 void AnchorEditor::refreshNow()
 {
     m_sourceControlComboBox->clear();
     for (Control* control : m_scene->items<Control>()) {
-        if (control->gui()) //FIXME: isAnchorable ekle
+        if (!DesignerScene::isInappropriateAnchorSource(control))
             m_sourceControlComboBox->addItem(control->id(), QVariant::fromValue(control));
     }
     m_sourceControlComboBox->setCurrentText(m_sourceControl->id());
@@ -438,4 +450,15 @@ void AnchorEditor::refreshNow()
         m_horizontalCenterRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->centerIn());
         m_verticalCenterRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->centerIn());
     }
+
+    m_centerInRow->setOverlayModeEnabled(m_sourceControl->popup());
+    m_leftRow->setEnabled(!m_sourceControl->popup());
+    m_rightRow->setEnabled(!m_sourceControl->popup());
+    m_topRow->setEnabled(!m_sourceControl->popup());
+    m_bottomRow->setEnabled(!m_sourceControl->popup());
+    m_fillRow->setEnabled(!m_sourceControl->popup());
+    m_horizontalCenterRow->setEnabled(!m_sourceControl->popup());
+    m_verticalCenterRow->setEnabled(!m_sourceControl->popup());
+    m_marginsSpinBox->setEnabled(!m_sourceControl->popup());
+    m_alignWhenCenteredCheckBox->setEnabled(!m_sourceControl->popup());
 }
