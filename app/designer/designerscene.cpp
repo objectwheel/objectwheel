@@ -27,64 +27,6 @@
 #include <QApplication>
 #include <QTimer>
 
-#include <anchoreditor.h>
-static QString anchorLineText(AnchorLine::Type type)
-{
-    switch (type) {
-    case AnchorLine::Left:
-        return QStringLiteral("left");
-    case AnchorLine::Right:
-        return QStringLiteral("right");
-    case AnchorLine::Top:
-        return QStringLiteral("top");
-    case AnchorLine::Bottom:
-        return QStringLiteral("bottom");
-    case AnchorLine::Baseline:
-        return QStringLiteral("baseline");
-    case AnchorLine::HorizontalCenter:
-        return QStringLiteral("horizontalCenter");
-    case AnchorLine::VerticalCenter:
-        return QStringLiteral("verticalCenter");
-    case AnchorLine::Fill:
-        return QStringLiteral("fill");
-    case AnchorLine::Center:
-        return QStringLiteral("centerIn");
-    default:
-        return QString();
-    }
-}
-
-static QString marginOffsetText(AnchorLine::Type type)
-{
-    switch (type) {
-    case AnchorLine::Left:
-        return QStringLiteral("leftMargin");
-    case AnchorLine::Right:
-        return QStringLiteral("rightMargin");
-    case AnchorLine::Top:
-        return QStringLiteral("topMargin");
-    case AnchorLine::Bottom:
-        return QStringLiteral("bottomMargin");
-    case AnchorLine::Baseline:
-        return QStringLiteral("baselineOffset");
-    case AnchorLine::HorizontalCenter:
-        return QStringLiteral("horizontalCenterOffset");
-    case AnchorLine::VerticalCenter:
-        return QStringLiteral("verticalCenterOffset");
-    default:
-        return QString();
-    }
-}
-
-static QString fixedTargetId(const Control* sourceControl, const Control* targetControl)
-{
-    if (targetControl->window() || targetControl->popup())
-        return QStringLiteral("parent");
-    if (sourceControl->parentControl() == targetControl)
-        return QStringLiteral("parent");
-    return targetControl->id();
-}
-
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
@@ -133,84 +75,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_paintLayer, [=] {
         m_paintLayer->update();
         if (!m_anchorLayer->activated()) {
-            static auto e = [this] {
-                auto e = new AnchorEditor(this);
-                connect(e, &AnchorEditor::anchored, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
-                    if (targetLine.isValid()) {
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors." + anchorLineText(sourceLineType),
-                                                                       fixedTargetId(e->sourceControl(), targetLine.control())
-                                                                       + "." + anchorLineText(targetLine.type()));
-                    } else {
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors." + anchorLineText(sourceLineType),
-                                                                       "undefined");
-                    }
-                });
-                connect(e, &AnchorEditor::filled, [=] (Control* control) {
-                    if (control) {
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.fill",
-                                                                       fixedTargetId(e->sourceControl(), control));
-                    } else {
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.fill", "undefined");
-                    }
-                });
-                connect(e, &AnchorEditor::centered, [=] (Control* control, bool overlay) {
-                    if (control) {
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.centerIn",
-                                                                       fixedTargetId(e->sourceControl(), control));
-                    } else {
-                        if (e->sourceControl()->popup() && overlay) {
-                            ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                           "anchors.centerIn", "Overlay.overlay");
-                        } else {
-                            ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                           "anchors.centerIn", "undefined");
-                        }
-                    }
-                });
-                connect(e, &AnchorEditor::cleared, [=] {
-                    for (const QString& name : UtilityFunctions::anchorLineNames())
-                        ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(), name, "undefined");
-                    for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
-                        ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(), name,
-                                                                        name.contains("alignWhenCentered") ? 1 : 0);
-                    }
-                });
-                connect(e, &AnchorEditor::marginOffsetEdited, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
-                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
-                                                                    "anchors." + marginOffsetText(sourceLineType),
-                                                                    marginOffset);
-                });
-                connect(e, &AnchorEditor::marginsEdited, [=] (qreal margins) {
-                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
-                                                                    "anchors.margins", margins);
-                });
-                connect(e, &AnchorEditor::alignmentActivated, [=] (bool align) {
-                    ControlRenderingManager::schedulePropertyUpdate(e->sourceControl()->uid(),
-                                                                    "anchors.alignWhenCentered", align);
-                });
-                connect(e, &AnchorEditor::sourceControlActivated, [=] {
-                    clearSelection();
-                    e->sourceControl()->setSelected(true);
-                });
-                return e;
-            }();
             Control* sourceControl = topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint()));
             Control* targetControl = topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
-            const QList<Control*>& selection = selectedControls();
-            clearSelection();
-            sourceControl->setSelected(true);
-            e->setSourceControl(sourceControl);
-            e->setPrimaryTargetControl(targetControl);
-            e->refresh();
-            e->exec();
-            clearSelection();
-            for (Control* control : selection)
-                control->setSelected(true);
+            if (isAnchorViable(sourceControl, targetControl))
+                emit anchorEditorActivated(sourceControl, targetControl);
         }
     });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,

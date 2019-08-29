@@ -17,6 +17,7 @@
 #include <qmlcodedocument.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <anchoreditor.h>
 
 #include <QScrollBar>
 #include <QMenu>
@@ -84,10 +85,69 @@ bool warnIfFileDoesNotExist(const QString& filePath)
     }
     return false;
 }
+
+
+QString fixedTargetId(const Control* sourceControl, const Control* targetControl)
+{
+    if (targetControl->window() || targetControl->popup())
+        return QStringLiteral("parent");
+    if (sourceControl->parentControl() == targetControl)
+        return QStringLiteral("parent");
+    return targetControl->id();
+}
+
+QString anchorLineText(AnchorLine::Type type)
+{
+    switch (type) {
+    case AnchorLine::Left:
+        return QStringLiteral("left");
+    case AnchorLine::Right:
+        return QStringLiteral("right");
+    case AnchorLine::Top:
+        return QStringLiteral("top");
+    case AnchorLine::Bottom:
+        return QStringLiteral("bottom");
+    case AnchorLine::Baseline:
+        return QStringLiteral("baseline");
+    case AnchorLine::HorizontalCenter:
+        return QStringLiteral("horizontalCenter");
+    case AnchorLine::VerticalCenter:
+        return QStringLiteral("verticalCenter");
+    case AnchorLine::Fill:
+        return QStringLiteral("fill");
+    case AnchorLine::Center:
+        return QStringLiteral("centerIn");
+    default:
+        return QString();
+    }
+}
+
+QString marginOffsetText(AnchorLine::Type type)
+{
+    switch (type) {
+    case AnchorLine::Left:
+        return QStringLiteral("leftMargin");
+    case AnchorLine::Right:
+        return QStringLiteral("rightMargin");
+    case AnchorLine::Top:
+        return QStringLiteral("topMargin");
+    case AnchorLine::Bottom:
+        return QStringLiteral("bottomMargin");
+    case AnchorLine::Baseline:
+        return QStringLiteral("baselineOffset");
+    case AnchorLine::HorizontalCenter:
+        return QStringLiteral("horizontalCenterOffset");
+    case AnchorLine::VerticalCenter:
+        return QStringLiteral("verticalCenterOffset");
+    default:
+        return QString();
+    }
+}
 }
 
 DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *parent)
     : QGraphicsView(new DesignerScene(parent), parent)
+    , m_anchorEditor(new AnchorEditor(scene(), this))
     , m_signalChooserDialog(new SignalChooserDialog(this))
     , m_qmlCodeEditorWidget(qmlCodeEditorWidget)
     , m_toolBar(new QToolBar(this))
@@ -313,6 +373,82 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
             mouseGrabber->ungrabMouse();
         onControlDoubleClick(i);
     }, Qt::QueuedConnection);
+
+
+    connect(m_anchorEditor, &AnchorEditor::anchored, this, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
+        if (targetLine.isValid()) {
+            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                           "anchors." + anchorLineText(sourceLineType),
+                                                           fixedTargetId(m_anchorEditor->sourceControl(), targetLine.control())
+                                                           + "." + anchorLineText(targetLine.type()));
+        } else {
+            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                           "anchors." + anchorLineText(sourceLineType),
+                                                           "undefined");
+        }
+    });
+    connect(m_anchorEditor, &AnchorEditor::filled, this, [=] (Control* control) {
+        if (control) {
+            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                           "anchors.fill",
+                                                           fixedTargetId(m_anchorEditor->sourceControl(), control));
+        } else {
+            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                           "anchors.fill", "undefined");
+        }
+    });
+    connect(m_anchorEditor, &AnchorEditor::centered, this, [=] (Control* control, bool overlay) {
+        if (control) {
+            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                           "anchors.centerIn",
+                                                           fixedTargetId(m_anchorEditor->sourceControl(), control));
+        } else {
+            if (m_anchorEditor->sourceControl()->popup() && overlay) {
+                ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                               "anchors.centerIn", "Overlay.overlay");
+            } else {
+                ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                               "anchors.centerIn", "undefined");
+            }
+        }
+    });
+    connect(m_anchorEditor, &AnchorEditor::cleared, this, [=] {
+        for (const QString& name : UtilityFunctions::anchorLineNames())
+            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(), name, "undefined");
+        for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
+            ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(), name,
+                                                            name.contains("alignWhenCentered") ? 1 : 0);
+        }
+    });
+    connect(m_anchorEditor, &AnchorEditor::marginOffsetEdited, this, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
+        ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                        "anchors." + marginOffsetText(sourceLineType),
+                                                        marginOffset);
+    });
+    connect(m_anchorEditor, &AnchorEditor::marginsEdited, this, [=] (qreal margins) {
+        ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                        "anchors.margins", margins);
+    });
+    connect(m_anchorEditor, &AnchorEditor::alignmentActivated, this, [=] (bool align) {
+        ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(),
+                                                        "anchors.alignWhenCentered", align);
+    });
+    connect(m_anchorEditor, &AnchorEditor::sourceControlActivated, this, [=] {
+        scene()->clearSelection();
+        m_anchorEditor->sourceControl()->setSelected(true);
+    });
+    connect(scene(), &DesignerScene::anchorEditorActivated, this, [=] (Control* sourceControl, Control* targetControl) {
+        const QList<Control*>& selection = scene()->selectedControls();
+        scene()->clearSelection();
+        sourceControl->setSelected(true);
+        m_anchorEditor->setSourceControl(sourceControl);
+        m_anchorEditor->setPrimaryTargetControl(targetControl);
+        m_anchorEditor->refresh();
+        m_anchorEditor->exec();
+        scene()->clearSelection();
+        for (Control* control : selection)
+            control->setSelected(true);
+    });
 }
 
 void DesignerView::setZoomLevel(qreal zoomLevel)

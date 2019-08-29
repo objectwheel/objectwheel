@@ -11,6 +11,7 @@ class QComboBox;
 class Control;
 class SignalChooserDialog;
 class QMenu;
+class AnchorEditor;
 
 class DesignerView final : public QGraphicsView
 {
@@ -78,6 +79,7 @@ private:
     void setZoomLevel(qreal zoomLevel);
 
 private:
+    AnchorEditor* m_anchorEditor;
     SignalChooserDialog* m_signalChooserDialog;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     QToolBar* m_toolBar;

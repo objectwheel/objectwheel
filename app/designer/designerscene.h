@@ -119,6 +119,7 @@ private:
 
 signals:
     void currentFormChanged(Form* currentForm);
+    void anchorEditorActivated(Control* sourceControl, Control* targetControl);
 
 private:
     DesignerItem* m_dragLayer;
