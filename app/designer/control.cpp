@@ -179,7 +179,7 @@ void Control::setRenderInfo(const RenderInfo& info)
     if (overlayPopup() != previouslyOverlayPopup) {
         if (overlayPopup())
             resetTransform();
-        else
+        else if (parentControl())
             setTransform(QTransform::fromTranslate(parentControl()->margins().left(), parentControl()->margins().top()));
     }
 
@@ -367,7 +367,7 @@ void Control::updateAnchors()
         return;
 
     QList<QPair<QString, Control*>> changedControls; // anchors.name, Control*
-    for (Control* control : scene()->items<Control>()) {
+    for (Control* control : topLevelControl()->childControls()) {
         for (const QPair<QString, QString>& pair : changedAnchors) {
             if (pair.second == control->uid())
                 changedControls.append(QPair<QString, Control*>(pair.first, control));
@@ -406,6 +406,13 @@ QVariant Control::property(const QString& propertyName) const
 Control* Control::parentControl() const
 {
     return static_cast<Control*>(parentItem());
+}
+
+Control* Control::topLevelControl() const
+{
+    QGraphicsItem* topItem = topLevelItem();
+    Q_ASSERT(topItem && topItem->type() >= Control::Type);
+    return static_cast<Control*>(topItem);
 }
 
 QList<Control*> Control::siblings() const

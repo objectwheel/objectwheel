@@ -56,7 +56,10 @@ public:
 
     void updateAnchors();
     QVariant property(const QString& propertyName) const;
+
     Control* parentControl() const;
+    Control* topLevelControl() const;
+
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
 
