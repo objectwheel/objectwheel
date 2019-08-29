@@ -232,10 +232,15 @@ Control* AnchorRow::targetControl() const
 
 void AnchorRow::setTargetControl(const Control* control)
 {
-    for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
-        if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {
-            m_targetControlComboBox->setCurrentIndex(i);
-            break;
+    if (overlayModeEnabled() && control->overlayPopup()) {
+        Q_ASSERT(m_sourceLineType == AnchorLine::Center);
+        m_targetControlComboBox->setCurrentText(QStringLiteral("Overlay.overlay"));
+    } else {
+        for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
+            if (m_targetControlComboBox->itemData(i).value<Control*>() == control) {
+                m_targetControlComboBox->setCurrentIndex(i);
+                break;
+            }
         }
     }
 }

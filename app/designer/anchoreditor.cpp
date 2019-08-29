@@ -452,13 +452,13 @@ void AnchorEditor::refreshNow()
     }
 
     m_centerInRow->setOverlayModeEnabled(m_sourceControl->popup());
-    m_leftRow->setEnabled(!m_sourceControl->popup());
-    m_rightRow->setEnabled(!m_sourceControl->popup());
-    m_topRow->setEnabled(!m_sourceControl->popup());
-    m_bottomRow->setEnabled(!m_sourceControl->popup());
-    m_fillRow->setEnabled(!m_sourceControl->popup());
-    m_horizontalCenterRow->setEnabled(!m_sourceControl->popup());
-    m_verticalCenterRow->setEnabled(!m_sourceControl->popup());
-    m_marginsSpinBox->setEnabled(!m_sourceControl->popup());
-    m_alignWhenCenteredCheckBox->setEnabled(!m_sourceControl->popup());
+    m_leftRow->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_rightRow->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_topRow->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_bottomRow->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_fillRow->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_horizontalCenterRow->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_verticalCenterRow->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_marginsSpinBox->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_alignWhenCenteredCheckBox->setEnabled(!m_centerInRow->overlayModeEnabled());
 }

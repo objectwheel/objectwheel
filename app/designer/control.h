@@ -25,6 +25,7 @@ public:
     bool visible() const;
     bool hasErrors() const;
     bool overlayPopup() const;
+    bool hasWindowAncestor() const;
 
     Anchors* anchors() const;
     QMarginsF margins() const;
@@ -85,6 +86,7 @@ private:
     QSizeF m_snapMargin;
     QString m_geometrySyncKey;
     bool m_geometrySyncEnabled;
+    bool m_updateAnchorsScheduled;
 };
 
 #endif // CONTROL_H

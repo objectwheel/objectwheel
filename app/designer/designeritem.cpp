@@ -343,8 +343,8 @@ void DesignerItem::mouseUngrabEvent(QEvent* event)
         if (scene())
             scene()->unsetCursor();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
-            movableSelectedAncestorItem->setBeingDragged(false);
             movableSelectedAncestorItem->setRaised(false);
+            movableSelectedAncestorItem->setBeingDragged(false);
         }
         m_movableSelectedAncestorItems.clear();
     }

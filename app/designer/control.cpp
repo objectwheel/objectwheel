@@ -13,6 +13,7 @@ Control::Control(Control* parent) : DesignerItem(parent)
   , m_anchors(new Anchors(this))
   , m_snapMargin(QSizeF(0, 0))
   , m_geometrySyncEnabled(false)
+  , m_updateAnchorsScheduled(false)
 {
     m_renderInfo.gui = false;
     m_renderInfo.popup = false;
@@ -63,6 +64,17 @@ bool Control::hasErrors() const
 bool Control::overlayPopup() const
 {
     return m_renderInfo.overlayPopup;
+}
+
+bool Control::hasWindowAncestor() const
+{
+    Control* parent = parentControl();
+    while (parent) {
+        if (parent->window())
+            return true;
+        parent = parent->parentControl();
+    }
+    return false;
 }
 
 Anchors* Control::anchors() const
@@ -279,6 +291,21 @@ static AnchorLine::Type anchorType(const QString& anchorName)
 
 void Control::updateAnchors()
 {
+    if (m_updateAnchorsScheduled) {
+        if (beingDragged()) {
+            return;
+        } else {
+            m_updateAnchorsScheduled = false;
+            disconnect(this, &Control::beingDraggedChanged, this, &Control::updateAnchors);
+        }
+    } else {
+        if (beingDragged()) {
+            m_updateAnchorsScheduled = true;
+            connect(this, &Control::beingDraggedChanged, this, &Control::updateAnchors);
+            return;
+        }
+    }
+
     for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
         const qreal value = m_renderInfo.anchors.value(name).toReal();
         if (name == "anchors.margins")
@@ -367,7 +394,9 @@ void Control::updateAnchors()
         return;
 
     QList<QPair<QString, Control*>> changedControls; // anchors.name, Control*
-    for (Control* control : topLevelControl()->childControls()) {
+    QList<Control*> allControls(topLevelControl()->childControls());
+    allControls.append(topLevelControl());
+    for (Control* control : qAsConst(allControls)) {
         for (const QPair<QString, QString>& pair : changedAnchors) {
             if (pair.second == control->uid())
                 changedControls.append(QPair<QString, Control*>(pair.first, control));
