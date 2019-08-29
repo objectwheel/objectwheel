@@ -31,13 +31,13 @@ public:
     void setTargetControlList(const QList<Control*>& targetControlList);
 
     Control* targetControl() const;
-    void setTargetControl(const Control* control);
+    void setTargetControl(const Control* control, bool overlaid = false);
 
     bool fillCenterModeEnabled() const;
     void setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* targetControl = nullptr);
 
-    bool overlayModeEnabled() const;
-    void setOverlayModeEnabled(bool overlayModeEnabled);
+    bool popupModeEnabled() const;
+    void setPopupModeEnabled(const Control* control);
 
     void setSourceButtonChecked(bool checked);
     void clear();
@@ -60,7 +60,7 @@ private:
     AnchorLine::Type m_targetLineTypeBackup;
     Control* m_targetControlBackup;
     bool m_fillCenterModeEnabled;
-    bool m_overlayModeEnabled;
+    bool m_popupModeEnabled;
     QBoxLayout* m_layout;
     QPushButton* m_sourceButton;
     QComboBox* m_targetControlComboBox;

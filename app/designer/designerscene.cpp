@@ -76,9 +76,11 @@ static QString marginOffsetText(AnchorLine::Type type)
     }
 }
 
-static QString fixedTargetId(const Control* targetControl)
+static QString fixedTargetId(const Control* sourceControl, const Control* targetControl)
 {
     if (targetControl->window() || targetControl->popup())
+        return QStringLiteral("parent");
+    if (sourceControl->parentControl() == targetControl)
         return QStringLiteral("parent");
     return targetControl->id();
 }
@@ -137,7 +139,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                     if (targetLine.isValid()) {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
                                                                        "anchors." + anchorLineText(sourceLineType),
-                                                                       fixedTargetId(targetLine.control()) + "." + anchorLineText(targetLine.type()));
+                                                                       fixedTargetId(e->sourceControl(), targetLine.control())
+                                                                       + "." + anchorLineText(targetLine.type()));
                     } else {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
                                                                        "anchors." + anchorLineText(sourceLineType),
@@ -147,7 +150,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                 connect(e, &AnchorEditor::filled, [=] (Control* control) {
                     if (control) {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.fill", fixedTargetId(control));
+                                                                       "anchors.fill",
+                                                                       fixedTargetId(e->sourceControl(), control));
                     } else {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
                                                                        "anchors.fill", "undefined");
@@ -156,7 +160,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
                 connect(e, &AnchorEditor::centered, [=] (Control* control, bool overlay) {
                     if (control) {
                         ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),
-                                                                       "anchors.centerIn", fixedTargetId(control));
+                                                                       "anchors.centerIn",
+                                                                       fixedTargetId(e->sourceControl(), control));
                     } else {
                         if (e->sourceControl()->popup() && overlay) {
                             ControlRenderingManager::scheduleBindingUpdate(e->sourceControl()->uid(),

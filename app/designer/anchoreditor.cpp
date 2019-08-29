@@ -242,7 +242,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
         m_verticalCenterRow->setFillCenterModeEnabled(checked, m_centerInRow->targetControl());
         if (checked) {
             emit centered(m_centerInRow->targetControl(),
-                          m_centerInRow->overlayModeEnabled() && m_centerInRow->targetControl() == 0);
+                          m_centerInRow->popupModeEnabled() && m_centerInRow->targetControl() == 0);
         } else {
             emit centered(nullptr, false);
         }
@@ -251,7 +251,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
         m_horizontalCenterRow->setTargetControl(m_centerInRow->targetControl());
         m_verticalCenterRow->setTargetControl(m_centerInRow->targetControl());
         emit centered(m_centerInRow->targetControl(),
-                      m_centerInRow->overlayModeEnabled() && m_centerInRow->targetControl() == 0);
+                      m_centerInRow->popupModeEnabled() && m_centerInRow->targetControl() == 0);
     });
     connect(clearButton, &QPushButton::clicked,
             this, &AnchorEditor::clear);
@@ -350,9 +350,8 @@ void AnchorEditor::clear()
     m_fillRow->setTargetControl(primaryTargetControl);
     m_horizontalCenterRow->setTargetControl(primaryTargetControl);
     m_verticalCenterRow->setTargetControl(primaryTargetControl);
-    m_centerInRow->setTargetControl(primaryTargetControl);
-    m_centerInRow->setOverlayModeEnabled(false); // needed
-    m_centerInRow->setOverlayModeEnabled(m_sourceControl->popup());
+    m_centerInRow->setPopupModeEnabled(m_sourceControl);
+    m_centerInRow->setTargetControl(primaryTargetControl, false);
 }
 
 void AnchorEditor::refreshNow()
@@ -444,21 +443,21 @@ void AnchorEditor::refreshNow()
         m_verticalCenterRow->setTargetLineType(m_sourceControl->anchors()->verticalCenter().type());
     }
 
+    m_centerInRow->setPopupModeEnabled(m_sourceControl);
     if (m_sourceControl->anchors()->centerIn()) {
         m_centerInRow->setSourceButtonChecked(true);
-        m_centerInRow->setTargetControl(m_sourceControl->anchors()->centerIn());
+        m_centerInRow->setTargetControl(m_sourceControl->anchors()->centerIn(), m_sourceControl->overlayPopup());
         m_horizontalCenterRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->centerIn());
         m_verticalCenterRow->setFillCenterModeEnabled(true, m_sourceControl->anchors()->centerIn());
     }
 
-    m_centerInRow->setOverlayModeEnabled(m_sourceControl->popup());
-    m_leftRow->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_rightRow->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_topRow->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_bottomRow->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_fillRow->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_horizontalCenterRow->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_verticalCenterRow->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_marginsSpinBox->setEnabled(!m_centerInRow->overlayModeEnabled());
-    m_alignWhenCenteredCheckBox->setEnabled(!m_centerInRow->overlayModeEnabled());
+    m_leftRow->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_rightRow->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_topRow->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_bottomRow->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_fillRow->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_horizontalCenterRow->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_verticalCenterRow->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_marginsSpinBox->setEnabled(!m_centerInRow->popupModeEnabled());
+    m_alignWhenCenteredCheckBox->setEnabled(!m_centerInRow->popupModeEnabled());
 }

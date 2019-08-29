@@ -63,7 +63,7 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
   , m_sourceLineType(sourceLineType)
   , m_targetLineType(AnchorLine::Invalid)
   , m_fillCenterModeEnabled(false)
-  , m_overlayModeEnabled(false)
+  , m_popupModeEnabled(false)
   , m_layout(new QHBoxLayout(this))
   , m_sourceButton(new QPushButton(this))
   , m_targetControlComboBox(new QComboBox(this))
@@ -230,10 +230,10 @@ Control* AnchorRow::targetControl() const
     return m_targetControlComboBox->currentData().value<Control*>();
 }
 
-void AnchorRow::setTargetControl(const Control* control)
+void AnchorRow::setTargetControl(const Control* control, bool overlaid)
 {
-    if (overlayModeEnabled() && control->overlayPopup()) {
-        Q_ASSERT(m_sourceLineType == AnchorLine::Center);
+    if (overlaid) {
+        Q_ASSERT(popupModeEnabled() && m_sourceLineType == AnchorLine::Center);
         m_targetControlComboBox->setCurrentText(QStringLiteral("Overlay.overlay"));
     } else {
         for (int i = 0; i < m_targetControlComboBox->count(); ++i) {
@@ -280,17 +280,17 @@ void AnchorRow::setFillCenterModeEnabled(bool fillCenterModeEnabled, Control* ta
     }
 }
 
-bool AnchorRow::overlayModeEnabled() const
+bool AnchorRow::popupModeEnabled() const
 {
-    return m_overlayModeEnabled;
+    return m_popupModeEnabled;
 }
 
-void AnchorRow::setOverlayModeEnabled(bool overlayModeEnabled)
+void AnchorRow::setPopupModeEnabled(const Control* control)
 {
     Q_ASSERT(m_sourceLineType == AnchorLine::Center);
-    if (m_overlayModeEnabled != overlayModeEnabled) {
-        m_overlayModeEnabled = overlayModeEnabled;
-        if (m_overlayModeEnabled)
+    if (m_popupModeEnabled != control->popup()) {
+        m_popupModeEnabled = control->popup();
+        if (m_popupModeEnabled && control->hasWindowAncestor())
             m_targetControlComboBox->addItem(QStringLiteral("Overlay.overlay"));
     }
 }
@@ -304,6 +304,8 @@ void AnchorRow::setSourceButtonChecked(bool checked)
 void AnchorRow::clear()
 {
     if (AnchorLine::isFillCenter(m_sourceLineType)) {
+        if (m_sourceLineType == AnchorLine::Center)
+            m_popupModeEnabled = false;
         setSourceButtonChecked(false);
     } else {
         setFillCenterModeEnabled(false);
