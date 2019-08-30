@@ -423,27 +423,39 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
             }
         }
     });
-
     connect(m_anchorEditor, &AnchorEditor::cleared, this, [=] {
-        for (const QString& name : UtilityFunctions::anchorLineNames())
-            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(), name, "undefined");
+        for (const QString& name : UtilityFunctions::anchorLineNames()) {
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               name, "undefined",
+                                               ControlPropertyManager::UpdateRenderer);
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               name, QString(),
+                                               ControlPropertyManager::SaveChanges);
+        }
         for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
-            ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(), name,
-                                                            name.contains("alignWhenCentered") ? 1 : 0);
+            ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
+                                                name, QString(),
+                                                name.contains("alignWhenCentered") ? 1 : 0,
+                                                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
         }
     });
     connect(m_anchorEditor, &AnchorEditor::marginOffsetEdited, this, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
-        ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                        "anchors." + marginOffsetText(sourceLineType),
-                                                        marginOffset);
+        ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
+                                            "anchors." + marginOffsetText(sourceLineType),
+                                            marginOffset == 0 ? QString() : QString::number(marginOffset), marginOffset,
+                                            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
     });
     connect(m_anchorEditor, &AnchorEditor::marginsEdited, this, [=] (qreal margins) {
-        ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                        "anchors.margins", margins);
+        ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
+                                            "anchors.margins",
+                                            margins == 0 ? QString() : QString::number(margins), margins,
+                                            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
     });
     connect(m_anchorEditor, &AnchorEditor::alignmentActivated, this, [=] (bool align) {
-        ControlRenderingManager::schedulePropertyUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                        "anchors.alignWhenCentered", align);
+        ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
+                                            "anchors.alignWhenCentered",
+                                            align ? QString() : "false", align,
+                                            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
     });
     connect(m_anchorEditor, &AnchorEditor::sourceControlActivated, this, [=] {
         scene()->clearSelection();
