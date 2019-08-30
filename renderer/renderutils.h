@@ -43,7 +43,7 @@ public:
     static void dash(const QSizeF& size, QImage& image);
     static void stopUnifiedTimer();
     static void makeDirtyRecursive(RenderEngine::ControlInstance* beginningInstance);
-    static void setInstancePropertyBinding(RenderEngine::ControlInstance* instance,
+    static void setInstancePropertyBinding(const RenderEngine::ControlInstance* instance,
                                            const QString& bindingName,
                                            const QString& expression);
     static void setInstancePropertyVariant(RenderEngine::ControlInstance* instance,

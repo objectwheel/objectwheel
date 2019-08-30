@@ -432,17 +432,39 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
                                                ControlPropertyManager::UpdateRenderer);
         }
         for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
-            ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
-                                                name, QString(),
-                                                name.contains("alignWhenCentered") ? 1 : 0,
-                                                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
+            if (name == "anchors.leftMargin"
+                    || name == "anchors.rightMargin"
+                    || name == "anchors.topMargin"
+                    || name == "anchors.bottomMargin") {
+                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                                   name, QString(), ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                                   name, "undefined", ControlPropertyManager::UpdateRenderer);
+            } else {
+                ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
+                                                    name, QString(),
+                                                    name.contains("alignWhenCentered") ? 1 : 0,
+                                                    ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
+            }
         }
     });
     connect(m_anchorEditor, &AnchorEditor::marginOffsetEdited, this, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
-        ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
-                                            "anchors." + marginOffsetText(sourceLineType),
-                                            marginOffset == 0 ? QString() : QString::number(marginOffset), marginOffset,
-                                            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
+        if (marginOffset == 0 && (sourceLineType == AnchorLine::Left
+                                  || sourceLineType == AnchorLine::Right
+                                  || sourceLineType == AnchorLine::Top
+                                  || sourceLineType == AnchorLine::Bottom)) {
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors." + marginOffsetText(sourceLineType),
+                                               QString(), ControlPropertyManager::SaveChanges);
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors." + marginOffsetText(sourceLineType),
+                                               "undefined", ControlPropertyManager::UpdateRenderer);
+        } else {
+            ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
+                                                "anchors." + marginOffsetText(sourceLineType),
+                                                marginOffset == 0 ? QString() : QString::number(marginOffset), marginOffset,
+                                                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
+        }
     });
     connect(m_anchorEditor, &AnchorEditor::marginsEdited, this, [=] (qreal margins) {
         ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),

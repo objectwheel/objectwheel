@@ -635,7 +635,7 @@ void RenderUtils::makeDirtyRecursive(RenderEngine::ControlInstance* beginningIns
         makeDirtyRecursive(childInstance);
 }
 
-void RenderUtils::setInstancePropertyBinding(RenderEngine::ControlInstance* instance,
+void RenderUtils::setInstancePropertyBinding(const RenderEngine::ControlInstance* instance,
                                              const QString& bindingName, const QString& expression)
 {
     Q_ASSERT(instance);
@@ -706,7 +706,8 @@ void RenderUtils::setInstancePropertyVariant(RenderEngine::ControlInstance* inst
     if (propertyName == "visible" || propertyName == "visibility") {
         instance->visible = propertyValue.toBool(); // works for visibility either
         // This lets dirty collector to collect dirt and send a render back
-        DesignerSupport::addDirty(RenderUtils::guiItem(instance), DesignerSupport::ContentUpdateMask);
+        DesignerSupport::addDirty(RenderUtils::guiItem(instance),
+                                  DesignerSupport::ContentUpdateMask);
         return;
     }
 
