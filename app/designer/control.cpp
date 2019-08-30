@@ -24,6 +24,7 @@ Control::Control(Control* parent) : DesignerItem(parent)
     setResizable(true);
     setAcceptHoverEvents(true);
     setCursor(Qt::OpenHandCursor);
+    setMousePressCursorShape(Qt::ClosedHandCursor);
 
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);

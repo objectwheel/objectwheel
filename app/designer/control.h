@@ -13,7 +13,7 @@ class Control : public DesignerItem
     friend class DesignerScene;
 
 public:
-    enum { Type = UserType + 2 };
+    enum { Type = UserType + 3 };
 
 public:
     explicit Control(Control* parent = nullptr);

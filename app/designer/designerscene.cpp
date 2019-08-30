@@ -45,7 +45,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_gadgetLayer);
 
-    m_anchorLayer->setAcceptedMouseButtons(Qt::RightButton);
+    m_anchorLayer->setAcceptedMouseButtons(Qt::LeftButton);
     m_anchorLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_anchorLayer);
 
@@ -59,8 +59,6 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_gadgetLayer, &GadgetLayer::handleSceneSelectionChange);
     connect(this, &DesignerScene::currentFormChanged,
             m_gadgetLayer, &GadgetLayer::handleSceneCurrentFormChange);
-    connect(m_gadgetLayer, &GadgetLayer::headlineDoubleClicked,
-            this, &DesignerScene::onHeadlineDoubleClick);
     connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
             m_gadgetLayer, &GadgetLayer::addResizers);
     connect(ProjectExposingManager::instance(), &ProjectExposingManager::controlExposed,
@@ -71,7 +69,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_anchorLayer, &AnchorLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
             m_anchorLayer, &AnchorLayer::updateGeometry);
-    connect(m_anchorLayer, &AnchorLayer::activatedChanged, // FIXME
+    connect(m_anchorLayer, &AnchorLayer::activatedChanged,
             m_paintLayer, [=] {
         m_paintLayer->update();
         if (!m_anchorLayer->activated()) {
@@ -243,6 +241,14 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
     return items;
 }
 
+DesignerItem* DesignerScene::topLevelItem(const QPointF& pos) const
+{
+    const QList<DesignerItem*> allItems(items(pos));
+    if (allItems.isEmpty())
+        return nullptr;
+    return allItems.first();
+}
+
 Control* DesignerScene::topLevelControl(const QPointF& pos) const
 {
     const QList<Control*> allItems(items<Control>(pos));
@@ -280,8 +286,8 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
 
 bool DesignerScene::showAllAnchors() const
 {
-    // TODO: Take that from view
-    // TODO: Make sure it returns true when anchor editor is open
+    // FIXME: Take that from view
+    // FIXME: Make sure it returns true when anchor editor is open
     return true || anchorLayer()->activated();
 }
 
@@ -614,13 +620,6 @@ void DesignerScene::discharge()
 void DesignerScene::onChange()
 {
     setSceneRect(sceneRect() | visibleItemsBoundingRect());
-}
-
-void DesignerScene::onHeadlineDoubleClick(bool isFormHeadline)
-{
-    ControlPropertyManager::instance()->doubleClicked(isFormHeadline
-                                                      ? m_currentForm
-                                                      : selectedControls().first());
 }
 
 void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)

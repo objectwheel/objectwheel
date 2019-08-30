@@ -40,9 +40,14 @@ void AnchorLayer::updateGeometry()
 
 void AnchorLayer::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
+    Q_ASSERT(scene());
+
     DesignerItem::mousePressEvent(event);
 
-    if (event->button() == Qt::RightButton)
+    if (DesignerScene::isInappropriateAnchorSource(scene()->topLevelControl(mapToScene(mousePressPoint()))))
+        return;
+
+    if (event->button() == Qt::LeftButton && event->modifiers() & Qt::ControlModifier)
         event->accept();
 }
 

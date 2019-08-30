@@ -50,6 +50,7 @@ public:
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
 
+    DesignerItem* topLevelItem(const QPointF& pos) const;
     Control* topLevelControl(const QPointF& pos) const;
     Control* highlightControl(const QPointF& pos) const;
 
@@ -104,7 +105,6 @@ public slots:
 
 private slots:
     void onChange();
-    void onHeadlineDoubleClick(bool isFormHeadline);
 
 private:
     void handleToolDrop(QGraphicsSceneDragDropEvent* event);

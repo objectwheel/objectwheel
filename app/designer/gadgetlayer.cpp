@@ -11,15 +11,23 @@ GadgetLayer::GadgetLayer(DesignerItem* parent) : DesignerItem(parent)
     m_formHeadlineItem->setPen(QPen(Qt::white));
     m_formHeadlineItem->setBrush(Qt::darkGray);
     m_formHeadlineItem->setCursor(Qt::OpenHandCursor);
+    m_formHeadlineItem->setMousePressCursorShape(Qt::ClosedHandCursor);
 
     m_headlineItem->setPen(QPen(Qt::white));
     m_headlineItem->setBrush(DesignerScene::outlineColor());
     m_headlineItem->setCursor(Qt::OpenHandCursor);
+    m_headlineItem->setMousePressCursorShape(Qt::ClosedHandCursor);
 
-    connect(m_headlineItem, &HeadlineItem::doubleClicked,
-            this, [=] { emit headlineDoubleClicked(false); });
     connect(m_formHeadlineItem, &HeadlineItem::doubleClicked,
-            this, [=] { emit headlineDoubleClicked(true); });
+            this, [=] (Qt::MouseButtons buttons) {
+        if (DesignerItem* targetItem = m_formHeadlineItem->targetItem())
+            emit targetItem->doubleClicked(buttons);
+    });
+    connect(m_headlineItem, &HeadlineItem::doubleClicked,
+            this, [=] (Qt::MouseButtons buttons) {
+        if (DesignerItem* targetItem = m_headlineItem->targetItem())
+            emit targetItem->doubleClicked(buttons);
+    });
 }
 
 void GadgetLayer::addResizers(DesignerItem* item)

@@ -368,12 +368,12 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     addAction(m_moveRightAct);
     addAction(m_moveLeftAct);
 
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked, this, [=] (Control* i) {
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
+            this, [=] (Control* i, Qt::MouseButtons buttons) {
         if (QGraphicsItem* mouseGrabber = scene()->mouseGrabberItem())
             mouseGrabber->ungrabMouse();
-        onControlDoubleClick(i);
+        onControlDoubleClick(i, buttons);
     }, Qt::QueuedConnection);
-
 
     connect(m_anchorEditor, &AnchorEditor::anchored, this, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
         if (targetLine.isValid()) {
@@ -596,9 +596,26 @@ void DesignerView::onInspectorItemDoubleClick(Control* control)
     m_qmlCodeEditorWidget->codeEditor()->gotoLine(pos);
 }
 
-void DesignerView::onControlDoubleClick(Control* control)
+void DesignerView::onControlDoubleClick(Control* control, Qt::MouseButtons buttons)
 {
-    m_qmlCodeEditorWidget->openDesigns(control, SaveUtils::controlMainQmlFileName());
+    if (buttons & Qt::LeftButton)
+        m_qmlCodeEditorWidget->openDesigns(control, SaveUtils::controlMainQmlFileName());
+    if (buttons & Qt::RightButton) {
+        Control* sourceControl = control;
+        Control* targetControl = control->parentControl();
+        if (DesignerScene::isAnchorViable(sourceControl, targetControl)) {
+            const QList<Control*>& selection = scene()->selectedControls();
+            scene()->clearSelection();
+            sourceControl->setSelected(true);
+            m_anchorEditor->setSourceControl(sourceControl);
+            m_anchorEditor->setPrimaryTargetControl(targetControl);
+            m_anchorEditor->refresh();
+            m_anchorEditor->exec();
+            scene()->clearSelection();
+            for (Control* control : selection)
+                control->setSelected(true);
+        }
+    }
 }
 
 void DesignerView::onAssetsFileOpen(const QString& relativePath, int line, int column)

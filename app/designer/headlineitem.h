@@ -12,6 +12,9 @@ class HeadlineItem final : public GadgetItem
 public:
     explicit HeadlineItem(DesignerItem* parent = nullptr);
 
+    enum { Type = UserType + 2 };
+    int type() const override;
+
     QString text() const;
     void setText(const QString& text);
 

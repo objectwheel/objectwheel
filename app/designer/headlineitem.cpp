@@ -12,6 +12,11 @@ HeadlineItem::HeadlineItem(DesignerItem* parent) : GadgetItem(parent)
 {
 }
 
+int HeadlineItem::type() const
+{
+    return Type;
+}
+
 QString HeadlineItem::text() const
 {
     return m_text;

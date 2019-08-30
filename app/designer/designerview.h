@@ -36,7 +36,7 @@ public:
 public slots:
     void discharge();
     void refresh() { onRefreshButtonClick(); }
-    void onControlDoubleClick(Control*);
+    void onControlDoubleClick(Control*, Qt::MouseButtons);
     void onInspectorItemDoubleClick(Control*);
     void onAssetsFileOpen(const QString& relativePath, int line, int column);
     void onDesignsFileOpen(Control* control, const QString& relativePath, int line, int column);

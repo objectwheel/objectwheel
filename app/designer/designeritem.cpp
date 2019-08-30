@@ -11,8 +11,8 @@ DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_beingHighlighted(false)
   , m_dragAccepted(false)
   , m_inSetGeometry(false)
+  , m_mousePressCursorShape(Qt::CustomCursor)
 {
-    setAcceptedMouseButtons(Qt::LeftButton);
 }
 
 int DesignerItem::type() const
@@ -206,6 +206,16 @@ void DesignerItem::setGeometry(const QRectF& geometry)
     }
 }
 
+Qt::CursorShape DesignerItem::mousePressCursorShape() const
+{
+    return m_mousePressCursorShape;
+}
+
+void DesignerItem::setMousePressCursorShape(const Qt::CursorShape& mousePressCursorShape)
+{
+    m_mousePressCursorShape = mousePressCursorShape;
+}
+
 DesignerScene* DesignerItem::scene() const
 {
     return static_cast<DesignerScene*>(QGraphicsObject::scene());
@@ -269,12 +279,14 @@ bool DesignerItem::event(QEvent* event)
 void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseDoubleClickEvent(event);
-    emit doubleClicked();
+    emit doubleClicked(event->buttons());
 }
 
 void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_mousePressPoint = event->pos();
+    if (scene() && m_mousePressCursorShape != Qt::CustomCursor)
+        scene()->setCursor(m_mousePressCursorShape);
     QGraphicsObject::mousePressEvent(event);
 }
 
@@ -287,7 +299,8 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     m_dragAccepted = true;
 
-    if (scene() && (flags() & ItemIsMovable) && m_movableSelectedAncestorItems.isEmpty()) {
+    if (scene() && (event->buttons() & Qt::LeftButton) && (flags() & ItemIsMovable)
+            && m_movableSelectedAncestorItems.isEmpty()) {
         DesignerItem* ancestor = this;
         DesignerItem* myMovableSelectedAncestorItem = ancestor;
         while (DesignerItem* parent = ancestor->parentItem()) {
@@ -317,7 +330,6 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
         m_movableSelectedAncestorItems.insert(myMovableSelectedAncestorItem);
 
-        scene()->setCursor(Qt::ClosedHandCursor);
         scene()->prepareDragLayer(myMovableSelectedAncestorItem);
 
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
@@ -339,9 +351,9 @@ void DesignerItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* opti
 void DesignerItem::mouseUngrabEvent(QEvent* event)
 {
     Q_UNUSED(event)
+    if (scene() && m_mousePressCursorShape != Qt::CustomCursor)
+        scene()->unsetCursor();
     if ((flags() & ItemIsMovable) && m_dragAccepted) {
-        if (scene())
-            scene()->unsetCursor();
         for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems) {
             movableSelectedAncestorItem->setRaised(false);
             movableSelectedAncestorItem->setBeingDragged(false);

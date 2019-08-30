@@ -55,7 +55,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             form, &Control::setRenderInfo);
     connect(form, &Control::doubleClicked,
-            form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
+            form, [=] (Qt::MouseButtons b) { ControlPropertyManager::instance()->doubleClicked(form, b); });
     connect(form, &Control::renderInfoChanged,
             form, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(form, c); });
     // Made it Qt::QueuedConnection in order to prevent
@@ -127,7 +127,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
             control, &Control::setRenderInfo);
     connect(control, &Control::doubleClicked,
-            control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
+            control, [=] (Qt::MouseButtons b) { ControlPropertyManager::instance()->doubleClicked(control, b); });
     connect(control, &Control::renderInfoChanged,
             control, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(control, c); });
     // Made it Qt::QueuedConnection in order to prevent
@@ -181,7 +181,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
                 childControl, &Control::setRenderInfo);
         connect(childControl, &Control::doubleClicked,
-                childControl, [=] { ControlPropertyManager::instance()->doubleClicked(childControl); });
+                childControl, [=] (Qt::MouseButtons b) { ControlPropertyManager::instance()->doubleClicked(childControl, b); });
         connect(childControl, &Control::renderInfoChanged,
                 childControl, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(childControl, c); });
         // Made it Qt::QueuedConnection in order to prevent

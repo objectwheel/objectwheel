@@ -24,9 +24,6 @@ public slots:
 private slots:
     void updateResizerPositions(DesignerItem* item);
 
-signals:
-    void headlineDoubleClicked(bool isFormHeadline);
-
 private:
     HeadlineItem* m_formHeadlineItem;
     HeadlineItem* m_headlineItem;

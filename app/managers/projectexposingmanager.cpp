@@ -60,7 +60,7 @@ void ProjectExposingManager::exposeProject()
         connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
                 form, &Control::setRenderInfo);
         connect(form, &Control::doubleClicked,
-                form, [=] { ControlPropertyManager::instance()->doubleClicked(form); });
+                form, [=] (Qt::MouseButtons b) { ControlPropertyManager::instance()->doubleClicked(form, b); });
         connect(form, &Control::renderInfoChanged,
                 form, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(form, c); });
         // Made it Qt::QueuedConnection in order to prevent
@@ -112,7 +112,7 @@ void ProjectExposingManager::exposeProject()
             connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
                     control, &Control::setRenderInfo);
             connect(control, &Control::doubleClicked,
-                    control, [=] { ControlPropertyManager::instance()->doubleClicked(control); });
+                    control, [=] (Qt::MouseButtons b) { ControlPropertyManager::instance()->doubleClicked(control, b); });
             connect(control, &Control::renderInfoChanged,
                     control, [=] (bool c) { ControlPropertyManager::instance()->renderInfoChanged(control, c); });
             // Made it Qt::QueuedConnection in order to prevent

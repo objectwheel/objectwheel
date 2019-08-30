@@ -61,6 +61,9 @@ public:
     void setGeometry(const QPointF& pos, const QSizeF& size);
     void setGeometry(const QRectF& geometry);
 
+    Qt::CursorShape mousePressCursorShape() const;
+    void setMousePressCursorShape(const Qt::CursorShape& mousePressCursorShape);
+
     DesignerScene* scene() const;
     DesignerItem* parentItem() const;
     DesignerItem* topLevelItem() const;
@@ -85,7 +88,7 @@ private:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
 signals:
-    void doubleClicked();
+    void doubleClicked(Qt::MouseButtons buttons);
     void geometryChanged();
     void resizableChanged();
     void beingDraggedChanged();
@@ -100,6 +103,7 @@ private:
     bool m_beingHighlighted;
     bool m_dragAccepted;
     bool m_inSetGeometry;
+    Qt::CursorShape m_mousePressCursorShape;
     QRectF m_rect;
     QPointF m_mousePressPoint;
     DesignerItem* m_parentItemBeforeRaise;
