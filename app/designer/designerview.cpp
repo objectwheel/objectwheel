@@ -5,7 +5,6 @@
 #include <controlcreationmanager.h>
 #include <controlpropertymanager.h>
 #include <controlremovingmanager.h>
-#include <controlrenderingmanager.h>
 #include <saveutils.h>
 #include <transparentstyle.h>
 #include <signalchooserdialog.h>
@@ -385,10 +384,10 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
         } else {
             ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
                                                "anchors." + anchorLineText(sourceLineType),
-                                               "undefined", ControlPropertyManager::UpdateRenderer);
+                                               QString(), ControlPropertyManager::SaveChanges);
             ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
                                                "anchors." + anchorLineText(sourceLineType),
-                                               QString(), ControlPropertyManager::SaveChanges);
+                                               "undefined", ControlPropertyManager::UpdateRenderer);
         }
     });
     connect(m_anchorEditor, &AnchorEditor::filled, this, [=] (Control* control) {
@@ -399,9 +398,9 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
                                                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
         } else {
             ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-                                               "anchors.fill", "undefined", ControlPropertyManager::UpdateRenderer);
-            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
                                                "anchors.fill", QString(), ControlPropertyManager::SaveChanges);
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors.fill", "undefined", ControlPropertyManager::UpdateRenderer);
         }
     });
     connect(m_anchorEditor, &AnchorEditor::centered, this, [=] (Control* control, bool overlay) {
@@ -417,20 +416,20 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
                                                    ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
             } else {
                 ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-                                                   "anchors.centerIn", "undefined", ControlPropertyManager::UpdateRenderer);
-                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
                                                    "anchors.centerIn", QString(), ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                                   "anchors.centerIn", "undefined", ControlPropertyManager::UpdateRenderer);
             }
         }
     });
     connect(m_anchorEditor, &AnchorEditor::cleared, this, [=] {
         for (const QString& name : UtilityFunctions::anchorLineNames()) {
             ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-                                               name, "undefined",
-                                               ControlPropertyManager::UpdateRenderer);
-            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
                                                name, QString(),
                                                ControlPropertyManager::SaveChanges);
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               name, "undefined",
+                                               ControlPropertyManager::UpdateRenderer);
         }
         for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
             ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),

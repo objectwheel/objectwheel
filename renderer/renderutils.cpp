@@ -969,6 +969,21 @@ QVariantMap RenderUtils::anchors(const RenderEngine::ControlInstance* instance, 
                 if (prop.isValid())
                     anchorMap.insert(name, prop.read());
             }
+            if (qreal margins = anchorMap.value("anchors.margins").toReal()) {
+                if (anchorMap.value("anchors.leftMargin").toReal() == margins
+                        && !ParserUtils::exists(instance->dir, "anchors.leftMargin")) {
+                    anchorMap.insert("anchors.leftMargin", 0);
+                } if (anchorMap.value("anchors.rightMargin").toReal() == margins
+                      && !ParserUtils::exists(instance->dir, "anchors.rightMargin")) {
+                    anchorMap.insert("anchors.rightMargin", 0);
+                } if (anchorMap.value("anchors.topMargin").toReal() == margins
+                      && !ParserUtils::exists(instance->dir, "anchors.topMargin")) {
+                    anchorMap.insert("anchors.topMargin", 0);
+                } if (anchorMap.value("anchors.bottomMargin").toReal() == margins
+                      && !ParserUtils::exists(instance->dir, "anchors.bottomMargin")) {
+                    anchorMap.insert("anchors.bottomMargin", 0);
+                }
+            }
         }
     }
     return anchorMap;
