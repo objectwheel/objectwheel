@@ -472,6 +472,33 @@ void ControlPropertyManager::setIndex(Control* control, quint32 index, ControlPr
     emit instance()->indexChanged(control);
 }
 
+void ControlPropertyManager::setBinding(Control* control, const QString& bindingName,
+                                         const QString& expression, Options options)
+{
+    Q_ASSERT(!control->hasErrors());
+
+    if (!control)
+        return;
+
+    if (bindingName.isEmpty())
+        return;
+
+    Q_ASSERT(bindingName != "id"
+            && bindingName != "x"
+            && bindingName != "y"
+            && bindingName != "z"
+            && bindingName != "width"
+            && bindingName != "height");
+
+    if (options & SaveChanges)
+        SaveManager::setProperty(control, bindingName, expression);
+
+    if (options & UpdateRenderer)
+        ControlRenderingManager::scheduleBindingUpdate(control->uid(), bindingName, expression);
+
+    emit instance()->propertyChanged(control, bindingName);
+}
+
 void ControlPropertyManager::setProperty(Control* control, const QString& propertyName,
                                          const QString& parserValue, const QVariant& propertyValue,
                                          Options options)

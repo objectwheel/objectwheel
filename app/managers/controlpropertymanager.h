@@ -44,6 +44,7 @@ public:
     static void setParent(Control* control, Control* parentControl, Options options);
     static void setId(Control* control, const QString& id, Options options);
     static void setIndex(Control* control, quint32 index, Options options);
+    static void setBinding(Control* control, const QString& bindingName, const QString& expression, Options options);
     static void setProperty(Control* control, const QString& propertyName, const QString& parserValue,
                             const QVariant& propertyValue, Options options);
 

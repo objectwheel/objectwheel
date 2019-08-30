@@ -144,6 +144,45 @@ QString fullPropertyValue(const QString& source, const QString& property, const 
     return QString();
 }
 
+void removeProperty(QTextDocument* document, quint32 begin, quint32 end)
+{
+    bool modified = document->isModified();
+    QTextCursor cursor(document);
+
+    cursor.setPosition(end);
+    cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+    bool forwardEmpty = !cursor.selectedText().contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]"));
+    cursor.clearSelection();
+
+    if (forwardEmpty) {
+        cursor.setPosition(begin);
+        cursor.movePosition(QTextCursor::PreviousBlock, QTextCursor::KeepAnchor);
+        cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+        bool backwardEmpty = !cursor.selectedText().contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]"));
+        cursor.clearSelection();
+
+        if (!backwardEmpty)
+            cursor.setPosition(begin);
+    } else {
+        cursor.setPosition(begin);
+    }
+
+    cursor.setPosition(end, QTextCursor::KeepAnchor);
+    cursor.beginEditBlock();
+    cursor.removeSelectedText();
+    cursor.endEditBlock();
+
+    if (!modified)
+        document->setModified(false);
+}
+
+void removeProperty(QString& source, quint32 begin, quint32 end)
+{
+    QTextDocument document(source);
+    removeProperty(&document, begin, end);
+    source = document.toPlainText();
+}
+
 bool propertyExists(const UiObjectMemberList* list, const QString& property)
 {
     while(list) {
@@ -249,8 +288,12 @@ void changeProperty(QString& source, const UiObjectMemberList* list, const QStri
         list = list->next;
     }
 
-    if (begin > 0 && end > 0)
-        source.replace(begin, end - begin, property + ": " + value);
+    if (begin > 0 && end > 0) {
+        if (value.isEmpty())
+            removeProperty(source, begin, end);
+        else
+            source.replace(begin, end - begin, property + ": " + value);
+    }
 }
 
 void addProperty(QTextDocument* document, const UiObjectInitializer* initializer, const QString& property, const QString& value)
@@ -296,7 +339,6 @@ void addProperty(QTextDocument* document, const UiObjectInitializer* initializer
 
 void changeProperty(QTextDocument* document, const UiObjectMemberList* list, const QString& property, const QString& value)
 {
-    bool modified = document->isModified();
     quint32 begin = 0, end = 0;
 
     while(list) {
@@ -335,15 +377,20 @@ void changeProperty(QTextDocument* document, const UiObjectMemberList* list, con
     }
 
     if (begin > 0 && end > 0) {
-        QTextCursor cursor(document);
-        cursor.beginEditBlock();
-        cursor.setPosition(begin);
-        cursor.setPosition(end, QTextCursor::KeepAnchor);
-        cursor.insertText(property + ": " + value);
-        cursor.endEditBlock();
+        if (value.isEmpty()) {
+            removeProperty(document, begin, end);
+        } else {
+            bool modified = document->isModified();
+            QTextCursor cursor(document);
+            cursor.beginEditBlock();
+            cursor.setPosition(begin);
+            cursor.setPosition(end, QTextCursor::KeepAnchor);
+            cursor.insertText(property + ": " + value);
+            cursor.endEditBlock();
 
-        if (!modified)
-            document->setModified(false);
+            if (!modified)
+                document->setModified(false);
+        }
     }
 }
 
@@ -700,7 +747,7 @@ void setProperty(const QString& controlDir, const QString& property, const QStri
 
     if (Internal::propertyExists(uiObjectInitializer->members, property))
         Internal::changeProperty(source, uiObjectInitializer->members, property, value);
-    else
+    else if (!value.isEmpty())
         Internal::addProperty(source, uiObjectInitializer, property, value);
 
     file.resize(0);
@@ -748,7 +795,7 @@ void setProperty(QTextDocument* doc, const QString& controlDir, const QString& p
 
     if (Internal::propertyExists(uiObjectInitializer->members, property))
         Internal::changeProperty(doc, uiObjectInitializer->members, property, value);
-    else
+    else if (!value.isEmpty())
         Internal::addProperty(doc, uiObjectInitializer, property, value);
 }
 

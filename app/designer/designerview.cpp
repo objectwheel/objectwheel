@@ -290,7 +290,7 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
 
     TransparentStyle::attach(m_toolBar);
 
-//  FIXME  setViewportMargins(0, 24, 0, 0);
+    //  FIXME  setViewportMargins(0, 24, 0, 0);
 
     m_sendBackAct->setText(tr("Send to Back"));
     m_bringFrontAct->setText(tr("Bring to Front"));
@@ -377,41 +377,53 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
 
     connect(m_anchorEditor, &AnchorEditor::anchored, this, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
         if (targetLine.isValid()) {
-            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                           "anchors." + anchorLineText(sourceLineType),
-                                                           fixedTargetId(m_anchorEditor->sourceControl(), targetLine.control())
-                                                           + "." + anchorLineText(targetLine.type()));
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors." + anchorLineText(sourceLineType),
+                                               fixedTargetId(m_anchorEditor->sourceControl(), targetLine.control())
+                                               + "." + anchorLineText(targetLine.type()),
+                                               ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
         } else {
-            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                           "anchors." + anchorLineText(sourceLineType),
-                                                           "undefined");
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors." + anchorLineText(sourceLineType),
+                                               "undefined", ControlPropertyManager::UpdateRenderer);
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors." + anchorLineText(sourceLineType),
+                                               QString(), ControlPropertyManager::SaveChanges);
         }
     });
     connect(m_anchorEditor, &AnchorEditor::filled, this, [=] (Control* control) {
         if (control) {
-            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                           "anchors.fill",
-                                                           fixedTargetId(m_anchorEditor->sourceControl(), control));
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors.fill",
+                                               fixedTargetId(m_anchorEditor->sourceControl(), control),
+                                               ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
         } else {
-            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                           "anchors.fill", "undefined");
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors.fill", "undefined", ControlPropertyManager::UpdateRenderer);
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors.fill", QString(), ControlPropertyManager::SaveChanges);
         }
     });
     connect(m_anchorEditor, &AnchorEditor::centered, this, [=] (Control* control, bool overlay) {
         if (control) {
-            ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                           "anchors.centerIn",
-                                                           fixedTargetId(m_anchorEditor->sourceControl(), control));
+            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                               "anchors.centerIn",
+                                               fixedTargetId(m_anchorEditor->sourceControl(), control),
+                                               ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
         } else {
             if (m_anchorEditor->sourceControl()->popup() && overlay) {
-                ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                               "anchors.centerIn", "Overlay.overlay");
+                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                                   "anchors.centerIn", "Overlay.overlay",
+                                                   ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
             } else {
-                ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(),
-                                                               "anchors.centerIn", "undefined");
+                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                                   "anchors.centerIn", "undefined", ControlPropertyManager::UpdateRenderer);
+                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
+                                                   "anchors.centerIn", QString(), ControlPropertyManager::SaveChanges);
             }
         }
     });
+
     connect(m_anchorEditor, &AnchorEditor::cleared, this, [=] {
         for (const QString& name : UtilityFunctions::anchorLineNames())
             ControlRenderingManager::scheduleBindingUpdate(m_anchorEditor->sourceControl()->uid(), name, "undefined");
