@@ -1,7 +1,7 @@
 #include <anchoreditor.h>
 #include <anchorrow.h>
-#include <control.h>
 #include <designerscene.h>
+#include <control.h>
 
 #include <QBoxLayout>
 #include <QLabel>

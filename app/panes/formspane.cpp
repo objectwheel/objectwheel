@@ -8,6 +8,7 @@
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <filesystemutils.h>
+#include <form.h>
 
 #include <QStandardPaths>
 #include <QPainter>

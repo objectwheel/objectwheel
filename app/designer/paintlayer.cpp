@@ -5,6 +5,7 @@
 #include <anchorlayer.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
+#include <control.h>
 
 #include <QPainter>
 #include <QtMath>

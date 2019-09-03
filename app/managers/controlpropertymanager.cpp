@@ -1,5 +1,5 @@
 #include <controlpropertymanager.h>
-#include <control.h>
+#include <form.h>
 #include <savemanager.h>
 #include <saveutils.h>
 #include <controlrenderingmanager.h>

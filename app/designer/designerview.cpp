@@ -1,5 +1,4 @@
 #include <designerview.h>
-#include <designerview.h>
 #include <designerscene.h>
 #include <utilsicons.h>
 #include <controlcreationmanager.h>
@@ -17,6 +16,7 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <anchoreditor.h>
+#include <form.h>
 
 #include <QScrollBar>
 #include <QMenu>

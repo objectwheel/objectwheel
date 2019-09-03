@@ -1,28 +1,22 @@
 #ifndef FORMSCENE_H
 #define FORMSCENE_H
 
-#include <form.h>
-#include <QPointer>
 #include <QGraphicsScene>
+#include <QPointer>
+#include <QSet>
+#include <QGraphicsItem>
 
+class DesignerItem;
+class Control;
+class Form;
 class GadgetLayer;
 class AnchorLayer;
 class PaintLayer;
-class QMimeData;
 
 class DesignerScene final : public QGraphicsScene
 {
     Q_OBJECT
     Q_DISABLE_COPY(DesignerScene)
-
-public:
-    enum OutlineMode {
-        NoOutline,
-        ClippingDashLine,
-        BoundingDashLine,
-        ClippingSolidLine,
-        BoundingSolidLine
-    };
 
 public:
     explicit DesignerScene(QObject* parent = nullptr);
@@ -42,7 +36,6 @@ public:
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
     AnchorLayer* anchorLayer() const;
-    PaintLayer* paintLayer() const;
     DesignerItem* parentBeforeDrag() const;
 
     QList<Form*> forms() const;
@@ -50,38 +43,26 @@ public:
     QList<DesignerItem*> selectedItems() const;
     QList<DesignerItem*> draggedResizedSelectedItems() const;
 
-    DesignerItem* topLevelItem(const QPointF& pos) const;
     Control* topLevelControl(const QPointF& pos) const;
     Control* highlightControl(const QPointF& pos) const;
 
-    bool showAllAnchors() const;
-    qreal devicePixelRatio() const;
-    QPointF cursorPos() const;
+    QRectF outerRect(const QRectF& rect) const;
     QRectF visibleItemsBoundingRect() const;
+
+    qreal zoomLevel() const;
+    qreal devicePixelRatio() const;
+
+    bool showAllAnchors() const;
+    QPointF cursorPos() const;
     QVector<QLineF> guidelines() const;
 
     template <typename T = DesignerItem, typename... Args>
     QList<T*> items(Args&&... args) const;
 
 public:
-    static bool showGridViewDots();
-    static bool showClippedControls();
-    static bool showMouseoverOutline();
-
     static bool isAnchorViable(const Control* sourceControl, const Control* targetControl);
     static bool isInappropriateAnchorSource(const Control* control);
     static bool isInappropriateAnchorTarget(const Control* control);
-
-    static int gridSize();
-    static int startDragDistance();
-
-    static qreal zoomLevel();
-    static OutlineMode outlineMode();
-    static QColor anchorColor();
-    static QColor outlineColor();
-    static QBrush backgroundTexture();
-    static QBrush blankControlDecorationBrush(const QColor& color);
-    static QPen pen(const QColor& color = outlineColor(), qreal width = 1, bool cosmetic = true);
 
     static QPointF snapPosition(qreal x, qreal y);
     static QPointF snapPosition(const QPointF& pos);
@@ -89,13 +70,14 @@ public:
     static QSizeF snapSize(qreal x, qreal y, qreal w, qreal h);
     static QSizeF snapSize(const QPointF& pos,const QSizeF& size);
 
-    static QRectF outerRect(const QRectF& rect);
     static QRectF rect(const Control* control);
     static QRectF contentRect(const Control* control);
     static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
 
     static qreal lowerZ(DesignerItem* parentItem);
     static qreal higherZ(DesignerItem* parentItem);
+
+    static QPen pen(const QColor& color = QColor(), qreal width = 1, bool cosmetic = true);
 
     static void drawDashLine(QPainter* painter, const QLineF& line);
     static void drawDashRect(QPainter* painter, const QRectF& rect);
@@ -137,7 +119,7 @@ inline QList<T*> DesignerScene::items(Args&&... args) const
 {
     QList<T*> items;
     const QList<QGraphicsItem*>& allItems = QGraphicsScene::items(std::forward<Args>(args)...);
-    for (QGraphicsItem* item : allItems) { // detaches allItems if it is not const
+    for (QGraphicsItem* item : allItems) {
         if (item->type() >= T::Type)
             items.append(static_cast<T*>(item));
     }

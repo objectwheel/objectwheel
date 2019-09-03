@@ -7,6 +7,7 @@
 #include <transparentstyle.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
+#include <form.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>

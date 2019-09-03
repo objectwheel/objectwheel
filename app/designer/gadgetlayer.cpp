@@ -2,6 +2,7 @@
 #include <designerscene.h>
 #include <headlineitem.h>
 #include <resizeritem.h>
+#include <form.h>
 #include <QCursor>
 
 GadgetLayer::GadgetLayer(DesignerItem* parent) : DesignerItem(parent)

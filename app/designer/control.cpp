@@ -5,6 +5,8 @@
 #include <hashfactory.h>
 #include <paintutils.h>
 #include <toolutils.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 #include <QPainter>
 #include <QStyleOption>
@@ -179,6 +181,7 @@ void Control::setRenderInfo(const RenderInfo& info)
     if (m_uid != info.uid)
         return;
 
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
     const QMarginsF previousMargins = m_renderInfo.margins;
     const bool previouslyOverlayPopup = overlayPopup();
 
@@ -187,7 +190,7 @@ void Control::setRenderInfo(const RenderInfo& info)
     updateAnchors();
     setResizable(gui());
     setZValue(property("z").toDouble());
-    setFlag(ItemClipsChildrenToShape, !DesignerScene::showClippedControls() && property("clip").toBool());
+    setFlag(ItemClipsChildrenToShape, !settings->showClippedControls && property("clip").toBool());
     setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
 
     if (info.codeChanged) {
@@ -214,8 +217,8 @@ void Control::setRenderInfo(const RenderInfo& info)
         if (visible() && rect().isValid() && PaintUtils::isBlankImage(m_renderInfo.image)) {
             m_renderInfo.image = PaintUtils::renderBlankControlImage(
                         rect(), id(), devicePixelRatio(),
-                        DesignerScene::blankControlDecorationBrush(Qt::darkGray),
-                        childControls(false).isEmpty() ? DesignerScene::outlineColor() : Qt::transparent);
+                        settings->toBlankControlDecorationBrush(Qt::darkGray),
+                        childControls(false).isEmpty() ? settings->outlineColor : Qt::transparent);
         }
     } else {
         setGeometrySyncEnabled(false);
@@ -229,7 +232,7 @@ void Control::setRenderInfo(const RenderInfo& info)
         if (hasErrors() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderErrorControlImage(
                         size(), id(), devicePixelRatio(),
-                        DesignerScene::blankControlDecorationBrush(QColor(203, 54, 59)),
+                        settings->toBlankControlDecorationBrush(QColor(203, 54, 59)),
                         QColor(203, 54, 59));
         }
 

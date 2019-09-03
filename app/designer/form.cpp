@@ -1,5 +1,7 @@
 #include <form.h>
 #include <designerscene.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 #include <QPainter>
 #include <QCursor>
@@ -38,18 +40,20 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Form::paintBackground(QPainter* painter)
 {
-    painter->fillRect(rect(), DesignerScene::backgroundTexture());
+    painter->fillRect(rect(), DesignerSettings::sceneSettings()->toBackgroundTexture());
 }
 
 void Form::paintForeground(QPainter* painter)
 {
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+
     painter->setBrush(Qt::NoBrush);
 
     // Draw grid view dots
-    if (DesignerScene::showGridViewDots()) {
+    if (settings->showGridViewDots) {
         QVector<QPointF> points;
-        for (qreal x = 0; x <= rect().right(); x += DesignerScene::gridSize()) {
-            for (qreal y = 0; y <= rect().bottom(); y += DesignerScene::gridSize())
+        for (qreal x = 0; x <= rect().right(); x += settings->gridSize) {
+            for (qreal y = 0; y <= rect().bottom(); y += settings->gridSize)
                 points.append(QPointF(x, y));
         }
         painter->setPen(DesignerScene::pen(Qt::darkGray, 1, false));

@@ -16,12 +16,12 @@
 #include <mainwindow.h>
 #include <hashfactory.h>
 #include <utilityfunctions.h>
+#include <form.h>
 
 #include <QMimeData>
 #include <QGraphicsView>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <QPointer>
 #include <QPen>
 #include <QtMath>
 #include <QApplication>
@@ -195,11 +195,6 @@ AnchorLayer* DesignerScene::anchorLayer() const
     return m_anchorLayer;
 }
 
-PaintLayer* DesignerScene::paintLayer() const
-{
-    return m_paintLayer;
-}
-
 DesignerItem* DesignerScene::parentBeforeDrag() const
 {
     return m_parentBeforeDrag;
@@ -239,14 +234,6 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
             items.removeAt(i);
     }
     return items;
-}
-
-DesignerItem* DesignerScene::topLevelItem(const QPointF& pos) const
-{
-    const QList<DesignerItem*> allItems(items(pos));
-    if (allItems.isEmpty())
-        return nullptr;
-    return allItems.first();
 }
 
 Control* DesignerScene::topLevelControl(const QPointF& pos) const
@@ -418,21 +405,6 @@ QVector<QLineF> DesignerScene::guidelines() const
     return lines;
 }
 
-bool DesignerScene::showGridViewDots()
-{
-    return DesignerSettings::sceneSettings()->showGridViewDots;
-}
-
-bool DesignerScene::showClippedControls()
-{
-    return DesignerSettings::sceneSettings()->showClippedControls;
-}
-
-bool DesignerScene::showMouseoverOutline()
-{
-    return DesignerSettings::sceneSettings()->showMouseoverOutline;
-}
-
 bool DesignerScene::isInappropriateAnchorSource(const Control* control)
 {
     if (control == 0)
@@ -466,9 +438,6 @@ bool DesignerScene::isAnchorViable(const Control* sourceControl, const Control* 
     if (isInappropriateAnchorTarget(targetControl))
         return false;
 
-    // if (sourceControl->popup() && sourceControl.type() != AnchorLine::Center)
-    //    return false;
-
     if (sourceControl->popup() && sourceControl->parentControl() != targetControl)
         return false;
 
@@ -486,49 +455,10 @@ bool DesignerScene::isAnchorViable(const Control* sourceControl, const Control* 
     return true;
 }
 
-int DesignerScene::gridSize()
-{
-    return DesignerSettings::sceneSettings()->gridSize;
-}
-
-int DesignerScene::startDragDistance()
-{
-    return DesignerSettings::sceneSettings()->dragStartDistance;
-}
-
-qreal DesignerScene::zoomLevel()
-{
-    return DesignerSettings::sceneSettings()->sceneZoomLevel;
-}
-
-DesignerScene::OutlineMode DesignerScene::outlineMode()
-{
-    return OutlineMode(DesignerSettings::sceneSettings()->controlOutlineDecoration);
-}
-
-QColor DesignerScene::anchorColor()
-{
-    return DesignerSettings::sceneSettings()->anchorColor;
-}
-
-QColor DesignerScene::outlineColor()
-{
-    return DesignerSettings::sceneSettings()->outlineColor;
-}
-
-QBrush DesignerScene::backgroundTexture()
-{
-    return DesignerSettings::sceneSettings()->toBackgroundBrush();
-}
-
-QBrush DesignerScene::blankControlDecorationBrush(const QColor& color)
-{
-    return DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(color);
-}
-
 QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
-{
-    QPen pen(color, width, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+{        
+    QPen pen(color.isValid() ? color : DesignerSettings::sceneSettings()->outlineColor, width,
+             Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     pen.setCosmetic(cosmetic);
     return pen;
 }
@@ -566,7 +496,7 @@ QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
     return size;
 }
 
-QRectF DesignerScene::outerRect(const QRectF& rect)
+QRectF DesignerScene::outerRect(const QRectF& rect) const
 {
     // Use on rectangular shapes where the item
     // is transformable but the pen is cosmetic
@@ -591,6 +521,12 @@ QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
     for (DesignerItem* item : items)
         boundingRect |= item->sceneBoundingRect();
     return boundingRect;
+}
+
+qreal DesignerScene::zoomLevel() const
+{
+    Q_ASSERT(views().size() == 1);
+    return views().first()->matrix().m11();
 }
 
 qreal DesignerScene::lowerZ(DesignerItem* parentItem)

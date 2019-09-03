@@ -2,7 +2,7 @@
 #include <designerscene.h>
 #include <savemanager.h>
 #include <controlrenderingmanager.h>
-#include <QDebug>
+#include <form.h>
 
 ControlRemovingManager* ControlRemovingManager::s_instance = nullptr;
 DesignerScene* ControlRemovingManager::s_designerScene = nullptr;
@@ -57,7 +57,7 @@ void ControlRemovingManager::removeControls(const QList<Control*>& controls, boo
 {
     for (const Control* control : controls) {
         if (control->type() == Form::Type) {
-            qWarning() << "ControlRemovingManager::removeControls() can't remove forms.";
+            qWarning("ControlRemovingManager::removeControls() can't remove forms");
             return;
         }
     }
