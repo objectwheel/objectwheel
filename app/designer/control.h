@@ -17,6 +17,7 @@ public:
 
 public:
     explicit Control(Control* parent = nullptr);
+    ~Control() override;
 
     int type() const override;
     bool gui() const;
@@ -64,6 +65,8 @@ public:
     QList<Control*> siblings() const;
     QList<Control*> childControls(bool recursive = true) const;
 
+    static QList<Control*> controls();
+
 protected:
     QRectF contentRect() const;
     void paintContent(QPainter* painter);
@@ -76,6 +79,7 @@ signals:
     void renderInfoChanged(bool codeChanged);
 
 private:
+    static QList<Control*> s_controls;
     quint32 m_index;
     QString m_id;
     QString m_uid;

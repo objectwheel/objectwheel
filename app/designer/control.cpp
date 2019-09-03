@@ -9,12 +9,15 @@
 #include <QPainter>
 #include <QStyleOption>
 
+QList<Control*> Control::s_controls;
+
 Control::Control(Control* parent) : DesignerItem(parent)
   , m_anchors(new Anchors(this))
   , m_snapMargin(QSizeF(0, 0))
   , m_geometrySyncEnabled(false)
   , m_updateAnchorsScheduled(false)
 {
+    s_controls.append(this);
     m_renderInfo.gui = false;
     m_renderInfo.popup = false;
     m_renderInfo.window = false;
@@ -30,6 +33,11 @@ Control::Control(Control* parent) : DesignerItem(parent)
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
     setFlag(ItemNegativeZStacksBehindParent);
+}
+
+Control::~Control()
+{
+    s_controls.removeOne(this);
 }
 
 int Control::type() const
@@ -486,6 +494,11 @@ QList<Control*> Control::childControls(bool recursive) const
     }
 
     return controls;
+}
+
+QList<Control*> Control::controls()
+{
+    return s_controls;
 }
 
 QRectF Control::contentRect() const
