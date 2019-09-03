@@ -317,62 +317,102 @@ QRectF DesignerScene::visibleItemsBoundingRect() const
 
 QVector<QLineF> DesignerScene::guidelines() const
 {
-    // FIXME: doesn't correctly work for items within a parent
     using namespace UtilityFunctions;
 
-    QVector<QLineF> lines; /*FIXME:*/ return lines;
-    QList<Control*> stillItems = items<Control>();
+    QVector<QLineF> lines;
+    QList<Control*> allControls;
     const QList<DesignerItem*>& movingItems = draggedResizedSelectedItems();
 
+    if (movingItems.isEmpty())
+        return lines;
+
     if (m_currentForm) {
-        stillItems.append(m_currentForm);
-        stillItems.append(m_currentForm->childControls());
+        allControls.append(m_currentForm);
+        allControls.append(m_currentForm->childControls());
     }
 
-    for (DesignerItem* movingItem : movingItems)
-        stillItems.removeOne(static_cast<Control*>(movingItem));
+    for (DesignerItem* movingItem : movingItems) {
+        if (movingItem->type() >= Control::Type)
+            allControls.removeOne(static_cast<Control*>(movingItem));
+    }
 
-    for (DesignerItem* stillItem : qAsConst(stillItems)) {
-        const QRectF& geometry = itemsBoundingRect(movingItems);
-        const QRectF& otherGeometry = stillItem->sceneBoundingRect();
+    if (allControls.isEmpty())
+        return lines;
 
-        /* Child center <-> Parent center */
+    const QRectF& geometry = itemsBoundingRect(movingItems);
+
+    for (Control* control : qAsConst(allControls)) {
+        const QRectF& otherGeometry = control->sceneBoundingRect();
+
+        /* My center <-> Other center */
         if (qRound64(geometry.center().x()) == qRound64(otherGeometry.center().x()))
             lines.append({geometry.center(), otherGeometry.center()});
 
         if (qRound64(geometry.center().y()) == qRound64(otherGeometry.center().y()))
             lines.append({geometry.center(), otherGeometry.center()});
 
-        /* Child left <-> Parent center */
-        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
+        /* My left <-> Other center */
+        if (qRound64(geometry.left()) == qRound64(otherGeometry.center().x()))
             lines.append({leftCenter(geometry), otherGeometry.center()});
 
-        /* Child left <-> Parent left */
-        if (qRound64(leftCenter(geometry).x()) == qRound64(otherGeometry.x()))
-            lines.append({leftCenter(geometry), leftCenter(otherGeometry)});
-
-        /* Child right <-> Parent center */
-        if (qRound64(rightCenter(geometry).x()) == qRound64(otherGeometry.center().x()))
+        /* My right <-> Other center */
+        if (qRound64(geometry.right()) == qRound64(otherGeometry.center().x()))
             lines.append({rightCenter(geometry), otherGeometry.center()});
 
-        /* Child right <-> Parent right */
-        if (qRound64(rightCenter(geometry).x()) == qRound64(rightCenter(otherGeometry).x()))
-            lines.append({rightCenter(geometry), rightCenter(otherGeometry)});
-
-        /* Child top <-> Parent center */
-        if (qRound64(topCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
+        /* My top <-> Other center */
+        if (qRound64(geometry.top()) == qRound64(otherGeometry.center().y()))
             lines.append({topCenter(geometry), otherGeometry.center()});
 
-        /* Child top <-> Parent top */
-        if (qRound64(topCenter(geometry).y()) == qRound64(topCenter(otherGeometry).y()))
-            lines.append({topCenter(geometry), topCenter(otherGeometry)});
-
-        /* Child bottom <-> Parent center */
-        if (qRound64(bottomCenter(geometry).y()) == qRound64(otherGeometry.center().y()))
+        /* My bottom <-> Other center */
+        if (qRound64(geometry.bottom()) == qRound64(otherGeometry.center().y()))
             lines.append({bottomCenter(geometry), otherGeometry.center()});
 
-        /* Child bottom <-> Parent bottom */
-        if (qRound64(bottomCenter(geometry).y()) == qRound64(bottomCenter(otherGeometry).y()))
+        /* My center <-> Other left */
+        if (qRound64(geometry.center().x()) == qRound64(otherGeometry.left()))
+            lines.append({geometry.center(), leftCenter(otherGeometry)});
+
+        /* My left <-> Other left */
+        if (qRound64(geometry.left()) == qRound64(otherGeometry.left()))
+            lines.append({leftCenter(geometry), leftCenter(otherGeometry)});
+
+        /* My right <-> Other left */
+        if (qRound64(geometry.right()) == qRound64(otherGeometry.left()))
+            lines.append({rightCenter(geometry), leftCenter(otherGeometry)});
+
+        /* My center <-> Other right */
+        if (qRound64(geometry.center().x()) == qRound64(otherGeometry.right()))
+            lines.append({geometry.center(), rightCenter(otherGeometry)});
+
+        /* My left <-> Other right */
+        if (qRound64(geometry.left()) == qRound64(otherGeometry.right()))
+            lines.append({leftCenter(geometry), rightCenter(otherGeometry)});
+
+        /* My right <-> Other right */
+        if (qRound64(geometry.right()) == qRound64(otherGeometry.right()))
+            lines.append({rightCenter(geometry), rightCenter(otherGeometry)});
+
+        /* My center <-> Other top */
+        if (qRound64(geometry.center().y()) == qRound64(otherGeometry.top()))
+            lines.append({geometry.center(), topCenter(otherGeometry)});
+
+        /* My top <-> Other top */
+        if (qRound64(geometry.top()) == qRound64(otherGeometry.top()))
+            lines.append({topCenter(geometry), topCenter(otherGeometry)});
+
+        /* My bottom <-> Other top */
+        if (qRound64(geometry.bottom()) == qRound64(otherGeometry.top()))
+            lines.append({bottomCenter(geometry), topCenter(otherGeometry)});
+
+        /* My center <-> Other bottom */
+        if (qRound64(geometry.center().y()) == qRound64(otherGeometry.bottom()))
+            lines.append({geometry.center(), bottomCenter(otherGeometry)});
+
+        /* My top <-> Other bottom */
+        if (qRound64(geometry.top()) == qRound64(otherGeometry.bottom()))
+            lines.append({topCenter(geometry), bottomCenter(otherGeometry)});
+
+        /* My bottom <-> Other bottom */
+        if (qRound64(geometry.bottom()) == qRound64(otherGeometry.bottom()))
             lines.append({bottomCenter(geometry), bottomCenter(otherGeometry)});
     }
     return lines;
