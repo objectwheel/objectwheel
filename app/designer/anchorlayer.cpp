@@ -13,6 +13,28 @@ bool AnchorLayer::activated() const
     return m_activated;
 }
 
+QPointF AnchorLayer::sourceScenePos() const
+{
+    return mapToScene(mousePressPoint());
+}
+
+QPointF AnchorLayer::targetScenePos() const
+{
+    return mapToScene(mouseMovePoint());
+}
+
+Control* AnchorLayer::sourceControl() const
+{
+    Q_ASSERT(scene());
+    return scene()->topLevelControl(sourceScenePos());
+}
+
+Control* AnchorLayer::targetControl() const
+{
+    Q_ASSERT(scene());
+    return scene()->topLevelControl(targetScenePos());
+}
+
 void AnchorLayer::setActivated(bool activated)
 {
     if (m_activated != activated) {

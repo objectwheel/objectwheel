@@ -1,10 +1,8 @@
 #include "signalchooserdialog.h"
 #include "ui_signalchooserdialog.h"
-
 #include <QPushButton>
 
-SignalChooserDialog::SignalChooserDialog(QWidget *parent) :
-    QDialog(parent),
+SignalChooserDialog::SignalChooserDialog(QWidget *parent) : QDialog(parent),
     ui(new Ui::SignalChooserDialog)
 {
     ui->setupUi(this);

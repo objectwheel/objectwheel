@@ -43,6 +43,8 @@ void Form::paintBackground(QPainter* painter)
 
 void Form::paintForeground(QPainter* painter)
 {
+    painter->setBrush(Qt::NoBrush);
+
     // Draw grid view dots
     if (DesignerScene::showGridViewDots()) {
         QVector<QPointF> points;
@@ -50,7 +52,6 @@ void Form::paintForeground(QPainter* painter)
             for (qreal y = 0; y <= rect().bottom(); y += DesignerScene::gridSize())
                 points.append(QPointF(x, y));
         }
-        painter->setBrush(Qt::NoBrush);
         painter->setPen(DesignerScene::pen(Qt::darkGray, 1, false));
         painter->drawPoints(points.data(), points.size());
     }

@@ -73,8 +73,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_paintLayer, [=] {
         m_paintLayer->update();
         if (!m_anchorLayer->activated()) {
-            Control* sourceControl = topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mousePressPoint()));
-            Control* targetControl = topLevelControl(anchorLayer()->mapToScene(anchorLayer()->mouseMovePoint()));
+            Control* sourceControl = anchorLayer()->sourceControl();
+            Control* targetControl = anchorLayer()->targetControl();
             if (isAnchorViable(sourceControl, targetControl))
                 emit anchorEditorActivated(sourceControl, targetControl);
         }

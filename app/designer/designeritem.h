@@ -10,9 +10,6 @@ class DesignerItem : public QGraphicsObject
     Q_OBJECT
     Q_DISABLE_COPY(DesignerItem)
 
-    friend class HeadlineItem; // For setBeingDragged
-    friend class ResizerItem; // For setBeingResized and setBeingDragged
-
 public:
     enum DesignerItemChange {
         ItemSizeChange = 100,

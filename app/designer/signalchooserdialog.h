@@ -3,17 +3,16 @@
 
 #include <QDialog>
 
-namespace Ui {
-class SignalChooserDialog;
-}
+namespace Ui { class SignalChooserDialog; }
 
-class SignalChooserDialog : public QDialog
+class SignalChooserDialog final : public QDialog
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SignalChooserDialog)
 
 public:
     explicit SignalChooserDialog(QWidget *parent = 0);
-    ~SignalChooserDialog();
+    ~SignalChooserDialog() override;
 
     void setSignalList(const QStringList&);
     QString currentSignal() const;

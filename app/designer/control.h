@@ -10,7 +10,7 @@ class Control : public DesignerItem
     Q_OBJECT
     Q_DISABLE_COPY(Control)
 
-    friend class DesignerScene;
+    friend class DesignerScene; // For m_geometrySyncKey
 
 public:
     enum { Type = UserType + 3 };
@@ -58,7 +58,6 @@ public:
 
     void updateAnchors();
     QVariant property(const QString& propertyName) const;
-
     Control* parentControl() const;
     Control* topLevelControl() const;
 
@@ -68,7 +67,7 @@ public:
     static QList<Control*> controls();
 
 protected:
-    QRectF contentRect() const;
+    QRectF surroundingRect() const;
     void paintContent(QPainter* painter);
     void paintHighlight(QPainter* painter);
     void paintOutline(QPainter* painter);

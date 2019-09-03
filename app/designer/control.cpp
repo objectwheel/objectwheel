@@ -501,7 +501,7 @@ QList<Control*> Control::controls()
     return s_controls;
 }
 
-QRectF Control::contentRect() const
+QRectF Control::surroundingRect() const
 {
     if (m_renderInfo.surroundingRect.isNull())
         return rect();
@@ -513,9 +513,9 @@ void Control::paintContent(QPainter* painter)
     if (m_pixmap.isNull())
         return;
     const QSizeF pixmapSize(m_pixmap.size() / m_pixmap.devicePixelRatio());
-    QRectF rect(contentRect().topLeft(), pixmapSize);
-    if (qAbs(contentRect().width() - pixmapSize.width()) > 2
-            || qAbs(contentRect().height() - pixmapSize.height()) > 2) {
+    QRectF rect(surroundingRect().topLeft(), pixmapSize);
+    if (qAbs(surroundingRect().width() - pixmapSize.width()) > 2
+            || qAbs(surroundingRect().height() - pixmapSize.height()) > 2) {
         rect.moveTopLeft(QPointF());
     }
     painter->drawPixmap(rect, m_pixmap, m_pixmap.rect());
@@ -535,7 +535,7 @@ void Control::paintOutline(QPainter* painter)
     if (DesignerScene::outlineMode() == DesignerScene::ClippingDashLine)
         return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(rect()));
     if (DesignerScene::outlineMode() == DesignerScene::BoundingDashLine)
-        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(contentRect()));
+        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(surroundingRect()));
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(Qt::darkGray));
@@ -543,7 +543,7 @@ void Control::paintOutline(QPainter* painter)
     if (DesignerScene::outlineMode() == DesignerScene::ClippingSolidLine)
         return painter->drawRect(DesignerScene::outerRect(rect()));
     if (DesignerScene::outlineMode() == DesignerScene::BoundingSolidLine)
-        return painter->drawRect(DesignerScene::outerRect(contentRect()));
+        return painter->drawRect(DesignerScene::outerRect(surroundingRect()));
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

@@ -4,13 +4,12 @@
 #include <gadgetlayer.h>
 #include <anchorlayer.h>
 #include <paintutils.h>
-#include <anchorline.h>
 #include <utilityfunctions.h>
 
 #include <QPainter>
 #include <QtMath>
 
-// FIXME: Do not treat "baseline" anchors as "top"
+// TODO: Do not treat "baseline" anchors as "top"
 
 enum { AngleDegree = 16 };
 
@@ -454,15 +453,13 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
 {
     Q_ASSERT(scene());
 
-    if (!scene()->anchorLayer()->activated() || false) // FIXME: alo paint when anchor editor is open
+    if (!scene()->anchorLayer()->activated() || false) // FIXME: also paint when anchor editor is open
         return;
 
     painter->save();
 
-    const QLineF line(scene()->anchorLayer()->mapToScene(scene()->anchorLayer()->mousePressPoint()),
-                      scene()->anchorLayer()->mapToScene(scene()->anchorLayer()->mouseMovePoint()));
-    const Control* sourceControl = scene()->topLevelControl(line.p1());
-    const Control* targetControl = scene()->topLevelControl(line.p2());
+    const Control* sourceControl = scene()->anchorLayer()->sourceControl();
+    const Control* targetControl = scene()->anchorLayer()->targetControl();
 
     if (!DesignerScene::isAnchorViable(sourceControl, targetControl))
         targetControl = nullptr;
@@ -483,6 +480,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     if (targetControl)
         painter->drawRect(DesignerScene::outerRect(DesignerScene::contentRect(targetControl)));
 
+    const QLineF line(scene()->anchorLayer()->sourceScenePos(), scene()->anchorLayer()->targetScenePos());
     bool twist = line.angle() < 90 || (line.angle() > 180 && line.angle() < 270);
     auto normal = line.normalVector();
     if (twist)

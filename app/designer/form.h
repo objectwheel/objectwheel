@@ -8,11 +8,11 @@ class Form final : public Control
     Q_OBJECT
     Q_DISABLE_COPY(Form)
 
-    friend class ControlCreationManager; // For constructor
-    friend class ProjectExposingManager; // For constructor
-
 public:
     enum { Type = UserType + 4 };
+
+public:
+    explicit Form(Control* parent = nullptr);
     int type() const override;
 
 private:
@@ -20,9 +20,6 @@ private:
     void paintBackground(QPainter* painter);
     void paintForeground(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget = nullptr) override;
-
-private:
-    explicit Form(Control* parent = nullptr);
 };
 
 #endif // FORM_H

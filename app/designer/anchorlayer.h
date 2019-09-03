@@ -3,18 +3,22 @@
 
 #include <designeritem.h>
 
+class Control;
 class AnchorLayer final : public DesignerItem
 {
     Q_OBJECT
     Q_DISABLE_COPY(AnchorLayer)
 
-    friend class PaintLayer; // For mousePressPoint()
-    friend class DesignerScene; // FIXME: DELETE ME For mousePressPoint()
-
 public:
     explicit AnchorLayer(DesignerItem* parent = nullptr);
 
     bool activated() const;
+
+    QPointF sourceScenePos() const;
+    QPointF targetScenePos() const;
+
+    Control* sourceControl() const;
+    Control* targetControl() const;
 
 public slots:
     void updateGeometry();
@@ -36,6 +40,5 @@ private:
     bool m_geometryUpdateScheduled;
     QPointF m_mouseMovePoint;
 };
-
 
 #endif // ANCHORLAYER_H
