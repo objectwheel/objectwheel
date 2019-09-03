@@ -90,7 +90,8 @@ public:
     static QSizeF snapSize(const QPointF& pos,const QSizeF& size);
 
     static QRectF outerRect(const QRectF& rect);
-    static QRectF contentSceneRect(const Control* control);
+    static QRectF rect(const Control* control);
+    static QRectF contentRect(const Control* control);
     static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
 
     static qreal lowerZ(DesignerItem* parentItem);
@@ -98,7 +99,6 @@ public:
 
     static void drawDashLine(QPainter* painter, const QLineF& line);
     static void drawDashRect(QPainter* painter, const QRectF& rect);
-
 
 public slots:
     void discharge();

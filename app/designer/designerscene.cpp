@@ -574,11 +574,15 @@ QRectF DesignerScene::outerRect(const QRectF& rect)
     return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
 }
 
-QRectF DesignerScene::contentSceneRect(const Control* control)
+QRectF DesignerScene::rect(const Control* control)
+{
+    return control->mapRectToScene(control->rect());
+}
+
+QRectF DesignerScene::contentRect(const Control* control)
 {
     const QMarginsF& margins = control->margins();
-    return control->mapRectToScene(control->rect()).adjusted(margins.left(), margins.top(),
-                                                             -margins.right(), -margins.bottom());
+    return rect(control).adjusted(margins.left(), margins.top(), -margins.right(), -margins.bottom());
 }
 
 QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
