@@ -458,7 +458,10 @@ Control* Control::topLevelControl() const
 
 QList<Control*> Control::siblings() const
 {
+    Q_ASSERT(scene());
     QList<Control*> siblings;
+    if (!scene())
+        return siblings;
     if (type() == Form::Type) {
         if (const DesignerScene* scene = this->scene()) {
             for (Form* form : scene->forms())
@@ -533,20 +536,25 @@ void Control::paintHighlight(QPainter* painter)
 
 void Control::paintOutline(QPainter* painter)
 {
-    if (DesignerScene::outlineMode() == DesignerScene::NoOutline)
+    if (!scene())
         return;
-    if (DesignerScene::outlineMode() == DesignerScene::ClippingDashLine)
-        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(rect()));
-    if (DesignerScene::outlineMode() == DesignerScene::BoundingDashLine)
-        return DesignerScene::drawDashRect(painter, DesignerScene::outerRect(surroundingRect()));
+
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+
+    if (settings->controlOutlineDecoration == 0) // NoOutline
+        return;
+    if (settings->controlOutlineDecoration == 1) // ClippingDashLine
+        return DesignerScene::drawDashRect(painter, scene()->outerRect(rect()));
+    if (settings->controlOutlineDecoration == 2) // BoundingDashLine
+        return DesignerScene::drawDashRect(painter, scene()->outerRect(surroundingRect()));
 
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(Qt::darkGray));
 
-    if (DesignerScene::outlineMode() == DesignerScene::ClippingSolidLine)
-        return painter->drawRect(DesignerScene::outerRect(rect()));
-    if (DesignerScene::outlineMode() == DesignerScene::BoundingSolidLine)
-        return painter->drawRect(DesignerScene::outerRect(surroundingRect()));
+    if (settings->controlOutlineDecoration == 3) // ClippingSolidLine
+        return painter->drawRect(scene()->outerRect(rect()));
+    if (settings->controlOutlineDecoration == 4) // BoundingSolidLine
+        return painter->drawRect(scene()->outerRect(surroundingRect()));
 }
 
 void Control::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

@@ -2,6 +2,8 @@
 #include <designerscene.h>
 #include <headlineitem.h>
 #include <resizeritem.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 #include <form.h>
 #include <QCursor>
 
@@ -15,7 +17,7 @@ GadgetLayer::GadgetLayer(DesignerItem* parent) : DesignerItem(parent)
     m_formHeadlineItem->setMousePressCursorShape(Qt::ClosedHandCursor);
 
     m_headlineItem->setPen(QPen(Qt::white));
-    m_headlineItem->setBrush(DesignerScene::outlineColor());
+    m_headlineItem->setBrush(DesignerSettings::sceneSettings()->outlineColor);
     m_headlineItem->setCursor(Qt::OpenHandCursor);
     m_headlineItem->setMousePressCursorShape(Qt::ClosedHandCursor);
 
@@ -72,8 +74,11 @@ void GadgetLayer::handleSceneSelectionChange()
 {
     Q_ASSERT(scene());
     DesignerItem* currentForm = scene()->currentForm();
-    if (currentForm)
-        m_formHeadlineItem->setBrush(currentForm->isSelected() ? DesignerScene::outlineColor() : Qt::darkGray);
+    if (currentForm) {
+        m_formHeadlineItem->setBrush(currentForm->isSelected()
+                                     ? DesignerSettings::sceneSettings()->outlineColor
+                                     : Qt::darkGray);
+    }
     for (DesignerItem* item : m_resizerHash.keys()) {
         for (ResizerItem* resizer : resizers(item)) {
             if (item->isVisible()) {

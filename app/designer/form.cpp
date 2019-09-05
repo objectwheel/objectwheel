@@ -40,11 +40,14 @@ void Form::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void Form::paintBackground(QPainter* painter)
 {
-    painter->fillRect(rect(), DesignerSettings::sceneSettings()->toBackgroundTexture());
+    painter->fillRect(rect(), DesignerSettings::sceneSettings()->toBackgroundBrush());
 }
 
 void Form::paintForeground(QPainter* painter)
 {
+    if (!scene())
+        return;
+
     const SceneSettings* settings = DesignerSettings::sceneSettings();
 
     painter->setBrush(Qt::NoBrush);
@@ -62,7 +65,7 @@ void Form::paintForeground(QPainter* painter)
 
     // Draw form frame
     painter->setPen(DesignerScene::pen(Qt::darkGray));
-    painter->drawRect(DesignerScene::outerRect(rect()));
+    painter->drawRect(scene()->outerRect(rect()));
 }
 
 void Form::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
