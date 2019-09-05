@@ -541,12 +541,12 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
 void PaintLayer::paintHoverOutline(QPainter* painter)
 {
     Q_ASSERT(scene());
-    if (DesignerScene::showMouseoverOutline()) {
+    if (DesignerSettings::sceneSettings()->showMouseoverOutline) {
         if (const DesignerItem* item = scene()->topLevelControl(scene()->cursorPos())) {
             if (!item->isSelected()) {
                 painter->setBrush(Qt::NoBrush);
                 painter->setPen(DesignerScene::pen());
-                painter->drawRect(DesignerScene::outerRect(item->mapRectToScene(item->rect())));
+                painter->drawRect(scene()->outerRect(item->mapRectToScene(item->rect())));
             }
         }
     }
@@ -557,7 +557,7 @@ void PaintLayer::paintGuidelines(QPainter* painter)
     Q_ASSERT(scene());
     const QVector<QLineF>& lines = scene()->guidelines();
     if (!lines.isEmpty()) {
-        painter->setBrush(DesignerScene::outlineColor());
+        painter->setBrush(DesignerSettings::sceneSettings()->outlineColor);
         painter->setPen(DesignerScene::pen());
         painter->drawLines(lines);
         for (const QLineF& line : lines) {
@@ -570,7 +570,7 @@ void PaintLayer::paintGuidelines(QPainter* painter)
 void PaintLayer::paintSelectionOutlines(QPainter* painter)
 {
     Q_ASSERT(scene());
-    const qreal z = DesignerScene::zoomLevel();
+    const qreal z = scene()->zoomLevel();
     const qreal m = 0.5 / z;
     QPainterPath outlinesPath, resizersPath;
     resizersPath.setFillRule(Qt::WindingFill);
@@ -588,7 +588,7 @@ void PaintLayer::paintSelectionOutlines(QPainter* painter)
         }
     }
     painter->setPen(Qt::NoPen);
-    painter->setBrush(DesignerScene::outlineColor());
+    painter->setBrush(DesignerSettings::sceneSettings()->outlineColor);
     painter->drawPath(outlinesPath.subtracted(resizersPath));
 }
 
@@ -602,7 +602,7 @@ void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
     // In short, this piece of code is only triggered for dragged childs.
     const QList<DesignerItem*>& items = scene()->draggedResizedSelectedItems();
     if (items.size() > 1) // Multiple items moving
-        DesignerScene::drawDashRect(painter, DesignerScene::outerRect(DesignerScene::itemsBoundingRect(items)));
+        DesignerScene::drawDashRect(painter, scene()->outerRect(DesignerScene::itemsBoundingRect(items)));
 }
 
 void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)

@@ -823,7 +823,7 @@ void DesignerView::onMoveUpAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        ControlPropertyManager::setPos(control, control->pos() + QPointF(0, -scene()->gridSize()),
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(0, -DesignerSettings::sceneSettings()->gridSize),
                                        ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
                                        |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
 
@@ -834,7 +834,7 @@ void DesignerView::onMoveDownAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        ControlPropertyManager::setPos(control, control->pos() + QPointF(0, scene()->gridSize()),
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(0, DesignerSettings::sceneSettings()->gridSize),
                                        ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
                                        |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
 
@@ -845,7 +845,7 @@ void DesignerView::onMoveRightAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        ControlPropertyManager::setPos(control, control->pos() + QPointF(scene()->gridSize(), 0),
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(DesignerSettings::sceneSettings()->gridSize, 0),
                                        ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
                                        |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
 }
@@ -855,7 +855,7 @@ void DesignerView::onMoveLeftAction()
     auto selectedControls = scene()->selectedControls();
     selectedControls.removeOne(scene()->currentForm());
     for (auto control : selectedControls)
-        ControlPropertyManager::setPos(control, control->pos() + QPointF(-scene()->gridSize(), 0),
+        ControlPropertyManager::setPos(control, control->pos() + QPointF(-DesignerSettings::sceneSettings()->gridSize, 0),
                                        ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer
                                        |ControlPropertyManager::CompressedCall | ControlPropertyManager::DontApplyDesigner);
 

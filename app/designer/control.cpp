@@ -458,11 +458,11 @@ Control* Control::topLevelControl() const
 
 QList<Control*> Control::siblings() const
 {
-    Q_ASSERT(scene());
     QList<Control*> siblings;
-    if (!scene())
-        return siblings;
     if (type() == Form::Type) {
+        Q_ASSERT(scene());
+        if (!scene())
+            return siblings;
         if (const DesignerScene* scene = this->scene()) {
             for (Form* form : scene->forms())
                 siblings.append(form);

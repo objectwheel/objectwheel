@@ -2,6 +2,8 @@
 #include <designerscene.h>
 #include <private/qgraphicsitem_p.h>
 #include <QGraphicsSceneMouseEvent>
+#include <designersettings.h>
+#include <scenesettings.h>
 
 DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_raised(false)
@@ -294,7 +296,7 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     const QPointF& dragDistance = event->pos() - m_mousePressPoint;
 
-    if (!m_dragAccepted && dragDistance.manhattanLength() < DesignerScene::startDragDistance())
+    if (!m_dragAccepted && dragDistance.manhattanLength() < DesignerSettings::sceneSettings()->dragStartDistance)
         return;
 
     m_dragAccepted = true;
