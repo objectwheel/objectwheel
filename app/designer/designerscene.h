@@ -29,14 +29,16 @@ public:
     void shrinkSceneRect();
     void unsetCursor() const;
     void setCursor(Qt::CursorShape cursor) const;
-    void prepareDragLayer(DesignerItem* item);
-    bool isLayerItem(DesignerItem* item) const;
+    void prepareDragLayer(const DesignerItem* item);
+    bool isLayerItem(const DesignerItem* item) const;
+    bool showAllAnchors() const;
 
     Form* currentForm() const;
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
     AnchorLayer* anchorLayer() const;
     DesignerItem* parentBeforeDrag() const;
+    QGraphicsView* view() const;
 
     QList<Form*> forms() const;
     QList<Control*> selectedControls() const;
@@ -52,7 +54,6 @@ public:
     qreal zoomLevel() const;
     qreal devicePixelRatio() const;
 
-    bool showAllAnchors() const;
     QPointF cursorPos() const;
     QVector<QLineF> guidelines() const;
 
@@ -74,8 +75,8 @@ public:
     static QRectF contentRect(const Control* control);
     static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
 
-    static qreal lowerZ(DesignerItem* parentItem);
-    static qreal higherZ(DesignerItem* parentItem);
+    static qreal lowerZ(const DesignerItem* parentItem);
+    static qreal higherZ(const DesignerItem* parentItem);
 
     static QPen pen(const QColor& color = QColor(), qreal width = 1, bool cosmetic = true);
 
@@ -87,6 +88,7 @@ public slots:
 
 private slots:
     void onChange();
+    void onAnchorLayerActivation();
 
 private:
     void handleToolDrop(QGraphicsSceneDragDropEvent* event);

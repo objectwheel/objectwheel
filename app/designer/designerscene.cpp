@@ -1,31 +1,21 @@
 #include <designerscene.h>
-#include <resizeritem.h>
+#include <designersettings.h>
+#include <scenesettings.h>
+#include <form.h>
+#include <gadgetlayer.h>
+#include <anchorlayer.h>
+#include <paintlayer.h>
+#include <hashfactory.h>
+#include <utilityfunctions.h>
 #include <controlpropertymanager.h>
 #include <projectexposingmanager.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
-#include <designersettings.h>
-#include <scenesettings.h>
-#include <headlineitem.h>
-#include <gadgetlayer.h>
-#include <anchorlayer.h>
-#include <paintlayer.h>
-#include <windowmanager.h>
-#include <centralwidget.h>
-#include <designerview.h>
-#include <mainwindow.h>
-#include <hashfactory.h>
-#include <utilityfunctions.h>
-#include <form.h>
 
-#include <QMimeData>
-#include <QGraphicsView>
-#include <QGraphicsSceneMouseEvent>
-#include <QPainter>
-#include <QPen>
 #include <QtMath>
-#include <QApplication>
-#include <QTimer>
+#include <QMimeData>
+#include <QGraphicsSceneMouseEvent>
+#include <QGraphicsView>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_dragLayer(new DesignerItem)
@@ -70,15 +60,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     connect(this, &DesignerScene::currentFormChanged,
             m_anchorLayer, &AnchorLayer::updateGeometry);
     connect(m_anchorLayer, &AnchorLayer::activatedChanged,
-            m_paintLayer, [=] {
-        m_paintLayer->update();
-        if (!m_anchorLayer->activated()) {
-            Control* sourceControl = anchorLayer()->sourceControl();
-            Control* targetControl = anchorLayer()->targetControl();
-            if (isAnchorViable(sourceControl, targetControl))
-                emit anchorEditorActivated(sourceControl, targetControl);
-        }
-    });
+            this, &DesignerScene::onAnchorLayerActivation);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
             m_paintLayer, &PaintLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
@@ -148,17 +130,15 @@ void DesignerScene::shrinkSceneRect()
 
 void DesignerScene::unsetCursor() const
 {
-    Q_ASSERT(views().size() == 1);
-    views().first()->viewport()->unsetCursor();
+    view()->viewport()->unsetCursor();
 }
 
 void DesignerScene::setCursor(Qt::CursorShape cursor) const
 {
-    Q_ASSERT(views().size() == 1);
-    views().first()->viewport()->setCursor(cursor);
+    view()->viewport()->setCursor(cursor);
 }
 
-void DesignerScene::prepareDragLayer(DesignerItem* item)
+void DesignerScene::prepareDragLayer(const DesignerItem* item)
 {
     m_parentBeforeDrag = item->parentItem();
     if (const DesignerItem* parentItem = item->parentItem()) {
@@ -167,12 +147,19 @@ void DesignerScene::prepareDragLayer(DesignerItem* item)
     }
 }
 
-bool DesignerScene::isLayerItem(DesignerItem* item) const
+bool DesignerScene::isLayerItem(const DesignerItem* item) const
 {
     return item == m_dragLayer
             || item == m_gadgetLayer
             || item == m_anchorLayer
             || item == m_paintLayer;
+}
+
+bool DesignerScene::showAllAnchors() const
+{
+    // FIXME: Take that from view
+    // FIXME: Make sure it returns true when anchor editor is open
+    return true || anchorLayer()->activated();
 }
 
 Form* DesignerScene::currentForm() const
@@ -200,6 +187,12 @@ DesignerItem* DesignerScene::parentBeforeDrag() const
     return m_parentBeforeDrag;
 }
 
+QGraphicsView* DesignerScene::view() const
+{
+    Q_ASSERT(views().size() == 1);
+    return views().first();
+}
+
 QList<Form*> DesignerScene::forms() const
 {
     return m_forms.toList();
@@ -207,18 +200,20 @@ QList<Form*> DesignerScene::forms() const
 
 QList<Control*> DesignerScene::selectedControls() const
 {
+    const QList<QGraphicsItem*>& items = QGraphicsScene::selectedItems();
     QList<Control*> selectedControls;
-    for (DesignerItem* item : selectedItems()) {
-        if (item->type() >= Control::Type)
-            selectedControls.append(static_cast<Control*>(item));
+    for (QGraphicsItem* selectedItem : items) {
+        if (selectedItem->type() >= Control::Type)
+            selectedControls.append(static_cast<Control*>(selectedItem));
     }
     return selectedControls;
 }
 
 QList<DesignerItem*> DesignerScene::selectedItems() const
 {
+    const QList<QGraphicsItem*>& items = QGraphicsScene::selectedItems();
     QList<DesignerItem*> selectedItems;
-    for (QGraphicsItem* selectedItem : QGraphicsScene::selectedItems()) {
+    for (QGraphicsItem* selectedItem : items) {
         if (selectedItem->type() >= DesignerItem::Type)
             selectedItems.append(static_cast<DesignerItem*>(selectedItem));
     }
@@ -229,7 +224,7 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
 {
     QList<DesignerItem*> items(selectedItems());
     for (int i = items.size() - 1; i >= 0; --i) {
-        DesignerItem* item = items.at(i);
+        const DesignerItem* item = items.at(i);
         if (!item->beingDragged() && !item->beingResized())
             items.removeAt(i);
     }
@@ -238,7 +233,7 @@ QList<DesignerItem*> DesignerScene::draggedResizedSelectedItems() const
 
 Control* DesignerScene::topLevelControl(const QPointF& pos) const
 {
-    const QList<Control*> allItems(items<Control>(pos));
+    const QList<Control*>& allItems = items<Control>(pos);
     if (allItems.isEmpty())
         return nullptr;
     return allItems.first();
@@ -248,7 +243,7 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
 {
     QList<DesignerItem*> draggedItems = draggedResizedSelectedItems();
     for (int i = draggedItems.size() - 1; i >= 0; --i) {
-        DesignerItem* item = draggedItems.at(i);
+        const DesignerItem* item = draggedItems.at(i);
         if (item->beingResized())
             return nullptr;
         draggedItems.append(item->childItems());
@@ -259,8 +254,7 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
 
     QList<Control*> itemsAtPos = items<Control>(pos);
     for (int i = itemsAtPos.size() - 1; i >= 0; --i) {
-        DesignerItem* item = itemsAtPos.at(i);
-        if (draggedItems.contains(item))
+        if (draggedItems.contains(itemsAtPos.at(i)))
             itemsAtPos.removeAt(i);
     }
 
@@ -271,35 +265,39 @@ Control* DesignerScene::highlightControl(const QPointF& pos) const
     return itemsAtPos.first();
 }
 
-bool DesignerScene::showAllAnchors() const
+QRectF DesignerScene::outerRect(const QRectF& rect) const
 {
-    // FIXME: Take that from view
-    // FIXME: Make sure it returns true when anchor editor is open
-    return true || anchorLayer()->activated();
-}
+    // Use on rectangular shapes where the item
+    // is transformable but the pen is cosmetic
 
-qreal DesignerScene::devicePixelRatio() const
-{
-    Q_ASSERT(views().size() == 1);
-    return views().first()->devicePixelRatioF();
-}
-
-QPointF DesignerScene::cursorPos() const
-{
-    Q_ASSERT(views().size() == 1);
-    QGraphicsView* view = views().first();
-    return view->mapToScene(view->viewport()->mapFromGlobal(QCursor::pos()));
+    return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
 }
 
 QRectF DesignerScene::visibleItemsBoundingRect() const
 {
     // Does not take untransformable items into account.
     QRectF boundingRect;
-    for (DesignerItem *item : items()) {
+    const QList<DesignerItem*>& allItems = items();
+    for (const DesignerItem* item : allItems) {
         if (item->isVisible() && !isLayerItem(item))
             boundingRect |= item->sceneBoundingRect();
     }
     return boundingRect.adjusted(-10, -15, 10, 10);
+}
+
+qreal DesignerScene::zoomLevel() const
+{
+    return view()->matrix().m11();
+}
+
+qreal DesignerScene::devicePixelRatio() const
+{
+    return view()->devicePixelRatioF();
+}
+
+QPointF DesignerScene::cursorPos() const
+{
+    return view()->mapToScene(view()->viewport()->mapFromGlobal(QCursor::pos()));
 }
 
 QVector<QLineF> DesignerScene::guidelines() const
@@ -405,31 +403,6 @@ QVector<QLineF> DesignerScene::guidelines() const
     return lines;
 }
 
-bool DesignerScene::isInappropriateAnchorSource(const Control* control)
-{
-    if (control == 0)
-        return true;
-
-    if (!control->gui())
-        return true;
-
-    if (control->window())
-        return true;
-
-    return false;
-}
-
-bool DesignerScene::isInappropriateAnchorTarget(const Control* control)
-{
-    if (control == 0)
-        return true;
-
-    if (!control->gui())
-        return true;
-
-    return false;
-}
-
 bool DesignerScene::isAnchorViable(const Control* sourceControl, const Control* targetControl)
 {
     if (isInappropriateAnchorSource(sourceControl))
@@ -455,12 +428,29 @@ bool DesignerScene::isAnchorViable(const Control* sourceControl, const Control* 
     return true;
 }
 
-QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
-{        
-    QPen pen(color.isValid() ? color : DesignerSettings::sceneSettings()->outlineColor, width,
-             Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
-    pen.setCosmetic(cosmetic);
-    return pen;
+bool DesignerScene::isInappropriateAnchorSource(const Control* control)
+{
+    if (control == 0)
+        return true;
+
+    if (!control->gui())
+        return true;
+
+    if (control->window())
+        return true;
+
+    return false;
+}
+
+bool DesignerScene::isInappropriateAnchorTarget(const Control* control)
+{
+    if (control == 0)
+        return true;
+
+    if (!control->gui())
+        return true;
+
+    return false;
 }
 
 QPointF DesignerScene::snapPosition(qreal x, qreal y)
@@ -496,14 +486,6 @@ QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
     return size;
 }
 
-QRectF DesignerScene::outerRect(const QRectF& rect) const
-{
-    // Use on rectangular shapes where the item
-    // is transformable but the pen is cosmetic
-
-    return rect.adjusted(-0.5 / zoomLevel(), -0.5 / zoomLevel(), 0, 0);
-}
-
 QRectF DesignerScene::rect(const Control* control)
 {
     return control->mapRectToScene(control->rect());
@@ -523,30 +505,34 @@ QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)
     return boundingRect;
 }
 
-qreal DesignerScene::zoomLevel() const
-{
-    Q_ASSERT(views().size() == 1);
-    return views().first()->matrix().m11();
-}
-
-qreal DesignerScene::lowerZ(DesignerItem* parentItem)
+qreal DesignerScene::lowerZ(const DesignerItem* parentItem)
 {
     qreal z = 0;
-    for (DesignerItem* childItem : parentItem->childItems(false)) {
+    const QList<DesignerItem*>& children = parentItem->childItems(false);
+    for (DesignerItem* childItem : children) {
         if (childItem->zValue() < z)
             z = childItem->zValue();
     }
     return z;
 }
 
-qreal DesignerScene::higherZ(DesignerItem* parentItem)
+qreal DesignerScene::higherZ(const DesignerItem* parentItem)
 {
     qreal z = 0;
-    for (DesignerItem* childItem : parentItem->childItems(false)) {
+    const QList<DesignerItem*>& children = parentItem->childItems(false);
+    for (DesignerItem* childItem : children) {
         if (childItem->zValue() > z)
             z = childItem->zValue();
     }
     return z;
+}
+
+QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
+{
+    QPen pen(color.isValid() ? color : DesignerSettings::sceneSettings()->outlineColor, width,
+             Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
+    pen.setCosmetic(cosmetic);
+    return pen;
 }
 
 void DesignerScene::drawDashLine(QPainter* painter, const QLineF& line)
@@ -602,6 +588,17 @@ void DesignerScene::onChange()
     setSceneRect(sceneRect() | visibleItemsBoundingRect());
 }
 
+void DesignerScene::onAnchorLayerActivation()
+{
+    m_paintLayer->update();
+    if (!m_anchorLayer->activated()) {
+        Control* sourceControl = m_anchorLayer->sourceControl();
+        Control* targetControl = m_anchorLayer->targetControl();
+        if (isAnchorViable(sourceControl, targetControl))
+            emit anchorEditorActivated(sourceControl, targetControl);
+    }
+}
+
 void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
 {
     QString dir;
@@ -623,7 +620,7 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
         clearSelection();
         newControl->setSelected(true);
     } else {
-        UtilityFunctions::showMessage(nullptr,
+        UtilityFunctions::showMessage(view(),
                                       tr("Oops"),
                                       tr("Operation failed, control has got problems."),
                                       QMessageBox::Critical);
