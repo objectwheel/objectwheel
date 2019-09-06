@@ -496,18 +496,6 @@ DesignerView::DesignerView(QmlCodeEditorWidget* qmlCodeEditorWidget, QWidget *pa
     });
 }
 
-void DesignerView::setZoomLevel(qreal zoomLevel)
-{
-    SceneSettings* settings = DesignerSettings::sceneSettings();
-    qreal recentZoomLevel = matrix().m11();
-    if (recentZoomLevel != zoomLevel) {
-        resetTransform();
-        scale((1.0 / recentZoomLevel) * zoomLevel, (1.0 / recentZoomLevel) * zoomLevel);
-        settings->sceneZoomLevel = zoomLevel;
-        settings->write();
-    }
-}
-
 void DesignerView::onSnappingButtonClick(bool value)
 {
     // FIXME
@@ -546,7 +534,7 @@ void DesignerView::onRedoButtonClick()
 
 void DesignerView::onZoomLevelChange(const QString& text)
 {
-    setZoomLevel(UtilityFunctions::textToZoomLevel(text));
+//    setZoomLevel(UtilityFunctions::textToZoomLevel(text));
 }
 
 void DesignerView::onRefreshButtonClick()
@@ -588,11 +576,6 @@ void DesignerView::discharge()
     m_hideDockWidgetTitleBarsButton->setChecked(false);
     m_snappingButton->setChecked(settings->snappingEnabled);
     onZoomLevelChange("100 %");
-}
-
-QSize DesignerView::sizeHint() const
-{
-    return QSize(680, 680);
 }
 
 void DesignerView::onInspectorItemDoubleClick(Control* control)
@@ -686,35 +669,6 @@ DesignerScene* DesignerView::scene() const
 {
     Q_ASSERT(QGraphicsView::scene());
     return static_cast<DesignerScene*>(QGraphicsView::scene());
-}
-
-void DesignerView::resizeEvent(QResizeEvent* event)
-{
-    QGraphicsView::resizeEvent(event);
-    m_toolBar->setGeometry(0, 0, viewport()->width(), 24);
-}
-
-void DesignerView::contextMenuEvent(QContextMenuEvent* event)
-{
-    QGraphicsView::contextMenuEvent(event);
-
-    auto selectedControls = scene()->selectedControls();
-    selectedControls.removeOne(scene()->currentForm());
-
-    if (selectedControls.isEmpty()) {
-        m_sendBackAct->setDisabled(true);
-        m_bringFrontAct->setDisabled(true);
-        m_cutAct->setDisabled(true);
-        m_copyAct->setDisabled(true);
-        m_deleteAct->setDisabled(true);
-    } else {
-        m_sendBackAct->setDisabled(false);
-        m_bringFrontAct->setDisabled(false);
-        m_cutAct->setDisabled(false);
-        m_copyAct->setDisabled(false);
-        m_deleteAct->setDisabled(false);
-    }
-    // FIXME : m_menu->exec(event->globalPos());
 }
 
 void DesignerView::onUndoAction()
@@ -887,91 +841,4 @@ void DesignerView::onBringFrontAction()
             options |= ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
         ControlPropertyManager::setZ(control, DesignerScene::higherZ(control->parentItem()) + 1, options);
     }
-}
-
-bool DesignerView::eventFilter(QObject *watched, QEvent *event)
-{
-    if (m_isPanning != Panning::NotStarted) {
-        if (event->type() == QEvent::Leave && m_isPanning == Panning::SpaceKeyStarted) {
-            // there is no way to keep the cursor so we stop panning here
-            stopPanning(event);
-        }
-        if (event->type() == QEvent::MouseMove) {
-            auto mouseEvent = static_cast<QMouseEvent*>(event);
-            if (!m_panningStartPosition.isNull()) {
-                horizontalScrollBar()->setValue(horizontalScrollBar()->value() -
-                                                (mouseEvent->x() - m_panningStartPosition.x()));
-                verticalScrollBar()->setValue(verticalScrollBar()->value() -
-                                              (mouseEvent->y() - m_panningStartPosition.y()));
-            }
-            m_panningStartPosition = mouseEvent->pos();
-            event->accept();
-            return true;
-        }
-    }
-    return QGraphicsView::eventFilter(watched, event);
-}
-
-void DesignerView::wheelEvent(QWheelEvent *event)
-{
-    // TODO: Implement a wheel zoom in/out for scene
-    if (event->modifiers().testFlag(Qt::ControlModifier))
-        event->ignore();
-    else
-        QGraphicsView::wheelEvent(event);
-}
-
-void DesignerView::mousePressEvent(QMouseEvent *event)
-{
-    if (m_isPanning == Panning::NotStarted) {
-        if (event->buttons().testFlag(Qt::MiddleButton))
-            startPanning(event);
-        else
-            QGraphicsView::mousePressEvent(event);
-    }
-}
-
-void DesignerView::mouseReleaseEvent(QMouseEvent *event)
-{
-    // not sure why buttons() are empty here, but we have that information from the enum
-    if (m_isPanning == Panning::MouseWheelStarted)
-        stopPanning(event);
-    else
-        QGraphicsView::mouseReleaseEvent(event);
-}
-
-void DesignerView::keyPressEvent(QKeyEvent *event)
-{
-    // check for autorepeat to avoid a stoped space panning by leave event to be restarted
-    if (!event->isAutoRepeat() && m_isPanning == Panning::NotStarted && event->key() == Qt::Key_Space) {
-        startPanning(event);
-        return;
-    }
-    QGraphicsView::keyPressEvent(event);
-}
-
-void DesignerView::keyReleaseEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Space && !event->isAutoRepeat() && m_isPanning == Panning::SpaceKeyStarted)
-        stopPanning(event);
-
-    QGraphicsView::keyReleaseEvent(event);
-}
-
-void DesignerView::startPanning(QEvent *event)
-{
-    if (event->type() == QEvent::KeyPress)
-        m_isPanning = Panning::SpaceKeyStarted;
-    else
-        m_isPanning = Panning::MouseWheelStarted;
-    viewport()->setCursor(Qt::ClosedHandCursor);
-    event->accept();
-}
-
-void DesignerView::stopPanning(QEvent *event)
-{
-    m_isPanning = Panning::NotStarted;
-    m_panningStartPosition = QPoint();
-    viewport()->unsetCursor();
-    event->accept();
 }

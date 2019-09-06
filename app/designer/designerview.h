@@ -23,16 +23,6 @@ public:
 
     DesignerScene* scene() const;
 
-    void stopPanning(QEvent* event);
-    void startPanning(QEvent* event);
-
-    void keyReleaseEvent(QKeyEvent* event) override;
-    void keyPressEvent(QKeyEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void wheelEvent(QWheelEvent* event) override;
-    bool eventFilter(QObject* watched, QEvent* event) override;
-
 public slots:
     void discharge();
     void refresh() { onRefreshButtonClick(); }
@@ -41,11 +31,6 @@ public slots:
     void onAssetsFileOpen(const QString& relativePath, int line, int column);
     void onDesignsFileOpen(Control* control, const QString& relativePath, int line, int column);
     void onControlSelectionChange(const QList<Control*>& selectedControls);
-
-protected:
-    QSize sizeHint() const override;
-    void resizeEvent(QResizeEvent* event) override;
-    void contextMenuEvent(QContextMenuEvent *event) override;
 
 private slots:
     void onFitButtonClick();
@@ -74,9 +59,6 @@ private slots:
 
 signals:
     void hideDockWidgetTitleBars(bool);
-
-private:
-    void setZoomLevel(qreal zoomLevel);
 
 private:
     AnchorEditor* m_anchorEditor;
@@ -108,12 +90,7 @@ private:
     QAction* m_moveRightAct;
     QAction* m_moveLeftAct;
 
-private:
-    enum Panning{
-        NotStarted, MouseWheelStarted, SpaceKeyStarted
-    };
-    Panning m_isPanning = Panning::NotStarted;
-    QPoint m_panningStartPosition;
+
 };
 
 #endif // DESIGNERVIEW_H
