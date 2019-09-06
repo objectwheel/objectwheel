@@ -73,7 +73,7 @@ void SceneSettings::reset()
     dragStartDistance = 8;
     sceneBackgroundTexture = 4;
     sceneZoomLevel = 1.0;
-    anchorColor = "#4FA211";
+    anchorColor = Qt::darkGray;
     /****/
     showGridViewDots = true;
     snappingEnabled = true;

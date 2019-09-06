@@ -95,16 +95,15 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     connect(s_renderEngine, &RenderEngine::previewDone,
             s_commandDispatcher, &CommandDispatcher::schedulePreviewDone);
 
-    QMetaObject::invokeMethod(s_renderSocket, "start",
+    // Caution! Receiver is living on another thread
+    QMetaObject::invokeMethod(s_renderSocket, "start", Qt::QueuedConnection,
                               Q_ARG(QString, CommandlineParser::serverName()));
 
     startQuitCountdown(30000);
 }
 
 ApplicationCore::~ApplicationCore()
-{
-    QMetaObject::invokeMethod(s_renderSocket, "deleteLater");
-
+{    
     s_socketThread->quit();
     s_socketThread->wait();
 }
@@ -149,14 +148,19 @@ void ApplicationCore::startQuitCountdown(int msec)
 
 void ApplicationCore::onTerminateCommand()
 {
-    QMetaObject::invokeMethod(s_renderSocket, "abort");
-    QMetaObject::invokeMethod(QCoreApplication::instance(), "quit");
+    // Caution! Receiver is living on another thread
+    QMetaObject::invokeMethod(s_renderSocket, "abort", Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, [=] {
+        QMetaObject::invokeMethod(qApp, &QApplication::quit, Qt::QueuedConnection);
+        qApp->quit();
+    }, Qt::QueuedConnection);
 }
 
 void ApplicationCore::quitIfDisconnected()
 {
     if (s_renderSocket->state() != QLocalSocket::ConnectedState) {
         qWarning() << tr("No connection, quitting...");
-        QCoreApplication::exit(EXIT_FAILURE);
+        QMetaObject::invokeMethod(qApp, "exit", Qt::QueuedConnection, Q_ARG(int, EXIT_FAILURE));
+        qApp->exit(EXIT_FAILURE);
     }
 }
