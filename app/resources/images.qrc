@@ -139,5 +139,11 @@
         <file>images/anchors/top.svg</file>
         <file>images/anchors/horizontal.svg</file>
         <file>images/anchors/vertical.svg</file>
+        <file>images/modes/builds-active.svg</file>
+        <file>images/modes/designer-active.svg</file>
+        <file>images/modes/documents-active.svg</file>
+        <file>images/modes/editor-active.svg</file>
+        <file>images/modes/options-active.svg</file>
+        <file>images/modes/split-active.svg</file>
     </qresource>
 </RCC>

@@ -5,6 +5,14 @@
 #include <QPainter>
 #include <QLayout>
 
+static QIcon icon(const QString& fileName)
+{
+    QIcon icon;
+    icon.addFile(":/images/modes/" + fileName + ".svg", QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(":/images/modes/" + fileName + "-active.svg", QSize(), QIcon::Normal, QIcon::On);
+    return icon;
+}
+
 ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
   , m_designerAction(new QAction(this))
   , m_editorAction(new QAction(this))
@@ -16,6 +24,25 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setIconSize({16, 16});
+    setStyleSheet(R"qss(
+        QToolButton {
+            border: none;
+            padding-left: 4px;
+            border-radius: 7px;
+            background-color: transparent;
+        }
+        QToolButton:pressed {
+            color: white;
+            background-color: #80000000;
+        }
+        QToolButton:checked {
+            color: white;
+            background-color: #60000000;
+        }
+        QToolButton:!checked:!pressed:hover {
+            background-color: #20000000;
+        }
+    )qss");
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {
@@ -109,12 +136,12 @@ QSize ModeSelectorPane::minimumSizeHint() const
 void ModeSelectorPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_designerAction->setIcon(QIcon(":/images/modes/designer.svg"));
-    m_editorAction->setIcon(QIcon(":/images/modes/editor.svg"));
-    m_splitAction->setIcon(QIcon(":/images/modes/split.svg"));
-    m_optionsAction->setIcon(QIcon(":/images/modes/options.svg"));
-    m_buildsAction->setIcon(QIcon(":/images/modes/builds.svg"));
-    m_documentsAction->setIcon(QIcon(":/images/modes/documents.svg"));
+    m_designerAction->setIcon(icon("designer"));
+    m_editorAction->setIcon(icon("editor"));
+    m_splitAction->setIcon(icon("split"));
+    m_optionsAction->setIcon(icon("options"));
+    m_buildsAction->setIcon(icon("builds"));
+    m_documentsAction->setIcon(icon("documents"));
 }
 
 void ModeSelectorPane::paintEvent(QPaintEvent*)
