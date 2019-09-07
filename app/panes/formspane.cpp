@@ -256,7 +256,7 @@ void FormsPane::refresh()
     clear();
 
     QTreeWidgetItem* selectionItem = nullptr;
-    // FIXME: Should we use scene->forms() instead? --but if you do make sure you order forms with their indexes--
+    // FIXME: Should we use scene->forms() instead? --but if you do, make sure you order forms with their indexes--
     for (const QString& path : SaveUtils::formPaths(ProjectManager::dir())) {
         const QString& id = SaveUtils::controlId(path);
         Q_ASSERT(!id.isEmpty());
@@ -267,7 +267,7 @@ void FormsPane::refresh()
 
         addTopLevelItem(item);
 
-        if (m_designerScene->currentForm()->id() == id)
+        if (m_designerScene->currentForm() && m_designerScene->currentForm()->id() == id)
             selectionItem = item;
     }
 

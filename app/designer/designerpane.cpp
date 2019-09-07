@@ -1,20 +1,23 @@
 #include <designerpane.h>
 #include <designerview.h>
-#include <signaleditor.h>
 #include <anchoreditor.h>
 
 #include <QMenu>
 #include <QEvent>
 #include <QToolBar>
+#include <QVBoxLayout>
 
 DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_menu(new QMenu(this))
   , m_toolBar(new QToolBar(this))
   , m_designerView(new DesignerView(this))
-  , m_signalEditor(new SignalEditor(this))
   , m_anchorEditor(new AnchorEditor(m_designerView->scene(), this))
 {
-
+    auto layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(m_toolBar);
+    layout->addWidget(m_designerView);
 }
 
 QMenu* DesignerPane::menu() const
@@ -35,11 +38,6 @@ DesignerView* DesignerPane::designerView() const
 AnchorEditor* DesignerPane::anchorEditor() const
 {
     return m_anchorEditor;
-}
-
-SignalEditor* DesignerPane::signalEditor() const
-{
-    return m_signalEditor;
 }
 
 QSize DesignerPane::sizeHint() const

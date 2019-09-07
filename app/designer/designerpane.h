@@ -6,7 +6,6 @@
 class QMenu;
 class QToolBar;
 class DesignerView;
-class SignalEditor;
 class AnchorEditor;
 
 class DesignerPane final : public QWidget
@@ -20,7 +19,6 @@ public:
     QMenu* menu() const;
     QToolBar* toolBar() const;
     DesignerView* designerView() const;
-    SignalEditor* signalEditor() const;
     AnchorEditor* anchorEditor() const;
 
     QSize sizeHint() const override;
@@ -34,7 +32,6 @@ private:
     QMenu* m_menu;
     QToolBar* m_toolBar;
     DesignerView* m_designerView;
-    SignalEditor* m_signalEditor;
     AnchorEditor* m_anchorEditor;
 };
 

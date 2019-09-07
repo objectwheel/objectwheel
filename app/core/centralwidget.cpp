@@ -14,13 +14,14 @@
 #include <qmlcodeeditor.h>
 #include <saveutils.h>
 #include <projectmanager.h>
-#include <control.h>
+#include <designerscene.h>
 #include <designerpane.h>
 #include <designercontroller.h>
 #include <outputpane.h>
 #include <outputcontroller.h>
 #include <issueswidget.h>
 #include <consolewidget.h>
+#include <form.h>
 
 #include <QBoxLayout>
 #include <QLabel>
@@ -115,13 +116,25 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     });
 
     connect(m_outputPane->issuesWidget(), &IssuesWidget::designsFileOpened,
-            m_designerView, &DesignerView::onDesignsFileOpen);
+            this, [=] (Control* control, const QString& relativePath, int line, int column) {
+        m_qmlCodeEditorWidget->openDesigns(control, relativePath);
+        m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
+    });
     connect(m_outputPane->issuesWidget(), &IssuesWidget::assetsFileOpened,
-            m_designerView, &DesignerView::onAssetsFileOpen);
+            this, [=] (const QString& relativePath, int line, int column) {
+        m_qmlCodeEditorWidget->openAssets(relativePath);
+        m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
+    });
     connect(m_outputPane->consoleWidget(), &ConsoleWidget::designsFileOpened,
-            m_designerView, &DesignerView::onDesignsFileOpen);
+            this, [=] (Control* control, const QString& relativePath, int line, int column) {
+        m_qmlCodeEditorWidget->openDesigns(control, relativePath);
+        m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
+    });
     connect(m_outputPane->consoleWidget(), &ConsoleWidget::assetsFileOpened,
-            m_designerView, &DesignerView::onAssetsFileOpen);
+            this, [=] (const QString& relativePath, int line, int column) {
+        m_qmlCodeEditorWidget->openAssets(relativePath);
+        m_qmlCodeEditorWidget->codeEditor()->gotoLine(line, column);
+    });
 
     //   BUG connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
     //            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
@@ -131,16 +144,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
             ControlRenderingManager::scheduleInit);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
-        Delayer::delay(3000);
-        m_designerView->refresh();
+        if (const Form* currentForm = m_designerPane->designerView()->scene()->currentForm()) {
+            Delayer::delay(3000);
+            ControlRenderingManager::scheduleRefresh(currentForm->uid());
+        }
     });
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &CentralWidget::onModeChange);
-}
-
-DesignerView* CentralWidget::designerView() const
-{
-    return m_designerView;
 }
 
 OutputPane* CentralWidget::outputPane() const
@@ -166,8 +176,8 @@ DesignerController* CentralWidget::designerController() const
 void CentralWidget::discharge()
 {
     m_outputController->discharge();
+    m_outputController->discharge();
     m_qmlCodeEditorWidget->discharge();
-    m_designerView->discharge();
     m_projectOptionsWidget->discharge();
     m_buildsWidget->discharge();
     m_helpWidget->discharge();
@@ -176,7 +186,7 @@ void CentralWidget::discharge()
 void CentralWidget::hideWidgets()
 {
     m_outputPane->hide();
-    m_designerView->hide();
+    m_designerPane->hide();
     g_editorContainer->hide();
     m_projectOptionsWidget->hide();
     m_buildsWidget->hide();
@@ -190,7 +200,7 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
     switch (mode) {
     case ModeManager::Designer:
         m_outputPane->show();
-        m_designerView->show();
+        m_designerPane->show();
         break;
 
     case ModeManager::Editor:
@@ -200,7 +210,7 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
 
     case ModeManager::Split:
         m_outputPane->show();
-        m_designerView->show();
+        m_designerPane->show();
         g_editorContainer->show();
         break;
 

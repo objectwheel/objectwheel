@@ -15,6 +15,8 @@
 #include <QHeaderView>
 #include <QScrollBar>
 
+// FIXME: Make sure you check all currentForm() usages if they are null or not before using them
+
 namespace {
 
 const int ROW_HEIGHT = 21;
