@@ -581,6 +581,7 @@ void DesignerScene::discharge()
     clearSelection();
     m_forms.clear();
     m_currentForm.clear();
+    update();
 }
 
 void DesignerScene::onChange()
