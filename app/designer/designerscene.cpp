@@ -67,6 +67,14 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_paintLayer, &PaintLayer::updateGeometry);
 }
 
+void DesignerScene::clear()
+{
+    clearSelection();
+    m_forms.clear();
+    m_currentForm.clear();
+    update();
+}
+
 void DesignerScene::addForm(Form* form)
 {
     m_forms.insert(form);
@@ -574,14 +582,6 @@ void DesignerScene::drawDashRect(QPainter* painter, const QRectF& rect)
     painter->drawPoint(rect.bottomLeft());
     painter->drawPoint(rect.bottomRight() - QPointF(0.25, 0.0));
     painter->restore();
-}
-
-void DesignerScene::discharge()
-{
-    clearSelection();
-    m_forms.clear();
-    m_currentForm.clear();
-    update();
 }
 
 void DesignerScene::onChange()

@@ -13,6 +13,7 @@
 #include <savemanager.h>
 #include <menumanager.h>
 #include <centralwidget.h>
+#include <designerpane.h>
 #include <designerview.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
@@ -143,7 +144,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QObject::connect(s_projectManager, &ProjectManager::stopped,
                      &ApplicationCore::onProjectStop);
 
-    DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerView()->scene();
+    DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerPane()->designerView()->scene();
     s_projectExposingManager->init(scene);
     s_controlCreationManager->init(scene);
     s_controlRemovingManager->init(scene);

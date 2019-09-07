@@ -3,15 +3,22 @@
 
 #include <QObject>
 
-class DesignerController : public QObject
+class DesignerPane;
+class DesignerController final : public QObject
 {
     Q_OBJECT
-public:
-    explicit DesignerController(QObject *parent = nullptr);
+    Q_DISABLE_COPY(DesignerController)
 
-signals:
+public:
+    explicit DesignerController(DesignerPane* designerPane, QObject* parent = nullptr);
 
 public slots:
+    void discharge();
+
+private slots:
+
+private:
+    DesignerPane* m_designerPane;
 };
 
 #endif // DESIGNERCONTROLLER_H

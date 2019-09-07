@@ -4,13 +4,14 @@
 #include <QSplitter>
 #include <modemanager.h>
 
-class DesignerView;
 class QmlCodeEditorWidget;
 class ProjectOptionsWidget;
 class HelpWidget;
 class BuildsWidget;
 class OutputPane;
 class OutputController;
+class DesignerPane;
+class DesignerController;
 
 class CentralWidget final : public QSplitter
 {
@@ -20,9 +21,10 @@ class CentralWidget final : public QSplitter
 public:
     explicit CentralWidget(QWidget* parent = nullptr);
     QmlCodeEditorWidget* qmlCodeEditorWidget() const;
-    DesignerView* designerView() const;
     OutputPane* outputPane() const;
     OutputController* outputController() const;
+    DesignerPane* designerPane() const;
+    DesignerController* designerController() const;
 
 public slots:
     void discharge();
@@ -35,8 +37,9 @@ private:
     QSplitter* m_splitterIn;
     OutputPane* m_outputPane;
     OutputController* m_outputController;
+    DesignerPane* m_designerPane;
+    DesignerController* m_designerController;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
-    DesignerView* m_designerView;
     ProjectOptionsWidget* m_projectOptionsWidget;
     BuildsWidget* m_buildsWidget;
     HelpWidget* m_helpWidget;

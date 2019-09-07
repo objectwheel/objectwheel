@@ -23,7 +23,7 @@ class RunController final : public QObject
     };
 
 public:
-    explicit RunController(RunPane* m_runPane, QObject* parent = nullptr);
+    explicit RunController(RunPane* runPane, QObject* parent = nullptr);
 
 public slots:
     void discharge();

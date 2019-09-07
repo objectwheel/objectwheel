@@ -30,7 +30,7 @@ public:
 private:
     void updateIcons();
     void changeEvent(QEvent* event) override;
-    void paintEvent(QPaintEvent*) override;
+    void paintEvent(QPaintEvent* event) override;
 
 private:
     PushButton* m_runButton;

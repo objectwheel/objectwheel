@@ -3,15 +3,33 @@
 
 #include <QWidget>
 
-class DesignerPane : public QWidget
+class QMenu;
+class QToolBar;
+class DesignerView;
+
+class DesignerPane final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(DesignerPane)
+
 public:
-    explicit DesignerPane(QWidget *parent = nullptr);
+    explicit DesignerPane(QWidget* parent = nullptr);
 
-signals:
+    QMenu* menu() const;
+    QToolBar* toolBar() const;
+    DesignerView* designerView() const;
 
-public slots:
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
+
+private:
+    void updateIcons();
+    void changeEvent(QEvent* event) override;
+
+private:
+    QMenu* m_menu;
+    QToolBar* m_toolBar;
+    DesignerView* m_designerView;
 };
 
 #endif // DESIGNERPANE_H

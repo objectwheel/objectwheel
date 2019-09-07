@@ -15,6 +15,8 @@
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <control.h>
+#include <designerpane.h>
+#include <designercontroller.h>
 #include <outputpane.h>
 #include <outputcontroller.h>
 #include <issueswidget.h>
@@ -24,7 +26,7 @@
 #include <QLabel>
 
 class EditorContainer : public QLabel {
-public: explicit EditorContainer(QWidget* parent) : QLabel(parent) {} 
+public: explicit EditorContainer(QWidget* parent) : QLabel(parent) {}
 public: QSize sizeHint() const override { return {680, 680}; }
 };
 
@@ -34,8 +36,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_splitterIn(new QSplitter)
   , m_outputPane(new OutputPane)
   , m_outputController(new OutputController(m_outputPane, this))
+  , m_designerPane(new DesignerPane)
+  , m_designerController(new DesignerController(m_designerPane, this))
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
-  , m_designerView(new DesignerView(m_qmlCodeEditorWidget))
   , m_projectOptionsWidget(new ProjectOptionsWidget)
   , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
@@ -61,7 +64,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     m_splitterIn->setHandleWidth(0);
     m_splitterIn->setFrameShape(QFrame::NoFrame);
     m_splitterIn->setOrientation(Qt::Horizontal);
-    m_splitterIn->addWidget(m_designerView);
+    m_splitterIn->addWidget(m_designerPane);
     m_splitterIn->addWidget(g_editorContainer);
     m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
@@ -148,6 +151,16 @@ OutputPane* CentralWidget::outputPane() const
 OutputController* CentralWidget::outputController() const
 {
     return m_outputController;
+}
+
+DesignerPane* CentralWidget::designerPane() const
+{
+    return m_designerPane;
+}
+
+DesignerController* CentralWidget::designerController() const
+{
+    return m_designerController;
 }
 
 void CentralWidget::discharge()

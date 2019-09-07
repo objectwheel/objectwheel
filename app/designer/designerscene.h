@@ -21,6 +21,7 @@ class DesignerScene final : public QGraphicsScene
 public:
     explicit DesignerScene(QObject* parent = nullptr);
 
+    void clear();
     void addForm(Form* form);
     void removeForm(Form* form);
     void removeControl(Control* control);
@@ -82,9 +83,6 @@ public:
 
     static void drawDashLine(QPainter* painter, const QLineF& line);
     static void drawDashRect(QPainter* painter, const QRectF& rect);
-
-public slots:
-    void discharge();
 
 private slots:
     void onChange();
