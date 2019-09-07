@@ -1,15 +1,15 @@
-#include "signalchooserdialog.h"
-#include "ui_signalchooserdialog.h"
+#include <signaleditor.h>
+#include <ui_signaleditor.h>
 #include <QPushButton>
 
-SignalChooserDialog::SignalChooserDialog(QWidget *parent) : QDialog(parent),
-    ui(new Ui::SignalChooserDialog)
+SignalEditor::SignalEditor(QWidget* parent) : QDialog(parent)
+  , ui(new Ui::SignalEditor)
 {
     ui->setupUi(this);
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Go"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setCursor(Qt::PointingHandCursor);
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
-    connect(ui->searchEdit, &QLineEdit::textChanged, this, &SignalChooserDialog::filterList);
+    connect(ui->searchEdit, &QLineEdit::textChanged, this, &SignalEditor::filterList);
     connect(ui->signalList->selectionModel(), &QItemSelectionModel::selectionChanged, this, [=] {
         ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(
                     ui->signalList->selectedItems().size() == 1
@@ -17,12 +17,12 @@ SignalChooserDialog::SignalChooserDialog(QWidget *parent) : QDialog(parent),
     });
 }
 
-SignalChooserDialog::~SignalChooserDialog()
+SignalEditor::~SignalEditor()
 {
     delete ui;
 }
 
-void SignalChooserDialog::setSignalList(const QStringList& signalss)
+void SignalEditor::setSignalList(const QStringList& signalss)
 {
     ui->searchEdit->clear();
     ui->signalList->clear();
@@ -31,19 +31,19 @@ void SignalChooserDialog::setSignalList(const QStringList& signalss)
     filterList();
 }
 
-QString SignalChooserDialog::currentSignal() const
+QString SignalEditor::currentSignal() const
 {
     return ui->signalList->currentItem()->text();
 }
 
-void SignalChooserDialog::discharge()
+void SignalEditor::discharge()
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
     ui->searchEdit->clear();
     ui->signalList->clear();
 }
 
-void SignalChooserDialog::filterList()
+void SignalEditor::filterList()
 {
     const QString& filterText = ui->searchEdit->text();
     for (int i = 0; i < ui->signalList->count(); i++) {

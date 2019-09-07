@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SignalChooserDialog</class>
- <widget class="QDialog" name="SignalChooserDialog">
+ <class>SignalEditor</class>
+ <widget class="QDialog" name="SignalEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -85,7 +85,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SignalChooserDialog</receiver>
+   <receiver>SignalEditor</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -101,7 +101,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SignalChooserDialog</receiver>
+   <receiver>SignalEditor</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -117,7 +117,7 @@
   <connection>
    <sender>signalList</sender>
    <signal>itemDoubleClicked(QListWidgetItem*)</signal>
-   <receiver>SignalChooserDialog</receiver>
+   <receiver>SignalEditor</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">

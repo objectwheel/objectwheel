@@ -13,10 +13,10 @@ HEADERS += $$PWD/control.h \
            $$PWD/headlineitem.h \
            $$PWD/paintlayer.h \
            $$PWD/resizeritem.h \
-           $$PWD/signalchooserdialog.h \
            $$PWD/gadgetitem.h \
-           $$PWD/anchorlayer.h \
+           $$PWD/signaleditor.h \
            $$PWD/anchoreditor.h \
+           $$PWD/anchorlayer.h \
            $$PWD/anchorrow.h \
            $$PWD/anchorline.h \
            $$PWD/anchors.h
@@ -33,12 +33,12 @@ SOURCES += $$PWD/control.cpp \
            $$PWD/headlineitem.cpp \
            $$PWD/paintlayer.cpp \
            $$PWD/resizeritem.cpp \
-           $$PWD/signalchooserdialog.cpp \
            $$PWD/gadgetitem.cpp \
-           $$PWD/anchorlayer.cpp \
+           $$PWD/signaleditor.cpp \
            $$PWD/anchoreditor.cpp \
+           $$PWD/anchorlayer.cpp \
            $$PWD/anchorrow.cpp \
            $$PWD/anchorline.cpp \
            $$PWD/anchors.cpp
 
-FORMS += $$PWD/signalchooserdialog.ui
+FORMS += $$PWD/signaleditor.ui
