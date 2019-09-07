@@ -409,7 +409,7 @@ QIcon deviceIcon(const QVariantMap& deviceInfo)
     const QString deviceUid = deviceInfo.value("deviceUid").toString();
 
     if (deviceUid == localDeviceInfo().value("deviceUid"))
-        return QIcon(":/images/mycomputer.png");
+        return QIcon(":/images/computer.svg");
     if (productType == "ios") {
         if (deviceName.contains("ipad", Qt::CaseInsensitive))
             return QIcon(":/images/ipad.svg");
@@ -422,7 +422,7 @@ QIcon deviceIcon(const QVariantMap& deviceInfo)
             return QIcon(":/images/macbook.svg");
         return QIcon(":/images/imac.svg");
     }
-    return QIcon(":/images/mycomputer.png");
+    return QIcon(":/images/computer.svg");
 }
 
 QString deviceUid(const QVariantMap& deviceInfo)

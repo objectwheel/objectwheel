@@ -465,21 +465,27 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 checkmarkOpt.palette.setColor(QPalette::Text, painter->pen().color());
                 proxy()->drawPrimitive(PE_IndicatorMenuCheckMark, &checkmarkOpt, painter, widget);
             }
+            bool dis = !(mi.state & State_Enabled);
+            bool act = mi.state & State_Selected;
             if (!mi.icon.isNull()) {
-                QIcon::Mode mode = (mi.state & State_Enabled) ? QIcon::Normal
-                                                              : QIcon::Disabled;
-                // Always be normal or disabled to follow the Mac style.
-                int smallIconSize = proxy()->pixelMetric(PM_SmallIconSize);
+                QIcon::Mode mode = dis ? QIcon::Disabled : QIcon::Normal;
+                if (act && !dis)
+                    mode = QIcon::Active;
+                QPixmap pixmap;
+
+                int smallIconSize = proxy()->pixelMetric(PM_SmallIconSize, option, widget);
                 QSize iconSize(smallIconSize, smallIconSize);
 
-                if (const QComboBox *comboBox = qobject_cast<const QComboBox*>(widget)) {
-                    iconSize = comboBox->iconSize();
-                }
+                if (const QComboBox *combo = qobject_cast<const QComboBox*>(widget))
+                    iconSize = combo->iconSize();
 
                 QWindow* window = nullptr;
                 if (widget)
                     window = UtilityFunctions::window(widget);
-                QPixmap pixmap = mi.icon.pixmap(window, iconSize, mode);
+                if (mi.checked)
+                    pixmap = mi.icon.pixmap(window, iconSize, mode, QIcon::On);
+                else
+                    pixmap = mi.icon.pixmap(window, iconSize, mode);
                 int pixw = pixmap.width() / pixmap.devicePixelRatio();
                 int pixh = pixmap.height() / pixmap.devicePixelRatio();
                 QRect cr(xpos, mi.rect.y(), checkcol, mi.rect.height());
@@ -488,6 +494,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 painter->drawPixmap(pmr.topLeft(), pixmap);
                 xpos += pixw + 6;
             }
+
             QString s = mi.text;
             const auto text_flags = Qt::AlignVCenter | Qt::TextHideMnemonic
                     | Qt::TextSingleLine | Qt::AlignAbsolute;

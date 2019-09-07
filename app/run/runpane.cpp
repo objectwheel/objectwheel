@@ -141,7 +141,7 @@ QSize RunPane::minimumSizeHint() const
 void RunPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_runDevicesButton->setIcon(QIcon(":/images/devices.png"));
+    m_runDevicesButton->setIcon(QIcon(":/images/devices.svg"));
     m_runButton->setIcon(renderButtonIcon(":/images/run.svg", palette()));
     m_stopButton->setIcon(renderButtonIcon(":/images/stop.svg", palette()));
     m_preferencesButton->setIcon(renderButtonIcon(":/images/settings.svg", palette()));

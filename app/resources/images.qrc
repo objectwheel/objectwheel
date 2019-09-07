@@ -58,8 +58,6 @@
         <file>images/template9.png</file>
         <file>images/drop.png</file>
         <file>images/splash.png</file>
-        <file>images/devices.png</file>
-        <file>images/mycomputer.png</file>
         <file>images/settings/general.png</file>
         <file>images/flags/en.png</file>
         <file>images/settings/interface.png</file>
@@ -156,5 +154,9 @@
         <file>images/designer/paste.svg</file>
         <file>images/designer/select-all.svg</file>
         <file>images/designer/send-to-back.svg</file>
+        <file>images/designer/toggle-selection.svg</file>
+        <file>images/designer/delete-all.svg</file>
+        <file>images/devices.svg</file>
+        <file>images/computer.svg</file>
     </qresource>
 </RCC>
