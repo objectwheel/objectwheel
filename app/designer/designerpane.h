@@ -27,6 +27,7 @@ public:
 private:
     void updateIcons();
     void changeEvent(QEvent* event) override;
+    void contextMenuEvent(QContextMenuEvent* event) override;
 
 private:
     QMenu* m_menu;

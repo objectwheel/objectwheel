@@ -145,5 +145,16 @@
         <file>images/modes/editor-active.svg</file>
         <file>images/modes/options-active.svg</file>
         <file>images/modes/split-active.svg</file>
+        <file>images/designer/bring-to-front.svg</file>
+        <file>images/designer/copy.svg</file>
+        <file>images/designer/cut.svg</file>
+        <file>images/designer/delete.svg</file>
+        <file>images/designer/move-down.svg</file>
+        <file>images/designer/move-left.svg</file>
+        <file>images/designer/move-right.svg</file>
+        <file>images/designer/move-up.svg</file>
+        <file>images/designer/paste.svg</file>
+        <file>images/designer/select-all.svg</file>
+        <file>images/designer/send-to-back.svg</file>
     </qresource>
 </RCC>
