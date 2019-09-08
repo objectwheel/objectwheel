@@ -7,11 +7,69 @@
 #include <controlpropertymanager.h>
 #include <control.h>
 #include <anchoreditor.h>
+#include <utilityfunctions.h>
 
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QComboBox>
 #include <QMenu>
+
+static QString cleanId(const Control* sourceControl, const Control* targetControl)
+{
+    if (targetControl->window() || targetControl->popup())
+        return QStringLiteral("parent");
+    if (sourceControl->parentControl() == targetControl)
+        return QStringLiteral("parent");
+    return targetControl->id();
+}
+
+static QString anchorLineText(AnchorLine::Type type)
+{
+    switch (type) {
+    case AnchorLine::Left:
+        return QStringLiteral("left");
+    case AnchorLine::Right:
+        return QStringLiteral("right");
+    case AnchorLine::Top:
+        return QStringLiteral("top");
+    case AnchorLine::Bottom:
+        return QStringLiteral("bottom");
+    case AnchorLine::Baseline:
+        return QStringLiteral("baseline");
+    case AnchorLine::HorizontalCenter:
+        return QStringLiteral("horizontalCenter");
+    case AnchorLine::VerticalCenter:
+        return QStringLiteral("verticalCenter");
+    case AnchorLine::Fill:
+        return QStringLiteral("fill");
+    case AnchorLine::Center:
+        return QStringLiteral("centerIn");
+    default:
+        return QString();
+    }
+}
+
+static QString marginOffsetText(AnchorLine::Type type)
+{
+    switch (type) {
+    case AnchorLine::Left:
+        return QStringLiteral("leftMargin");
+    case AnchorLine::Right:
+        return QStringLiteral("rightMargin");
+    case AnchorLine::Top:
+        return QStringLiteral("topMargin");
+    case AnchorLine::Bottom:
+        return QStringLiteral("bottomMargin");
+    case AnchorLine::Baseline:
+        return QStringLiteral("baselineOffset");
+    case AnchorLine::HorizontalCenter:
+        return QStringLiteral("horizontalCenterOffset");
+    case AnchorLine::VerticalCenter:
+        return QStringLiteral("verticalCenterOffset");
+    default:
+        return QString();
+    }
+}
 
 DesignerController::DesignerController(DesignerPane* designerPane, QObject* parent) : QObject(parent)
   , m_designerPane(designerPane)
@@ -21,105 +79,18 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onCustomContextMenuRequest);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
             this, &DesignerController::onControlDoubleClick);
-
-//    connect(m_anchorEditor, &AnchorEditor::anchored, this, [=] (AnchorLine::Type sourceLineType, const AnchorLine& targetLine) {
-//        if (targetLine.isValid()) {
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors." + anchorLineText(sourceLineType),
-//                                               fixedTargetId(m_anchorEditor->sourceControl(), targetLine.control())
-//                                               + "." + anchorLineText(targetLine.type()),
-//                                               ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
-//        } else {
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors." + anchorLineText(sourceLineType),
-//                                               QString(), ControlPropertyManager::SaveChanges);
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors." + anchorLineText(sourceLineType),
-//                                               "undefined", ControlPropertyManager::UpdateRenderer);
-//        }
-//    });
-//    connect(m_anchorEditor, &AnchorEditor::filled, this, [=] (Control* control) {
-//        if (control) {
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors.fill",
-//                                               fixedTargetId(m_anchorEditor->sourceControl(), control),
-//                                               ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
-//        } else {
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors.fill", QString(), ControlPropertyManager::SaveChanges);
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors.fill", "undefined", ControlPropertyManager::UpdateRenderer);
-//        }
-//    });
-//    connect(m_anchorEditor, &AnchorEditor::centered, this, [=] (Control* control, bool overlay) {
-//        if (control) {
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors.centerIn",
-//                                               fixedTargetId(m_anchorEditor->sourceControl(), control),
-//                                               ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
-//        } else {
-//            if (m_anchorEditor->sourceControl()->popup() && overlay) {
-//                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                                   "anchors.centerIn", "Overlay.overlay",
-//                                                   ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
-//            } else {
-//                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                                   "anchors.centerIn", QString(), ControlPropertyManager::SaveChanges);
-//                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                                   "anchors.centerIn", "undefined", ControlPropertyManager::UpdateRenderer);
-//            }
-//        }
-//    });
-//    connect(m_anchorEditor, &AnchorEditor::cleared, this, [=] {
-//        for (const QString& name : UtilityFunctions::anchorLineNames()) {
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               name, QString(),
-//                                               ControlPropertyManager::SaveChanges);
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               name, "undefined",
-//                                               ControlPropertyManager::UpdateRenderer);
-//        }
-//        for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
-//            if (name == "anchors.leftMargin"
-//                    || name == "anchors.rightMargin"
-//                    || name == "anchors.topMargin"
-//                    || name == "anchors.bottomMargin") {
-//                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                                   name, QString(), ControlPropertyManager::SaveChanges);
-//                ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                                   name, "undefined", ControlPropertyManager::UpdateRenderer);
-//            } else {
-//                ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
-//                                                    name, QString(),
-//                                                    name.contains("alignWhenCentered") ? 1 : 0,
-//                                                    ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
-//            }
-//        }
-//    });
-//    connect(m_anchorEditor, &AnchorEditor::marginOffsetEdited, this, [=] (AnchorLine::Type sourceLineType, qreal marginOffset) {
-//        if (marginOffset == 0 && (sourceLineType == AnchorLine::Left
-//                                  || sourceLineType == AnchorLine::Right
-//                                  || sourceLineType == AnchorLine::Top
-//                                  || sourceLineType == AnchorLine::Bottom)) {
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors." + marginOffsetText(sourceLineType),
-//                                               QString(), ControlPropertyManager::SaveChanges);
-//            ControlPropertyManager::setBinding(m_anchorEditor->sourceControl(),
-//                                               "anchors." + marginOffsetText(sourceLineType),
-//                                               "undefined", ControlPropertyManager::UpdateRenderer);
-//        } else {
-//            ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
-//                                                "anchors." + marginOffsetText(sourceLineType),
-//                                                marginOffset == 0 ? QString() : QString::number(marginOffset), marginOffset,
-//                                                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
-//        }
-//    });
-//    connect(m_anchorEditor, &AnchorEditor::marginsEdited, this, [=] (qreal margins) {
-//        ControlPropertyManager::setProperty(m_anchorEditor->sourceControl(),
-//                                            "anchors.margins",
-//                                            margins == 0 ? QString() : QString::number(margins), margins,
-//                                            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer);
-//    });
+    connect(m_designerPane->anchorEditor(), &AnchorEditor::anchored,
+            this, &DesignerController::onAnchor);
+    connect(m_designerPane->anchorEditor(), &AnchorEditor::filled,
+            this, &DesignerController::onAnchorFill);
+    connect(m_designerPane->anchorEditor(), &AnchorEditor::centered,
+            this, &DesignerController::onAnchorCenter);
+    connect(m_designerPane->anchorEditor(), &AnchorEditor::cleared,
+            this, &DesignerController::onAnchorClear);
+    connect(m_designerPane->anchorEditor(), &AnchorEditor::marginOffsetEdited,
+            this, &DesignerController::onAnchorMarginOffsetEdit);
+    connect(m_designerPane->anchorEditor(), &AnchorEditor::marginsEdited,
+            this, &DesignerController::onAnchorMarginsEdit);
     connect(m_designerPane->anchorEditor(), &AnchorEditor::alignmentActivated,
             this, &DesignerController::onAnchorAlignmentActivation);
     connect(m_designerPane->anchorEditor(), &AnchorEditor::sourceControlActivated,
@@ -196,7 +167,31 @@ void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons
 
 void DesignerController::onAnchorClear()
 {
-
+    for (const QString& name : UtilityFunctions::anchorLineNames()) {
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           name, QString(),
+                                           ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           name, "undefined",
+                                           ControlPropertyManager::UpdateRenderer);
+    }
+    for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
+        if (name == "anchors.leftMargin"
+                || name == "anchors.rightMargin"
+                || name == "anchors.topMargin"
+                || name == "anchors.bottomMargin") {
+            ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                               name, QString(), ControlPropertyManager::SaveChanges);
+            ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                               name, "undefined", ControlPropertyManager::UpdateRenderer);
+        } else {
+            ControlPropertyManager::setProperty(m_designerPane->anchorEditor()->sourceControl(),
+                                                name, QString(),
+                                                name.contains("alignWhenCentered") ? 1 : 0,
+                                                ControlPropertyManager::SaveChanges |
+                                                ControlPropertyManager::UpdateRenderer);
+        }
+    }
 }
 
 void DesignerController::onAnchorSourceControlActivation()
@@ -207,27 +202,95 @@ void DesignerController::onAnchorSourceControlActivation()
 
 void DesignerController::onAnchor(AnchorLine::Type sourceLineType, const AnchorLine& targetLine)
 {
-
+    if (targetLine.isValid()) {
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors." + anchorLineText(sourceLineType),
+                                           cleanId(m_designerPane->anchorEditor()->sourceControl(),
+                                                         targetLine.control())
+                                           + "." + anchorLineText(targetLine.type()),
+                                           ControlPropertyManager::SaveChanges |
+                                           ControlPropertyManager::UpdateRenderer);
+    } else {
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors." + anchorLineText(sourceLineType),
+                                           QString(), ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors." + anchorLineText(sourceLineType),
+                                           "undefined", ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 void DesignerController::onAnchorFill(Control* control)
 {
-
+    if (control) {
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors.fill",
+                                           cleanId(m_designerPane->anchorEditor()->sourceControl(), control),
+                                           ControlPropertyManager::SaveChanges |
+                                           ControlPropertyManager::UpdateRenderer);
+    } else {
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors.fill", QString(),
+                                           ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors.fill", "undefined",
+                                           ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 void DesignerController::onAnchorCenter(Control* control, bool overlay)
 {
-
+    if (control) {
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors.centerIn",
+                                           cleanId(m_designerPane->anchorEditor()->sourceControl(), control),
+                                           ControlPropertyManager::SaveChanges |
+                                           ControlPropertyManager::UpdateRenderer);
+    } else {
+        if (m_designerPane->anchorEditor()->sourceControl()->popup() && overlay) {
+            ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                               "anchors.centerIn", "Overlay.overlay",
+                                               ControlPropertyManager::SaveChanges |
+                                               ControlPropertyManager::UpdateRenderer);
+        } else {
+            ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                               "anchors.centerIn", QString(),
+                                               ControlPropertyManager::SaveChanges);
+            ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                               "anchors.centerIn", "undefined",
+                                               ControlPropertyManager::UpdateRenderer);
+        }
+    }
 }
 
 void DesignerController::onAnchorMarginOffsetEdit(AnchorLine::Type sourceLineType, qreal marginOffset)
 {
-
+    if (marginOffset == 0 && (sourceLineType == AnchorLine::Left
+                              || sourceLineType == AnchorLine::Right
+                              || sourceLineType == AnchorLine::Top
+                              || sourceLineType == AnchorLine::Bottom)) {
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors." + marginOffsetText(sourceLineType),
+                                           QString(), ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
+                                           "anchors." + marginOffsetText(sourceLineType),
+                                           "undefined", ControlPropertyManager::UpdateRenderer);
+    } else {
+        ControlPropertyManager::setProperty(m_designerPane->anchorEditor()->sourceControl(),
+                                            "anchors." + marginOffsetText(sourceLineType),
+                                            marginOffset == 0 ? QString() : QString::number(marginOffset), marginOffset,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 void DesignerController::onAnchorMarginsEdit(qreal margins)
 {
-
+    ControlPropertyManager::setProperty(m_designerPane->anchorEditor()->sourceControl(),
+                                        "anchors.margins",
+                                        margins == 0 ? QString() : QString::number(margins), margins,
+                                        ControlPropertyManager::SaveChanges |
+                                        ControlPropertyManager::UpdateRenderer);
 }
 
 void DesignerController::onAnchorAlignmentActivation(bool aligned)
@@ -235,8 +298,8 @@ void DesignerController::onAnchorAlignmentActivation(bool aligned)
     ControlPropertyManager::setProperty(m_designerPane->anchorEditor()->sourceControl(),
                                         "anchors.alignWhenCentered",
                                         aligned ? QString() : "false", aligned,
-                                        ControlPropertyManager::SaveChanges
-                                        | ControlPropertyManager::UpdateRenderer);
+                                        ControlPropertyManager::SaveChanges |
+                                        ControlPropertyManager::UpdateRenderer);
 }
 
 void DesignerController::onAnchorEditorActivation(Control* sourceControl, Control* targetControl)
