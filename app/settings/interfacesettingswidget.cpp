@@ -314,7 +314,7 @@ void InterfaceSettingsWidget::reset()
 
 QIcon InterfaceSettingsWidget::icon() const
 {
-    return QIcon(":/images/settings/interface.png");
+    return QIcon(":/images/settings/interface.svg");
 }
 
 QString InterfaceSettingsWidget::title() const

@@ -12,5 +12,5 @@ CodeEditorSettingsPage::CodeEditorSettingsPage(QWidget* parent) : SettingsPage(p
 
 QIcon CodeEditorSettingsPage::icon() const
 {
-    return QIcon(":/images/settings/codeeditor.png");
+    return QIcon(":/images/settings/code-editor.svg");
 }

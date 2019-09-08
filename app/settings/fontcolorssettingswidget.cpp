@@ -198,7 +198,7 @@ void FontColorsSettingsWidget::reset()
 
 QIcon FontColorsSettingsWidget::icon() const
 {
-    return QIcon(":/images/settings/fontcolors.png");
+    return QIcon(":/images/settings/font-colors.svg");
 }
 
 QString FontColorsSettingsWidget::title() const

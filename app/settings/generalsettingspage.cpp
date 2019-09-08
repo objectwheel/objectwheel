@@ -10,5 +10,5 @@ GeneralSettingsPage::GeneralSettingsPage(QWidget* parent) : SettingsPage(parent)
 
 QIcon GeneralSettingsPage::icon() const
 {
-    return QIcon(":/images/settings/general.png");
+    return QIcon(":/images/settings/general.svg");
 }

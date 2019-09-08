@@ -10,5 +10,5 @@ DesignerSettingsPage::DesignerSettingsPage(QWidget* parent) : SettingsPage(paren
 
 QIcon DesignerSettingsPage::icon() const
 {
-    return QIcon(":/images/settings/designer.png");
+    return QIcon(":/images/settings/designer.svg");
 }

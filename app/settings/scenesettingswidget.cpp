@@ -272,7 +272,7 @@ void SceneSettingsWidget::reset()
 
 QIcon SceneSettingsWidget::icon() const
 {
-    return QIcon(":/images/settings/scene.png");
+    return QIcon(":/images/settings/scene.svg");
 }
 
 QString SceneSettingsWidget::title() const

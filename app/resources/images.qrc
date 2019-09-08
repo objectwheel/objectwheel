@@ -58,12 +58,7 @@
         <file>images/template9.png</file>
         <file>images/drop.png</file>
         <file>images/splash.png</file>
-        <file>images/settings/general.png</file>
         <file>images/flags/en.png</file>
-        <file>images/settings/interface.png</file>
-        <file>images/settings/codeeditor.png</file>
-        <file>images/settings/fontcolors.png</file>
-        <file>images/settings/behavior.png</file>
         <file>images/android.svg</file>
         <file>images/ios.svg</file>
         <file>images/ipad.svg</file>
@@ -120,8 +115,6 @@
         <file>images/left.svg</file>
         <file>images/settings.svg</file>
         <file>images/filter.svg</file>
-        <file>images/settings/designer.png</file>
-        <file>images/settings/scene.png</file>
         <file>images/nooutline.svg</file>
         <file>images/outerline.svg</file>
         <file>images/outline.svg</file>
@@ -165,5 +158,12 @@
         <file>images/designer/snapping.svg</file>
         <file>images/designer/theme-settings.svg</file>
         <file>images/designer/scene-settings.svg</file>
+        <file>images/settings/behavior.svg</file>
+        <file>images/settings/code-editor.svg</file>
+        <file>images/settings/designer.svg</file>
+        <file>images/settings/font-colors.svg</file>
+        <file>images/settings/general.svg</file>
+        <file>images/settings/interface.svg</file>
+        <file>images/settings/scene.svg</file>
     </qresource>
 </RCC>

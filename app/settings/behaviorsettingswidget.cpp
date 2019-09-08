@@ -70,7 +70,7 @@ void BehaviorSettingsWidget::reset()
 
 QIcon BehaviorSettingsWidget::icon() const
 {
-    return QIcon(":/images/settings/behavior.png");
+    return QIcon(":/images/settings/behavior.svg");
 }
 
 QString BehaviorSettingsWidget::title() const
