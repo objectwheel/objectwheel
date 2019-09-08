@@ -115,6 +115,9 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
         file.write(qmldirLine.toUtf8());
     });
 
+    connect(m_designerController, &DesignerController::codeEditorTriggered,
+            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::openDesigns);
+
     connect(m_outputPane->issuesWidget(), &IssuesWidget::designsFileOpened,
             this, [=] (Control* control, const QString& relativePath, int line, int column) {
         m_qmlCodeEditorWidget->openDesigns(control, relativePath);

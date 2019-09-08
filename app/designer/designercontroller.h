@@ -1,7 +1,7 @@
 #ifndef DESIGNERCONTROLLER_H
 #define DESIGNERCONTROLLER_H
 
-#include <QObject>
+#include <anchorline.h>
 
 class DesignerPane;
 class Control;
@@ -20,6 +20,20 @@ public slots:
 
 private slots:
     void onCustomContextMenuRequest(const QPoint& pos);
+    void onControlDoubleClick(Control* control, Qt::MouseButtons buttons);
+
+    void onAnchorClear();
+    void onAnchorSourceControlActivation();
+    void onAnchor(AnchorLine::Type sourceLineType, const AnchorLine& targetLine);
+    void onAnchorFill(Control* control);
+    void onAnchorCenter(Control* control, bool overlay);
+    void onAnchorMarginOffsetEdit(AnchorLine::Type sourceLineType, qreal marginOffset);
+    void onAnchorMarginsEdit(qreal margins);
+    void onAnchorAlignmentActivation(bool aligned);
+    void onAnchorEditorActivation(Control* sourceControl, Control* targetControl);
+
+signals:
+    void codeEditorTriggered(Control* control, const QString& relativeFileName);
 
 private:
     DesignerPane* m_designerPane;
