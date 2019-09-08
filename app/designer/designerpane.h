@@ -7,6 +7,8 @@ class QMenu;
 class QToolBar;
 class DesignerView;
 class AnchorEditor;
+class QToolButton;
+class QComboBox;
 
 class DesignerPane final : public QWidget
 {
@@ -48,6 +50,19 @@ private:
     QAction* m_moveRightAction;
     QAction* m_moveUpAction;
     QAction* m_moveDownAction;
+
+    QToolButton* m_clearButton;
+    QToolButton* m_refreshButton;
+    QToolButton* m_anchorsButton;
+    QToolButton* m_snappingButton;
+    QToolButton* m_gridViewButton;
+    QToolButton* m_guidelinesButton;
+    QToolButton* m_controlOutlineButton;
+    QToolButton* m_backgroundTextureButton;
+    QToolButton* m_settingsButton;
+    QToolButton* m_themeSettingsButton;
+    QComboBox* m_zoomLevelComboBox;
+    QComboBox* m_themeComboBox;
 };
 
 #endif // DESIGNERPANE_H

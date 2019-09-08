@@ -158,5 +158,12 @@
         <file>images/designer/delete-all.svg</file>
         <file>images/devices.svg</file>
         <file>images/computer.svg</file>
+        <file>images/designer/anchors.svg</file>
+        <file>images/designer/grid-view.svg</file>
+        <file>images/designer/guidelines.svg</file>
+        <file>images/designer/refresh.svg</file>
+        <file>images/designer/snapping.svg</file>
+        <file>images/designer/theme-settings.svg</file>
+        <file>images/designer/scene-settings.svg</file>
     </qresource>
 </RCC>
