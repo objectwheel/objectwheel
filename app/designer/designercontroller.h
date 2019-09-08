@@ -4,6 +4,8 @@
 #include <QObject>
 
 class DesignerPane;
+class Control;
+
 class DesignerController final : public QObject
 {
     Q_OBJECT
@@ -13,12 +15,15 @@ public:
     explicit DesignerController(DesignerPane* designerPane, QObject* parent = nullptr);
 
 public slots:
+    void charge();
     void discharge();
 
 private slots:
+    void onCustomContextMenuRequest(const QPoint& pos);
 
 private:
     DesignerPane* m_designerPane;
+    Control* m_menuTargetControl;
 };
 
 #endif // DESIGNERCONTROLLER_H

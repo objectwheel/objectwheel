@@ -1,1 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#8bb7f0" d="M1 0H14V1H1z"></path><path fill="#4e7ab5" d="M14 0L1 0 1 1 14 1 14 0z"></path><path fill="#8bb7f0" d="M1 14H14V15H1z"></path><path fill="#4e7ab5" d="M14 14L1 14 1 15 14 15 14 14z"></path><path fill="#66798f" d="M1.5 12A.5.5 0 1 0 1.5 13 .5.5 0 1 0 1.5 12zM1.5 10A.5.5 0 1 0 1.5 11 .5.5 0 1 0 1.5 10zM1.5 8A.5.5 0 1 0 1.5 9 .5.5 0 1 0 1.5 8zM1.5 6A.5.5 0 1 0 1.5 7 .5.5 0 1 0 1.5 6zM1.5 4A.5.5 0 1 0 1.5 5 .5.5 0 1 0 1.5 4zM1.5 2A.5.5 0 1 0 1.5 3 .5.5 0 1 0 1.5 2zM13.5 12A.5.5 0 1 0 13.5 13 .5.5 0 1 0 13.5 12zM13.5 10A.5.5 0 1 0 13.5 11 .5.5 0 1 0 13.5 10zM13.5 8A.5.5 0 1 0 13.5 9 .5.5 0 1 0 13.5 8zM13.5 6A.5.5 0 1 0 13.5 7 .5.5 0 1 0 13.5 6zM13.5 4A.5.5 0 1 0 13.5 5 .5.5 0 1 0 13.5 4zM13.5 2A.5.5 0 1 0 13.5 3 .5.5 0 1 0 13.5 2zM10 4L7.5 1 5 4z"></path><g><path fill="#66798f" d="M5 11L7.5 14 10 11z"></path></g><path fill="#66798f" d="M7 3H8V12H7z"></path></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.2" baseProfile="tiny" id="katman_1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16"
+	 xml:space="preserve">
+<path fill="#E1EBF2" d="M1.5,1.5h9v9h-9V1.5z"/>
+<path fill="#788B9C" d="M11,11H1V1h10V11z M2,10h8V2H2V10z"/>
+<g>
+	<path fill="#8BB7F0" d="M5.5,5.5h9v9h-9V5.5z"/>
+	<path fill="#4E7AB5" d="M15,15H5V5h10V15z M6,14h8V6H6V14z"/>
+</g>
+<line fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="2,1,0,0,0,0" x1="4.5" y1="0" x2="4.5" y2="16"/>
+<line fill="none" stroke="#000000" stroke-miterlimit="10" stroke-dasharray="2,1,0,0,0,0" x1="0" y1="4.5" x2="16" y2="4.5"/>
+</svg>

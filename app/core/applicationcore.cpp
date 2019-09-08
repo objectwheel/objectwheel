@@ -255,7 +255,7 @@ void ApplicationCore::onProjectStop()
 
 void ApplicationCore::onProjectStart()
 {
-    // WindowManager::mainWindow()->discharge();
+    WindowManager::mainWindow()->charge();
 }
 
 void ApplicationCore::onUserSessionStop()

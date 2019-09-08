@@ -477,12 +477,12 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         }
     });
 
-    connect(m_resetButton, &QPushButton::clicked, this, &ThemeChooserWidget::discharge);
+    connect(m_resetButton, &QPushButton::clicked, this, &ThemeChooserWidget::charge);
     connect(m_saveButton, &QPushButton::clicked, this, &ThemeChooserWidget::save);
     connect(m_seeRunningButton, &QPushButton::clicked, this, &ThemeChooserWidget::run);
 }
 
-void ThemeChooserWidget::discharge()
+void ThemeChooserWidget::charge()
 {
     m_stylesCombo->setCurrentIndex(0);
     m_themesCombo->setCurrentIndex(0);

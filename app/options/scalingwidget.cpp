@@ -21,7 +21,7 @@ ScalingWidget::ScalingWidget(QWidget *parent) : QGroupBox(parent)
     connect(m_noScalingButton, &QRadioButton::clicked, this, &ScalingWidget::saveTheme);
 }
 
-void ScalingWidget::discharge()
+void ScalingWidget::charge()
 {
     if (!ProjectManager::isStarted())
         return;

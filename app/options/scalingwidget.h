@@ -14,7 +14,7 @@ public:
     explicit ScalingWidget(QWidget* parent = nullptr);
 
 public slots:
-    void discharge();
+    void charge();
 
 private slots:
     void saveTheme();

@@ -423,6 +423,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     //resetState = saveState();
 }
 
+void MainWindow::charge()
+{
+    m_centralWidget->charge();
+}
+
 void MainWindow::discharge()
 {
     m_runController->discharge();
@@ -433,6 +438,7 @@ void MainWindow::discharge()
     m_inspectorPane->discharge();
     m_propertiesPane->discharge();
     m_assetsPane->discharge();
+    m_signalEditor->discharge();
 
     showLeftPanes(true);
     showRightPanes(true);

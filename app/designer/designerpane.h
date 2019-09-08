@@ -23,13 +23,33 @@ public:
     DesignerView* designerView() const;
     AnchorEditor* anchorEditor() const;
 
+    QToolButton* refreshButton() const;
+    QToolButton* clearButton() const;
+    QToolButton* anchorsButton() const;
+    QToolButton* snappingButton() const;
+    QToolButton* gridViewButton() const;
+    QToolButton* guidelinesButton() const;
+    QToolButton* sceneSettingsButton() const;
+    QToolButton* themeSettingsButton() const;
+    QComboBox* zoomLevelComboBox() const;
+    QComboBox* themeComboBox() const;
+
+    QAction* toggleSelectionAction() const;
+    QAction* selectAllAction() const;
+    QAction* sendBackAction() const;
+    QAction* bringFrontAction() const;
+    QAction* cutAction() const;
+    QAction* copyAction() const;
+    QAction* pasteAction() const;
+    QAction* deleteAction() const;
+    QAction* deleteAllAction() const;
+    QAction* moveLeftAction() const;
+    QAction* moveRightAction() const;
+    QAction* moveUpAction() const;
+    QAction* moveDownAction() const;
+
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
-
-private:
-    void updateIcons();
-    void changeEvent(QEvent* event) override;
-    void contextMenuEvent(QContextMenuEvent* event) override;
 
 private:
     QMenu* m_menu;
@@ -43,8 +63,6 @@ private:
     QToolButton* m_snappingButton;
     QToolButton* m_gridViewButton;
     QToolButton* m_guidelinesButton;
-    QToolButton* m_controlOutlineButton;
-    QToolButton* m_backgroundTextureButton;
     QToolButton* m_sceneSettingsButton;
     QToolButton* m_themeSettingsButton;
     QComboBox* m_zoomLevelComboBox;

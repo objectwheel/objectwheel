@@ -27,6 +27,7 @@ public:
     DesignerController* designerController() const;
 
 public slots:
+    void charge();
     void discharge();
 
 private slots:

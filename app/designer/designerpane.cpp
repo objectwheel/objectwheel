@@ -2,17 +2,23 @@
 #include <designerview.h>
 #include <anchoreditor.h>
 #include <transparentstyle.h>
-#include <paintutils.h>
+#include <utilityfunctions.h>
 #include <designersettings.h>
 #include <scenesettings.h>
 
 #include <QMenu>
-#include <QEvent>
 #include <QToolBar>
 #include <QVBoxLayout>
-#include <QContextMenuEvent>
 #include <QToolButton>
 #include <QComboBox>
+
+static QString symbol(const QToolButton* toolButton)
+{
+    const QKeySequence& seq = toolButton->shortcut();
+    if (seq.isEmpty())
+        return QStringLiteral("");
+    return QStringLiteral(" (%1)").arg(seq.toString(QKeySequence::NativeText));
+}
 
 DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_menu(new QMenu(this))
@@ -26,8 +32,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_snappingButton(new QToolButton(this))
   , m_gridViewButton(new QToolButton(this))
   , m_guidelinesButton(new QToolButton(this))
-  , m_controlOutlineButton(new QToolButton(this))
-  , m_backgroundTextureButton(new QToolButton(this))
   , m_sceneSettingsButton(new QToolButton(this))
   , m_themeSettingsButton(new QToolButton(this))
   , m_zoomLevelComboBox(new QComboBox(this))
@@ -48,7 +52,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_moveDownAction(m_menu->addAction(tr("Move Down")))
 {
     setFocusPolicy(Qt::NoFocus);
-    // setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred); default for pure widgets
+    setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {
@@ -72,8 +76,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addWidget(m_gridViewButton);
     m_toolBar->addWidget(m_guidelinesButton);
     m_toolBar->addSeparator();
-    m_toolBar->addWidget(m_controlOutlineButton);
-    m_toolBar->addWidget(m_backgroundTextureButton);
     m_toolBar->addWidget(m_zoomLevelComboBox);
     m_toolBar->addWidget(m_sceneSettingsButton);
     m_toolBar->addSeparator();
@@ -86,38 +88,33 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_snappingButton->setCursor(Qt::PointingHandCursor);
     m_gridViewButton->setCursor(Qt::PointingHandCursor);
     m_guidelinesButton->setCursor(Qt::PointingHandCursor);
-    m_controlOutlineButton->setCursor(Qt::PointingHandCursor);
-    m_backgroundTextureButton->setCursor(Qt::PointingHandCursor);
     m_zoomLevelComboBox->setCursor(Qt::PointingHandCursor);
     m_sceneSettingsButton->setCursor(Qt::PointingHandCursor);
     m_themeComboBox->setCursor(Qt::PointingHandCursor);
     m_themeSettingsButton->setCursor(Qt::PointingHandCursor);
 
-    m_refreshButton->setToolTip(tr("Refresh Control Images"));
-    m_clearButton->setToolTip(tr("Clear Controls on the Form"));
-    m_anchorsButton->setToolTip(tr("Show/Hide Anchors"));
-    m_snappingButton->setToolTip(tr("Enable/Disable Snapping"));
-    m_gridViewButton->setToolTip(tr("Enable/Disable Grid View Dots"));
-    m_guidelinesButton->setToolTip(tr("Enable/Disable Guidelines"));
-    m_controlOutlineButton->setToolTip(tr("Change Control Outline Decoration"));
-    m_backgroundTextureButton->setToolTip(tr("Change Scene Background Texture"));
-    m_zoomLevelComboBox->setToolTip(tr("Change Zoom Level of the Scene"));
-    m_sceneSettingsButton->setToolTip(tr("Open Scene Settings"));
-    m_themeComboBox->setToolTip(tr("Change Project Theme"));
-    m_themeSettingsButton->setToolTip(tr("Open Project Theme Settings"));
+    m_refreshButton->setShortcut(Qt::Key_R);
+    m_refreshButton->setToolTip(tr("Refresh control images") + symbol(m_refreshButton));
+    m_clearButton->setToolTip(tr("Clear controls on the form"));
+    m_anchorsButton->setToolTip(tr("Show/Hide anchors"));
+    m_snappingButton->setToolTip(tr("Enable/Disable snapping"));
+    m_gridViewButton->setToolTip(tr("Enable/Disable grid view dots"));
+    m_guidelinesButton->setToolTip(tr("Enable/Disable guidelines"));
+    m_zoomLevelComboBox->setToolTip(tr("Change zoom level of the scene"));
+    m_sceneSettingsButton->setToolTip(tr("Open scene settings"));
+    m_themeComboBox->setToolTip(tr("Change project theme"));
+    m_themeSettingsButton->setToolTip(tr("Open project theme settings"));
 
-    m_refreshButton->setFixedSize(QSize(22, 22));
-    m_clearButton->setFixedSize(QSize(22, 22));
-    m_anchorsButton->setFixedSize(QSize(22, 22));
-    m_snappingButton->setFixedSize(QSize(22, 22));
-    m_gridViewButton->setFixedSize(QSize(22, 22));
-    m_guidelinesButton->setFixedSize(QSize(22, 22));
-    m_controlOutlineButton->setFixedSize(QSize(22, 22));
-    m_backgroundTextureButton->setFixedSize(QSize(22, 22));
-    m_zoomLevelComboBox->setFixedSize(QSize(22, 22));
-    m_sceneSettingsButton->setFixedSize(QSize(22, 22));
-    m_themeComboBox->setFixedSize(QSize(22, 22));
-    m_themeSettingsButton->setFixedSize(QSize(22, 22));
+    m_refreshButton->setFixedSize(QSize(20, 20));
+    m_clearButton->setFixedSize(QSize(20, 20));
+    m_anchorsButton->setFixedSize(QSize(20, 20));
+    m_snappingButton->setFixedSize(QSize(20, 20));
+    m_gridViewButton->setFixedSize(QSize(20, 20));
+    m_guidelinesButton->setFixedSize(QSize(20, 20));
+    m_zoomLevelComboBox->setFixedHeight(20);
+    m_sceneSettingsButton->setFixedSize(QSize(20, 20));
+    m_themeComboBox->setFixedHeight(20);
+    m_themeSettingsButton->setFixedSize(QSize(20, 20));
 
     m_refreshButton->setIconSize(QSize(16, 16));
     m_clearButton->setIconSize(QSize(16, 16));
@@ -125,8 +122,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_snappingButton->setIconSize(QSize(16, 16));
     m_gridViewButton->setIconSize(QSize(16, 16));
     m_guidelinesButton->setIconSize(QSize(16, 16));
-    m_controlOutlineButton->setIconSize(QSize(16, 16));
-    m_backgroundTextureButton->setIconSize(QSize(16, 16));
     m_zoomLevelComboBox->setIconSize(QSize(16, 16));
     m_sceneSettingsButton->setIconSize(QSize(16, 16));
     m_themeComboBox->setIconSize(QSize(16, 16));
@@ -141,20 +136,25 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_sceneSettingsButton->setIcon(QIcon(QStringLiteral(":/images/designer/scene-settings.svg")));
     m_themeSettingsButton->setIcon(QIcon(QStringLiteral(":/images/designer/theme-settings.svg")));
 
-    using namespace PaintUtils;
-    const QPen pen(Qt::black, 2);
-    const qreal dpr = m_backgroundTextureButton->devicePixelRatioF();
-    m_backgroundTextureButton->addAction(new QAction(
-    {renderPropertyColorPixmap(QSize(13, 13), QString(":/images/texture.svg"), pen, dpr)}, tr("Checkered")));
-    m_backgroundTextureButton->addAction(new QAction(
-    {renderPropertyColorPixmap(QSize(13, 13), Qt::black, pen, dpr)}, tr("Black")));
-    m_backgroundTextureButton->addAction(new QAction(
-    {renderPropertyColorPixmap(QSize(13, 13), Qt::darkGray, pen, dpr)}, tr("Dark gray")));
-    m_backgroundTextureButton->addAction(new QAction(
-    {renderPropertyColorPixmap(QSize(13, 13), Qt::lightGray, pen, dpr)}, tr("Light gray")));
-    m_backgroundTextureButton->addAction(new QAction(
-    {renderPropertyColorPixmap(QSize(13, 13), Qt::white, pen, dpr)},tr("White")));
-    m_backgroundTextureButton->setIcon(m_backgroundTextureButton->actions().first()->icon());
+    m_themeComboBox->addItem(tr("Default"));
+    m_themeComboBox->addItem(tr("Fusion"));
+    m_themeComboBox->addItem(tr("Imagine"));
+    m_themeComboBox->addItem(tr("Material"));
+    m_themeComboBox->addItem(tr("Universal"));
+
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    m_zoomLevelComboBox->addItems(UtilityFunctions::zoomTexts());
+    m_zoomLevelComboBox->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
+
+    m_anchorsButton->setCheckable(true);
+    m_snappingButton->setCheckable(true);
+    m_gridViewButton->setCheckable(true);
+    m_guidelinesButton->setCheckable(true);
+
+    m_anchorsButton->setChecked(false);
+    m_snappingButton->setChecked(settings->snappingEnabled);
+    m_gridViewButton->setChecked(settings->showGridViewDots);
+    m_guidelinesButton->setChecked(settings->showGuideLines);
 
     TransparentStyle::attach(m_toolBar);
 
@@ -227,6 +227,121 @@ AnchorEditor* DesignerPane::anchorEditor() const
     return m_anchorEditor;
 }
 
+QToolButton* DesignerPane::refreshButton() const
+{
+    return m_refreshButton;
+}
+
+QToolButton* DesignerPane::clearButton() const
+{
+    return m_clearButton;
+}
+
+QToolButton* DesignerPane::anchorsButton() const
+{
+    return m_anchorsButton;
+}
+
+QToolButton* DesignerPane::snappingButton() const
+{
+    return m_snappingButton;
+}
+
+QToolButton* DesignerPane::gridViewButton() const
+{
+    return m_gridViewButton;
+}
+
+QToolButton* DesignerPane::guidelinesButton() const
+{
+    return m_guidelinesButton;
+}
+
+QToolButton* DesignerPane::sceneSettingsButton() const
+{
+    return m_sceneSettingsButton;
+}
+
+QToolButton* DesignerPane::themeSettingsButton() const
+{
+    return m_themeSettingsButton;
+}
+
+QComboBox* DesignerPane::zoomLevelComboBox() const
+{
+    return m_zoomLevelComboBox;
+}
+
+QComboBox* DesignerPane::themeComboBox() const
+{
+    return m_themeComboBox;
+}
+
+QAction* DesignerPane::toggleSelectionAction() const
+{
+    return m_toggleSelectionAction;
+}
+
+QAction* DesignerPane::selectAllAction() const
+{
+    return m_selectAllAction;
+}
+
+QAction* DesignerPane::sendBackAction() const
+{
+    return m_sendBackAction;
+}
+
+QAction* DesignerPane::bringFrontAction() const
+{
+    return m_bringFrontAction;
+}
+
+QAction* DesignerPane::cutAction() const
+{
+    return m_cutAction;
+}
+
+QAction* DesignerPane::copyAction() const
+{
+    return m_copyAction;
+}
+
+QAction* DesignerPane::pasteAction() const
+{
+    return m_pasteAction;
+}
+
+QAction* DesignerPane::deleteAction() const
+{
+    return m_deleteAction;
+}
+
+QAction* DesignerPane::deleteAllAction() const
+{
+    return m_deleteAllAction;
+}
+
+QAction* DesignerPane::moveLeftAction() const
+{
+    return m_moveLeftAction;
+}
+
+QAction* DesignerPane::moveRightAction() const
+{
+    return m_moveRightAction;
+}
+
+QAction* DesignerPane::moveUpAction() const
+{
+    return m_moveUpAction;
+}
+
+QAction* DesignerPane::moveDownAction() const
+{
+    return m_moveDownAction;
+}
+
 QSize DesignerPane::sizeHint() const
 {
     return {680, 680};
@@ -235,39 +350,4 @@ QSize DesignerPane::sizeHint() const
 QSize DesignerPane::minimumSizeHint() const
 {
     return {0, 0};
-}
-
-void DesignerPane::updateIcons()
-{
-    //    using namespace PaintUtils;
-    //    m_runDevicesButton->setIcon(QIcon(":/images/devices.png"));
-    //    m_runButton->setIcon(renderButtonIcon(":/images/run.svg", palette()));
-    //    m_stopButton->setIcon(renderButtonIcon(":/images/stop.svg", palette()));
-    //    m_preferencesButton->setIcon(renderButtonIcon(":/images/settings.svg", palette()));
-    //    m_projectsButton->setIcon(renderButtonIcon(":/images/projects.svg", palette()));
-
-    //    QStringList iconFileNames {
-    //        ":/images/left.svg",
-    //        ":/images/bottom.svg",
-    //        ":/images/right.svg"
-    //    };
-    //    for (int i = 0; i < iconFileNames.size(); ++i) {
-    //        QAction* action = m_segmentedBar->actions().at(i);
-    //        action->setIcon(renderButtonIcon(iconFileNames.at(i), palette()));
-    //    }
-}
-
-void DesignerPane::changeEvent(QEvent* event)
-{
-    if(event->type() == QEvent::ApplicationFontChange
-            || event->type() == QEvent::PaletteChange) {
-        updateIcons();
-    }
-    QWidget::changeEvent(event);
-}
-
-void DesignerPane::contextMenuEvent(QContextMenuEvent* event)
-{
-    event->accept();
-    m_menu->popup(event->globalPos());
 }

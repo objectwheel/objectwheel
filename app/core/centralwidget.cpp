@@ -173,12 +173,17 @@ DesignerController* CentralWidget::designerController() const
     return m_designerController;
 }
 
+void CentralWidget::charge()
+{
+    m_designerController->charge();
+    m_projectOptionsWidget->charge();
+}
+
 void CentralWidget::discharge()
 {
     m_outputController->discharge();
-    m_outputController->discharge();
+    m_designerController->discharge();
     m_qmlCodeEditorWidget->discharge();
-    m_projectOptionsWidget->discharge();
     m_buildsWidget->discharge();
     m_helpWidget->discharge();
 }

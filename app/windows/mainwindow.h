@@ -33,6 +33,7 @@ public:
     ToolboxPane* toolboxPane() const;
 
 public slots:
+    void charge();
     void discharge();
     void showLeftPanes(bool);
     void showRightPanes(bool);
