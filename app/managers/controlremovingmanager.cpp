@@ -55,19 +55,16 @@ void ControlRemovingManager::removeControl(Control* control, bool removeFromData
 
 void ControlRemovingManager::removeControls(const QList<Control*>& controls, bool removeFromDatabaseAlso)
 {
-    for (const Control* control : controls) {
-        if (control->type() == Form::Type) {
-            qWarning("ControlRemovingManager::removeControls() can't remove forms");
-            return;
-        }
-    }
-
     QList<Control*> finalList(controls);
     for (const Control* control : controls) {
+        if (control->type() == Form::Type)
+            continue;
         for (Control* childControl : control->childControls())
             finalList.removeOne(childControl);
     }
 
-    for (Control* control : finalList)
-        removeControl(control, removeFromDatabaseAlso);
+    for (Control* control : finalList) {
+        if (control->type() != Form::Type)
+            removeControl(control, removeFromDatabaseAlso);
+    }
 }

@@ -4,8 +4,6 @@
 #include <anchorline.h>
 
 class DesignerPane;
-class Control;
-
 class DesignerController final : public QObject
 {
     Q_OBJECT
@@ -64,7 +62,6 @@ signals:
 
 private:
     DesignerPane* m_designerPane;
-    Control* m_menuTargetControl;
 };
 
 #endif // DESIGNERCONTROLLER_H

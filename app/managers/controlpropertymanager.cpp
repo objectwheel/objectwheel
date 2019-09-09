@@ -405,6 +405,12 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         control->setParentItem(parentControl);
         control->setTransform(QTransform::fromTranslate(parentControl->margins().left(),
                                                         parentControl->margins().top()));
+        // FIXME: Fix this whenever we are able to manage raising or lowering
+        // Controls based on their indexes,
+        control->setFlag(Control::ItemStacksBehindParent,
+                control->property("z").toDouble() < 0
+                && !(parentControl && (parentControl->window() || parentControl->popup())));
+
     }
 
     if (options & CompressedCall) {

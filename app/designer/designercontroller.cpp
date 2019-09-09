@@ -5,6 +5,7 @@
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <controlpropertymanager.h>
+#include <controlremovingmanager.h>
 #include <form.h>
 #include <anchoreditor.h>
 #include <utilityfunctions.h>
@@ -77,7 +78,6 @@ static QString marginOffsetText(AnchorLine::Type type)
 
 DesignerController::DesignerController(DesignerPane* designerPane, QObject* parent) : QObject(parent)
   , m_designerPane(designerPane)
-  , m_menuTargetControl(nullptr)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     const DesignerScene* scene = m_designerPane->designerView()->scene();
@@ -197,25 +197,26 @@ void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
     const QPoint& globalPos = m_designerPane->mapToGlobal(pos);
     DesignerScene* scene = view->scene();
 
-    m_menuTargetControl = scene->topLevelControl(view->mapToScene(view->viewport()->mapFromGlobal(globalPos)));
+    if (scene->currentForm() == 0)
+        return;
 
-    if (m_menuTargetControl && !m_menuTargetControl->isSelected()) {
+    Control* controlUnderCursor = scene->topLevelControl(view->mapToScene(view->viewport()->mapFromGlobal(globalPos)));
+    if (controlUnderCursor && !controlUnderCursor->isSelected()) {
         scene->clearSelection();
-        m_menuTargetControl->setSelected(true);
+        controlUnderCursor->setSelected(true);
     }
-    bool emptySelection = scene->selectedControls().isEmpty();
-    m_designerPane->invertSelectionAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->sendBackAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->bringFrontAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->cutAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->copyAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->deleteAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->moveLeftAction()->setEnabled(m_menuTargetControl && !emptySelection);
-    m_designerPane->moveRightAction()->setEnabled(m_menuTargetControl && !emptySelection);
-    m_designerPane->moveUpAction()->setEnabled(m_menuTargetControl && !emptySelection);
-    m_designerPane->moveDownAction()->setEnabled(m_menuTargetControl && !emptySelection);
+
+    int selectedSize = scene->selectedControls().size();
+    m_designerPane->sendBackAction()->setEnabled(selectedSize == 1);
+    m_designerPane->bringFrontAction()->setEnabled(selectedSize == 1);
+    m_designerPane->cutAction()->setEnabled(selectedSize > 0);
+    m_designerPane->copyAction()->setEnabled(selectedSize > 0);
+    m_designerPane->deleteAction()->setEnabled(selectedSize > 0);
+    m_designerPane->moveLeftAction()->setEnabled(selectedSize > 0);
+    m_designerPane->moveRightAction()->setEnabled(selectedSize > 0);
+    m_designerPane->moveUpAction()->setEnabled(selectedSize > 0);
+    m_designerPane->moveDownAction()->setEnabled(selectedSize > 0);
     m_designerPane->menu()->exec(globalPos);
-    m_menuTargetControl = nullptr;
 }
 
 void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons buttons)
@@ -245,7 +246,8 @@ void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons
 
 void DesignerController::onAnchorClear()
 {
-    for (const QString& name : UtilityFunctions::anchorLineNames()) {
+    const QStringList& lines = UtilityFunctions::anchorLineNames();
+    for (const QString& name : lines) {
         ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
                                            name, QString(),
                                            ControlPropertyManager::SaveChanges);
@@ -253,7 +255,8 @@ void DesignerController::onAnchorClear()
                                            name, "undefined",
                                            ControlPropertyManager::UpdateRenderer);
     }
-    for (const QString& name : UtilityFunctions::anchorPropertyNames()) {
+    const QStringList& properties = UtilityFunctions::anchorPropertyNames();
+    for (const QString& name : properties) {
         if (name == "anchors.leftMargin"
                 || name == "anchors.rightMargin"
                 || name == "anchors.topMargin"
@@ -447,22 +450,66 @@ void DesignerController::onThemeComboBoxActivation(const QString& currentText)
 
 void DesignerController::onInvertSelectionActionTrigger()
 {
-
+    if (Form* currentForm = m_designerPane->designerView()->scene()->currentForm()) {
+        currentForm->setSelected(!currentForm->isSelected());
+        const QList<Control*>& childControls = currentForm->childControls();
+        for (Control* control : childControls)
+            control->setSelected(!control->isSelected());
+    }
 }
 
 void DesignerController::onSelectAllActionTrigger()
 {
-
+    if (Form* currentForm = m_designerPane->designerView()->scene()->currentForm()) {
+        currentForm->setSelected(true);
+        const QList<Control*>& childControls = currentForm->childControls();
+        for (Control* control : childControls)
+            control->setSelected(true);
+    }
 }
 
 void DesignerController::onSendBackActionTrigger()
 {
-
+    const QList<Control*>& selectedControls = m_designerPane->designerView()->scene()->selectedControls();
+    if (selectedControls.size() != 1)
+        return;
+    Control* control = selectedControls.first();
+    if (control->parentControl() == 0)
+        return;
+    ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+    if (control->gui() && !control->window() && !control->popup()) {
+        options = ControlPropertyManager::SaveChanges
+                | ControlPropertyManager::UpdateRenderer
+                | ControlPropertyManager::CompressedCall
+                | ControlPropertyManager::DontApplyDesigner;
+    }
+    qreal lowerZ = DesignerScene::lowerZ(control->parentControl());
+    // FIXME: Add this whenever we are able to manage raising or lowering
+    // Controls based on their indexes,
+    // if (lowerZ != control->zValue())
+        ControlPropertyManager::setZ(control, lowerZ - 1, options);
 }
 
 void DesignerController::onBringFrontActionTrigger()
 {
-
+    const QList<Control*>& selectedControls = m_designerPane->designerView()->scene()->selectedControls();
+    if (selectedControls.size() != 1)
+        return;
+    Control* control = selectedControls.first();
+    if (control->parentControl() == 0)
+        return;
+    ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+    if (control->gui() && !control->window() && !control->popup()) {
+        options = ControlPropertyManager::SaveChanges
+                | ControlPropertyManager::UpdateRenderer
+                | ControlPropertyManager::CompressedCall
+                | ControlPropertyManager::DontApplyDesigner;
+    }
+    qreal higherZ = DesignerScene::higherZ(control->parentControl());
+    // FIXME: Add this whenever we are able to manage raising or lowering
+    // Controls based on their indexes,
+    // if (higherZ != control->zValue())
+        ControlPropertyManager::setZ(control, higherZ + 1, options);
 }
 
 void DesignerController::onCutActionTrigger()
@@ -482,7 +529,7 @@ void DesignerController::onPasteActionTrigger()
 
 void DesignerController::onDeleteActionTrigger()
 {
-
+    ControlRemovingManager::removeControls(m_designerPane->designerView()->scene()->selectedControls(), true);
 }
 
 void DesignerController::onMoveLeftActionTrigger()
@@ -564,8 +611,16 @@ QList<Control*> DesignerController::movableSelectedAncestorControls(const QList<
     if (selectedControls.isEmpty())
         return movableSelectedAncestorControls.toList();
 
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
+
+    if (scene->currentForm() && scene->currentForm()->isSelected()) {
+        movableSelectedAncestorControls.insert(scene->currentForm());
+        return movableSelectedAncestorControls.toList();
+    }
+
     Control* ancestor = selectedControls.first();
     Control* myMovableSelectedAncestorControl = ancestor;
+
     while (Control* parent = ancestor->parentControl()) {
         if (parent->isSelected() && (parent->flags() & Control::ItemIsMovable))
             myMovableSelectedAncestorControl = parent;
@@ -582,9 +637,11 @@ QList<Control*> DesignerController::movableSelectedAncestorControls(const QList<
     movableSelectedAncestorControls.remove(myMovableSelectedAncestorControl);
 
     const QList<Control*>& ancestorSiblings = myMovableSelectedAncestorControl->siblings();
-    for (Control* movableSelectedAncestorControl : movableSelectedAncestorControls.toList()) {
+    const QList<Control*>& controls = movableSelectedAncestorControls.toList();
+    for (Control* movableSelectedAncestorControl : controls) {
         if (!ancestorSiblings.contains(movableSelectedAncestorControl)) {
-            for (Control* childControl : movableSelectedAncestorControl->childControls())
+            const QList<Control*>& childControls = movableSelectedAncestorControl->childControls();
+            for (Control* childControl : childControls)
                 childControl->setSelected(false);
             movableSelectedAncestorControl->setSelected(false);
             movableSelectedAncestorControls.remove(movableSelectedAncestorControl);

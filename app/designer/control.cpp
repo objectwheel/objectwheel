@@ -34,7 +34,6 @@ Control::Control(Control* parent) : DesignerItem(parent)
     setFlag(ItemIsMovable);
     setFlag(ItemIsSelectable);
     setFlag(ItemSendsGeometryChanges);
-    setFlag(ItemNegativeZStacksBehindParent);
 }
 
 Control::~Control()
@@ -186,6 +185,12 @@ void Control::setRenderInfo(const RenderInfo& info)
     const bool previouslyOverlayPopup = overlayPopup();
 
     m_renderInfo = info;
+
+    // FIXME: Fix this whenever we are able to manage raising or lowering
+    // Controls based on their indexes,
+    setFlag(ItemStacksBehindParent,
+            property("z").toDouble() < 0
+            && !(parentControl() && (parentControl()->window() || parentControl()->popup())));
 
     updateAnchors();
     setResizable(gui());
