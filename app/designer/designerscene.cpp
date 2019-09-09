@@ -18,6 +18,7 @@
 #include <QGraphicsView>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
+  , m_cursorShape(Qt::CustomCursor)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
   , m_anchorLayer(new AnchorLayer)
@@ -136,14 +137,18 @@ void DesignerScene::shrinkSceneRect()
     setSceneRect(visibleItemsBoundingRect().adjusted(-10, -10, 10, 10));
 }
 
-void DesignerScene::unsetCursor() const
+void DesignerScene::unsetCursor()
 {
-    view()->viewport()->unsetCursor();
+    if (m_cursorShape != Qt::CustomCursor) {
+        view()->viewport()->setCursor(m_cursorShape);
+        m_cursorShape = Qt::CustomCursor;
+    }
 }
 
-void DesignerScene::setCursor(Qt::CursorShape cursor) const
+void DesignerScene::setCursor(Qt::CursorShape cursorShape)
 {
-    view()->viewport()->setCursor(cursor);
+    m_cursorShape = view()->viewport()->cursor().shape();
+    view()->viewport()->setCursor(cursorShape);
 }
 
 void DesignerScene::prepareDragLayer(const DesignerItem* item)

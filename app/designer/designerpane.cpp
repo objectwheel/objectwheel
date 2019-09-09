@@ -34,7 +34,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_zoomLevelComboBox(new QComboBox(this))
   , m_themeComboBox(new QComboBox(this))
 
-  , m_toggleSelectionAction(new QAction(this))
+  , m_invertSelectionAction(new QAction(this))
   , m_selectAllAction(new QAction(this))
   , m_sendBackAction(new QAction(this))
   , m_bringFrontAction(new QAction(this))
@@ -140,7 +140,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     TransparentStyle::attach(m_toolBar);
 
-    m_toggleSelectionAction->setShortcutVisibleInContextMenu(true);
+    m_invertSelectionAction->setShortcutVisibleInContextMenu(true);
     m_selectAllAction->setShortcutVisibleInContextMenu(true);
     m_sendBackAction->setShortcutVisibleInContextMenu(true);
     m_bringFrontAction->setShortcutVisibleInContextMenu(true);
@@ -154,7 +154,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveUpAction->setShortcutVisibleInContextMenu(true);
     m_moveDownAction->setShortcutVisibleInContextMenu(true);
 
-    m_toggleSelectionAction->setText(tr("Toggle Selection"));
+    m_invertSelectionAction->setText(tr("Invert Selection"));
     m_selectAllAction->setText(tr("Select All"));
     m_sendBackAction->setText(tr("Send to Back"));
     m_bringFrontAction->setText(tr("Bring to Front"));
@@ -168,7 +168,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveUpAction->setText(tr("Move Up"));
     m_moveDownAction->setText(tr("Move Down"));
 
-    m_toggleSelectionAction->setIcon(QIcon(QStringLiteral(":/images/designer/toggle-selection.svg")));
+    m_invertSelectionAction->setIcon(QIcon(QStringLiteral(":/images/designer/invert-selection.svg")));
     m_selectAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/select-all.svg")));
     m_sendBackAction->setIcon(QIcon(QStringLiteral(":/images/designer/send-to-back.svg")));
     m_bringFrontAction->setIcon(QIcon(QStringLiteral(":/images/designer/bring-to-front.svg")));
@@ -198,7 +198,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveUpAction->setShortcut(Qt::Key_Up);
     m_moveDownAction->setShortcut(Qt::Key_Down);
 
-    addAction(m_toggleSelectionAction);
+    addAction(m_invertSelectionAction);
     addAction(m_selectAllAction);
     addAction(m_sendBackAction);
     addAction(m_bringFrontAction);
@@ -212,7 +212,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     addAction(m_moveUpAction);
     addAction(m_moveDownAction);
 
-    m_menu->addAction(m_toggleSelectionAction);
+    m_menu->addAction(m_invertSelectionAction);
     m_menu->addAction(m_selectAllAction);
     m_menu->addAction(m_sendBackAction);
     m_menu->addAction(m_bringFrontAction);
@@ -301,9 +301,9 @@ QComboBox* DesignerPane::themeComboBox() const
     return m_themeComboBox;
 }
 
-QAction* DesignerPane::toggleSelectionAction() const
+QAction* DesignerPane::invertSelectionAction() const
 {
-    return m_toggleSelectionAction;
+    return m_invertSelectionAction;
 }
 
 QAction* DesignerPane::selectAllAction() const

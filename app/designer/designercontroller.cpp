@@ -10,6 +10,7 @@
 #include <utilityfunctions.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <private/qgraphicsitem_p.h>
 
 #include <QToolButton>
 #include <QJsonObject>
@@ -140,8 +141,8 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
     connect(m_designerPane->themeComboBox(), qOverload<const QString&>(&QComboBox::activated),
             this, &DesignerController::onThemeComboBoxActivation);
 
-    connect(m_designerPane->toggleSelectionAction(), &QAction::triggered,
-            this, &DesignerController::onToggleSelectionActionTrigger);
+    connect(m_designerPane->invertSelectionAction(), &QAction::triggered,
+            this, &DesignerController::onInvertSelectionActionTrigger);
     connect(m_designerPane->selectAllAction(), &QAction::triggered,
             this, &DesignerController::onSelectAllActionTrigger);
     connect(m_designerPane->sendBackAction(), &QAction::triggered,
@@ -193,20 +194,26 @@ void DesignerController::discharge()
 void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
 {
     const DesignerView* view = m_designerPane->designerView();
-    const DesignerScene* scene = view->scene();
     const QPoint& globalPos = m_designerPane->mapToGlobal(pos);
+    DesignerScene* scene = view->scene();
 
     m_menuTargetControl = scene->topLevelControl(view->mapToScene(view->viewport()->mapFromGlobal(globalPos)));
-    m_designerPane->toggleSelectionAction()->setEnabled(m_menuTargetControl);
+
+    if (m_menuTargetControl && !m_menuTargetControl->isSelected()) {
+        scene->clearSelection();
+        m_menuTargetControl->setSelected(true);
+    }
+    bool emptySelection = scene->selectedControls().isEmpty();
+    m_designerPane->invertSelectionAction()->setEnabled(m_menuTargetControl);
     m_designerPane->sendBackAction()->setEnabled(m_menuTargetControl);
     m_designerPane->bringFrontAction()->setEnabled(m_menuTargetControl);
     m_designerPane->cutAction()->setEnabled(m_menuTargetControl);
     m_designerPane->copyAction()->setEnabled(m_menuTargetControl);
     m_designerPane->deleteAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->moveLeftAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->moveRightAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->moveUpAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->moveDownAction()->setEnabled(m_menuTargetControl);
+    m_designerPane->moveLeftAction()->setEnabled(m_menuTargetControl && !emptySelection);
+    m_designerPane->moveRightAction()->setEnabled(m_menuTargetControl && !emptySelection);
+    m_designerPane->moveUpAction()->setEnabled(m_menuTargetControl && !emptySelection);
+    m_designerPane->moveDownAction()->setEnabled(m_menuTargetControl && !emptySelection);
     m_designerPane->menu()->exec(globalPos);
     m_menuTargetControl = nullptr;
 }
@@ -438,7 +445,7 @@ void DesignerController::onThemeComboBoxActivation(const QString& currentText)
 
 }
 
-void DesignerController::onToggleSelectionActionTrigger()
+void DesignerController::onInvertSelectionActionTrigger()
 {
 
 }
@@ -480,69 +487,110 @@ void DesignerController::onDeleteActionTrigger()
 
 void DesignerController::onMoveLeftActionTrigger()
 {
-
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
+    const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
+    for (Control* control : controls) {
+        ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+        if (control->type() != Form::Type) {
+            options = ControlPropertyManager::SaveChanges
+                    | ControlPropertyManager::UpdateRenderer
+                    | ControlPropertyManager::CompressedCall
+                    | ControlPropertyManager::DontApplyDesigner;
+        }
+        ControlPropertyManager::setPos(control, control->pos() +
+                                       QPointF(-DesignerSettings::sceneSettings()->gridSize, 0),
+                                       options);
+    }
 }
 
 void DesignerController::onMoveRightActionTrigger()
 {
-
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
+    const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
+    for (Control* control : controls) {
+        ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+        if (control->type() != Form::Type) {
+            options = ControlPropertyManager::SaveChanges
+                    | ControlPropertyManager::UpdateRenderer
+                    | ControlPropertyManager::CompressedCall
+                    | ControlPropertyManager::DontApplyDesigner;
+        }
+        ControlPropertyManager::setPos(control, control->pos() +
+                                       QPointF(DesignerSettings::sceneSettings()->gridSize, 0),
+                                       options);
+    }
 }
 
 void DesignerController::onMoveUpActionTrigger()
 {
-
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
+    const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
+    for (Control* control : controls) {
+        ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+        if (control->type() != Form::Type) {
+            options = ControlPropertyManager::SaveChanges
+                    | ControlPropertyManager::UpdateRenderer
+                    | ControlPropertyManager::CompressedCall
+                    | ControlPropertyManager::DontApplyDesigner;
+        }
+        ControlPropertyManager::setPos(control, control->pos() +
+                                       QPointF(0, -DesignerSettings::sceneSettings()->gridSize),
+                                       options);
+    }
 }
-#include <private/qgraphicsitem_p.h>
+
 void DesignerController::onMoveDownActionTrigger()
 {
-    DesignerScene* scene = m_designerPane->designerView()->scene();
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
+    const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
+    for (Control* control : controls) {
+        ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
+        if (control->type() != Form::Type) {
+            options = ControlPropertyManager::SaveChanges
+                    | ControlPropertyManager::UpdateRenderer
+                    | ControlPropertyManager::CompressedCall
+                    | ControlPropertyManager::DontApplyDesigner;
+        }
+        ControlPropertyManager::setPos(control, control->pos() +
+                                       QPointF(0, DesignerSettings::sceneSettings()->gridSize),
+                                       options);
+    }
+}
+
+QList<Control*> DesignerController::movableSelectedAncestorControls(const QList<Control*>& selectedControls) const
+{
     QSet<Control*> movableSelectedAncestorControls;
-    const QList<Control*>& selectedControls = scene->selectedControls();
 
-    if (m_menuTargetControl == 0) {
-        if (!selectedControls.isEmpty()) {
-            Control* ancestor = selectedControls.first();
-            Control* myMovableSelectedAncestorControl = ancestor;
-            while (Control* parent = ancestor->parentControl()) {
-                if (parent->isSelected() && (parent->flags() & Control::ItemIsMovable))
-                    myMovableSelectedAncestorControl = parent;
-                ancestor = parent;
-            }
+    if (selectedControls.isEmpty())
+        return movableSelectedAncestorControls.toList();
 
-            for (Control* selectedControl : selectedControls) {
-                if (selectedControl->flags() & Control::ItemIsMovable) {
-                    if (!QGraphicsItemPrivate::movableAncestorIsSelected(selectedControl))
-                        movableSelectedAncestorControls.insert(selectedControl);
-                }
-            }
-
-            movableSelectedAncestorControls.remove(myMovableSelectedAncestorControl);
-
-            const QList<Control*>& ancestorSiblings = myMovableSelectedAncestorControl->siblings();
-            for (Control* movableSelectedAncestorControl : movableSelectedAncestorControls.toList()) {
-                if (!ancestorSiblings.contains(movableSelectedAncestorControl)) {
-                    for (Control* childControl : movableSelectedAncestorControl->childControls())
-                        childControl->setSelected(false);
-                    movableSelectedAncestorControl->setSelected(false);
-                    movableSelectedAncestorControls.remove(movableSelectedAncestorControl);
-                }
-            }
-
-            movableSelectedAncestorControls.insert(myMovableSelectedAncestorControl);
-        }
-    } else {
-        movableSelectedAncestorControls.insert(m_menuTargetControl);
+    Control* ancestor = selectedControls.first();
+    Control* myMovableSelectedAncestorControl = ancestor;
+    while (Control* parent = ancestor->parentControl()) {
+        if (parent->isSelected() && (parent->flags() & Control::ItemIsMovable))
+            myMovableSelectedAncestorControl = parent;
+        ancestor = parent;
     }
 
-    for (Control* movableSelectedAncestorControl : movableSelectedAncestorControls) {
-        if (movableSelectedAncestorControl->type() != Form::Type) {
-            ControlPropertyManager::setPos(movableSelectedAncestorControl,
-                                           movableSelectedAncestorControl->pos() +
-                                           QPointF(0, DesignerSettings::sceneSettings()->gridSize),
-                                           ControlPropertyManager::SaveChanges |
-                                           ControlPropertyManager::UpdateRenderer |
-                                           ControlPropertyManager::CompressedCall |
-                                           ControlPropertyManager::DontApplyDesigner);
+    for (Control* selectedControl : selectedControls) {
+        if (selectedControl->flags() & Control::ItemIsMovable) {
+            if (!QGraphicsItemPrivate::movableAncestorIsSelected(selectedControl))
+                movableSelectedAncestorControls.insert(selectedControl);
         }
     }
+
+    movableSelectedAncestorControls.remove(myMovableSelectedAncestorControl);
+
+    const QList<Control*>& ancestorSiblings = myMovableSelectedAncestorControl->siblings();
+    for (Control* movableSelectedAncestorControl : movableSelectedAncestorControls.toList()) {
+        if (!ancestorSiblings.contains(movableSelectedAncestorControl)) {
+            for (Control* childControl : movableSelectedAncestorControl->childControls())
+                childControl->setSelected(false);
+            movableSelectedAncestorControl->setSelected(false);
+            movableSelectedAncestorControls.remove(movableSelectedAncestorControl);
+        }
+    }
+
+    movableSelectedAncestorControls.insert(myMovableSelectedAncestorControl);
+    return movableSelectedAncestorControls.toList();
 }

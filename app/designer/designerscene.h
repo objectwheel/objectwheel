@@ -28,8 +28,8 @@ public:
     void setCurrentForm(Form* currentForm);
 
     void shrinkSceneRect();
-    void unsetCursor() const;
-    void setCursor(Qt::CursorShape cursor) const;
+    void unsetCursor();
+    void setCursor(Qt::CursorShape cursorShape);
     void prepareDragLayer(const DesignerItem* item);
     bool isLayerItem(const DesignerItem* item) const;
     bool showAllAnchors() const;
@@ -104,6 +104,7 @@ signals:
     void anchorEditorActivated(Control* sourceControl, Control* targetControl);
 
 private:
+    Qt::CursorShape m_cursorShape;
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
     AnchorLayer* m_anchorLayer;

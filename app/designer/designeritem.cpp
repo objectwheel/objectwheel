@@ -287,7 +287,7 @@ void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_mousePressPoint = event->pos();
-    if (scene() && m_mousePressCursorShape != Qt::CustomCursor)
+    if (scene() && (event->buttons() & Qt::LeftButton) && m_mousePressCursorShape != Qt::CustomCursor)
         scene()->setCursor(m_mousePressCursorShape);
     QGraphicsObject::mousePressEvent(event);
 }

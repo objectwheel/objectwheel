@@ -43,7 +43,7 @@ private slots:
     void onZoomLevelComboBoxActivation(const QString& currentText);
     void onThemeComboBoxActivation(const QString& currentText);
 
-    void onToggleSelectionActionTrigger();
+    void onInvertSelectionActionTrigger();
     void onSelectAllActionTrigger();
     void onSendBackActionTrigger();
     void onBringFrontActionTrigger();
@@ -55,6 +55,9 @@ private slots:
     void onMoveRightActionTrigger();
     void onMoveUpActionTrigger();
     void onMoveDownActionTrigger();
+
+private:
+    QList<Control*> movableSelectedAncestorControls(const QList<Control*>& selectedControls) const;
 
 signals:
     void codeEditorTriggered(Control* control, const QString& relativeFileName);

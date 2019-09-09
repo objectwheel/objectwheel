@@ -34,7 +34,7 @@ public:
     QComboBox* zoomLevelComboBox() const;
     QComboBox* themeComboBox() const;
 
-    QAction* toggleSelectionAction() const;
+    QAction* invertSelectionAction() const;
     QAction* selectAllAction() const;
     QAction* sendBackAction() const;
     QAction* bringFrontAction() const;
@@ -68,7 +68,7 @@ private:
     QComboBox* m_zoomLevelComboBox;
     QComboBox* m_themeComboBox;
 
-    QAction* m_toggleSelectionAction;
+    QAction* m_invertSelectionAction;
     QAction* m_selectAllAction;
     QAction* m_sendBackAction;
     QAction* m_bringFrontAction;
