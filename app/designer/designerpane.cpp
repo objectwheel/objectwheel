@@ -2,9 +2,6 @@
 #include <designerview.h>
 #include <anchoreditor.h>
 #include <transparentstyle.h>
-#include <utilityfunctions.h>
-#include <designersettings.h>
-#include <scenesettings.h>
 
 #include <QMenu>
 #include <QToolBar>
@@ -136,25 +133,10 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_sceneSettingsButton->setIcon(QIcon(QStringLiteral(":/images/designer/scene-settings.svg")));
     m_themeSettingsButton->setIcon(QIcon(QStringLiteral(":/images/designer/theme-settings.svg")));
 
-    m_themeComboBox->addItem(tr("Default"));
-    m_themeComboBox->addItem(tr("Fusion"));
-    m_themeComboBox->addItem(tr("Imagine"));
-    m_themeComboBox->addItem(tr("Material"));
-    m_themeComboBox->addItem(tr("Universal"));
-
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
-    m_zoomLevelComboBox->addItems(UtilityFunctions::zoomTexts());
-    m_zoomLevelComboBox->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
-
     m_anchorsButton->setCheckable(true);
     m_snappingButton->setCheckable(true);
     m_gridViewButton->setCheckable(true);
     m_guidelinesButton->setCheckable(true);
-
-    m_anchorsButton->setChecked(false);
-    m_snappingButton->setChecked(settings->snappingEnabled);
-    m_gridViewButton->setChecked(settings->showGridViewDots);
-    m_guidelinesButton->setChecked(settings->showGuideLines);
 
     TransparentStyle::attach(m_toolBar);
 

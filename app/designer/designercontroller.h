@@ -32,6 +32,17 @@ private slots:
     void onAnchorAlignmentActivation(bool aligned);
     void onAnchorEditorActivation(Control* sourceControl, Control* targetControl);
 
+    void onRefreshButtonClick();
+    void onClearButtonClick();
+    void onAnchorsButtonClick();
+    void onSnappingButtonClick();
+    void onGridViewButtonClick();
+    void onGuidelinesButtonClick();
+    void onSceneSettingsButtonClick();
+    void onThemeSettingsButtonClick();
+    void onZoomLevelComboBoxActivation(const QString& currentText);
+    void onThemeComboBoxActivation(const QString& currentText);
+
 signals:
     void codeEditorTriggered(Control* control, const QString& relativeFileName);
 

@@ -8,7 +8,10 @@
 #include <control.h>
 #include <anchoreditor.h>
 #include <utilityfunctions.h>
+#include <designersettings.h>
+#include <scenesettings.h>
 
+#include <QToolButton>
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QComboBox>
@@ -74,11 +77,28 @@ static QString marginOffsetText(AnchorLine::Type type)
 DesignerController::DesignerController(DesignerPane* designerPane, QObject* parent) : QObject(parent)
   , m_designerPane(designerPane)
 {
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
     const DesignerScene* scene = m_designerPane->designerView()->scene();
+
+    m_designerPane->themeComboBox()->addItem(QStringLiteral("Default"));
+    m_designerPane->themeComboBox()->addItem(QStringLiteral("Fusion"));
+    m_designerPane->themeComboBox()->addItem(QStringLiteral("Imagine"));
+    m_designerPane->themeComboBox()->addItem(QStringLiteral("Material"));
+    m_designerPane->themeComboBox()->addItem(QStringLiteral("Universal"));
+
+    m_designerPane->zoomLevelComboBox()->addItems(UtilityFunctions::zoomTexts());
+    m_designerPane->zoomLevelComboBox()->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
+
+    m_designerPane->anchorsButton()->setChecked(false);
+    m_designerPane->snappingButton()->setChecked(settings->snappingEnabled);
+    m_designerPane->gridViewButton()->setChecked(settings->showGridViewDots);
+    m_designerPane->guidelinesButton()->setChecked(settings->showGuideLines);
+
     connect(m_designerPane, &DesignerPane::customContextMenuRequested,
             this, &DesignerController::onCustomContextMenuRequest);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
             this, &DesignerController::onControlDoubleClick);
+
     connect(m_designerPane->anchorEditor(), &AnchorEditor::anchored,
             this, &DesignerController::onAnchor);
     connect(m_designerPane->anchorEditor(), &AnchorEditor::filled,
@@ -97,6 +117,27 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onAnchorSourceControlActivation);
     connect(scene, &DesignerScene::anchorEditorActivated,
             this, &DesignerController::onAnchorEditorActivation);
+
+    connect(m_designerPane->refreshButton(), &QToolButton::toggled,
+            this, &DesignerController::onRefreshButtonClick);
+    connect(m_designerPane->clearButton(), &QToolButton::toggled,
+            this, &DesignerController::onClearButtonClick);
+    connect(m_designerPane->anchorsButton(), &QToolButton::toggled,
+            this, &DesignerController::onAnchorsButtonClick);
+    connect(m_designerPane->snappingButton(), &QToolButton::toggled,
+            this, &DesignerController::onSnappingButtonClick);
+    connect(m_designerPane->gridViewButton(), &QToolButton::toggled,
+            this, &DesignerController::onGridViewButtonClick);
+    connect(m_designerPane->guidelinesButton(), &QToolButton::toggled,
+            this, &DesignerController::onGuidelinesButtonClick);
+    connect(m_designerPane->sceneSettingsButton(), &QToolButton::toggled,
+            this, &DesignerController::onSceneSettingsButtonClick);
+    connect(m_designerPane->themeSettingsButton(), &QToolButton::toggled,
+            this, &DesignerController::onThemeSettingsButtonClick);
+    connect(m_designerPane->zoomLevelComboBox(), qOverload<const QString&>(&QComboBox::activated),
+            this, &DesignerController::onZoomLevelComboBoxActivation);
+    connect(m_designerPane->themeComboBox(), qOverload<const QString&>(&QComboBox::activated),
+            this, &DesignerController::onThemeComboBoxActivation);
 }
 
 void DesignerController::charge()
@@ -136,7 +177,6 @@ void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
     m_designerPane->moveRightAction()->setEnabled(m_menuTargetControl);
     m_designerPane->moveUpAction()->setEnabled(m_menuTargetControl);
     m_designerPane->moveDownAction()->setEnabled(m_menuTargetControl);
-
     m_designerPane->menu()->popup(globalPos);
 }
 
@@ -315,4 +355,54 @@ void DesignerController::onAnchorEditorActivation(Control* sourceControl, Contro
     scene->clearSelection();
     for (Control* control : selection)
         control->setSelected(true);
+}
+
+void DesignerController::onRefreshButtonClick()
+{
+
+}
+
+void DesignerController::onClearButtonClick()
+{
+
+}
+
+void DesignerController::onAnchorsButtonClick()
+{
+
+}
+
+void DesignerController::onSnappingButtonClick()
+{
+
+}
+
+void DesignerController::onGridViewButtonClick()
+{
+
+}
+
+void DesignerController::onGuidelinesButtonClick()
+{
+
+}
+
+void DesignerController::onSceneSettingsButtonClick()
+{
+
+}
+
+void DesignerController::onThemeSettingsButtonClick()
+{
+
+}
+
+void DesignerController::onZoomLevelComboBoxActivation(const QString& currentText)
+{
+
+}
+
+void DesignerController::onThemeComboBoxActivation(const QString& currentText)
+{
+
 }
