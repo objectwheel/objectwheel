@@ -5,7 +5,7 @@
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <controlpropertymanager.h>
-#include <control.h>
+#include <form.h>
 #include <anchoreditor.h>
 #include <utilityfunctions.h>
 #include <designersettings.h>
@@ -76,6 +76,7 @@ static QString marginOffsetText(AnchorLine::Type type)
 
 DesignerController::DesignerController(DesignerPane* designerPane, QObject* parent) : QObject(parent)
   , m_designerPane(designerPane)
+  , m_menuTargetControl(nullptr)
 {
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     const DesignerScene* scene = m_designerPane->designerView()->scene();
@@ -138,12 +139,41 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onZoomLevelComboBoxActivation);
     connect(m_designerPane->themeComboBox(), qOverload<const QString&>(&QComboBox::activated),
             this, &DesignerController::onThemeComboBoxActivation);
+
+    connect(m_designerPane->toggleSelectionAction(), &QAction::triggered,
+            this, &DesignerController::onToggleSelectionActionTrigger);
+    connect(m_designerPane->selectAllAction(), &QAction::triggered,
+            this, &DesignerController::onSelectAllActionTrigger);
+    connect(m_designerPane->sendBackAction(), &QAction::triggered,
+            this, &DesignerController::onSendBackActionTrigger);
+    connect(m_designerPane->bringFrontAction(), &QAction::triggered,
+            this, &DesignerController::onBringFrontActionTrigger);
+    connect(m_designerPane->cutAction(), &QAction::triggered,
+            this, &DesignerController::onCutActionTrigger);
+    connect(m_designerPane->copyAction(), &QAction::triggered,
+            this, &DesignerController::onCopyActionTrigger);
+    connect(m_designerPane->pasteAction(), &QAction::triggered,
+            this, &DesignerController::onPasteActionTrigger);
+    connect(m_designerPane->deleteAction(), &QAction::triggered,
+            this, &DesignerController::onDeleteActionTrigger);
+    connect(m_designerPane->deleteAllAction(), &QAction::triggered,
+            this, &DesignerController::onClearButtonClick);
+    connect(m_designerPane->moveLeftAction(), &QAction::triggered,
+            this, &DesignerController::onMoveLeftActionTrigger);
+    connect(m_designerPane->moveRightAction(), &QAction::triggered,
+            this, &DesignerController::onMoveRightActionTrigger);
+    connect(m_designerPane->moveUpAction(), &QAction::triggered,
+            this, &DesignerController::onMoveUpActionTrigger);
+    connect(m_designerPane->moveDownAction(), &QAction::triggered,
+            this, &DesignerController::onMoveDownActionTrigger);
 }
 
 void DesignerController::charge()
 {
     if (!ProjectManager::isStarted())
         return;
+
+    m_designerPane->themeComboBox()->setCurrentIndex(0);
 
     const QJsonObject& object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
     const QString& theme = object.value("stylev2").toString();
@@ -177,7 +207,8 @@ void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
     m_designerPane->moveRightAction()->setEnabled(m_menuTargetControl);
     m_designerPane->moveUpAction()->setEnabled(m_menuTargetControl);
     m_designerPane->moveDownAction()->setEnabled(m_menuTargetControl);
-    m_designerPane->menu()->popup(globalPos);
+    m_designerPane->menu()->exec(globalPos);
+    m_menuTargetControl = nullptr;
 }
 
 void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons buttons)
@@ -246,7 +277,7 @@ void DesignerController::onAnchor(AnchorLine::Type sourceLineType, const AnchorL
         ControlPropertyManager::setBinding(m_designerPane->anchorEditor()->sourceControl(),
                                            "anchors." + anchorLineText(sourceLineType),
                                            cleanId(m_designerPane->anchorEditor()->sourceControl(),
-                                                         targetLine.control())
+                                                   targetLine.control())
                                            + "." + anchorLineText(targetLine.type()),
                                            ControlPropertyManager::SaveChanges |
                                            ControlPropertyManager::UpdateRenderer);
@@ -405,4 +436,113 @@ void DesignerController::onZoomLevelComboBoxActivation(const QString& currentTex
 void DesignerController::onThemeComboBoxActivation(const QString& currentText)
 {
 
+}
+
+void DesignerController::onToggleSelectionActionTrigger()
+{
+
+}
+
+void DesignerController::onSelectAllActionTrigger()
+{
+
+}
+
+void DesignerController::onSendBackActionTrigger()
+{
+
+}
+
+void DesignerController::onBringFrontActionTrigger()
+{
+
+}
+
+void DesignerController::onCutActionTrigger()
+{
+
+}
+
+void DesignerController::onCopyActionTrigger()
+{
+
+}
+
+void DesignerController::onPasteActionTrigger()
+{
+
+}
+
+void DesignerController::onDeleteActionTrigger()
+{
+
+}
+
+void DesignerController::onMoveLeftActionTrigger()
+{
+
+}
+
+void DesignerController::onMoveRightActionTrigger()
+{
+
+}
+
+void DesignerController::onMoveUpActionTrigger()
+{
+
+}
+#include <private/qgraphicsitem_p.h>
+void DesignerController::onMoveDownActionTrigger()
+{
+    DesignerScene* scene = m_designerPane->designerView()->scene();
+    QSet<Control*> movableSelectedAncestorControls;
+    const QList<Control*>& selectedControls = scene->selectedControls();
+
+    if (m_menuTargetControl == 0) {
+        if (!selectedControls.isEmpty()) {
+            Control* ancestor = selectedControls.first();
+            Control* myMovableSelectedAncestorControl = ancestor;
+            while (Control* parent = ancestor->parentControl()) {
+                if (parent->isSelected() && (parent->flags() & Control::ItemIsMovable))
+                    myMovableSelectedAncestorControl = parent;
+                ancestor = parent;
+            }
+
+            for (Control* selectedControl : selectedControls) {
+                if (selectedControl->flags() & Control::ItemIsMovable) {
+                    if (!QGraphicsItemPrivate::movableAncestorIsSelected(selectedControl))
+                        movableSelectedAncestorControls.insert(selectedControl);
+                }
+            }
+
+            movableSelectedAncestorControls.remove(myMovableSelectedAncestorControl);
+
+            const QList<Control*>& ancestorSiblings = myMovableSelectedAncestorControl->siblings();
+            for (Control* movableSelectedAncestorControl : movableSelectedAncestorControls.toList()) {
+                if (!ancestorSiblings.contains(movableSelectedAncestorControl)) {
+                    for (Control* childControl : movableSelectedAncestorControl->childControls())
+                        childControl->setSelected(false);
+                    movableSelectedAncestorControl->setSelected(false);
+                    movableSelectedAncestorControls.remove(movableSelectedAncestorControl);
+                }
+            }
+
+            movableSelectedAncestorControls.insert(myMovableSelectedAncestorControl);
+        }
+    } else {
+        movableSelectedAncestorControls.insert(m_menuTargetControl);
+    }
+
+    for (Control* movableSelectedAncestorControl : movableSelectedAncestorControls) {
+        if (movableSelectedAncestorControl->type() != Form::Type) {
+            ControlPropertyManager::setPos(movableSelectedAncestorControl,
+                                           movableSelectedAncestorControl->pos() +
+                                           QPointF(0, DesignerSettings::sceneSettings()->gridSize),
+                                           ControlPropertyManager::SaveChanges |
+                                           ControlPropertyManager::UpdateRenderer |
+                                           ControlPropertyManager::CompressedCall |
+                                           ControlPropertyManager::DontApplyDesigner);
+        }
+    }
 }

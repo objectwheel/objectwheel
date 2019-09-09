@@ -34,19 +34,19 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_zoomLevelComboBox(new QComboBox(this))
   , m_themeComboBox(new QComboBox(this))
 
-  , m_toggleSelectionAction(m_menu->addAction(tr("Toggle Selection")))
-  , m_selectAllAction(m_menu->addAction(tr("Select All")))
-  , m_sendBackAction(m_menu->addAction(tr("Send to Back")))
-  , m_bringFrontAction(m_menu->addAction(tr("Bring to Front")))
-  , m_cutAction(m_menu->addAction(tr("Cut")))
-  , m_copyAction(m_menu->addAction(tr("Copy")))
-  , m_pasteAction(m_menu->addAction(tr("Paste")))
-  , m_deleteAction(m_menu->addAction(tr("Delete")))
-  , m_deleteAllAction(m_menu->addAction(tr("Delete All")))
-  , m_moveLeftAction(m_menu->addAction(tr("Move Left")))
-  , m_moveRightAction(m_menu->addAction(tr("Move Right")))
-  , m_moveUpAction(m_menu->addAction(tr("Move Up")))
-  , m_moveDownAction(m_menu->addAction(tr("Move Down")))
+  , m_toggleSelectionAction(new QAction(this))
+  , m_selectAllAction(new QAction(this))
+  , m_sendBackAction(new QAction(this))
+  , m_bringFrontAction(new QAction(this))
+  , m_cutAction(new QAction(this))
+  , m_copyAction(new QAction(this))
+  , m_pasteAction(new QAction(this))
+  , m_deleteAction(new QAction(this))
+  , m_deleteAllAction(new QAction(this))
+  , m_moveLeftAction(new QAction(this))
+  , m_moveRightAction(new QAction(this))
+  , m_moveUpAction(new QAction(this))
+  , m_moveDownAction(new QAction(this))
 {
     setFocusPolicy(Qt::NoFocus);
     setContextMenuPolicy(Qt::CustomContextMenu);
@@ -154,6 +154,20 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveUpAction->setShortcutVisibleInContextMenu(true);
     m_moveDownAction->setShortcutVisibleInContextMenu(true);
 
+    m_toggleSelectionAction->setText(tr("Toggle Selection"));
+    m_selectAllAction->setText(tr("Select All"));
+    m_sendBackAction->setText(tr("Send to Back"));
+    m_bringFrontAction->setText(tr("Bring to Front"));
+    m_cutAction->setText(tr("Cut"));
+    m_copyAction->setText(tr("Copy"));
+    m_pasteAction->setText(tr("Paste"));
+    m_deleteAction->setText(tr("Delete"));
+    m_deleteAllAction->setText(tr("Delete All"));
+    m_moveLeftAction->setText(tr("Move Left"));
+    m_moveRightAction->setText(tr("Move Right"));
+    m_moveUpAction->setText(tr("Move Up"));
+    m_moveDownAction->setText(tr("Move Down"));
+
     m_toggleSelectionAction->setIcon(QIcon(QStringLiteral(":/images/designer/toggle-selection.svg")));
     m_selectAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/select-all.svg")));
     m_sendBackAction->setIcon(QIcon(QStringLiteral(":/images/designer/send-to-back.svg")));
@@ -183,6 +197,34 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveRightAction->setShortcut(Qt::Key_Right);
     m_moveUpAction->setShortcut(Qt::Key_Up);
     m_moveDownAction->setShortcut(Qt::Key_Down);
+
+    addAction(m_toggleSelectionAction);
+    addAction(m_selectAllAction);
+    addAction(m_sendBackAction);
+    addAction(m_bringFrontAction);
+    addAction(m_cutAction);
+    addAction(m_copyAction);
+    addAction(m_pasteAction);
+    addAction(m_deleteAction);
+    addAction(m_deleteAllAction);
+    addAction(m_moveLeftAction);
+    addAction(m_moveRightAction);
+    addAction(m_moveUpAction);
+    addAction(m_moveDownAction);
+
+    m_menu->addAction(m_toggleSelectionAction);
+    m_menu->addAction(m_selectAllAction);
+    m_menu->addAction(m_sendBackAction);
+    m_menu->addAction(m_bringFrontAction);
+    m_menu->addAction(m_cutAction);
+    m_menu->addAction(m_copyAction);
+    m_menu->addAction(m_pasteAction);
+    m_menu->addAction(m_deleteAction);
+    m_menu->addAction(m_deleteAllAction);
+    m_menu->addAction(m_moveLeftAction);
+    m_menu->addAction(m_moveRightAction);
+    m_menu->addAction(m_moveUpAction);
+    m_menu->addAction(m_moveDownAction);
 
     m_menu->insertSeparator(m_sendBackAction);
     m_menu->insertSeparator(m_cutAction);

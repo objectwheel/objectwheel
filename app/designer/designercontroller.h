@@ -43,6 +43,19 @@ private slots:
     void onZoomLevelComboBoxActivation(const QString& currentText);
     void onThemeComboBoxActivation(const QString& currentText);
 
+    void onToggleSelectionActionTrigger();
+    void onSelectAllActionTrigger();
+    void onSendBackActionTrigger();
+    void onBringFrontActionTrigger();
+    void onCutActionTrigger();
+    void onCopyActionTrigger();
+    void onPasteActionTrigger();
+    void onDeleteActionTrigger();
+    void onMoveLeftActionTrigger();
+    void onMoveRightActionTrigger();
+    void onMoveUpActionTrigger();
+    void onMoveDownActionTrigger();
+
 signals:
     void codeEditorTriggered(Control* control, const QString& relativeFileName);
 
