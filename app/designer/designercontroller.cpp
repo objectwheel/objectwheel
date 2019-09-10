@@ -11,6 +11,8 @@
 #include <utilityfunctions.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <controlrenderingmanager.h>
+
 #include <private/qgraphicsitem_p.h>
 
 #include <QToolButton>
@@ -120,21 +122,21 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
     connect(scene, &DesignerScene::anchorEditorActivated,
             this, &DesignerController::onAnchorEditorActivation);
 
-    connect(m_designerPane->refreshButton(), &QToolButton::toggled,
+    connect(m_designerPane->refreshButton(), &QToolButton::clicked,
             this, &DesignerController::onRefreshButtonClick);
-    connect(m_designerPane->clearButton(), &QToolButton::toggled,
+    connect(m_designerPane->clearButton(), &QToolButton::clicked,
             this, &DesignerController::onClearButtonClick);
-    connect(m_designerPane->anchorsButton(), &QToolButton::toggled,
+    connect(m_designerPane->anchorsButton(), &QToolButton::clicked,
             this, &DesignerController::onAnchorsButtonClick);
-    connect(m_designerPane->snappingButton(), &QToolButton::toggled,
+    connect(m_designerPane->snappingButton(), &QToolButton::clicked,
             this, &DesignerController::onSnappingButtonClick);
-    connect(m_designerPane->gridViewButton(), &QToolButton::toggled,
+    connect(m_designerPane->gridViewButton(), &QToolButton::clicked,
             this, &DesignerController::onGridViewButtonClick);
-    connect(m_designerPane->guidelinesButton(), &QToolButton::toggled,
+    connect(m_designerPane->guidelinesButton(), &QToolButton::clicked,
             this, &DesignerController::onGuidelinesButtonClick);
-    connect(m_designerPane->sceneSettingsButton(), &QToolButton::toggled,
+    connect(m_designerPane->sceneSettingsButton(), &QToolButton::clicked,
             this, &DesignerController::onSceneSettingsButtonClick);
-    connect(m_designerPane->themeSettingsButton(), &QToolButton::toggled,
+    connect(m_designerPane->themeSettingsButton(), &QToolButton::clicked,
             this, &DesignerController::onThemeSettingsButtonClick);
     connect(m_designerPane->zoomLevelComboBox(), qOverload<const QString&>(&QComboBox::activated),
             this, &DesignerController::onZoomLevelComboBoxActivation);
@@ -206,12 +208,15 @@ void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
         controlUnderCursor->setSelected(true);
     }
 
-    int selectedSize = scene->selectedControls().size();
-    m_designerPane->sendBackAction()->setEnabled(selectedSize == 1);
-    m_designerPane->bringFrontAction()->setEnabled(selectedSize == 1);
-    m_designerPane->cutAction()->setEnabled(selectedSize > 0);
-    m_designerPane->copyAction()->setEnabled(selectedSize > 0);
-    m_designerPane->deleteAction()->setEnabled(selectedSize > 0);
+    const QList<Control*>& selectedControls = scene->selectedControls();
+    int selectedSize = selectedControls.size();
+    bool onlyForm = selectedSize == 1 && selectedControls.first()->type() == Form::Type;
+
+    m_designerPane->sendBackAction()->setEnabled(selectedSize == 1 && !onlyForm);
+    m_designerPane->bringFrontAction()->setEnabled(selectedSize == 1 && !onlyForm);
+    m_designerPane->cutAction()->setEnabled(selectedSize > 0 && !onlyForm);
+    m_designerPane->copyAction()->setEnabled(selectedSize > 0 && !onlyForm);
+    m_designerPane->deleteAction()->setEnabled(selectedSize > 0 && !onlyForm);
     m_designerPane->moveLeftAction()->setEnabled(selectedSize > 0);
     m_designerPane->moveRightAction()->setEnabled(selectedSize > 0);
     m_designerPane->moveUpAction()->setEnabled(selectedSize > 0);
@@ -231,6 +236,7 @@ void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons
         Control* targetControl = control->parentControl();
         if (DesignerScene::isAnchorViable(sourceControl, targetControl)) {
             const QList<Control*>& selection = scene->selectedControls();
+            scene->increaseShowAllAnchorsCounter();
             scene->clearSelection();
             sourceControl->setSelected(true);
             m_designerPane->anchorEditor()->setSourceControl(sourceControl);
@@ -238,6 +244,7 @@ void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons
             m_designerPane->anchorEditor()->refresh();
             m_designerPane->anchorEditor()->exec();
             scene->clearSelection();
+            scene->decreaseShowAllAnchorsCounter();
             for (Control* control : selection)
                 control->setSelected(true);
         }
@@ -400,17 +407,41 @@ void DesignerController::onAnchorEditorActivation(Control* sourceControl, Contro
 
 void DesignerController::onRefreshButtonClick()
 {
-
+    if (Form* currentForm = m_designerPane->designerView()->scene()->currentForm())
+        ControlRenderingManager::scheduleRefresh(currentForm->uid());
 }
 
 void DesignerController::onClearButtonClick()
 {
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
 
+    if (!scene->currentForm())
+        return;
+
+    QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
+                m_designerPane,
+                tr("Do you want to continue?"),
+                tr("This will delete all the controls on the current form."),
+                QMessageBox::Question,
+                QMessageBox::Yes | QMessageBox::No,
+                QMessageBox::No);
+
+    switch (ret) {
+    case QMessageBox::Yes:
+        ControlRemovingManager::removeControls(scene->currentForm()->childControls(false), true);
+        break;
+    default:
+        break;
+    }
 }
 
 void DesignerController::onAnchorsButtonClick()
 {
-
+    DesignerScene* scene = m_designerPane->designerView()->scene();
+    if (m_designerPane->anchorsButton()->isChecked())
+        scene->increaseShowAllAnchorsCounter();
+    else
+        scene->decreaseShowAllAnchorsCounter();
 }
 
 void DesignerController::onSnappingButtonClick()
@@ -487,7 +518,7 @@ void DesignerController::onSendBackActionTrigger()
     // FIXME: Add this whenever we are able to manage raising or lowering
     // Controls based on their indexes,
     // if (lowerZ != control->zValue())
-        ControlPropertyManager::setZ(control, lowerZ - 1, options);
+    ControlPropertyManager::setZ(control, lowerZ - 1, options);
 }
 
 void DesignerController::onBringFrontActionTrigger()
@@ -509,7 +540,7 @@ void DesignerController::onBringFrontActionTrigger()
     // FIXME: Add this whenever we are able to manage raising or lowering
     // Controls based on their indexes,
     // if (higherZ != control->zValue())
-        ControlPropertyManager::setZ(control, higherZ + 1, options);
+    ControlPropertyManager::setZ(control, higherZ + 1, options);
 }
 
 void DesignerController::onCutActionTrigger()

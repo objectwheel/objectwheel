@@ -32,6 +32,9 @@ public:
     void setCursor(Qt::CursorShape cursorShape);
     void prepareDragLayer(const DesignerItem* item);
     bool isLayerItem(const DesignerItem* item) const;
+
+    void increaseShowAllAnchorsCounter();
+    void decreaseShowAllAnchorsCounter();
     bool showAllAnchors() const;
 
     Form* currentForm() const;
@@ -104,6 +107,7 @@ signals:
     void anchorEditorActivated(Control* sourceControl, Control* targetControl);
 
 private:
+    int m_showAllAnchorsCounter;
     Qt::CursorShape m_cursorShape;
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;

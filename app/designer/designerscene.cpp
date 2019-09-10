@@ -18,6 +18,7 @@
 #include <QGraphicsView>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
+  , m_showAllAnchorsCounter(0)
   , m_cursorShape(Qt::CustomCursor)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
@@ -168,11 +169,21 @@ bool DesignerScene::isLayerItem(const DesignerItem* item) const
             || item == m_paintLayer;
 }
 
+void DesignerScene::increaseShowAllAnchorsCounter()
+{
+    m_showAllAnchorsCounter++;
+    update();
+}
+
+void DesignerScene::decreaseShowAllAnchorsCounter()
+{
+    m_showAllAnchorsCounter--;
+    update();
+}
+
 bool DesignerScene::showAllAnchors() const
 {
-    // FIXME: Take that from view
-    // FIXME: Make sure it returns true when anchor editor is open
-    return true || anchorLayer()->activated();
+    return m_showAllAnchorsCounter > 0 || anchorLayer()->activated();
 }
 
 Form* DesignerScene::currentForm() const

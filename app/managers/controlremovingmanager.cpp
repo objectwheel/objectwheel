@@ -59,7 +59,8 @@ void ControlRemovingManager::removeControls(const QList<Control*>& controls, boo
     for (const Control* control : controls) {
         if (control->type() == Form::Type)
             continue;
-        for (Control* childControl : control->childControls())
+        const QList<Control*>& childControls = control->childControls();
+        for (Control* childControl : childControls)
             finalList.removeOne(childControl);
     }
 
