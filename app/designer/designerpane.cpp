@@ -49,7 +49,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_moveDownAction(new QAction(this))
 {
     setFocusPolicy(Qt::NoFocus);
-    setContextMenuPolicy(Qt::CustomContextMenu);
+//    setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {
@@ -93,7 +93,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_refreshButton->setShortcut(Qt::Key_R);
     m_refreshButton->setToolTip(tr("Refresh control images") + symbol(m_refreshButton));
     m_clearButton->setToolTip(tr("Clear controls on the form"));
-    m_anchorsButton->setToolTip(tr("Show/Hide anchors"));
+    m_anchorsButton->setToolTip(tr("Enable/Disable painting all the anchors"));
     m_snappingButton->setToolTip(tr("Enable/Disable snapping"));
     m_gridViewButton->setToolTip(tr("Enable/Disable grid view dots"));
     m_guidelinesButton->setToolTip(tr("Enable/Disable guidelines"));

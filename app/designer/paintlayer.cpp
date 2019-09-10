@@ -410,9 +410,9 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
 void PaintLayer::paintAnchors(QPainter* painter)
 {
     Q_ASSERT(scene());
-    const QList<Control*>& anchorControls = scene()->showAllAnchors()
-            ? scene()->items<Control>()
-            : scene()->selectedControls();
+    const QList<Control*>& anchorControls = scene()->anchorVisibility() == DesignerScene::VisibleForSelectedControlsOnly
+            ? scene()->selectedControls()
+            : scene()->items<Control>();
     for (Control* selectedControl : anchorControls) {
         if (selectedControl->anchors()->fill()) {
             paintFillAnchor(painter, selectedControl);
@@ -464,8 +464,10 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
 {
     Q_ASSERT(scene());
 
-    if (!scene()->anchorLayer()->activated() || false) // FIXME: also paint when anchor editor is open
+    if (!(scene()->anchorVisibility() & DesignerScene::VisibleForAllControlsDueToAnchorLayer)
+            && !(scene()->anchorVisibility() & DesignerScene::VisibleForAllControlsDueToAnchorEditorConnection)) {
         return;
+    }
 
     painter->save();
 

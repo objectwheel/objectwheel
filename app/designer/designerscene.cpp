@@ -18,7 +18,7 @@
 #include <QGraphicsView>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
-  , m_showAllAnchorsCounter(0)
+  , m_anchorVisibility(VisibleForSelectedControlsOnly)
   , m_cursorShape(Qt::CustomCursor)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
@@ -167,23 +167,6 @@ bool DesignerScene::isLayerItem(const DesignerItem* item) const
             || item == m_gadgetLayer
             || item == m_anchorLayer
             || item == m_paintLayer;
-}
-
-void DesignerScene::increaseShowAllAnchorsCounter()
-{
-    m_showAllAnchorsCounter++;
-    update();
-}
-
-void DesignerScene::decreaseShowAllAnchorsCounter()
-{
-    m_showAllAnchorsCounter--;
-    update();
-}
-
-bool DesignerScene::showAllAnchors() const
-{
-    return m_showAllAnchorsCounter > 0 || anchorLayer()->activated();
 }
 
 Form* DesignerScene::currentForm() const
@@ -427,6 +410,19 @@ QVector<QLineF> DesignerScene::guidelines() const
     return lines;
 }
 
+DesignerScene::AnchorVisibility DesignerScene::anchorVisibility() const
+{
+    return m_anchorVisibility;
+}
+
+void DesignerScene::setAnchorVisibility(DesignerScene::AnchorVisibility anchorVisibility)
+{
+    if (m_anchorVisibility != anchorVisibility) {
+        m_anchorVisibility = anchorVisibility;
+        update();
+    }
+}
+
 bool DesignerScene::isAnchorViable(const Control* sourceControl, const Control* targetControl)
 {
     if (isInappropriateAnchorSource(sourceControl))
@@ -607,7 +603,11 @@ void DesignerScene::onChange()
 
 void DesignerScene::onAnchorLayerActivation()
 {
-    m_paintLayer->update();
+    if (m_anchorLayer->activated())
+        setAnchorVisibility(anchorVisibility() | VisibleForAllControlsDueToAnchorLayer);
+    else
+        setAnchorVisibility(anchorVisibility() & ~VisibleForAllControlsDueToAnchorLayer);
+
     if (!m_anchorLayer->activated()) {
         Control* sourceControl = m_anchorLayer->sourceControl();
         Control* targetControl = m_anchorLayer->targetControl();

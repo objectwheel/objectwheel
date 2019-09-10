@@ -236,7 +236,7 @@ void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons
         Control* targetControl = control->parentControl();
         if (DesignerScene::isAnchorViable(sourceControl, targetControl)) {
             const QList<Control*>& selection = scene->selectedControls();
-            scene->increaseShowAllAnchorsCounter();
+            scene->setAnchorVisibility(scene->anchorVisibility() | DesignerScene::VisibleForAllControlsDueToAnchorEditor);
             scene->clearSelection();
             sourceControl->setSelected(true);
             m_designerPane->anchorEditor()->setSourceControl(sourceControl);
@@ -244,7 +244,7 @@ void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons
             m_designerPane->anchorEditor()->refresh();
             m_designerPane->anchorEditor()->exec();
             scene->clearSelection();
-            scene->decreaseShowAllAnchorsCounter();
+            scene->setAnchorVisibility(scene->anchorVisibility() & ~DesignerScene::VisibleForAllControlsDueToAnchorEditor);
             for (Control* control : selection)
                 control->setSelected(true);
         }
@@ -396,10 +396,12 @@ void DesignerController::onAnchorEditorActivation(Control* sourceControl, Contro
     const QList<Control*>& selection = scene->selectedControls();
     scene->clearSelection();
     sourceControl->setSelected(true);
+    scene->setAnchorVisibility(scene->anchorVisibility() | DesignerScene::VisibleForAllControlsDueToAnchorEditorConnection);
     m_designerPane->anchorEditor()->setSourceControl(sourceControl);
     m_designerPane->anchorEditor()->setPrimaryTargetControl(targetControl);
     m_designerPane->anchorEditor()->refresh();
     m_designerPane->anchorEditor()->exec();
+    scene->setAnchorVisibility(scene->anchorVisibility() & ~DesignerScene::VisibleForAllControlsDueToAnchorEditorConnection);
     scene->clearSelection();
     for (Control* control : selection)
         control->setSelected(true);
@@ -438,10 +440,12 @@ void DesignerController::onClearButtonClick()
 void DesignerController::onAnchorsButtonClick()
 {
     DesignerScene* scene = m_designerPane->designerView()->scene();
+    DesignerScene::AnchorVisibility visibility = scene->anchorVisibility();
     if (m_designerPane->anchorsButton()->isChecked())
-        scene->increaseShowAllAnchorsCounter();
+        visibility |= DesignerScene::VisibleForAllControlsDueToSettings;
     else
-        scene->decreaseShowAllAnchorsCounter();
+        visibility &= ~DesignerScene::VisibleForAllControlsDueToSettings;
+    scene->setAnchorVisibility(visibility);
 }
 
 void DesignerController::onSnappingButtonClick()

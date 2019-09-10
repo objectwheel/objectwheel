@@ -19,6 +19,16 @@ class DesignerScene final : public QGraphicsScene
     Q_DISABLE_COPY(DesignerScene)
 
 public:
+    enum AnchorVisibilityReasons {
+        VisibleForSelectedControlsOnly = 0x00,
+        VisibleForAllControlsDueToSettings = 0x01,
+        VisibleForAllControlsDueToAnchorLayer = 0x02,
+        VisibleForAllControlsDueToAnchorEditor = 0x04,
+        VisibleForAllControlsDueToAnchorEditorConnection = 0x08
+    };
+    Q_DECLARE_FLAGS(AnchorVisibility, AnchorVisibilityReasons)
+
+public:
     explicit DesignerScene(QObject* parent = nullptr);
 
     void clear();
@@ -32,10 +42,6 @@ public:
     void setCursor(Qt::CursorShape cursorShape);
     void prepareDragLayer(const DesignerItem* item);
     bool isLayerItem(const DesignerItem* item) const;
-
-    void increaseShowAllAnchorsCounter();
-    void decreaseShowAllAnchorsCounter();
-    bool showAllAnchors() const;
 
     Form* currentForm() const;
     DesignerItem* dragLayer() const;
@@ -60,6 +66,9 @@ public:
 
     QPointF cursorPos() const;
     QVector<QLineF> guidelines() const;
+
+    AnchorVisibility anchorVisibility() const;
+    void setAnchorVisibility(AnchorVisibility anchorVisibility);
 
     template <typename T = DesignerItem, typename... Args>
     QList<T*> items(Args&&... args) const;
@@ -107,7 +116,7 @@ signals:
     void anchorEditorActivated(Control* sourceControl, Control* targetControl);
 
 private:
-    int m_showAllAnchorsCounter;
+    AnchorVisibility m_anchorVisibility;
     Qt::CursorShape m_cursorShape;
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
@@ -118,6 +127,8 @@ private:
     QPointer<Form> m_currentForm;
     QPointer<DesignerItem> m_recentHighlightedItem;
 };
+
+Q_DECLARE_OPERATORS_FOR_FLAGS(DesignerScene::AnchorVisibility)
 
 template <typename T, typename... Args>
 inline QList<T*> DesignerScene::items(Args&&... args) const

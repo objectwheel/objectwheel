@@ -7,7 +7,7 @@ class Control;
 class AnchorLine final
 {
 public:
-    enum Type {
+    enum Types {
         Invalid = 0x0,
         NoAnchor = Invalid,
         Left = 0x01,
@@ -24,7 +24,7 @@ public:
         HorizontalMask = Top | Bottom | VerticalCenter | Baseline,
         AllMask = VerticalMask | HorizontalMask
     };
-    Q_DECLARE_FLAGS(Types, Type)
+    Q_DECLARE_FLAGS(Type, Types)
 
 public:
     AnchorLine();
@@ -53,6 +53,6 @@ private:
     QPointer<Control> m_control;
 };
 
-Q_DECLARE_OPERATORS_FOR_FLAGS(AnchorLine::Types)
+Q_DECLARE_OPERATORS_FOR_FLAGS(AnchorLine::Type)
 
 #endif // ANCHORLINE_H
