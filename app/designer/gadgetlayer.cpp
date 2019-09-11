@@ -31,6 +31,21 @@ GadgetLayer::GadgetLayer(DesignerItem* parent) : DesignerItem(parent)
         if (DesignerItem* targetItem = m_headlineItem->targetItem())
             emit targetItem->doubleClicked(buttons);
     });
+    connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
+            this, [=] {
+        m_headlineItem->setBrush(DesignerSettings::sceneSettings()->outlineColor);
+        if (const DesignerItem* currentForm = scene()->currentForm()) {
+            m_formHeadlineItem->setBrush(currentForm->isSelected()
+                                         ? DesignerSettings::sceneSettings()->outlineColor
+                                         : Qt::darkGray);
+        }
+        const QList<Control*>& allControls = Control::controls();
+        for (Control* control : allControls) {
+            const QList<ResizerItem*>& resizers_ = resizers(control);
+            for (ResizerItem* resizer : resizers_)
+                resizer->setPen(DesignerScene::pen());
+        }
+    });
 }
 
 void GadgetLayer::addResizers(DesignerItem* item)

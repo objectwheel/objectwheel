@@ -9,14 +9,6 @@
 #include <QToolButton>
 #include <QComboBox>
 
-static QString symbol(const QToolButton* toolButton)
-{
-    const QKeySequence& seq = toolButton->shortcut();
-    if (seq.isEmpty())
-        return QStringLiteral("");
-    return QStringLiteral(" (%1)").arg(seq.toString(QKeySequence::NativeText));
-}
-
 DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_menu(new QMenu(this))
   , m_toolBar(new QToolBar(this))
@@ -36,6 +28,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
   , m_invertSelectionAction(new QAction(this))
   , m_selectAllAction(new QAction(this))
+  , m_refreshFormContentAction(new QAction(this))
   , m_sendBackAction(new QAction(this))
   , m_bringFrontAction(new QAction(this))
   , m_cutAction(new QAction(this))
@@ -90,8 +83,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeComboBox->setCursor(Qt::PointingHandCursor);
     m_themeSettingsButton->setCursor(Qt::PointingHandCursor);
 
-    m_refreshButton->setShortcut(Qt::Key_R);
-    m_refreshButton->setToolTip(tr("Refresh control images") + symbol(m_refreshButton));
+    m_refreshButton->setToolTip(tr("Refresh form content (R)"));
     m_clearButton->setToolTip(tr("Clear controls on the form"));
     m_anchorsButton->setToolTip(tr("Enable/Disable painting all the anchors"));
     m_snappingButton->setToolTip(tr("Enable/Disable snapping"));
@@ -142,6 +134,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_invertSelectionAction->setShortcutVisibleInContextMenu(true);
     m_selectAllAction->setShortcutVisibleInContextMenu(true);
+    m_refreshFormContentAction->setShortcutVisibleInContextMenu(true);
     m_sendBackAction->setShortcutVisibleInContextMenu(true);
     m_bringFrontAction->setShortcutVisibleInContextMenu(true);
     m_cutAction->setShortcutVisibleInContextMenu(true);
@@ -156,6 +149,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_invertSelectionAction->setText(tr("Invert Selection"));
     m_selectAllAction->setText(tr("Select All"));
+    m_refreshFormContentAction->setText(tr("Refresh Form Content"));
     m_sendBackAction->setText(tr("Send to Back"));
     m_bringFrontAction->setText(tr("Bring to Front"));
     m_cutAction->setText(tr("Cut"));
@@ -170,6 +164,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_invertSelectionAction->setIcon(QIcon(QStringLiteral(":/images/designer/invert-selection.svg")));
     m_selectAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/select-all.svg")));
+    m_refreshFormContentAction->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
     m_sendBackAction->setIcon(QIcon(QStringLiteral(":/images/designer/send-to-back.svg")));
     m_bringFrontAction->setIcon(QIcon(QStringLiteral(":/images/designer/bring-to-front.svg")));
     m_cutAction->setIcon(QIcon(QStringLiteral(":/images/designer/cut.svg")));
@@ -183,6 +178,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveDownAction->setIcon(QIcon(QStringLiteral(":/images/designer/move-down.svg")));
 
     m_selectAllAction->setShortcut(QKeySequence::SelectAll);
+    m_refreshFormContentAction->setShortcut(Qt::Key_R);
     m_sendBackAction->setShortcut(Qt::CTRL + Qt::Key_Down);
     m_bringFrontAction->setShortcut(Qt::CTRL + Qt::Key_Up);
     m_cutAction->setShortcut(QKeySequence::Cut);
@@ -200,6 +196,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     addAction(m_invertSelectionAction);
     addAction(m_selectAllAction);
+    addAction(m_refreshFormContentAction);
     addAction(m_sendBackAction);
     addAction(m_bringFrontAction);
     addAction(m_cutAction);
@@ -214,6 +211,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_menu->addAction(m_invertSelectionAction);
     m_menu->addAction(m_selectAllAction);
+    m_menu->addAction(m_refreshFormContentAction);
     m_menu->addAction(m_sendBackAction);
     m_menu->addAction(m_bringFrontAction);
     m_menu->addAction(m_cutAction);
@@ -309,6 +307,11 @@ QAction* DesignerPane::invertSelectionAction() const
 QAction* DesignerPane::selectAllAction() const
 {
     return m_selectAllAction;
+}
+
+QAction* DesignerPane::refreshFormContentAction() const
+{
+    return m_refreshFormContentAction;
 }
 
 QAction* DesignerPane::sendBackAction() const

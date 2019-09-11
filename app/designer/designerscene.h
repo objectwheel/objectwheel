@@ -98,6 +98,7 @@ public:
 private slots:
     void onChange();
     void onAnchorLayerActivation();
+    void onSceneSettingsChange();
 
 private:
     void handleToolDrop(QGraphicsSceneDragDropEvent* event);

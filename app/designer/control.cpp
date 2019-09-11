@@ -220,6 +220,9 @@ void Control::setRenderInfo(const RenderInfo& info)
         }
 
         if (visible() && rect().isValid() && PaintUtils::isBlankImage(m_renderInfo.image)) {
+            // TODO: Can't get here after changing SceneSettings, so outlineColor
+            // toBlankControlDecorationBrush() settings are not applied even if
+            // they change. User just need to refresh the control or move it a bit.
             m_renderInfo.image = PaintUtils::renderBlankControlImage(
                         rect(), id(), devicePixelRatio(),
                         settings->toBlankControlDecorationBrush(Qt::darkGray),

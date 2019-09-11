@@ -36,6 +36,7 @@ public:
 
     QAction* invertSelectionAction() const;
     QAction* selectAllAction() const;
+    QAction* refreshFormContentAction() const;
     QAction* sendBackAction() const;
     QAction* bringFrontAction() const;
     QAction* cutAction() const;
@@ -70,6 +71,7 @@ private:
 
     QAction* m_invertSelectionAction;
     QAction* m_selectAllAction;
+    QAction* m_refreshFormContentAction;
     QAction* m_sendBackAction;
     QAction* m_bringFrontAction;
     QAction* m_cutAction;

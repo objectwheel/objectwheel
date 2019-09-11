@@ -45,10 +45,13 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_paintLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_paintLayer);
 
+    // Make sure DesignerView is initalized
+    QMetaObject::invokeMethod(this, &DesignerScene::onSceneSettingsChange, Qt::QueuedConnection);
+
+    connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
+            this, &DesignerScene::onSceneSettingsChange);
     connect(this, &DesignerScene::changed,
             this, &DesignerScene::onChange);
-    connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
-            this, [=] { update(); });
     connect(this, &DesignerScene::selectionChanged,
             m_gadgetLayer, &GadgetLayer::handleSceneSelectionChange);
     connect(this, &DesignerScene::currentFormChanged,
@@ -616,6 +619,19 @@ void DesignerScene::onAnchorLayerActivation()
         if (isAnchorViable(sourceControl, targetControl))
             emit anchorEditorActivated(sourceControl, targetControl);
     }
+}
+
+void DesignerScene::onSceneSettingsChange()
+{
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    if (zoomLevel() != settings->sceneZoomLevel) {
+        view()->resetTransform();
+        view()->scale(settings->sceneZoomLevel, settings->sceneZoomLevel);
+    }
+    const QList<Control*>& allControls = Control::controls();
+    for (Control* control : allControls)
+        control->setRenderInfo(control->renderInfo());
+    update();
 }
 
 void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)

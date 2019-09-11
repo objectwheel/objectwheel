@@ -81,7 +81,6 @@ static QString marginOffsetText(AnchorLine::Type type)
 DesignerController::DesignerController(DesignerPane* designerPane, QObject* parent) : QObject(parent)
   , m_designerPane(designerPane)
 {
-    const SceneSettings* settings = DesignerSettings::sceneSettings();
     const DesignerScene* scene = m_designerPane->designerView()->scene();
 
     m_designerPane->themeComboBox()->addItem(QStringLiteral("Default"));
@@ -89,15 +88,12 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
     m_designerPane->themeComboBox()->addItem(QStringLiteral("Imagine"));
     m_designerPane->themeComboBox()->addItem(QStringLiteral("Material"));
     m_designerPane->themeComboBox()->addItem(QStringLiteral("Universal"));
-
     m_designerPane->zoomLevelComboBox()->addItems(UtilityFunctions::zoomTexts());
-    m_designerPane->zoomLevelComboBox()->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
 
-    m_designerPane->anchorsButton()->setChecked(settings->showAllAnchors);
-    m_designerPane->snappingButton()->setChecked(settings->snappingEnabled);
-    m_designerPane->gridViewButton()->setChecked(settings->showGridViewDots);
-    m_designerPane->guidelinesButton()->setChecked(settings->showGuideLines);
+    onSceneSettingsChange();
 
+    connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
+            this, &DesignerController::onSceneSettingsChange);
     connect(m_designerPane, &DesignerPane::customContextMenuRequested,
             this, &DesignerController::onCustomContextMenuRequest);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
@@ -147,6 +143,8 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onInvertSelectionActionTrigger);
     connect(m_designerPane->selectAllAction(), &QAction::triggered,
             this, &DesignerController::onSelectAllActionTrigger);
+    connect(m_designerPane->refreshFormContentAction(), &QAction::triggered,
+            this, &DesignerController::onRefreshButtonClick);
     connect(m_designerPane->sendBackAction(), &QAction::triggered,
             this, &DesignerController::onSendBackActionTrigger);
     connect(m_designerPane->bringFrontAction(), &QAction::triggered,
@@ -191,6 +189,16 @@ void DesignerController::charge()
 void DesignerController::discharge()
 {
     m_designerPane->designerView()->scene()->clear();
+}
+
+void DesignerController::onSceneSettingsChange()
+{
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
+    m_designerPane->zoomLevelComboBox()->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
+    m_designerPane->anchorsButton()->setChecked(settings->showAllAnchors);
+    m_designerPane->snappingButton()->setChecked(settings->snappingEnabled);
+    m_designerPane->gridViewButton()->setChecked(settings->showGridViewDots);
+    m_designerPane->guidelinesButton()->setChecked(settings->showGuideLines);
 }
 
 void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
@@ -489,7 +497,12 @@ void DesignerController::onThemeSettingsButtonClick()
 
 void DesignerController::onZoomLevelComboBoxActivation(const QString& currentText)
 {
-
+    SceneSettings* settings = DesignerSettings::sceneSettings();
+    qreal sceneZoomLevel = UtilityFunctions::textToZoomLevel(m_designerPane->zoomLevelComboBox()->currentText());
+    if (settings->sceneZoomLevel != sceneZoomLevel) {
+        settings->sceneZoomLevel = sceneZoomLevel;
+        settings->write();
+    }
 }
 
 void DesignerController::onThemeComboBoxActivation(const QString& currentText)

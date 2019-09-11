@@ -214,6 +214,11 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
         m_outlineColorButton->setColor(SceneSettings(0).outlineColor);
     });
 
+    connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged, this, [=] {
+        activate();
+        revert();
+    });
+
     activate();
     revert();
 }
