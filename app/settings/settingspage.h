@@ -24,6 +24,7 @@ public:
     virtual bool containsWord(const QString& word) const;
 
     void addWidget(SettingsWidget* widget);
+    void setWidgetVisible(SettingsWidget* widget);
     QList<SettingsWidget*> widgets() const;
 
 private:

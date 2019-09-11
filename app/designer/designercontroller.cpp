@@ -12,6 +12,8 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <controlrenderingmanager.h>
+#include <windowmanager.h>
+#include <preferenceswindow.h>
 
 #include <private/qgraphicsitem_p.h>
 
@@ -487,7 +489,11 @@ void DesignerController::onGuidelinesButtonClick()
 
 void DesignerController::onSceneSettingsButtonClick()
 {
-
+    WindowManager::preferencesWindow()->show();
+    WindowManager::preferencesWindow()->raise();
+    WindowManager::preferencesWindow()->activateWindow();
+    WindowManager::preferencesWindow()->updateGeometry();
+    WindowManager::preferencesWindow()->setCurrentWidget(PreferencesWindow::SceneSettingsWidget);
 }
 
 void DesignerController::onThemeSettingsButtonClick()

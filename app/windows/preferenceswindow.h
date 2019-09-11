@@ -10,6 +10,7 @@ class QListWidget;
 class LineEdit;
 class QDialogButtonBox;
 class SettingsPage;
+class SettingsWidget;
 
 class PreferencesWindow : public QWidget
 {
@@ -18,7 +19,20 @@ class PreferencesWindow : public QWidget
     friend class WindowManager;
 
 public:
-    explicit PreferencesWindow(QWidget *parent = nullptr);
+    enum Widget {
+        SceneSettingsWidget,
+        InterfaceSettingsWidget,
+        FontColorsSettingsWidget,
+        BehaviorSettingsWidget
+    };
+
+public:
+    explicit PreferencesWindow(QWidget* parent = nullptr);
+
+    void setCurrentWidget(Widget widget);
+
+    SettingsPage* page(Widget widget) const;
+    SettingsWidget* widget(Widget widget) const;
 
 private slots:
     void apply();

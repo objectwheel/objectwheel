@@ -82,6 +82,16 @@ void SettingsPage::addWidget(SettingsWidget* widget)
     m_tabWidget->addTab(widget, widget->icon(), widget->title());
 }
 
+void SettingsPage::setWidgetVisible(SettingsWidget* widget)
+{
+    for (int i = 0; i < m_tabWidget->count(); ++i) {
+        if (widget == qobject_cast<SettingsWidget*>(m_tabWidget->widget(i))) {
+            m_tabWidget->setCurrentIndex(i);
+            break;
+        }
+    }
+}
+
 QList<SettingsWidget*> SettingsPage::widgets() const
 {
     QList<SettingsWidget*> widgets;

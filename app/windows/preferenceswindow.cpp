@@ -111,6 +111,70 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
             this, &PreferencesWindow::resetSettings);
 }
 
+void PreferencesWindow::setCurrentWidget(PreferencesWindow::Widget w)
+{
+    SettingsPage* current = page(w);
+    Q_ASSERT(current);
+    for (int i = 0; i < m_listWidget->count(); ++i) {
+        if (SettingsPage* page = pageFromItem(m_listWidget->item(i))) {
+            if (page == current) {
+                m_listWidget->setCurrentRow(i);
+                break;
+            }
+        }
+    }
+    current->setWidgetVisible(widget(w));
+}
+
+SettingsPage* PreferencesWindow::page(PreferencesWindow::Widget w) const
+{
+    SettingsWidget* wid = widget(w);
+    if (wid == 0)
+        return nullptr;
+    for (int i = 0; i < m_listWidget->count(); ++i) {
+        if (SettingsPage* page = pageFromItem(m_listWidget->item(i))) {
+            const QList<SettingsWidget*>& widgets = page->widgets();
+            for (SettingsWidget* widget : widgets) {
+                if (widget == wid)
+                    return page;
+            }
+        }
+    }
+    return nullptr;
+}
+
+SettingsWidget* PreferencesWindow::widget(PreferencesWindow::Widget w) const
+{
+    for (int i = 0; i < m_listWidget->count(); ++i) {
+        if (SettingsPage* page = pageFromItem(m_listWidget->item(i))) {
+            const QList<SettingsWidget*>& widgets = page->widgets();
+            for (SettingsWidget* widget : widgets) {
+                switch (w) {
+                case SceneSettingsWidget:
+                    if (widget->metaObject()->className() == QStringLiteral("SceneSettingsWidget"))
+                        return widget;
+                    break;
+                case InterfaceSettingsWidget:
+                    if (widget->metaObject()->className() == QStringLiteral("InterfaceSettingsWidget"))
+                        return widget;
+                    break;
+                case FontColorsSettingsWidget:
+                    if (widget->metaObject()->className() == QStringLiteral("FontColorsSettingsWidget"))
+                        return widget;
+                    break;
+                case BehaviorSettingsWidget:
+                    if (widget->metaObject()->className() == QStringLiteral("BehaviorSettingsWidget"))
+                        return widget;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+    return nullptr;
+}
+
 void PreferencesWindow::apply()
 {
     for (int i = 0; i < m_listWidget->count(); ++i) {
