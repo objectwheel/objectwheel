@@ -16,6 +16,7 @@ struct SceneSettings final : public Settings
     QBrush toBlankControlDecorationBrush(const QColor& color) const;
 
     bool showGuideLines;
+    bool showAllAnchors;
     int dragStartDistance;
     int sceneBackgroundTexture;
     qreal sceneZoomLevel;

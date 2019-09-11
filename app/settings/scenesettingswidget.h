@@ -31,11 +31,13 @@ private:
 private:
     QGroupBox* m_designGroup;
     QLabel* m_showGuideLinesLabel;
+    QLabel* m_showAllAnchorsLabel;
     QLabel* m_dragStartDistanceLabel;
     QLabel* m_sceneBackgroundTextureLabel;
     QLabel* m_sceneZoomLevelLabel;
     QLabel* m_anchorColorLabel;
     QCheckBox* m_showGuideLinesCheckBox;
+    QCheckBox* m_showAllAnchorsCheckBox;
     QSpinBox* m_dragStartDistanceSpinBox;
     QComboBox* m_sceneBackgroundTextureBox;
     QComboBox* m_sceneZoomLevelBox;

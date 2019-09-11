@@ -93,7 +93,7 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
     m_designerPane->zoomLevelComboBox()->addItems(UtilityFunctions::zoomTexts());
     m_designerPane->zoomLevelComboBox()->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
 
-    m_designerPane->anchorsButton()->setChecked(false);
+    m_designerPane->anchorsButton()->setChecked(settings->showAllAnchors);
     m_designerPane->snappingButton()->setChecked(settings->snappingEnabled);
     m_designerPane->gridViewButton()->setChecked(settings->showGridViewDots);
     m_designerPane->guidelinesButton()->setChecked(settings->showGuideLines);
@@ -439,28 +439,42 @@ void DesignerController::onClearButtonClick()
 
 void DesignerController::onAnchorsButtonClick()
 {
-    DesignerScene* scene = m_designerPane->designerView()->scene();
-    DesignerScene::AnchorVisibility visibility = scene->anchorVisibility();
-    if (m_designerPane->anchorsButton()->isChecked())
-        visibility |= DesignerScene::VisibleForAllControlsDueToSettings;
-    else
-        visibility &= ~DesignerScene::VisibleForAllControlsDueToSettings;
-    scene->setAnchorVisibility(visibility);
+    SceneSettings* settings = DesignerSettings::sceneSettings();
+    bool showAllAnchors = m_designerPane->anchorsButton()->isChecked();
+    if (settings->showAllAnchors != showAllAnchors) {
+        settings->showAllAnchors = showAllAnchors;
+        settings->write();
+    }
 }
 
 void DesignerController::onSnappingButtonClick()
 {
-
+    SceneSettings* settings = DesignerSettings::sceneSettings();
+    bool snappingEnabled = m_designerPane->snappingButton()->isChecked();
+    if (settings->snappingEnabled != snappingEnabled) {
+        settings->snappingEnabled = snappingEnabled;
+        settings->write();
+    }
 }
 
 void DesignerController::onGridViewButtonClick()
 {
-
+    SceneSettings* settings = DesignerSettings::sceneSettings();
+    bool showGridViewDots = m_designerPane->gridViewButton()->isChecked();
+    if (settings->showGridViewDots != showGridViewDots) {
+        settings->showGridViewDots = showGridViewDots;
+        settings->write();
+    }
 }
 
 void DesignerController::onGuidelinesButtonClick()
 {
-
+    SceneSettings* settings = DesignerSettings::sceneSettings();
+    bool showGuideLines = m_designerPane->guidelinesButton()->isChecked();
+    if (settings->showGuideLines != showGuideLines) {
+        settings->showGuideLines = showGuideLines;
+        settings->write();
+    }
 }
 
 void DesignerController::onSceneSettingsButtonClick()

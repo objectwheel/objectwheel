@@ -47,6 +47,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
 
     connect(this, &DesignerScene::changed,
             this, &DesignerScene::onChange);
+    connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
+            this, [=] { update(); });
     connect(this, &DesignerScene::selectionChanged,
             m_gadgetLayer, &GadgetLayer::handleSceneSelectionChange);
     connect(this, &DesignerScene::currentFormChanged,

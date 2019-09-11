@@ -21,7 +21,6 @@ class DesignerScene final : public QGraphicsScene
 public:
     enum AnchorVisibilityReasons {
         VisibleForSelectedControlsOnly = 0x00,
-        VisibleForAllControlsDueToSettings = 0x01,
         VisibleForAllControlsDueToAnchorLayer = 0x02,
         VisibleForAllControlsDueToAnchorEditor = 0x04,
         VisibleForAllControlsDueToAnchorEditorConnection = 0x08

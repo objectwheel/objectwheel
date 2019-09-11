@@ -3,6 +3,7 @@
 #include <QBrush>
 
 static const char g_showGuideLines[] = "ShowGuideLines";
+static const char g_showAllAnchors[] = "ShowAllAnchors";
 static const char g_dragStartDistance[] = "DragStartDistance";
 static const char g_sceneBackgroundTexture[] = "SceneBackgroundTexture";
 static const char g_sceneZoomLevel[] = "SceneZoomLevel";
@@ -27,6 +28,7 @@ void SceneSettings::read()
 
     begin();
     showGuideLines = value<bool>(g_showGuideLines, showGuideLines);
+    showAllAnchors = value<bool>(g_showAllAnchors, showAllAnchors);
     dragStartDistance = value<int>(g_dragStartDistance, dragStartDistance);
     sceneBackgroundTexture = value<int>(g_sceneBackgroundTexture, sceneBackgroundTexture);
     sceneZoomLevel = value<qreal>(g_sceneZoomLevel, sceneZoomLevel);
@@ -48,6 +50,7 @@ void SceneSettings::write()
 {
     begin();
     setValue(g_showGuideLines, showGuideLines);
+    setValue(g_showAllAnchors, showAllAnchors);
     setValue(g_dragStartDistance, dragStartDistance);
     setValue(g_sceneBackgroundTexture, sceneBackgroundTexture);
     setValue(g_sceneZoomLevel, sceneZoomLevel);
@@ -70,6 +73,7 @@ void SceneSettings::write()
 void SceneSettings::reset()
 {
     showGuideLines = true;
+    showAllAnchors = false;
     dragStartDistance = 8;
     sceneBackgroundTexture = 4;
     sceneZoomLevel = 1.0;

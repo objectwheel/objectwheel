@@ -17,11 +17,13 @@
 SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(parent)
   , m_designGroup(new QGroupBox(contentWidget()))
   , m_showGuideLinesLabel(new QLabel(m_designGroup))
+  , m_showAllAnchorsLabel(new QLabel(m_designGroup))
   , m_dragStartDistanceLabel(new QLabel(m_designGroup))
   , m_sceneBackgroundTextureLabel(new QLabel(m_designGroup))
   , m_sceneZoomLevelLabel(new QLabel(m_designGroup))
   , m_anchorColorLabel(new QLabel(m_designGroup))
   , m_showGuideLinesCheckBox(new QCheckBox(m_designGroup))
+  , m_showAllAnchorsCheckBox(new QCheckBox(m_designGroup))
   , m_dragStartDistanceSpinBox(new QSpinBox(m_designGroup))
   , m_sceneBackgroundTextureBox(new QComboBox(m_designGroup))
   , m_sceneZoomLevelBox(new QComboBox(m_designGroup))
@@ -62,29 +64,35 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     designLayout->setContentsMargins(6, 6, 6, 6);
     designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     designLayout->addWidget(m_showGuideLinesLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_dragStartDistanceLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneBackgroundTextureLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneZoomLevelLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_anchorColorLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_showAllAnchorsLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_dragStartDistanceLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundTextureLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneZoomLevelLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_anchorColorLabel, 5, 0, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_showGuideLinesCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_dragStartDistanceSpinBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneBackgroundTextureBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_sceneZoomLevelBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_anchorColorButton, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    designLayout->addWidget(m_anchorColorResetButton, 4, 2, Qt::AlignRight | Qt::AlignVCenter);
+    designLayout->addWidget(m_showAllAnchorsCheckBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_dragStartDistanceSpinBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneBackgroundTextureBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_sceneZoomLevelBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_anchorColorButton, 5, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    designLayout->addWidget(m_anchorColorResetButton, 5, 2, Qt::AlignRight | Qt::AlignVCenter);
     designLayout->setColumnStretch(3, 1);
     designLayout->setColumnMinimumWidth(1, 20);
 
     m_designGroup->setTitle(tr("Design"));
     m_showGuideLinesLabel->setText(tr("Guide lines") + ":");
+    m_showAllAnchorsLabel->setText(tr("Anchors") + ":");
     m_dragStartDistanceLabel->setText(tr("Drag start distance") + ":");
     m_sceneBackgroundTextureLabel->setText(tr("Background texture") + ":");
     m_sceneZoomLevelLabel->setText(tr("Zoom level") + ":");
     m_anchorColorLabel->setText(tr("Anchor visualization color") + ":");
     m_showGuideLinesCheckBox->setText(tr("Show guide lines for dragging"));
+    m_showAllAnchorsCheckBox->setText(tr("Show/paint all anchors"));
     m_anchorColorResetButton->setText(tr("Reset"));
 
     m_showGuideLinesCheckBox->setToolTip(tr("Show guide lines while controls are moving"));
+    m_showAllAnchorsCheckBox->setToolTip(tr("Show/paint all anchors; if disabled, only "
+                                            "anchors for selected controls are going to be visible"));
     m_dragStartDistanceSpinBox->setToolTip(tr("Change the blocking drag start distace"));
     m_sceneBackgroundTextureBox->setToolTip(tr("Change background color of the scene"));
     m_sceneZoomLevelBox->setToolTip(tr("Change zoom level of the scene"));
@@ -92,6 +100,7 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     m_anchorColorResetButton->setToolTip(tr("Reset anchor visualization to default"));
 
     m_showGuideLinesCheckBox->setCursor(Qt::PointingHandCursor);
+    m_showAllAnchorsCheckBox->setCursor(Qt::PointingHandCursor);
     m_dragStartDistanceSpinBox->setCursor(Qt::PointingHandCursor);
     m_sceneBackgroundTextureBox->setCursor(Qt::PointingHandCursor);
     m_sceneZoomLevelBox->setCursor(Qt::PointingHandCursor);
@@ -219,6 +228,7 @@ void SceneSettingsWidget::apply()
     SceneSettings* settings = DesignerSettings::sceneSettings();
     /****/
     settings->showGuideLines = m_showGuideLinesCheckBox->isChecked();
+    settings->showAllAnchors = m_showAllAnchorsCheckBox->isChecked();
     settings->dragStartDistance = m_dragStartDistanceSpinBox->value();
     settings->sceneBackgroundTexture = m_sceneBackgroundTextureBox->currentIndex();
     settings->sceneZoomLevel = UtilityFunctions::textToZoomLevel(m_sceneZoomLevelBox->currentText());
@@ -246,6 +256,7 @@ void SceneSettingsWidget::revert()
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     /****/
     m_showGuideLinesCheckBox->setChecked(settings->showGuideLines);
+    m_showAllAnchorsCheckBox->setChecked(settings->showAllAnchors);
     m_dragStartDistanceSpinBox->setValue(settings->dragStartDistance);
     m_sceneBackgroundTextureBox->setCurrentIndex(settings->sceneBackgroundTexture);
     m_sceneZoomLevelBox->setCurrentText(UtilityFunctions::zoomLevelToText(settings->sceneZoomLevel));
@@ -287,6 +298,7 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_gridViewGroup->title().contains(word, Qt::CaseInsensitive)
             || m_controlsGroup->title().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_showAllAnchorsLabel->text().contains(word, Qt::CaseInsensitive)
             || m_dragStartDistanceLabel->text().contains(word, Qt::CaseInsensitive)
             || m_sceneBackgroundTextureLabel->text().contains(word, Qt::CaseInsensitive)
             || m_sceneZoomLevelLabel->text().contains(word, Qt::CaseInsensitive)
@@ -300,6 +312,7 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_controlOutlineDecorationLabel->text().contains(word, Qt::CaseInsensitive)
             || m_outlineColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_showAllAnchorsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_snappingEnabledCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showMouseoverOutlineCheckBox->text().contains(word, Qt::CaseInsensitive)

@@ -49,7 +49,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_moveDownAction(new QAction(this))
 {
     setFocusPolicy(Qt::NoFocus);
-//    setContextMenuPolicy(Qt::CustomContextMenu);
+    setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {

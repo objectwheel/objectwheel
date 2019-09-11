@@ -410,7 +410,9 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
 void PaintLayer::paintAnchors(QPainter* painter)
 {
     Q_ASSERT(scene());
-    const QList<Control*>& anchorControls = scene()->anchorVisibility() == DesignerScene::VisibleForSelectedControlsOnly
+    SceneSettings* settings = DesignerSettings::sceneSettings();
+    const QList<Control*>& anchorControls =
+            scene()->anchorVisibility() == DesignerScene::VisibleForSelectedControlsOnly && !settings->showAllAnchors
             ? scene()->selectedControls()
             : scene()->items<Control>();
     for (Control* selectedControl : anchorControls) {
@@ -557,14 +559,16 @@ void PaintLayer::paintHoverOutline(QPainter* painter)
 void PaintLayer::paintGuidelines(QPainter* painter)
 {
     Q_ASSERT(scene());
-    const QVector<QLineF>& lines = scene()->guidelines();
-    if (!lines.isEmpty()) {
-        painter->setBrush(DesignerSettings::sceneSettings()->outlineColor);
-        painter->setPen(DesignerScene::pen());
-        painter->drawLines(lines);
-        for (const QLineF& line : lines) {
-            painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
-            painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+    if (DesignerSettings::sceneSettings()->showGuideLines) {
+        const QVector<QLineF>& lines = scene()->guidelines();
+        if (!lines.isEmpty()) {
+            painter->setBrush(DesignerSettings::sceneSettings()->outlineColor);
+            painter->setPen(DesignerScene::pen());
+            painter->drawLines(lines);
+            for (const QLineF& line : lines) {
+                painter->drawRoundedRect(QRectF(line.p1() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+                painter->drawRoundedRect(QRectF(line.p2() - QPointF(1.5, 1.5), QSizeF(3.0, 3.0)), 1.5, 1.5);
+            }
         }
     }
 }
