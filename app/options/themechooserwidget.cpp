@@ -482,6 +482,15 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     connect(m_seeRunningButton, &QPushButton::clicked, this, &ThemeChooserWidget::run);
 }
 
+void ThemeChooserWidget::setCurrentStyle(const QString& style)
+{
+    m_stylesCombo->setCurrentText(style);
+    QMetaObject::invokeMethod(this, [=] {
+        refresh();
+        save();
+    }, Qt::QueuedConnection);
+}
+
 void ThemeChooserWidget::charge()
 {
     m_stylesCombo->setCurrentIndex(0);

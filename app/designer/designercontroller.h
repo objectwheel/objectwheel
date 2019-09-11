@@ -40,7 +40,6 @@ private slots:
     void onSceneSettingsButtonClick();
     void onThemeSettingsButtonClick();
     void onZoomLevelComboBoxActivation(const QString& currentText);
-    void onThemeComboBoxActivation(const QString& currentText);
 
     void onInvertSelectionActionTrigger();
     void onSelectAllActionTrigger();
@@ -60,6 +59,7 @@ private:
 
 signals:
     void codeEditorTriggered(Control* control, const QString& relativeFileName);
+    void projectThemeActivated(const QString& theme);
 
 private:
     DesignerPane* m_designerPane;

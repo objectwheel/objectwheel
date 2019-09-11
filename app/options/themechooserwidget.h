@@ -20,6 +20,8 @@ public:
 public:
     explicit ThemeChooserWidget(const Version& version, QWidget *parent = nullptr);
 
+    void setCurrentStyle(const QString& style);
+
 public slots:
     void charge();
 

@@ -16,6 +16,8 @@ class ProjectOptionsWidget : public QWidget
 public:
     explicit ProjectOptionsWidget(QWidget *parent = nullptr);
 
+    ThemeChooserWidget* themeChooserWidget_2() const;
+
 protected:
     QSize sizeHint() const override;
 

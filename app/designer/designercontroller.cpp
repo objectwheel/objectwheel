@@ -14,6 +14,7 @@
 #include <controlrenderingmanager.h>
 #include <windowmanager.h>
 #include <preferenceswindow.h>
+#include <modemanager.h>
 
 #include <private/qgraphicsitem_p.h>
 
@@ -139,7 +140,7 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
     connect(m_designerPane->zoomLevelComboBox(), qOverload<const QString&>(&QComboBox::activated),
             this, &DesignerController::onZoomLevelComboBoxActivation);
     connect(m_designerPane->themeComboBox(), qOverload<const QString&>(&QComboBox::activated),
-            this, &DesignerController::onThemeComboBoxActivation);
+            this, &DesignerController::projectThemeActivated);
 
     connect(m_designerPane->invertSelectionAction(), &QAction::triggered,
             this, &DesignerController::onInvertSelectionActionTrigger);
@@ -498,22 +499,17 @@ void DesignerController::onSceneSettingsButtonClick()
 
 void DesignerController::onThemeSettingsButtonClick()
 {
-
+    ModeManager::setMode(ModeManager::Options);
 }
 
 void DesignerController::onZoomLevelComboBoxActivation(const QString& currentText)
 {
     SceneSettings* settings = DesignerSettings::sceneSettings();
-    qreal sceneZoomLevel = UtilityFunctions::textToZoomLevel(m_designerPane->zoomLevelComboBox()->currentText());
+    qreal sceneZoomLevel = UtilityFunctions::textToZoomLevel(currentText);
     if (settings->sceneZoomLevel != sceneZoomLevel) {
         settings->sceneZoomLevel = sceneZoomLevel;
         settings->write();
     }
-}
-
-void DesignerController::onThemeComboBoxActivation(const QString& currentText)
-{
-
 }
 
 void DesignerController::onInvertSelectionActionTrigger()

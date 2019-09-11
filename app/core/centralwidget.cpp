@@ -22,6 +22,7 @@
 #include <issueswidget.h>
 #include <consolewidget.h>
 #include <form.h>
+#include <themechooserwidget.h>
 
 #include <QBoxLayout>
 #include <QLabel>
@@ -117,6 +118,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
 
     connect(m_designerController, &DesignerController::codeEditorTriggered,
             m_qmlCodeEditorWidget, &QmlCodeEditorWidget::openDesigns);
+    connect(m_designerController, &DesignerController::projectThemeActivated,
+            m_projectOptionsWidget->themeChooserWidget_2(), &ThemeChooserWidget::setCurrentStyle);
 
     connect(m_outputPane->issuesWidget(), &IssuesWidget::designsFileOpened,
             this, [=] (Control* control, const QString& relativePath, int line, int column) {

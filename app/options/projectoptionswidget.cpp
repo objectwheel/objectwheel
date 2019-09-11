@@ -39,3 +39,8 @@ void ProjectOptionsWidget::charge()
     m_themeChooserWidget_2->charge();
     m_scalingWidget->charge();
 }
+
+ThemeChooserWidget* ProjectOptionsWidget::themeChooserWidget_2() const
+{
+    return m_themeChooserWidget_2;
+}
