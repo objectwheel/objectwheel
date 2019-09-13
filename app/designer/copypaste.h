@@ -2,6 +2,7 @@
 #define COPYPASTE_H
 
 #include <QPointer>
+#include <QPointF>
 
 class Control;
 
@@ -14,8 +15,11 @@ struct CopyPaste final
     bool isValid() const;
     void invalidate();
 
-    int copyCount() const;
-    void increaseCopyCount();
+    int count() const;
+    void increaseCount();
+
+    QPointF pos() const;
+    void setPos(const QPointF& pos);
 
     ActionType actionType() const;
     void setActionType(const ActionType& actionType);
@@ -24,7 +28,8 @@ struct CopyPaste final
     void setControls(const QList<Control*>& controls);
 
 private:
-    int m_copyCount;
+    int m_count;
+    QPointF m_pos;
     ActionType m_actionType;
     QList<QPointer<Control>> m_controls;
 };

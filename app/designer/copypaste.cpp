@@ -2,7 +2,7 @@
 #include <control.h>
 
 CopyPaste::CopyPaste()
-    : m_copyCount(0)
+    : m_count(0)
     , m_actionType(Invalid)
 {
 }
@@ -17,14 +17,24 @@ void CopyPaste::invalidate()
     *this = CopyPaste();
 }
 
-int CopyPaste::copyCount() const
+int CopyPaste::count() const
 {
-    return m_copyCount;
+    return m_count;
 }
 
-void CopyPaste::increaseCopyCount()
+void CopyPaste::increaseCount()
 {
-    m_copyCount++;
+    m_count++;
+}
+
+QPointF CopyPaste::pos() const
+{
+    return m_pos;
+}
+
+void CopyPaste::setPos(const QPointF& pos)
+{
+    m_pos = pos;
 }
 
 CopyPaste::ActionType CopyPaste::actionType() const
