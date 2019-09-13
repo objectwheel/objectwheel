@@ -7,22 +7,24 @@ class Control;
 
 struct CopyPaste final
 {
-    Q_DISABLE_COPY(CopyPaste)
-
     enum ActionType { Invalid, Copy, Cut };
 
     CopyPaste();
 
-    bool isValid();
+    bool isValid() const;
     void invalidate();
 
-    ActionType actionType();
+    int copyCount() const;
+    void increaseCopyCount();
+
+    ActionType actionType() const;
     void setActionType(const ActionType& actionType);
 
-    QList<Control*> controls();
+    QList<Control*> controls() const;
     void setControls(const QList<Control*>& controls);
 
 private:
+    int m_copyCount;
     ActionType m_actionType;
     QList<QPointer<Control>> m_controls;
 };

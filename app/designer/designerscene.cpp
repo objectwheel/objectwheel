@@ -428,6 +428,32 @@ void DesignerScene::setAnchorVisibility(DesignerScene::AnchorVisibility anchorVi
     }
 }
 
+void DesignerScene::reparentControl(Control* control, Control* parentControl, const QPointF& pos) const
+{
+    // NOTE: We compress setPos because there might be some other
+    // compressed setPos'es in the list, We want the setPos that
+    // happens after reparent operation to take place at the very last
+    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
+            | ControlPropertyManager::CompressedCall;
+
+    if (control->gui())
+        options |= ControlPropertyManager::UpdateRenderer;
+
+    control->setGeometrySyncEnabled(false);
+    control->m_geometrySyncKey = HashFactory::generate();
+
+    // NOTE: Do not move this assignment below setParent,
+    // because parent change effects the newPos result
+    // NOTE: Move the item position backwards as much as next parent margins are
+    // Because it will be followed by a ControlPropertyManager::setParent call and it
+    // will move the item by setting a transform on it according to its parent margin
+    const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
+    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, -margins));
+    ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges |
+                                      ControlPropertyManager::UpdateRenderer);
+    ControlPropertyManager::setPos(control, pos.isNull() ? newPos : pos, options, control->m_geometrySyncKey);
+}
+
 bool DesignerScene::isAnchorViable(const Control* sourceControl, const Control* targetControl)
 {
     if (isInappropriateAnchorSource(sourceControl))
@@ -660,32 +686,6 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
                                       tr("Operation failed, control has got problems."),
                                       QMessageBox::Critical);
     }
-}
-
-void DesignerScene::reparentControl(Control* control, Control* parentControl) const
-{
-    // NOTE: We compress setPos because there might be some other
-    // compressed setPos'es in the list, We want the setPos that
-    // happens after reparent operation to take place at the very last
-    ControlPropertyManager::Options options = ControlPropertyManager::SaveChanges
-            | ControlPropertyManager::CompressedCall;
-
-    if (control->gui())
-        options |= ControlPropertyManager::UpdateRenderer;
-
-    control->setGeometrySyncEnabled(false);
-    control->m_geometrySyncKey = HashFactory::generate();
-
-    // NOTE: Do not move this assignment below setParent,
-    // because parent change effects the newPos result
-    // NOTE: Move the item position backwards as much as next parent margins are
-    // Because it will be followed by a ControlPropertyManager::setParent call and it
-    // will move the item by setting a transform on it according to its parent margin
-    const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
-    const QPointF& newPos = DesignerScene::snapPosition(control->mapToItem(parentControl, -margins));
-    ControlPropertyManager::setParent(control, parentControl, ControlPropertyManager::SaveChanges
-                                      | ControlPropertyManager::UpdateRenderer);
-    ControlPropertyManager::setPos(control, newPos, options, control->m_geometrySyncKey);
 }
 
 void DesignerScene::mouseMoveEvent(QGraphicsSceneMouseEvent* event)

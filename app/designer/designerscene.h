@@ -69,6 +69,8 @@ public:
     AnchorVisibility anchorVisibility() const;
     void setAnchorVisibility(AnchorVisibility anchorVisibility);
 
+    void reparentControl(Control* control, Control* parentControl, const QPointF& pos = QPointF()) const;
+
     template <typename T = DesignerItem, typename... Args>
     QList<T*> items(Args&&... args) const;
 
@@ -102,9 +104,6 @@ private slots:
 
 private:
     void handleToolDrop(QGraphicsSceneDragDropEvent* event);
-    void reparentControl(Control* control, Control* parentControl) const;
-
-private:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void dragMoveEvent(QGraphicsSceneDragDropEvent* event) override;
