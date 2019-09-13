@@ -20,8 +20,7 @@
 	<string>NSApplication</string>
 	<key>NSHighResolutionCapable</key>
 	<string>True</string>
-    <!-- Disabled due to apps made in Ow should complain with how they look on the designer -->
-    <!-- <key>NSRequiresAquaSystemAppearance</key> -->
-    <!-- <string>True</string> -->
+    <key>NSRequiresAquaSystemAppearance</key>
+    <string>True</string>
 </dict>
 </plist>

@@ -663,7 +663,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     //if (GeneralSettings::interfaceSettings()->preserveDesignerState)
     //    writeSettings();
-    event->accept();
+    QMainWindow::closeEvent(event);
 }
 
 QSize MainWindow::sizeHint() const

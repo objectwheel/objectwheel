@@ -12,7 +12,6 @@
 #include <QGridLayout>
 #include <QPushButton>
 #include <QDialogButtonBox>
-#include <QCloseEvent>
 #include <QShowEvent>
 
 enum Roles { SettingsPageRole = Qt::UserRole + 1 };
@@ -313,12 +312,7 @@ void PreferencesWindow::closeEvent(QCloseEvent* event)
     if (GeneralSettings::interfaceSettings()->preserveDesignerState)
         writeSettings();
     revert();
-
-    // Workaround for a weird behaviour of close event. When you close
-    // a window, not hiding it, and reopening it later with "show()",
-    // content of the widget is blank for some reason. So we should hide
-    event->ignore();
-    emit done();
+    QWidget::closeEvent(event);
 }
 
 QSize PreferencesWindow::sizeHint() const

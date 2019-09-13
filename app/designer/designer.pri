@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/control.h \
            $$PWD/controlsavefilter.h \
+           $$PWD/copypaste.h \
            $$PWD/designercontroller.h \
            $$PWD/designeritem.h \
            $$PWD/designerpane.h \
@@ -23,6 +24,7 @@ HEADERS += $$PWD/control.h \
 
 SOURCES += $$PWD/control.cpp \
            $$PWD/controlsavefilter.cpp \
+           $$PWD/copypaste.cpp \
            $$PWD/designercontroller.cpp \
            $$PWD/designeritem.cpp \
            $$PWD/designerpane.cpp \

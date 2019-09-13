@@ -2,6 +2,7 @@
 #define DESIGNERCONTROLLER_H
 
 #include <anchorline.h>
+#include <copypaste.h>
 
 class DesignerPane;
 class DesignerController final : public QObject
@@ -63,6 +64,7 @@ signals:
 
 private:
     DesignerPane* m_designerPane;
+    CopyPaste m_copyPaste;
 };
 
 #endif // DESIGNERCONTROLLER_H

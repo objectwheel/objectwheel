@@ -217,7 +217,7 @@ void WelcomeWindow::closeEvent(QCloseEvent* event)
 {
     if (GeneralSettings::interfaceSettings()->preserveDesignerState)
         writeSettings();
-    event->accept();
+    QWidget::closeEvent(event);
 }
 
 QSize WelcomeWindow::sizeHint() const

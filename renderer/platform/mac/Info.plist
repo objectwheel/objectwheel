@@ -12,5 +12,7 @@
     <string>com.objectwheel.renderer</string>
     <key>LSUIElement</key>
     <string>1</string>
+    <key>NSRequiresAquaSystemAppearance</key>
+    <string>True</string>
 </dict>
 </plist>

@@ -3,18 +3,19 @@
 #include <designerview.h>
 #include <designerscene.h>
 #include <saveutils.h>
-#include <projectmanager.h>
-#include <controlpropertymanager.h>
-#include <controlremovingmanager.h>
 #include <form.h>
 #include <anchoreditor.h>
 #include <utilityfunctions.h>
 #include <designersettings.h>
 #include <scenesettings.h>
-#include <controlrenderingmanager.h>
 #include <windowmanager.h>
 #include <preferenceswindow.h>
 #include <modemanager.h>
+#include <projectmanager.h>
+#include <controlpropertymanager.h>
+#include <controlremovingmanager.h>
+#include <controlrenderingmanager.h>
+#include <controlcreationmanager.h>
 
 #include <private/qgraphicsitem_p.h>
 
@@ -576,19 +577,92 @@ void DesignerController::onBringFrontActionTrigger()
     ControlPropertyManager::setZ(control, higherZ + 1, options);
 }
 
+// TODO: Improve copy-paste positioning. "Pasting into a sub control and"
+// "positioning wherever you right click".. implement those 2 features in future
+
 void DesignerController::onCutActionTrigger()
 {
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
 
+    QList<Control*> controls(scene->selectedControls());
+    controls.removeOne(scene->currentForm());
+
+    const QList<Control*> copy(controls);
+    for (const Control* control : copy) {
+        for (Control* childControl : control->childControls())
+            controls.removeOne(childControl);
+    }
+
+    QList<QPointer<Control>> controlPtrList;
+    for (Control* control : controls)
+        controlPtrList.append(QPointer<Control>(control));
+
+    m_copyPaste.setActionType(CopyPaste::Cut);
+    m_copyPaste.setControls(controlPtrList);
 }
 
 void DesignerController::onCopyActionTrigger()
 {
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
 
+    QList<Control*> controls(scene->selectedControls());
+    controls.removeOne(scene->currentForm());
+
+    const QList<Control*> copy(controls);
+    for (const Control* control : copy) {
+        for (Control* childControl : control->childControls())
+            controls.removeOne(childControl);
+    }
+
+    QList<QPointer<Control>> controlPtrList;
+    for (Control* control : controls)
+        controlPtrList.append(QPointer<Control>(control));
+
+    m_copyPaste.setActionType(CopyPaste::Copy);
+    m_copyPaste.setControls(controlPtrList);
 }
 
 void DesignerController::onPasteActionTrigger()
 {
+    DesignerScene* scene = m_designerPane->designerView()->scene();
 
+    if (!m_copyPaste.isValid())
+        return;
+
+    const CopyPaste::ActionType actionType = m_copyPaste.actionType();
+    const QList<QPointer<Control>>& controls = m_copyPaste.controls();
+
+    if (actionType == CopyPaste::Cut)
+        m_copyPaste.invalidate();
+
+    scene->clearSelection();
+
+    for (const QPointer<Control>& control : controls) {
+        if (control.isNull())
+            continue;
+        Q_ASSERT(control->type() != Form::Type);
+
+        Control* newControl = nullptr;
+        if (actionType == CopyPaste::Cut) {
+            ControlPropertyManager::setParent(control, scene->currentForm(),
+                                              ControlPropertyManager::SaveChanges
+                                              | ControlPropertyManager::UpdateRenderer);
+            ControlRenderingManager::scheduleRefresh(scene->currentForm()->uid());
+        } else {
+            // NOTE: Move the item position backwards as much as next parent margins are
+            // Because it will be followed by a ControlPropertyManager::setParent call and it
+            // will move the item by setting a transform on it according to its parent margin
+            const QPointF margins(scene->currentForm()->margins().left(),
+                                  scene->currentForm()->margins().top());
+            newControl = ControlCreationManager::createControl(
+                        scene->currentForm(), control->dir(),
+                        DesignerScene::snapPosition(control->mapToItem(scene->currentForm(), QPointF(10, 10) - margins)),
+                        control->size(), control->pixmap());
+        }
+
+        if (newControl)
+            newControl->setSelected(true);
+    }
 }
 
 void DesignerController::onDeleteActionTrigger()
