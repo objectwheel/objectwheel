@@ -56,6 +56,7 @@ private slots:
     void onMoveDownActionTrigger();
 
 private:
+    QList<Control*> selectedAncestorControls() const;
     QList<Control*> movableSelectedAncestorControls(const QList<Control*>& selectedControls) const;
 
 signals:

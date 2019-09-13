@@ -1,4 +1,5 @@
 #include <copypaste.h>
+#include <control.h>
 
 CopyPaste::CopyPaste() : m_actionType(Invalid)
 {
@@ -25,12 +26,19 @@ void CopyPaste::setActionType(const ActionType& actionType)
     m_actionType = actionType;
 }
 
-QList<QPointer<Control>> CopyPaste::controls()
+QList<Control*> CopyPaste::controls()
 {
-    return m_controls;
+    QList<Control*> controls;
+    for (Control* control : qAsConst(m_controls)) {
+        if (control)
+            controls.append(control);
+    }
+    return controls;
 }
 
-void CopyPaste::setControls(const QList<QPointer<Control>>& controls)
+void CopyPaste::setControls(const QList<Control*>& controls)
 {
-    m_controls = controls;
+    m_controls.clear();
+    for (Control* control : controls)
+        m_controls.append(control);
 }

@@ -19,8 +19,8 @@ struct CopyPaste final
     ActionType actionType();
     void setActionType(const ActionType& actionType);
 
-    QList<QPointer<Control>> controls();
-    void setControls(const QList<QPointer<Control>>& controls);
+    QList<Control*> controls();
+    void setControls(const QList<Control*>& controls);
 
 private:
     ActionType m_actionType;

@@ -582,71 +582,36 @@ void DesignerController::onBringFrontActionTrigger()
 
 void DesignerController::onCutActionTrigger()
 {
-    const DesignerScene* scene = m_designerPane->designerView()->scene();
-
-    QList<Control*> controls(scene->selectedControls());
-    controls.removeOne(scene->currentForm());
-
-    const QList<Control*> copy(controls);
-    for (const Control* control : copy) {
-        for (Control* childControl : control->childControls())
-            controls.removeOne(childControl);
-    }
-
-    QList<QPointer<Control>> controlPtrList;
-    for (Control* control : controls)
-        controlPtrList.append(QPointer<Control>(control));
-
+    m_copyPaste.setControls(selectedAncestorControls());
     m_copyPaste.setActionType(CopyPaste::Cut);
-    m_copyPaste.setControls(controlPtrList);
 }
 
 void DesignerController::onCopyActionTrigger()
 {
-    const DesignerScene* scene = m_designerPane->designerView()->scene();
-
-    QList<Control*> controls(scene->selectedControls());
-    controls.removeOne(scene->currentForm());
-
-    const QList<Control*> copy(controls);
-    for (const Control* control : copy) {
-        for (Control* childControl : control->childControls())
-            controls.removeOne(childControl);
-    }
-
-    QList<QPointer<Control>> controlPtrList;
-    for (Control* control : controls)
-        controlPtrList.append(QPointer<Control>(control));
-
+    m_copyPaste.setControls(selectedAncestorControls());
     m_copyPaste.setActionType(CopyPaste::Copy);
-    m_copyPaste.setControls(controlPtrList);
 }
 
 void DesignerController::onPasteActionTrigger()
 {
-    DesignerScene* scene = m_designerPane->designerView()->scene();
-
     if (!m_copyPaste.isValid())
         return;
 
+    DesignerScene* scene = m_designerPane->designerView()->scene();
     const CopyPaste::ActionType actionType = m_copyPaste.actionType();
-    const QList<QPointer<Control>>& controls = m_copyPaste.controls();
+    const QList<Control*>& controls = m_copyPaste.controls();
 
     if (actionType == CopyPaste::Cut)
         m_copyPaste.invalidate();
 
     scene->clearSelection();
 
-    for (const QPointer<Control>& control : controls) {
-        if (control.isNull())
-            continue;
-        Q_ASSERT(control->type() != Form::Type);
-
+    for (Control* control : controls) {
         Control* newControl = nullptr;
         if (actionType == CopyPaste::Cut) {
             ControlPropertyManager::setParent(control, scene->currentForm(),
-                                              ControlPropertyManager::SaveChanges
-                                              | ControlPropertyManager::UpdateRenderer);
+                                              ControlPropertyManager::SaveChanges |
+                                              ControlPropertyManager::UpdateRenderer);
             ControlRenderingManager::scheduleRefresh(scene->currentForm()->uid());
         } else {
             // NOTE: Move the item position backwards as much as next parent margins are
@@ -740,6 +705,22 @@ void DesignerController::onMoveDownActionTrigger()
                                        QPointF(0, DesignerSettings::sceneSettings()->gridSize),
                                        options);
     }
+}
+
+QList<Control*> DesignerController::selectedAncestorControls() const
+{
+    const DesignerScene* scene = m_designerPane->designerView()->scene();
+    QList<Control*> selectedControls(scene->selectedControls());
+    selectedControls.removeOne(scene->currentForm());
+
+    const QList<Control*> copy(selectedControls);
+    for (const Control* control : copy) {
+        const QList<Control*>& childControls = control->childControls();
+        for (Control* childControl : childControls)
+            selectedControls.removeOne(childControl);
+    }
+
+    return selectedControls;
 }
 
 QList<Control*> DesignerController::movableSelectedAncestorControls(const QList<Control*>& selectedControls) const
