@@ -581,9 +581,6 @@ void DesignerController::onBringFrontActionTrigger()
     ControlPropertyManager::setZ(control, higherZ + 1, options);
 }
 
-// TODO: Improve copy-paste positioning. "Pasting into a sub control and"
-// "positioning wherever you right click".. implement those 2 features in future
-
 void DesignerController::onCutActionTrigger()
 {
     m_copyPaste.invalidate();
