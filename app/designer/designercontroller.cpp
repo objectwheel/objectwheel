@@ -147,7 +147,7 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onInvertSelectionActionTrigger);
     connect(m_designerPane->selectAllAction(), &QAction::triggered,
             this, &DesignerController::onSelectAllActionTrigger);
-    connect(m_designerPane->refreshFormContentAction(), &QAction::triggered,
+    connect(m_designerPane->refreshAction(), &QAction::triggered,
             this, &DesignerController::onRefreshButtonClick);
     connect(m_designerPane->sendBackAction(), &QAction::triggered,
             this, &DesignerController::onSendBackActionTrigger);

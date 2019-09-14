@@ -17,8 +17,8 @@ ProjectOptionsWidget::ProjectOptionsWidget(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_scrollArea);
     m_layout->setContentsMargins(0, 0, 0, 0);
 
-    m_gridLayout->addWidget(m_themeChooserWidget, 0, 0);
-    m_gridLayout->addWidget(m_themeChooserWidget_2, 1, 0);
+    m_gridLayout->addWidget(m_themeChooserWidget_2, 0, 0);
+    m_gridLayout->addWidget(m_themeChooserWidget, 1, 0);
     m_gridLayout->addWidget(m_scalingWidget, 2, 0);
 
     m_scrollArea->setWidget(m_containerWidget);

@@ -545,6 +545,7 @@ bool initProjectMeta(const QString& projectDir)
     hash.insert(ProjectSignature, Internal::projectSignature());
     hash.insert(ProjectVersion, Internal::version());
     hash.insert(ProjectUid, HashFactory::generate());
+    hash.insert(ProjectHdpiScaling, true);
 
     return Internal::saveMetaHash(hash, Internal::toProjectMetaFile(projectDir));
 }

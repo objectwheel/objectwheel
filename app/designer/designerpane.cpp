@@ -28,7 +28,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
   , m_invertSelectionAction(new QAction(this))
   , m_selectAllAction(new QAction(this))
-  , m_refreshFormContentAction(new QAction(this))
+  , m_refreshAction(new QAction(this))
   , m_sendBackAction(new QAction(this))
   , m_bringFrontAction(new QAction(this))
   , m_cutAction(new QAction(this))
@@ -65,12 +65,11 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addWidget(m_snappingButton);
     m_toolBar->addWidget(m_gridViewButton);
     m_toolBar->addWidget(m_guidelinesButton);
-    m_toolBar->addSeparator();
-    m_toolBar->addWidget(m_zoomLevelComboBox);
     m_toolBar->addWidget(m_sceneSettingsButton);
+    m_toolBar->addWidget(m_zoomLevelComboBox);
     m_toolBar->addSeparator();
-    m_toolBar->addWidget(m_themeComboBox);
     m_toolBar->addWidget(m_themeSettingsButton);
+    m_toolBar->addWidget(m_themeComboBox);
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_clearButton->setCursor(Qt::PointingHandCursor);
@@ -83,7 +82,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeComboBox->setCursor(Qt::PointingHandCursor);
     m_themeSettingsButton->setCursor(Qt::PointingHandCursor);
 
-    m_refreshButton->setToolTip(tr("Refresh form content (R)"));
+    m_refreshButton->setToolTip(tr("Refresh (R)"));
     m_clearButton->setToolTip(tr("Clear controls on the form"));
     m_anchorsButton->setToolTip(tr("Enable/Disable painting all the anchors"));
     m_snappingButton->setToolTip(tr("Enable/Disable snapping"));
@@ -134,7 +133,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_invertSelectionAction->setShortcutVisibleInContextMenu(true);
     m_selectAllAction->setShortcutVisibleInContextMenu(true);
-    m_refreshFormContentAction->setShortcutVisibleInContextMenu(true);
+    m_refreshAction->setShortcutVisibleInContextMenu(true);
     m_sendBackAction->setShortcutVisibleInContextMenu(true);
     m_bringFrontAction->setShortcutVisibleInContextMenu(true);
     m_cutAction->setShortcutVisibleInContextMenu(true);
@@ -149,7 +148,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_invertSelectionAction->setText(tr("Invert Selection"));
     m_selectAllAction->setText(tr("Select All"));
-    m_refreshFormContentAction->setText(tr("Refresh Form Content"));
+    m_refreshAction->setText(tr("Refresh"));
     m_sendBackAction->setText(tr("Send to Back"));
     m_bringFrontAction->setText(tr("Bring to Front"));
     m_cutAction->setText(tr("Cut"));
@@ -164,7 +163,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_invertSelectionAction->setIcon(QIcon(QStringLiteral(":/images/designer/invert-selection.svg")));
     m_selectAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/select-all.svg")));
-    m_refreshFormContentAction->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
+    m_refreshAction->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
     m_sendBackAction->setIcon(QIcon(QStringLiteral(":/images/designer/send-to-back.svg")));
     m_bringFrontAction->setIcon(QIcon(QStringLiteral(":/images/designer/bring-to-front.svg")));
     m_cutAction->setIcon(QIcon(QStringLiteral(":/images/designer/cut.svg")));
@@ -178,7 +177,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveDownAction->setIcon(QIcon(QStringLiteral(":/images/designer/move-down.svg")));
 
     m_selectAllAction->setShortcut(QKeySequence::SelectAll);
-    m_refreshFormContentAction->setShortcut(Qt::Key_R);
+    m_refreshAction->setShortcut(Qt::Key_R);
     m_sendBackAction->setShortcut(Qt::CTRL + Qt::Key_Down);
     m_bringFrontAction->setShortcut(Qt::CTRL + Qt::Key_Up);
     m_cutAction->setShortcut(QKeySequence::Cut);
@@ -196,7 +195,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     addAction(m_invertSelectionAction);
     addAction(m_selectAllAction);
-    addAction(m_refreshFormContentAction);
+    addAction(m_refreshAction);
     addAction(m_sendBackAction);
     addAction(m_bringFrontAction);
     addAction(m_cutAction);
@@ -211,7 +210,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_menu->addAction(m_invertSelectionAction);
     m_menu->addAction(m_selectAllAction);
-    m_menu->addAction(m_refreshFormContentAction);
+    m_menu->addAction(m_refreshAction);
     m_menu->addAction(m_sendBackAction);
     m_menu->addAction(m_bringFrontAction);
     m_menu->addAction(m_cutAction);
@@ -309,9 +308,9 @@ QAction* DesignerPane::selectAllAction() const
     return m_selectAllAction;
 }
 
-QAction* DesignerPane::refreshFormContentAction() const
+QAction* DesignerPane::refreshAction() const
 {
-    return m_refreshFormContentAction;
+    return m_refreshAction;
 }
 
 QAction* DesignerPane::sendBackAction() const

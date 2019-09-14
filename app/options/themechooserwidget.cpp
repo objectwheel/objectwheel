@@ -62,7 +62,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_loadingIndicator->setInnerRadius(5);
     m_loadingIndicator->setLineWidth(3);
 
-    m_stylesLabel->setText(tr("Style:"));
+    m_stylesLabel->setText(m_version == V2 ? tr("Quick Controls Style:") : tr("Quick Controls 1 Style:"));
     UtilityFunctions::adjustFontWeight(m_stylesLabel, QFont::DemiBold);
 
     m_stylesCombo->addItems(m_version == V1 ? STYLES : STYLES_V2);
@@ -484,11 +484,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
 void ThemeChooserWidget::setCurrentStyle(const QString& style)
 {
-    m_stylesCombo->setCurrentText(style);
-    QMetaObject::invokeMethod(this, [=] {
-        refresh();
-        save();
-    }, Qt::QueuedConnection);
+    if (m_stylesCombo->currentText() != style) {
+        m_stylesCombo->setCurrentText(style);
+        QMetaObject::invokeMethod(this, [=] {
+            refresh();
+            save();
+        }, Qt::QueuedConnection);
+    }
 }
 
 void ThemeChooserWidget::charge()

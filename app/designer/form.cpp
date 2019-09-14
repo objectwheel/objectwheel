@@ -59,8 +59,10 @@ void Form::paintForeground(QPainter* painter)
             for (qreal y = 0; y <= rect().bottom(); y += settings->gridSize)
                 points.append(QPointF(x, y));
         }
+        painter->setClipRect(rect());
         painter->setPen(DesignerScene::pen(Qt::darkGray, 1, false));
         painter->drawPoints(points.data(), points.size());
+        painter->setClipping(false);
     }
 
     // Draw form frame
