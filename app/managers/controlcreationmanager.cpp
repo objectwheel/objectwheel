@@ -6,6 +6,8 @@
 #include <savemanager.h>
 #include <controlrenderingmanager.h>
 #include <controlpropertymanager.h>
+#include <filesystemutils.h>
+#include <QTemporaryDir>
 
 ControlCreationManager* ControlCreationManager::s_instance = nullptr;
 DesignerScene* ControlCreationManager::s_designerScene = nullptr;
@@ -95,7 +97,20 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
                                                const QSizeF& initialSize,
                                                const QPixmap& initialPixmap)
 {
-    const QString& newControlRootPath = SaveManager::addControl(controlRootPath, targetParentControl->dir());
+    QString newControlRootPath;
+    if (controlRootPath == targetParentControl->dir()) {
+        QTemporaryDir tmpDir;
+        if (tmpDir.isValid()) {
+            if (!FileSystemUtils::copy(controlRootPath, tmpDir.path(), true)) {
+                qWarning("SaveManager::addControl: Failed. Cannot copy the control to its new root path.");
+                return nullptr;
+            }
+            newControlRootPath = SaveManager::addControl(tmpDir.path(), controlRootPath);
+        }
+    } else {
+        newControlRootPath = SaveManager::addControl(controlRootPath, targetParentControl->dir());
+    }
+
     if (newControlRootPath.isEmpty()) {
         qWarning("ControlCreationManager::createControl: Failed.");
         return nullptr;

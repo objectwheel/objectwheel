@@ -230,6 +230,7 @@ void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
     m_designerPane->bringFrontAction()->setEnabled(selectedSize == 1 && !onlyForm);
     m_designerPane->cutAction()->setEnabled(selectedSize > 0 && !onlyForm);
     m_designerPane->copyAction()->setEnabled(selectedSize > 0 && !onlyForm);
+    m_designerPane->pasteAction()->setEnabled(m_copyPaste.isValid());
     m_designerPane->deleteAction()->setEnabled(selectedSize > 0 && !onlyForm);
     m_designerPane->moveLeftAction()->setEnabled(selectedSize > 0);
     m_designerPane->moveRightAction()->setEnabled(selectedSize > 0);
@@ -585,12 +586,14 @@ void DesignerController::onBringFrontActionTrigger()
 
 void DesignerController::onCutActionTrigger()
 {
+    m_copyPaste.invalidate();
     m_copyPaste.setControls(selectedAncestorControls());
     m_copyPaste.setActionType(CopyPaste::Cut);
 }
 
 void DesignerController::onCopyActionTrigger()
 {
+    m_copyPaste.invalidate();
     m_copyPaste.setControls(selectedAncestorControls());
     m_copyPaste.setActionType(CopyPaste::Copy);
 }
@@ -602,9 +605,9 @@ void DesignerController::onPasteActionTrigger()
 
     DesignerScene* scene = m_designerPane->designerView()->scene();
     Control* parentControl = scene->currentForm();
-
     const CopyPaste::ActionType actionType = m_copyPaste.actionType();
     const QList<Control*>& controls = m_copyPaste.controls();
+    const QPointF& copyPos = m_copyPaste.pos();
 
     if (actionType == CopyPaste::Cut)
         m_copyPaste.invalidate();
@@ -618,14 +621,16 @@ void DesignerController::onPasteActionTrigger()
     QList<Control*> newControls;
     for (Control* control : controls) {
         if (actionType == CopyPaste::Cut) {
-            if (control->parentControl() != parentControl) {
-                QPointF pos = control->mapToItem(parentControl, QPointF(10, 10) - margins);
-                if (!m_copyPaste.pos().isNull())
-                    pos = parentControl->mapFromScene(m_copyPaste.pos());
-                scene->reparentControl(control, parentControl, DesignerScene::snapPosition(pos));
-                clearSelection = true;
-                newControls.append(control);
-            }
+            if (control == parentControl)
+                continue;
+            if (control->parentControl() == parentControl)
+                continue;
+            QPointF pos = control->mapToItem(parentControl, QPointF(10, 10) - margins);
+            if (!copyPos.isNull())
+                pos = parentControl->mapFromScene(copyPos);
+            scene->reparentControl(control, parentControl, DesignerScene::snapPosition(pos));
+            clearSelection = true;
+            newControls.append(control);
         } else {
             // NOTE: Move the item position backwards as much as next parent margins are
             // Because it will be followed by a ControlPropertyManager::setParent call and it
@@ -633,8 +638,8 @@ void DesignerController::onPasteActionTrigger()
             m_copyPaste.increaseCount();
             qreal xy = 10 * m_copyPaste.count();
             QPointF pos = control->mapToItem(parentControl, QPointF(xy, xy) - margins);
-            if (!m_copyPaste.pos().isNull())
-                pos = parentControl->mapFromScene(m_copyPaste.pos());
+            if (!copyPos.isNull())
+                pos = parentControl->mapFromScene(copyPos);
             Control* newControl = ControlCreationManager::createControl(
                         parentControl, control->dir(), DesignerScene::snapPosition(pos),
                         control->size(), control->pixmap());

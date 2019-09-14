@@ -9,7 +9,14 @@ CopyPaste::CopyPaste()
 
 bool CopyPaste::isValid() const
 {
-    return m_actionType != Invalid && !m_controls.isEmpty();
+    bool valid = m_actionType != Invalid && !m_controls.isEmpty();
+    if (!valid)
+        return false;
+    for (Control* control : m_controls) {
+        if (control)
+            return true;
+    }
+    return false;
 }
 
 void CopyPaste::invalidate()

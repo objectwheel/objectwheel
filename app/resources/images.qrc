@@ -38,7 +38,6 @@
         <file>images/robot.png</file>
         <file>images/forgot.png</file>
         <file>images/lock.png</file>
-        <file>images/toolbox.png</file>
         <file>images/fileicon.png</file>
         <file>images/options.png</file>
         <file>images/dots.png</file>
@@ -62,7 +61,6 @@
         <file>images/android.svg</file>
         <file>images/ios.svg</file>
         <file>images/ipad.svg</file>
-        <file>images/question.png</file>
         <file>images/macbook.svg</file>
         <file>images/imac.svg</file>
         <file>images/console.svg</file>
@@ -147,7 +145,6 @@
         <file>images/designer/paste.svg</file>
         <file>images/designer/select-all.svg</file>
         <file>images/designer/send-to-back.svg</file>
-        <file>images/designer/toggle-selection.svg</file>
         <file>images/designer/delete-all.svg</file>
         <file>images/devices.svg</file>
         <file>images/computer.svg</file>
@@ -165,5 +162,8 @@
         <file>images/settings/general.svg</file>
         <file>images/settings/interface.svg</file>
         <file>images/settings/scene.svg</file>
+        <file>images/question.png</file>
+        <file>images/toolbox.png</file>
+        <file>images/designer/invert-selection.svg</file>
     </qresource>
 </RCC>
