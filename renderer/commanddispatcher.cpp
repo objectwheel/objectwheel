@@ -34,10 +34,6 @@ void CommandDispatcher::schedulePreviewDone(const RenderInfo& info)
 void CommandDispatcher::onDataReceived(const RendererCommands& command, const QByteArray& data)
 {
     switch (command) {
-    case Terminate:
-        emit terminate();
-        break;
-
     case Init:
         emit init();
         break;

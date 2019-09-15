@@ -101,7 +101,8 @@ void DesignerScene::removeForm(Form* form)
 
 void DesignerScene::removeControl(Control* control)
 {
-    removeItem(control);
+    if (control->scene())
+        removeItem(control);
     delete control; // Deletes its children too
 }
 

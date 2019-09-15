@@ -60,6 +60,11 @@ RenderEngine::~RenderEngine()
 
 void RenderEngine::init()
 {
+    if (m_initialized) {
+        qWarning("RenderEngine: Re-initialization request rejected");
+        return;
+    }
+
     emit initializationProgressChanged(g_progress_1);
 
     /* Create instances, handle parent-child relationship, set ids, save form instances */

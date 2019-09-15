@@ -5,6 +5,7 @@
 
 class RenderServer;
 class CommandDispatcher;
+class QProcess;
 struct RenderInfo;
 
 class ControlRenderingManager final : public QObject
@@ -31,8 +32,9 @@ public:
     static void scheduleBindingUpdate(const QString& uid, const QString& bindingName, const QString& expression);
     static void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     static void scheduleRefresh(const QString& formUid);
-    static void scheduleTerminate();
-    static void scheduleInit();
+
+    static void start();
+    static void terminate();
 
 private slots:
     void onConnected();
@@ -41,6 +43,7 @@ private slots:
     void onRenderInfosReady(const QList<RenderInfo>& infos);
 
 signals:
+    void connected();
     void renderDone(const RenderInfo& info);
     void previewDone(const RenderInfo& info);
     void initializationProgressChanged(int progress);
@@ -54,6 +57,8 @@ private:
     static RenderServer* s_renderServer;
     static QThread* s_serverThread;
     static CommandDispatcher* s_commandDispatcher;
+    static QProcess* s_process;
+    static bool s_terminatedKnowingly;
 };
 
 #endif // CONTROLRENDERINGMANAGER_H

@@ -146,15 +146,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     //            m_qmlCodeEditorWidget, &QmlCodeEditorWidget::onControlRemoval);
 
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
-            ControlRenderingManager::scheduleTerminate);
+            ControlRenderingManager::terminate);
     connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged,
-            ControlRenderingManager::scheduleInit);
-    connect(m_projectOptionsWidget, &ProjectOptionsWidget::themeChanged, this, [=] {
-        if (const Form* currentForm = m_designerPane->designerView()->scene()->currentForm()) {
-            Delayer::delay(3000);
-            ControlRenderingManager::scheduleRefresh(currentForm->uid());
-        }
-    });
+            ControlRenderingManager::start);
+
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &CentralWidget::onModeChange);
 }

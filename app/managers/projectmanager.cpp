@@ -239,7 +239,7 @@ bool ProjectManager::start(const QString& uid)
     // Because it might fix broken id and indexes
     ProjectExposingManager::exposeProject();
 
-    ControlRenderingManager::scheduleInit();
+    ControlRenderingManager::start();
     DocumentManager::updateProjectInfo();
     updateLastModification(s_uid);
 
@@ -250,7 +250,7 @@ bool ProjectManager::start(const QString& uid)
 
 void ProjectManager::stop()
 {
-    ControlRenderingManager::scheduleTerminate();
+    ControlRenderingManager::terminate();
     ProjectExposingManager::removeProject();
     updateSize(s_uid);
     s_uid = "";

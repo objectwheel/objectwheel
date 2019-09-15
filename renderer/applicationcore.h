@@ -19,8 +19,6 @@ public:
 private slots:
     void startQuitCountdown(int msec);
 
-    void onTerminateCommand();
-
 private:
     static void quitIfDisconnected();
 

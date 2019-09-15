@@ -12,12 +12,12 @@
 #include <QLocalServer>
 #include <QMessageBox>
 
-namespace { bool g_initScheduled = false; }
-
 ControlRenderingManager* ControlRenderingManager::s_instance = nullptr;
 RenderServer* ControlRenderingManager::s_renderServer = nullptr;
 QThread* ControlRenderingManager::s_serverThread = nullptr;
 CommandDispatcher* ControlRenderingManager::s_commandDispatcher = nullptr;
+QProcess* ControlRenderingManager::s_process = nullptr;
+bool ControlRenderingManager::s_terminatedKnowingly = false;
 
 ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(parent)
 {
@@ -26,11 +26,18 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
     s_instance = this;
     s_renderServer = new RenderServer;
     s_serverThread = new QThread(this);
+    s_process = new QProcess(this);
 
     s_renderServer->moveToThread(s_serverThread);
     s_serverThread->start();
 
     s_commandDispatcher = new CommandDispatcher(s_renderServer, this);
+
+    s_process->setProgram(QCoreApplication::applicationDirPath() + "/renderer");
+#if !defined(QT_DEBUG)
+    s_process->setStandardOutputFile(QProcess::nullDevice());
+    s_process->setStandardErrorFile(QProcess::nullDevice());
+#endif
 
     connect(s_renderServer, &RenderServer::connected,
             this, &ControlRenderingManager::onConnected);
@@ -57,6 +64,7 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
 
 ControlRenderingManager::~ControlRenderingManager()
 {
+    terminate();
     s_serverThread->quit();
     s_serverThread->wait();
 
@@ -148,65 +156,53 @@ void ControlRenderingManager::schedulePropertyUpdate(const QString& uid, const Q
     s_commandDispatcher->schedulePropertyUpdate(uid, propertyName, propertyValue);
 }
 
-void ControlRenderingManager::scheduleInit()
+void ControlRenderingManager::start()
 {
-    Q_ASSERT_X(!g_initScheduled, "scheduleInit", "Already scheduled");
-
-    s_serverThread->wait(100); // may scheduleTerminate happens after scheduleInit is called from ProjectManager
-
-    if (s_renderServer->isConnected()) {
-        s_commandDispatcher->scheduleInit();
-    } else {
-        QStringList arguments;
-        arguments << ProjectManager::dir();
-        arguments << s_renderServer->serverName();
-
-        QProcess process;
-        process.setArguments(arguments);
-        process.setProgram(QCoreApplication::applicationDirPath() + "/renderer");
-
-#if !defined(QT_DEBUG)
-        process.setStandardOutputFile(QProcess::nullDevice());
-        process.setStandardErrorFile(QProcess::nullDevice());
-#endif
-
+    QStringList arguments;
+    arguments.append(ProjectManager::dir());
+    arguments.append(s_renderServer->serverName());
+    s_process->setArguments(arguments);
 #if !defined(RENDERER_DEBUG)
-        process.startDetached();
+    s_process->start();
 #endif
-
-        g_initScheduled = true;
-    }
 }
 
-void ControlRenderingManager::scheduleTerminate()
+void ControlRenderingManager::terminate()
 {
-    s_commandDispatcher->scheduleTerminate();
-    QMetaObject::invokeMethod(s_renderServer, "abort");
+    s_terminatedKnowingly = true;
+    s_process->kill();
+    s_process->waitForFinished(1000);
 }
 
 void ControlRenderingManager::onConnected()
 {
-    if (g_initScheduled)
-        s_commandDispatcher->scheduleInit();
+    s_terminatedKnowingly = false;
+    s_commandDispatcher->scheduleInit();
+    emit connected();
 }
 
 void ControlRenderingManager::onDisconnected()
 {
+    if (s_terminatedKnowingly) {
+        s_terminatedKnowingly = false;
+        return;
+    }
+    if (s_process->state() != QProcess::NotRunning)
+        terminate();
     if (ProjectManager::isStarted()) {
         QMessageBox::StandardButton result = UtilityFunctions::showMessage(
                     nullptr, tr("Rendering Engine Crashed"),
                     tr("Would you like to start it over again?"),
                     QMessageBox::Question,
                     QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
-        if (result & QMessageBox::Yes)
-            scheduleInit();
+        if (result == QMessageBox::Yes)
+            start();
     }
 }
 
 void ControlRenderingManager::onConnectionTimeout()
 {
     // TODO
-
     qWarning() << "Connection timeout, in" << __FILE__ << ":" << __LINE__;
 }
 
@@ -214,7 +210,4 @@ void ControlRenderingManager::onRenderInfosReady(const QList<RenderInfo>& infos)
 {
     for (const RenderInfo& info : infos)
         emit renderDone(info);
-
-    if (g_initScheduled)
-        g_initScheduled = false;
 }

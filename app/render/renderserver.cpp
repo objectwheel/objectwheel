@@ -90,7 +90,6 @@ void RenderServer::onNewConnection()
 
         emit connected();
     } else {
-        send(pendingConnection, RendererCommands::Terminate);
         pendingConnection->abort();
     }
 }

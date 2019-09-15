@@ -21,11 +21,6 @@ void CommandDispatcher::scheduleInit()
     send(m_server, RendererCommands::Init);
 }
 
-void CommandDispatcher::scheduleTerminate()
-{
-    send(m_server, RendererCommands::Terminate);
-}
-
 void CommandDispatcher::scheduleDevicePixelRatioUpdate(qreal devicePixelRatio)
 {
     send(m_server, RendererCommands::DevicePixelRatioUpdate, push(devicePixelRatio));
