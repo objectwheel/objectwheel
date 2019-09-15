@@ -1,5 +1,8 @@
 {
     "QtQuick2"          : "Qt Quick - Basic",
     "QtQuick.Controls2" : "Qt Quick - Controls 2",
-    "QtQuick.Extras1"   : "Qt Quick - Extras"
+    "QtQuick.Controls1" : "Qt Quick - Controls 1",
+    "QtQuick.Layouts1"  : "Qt Quick - Layouts",
+    "QtQuick.Extras1"   : "Qt Quick - Extras",
+    "QtQuick.Dialogs1"   : "Qt Quick - Dialogs"
 }

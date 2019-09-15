@@ -92,6 +92,11 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
     m_designerPane->themeComboBox()->addItem(QStringLiteral("Imagine"));
     m_designerPane->themeComboBox()->addItem(QStringLiteral("Material"));
     m_designerPane->themeComboBox()->addItem(QStringLiteral("Universal"));
+
+    m_designerPane->themeComboBox1()->addItem(QStringLiteral("Desktop"));
+    m_designerPane->themeComboBox1()->addItem(QStringLiteral("Base"));
+    m_designerPane->themeComboBox1()->addItem(QStringLiteral("Flat"));
+
     m_designerPane->zoomLevelComboBox()->addItems(UtilityFunctions::zoomTexts());
 
     onSceneSettingsChange();
@@ -144,6 +149,8 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onZoomLevelComboBoxActivation);
     connect(m_designerPane->themeComboBox(), qOverload<const QString&>(&QComboBox::activated),
             this, &DesignerController::projectThemeActivated);
+    connect(m_designerPane->themeComboBox1(), qOverload<const QString&>(&QComboBox::activated),
+            this, &DesignerController::projectThemeActivated1);
 
     connect(m_designerPane->invertSelectionAction(), &QAction::triggered,
             this, &DesignerController::onInvertSelectionActionTrigger);
@@ -181,13 +188,23 @@ void DesignerController::charge()
         return;
 
     m_designerPane->themeComboBox()->setCurrentIndex(0);
+    m_designerPane->themeComboBox1()->setCurrentIndex(0);
 
     const QJsonObject& object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
     const QString& theme = object.value("stylev2").toString();
+    const QString& theme1 = object.value("stylev1").toString();
+
     if (!theme.isEmpty()) {
         for (int i = 0; i < m_designerPane->themeComboBox()->count(); i++) {
             if (m_designerPane->themeComboBox()->itemText(i).contains(theme))
                 m_designerPane->themeComboBox()->setCurrentIndex(i);
+        }
+    }
+
+    if (!theme1.isEmpty()) {
+        for (int i = 0; i < m_designerPane->themeComboBox1()->count(); i++) {
+            if (m_designerPane->themeComboBox1()->itemText(i).contains(theme1))
+                m_designerPane->themeComboBox1()->setCurrentIndex(i);
         }
     }
 }

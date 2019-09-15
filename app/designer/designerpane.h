@@ -34,6 +34,7 @@ public:
     QToolButton* themeSettingsButton() const;
     QComboBox* zoomLevelComboBox() const;
     QComboBox* themeComboBox() const;
+    QComboBox* themeComboBox1() const;
 
     QAction* invertSelectionAction() const;
     QAction* selectAllAction() const;
@@ -70,6 +71,7 @@ private:
     QToolButton* m_themeSettingsButton;
     QComboBox* m_zoomLevelComboBox;
     QComboBox* m_themeComboBox;
+    QComboBox* m_themeComboBox1;
 
     QAction* m_invertSelectionAction;
     QAction* m_selectAllAction;

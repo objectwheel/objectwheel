@@ -26,6 +26,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_themeSettingsButton(new QToolButton(this))
   , m_zoomLevelComboBox(new QComboBox(this))
   , m_themeComboBox(new QComboBox(this))
+  , m_themeComboBox1(new QComboBox(this))
 
   , m_invertSelectionAction(new QAction(this))
   , m_selectAllAction(new QAction(this))
@@ -72,6 +73,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_themeSettingsButton);
     m_toolBar->addWidget(m_themeComboBox);
+    m_toolBar->addWidget(m_themeComboBox1);
     m_toolBar->addSeparator();
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
@@ -84,6 +86,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_zoomLevelComboBox->setCursor(Qt::PointingHandCursor);
     m_sceneSettingsButton->setCursor(Qt::PointingHandCursor);
     m_themeComboBox->setCursor(Qt::PointingHandCursor);
+    m_themeComboBox1->setCursor(Qt::PointingHandCursor);
     m_themeSettingsButton->setCursor(Qt::PointingHandCursor);
 
     m_refreshButton->setToolTip(tr("Refresh (R)"));
@@ -96,6 +99,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_zoomLevelComboBox->setToolTip(tr("Change zoom level of the scene"));
     m_sceneSettingsButton->setToolTip(tr("Open scene settings"));
     m_themeComboBox->setToolTip(tr("Change Quick Controls v2 theme"));
+    m_themeComboBox1->setToolTip(tr("Change Quick Controls v1 theme"));
     m_themeSettingsButton->setToolTip(tr("Open project theme settings"));
 
     m_refreshButton->setFixedSize(QSize(20, 20));
@@ -108,6 +112,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_zoomLevelComboBox->setFixedHeight(20);
     m_sceneSettingsButton->setFixedSize(QSize(20, 20));
     m_themeComboBox->setFixedHeight(20);
+    m_themeComboBox1->setFixedHeight(20);
     m_themeSettingsButton->setFixedSize(QSize(20, 20));
 
     m_refreshButton->setIconSize(QSize(16, 16));
@@ -120,6 +125,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_zoomLevelComboBox->setIconSize(QSize(16, 16));
     m_sceneSettingsButton->setIconSize(QSize(16, 16));
     m_themeComboBox->setIconSize(QSize(16, 16));
+    m_themeComboBox1->setIconSize(QSize(16, 16));
     m_themeSettingsButton->setIconSize(QSize(16, 16));
 
     m_refreshButton->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
@@ -309,6 +315,11 @@ QComboBox* DesignerPane::zoomLevelComboBox() const
 QComboBox* DesignerPane::themeComboBox() const
 {
     return m_themeComboBox;
+}
+
+QComboBox* DesignerPane::themeComboBox1() const
+{
+    return m_themeComboBox1;
 }
 
 QAction* DesignerPane::invertSelectionAction() const

@@ -63,6 +63,7 @@ private:
 signals:
     void codeEditorTriggered(Control* control, const QString& relativeFileName);
     void projectThemeActivated(const QString& theme);
+    void projectThemeActivated1(const QString& theme);
 
 private:
     DesignerPane* m_designerPane;
