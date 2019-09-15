@@ -2,7 +2,7 @@
 TEMPLATE = lib
 CONFIG  += plugin c++14 strict_c++
 TARGET   = utils
-QT      += core-private widgets qml quick websockets multimedia
+QT      += core-private widgets qml quick websockets multimedia quickcontrols2
 DEFINES += UTILS_LIBRARY
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000

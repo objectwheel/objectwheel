@@ -243,9 +243,12 @@ void RenderEngine::updateControlCode(const QString& uid)
 
     // We delete previous instance object after we reparent all of its children into the new instance
     if (oldObject) {
-        if (auto item = RenderUtils::guiItem(oldObject))
+        if (item) {
             item->setParentItem(nullptr);
-        delete oldObject;
+            delete item;
+        }
+        if (oldObject != item)
+            delete oldObject;
     }
 
     RenderUtils::doComplete(oldInstance, this);
@@ -303,10 +306,14 @@ void RenderEngine::updateFormCode(const QString& uid)
         RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldFormInstance, m_view));
     }
 
+    // We delete previous instance object after we reparent all of its children into the new instance
     if (oldObject) {
-        if (auto item = RenderUtils::guiItem(oldObject))
+        if (item) {
             item->setParentItem(nullptr);
-        delete oldObject;
+            delete item;
+        }
+        if (oldObject != item)
+            delete oldObject;
     }
 
     RenderUtils::doComplete(oldFormInstance, this);

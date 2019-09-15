@@ -745,9 +745,13 @@ void RenderUtils::deleteInstancesRecursive(RenderEngine::ControlInstance* instan
         designerSupport.derefFromEffectItem(item);
 
     if (instance->object) {
-        if (auto item = RenderUtils::guiItem(instance->object))
+        auto item = RenderUtils::guiItem(instance->object);
+        if (item) {
             item->setParentItem(nullptr);
-        delete instance->object;
+            delete item;
+        }
+        if (instance->object != item)
+            delete instance->object;
     }
     delete instance;
 }
@@ -770,9 +774,13 @@ void RenderUtils::cleanUpFormInstances(const QList<RenderEngine::ControlInstance
             designerSupport.derefFromEffectItem(item);
 
         if (formInstance->object) {
-            if (auto item = RenderUtils::guiItem(formInstance->object))
+            auto item = RenderUtils::guiItem(formInstance->object);
+            if (item) {
                 item->setParentItem(nullptr);
-            delete formInstance->object;
+                delete item;
+            }
+            if (formInstance->object != item)
+                delete formInstance->object;
         }
 
         delete formInstance->context;

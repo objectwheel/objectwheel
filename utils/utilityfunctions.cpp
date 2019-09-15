@@ -484,9 +484,11 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
 #if !defined(Q_OS_MACOS)
     dialog.QWidget::setWindowTitle(title);
     dialog.setText(text);
-#else    
+#else
     dialog.setText(title);
     dialog.setInformativeText(text);
+    for (QAbstractButton* button : dialog.buttons())
+        button->setCursor(Qt::PointingHandCursor);
     if (auto label = dialog.findChild<QWidget*>(QStringLiteral("qt_msgbox_label"))) {
         int MIN_WIDTH = qMax(label->fontMetrics().horizontalAdvance(title), 300);
         label->setStyleSheet(QStringLiteral("QLabel { min-width: %1px; }").arg(MIN_WIDTH));
