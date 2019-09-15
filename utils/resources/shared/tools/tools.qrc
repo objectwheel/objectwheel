@@ -138,5 +138,15 @@
         <file>MessageDialog/t/main.qml</file>
         <file>SystemTrayIcon/m/control.meta</file>
         <file>SystemTrayIcon/t/main.qml</file>
+        <file>ColorDialog1/m/control.meta</file>
+        <file>ColorDialog1/t/main.qml</file>
+        <file>FileDialog1/m/control.meta</file>
+        <file>FileDialog1/t/main.qml</file>
+        <file>FolderDialog/m/control.meta</file>
+        <file>FolderDialog/t/main.qml</file>
+        <file>FontDialog1/m/control.meta</file>
+        <file>FontDialog1/t/main.qml</file>
+        <file>MessageDialog1/m/control.meta</file>
+        <file>MessageDialog1/t/main.qml</file>
     </qresource>
 </RCC>
