@@ -936,11 +936,14 @@ QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
         QQmlProperty defaultProperty(instance->object);
         Q_ASSERT(defaultProperty.isValid());
         QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-        Q_ASSERT(childList.isValid() && childList.canAppend());
-        childList.append(item);
-        const QRectF rect(item->mapRectToItem(parentItem, QRectF(QPointF(), item->size())));
-        QMarginsF margins(rect.left(), rect.top(), parentItem->width() - rect.right(),
-                          parentItem->height() - rect.bottom());
+        QMarginsF margins;
+        //Q_ASSERT(childList.isValid() && childList.canAppend());
+        if (childList.isValid() && childList.canAppend()) {
+            childList.append(item);
+            const QRectF rect(item->mapRectToItem(parentItem, QRectF(QPointF(), item->size())));
+            margins = QMarginsF(rect.left(), rect.top(), parentItem->width() - rect.right(),
+                                parentItem->height() - rect.bottom());
+        }
         item->setParentItem(nullptr);
         delete item;
         if (completeDisabled)

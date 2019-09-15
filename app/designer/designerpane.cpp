@@ -95,7 +95,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_guidelinesButton->setToolTip(tr("Enable/Disable guidelines"));
     m_zoomLevelComboBox->setToolTip(tr("Change zoom level of the scene"));
     m_sceneSettingsButton->setToolTip(tr("Open scene settings"));
-    m_themeComboBox->setToolTip(tr("Change project theme"));
+    m_themeComboBox->setToolTip(tr("Change Quick Controls v2 theme"));
     m_themeSettingsButton->setToolTip(tr("Open project theme settings"));
 
     m_refreshButton->setFixedSize(QSize(20, 20));
