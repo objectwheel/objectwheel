@@ -24,6 +24,7 @@ public:
     AnchorEditor* anchorEditor() const;
 
     QToolButton* refreshButton() const;
+    QToolButton* shrinkSceneButton() const;
     QToolButton* clearButton() const;
     QToolButton* anchorsButton() const;
     QToolButton* snappingButton() const;
@@ -59,6 +60,7 @@ private:
     AnchorEditor* m_anchorEditor;
 
     QToolButton* m_refreshButton;
+    QToolButton* m_shrinkSceneButton;
     QToolButton* m_clearButton;
     QToolButton* m_anchorsButton;
     QToolButton* m_snappingButton;

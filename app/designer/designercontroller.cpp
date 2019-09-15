@@ -124,6 +124,8 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
 
     connect(m_designerPane->refreshButton(), &QToolButton::clicked,
             this, &DesignerController::onRefreshButtonClick);
+    connect(m_designerPane->shrinkSceneButton(), &QToolButton::clicked,
+            this, &DesignerController::onShrinkSceneButtonClick);
     connect(m_designerPane->clearButton(), &QToolButton::clicked,
             this, &DesignerController::onClearButtonClick);
     connect(m_designerPane->anchorsButton(), &QToolButton::clicked,
@@ -427,6 +429,11 @@ void DesignerController::onRefreshButtonClick()
 {
     if (Form* currentForm = m_designerPane->designerView()->scene()->currentForm())
         ControlRenderingManager::scheduleRefresh(currentForm->uid());
+}
+
+void DesignerController::onShrinkSceneButtonClick()
+{
+    m_designerPane->designerView()->scene()->shrinkSceneRect();
 }
 
 void DesignerController::onClearButtonClick()

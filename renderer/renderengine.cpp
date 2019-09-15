@@ -894,7 +894,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     // Make sure everything is visible
     if (instance->gui) {
         if (!instance->window)
-            QQmlProperty(object, "visible", instance->context).write(true);
+            QQmlProperty::write(object, "visible", true, instance->context);
         QQuickItem* item = RenderUtils::guiItem(instance->object);
         item->setVisible(true); // Especially important for popup
         item->update();
@@ -1018,7 +1018,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     // Make sure everything is visible
     if (instance->gui) {
         if (!instance->window)
-            QQmlProperty(object, "visible", instance->context).write(true);
+            QQmlProperty::write(object, "visible", true, instance->context);
         QQuickItem* item = RenderUtils::guiItem(instance->object);
         item->setVisible(true); // Especially important for popup
         item->update();

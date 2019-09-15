@@ -16,6 +16,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_anchorEditor(new AnchorEditor(m_designerView->scene(), this))
 
   , m_refreshButton(new QToolButton(this))
+  , m_shrinkSceneButton(new QToolButton(this))
   , m_clearButton(new QToolButton(this))
   , m_anchorsButton(new QToolButton(this))
   , m_snappingButton(new QToolButton(this))
@@ -59,6 +60,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_toolBar->setFixedHeight(24);
     m_toolBar->addWidget(m_refreshButton);
+    m_toolBar->addWidget(m_shrinkSceneButton);
     m_toolBar->addWidget(m_clearButton);
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_anchorsButton);
@@ -70,8 +72,10 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_themeSettingsButton);
     m_toolBar->addWidget(m_themeComboBox);
+    m_toolBar->addSeparator();
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
+    m_shrinkSceneButton->setCursor(Qt::PointingHandCursor);
     m_clearButton->setCursor(Qt::PointingHandCursor);
     m_anchorsButton->setCursor(Qt::PointingHandCursor);
     m_snappingButton->setCursor(Qt::PointingHandCursor);
@@ -83,6 +87,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeSettingsButton->setCursor(Qt::PointingHandCursor);
 
     m_refreshButton->setToolTip(tr("Refresh (R)"));
+    m_shrinkSceneButton->setToolTip(tr("Shrink the Scene"));
     m_clearButton->setToolTip(tr("Clear controls on the form"));
     m_anchorsButton->setToolTip(tr("Enable/Disable painting all the anchors"));
     m_snappingButton->setToolTip(tr("Enable/Disable snapping"));
@@ -94,6 +99,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeSettingsButton->setToolTip(tr("Open project theme settings"));
 
     m_refreshButton->setFixedSize(QSize(20, 20));
+    m_shrinkSceneButton->setFixedSize(QSize(20, 20));
     m_clearButton->setFixedSize(QSize(20, 20));
     m_anchorsButton->setFixedSize(QSize(20, 20));
     m_snappingButton->setFixedSize(QSize(20, 20));
@@ -105,6 +111,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeSettingsButton->setFixedSize(QSize(20, 20));
 
     m_refreshButton->setIconSize(QSize(16, 16));
+    m_shrinkSceneButton->setIconSize(QSize(16, 16));
     m_clearButton->setIconSize(QSize(16, 16));
     m_anchorsButton->setIconSize(QSize(16, 16));
     m_snappingButton->setIconSize(QSize(16, 16));
@@ -116,6 +123,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeSettingsButton->setIconSize(QSize(16, 16));
 
     m_refreshButton->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
+    m_shrinkSceneButton->setIcon(QIcon(QStringLiteral(":/images/designer/shrink-scene.svg")));
     m_clearButton->setIcon(QIcon(QStringLiteral(":/images/designer/delete-all.svg")));
     m_anchorsButton->setIcon(QIcon(QStringLiteral(":/images/designer/anchors.svg")));
     m_snappingButton->setIcon(QIcon(QStringLiteral(":/images/designer/snapping.svg")));
@@ -251,6 +259,11 @@ AnchorEditor* DesignerPane::anchorEditor() const
 QToolButton* DesignerPane::refreshButton() const
 {
     return m_refreshButton;
+}
+
+QToolButton* DesignerPane::shrinkSceneButton() const
+{
+    return m_shrinkSceneButton;
 }
 
 QToolButton* DesignerPane::clearButton() const

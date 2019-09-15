@@ -33,6 +33,7 @@ private slots:
     void onAnchorEditorActivation(Control* sourceControl, Control* targetControl);
 
     void onRefreshButtonClick();
+    void onShrinkSceneButtonClick();
     void onClearButtonClick();
     void onAnchorsButtonClick();
     void onSnappingButtonClick();
