@@ -41,7 +41,7 @@ static const char groupPostfix[] = "StorageSettings";
 StorageSettings::StorageSettings()
     : m_cleanWhitespace(true),
       m_inEntireDocument(false),
-      m_addFinalNewLine(true),
+      m_addFinalNewLine(false),
       m_cleanIndentation(true)
 {
 }

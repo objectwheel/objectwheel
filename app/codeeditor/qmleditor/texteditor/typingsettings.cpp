@@ -39,8 +39,8 @@ namespace TextEditor {
 
 TypingSettings::TypingSettings():
     m_autoIndent(true),
-    m_tabKeyBehavior(TabNeverIndents),
-    m_smartBackspaceBehavior(BackspaceNeverIndents)
+    m_tabKeyBehavior(TabAlwaysIndents),
+    m_smartBackspaceBehavior(BackspaceFollowsPreviousIndents)
 {
 }
 
