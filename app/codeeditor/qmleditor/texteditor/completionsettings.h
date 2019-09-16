@@ -61,7 +61,7 @@ public:
     int m_automaticProposalTimeoutInMs = 400;
     bool m_autoInsertBrackets = true;
     bool m_surroundingAutoBrackets = true;
-    bool m_autoInsertQuotes = false;
+    bool m_autoInsertQuotes = true;
     bool m_surroundingAutoQuotes = true;
     bool m_partiallyComplete = true;
     bool m_spaceAfterFunctionName = false;

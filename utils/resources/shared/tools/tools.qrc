@@ -164,5 +164,9 @@
         <file>Video/t/main.qml</file>
         <file>VideoOutput/m/control.meta</file>
         <file>VideoOutput/t/main.qml</file>
+        <file>PieMenu/m/control.meta</file>
+        <file>PieMenu/t/main.qml</file>
+        <file>Picture/m/control.meta</file>
+        <file>Picture/t/main.qml</file>
     </qresource>
 </RCC>
