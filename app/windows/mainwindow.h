@@ -15,7 +15,6 @@ class InspectorPane;
 class CentralWidget;
 class PropertiesPane;
 class AssetsPane;
-class SignalEditor;
 
 class MainWindow : public QMainWindow
 {
@@ -71,7 +70,6 @@ private:
     InspectorPane* m_inspectorPane;
     PropertiesPane* m_propertiesPane;
     AssetsPane* m_assetsPane;
-    SignalEditor* m_signalEditor;
 };
 
 #endif // MAINWINDOW_H

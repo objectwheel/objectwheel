@@ -35,7 +35,6 @@
 #include <outputcontroller.h>
 #include <designerpane.h>
 #include <designerscene.h>
-#include <signaleditor.h>
 #include <parserutils.h>
 
 #include <QWindow>
@@ -81,24 +80,6 @@ bool propertiesDockWidgetVisible;
 bool formsDockWidgetVisible;
 bool toolboxDockWidgetVisible;
 bool inspectorDockWidgetVisible;
-
-
-QString methodName(const QString& signal)
-{
-    QString method(signal);
-    method.replace(0, 1, method[0].toUpper());
-    return method.prepend("on");
-}
-
-bool warnIfFileDoesNotExist(const QString& filePath)
-{
-    if (!QFileInfo::exists(filePath)) {
-        return UtilityFunctions::showMessage(
-                    nullptr, QObject::tr("Oops"),
-                    QObject::tr("File %1 does not exist.").arg(QFileInfo(filePath).fileName()));
-    }
-    return false;
-}
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
@@ -113,7 +94,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_propertiesPane(new PropertiesPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_assetsPane(new AssetsPane)
-  , m_signalEditor(new SignalEditor(this))
 {
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
@@ -311,64 +291,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         for (Control* control : selectedControls)
             control->setSelected(true);
     });
-    connect(m_inspectorPane, &InspectorPane::controlDoubleClicked,
-            this, [=] (Control* control) {
-        if (control == 0)
-            return;
-
-        if (control->hasErrors()) {
-            UtilityFunctions::showMessage(
-                        this, tr("Oops"),
-                        tr("Control has got errors, solve these problems first."));
-            return;
-        }
-
-        if (m_centralWidget->designerPane()->designerView()->scene()->currentForm() == 0)
-            return;
-
-        m_signalEditor->setSignalList(control->events().toList());
-
-        int result = m_signalEditor->exec();
-        if (result == QDialog::Rejected)
-            return;
-
-        // 1. Control name; 2. Method name
-        #define METHOD_DECL "%1_%2"
-        #define FORM_DECL "%1_onCompleted"
-        #define METHOD_BODY \
-            "\n\n"\
-            "function %1() {\n"\
-            "    // Do something...\n"\
-            "}"
-
-        const QString& methodSign = QString::fromUtf8(METHOD_DECL)
-                .arg(control->id())
-                .arg(methodName(m_signalEditor->currentSignal()));
-        const QString& methodBody = QString::fromUtf8(METHOD_BODY).arg(methodSign);
-        const QString& formSign = m_centralWidget->designerPane()->designerView()->scene()->currentForm()->id();
-        const QString& formJS = formSign + ".js";
-        const QString& fullPath = SaveUtils::toProjectAssetsDir(ProjectManager::dir()) + '/' + formJS;
-
-        if (warnIfFileDoesNotExist(fullPath))
-            return;
-
-        m_centralWidget->qmlCodeEditorWidget()->openAssets(formJS);
-
-        QmlCodeEditorWidget::AssetsDocument* document = m_centralWidget->qmlCodeEditorWidget()->getAssets(formJS);
-        Q_ASSERT(document);
-
-        int pos = ParserUtils::methodLine(document->document, fullPath, methodSign);
-        if (pos < 0) {
-            const QString& connection =
-                    control->id() + "." + m_signalEditor->currentSignal() + ".connect(" + methodSign + ")";
-            const QString& loaderSign = QString::fromUtf8(FORM_DECL).arg(formSign);
-            ParserUtils::addConnection(document->document, fullPath, loaderSign, connection);
-            pos = ParserUtils::addMethod(document->document, fullPath, methodBody);
-            pos += 3;
-        }
-
-        m_centralWidget->qmlCodeEditorWidget()->codeEditor()->gotoLine(pos);
-    });
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0
@@ -438,7 +360,6 @@ void MainWindow::discharge()
     m_inspectorPane->discharge();
     m_propertiesPane->discharge();
     m_assetsPane->discharge();
-    m_signalEditor->discharge();
 
     showLeftPanes(true);
     showRightPanes(true);

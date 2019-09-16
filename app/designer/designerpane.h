@@ -41,6 +41,8 @@ public:
     QAction* refreshAction() const;
     QAction* sendBackAction() const;
     QAction* bringFrontAction() const;
+    QAction* viewSourceCodeAction() const;
+    QAction* addNewSignalHandlerAction() const;
     QAction* cutAction() const;
     QAction* copyAction() const;
     QAction* pasteAction() const;
@@ -77,7 +79,9 @@ private:
     QAction* m_selectAllAction;
     QAction* m_refreshAction;
     QAction* m_sendBackAction;
-    QAction* m_bringFrontAction;
+    QAction* m_bringFrontAction;    
+    QAction* m_viewSourceCodeAction;
+    QAction* m_addNewSignalHandlerAction;
     QAction* m_cutAction;
     QAction* m_copyAction;
     QAction* m_pasteAction;

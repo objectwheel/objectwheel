@@ -47,6 +47,8 @@ private slots:
     void onSelectAllActionTrigger();
     void onSendBackActionTrigger();
     void onBringFrontActionTrigger();
+    void onViewSourceCodeActionTrigger();
+    void onAddNewSignalHandlerActionTrigger();
     void onCutActionTrigger();
     void onCopyActionTrigger();
     void onPasteActionTrigger();
@@ -61,7 +63,8 @@ private:
     QList<Control*> movableSelectedAncestorControls(const QList<Control*>& selectedControls) const;
 
 signals:
-    void codeEditorTriggered(Control* control, const QString& relativeFileName);
+    void viewSourceCodeTriggered(Control* control);
+    void addNewSignalHandlerTriggered(Control* control);
     void projectThemeActivated(const QString& theme);
     void projectThemeActivated1(const QString& theme);
 

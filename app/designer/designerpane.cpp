@@ -33,6 +33,8 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_refreshAction(new QAction(this))
   , m_sendBackAction(new QAction(this))
   , m_bringFrontAction(new QAction(this))
+  , m_viewSourceCodeAction(new QAction(this))
+  , m_addNewSignalHandlerAction(new QAction(this))
   , m_cutAction(new QAction(this))
   , m_copyAction(new QAction(this))
   , m_pasteAction(new QAction(this))
@@ -145,7 +147,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     TransparentStyle::attach(m_toolBar);
 
-    m_invertSelectionAction->setShortcutVisibleInContextMenu(true);
     m_selectAllAction->setShortcutVisibleInContextMenu(true);
     m_refreshAction->setShortcutVisibleInContextMenu(true);
     m_sendBackAction->setShortcutVisibleInContextMenu(true);
@@ -154,7 +155,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_copyAction->setShortcutVisibleInContextMenu(true);
     m_pasteAction->setShortcutVisibleInContextMenu(true);
     m_deleteAction->setShortcutVisibleInContextMenu(true);
-    m_deleteAllAction->setShortcutVisibleInContextMenu(true);
     m_moveLeftAction->setShortcutVisibleInContextMenu(true);
     m_moveRightAction->setShortcutVisibleInContextMenu(true);
     m_moveUpAction->setShortcutVisibleInContextMenu(true);
@@ -165,6 +165,8 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_refreshAction->setText(tr("Refresh"));
     m_sendBackAction->setText(tr("Send to Back"));
     m_bringFrontAction->setText(tr("Bring to Front"));
+    m_viewSourceCodeAction->setText(tr("View Source Code"));
+    m_addNewSignalHandlerAction->setText(tr("Add New Signal Handler"));
     m_cutAction->setText(tr("Cut"));
     m_copyAction->setText(tr("Copy"));
     m_pasteAction->setText(tr("Paste"));
@@ -180,6 +182,8 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_refreshAction->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
     m_sendBackAction->setIcon(QIcon(QStringLiteral(":/images/designer/send-to-back.svg")));
     m_bringFrontAction->setIcon(QIcon(QStringLiteral(":/images/designer/bring-to-front.svg")));
+    m_viewSourceCodeAction->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
+    m_addNewSignalHandlerAction->setIcon(QIcon(QStringLiteral(":/images/designer/add-new-signal-handler.svg")));
     m_cutAction->setIcon(QIcon(QStringLiteral(":/images/designer/cut.svg")));
     m_copyAction->setIcon(QIcon(QStringLiteral(":/images/designer/copy.svg")));
     m_pasteAction->setIcon(QIcon(QStringLiteral(":/images/designer/paste.svg")));
@@ -212,6 +216,8 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     addAction(m_refreshAction);
     addAction(m_sendBackAction);
     addAction(m_bringFrontAction);
+    addAction(m_viewSourceCodeAction);
+    addAction(m_addNewSignalHandlerAction);
     addAction(m_cutAction);
     addAction(m_copyAction);
     addAction(m_pasteAction);
@@ -227,6 +233,8 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_menu->addAction(m_refreshAction);
     m_menu->addAction(m_sendBackAction);
     m_menu->addAction(m_bringFrontAction);
+    m_menu->addAction(m_viewSourceCodeAction);
+    m_menu->addAction(m_addNewSignalHandlerAction);
     m_menu->addAction(m_cutAction);
     m_menu->addAction(m_copyAction);
     m_menu->addAction(m_pasteAction);
@@ -345,6 +353,16 @@ QAction* DesignerPane::sendBackAction() const
 QAction* DesignerPane::bringFrontAction() const
 {
     return m_bringFrontAction;
+}
+
+QAction* DesignerPane::viewSourceCodeAction() const
+{
+    return m_viewSourceCodeAction;
+}
+
+QAction* DesignerPane::addNewSignalHandlerAction() const
+{
+    return m_addNewSignalHandlerAction;
 }
 
 QAction* DesignerPane::cutAction() const

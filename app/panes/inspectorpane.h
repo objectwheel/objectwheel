@@ -41,7 +41,6 @@ private slots:
     void onFormRemove(Control* control);
     void onCurrentFormChange(Form* currentForm);
     void onItemSelectionChange();
-    void onItemDoubleClick(QTreeWidgetItem* item, int column);
 
 private:
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
@@ -49,7 +48,6 @@ private:
     QSize sizeHint() const override;
 
 signals:
-    void controlDoubleClicked(Control* control);
     void controlSelectionChanged(const QList<Control*>& selectedControls);
 
 private:

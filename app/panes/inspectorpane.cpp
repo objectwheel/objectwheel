@@ -304,7 +304,6 @@ InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QT
             this, &InspectorPane::onControlRemove);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &InspectorPane::onFormRemove);
-    connect(this, &InspectorPane::itemDoubleClicked, this, &InspectorPane::onItemDoubleClick);
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &InspectorPane::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
@@ -680,18 +679,6 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
                 childItem->setText(0, control->id());
         }
     }
-}
-
-void InspectorPane::onItemDoubleClick(QTreeWidgetItem* item, int)
-{
-    if (!isProjectStarted)
-        return;
-
-    Control* control = controlFromItem(item, m_designerScene->currentForm());
-    if (!control)
-        return;
-
-    emit controlDoubleClicked(control);
 }
 
 void InspectorPane::onSceneSelectionChange()

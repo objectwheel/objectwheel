@@ -1,3 +1,6 @@
+import QtQml 2.12
+import QtQml.Models 2.12
+import QtQml.StateMachine 1.12
 import QtQuick 2.12
 import QtQuick.Extras 1.4
 import QtQuick.Layouts 1.12
@@ -9,8 +12,6 @@ import QtQuick.Controls.Material 2.12
 import QtQuick.Controls.Fusion 2.12
 import QtQuick.Controls.Universal 2.12
 import QtQuick.Window 2.12
-import QtQml 2.12
-import QtQml.Models 2.12
 import QtQuick.Dialogs 1.3
 import QtQuick.XmlListModel 2.12
 import QtQuick.Templates 2.12
@@ -37,7 +38,6 @@ import QtBluetooth 5.12
 import QtWebView 1.1
 import QtQuick.Shapes 1.12
 import QtCharts 2.3
-import QtQml.StateMachine 1.12
 import QtGamepad 1.12
 import QtAudioEngine 1.1
 import QtScxml 5.8
