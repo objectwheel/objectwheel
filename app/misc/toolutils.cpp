@@ -4,6 +4,7 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonArray>
 #include <QFile>
 #include <QPixmap>
 
@@ -35,12 +36,27 @@ const QJsonObject& toolCategories()
             qWarning("ToolUtils: Failed to read reference json file for tool categories");
             return categories;
         }
-        categories = QJsonDocument::fromJson(file.readAll()).object();
+        categories = QJsonDocument::fromJson(file.readAll()).object().value("categories").toObject();
         file.close();
     }
     return categories;
 }
 
+const QList<QString>& toolCategoriesOrder()
+{
+    static QList<QString> order;
+    if (order.isEmpty()) {
+        QFile file(":/resources/other/tool-categories.json");
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning("ToolUtils: Failed to read reference json file for tool order");
+            return order;
+        }
+        for (const QJsonValue& v : QJsonDocument::fromJson(file.readAll()).object().value("order").toArray())
+            order.append(v.toString());
+        file.close();
+    }
+    return order;
+}
 } // Internal
 
 QString toolName(const QString& controlDir)
@@ -55,6 +71,18 @@ QString toolName(const QString& controlDir)
         name = pieces.last();
 
     return name;
+}
+
+QString toolIconPath(const QString& controlDir)
+{
+    Q_ASSERT(SaveUtils::isControlValid(controlDir));
+
+    const QJsonObject& icons(Internal::toolIcons());
+    const QString& module = ParserUtils::module(controlDir);
+    const QString& iconPath = icons.contains(module)
+            ? icons.value(module).toString()
+            : QStringLiteral(":/images/item.svg");
+    return iconPath;
 }
 
 QString toolCetegory(const QString& controlDir)
@@ -78,16 +106,9 @@ QString toolCetegory(const QString& controlDir)
     return category;
 }
 
-QString toolIconPath(const QString& controlDir)
+int toolCetegoryIndex(const QString& category)
 {
-    Q_ASSERT(SaveUtils::isControlValid(controlDir));
-
-    const QJsonObject& icons(Internal::toolIcons());
-    const QString& module = ParserUtils::module(controlDir);
-    const QString& iconPath = icons.contains(module)
-            ? icons.value(module).toString()
-            : QStringLiteral(":/images/item.svg");
-    return iconPath;
+    return Internal::toolCategoriesOrder().indexOf(category);
 }
 
 } // ToolUtils

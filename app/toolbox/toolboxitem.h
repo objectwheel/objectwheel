@@ -17,6 +17,8 @@ public:
     QString dir() const;
     void setDir(const QString& dir);
 
+    bool operator<(const QTreeWidgetItem& other) const override;
+
 private:
     QString m_dir;
 };

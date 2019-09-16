@@ -139,7 +139,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
             this, [=] (Control* control) {
         m_qmlCodeEditorWidget->openDesigns(control, SaveUtils::controlMainQmlFileName());
     });
-    connect(m_designerController, &DesignerController::addNewSignalHandlerTriggered,
+    connect(m_designerController, &DesignerController::goToSlotTriggered,
             this, [=] (Control* control) {
         if (control == 0)
             return;

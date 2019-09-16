@@ -164,8 +164,8 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onBringFrontActionTrigger);
     connect(m_designerPane->viewSourceCodeAction(), &QAction::triggered,
             this, &DesignerController::onViewSourceCodeActionTrigger);
-    connect(m_designerPane->addNewSignalHandlerAction(), &QAction::triggered,
-            this, &DesignerController::onAddNewSignalHandlerActionTrigger);
+    connect(m_designerPane->goToSlotAction(), &QAction::triggered,
+            this, &DesignerController::onGoToSlotActionTrigger);
     connect(m_designerPane->cutAction(), &QAction::triggered,
             this, &DesignerController::onCutActionTrigger);
     connect(m_designerPane->copyAction(), &QAction::triggered,
@@ -252,7 +252,7 @@ void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
     m_designerPane->sendBackAction()->setEnabled(selectedSize == 1 && !onlyForm);
     m_designerPane->bringFrontAction()->setEnabled(selectedSize == 1 && !onlyForm);
     m_designerPane->viewSourceCodeAction()->setEnabled(selectedSize == 1);
-    m_designerPane->addNewSignalHandlerAction()->setEnabled(selectedSize == 1);
+    m_designerPane->goToSlotAction()->setEnabled(selectedSize == 1);
     m_designerPane->cutAction()->setEnabled(selectedSize > 0 && !onlyForm);
     m_designerPane->copyAction()->setEnabled(selectedSize > 0 && !onlyForm);
     m_designerPane->pasteAction()->setEnabled(m_copyPaste.isValid());
@@ -619,12 +619,12 @@ void DesignerController::onViewSourceCodeActionTrigger()
     emit viewSourceCodeTriggered(selectedControls.first());
 }
 
-void DesignerController::onAddNewSignalHandlerActionTrigger()
+void DesignerController::onGoToSlotActionTrigger()
 {
     const QList<Control*>& selectedControls = m_designerPane->designerView()->scene()->selectedControls();
     if (selectedControls.size() != 1)
         return;
-    emit addNewSignalHandlerTriggered(selectedControls.first());
+    emit goToSlotTriggered(selectedControls.first());
 }
 
 void DesignerController::onCutActionTrigger()

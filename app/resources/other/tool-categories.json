@@ -1,10 +1,30 @@
 {
-    "QtQuick2"          : "Qt Quick - Basic",
-    "QtQuick.Controls2" : "Qt Quick - Controls 2",
-    "QtQuick.Controls1" : "Qt Quick - Controls 1",
-    "QtQuick.Layouts1"  : "Qt Quick - Layouts",
-    "QtQuick.Extras1"   : "Qt Quick - Extras",
-    "QtQuick.Dialogs1"  : "Qt Quick - Dialogs",
-    "QtMultimedia5"     : "Qt Multimedia",
-    "Qt.labs.platform1" : "Qt Labs - Platform"
+    "categories" : {
+        "QtQuick2"          : "Quick - Basic",
+        "QtQuick.Controls2" : "Quick - Controls 2",
+        "QtQuick.Controls1" : "Quick - Controls 1",
+        "QtQuick.Layouts1"  : "Quick - Layouts",
+        "QtQuick.Extras1"   : "Quick - Extras",
+        "QtQuick.Dialogs1"  : "Quick - Dialogs",
+        "Qt.labs.platform1" : "Labs - Platform",
+        "QtMultimedia5"     : "Multimedia",
+        "QtWebView1"        : "WebView",
+        "QtWebSockets1"     : "WebSockets",
+        "QtCharts2"         : "Charts",
+        "QtBluetooth5"      : "Bluetooth"
+    },
+    "order" : [
+        "Quick - Basic",
+        "Quick - Controls 2",
+        "Quick - Controls 1",
+        "Quick - Extras",
+        "Quick - Layouts",
+        "Quick - Dialogs",
+        "Labs - Platform",
+        "Multimedia",
+        "Charts",
+        "WebView",
+        "WebSockets",
+        "Bluetooth"
+    ]
 }

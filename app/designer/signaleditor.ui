@@ -32,7 +32,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Choose a &lt;b&gt;signal&lt;/b&gt; to start coding:</string>
+      <string>Select a &lt;b&gt;signal&lt;/b&gt; for going to its slot:</string>
      </property>
     </widget>
    </item>

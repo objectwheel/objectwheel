@@ -34,7 +34,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_sendBackAction(new QAction(this))
   , m_bringFrontAction(new QAction(this))
   , m_viewSourceCodeAction(new QAction(this))
-  , m_addNewSignalHandlerAction(new QAction(this))
+  , m_goToSlotAction(new QAction(this))
   , m_cutAction(new QAction(this))
   , m_copyAction(new QAction(this))
   , m_pasteAction(new QAction(this))
@@ -166,7 +166,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_sendBackAction->setText(tr("Send to Back"));
     m_bringFrontAction->setText(tr("Bring to Front"));
     m_viewSourceCodeAction->setText(tr("View Source Code"));
-    m_addNewSignalHandlerAction->setText(tr("Add New Signal Handler"));
+    m_goToSlotAction->setText(tr("Go to Slot"));
     m_cutAction->setText(tr("Cut"));
     m_copyAction->setText(tr("Copy"));
     m_pasteAction->setText(tr("Paste"));
@@ -183,7 +183,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_sendBackAction->setIcon(QIcon(QStringLiteral(":/images/designer/send-to-back.svg")));
     m_bringFrontAction->setIcon(QIcon(QStringLiteral(":/images/designer/bring-to-front.svg")));
     m_viewSourceCodeAction->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
-    m_addNewSignalHandlerAction->setIcon(QIcon(QStringLiteral(":/images/designer/add-new-signal-handler.svg")));
+    m_goToSlotAction->setIcon(QIcon(QStringLiteral(":/images/designer/go-to-slot.svg")));
     m_cutAction->setIcon(QIcon(QStringLiteral(":/images/designer/cut.svg")));
     m_copyAction->setIcon(QIcon(QStringLiteral(":/images/designer/copy.svg")));
     m_pasteAction->setIcon(QIcon(QStringLiteral(":/images/designer/paste.svg")));
@@ -217,7 +217,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     addAction(m_sendBackAction);
     addAction(m_bringFrontAction);
     addAction(m_viewSourceCodeAction);
-    addAction(m_addNewSignalHandlerAction);
+    addAction(m_goToSlotAction);
     addAction(m_cutAction);
     addAction(m_copyAction);
     addAction(m_pasteAction);
@@ -234,7 +234,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_menu->addAction(m_sendBackAction);
     m_menu->addAction(m_bringFrontAction);
     m_menu->addAction(m_viewSourceCodeAction);
-    m_menu->addAction(m_addNewSignalHandlerAction);
+    m_menu->addAction(m_goToSlotAction);
     m_menu->addAction(m_cutAction);
     m_menu->addAction(m_copyAction);
     m_menu->addAction(m_pasteAction);
@@ -360,9 +360,9 @@ QAction* DesignerPane::viewSourceCodeAction() const
     return m_viewSourceCodeAction;
 }
 
-QAction* DesignerPane::addNewSignalHandlerAction() const
+QAction* DesignerPane::goToSlotAction() const
 {
-    return m_addNewSignalHandlerAction;
+    return m_goToSlotAction;
 }
 
 QAction* DesignerPane::cutAction() const

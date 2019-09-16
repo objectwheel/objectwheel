@@ -36,14 +36,15 @@ void ToolboxController::discharge()
 void ToolboxController::onProjectInfoUpdate()
 {
     DocumentManager::instance()->disconnect(this);
+    ToolboxTree* toolboxTree = m_toolboxPane->toolboxTree();
     for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& toolPath = ":/tools/" + toolDirName;
         Q_ASSERT(SaveUtils::isControlValid(toolPath));
-        m_toolboxPane->toolboxTree()->addTool(
-                    ToolUtils::toolName(toolPath),
-                    ToolUtils::toolCetegory(toolPath), toolPath,
-                    QIcon(ToolUtils::toolIconPath(toolPath)));
+        toolboxTree->addTool(ToolUtils::toolName(toolPath),
+                             ToolUtils::toolCetegory(toolPath), toolPath,
+                             QIcon(ToolUtils::toolIconPath(toolPath)));
     }
+    toolboxTree->sortByColumn(0, Qt::AscendingOrder); // Make the lower index to be at top
 }
 
 void ToolboxController::onToolboxItemPress(ToolboxItem* item)
@@ -87,7 +88,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
         }
     });
 
-    QTimer::singleShot(155, [=] {
+    QTimer::singleShot(100, [=] {
         if (locked) {
             disconnect(*conn);
             delete conn;

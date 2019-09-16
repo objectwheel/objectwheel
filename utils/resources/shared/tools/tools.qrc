@@ -168,5 +168,19 @@
         <file>PieMenu/t/main.qml</file>
         <file>Picture/m/control.meta</file>
         <file>Picture/t/main.qml</file>
+        <file>WebView/m/control.meta</file>
+        <file>WebView/t/main.qml</file>
+        <file>WebSocket/m/control.meta</file>
+        <file>WebSocket/t/main.qml</file>
+        <file>WebSocketServer/m/control.meta</file>
+        <file>WebSocketServer/t/main.qml</file>
+        <file>ChartView/m/control.meta</file>
+        <file>ChartView/t/main.qml</file>
+        <file>PolarChartView/m/control.meta</file>
+        <file>PolarChartView/t/main.qml</file>
+        <file>BluetoothDiscoveryModel/m/control.meta</file>
+        <file>BluetoothDiscoveryModel/t/main.qml</file>
+        <file>BluetoothSocket/m/control.meta</file>
+        <file>BluetoothSocket/t/main.qml</file>
     </qresource>
 </RCC>

@@ -166,7 +166,7 @@
         <file>images/toolbox.png</file>
         <file>images/designer/invert-selection.svg</file>
         <file>images/designer/shrink-scene.svg</file>
-        <file>images/designer/add-new-signal-handler.svg</file>
         <file>images/designer/view-source-code.svg</file>
+        <file>images/designer/go-to-slot.svg</file>
     </qresource>
 </RCC>

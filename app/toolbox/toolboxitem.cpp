@@ -1,4 +1,5 @@
 #include <toolboxitem.h>
+#include <toolutils.h>
 
 ToolboxItem::ToolboxItem(int type) : QTreeWidgetItem(type)
 {
@@ -23,4 +24,11 @@ QString ToolboxItem::dir() const
 void ToolboxItem::setDir(const QString& dir)
 {
     m_dir = dir;
+}
+
+bool ToolboxItem::operator<(const QTreeWidgetItem& other) const
+{
+    if (isCategory())
+        return ToolUtils::toolCetegoryIndex(text(0)) < ToolUtils::toolCetegoryIndex(other.text(0));
+    return QTreeWidgetItem::operator<(other);
 }

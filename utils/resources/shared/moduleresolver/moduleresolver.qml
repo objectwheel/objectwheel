@@ -35,7 +35,6 @@ import QtMultimedia 5.12
 import QtGraphicalEffects 1.12
 import QtDataVisualization 1.3
 import QtBluetooth 5.12
-import QtWebView 1.1
 import QtQuick.Shapes 1.12
 import QtCharts 2.3
 import QtGamepad 1.12
@@ -45,6 +44,7 @@ import QtRemoteObjects 5.12
 import QtQuick.VirtualKeyboard 2.4
 import QtQuick.VirtualKeyboard.Styles 2.2
 import QtQuick.VirtualKeyboard.Settings 2.2
+import QtWebView 1.1
 import QtWebChannel 1.0
 import QtWebEngine 1.8
 import QtWebSockets 1.1
