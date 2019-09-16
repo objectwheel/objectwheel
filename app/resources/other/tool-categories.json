@@ -4,5 +4,7 @@
     "QtQuick.Controls1" : "Qt Quick - Controls 1",
     "QtQuick.Layouts1"  : "Qt Quick - Layouts",
     "QtQuick.Extras1"   : "Qt Quick - Extras",
-    "QtQuick.Dialogs1"   : "Qt Quick - Dialogs"
+    "QtQuick.Dialogs1"  : "Qt Quick - Dialogs",
+    "QtMultimedia5"     : "Qt Multimedia",
+    "Qt.labs.platform1" : "Qt Labs - Platform"
 }

@@ -148,5 +148,21 @@
         <file>FontDialog1/t/main.qml</file>
         <file>MessageDialog1/m/control.meta</file>
         <file>MessageDialog1/t/main.qml</file>
+        <file>Audio/m/control.meta</file>
+        <file>Audio/t/main.qml</file>
+        <file>Camera/m/control.meta</file>
+        <file>Camera/t/main.qml</file>
+        <file>MediaPlayer/m/control.meta</file>
+        <file>MediaPlayer/t/main.qml</file>
+        <file>Radio/m/control.meta</file>
+        <file>Radio/t/main.qml</file>
+        <file>SoundEffect/m/control.meta</file>
+        <file>SoundEffect/t/main.qml</file>
+        <file>Torch/m/control.meta</file>
+        <file>Torch/t/main.qml</file>
+        <file>Video/m/control.meta</file>
+        <file>Video/t/main.qml</file>
+        <file>VideoOutput/m/control.meta</file>
+        <file>VideoOutput/t/main.qml</file>
     </qresource>
 </RCC>
