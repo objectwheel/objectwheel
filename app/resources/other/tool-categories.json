@@ -1,6 +1,7 @@
 {
     "categories" : {
-        "QtQuick2"          : "Quick - Basic",
+        "QtQml2"            : "Qml",
+        "QtQuick2"          : "Quick",
         "QtQuick.Controls2" : "Quick - Controls 2",
         "QtQuick.Controls1" : "Quick - Controls 1",
         "QtQuick.Layouts1"  : "Quick - Layouts",
@@ -11,10 +12,13 @@
         "QtWebView1"        : "WebView",
         "QtWebSockets1"     : "WebSockets",
         "QtCharts2"         : "Charts",
-        "QtBluetooth5"      : "Bluetooth"
+        "QtBluetooth5"      : "Bluetooth",
+        "QtPositioning5"    : "Positioning",
+        "QtLocation5"       : "Location"
     },
     "order" : [
-        "Quick - Basic",
+        "Qml",
+        "Quick",
         "Quick - Controls 2",
         "Quick - Controls 1",
         "Quick - Extras",
@@ -25,6 +29,8 @@
         "Charts",
         "WebView",
         "WebSockets",
-        "Bluetooth"
+        "Bluetooth",
+        "Positioning",
+        "Location"
     ]
 }

@@ -182,5 +182,63 @@
         <file>BluetoothDiscoveryModel/t/main.qml</file>
         <file>BluetoothSocket/m/control.meta</file>
         <file>BluetoothSocket/t/main.qml</file>
+        <file>PositionSource/m/control.meta</file>
+        <file>PositionSource/t/main.qml</file>
+        <file>Map/m/control.meta</file>
+        <file>Map/t/main.qml</file>
+        <file>AnimatedSprite/m/control.meta</file>
+        <file>AnimatedSprite/t/main.qml</file>
+        <file>BorderImage/m/control.meta</file>
+        <file>BorderImage/t/main.qml</file>
+        <file>Canvas/m/control.meta</file>
+        <file>Canvas/t/main.qml</file>
+        <file>Column/m/control.meta</file>
+        <file>Column/t/main.qml</file>
+        <file>DropArea/m/control.meta</file>
+        <file>DropArea/t/main.qml</file>
+        <file>Flickable/m/control.meta</file>
+        <file>Flickable/t/main.qml</file>
+        <file>Flipable/m/control.meta</file>
+        <file>Flipable/t/main.qml</file>
+        <file>Flow/m/control.meta</file>
+        <file>Flow/t/main.qml</file>
+        <file>FocusScope/m/control.meta</file>
+        <file>FocusScope/t/main.qml</file>
+        <file>FontLoader/m/control.meta</file>
+        <file>FontLoader/t/main.qml</file>
+        <file>Grid/m/control.meta</file>
+        <file>Grid/t/main.qml</file>
+        <file>GridView/m/control.meta</file>
+        <file>GridView/t/main.qml</file>
+        <file>Item/m/control.meta</file>
+        <file>Item/t/main.qml</file>
+        <file>ListView/m/control.meta</file>
+        <file>ListView/t/main.qml</file>
+        <file>Loader/m/control.meta</file>
+        <file>Loader/t/main.qml</file>
+        <file>MouseArea/m/control.meta</file>
+        <file>MouseArea/t/main.qml</file>
+        <file>MultiPointTouchArea/m/control.meta</file>
+        <file>MultiPointTouchArea/t/main.qml</file>
+        <file>PathView/m/control.meta</file>
+        <file>PathView/t/main.qml</file>
+        <file>PinchArea/m/control.meta</file>
+        <file>PinchArea/t/main.qml</file>
+        <file>Repeater/m/control.meta</file>
+        <file>Repeater/t/main.qml</file>
+        <file>Row/m/control.meta</file>
+        <file>Row/t/main.qml</file>
+        <file>ShaderEffect/m/control.meta</file>
+        <file>ShaderEffect/t/main.qml</file>
+        <file>ShaderEffectSource/m/control.meta</file>
+        <file>ShaderEffectSource/t/main.qml</file>
+        <file>TableView/m/control.meta</file>
+        <file>TableView/t/main.qml</file>
+        <file>Text/m/control.meta</file>
+        <file>Text/t/main.qml</file>
+        <file>TextEdit/m/control.meta</file>
+        <file>TextEdit/t/main.qml</file>
+        <file>TextInput/m/control.meta</file>
+        <file>TextInput/t/main.qml</file>
     </qresource>
 </RCC>
