@@ -240,5 +240,13 @@
         <file>TextEdit/t/main.qml</file>
         <file>TextInput/m/control.meta</file>
         <file>TextInput/t/main.qml</file>
+        <file>Binding/m/control.meta</file>
+        <file>Binding/t/main.qml</file>
+        <file>Component/m/control.meta</file>
+        <file>Component/t/main.qml</file>
+        <file>Connections/m/control.meta</file>
+        <file>Connections/t/main.qml</file>
+        <file>QtObject/m/control.meta</file>
+        <file>QtObject/t/main.qml</file>
     </qresource>
 </RCC>
