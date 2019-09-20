@@ -82,6 +82,14 @@ static QString marginOffsetText(AnchorLine::Type type)
     }
 }
 
+static QPointF farTopLeft(const QList<Control*>& controls)
+{
+    QRectF boundingRect;
+    for (const Control* control : controls)
+        boundingRect |= control->sceneBoundingRect();
+    return boundingRect.topLeft();
+}
+
 DesignerController::DesignerController(DesignerPane* designerPane, QObject* parent) : QObject(parent)
   , m_designerPane(designerPane)
 {
@@ -658,7 +666,15 @@ void DesignerController::onPasteActionTrigger()
     const QList<Control*>& selectedControls = scene->selectedControls();
     if (selectedControls.size() == 1)
         parentControl = selectedControls.first();
+
     const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
+    const QPointF& topLeft = farTopLeft(controls);
+    const QPointF& parentTopLeft = parentControl->mapFromScene(topLeft);
+    const QPointF& moveGap = copyPos - topLeft;
+
+    // NOTE: Move the item position backwards as much as next parent margins are
+    // Because it will be followed by a ControlPropertyManager::setParent call and it
+    // will move the item by setting a transform on it according to its parent margin
 
     bool clearSelection = false;
     QList<Control*> newControls;
@@ -666,22 +682,29 @@ void DesignerController::onPasteActionTrigger()
         if (actionType == CopyPaste::Cut) {
             if (control == parentControl)
                 continue;
-            if (control->parentControl() == parentControl)
+            if (control->parentControl() == parentControl && copyPos.isNull())
                 continue;
-            QPointF pos = control->mapToItem(parentControl, QPointF(10, 10) - margins);
-            if (!copyPos.isNull())
-                pos = parentControl->mapFromScene(copyPos);
-            scene->reparentControl(control, parentControl, DesignerScene::snapPosition(pos));
+            if (control->parentControl() == parentControl) {
+                control->setBeingDragged(true);
+                control->setPos(control->pos() + moveGap);
+                control->setBeingDragged(false);
+            } else {
+                QPointF pos = control->mapToItem(parentControl, QPointF());
+                if (copyPos.isNull())
+                    pos += -parentTopLeft + QPointF(10, 10);
+                else
+                    pos += moveGap - margins;
+                scene->reparentControl(control, parentControl, DesignerScene::snapPosition(pos));
+            }
             clearSelection = true;
             newControls.append(control);
         } else {
-            // NOTE: Move the item position backwards as much as next parent margins are
-            // Because it will be followed by a ControlPropertyManager::setParent call and it
-            // will move the item by setting a transform on it according to its parent margin
             m_copyPaste.increaseCount();
             qreal xy = 10 * m_copyPaste.count();
-            QPointF pos = control->mapToItem(parentControl, QPointF(xy, xy) - margins);
-            if (!copyPos.isNull())
+            QPointF pos = control->mapToItem(parentControl, QPointF()) - margins + QPointF(xy, xy);
+            if (control->parentControl() == parentControl && copyPos.isNull())
+                pos = control->pos() + QPointF(xy, xy);
+            else if (!copyPos.isNull())
                 pos = parentControl->mapFromScene(copyPos);
             Control* newControl = ControlCreationManager::createControl(
                         parentControl, control->dir(), DesignerScene::snapPosition(pos),
