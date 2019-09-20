@@ -16,7 +16,7 @@ struct CopyPaste final
     void invalidate();
 
     int count() const;
-    void increaseCount();
+    void increaseCount(Control* counterControl);
 
     QPointF pos() const;
     void setPos(const QPointF& pos);
@@ -29,6 +29,7 @@ struct CopyPaste final
 
 private:
     int m_count;
+    Control* m_counterControl;
     QPointF m_pos;
     ActionType m_actionType;
     QList<QPointer<Control>> m_controls;

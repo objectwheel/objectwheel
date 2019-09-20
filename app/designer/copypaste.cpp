@@ -3,6 +3,7 @@
 
 CopyPaste::CopyPaste()
     : m_count(0)
+    , m_counterControl(nullptr)
     , m_actionType(Invalid)
 {
 }
@@ -29,9 +30,14 @@ int CopyPaste::count() const
     return m_count;
 }
 
-void CopyPaste::increaseCount()
+void CopyPaste::increaseCount(Control* counterControl)
 {
-    m_count++;
+    if (m_counterControl != counterControl) {
+        m_counterControl = counterControl;
+        m_count = 1;
+    } else {
+        m_count++;
+    }
 }
 
 QPointF CopyPaste::pos() const
