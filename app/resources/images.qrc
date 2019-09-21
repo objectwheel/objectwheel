@@ -168,5 +168,6 @@
         <file>images/designer/shrink-scene.svg</file>
         <file>images/designer/view-source-code.svg</file>
         <file>images/designer/go-to-slot.svg</file>
+        <file>images/designer/edit-anchors.svg</file>
     </qresource>
 </RCC>

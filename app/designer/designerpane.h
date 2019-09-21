@@ -7,6 +7,7 @@ class QMenu;
 class QToolBar;
 class DesignerView;
 class AnchorEditor;
+class SignalEditor;
 class QToolButton;
 class QComboBox;
 
@@ -22,6 +23,7 @@ public:
     QToolBar* toolBar() const;
     DesignerView* designerView() const;
     AnchorEditor* anchorEditor() const;
+    SignalEditor* signalEditor() const;
 
     QToolButton* refreshButton() const;
     QToolButton* shrinkSceneButton() const;
@@ -41,6 +43,7 @@ public:
     QAction* refreshAction() const;
     QAction* sendBackAction() const;
     QAction* bringFrontAction() const;
+    QAction* editAnchorsAction() const;
     QAction* viewSourceCodeAction() const;
     QAction* goToSlotAction() const;
     QAction* cutAction() const;
@@ -61,6 +64,7 @@ private:
     QToolBar* m_toolBar;
     DesignerView* m_designerView;
     AnchorEditor* m_anchorEditor;
+    SignalEditor* m_signalEditor;
 
     QToolButton* m_refreshButton;
     QToolButton* m_shrinkSceneButton;
@@ -79,7 +83,8 @@ private:
     QAction* m_selectAllAction;
     QAction* m_refreshAction;
     QAction* m_sendBackAction;
-    QAction* m_bringFrontAction;    
+    QAction* m_bringFrontAction;
+    QAction* m_editAnchorsAction;
     QAction* m_viewSourceCodeAction;
     QAction* m_goToSlotAction;
     QAction* m_cutAction;

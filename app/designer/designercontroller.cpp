@@ -5,6 +5,7 @@
 #include <saveutils.h>
 #include <form.h>
 #include <anchoreditor.h>
+#include <signaleditor.h>
 #include <utilityfunctions.h>
 #include <designersettings.h>
 #include <scenesettings.h>
@@ -170,6 +171,8 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onSendBackActionTrigger);
     connect(m_designerPane->bringFrontAction(), &QAction::triggered,
             this, &DesignerController::onBringFrontActionTrigger);
+    connect(m_designerPane->editAnchorsAction(), &QAction::triggered,
+            this, &DesignerController::onEditAnchorsActionTrigger);
     connect(m_designerPane->viewSourceCodeAction(), &QAction::triggered,
             this, &DesignerController::onViewSourceCodeActionTrigger);
     connect(m_designerPane->goToSlotAction(), &QAction::triggered,
@@ -224,6 +227,7 @@ void DesignerController::charge()
 void DesignerController::discharge()
 {
     m_designerPane->designerView()->scene()->clear();
+    m_designerPane->signalEditor()->discharge();
 }
 
 void DesignerController::onSceneSettingsChange()
@@ -259,6 +263,7 @@ void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
     m_copyPaste.setPos(scenePos);
     m_designerPane->sendBackAction()->setEnabled(selectedSize == 1 && !onlyForm);
     m_designerPane->bringFrontAction()->setEnabled(selectedSize == 1 && !onlyForm);
+    m_designerPane->editAnchorsAction()->setEnabled(selectedSize == 1 && !onlyForm);
     m_designerPane->viewSourceCodeAction()->setEnabled(selectedSize == 1);
     m_designerPane->goToSlotAction()->setEnabled(selectedSize == 1);
     m_designerPane->cutAction()->setEnabled(selectedSize > 0 && !onlyForm);
@@ -619,6 +624,26 @@ void DesignerController::onBringFrontActionTrigger()
     ControlPropertyManager::setZ(control, higherZ + 1, options);
 }
 
+void DesignerController::onEditAnchorsActionTrigger()
+{
+    DesignerScene* scene = m_designerPane->designerView()->scene();
+    const QList<Control*>& selectedControls = scene->selectedControls();
+
+    if (selectedControls.size() != 1)
+        return;
+
+    Control* sourceControl = selectedControls.first();
+    Control* targetControl = sourceControl->parentControl();
+    if (DesignerScene::isAnchorViable(sourceControl, targetControl)) {
+        scene->setAnchorVisibility(scene->anchorVisibility() | DesignerScene::VisibleForAllControlsDueToAnchorEditor);
+        m_designerPane->anchorEditor()->setSourceControl(sourceControl);
+        m_designerPane->anchorEditor()->setPrimaryTargetControl(targetControl);
+        m_designerPane->anchorEditor()->refresh();
+        m_designerPane->anchorEditor()->exec();
+        scene->setAnchorVisibility(scene->anchorVisibility() & ~DesignerScene::VisibleForAllControlsDueToAnchorEditor);
+    }
+}
+
 void DesignerController::onViewSourceCodeActionTrigger()
 {
     const QList<Control*>& selectedControls = m_designerPane->designerView()->scene()->selectedControls();
@@ -630,9 +655,30 @@ void DesignerController::onViewSourceCodeActionTrigger()
 void DesignerController::onGoToSlotActionTrigger()
 {
     const QList<Control*>& selectedControls = m_designerPane->designerView()->scene()->selectedControls();
+
     if (selectedControls.size() != 1)
         return;
-    emit goToSlotTriggered(selectedControls.first());
+
+    Control* control = selectedControls.first();
+
+    if (control->hasErrors()) {
+        UtilityFunctions::showMessage(m_designerPane, tr("Oops"),
+                                      tr("Control has got errors, solve these problems first."));
+        return;
+    }
+
+    DesignerScene* scene = m_designerPane->designerView()->scene();
+    SignalEditor* signalEditor = m_designerPane->signalEditor();
+    if (scene->currentForm() == 0)
+        return;
+
+    signalEditor->setSignalList(control->events().toList());
+
+    int result = signalEditor->exec();
+    if (result == QDialog::Rejected)
+        return;
+
+    emit goToSlotTriggered(control, signalEditor->currentSignal());
 }
 
 void DesignerController::onCutActionTrigger()

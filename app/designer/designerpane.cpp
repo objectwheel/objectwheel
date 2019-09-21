@@ -1,6 +1,7 @@
 #include <designerpane.h>
 #include <designerview.h>
 #include <anchoreditor.h>
+#include <signaleditor.h>
 #include <transparentstyle.h>
 
 #include <QMenu>
@@ -14,6 +15,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_toolBar(new QToolBar(this))
   , m_designerView(new DesignerView(this))
   , m_anchorEditor(new AnchorEditor(m_designerView->scene(), this))
+  , m_signalEditor(new SignalEditor(this))
 
   , m_refreshButton(new QToolButton(this))
   , m_shrinkSceneButton(new QToolButton(this))
@@ -33,6 +35,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_refreshAction(new QAction(this))
   , m_sendBackAction(new QAction(this))
   , m_bringFrontAction(new QAction(this))
+  , m_editAnchorsAction(new QAction(this))
   , m_viewSourceCodeAction(new QAction(this))
   , m_goToSlotAction(new QAction(this))
   , m_cutAction(new QAction(this))
@@ -165,6 +168,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_refreshAction->setText(tr("Refresh"));
     m_sendBackAction->setText(tr("Send to Back"));
     m_bringFrontAction->setText(tr("Bring to Front"));
+    m_editAnchorsAction->setText(tr("Edit Anchors"));
     m_viewSourceCodeAction->setText(tr("View Source Code"));
     m_goToSlotAction->setText(tr("Go to Slot"));
     m_cutAction->setText(tr("Cut"));
@@ -182,6 +186,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_refreshAction->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
     m_sendBackAction->setIcon(QIcon(QStringLiteral(":/images/designer/send-to-back.svg")));
     m_bringFrontAction->setIcon(QIcon(QStringLiteral(":/images/designer/bring-to-front.svg")));
+    m_editAnchorsAction->setIcon(QIcon(QStringLiteral(":/images/designer/edit-anchors.svg")));
     m_viewSourceCodeAction->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
     m_goToSlotAction->setIcon(QIcon(QStringLiteral(":/images/designer/go-to-slot.svg")));
     m_cutAction->setIcon(QIcon(QStringLiteral(":/images/designer/cut.svg")));
@@ -216,6 +221,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     addAction(m_refreshAction);
     addAction(m_sendBackAction);
     addAction(m_bringFrontAction);
+    addAction(m_editAnchorsAction);
     addAction(m_viewSourceCodeAction);
     addAction(m_goToSlotAction);
     addAction(m_cutAction);
@@ -233,6 +239,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_menu->addAction(m_refreshAction);
     m_menu->addAction(m_sendBackAction);
     m_menu->addAction(m_bringFrontAction);
+    m_menu->addAction(m_editAnchorsAction);
     m_menu->addAction(m_viewSourceCodeAction);
     m_menu->addAction(m_goToSlotAction);
     m_menu->addAction(m_cutAction);
@@ -268,6 +275,11 @@ DesignerView* DesignerPane::designerView() const
 AnchorEditor* DesignerPane::anchorEditor() const
 {
     return m_anchorEditor;
+}
+
+SignalEditor* DesignerPane::signalEditor() const
+{
+    return m_signalEditor;
 }
 
 QToolButton* DesignerPane::refreshButton() const
@@ -353,6 +365,11 @@ QAction* DesignerPane::sendBackAction() const
 QAction* DesignerPane::bringFrontAction() const
 {
     return m_bringFrontAction;
+}
+
+QAction* DesignerPane::editAnchorsAction() const
+{
+    return m_editAnchorsAction;
 }
 
 QAction* DesignerPane::viewSourceCodeAction() const

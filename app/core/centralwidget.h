@@ -12,7 +12,6 @@ class OutputPane;
 class OutputController;
 class DesignerPane;
 class DesignerController;
-class SignalEditor;
 
 class CentralWidget final : public QSplitter
 {
@@ -45,7 +44,6 @@ private:
     ProjectOptionsWidget* m_projectOptionsWidget;
     BuildsWidget* m_buildsWidget;
     HelpWidget* m_helpWidget;
-    SignalEditor* m_signalEditor;
 };
 
 #endif // CENTRALWIDGET_H

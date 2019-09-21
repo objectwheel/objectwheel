@@ -47,6 +47,7 @@ private slots:
     void onSelectAllActionTrigger();
     void onSendBackActionTrigger();
     void onBringFrontActionTrigger();
+    void onEditAnchorsActionTrigger();
     void onViewSourceCodeActionTrigger();
     void onGoToSlotActionTrigger();
     void onCutActionTrigger();
@@ -63,8 +64,8 @@ private:
     QList<Control*> movableSelectedAncestorControls(const QList<Control*>& selectedControls) const;
 
 signals:
-    void goToSlotTriggered(Control* control);
     void viewSourceCodeTriggered(Control* control);
+    void goToSlotTriggered(Control* control, const QString& signal);
     void projectThemeActivated(const QString& theme);
     void projectThemeActivated1(const QString& theme);
 

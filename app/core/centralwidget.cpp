@@ -23,7 +23,6 @@
 #include <consolewidget.h>
 #include <form.h>
 #include <themechooserwidget.h>
-#include <signaleditor.h>
 
 #include <QBoxLayout>
 #include <QLabel>
@@ -62,7 +61,6 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_projectOptionsWidget(new ProjectOptionsWidget)
   , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
-  , m_signalEditor(new SignalEditor(this))
 {
     setHandleWidth(0);
     setFrameShape(QFrame::NoFrame);
@@ -140,28 +138,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
         m_qmlCodeEditorWidget->openDesigns(control, SaveUtils::controlMainQmlFileName());
     });
     connect(m_designerController, &DesignerController::goToSlotTriggered,
-            this, [=] (Control* control) {
-        if (control == 0)
-            return;
-
-        if (control->hasErrors()) {
-            UtilityFunctions::showMessage(
-                        this, tr("Oops"),
-                        tr("Control has got errors, solve these problems first."));
-            return;
-        }
-
-        DesignerScene* scene = designerPane()->designerView()->scene();
-
-        if (scene->currentForm() == 0)
-            return;
-
-        m_signalEditor->setSignalList(control->events().toList());
-
-        int result = m_signalEditor->exec();
-        if (result == QDialog::Rejected)
-            return;
-
+            this, [=] (Control* control, const QString& signal) {
         // 1. Control name; 2. Method name
         #define METHOD_DECL "%1_%2"
         #define FORM_DECL "%1_onCompleted"
@@ -171,9 +148,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
             "    \n"\
             "}"
 
+        DesignerScene* scene = designerPane()->designerView()->scene();
         const QString& methodSign = QString::fromUtf8(METHOD_DECL)
                 .arg(control->id())
-                .arg(methodName(m_signalEditor->currentSignal()));
+                .arg(methodName(signal));
         const QString& methodBody = QString::fromUtf8(METHOD_BODY).arg(methodSign);
         const QString& formSign = scene->currentForm()->id();
         const QString& formJS = formSign + ".js";
@@ -190,7 +168,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
         int pos = ParserUtils::methodLine(document->document, fullPath, methodSign);
         if (pos < 0) {
             const QString& connection =
-                    control->id() + "." + m_signalEditor->currentSignal() + ".connect(" + methodSign + ")";
+                    control->id() + "." + signal + ".connect(" + methodSign + ")";
             const QString& loaderSign = QString::fromUtf8(FORM_DECL).arg(formSign);
             ParserUtils::addConnection(document->document, fullPath, loaderSign, connection);
             pos = ParserUtils::addMethod(document->document, fullPath, methodBody);
@@ -270,7 +248,6 @@ void CentralWidget::discharge()
     m_qmlCodeEditorWidget->discharge();
     m_buildsWidget->discharge();
     m_helpWidget->discharge();
-    m_signalEditor->discharge();
 }
 
 void CentralWidget::hideWidgets()
