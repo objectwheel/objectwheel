@@ -1,4 +1,6 @@
 #include <gadgetitem.h>
+#include <designerscene.h>
+#include <designerview.h>
 #include <QGraphicsSceneMouseEvent>
 
 GadgetItem::GadgetItem(DesignerItem* parent) : DesignerItem(parent)
@@ -51,7 +53,9 @@ void GadgetItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void GadgetItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
-    m_dragDistanceVector = event->pos() - event->buttonDownPos(event->button());
+    // Damn event->button() always returns
+    // Qt::NoButton for mouse move events
+    m_dragDistanceVector = event->pos() - event->buttonDownPos(scene()->view()->mousePressButton());
 }
 
 void GadgetItem::mouseUngrabEvent(QEvent* event)

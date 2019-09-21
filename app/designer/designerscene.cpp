@@ -1,4 +1,5 @@
 #include <designerscene.h>
+#include <designerview.h>
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <form.h>
@@ -15,7 +16,6 @@
 #include <QtMath>
 #include <QMimeData>
 #include <QGraphicsSceneMouseEvent>
-#include <QGraphicsView>
 
 DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_anchorVisibility(VisibleForSelectedControlsOnly)
@@ -201,10 +201,10 @@ DesignerItem* DesignerScene::parentBeforeDrag() const
     return m_parentBeforeDrag;
 }
 
-QGraphicsView* DesignerScene::view() const
+DesignerView* DesignerScene::view() const
 {
     Q_ASSERT(views().size() == 1);
-    return views().first();
+    return static_cast<DesignerView*>(views().first());
 }
 
 QList<Form*> DesignerScene::forms() const

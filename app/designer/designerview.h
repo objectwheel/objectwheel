@@ -8,6 +8,7 @@ class DesignerView final : public QGraphicsView
 {
     Q_OBJECT
     Q_DISABLE_COPY(DesignerView)
+    Q_DECLARE_PRIVATE(QGraphicsView)
 
     enum Panning {
         NotStarted,
@@ -19,6 +20,8 @@ public:
     explicit DesignerView(QWidget* parent = nullptr);
 
     DesignerScene* scene() const;
+
+    Qt::MouseButton mousePressButton() const;
 
 private:
     void startPanning(QEvent* event);

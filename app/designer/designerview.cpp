@@ -1,5 +1,6 @@
 #include <designerview.h>
 #include <designerscene.h>
+#include <private/qgraphicsview_p.h>
 
 #include <QMouseEvent>
 #include <QScrollBar>
@@ -27,6 +28,12 @@ DesignerView::DesignerView(QWidget* parent) : QGraphicsView(new DesignerScene(pa
 DesignerScene* DesignerView::scene() const
 {
     return static_cast<DesignerScene*>(QGraphicsView::scene());
+}
+
+Qt::MouseButton DesignerView::mousePressButton() const
+{
+    Q_D(const QGraphicsView);
+    return d->mousePressButton;
 }
 
 void DesignerView::startPanning(QEvent* event)

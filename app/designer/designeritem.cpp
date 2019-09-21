@@ -1,9 +1,10 @@
 #include <designeritem.h>
 #include <designerscene.h>
-#include <private/qgraphicsitem_p.h>
-#include <QGraphicsSceneMouseEvent>
+#include <designerview.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <private/qgraphicsitem_p.h>
+#include <QGraphicsSceneMouseEvent>
 
 DesignerItem::DesignerItem(DesignerItem* parent) : QGraphicsObject(parent)
   , m_raised(false)
@@ -288,9 +289,9 @@ void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    const QPointF& dragDistance = event->pos() - event->buttonDownPos(event->button());
-
-    qDebug() << dragDistance;
+    // Damn event->button() always returns
+    // Qt::NoButton for mouse move events
+    const QPointF& dragDistance = event->pos() - event->buttonDownPos(scene()->view()->mousePressButton());
 
     if (!m_dragAccepted && dragDistance.manhattanLength()
             < DesignerSettings::sceneSettings()->dragStartDistance) {

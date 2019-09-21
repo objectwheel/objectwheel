@@ -12,6 +12,7 @@ class Form;
 class GadgetLayer;
 class AnchorLayer;
 class PaintLayer;
+class DesignerView;
 
 class DesignerScene final : public QGraphicsScene
 {
@@ -47,7 +48,7 @@ public:
     GadgetLayer* gadgetLayer() const;
     AnchorLayer* anchorLayer() const;
     DesignerItem* parentBeforeDrag() const;
-    QGraphicsView* view() const;
+    DesignerView* view() const;
 
     QList<Form*> forms() const;
     QList<Control*> selectedControls() const;
