@@ -1,3 +1,31 @@
+SystemTrayIcon gibi arkada çalışmaya başlayıp salak saçma aksiyon alan qml tiplerini aynı propertylere sahip bir QObjectle falan değiştir
+double click için varsayılan olarak hangisinin olacağı da scene settings içinden ayarlanabilsin
+Broadcasting ile ilgili bir settings sayfası ekle ayrıca ana ekrandaki "devices" listesinin sonuna "settings" menu elemanı ekle
+SignalEditor'de sinyalleri yukarıdan aşağıya doğru, class hiyerarşisine göre sırala, base class'ın propertileri en altta olacak şekilde
+properties pane url li dosya yolları için bir toolbutton sunup, tıklanınca "Assets" içinden başlamalı ve controllere assets'den yol atama olayını kolaylaştırmalı
+qmlcodeeditor'ün gadgetlerinin layoutları bozuk, nesneler içi içe giriyor, bunu düzelt
+image gadgetinin smooth şekilde resimleri boyutlandırdığından emin ol
+qmlcodeeditor de saçmalamalar oluyor, dosya değiştirme çalışmıyor
+headline'dan tutulup çekilince marginler ayarlanabilsin
+niye popuplar proje yüklenince saçma bir konumda başlıyor centerın: overlay
+neden amk bir formun kodunu ApplicationWindow'dan Page'ye çevirince sikko render engine patlıyor
+bunu düzeltince Overlay.overlay ile merkeze perçinlenmiş bir Popup'ın parentini AppWin den Page ye çevir bak bakem nolcak perçine
+formspane üzerine refresh butonu koy, herşeyi tüm formları reflesin, ama  designerview'deki refresh sadece aktif formu reflesin
+kontroller "parent: Overlay.overlay" şeklinde veya başka bi şekilde parent propertisi üzeriden set edilirse saçma bi durum oluşuyor QQmlPropertyListReference.append metodunu ve child nesneler üzerindeki setTransform konum kaydırma olayını bi bu duruma göre ele al düzelt
+"application/x-objectwheel-tool" gibi şeyler için coreconstants diye bi genel class oluştur
+Pencere (window - popup) olan form'lar formspane de belli edilmeli
+PropertiesPane önemli olan propertyleri önde göstermeli ve Anchor ve Layout özelliklerini de yönetebilmeli, ayrıca
+    itemlerin Layout attached propertileride eğer ilgili item bir layout içinde ise belirmeli ve yönetilebilmeli
+    ayrıca itemlerin türüni/type'ını kolayca propertiespane aracılığı ile değiştirebilmeliyiz
+Çökme-raportu-9.txt, buraporlarla ilgilen
+Render Engine tüm assertlere karşı kontrol edilecek, assert yapan designer özellikleri assert etmeyecek
+    şekilde pasifleştirilecek
+qt quick extras'dan delay buttonlar vs siyah gözüküyor, neden?
+Designer'ın Toolbar'ına resizelar sonrası genişleyen sceneyi "fitleme" butonu ekle, toolbardaki tüm butonları
+Containerlar (Column, Row, Grid, Layouts vs vs) için üzerine bir item sürükleyince hizalama çizgileri göster
+properties pane bok dolu, bir sürü saçma property var, bir propertiden on tane var, ve propertiler yanlış
+    yerlerde dizilmiş, QObject altında Item propertileri vs gözüküyor
+
 GUI CORE V2 TODOS:
 
  --> FormsPane ve Form Altyapısı
