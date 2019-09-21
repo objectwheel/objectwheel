@@ -37,7 +37,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_gadgetLayer);
 
-    m_anchorLayer->setAcceptedMouseButtons(Qt::LeftButton);
+    m_anchorLayer->setAcceptHoverEvents(true);
+    m_anchorLayer->setAcceptedMouseButtons(Qt::RightButton);
     m_anchorLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_anchorLayer);
 

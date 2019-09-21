@@ -261,11 +261,6 @@ QList<DesignerItem*> DesignerItem::childItems(bool recursive) const
     return childs;
 }
 
-QPointF DesignerItem::mousePressPoint() const
-{
-    return m_mousePressPoint;
-}
-
 bool DesignerItem::event(QEvent* event)
 {
     switch (event->type()) {
@@ -286,7 +281,6 @@ void DesignerItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    m_mousePressPoint = event->pos();
     if (scene() && (event->buttons() & Qt::LeftButton) && m_mousePressCursorShape != Qt::CustomCursor)
         scene()->setCursor(m_mousePressCursorShape);
     QGraphicsObject::mousePressEvent(event);
@@ -294,10 +288,14 @@ void DesignerItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
 void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    const QPointF& dragDistance = event->pos() - m_mousePressPoint;
+    const QPointF& dragDistance = event->pos() - event->buttonDownPos(event->button());
 
-    if (!m_dragAccepted && dragDistance.manhattanLength() < DesignerSettings::sceneSettings()->dragStartDistance)
+    qDebug() << dragDistance;
+
+    if (!m_dragAccepted && dragDistance.manhattanLength()
+            < DesignerSettings::sceneSettings()->dragStartDistance) {
         return;
+    }
 
     m_dragAccepted = true;
 

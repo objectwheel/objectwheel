@@ -16,7 +16,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_designerView(new DesignerView(this))
   , m_anchorEditor(new AnchorEditor(m_designerView->scene(), this))
   , m_signalEditor(new SignalEditor(this))
-
+  //
   , m_refreshButton(new QToolButton(this))
   , m_shrinkSceneButton(new QToolButton(this))
   , m_clearButton(new QToolButton(this))
@@ -29,7 +29,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_zoomLevelComboBox(new QComboBox(this))
   , m_themeComboBox(new QComboBox(this))
   , m_themeComboBox1(new QComboBox(this))
-
+  //
   , m_invertSelectionAction(new QAction(this))
   , m_selectAllAction(new QAction(this))
   , m_refreshAction(new QAction(this))
@@ -49,7 +49,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_moveDownAction(new QAction(this))
 {
     setFocusPolicy(Qt::NoFocus);
-    setContextMenuPolicy(Qt::CustomContextMenu);
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {

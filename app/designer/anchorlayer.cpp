@@ -3,6 +3,7 @@
 #include <QGraphicsSceneMouseEvent>
 
 AnchorLayer::AnchorLayer(DesignerItem* parent) : DesignerItem(parent)
+  , m_pressed(false)
   , m_activated(false)
   , m_geometryUpdateScheduled(false)
 {
@@ -15,12 +16,12 @@ bool AnchorLayer::activated() const
 
 QPointF AnchorLayer::sourceScenePos() const
 {
-    return mapToScene(mousePressPoint());
+    return mapToScene(m_mousePressPoint);
 }
 
 QPointF AnchorLayer::targetScenePos() const
 {
-    return mapToScene(mouseMovePoint());
+    return mapToScene(m_mouseMovePoint);
 }
 
 Control* AnchorLayer::sourceControl() const
@@ -43,11 +44,6 @@ void AnchorLayer::setActivated(bool activated)
     }
 }
 
-QPointF AnchorLayer::mouseMovePoint() const
-{
-    return m_mouseMovePoint;
-}
-
 void AnchorLayer::updateGeometry()
 {
     if (m_geometryUpdateScheduled)
@@ -66,11 +62,14 @@ void AnchorLayer::mousePressEvent(QGraphicsSceneMouseEvent* event)
 
     DesignerItem::mousePressEvent(event);
 
-    if (DesignerScene::isInappropriateAnchorSource(scene()->topLevelControl(mapToScene(mousePressPoint()))))
+    if (DesignerScene::isInappropriateAnchorSource(scene()->topLevelControl(event->scenePos())))
         return;
 
-    if (event->button() == Qt::LeftButton && event->modifiers() & Qt::ControlModifier)
+    if (event->button() == Qt::RightButton) {
+        m_pressed = true;
+        m_mousePressPoint = event->pos();
         event->accept();
+    }
 }
 
 void AnchorLayer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)

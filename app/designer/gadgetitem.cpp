@@ -51,7 +51,7 @@ void GadgetItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void GadgetItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     DesignerItem::mouseMoveEvent(event);
-    m_dragDistanceVector = event->pos() - mousePressPoint();
+    m_dragDistanceVector = event->pos() - event->buttonDownPos(event->button());
 }
 
 void GadgetItem::mouseUngrabEvent(QEvent* event)

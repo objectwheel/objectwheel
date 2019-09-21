@@ -68,9 +68,6 @@ public:
     QList<DesignerItem*> childItems(bool recursive = true) const;
 
 protected:
-    QPointF mousePressPoint() const;
-
-protected:
     bool event(QEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -102,7 +99,6 @@ private:
     bool m_inSetGeometry;
     Qt::CursorShape m_mousePressCursorShape;
     QRectF m_rect;
-    QPointF m_mousePressPoint;
     DesignerItem* m_parentItemBeforeRaise;
     QSet<DesignerItem*> m_movableSelectedAncestorItems;
 };

@@ -25,7 +25,6 @@ public slots:
 
 private:
     void setActivated(bool activated);
-    QPointF mouseMovePoint() const;
 
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
@@ -36,9 +35,10 @@ signals:
     void activatedChanged();
 
 private:
+    bool m_pressed;
     bool m_activated;
     bool m_geometryUpdateScheduled;
-    QPointF m_mouseMovePoint;
+    QPointF m_mousePressPoint, m_mouseMovePoint;
 };
 
 #endif // ANCHORLAYER_H
