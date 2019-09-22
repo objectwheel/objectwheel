@@ -2,7 +2,7 @@
 #include <designerscene.h>
 #include <resizeritem.h>
 #include <gadgetlayer.h>
-#include <anchorlayer.h>
+#include <mouselayer.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
 #include <control.h>
@@ -474,8 +474,8 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->save();
 
     SceneSettings* settings = DesignerSettings::sceneSettings();
-    const Control* sourceControl = scene()->anchorLayer()->sourceControl();
-    const Control* targetControl = scene()->anchorLayer()->targetControl();
+    const Control* sourceControl = scene()->mouseLayer()->mouseStartControl();
+    const Control* targetControl = scene()->mouseLayer()->mouseEndControl();
 
     if (!DesignerScene::isAnchorViable(sourceControl, targetControl))
         targetControl = nullptr;
@@ -496,7 +496,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     if (targetControl)
         painter->drawRect(scene()->outerRect(DesignerScene::contentRect(targetControl)));
 
-    const QLineF line(scene()->anchorLayer()->sourceScenePos(), scene()->anchorLayer()->targetScenePos());
+    const QLineF line(scene()->mouseLayer()->mouseStartPos(), scene()->mouseLayer()->mouseEndPos());
     bool twist = line.angle() < 90 || (line.angle() > 180 && line.angle() < 270);
     auto normal = line.normalVector();
     if (twist)

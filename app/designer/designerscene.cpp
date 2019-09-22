@@ -4,7 +4,7 @@
 #include <scenesettings.h>
 #include <form.h>
 #include <gadgetlayer.h>
-#include <anchorlayer.h>
+#include <mouselayer.h>
 #include <paintlayer.h>
 #include <hashfactory.h>
 #include <utilityfunctions.h>
@@ -22,7 +22,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
   , m_cursorShape(Qt::CustomCursor)
   , m_dragLayer(new DesignerItem)
   , m_gadgetLayer(new GadgetLayer)
-  , m_anchorLayer(new AnchorLayer)
+  , m_mouseLayer(new MouseLayer)
   , m_paintLayer(new PaintLayer)
   , m_parentBeforeDrag(nullptr)
 {
@@ -37,10 +37,9 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     m_gadgetLayer->setZValue(std::numeric_limits<int>::max());
     addItem(m_gadgetLayer);
 
-    m_anchorLayer->setAcceptHoverEvents(true);
-    m_anchorLayer->setAcceptedMouseButtons(Qt::RightButton);
-    m_anchorLayer->setZValue(std::numeric_limits<int>::max());
-    addItem(m_anchorLayer);
+    m_mouseLayer->setAcceptedMouseButtons(Qt::RightButton);
+    m_mouseLayer->setZValue(std::numeric_limits<int>::max());
+    addItem(m_mouseLayer);
 
     m_paintLayer->setAcceptedMouseButtons(Qt::NoButton);
     m_paintLayer->setZValue(std::numeric_limits<int>::max());
@@ -64,10 +63,10 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             m_gadgetLayer, &GadgetLayer::removeResizers);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
-            m_anchorLayer, &AnchorLayer::updateGeometry);
+            m_mouseLayer, &MouseLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
-            m_anchorLayer, &AnchorLayer::updateGeometry);
-    connect(m_anchorLayer, &AnchorLayer::activatedChanged,
+            m_mouseLayer, &MouseLayer::updateGeometry);
+    connect(m_mouseLayer, &MouseLayer::activatedChanged,
             this, &DesignerScene::onAnchorLayerActivation);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
             m_paintLayer, &PaintLayer::updateGeometry);
@@ -172,7 +171,7 @@ bool DesignerScene::isLayerItem(const DesignerItem* item) const
 {
     return item == m_dragLayer
             || item == m_gadgetLayer
-            || item == m_anchorLayer
+            || item == m_mouseLayer
             || item == m_paintLayer;
 }
 
@@ -191,9 +190,9 @@ GadgetLayer* DesignerScene::gadgetLayer() const
     return m_gadgetLayer;
 }
 
-AnchorLayer* DesignerScene::anchorLayer() const
+MouseLayer* DesignerScene::mouseLayer() const
 {
-    return m_anchorLayer;
+    return m_mouseLayer;
 }
 
 DesignerItem* DesignerScene::parentBeforeDrag() const
@@ -636,14 +635,14 @@ void DesignerScene::onChange()
 
 void DesignerScene::onAnchorLayerActivation()
 {
-    if (m_anchorLayer->activated())
+    if (m_mouseLayer->activated())
         setAnchorVisibility(anchorVisibility() | VisibleForAllControlsDueToAnchorLayer);
     else
         setAnchorVisibility(anchorVisibility() & ~VisibleForAllControlsDueToAnchorLayer);
 
-    if (!m_anchorLayer->activated()) {
-        Control* sourceControl = m_anchorLayer->sourceControl();
-        Control* targetControl = m_anchorLayer->targetControl();
+    if (!m_mouseLayer->activated()) {
+        Control* sourceControl = m_mouseLayer->mouseStartControl();
+        Control* targetControl = m_mouseLayer->mouseEndControl();
         if (isAnchorViable(sourceControl, targetControl))
             emit anchorEditorActivated(sourceControl, targetControl);
     }

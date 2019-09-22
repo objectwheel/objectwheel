@@ -10,7 +10,7 @@ class DesignerItem;
 class Control;
 class Form;
 class GadgetLayer;
-class AnchorLayer;
+class MouseLayer;
 class PaintLayer;
 class DesignerView;
 
@@ -46,7 +46,7 @@ public:
     Form* currentForm() const;
     DesignerItem* dragLayer() const;
     GadgetLayer* gadgetLayer() const;
-    AnchorLayer* anchorLayer() const;
+    MouseLayer* mouseLayer() const;
     DesignerItem* parentBeforeDrag() const;
     DesignerView* view() const;
 
@@ -120,7 +120,7 @@ private:
     Qt::CursorShape m_cursorShape;
     DesignerItem* m_dragLayer;
     GadgetLayer* m_gadgetLayer;
-    AnchorLayer* m_anchorLayer;
+    MouseLayer* m_mouseLayer;
     PaintLayer* m_paintLayer;
     QSet<Form*> m_forms;
     DesignerItem* m_parentBeforeDrag;
