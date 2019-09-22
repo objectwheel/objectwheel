@@ -466,7 +466,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
 {
     Q_ASSERT(scene());
 
-    if (!(scene()->anchorVisibility() & DesignerScene::VisibleForAllControlsDueToAnchorLayer)
+    if (!(scene()->anchorVisibility() & DesignerScene::VisibleForAllControlsDueToMouseLayerDraggingActivation)
             && !(scene()->anchorVisibility() & DesignerScene::VisibleForAllControlsDueToAnchorEditorConnection)) {
         return;
     }

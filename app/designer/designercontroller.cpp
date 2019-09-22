@@ -17,6 +17,7 @@
 #include <controlremovingmanager.h>
 #include <controlrenderingmanager.h>
 #include <controlcreationmanager.h>
+#include <mouselayer.h>
 
 #include <private/qgraphicsitem_p.h>
 
@@ -112,10 +113,15 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
 
     connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
             this, &DesignerController::onSceneSettingsChange);
-    connect(m_designerPane, &DesignerPane::customContextMenuRequested,
-            this, &DesignerController::onCustomContextMenuRequest);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
             this, &DesignerController::onControlDoubleClick);
+    connect(scene->mouseLayer(), &MouseLayer::doubleClicked,
+            this, &DesignerController::onControlDoubleClick);
+    connect(scene->mouseLayer(), &MouseLayer::clicked,
+            this, [=] (Control* c, Qt::MouseButtons buttons) {
+        if (buttons & Qt::RightButton)
+            onContextMenuRequest(scene->mouseLayer()->mouseEndPos().toPoint());
+    });
 
     connect(m_designerPane->anchorEditor(), &AnchorEditor::anchored,
             this, &DesignerController::onAnchor);
@@ -240,7 +246,7 @@ void DesignerController::onSceneSettingsChange()
     m_designerPane->guidelinesButton()->setChecked(settings->showGuideLines);
 }
 
-void DesignerController::onCustomContextMenuRequest(const QPoint& pos)
+void DesignerController::onContextMenuRequest(const QPoint& pos)
 {
     const DesignerView* view = m_designerPane->designerView();
     const QPoint& globalPos = m_designerPane->mapToGlobal(pos);

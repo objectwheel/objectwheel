@@ -66,8 +66,8 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_mouseLayer, &MouseLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
             m_mouseLayer, &MouseLayer::updateGeometry);
-    connect(m_mouseLayer, &MouseLayer::activatedChanged,
-            this, &DesignerScene::onAnchorLayerActivation);
+    connect(m_mouseLayer, &MouseLayer::draggingActivatedChanged,
+            this, &DesignerScene::onMouseLayerDraggingActivation);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
             m_paintLayer, &PaintLayer::updateGeometry);
     connect(this, &DesignerScene::currentFormChanged,
@@ -633,14 +633,12 @@ void DesignerScene::onChange()
     setSceneRect(sceneRect() | visibleItemsBoundingRect());
 }
 
-void DesignerScene::onAnchorLayerActivation()
+void DesignerScene::onMouseLayerDraggingActivation()
 {
-    if (m_mouseLayer->activated())
-        setAnchorVisibility(anchorVisibility() | VisibleForAllControlsDueToAnchorLayer);
-    else
-        setAnchorVisibility(anchorVisibility() & ~VisibleForAllControlsDueToAnchorLayer);
-
-    if (!m_mouseLayer->activated()) {
+    if (m_mouseLayer->draggingActivated()) {
+        setAnchorVisibility(anchorVisibility() | VisibleForAllControlsDueToMouseLayerDraggingActivation);
+    } else {
+        setAnchorVisibility(anchorVisibility() & ~VisibleForAllControlsDueToMouseLayerDraggingActivation);
         Control* sourceControl = m_mouseLayer->mouseStartControl();
         Control* targetControl = m_mouseLayer->mouseEndControl();
         if (isAnchorViable(sourceControl, targetControl))

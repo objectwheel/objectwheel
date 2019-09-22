@@ -22,7 +22,7 @@ class DesignerScene final : public QGraphicsScene
 public:
     enum AnchorVisibilityReasons {
         VisibleForSelectedControlsOnly = 0x00,
-        VisibleForAllControlsDueToAnchorLayer = 0x02,
+        VisibleForAllControlsDueToMouseLayerDraggingActivation = 0x02,
         VisibleForAllControlsDueToAnchorEditor = 0x04,
         VisibleForAllControlsDueToAnchorEditorConnection = 0x08
     };
@@ -100,7 +100,7 @@ public:
 
 private slots:
     void onChange();
-    void onAnchorLayerActivation();
+    void onMouseLayerDraggingActivation();
     void onSceneSettingsChange();
 
 private:

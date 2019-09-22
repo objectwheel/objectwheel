@@ -19,7 +19,7 @@ public slots:
 
 private slots:
     void onSceneSettingsChange();
-    void onCustomContextMenuRequest(const QPoint& pos);
+    void onContextMenuRequest(const QPoint& pos);
     void onControlDoubleClick(Control* control, Qt::MouseButtons buttons);
 
     void onAnchorClear();

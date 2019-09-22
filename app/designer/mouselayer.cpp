@@ -1,17 +1,17 @@
 #include <mouselayer.h>
 #include <designerscene.h>
-#include <designerview.h>
 #include <QGraphicsSceneMouseEvent>
 
 MouseLayer::MouseLayer(DesignerItem* parent) : DesignerItem(parent)
-  , m_activated(false)
+  , m_draggingActivated(false)
   , m_geometryUpdateScheduled(false)
 {
+    setMousePressCursorShape(Qt::BlankCursor);
 }
 
-bool MouseLayer::activated() const
+bool MouseLayer::draggingActivated() const
 {
-    return m_activated;
+    return m_draggingActivated;
 }
 
 QPointF MouseLayer::mouseStartPos() const
@@ -48,11 +48,11 @@ void MouseLayer::updateGeometry()
     }, Qt::QueuedConnection);
 }
 
-void MouseLayer::setActivated(bool activated)
+void MouseLayer::setDraggingActivated(bool draggingActivated)
 {
-    if (m_activated != activated) {
-        m_activated = activated;
-        emit activatedChanged();
+    if (m_draggingActivated != draggingActivated) {
+        m_draggingActivated = draggingActivated;
+        emit draggingActivatedChanged();
     }
 }
 
@@ -63,11 +63,12 @@ void MouseLayer::mousePressEvent(QGraphicsSceneMouseEvent* event)
     DesignerItem::mousePressEvent(event);
 
     m_mouseStartPos = event->scenePos();
+    m_mouseEndPos = m_mouseStartPos;
 
     if (DesignerScene::isInappropriateAnchorSource(mouseStartControl()))
         return;
 
-    if (event->button() == Qt::RightButton)
+    if (event->modifiers() == Qt::NoModifier)
         event->accept();
 }
 
@@ -77,23 +78,28 @@ void MouseLayer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     DesignerItem::mouseMoveEvent(event);
 
-    if (dragAccepted() && !activated()) {
-        scene()->setCursor(Qt::BlankCursor);
-        setActivated(true);
-    }
-
     m_mouseEndPos = event->scenePos();
+
+    if (dragAccepted() && !draggingActivated())
+        setDraggingActivated(true);
+
     update();
 }
-
+#include <designerview.h>
 void MouseLayer::mouseUngrabEvent(QEvent* event)
 {
     Q_ASSERT(scene());
 
     DesignerItem::mouseUngrabEvent(event); // Clears dragAccepted state
 
-    if (activated()) {
-        scene()->unsetCursor();
-        setActivated(false);
-    }
+    if (draggingActivated())
+        setDraggingActivated(false);
+    else
+        emit clicked(mouseEndControl(), scene()->view()->mousePressButton());
+}
+
+void MouseLayer::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
+{
+    DesignerItem::mouseDoubleClickEvent(event);
+    emit doubleClicked(mouseEndControl(), event->buttons());
 }

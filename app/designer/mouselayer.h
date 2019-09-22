@@ -12,7 +12,7 @@ class MouseLayer final : public DesignerItem
 public:
     explicit MouseLayer(DesignerItem* parent = nullptr);
 
-    bool activated() const;
+    bool draggingActivated() const;
 
     QPointF mouseStartPos() const;
     QPointF mouseEndPos() const;
@@ -24,18 +24,21 @@ public slots:
     void updateGeometry();
 
 private:
-    void setActivated(bool activated);
+    void setDraggingActivated(bool draggingActivated);
 
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseUngrabEvent(QEvent* event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 
 signals:
-    void activatedChanged();
+    void clicked(Control* control, Qt::MouseButtons buttons);
+    void doubleClicked(Control* control, Qt::MouseButtons buttons);
+    void draggingActivatedChanged();
 
 private:
-    bool m_activated;
+    bool m_draggingActivated;
     bool m_geometryUpdateScheduled;
     QPointF m_mouseStartPos, m_mouseEndPos;
 };
