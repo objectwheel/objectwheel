@@ -86,11 +86,13 @@ void DesignerView::mousePressEvent(QMouseEvent* event)
 
 void DesignerView::mouseReleaseEvent(QMouseEvent* event)
 {
+    Q_D(QGraphicsView);
     // not sure why buttons() are empty here, but we have that information from the enum
     if (m_panningState == Panning::MouseWheelStarted)
         stopPanning(event);
     else
         QGraphicsView::mouseReleaseEvent(event);
+    d->mousePressButton = Qt::NoButton;
 }
 
 void DesignerView::wheelEvent(QWheelEvent* event)

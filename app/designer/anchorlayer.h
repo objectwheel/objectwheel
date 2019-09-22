@@ -28,14 +28,12 @@ private:
 
 private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseUngrabEvent(QEvent* event) override;
+    void hoverMoveEvent(QGraphicsSceneHoverEvent* event) override;
 
 signals:
     void activatedChanged();
 
 private:
-    bool m_pressed;
     bool m_activated;
     bool m_geometryUpdateScheduled;
     QPointF m_mousePressPoint, m_mouseMovePoint;
