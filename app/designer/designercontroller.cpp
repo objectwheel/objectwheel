@@ -244,12 +244,11 @@ void DesignerController::onSceneSettingsChange()
     m_designerPane->guidelinesButton()->setChecked(settings->showGuideLines);
 }
 
-void DesignerController::onContextMenuRequest(const QPoint& pos)
+void DesignerController::onContextMenuRequest(const QPoint& scenePos)
 {
     const DesignerView* view = m_designerPane->designerView();
-    const QPoint& globalPos = m_designerPane->mapToGlobal(pos);
-    const QPointF& scenePos = view->mapToScene(view->viewport()->mapFromGlobal(globalPos));
     DesignerScene* scene = view->scene();
+    const QPoint& globalPos = view->viewport()->mapToGlobal(view->mapFromScene(scenePos));
 
     if (scene->currentForm() == 0)
         return;
@@ -282,30 +281,19 @@ void DesignerController::onContextMenuRequest(const QPoint& pos)
     m_copyPaste.setPos(QPointF());
 }
 
-void DesignerController::onControlDoubleClick(Control* control, Qt::MouseButtons buttons)
+void DesignerController::onControlDoubleClick(Control*, Qt::MouseButtons buttons)
 {
     DesignerScene* scene = m_designerPane->designerView()->scene();
+    const SceneSettings* settings = DesignerSettings::sceneSettings();
     if (QGraphicsItem* mouseGrabber = scene->mouseGrabberItem())
         mouseGrabber->ungrabMouse();
-    if (buttons & Qt::LeftButton)
-        emit viewSourceCodeTriggered(control);
-    if (buttons & Qt::RightButton) {
-        Control* sourceControl = control;
-        Control* targetControl = control->parentControl();
-        if (DesignerScene::isAnchorViable(sourceControl, targetControl)) {
-            const QList<Control*>& selection = scene->selectedControls();
-            scene->setAnchorVisibility(scene->anchorVisibility() | DesignerScene::VisibleForAllControlsDueToAnchorEditor);
-            scene->clearSelection();
-            sourceControl->setSelected(true);
-            m_designerPane->anchorEditor()->setSourceControl(sourceControl);
-            m_designerPane->anchorEditor()->setPrimaryTargetControl(targetControl);
-            m_designerPane->anchorEditor()->refresh();
-            m_designerPane->anchorEditor()->exec();
-            scene->clearSelection();
-            scene->setAnchorVisibility(scene->anchorVisibility() & ~DesignerScene::VisibleForAllControlsDueToAnchorEditor);
-            for (Control* control : selection)
-                control->setSelected(true);
-        }
+    if (buttons & Qt::LeftButton) {
+        if (settings->controlDoubleClickAction == 0)
+            onEditAnchorsActionTrigger();
+        else if (settings->controlDoubleClickAction == 1)
+            onViewSourceCodeActionTrigger();
+        else
+            onGoToSlotActionTrigger();
     }
 }
 

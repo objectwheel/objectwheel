@@ -7,7 +7,7 @@ MouseLayer::MouseLayer(DesignerItem* parent) : DesignerItem(parent)
   , m_draggingActivated(false)
   , m_geometryUpdateScheduled(false)
 {
-    setMousePressCursorShape(Qt::BlankCursor);
+    setMousePressCursorShape(Qt::ClosedHandCursor);
 }
 
 bool MouseLayer::draggingActivated() const
@@ -81,8 +81,10 @@ void MouseLayer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     m_mouseEndPos = event->scenePos();
 
-    if (dragAccepted() && !draggingActivated())
+    if (dragAccepted() && !draggingActivated()) {
+        scene()->setCursor(Qt::BlankCursor);
         setDraggingActivated(true);
+    }
 
     update();
 }
@@ -93,8 +95,10 @@ void MouseLayer::mouseUngrabEvent(QEvent* event)
 
     DesignerItem::mouseUngrabEvent(event); // Clears dragAccepted state
 
-    if (draggingActivated())
+    if (draggingActivated()) {
+        scene()->unsetCursor();
         setDraggingActivated(false);
-    else
+    } else {
         emit clicked(mouseEndControl(), scene()->view()->mousePressButton());
+    }
 }

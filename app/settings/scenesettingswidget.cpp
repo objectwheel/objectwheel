@@ -187,7 +187,7 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     m_showClippedControlsCheckBox->setToolTip(tr("Show controls even if they are clipped out by their parent control"));
     m_blankControlDecorationBox->setToolTip(tr("Change decoration for blank controls with transparent content"));
     m_controlOutlineDecorationBox->setToolTip(tr("Change decoration for control outlines"));
-    m_controlDoubleClickActionBox->setToolTip(tr("Change decoration for control outlines"));
+    m_controlDoubleClickActionBox->setToolTip(tr("Change default action for the double clicks on controls"));
     m_outlineColorButton->setToolTip(tr("Change outline color of controls"));
     m_outlineColorResetButton->setToolTip(tr("Reset outline color to default"));
 
