@@ -1,6 +1,5 @@
 #include <qmlcodeeditortoolbar.h>
 #include <qmlcodedocument.h>
-#include <utilsicons.h>
 #include <utilityfunctions.h>
 #include <qmlcodeeditor.h>
 
@@ -12,9 +11,6 @@
 #include <QMenu>
 #include <QComboBox>
 #include <QTimer>
-
-using namespace Utils;
-using namespace Icons;
 
 #define MARK_BULLET "•"
 
@@ -46,8 +42,9 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
   , m_redoButton(new QToolButton)
   , m_closeButton(new QToolButton)
   , m_newFileButton(new QToolButton)
-  , m_openFileButton(new QToolButton)
+  , m_addFileButton(new QToolButton)
   , m_saveButton(new QToolButton)
+  , m_saveAllButton(new QToolButton)
   , m_cutButton(new QToolButton)
   , m_copyButton(new QToolButton)
   , m_pasteButton(new QToolButton)
@@ -71,6 +68,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     addWidget(m_copyButton);
     addWidget(m_pasteButton);
     addWidget(m_saveButton);
+    addWidget(m_saveAllButton);
     addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addSeparator();
     addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
@@ -79,7 +77,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     addSeparator();
     addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_actions.append(addWidget(m_newFileButton));                               // 0
-    m_actions.append(addWidget(m_openFileButton));                              // 1
+    m_actions.append(addWidget(m_addFileButton));                              // 1
     m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 2
     m_actions.append(addSeparator());                                           // 3
     m_actions.append(addWidget(UtilityFunctions::createSpacingWidget({1, 1}))); // 4
@@ -107,8 +105,9 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_redoButton->setFixedHeight(20);
     m_closeButton->setFixedHeight(20);
     m_newFileButton->setFixedHeight(20);
-    m_openFileButton->setFixedHeight(20);
+    m_addFileButton->setFixedHeight(20);
     m_saveButton->setFixedHeight(20);
+    m_saveAllButton->setFixedHeight(20);
     m_cutButton->setFixedHeight(20);
     m_copyButton->setFixedHeight(20);
     m_pasteButton->setFixedHeight(20);
@@ -123,8 +122,9 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_redoButton->setCursor(Qt::PointingHandCursor);
     m_closeButton->setCursor(Qt::PointingHandCursor);
     m_newFileButton->setCursor(Qt::PointingHandCursor);
-    m_openFileButton->setCursor(Qt::PointingHandCursor);
+    m_addFileButton->setCursor(Qt::PointingHandCursor);
     m_saveButton->setCursor(Qt::PointingHandCursor);
+    m_saveAllButton->setCursor(Qt::PointingHandCursor);
     m_cutButton->setCursor(Qt::PointingHandCursor);
     m_copyButton->setCursor(Qt::PointingHandCursor);
     m_pasteButton->setCursor(Qt::PointingHandCursor);
@@ -137,23 +137,25 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_redoButton->setToolTip(tr("Redo action"));
     m_closeButton->setToolTip(tr("Close document"));
     m_newFileButton->setToolTip(tr("New external file"));
-    m_openFileButton->setToolTip(tr("Open external file"));
+    m_addFileButton->setToolTip(tr("Add external file"));
     m_saveButton->setToolTip(tr("Save document"));
+    m_saveAllButton->setToolTip(tr("Save all open documents"));
     m_cutButton->setToolTip(tr("Cut selection"));
     m_copyButton->setToolTip(tr("Copy selection"));
     m_pasteButton->setToolTip(tr("Paste from clipboard"));
     m_scopeButton->setToolTip(tr("Change the scope of open files"));
     m_lineColumnLabel->setToolTip(tr("Cursor position"));
 
-    m_undoButton->setIcon(UNDO_TOOLBAR.icon());
-    m_redoButton->setIcon(REDO_TOOLBAR.icon());
-    m_closeButton->setIcon(CLOSE_TOOLBAR.icon());
-    m_newFileButton->setIcon(FILENEW.icon());
-    m_openFileButton->setIcon(OPENFILE_TOOLBAR.icon());
-    m_saveButton->setIcon(SAVEFILE_TOOLBAR.icon());
-    m_cutButton->setIcon(CUT_TOOLBAR.icon());
-    m_copyButton->setIcon(COPY_TOOLBAR.icon());
-    m_pasteButton->setIcon(PASTE_TOOLBAR.icon());
+    m_undoButton->setIcon(QIcon(QStringLiteral(":/images/designer/undo.svg")));
+    m_redoButton->setIcon(QIcon(QStringLiteral(":/images/designer/redo.svg")));
+    m_closeButton->setIcon(QIcon(QStringLiteral(":/images/designer/close.svg")));
+    m_newFileButton->setIcon(QIcon(QStringLiteral(":/images/designer/new-file.svg")));
+    m_addFileButton->setIcon(QIcon(QStringLiteral(":/images/designer/add-file.svg")));
+    m_saveButton->setIcon(QIcon(QStringLiteral(":/images/designer/save.svg")));
+    m_saveAllButton->setIcon(QIcon(QStringLiteral(":/images/designer/save-all.svg")));
+    m_cutButton->setIcon(QIcon(QStringLiteral(":/images/designer/cut.svg")));
+    m_copyButton->setIcon(QIcon(QStringLiteral(":/images/designer/copy.svg")));
+    m_pasteButton->setIcon(QIcon(QStringLiteral(":/images/designer/paste.svg")));
 
     auto menu = new QMenu(m_scopeButton);
     auto group = new QActionGroup(menu);
@@ -169,15 +171,15 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     group->addAction(g_designsAction);
     group->addAction(g_othersAction);
 
-    g_assetsAction->setIcon(ASSETS_TOOLBAR.icon());
+    g_assetsAction->setIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
     g_assetsAction->setCheckable(true);
     g_assetsAction->setProperty("ow_scope", Assets);
 
-    g_designsAction->setIcon(DESIGNS_TOOLBAR.icon());
+    g_designsAction->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
     g_designsAction->setCheckable(true);
     g_designsAction->setProperty("ow_scope", Designs);
 
-    g_othersAction->setIcon(OTHERS_TOOLBAR.icon());
+    g_othersAction->setIcon(QIcon(QStringLiteral(":/images/designer/external-files.svg")));
     g_othersAction->setCheckable(true);
     g_othersAction->setProperty("ow_scope", Others);
 
@@ -213,10 +215,12 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
             this, &QmlCodeEditorToolBar::closed);
     connect(m_newFileButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::newFile);
-    connect(m_openFileButton, &QToolButton::clicked,
-            this, &QmlCodeEditorToolBar::openFile);
+    connect(m_addFileButton, &QToolButton::clicked,
+            this, &QmlCodeEditorToolBar::addFile);
     connect(m_saveButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::saved);
+    connect(m_saveAllButton, &QToolButton::clicked,
+            this, &QmlCodeEditorToolBar::savedAll);
     connect(m_codeEditor, &QmlCodeEditor::copyAvailable,
             m_cutButton, &QToolButton::setEnabled);
     connect(m_cutButton, &QToolButton::clicked,
@@ -256,8 +260,8 @@ void QmlCodeEditorToolBar::setShowed(bool show)
 void QmlCodeEditorToolBar::discharge()
 {
     g_assetsAction->setText(tr("Assets\t"));
-    g_designsAction->setText(tr("Designs\t"));
-    g_othersAction->setText(tr("Others\t"));
+    g_designsAction->setText(tr("Source Codes\t"));
+    g_othersAction->setText(tr("External Files\t"));
 
     setPinned(true);
     setShowed(false);
@@ -274,11 +278,11 @@ void QmlCodeEditorToolBar::setScope(QmlCodeEditorToolBar::Scope scope)
     m_scopeButton->setProperty("ow_scope", scope);
 
     if (scope == Assets)
-        m_scopeButton->setIcon(ASSETS_TOOLBAR.icon());
+        m_scopeButton->setIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
     else if (scope == Designs)
-        m_scopeButton->setIcon(DESIGNS_TOOLBAR.icon());
+        m_scopeButton->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
     else
-        m_scopeButton->setIcon(OTHERS_TOOLBAR.icon());
+        m_scopeButton->setIcon(QIcon(QStringLiteral(":/images/designer/external-files.svg")));
 
     for (QAction* action : m_scopeButton->menu()->actions()) {
         Scope s = action->property("ow_scope").value<Scope>();
@@ -311,10 +315,10 @@ void QmlCodeEditorToolBar::onPinButtonClick()
     bool pin = !m_pinButton->property("ow_pinned").toBool();
     if (pin) {
         m_pinButton->setToolTip(tr("Unpin Editor"));
-        m_pinButton->setIcon(PINNED_TOOLBAR.icon());
+        m_pinButton->setIcon(QIcon(QStringLiteral(":/images/designer/unpin.svg")));
     } else {
         m_pinButton->setToolTip(tr("Pin Editor"));
-        m_pinButton->setIcon(PIN_TOOLBAR.icon());
+        m_pinButton->setIcon(QIcon(QStringLiteral(":/images/designer/pin.svg")));
     }
     m_pinButton->setProperty("ow_pinned", pin);
 }
@@ -323,10 +327,10 @@ void QmlCodeEditorToolBar::onShowButtonClick()
 {
     bool show = !m_showButton->property("ow_showed").toBool();
     if (show) {
-        m_showButton->setIcon(CLOSE_SPLIT_RIGHT.icon());
+        m_showButton->setIcon(QIcon(QStringLiteral(":/images/designer/right.svg")));
         m_showButton->setToolTip(tr("Hide File Explorer"));
     } else {
-        m_showButton->setIcon(CLOSE_SPLIT_LEFT.icon());
+        m_showButton->setIcon(QIcon(QStringLiteral(":/images/designer/left.svg")));
         m_showButton->setToolTip(tr("Show File Explorer"));
     }
     m_showButton->setProperty("ow_showed", show);

@@ -25,6 +25,9 @@ Designer'ın Toolbar'ına resizelar sonrası genişleyen sceneyi "fitleme" buton
 Containerlar (Column, Row, Grid, Layouts vs vs) için üzerine bir item sürükleyince hizalama çizgileri göster
 properties pane bok dolu, bir sürü saçma property var, bir propertiden on tane var, ve propertiler yanlış
     yerlerde dizilmiş, QObject altında Item propertileri vs gözüküyor
+Menüler (popup) bir kaç kez açıldıktan sonra daha açılmamaya başlıyor
+Buttonlar, Radio buttonlar, checkboxlar, spinboxlar, tüm widgetları cross-platform bir şekilde macos sitili ile çiz
+    applicationstyle.cpp yi geliştir, cizimlerde macstyle.cpp nin style hintlerini, pixelmetriklerini de aktar kopyala
 
 GUI CORE V2 TODOS:
 

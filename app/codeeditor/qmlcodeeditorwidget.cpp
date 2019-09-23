@@ -153,6 +153,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
 
     connect(toolBar(), &QmlCodeEditorToolBar::saved,
             this, &QmlCodeEditorWidget::saveOpen);
+    connect(toolBar(), &QmlCodeEditorToolBar::savedAll,
+            this, &QmlCodeEditorWidget::saveAll);
     connect(toolBar(), &QmlCodeEditorToolBar::closed,
             this, &QmlCodeEditorWidget::close);
     connect(toolBar(), &QmlCodeEditorToolBar::showed,
@@ -165,8 +167,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
             this, &QmlCodeEditorWidget::onComboActivation);
     connect(toolBar(), &QmlCodeEditorToolBar::newFile,
             this, &QmlCodeEditorWidget::onNewOthersFile);
-    connect(toolBar(), &QmlCodeEditorToolBar::openFile,
-            this, &QmlCodeEditorWidget::onOpenOthersFile);
+    connect(toolBar(), &QmlCodeEditorToolBar::addFile,
+            this, &QmlCodeEditorWidget::onAddOthersFile);
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
@@ -235,7 +237,7 @@ void QmlCodeEditorWidget::onNewOthersFile()
     openOthers(fullPath);
 }
 
-void QmlCodeEditorWidget::onOpenOthersFile()
+void QmlCodeEditorWidget::onAddOthersFile()
 {
     const QString& fullPath = QFileDialog::getOpenFileName(
                 this,

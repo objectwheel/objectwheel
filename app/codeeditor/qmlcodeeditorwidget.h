@@ -72,7 +72,7 @@ public slots:
 
 private slots:
     void onNewOthersFile();
-    void onOpenOthersFile();
+    void onAddOthersFile();
     void onModificationChange(Document* document);
     void onPinActivation(bool pinned);
     void onScopeActivation(QmlCodeEditorToolBar::Scope);

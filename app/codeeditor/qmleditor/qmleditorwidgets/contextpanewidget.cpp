@@ -466,7 +466,7 @@ void ContextPaneWidget::setPinButton()
     m_toolButton->setAutoRaise(true);
     m_pinned = true;
 
-    m_toolButton->setIcon(Utils::Icons::PIN_TOOLBAR.icon());
+    m_toolButton->setIcon(Utils::Icons::UNPIN_TOOLBAR.icon());
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_toolButton->setFixedSize(20, 20);
     m_toolButton->setToolTip(tr("Unpins the toolbar and moves it to the default position."));

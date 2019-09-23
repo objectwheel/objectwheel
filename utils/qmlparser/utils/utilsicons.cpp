@@ -136,8 +136,8 @@ const Icon RESET_TOOLBAR({
         {QLatin1String(":/utils/images/reset.png"), Theme::IconsBaseColor}});
 const Icon PIN_TOOLBAR({
         {QLatin1String(":/utils/images/pin.png"), Theme::IconsBaseColor}});
-const Icon PINNED_TOOLBAR({
-        {QLatin1String(":/utils/images/pinned.png"), Theme::IconsBaseColor}});
+const Icon UNPIN_TOOLBAR({
+        {QLatin1String(":/utils/images/unpin.png"), Theme::IconsBaseColor}});
 const Icon DESIGNS_TOOLBAR({
         {QLatin1String(":/utils/images/designs.png"), Theme::IconsBaseColor}});
 const Icon OTHERS_TOOLBAR({

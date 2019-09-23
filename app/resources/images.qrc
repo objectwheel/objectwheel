@@ -166,5 +166,18 @@
         <file>images/designer/view-source-code.svg</file>
         <file>images/designer/go-to-slot.svg</file>
         <file>images/designer/edit-anchors.svg</file>
+        <file>images/designer/close.svg</file>
+        <file>images/designer/redo.svg</file>
+        <file>images/designer/save-all.svg</file>
+        <file>images/designer/save.svg</file>
+        <file>images/designer/undo.svg</file>
+        <file>images/designer/unpin.svg</file>
+        <file>images/designer/add-file.svg</file>
+        <file>images/designer/new-file.svg</file>
+        <file>images/designer/assets.svg</file>
+        <file>images/designer/external-files.svg</file>
+        <file>images/designer/left.svg</file>
+        <file>images/designer/right.svg</file>
+        <file>images/designer/pin.svg</file>
     </qresource>
 </RCC>

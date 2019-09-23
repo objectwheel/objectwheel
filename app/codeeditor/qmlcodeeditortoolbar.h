@@ -57,9 +57,10 @@ private slots:
 
 signals:
     void saved();
+    void savedAll();
     void closed();
     void newFile();
-    void openFile();
+    void addFile();
     void pinned(bool);
     void showed(bool);
     void scopeActivated(Scope);
@@ -77,8 +78,9 @@ private:
     QToolButton* m_redoButton;
     QToolButton* m_closeButton;
     QToolButton* m_newFileButton;
-    QToolButton* m_openFileButton;
+    QToolButton* m_addFileButton;
     QToolButton* m_saveButton;
+    QToolButton* m_saveAllButton;
     QToolButton* m_cutButton;
     QToolButton* m_copyButton;
     QToolButton* m_pasteButton;

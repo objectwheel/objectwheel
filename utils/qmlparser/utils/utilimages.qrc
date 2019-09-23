@@ -219,8 +219,6 @@
         <file>images/snapping@2x.png</file>
         <file>images/pin.png</file>
         <file>images/pin@2x.png</file>
-        <file>images/pinned.png</file>
-        <file>images/pinned@2x.png</file>
         <file>images/delete.png</file>
         <file>images/delete@2x.png</file>
         <file>images/rename.png</file>
@@ -244,5 +242,7 @@
         <file>images/others.png</file>
         <file>images/others@2x.png</file>
         <file>tooltip/images/f1@2x.png</file>
+        <file>images/unpin.png</file>
+        <file>images/unpin@2x.png</file>
     </qresource>
 </RCC>
