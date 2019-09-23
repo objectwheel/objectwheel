@@ -15,6 +15,7 @@ static const char g_showMouseoverOutline[] = "ShowMouseoverOutline";
 static const char g_showClippedControls[] = "ShowClippedControls";
 static const char g_blankControlDecoration[] = "BlankControlDecoration";
 static const char g_controlOutlineDecoration[] = "ControlOutlineDecoration";
+static const char g_controlDoubleClickAction[] = "ControlDoubleClickAction";
 static const char g_outlineColor[] = "OutlineColor";
 
 SceneSettings::SceneSettings(DesignerSettings* designerSettings) : Settings(designerSettings)
@@ -42,6 +43,7 @@ void SceneSettings::read()
     showClippedControls = value<bool>(g_showClippedControls, showClippedControls);
     blankControlDecoration = value<int>(g_blankControlDecoration, blankControlDecoration);
     controlOutlineDecoration = value<int>(g_controlOutlineDecoration, controlOutlineDecoration);
+    controlDoubleClickAction = value<int>(g_controlDoubleClickAction, controlDoubleClickAction);
     outlineColor = value<QColor>(g_outlineColor, outlineColor);
     end();
 }
@@ -64,6 +66,7 @@ void SceneSettings::write()
     setValue(g_showClippedControls, showClippedControls);
     setValue(g_blankControlDecoration, blankControlDecoration);
     setValue(g_controlOutlineDecoration, controlOutlineDecoration);
+    setValue(g_controlDoubleClickAction, controlDoubleClickAction);
     setValue(g_outlineColor, outlineColor);
     end();
 
@@ -87,6 +90,7 @@ void SceneSettings::reset()
     showClippedControls = false;
     blankControlDecoration = 3;
     controlOutlineDecoration = 1;
+    controlDoubleClickAction = 1;
     outlineColor = "#2483ec";
 }
 

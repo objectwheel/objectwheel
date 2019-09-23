@@ -115,10 +115,8 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onSceneSettingsChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::doubleClicked,
             this, &DesignerController::onControlDoubleClick);
-    connect(scene->mouseLayer(), &MouseLayer::doubleClicked,
-            this, &DesignerController::onControlDoubleClick);
     connect(scene->mouseLayer(), &MouseLayer::clicked,
-            this, [=] (Control* c, Qt::MouseButtons buttons) {
+            this, [=] (Control*, Qt::MouseButtons buttons) {
         if (buttons & Qt::RightButton)
             onContextMenuRequest(scene->mouseLayer()->mouseEndPos().toPoint());
     });

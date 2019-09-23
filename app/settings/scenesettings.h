@@ -30,6 +30,7 @@ struct SceneSettings final : public Settings
     bool showClippedControls;
     int blankControlDecoration;
     int controlOutlineDecoration;
+    int controlDoubleClickAction;
     QColor outlineColor;
 };
 

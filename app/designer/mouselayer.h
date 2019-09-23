@@ -30,17 +30,16 @@ private:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseUngrabEvent(QEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 
 signals:
-    void clicked(Control* control, Qt::MouseButtons buttons);
-    void doubleClicked(Control* control, Qt::MouseButtons buttons);
     void draggingActivatedChanged();
+    void clicked(Control* control, Qt::MouseButtons buttons);
 
 private:
     bool m_draggingActivated;
     bool m_geometryUpdateScheduled;
-    QPointF m_mouseStartPos, m_mouseEndPos;
+    QPointF m_mouseStartPos;
+    QPointF m_mouseEndPos;
 };
 
 #endif // MOUSELAYER_H

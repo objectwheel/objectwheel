@@ -1,5 +1,6 @@
 #include <mouselayer.h>
 #include <designerscene.h>
+#include <designerview.h>
 #include <QGraphicsSceneMouseEvent>
 
 MouseLayer::MouseLayer(DesignerItem* parent) : DesignerItem(parent)
@@ -85,7 +86,7 @@ void MouseLayer::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     update();
 }
-#include <designerview.h>
+
 void MouseLayer::mouseUngrabEvent(QEvent* event)
 {
     Q_ASSERT(scene());
@@ -96,10 +97,4 @@ void MouseLayer::mouseUngrabEvent(QEvent* event)
         setDraggingActivated(false);
     else
         emit clicked(mouseEndControl(), scene()->view()->mousePressButton());
-}
-
-void MouseLayer::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
-{
-    DesignerItem::mouseDoubleClickEvent(event);
-    emit doubleClicked(mouseEndControl(), event->buttons());
 }
