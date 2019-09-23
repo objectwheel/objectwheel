@@ -22,7 +22,7 @@ BehaviorSettingsWidget::BehaviorSettingsWidget(QWidget* parent) : SettingsWidget
     savingLayout->addWidget(m_autoSaveBeforeRunningBox);
 
     m_savingGroup->setTitle(tr("Saving"));
-    m_autoSaveBeforeRunningBox->setText(tr("Automatically save changes to code before running a project."));
+    m_autoSaveBeforeRunningBox->setText(tr("Automatically save code changes before running a project."));
 
     m_autoSaveBeforeRunningBox->setToolTip(tr("Enable automatic code saving before running a project"));
 

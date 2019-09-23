@@ -199,7 +199,6 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(paren
     m_outlineColorButton->setCursor(Qt::PointingHandCursor);
     m_outlineColorResetButton->setCursor(Qt::PointingHandCursor);
 
-    m_controlOutlineDecorationBox->setIconSize({14, 14});
     m_controlDoubleClickActionBox->setIconSize({16, 16});
     m_outlineColorButton->setFixedWidth(64);
 
@@ -350,32 +349,32 @@ void SceneSettingsWidget::fill()
 
     m_sceneZoomLevelBox->addItems(UtilityFunctions::zoomTexts());
 
-    m_controlOutlineDecorationBox->addItem(QIcon(":/images/nooutline.svg"), tr("No outline"));
-    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping dash line"));
-    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding dash line"));
-    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("Clipping solid line"));
-    m_controlOutlineDecorationBox->addItem(QIcon(":/images/outerline.svg"), tr("Bounding solid line"));
+    m_controlOutlineDecorationBox->addItem(tr("No Outline"));
+    m_controlOutlineDecorationBox->addItem(tr("Clipping Dash Line"));
+    m_controlOutlineDecorationBox->addItem(tr("Bounding Dash Line"));
+    m_controlOutlineDecorationBox->addItem(tr("Clipping Solid Line"));
+    m_controlOutlineDecorationBox->addItem(tr("Bounding Solid Line"));
+
+    m_blankControlDecorationBox->addItem(tr("No Decoration"));
+    m_blankControlDecorationBox->addItem(tr("Id Only"));
+    m_blankControlDecorationBox->addItem(tr("Id + Diag Pattern"));
+    m_blankControlDecorationBox->addItem(tr("Id + Dense Pattern"));
 
     m_controlDoubleClickActionBox->addItem(QIcon(QStringLiteral(":/images/designer/edit-anchors.svg")),
-                                           tr("Edit Anchors action"));
+                                           tr("Edit Anchors Action"));
     m_controlDoubleClickActionBox->addItem(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")),
-                                           tr("View Source Code action"));
+                                           tr("View Source Code Action"));
     m_controlDoubleClickActionBox->addItem(QIcon(QStringLiteral(":/images/designer/go-to-slot.svg")),
-                                           tr("Go to Slot action"));
-
-    m_blankControlDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("No decoration"));
-    m_blankControlDecorationBox->addItem(QIcon(":/images/outline.svg"), tr("Id only"));
-    m_blankControlDecorationBox->addItem(QIcon(":/images/nooutline.svg"), tr("Diag pattern with id"));
-    m_blankControlDecorationBox->addItem(QIcon(":/images/nooutline.svg"), tr("Dense pattern width id"));
+                                           tr("Go to Slot Action"));
 
     m_sceneBackgroundTextureBox->addItem(
     {renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)}, tr("Checkered"));
     m_sceneBackgroundTextureBox->addItem(
     {renderPropertyColorPixmap(size, Qt::black, pen, dpr)}, tr("Black"));
     m_sceneBackgroundTextureBox->addItem(
-    {renderPropertyColorPixmap(size, Qt::darkGray, pen, dpr)}, tr("Dark gray"));
+    {renderPropertyColorPixmap(size, Qt::darkGray, pen, dpr)}, tr("Dark Gray"));
     m_sceneBackgroundTextureBox->addItem(
-    {renderPropertyColorPixmap(size, Qt::lightGray, pen, dpr)}, tr("Light gray"));
+    {renderPropertyColorPixmap(size, Qt::lightGray, pen, dpr)}, tr("Light Gray"));
     m_sceneBackgroundTextureBox->addItem(
     {renderPropertyColorPixmap(size, Qt::white, pen, dpr)},tr("White"));
 }
