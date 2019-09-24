@@ -50,6 +50,6 @@ import QtWebEngine 1.8
 import QtWebSockets 1.1
 
 // import QtWayland.Compositor 1.3 -- disabled by default
-// import QtWinExtras 1.0 -- win spesifi
+// import QtWinExtras 1.0 -- win spesific
 
 Item {}

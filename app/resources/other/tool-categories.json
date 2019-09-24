@@ -1,20 +1,22 @@
 {
     "categories" : {
-        "QtQml2"            : "Qml",
-        "QtQuick2"          : "Quick",
-        "QtQuick.Controls2" : "Quick - Controls 2",
-        "QtQuick.Controls1" : "Quick - Controls 1",
-        "QtQuick.Layouts1"  : "Quick - Layouts",
-        "QtQuick.Extras1"   : "Quick - Extras",
-        "QtQuick.Dialogs1"  : "Quick - Dialogs",
-        "Qt.labs.platform1" : "Labs - Platform",
-        "QtMultimedia5"     : "Multimedia",
-        "QtWebView1"        : "WebView",
-        "QtWebSockets1"     : "WebSockets",
-        "QtCharts2"         : "Charts",
-        "QtBluetooth5"      : "Bluetooth",
-        "QtPositioning5"    : "Positioning",
-        "QtLocation5"       : "Location"
+        "QtQml2"              : "Qml",
+        "QtQuick2"            : "Quick",
+        "QtQuick.Controls2"   : "Quick - Controls 2",
+        "QtQuick.Controls1"   : "Quick - Controls 1",
+        "QtQuick.Layouts1"    : "Quick - Layouts",
+        "QtQuick.Extras1"     : "Quick - Extras",
+        "QtQuick.Dialogs1"    : "Quick - Dialogs",
+        "Qt.labs.platform1"   : "Labs - Platform",
+        "QtMultimedia5"       : "Multimedia",
+        "QtWebView1"          : "Web View",
+        "QtWebSockets1"       : "Web Sockets",
+        "QtCharts2"           : "Charts",
+        "QtBluetooth5"        : "Bluetooth",
+        "QtPositioning5"      : "Positioning",
+        "QtLocation5"         : "Location",
+        "QtSensors5"          : "Sensors",
+        "QtGraphicalEffects1" : "Graphical Effects"
     },
     "order" : [
         "Qml",
@@ -25,12 +27,14 @@
         "Quick - Layouts",
         "Quick - Dialogs",
         "Labs - Platform",
-        "Multimedia",
+        "Graphical Effects",
         "Charts",
-        "WebView",
-        "WebSockets",
+        "Web View",
+        "Web Sockets",
         "Bluetooth",
+        "Multimedia",
         "Positioning",
-        "Location"
+        "Location",
+        "Sensors"
     ]
 }

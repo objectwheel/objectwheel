@@ -134,7 +134,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto inspectorTitlePinButton = new QToolButton;
     inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     inspectorTitlePinButton->setCursor(Qt::PointingHandCursor);
-    inspectorTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    inspectorTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
     connect(inspectorTitlePinButton, &QToolButton::clicked,
             this, [] {
         inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
@@ -163,7 +163,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto propertiesTitlePinButton = new QToolButton;
     propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     propertiesTitlePinButton->setCursor(Qt::PointingHandCursor);
-    propertiesTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    propertiesTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
     connect(propertiesTitlePinButton, &QToolButton::clicked,
             this, [] {
         propertiesDockWidget->setFloating(!propertiesDockWidget->isFloating());
@@ -192,7 +192,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto assetsTitlePinButton = new QToolButton;
     assetsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     assetsTitlePinButton->setCursor(Qt::PointingHandCursor);
-    assetsTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    assetsTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
     connect(assetsTitlePinButton, &QToolButton::clicked,
             this, [] {
         assetsDockWidget->setFloating(!assetsDockWidget->isFloating());
@@ -223,7 +223,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto toolboxTitlePinButton = new QToolButton;
     toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     toolboxTitlePinButton->setCursor(Qt::PointingHandCursor);
-    toolboxTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    toolboxTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
     connect(toolboxTitlePinButton, &QToolButton::clicked,
             this, [] {
         toolboxDockWidget->setFloating(!toolboxDockWidget->isFloating());
@@ -252,7 +252,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     auto formsTitlePinButton = new QToolButton;
     formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
     formsTitlePinButton->setCursor(Qt::PointingHandCursor);
-    formsTitlePinButton->setIcon(QIcon(":/images/unpin.png"));
+    formsTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
     connect(formsTitlePinButton, &QToolButton::clicked,
             this, [] {
         formsDockWidget->setFloating(!formsDockWidget->isFloating());
@@ -281,8 +281,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             m_runPane->segmentedBar()->setEnabled(false);
     });
 
-//  FIXME  connect(m_centralWidget->designerView(), &DesignerView::hideDockWidgetTitleBars,
-//            this, &MainWindow::setDockWidgetTitleBarsHidden);
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &MainWindow::onModeChange);
     connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
@@ -410,45 +408,6 @@ void MainWindow::showRightPanes(bool show)
     if (dockWidgetArea(toolboxDockWidget) == Qt::RightDockWidgetArea) {
         toolboxDockWidget->setVisible(show);
         toolboxDockWidgetVisible = show;
-    }
-}
-
-void MainWindow::setDockWidgetTitleBarsHidden(bool yes)
-{
-    static auto w1 = new QWidget(this);
-    static auto w2 = new QWidget(this);
-    static auto w3 = new QWidget(this);
-    static auto w4 = new QWidget(this);
-    static auto w5 = new QWidget(this);
-    static bool set = false;
-
-    if (!set) {
-        set = true;
-        w1->setMinimumSize(0, 0);
-        w2->setMinimumSize(0, 0);
-        w3->setMinimumSize(0, 0);
-        w4->setMinimumSize(0, 0);
-        w5->setMinimumSize(0, 0);
-
-        w1->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-        w2->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-        w3->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-        w4->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-        w5->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
-    }
-
-    if (yes) {
-        formsDockWidget->setTitleBarWidget(w1);
-        toolboxDockWidget->setTitleBarWidget(w2);
-        inspectorDockWidget->setTitleBarWidget(w3);
-        propertiesDockWidget->setTitleBarWidget(w4);
-        assetsDockWidget->setTitleBarWidget(w5);
-    } else {
-        formsDockWidget->setTitleBarWidget(formsTitleBar);
-        toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
-        inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
-        propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
-        assetsDockWidget->setTitleBarWidget(assetsTitleBar);
     }
 }
 
@@ -589,5 +548,5 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 QSize MainWindow::sizeHint() const
 {
-    return {1200, 700};
+    return {1220, 720};
 }

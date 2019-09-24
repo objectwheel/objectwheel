@@ -25,7 +25,6 @@
         <file>images/landscape.png</file>
         <file>images/portrait.png</file>
         <file>images/form.png</file>
-        <file>images/unpin.png</file>
         <file>images/delete.png</file>
         <file>images/newfile.png</file>
         <file>images/error.png</file>
@@ -179,5 +178,6 @@
         <file>images/designer/left.svg</file>
         <file>images/designer/right.svg</file>
         <file>images/designer/pin.svg</file>
+        <file>images/detach.svg</file>
     </qresource>
 </RCC>
