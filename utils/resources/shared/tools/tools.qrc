@@ -338,5 +338,11 @@
         <file>ThresholdMask/t/main.qml</file>
         <file>ZoomBlur/m/control.meta</file>
         <file>ZoomBlur/t/main.qml</file>
+        <file>DayOfWeekRow/m/control.meta</file>
+        <file>DayOfWeekRow/t/main.qml</file>
+        <file>MonthGrid/m/control.meta</file>
+        <file>MonthGrid/t/main.qml</file>
+        <file>WeekNumberColumn/m/control.meta</file>
+        <file>WeekNumberColumn/t/main.qml</file>
     </qresource>
 </RCC>
