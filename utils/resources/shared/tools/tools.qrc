@@ -344,5 +344,13 @@
         <file>MonthGrid/t/main.qml</file>
         <file>WeekNumberColumn/m/control.meta</file>
         <file>WeekNumberColumn/t/main.qml</file>
+        <file>Calendar/m/control.meta</file>
+        <file>Calendar/t/main.qml</file>
+        <file>ScrollView/m/control.meta</file>
+        <file>ScrollView/t/main.qml</file>
+        <file>SplitView/m/control.meta</file>
+        <file>SplitView/t/main.qml</file>
+        <file>StackView/m/control.meta</file>
+        <file>StackView/t/main.qml</file>
     </qresource>
 </RCC>

@@ -183,7 +183,9 @@
         <file>images/tools/Text.svg</file>
         <file>images/tools/TextEdit.svg</file>
         <file>images/tools/TextInput.svg</file>
+        <file>images/tools/TreeView.svg</file>
         <file>images/tools/BusyIndicator.svg</file>
+        <file>images/tools/BusyIndicator2.svg</file>
         <file>images/tools/Button.svg</file>
         <file>images/tools/TabButton.svg</file>
         <file>images/tools/ToolButton.svg</file>
@@ -193,6 +195,9 @@
         <file>images/tools/CheckBox.svg</file>
         <file>images/tools/ComboBox.svg</file>
         <file>images/tools/SpinBox.svg</file>
+        <file>images/tools/Calendar.svg</file>
+        <file>images/tools/StackView.svg</file>
+        <file>images/tools/SplitView.svg</file>
 
         <file>images/tools/CircularGauge.svg</file>
         <file>images/tools/DelayButton.svg</file>
@@ -222,26 +227,20 @@
         <file>images/tools/SwipeView.svg</file>
         <file>images/tools/Tumbler2.svg</file>
         <file>images/tools/Picture.svg</file>
-
         <file>images/tools/ColorDialog.svg</file>
         <file>images/tools/FileDialog.svg</file>
         <file>images/tools/Dialog2.svg</file>
         <file>images/tools/MessageDialog.svg</file>
         <file>images/tools/FontDialog.svg</file>
-
         <file>images/tools/GridLayout.svg</file>
         <file>images/tools/StackLayout.svg</file>
         <file>images/tools/RowLayout.svg</file>
         <file>images/tools/ColumnLayout.svg</file>
-
         <file>images/tools/ChartView.svg</file>
         <file>images/tools/PolarChartView.svg</file>
-
         <file>images/tools/WebView.svg</file>
-
         <file>images/tools/WebSocket.svg</file>
         <file>images/tools/WebSocketServer.svg</file>
-
         <file>images/tools/Audio.svg</file>
         <file>images/tools/Video.svg</file>
         <file>images/tools/VideoOutput.svg</file>
@@ -250,11 +249,8 @@
         <file>images/tools/Radio.svg</file>
         <file>images/tools/SoundEffect.svg</file>
         <file>images/tools/Torch.svg</file>
-
         <file>images/tools/PositionSource.svg</file>
-
         <file>images/tools/Map.svg</file>
-
         <file>images/tools/DayOfWeekRow.svg</file>
         <file>images/tools/WeekNumberColumn.svg</file>
         <file>images/tools/MonthGrid.svg</file>
