@@ -66,13 +66,47 @@
     "QtQuick.Controls2.Tumbler"           : ":/images/tools/Tumbler.svg",
     "QtQuick.Controls2.SwipeView"         : ":/images/tools/SwipeView.svg",
 
-    "QtQuick.Extras1.CircularGauge"       : ":/images/tools/CircularGauge.png",
-    "QtQuick.Extras1.DelayButton"         : ":/images/tools/DelayButton.png",
-    "QtQuick.Extras1.Dial"                : ":/images/tools/Dial.png",
-    "QtQuick.Extras1.Gauge"               : ":/images/tools/Gauge.png",
-    "QtQuick.Extras1.StatusIndicator"     : ":/images/tools/StatusIndicator.png",
+    "QtQuick.Extras1.CircularGauge"       : ":/images/tools/CircularGauge.svg",
+    "QtQuick.Extras1.DelayButton"         : ":/images/tools/DelayButton.svg",
+    "QtQuick.Extras1.Dial"                : ":/images/tools/Dial2.svg",
+    "QtQuick.Extras1.Gauge"               : ":/images/tools/Gauge.svg",
+    "QtQuick.Extras1.StatusIndicator"     : ":/images/tools/StatusIndicator.svg",
     "QtQuick.Extras1.ToggleButton"        : ":/images/tools/ToggleButton.svg",
-    "QtQuick.Extras1.Tumbler"             : ":/images/tools/Tumbler.png",
+    "QtQuick.Extras1.Picture"             : ":/images/tools/Picture.svg",
+    "QtQuick.Extras1.PieMenu"             : ":/images/tools/PieMenu.svg",
+    "QtQuick.Extras1.Tumbler"             : ":/images/tools/Tumbler2.svg",
+
+    "QtQuick.Layouts1.RowLayout"          : ":/images/tools/RowLayout.svg",
+    "QtQuick.Layouts1.ColumnLayout"       : ":/images/tools/ColumnLayout.svg",
+    "QtQuick.Layouts1.StackLayout"        : ":/images/tools/StackLayout.svg",
+    "QtQuick.Layouts1.GridLayout"         : ":/images/tools/GridLayout.svg",
+
+    "QtQuick.Dialogs1.FileDialog"         : ":/images/tools/FileDialog.svg",
+    "QtQuick.Dialogs1.ColorDialog"        : ":/images/tools/ColorDialog.svg",
+    "QtQuick.Dialogs1.Dialog"             : ":/images/tools/Dialog2.svg",
+    "QtQuick.Dialogs1.FontDialog"         : ":/images/tools/FontDialog.svg",
+    "QtQuick.Dialogs1.MessageDialog"      : ":/images/tools/MessageDialog.svg",
+
+    "QtCharts2.ChartView"                 : ":/images/tools/ChartView.svg",
+    "QtCharts2.PolarChartView"            : ":/images/tools/PolarChartView.svg",
+
+    "QtWebView1.WebView"                  : ":/images/tools/WebView.svg",
+
+    "QtWebSockets1.WebSocket"             : ":/images/tools/WebSocket.svg",
+    "QtWebSockets1.WebSocketServer"       : ":/images/tools/WebSocketServer.svg",
+
+    "QtMultimedia5.Audio"                 : ":/images/tools/Audio.svg",
+    "QtMultimedia5.Video"           : ":/images/tools/Video.svg",
+    "QtMultimedia5.VideoOutput"           : ":/images/tools/VideoOutput.svg",
+    "QtMultimedia5.MediaPlayer"           : ":/images/tools/MediaPlayer.svg",
+    "QtMultimedia5.Camera"                : ":/images/tools/Camera.svg",
+    "QtMultimedia5.Radio"                 : ":/images/tools/Radio.svg",
+    "QtMultimedia5.SoundEffect"           : ":/images/tools/SoundEffect.svg",
+    "QtMultimedia5.Torch"                 : ":/images/tools/Torch.svg",
+
+    "QtLocation5.Map"                     : ":/images/tools/Map.svg",
+
+    "QtPositioning5.PositionSource"       : ":/images/tools/PositionSource.svg",
 
     "Qt.labs.calendar1.DayOfWeekRow"      : ":/images/tools/DayOfWeekRow.svg",
     "Qt.labs.calendar1.WeekNumberColumn"  : ":/images/tools/WeekNumberColumn.svg",

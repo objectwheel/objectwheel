@@ -193,16 +193,17 @@
         <file>images/tools/CheckBox.svg</file>
         <file>images/tools/ComboBox.svg</file>
         <file>images/tools/SpinBox.svg</file>
-        <file>images/tools/CircularGauge.png</file>
+
+        <file>images/tools/CircularGauge.svg</file>
         <file>images/tools/DelayButton.svg</file>
         <file>images/tools/DelayButton.png</file>
         <file>images/tools/Dial.svg</file>
-        <file>images/tools/Dial.png</file>
+        <file>images/tools/Dial2.svg</file>
         <file>images/tools/DialogButtonBox.svg</file>
         <file>images/tools/Frame.svg</file>
         <file>images/tools/Popup.svg</file>
         <file>images/tools/Dialog.svg</file>
-        <file>images/tools/Gauge.png</file>
+        <file>images/tools/Gauge.svg</file>
         <file>images/tools/GroupBox.svg</file>
         <file>images/tools/Label.svg</file>
         <file>images/tools/PageIndicator.svg</file>
@@ -211,14 +212,49 @@
         <file>images/tools/RangeSlider.svg</file>
         <file>images/tools/RoundButton.svg</file>
         <file>images/tools/Slider.svg</file>
-        <file>images/tools/StatusIndicator.png</file>
+        <file>images/tools/PieMenu.svg</file>
+        <file>images/tools/StatusIndicator.svg</file>
         <file>images/tools/Switch.svg</file>
         <file>images/tools/TextArea.svg</file>
         <file>images/tools/TextField.svg</file>
         <file>images/tools/ToggleButton.svg</file>
         <file>images/tools/Tumbler.svg</file>
         <file>images/tools/SwipeView.svg</file>
-        <file>images/tools/Tumbler2.png</file>
+        <file>images/tools/Tumbler2.svg</file>
+        <file>images/tools/Picture.svg</file>
+
+        <file>images/tools/ColorDialog.svg</file>
+        <file>images/tools/FileDialog.svg</file>
+        <file>images/tools/Dialog2.svg</file>
+        <file>images/tools/MessageDialog.svg</file>
+        <file>images/tools/FontDialog.svg</file>
+
+        <file>images/tools/GridLayout.svg</file>
+        <file>images/tools/StackLayout.svg</file>
+        <file>images/tools/RowLayout.svg</file>
+        <file>images/tools/ColumnLayout.svg</file>
+
+        <file>images/tools/ChartView.svg</file>
+        <file>images/tools/PolarChartView.svg</file>
+
+        <file>images/tools/WebView.svg</file>
+
+        <file>images/tools/WebSocket.svg</file>
+        <file>images/tools/WebSocketServer.svg</file>
+
+        <file>images/tools/Audio.svg</file>
+        <file>images/tools/Video.svg</file>
+        <file>images/tools/VideoOutput.svg</file>
+        <file>images/tools/MediaPlayer.svg</file>
+        <file>images/tools/Camera.svg</file>
+        <file>images/tools/Radio.svg</file>
+        <file>images/tools/SoundEffect.svg</file>
+        <file>images/tools/Torch.svg</file>
+
+        <file>images/tools/PositionSource.svg</file>
+
+        <file>images/tools/Map.svg</file>
+
         <file>images/tools/DayOfWeekRow.svg</file>
         <file>images/tools/WeekNumberColumn.svg</file>
         <file>images/tools/MonthGrid.svg</file>
