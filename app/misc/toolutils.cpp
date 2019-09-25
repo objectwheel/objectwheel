@@ -81,7 +81,7 @@ QString toolIconPath(const QString& controlDir)
     const QString& module = ParserUtils::module(controlDir);
     const QString& iconPath = icons.contains(module)
             ? icons.value(module).toString()
-            : QStringLiteral(":/images/item.svg");
+            : QStringLiteral(":/images/tools/Unknown.svg");
     return iconPath;
 }
 

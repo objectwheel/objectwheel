@@ -10,6 +10,7 @@
 #include <QStyleOption>
 #include <QPalette>
 #include <QFileInfo>
+#include <QWindow>
 
 QImage PaintUtils::renderFilledImage(const QSizeF& size, const QColor& fillColor, qreal dpr)
 {
@@ -24,14 +25,18 @@ QImage PaintUtils::renderTransparentImage(const QSizeF& size, qreal dpr)
     return renderFilledImage(size, Qt::transparent, dpr);
 }
 
-QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, qreal dpr)
+QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, void* widget)
 {
-    QImage dest = renderTransparentImage(size, dpr);
-    QRectF destRect{{}, size};
+    QWindow* window = UtilityFunctions::window((QWidget*)widget);
+    const qreal dpr = window ? window->devicePixelRatio() : qApp->devicePixelRatio();
+    const QSize iconSize(16, 16);
 
-    QImage source(imagePath);
+    QImage dest = renderTransparentImage(size, dpr);
+    QImage source(QIcon(imagePath).pixmap(window, iconSize).toImage());
     source.setDevicePixelRatio(dpr);
-    QRectF sourceRect{{}, QSizeF{24, 24}};
+
+    QRectF destRect({}, size);
+    QRectF sourceRect({}, iconSize);
     sourceRect.moveCenter(destRect.center());
 
     QPainter p(&dest);

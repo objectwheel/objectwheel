@@ -74,38 +74,6 @@
         <file>images/modes/split.svg</file>
         <file>images/stop.svg</file>
         <file>images/run.svg</file>
-        <file>images/tools/AnimatedImage.png</file>
-        <file>images/tools/BusyIndicator.png</file>
-        <file>images/tools/Button.png</file>
-        <file>images/tools/CheckBox.png</file>
-        <file>images/tools/CircularGauge.png</file>
-        <file>images/tools/ComboBox.png</file>
-        <file>images/tools/DelayButton.png</file>
-        <file>images/tools/DelayButton2.png</file>
-        <file>images/tools/Dial.png</file>
-        <file>images/tools/Dial2.png</file>
-        <file>images/tools/Frame.png</file>
-        <file>images/tools/Gauge.png</file>
-        <file>images/tools/GroupBox.png</file>
-        <file>images/tools/Image.png</file>
-        <file>images/tools/Label.png</file>
-        <file>images/tools/PageIndicator.png</file>
-        <file>images/tools/ProgressBar.png</file>
-        <file>images/tools/RadioButton.png</file>
-        <file>images/tools/RangeSlider.png</file>
-        <file>images/tools/Rectangle.png</file>
-        <file>images/tools/RoundButton.png</file>
-        <file>images/tools/Slider.png</file>
-        <file>images/tools/SpinBox.png</file>
-        <file>images/tools/StatusIndicator.png</file>
-        <file>images/tools/Switch.png</file>
-        <file>images/tools/TextArea.png</file>
-        <file>images/tools/TextField.png</file>
-        <file>images/tools/Timer.png</file>
-        <file>images/tools/ToggleButton.png</file>
-        <file>images/tools/Tumbler.png</file>
-        <file>images/tools/Tumbler2.png</file>
-        <file>images/item.svg</file>
         <file>images/bottom.svg</file>
         <file>images/top.svg</file>
         <file>images/right.svg</file>
@@ -179,5 +147,80 @@
         <file>images/designer/right.svg</file>
         <file>images/designer/pin.svg</file>
         <file>images/detach.svg</file>
+        <file>images/tools/Unknown.svg</file>
+        <file>images/tools/Binding.svg</file>
+        <file>images/tools/Connections.svg</file>
+        <file>images/tools/QtObject.svg</file>
+        <file>images/tools/Timer.svg</file>
+        <file>images/tools/Component.svg</file>
+        <file>images/tools/AnimatedImage.svg</file>
+        <file>images/tools/AnimatedSprite.svg</file>
+        <file>images/tools/BorderImage.svg</file>
+        <file>images/tools/Canvas.svg</file>
+        <file>images/tools/Row.svg</file>
+        <file>images/tools/Column.svg</file>
+        <file>images/tools/DropArea.svg</file>
+        <file>images/tools/Flipable.svg</file>
+        <file>images/tools/Flickable.svg</file>
+        <file>images/tools/Flow.svg</file>
+        <file>images/tools/FocusScope.svg</file>
+        <file>images/tools/FontLoader.svg</file>
+        <file>images/tools/Grid.svg</file>
+        <file>images/tools/GridView.svg</file>
+        <file>images/tools/Image.svg</file>
+        <file>images/tools/Item.svg</file>
+        <file>images/tools/ListView.svg</file>
+        <file>images/tools/Loader.svg</file>
+        <file>images/tools/MouseArea.svg</file>
+        <file>images/tools/MultiPointTouchArea.svg</file>
+        <file>images/tools/PathView.svg</file>
+        <file>images/tools/PinchArea.svg</file>
+        <file>images/tools/Rectangle.svg</file>
+        <file>images/tools/Repeater.svg</file>
+        <file>images/tools/ShaderEffect.svg</file>
+        <file>images/tools/ShaderEffectSource.svg</file>
+        <file>images/tools/TableView.svg</file>
+        <file>images/tools/Text.svg</file>
+        <file>images/tools/TextEdit.svg</file>
+        <file>images/tools/TextInput.svg</file>
+        <file>images/tools/BusyIndicator.svg</file>
+        <file>images/tools/Button.svg</file>
+        <file>images/tools/TabButton.svg</file>
+        <file>images/tools/ToolButton.svg</file>
+        <file>images/tools/ToolBar.svg</file>
+        <file>images/tools/TabBar.svg</file>
+        <file>images/tools/ToolSeparator.svg</file>
+        <file>images/tools/CheckBox.svg</file>
+        <file>images/tools/ComboBox.svg</file>
+        <file>images/tools/SpinBox.svg</file>
+        <file>images/tools/CircularGauge.png</file>
+        <file>images/tools/DelayButton.svg</file>
+        <file>images/tools/DelayButton.png</file>
+        <file>images/tools/Dial.svg</file>
+        <file>images/tools/Dial.png</file>
+        <file>images/tools/DialogButtonBox.svg</file>
+        <file>images/tools/Frame.svg</file>
+        <file>images/tools/Popup.svg</file>
+        <file>images/tools/Dialog.svg</file>
+        <file>images/tools/Gauge.png</file>
+        <file>images/tools/GroupBox.svg</file>
+        <file>images/tools/Label.svg</file>
+        <file>images/tools/PageIndicator.svg</file>
+        <file>images/tools/ProgressBar.svg</file>
+        <file>images/tools/RadioButton.svg</file>
+        <file>images/tools/RangeSlider.svg</file>
+        <file>images/tools/RoundButton.svg</file>
+        <file>images/tools/Slider.svg</file>
+        <file>images/tools/StatusIndicator.png</file>
+        <file>images/tools/Switch.svg</file>
+        <file>images/tools/TextArea.svg</file>
+        <file>images/tools/TextField.svg</file>
+        <file>images/tools/ToggleButton.svg</file>
+        <file>images/tools/Tumbler.svg</file>
+        <file>images/tools/SwipeView.svg</file>
+        <file>images/tools/Tumbler2.png</file>
+        <file>images/tools/DayOfWeekRow.svg</file>
+        <file>images/tools/WeekNumberColumn.svg</file>
+        <file>images/tools/MonthGrid.svg</file>
     </qresource>
 </RCC>

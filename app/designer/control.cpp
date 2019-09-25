@@ -180,6 +180,7 @@ void Control::setRenderInfo(const RenderInfo& info)
     if (m_uid != info.uid)
         return;
 
+    enum { NONGUI_ICON_SIZE = 32 };
     const SceneSettings* settings = DesignerSettings::sceneSettings();
     const QMarginsF previousMargins = m_renderInfo.margins;
     const bool previouslyOverlayPopup = overlayPopup();
@@ -232,9 +233,11 @@ void Control::setRenderInfo(const RenderInfo& info)
         setGeometrySyncEnabled(false);
         m_geometrySyncKey.clear();
 
-        if (size() != QSizeF(40, 40)) {
-            if (!hasErrors() || size().isEmpty())
-                ControlPropertyManager::setSize(this, QSizeF(40, 40), ControlPropertyManager::NoOption);
+        if (size() != QSizeF(NONGUI_ICON_SIZE, NONGUI_ICON_SIZE)) {
+            if (!hasErrors() || size().isEmpty()) {
+                ControlPropertyManager::setSize(this, QSizeF(NONGUI_ICON_SIZE, NONGUI_ICON_SIZE),
+                                                ControlPropertyManager::NoOption);
+            }
         }
 
         if (hasErrors() && size().isValid()) {
@@ -246,7 +249,7 @@ void Control::setRenderInfo(const RenderInfo& info)
 
         if (m_renderInfo.image.isNull() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderNonGuiControlImage(
-                        ToolUtils::toolIconPath(dir()), size(), devicePixelRatio());
+                        ToolUtils::toolIconPath(dir()), size(), scene()->view());
         }
     }
 
