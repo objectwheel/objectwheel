@@ -274,5 +274,27 @@
         <file>images/tools/ProximitySensor.svg</file>
         <file>images/tools/PressureSensor.svg</file>
         <file>images/tools/HumiditySensor.svg</file>
+        <file>images/tools/DirectionalBlur.svg</file>
+        <file>images/tools/MaskedBlur.svg</file>
+        <file>images/tools/RadialBlur.svg</file>
+        <file>images/tools/RecursiveBlur.svg</file>
+        <file>images/tools/FastBlur.svg</file>
+        <file>images/tools/ZoomBlur.svg</file>
+        <file>images/tools/GaussianBlur.svg</file>
+        <file>images/tools/Colorize.svg</file>
+        <file>images/tools/ColorOverlay.svg</file>
+        <file>images/tools/HueSaturation.svg</file>
+        <file>images/tools/Glow.svg</file>
+        <file>images/tools/LevelAdjust.svg</file>
+        <file>images/tools/OpacityMask.svg</file>
+        <file>images/tools/Displace.svg</file>
+        <file>images/tools/GammaAdjust.svg</file>
+        <file>images/tools/Desaturate.svg</file>
+        <file>images/tools/BrightnessContrast.svg</file>
+        <file>images/tools/Blend.svg</file>
+        <file>images/tools/RectangularGlow.svg</file>
+        <file>images/tools/InnerShadow.svg</file>
+        <file>images/tools/DropShadow.svg</file>
+        <file>images/tools/ThresholdMask.svg</file>
     </qresource>
 </RCC>
