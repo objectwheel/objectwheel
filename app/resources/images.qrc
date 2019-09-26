@@ -198,10 +198,10 @@
         <file>images/tools/Calendar.svg</file>
         <file>images/tools/StackView.svg</file>
         <file>images/tools/SplitView.svg</file>
-
+        <file>images/tools/BluetoothSocket.svg</file>
+        <file>images/tools/BluetoothDiscoveryModel.svg</file>
         <file>images/tools/CircularGauge.svg</file>
         <file>images/tools/DelayButton.svg</file>
-        <file>images/tools/DelayButton.png</file>
         <file>images/tools/Dial.svg</file>
         <file>images/tools/Dial2.svg</file>
         <file>images/tools/DialogButtonBox.svg</file>
@@ -254,5 +254,25 @@
         <file>images/tools/DayOfWeekRow.svg</file>
         <file>images/tools/WeekNumberColumn.svg</file>
         <file>images/tools/MonthGrid.svg</file>
+        <file>images/tools/LidSensor.svg</file>
+        <file>images/tools/RotationSensor.svg</file>
+        <file>images/tools/SensorGesture.svg</file>
+        <file>images/tools/IRProximitySensor.svg</file>
+        <file>images/tools/HolsterSensor.svg</file>
+        <file>images/tools/OrientationSensor.svg</file>
+        <file>images/tools/TiltSensor.svg</file>
+        <file>images/tools/Accelerometer.svg</file>
+        <file>images/tools/Altimeter.svg</file>
+        <file>images/tools/AmbientLightSensor.svg</file>
+        <file>images/tools/AmbientTemperatureSensor.svg</file>
+        <file>images/tools/Gyroscope.svg</file>
+        <file>images/tools/LightSensor.svg</file>
+        <file>images/tools/DistanceSensor.svg</file>
+        <file>images/tools/Magnetometer.svg</file>
+        <file>images/tools/Compass.svg</file>
+        <file>images/tools/TapSensor.svg</file>
+        <file>images/tools/ProximitySensor.svg</file>
+        <file>images/tools/PressureSensor.svg</file>
+        <file>images/tools/HumiditySensor.svg</file>
     </qresource>
 </RCC>

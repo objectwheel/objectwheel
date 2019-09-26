@@ -4,7 +4,6 @@
     "QtQml2.QtObject"                     : ":/images/tools/QtObject.svg",
     "QtQml2.Timer"                        : ":/images/tools/Timer.svg",
     "QtQml2.Component"                    : ":/images/tools/Component.svg",
-
     "QtQuick2.AnimatedImage"              : ":/images/tools/AnimatedImage.svg",
     "QtQuick2.AnimatedSprite"             : ":/images/tools/AnimatedSprite.svg",
     "QtQuick2.BorderImage"                : ":/images/tools/BorderImage.svg",
@@ -35,7 +34,6 @@
     "QtQuick2.Text"                       : ":/images/tools/Text.svg",
     "QtQuick2.TextEdit"                   : ":/images/tools/TextEdit.svg",
     "QtQuick2.TextInput"                  : ":/images/tools/TextInput.svg",
-
     "QtQuick.Controls2.BusyIndicator"     : ":/images/tools/BusyIndicator.svg",
     "QtQuick.Controls2.Button"            : ":/images/tools/Button.svg",
     "QtQuick.Controls2.TabButton"         : ":/images/tools/TabButton.svg",
@@ -65,7 +63,6 @@
     "QtQuick.Controls2.TextField"         : ":/images/tools/TextField.svg",
     "QtQuick.Controls2.Tumbler"           : ":/images/tools/Tumbler.svg",
     "QtQuick.Controls2.SwipeView"         : ":/images/tools/SwipeView.svg",
-
     "QtQuick.Controls1.BusyIndicator"     : ":/images/tools/BusyIndicator2.svg",
     "QtQuick.Controls1.Button"            : ":/images/tools/Button.svg",
     "QtQuick.Controls1.Tab"               : ":/images/tools/TabButton.svg",
@@ -101,7 +98,8 @@
     "QtQuick.Controls1.ScrollView"        : ":/images/tools/Flickable.svg",
     "QtQuick.Controls1.SplitView"         : ":/images/tools/SplitView.svg",
     "QtQuick.Controls1.TableView"         : ":/images/tools/TableView.svg",
-
+    "QtBluetooth5.BluetoothSocket"        : ":/images/tools/BluetoothSocket.svg",
+    "QtBluetooth5.BluetoothDiscoveryModel": ":/images/tools/BluetoothDiscoveryModel.svg",
     "QtQuick.Extras1.CircularGauge"       : ":/images/tools/CircularGauge.svg",
     "QtQuick.Extras1.DelayButton"         : ":/images/tools/DelayButton.svg",
     "QtQuick.Extras1.Dial"                : ":/images/tools/Dial2.svg",
@@ -137,5 +135,25 @@
     "QtPositioning5.PositionSource"       : ":/images/tools/PositionSource.svg",
     "Qt.labs.calendar1.DayOfWeekRow"      : ":/images/tools/DayOfWeekRow.svg",
     "Qt.labs.calendar1.WeekNumberColumn"  : ":/images/tools/WeekNumberColumn.svg",
-    "Qt.labs.calendar1.MonthGrid"         : ":/images/tools/MonthGrid.svg"
+    "Qt.labs.calendar1.MonthGrid"         : ":/images/tools/MonthGrid.svg",
+    "QtSensors5.LidSensor"                : ":/images/tools/LidSensor.svg",
+    "QtSensors5.RotationSensor"           : ":/images/tools/RotationSensor.svg",
+    "QtSensors5.SensorGesture"            : ":/images/tools/SensorGesture.svg",
+    "QtSensors5.IRProximitySensor"        : ":/images/tools/IRProximitySensor.svg",
+    "QtSensors5.HolsterSensor"            : ":/images/tools/HolsterSensor.svg",
+    "QtSensors5.OrientationSensor"        : ":/images/tools/OrientationSensor.svg",
+    "QtSensors5.TiltSensor"               : ":/images/tools/TiltSensor.svg",
+    "QtSensors5.Accelerometer"            : ":/images/tools/Accelerometer.svg",
+    "QtSensors5.Altimeter"                : ":/images/tools/Altimeter.svg",
+    "QtSensors5.AmbientLightSensor"       : ":/images/tools/AmbientLightSensor.svg",
+    "QtSensors5.AmbientTemperatureSensor" : ":/images/tools/AmbientTemperatureSensor.svg",
+    "QtSensors5.Gyroscope"                : ":/images/tools/Gyroscope.svg",
+    "QtSensors5.LightSensor"              : ":/images/tools/LightSensor.svg",
+    "QtSensors5.DistanceSensor"           : ":/images/tools/DistanceSensor.svg",
+    "QtSensors5.Magnetometer"             : ":/images/tools/Magnetometer.svg",
+    "QtSensors5.Compass"                  : ":/images/tools/Compass.svg",
+    "QtSensors5.TapSensor"                : ":/images/tools/TapSensor.svg",
+    "QtSensors5.ProximitySensor"          : ":/images/tools/ProximitySensor.svg",
+    "QtSensors5.HumiditySensor"           : ":/images/tools/HumiditySensor.svg",
+    "QtSensors5.PressureSensor"           : ":/images/tools/PressureSensor.svg"
 }
