@@ -296,5 +296,11 @@
         <file>images/tools/InnerShadow.svg</file>
         <file>images/tools/DropShadow.svg</file>
         <file>images/tools/ThresholdMask.svg</file>
+        <file>images/tools/LinearGradient.svg</file>
+        <file>images/tools/RadialGradient.svg</file>
+        <file>images/tools/ConicalGradient.svg</file>
+        <file>images/tools/SystemTrayIcon.svg</file>
+        <file>images/tools/FileDialog2.svg</file>
+        <file>images/tools/FolderDialog.svg</file>
     </qresource>
 </RCC>

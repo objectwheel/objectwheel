@@ -156,7 +156,9 @@
     "QtSensors5.ProximitySensor"             : ":/images/tools/ProximitySensor.svg",
     "QtSensors5.HumiditySensor"              : ":/images/tools/HumiditySensor.svg",
     "QtSensors5.PressureSensor"              : ":/images/tools/PressureSensor.svg",
-
+    "QtGraphicalEffects1.ConicalGradient"    : ":/images/tools/ConicalGradient.svg",
+    "QtGraphicalEffects1.RadialGradient"     : ":/images/tools/RadialGradient.svg",
+    "QtGraphicalEffects1.LinearGradient"     : ":/images/tools/LinearGradient.svg",
     "QtGraphicalEffects1.ThresholdMask"      : ":/images/tools/ThresholdMask.svg",
     "QtGraphicalEffects1.DropShadow"         : ":/images/tools/DropShadow.svg",
     "QtGraphicalEffects1.InnerShadow"        : ":/images/tools/InnerShadow.svg",
@@ -178,5 +180,11 @@
     "QtGraphicalEffects1.RecursiveBlur"      : ":/images/tools/RecursiveBlur.svg",
     "QtGraphicalEffects1.FastBlur"           : ":/images/tools/FastBlur.svg",
     "QtGraphicalEffects1.GaussianBlur"       : ":/images/tools/GaussianBlur.svg",
-    "QtGraphicalEffects1.ZoomBlur"           : ":/images/tools/ZoomBlur.svg"
+    "QtGraphicalEffects1.ZoomBlur"           : ":/images/tools/ZoomBlur.svg",
+    "Qt.labs.platform1.FileDialog"           : ":/images/tools/FileDialog2.svg",
+    "Qt.labs.platform1.FolderDialog"         : ":/images/tools/FolderDialog.svg",
+    "Qt.labs.platform1.SystemTrayIcon"       : ":/images/tools/SystemTrayIcon.svg",
+    "Qt.labs.platform1.FontDialog"           : ":/images/tools/FontDialog.svg",
+    "Qt.labs.platform1.MessageDialog"        : ":/images/tools/MessageDialog.svg",
+    "Qt.labs.platform1.ColorDialog"          : ":/images/tools/ColorDialog.svg"
 }
