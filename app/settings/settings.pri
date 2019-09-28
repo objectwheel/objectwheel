@@ -17,6 +17,8 @@ HEADERS += $$PWD/settingspage.h \
            $$PWD/fontcolorssettingswidget.h \
            $$PWD/fontcolorssettings.h \
            $$PWD/groupsettings.h \
+           $$PWD/toolboxsettings.h \
+           $$PWD/toolboxsettingswidget.h \
            $$PWD/behaviorsettings.h \
            $$PWD/behaviorsettingswidget.h
 
@@ -36,5 +38,7 @@ SOURCES += $$PWD/settingspage.cpp \
            $$PWD/fontcolorssettings.cpp \
            $$PWD/fontcolorssettingswidget.cpp \
            $$PWD/groupsettings.cpp \
+           $$PWD/toolboxsettings.cpp \
+           $$PWD/toolboxsettingswidget.cpp \
            $$PWD/behaviorsettings.cpp \
            $$PWD/behaviorsettingswidget.cpp

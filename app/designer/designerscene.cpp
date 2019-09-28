@@ -724,7 +724,10 @@ void DesignerScene::dragMoveEvent(QGraphicsSceneDragDropEvent* event)
     if (event->mimeData()->hasFormat(QStringLiteral("application/x-objectwheel-tool"))) {
         if (m_recentHighlightedItem)
             m_recentHighlightedItem->setBeingHighlighted(false);
-        if ((m_recentHighlightedItem = topLevelControl(event->scenePos())))
+        m_recentHighlightedItem = topLevelControl(event->scenePos());
+        if (m_recentHighlightedItem == 0)
+            m_recentHighlightedItem = m_currentForm;
+        if (m_recentHighlightedItem)
             m_recentHighlightedItem->setBeingHighlighted(true);
         event->setAccepted(m_recentHighlightedItem);
     } else {

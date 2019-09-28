@@ -317,5 +317,6 @@
         <file>images/tools/ScrollIndicator.svg</file>
         <file>images/tools/StatusBar.svg</file>
         <file>images/tools/ExclusiveGroup.svg</file>
+        <file>images/settings/toolbox.svg</file>
     </qresource>
 </RCC>

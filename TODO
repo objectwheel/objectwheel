@@ -1,6 +1,6 @@
 Designer Core TODOs
 
-ToolBox'dan direk designer scene üzerine drop yapılabilsin,bunu desteklesin
+IconWidget diye bir class ekle, ikon gösterebilen, bak bakalım Qt de öyle bişey varmı önce, böylece tüm ikonları svg yap
 FormsPane'de add tuşuna basınca bir drop down menü açılıp
     Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
     hangi elemana tıklanırsa yeni form olarak o eleman türünden oluşturulsun

@@ -19,6 +19,7 @@ public slots:
     void discharge();
 
 private slots:
+    void onToolboxSettingsChange();
     void onProjectInfoUpdate();
     void onToolboxItemPress(ToolboxItem* item);
     void onSearchTextChange(const QString& text);

@@ -149,6 +149,10 @@ SettingsWidget* PreferencesWindow::widget(PreferencesWindow::Widget w) const
             const QList<SettingsWidget*>& widgets = page->widgets();
             for (SettingsWidget* widget : widgets) {
                 switch (w) {
+                case ToolboxSettingsWidget:
+                    if (widget->metaObject()->className() == QStringLiteral("ToolboxSettingsWidget"))
+                        return widget;
+                    break;
                 case SceneSettingsWidget:
                     if (widget->metaObject()->className() == QStringLiteral("SceneSettingsWidget"))
                         return widget;

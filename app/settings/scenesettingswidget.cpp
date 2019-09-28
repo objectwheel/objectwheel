@@ -14,7 +14,7 @@
 #include <QSpinBox>
 #include <QPen>
 
-SceneSettingsWidget::SceneSettingsWidget(QWidget *parent) : SettingsWidget(parent)
+SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(parent)
   , m_designGroup(new QGroupBox(contentWidget()))
   , m_showGuideLinesLabel(new QLabel(m_designGroup))
   , m_showAllAnchorsLabel(new QLabel(m_designGroup))

@@ -12,11 +12,8 @@ ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
 
     setIndentation(0);
     setColumnCount(1);
-    setIconSize({16, 16});
     setRootIsDecorated(false);
-    setAlternatingRowColors(true);
     setFocusPolicy(Qt::NoFocus);
-    setTextElideMode(Qt::ElideMiddle);
     setVerticalScrollMode(ScrollPerPixel);
     setHorizontalScrollMode(ScrollPerPixel);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

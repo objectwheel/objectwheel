@@ -11,6 +11,7 @@
 #include <paintutils.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <toolboxsettings.h>
 
 #include <QDir>
 #include <QMimeData>
@@ -20,17 +21,29 @@
 ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) : QObject(parent)
   , m_toolboxPane(toolboxPane)
 {
+    onToolboxSettingsChange();
     connect(DocumentManager::instance(), &DocumentManager::projectInfoUpdated,
             this, &ToolboxController::onProjectInfoUpdate);
     connect(m_toolboxPane->toolboxTree(), &ToolboxTree::itemPressed,
             this, &ToolboxController::onToolboxItemPress);
     connect(m_toolboxPane->searchEdit(), &LineEdit::textChanged,
             this, &ToolboxController::onSearchTextChange);
+    connect(DesignerSettings::instance(), &DesignerSettings::toolboxSettingsChanged,
+            this, &ToolboxController::onToolboxSettingsChange);
 }
 
 void ToolboxController::discharge()
 {
     m_toolboxPane->searchEdit()->clear();
+}
+
+void ToolboxController::onToolboxSettingsChange()
+{
+    ToolboxTree* tree = m_toolboxPane->toolboxTree();
+    const ToolboxSettings* settings = DesignerSettings::toolboxSettings();
+    tree->setAlternatingRowColors(settings->enableAlternatingRowColors);
+    tree->setTextElideMode(Qt::TextElideMode(settings->textElideMode));
+    tree->setIconSize(QSize(settings->iconSize, settings->iconSize));
 }
 
 void ToolboxController::onProjectInfoUpdate()

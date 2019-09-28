@@ -20,6 +20,7 @@ class PreferencesWindow : public QWidget
 
 public:
     enum Widget {
+        ToolboxSettingsWidget,
         SceneSettingsWidget,
         InterfaceSettingsWidget,
         FontColorsSettingsWidget,
