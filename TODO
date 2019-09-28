@@ -1,3 +1,55 @@
+Designer Core TODOs
+
+qmlcodeeditor external, internal, global ikonlarını değiştir
+pin/unpin ikonlarını adam akıllı bir standarta bağla
+Preferences window ikonlarını eski haline getirmeyi bir düşün
+set Unset cursorda bi mallık oluyor, bi zoom yaptım, geri çıktım, tüm kontrolleri seçip deletleyince designer da form dışına mouse move yapınca sanki kontrol üzerine gelmiş gibi open hand cursor oluyor
+ayrıca shortcutlar yine saçmalıyor her nedense çalışmıyor, yukarıdaki mevzu olunca shortcutlar da aynı şekilde bozuldu ve örneğin delete çalışmıyor artık, bunu denemek için bir timer kur her saniye application'un global focus objecsini print etsin bakalım focus nereye kayıyorda böyle oluyor
+projeler ekranında renderer ile bağlantı koparsa ve kullanıcı "no" ya basarsa proje yüklenme olayı iptal edilsin
+form nongui yapılırsa renderer patlamasın
+bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
+toolboxdan extras kütüphanesinden kontroller sürükle bırak yaparken renderer patladı, neden?
+qmlcode editor'e save all butonu ekle ve ayrıca CMD + R = run, CMD + Shift + S = save all vs klavye kısayollarını ekle
+dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
+Popup toolboxdan sürüklenemiyor, render engine patlıyor, silerken de patlıyor aq, ya kod değişirken?
+...Dialog da aynı şekilde...
+ quick controls 1 için tema değiştime neden saçmalıyor?
+neden bir kontrol içine başka bir kontrol koyunca dıştaki blank laşıyor?
+Tab için ASSERT: "childList.isValid() && childList.canAppend()" in file ../../../objectwheel/renderer/renderutils.cpp, line 939 aldık, neden???
+İNTERPRETER neden detached olarak ayrı bir ikon olarak dock üzerinde başlamıyor?
+non-gui kontrollerin gui çocuk edinmelerini engelle, ya çocuk nongui olursa ? bunu bi düşün
+chartview ile tüm "barseries" tarzı toolları Qt Creator'e baka baka aynen kopya et ve toolbox'a ekle
+drag drop olayları nedense ilk seferde çalışmıyor, itemin ikonu gözükmüyor
+kodları collapse/expand yapma olayı bozuk kod editörde
+tüm ikonları svg yapalım QIcon kullanarak, ayrıca QIcon ile dpi değişince ikonlar da pixmap fonksiyonu
+  yardımıyla güncellenebilir, bi daha bi daha yeniden aynı svg dosyasının yüklenmesine de gerek kalmaz
+  yani static qpixmap olan yerleri de bu mantığa uygun hale getirmeli
+toollar için qmlc cache dosyası da ekle bakalım ne olacak
+toolbox settings ekle, ikonları büyütme seçeneği ekle, ilerde bu bölüme tool kategorileme ve alfabetik sıralama vs ayarları da eklenir
+headlineların item genişliğine eşit olup olmayacağına dair scenesettings ekle
+tüm png tool ikonlarını ve images.qrc leri ve tool-icons.json ları sil
+ayrıca toolbox üzerine bir settings ikonu koy ve toolbox ayarlarna yönlendirsin
+toolbox içinde bir sürü tool sürüklenmek isteyince patlıyor
+Menu, MenuBar, ToolBar, TabBar gibi bazı (özellikle Container bazlı) toollar, içinde "c" klasörü olsun ve içinde hazır çocukları olsun arsayılan olarak, çocuk derken mesela MenuBarItem, MenuItem, TabButton vs vs
+Inspector Pane ikonları ayvayı yemiş, onları yeni ikon sistemine uygun olarak restore et
+Yukarıdaki çocuk olarak sayılan elemanlar için designer şu özellikleri desteklemeli:
+    Eğer babaları kendi özel konteynerleri ise (MenuBar, TabBar gibi), ilgili çocukların x, y, width, height gibi özellikleri set edilememeli, mesela designera x, y uygulanır ama UpdateRenderer ve Save edilmez. Resizerlar bu gibi kontroller için pasif olmalı. Ancak ilgili kontrol headline ile yada doğal olarak sürüklenebilmeli ve reparent edilebilmeli, ancak dediğimiz gibi eğer kendi doğal konteynerları babaları ise x, y, w, h set edilmemeli eski yerlerine geri dönmeliler, ayrıca belki properties pane de x, y, w, h propertilerini babaları uygun olduğunda göstermemeli gizlemeli
+engine crash mesajına "dont ask again" ekle
+
+ApplicationWindow'a
+header: TabBar {
+        TabButton {
+            text: "Text"
+        }
+        TabButton {
+            text: "Text"
+        }
+        TabButton {
+            text: "Text"
+        }
+    }
+Ekleyince bile render engine patlıyor aq?
+
 SystemTrayIcon gibi arkada çalışmaya başlayıp salak saçma aksiyon alan qml tiplerini aynı propertylere sahip bir QObjectle falan değiştir
 double click için varsayılan olarak hangisinin olacağı da scene settings içinden ayarlanabilsin
 Broadcasting ile ilgili bir settings sayfası ekle ayrıca ana ekrandaki "devices" listesinin sonuna "settings" menu elemanı ekle

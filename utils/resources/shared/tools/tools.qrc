@@ -352,5 +352,35 @@
         <file>SplitView/t/main.qml</file>
         <file>StackView/m/control.meta</file>
         <file>StackView/t/main.qml</file>
+        <file>ButtonGroup/m/control.meta</file>
+        <file>ButtonGroup/t/main.qml</file>
+        <file>Container/m/control.meta</file>
+        <file>Container/t/main.qml</file>
+        <file>Control/m/control.meta</file>
+        <file>Control/t/main.qml</file>
+        <file>Drawer/m/control.meta</file>
+        <file>Drawer/t/main.qml</file>
+        <file>Menu/m/control.meta</file>
+        <file>Menu/t/main.qml</file>
+        <file>MenuBar/m/control.meta</file>
+        <file>MenuBar/t/main.qml</file>
+        <file>MenuBarItem/m/control.meta</file>
+        <file>MenuBarItem/t/main.qml</file>
+        <file>MenuItem/m/control.meta</file>
+        <file>MenuItem/t/main.qml</file>
+        <file>MenuSeparator/m/control.meta</file>
+        <file>MenuSeparator/t/main.qml</file>
+        <file>Page/m/control.meta</file>
+        <file>Page/t/main.qml</file>
+        <file>Pane/m/control.meta</file>
+        <file>Pane/t/main.qml</file>
+        <file>ScrollBar/m/control.meta</file>
+        <file>ScrollBar/t/main.qml</file>
+        <file>ScrollIndicator/m/control.meta</file>
+        <file>ScrollIndicator/t/main.qml</file>
+        <file>ScrollView1/m/control.meta</file>
+        <file>ScrollView1/t/main.qml</file>
+        <file>StackView1/m/control.meta</file>
+        <file>StackView1/t/main.qml</file>
     </qresource>
 </RCC>
