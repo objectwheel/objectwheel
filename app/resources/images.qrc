@@ -302,5 +302,18 @@
         <file>images/tools/SystemTrayIcon.svg</file>
         <file>images/tools/FileDialog2.svg</file>
         <file>images/tools/FolderDialog.svg</file>
+        <file>images/tools/ButtonGroup.svg</file>
+        <file>images/tools/Container.svg</file>
+        <file>images/tools/Control.svg</file>
+        <file>images/tools/Drawer.svg</file>
+        <file>images/tools/Menu.svg</file>
+        <file>images/tools/MenuBar.svg</file>
+        <file>images/tools/MenuItem.svg</file>
+        <file>images/tools/MenuBarItem.svg</file>
+        <file>images/tools/MenuSeparator.svg</file>
+        <file>images/tools/Page.svg</file>
+        <file>images/tools/Pane.svg</file>
+        <file>images/tools/ScrollBar.svg</file>
+        <file>images/tools/ScrollIndicator.svg</file>
     </qresource>
 </RCC>
