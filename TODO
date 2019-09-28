@@ -55,6 +55,7 @@ header: TabBar {
     }
 Ekleyince bile render engine patlıyor aq?
 
+Her tool ikonu ayrı olsun, bir ikon birden fazla kullanılmasın
 FormsPane sağ tık menüsü olsun ve sağ tık ve drag drop desteklesin
 SystemTrayIcon gibi arkada çalışmaya başlayıp salak saçma aksiyon alan qml tiplerini aynı propertylere sahip bir QObjectle falan değiştir
 double click için varsayılan olarak hangisinin olacağı da scene settings içinden ayarlanabilsin
@@ -86,6 +87,17 @@ properties pane bok dolu, bir sürü saçma property var, bir propertiden on tan
 Menüler (popup) bir kaç kez açıldıktan sonra daha açılmamaya başlıyor
 Buttonlar, Radio buttonlar, checkboxlar, spinboxlar, tüm widgetları cross-platform bir şekilde macos sitili ile çiz
     applicationstyle.cpp yi geliştir, cizimlerde macstyle.cpp nin style hintlerini, pixelmetriklerini de aktar kopyala
+    quick_controls_conf ve project options sayfası yeniden dizayn edilecek
+    Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir
+    belki saveutils veritabanı'da cbor'a çevrilmeli? nasıl olsa büyük veri saklanmicak artık
+    designercore'a designerwidget, designerview, control.cpp vs ye dalınacak
+    server ayağı kaldırılacak hayata geçirilecek
+    tüm api işleri cbor'a taşınabilir olacak şekilde çevrilecek
+    Objectwheel registration süreci çalışır hale getirilecek
+    Feedback mekanizması eklenecek
+    Share buttonu eklenecek
+    videolar ve tutorialler eklenecek, bunlar için özel "learning page" tasarlanacak Objectwheel'e
+      entegre edilecek
 
 GUI CORE V2 TODOS:
 
