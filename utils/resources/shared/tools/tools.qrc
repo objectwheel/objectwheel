@@ -382,5 +382,17 @@
         <file>ScrollView1/t/main.qml</file>
         <file>StackView1/m/control.meta</file>
         <file>StackView1/t/main.qml</file>
+        <file>MenuBar2/m/control.meta</file>
+        <file>MenuBar2/t/main.qml</file>
+        <file>Menu2/m/control.meta</file>
+        <file>Menu2/t/main.qml</file>
+        <file>Menu1/m/control.meta</file>
+        <file>Menu1/t/main.qml</file>
+        <file>MenuBar1/m/control.meta</file>
+        <file>MenuBar1/t/main.qml</file>
+        <file>StatusBar/m/control.meta</file>
+        <file>StatusBar/t/main.qml</file>
+        <file>ExclusiveGroup/m/control.meta</file>
+        <file>ExclusiveGroup/t/main.qml</file>
     </qresource>
 </RCC>

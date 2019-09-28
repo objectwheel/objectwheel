@@ -1,5 +1,10 @@
 Designer Core TODOs
 
+ToolBox'dan direk designer scene üzerine drop yapılabilsin,bunu desteklesin
+FormsPane'de add tuşuna basınca bir drop down menü açılıp
+    Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
+    hangi elemana tıklanırsa yeni form olarak o eleman türünden oluşturulsun
+f1 ile help açma olayını düzeltelim ayrıca f1 ikonu hover edince çıkan blurlu bozuk onu da düzelt
 qmlcodeeditor external, internal, global ikonlarını değiştir
 pin/unpin ikonlarını adam akıllı bir standarta bağla
 Preferences window ikonlarını eski haline getirmeyi bir düşün
@@ -50,6 +55,7 @@ header: TabBar {
     }
 Ekleyince bile render engine patlıyor aq?
 
+FormsPane sağ tık menüsü olsun ve sağ tık ve drag drop desteklesin
 SystemTrayIcon gibi arkada çalışmaya başlayıp salak saçma aksiyon alan qml tiplerini aynı propertylere sahip bir QObjectle falan değiştir
 double click için varsayılan olarak hangisinin olacağı da scene settings içinden ayarlanabilsin
 Broadcasting ile ilgili bir settings sayfası ekle ayrıca ana ekrandaki "devices" listesinin sonuna "settings" menu elemanı ekle
