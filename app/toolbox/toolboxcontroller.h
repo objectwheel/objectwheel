@@ -21,8 +21,8 @@ public slots:
 private slots:
     void onToolboxSettingsChange();
     void onProjectInfoUpdate();
+    void onSearchEditEditingFinish();
     void onToolboxItemPress(ToolboxItem* item);
-    void onSearchTextChange(const QString& text);
 
 private:
     QDrag* establishDrag(ToolboxItem* item);

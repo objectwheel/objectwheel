@@ -26,8 +26,8 @@ ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) 
             this, &ToolboxController::onProjectInfoUpdate);
     connect(m_toolboxPane->toolboxTree(), &ToolboxTree::itemPressed,
             this, &ToolboxController::onToolboxItemPress);
-    connect(m_toolboxPane->searchEdit(), &LineEdit::textChanged,
-            this, &ToolboxController::onSearchTextChange);
+    connect(m_toolboxPane->searchEdit(), &LineEdit::editingFinished,
+            this, &ToolboxController::onSearchEditEditingFinish);
     connect(DesignerSettings::instance(), &DesignerSettings::toolboxSettingsChanged,
             this, &ToolboxController::onToolboxSettingsChange);
 }
@@ -58,6 +58,29 @@ void ToolboxController::onProjectInfoUpdate()
                              QIcon(ToolUtils::toolIconPath(toolPath)));
     }
     toolboxTree->sortByColumn(0, Qt::AscendingOrder); // Make the lower index to be at top
+}
+
+void ToolboxController::onSearchEditEditingFinish()
+{
+    const QString& searchTerm = m_toolboxPane->searchEdit()->text();
+    for (int i = 0; i < m_toolboxPane->toolboxTree()->topLevelItemCount(); ++i) {
+        bool categoryItemVisible = false;
+        QTreeWidgetItem* categoryItem = m_toolboxPane->toolboxTree()->topLevelItem(i);
+
+        for (int j = 0; j < categoryItem->childCount(); ++j) {
+            QTreeWidgetItem* toolboxItem = categoryItem->child(j);
+            bool itemVisible = searchTerm.isEmpty()
+                    ? true : toolboxItem->text(0).contains(searchTerm, Qt::CaseInsensitive);
+
+            if (toolboxItem->isHidden() == itemVisible)
+                toolboxItem->setHidden(!itemVisible);
+            if (itemVisible)
+                categoryItemVisible = true;
+        }
+
+        if (categoryItem->isHidden() == categoryItemVisible)
+            categoryItem->setHidden(!categoryItemVisible);
+    }
 }
 
 void ToolboxController::onToolboxItemPress(ToolboxItem* item)
@@ -112,28 +135,6 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
     });
 
     ControlRenderingManager::schedulePreview(SaveUtils::toControlMainQmlFile(item->dir()));
-}
-
-void ToolboxController::onSearchTextChange(const QString& text)
-{
-    for (int i = 0; i < m_toolboxPane->toolboxTree()->topLevelItemCount(); ++i) {
-        bool categoryItemVisible = false;
-        QTreeWidgetItem* categoryItem = m_toolboxPane->toolboxTree()->topLevelItem(i);
-
-        for (int j = 0; j < categoryItem->childCount(); ++j) {
-            QTreeWidgetItem* toolboxItem = categoryItem->child(j);
-            bool itemVisible = text.isEmpty()
-                    ? true : toolboxItem->text(0).contains(text, Qt::CaseInsensitive);
-
-            if (toolboxItem->isHidden() == itemVisible)
-                toolboxItem->setHidden(!itemVisible);
-            if (itemVisible)
-                categoryItemVisible = true;
-        }
-
-        if (categoryItem->isHidden() == categoryItemVisible)
-            categoryItem->setHidden(!categoryItemVisible);
-    }
 }
 
 QDrag* ToolboxController::establishDrag(ToolboxItem* item)

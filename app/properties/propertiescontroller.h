@@ -3,8 +3,9 @@
 
 #include <QObject>
 
-class PropertiesPane;
 class Control;
+class PropertiesPane;
+class DesignerScene;
 
 class PropertiesController final : public QObject
 {
@@ -12,12 +13,14 @@ class PropertiesController final : public QObject
     Q_DISABLE_COPY(PropertiesController)
 
 public:
-    explicit PropertiesController(PropertiesPane* propertiesPane, QObject* parent = nullptr);
+    explicit PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
+                                  QObject* parent = nullptr);
 
 public slots:
     void discharge();
 
 private slots:
+    void onSearchEditEditingFinish();
     void onSceneSelectionChange();
     void onControlZChange(Control*);
     void onControlRenderInfoChange(Control*, bool codeChanged);
@@ -30,6 +33,7 @@ private slots:
 
 private:
     PropertiesPane* m_propertiesPane;
+    DesignerScene* m_designerScene;
 };
 
 #endif // PROPERTIESCONTROLLER_H

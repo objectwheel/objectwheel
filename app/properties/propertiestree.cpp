@@ -63,3 +63,100 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
                 .arg(palette().brightText().color().name())
                 );
 }
+
+PropertiesDelegate* PropertiesTree::propertiesDelegate() const
+{
+    return static_cast<PropertiesDelegate*>(itemDelegate());
+}
+
+void PropertiesTree::paintEvent(QPaintEvent* event)
+{
+    QPainter painter(viewport());
+    painter.fillRect(rect(), palette().base());
+    painter.setClipping(true);
+
+    QColor lineColor(palette().dark().color());
+    lineColor.setAlpha(50);
+    painter.setPen(lineColor);
+
+    qreal rowCount = viewport()->height() / qreal(propertiesDelegate()->sizeHint().height());
+    const QList<Control*>& selectedControls = m_designerScene->selectedControls();
+    for (int i = 0; i < rowCount; ++i) {
+        painter.save();
+        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
+        QPainterPath path;
+        path.addRect(rect);
+        painter.setClipPath(path);
+
+        if (i % 2) {
+            painter.fillRect(rect, palette().alternateBase());
+        } else if (topLevelItemCount() == 0) {
+            if (i == int((rowCount - 1) / 2.0) || i == int((rowCount - 1)/ 2.0) + 1) {
+                QString message;
+                if (selectedControls.size() == 0)
+                    message = tr("No controls selected");
+                else if (selectedControls.size() == 1)
+                    message = tr("Control has errors");
+                else
+                    message = tr("Multiple controls selected");
+
+                QColor messageColor = selectedControls.size() == 1
+                        ? palette().linkVisited().color()
+                        : palette().dark().color();
+                messageColor.setAlpha(180);
+
+                painter.setPen(messageColor);
+                painter.drawText(rect, Qt::AlignCenter, message);
+                painter.setPen(lineColor);
+            }
+        }
+
+        // Draw top and bottom lines
+        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+        painter.restore();
+    }
+
+    QTreeWidget::paintEvent(event);
+}
+
+void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
+{
+    painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    const qreal width = 10;
+    const QAbstractItemModel* model = index.model();
+    const bool hasChild = itemFromIndex(index)->childCount();
+    const bool isClassRow = !model->parent(index).isValid() && index.row() > 3; // FIXME: For Temporary "index" entry, should be 2 otherwise
+
+    QRectF handleRect(0, 0, width, width);
+    handleRect.moveCenter(rect.center());
+    handleRect.moveRight(rect.right() - 0.5);
+
+    QStyleOptionViewItem option;
+    option.initFrom(this);
+    option.rect = rect;
+
+    fillBackground(painter, option, calculateVisibleRow(itemFromIndex(index)), isClassRow, false);
+
+    // Draw handle
+    if (hasChild) {
+        QPen pen;
+        pen.setWidthF(1.2);
+        pen.setColor(isClassRow ? palette().highlightedText().color() : palette().text().color());
+        painter->setPen(pen);
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRoundedRect(handleRect, 0, 0);
+
+        painter->drawLine(QPointF(handleRect.left() + 2.5, handleRect.center().y()),
+                          QPointF(handleRect.right() - 2.5, handleRect.center().y()));
+
+        if (!isExpanded(index)) {
+            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2.5),
+                              QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
+        }
+    }
+
+    painter->restore();
+}

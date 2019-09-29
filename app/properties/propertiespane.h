@@ -1,33 +1,35 @@
 #ifndef PROPERTIESPANE_H
 #define PROPERTIESPANE_H
 
-#include <QTreeWidget>
+#include <QWidget>
 
+class PropertiesTree;
 class LineEdit;
-class DesignerScene;
-class Control;
+class QLineEdit;
 class QSpinBox;
+class QTreeWidgetItem;
 
-class PropertiesPane final : public QTreeWidget
+class PropertiesPane final : public QWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY(PropertiesPane)
 
 public:
-    explicit PropertiesPane(DesignerScene* designerScene, QWidget* parent = nullptr);
+    explicit PropertiesPane(QWidget* parent = nullptr);
 
-public slots:
-    void discharge();
+    PropertiesTree* propertiesTree() const;
+    LineEdit* searchEdit() const;
+    QTreeWidgetItem* typeItem() const;
+    QTreeWidgetItem* uidItem() const;
+    QTreeWidgetItem* idItem() const;
+    QTreeWidgetItem* indexItem() const;
+    QLineEdit* idEdit() const;
+    QSpinBox* indexEdit() const;
 
-private:
-    void filterList(const QString& filter);
-    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
-    void paintEvent(QPaintEvent* e) override;
-    void updateGeometries() override;
     QSize sizeHint() const override;
 
 public:
-    DesignerScene* m_designerScene;
+    PropertiesTree* m_propertiesTree;
     LineEdit* m_searchEdit;
     QTreeWidgetItem* m_typeItem;
     QTreeWidgetItem* m_uidItem;

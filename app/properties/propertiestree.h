@@ -3,6 +3,8 @@
 
 #include <QTreeWidget>
 
+class PropertiesDelegate;
+
 class PropertiesTree final : public QTreeWidget
 {
     Q_OBJECT
@@ -13,6 +15,11 @@ class PropertiesTree final : public QTreeWidget
 public:
     explicit PropertiesTree(QWidget* parent = nullptr);
 
+    PropertiesDelegate* propertiesDelegate() const;
+
+private:
+    void paintEvent(QPaintEvent* event);
+    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const;
 };
 
 #endif // PROPERTIESTREE_H
