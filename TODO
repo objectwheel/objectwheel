@@ -4,6 +4,10 @@ IconWidget diye bir class ekle, ikon gösterebilen, bak bakalım Qt de öyle bi�
 FormsPane'de add tuşuna basınca bir drop down menü açılıp
     Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
     hangi elemana tıklanırsa yeni form olarak o eleman türünden oluşturulsun
+InspectorPane'e de aynı kontrol sağ tık menüsünden ekle, ayrıca InspectorPane için de settings'e
+    çift tıklanınca varsayılan olarak neyin açılacağı sorulsun, kod mu, SignalEditor mü vs
+Sağ tık menüsüne "bu obje ile ilgili yardım al" minvalinde "Go to Help" gibi bir seçenek de ekle
+    böylece ilgili kontrol ile ilgili kolayca documents sekmesine gidilebilsin
 f1 ile help açma olayını düzeltelim ayrıca f1 ikonu hover edince çıkan blurlu bozuk onu da düzelt
 qmlcodeeditor external, internal, global ikonlarını değiştir
 pin/unpin ikonlarını adam akıllı bir standarta bağla

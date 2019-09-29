@@ -119,6 +119,7 @@ QPointF bottomCenter(const QRectF& rect);
 QPixmap imageToPixmap(const QImage& image);
 QStringList anchorLineNames();
 QStringList anchorPropertyNames();
+void disableWheelEvent(QWidget* widget);
 
 } // UtilityFunctions
 

@@ -24,37 +24,17 @@
 #include <QApplication>
 
 namespace {
-
-const int ROW_HEIGHT = 21;
+enum { ROW_HEIGHT = 21 };
 int g_verticalScrollBarPosition = 99999;
 int g_horizontalScrollBarPosition = 99999;
-
-void initPalette(QWidget* widget)
-{
-    QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#AB8157");
-    palette.setColor(QPalette::Dark, "#9C7650");
-    palette.setColor(QPalette::AlternateBase, "#f7efe6");
-    widget->setPalette(palette);
 }
 
-class WheelDisabler final : public QObject {
-    Q_OBJECT
-    bool eventFilter(QObject* o, QEvent* e) override {
-        if (e->type() == QEvent::Wheel && qobject_cast<QAbstractSpinBox*>(o)) {
-            e->ignore();
-            return true;
-        }
-        return QObject::eventFilter(o, e);
-    }
-} g_wheelDisabler;
-
-bool isXProperty(const QString& propertyName)
+static bool isXProperty(const QString& propertyName)
 {
     return propertyName == "x";
 }
 
-bool isGeometryProperty(const QString& propertyName)
+static bool isGeometryProperty(const QString& propertyName)
 {
     return propertyName == "x"
             || propertyName == "y"
@@ -63,7 +43,7 @@ bool isGeometryProperty(const QString& propertyName)
 }
 
 template<typename SpinBox>
-void fixPosForForm(const Control* control, const QString& propertyName, SpinBox spinBox)
+static void fixPosForForm(const Control* control, const QString& propertyName, SpinBox spinBox)
 {
     if (control->type() == Form::Type) {
         if ((propertyName == "x" || propertyName == "y")
@@ -73,13 +53,13 @@ void fixPosForForm(const Control* control, const QString& propertyName, SpinBox 
     }
 }
 
-void fixVisible(Control* control, const QString& propertyName, QCheckBox* checkBox)
+static void fixVisible(Control* control, const QString& propertyName, QCheckBox* checkBox)
 {
     if (propertyName == "visible")
         checkBox->setChecked(control->visible());
 }
 
-void fixVisibilityForWindow(Control* control, const QString& propertyName, QComboBox* comboBox)
+static void fixVisibilityForWindow(Control* control, const QString& propertyName, QComboBox* comboBox)
 {
     if (control->window() && propertyName == "visibility") {
         comboBox->setCurrentText("AutomaticVisibility");
@@ -95,7 +75,7 @@ void fixVisibilityForWindow(Control* control, const QString& propertyName, QComb
     }
 }
 
-void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
+static void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
 {
     QTreeWidget* treeWidget = fontItem->treeWidget();
     Q_ASSERT(treeWidget);
@@ -120,7 +100,7 @@ void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
     }
 }
 
-void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool classRow, bool verticalLine)
+static void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool classRow, bool verticalLine)
 {
     painter->save();
 
@@ -156,7 +136,7 @@ void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int r
     painter->restore();
 }
 
-QString urlToDisplayText(const QUrl& url, const QString& controlDir)
+static QString urlToDisplayText(const QUrl& url, const QString& controlDir)
 {
     QString displayText = url.toDisplayString();
     if (url.isLocalFile()) {
@@ -166,7 +146,7 @@ QString urlToDisplayText(const QUrl& url, const QString& controlDir)
     return displayText;
 }
 
-QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
+static QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
 {
     QList<QTreeWidgetItem*> items;
 
@@ -179,7 +159,7 @@ QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
     return items;
 }
 
-QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
+static QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
                                          bool includeCollapsed = true, bool includeHidden = false)
 {
     QList<QTreeWidgetItem*> items;
@@ -207,7 +187,7 @@ QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool inclu
     return items;
 }
 
-int calculateVisibleRow(const QTreeWidgetItem* item)
+static int calculateVisibleRow(const QTreeWidgetItem* item)
 {
     QTreeWidget* treeWidget = item->treeWidget();
     Q_ASSERT(treeWidget);
@@ -229,7 +209,7 @@ int calculateVisibleRow(const QTreeWidgetItem* item)
     return 0;
 }
 
-QWidget* createIdHandlerWidget(Control* control)
+static QWidget* createIdHandlerWidget(Control* control)
 {
     auto lineEdit = new QLineEdit;
     lineEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), lineEdit));
@@ -239,7 +219,6 @@ QWidget* createIdHandlerWidget(Control* control)
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
-    initPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -257,7 +236,7 @@ QWidget* createIdHandlerWidget(Control* control)
     return lineEdit;
 }
 
-QWidget* createStringHandlerWidget(const QString& propertyName, const QString& text,
+static QWidget* createStringHandlerWidget(const QString& propertyName, const QString& text,
                                    Control* control)
 {
     auto lineEdit = new QLineEdit;
@@ -267,7 +246,6 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
-    initPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -286,7 +264,7 @@ QWidget* createStringHandlerWidget(const QString& propertyName, const QString& t
     return lineEdit;
 }
 
-QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
+static QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
                                 Control* control)
 {
     auto lineEdit = new QLineEdit;
@@ -296,7 +274,6 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     lineEdit->setFocusPolicy(Qt::StrongFocus);
     lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
     lineEdit->setMinimumWidth(1);
-    initPalette(lineEdit);
 
     QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
     {
@@ -318,7 +295,7 @@ QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
     return lineEdit;
 }
 
-QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
+static QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
 {
     auto comboBox = new QComboBox;
     TransparentStyle::attach(comboBox);
@@ -330,7 +307,6 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
     fixVisibilityForWindow(control, enumm.name, comboBox);
-    initPalette(comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -362,7 +338,7 @@ QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
     return comboBox;
 }
 
-QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Control* control)
+static QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Control* control)
 {
     auto checkBox = new QCheckBox;
     checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -371,7 +347,6 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     checkBox->setFocusPolicy(Qt::ClickFocus);
     checkBox->setMinimumWidth(1);
     fixVisible(control, propertyName, checkBox);
-    initPalette(checkBox);
 
     QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
     {
@@ -397,7 +372,7 @@ QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Cont
     return widget;
 }
 
-QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
+static QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
                                   Control* control)
 {
     auto toolButton = new QToolButton;
@@ -411,7 +386,6 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     toolButton->setFocusPolicy(Qt::ClickFocus);
     toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
     toolButton->setMinimumWidth(1);
-    initPalette(toolButton);
 
     QObject::connect(toolButton, &QCheckBox::clicked, [=]
     {
@@ -438,7 +412,7 @@ QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& col
     return toolButton;
 }
 
-QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
+static QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
                                    Control* control, bool integer)
 {
     QAbstractSpinBox* abstractSpinBox;
@@ -449,11 +423,10 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
 
     TransparentStyle::attach(abstractSpinBox);
     abstractSpinBox->setCursor(Qt::PointingHandCursor);
-    abstractSpinBox->installEventFilter(&g_wheelDisabler);
     abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
     abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
     abstractSpinBox->setMinimumWidth(1);
-    initPalette(abstractSpinBox);
+    UtilityFunctions::disableWheelEvent(abstractSpinBox);
 
     const auto& updateFunction = [=]
     {
@@ -514,19 +487,18 @@ QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
     return abstractSpinBox;
 }
 
-QWidget* createIndexHandlerWidget(Control* control)
+static QWidget* createIndexHandlerWidget(Control* control)
 {
     auto spinBox = new QSpinBox;
     TransparentStyle::attach(spinBox);
     spinBox->setCursor(Qt::PointingHandCursor);
-    spinBox->installEventFilter(&g_wheelDisabler);
     spinBox->setFocusPolicy(Qt::StrongFocus);
     spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
     spinBox->setMinimumWidth(1);
     spinBox->setMaximum(std::numeric_limits<int>::max());
     spinBox->setMinimum(std::numeric_limits<int>::lowest());
     spinBox->setValue(control->index());
-    initPalette(spinBox);
+    UtilityFunctions::disableWheelEvent(spinBox);
 
     QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
     {
@@ -541,7 +513,7 @@ QWidget* createIndexHandlerWidget(Control* control)
     return spinBox;
 }
 
-QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, QTreeWidgetItem* fontItem)
+static QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, QTreeWidgetItem* fontItem)
 {
     auto comboBox = new QComboBox;
     TransparentStyle::attach(comboBox);
@@ -552,7 +524,6 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, 
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
-    initPalette(comboBox);
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
@@ -574,7 +545,7 @@ QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, 
     return comboBox;
 }
 
-QWidget* createFontWeightHandlerWidget(int weight, Control* control)
+static QWidget* createFontWeightHandlerWidget(int weight, Control* control)
 {
     auto comboBox = new QComboBox;
     TransparentStyle::attach(comboBox);
@@ -583,7 +554,6 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
-    initPalette(comboBox);
 
     QMetaEnum weightEnum = QMetaEnum::fromType<QFont::Weight>();
     for (int i = weightEnum.keyCount(); i--;) { // Necessary somehow
@@ -610,7 +580,7 @@ QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     return comboBox;
 }
 
-QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalization, Control* control)
+static QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalization, Control* control)
 {
     auto comboBox = new QComboBox;
     TransparentStyle::attach(comboBox);
@@ -619,7 +589,6 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     comboBox->setFocusPolicy(Qt::ClickFocus);
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
-    initPalette(comboBox);
 
     QMetaEnum capitalizationEnum = QMetaEnum::fromType<QFont::Capitalization>();
     for (int i = capitalizationEnum.keyCount(); i--;) { // Necessary somehow
@@ -647,19 +616,18 @@ QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalizat
     return comboBox;
 }
 
-QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control, QTreeWidgetItem* fontItem)
+static QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control, QTreeWidgetItem* fontItem)
 {
     QSpinBox* spinBox = new QSpinBox;
     TransparentStyle::attach(spinBox);
     spinBox->setCursor(Qt::PointingHandCursor);
-    spinBox->installEventFilter(&g_wheelDisabler);
     spinBox->setFocusPolicy(Qt::StrongFocus);
     spinBox->setMinimum(0);
     spinBox->setMaximum(72);
     spinBox->setValue(size < 0 ? 0 : size);
     spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
     spinBox->setMinimumWidth(1);
-    initPalette(spinBox);
+    UtilityFunctions::disableWheelEvent(spinBox);
 
     QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
     {
@@ -698,7 +666,7 @@ QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Cont
     return spinBox;
 }
 
-void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
+static void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
                                          const QVector<PropertyNode>& properties,
                                          Control* control, int integer)
 {
@@ -762,7 +730,7 @@ void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
     treeWidget->expandItem(geometryItem);
 }
 
-void createAndAddFontPropertiesBlock(QTreeWidgetItem* classItem, const QFont& font, Control* control)
+static void createAndAddFontPropertiesBlock(QTreeWidgetItem* classItem, const QFont& font, Control* control)
 {
     QTreeWidget* treeWidget = classItem->treeWidget();
     Q_ASSERT(treeWidget);
@@ -879,7 +847,6 @@ void createAndAddFontPropertiesBlock(QTreeWidgetItem* classItem, const QFont& fo
 
     treeWidget->expandItem(fontItem);
 }
-}
 
 class PropertiesListDelegate: public QStyledItemDelegate
 {
@@ -939,7 +906,11 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
   , m_designerScene(designerScene)
   , m_searchEdit(new LineEdit(this))
 {
-    initPalette(this);
+    QPalette p(palette());
+    p.setColor(QPalette::Light, "#AB8157");
+    p.setColor(QPalette::Dark, "#9C7650");
+    p.setColor(QPalette::AlternateBase, "#f7efe6");
+    setPalette(p);
 
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
@@ -1060,7 +1031,6 @@ void PropertiesPane::discharge()
 // FIXME: This function has severe performance issues.
 void PropertiesPane::onSceneSelectionChange()
 {
-    return; // FIXME
     const int verticalScrollBarPosition = g_verticalScrollBarPosition;
     const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
 
@@ -1073,13 +1043,6 @@ void PropertiesPane::onSceneSelectionChange()
     setDisabled(selectedControl->hasErrors());
 
     QVector<PropertyNode> properties = selectedControl->properties();
-    for (PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName.startsWith("__"))
-                propertyNode.properties.remove(propertyName);
-        }
-    }
-
     if (properties.isEmpty())
         return;
 

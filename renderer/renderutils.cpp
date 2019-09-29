@@ -21,11 +21,9 @@
 #include <private/qquickitem_p.h>
 #include <private/qquickoverlay_p.h>
 
-namespace {
-
-void hideWindow(QObject* object)
+static void setWindowHidden(QObject* object)
 {
-    if (!object)
+    if (object == 0)
         return;
 
     if (object->isWindowType()) {
@@ -45,9 +43,9 @@ void hideWindow(QObject* object)
     }
 }
 
-void stopAnimation(QObject *object)
+static void stopAnimation(QObject* object)
 {
-    if (object == nullptr)
+    if (object == 0)
         return;
 
     QQuickTransition *transition = qobject_cast<QQuickTransition*>(object);
@@ -71,7 +69,7 @@ void stopAnimation(QObject *object)
     }
 }
 
-void disableTextCursor(QQuickItem* item)
+static void disableTextCursor(QQuickItem* item)
 {
     for (QQuickItem* childItem : item->childItems())
         disableTextCursor(childItem);
@@ -85,7 +83,7 @@ void disableTextCursor(QQuickItem* item)
         textEdit->setCursorVisible(false);
 }
 
-void allSubObject(QObject* object, QObjectList& objectList)
+static void allSubObject(QObject* object, QObjectList& objectList)
 {
     // don't add null pointer and stop if the object is already in the list
     if (!object || objectList.contains(object))
@@ -133,7 +131,7 @@ void allSubObject(QObject* object, QObjectList& objectList)
     }
 }
 
-QList<QQuickItem*> allChildItemsRecursive(const QQuickItem* parentItem)
+static QList<QQuickItem*> allChildItemsRecursive(const QQuickItem* parentItem)
 {
     QList<QQuickItem*> itemList;
     if (!parentItem)
@@ -147,7 +145,7 @@ QList<QQuickItem*> allChildItemsRecursive(const QQuickItem* parentItem)
     return itemList;
 }
 
-void doComponentCompleteRecursive(QObject* object, const RenderEngine* engine)
+static void doComponentCompleteRecursive(QObject* object, const RenderEngine* engine)
 {
     if (object) {
         QQuickItem *item = qobject_cast<QQuickItem*>(object);
@@ -182,18 +180,43 @@ void doComponentCompleteRecursive(QObject* object, const RenderEngine* engine)
     }
 }
 
-bool metaPropertyPasses(const QMetaProperty& mp)
+static QString cleanClassName(const QMetaObject* metaObject)
 {
-    auto type = mp.type();
+    QString className = metaObject->className();
+    className.replace("QQuickWindowQmlImpl", "Window");
+    className.replace("QQuick", "");
+    className.replace("QDeclarative", "");
+    className.replace("QQml", "");
+    className.replace("QWindow", "Window");
+    className.replace(QRegularExpression("_QMLTYPE_\\d+"), "");
+    className.replace(QRegularExpression("_QML_\\d+"), "");
+    return className;
+}
 
-    if (!mp.isValid())
+static QString cleanScopeName(QString scope)
+{
+    scope.replace("QQuickWindowQmlImpl", "Window");
+    scope.replace("QQuick", "");
+    scope.replace("QDeclarative", "");
+    scope.replace("QQml", "");
+    scope.replace("QWindow", "Window");
+    return scope;
+}
+
+static bool isPropertyValid(const QMetaProperty& property)
+{
+    const QVariant::Type type = property.type();
+    const QString typeName = property.typeName();
+    const QString propertyName = property.name();
+
+    if (!property.isValid())
         return false;
 
-    if (QString(mp.typeName()).contains("*")
-            || QString(mp.name()).contains(".")
-            || QString(mp.name()).count(".") > 1
-            || QString(mp.name()).startsWith("__")
-            || mp.isFlagType()) {
+    if (typeName.contains("*")
+            || propertyName.contains(".")
+            || propertyName.count(".") > 1
+            || propertyName.startsWith("__")
+            || property.isFlagType()) {
         return false;
     }
 
@@ -260,31 +283,7 @@ bool metaPropertyPasses(const QMetaProperty& mp)
     return true;
 }
 
-QString cleanClassName(const QMetaObject* metaObject)
-{
-    QString className = metaObject->className();
-    className.replace("QQuickWindowQmlImpl", "Window");
-    className.replace("QQuick", "");
-    className.replace("QDeclarative", "");
-    className.replace("QQml", "");
-    className.replace("QWindow", "Window");
-    className.replace(QRegularExpression("_QMLTYPE_\\d+"), "");
-    className.replace(QRegularExpression("_QML_\\d+"), "");
-    return className;
-}
-
-QString cleanScopeName(const QString& scope)
-{
-    QString sc(scope);
-    sc.replace("QQuickWindowQmlImpl", "Window");
-    sc.replace("QQuick", "");
-    sc.replace("QDeclarative", "");
-    sc.replace("QQml", "");
-    sc.replace("QWindow", "Window");
-    return sc;
-}
-
-bool propertyExistsInNodes(const QVector<PropertyNode>& nodes, const QString& property)
+static bool propertyExistsInNodes(const QVector<PropertyNode>& nodes, const QString& property)
 {
     for (const auto& node : nodes) {
         for (const auto& propertyName : node.properties.keys()) {
@@ -299,13 +298,13 @@ bool propertyExistsInNodes(const QVector<PropertyNode>& nodes, const QString& pr
     return false;
 }
 
-bool unitePropertiesIfPossible(QVector<PropertyNode>& nodes, const QString& className,
-                               const QMap<QString, QVariant>& properties, const QVector<Enum>& enums)
+static bool unitePropertiesIfPossible(QVector<PropertyNode>& nodes, const QString& className,
+                                      const QMap<QString, QVariant>& properties, const QVector<Enum>& enums)
 {
-    for (auto& node : nodes) {
+    for (PropertyNode& node : nodes) {
         if (node.cleanClassName == className) {
             node.properties.unite(properties);
-            node.enums << enums;
+            node.enums.append(enums);
             return true;
         }
     }
@@ -313,7 +312,7 @@ bool unitePropertiesIfPossible(QVector<PropertyNode>& nodes, const QString& clas
     return false;
 }
 
-QVector<Enum> subEnums(QMetaProperty property, const QObject* parentObject)
+static QVector<Enum> subEnums(QMetaProperty property, const QObject* parentObject)
 {
     QVector<Enum> enums;
 
@@ -331,7 +330,7 @@ QVector<Enum> subEnums(QMetaProperty property, const QObject* parentObject)
             if (subproperty.isReadable()
                     && subproperty.isWritable()
                     && !QString(subproperty.typeName()).contains("*")
-                    && metaPropertyPasses(subproperty)) {
+                    && isPropertyValid(subproperty)) {
                 if (subproperty.isEnumType() && !subproperty.isFlagType()) {
                     auto metaEnum = subproperty.enumerator();
 
@@ -354,14 +353,14 @@ QVector<Enum> subEnums(QMetaProperty property, const QObject* parentObject)
     return enums;
 }
 
-QMap<QString, QVariant> subProperties(QMetaProperty property, const QObject* parentObject)
+static QMap<QString, QVariant> subProperties(const QMetaProperty& property, const QObject* parentObject)
 {
     QMap<QString, QVariant> properties;
 
-    if (QString::fromUtf8(property.name()) == "contentItem"
-            || QString::fromUtf8(property.name()) == "parent") { // TODO: Improve this
-        return properties;
-    }
+    const QString propertyName = property.name();
+
+    if (propertyName == "contentItem" || propertyName == "parent")
+        return properties; // TODO: Improve this
 
     if (!property.isConstant()
             || !property.isReadable()
@@ -369,25 +368,19 @@ QMap<QString, QVariant> subProperties(QMetaProperty property, const QObject* par
         return properties;
     }
 
-    auto object = qvariant_cast<QObject*>(property.read(parentObject));
-
-    if (object) {
-        auto metaObject = object->metaObject();
-
-        for (int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); i++) {
-            const auto& subproperty = metaObject->property(i);
-
-            if (subproperty.isReadable()
-                    && subproperty.isWritable()
-                    && !QString(subproperty.typeName()).contains("*")
-                    && metaPropertyPasses(subproperty)) {
-                properties[property.name() + QString(".") + subproperty.name()] = subproperty.read(object);
+    if (auto object = qvariant_cast<QObject*>(property.read(parentObject))) {
+        const QMetaObject* metaObject = object->metaObject();
+        for (int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); ++i) {
+            const QMetaProperty& subProperty = metaObject->property(i);
+            if (subProperty.isReadable()
+                    && subProperty.isWritable()
+                    && isPropertyValid(subProperty)) {
+                properties[propertyName + '.' + subProperty.name()] = subProperty.read(object);
             }
         }
     }
 
     return properties;
-}
 }
 
 QList<QQuickItem*> RenderUtils::allItems(RenderEngine::ControlInstance* formInstance)
@@ -585,7 +578,7 @@ void RenderUtils::tweakObjects(QObject* object)
     allSubObject(object, objectList);
     for(QObject* childObject : objectList) {
         stopAnimation(childObject);
-        hideWindow(childObject);
+        setWindowHidden(childObject);
     }
 }
 
@@ -858,16 +851,21 @@ void RenderUtils::valueFromGeometrySyncKey(QVariant* value, QString* hash)
 QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstance* instance)
 {
     Q_ASSERT(instance);
+
+    QVector<Enum> enums;
     QVector<PropertyNode> propertyNodes;
+    QMap<QString, QVariant> properties;
+
     if (!instance->errors.isEmpty())
         return propertyNodes;
 
-    QObject* object = instance->object;
-    Q_ASSERT(object);
+    if (instance->object == 0)
+        return propertyNodes;
 
-    QVector<Enum> enums;
-    QMap<QString, QVariant> properties;
-    auto metaObject = object->metaObject();
+
+    const QObject* object = instance->object;
+    const QMetaObject* metaObject = object->metaObject();
+
     while (metaObject) {
         if (metaObject->propertyOffset() - metaObject->propertyCount() == 0) {
             metaObject = metaObject->superClass();
@@ -883,7 +881,7 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
 
             if (property.isReadable()
                     && property.isWritable()
-                    && metaPropertyPasses(property)
+                    && isPropertyValid(property)
                     && !propertyExistsInNodes(propertyNodes, property.name())) {
                 if (property.isEnumType() && !property.isFlagType()) {
                     auto metaEnum = property.enumerator();

@@ -676,4 +676,19 @@ QStringList anchorPropertyNames()
     return anchorPropertyNames;
 }
 
+void disableWheelEvent(QWidget* widget)
+{
+    class WheelDisabler final : public QObject {
+        bool eventFilter(QObject* object, QEvent* event) override {
+            if (event->type() == QEvent::Wheel) {
+                event->ignore();
+                return true;
+            }
+            return QObject::eventFilter(object, event);
+        }
+    };
+    static WheelDisabler disabler;
+    widget->installEventFilter(&disabler);
+}
+
 } // UtilityFunctions
