@@ -47,16 +47,6 @@ QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSiz
     return dest;
 }
 
-QIcon PaintUtils::renderItemIcon(const QString& fileName, const QPalette& palette)
-{
-    QIcon icon;
-    QColor normal = palette.text().color();
-    QColor selected = palette.highlightedText().color();
-    icon.addPixmap(renderOverlaidPixmap(fileName, normal, 1), QIcon::Normal);
-    icon.addPixmap(renderOverlaidPixmap(fileName, selected, 1), QIcon::Selected);
-    return icon;
-}
-
 QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QPalette& palette)
 {
     QIcon icon;

@@ -24,7 +24,6 @@
         <file>images/refresh.png</file>
         <file>images/landscape.png</file>
         <file>images/portrait.png</file>
-        <file>images/form.png</file>
         <file>images/delete.png</file>
         <file>images/newfile.png</file>
         <file>images/error.png</file>
@@ -318,5 +317,6 @@
         <file>images/tools/StatusBar.svg</file>
         <file>images/tools/ExclusiveGroup.svg</file>
         <file>images/settings/toolbox.svg</file>
+        <file>images/tools/Form.svg</file>
     </qresource>
 </RCC>

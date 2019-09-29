@@ -164,8 +164,7 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
         else
             item->setText(1, QObject::tr("No"));
 
-        item->setIcon(0, PaintUtils::renderItemIcon(ToolUtils::toolIconPath(child->dir()),
-                                                    treeWidget->palette()));
+        item->setIcon(0, QIcon(ToolUtils::toolIconPath(child->dir())));
         parentItem->addChild(item);
         addChildrenIntoItem(item, child->childControls(false));
     }
@@ -447,7 +446,7 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
     formItem->setText(0, currentForm->id());
     formItem->setData(0, Qt::UserRole, currentForm->hasErrors());
     formItem->setData(1, Qt::UserRole, currentForm->hasErrors());
-    formItem->setIcon(0, PaintUtils::renderItemIcon(":/images/form.png", palette()));
+    formItem->setIcon(0, QIcon(":/images/tools/Form.svg"));
 
     if (currentForm->gui() && !currentForm->hasErrors())
         formItem->setText(1, tr("Yes"));
@@ -609,11 +608,9 @@ void InspectorPane::onControlRenderInfoChange(Control* control, bool codeChanged
                 else
                     childItem->setText(1, tr("No"));
 
-                childItem->setIcon(0, PaintUtils::renderItemIcon(
-                                       control->type() == Form::Type
-                                       ? ":/images/form.png"
-                                       : ToolUtils::toolIconPath(control->dir()),
-                                       palette()));
+                childItem->setIcon(0, QIcon(control->type() == Form::Type
+                                            ? ":/images/tools/Form.svg"
+                                            : ToolUtils::toolIconPath(control->dir())));
                 return;
             }
         }
