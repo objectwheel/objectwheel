@@ -13,8 +13,6 @@ class PropertiesPane final : public QTreeWidget
     Q_OBJECT
     Q_DISABLE_COPY(PropertiesPane)
 
-    friend class PropertiesListDelegate; // For itemFromIndex()
-
 public:
     explicit PropertiesPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 

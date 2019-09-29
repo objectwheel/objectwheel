@@ -1,233 +1,430 @@
-#include <runcontroller.h>
-#include <runpane.h>
-#include <pushbutton.h>
-#include <rundevicesbutton.h>
-#include <runprogressbar.h>
-#include <runmanager.h>
-#include <projectmanager.h>
-#include <windowmanager.h>
-#include <welcomewindow.h>
-#include <preferenceswindow.h>
-#include <utilityfunctions.h>
-#include <segmentedbar.h>
-#include <QTime>
+#include <propertiescontroller.h>
+#include <propertiespane.h>
 
-RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
-  , m_runScheduled(false)
-  , m_appManuallyTerminated(false)
-  , m_runPane(runPane)
+PropertiesController::PropertiesController(PropertiesPane* propertiesPane, QObject* parent) : QObject(parent)
+  , m_propertiesPane(propertiesPane)
 {
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &RunController::discharge);
-    connect(m_runPane->projectsButton(), &PushButton::clicked,
-            this, &RunController::onProjectsButtonClick);
-    connect(m_runPane->preferencesButton(), &PushButton::clicked,
-            this, &RunController::onPreferencesButtonClick);
-    connect(m_runPane->runButton(), &PushButton::clicked,
-            this, &RunController::onRunButtonClick);
-    connect(m_runPane->stopButton(), &PushButton::clicked,
-            this, &RunController::onStopButtonClick);
-    connect(m_runPane->segmentedBar(), &SegmentedBar::actionTriggered,
-            this, &RunController::onSegmentedBarActionTrigger);
-
-    connect(RunManager::instance(), &RunManager::applicationStarted,
-            this, &RunController::onApplicationStart);
-    connect(RunManager::instance(), &RunManager::applicationErrorOccurred,
-            this, &RunController::onApplicationErrorOccur);
-    connect(RunManager::instance(), &RunManager::applicationFinished,
-            this, &RunController::onApplicationFinish);
-    connect(RunManager::instance(), &RunManager::applicationUploadProgress,
-            this, &RunController::onApplicationUploadProgress);
-
-    connect(RunManager::instance(), &RunManager::deviceConnected,
-            this, &RunController::onDeviceConnect);
-    connect(RunManager::instance(), &RunManager::deviceDisconnected,
-            this, &RunController::onDeviceDisconnect);
+    connect(m_idEdit, &QLineEdit::editingFinished,
+            this, &PropertiesController::onControlIdEditingFinish);
+    connect(m_indexEdit, &QSpinBox::editingFinished,
+            this, &PropertiesController::onControlIndexEditingFinish);
+    connect(m_searchEdit, &LineEdit::textChanged, this, &PropertiesController::filterList);
+    connect(m_designerScene, &DesignerScene::currentFormChanged,
+            this, &PropertiesController::onSceneSelectionChange);
+    connect(m_designerScene, &DesignerScene::selectionChanged,
+            this, &PropertiesController::onSceneSelectionChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::zChanged,
+            this, &PropertiesController::onControlZChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+            this, &PropertiesController::onControlRenderInfoChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::geometryChanged,
+            this, &PropertiesController::onControlGeometryChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::propertyChanged,
+            this, &PropertiesController::onControlPropertyChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
+            this, &PropertiesController::onControlIdChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
+            this, &PropertiesController::onControlIndexChange);
 }
 
-void RunController::discharge()
+void PropertiesController::discharge()
 {
-    m_runScheduled = false;
-    m_appManuallyTerminated = false;
-    RunManager::sendTerminate();
-    m_runPane->stopButton()->setDisabled(true);
-    m_runPane->runProgressBar()->setBusy(false);
-    m_runPane->runProgressBar()->setProgress(0);
-    m_runPane->runProgressBar()->setProgressColor(QColor());
-    m_runPane->runProgressBar()->setText(progressBarMessageFor(Welcome));
-
-    m_runPane->segmentedBar()->actions().at(0)->setChecked(true);
-    m_runPane->segmentedBar()->actions().at(2)->setChecked(true);
+    m_searchEdit->clear();
+    clear();
 }
 
-void RunController::onProjectsButtonClick()
+// FIXME: This function has severe performance issues.
+void PropertiesController::onSceneSelectionChange()
 {
-    WindowManager::welcomeWindow()->show();
-    WindowManager::welcomeWindow()->raise();
-}
+    clear();
 
-void RunController::onPreferencesButtonClick()
-{
-    WindowManager::preferencesWindow()->show();
-    WindowManager::preferencesWindow()->raise();
-    WindowManager::preferencesWindow()->activateWindow();
-    WindowManager::preferencesWindow()->updateGeometry();
-}
-
-void RunController::onRunButtonClick()
-{
-    if (m_runPane->stopButton()->isEnabled()) {
-        m_runScheduled = true;
-    } else {
-        m_runScheduled = false;
-        QMetaObject::invokeMethod(this, &RunController::ran, Qt::QueuedConnection);
-    }
-    m_appManuallyTerminated = false;
-    m_runPane->runProgressBar()->setBusy(true);
-    m_runPane->runProgressBar()->setProgress(1);
-    m_runPane->runProgressBar()->setProgressColor(QColor());
-    m_runPane->runProgressBar()->setText(progressBarMessageFor(Starting));
-    m_runPane->stopButton()->setEnabled(true);
-    RunManager::sendExecute(m_runPane->runDevicesButton()->currentDevice(), ProjectManager::dir());
-}
-
-void RunController::onStopButtonClick()
-{
-    m_appManuallyTerminated = true;
-    RunManager::sendTerminate();
-}
-
-void RunController::onSegmentedBarActionTrigger(QAction* action)
-{
-    emit segmentedBarActionTriggered(m_runPane->segmentedBar()->actions().indexOf(action), action->isChecked());
-}
-
-void RunController::onApplicationStart()
-{
-    m_runPane->runProgressBar()->setBusy(false);
-    m_runPane->runProgressBar()->setProgress(100);
-    m_runPane->runProgressBar()->setProgressColor("#247dd6");
-    m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
-}
-
-void RunController::onApplicationErrorOccur(QProcess::ProcessError error, const QString& errorString)
-{
-    if (error == QProcess::Crashed && m_runScheduled)
+    if (m_designerScene->selectedControls().size() != 1)
         return;
-    m_runScheduled = false;
-    m_runPane->runProgressBar()->setProgressColor("#e05650");
-    if (error == QProcess::FailedToStart) {
-        m_runPane->stopButton()->setEnabled(false);
-        m_runPane->runProgressBar()->setBusy(false);
-        m_runPane->runProgressBar()->setProgress(100);
-        m_runPane->runProgressBar()->setText(progressBarMessageFor(Failure, errorString));
-    } else if (m_appManuallyTerminated) {
-        m_runPane->runProgressBar()->setText(progressBarMessageFor(Stopped));
-    } else {
-        m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    setDisabled(selectedControl->hasErrors());
+
+    QVector<PropertyNode> properties = selectedControl->properties();
+    if (properties.isEmpty())
+        return;
+
+    m_typeItem->setText(1, properties.first().cleanClassName);
+    m_uidItem->setText(1, selectedControl->uid());
+    m_idEdit->setText(selectedControl->id());
+    m_indexEdit->setValue(selectedControl->index());
+
+    for (const PropertyNode& propertyNode : properties) {
+        const QVector<Enum>& enumList = propertyNode.enums;
+        const QMap<QString, QVariant>& propertyMap = propertyNode.properties;
+
+        if (propertyMap.isEmpty() && enumList.isEmpty())
+            continue;
+
+        auto classItem = new QTreeWidgetItem;
+        classItem->setText(0, propertyNode.cleanClassName);
+        addTopLevelItem(classItem);
+
+        for (const QString& propertyName : propertyMap.keys()) {
+            const QVariant& propertyValue = propertyMap.value(propertyName);
+
+            switch (propertyValue.type()) {
+            case QVariant::Font: {
+                const QFont& font = propertyValue.value<QFont>();
+                createAndAddFontPropertiesBlock(classItem, font, selectedControl);
+                break;
+            }
+
+            case QVariant::Color: {
+                const QColor& color = propertyValue.value<QColor>();
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole,
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
+                classItem->addChild(item);
+                setItemWidget(item, 1,
+                              createColorHandlerWidget(propertyName, color, selectedControl));
+                break;
+            }
+
+            case QVariant::Bool: {
+                const bool checked = propertyValue.value<bool>();
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole,
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
+                classItem->addChild(item);
+                setItemWidget(item, 1,
+                              createBoolHandlerWidget(propertyName, checked, selectedControl));
+                break;
+            }
+
+            case QVariant::String: {
+                const QString& text = propertyValue.value<QString>();
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole,
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
+                classItem->addChild(item);
+                setItemWidget(item, 1,
+                              createStringHandlerWidget(propertyName, text, selectedControl));
+                break;
+            }
+
+            case QVariant::Url: {
+                const QUrl& url = propertyValue.value<QUrl>();
+                const QString& displayText = urlToDisplayText(url, selectedControl->dir());
+                auto item = new QTreeWidgetItem;
+                item->setText(0, propertyName);
+                item->setData(0, Qt::DecorationRole,
+                              ParserUtils::exists(selectedControl->dir(), propertyName));
+                classItem->addChild(item);
+                setItemWidget(item, 1,
+                              createUrlHandlerWidget(propertyName, displayText, selectedControl));
+                break;
+            }
+
+            case QVariant::Double: {
+                if (isXProperty(propertyName)) {
+                    createAndAddGeometryPropertiesBlock(classItem, properties, selectedControl, false);
+                } else {
+                    if (isGeometryProperty(propertyName))
+                        break;
+
+                    double number = propertyValue.value<double>();
+                    auto item = new QTreeWidgetItem;
+                    item->setText(0, propertyName);
+                    item->setData(0, Qt::DecorationRole,
+                                  ParserUtils::exists(selectedControl->dir(), propertyName));
+                    classItem->addChild(item);
+                    setItemWidget(item, 1,
+                                  createNumberHandlerWidget(propertyName, number, selectedControl, false));
+                }
+                break;
+            }
+
+            case QVariant::Int: {
+                if (isXProperty(propertyName)) {
+                    createAndAddGeometryPropertiesBlock(classItem, properties, selectedControl, true);
+                } else {
+                    if (isGeometryProperty(propertyName))
+                        break;
+
+                    int number = propertyValue.value<int>();
+                    auto item = new QTreeWidgetItem;
+                    item->setText(0, propertyName);
+                    item->setData(0, Qt::DecorationRole,
+                                  ParserUtils::exists(selectedControl->dir(), propertyName));
+                    classItem->addChild(item);
+                    setItemWidget(item, 1,
+                                  createNumberHandlerWidget(propertyName, number, selectedControl, true));
+                }
+                break;
+            }
+
+            default:
+                break;
+            }
+        }
+
+        for (const Enum& enumm : enumList) {
+            auto item = new QTreeWidgetItem;
+            item->setText(0, enumm.name);
+            item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->dir(), enumm.name));
+            classItem->addChild(item);
+            setItemWidget(item, 1, createEnumHandlerWidget(enumm, selectedControl));
+        }
+
+        expandItem(classItem);
+    }
+
+    filterList(m_searchEdit->text());
+}
+
+void PropertiesController::onControlZChange(Control* control)
+{
+    if (topLevelItemCount() <= 0)
+        return;
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "z") {
+                QTreeWidget* treeWidget = childItem->treeWidget();
+                Q_ASSERT(treeWidget);
+                QSpinBox* iSpinBox
+                        = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                QDoubleSpinBox* dSpinBox
+                        = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                Q_ASSERT(iSpinBox || dSpinBox);
+
+                childItem->setData(0, Qt::DecorationRole, ParserUtils::exists(control->dir(), "z"));
+                if (dSpinBox) {
+                    dSpinBox->blockSignals(true);
+                    dSpinBox->setValue(control->zValue());
+                    dSpinBox->blockSignals(false);
+                } else {
+                    iSpinBox->blockSignals(true);
+                    iSpinBox->setValue(control->zValue());
+                    iSpinBox->blockSignals(false);
+                }
+                break;
+            }
+        }
     }
 }
 
-void RunController::onApplicationFinish(int exitCode, QProcess::ExitStatus exitStatus)
+void PropertiesController::onControlRenderInfoChange(Control* control, bool codeChanged)
 {
-    if (exitStatus == QProcess::CrashExit && m_runScheduled) {
-        m_runScheduled = false;
-        emit ran();
+    if (m_designerScene->selectedControls().size() != 1)
         return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    if (topLevelItemCount() <= 0)
+        return onSceneSelectionChange();
+
+    if (codeChanged)
+        return onSceneSelectionChange();
+    else
+        return onControlGeometryChange(control);
+}
+
+void PropertiesController::onControlGeometryChange(const Control* control)
+{
+    if (topLevelItemCount() <= 0)
+        return;
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    const QRectF& geometry = control->geometry();
+
+    bool xUnknown = false, yUnknown = false;
+    if (control->type() == Form::Type) {
+        xUnknown = !ParserUtils::exists(control->dir(), "x");
+        yUnknown = !ParserUtils::exists(control->dir(), "y");
     }
-    m_runScheduled = false;
-    if (exitStatus != QProcess::CrashExit) {
-        if (exitCode == EXIT_FAILURE) {
-            m_runPane->runProgressBar()->setProgressColor("#e05650");
-            m_runPane->runProgressBar()->setText(progressBarMessageFor(Crashed));
+
+    const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
+            .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
+            .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
+            .arg(int(geometry.width()))
+            .arg(int(geometry.height()));
+
+    const bool xChanged = ParserUtils::exists(control->dir(), "x");
+    const bool yChanged = ParserUtils::exists(control->dir(), "y");
+    const bool wChanged = ParserUtils::exists(control->dir(), "width");
+    const bool hChanged = ParserUtils::exists(control->dir(), "height");
+    const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
+
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "geometry") {
+                childItem->setText(1, geometryText);
+                childItem->setData(0, Qt::DecorationRole, geometryChanged);
+            }
+            if (!isGeometryProperty(childItem->text(0)))
+                continue;
+
+            QTreeWidget* treeWidget = childItem->treeWidget();
+            Q_ASSERT(treeWidget);
+            QSpinBox* iSpinBox
+                    = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+            QDoubleSpinBox* dSpinBox
+                    = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
+            Q_ASSERT(iSpinBox || dSpinBox);
+
+            if (dSpinBox)
+                dSpinBox->blockSignals(true);
+            else
+                iSpinBox->blockSignals(true);
+
+            if (childItem->text(0) == "x") {
+                childItem->setData(0, Qt::DecorationRole, xChanged);
+                if (dSpinBox) {
+                    dSpinBox->setValue(geometry.x());
+                    fixPosForForm(control, "x", dSpinBox);
+                } else {
+                    iSpinBox->setValue(geometry.x());
+                    fixPosForForm(control, "x", iSpinBox);
+                }
+            } else if (childItem->text(0) == "y") {
+                childItem->setData(0, Qt::DecorationRole, yChanged);
+                if (dSpinBox) {
+                    dSpinBox->setValue(geometry.y());
+                    fixPosForForm(control, "y", dSpinBox);
+                } else {
+                    iSpinBox->setValue(geometry.y());
+                    fixPosForForm(control, "y", iSpinBox);
+                }
+            } else if (childItem->text(0) == "width") {
+                childItem->setData(0, Qt::DecorationRole, wChanged);
+                if (dSpinBox)
+                    dSpinBox->setValue(control->width());
+                else
+                    iSpinBox->setValue(control->width());
+            } else if (childItem->text(0) == "height") {
+                childItem->setData(0, Qt::DecorationRole, hChanged);
+                if (dSpinBox)
+                    dSpinBox->setValue(control->height());
+                else
+                    iSpinBox->setValue(control->height());
+            }
+
+            if (dSpinBox)
+                dSpinBox->blockSignals(false);
+            else
+                iSpinBox->blockSignals(false);
+        }
+    }
+}
+
+void PropertiesController::onControlIndexChange(Control* control)
+{
+    if (topLevelItemCount() <= 0)
+        return;
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    QList<Control*> affectedControls({control});
+    affectedControls.append(control->siblings());
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (!affectedControls.contains(selectedControl))
+        return;
+
+    Control* issuedControl = nullptr;
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "uid") {
+                const QString& uid = childItem->text(1);
+                for (Control* ctrl : affectedControls) {
+                    if (ctrl->uid() == uid)
+                        issuedControl = ctrl;
+                }
+            } else if (childItem->text(0) == "index") {
+                Q_ASSERT(issuedControl);
+                QTreeWidget* treeWidget = childItem->treeWidget();
+                Q_ASSERT(treeWidget);
+                QSpinBox* spinBox
+                        = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                Q_ASSERT(spinBox);
+                spinBox->setValue(control->index());
+                break;
+            }
+        }
+    }
+}
+
+void PropertiesController::onControlIdChange(Control* control, const QString& /*previousId*/)
+{
+    if (topLevelItemCount() <= 0)
+        return;
+
+    if (m_designerScene->selectedControls().size() != 1)
+        return;
+
+    Control* selectedControl = m_designerScene->selectedControls().first();
+    if (selectedControl != control)
+        return;
+
+    for (QTreeWidgetItem* topLevelItem : topLevelItems(this)) {
+        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+            if (childItem->text(0) == "id") {
+                QTreeWidget* treeWidget = childItem->treeWidget();
+                Q_ASSERT(treeWidget);
+                QLineEdit* lineEdit
+                        = qobject_cast<QLineEdit*>(treeWidget->itemWidget(childItem, 1));
+                Q_ASSERT(lineEdit);
+                lineEdit->setText(control->id());
+                break;
+            }
+        }
+    }
+}
+
+void PropertiesController::onControlPropertyChange()
+{
+    Q_UNUSED(0)
+    /*
+        FIXME: Empty for now, because the only user of the setProperty function of
+               ControlPropertyManager is this class. Hence no need to handle property
+               changes which made by us already.
+    */
+}
+
+void PropertiesController::onControlIdEditingFinish()
+{
+    if (control->id() != m_idEdit->text()) {
+        if (m_idEdit->text().isEmpty()) {
+            m_idEdit->setText(control->id());
         } else {
-            m_runPane->runProgressBar()->setText(progressBarMessageFor(Finished));
-        }
-    }
-    m_runPane->stopButton()->setEnabled(false);
-}
-
-void RunController::onApplicationUploadProgress(int progress)
-{
-    m_runPane->runProgressBar()->setProgress(progress * 0.99);
-}
-
-void RunController::onDeviceConnect(const QString& uid)
-{
-    m_runPane->runDevicesButton()->addDevice(RunManager::deviceInfo(uid));
-    if (!m_runPane->stopButton()->isEnabled())
-        m_runPane->runDevicesButton()->setCurrentDevice(uid);
-}
-
-void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
-{
-    const QString& deviceUid = UtilityFunctions::deviceUid(deviceInfo);
-    if (m_runPane->runDevicesButton()->currentDevice() == deviceUid)
-        m_runPane->runDevicesButton()->setCurrentDevice(UtilityFunctions::deviceUid(UtilityFunctions::localDeviceInfo()));
-    m_runPane->runDevicesButton()->removeDevice(deviceUid);
-
-    if (RunManager::recentDevice() == deviceUid) {
-        m_runScheduled = false;
-        RunManager::scheduleUploadCancelation();
-        if (m_runPane->runProgressBar()->progress() > 0
-                && m_runPane->runProgressBar()->progress() < 100) {
-            m_runPane->runProgressBar()->setProgressColor("#e05650");
-            m_runPane->runProgressBar()->setBusy(false);
-            m_runPane->runProgressBar()->setProgress(100);
-        }
-        if (m_runPane->stopButton()->isEnabled()) {
-            m_runPane->stopButton()->setEnabled(false);
-            m_runPane->runProgressBar()->setText(
-                        progressBarMessageFor(Disconnected, UtilityFunctions::deviceName(deviceInfo)));
+            ControlPropertyManager::setId(control, m_idEdit->text(),
+                                          ControlPropertyManager::SaveChanges
+                                          | ControlPropertyManager::UpdateRenderer);
         }
     }
 }
 
-QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
+void PropertiesController::onControlIndexEditingFinish()
 {
-    using namespace UtilityFunctions;
-    static const char* msgWelcome  = QT_TR_NOOP("<b>Ready</b>  |  Welcome to Objectwheel (Beta)");
-    static const char* msgStarting = QT_TR_NOOP("<b>Starting</b> the application....");
-    static const char* msgFailure  = QT_TR_NOOP("<b>System Failure</b>  |  %1 at %2");
-    static const char* msgDisconnected = QT_TR_NOOP("<b>Disconnected</b>  |  Connection lost to <i>%1</i> at %2");
-    static const char* msgRunning  = QT_TR_NOOP("<b>Running</b> on %1");
-    static const char* msgCrashed  = QT_TR_NOOP("<b>Crashed</b>  |  The application crashed at %1");
-    static const char* msgStopped  = QT_TR_NOOP("<b>Stopped</b>  |  The application terminated at %1");
-    static const char* msgFinished = QT_TR_NOOP("<b>Finished</b>  |  The application exited at %1");
+    // NOTE: No need for previous value equality check, since this signal is only emitted
+    // when the value is changed
+    ControlPropertyManager::Options options =
+            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
 
-    if (!ProjectManager::isStarted())
-        return {};
-
-    QString message = "<p style='white-space:pre'>" + ProjectManager::name() + "  :  ";
-
-    switch (kind) {
-    case Welcome:
-        message += tr(msgWelcome);
-        break;
-    case Starting:
-        message += tr(msgStarting);
-        break;
-    case Failure:
-        message += tr(msgFailure).arg(arg).arg(QTime::currentTime().toString());
-        break;
-    case Disconnected:
-        message += tr(msgDisconnected).arg(arg).arg(QTime::currentTime().toString());
-        break;
-    case Running:
-        message += tr(msgRunning).arg(deviceName(RunManager::deviceInfo(RunManager::recentDevice())));
-        break;
-    case Crashed:
-        message += tr(msgCrashed).arg(QTime::currentTime().toString());
-        break;
-    case Stopped:
-        message += tr(msgStopped).arg(QTime::currentTime().toString());
-        break;
-    case Finished:
-        message += tr(msgFinished).arg(QTime::currentTime().toString());
-        break;
-    default:
-        break;
-    }
-
-    return message += "</p>";
+    ControlPropertyManager::setIndex(control, spinBox->value(), options);
 }

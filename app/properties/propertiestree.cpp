@@ -1,11 +1,8 @@
-#include <toolboxtree.h>
-#include <toolboxitem.h>
-#include <toolboxdelegate.h>
-
-#include <QApplication>
+#include <propertiestree.h>
+#include <propertiesdelegate.h>
 #include <QHeaderView>
 
-ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
+PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
 {
     QPalette p(palette());
     p.setColor(QPalette::Light, "#AB8157");
@@ -27,7 +24,7 @@ ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
     setExpandsOnDoubleClick(true);
-    setItemDelegate(new PropertiesListDelegate(this));
+    setItemDelegate(new PropertiesDelegate(this));
     setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
