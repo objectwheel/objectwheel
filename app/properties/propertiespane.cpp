@@ -23,11 +23,7 @@
 #include <QHBoxLayout>
 #include <QApplication>
 
-namespace {
-enum { ROW_HEIGHT = 21 };
-int g_verticalScrollBarPosition = 99999;
-int g_horizontalScrollBarPosition = 99999;
-}
+namespace { enum { ROW_HEIGHT = 21 }; }
 
 static bool isXProperty(const QString& propertyName)
 {
@@ -98,42 +94,6 @@ static void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool i
             break;
         }
     }
-}
-
-static void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool classRow, bool verticalLine)
-{
-    painter->save();
-
-    const QPalette& pal = option.palette;
-    const QRectF& rect = option.rect;
-
-    QPainterPath path;
-    path.addRect(rect);
-    painter->setClipPath(path);
-    painter->setClipping(true);
-
-    // Fill background
-    if (classRow)
-        painter->fillRect(rect, pal.light());
-    else if (row % 2)
-        painter->fillRect(rect, pal.alternateBase());
-    else
-        painter->fillRect(rect, pal.base());
-
-    // Draw top and bottom lines
-    QColor lineColor(pal.dark().color());
-    lineColor.setAlpha(50);
-    painter->setPen(lineColor);
-    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-
-    // Draw vertical line
-    if (verticalLine) {
-        painter->drawLine(rect.topRight() + QPointF(-0.5, 0.5),
-                          rect.bottomRight() + QPointF(-0.5, -0.5));
-    }
-
-    painter->restore();
 }
 
 static QString urlToDisplayText(const QUrl& url, const QString& controlDir)
@@ -207,33 +167,6 @@ static int calculateVisibleRow(const QTreeWidgetItem* item)
 
     Q_ASSERT(0);
     return 0;
-}
-
-static QWidget* createIdHandlerWidget(Control* control)
-{
-    auto lineEdit = new QLineEdit;
-    lineEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), lineEdit));
-    lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
-    lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    lineEdit->setText(control->id());
-    lineEdit->setFocusPolicy(Qt::StrongFocus);
-    lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
-    lineEdit->setMinimumWidth(1);
-
-    QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
-    {
-        if (control->id() != lineEdit->text()) {
-            if (lineEdit->text().isEmpty()) {
-                lineEdit->setText(control->id());
-            } else {
-                ControlPropertyManager::setId(control, lineEdit->text(),
-                                              ControlPropertyManager::SaveChanges
-                                              | ControlPropertyManager::UpdateRenderer);
-            }
-        }
-    });
-
-    return lineEdit;
 }
 
 static QWidget* createStringHandlerWidget(const QString& propertyName, const QString& text,
@@ -485,32 +418,6 @@ static QWidget* createNumberHandlerWidget(const QString& propertyName, double nu
     }
 
     return abstractSpinBox;
-}
-
-static QWidget* createIndexHandlerWidget(Control* control)
-{
-    auto spinBox = new QSpinBox;
-    TransparentStyle::attach(spinBox);
-    spinBox->setCursor(Qt::PointingHandCursor);
-    spinBox->setFocusPolicy(Qt::StrongFocus);
-    spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
-    spinBox->setMinimumWidth(1);
-    spinBox->setMaximum(std::numeric_limits<int>::max());
-    spinBox->setMinimum(std::numeric_limits<int>::lowest());
-    spinBox->setValue(control->index());
-    UtilityFunctions::disableWheelEvent(spinBox);
-
-    QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
-    {
-        // NOTE: No need for previous value equality check, since this signal is only emitted
-        // when the value is changed
-        ControlPropertyManager::Options options =
-                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
-
-        ControlPropertyManager::setIndex(control, spinBox->value(), options);
-    });
-
-    return spinBox;
 }
 
 static QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, QTreeWidgetItem* fontItem)
@@ -848,63 +755,15 @@ static void createAndAddFontPropertiesBlock(QTreeWidgetItem* classItem, const QF
     treeWidget->expandItem(fontItem);
 }
 
-class PropertiesListDelegate: public QStyledItemDelegate
-{
-    Q_OBJECT
-
-public:
-    explicit PropertiesListDelegate(PropertiesPane* parent) : QStyledItemDelegate(parent)
-      , m_propertiesPane(parent)
-    {}
-
-    void paint(QPainter* painter, const QStyleOptionViewItem& option,
-               const QModelIndex& index) const override
-    {
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-
-        const QAbstractItemModel* model = index.model();
-        const bool isClassRow = !model->parent(index).isValid() && index.row() > 3; // FIXME: For Temporary "index" entry, should be 2 otherwise
-
-        fillBackground(painter, option,
-                       calculateVisibleRow(m_propertiesPane->itemFromIndex(index)),
-                       isClassRow, index.column() == 0 && !isClassRow);
-
-        // Draw text
-        if (isClassRow) {
-            painter->setPen(option.palette.highlightedText().color());
-        } else {
-            if (index.column() == 0 && index.data(Qt::DecorationRole).toBool()) {
-                QFont font (option.font);
-                font.setWeight(QFont::Medium);
-                painter->setFont(font);
-                painter->setPen(option.palette.link().color());
-            } else {
-                painter->setPen(option.palette.text().color());
-            }
-        }
-
-        const QRectF& textRect = option.rect.adjusted(5, 0, 0, 0);
-        const QString& text = index.data(Qt::DisplayRole).toString();
-        painter->drawText(textRect,
-                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
-                          QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
-        painter->restore();
-    }
-
-    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
-    {
-        const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
-        return QSize(size.width(), ROW_HEIGHT);
-    }
-
-private:
-    PropertiesPane* m_propertiesPane;
-};
-
 PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
   , m_searchEdit(new LineEdit(this))
+  , m_typeItem(new QTreeWidgetItem)
+  , m_uidItem(new QTreeWidgetItem)
+  , m_idItem(new QTreeWidgetItem)
+  , m_indexItem(new QTreeWidgetItem)
+  , m_idEdit(new QLineEdit(this))
+  , m_indexEdit(new QSpinBox(this))
 {
     QPalette p(palette());
     p.setColor(QPalette::Light, "#AB8157");
@@ -965,6 +824,40 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
                 .arg(palette().brightText().color().name())
                 );
 
+    m_idEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), m_idEdit));
+    m_idEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
+    m_idEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    m_idEdit->setFocusPolicy(Qt::StrongFocus);
+    m_idEdit->setSizePolicy(QSizePolicy::Ignored, m_idEdit->sizePolicy().verticalPolicy());
+    m_idEdit->setMinimumWidth(1);
+
+    TransparentStyle::attach(m_indexEdit);
+    m_indexEdit->setCursor(Qt::PointingHandCursor);
+    m_indexEdit->setFocusPolicy(Qt::StrongFocus);
+    m_indexEdit->setSizePolicy(QSizePolicy::Ignored, m_indexEdit->sizePolicy().verticalPolicy());
+    m_indexEdit->setMinimumWidth(1);
+    m_indexEdit->setMaximum(std::numeric_limits<int>::max());
+    m_indexEdit->setMinimum(std::numeric_limits<int>::lowest());
+    UtilityFunctions::disableWheelEvent(m_indexEdit);
+
+    m_typeItem->setText(0, tr("Type"));
+    m_typeItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
+    addTopLevelItem(m_typeItem);
+
+    m_uidItem->setText(0, "uid");
+    m_uidItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
+    addTopLevelItem(m_uidItem);
+
+    m_idItem->setText(0, "id");
+    m_idItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
+    addTopLevelItem(m_idItem);
+    setItemWidget(m_idItem, 1, m_idEdit);
+
+    m_indexItem->setText(0, "index");
+    m_indexItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
+    addTopLevelItem(m_indexItem);
+    setItemWidget(m_indexItem, 1, m_indexEdit);
+
     m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit->devicePixelRatioF())),
                             QLineEdit::LeadingPosition);
     m_searchEdit->setPlaceholderText(tr("Search"));
@@ -975,33 +868,12 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
     // must call it manually.
     m_searchEdit->adjustSize();
 
+
+    connect(m_idEdit, &QLineEdit::editingFinished,
+            this, &PropertiesPane::onControlIdEditingFinish);
+    connect(m_indexEdit, &QSpinBox::editingFinished,
+            this, &PropertiesPane::onControlIndexEditingFinish);
     connect(m_searchEdit, &LineEdit::textChanged, this, &PropertiesPane::filterList);
-
-    connect(verticalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
-    {
-        if (topLevelItemCount() > 0) {
-            g_verticalScrollBarPosition = verticalScrollBar()->maximum()
-                    - verticalScrollBar()->minimum() - value;
-        }
-    });
-    connect(horizontalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
-    {
-        if (topLevelItemCount() > 0) {
-            g_horizontalScrollBarPosition = horizontalScrollBar()->maximum()
-                    - horizontalScrollBar()->minimum() - value;
-        }
-    });
-    connect(verticalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
-    {
-        if (topLevelItemCount() > 0)
-            g_verticalScrollBarPosition = max - min - verticalScrollBar()->value();
-    });
-    connect(horizontalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
-    {
-        if (topLevelItemCount() > 0)
-            g_horizontalScrollBarPosition = max - min - horizontalScrollBar()->value();
-    });
-
     connect(m_designerScene, &DesignerScene::currentFormChanged,
             this, &PropertiesPane::onSceneSelectionChange);
     connect(m_designerScene, &DesignerScene::selectionChanged,
@@ -1022,18 +894,15 @@ PropertiesPane::PropertiesPane(DesignerScene* designerScene, QWidget* parent) : 
 
 void PropertiesPane::discharge()
 {
-    g_verticalScrollBarPosition = 99999;
-    g_horizontalScrollBarPosition = 99999;
     m_searchEdit->clear();
     clear();
 }
 
+#include <QElapsedTimer>
+#include <QDebug>
 // FIXME: This function has severe performance issues.
 void PropertiesPane::onSceneSelectionChange()
 {
-    const int verticalScrollBarPosition = g_verticalScrollBarPosition;
-    const int horizontalScrollBarPosition = g_horizontalScrollBarPosition;
-
     clear();
 
     if (m_designerScene->selectedControls().size() != 1)
@@ -1046,30 +915,10 @@ void PropertiesPane::onSceneSelectionChange()
     if (properties.isEmpty())
         return;
 
-    QTreeWidgetItem* typeItem = new QTreeWidgetItem;
-    typeItem->setText(0, tr("Type"));
-    typeItem->setText(1, properties.first().cleanClassName);
-    typeItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
-    addTopLevelItem(typeItem);
-
-    QTreeWidgetItem* uidItem = new QTreeWidgetItem;
-    uidItem->setText(0, "uid");
-    uidItem->setText(1, selectedControl->uid());
-    uidItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
-    addTopLevelItem(uidItem);
-
-    QTreeWidgetItem* idItem = new QTreeWidgetItem;
-    idItem->setText(0, "id");
-    idItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
-    addTopLevelItem(idItem);
-    setItemWidget(idItem, 1, createIdHandlerWidget(selectedControl));
-
-    // FIXME: For Temporary "index" entry
-    QTreeWidgetItem* indexItem = new QTreeWidgetItem;
-    indexItem->setText(0, "index");
-    indexItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
-    addTopLevelItem(indexItem);
-    setItemWidget(indexItem, 1, createIndexHandlerWidget(selectedControl));
+    m_typeItem->setText(1, properties.first().cleanClassName);
+    m_uidItem->setText(1, selectedControl->uid());
+    m_idEdit->setText(selectedControl->id());
+    m_indexEdit->setValue(selectedControl->index());
 
     for (const PropertyNode& propertyNode : properties) {
         const QVector<Enum>& enumList = propertyNode.enums;
@@ -1196,13 +1045,6 @@ void PropertiesPane::onSceneSelectionChange()
     }
 
     filterList(m_searchEdit->text());
-
-    verticalScrollBar()->setSliderPosition(verticalScrollBar()->maximum()
-                                           - verticalScrollBar()->minimum()
-                                           - verticalScrollBarPosition);
-    horizontalScrollBar()->setSliderPosition(horizontalScrollBar()->maximum()
-                                             - horizontalScrollBar()->minimum()
-                                             - horizontalScrollBarPosition);
 }
 
 void PropertiesPane::onControlZChange(Control* control)
@@ -1429,6 +1271,29 @@ void PropertiesPane::onControlPropertyChange()
                ControlPropertyManager is this class. Hence no need to handle property
                changes which made by us already.
     */
+}
+
+void PropertiesPane::onControlIdEditingFinish()
+{
+    if (control->id() != m_idEdit->text()) {
+        if (m_idEdit->text().isEmpty()) {
+            m_idEdit->setText(control->id());
+        } else {
+            ControlPropertyManager::setId(control, m_idEdit->text(),
+                                          ControlPropertyManager::SaveChanges
+                                          | ControlPropertyManager::UpdateRenderer);
+        }
+    }
+}
+
+void PropertiesPane::onControlIndexEditingFinish()
+{
+    // NOTE: No need for previous value equality check, since this signal is only emitted
+    // when the value is changed
+    ControlPropertyManager::Options options =
+            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
+
+    ControlPropertyManager::setIndex(control, spinBox->value(), options);
 }
 
 void PropertiesPane::filterList(const QString& filter)

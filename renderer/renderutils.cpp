@@ -862,7 +862,6 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
     if (instance->object == 0)
         return propertyNodes;
 
-
     const QObject* object = instance->object;
     const QMetaObject* metaObject = object->metaObject();
 

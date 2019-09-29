@@ -72,8 +72,8 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setPlaceholderText(tr("Search"));
     m_searchLineEdit->setClearButtonEnabled(true);
-    connect(m_searchLineEdit, &LineEdit::textEdited,
-            this, &PreferencesWindow::search);
+    connect(m_searchLineEdit, &LineEdit::editingFinished,
+            this, [=] { search(m_searchLineEdit->text()); });
 
     m_dialogButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Reset
                                           | QDialogButtonBox::Apply | QDialogButtonBox::Ok);
