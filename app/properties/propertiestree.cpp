@@ -1,6 +1,7 @@
 #include <propertiestree.h>
 #include <propertiesdelegate.h>
 #include <QHeaderView>
+#include <QPainter>
 
 PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
 {
@@ -69,6 +70,14 @@ PropertiesDelegate* PropertiesTree::propertiesDelegate() const
     return static_cast<PropertiesDelegate*>(itemDelegate());
 }
 
+QList<QTreeWidgetItem*> PropertiesTree::topLevelItems() const
+{
+    QList<QTreeWidgetItem*> items;
+    for (int i = 0; i < topLevelItemCount(); ++i)
+        items.append(topLevelItem(i));
+    return items;
+}
+
 void PropertiesTree::paintEvent(QPaintEvent* event)
 {
     QPainter painter(viewport());
@@ -79,11 +88,12 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
-    qreal rowCount = viewport()->height() / qreal(propertiesDelegate()->sizeHint().height());
+    qreal height = PropertiesDelegate::ROW_HEIGHT;
+    qreal rowCount = viewport()->height() / height;
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
     for (int i = 0; i < rowCount; ++i) {
         painter.save();
-        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
+        QRectF rect(0, i * height, viewport()->width(), height);
         QPainterPath path;
         path.addRect(rect);
         painter.setClipPath(path);
@@ -138,7 +148,9 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     option.initFrom(this);
     option.rect = rect;
 
-    fillBackground(painter, option, calculateVisibleRow(itemFromIndex(index)), isClassRow, false);
+    propertiesDelegate()->paintBackground(painter, option,
+                                          propertiesDelegate()->calculateVisibleRow(itemFromIndex(index)),
+                                          isClassRow, false);
 
     // Draw handle
     if (hasChild) {

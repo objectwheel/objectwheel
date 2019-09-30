@@ -12,6 +12,9 @@ class PropertiesDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY(PropertiesDelegate)
 
 public:
+    enum { ROW_HEIGHT = 21 };
+
+public:
     explicit PropertiesDelegate(PropertiesTree* propertiesTree);
 
     int calculateVisibleRow(const QTreeWidgetItem* item) const;

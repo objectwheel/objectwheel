@@ -2,19 +2,6 @@
 #include <propertiestree.h>
 #include <QPainter>
 
-static QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget)
-{
-    QList<QTreeWidgetItem*> items;
-
-    if (!treeWidget)
-        return items;
-
-    for (int i = 0; i < treeWidget->topLevelItemCount(); ++i)
-        items.append(treeWidget->topLevelItem(i));
-
-    return items;
-}
-
 static QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
                                          bool includeCollapsed = true, bool includeHidden = false)
 {
@@ -49,15 +36,13 @@ PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyled
 
 int PropertiesDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
 {
-    QTreeWidget* treeWidget = item->treeWidget();
-    Q_ASSERT(treeWidget);
-
+    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesTree->topLevelItems();
     int totalCount = 0;
-    for (QTreeWidgetItem* topLevelItem : topLevelItems(treeWidget))
+    for (QTreeWidgetItem* topLevelItem : topLevelItems)
         totalCount += allSubChildItems(topLevelItem, true, false).size();
 
     int count = 0;
-    for (QTreeWidgetItem* topLevelItem : topLevelItems(treeWidget)) {
+    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
         for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem, true, false)) {
             if (childItem == item)
                 return totalCount - count - 1;
@@ -142,5 +127,5 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     const QSize& size = QStyledItemDelegate::sizeHint(option, index);
-    return QSize(size.width(), 21);
+    return QSize(size.width(), ROW_HEIGHT);
 }

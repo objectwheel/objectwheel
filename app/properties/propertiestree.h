@@ -17,6 +17,8 @@ public:
 
     PropertiesDelegate* propertiesDelegate() const;
 
+    QList<QTreeWidgetItem*> topLevelItems() const;
+
 private:
     void paintEvent(QPaintEvent* event);
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const;
