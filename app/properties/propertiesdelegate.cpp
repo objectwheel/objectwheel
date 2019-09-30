@@ -2,34 +2,6 @@
 #include <propertiestree.h>
 #include <QPainter>
 
-static QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
-                                         bool includeCollapsed = true, bool includeHidden = false)
-{
-    QList<QTreeWidgetItem*> items;
-
-    if (!parentItem)
-        return items;
-
-    if ((!includeCollapsed && !parentItem->isExpanded())
-            || (!includeHidden && parentItem->isHidden())) {
-        if (includeParent && (includeHidden || !parentItem->isHidden()))
-            items.append(parentItem);
-
-        return items;
-    }
-
-    if (includeParent)
-        items.append(parentItem);
-
-    for (int i = 0; i < parentItem->childCount(); i++) {
-        if (includeHidden || !parentItem->child(i)->isHidden())
-            items.append(parentItem->child(i));
-        items.append(allSubChildItems(parentItem->child(i), false, includeCollapsed, includeHidden));
-    }
-
-    return items;
-}
-
 PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyledItemDelegate(propertiesTree)
   , m_propertiesTree(propertiesTree)
 {}
@@ -39,11 +11,11 @@ int PropertiesDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
     const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesTree->topLevelItems();
     int totalCount = 0;
     for (QTreeWidgetItem* topLevelItem : topLevelItems)
-        totalCount += allSubChildItems(topLevelItem, true, false).size();
+        totalCount += m_propertiesTree->allSubChildItems(topLevelItem, true, false).size();
 
     int count = 0;
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem, true, false)) {
+        for (QTreeWidgetItem* childItem : m_propertiesTree->allSubChildItems(topLevelItem, true, false)) {
             if (childItem == item)
                 return totalCount - count - 1;
             ++count;

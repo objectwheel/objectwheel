@@ -18,6 +18,8 @@ public:
     PropertiesDelegate* propertiesDelegate() const;
 
     QList<QTreeWidgetItem*> topLevelItems() const;
+    QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
+                                             bool includeCollapsed = true, bool includeHidden = false) const;
 
 private:
     void paintEvent(QPaintEvent* event);

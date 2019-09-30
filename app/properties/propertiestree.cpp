@@ -78,6 +78,36 @@ QList<QTreeWidgetItem*> PropertiesTree::topLevelItems() const
     return items;
 }
 
+QList<QTreeWidgetItem*> PropertiesTree::allSubChildItems(QTreeWidgetItem* parentItem,
+                                                         bool includeParent,
+                                                         bool includeCollapsed,
+                                                         bool includeHidden) const
+{
+    QList<QTreeWidgetItem*> items;
+
+    if (!parentItem)
+        return items;
+
+    if ((!includeCollapsed && !parentItem->isExpanded())
+            || (!includeHidden && parentItem->isHidden())) {
+        if (includeParent && (includeHidden || !parentItem->isHidden()))
+            items.append(parentItem);
+
+        return items;
+    }
+
+    if (includeParent)
+        items.append(parentItem);
+
+    for (int i = 0; i < parentItem->childCount(); i++) {
+        if (includeHidden || !parentItem->child(i)->isHidden())
+            items.append(parentItem->child(i));
+        items.append(allSubChildItems(parentItem->child(i), false, includeCollapsed, includeHidden));
+    }
+
+    return items;
+}
+
 void PropertiesTree::paintEvent(QPaintEvent* event)
 {
     QPainter painter(viewport());

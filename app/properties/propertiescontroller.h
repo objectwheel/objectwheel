@@ -32,6 +32,9 @@ private slots:
     void onControlIndexEditingFinish();
 
 private:
+    Control* control() const;
+
+private:
     PropertiesPane* m_propertiesPane;
     DesignerScene* m_designerScene;
 };

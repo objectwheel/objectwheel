@@ -725,7 +725,7 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
 void PropertiesController::discharge()
 {
     m_propertiesPane->searchEdit()->clear();
-    clear();
+    m_propertiesPane->propertiesTree()->clear();
 }
 
 void PropertiesController::onSearchEditEditingFinish()
@@ -764,13 +764,13 @@ void PropertiesController::onSearchEditEditingFinish()
 // FIXME: This function has severe performance issues.
 void PropertiesController::onSceneSelectionChange()
 {
-    clear();
+    m_propertiesPane->propertiesTree()->clear();
 
     if (m_designerScene->selectedControls().size() != 1)
         return;
 
     Control* selectedControl = m_designerScene->selectedControls().first();
-    setDisabled(selectedControl->hasErrors());
+    m_propertiesPane->setDisabled(selectedControl->hasErrors());
 
     QVector<PropertyNode> properties = selectedControl->properties();
     if (properties.isEmpty())
@@ -810,7 +810,7 @@ void PropertiesController::onSceneSelectionChange()
                               ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                              createColorHandlerWidget(propertyName, color, selectedControl));
+                                                                  createColorHandlerWidget(propertyName, color, selectedControl));
                 break;
             }
 
@@ -822,7 +822,7 @@ void PropertiesController::onSceneSelectionChange()
                               ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                              createBoolHandlerWidget(propertyName, checked, selectedControl));
+                                                                  createBoolHandlerWidget(propertyName, checked, selectedControl));
                 break;
             }
 
@@ -834,7 +834,7 @@ void PropertiesController::onSceneSelectionChange()
                               ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                              createStringHandlerWidget(propertyName, text, selectedControl));
+                                                                  createStringHandlerWidget(propertyName, text, selectedControl));
                 break;
             }
 
@@ -847,7 +847,7 @@ void PropertiesController::onSceneSelectionChange()
                               ParserUtils::exists(selectedControl->dir(), propertyName));
                 classItem->addChild(item);
                 m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                              createUrlHandlerWidget(propertyName, displayText, selectedControl));
+                                                                  createUrlHandlerWidget(propertyName, displayText, selectedControl));
                 break;
             }
 
@@ -865,7 +865,7 @@ void PropertiesController::onSceneSelectionChange()
                                   ParserUtils::exists(selectedControl->dir(), propertyName));
                     classItem->addChild(item);
                     m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                  createNumberHandlerWidget(propertyName, number, selectedControl, false));
+                                                                      createNumberHandlerWidget(propertyName, number, selectedControl, false));
                 }
                 break;
             }
@@ -884,7 +884,7 @@ void PropertiesController::onSceneSelectionChange()
                                   ParserUtils::exists(selectedControl->dir(), propertyName));
                     classItem->addChild(item);
                     m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                  createNumberHandlerWidget(propertyName, number, selectedControl, true));
+                                                                      createNumberHandlerWidget(propertyName, number, selectedControl, true));
                 }
                 break;
             }
@@ -921,7 +921,7 @@ void PropertiesController::onControlZChange(Control* control)
         return;
 
     for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
             if (childItem->text(0) == "z") {
                 QTreeWidget* treeWidget = childItem->treeWidget();
                 Q_ASSERT(treeWidget);
@@ -998,7 +998,7 @@ void PropertiesController::onControlGeometryChange(const Control* control)
     const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
 
     for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
             if (childItem->text(0) == "geometry") {
                 childItem->setText(1, geometryText);
                 childItem->setData(0, Qt::DecorationRole, geometryChanged);
@@ -1076,7 +1076,7 @@ void PropertiesController::onControlIndexChange(Control* control)
 
     Control* issuedControl = nullptr;
     for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
             if (childItem->text(0) == "uid") {
                 const QString& uid = childItem->text(1);
                 for (Control* ctrl : affectedControls) {
@@ -1110,7 +1110,7 @@ void PropertiesController::onControlIdChange(Control* control, const QString& /*
         return;
 
     for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
             if (childItem->text(0) == "id") {
                 QTreeWidget* treeWidget = childItem->treeWidget();
                 Q_ASSERT(treeWidget);
@@ -1136,13 +1136,15 @@ void PropertiesController::onControlPropertyChange()
 
 void PropertiesController::onControlIdEditingFinish()
 {
-    if (control->id() != m_propertiesPane->idEdit()->text()) {
-        if (m_propertiesPane->idEdit()->text().isEmpty()) {
-            m_propertiesPane->idEdit()->setText(control->id());
-        } else {
-            ControlPropertyManager::setId(control, m_propertiesPane->idEdit()->text(),
-                                          ControlPropertyManager::SaveChanges
-                                          | ControlPropertyManager::UpdateRenderer);
+    if (Control* selectedControl = control()) {
+        if (selectedControl->id() != m_propertiesPane->idEdit()->text()) {
+            if (m_propertiesPane->idEdit()->text().isEmpty()) {
+                m_propertiesPane->idEdit()->setText(selectedControl->id());
+            } else {
+                ControlPropertyManager::setId(selectedControl, m_propertiesPane->idEdit()->text(),
+                                              ControlPropertyManager::SaveChanges |
+                                              ControlPropertyManager::UpdateRenderer);
+            }
         }
     }
 }
@@ -1151,8 +1153,15 @@ void PropertiesController::onControlIndexEditingFinish()
 {
     // NOTE: No need for previous value equality check, since this signal is only emitted
     // when the value is changed
-    ControlPropertyManager::Options options =
-            ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
+    ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
+                                     ControlPropertyManager::SaveChanges |
+                                     ControlPropertyManager::UpdateRenderer);
+}
 
-    ControlPropertyManager::setIndex(control, m_propertiesPane->indexEdit()->value(), options);
+Control* PropertiesController::control() const
+{
+    const QList<Control*>& selectedControls = m_designerScene->selectedControls();
+    if (selectedControls.size() != 1)
+        return nullptr;
+    return selectedControls.first();
 }
