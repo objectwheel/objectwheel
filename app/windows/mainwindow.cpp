@@ -6,6 +6,7 @@
 #include <toolboxpane.h>
 #include <toolboxcontroller.h>
 #include <propertiespane.h>
+#include <propertiescontroller.h>
 #include <assetspane.h>
 #include <formspane.h>
 #include <inspectorpane.h>
@@ -90,9 +91,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_modeSelectorController(new ModeSelectorController(m_modeSelectorPane, this))
   , m_toolboxPane(new ToolboxPane)
   , m_toolboxController(new ToolboxController(m_toolboxPane, this))
+  , m_propertiesPane(new PropertiesPane)
+  , m_propertiesController(new PropertiesController(m_propertiesPane, m_centralWidget->designerPane()->designerView()->scene(), this))
   , m_formsPane(new FormsPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_inspectorPane(new InspectorPane(m_centralWidget->designerPane()->designerView()->scene()))
-  , m_propertiesPane(new PropertiesPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_assetsPane(new AssetsPane)
 {
     setWindowTitle(APP_NAME);
@@ -353,10 +355,10 @@ void MainWindow::discharge()
     m_runController->discharge();
     m_modeSelectorController->discharge();
     m_toolboxController->discharge();
+    m_propertiesController->discharge();
     m_centralWidget->discharge();
     m_formsPane->discharge();
     m_inspectorPane->discharge();
-    m_propertiesPane->discharge();
     m_assetsPane->discharge();
 
     showLeftPanes(true);

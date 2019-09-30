@@ -34,6 +34,21 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
   , m_idEdit(new QLineEdit(this))
   , m_indexEdit(new QSpinBox(this))
 {
+    setFocusPolicy(Qt::NoFocus);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    m_searchEdit->setClearButtonEnabled(true);
+    m_searchEdit->setPlaceholderText(tr("Search"));
+    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959",
+                                                             m_searchEdit->devicePixelRatioF()),
+                            QLineEdit::LeadingPosition);
+
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(2);
+    layout->setContentsMargins(3, 3, 3, 3);
+    layout->addWidget(m_propertiesTree);
+    layout->addWidget(m_searchEdit);
+
     m_idEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), m_idEdit));
     m_idEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     m_idEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -67,17 +82,11 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     m_indexItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     m_propertiesTree->addTopLevelItem(m_indexItem);
     m_propertiesTree->setItemWidget(m_indexItem, 1, m_indexEdit);
+}
 
-    m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959",
-                                                                   m_searchEdit->devicePixelRatioF())),
-                            QLineEdit::LeadingPosition);
-    m_searchEdit->setPlaceholderText(tr("Search"));
-    m_searchEdit->setClearButtonEnabled(true);
-    // Since PropertiesPane (parent of the m_searchEdit) has
-    // its own layout and we don't add m_searchEdit into it
-    // QWidget::setVisible does not adjust the size. So we
-    // must call it manually.
-    m_searchEdit->adjustSize();
+PropertiesTree* PropertiesPane::propertiesTree() const
+{
+    return m_propertiesTree;
 }
 
 QSize PropertiesPane::sizeHint() const

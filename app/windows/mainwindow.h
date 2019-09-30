@@ -10,10 +10,11 @@ class ModeSelectorPane;
 class ModeSelectorController;
 class ToolboxPane;
 class ToolboxController;
+class PropertiesPane;
+class PropertiesController;
 class FormsPane;
 class InspectorPane;
 class CentralWidget;
-class PropertiesPane;
 class AssetsPane;
 
 class MainWindow : public QMainWindow
@@ -65,9 +66,10 @@ private:
     ModeSelectorController* m_modeSelectorController;
     ToolboxPane* m_toolboxPane;
     ToolboxController* m_toolboxController;
+    PropertiesPane* m_propertiesPane;
+    PropertiesController* m_propertiesController;
     FormsPane* m_formsPane;
     InspectorPane* m_inspectorPane;
-    PropertiesPane* m_propertiesPane;
     AssetsPane* m_assetsPane;
 };
 
