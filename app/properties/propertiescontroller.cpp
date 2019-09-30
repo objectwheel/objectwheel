@@ -772,10 +772,10 @@ void PropertiesController::onSceneSelectionChange()
         if (properties.isEmpty())
             return;
 
-        m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
-        m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
-        m_propertiesPane->idEdit()->setText(selectedControl->id());
-        m_propertiesPane->indexEdit()->setValue(selectedControl->index());
+//        m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
+//        m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
+//        m_propertiesPane->idEdit()->setText(selectedControl->id());
+//        m_propertiesPane->indexEdit()->setValue(selectedControl->index());
 
         for (const PropertyNode& propertyNode : properties) {
             const QVector<Enum>& enumList = propertyNode.enums;
@@ -1082,6 +1082,7 @@ void PropertiesController::onControlIndexChange(Control* control)
         }
     }
 }
+
 void PropertiesController::onControlIdChange(Control* control, const QString& /*previousId*/)
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)

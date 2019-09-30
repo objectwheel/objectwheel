@@ -43,12 +43,6 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
                                                              m_searchEdit->devicePixelRatioF()),
                             QLineEdit::LeadingPosition);
 
-    auto layout = new QVBoxLayout(this);
-    layout->setSpacing(2);
-    layout->setContentsMargins(3, 3, 3, 3);
-    layout->addWidget(m_propertiesTree);
-    layout->addWidget(m_searchEdit);
-
     m_idEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), m_idEdit));
     m_idEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     m_idEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -82,6 +76,12 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     m_indexItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     m_propertiesTree->addTopLevelItem(m_indexItem);
     m_propertiesTree->setItemWidget(m_indexItem, 1, m_indexEdit);
+
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(2);
+    layout->setContentsMargins(3, 3, 3, 3);
+    layout->addWidget(m_propertiesTree);
+    layout->addWidget(m_searchEdit);
 }
 
 PropertiesTree* PropertiesPane::propertiesTree() const
