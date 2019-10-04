@@ -17,15 +17,14 @@ class PropertyItemFactory final : public QObject
 public:
     enum Type {
         String,
-        Url,
         Enum,
         Bool,
         Color,
-        NumberInt,
-        NumberReal,
+        Int,
+        Real,
+        FontSize,
         FontFamily,
         FontWeight,
-        FontSize,
         FontCapitalization
     };
     Q_ENUM(Type)
