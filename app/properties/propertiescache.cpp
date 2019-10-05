@@ -1,7 +1,8 @@
-#include <editorwidgetcache.h>
+#include <propertiescache.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
 
+#include <QTreeWidgetItem>
 #include <QMetaEnum>
 #include <QStack>
 #include <QHBoxLayout>
@@ -12,52 +13,71 @@
 #include <QSpinBox>
 #include <QFontDatabase>
 
-EditorWidgetCache::EditorWidgetCache(QObject* parent) : QObject(parent)
+PropertiesCache::PropertiesCache(QObject* parent) : QObject(parent)
 {
 }
 
-EditorWidgetCache::~EditorWidgetCache()
+PropertiesCache::~PropertiesCache()
 {
     clear();
 }
 
-void EditorWidgetCache::clear()
+void PropertiesCache::clear()
 {
-    for (PropertyStack* stack : m_widgets) {
-        for (QWidget* widget : *stack)
+    for (WidgetStack* stack : qAsConst(m_widgets)) {
+        const WidgetStack& _stack = *stack;
+        for (QWidget* widget : _stack)
             delete widget;
         delete stack;
     }
     m_widgets.clear();
+
+    for (QTreeWidgetItem* item : qAsConst(m_items))
+        delete item;
+    m_items.clear();
 }
 
-void EditorWidgetCache::reserve(int size)
+void PropertiesCache::reserve(int size)
 {
-    auto e = QMetaEnum::fromType<Type>();
+    const QMetaEnum& e = QMetaEnum::fromType<Type>();
     for (int i = 0; i < e.keyCount(); ++i) {
         Type type = Type(e.value(i));
         for (int i = size; i--;)
             push(type, createWidget(type));
     }
+    for (int i = size; i--;)
+        push(new QTreeWidgetItem);
 }
 
-void EditorWidgetCache::push(EditorWidgetCache::Type type, QWidget* widget)
+void PropertiesCache::push(PropertiesCache::Type type, QWidget* widget)
 {
     if (!m_widgets.contains(type))
-        m_widgets.insert(type, new PropertyStack);
+        m_widgets.insert(type, new WidgetStack);
     m_widgets.value(type)->push(widget);
 }
 
-QWidget* EditorWidgetCache::pop(EditorWidgetCache::Type type)
+void PropertiesCache::push(QTreeWidgetItem* item)
 {
-    if (PropertyStack* stack = m_widgets.value(type, nullptr)) {
+    m_items.push(item);
+}
+
+QWidget* PropertiesCache::pop(PropertiesCache::Type type)
+{
+    if (WidgetStack* stack = m_widgets.value(type, nullptr)) {
         if (!stack->isEmpty())
             return stack->pop();
     }
     return createWidget(type);
 }
 
-QWidget* EditorWidgetCache::createWidget(EditorWidgetCache::Type type)
+QTreeWidgetItem* PropertiesCache::pop()
+{
+    if (m_items.isEmpty())
+        return new QTreeWidgetItem;
+    return m_items.pop();
+}
+
+QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
 {
     switch (type) {
     case String: {
@@ -175,7 +195,7 @@ QWidget* EditorWidgetCache::createWidget(EditorWidgetCache::Type type)
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
-        auto e = QMetaEnum::fromType<QFont::Weight>();
+        const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
         for (int i = 0; i < e.keyCount(); ++i)
             comboBox->addItem(e.key(i));
         return comboBox;
@@ -189,7 +209,7 @@ QWidget* EditorWidgetCache::createWidget(EditorWidgetCache::Type type)
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
-        auto e = QMetaEnum::fromType<QFont::Capitalization>();
+        const QMetaEnum& e = QMetaEnum::fromType<QFont::Capitalization>();
         for (int i = 0; i < e.keyCount(); ++i)
             comboBox->addItem(e.key(i));
         return comboBox;

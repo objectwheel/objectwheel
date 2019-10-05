@@ -400,7 +400,7 @@ static QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
 
-    auto e = QMetaEnum::fromType<QFont::Weight>();
+    const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
     for (int i = 0; i < e.keyCount(); ++i)
         comboBox->addItem(e.key(i));
 
@@ -433,7 +433,7 @@ static QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capi
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
 
-    auto e = QMetaEnum::fromType<QFont::Capitalization>();
+    const QMetaEnum& e = QMetaEnum::fromType<QFont::Capitalization>();
     for (int i = 0; i < e.keyCount(); ++i)
         comboBox->addItem(e.key(i));
 
@@ -571,124 +571,6 @@ static void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
     treeWidget->expandItem(geometryItem);
 }
 
-static void createAndAddFontPropertiesBlock(QTreeWidgetItem* classItem, const QFont& font, Control* control)
-{
-    QTreeWidget* treeWidget = classItem->treeWidget();
-    Q_ASSERT(treeWidget);
-
-    const bool isPx = font.pixelSize() > 0 ? true : false;
-    const QString& fontText = QString::fromUtf8("[%1, %2%3]")
-            .arg(QFontInfo(font).family())
-            .arg(isPx ? font.pixelSize() : font.pointSize())
-            .arg(isPx ? "px" : "pt");
-
-    const bool fChanged    = ParserUtils::exists(control->dir(), "font.family");
-    const bool bChanged    = ParserUtils::exists(control->dir(), "font.bold");
-    const bool iChanged    = ParserUtils::exists(control->dir(), "font.italic");
-    const bool uChanged    = ParserUtils::exists(control->dir(), "font.underline");
-    const bool poChanged   = ParserUtils::exists(control->dir(), "font.pointSize");
-    const bool piChanged   = ParserUtils::exists(control->dir(), "font.pixelSize");
-    const bool wChanged    = ParserUtils::exists(control->dir(), "font.weight");
-    const bool oChanged    = ParserUtils::exists(control->dir(), "font.overline");
-    const bool sChanged    = ParserUtils::exists(control->dir(), "font.strikeout");
-    const bool cChanged    = ParserUtils::exists(control->dir(), "font.capitalization");
-    const bool kChanged    = ParserUtils::exists(control->dir(), "font.kerning");
-    const bool prChanged   = ParserUtils::exists(control->dir(), "font.preferShaping");
-    const bool fontChanged = fChanged || bChanged || iChanged || uChanged || poChanged || piChanged
-            || wChanged || oChanged || sChanged || cChanged || kChanged || prChanged;
-
-    auto fontItem = new QTreeWidgetItem;
-    fontItem->setText(0, "font");
-    fontItem->setText(1, fontText);
-    fontItem->setData(0, Qt::DecorationRole, fontChanged);
-    classItem->addChild(fontItem);
-
-    auto poItem = new QTreeWidgetItem;
-    poItem->setText(0, "pointSize");
-    poItem->setData(0, Qt::DecorationRole, poChanged);
-    fontItem->addChild(poItem);
-    treeWidget->setItemWidget(
-                poItem, 1, createFontSizeHandlerWidget("pointSize", font.pointSize(), control, fontItem));
-
-    auto pxItem = new QTreeWidgetItem;
-    pxItem->setText(0, "pixelSize");
-    pxItem->setData(0, Qt::DecorationRole, piChanged);
-    fontItem->addChild(pxItem);
-    treeWidget->setItemWidget(
-                pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), control, fontItem));
-
-    auto fItem = new QTreeWidgetItem;
-    fItem->setText(0, "family");
-    fItem->setData(0, Qt::DecorationRole, fChanged);
-    fontItem->addChild(fItem);
-    treeWidget->setItemWidget(
-                fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), control, fontItem));
-
-    auto wItem = new QTreeWidgetItem;
-    wItem->setText(0, "weight");
-    wItem->setData(0, Qt::DecorationRole, wChanged);
-    fontItem->addChild(wItem);
-    treeWidget->setItemWidget(wItem, 1, createFontWeightHandlerWidget(font.weight(), control));
-
-    auto cItem = new QTreeWidgetItem;
-    cItem->setText(0, "capitalization");
-    cItem->setData(0, Qt::DecorationRole, cChanged);
-    fontItem->addChild(cItem);
-    treeWidget->setItemWidget(cItem, 1,
-                              createFontCapitalizationHandlerWidget(font.capitalization(), control));
-
-    auto bItem = new QTreeWidgetItem;
-    bItem->setText(0, "bold");
-    bItem->setData(0, Qt::DecorationRole, bChanged);
-    fontItem->addChild(bItem);
-    treeWidget->setItemWidget(bItem, 1, createBoolHandlerWidget("font.bold", font.bold(), control));
-
-    auto iItem = new QTreeWidgetItem;
-    iItem->setText(0, "italic");
-    iItem->setData(0, Qt::DecorationRole, iChanged);
-    fontItem->addChild(iItem);
-    treeWidget->setItemWidget(
-                iItem, 1, createBoolHandlerWidget("font.italic", font.italic(), control));
-
-    auto uItem = new QTreeWidgetItem;
-    uItem->setText(0, "underline");
-    uItem->setData(0, Qt::DecorationRole, uChanged);
-    fontItem->addChild(uItem);
-    treeWidget->setItemWidget(
-                uItem, 1, createBoolHandlerWidget("font.underline", font.underline(), control));
-
-    auto oItem = new QTreeWidgetItem;
-    oItem->setText(0, "overline");
-    oItem->setData(0, Qt::DecorationRole, oChanged);
-    fontItem->addChild(oItem);
-    treeWidget->setItemWidget(
-                oItem, 1, createBoolHandlerWidget("font.overline", font.overline(), control));
-
-    auto sItem = new QTreeWidgetItem;
-    sItem->setText(0, "strikeout");
-    sItem->setData(0, Qt::DecorationRole, sChanged);
-    fontItem->addChild(sItem);
-    treeWidget->setItemWidget(
-                sItem, 1, createBoolHandlerWidget("font.strikeout", font.strikeOut(), control));
-
-    auto kItem = new QTreeWidgetItem;
-    kItem->setText(0, "kerning");
-    kItem->setData(0, Qt::DecorationRole, kChanged);
-    fontItem->addChild(kItem);
-    treeWidget->setItemWidget(
-                kItem, 1, createBoolHandlerWidget("font.kerning", font.kerning(), control));
-
-    auto prItem = new QTreeWidgetItem;
-    prItem->setText(0, "preferShaping");
-    prItem->setData(0, Qt::DecorationRole, prChanged);
-    fontItem->addChild(prItem);
-    treeWidget->setItemWidget(prItem, 1, createBoolHandlerWidget(
-                                  "font.preferShaping",
-                                  !(font.styleStrategy() & QFont::PreferNoShaping), control));
-
-    treeWidget->expandItem(fontItem);
-}
-
 PropertiesController::PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
                                            QObject* parent) : QObject(parent)
   , m_propertiesPane(propertiesPane)
@@ -790,7 +672,117 @@ void PropertiesController::onSceneSelectionChange()
                 switch (propertyValue.type()) {
                 case QVariant::Font: {
                     const QFont& font = propertyValue.value<QFont>();
-                    createAndAddFontPropertiesBlock(classItem, font, selectedControl);
+                    const bool isPx = font.pixelSize() > 0 ? true : false;
+                    const QString& fontText = QString::fromUtf8("[%1, %2%3]")
+                            .arg(QFontInfo(font).family())
+                            .arg(isPx ? font.pixelSize() : font.pointSize())
+                            .arg(isPx ? "px" : "pt");
+
+                    const bool fChanged    = ParserUtils::exists(selectedControl->dir(), "font.family");
+                    const bool bChanged    = ParserUtils::exists(selectedControl->dir(), "font.bold");
+                    const bool iChanged    = ParserUtils::exists(selectedControl->dir(), "font.italic");
+                    const bool uChanged    = ParserUtils::exists(selectedControl->dir(), "font.underline");
+                    const bool poChanged   = ParserUtils::exists(selectedControl->dir(), "font.pointSize");
+                    const bool piChanged   = ParserUtils::exists(selectedControl->dir(), "font.pixelSize");
+                    const bool wChanged    = ParserUtils::exists(selectedControl->dir(), "font.weight");
+                    const bool oChanged    = ParserUtils::exists(selectedControl->dir(), "font.overline");
+                    const bool sChanged    = ParserUtils::exists(selectedControl->dir(), "font.strikeout");
+                    const bool cChanged    = ParserUtils::exists(selectedControl->dir(), "font.capitalization");
+                    const bool kChanged    = ParserUtils::exists(selectedControl->dir(), "font.kerning");
+                    const bool prChanged   = ParserUtils::exists(selectedControl->dir(), "font.preferShaping");
+                    const bool fontChanged = fChanged || bChanged || iChanged || uChanged || poChanged || piChanged
+                            || wChanged || oChanged || sChanged || cChanged || kChanged || prChanged;
+
+                    auto fontItem = new QTreeWidgetItem;
+                    fontItem->setText(0, "font");
+                    fontItem->setText(1, fontText);
+                    fontItem->setData(0, Qt::DecorationRole, fontChanged);
+                    classItem->addChild(fontItem);
+
+                    auto poItem = new QTreeWidgetItem;
+                    poItem->setText(0, "pointSize");
+                    poItem->setData(0, Qt::DecorationRole, poChanged);
+                    fontItem->addChild(poItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                poItem, 1, createFontSizeHandlerWidget("pointSize", font.pointSize(), selectedControl, fontItem));
+
+                    auto pxItem = new QTreeWidgetItem;
+                    pxItem->setText(0, "pixelSize");
+                    pxItem->setData(0, Qt::DecorationRole, piChanged);
+                    fontItem->addChild(pxItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), selectedControl, fontItem));
+
+                    auto fItem = new QTreeWidgetItem;
+                    fItem->setText(0, "family");
+                    fItem->setData(0, Qt::DecorationRole, fChanged);
+                    fontItem->addChild(fItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), selectedControl, fontItem));
+
+                    auto wItem = new QTreeWidgetItem;
+                    wItem->setText(0, "weight");
+                    wItem->setData(0, Qt::DecorationRole, wChanged);
+                    fontItem->addChild(wItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(wItem, 1, createFontWeightHandlerWidget(font.weight(), selectedControl));
+
+                    auto cItem = new QTreeWidgetItem;
+                    cItem->setText(0, "capitalization");
+                    cItem->setData(0, Qt::DecorationRole, cChanged);
+                    fontItem->addChild(cItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(cItem, 1,
+                                              createFontCapitalizationHandlerWidget(font.capitalization(), selectedControl));
+
+                    auto bItem = new QTreeWidgetItem;
+                    bItem->setText(0, "bold");
+                    bItem->setData(0, Qt::DecorationRole, bChanged);
+                    fontItem->addChild(bItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(bItem, 1, createBoolHandlerWidget("font.bold", font.bold(), selectedControl));
+
+                    auto iItem = new QTreeWidgetItem;
+                    iItem->setText(0, "italic");
+                    iItem->setData(0, Qt::DecorationRole, iChanged);
+                    fontItem->addChild(iItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                iItem, 1, createBoolHandlerWidget("font.italic", font.italic(), selectedControl));
+
+                    auto uItem = new QTreeWidgetItem;
+                    uItem->setText(0, "underline");
+                    uItem->setData(0, Qt::DecorationRole, uChanged);
+                    fontItem->addChild(uItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                uItem, 1, createBoolHandlerWidget("font.underline", font.underline(), selectedControl));
+
+                    auto oItem = new QTreeWidgetItem;
+                    oItem->setText(0, "overline");
+                    oItem->setData(0, Qt::DecorationRole, oChanged);
+                    fontItem->addChild(oItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                oItem, 1, createBoolHandlerWidget("font.overline", font.overline(), selectedControl));
+
+                    auto sItem = new QTreeWidgetItem;
+                    sItem->setText(0, "strikeout");
+                    sItem->setData(0, Qt::DecorationRole, sChanged);
+                    fontItem->addChild(sItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                sItem, 1, createBoolHandlerWidget("font.strikeout", font.strikeOut(), selectedControl));
+
+                    auto kItem = new QTreeWidgetItem;
+                    kItem->setText(0, "kerning");
+                    kItem->setData(0, Qt::DecorationRole, kChanged);
+                    fontItem->addChild(kItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(
+                                kItem, 1, createBoolHandlerWidget("font.kerning", font.kerning(), selectedControl));
+
+                    auto prItem = new QTreeWidgetItem;
+                    prItem->setText(0, "preferShaping");
+                    prItem->setData(0, Qt::DecorationRole, prChanged);
+                    fontItem->addChild(prItem);
+                    m_propertiesPane->propertiesTree()->setItemWidget(prItem, 1, createBoolHandlerWidget(
+                                                  "font.preferShaping",
+                                                  !(font.styleStrategy() & QFont::PreferNoShaping), selectedControl));
+
+                    m_propertiesPane->propertiesTree()->expandItem(fontItem);
                     break;
                 }
 

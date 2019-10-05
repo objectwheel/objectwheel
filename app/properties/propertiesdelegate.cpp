@@ -1,6 +1,6 @@
 #include <propertiesdelegate.h>
 #include <propertiestree.h>
-#include <editorwidgetcache.h>
+#include <propertiescache.h>
 #include <QPainter>
 
 PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyledItemDelegate(propertiesTree)
@@ -107,15 +107,15 @@ QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem& option, const QMo
 QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/,
                                           const QModelIndex& index) const
 {
-    EditorWidgetCache::Type type = index.data(TypeRole).value<EditorWidgetCache::Type>();
-    QWidget* widget = m_propertiesTree->itemCache()->pop(type);
+    PropertiesCache::Type type = index.data(TypeRole).value<PropertiesCache::Type>();
+    QWidget* widget = m_propertiesTree->cache()->pop(type);
     widget->setParent(parent);
-    return m_propertiesTree->itemCache()->pop(type);
+    return m_propertiesTree->cache()->pop(type);
 }
 
 void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
 {
-    EditorWidgetCache::Type type = index.data(TypeRole).value<EditorWidgetCache::Type>();
+    PropertiesCache::Type type = index.data(TypeRole).value<PropertiesCache::Type>();
     editor->setParent(0);
-    m_propertiesTree->itemCache()->push(type, editor);
+    m_propertiesTree->cache()->push(type, editor);
 }
