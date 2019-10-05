@@ -507,70 +507,6 @@ static QWidget* createFontSizeHandlerWidget(const QString& propertyName, int siz
     return spinBox;
 }
 
-static void createAndAddGeometryPropertiesBlock(QTreeWidgetItem* classItem,
-                                                const QVector<PropertyNode>& properties,
-                                                Control* control, int integer)
-{
-    QTreeWidget* treeWidget = classItem->treeWidget();
-    Q_ASSERT(treeWidget);
-
-    const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
-
-    bool xUnknown = false, yUnknown = false;
-    if (control->type() == Form::Type) {
-        xUnknown = !ParserUtils::exists(control->dir(), "x");
-        yUnknown = !ParserUtils::exists(control->dir(), "y");
-    }
-
-    const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
-            .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
-            .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
-            .arg(int(geometry.width()))
-            .arg(int(geometry.height()));
-
-    const bool xChanged = ParserUtils::exists(control->dir(), "x");
-    const bool yChanged = ParserUtils::exists(control->dir(), "y");
-    const bool wChanged = ParserUtils::exists(control->dir(), "width");
-    const bool hChanged = ParserUtils::exists(control->dir(), "height");
-    const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
-
-    auto geometryItem = new QTreeWidgetItem;
-    geometryItem->setText(0, "geometry");
-    geometryItem->setText(1, geometryText);
-    geometryItem->setData(0, Qt::DecorationRole, geometryChanged);
-    classItem->addChild(geometryItem);
-
-    auto xItem = new QTreeWidgetItem;
-    xItem->setText(0, "x");
-    xItem->setData(0, Qt::DecorationRole, xChanged);
-    geometryItem->addChild(xItem);
-    treeWidget->setItemWidget(
-                xItem, 1, createNumberHandlerWidget("x", geometry.x(), control, integer));
-
-    auto yItem = new QTreeWidgetItem;
-    yItem->setText(0, "y");
-    yItem->setData(0, Qt::DecorationRole, yChanged);
-    geometryItem->addChild(yItem);
-    treeWidget->setItemWidget(
-                yItem, 1, createNumberHandlerWidget("y", geometry.y(), control, integer));
-
-    auto wItem = new QTreeWidgetItem;
-    wItem->setText(0, "width");
-    wItem->setData(0, Qt::DecorationRole, wChanged);
-    geometryItem->addChild(wItem);
-    treeWidget->setItemWidget(
-                wItem, 1, createNumberHandlerWidget("width", geometry.width(), control, integer));
-
-    auto hItem = new QTreeWidgetItem;
-    hItem->setText(0, "height");
-    hItem->setData(0, Qt::DecorationRole, hChanged);
-    geometryItem->addChild(hItem);
-    treeWidget->setItemWidget(
-                hItem, 1, createNumberHandlerWidget("height", geometry.height(), control, integer));
-
-    treeWidget->expandItem(geometryItem);
-}
-
 PropertiesController::PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
                                            QObject* parent) : QObject(parent)
   , m_propertiesPane(propertiesPane)
@@ -650,8 +586,8 @@ void PropertiesController::onSceneSelectionChange()
         if (properties.isEmpty())
             return;
 
-//        m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
-//        m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
+        //        m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
+        //        m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
         m_propertiesPane->idEdit()->setText(selectedControl->id());
         m_propertiesPane->indexEdit()->setValue(selectedControl->index());
 
@@ -731,7 +667,7 @@ void PropertiesController::onSceneSelectionChange()
                     cItem->setData(0, Qt::DecorationRole, cChanged);
                     fontItem->addChild(cItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(cItem, 1,
-                                              createFontCapitalizationHandlerWidget(font.capitalization(), selectedControl));
+                                                                      createFontCapitalizationHandlerWidget(font.capitalization(), selectedControl));
 
                     auto bItem = new QTreeWidgetItem;
                     bItem->setText(0, "bold");
@@ -779,8 +715,8 @@ void PropertiesController::onSceneSelectionChange()
                     prItem->setData(0, Qt::DecorationRole, prChanged);
                     fontItem->addChild(prItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(prItem, 1, createBoolHandlerWidget(
-                                                  "font.preferShaping",
-                                                  !(font.styleStrategy() & QFont::PreferNoShaping), selectedControl));
+                                                                          "font.preferShaping",
+                                                                          !(font.styleStrategy() & QFont::PreferNoShaping), selectedControl));
 
                     m_propertiesPane->propertiesTree()->expandItem(fontItem);
                     break;
@@ -837,7 +773,60 @@ void PropertiesController::onSceneSelectionChange()
 
                 case QVariant::Double: {
                     if (isXProperty(propertyName)) {
-                        createAndAddGeometryPropertiesBlock(classItem, properties, selectedControl, false);
+                        const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
+                        bool xUnknown = false, yUnknown = false;
+                        if (selectedControl->type() == Form::Type) {
+                            xUnknown = !ParserUtils::exists(selectedControl->dir(), "x");
+                            yUnknown = !ParserUtils::exists(selectedControl->dir(), "y");
+                        }
+
+                        const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
+                                .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
+                                .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
+                                .arg(int(geometry.width()))
+                                .arg(int(geometry.height()));
+
+                        const bool xChanged = ParserUtils::exists(selectedControl->dir(), "x");
+                        const bool yChanged = ParserUtils::exists(selectedControl->dir(), "y");
+                        const bool wChanged = ParserUtils::exists(selectedControl->dir(), "width");
+                        const bool hChanged = ParserUtils::exists(selectedControl->dir(), "height");
+                        const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
+
+                        auto geometryItem = new QTreeWidgetItem;
+                        geometryItem->setText(0, "geometry");
+                        geometryItem->setText(1, geometryText);
+                        geometryItem->setData(0, Qt::DecorationRole, geometryChanged);
+                        classItem->addChild(geometryItem);
+
+                        auto xItem = new QTreeWidgetItem;
+                        xItem->setText(0, "x");
+                        xItem->setData(0, Qt::DecorationRole, xChanged);
+                        geometryItem->addChild(xItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, false));
+
+                        auto yItem = new QTreeWidgetItem;
+                        yItem->setText(0, "y");
+                        yItem->setData(0, Qt::DecorationRole, yChanged);
+                        geometryItem->addChild(yItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, false));
+
+                        auto wItem = new QTreeWidgetItem;
+                        wItem->setText(0, "width");
+                        wItem->setData(0, Qt::DecorationRole, wChanged);
+                        geometryItem->addChild(wItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, false));
+
+                        auto hItem = new QTreeWidgetItem;
+                        hItem->setText(0, "height");
+                        hItem->setData(0, Qt::DecorationRole, hChanged);
+                        geometryItem->addChild(hItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, false));
+
+                        m_propertiesPane->propertiesTree()->expandItem(geometryItem);
                     } else {
                         if (isGeometryProperty(propertyName))
                             break;
@@ -856,7 +845,60 @@ void PropertiesController::onSceneSelectionChange()
 
                 case QVariant::Int: {
                     if (isXProperty(propertyName)) {
-                        createAndAddGeometryPropertiesBlock(classItem, properties, selectedControl, true);
+                        const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
+                        bool xUnknown = false, yUnknown = false;
+                        if (selectedControl->type() == Form::Type) {
+                            xUnknown = !ParserUtils::exists(selectedControl->dir(), "x");
+                            yUnknown = !ParserUtils::exists(selectedControl->dir(), "y");
+                        }
+
+                        const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
+                                .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
+                                .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
+                                .arg(int(geometry.width()))
+                                .arg(int(geometry.height()));
+
+                        const bool xChanged = ParserUtils::exists(selectedControl->dir(), "x");
+                        const bool yChanged = ParserUtils::exists(selectedControl->dir(), "y");
+                        const bool wChanged = ParserUtils::exists(selectedControl->dir(), "width");
+                        const bool hChanged = ParserUtils::exists(selectedControl->dir(), "height");
+                        const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
+
+                        auto geometryItem = new QTreeWidgetItem;
+                        geometryItem->setText(0, "geometry");
+                        geometryItem->setText(1, geometryText);
+                        geometryItem->setData(0, Qt::DecorationRole, geometryChanged);
+                        classItem->addChild(geometryItem);
+
+                        auto xItem = new QTreeWidgetItem;
+                        xItem->setText(0, "x");
+                        xItem->setData(0, Qt::DecorationRole, xChanged);
+                        geometryItem->addChild(xItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, true));
+
+                        auto yItem = new QTreeWidgetItem;
+                        yItem->setText(0, "y");
+                        yItem->setData(0, Qt::DecorationRole, yChanged);
+                        geometryItem->addChild(yItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, true));
+
+                        auto wItem = new QTreeWidgetItem;
+                        wItem->setText(0, "width");
+                        wItem->setData(0, Qt::DecorationRole, wChanged);
+                        geometryItem->addChild(wItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, true));
+
+                        auto hItem = new QTreeWidgetItem;
+                        hItem->setText(0, "height");
+                        hItem->setData(0, Qt::DecorationRole, hChanged);
+                        geometryItem->addChild(hItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, true));
+
+                        m_propertiesPane->propertiesTree()->expandItem(geometryItem);
                     } else {
                         if (isGeometryProperty(propertyName))
                             break;
