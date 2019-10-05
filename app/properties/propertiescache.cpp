@@ -42,6 +42,8 @@ void PropertiesCache::reserve(int size)
     const QMetaEnum& e = QMetaEnum::fromType<Type>();
     for (int i = 0; i < e.keyCount(); ++i) {
         Type type = Type(e.value(i));
+        if (type == Type::Invalid)
+            continue;
         for (int i = size; i--;)
             push(type, createWidget(type));
     }
@@ -51,18 +53,28 @@ void PropertiesCache::reserve(int size)
 
 void PropertiesCache::push(PropertiesCache::Type type, QWidget* widget)
 {
+    Q_ASSERT(widget);
+    Q_ASSERT(type != Type::Invalid);
     if (!m_widgets.contains(type))
         m_widgets.insert(type, new WidgetStack);
+    widget->setParent(nullptr);
+    widget->setVisible(false);
     m_widgets.value(type)->push(widget);
 }
 
 void PropertiesCache::push(QTreeWidgetItem* item)
 {
+    if (QTreeWidgetItem* parent = item->parent())
+        parent->takeChild(parent->indexOfChild(item));
+    else if (QTreeWidget* tree = item->treeWidget())
+        tree->takeTopLevelItem(tree->indexOfTopLevelItem(item));
+    item->setHidden(true);
     m_items.push(item);
 }
 
 QWidget* PropertiesCache::pop(PropertiesCache::Type type)
 {
+    Q_ASSERT(type != Type::Invalid);
     if (WidgetStack* stack = m_widgets.value(type, nullptr)) {
         if (!stack->isEmpty())
             return stack->pop();
@@ -106,18 +118,11 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         checkBox->setCursor(Qt::PointingHandCursor);
         checkBox->setFocusPolicy(Qt::ClickFocus);
+        checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
         checkBox->setMinimumWidth(1);
-        auto widget = new QWidget;
-        widget->setMinimumWidth(1);
-        widget->setAttribute(Qt::WA_MacShowFocusRect, false);
-        widget->setFocusPolicy(Qt::ClickFocus);
-        widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
-        auto layout = new QHBoxLayout(widget);
-        layout->addWidget(checkBox);
-        layout->addStretch();
-        layout->setSpacing(0);
-        layout->setContentsMargins(2, 0, 0, 0);
-        return widget;
+        checkBox->setFixedWidth(checkBox->style()->pixelMetric(QStyle::PM_IndicatorWidth) + 2);
+        checkBox->setStyleSheet("QCheckBox { margin-left: 2px; }");
+        return checkBox;
     }
 
     case Color: {
@@ -214,6 +219,9 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
             comboBox->addItem(e.key(i));
         return comboBox;
     }
+
+    default:
+        break;
     }
 
     return nullptr;

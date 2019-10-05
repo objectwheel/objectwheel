@@ -2,6 +2,48 @@
 #include <propertiestree.h>
 #include <propertiescache.h>
 #include <QPainter>
+#include <QDebug>
+#include <QLineEdit>
+static void setInitialValue(QWidget* widget, PropertiesCache::Type type, const QVariant& value)
+{
+    const char* propertyName = 0;
+    switch (type) {
+    case PropertiesCache::String:
+        propertyName = "text";
+        break;
+    case PropertiesCache::Enum:
+        propertyName = "currentText";
+        break;
+    case PropertiesCache::Bool:
+        propertyName = "checked";
+        break;
+    case PropertiesCache::Color:
+        propertyName = "color";
+        break;
+    case PropertiesCache::Int:
+        propertyName = "value";
+        break;
+    case PropertiesCache::Real:
+        propertyName = "value";
+        break;
+    case PropertiesCache::FontSize:
+        propertyName = "value";
+        break;
+    case PropertiesCache::FontFamily:
+        propertyName = "currentText";
+        break;
+    case PropertiesCache::FontWeight:
+        propertyName = "currentText";
+        break;
+    case PropertiesCache::FontCapitalization:
+        propertyName = "currentText";
+        break;
+    default:
+        break;
+    }
+    if (propertyName)
+        widget->setProperty(propertyName, value);
+}
 
 PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyledItemDelegate(propertiesTree)
   , m_propertiesTree(propertiesTree)
@@ -80,7 +122,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
     if (isClassRow) {
         painter->setPen(option.palette.highlightedText().color());
     } else {
-        if (index.column() == 0 && index.data(Qt::DecorationRole).toBool()) {
+        if (index.column() == 0 && index.data(PropertiesTree::ModificationRole).toBool()) {
             QFont font (option.font);
             font.setWeight(QFont::Medium);
             painter->setFont(font);
@@ -103,19 +145,39 @@ QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem& option, const QMo
     return QSize(size.width(), ROW_HEIGHT);
 }
 
+void PropertiesDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+{
+    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
+    if (type == PropertiesCache::Invalid || index.column() == 0)
+        return QStyledItemDelegate::setModelData(editor, model, index);
+}
 
-QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/,
+void PropertiesDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+{
+    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
+    if (type == PropertiesCache::Invalid || index.column() == 0)
+        return QStyledItemDelegate::setEditorData(editor, index);
+    setInitialValue(editor, type, index.data(PropertiesTree::InitialValueRole));
+}
+
+QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option,
                                           const QModelIndex& index) const
 {
-    PropertiesCache::Type type = index.data(TypeRole).value<PropertiesCache::Type>();
+    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
+    if (type == PropertiesCache::Invalid || index.column() == 0)
+        return QStyledItemDelegate::createEditor(parent, option, index);
+
     QWidget* widget = m_propertiesTree->cache()->pop(type);
     widget->setParent(parent);
-    return m_propertiesTree->cache()->pop(type);
+    widget->setVisible(true);
+    return widget;
 }
 
 void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
 {
-    PropertiesCache::Type type = index.data(TypeRole).value<PropertiesCache::Type>();
-    editor->setParent(0);
+    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
+    if (type == PropertiesCache::Invalid || index.column() == 0)
+        return QStyledItemDelegate::destroyEditor(editor, index);
+
     m_propertiesTree->cache()->push(type, editor);
 }

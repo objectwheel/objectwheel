@@ -13,7 +13,6 @@ class PropertiesDelegate final : public QStyledItemDelegate
 
 public:
     enum { ROW_HEIGHT = 21 };
-    enum { TypeRole = Qt::UserRole + 1 };
 
 public:
     explicit PropertiesDelegate(PropertiesTree* propertiesTree);
@@ -24,7 +23,8 @@ public:
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override;
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const override;
     void destroyEditor(QWidget* editor, const QModelIndex& index) const override;

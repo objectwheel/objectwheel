@@ -60,20 +60,16 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     UtilityFunctions::disableWheelEvent(m_indexEdit);
 
     m_typeItem->setText(0, tr("Type"));
-    m_typeItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     m_propertiesTree->addTopLevelItem(m_typeItem);
 
     m_uidItem->setText(0, "uid");
-    m_uidItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     m_propertiesTree->addTopLevelItem(m_uidItem);
 
     m_idItem->setText(0, "id");
-    m_idItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     m_propertiesTree->addTopLevelItem(m_idItem);
     m_propertiesTree->setItemWidget(m_idItem, 1, m_idEdit);
 
     m_indexItem->setText(0, "index");
-    m_indexItem->setData(0, Qt::DecorationRole, false); // No 'property changed' indication
     m_propertiesTree->addTopLevelItem(m_indexItem);
     m_propertiesTree->setItemWidget(m_indexItem, 1, m_indexEdit);
 
@@ -97,6 +93,14 @@ QSize PropertiesPane::sizeHint() const
 QSpinBox* PropertiesPane::indexEdit() const
 {
     return m_indexEdit;
+}
+
+bool PropertiesPane::isPermanentItem(QTreeWidgetItem* item) const
+{
+    return item == m_indexItem
+            || item == m_idItem
+            || item == m_uidItem
+            || item == m_typeItem;
 }
 
 QLineEdit* PropertiesPane::idEdit() const

@@ -1,6 +1,9 @@
 #include <propertiescontroller.h>
 #include <propertiespane.h>
 #include <propertiestree.h>
+#include <propertiescache.h>
+#include <propertiesdelegate.h>
+
 #include <lineedit.h>
 
 #include <saveutils.h>
@@ -107,34 +110,6 @@ static QString urlToDisplayText(const QUrl& url, const QString& controlDir)
     return displayText;
 }
 
-static QWidget* createStringHandlerWidget(const QString& propertyName, const QString& text,
-                                          Control* control)
-{
-    auto lineEdit = new QLineEdit;
-    lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
-    lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    lineEdit->setText(text);
-    lineEdit->setFocusPolicy(Qt::StrongFocus);
-    lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
-    lineEdit->setMinimumWidth(1);
-
-    QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
-    {
-        const QString& previousValue = UtilityFunctions::getProperty(propertyName, control->properties()).value<QString>();
-
-        if (previousValue == lineEdit->text())
-            return;
-
-        ControlPropertyManager::setProperty(control,
-                                            propertyName, UtilityFunctions::stringify(lineEdit->text()),
-                                            lineEdit->text(),
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    return lineEdit;
-}
-
 static QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
                                        Control* control)
 {
@@ -207,40 +182,6 @@ static QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
     });
 
     return comboBox;
-}
-
-static QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Control* control)
-{
-    auto checkBox = new QCheckBox;
-    checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-    checkBox->setCursor(Qt::PointingHandCursor);
-    checkBox->setChecked(checked);
-    checkBox->setFocusPolicy(Qt::ClickFocus);
-    checkBox->setMinimumWidth(1);
-    fixVisible(control, propertyName, checkBox);
-
-    QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
-    {
-        // NOTE: No need for previous value equality check, since this signal is only emitted
-        // when the value is changed/toggled
-        ControlPropertyManager::setProperty(control,
-                                            propertyName, checkBox->isChecked() ? "true" : "false",
-                                            checkBox->isChecked(),
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    auto widget = new QWidget;
-    widget->setMinimumWidth(1);
-    widget->setAttribute(Qt::WA_MacShowFocusRect, false);
-    widget->setFocusPolicy(Qt::ClickFocus);
-    widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
-    auto layout = new QHBoxLayout(widget);
-    layout->addWidget(checkBox);
-    layout->addStretch();
-    layout->setSpacing(0);
-    layout->setContentsMargins(2, 0, 0, 0);
-    return widget;
 }
 
 static QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
@@ -507,6 +448,40 @@ static QWidget* createFontSizeHandlerWidget(const QString& propertyName, int siz
     return spinBox;
 }
 
+static QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Control* control)
+{
+    auto checkBox = new QCheckBox;
+    checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+    checkBox->setCursor(Qt::PointingHandCursor);
+    checkBox->setChecked(checked);
+    checkBox->setFocusPolicy(Qt::ClickFocus);
+    checkBox->setMinimumWidth(1);
+    fixVisible(control, propertyName, checkBox);
+
+    QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
+    {
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed/toggled
+        ControlPropertyManager::setProperty(control,
+                                            propertyName, checkBox->isChecked() ? "true" : "false",
+                                            checkBox->isChecked(),
+                                            ControlPropertyManager::SaveChanges
+                                            | ControlPropertyManager::UpdateRenderer);
+    });
+
+    auto widget = new QWidget;
+    widget->setMinimumWidth(1);
+    widget->setAttribute(Qt::WA_MacShowFocusRect, false);
+    widget->setFocusPolicy(Qt::ClickFocus);
+    widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
+    auto layout = new QHBoxLayout(widget);
+    layout->addWidget(checkBox);
+    layout->addStretch();
+    layout->setSpacing(0);
+    layout->setContentsMargins(2, 0, 0, 0);
+    return widget;
+}
+
 PropertiesController::PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
                                            QObject* parent) : QObject(parent)
   , m_propertiesPane(propertiesPane)
@@ -538,47 +513,63 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
 
 void PropertiesController::discharge()
 {
+    clear();
     m_propertiesPane->searchEdit()->clear();
-    m_propertiesPane->propertiesTree()->clear();
+}
+
+void PropertiesController::clear()
+{
+    m_propertiesPane->typeItem()->setHidden(true);
+    m_propertiesPane->uidItem()->setHidden(true);
+    m_propertiesPane->idItem()->setHidden(true);
+    m_propertiesPane->indexItem()->setHidden(true);
+
+    for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
+        if (m_propertiesPane->isPermanentItem(topLevelItem))
+            continue;
+        for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem))
+            m_propertiesPane->propertiesTree()->cache()->push(childItem);
+        m_propertiesPane->propertiesTree()->cache()->push(topLevelItem);
+    }
 }
 
 void PropertiesController::onSearchEditEditingFinish()
 {
-    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
-    const QString& searchTerm = m_propertiesPane->searchEdit()->text();
-    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-        auto tlv = false;
-        for (int j = 0; j < topLevelItem->childCount(); j++) {
-            auto tci = topLevelItem->child(j);
-            auto tcv = false;
-            auto vv = tci->text(0).contains(searchTerm, Qt::CaseInsensitive);
+//    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
+//    const QString& searchTerm = m_propertiesPane->searchEdit()->text();
+//    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
+//        auto tlv = false;
+//        for (int j = 0; j < topLevelItem->childCount(); j++) {
+//            auto tci = topLevelItem->child(j);
+//            auto tcv = false;
+//            auto vv = tci->text(0).contains(searchTerm, Qt::CaseInsensitive);
 
-            for (int z = 0; z < tci->childCount(); z++) {
-                auto tdi = tci->child(z);
-                auto v = (searchTerm.isEmpty() || vv)
-                        ? true
-                        : tdi->text(0).contains(searchTerm, Qt::CaseInsensitive);
+//            for (int z = 0; z < tci->childCount(); z++) {
+//                auto tdi = tci->child(z);
+//                auto v = (searchTerm.isEmpty() || vv)
+//                        ? true
+//                        : tdi->text(0).contains(searchTerm, Qt::CaseInsensitive);
 
-                tdi->setHidden(!v);
-                if (v)
-                    tcv = v;
-            }
+//                tdi->setHidden(!v);
+//                if (v)
+//                    tcv = v;
+//            }
 
-            auto v = searchTerm.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
-            tci->setHidden(!v);
-            if (v)
-                tlv = v;
-        }
+//            auto v = searchTerm.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
+//            tci->setHidden(!v);
+//            if (v)
+//                tlv = v;
+//        }
 
-        auto v = searchTerm.isEmpty() ? true : tlv;
-        topLevelItem->setHidden(!v);
-    }
+//        auto v = searchTerm.isEmpty() ? true : tlv;
+//        topLevelItem->setHidden(!v);
+//    }
 }
 
 // FIXME: This function has severe performance issues.
 void PropertiesController::onSceneSelectionChange()
 {
-    m_propertiesPane->propertiesTree()->clear();
+    clear();
 
     if (Control* selectedControl = control()) {
         m_propertiesPane->setDisabled(selectedControl->hasErrors());
@@ -586,10 +577,14 @@ void PropertiesController::onSceneSelectionChange()
         if (properties.isEmpty())
             return;
 
-        //        m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
-        //        m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
+        m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
+        m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
         m_propertiesPane->idEdit()->setText(selectedControl->id());
         m_propertiesPane->indexEdit()->setValue(selectedControl->index());
+        m_propertiesPane->typeItem()->setHidden(false);
+        m_propertiesPane->uidItem()->setHidden(false);
+        m_propertiesPane->idItem()->setHidden(false);
+        m_propertiesPane->indexItem()->setHidden(false);
 
         for (const PropertyNode& propertyNode : properties) {
             const QVector<Enum>& enumList = propertyNode.enums;
@@ -602,6 +597,7 @@ void PropertiesController::onSceneSelectionChange()
             classItem->setText(0, propertyNode.cleanClassName);
             m_propertiesPane->propertiesTree()->addTopLevelItem(classItem);
 
+            QList<QTreeWidgetItem*> children;
             for (const QString& propertyName : propertyMap.keys()) {
                 const QVariant& propertyValue = propertyMap.value(propertyName);
 
@@ -632,87 +628,87 @@ void PropertiesController::onSceneSelectionChange()
                     auto fontItem = new QTreeWidgetItem;
                     fontItem->setText(0, "font");
                     fontItem->setText(1, fontText);
-                    fontItem->setData(0, Qt::DecorationRole, fontChanged);
+                    fontItem->setData(0, PropertiesTree::ModificationRole, fontChanged);
                     classItem->addChild(fontItem);
 
                     auto poItem = new QTreeWidgetItem;
                     poItem->setText(0, "pointSize");
-                    poItem->setData(0, Qt::DecorationRole, poChanged);
+                    poItem->setData(0, PropertiesTree::ModificationRole, poChanged);
                     fontItem->addChild(poItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 poItem, 1, createFontSizeHandlerWidget("pointSize", font.pointSize(), selectedControl, fontItem));
 
                     auto pxItem = new QTreeWidgetItem;
                     pxItem->setText(0, "pixelSize");
-                    pxItem->setData(0, Qt::DecorationRole, piChanged);
+                    pxItem->setData(0, PropertiesTree::ModificationRole, piChanged);
                     fontItem->addChild(pxItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), selectedControl, fontItem));
 
                     auto fItem = new QTreeWidgetItem;
                     fItem->setText(0, "family");
-                    fItem->setData(0, Qt::DecorationRole, fChanged);
+                    fItem->setData(0, PropertiesTree::ModificationRole, fChanged);
                     fontItem->addChild(fItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), selectedControl, fontItem));
 
                     auto wItem = new QTreeWidgetItem;
                     wItem->setText(0, "weight");
-                    wItem->setData(0, Qt::DecorationRole, wChanged);
+                    wItem->setData(0, PropertiesTree::ModificationRole, wChanged);
                     fontItem->addChild(wItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(wItem, 1, createFontWeightHandlerWidget(font.weight(), selectedControl));
 
                     auto cItem = new QTreeWidgetItem;
                     cItem->setText(0, "capitalization");
-                    cItem->setData(0, Qt::DecorationRole, cChanged);
+                    cItem->setData(0, PropertiesTree::ModificationRole, cChanged);
                     fontItem->addChild(cItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(cItem, 1,
                                                                       createFontCapitalizationHandlerWidget(font.capitalization(), selectedControl));
 
                     auto bItem = new QTreeWidgetItem;
                     bItem->setText(0, "bold");
-                    bItem->setData(0, Qt::DecorationRole, bChanged);
+                    bItem->setData(0, PropertiesTree::ModificationRole, bChanged);
                     fontItem->addChild(bItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(bItem, 1, createBoolHandlerWidget("font.bold", font.bold(), selectedControl));
 
                     auto iItem = new QTreeWidgetItem;
                     iItem->setText(0, "italic");
-                    iItem->setData(0, Qt::DecorationRole, iChanged);
+                    iItem->setData(0, PropertiesTree::ModificationRole, iChanged);
                     fontItem->addChild(iItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 iItem, 1, createBoolHandlerWidget("font.italic", font.italic(), selectedControl));
 
                     auto uItem = new QTreeWidgetItem;
                     uItem->setText(0, "underline");
-                    uItem->setData(0, Qt::DecorationRole, uChanged);
+                    uItem->setData(0, PropertiesTree::ModificationRole, uChanged);
                     fontItem->addChild(uItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 uItem, 1, createBoolHandlerWidget("font.underline", font.underline(), selectedControl));
 
                     auto oItem = new QTreeWidgetItem;
                     oItem->setText(0, "overline");
-                    oItem->setData(0, Qt::DecorationRole, oChanged);
+                    oItem->setData(0, PropertiesTree::ModificationRole, oChanged);
                     fontItem->addChild(oItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 oItem, 1, createBoolHandlerWidget("font.overline", font.overline(), selectedControl));
 
                     auto sItem = new QTreeWidgetItem;
                     sItem->setText(0, "strikeout");
-                    sItem->setData(0, Qt::DecorationRole, sChanged);
+                    sItem->setData(0, PropertiesTree::ModificationRole, sChanged);
                     fontItem->addChild(sItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 sItem, 1, createBoolHandlerWidget("font.strikeout", font.strikeOut(), selectedControl));
 
                     auto kItem = new QTreeWidgetItem;
                     kItem->setText(0, "kerning");
-                    kItem->setData(0, Qt::DecorationRole, kChanged);
+                    kItem->setData(0, PropertiesTree::ModificationRole, kChanged);
                     fontItem->addChild(kItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 kItem, 1, createBoolHandlerWidget("font.kerning", font.kerning(), selectedControl));
 
                     auto prItem = new QTreeWidgetItem;
                     prItem->setText(0, "preferShaping");
-                    prItem->setData(0, Qt::DecorationRole, prChanged);
+                    prItem->setData(0, PropertiesTree::ModificationRole, prChanged);
                     fontItem->addChild(prItem);
                     m_propertiesPane->propertiesTree()->setItemWidget(prItem, 1, createBoolHandlerWidget(
                                                                           "font.preferShaping",
@@ -726,8 +722,7 @@ void PropertiesController::onSceneSelectionChange()
                     const QColor& color = propertyValue.value<QColor>();
                     auto item = new QTreeWidgetItem;
                     item->setText(0, propertyName);
-                    item->setData(0, Qt::DecorationRole,
-                                  ParserUtils::exists(selectedControl->dir(), propertyName));
+                    item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     classItem->addChild(item);
                     m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
                                                                       createColorHandlerWidget(propertyName, color, selectedControl));
@@ -735,26 +730,28 @@ void PropertiesController::onSceneSelectionChange()
                 }
 
                 case QVariant::Bool: {
-                    const bool checked = propertyValue.value<bool>();
-                    auto item = new QTreeWidgetItem;
+                    const bool checked = propertyName == "visible"
+                            ? selectedControl->visible()
+                            : propertyValue.value<bool>();
+                    auto item = m_propertiesPane->propertiesTree()->cache()->pop();
                     item->setText(0, propertyName);
-                    item->setData(0, Qt::DecorationRole,
-                                  ParserUtils::exists(selectedControl->dir(), propertyName));
-                    classItem->addChild(item);
-                    m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                                                      createBoolHandlerWidget(propertyName, checked, selectedControl));
+                    item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
+                    item->setData(1, PropertiesTree::TypeRole, PropertiesCache::Bool);
+                    item->setData(1, PropertiesTree::InitialValueRole, checked);
+                    children.append(item);
+//                    connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=] {});
                     break;
                 }
 
                 case QVariant::String: {
                     const QString& text = propertyValue.value<QString>();
-                    auto item = new QTreeWidgetItem;
+                    auto item = m_propertiesPane->propertiesTree()->cache()->pop();
                     item->setText(0, propertyName);
-                    item->setData(0, Qt::DecorationRole,
-                                  ParserUtils::exists(selectedControl->dir(), propertyName));
-                    classItem->addChild(item);
-                    m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                                                      createStringHandlerWidget(propertyName, text, selectedControl));
+                    item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
+                    item->setData(1, PropertiesTree::TypeRole, PropertiesCache::String);
+                    item->setData(1, PropertiesTree::InitialValueRole, text);
+                    children.append(item);
+//                    connect(lineEdit, &QLineEdit::editingFinished, [=] {});
                     break;
                 }
 
@@ -763,8 +760,7 @@ void PropertiesController::onSceneSelectionChange()
                     const QString& displayText = urlToDisplayText(url, selectedControl->dir());
                     auto item = new QTreeWidgetItem;
                     item->setText(0, propertyName);
-                    item->setData(0, Qt::DecorationRole,
-                                  ParserUtils::exists(selectedControl->dir(), propertyName));
+                    item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     classItem->addChild(item);
                     m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
                                                                       createUrlHandlerWidget(propertyName, displayText, selectedControl));
@@ -795,33 +791,33 @@ void PropertiesController::onSceneSelectionChange()
                         auto geometryItem = new QTreeWidgetItem;
                         geometryItem->setText(0, "geometry");
                         geometryItem->setText(1, geometryText);
-                        geometryItem->setData(0, Qt::DecorationRole, geometryChanged);
+                        geometryItem->setData(0, PropertiesTree::ModificationRole, geometryChanged);
                         classItem->addChild(geometryItem);
 
                         auto xItem = new QTreeWidgetItem;
                         xItem->setText(0, "x");
-                        xItem->setData(0, Qt::DecorationRole, xChanged);
+                        xItem->setData(0, PropertiesTree::ModificationRole, xChanged);
                         geometryItem->addChild(xItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, false));
 
                         auto yItem = new QTreeWidgetItem;
                         yItem->setText(0, "y");
-                        yItem->setData(0, Qt::DecorationRole, yChanged);
+                        yItem->setData(0, PropertiesTree::ModificationRole, yChanged);
                         geometryItem->addChild(yItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, false));
 
                         auto wItem = new QTreeWidgetItem;
                         wItem->setText(0, "width");
-                        wItem->setData(0, Qt::DecorationRole, wChanged);
+                        wItem->setData(0, PropertiesTree::ModificationRole, wChanged);
                         geometryItem->addChild(wItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, false));
 
                         auto hItem = new QTreeWidgetItem;
                         hItem->setText(0, "height");
-                        hItem->setData(0, Qt::DecorationRole, hChanged);
+                        hItem->setData(0, PropertiesTree::ModificationRole, hChanged);
                         geometryItem->addChild(hItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, false));
@@ -834,8 +830,7 @@ void PropertiesController::onSceneSelectionChange()
                         double number = propertyValue.value<double>();
                         auto item = new QTreeWidgetItem;
                         item->setText(0, propertyName);
-                        item->setData(0, Qt::DecorationRole,
-                                      ParserUtils::exists(selectedControl->dir(), propertyName));
+                        item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                         classItem->addChild(item);
                         m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
                                                                           createNumberHandlerWidget(propertyName, number, selectedControl, false));
@@ -867,33 +862,33 @@ void PropertiesController::onSceneSelectionChange()
                         auto geometryItem = new QTreeWidgetItem;
                         geometryItem->setText(0, "geometry");
                         geometryItem->setText(1, geometryText);
-                        geometryItem->setData(0, Qt::DecorationRole, geometryChanged);
+                        geometryItem->setData(0, PropertiesTree::ModificationRole, geometryChanged);
                         classItem->addChild(geometryItem);
 
                         auto xItem = new QTreeWidgetItem;
                         xItem->setText(0, "x");
-                        xItem->setData(0, Qt::DecorationRole, xChanged);
+                        xItem->setData(0, PropertiesTree::ModificationRole, xChanged);
                         geometryItem->addChild(xItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, true));
 
                         auto yItem = new QTreeWidgetItem;
                         yItem->setText(0, "y");
-                        yItem->setData(0, Qt::DecorationRole, yChanged);
+                        yItem->setData(0, PropertiesTree::ModificationRole, yChanged);
                         geometryItem->addChild(yItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, true));
 
                         auto wItem = new QTreeWidgetItem;
                         wItem->setText(0, "width");
-                        wItem->setData(0, Qt::DecorationRole, wChanged);
+                        wItem->setData(0, PropertiesTree::ModificationRole, wChanged);
                         geometryItem->addChild(wItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, true));
 
                         auto hItem = new QTreeWidgetItem;
                         hItem->setText(0, "height");
-                        hItem->setData(0, Qt::DecorationRole, hChanged);
+                        hItem->setData(0, PropertiesTree::ModificationRole, hChanged);
                         geometryItem->addChild(hItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, true));
@@ -906,8 +901,7 @@ void PropertiesController::onSceneSelectionChange()
                         int number = propertyValue.value<int>();
                         auto item = new QTreeWidgetItem;
                         item->setText(0, propertyName);
-                        item->setData(0, Qt::DecorationRole,
-                                      ParserUtils::exists(selectedControl->dir(), propertyName));
+                        item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                         classItem->addChild(item);
                         m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
                                                                           createNumberHandlerWidget(propertyName, number, selectedControl, true));
@@ -923,11 +917,14 @@ void PropertiesController::onSceneSelectionChange()
             for (const Enum& enumm : enumList) {
                 auto item = new QTreeWidgetItem;
                 item->setText(0, enumm.name);
-                item->setData(0, Qt::DecorationRole, ParserUtils::exists(selectedControl->dir(), enumm.name));
+                item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), enumm.name));
                 classItem->addChild(item);
                 m_propertiesPane->propertiesTree()->setItemWidget(item, 1, createEnumHandlerWidget(enumm, selectedControl));
             }
 
+            classItem->addChildren(children);
+            for (auto i : children)
+                m_propertiesPane->propertiesTree()->openPersistentEditor(i, 1);
             m_propertiesPane->propertiesTree()->expandItem(classItem);
         }
 
@@ -954,7 +951,7 @@ void PropertiesController::onControlZChange(Control* control)
                             = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
                     Q_ASSERT(iSpinBox || dSpinBox);
 
-                    childItem->setData(0, Qt::DecorationRole, ParserUtils::exists(control->dir(), "z"));
+                    childItem->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(control->dir(), "z"));
                     if (dSpinBox) {
                         dSpinBox->blockSignals(true);
                         dSpinBox->setValue(control->zValue());
@@ -1018,7 +1015,7 @@ void PropertiesController::onControlGeometryChange(const Control* control)
             for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
                 if (childItem->text(0) == "geometry") {
                     childItem->setText(1, geometryText);
-                    childItem->setData(0, Qt::DecorationRole, geometryChanged);
+                    childItem->setData(0, PropertiesTree::ModificationRole, geometryChanged);
                 }
                 if (!isGeometryProperty(childItem->text(0)))
                     continue;
@@ -1037,7 +1034,7 @@ void PropertiesController::onControlGeometryChange(const Control* control)
                     iSpinBox->blockSignals(true);
 
                 if (childItem->text(0) == "x") {
-                    childItem->setData(0, Qt::DecorationRole, xChanged);
+                    childItem->setData(0, PropertiesTree::ModificationRole, xChanged);
                     if (dSpinBox) {
                         dSpinBox->setValue(geometry.x());
                         fixPosForForm(control, "x", dSpinBox);
@@ -1046,7 +1043,7 @@ void PropertiesController::onControlGeometryChange(const Control* control)
                         fixPosForForm(control, "x", iSpinBox);
                     }
                 } else if (childItem->text(0) == "y") {
-                    childItem->setData(0, Qt::DecorationRole, yChanged);
+                    childItem->setData(0, PropertiesTree::ModificationRole, yChanged);
                     if (dSpinBox) {
                         dSpinBox->setValue(geometry.y());
                         fixPosForForm(control, "y", dSpinBox);
@@ -1055,13 +1052,13 @@ void PropertiesController::onControlGeometryChange(const Control* control)
                         fixPosForForm(control, "y", iSpinBox);
                     }
                 } else if (childItem->text(0) == "width") {
-                    childItem->setData(0, Qt::DecorationRole, wChanged);
+                    childItem->setData(0, PropertiesTree::ModificationRole, wChanged);
                     if (dSpinBox)
                         dSpinBox->setValue(control->width());
                     else
                         iSpinBox->setValue(control->width());
                 } else if (childItem->text(0) == "height") {
-                    childItem->setData(0, Qt::DecorationRole, hChanged);
+                    childItem->setData(0, PropertiesTree::ModificationRole, hChanged);
                     if (dSpinBox)
                         dSpinBox->setValue(control->height());
                     else
@@ -1170,6 +1167,31 @@ void PropertiesController::onControlIndexEditingFinish()
     ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
                                      ControlPropertyManager::SaveChanges |
                                      ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onStringPropertyEditingFinish()
+{
+//    const QString& previousValue = UtilityFunctions::getProperty(propertyName, control->properties()).value<QString>();
+
+//    if (previousValue == lineEdit->text())
+//        return;
+
+//    ControlPropertyManager::setProperty(control,
+//                                        propertyName, UtilityFunctions::stringify(lineEdit->text()),
+//                                        lineEdit->text(),
+//                                        ControlPropertyManager::SaveChanges
+//                                        | ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onBoolPropertyEditingFinish()
+{
+    // NOTE: No need for previous value equality check, since this signal is only emitted
+    // when the value is changed/toggled
+//    ControlPropertyManager::setProperty(control,
+//                                        propertyName, checkBox->isChecked() ? "true" : "false",
+//                                        checkBox->isChecked(),
+//                                        ControlPropertyManager::SaveChanges
+//                                        | ControlPropertyManager::UpdateRenderer);
 }
 
 Control* PropertiesController::control() const

@@ -14,6 +14,13 @@ class PropertiesTree final : public QTreeWidget
     friend class PropertiesDelegate; // For itemFromIndex()
 
 public:
+    enum Roles {
+        TypeRole = Qt::UserRole + 1,
+        InitialValueRole,
+        ModificationRole
+    };
+
+public:
     explicit PropertiesTree(QWidget* parent = nullptr);
 
     PropertiesDelegate* delegate() const;

@@ -25,6 +25,7 @@ public:
     QTreeWidgetItem* indexItem() const;
     QLineEdit* idEdit() const;
     QSpinBox* indexEdit() const;
+    bool isPermanentItem(QTreeWidgetItem* item) const;
 
     QSize sizeHint() const override;
 

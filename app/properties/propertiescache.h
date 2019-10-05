@@ -15,6 +15,7 @@ class PropertiesCache final : public QObject
 
 public:
     enum Type {
+        Invalid,
         String,
         Enum,
         Bool,

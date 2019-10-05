@@ -18,6 +18,7 @@ public:
 
 public slots:
     void discharge();
+    void clear();
 
 private slots:
     void onSearchEditEditingFinish();
@@ -30,6 +31,9 @@ private slots:
     void onControlPropertyChange();
     void onControlIdEditingFinish();
     void onControlIndexEditingFinish();
+
+    void onStringPropertyEditingFinish();
+    void onBoolPropertyEditingFinish();
 
 private:
     Control* control() const;
