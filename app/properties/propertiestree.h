@@ -4,7 +4,7 @@
 #include <QTreeWidget>
 
 class PropertiesDelegate;
-class PropertyItemCache;
+class EditorWidgetCache;
 
 class PropertiesTree final : public QTreeWidget
 {
@@ -17,7 +17,7 @@ public:
     explicit PropertiesTree(QWidget* parent = nullptr);
 
     PropertiesDelegate* delegate() const;
-    PropertyItemCache* itemCache() const;
+    EditorWidgetCache* itemCache() const;
 
     QList<QTreeWidgetItem*> topLevelItems() const;
     QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem,
@@ -31,7 +31,7 @@ private:
 
 private:
     PropertiesDelegate* m_delegate;
-    PropertyItemCache* m_itemCache;
+    EditorWidgetCache* m_itemCache;
 };
 
 #endif // PROPERTIESTREE_H

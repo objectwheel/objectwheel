@@ -400,17 +400,15 @@ static QWidget* createFontWeightHandlerWidget(int weight, Control* control)
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
 
-    QMetaEnum weightEnum = QMetaEnum::fromType<QFont::Weight>();
-    for (int i = weightEnum.keyCount(); i--;) { // Necessary somehow
-        if (QString::fromUtf8(weightEnum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
-            comboBox->addItem(weightEnum.key(i));
-    }
+    auto e = QMetaEnum::fromType<QFont::Weight>();
+    for (int i = 0; i < e.keyCount(); ++i)
+        comboBox->addItem(e.key(i));
 
-    comboBox->setCurrentText(QMetaEnum::fromType<QFont::Weight>().valueToKey(weight));
+    comboBox->setCurrentText(e.valueToKey(weight));
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
-        int weightValue = weightEnum.keyToValue(comboBox->currentText().toUtf8().constData());
+        int weightValue = e.keyToValue(comboBox->currentText().toUtf8().constData());
         const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
 
         if (weightValue == font.weight())
@@ -435,17 +433,15 @@ static QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capi
     comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
     comboBox->setMinimumWidth(1);
 
-    QMetaEnum capitalizationEnum = QMetaEnum::fromType<QFont::Capitalization>();
-    for (int i = capitalizationEnum.keyCount(); i--;) { // Necessary somehow
-        if (QString::fromUtf8(capitalizationEnum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
-            comboBox->addItem(capitalizationEnum.key(i));
-    }
+    auto e = QMetaEnum::fromType<QFont::Capitalization>();
+    for (int i = 0; i < e.keyCount(); ++i)
+        comboBox->addItem(e.key(i));
 
-    comboBox->setCurrentText(QMetaEnum::fromType<QFont::Capitalization>().valueToKey(capitalization));
+    comboBox->setCurrentText(e.valueToKey(capitalization));
 
     QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
     {
-        int capitalizationValue = capitalizationEnum.keyToValue(comboBox->currentText().toUtf8().constData());
+        int capitalizationValue = e.keyToValue(comboBox->currentText().toUtf8().constData());
         const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
 
         if (capitalizationValue == font.capitalization())
@@ -774,8 +770,8 @@ void PropertiesController::onSceneSelectionChange()
 
 //        m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
 //        m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
-//        m_propertiesPane->idEdit()->setText(selectedControl->id());
-//        m_propertiesPane->indexEdit()->setValue(selectedControl->index());
+        m_propertiesPane->idEdit()->setText(selectedControl->id());
+        m_propertiesPane->indexEdit()->setValue(selectedControl->index());
 
         for (const PropertyNode& propertyNode : properties) {
             const QVector<Enum>& enumList = propertyNode.enums;

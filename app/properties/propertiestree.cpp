@@ -1,12 +1,12 @@
 #include <propertiestree.h>
 #include <propertiesdelegate.h>
-#include <propertyitemcache.h>
+#include <editorwidgetcache.h>
 #include <QHeaderView>
 #include <QPainter>
 
 PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
   , m_delegate(new PropertiesDelegate(this))
-  , m_itemCache(new PropertyItemCache(this))
+  , m_itemCache(new EditorWidgetCache(this))
 {
     m_itemCache->reserve(20);
 
@@ -74,7 +74,7 @@ PropertiesDelegate* PropertiesTree::delegate() const
     return m_delegate;
 }
 
-PropertyItemCache* PropertiesTree::itemCache() const
+EditorWidgetCache* PropertiesTree::itemCache() const
 {
     return m_itemCache;
 }

@@ -1,10 +1,9 @@
-#include <propertyitemcache.h>
+#include <editorwidgetcache.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
 
 #include <QMetaEnum>
 #include <QStack>
-#include <QTreeWidgetItem>
 #include <QHBoxLayout>
 #include <QLineEdit>
 #include <QComboBox>
@@ -13,59 +12,53 @@
 #include <QSpinBox>
 #include <QFontDatabase>
 
-PropertyItemCache::PropertyItemCache(QObject* parent) : QObject(parent)
+EditorWidgetCache::EditorWidgetCache(QObject* parent) : QObject(parent)
 {
 }
 
-PropertyItemCache::~PropertyItemCache()
+EditorWidgetCache::~EditorWidgetCache()
 {
     clear();
 }
 
-void PropertyItemCache::clear()
+void EditorWidgetCache::clear()
 {
-    for (PropertyStack* stack : m_items) {
-        for (PropertyItem propertyItem : *stack) {
-            delete propertyItem.widget;
-            delete propertyItem.item;
-        }
+    for (PropertyStack* stack : m_widgets) {
+        for (QWidget* widget : *stack)
+            delete widget;
         delete stack;
     }
-    m_items.clear();
+    m_widgets.clear();
 }
 
-void PropertyItemCache::reserve(int size)
+void EditorWidgetCache::reserve(int size)
 {
     auto e = QMetaEnum::fromType<Type>();
     for (int i = 0; i < e.keyCount(); ++i) {
         Type type = Type(e.value(i));
-        for (;size--;)
-            push(type, createPropertyItem(type));
+        for (int i = size; i--;)
+            push(type, createWidget(type));
     }
 }
 
-void PropertyItemCache::push(PropertyItemCache::Type type,
-                               const PropertyItemCache::PropertyItem& propertyItem)
+void EditorWidgetCache::push(EditorWidgetCache::Type type, QWidget* widget)
 {
-    if (!m_items.contains(type))
-        m_items.insert(type, new PropertyStack);
-    m_items.value(type)->push(propertyItem);
+    if (!m_widgets.contains(type))
+        m_widgets.insert(type, new PropertyStack);
+    m_widgets.value(type)->push(widget);
 }
 
-PropertyItemCache::PropertyItem PropertyItemCache::pop(PropertyItemCache::Type type)
+QWidget* EditorWidgetCache::pop(EditorWidgetCache::Type type)
 {
-    if (PropertyStack* stack = m_items.value(type, nullptr)) {
+    if (PropertyStack* stack = m_widgets.value(type, nullptr)) {
         if (!stack->isEmpty())
             return stack->pop();
     }
-    return createPropertyItem(type);
+    return createWidget(type);
 }
 
-PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyItemCache::Type type)
+QWidget* EditorWidgetCache::createWidget(EditorWidgetCache::Type type)
 {
-    PropertyItem propertyItem;
-    propertyItem.item = new QTreeWidgetItem;
-
     switch (type) {
     case String: {
         auto lineEdit = new QLineEdit;
@@ -74,8 +67,7 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         lineEdit->setFocusPolicy(Qt::StrongFocus);
         lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
         lineEdit->setMinimumWidth(1);
-        propertyItem.widget = lineEdit;
-        break;
+        return lineEdit;
     }
 
     case Enum: {
@@ -86,8 +78,7 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
-        propertyItem.widget = comboBox;
-        break;
+        return comboBox;
     }
 
     case Bool: {
@@ -106,8 +97,7 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         layout->addStretch();
         layout->setSpacing(0);
         layout->setContentsMargins(2, 0, 0, 0);
-        propertyItem.widget = widget;
-        break;
+        return widget;
     }
 
     case Color: {
@@ -120,8 +110,7 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         toolButton->setFocusPolicy(Qt::ClickFocus);
         toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
         toolButton->setMinimumWidth(1);
-        propertyItem.widget = toolButton;
-        break;
+        return toolButton;
     }
 
     case Int: {
@@ -135,8 +124,7 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         spinBox->setMinimumWidth(1);
         TransparentStyle::attach(spinBox);
         UtilityFunctions::disableWheelEvent(spinBox);
-        propertyItem.widget = spinBox;
-        break;
+        return spinBox;
     }
 
     case Real: {
@@ -150,8 +138,7 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         spinBox->setMinimumWidth(1);
         TransparentStyle::attach(spinBox);
         UtilityFunctions::disableWheelEvent(spinBox);
-        propertyItem.widget = spinBox;
-        break;
+        return spinBox;
     }
 
     case FontSize: {
@@ -165,8 +152,7 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         spinBox->setMinimumWidth(1);
         TransparentStyle::attach(spinBox);
         UtilityFunctions::disableWheelEvent(spinBox);
-        propertyItem.widget = spinBox;
-        break;
+        return spinBox;
     }
 
     case FontFamily: {
@@ -177,9 +163,8 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
-        propertyItem.widget = comboBox;
         comboBox->addItems(QFontDatabase().families());
-        break;
+        return comboBox;
     }
 
     case FontWeight: {
@@ -190,11 +175,10 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
-        propertyItem.widget = comboBox;
         auto e = QMetaEnum::fromType<QFont::Weight>();
         for (int i = 0; i < e.keyCount(); ++i)
             comboBox->addItem(e.key(i));
-        break;
+        return comboBox;
     }
 
     case FontCapitalization: {
@@ -205,13 +189,12 @@ PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyIt
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
-        propertyItem.widget = comboBox;
         auto e = QMetaEnum::fromType<QFont::Capitalization>();
         for (int i = 0; i < e.keyCount(); ++i)
             comboBox->addItem(e.key(i));
-        break;
+        return comboBox;
     }
     }
 
-    return propertyItem;
+    return nullptr;
 }

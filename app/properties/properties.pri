@@ -2,13 +2,13 @@ DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/propertiespane.h \
+           $$PWD/editorwidgetcache.h \
            $$PWD/propertiescontroller.h \
            $$PWD/propertiesdelegate.h \
-           $$PWD/propertiestree.h \
-           $$PWD/propertyitemcache.h
+           $$PWD/propertiestree.h
 
 SOURCES += $$PWD/propertiespane.cpp \
+           $$PWD/editorwidgetcache.cpp \
            $$PWD/propertiescontroller.cpp \
            $$PWD/propertiesdelegate.cpp \
-           $$PWD/propertiestree.cpp \
-           $$PWD/propertyitemcache.cpp
+           $$PWD/propertiestree.cpp

@@ -223,9 +223,9 @@ QPalette ApplicationCore::palette()
     palette.setColor(QPalette::AlternateBase, "#f5f5f5");
     palette.setColor(QPalette::Button, "#ececec");
     palette.setColor(QPalette::Window, "#ececec");
-    palette.setColor(QPalette::Highlight, "#808080");
+    palette.setColor(QPalette::Highlight, "#f0f0f0");
     palette.setColor(QPalette::BrightText, "#ffffff");
-    palette.setColor(QPalette::HighlightedText, "#ffffff");
+    palette.setColor(QPalette::HighlightedText, "#2f2f2f");
     palette.setColor(QPalette::ToolTipText, "#2f2f2f");
     palette.setColor(QPalette::ToolTipBase, "#ececec");
     palette.setColor(QPalette::Link, "#025dbf");
