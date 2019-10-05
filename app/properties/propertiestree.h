@@ -16,6 +16,7 @@ class PropertiesTree final : public QTreeWidget
 public:
     enum Roles {
         TypeRole = Qt::UserRole + 1,
+        PropertyNameRole,
         InitialValueRole,
         ModificationRole
     };

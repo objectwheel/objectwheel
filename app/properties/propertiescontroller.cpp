@@ -487,6 +487,8 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
   , m_propertiesPane(propertiesPane)
   , m_designerScene(designerScene)
 {
+    connect(m_propertiesPane->propertiesTree()->delegate(), &PropertiesDelegate::propertyEdited,
+            this, &PropertiesController::onPropertyEdit);
     connect(m_propertiesPane->idEdit(), &QLineEdit::editingFinished,
             this, &PropertiesController::onControlIdEditingFinish);
     connect(m_propertiesPane->indexEdit(), &QSpinBox::editingFinished,
@@ -535,35 +537,35 @@ void PropertiesController::clear()
 
 void PropertiesController::onSearchEditEditingFinish()
 {
-//    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
-//    const QString& searchTerm = m_propertiesPane->searchEdit()->text();
-//    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-//        auto tlv = false;
-//        for (int j = 0; j < topLevelItem->childCount(); j++) {
-//            auto tci = topLevelItem->child(j);
-//            auto tcv = false;
-//            auto vv = tci->text(0).contains(searchTerm, Qt::CaseInsensitive);
+    //    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
+    //    const QString& searchTerm = m_propertiesPane->searchEdit()->text();
+    //    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
+    //        auto tlv = false;
+    //        for (int j = 0; j < topLevelItem->childCount(); j++) {
+    //            auto tci = topLevelItem->child(j);
+    //            auto tcv = false;
+    //            auto vv = tci->text(0).contains(searchTerm, Qt::CaseInsensitive);
 
-//            for (int z = 0; z < tci->childCount(); z++) {
-//                auto tdi = tci->child(z);
-//                auto v = (searchTerm.isEmpty() || vv)
-//                        ? true
-//                        : tdi->text(0).contains(searchTerm, Qt::CaseInsensitive);
+    //            for (int z = 0; z < tci->childCount(); z++) {
+    //                auto tdi = tci->child(z);
+    //                auto v = (searchTerm.isEmpty() || vv)
+    //                        ? true
+    //                        : tdi->text(0).contains(searchTerm, Qt::CaseInsensitive);
 
-//                tdi->setHidden(!v);
-//                if (v)
-//                    tcv = v;
-//            }
+    //                tdi->setHidden(!v);
+    //                if (v)
+    //                    tcv = v;
+    //            }
 
-//            auto v = searchTerm.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
-//            tci->setHidden(!v);
-//            if (v)
-//                tlv = v;
-//        }
+    //            auto v = searchTerm.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
+    //            tci->setHidden(!v);
+    //            if (v)
+    //                tlv = v;
+    //        }
 
-//        auto v = searchTerm.isEmpty() ? true : tlv;
-//        topLevelItem->setHidden(!v);
-//    }
+    //        auto v = searchTerm.isEmpty() ? true : tlv;
+    //        topLevelItem->setHidden(!v);
+    //    }
 }
 
 // FIXME: This function has severe performance issues.
@@ -736,10 +738,10 @@ void PropertiesController::onSceneSelectionChange()
                     auto item = m_propertiesPane->propertiesTree()->cache()->pop();
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                    item->setData(1, PropertiesTree::TypeRole, PropertiesCache::Bool);
+                    item->setData(1, PropertiesTree::PropertyNameRole, propertyName);
                     item->setData(1, PropertiesTree::InitialValueRole, checked);
+                    item->setData(1, PropertiesTree::TypeRole, PropertiesCache::Bool);
                     children.append(item);
-//                    connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=] {});
                     break;
                 }
 
@@ -748,10 +750,10 @@ void PropertiesController::onSceneSelectionChange()
                     auto item = m_propertiesPane->propertiesTree()->cache()->pop();
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                    item->setData(1, PropertiesTree::TypeRole, PropertiesCache::String);
+                    item->setData(1, PropertiesTree::PropertyNameRole, propertyName);
                     item->setData(1, PropertiesTree::InitialValueRole, text);
+                    item->setData(1, PropertiesTree::TypeRole, PropertiesCache::String);
                     children.append(item);
-//                    connect(lineEdit, &QLineEdit::editingFinished, [=] {});
                     break;
                 }
 
@@ -1169,29 +1171,78 @@ void PropertiesController::onControlIndexEditingFinish()
                                      ControlPropertyManager::UpdateRenderer);
 }
 
-void PropertiesController::onStringPropertyEditingFinish()
+void PropertiesController::onPropertyEdit(int type, const QString& propertyName, const QVariant& value)
 {
-//    const QString& previousValue = UtilityFunctions::getProperty(propertyName, control->properties()).value<QString>();
-
-//    if (previousValue == lineEdit->text())
-//        return;
-
-//    ControlPropertyManager::setProperty(control,
-//                                        propertyName, UtilityFunctions::stringify(lineEdit->text()),
-//                                        lineEdit->text(),
-//                                        ControlPropertyManager::SaveChanges
-//                                        | ControlPropertyManager::UpdateRenderer);
+    switch (type) {
+    case PropertiesCache::String:
+        onStringPropertyEditingFinish(propertyName, value.toString());
+        break;
+        //    case PropertiesCache::Enum:
+        //        propertyName = "currentText";
+        //        break;
+        //    case PropertiesCache::Bool: {
+        //        auto checkBox = static_cast<QCheckBox*>(widget);
+        //        connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
+        //                [=] { emit propertyEdited(type, propertyName, checkBox->isChecked()); });
+        //    } break;
+        //    case PropertiesCache::Color:
+        //        propertyName = "color";
+        //        break;
+        //    case PropertiesCache::Int:
+        //        propertyName = "value";
+        //        break;
+        //    case PropertiesCache::Real:
+        //        propertyName = "value";
+        //        break;
+        //    case PropertiesCache::FontSize:
+        //        propertyName = "value";
+        //        break;
+        //    case PropertiesCache::FontFamily:
+        //        propertyName = "currentText";
+        //        break;
+        //    case PropertiesCache::FontWeight:
+        //        propertyName = "currentText";
+        //        break;
+        //    case PropertiesCache::FontCapitalization:
+        //        propertyName = "currentText";
+        //        break;
+    default:
+        break;
+    }
 }
 
-void PropertiesController::onBoolPropertyEditingFinish()
+void PropertiesController::onStringPropertyEditingFinish(const QString& propertyName, const QString& text)
 {
-    // NOTE: No need for previous value equality check, since this signal is only emitted
-    // when the value is changed/toggled
-//    ControlPropertyManager::setProperty(control,
-//                                        propertyName, checkBox->isChecked() ? "true" : "false",
-//                                        checkBox->isChecked(),
-//                                        ControlPropertyManager::SaveChanges
-//                                        | ControlPropertyManager::UpdateRenderer);
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        const QString& previousValue
+                = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QString>();
+
+        if (previousValue == text)
+            return;
+
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            UtilityFunctions::stringify(text), text,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
+}
+
+void PropertiesController::onBoolPropertyEditingFinish(const QString& propertyName, bool checked)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed/toggled
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            checked ? "true" : "false", checked,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 Control* PropertiesController::control() const

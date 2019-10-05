@@ -2,8 +2,9 @@
 #include <propertiestree.h>
 #include <propertiescache.h>
 #include <QPainter>
-#include <QDebug>
 #include <QLineEdit>
+#include <QCheckBox>
+
 static void setInitialValue(QWidget* widget, PropertiesCache::Type type, const QVariant& value)
 {
     const char* propertyName = 0;
@@ -141,43 +142,93 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 
 QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    const QSize& size = QStyledItemDelegate::sizeHint(option, index);
-    return QSize(size.width(), ROW_HEIGHT);
+    return QSize(QStyledItemDelegate::sizeHint(option, index).width(), ROW_HEIGHT);
 }
 
-void PropertiesDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+void PropertiesDelegate::setModelData(QWidget*, QAbstractItemModel*, const QModelIndex&) const
 {
-    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
-    if (type == PropertiesCache::Invalid || index.column() == 0)
-        return QStyledItemDelegate::setModelData(editor, model, index);
+    // do nothing
 }
 
-void PropertiesDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+void PropertiesDelegate::setEditorData(QWidget*, const QModelIndex&) const
 {
-    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
-    if (type == PropertiesCache::Invalid || index.column() == 0)
-        return QStyledItemDelegate::setEditorData(editor, index);
-    setInitialValue(editor, type, index.data(PropertiesTree::InitialValueRole));
+    // do nothing
 }
 
 QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option,
                                           const QModelIndex& index) const
 {
-    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
-    if (type == PropertiesCache::Invalid || index.column() == 0)
+    if (index.column() == 0)
+        return nullptr;
+
+    auto type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
+    if (type == PropertiesCache::Invalid)
         return QStyledItemDelegate::createEditor(parent, option, index);
 
     QWidget* widget = m_propertiesTree->cache()->pop(type);
     widget->setParent(parent);
     widget->setVisible(true);
+    setInitialValue(widget, type, index.data(PropertiesTree::InitialValueRole));
+    addConnection(widget, type, index.data(PropertiesTree::PropertyNameRole).toString());
     return widget;
 }
 
 void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
 {
-    PropertiesCache::Type type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
-    if (type == PropertiesCache::Invalid || index.column() == 0)
+    if (index.column() == 0)
+        return editor->deleteLater();
+
+    auto type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
+    if (type == PropertiesCache::Invalid)
         return QStyledItemDelegate::destroyEditor(editor, index);
 
+    clearConnection(editor);
     m_propertiesTree->cache()->push(type, editor);
+}
+
+void PropertiesDelegate::addConnection(QWidget* widget, int type, const QString& propertyName) const
+{
+    switch (type) {
+    case PropertiesCache::String: {
+        auto lineEdit = static_cast<QLineEdit*>(widget);
+        connect(lineEdit, &QLineEdit::editingFinished,
+                [=] { emit propertyEdited(type, propertyName, lineEdit->text()); });
+    } break;
+//    case PropertiesCache::Enum:
+//        propertyName = "currentText";
+//        break;
+    case PropertiesCache::Bool: {
+        auto checkBox = static_cast<QCheckBox*>(widget);
+        connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
+                [=] { emit propertyEdited(type, propertyName, checkBox->isChecked()); });
+    } break;
+//    case PropertiesCache::Color:
+//        propertyName = "color";
+//        break;
+//    case PropertiesCache::Int:
+//        propertyName = "value";
+//        break;
+//    case PropertiesCache::Real:
+//        propertyName = "value";
+//        break;
+//    case PropertiesCache::FontSize:
+//        propertyName = "value";
+//        break;
+//    case PropertiesCache::FontFamily:
+//        propertyName = "currentText";
+//        break;
+//    case PropertiesCache::FontWeight:
+//        propertyName = "currentText";
+//        break;
+//    case PropertiesCache::FontCapitalization:
+//        propertyName = "currentText";
+//        break;
+    default:
+        break;
+    }
+}
+
+void PropertiesDelegate::clearConnection(QWidget* widget) const
+{
+    disconnect(widget, 0, 0, 0);
 }

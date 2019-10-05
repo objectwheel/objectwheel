@@ -5,7 +5,6 @@
 #include <QTreeWidgetItem>
 #include <QMetaEnum>
 #include <QStack>
-#include <QHBoxLayout>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QCheckBox>
@@ -120,7 +119,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         checkBox->setFocusPolicy(Qt::ClickFocus);
         checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
         checkBox->setMinimumWidth(1);
-        checkBox->setFixedWidth(checkBox->style()->pixelMetric(QStyle::PM_IndicatorWidth) + 2);
+        checkBox->setFixedWidth(checkBox->style()->pixelMetric(QStyle::PM_IndicatorWidth) + 3);
         checkBox->setStyleSheet("QCheckBox { margin-left: 2px; }");
         return checkBox;
     }

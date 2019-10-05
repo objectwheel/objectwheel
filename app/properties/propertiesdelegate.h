@@ -30,6 +30,13 @@ public:
     void destroyEditor(QWidget* editor, const QModelIndex& index) const override;
 
 private:
+    void addConnection(QWidget* widget, int type, const QString& propertyName) const;
+    void clearConnection(QWidget* widget) const;
+
+signals:
+    void propertyEdited(int type, const QString& propertyName, const QVariant& value) const;
+
+private:
     PropertiesTree* m_propertiesTree;
 };
 

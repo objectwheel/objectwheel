@@ -32,8 +32,9 @@ private slots:
     void onControlIdEditingFinish();
     void onControlIndexEditingFinish();
 
-    void onStringPropertyEditingFinish();
-    void onBoolPropertyEditingFinish();
+    void onPropertyEdit(int type, const QString& propertyName, const QVariant& value);
+    void onStringPropertyEditingFinish(const QString& propertyName, const QString& text);
+    void onBoolPropertyEditingFinish(const QString& propertyName, bool checked);
 
 private:
     Control* control() const;
