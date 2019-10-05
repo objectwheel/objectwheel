@@ -13,6 +13,7 @@ class PropertiesDelegate final : public QStyledItemDelegate
 
 public:
     enum { ROW_HEIGHT = 21 };
+    enum { TypeRole = Qt::UserRole + 1 };
 
 public:
     explicit PropertiesDelegate(PropertiesTree* propertiesTree);

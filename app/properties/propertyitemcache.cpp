@@ -13,16 +13,16 @@
 #include <QSpinBox>
 #include <QFontDatabase>
 
-PropertyItemFactory::PropertyItemFactory(QObject* parent) : QObject(parent)
+PropertyItemCache::PropertyItemCache(QObject* parent) : QObject(parent)
 {
 }
 
-PropertyItemFactory::~PropertyItemFactory()
+PropertyItemCache::~PropertyItemCache()
 {
     clear();
 }
 
-void PropertyItemFactory::clear()
+void PropertyItemCache::clear()
 {
     for (PropertyStack* stack : m_items) {
         for (PropertyItem propertyItem : *stack) {
@@ -34,7 +34,7 @@ void PropertyItemFactory::clear()
     m_items.clear();
 }
 
-void PropertyItemFactory::reserve(int size)
+void PropertyItemCache::reserve(int size)
 {
     auto e = QMetaEnum::fromType<Type>();
     for (int i = 0; i < e.keyCount(); ++i) {
@@ -44,15 +44,15 @@ void PropertyItemFactory::reserve(int size)
     }
 }
 
-void PropertyItemFactory::push(PropertyItemFactory::Type type,
-                               const PropertyItemFactory::PropertyItem& propertyItem)
+void PropertyItemCache::push(PropertyItemCache::Type type,
+                               const PropertyItemCache::PropertyItem& propertyItem)
 {
     if (!m_items.contains(type))
         m_items.insert(type, new PropertyStack);
     m_items.value(type)->push(propertyItem);
 }
 
-PropertyItemFactory::PropertyItem PropertyItemFactory::pop(PropertyItemFactory::Type type)
+PropertyItemCache::PropertyItem PropertyItemCache::pop(PropertyItemCache::Type type)
 {
     if (PropertyStack* stack = m_items.value(type, nullptr)) {
         if (!stack->isEmpty())
@@ -61,7 +61,7 @@ PropertyItemFactory::PropertyItem PropertyItemFactory::pop(PropertyItemFactory::
     return createPropertyItem(type);
 }
 
-PropertyItemFactory::PropertyItem PropertyItemFactory::createPropertyItem(PropertyItemFactory::Type type)
+PropertyItemCache::PropertyItem PropertyItemCache::createPropertyItem(PropertyItemCache::Type type)
 {
     PropertyItem propertyItem;
     propertyItem.item = new QTreeWidgetItem;

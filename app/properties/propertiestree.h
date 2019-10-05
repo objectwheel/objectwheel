@@ -4,6 +4,7 @@
 #include <QTreeWidget>
 
 class PropertiesDelegate;
+class PropertyItemCache;
 
 class PropertiesTree final : public QTreeWidget
 {
@@ -15,15 +16,22 @@ class PropertiesTree final : public QTreeWidget
 public:
     explicit PropertiesTree(QWidget* parent = nullptr);
 
-    PropertiesDelegate* propertiesDelegate() const;
+    PropertiesDelegate* delegate() const;
+    PropertyItemCache* itemCache() const;
 
     QList<QTreeWidgetItem*> topLevelItems() const;
-    QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
-                                             bool includeCollapsed = true, bool includeHidden = false) const;
+    QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem,
+                                             bool includeParent = true,
+                                             bool includeCollapsed = true,
+                                             bool includeHidden = false) const;
 
 private:
     void paintEvent(QPaintEvent* event);
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const;
+
+private:
+    PropertiesDelegate* m_delegate;
+    PropertyItemCache* m_itemCache;
 };
 
 #endif // PROPERTIESTREE_H

@@ -1,5 +1,5 @@
-#ifndef PROPERTYITEMFACTORY_H
-#define PROPERTYITEMFACTORY_H
+#ifndef PROPERTYITEMCACHE_H
+#define PROPERTYITEMCACHE_H
 
 #include <QHash>
 #include <QObject>
@@ -9,10 +9,10 @@ class QWidget;
 template<class T>
 class QStack;
 
-class PropertyItemFactory final : public QObject
+class PropertyItemCache final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(PropertyItemFactory)
+    Q_DISABLE_COPY(PropertyItemCache)
 
 public:
     enum Type {
@@ -38,8 +38,8 @@ public:
     using PropertyHash = QHash<Type, PropertyStack*>;
 
 public:
-    explicit PropertyItemFactory(QObject* parent = nullptr);
-    ~PropertyItemFactory() override;
+    explicit PropertyItemCache(QObject* parent = nullptr);
+    ~PropertyItemCache() override;
 
     void clear();
     void reserve(int size);
@@ -53,4 +53,4 @@ private:
     PropertyHash m_items;
 };
 
-#endif // PROPERTYITEMFACTORY_H
+#endif // PROPERTYITEMCACHE_H

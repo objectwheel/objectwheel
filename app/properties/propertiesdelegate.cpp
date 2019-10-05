@@ -1,5 +1,6 @@
 #include <propertiesdelegate.h>
 #include <propertiestree.h>
+#include <propertyitemcache.h>
 #include <QPainter>
 
 PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyledItemDelegate(propertiesTree)
@@ -103,38 +104,10 @@ QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem& option, const QMo
 }
 
 
-
 QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option,
                                           const QModelIndex& index) const
 {
-//    case QVariant::Bool: {
-//        const bool checked = propertyValue.value<bool>();
-//        auto item = new QTreeWidgetItem;
-//        item->setText(0, propertyName);
-//        item->setData(0, Qt::DecorationRole,
-//                      ParserUtils::exists(selectedControl->dir(), propertyName));
-//        classItem->addChild(item);
-//        m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-//                                                          createBoolHandlerWidget(propertyName, checked, selectedControl));
-//        break;
-//    }
-
-//        auto checkBox = new QCheckBox;
-//        checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-//        checkBox->setCursor(Qt::PointingHandCursor);
-//        checkBox->setFocusPolicy(Qt::ClickFocus);
-//        checkBox->setMinimumWidth(1);
-//        auto widget = new QWidget;
-//        widget->setMinimumWidth(1);
-//        widget->setAttribute(Qt::WA_MacShowFocusRect, false);
-//        widget->setFocusPolicy(Qt::ClickFocus);
-//        widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
-//        auto layout = new QHBoxLayout(widget);
-//        layout->addWidget(checkBox);
-//        layout->addStretch();
-//        layout->setSpacing(0);
-//        layout->setContentsMargins(2, 0, 0, 0);
-//        return widget;
+    return m_propertiesTree->itemCache()->pop(index.data(PropertyItemCache::TypeRole))
 }
 
 void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const

@@ -1,15 +1,14 @@
 #include <propertiestree.h>
 #include <propertiesdelegate.h>
+#include <propertyitemcache.h>
 #include <QHeaderView>
 #include <QPainter>
 
 PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
+  , m_delegate(new PropertiesDelegate(this))
+  , m_itemCache(new PropertyItemCache(this))
 {
-    QPalette p(palette());
-    p.setColor(QPalette::Light, "#AB8157");
-    p.setColor(QPalette::Dark, "#9C7650");
-    p.setColor(QPalette::AlternateBase, "#f7efe6");
-    setPalette(p);
+    m_itemCache->reserve(20);
 
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
@@ -25,7 +24,7 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
     setExpandsOnDoubleClick(true);
-    setItemDelegate(new PropertiesDelegate(this));
+    setItemDelegate(m_delegate);
     setFocusPolicy(Qt::NoFocus);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
@@ -34,6 +33,12 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
     setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QPalette p(palette());
+    p.setColor(QPalette::Light, "#AB8157");
+    p.setColor(QPalette::Dark, "#9C7650");
+    p.setColor(QPalette::AlternateBase, "#f7efe6");
+    setPalette(p);
     setStyleSheet(
                 QString {
                     "QTreeView {"
@@ -61,13 +66,17 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
                 .arg(palette().dark().color().darker(120).name())
                 .arg(palette().light().color().name())
                 .arg(palette().dark().color().name())
-                .arg(palette().brightText().color().name())
-                );
+                .arg(palette().brightText().color().name()));
 }
 
-PropertiesDelegate* PropertiesTree::propertiesDelegate() const
+PropertiesDelegate* PropertiesTree::delegate() const
 {
-    return static_cast<PropertiesDelegate*>(itemDelegate());
+    return m_delegate;
+}
+
+PropertyItemCache* PropertiesTree::itemCache() const
+{
+    return m_itemCache;
 }
 
 QList<QTreeWidgetItem*> PropertiesTree::topLevelItems() const
@@ -178,9 +187,9 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     option.initFrom(this);
     option.rect = rect;
 
-    propertiesDelegate()->paintBackground(painter, option,
-                                          propertiesDelegate()->calculateVisibleRow(itemFromIndex(index)),
-                                          isClassRow, false);
+    delegate()->paintBackground(painter, option,
+                                delegate()->calculateVisibleRow(itemFromIndex(index)),
+                                isClassRow, false);
 
     // Draw handle
     if (hasChild) {
