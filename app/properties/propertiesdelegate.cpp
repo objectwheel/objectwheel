@@ -3,6 +3,7 @@
 #include <propertiesdelegatecache.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QPainter>
 #include <QLineEdit>
@@ -40,9 +41,13 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
     case PropertiesDelegate::Bool:
         propertyName = "checked";
         break;
-    case PropertiesDelegate::Color:
-        propertyName = "color";
-        break;
+    case PropertiesDelegate::Color: {
+        const QColor& color = value.value<QColor>();
+        auto toolButton = static_cast<QToolButton*>(widget);
+        toolButton->setText(color.name(QColor::HexArgb));
+        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black},
+                                                                        toolButton->devicePixelRatioF())));
+    } break;
     case PropertiesDelegate::Int:
     case PropertiesDelegate::Real:
     case PropertiesDelegate::FontSize:
@@ -78,6 +83,11 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         auto checkBox = static_cast<QCheckBox*>(widget);
         QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
                          [=] { callback.call(checkBox->isChecked()); });
+    } break;
+    case PropertiesDelegate::Color: {
+        auto toolButton = static_cast<QToolButton*>(widget);
+        QObject::connect(toolButton, qOverload<bool>(&QToolButton::clicked),
+                         [=] { callback.call(QVariant::fromValue<QToolButton*>(toolButton)); });
     } break;
         //    case Color:
         //        propertyName = "color";

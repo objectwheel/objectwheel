@@ -28,11 +28,6 @@
 #include <QHBoxLayout>
 #include <QApplication>
 
-template<typename C, typename Ret, typename... Args, typename... BArgs>
-auto toFunction(Ret (C::*f)(Args...), BArgs&&... bargs) {
-    return std::function<Ret(Args...)>(std::bind(f, std::forward<BArgs>(bargs)...));
-}
-
 static bool isXProperty(const QString& propertyName)
 {
     return propertyName == "x";
@@ -127,46 +122,6 @@ static QWidget* createUrlHandlerWidget(const QString& propertyName, const QStrin
     });
 
     return lineEdit;
-}
-
-static QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
-                                         Control* control)
-{
-    auto toolButton = new QToolButton;
-    toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
-    toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    toolButton->setText(color.name(QColor::HexArgb));
-    toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black}, toolButton->devicePixelRatioF())));
-    toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
-    toolButton->setIconSize({12, 12});
-    toolButton->setCursor(Qt::PointingHandCursor);
-    toolButton->setFocusPolicy(Qt::ClickFocus);
-    toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
-    toolButton->setMinimumWidth(1);
-
-    QObject::connect(toolButton, &QCheckBox::clicked, [=]
-    {
-        const QColor& previousColor = UtilityFunctions::getProperty(propertyName, control->properties()).value<QColor>();
-
-        QColorDialog cDialog;
-        cDialog.setWindowTitle(QObject::tr("Select Color"));
-        cDialog.setOptions(QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
-        cDialog.setCurrentColor(previousColor);
-        cDialog.exec();
-
-        const QColor& color = cDialog.currentColor();
-        if (color == previousColor || !color.isValid())
-            return;
-
-        toolButton->setText(color.name(QColor::HexArgb));
-        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black}, toolButton->devicePixelRatioF())));
-        ControlPropertyManager::setProperty(control, propertyName,
-                                            UtilityFunctions::stringify(color.name(QColor::HexArgb)), color,
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    return toolButton;
 }
 
 static QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
@@ -668,13 +623,17 @@ void PropertiesController::onSceneSelectionChange()
                 }
 
                 case QVariant::Color: {
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onColorPropertyEdit,
+                                                                     this, propertyName);
                     const QColor& color = propertyValue.value<QColor>();
-                    auto item = new QTreeWidgetItem;
+                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    item->setText(1, QString());
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                    classItem->addChild(item);
-                    m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                                                      createColorHandlerWidget(propertyName, color, selectedControl));
+                    item->setData(1, PropertiesDelegate::InitialValueRole, color);
+                    item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Color);
+                    item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    children.append(item);
                     break;
                 }
 
@@ -1144,6 +1103,34 @@ void PropertiesController::onControlIndexEditingFinish()
     ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
                                      ControlPropertyManager::SaveChanges |
                                      ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onColorPropertyEdit(const QString& propertyName, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        QToolButton* toolButton = value.value<QToolButton*>();
+        const QColor& previousColor = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QColor>();
+
+        QColorDialog cDialog;
+        cDialog.setWindowTitle(QObject::tr("Select Color"));
+        cDialog.setOptions(QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+        cDialog.setCurrentColor(previousColor);
+        cDialog.exec();
+
+        const QColor& color = cDialog.currentColor();
+        if (color == previousColor || !color.isValid())
+            return;
+
+        toolButton->setText(color.name(QColor::HexArgb));
+        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black}, toolButton->devicePixelRatioF())));
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            UtilityFunctions::stringify(color.name(QColor::HexArgb)), color,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 void PropertiesController::onStringPropertyEdit(const QString& propertyName, const QVariant& value)
