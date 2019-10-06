@@ -58,7 +58,6 @@ public:
     void destroyItem(QTreeWidgetItem* item) const;
 
 private:
-    QWidget* createWidget(int type) const;
     void addConnection(QWidget* widget, int type, const QString& propertyName) const;
     void clearConnection(QWidget* widget) const;
 

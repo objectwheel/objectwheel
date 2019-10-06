@@ -685,7 +685,6 @@ void PropertiesController::onSceneSelectionChange()
                     item->setText(1, QString());
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                    item->setData(1, PropertiesDelegate::PropertyNameRole, propertyName);
                     item->setData(1, PropertiesDelegate::InitialValueRole, checked);
                     item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
                     children.append(item);
@@ -698,7 +697,6 @@ void PropertiesController::onSceneSelectionChange()
                     item->setText(1, QString());
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                    item->setData(1, PropertiesDelegate::PropertyNameRole, propertyName);
                     item->setData(1, PropertiesDelegate::InitialValueRole, text);
                     item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::String);
                     children.append(item);
@@ -880,7 +878,6 @@ void PropertiesController::onSceneSelectionChange()
                 item->setText(1, QString());
                 item->setText(0, enumm.name);
                 item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), enumm.name));
-                item->setData(1, PropertiesDelegate::PropertyNameRole, enumm.name);
                 item->setData(1, PropertiesDelegate::ValuesRole, QVariant(enumm.keys.keys()));
                 item->setData(1, PropertiesDelegate::InitialValueRole, value);
                 item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Enum);
