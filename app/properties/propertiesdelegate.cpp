@@ -1,18 +1,18 @@
 #include <propertiesdelegate.h>
 #include <propertiestree.h>
-#include <propertiescache.h>
+#include <propertiesdelegatecache.h>
 #include <QPainter>
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QComboBox>
 
-static void setValues(QWidget* widget, PropertiesCache::Type type, const QVariant& value)
+static void setValues(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value)
 {
     switch (type) {
-    case PropertiesCache::Enum:
-    case PropertiesCache::FontFamily:
-    case PropertiesCache::FontWeight:
-    case PropertiesCache::FontCapitalization:
+    case PropertiesDelegate::Enum:
+    case PropertiesDelegate::FontFamily:
+    case PropertiesDelegate::FontWeight:
+    case PropertiesDelegate::FontCapitalization:
         static_cast<QComboBox*>(widget)->addItems(value.value<QList<QString>>());
         break;
     default:
@@ -20,28 +20,28 @@ static void setValues(QWidget* widget, PropertiesCache::Type type, const QVarian
     }
 }
 
-static void setInitialValue(QWidget* widget, PropertiesCache::Type type, const QVariant& value)
+static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value)
 {
     const char* propertyName = 0;
     switch (type) {
-    case PropertiesCache::String:
+    case PropertiesDelegate::String:
         propertyName = "text";
         break;
-    case PropertiesCache::Bool:
+    case PropertiesDelegate::Bool:
         propertyName = "checked";
         break;
-    case PropertiesCache::Color:
+    case PropertiesDelegate::Color:
         propertyName = "color";
         break;
-    case PropertiesCache::Int:
-    case PropertiesCache::Real:
-    case PropertiesCache::FontSize:
+    case PropertiesDelegate::Int:
+    case PropertiesDelegate::Real:
+    case PropertiesDelegate::FontSize:
         propertyName = "value";
         break;
-    case PropertiesCache::Enum:
-    case PropertiesCache::FontFamily:
-    case PropertiesCache::FontWeight:
-    case PropertiesCache::FontCapitalization:
+    case PropertiesDelegate::Enum:
+    case PropertiesDelegate::FontFamily:
+    case PropertiesDelegate::FontWeight:
+    case PropertiesDelegate::FontCapitalization:
         propertyName = "currentText";
         break;
     default:
@@ -53,7 +53,10 @@ static void setInitialValue(QWidget* widget, PropertiesCache::Type type, const Q
 
 PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyledItemDelegate(propertiesTree)
   , m_propertiesTree(propertiesTree)
-{}
+  , m_cache(new PropertiesDelegateCache(this))
+{
+    m_cache->reserve(20);
+}
 
 int PropertiesDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
 {
@@ -128,7 +131,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
     if (isClassRow) {
         painter->setPen(option.palette.highlightedText().color());
     } else {
-        if (index.column() == 0 && index.data(PropertiesTree::ModificationRole).toBool()) {
+        if (index.column() == 0 && index.data(ModificationRole).toBool()) {
             QFont font (option.font);
             font.setWeight(QFont::Medium);
             painter->setFont(font);
@@ -166,16 +169,16 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
     if (index.column() == 0)
         return nullptr;
 
-    auto type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
-    if (type == PropertiesCache::Invalid)
+    auto type = index.data(TypeRole).value<Type>();
+    if (type == PropertiesDelegate::Invalid)
         return QStyledItemDelegate::createEditor(parent, option, index);
 
-    QWidget* widget = m_propertiesTree->cache()->pop(type);
+    QWidget* widget = m_cache->pop(type);
     widget->setParent(parent);
     widget->setVisible(true);
-    setValues(widget, type, index.data(PropertiesTree::ValuesRole));
-    setInitialValue(widget, type, index.data(PropertiesTree::InitialValueRole));
-    addConnection(widget, type, index.data(PropertiesTree::PropertyNameRole).toString());
+    setValues(widget, type, index.data(ValuesRole));
+    setInitialValue(widget, type, index.data(InitialValueRole));
+    addConnection(widget, type, index.data(PropertyNameRole).toString());
     return widget;
 }
 
@@ -184,51 +187,61 @@ void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index
     if (index.column() == 0)
         return editor->deleteLater();
 
-    auto type = index.data(PropertiesTree::TypeRole).value<PropertiesCache::Type>();
-    if (type == PropertiesCache::Invalid)
+    auto type = index.data(TypeRole).value<PropertiesDelegate::Type>();
+    if (type == PropertiesDelegate::Invalid)
         return QStyledItemDelegate::destroyEditor(editor, index);
 
     clearConnection(editor);
-    m_propertiesTree->cache()->push(type, editor);
+    m_cache->push(type, editor);
+}
+
+QTreeWidgetItem* PropertiesDelegate::createItem() const
+{
+    return m_cache->pop();
+}
+
+void PropertiesDelegate::destroyItem(QTreeWidgetItem* item) const
+{
+    m_cache->push(item);
 }
 
 void PropertiesDelegate::addConnection(QWidget* widget, int type, const QString& propertyName) const
 {
     switch (type) {
-    case PropertiesCache::String: {
+    case PropertiesDelegate::String: {
         auto lineEdit = static_cast<QLineEdit*>(widget);
         connect(lineEdit, &QLineEdit::editingFinished,
                 [=] { emit propertyEdited(type, propertyName, lineEdit->text()); });
     } break;
-    case PropertiesCache::Enum: {
+    case PropertiesDelegate::Enum: {
         auto comboBox = static_cast<QComboBox*>(widget);
         connect(comboBox, qOverload<int>(&QComboBox::activated),
                 [=] { emit propertyEdited(type, propertyName, comboBox->currentText()); });
     } break;
-    case PropertiesCache::Bool: {
+    case PropertiesDelegate::Bool: {
         auto checkBox = static_cast<QCheckBox*>(widget);
         connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
                 [=] { emit propertyEdited(type, propertyName, checkBox->isChecked()); });
     } break;
-//    case PropertiesCache::Color:
+//    case PropertiesDelegate::Color:
 //        propertyName = "color";
 //        break;
-//    case PropertiesCache::Int:
+//    case PropertiesDelegate::Int:
 //        propertyName = "value";
 //        break;
-//    case PropertiesCache::Real:
+//    case PropertiesDelegate::Real:
 //        propertyName = "value";
 //        break;
-//    case PropertiesCache::FontSize:
+//    case PropertiesDelegate::FontSize:
 //        propertyName = "value";
 //        break;
-//    case PropertiesCache::FontFamily:
+//    case PropertiesDelegate::FontFamily:
 //        propertyName = "currentText";
 //        break;
-//    case PropertiesCache::FontWeight:
+//    case PropertiesDelegate::FontWeight:
 //        propertyName = "currentText";
 //        break;
-//    case PropertiesCache::FontCapitalization:
+//    case PropertiesDelegate::FontCapitalization:
 //        propertyName = "currentText";
 //        break;
     default:

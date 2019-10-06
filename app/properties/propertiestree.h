@@ -4,7 +4,7 @@
 #include <QTreeWidget>
 
 class PropertiesDelegate;
-class PropertiesCache;
+class PropertiesDelegateCache;
 
 class PropertiesTree final : public QTreeWidget
 {
@@ -14,20 +14,9 @@ class PropertiesTree final : public QTreeWidget
     friend class PropertiesDelegate; // For itemFromIndex()
 
 public:
-    enum Roles {
-        TypeRole = Qt::UserRole + 1,
-        ValuesRole,
-        InitialValueRole,
-        PropertyNameRole,
-        ModificationRole
-    };
-
-public:
     explicit PropertiesTree(QWidget* parent = nullptr);
 
     PropertiesDelegate* delegate() const;
-    PropertiesCache* cache() const;
-
     QList<QTreeWidgetItem*> topLevelItems() const;
     QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem,
                                              bool includeParent = true,
@@ -40,7 +29,6 @@ private:
 
 private:
     PropertiesDelegate* m_delegate;
-    PropertiesCache* m_cache;
 };
 
 #endif // PROPERTIESTREE_H

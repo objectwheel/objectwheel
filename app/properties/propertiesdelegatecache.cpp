@@ -1,4 +1,5 @@
-#include <propertiescache.h>
+#include <propertiesdelegatecache.h>
+#include <propertiesdelegate.h>
 #include <transparentstyle.h>
 #include <utilityfunctions.h>
 
@@ -12,16 +13,16 @@
 #include <QSpinBox>
 #include <QFontDatabase>
 
-PropertiesCache::PropertiesCache(QObject* parent) : QObject(parent)
+PropertiesDelegateCache::PropertiesDelegateCache(QObject* parent) : QObject(parent)
 {
 }
 
-PropertiesCache::~PropertiesCache()
+PropertiesDelegateCache::~PropertiesDelegateCache()
 {
     clear();
 }
 
-void PropertiesCache::clear()
+void PropertiesDelegateCache::clear()
 {
     for (WidgetStack* stack : qAsConst(m_widgets)) {
         const WidgetStack& _stack = *stack;
@@ -36,12 +37,12 @@ void PropertiesCache::clear()
     m_items.clear();
 }
 
-void PropertiesCache::reserve(int size)
+void PropertiesDelegateCache::reserve(int size)
 {
-    const QMetaEnum& e = QMetaEnum::fromType<Type>();
+    const QMetaEnum& e = QMetaEnum::fromType<PropertiesDelegate::Type>();
     for (int i = 0; i < e.keyCount(); ++i) {
-        Type type = Type(e.value(i));
-        if (type == Type::Invalid)
+        PropertiesDelegate::Type type = PropertiesDelegate::Type(e.value(i));
+        if (type == PropertiesDelegate::Type::Invalid)
             continue;
         for (int i = size; i--;)
             push(type, createWidget(type));
@@ -50,10 +51,10 @@ void PropertiesCache::reserve(int size)
         push(new QTreeWidgetItem);
 }
 
-void PropertiesCache::push(PropertiesCache::Type type, QWidget* widget)
+void PropertiesDelegateCache::push(int type, QWidget* widget)
 {
     Q_ASSERT(widget);
-    Q_ASSERT(type != Type::Invalid);
+    Q_ASSERT(type != PropertiesDelegate::Type::Invalid);
     if (!m_widgets.contains(type))
         m_widgets.insert(type, new WidgetStack);
     widget->setParent(nullptr);
@@ -61,7 +62,7 @@ void PropertiesCache::push(PropertiesCache::Type type, QWidget* widget)
     m_widgets.value(type)->push(widget);
 }
 
-void PropertiesCache::push(QTreeWidgetItem* item)
+void PropertiesDelegateCache::push(QTreeWidgetItem* item)
 {
     if (QTreeWidgetItem* parent = item->parent())
         parent->takeChild(parent->indexOfChild(item));
@@ -71,9 +72,9 @@ void PropertiesCache::push(QTreeWidgetItem* item)
     m_items.push(item);
 }
 
-QWidget* PropertiesCache::pop(PropertiesCache::Type type)
+QWidget* PropertiesDelegateCache::pop(int type)
 {
-    Q_ASSERT(type != Type::Invalid);
+    Q_ASSERT(type != PropertiesDelegate::Type::Invalid);
     if (WidgetStack* stack = m_widgets.value(type, nullptr)) {
         if (!stack->isEmpty())
             return stack->pop();
@@ -81,17 +82,17 @@ QWidget* PropertiesCache::pop(PropertiesCache::Type type)
     return createWidget(type);
 }
 
-QTreeWidgetItem* PropertiesCache::pop()
+QTreeWidgetItem* PropertiesDelegateCache::pop()
 {
     if (m_items.isEmpty())
         return new QTreeWidgetItem;
     return m_items.pop();
 }
 
-QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
+QWidget* PropertiesDelegateCache::createWidget(int type)
 {
     switch (type) {
-    case String: {
+    case PropertiesDelegate::String: {
         auto lineEdit = new QLineEdit;
         lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
         lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -101,7 +102,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return lineEdit;
     }
 
-    case Enum: {
+    case PropertiesDelegate::Enum: {
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
@@ -112,7 +113,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return comboBox;
     }
 
-    case Bool: {
+    case PropertiesDelegate::Bool: {
         auto checkBox = new QCheckBox;
         checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         checkBox->setCursor(Qt::PointingHandCursor);
@@ -124,7 +125,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return checkBox;
     }
 
-    case Color: {
+    case PropertiesDelegate::Color: {
         auto toolButton = new QToolButton;
         toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
         toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -137,7 +138,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return toolButton;
     }
 
-    case Int: {
+    case PropertiesDelegate::Int: {
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
         spinBox->setFocusPolicy(Qt::StrongFocus);
@@ -151,7 +152,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return spinBox;
     }
 
-    case Real: {
+    case PropertiesDelegate::Real: {
         auto spinBox = new QDoubleSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
         spinBox->setFocusPolicy(Qt::StrongFocus);
@@ -165,7 +166,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return spinBox;
     }
 
-    case FontSize: {
+    case PropertiesDelegate::FontSize: {
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
         spinBox->setFocusPolicy(Qt::StrongFocus);
@@ -179,7 +180,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return spinBox;
     }
 
-    case FontFamily: {
+    case PropertiesDelegate::FontFamily: {
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
@@ -191,7 +192,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return comboBox;
     }
 
-    case FontWeight: {
+    case PropertiesDelegate::FontWeight: {
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
@@ -205,7 +206,7 @@ QWidget* PropertiesCache::createWidget(PropertiesCache::Type type)
         return comboBox;
     }
 
-    case FontCapitalization: {
+    case PropertiesDelegate::FontCapitalization: {
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);

@@ -5,6 +5,7 @@
 
 class PropertiesTree;
 class QTreeWidgetItem;
+class PropertiesDelegateCache;
 
 class PropertiesDelegate final : public QStyledItemDelegate
 {
@@ -13,6 +14,28 @@ class PropertiesDelegate final : public QStyledItemDelegate
 
 public:
     enum { ROW_HEIGHT = 21 };
+    enum Type {
+        Invalid,
+        String,
+        Enum,
+        Bool,
+        Color,
+        Int,
+        Real,
+        FontSize,
+        FontFamily,
+        FontWeight,
+        FontCapitalization
+    };
+    Q_ENUM(Type)
+
+    enum Roles {
+        TypeRole = Qt::UserRole + 1,
+        ValuesRole,
+        InitialValueRole,
+        PropertyNameRole,
+        ModificationRole
+    };
 
 public:
     explicit PropertiesDelegate(PropertiesTree* propertiesTree);
@@ -28,6 +51,8 @@ public:
     QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option,
                           const QModelIndex &index) const override;
     void destroyEditor(QWidget* editor, const QModelIndex& index) const override;
+    QTreeWidgetItem* createItem() const;
+    void destroyItem(QTreeWidgetItem* item) const;
 
 private:
     void addConnection(QWidget* widget, int type, const QString& propertyName) const;
@@ -38,6 +63,7 @@ signals:
 
 private:
     PropertiesTree* m_propertiesTree;
+    PropertiesDelegateCache* m_cache;
 };
 
 #endif // PROPERTIESDELEGATE_H
