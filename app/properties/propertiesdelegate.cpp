@@ -4,6 +4,21 @@
 #include <QPainter>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QComboBox>
+
+static void setValues(QWidget* widget, PropertiesCache::Type type, const QVariant& value)
+{
+    switch (type) {
+    case PropertiesCache::Enum:
+    case PropertiesCache::FontFamily:
+    case PropertiesCache::FontWeight:
+    case PropertiesCache::FontCapitalization:
+        static_cast<QComboBox*>(widget)->addItems(value.value<QList<QString>>());
+        break;
+    default:
+        break;
+    }
+}
 
 static void setInitialValue(QWidget* widget, PropertiesCache::Type type, const QVariant& value)
 {
@@ -12,9 +27,6 @@ static void setInitialValue(QWidget* widget, PropertiesCache::Type type, const Q
     case PropertiesCache::String:
         propertyName = "text";
         break;
-    case PropertiesCache::Enum:
-        propertyName = "currentText";
-        break;
     case PropertiesCache::Bool:
         propertyName = "checked";
         break;
@@ -22,20 +34,13 @@ static void setInitialValue(QWidget* widget, PropertiesCache::Type type, const Q
         propertyName = "color";
         break;
     case PropertiesCache::Int:
-        propertyName = "value";
-        break;
     case PropertiesCache::Real:
-        propertyName = "value";
-        break;
     case PropertiesCache::FontSize:
         propertyName = "value";
         break;
+    case PropertiesCache::Enum:
     case PropertiesCache::FontFamily:
-        propertyName = "currentText";
-        break;
     case PropertiesCache::FontWeight:
-        propertyName = "currentText";
-        break;
     case PropertiesCache::FontCapitalization:
         propertyName = "currentText";
         break;
@@ -168,6 +173,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
     QWidget* widget = m_propertiesTree->cache()->pop(type);
     widget->setParent(parent);
     widget->setVisible(true);
+    setValues(widget, type, index.data(PropertiesTree::ValuesRole));
     setInitialValue(widget, type, index.data(PropertiesTree::InitialValueRole));
     addConnection(widget, type, index.data(PropertiesTree::PropertyNameRole).toString());
     return widget;
@@ -194,9 +200,11 @@ void PropertiesDelegate::addConnection(QWidget* widget, int type, const QString&
         connect(lineEdit, &QLineEdit::editingFinished,
                 [=] { emit propertyEdited(type, propertyName, lineEdit->text()); });
     } break;
-//    case PropertiesCache::Enum:
-//        propertyName = "currentText";
-//        break;
+    case PropertiesCache::Enum: {
+        auto comboBox = static_cast<QComboBox*>(widget);
+        connect(comboBox, qOverload<int>(&QComboBox::activated),
+                [=] { emit propertyEdited(type, propertyName, comboBox->currentText()); });
+    } break;
     case PropertiesCache::Bool: {
         auto checkBox = static_cast<QCheckBox*>(widget);
         connect(checkBox, qOverload<bool>(&QCheckBox::clicked),

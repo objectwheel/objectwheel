@@ -34,6 +34,7 @@ private slots:
 
     void onPropertyEdit(int type, const QString& propertyName, const QVariant& value);
     void onStringPropertyEditingFinish(const QString& propertyName, const QString& text);
+    void onEnumPropertyEditingFinish(const QString& propertyName, const QString& currentText);
     void onBoolPropertyEditingFinish(const QString& propertyName, bool checked);
 
 private:

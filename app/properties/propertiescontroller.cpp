@@ -59,22 +59,6 @@ static void fixVisible(Control* control, const QString& propertyName, QCheckBox*
         checkBox->setChecked(control->visible());
 }
 
-static void fixVisibilityForWindow(Control* control, const QString& propertyName, QComboBox* comboBox)
-{
-    if (control->window() && propertyName == "visibility") {
-        comboBox->setCurrentText("AutomaticVisibility");
-
-        const QString& visibility = ParserUtils::property(control->dir(), propertyName);
-        if (visibility.isEmpty())
-            return;
-
-        for (int i = 0; i < comboBox->count(); ++i) {
-            if (visibility.contains(comboBox->itemText(i)))
-                comboBox->setCurrentIndex(i);
-        }
-    }
-}
-
 static void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
 {
     QTreeWidget* treeWidget = fontItem->treeWidget();
@@ -139,49 +123,6 @@ static QWidget* createUrlHandlerWidget(const QString& propertyName, const QStrin
     });
 
     return lineEdit;
-}
-
-static QWidget* createEnumHandlerWidget(const Enum& enumm, Control* control)
-{
-    auto comboBox = new QComboBox;
-    TransparentStyle::attach(comboBox);
-    comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-    comboBox->addItems(enumm.keys.keys());
-    comboBox->setCurrentText(enumm.value);
-    comboBox->setCursor(Qt::PointingHandCursor);
-    comboBox->setFocusPolicy(Qt::ClickFocus);
-    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-    comboBox->setMinimumWidth(1);
-    fixVisibilityForWindow(control, enumm.name, comboBox);
-
-    QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
-    {
-        const QString& previousValue = UtilityFunctions::getEnum(enumm.name, control->properties()).value;
-
-        if (previousValue == comboBox->currentText())
-            return;
-
-        QFile file(SaveUtils::toControlMainQmlFile(control->dir()));
-        if (!file.open(QFile::ReadOnly)) {
-            qWarning("createEnumHandlerWidget: Cannot open control main qml file");
-            return;
-        }
-
-        QString fixedScope = enumm.scope;
-        if (control->window() && fixedScope == "Window") {
-            if (!file.readAll().contains("import QtQuick.Window"))
-                fixedScope = "ApplicationWindow";
-        }
-        file.close();
-
-        ControlPropertyManager::setProperty(control,
-                                            enumm.name, fixedScope + "." + comboBox->currentText(),
-                                            enumm.keys.value(comboBox->currentText()),
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    return comboBox;
 }
 
 static QWidget* createColorHandlerWidget(const QString& propertyName, const QColor& color,
@@ -579,6 +520,10 @@ void PropertiesController::onSceneSelectionChange()
         if (properties.isEmpty())
             return;
 
+        m_propertiesPane->propertiesTree()->viewport()->setUpdatesEnabled(false);
+        m_propertiesPane->propertiesTree()->setUpdatesEnabled(false);
+        m_propertiesPane->setUpdatesEnabled(false);
+
         m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
         m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
         m_propertiesPane->idEdit()->setText(selectedControl->id());
@@ -736,6 +681,7 @@ void PropertiesController::onSceneSelectionChange()
                             ? selectedControl->visible()
                             : propertyValue.value<bool>();
                     auto item = m_propertiesPane->propertiesTree()->cache()->pop();
+                    item->setText(1, QString());
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesTree::PropertyNameRole, propertyName);
@@ -748,6 +694,7 @@ void PropertiesController::onSceneSelectionChange()
                 case QVariant::String: {
                     const QString& text = propertyValue.value<QString>();
                     auto item = m_propertiesPane->propertiesTree()->cache()->pop();
+                    item->setText(1, QString());
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesTree::PropertyNameRole, propertyName);
@@ -917,11 +864,26 @@ void PropertiesController::onSceneSelectionChange()
             }
 
             for (const Enum& enumm : enumList) {
-                auto item = new QTreeWidgetItem;
+                QString value = enumm.value;
+                if (selectedControl->window() && enumm.name == "visibility") {
+                    value = "AutomaticVisibility";
+                    const QString& visibility = ParserUtils::property(selectedControl->dir(), enumm.name);
+                    if (!visibility.isEmpty()) {
+                        for (const QString& key : enumm.keys.keys()) {
+                            if (visibility.contains(key))
+                                value = key;
+                        }
+                    }
+                }
+                auto item = m_propertiesPane->propertiesTree()->cache()->pop();
+                item->setText(1, QString());
                 item->setText(0, enumm.name);
                 item->setData(0, PropertiesTree::ModificationRole, ParserUtils::exists(selectedControl->dir(), enumm.name));
-                classItem->addChild(item);
-                m_propertiesPane->propertiesTree()->setItemWidget(item, 1, createEnumHandlerWidget(enumm, selectedControl));
+                item->setData(1, PropertiesTree::PropertyNameRole, enumm.name);
+                item->setData(1, PropertiesTree::ValuesRole, QVariant(enumm.keys.keys()));
+                item->setData(1, PropertiesTree::InitialValueRole, value);
+                item->setData(1, PropertiesTree::TypeRole, PropertiesCache::Enum);
+                children.append(item);
             }
 
             classItem->addChildren(children);
@@ -931,6 +893,10 @@ void PropertiesController::onSceneSelectionChange()
         }
 
         onSearchEditEditingFinish();
+
+        m_propertiesPane->propertiesTree()->viewport()->setUpdatesEnabled(true);
+        m_propertiesPane->propertiesTree()->setUpdatesEnabled(true);
+        m_propertiesPane->setUpdatesEnabled(true);
     }
 }
 
@@ -1230,14 +1196,46 @@ void PropertiesController::onStringPropertyEditingFinish(const QString& property
     }
 }
 
+void PropertiesController::onEnumPropertyEditingFinish(const QString& propertyName, const QString& currentText)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        const QString& previousValue = UtilityFunctions::getEnum(propertyName, selectedControl->properties()).value;
+
+        if (previousValue == currentText)
+            return;
+
+        QFile file(SaveUtils::toControlMainQmlFile(selectedControl->dir()));
+        if (!file.open(QFile::ReadOnly)) {
+            qWarning("createEnumHandlerWidget: Cannot open control main qml file");
+            return;
+        }
+
+//        QString fixedScope = enumm.scope;
+//        if (selectedControl->window() && fixedScope == "Window") {
+//            if (!file.readAll().contains("import QtQuick.Window"))
+//                fixedScope = "ApplicationWindow";
+//        }
+//        file.close();
+
+//        ControlPropertyManager::setProperty(selectedControl,
+//                                            propertyName, fixedScope + "." + currentText,
+//                                            enumm.keys.value(currentText),
+//                                            ControlPropertyManager::SaveChanges |
+//                                            ControlPropertyManager::UpdateRenderer);
+    }
+}
+
 void PropertiesController::onBoolPropertyEditingFinish(const QString& propertyName, bool checked)
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
 
     if (Control* selectedControl = this->control()) {
-        // NOTE: No need for previous value equality check, since this signal is only emitted
-        // when the value is changed/toggled
+        // NOTE: No need for previous value equality check, since this
+        // signal is only emitted when the value is changed/toggled
         ControlPropertyManager::setProperty(selectedControl, propertyName,
                                             checked ? "true" : "false", checked,
                                             ControlPropertyManager::SaveChanges |
