@@ -61,6 +61,50 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
         widget->setProperty(propertyName, value);
 }
 
+void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
+{
+    switch (type) {
+    case PropertiesDelegate::String: {
+        auto lineEdit = static_cast<QLineEdit*>(widget);
+        QObject::connect(lineEdit, &QLineEdit::editingFinished,
+                         [=] { callback.call(lineEdit->text()); });
+    } break;
+    case PropertiesDelegate::Enum: {
+        auto comboBox = static_cast<QComboBox*>(widget);
+        QObject::connect(comboBox, qOverload<int>(&QComboBox::activated),
+                         [=] { callback.call(comboBox->currentText()); });
+    } break;
+    case PropertiesDelegate::Bool: {
+        auto checkBox = static_cast<QCheckBox*>(widget);
+        QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
+                         [=] { callback.call(checkBox->isChecked()); });
+    } break;
+        //    case Color:
+        //        propertyName = "color";
+        //        break;
+        //    case Int:
+        //        propertyName = "value";
+        //        break;
+        //    case Real:
+        //        propertyName = "value";
+        //        break;
+        //    case FontSize:
+        //        propertyName = "value";
+        //        break;
+        //    case FontFamily:
+        //        propertyName = "currentText";
+        //        break;
+        //    case FontWeight:
+        //        propertyName = "currentText";
+        //        break;
+        //    case FontCapitalization:
+        //        propertyName = "currentText";
+        //        break;
+    default:
+        break;
+    }
+}
+
 static QWidget* createWidget(PropertiesDelegate::Type type)
 {
     switch (type) {
@@ -217,11 +261,17 @@ void PropertiesDelegate::reserve(int size)
         Type type = Type(e.value(i));
         if (type == Type::Invalid)
             continue;
-        for (int i = size; i--;)
-            m_cache->push(type, createWidget(type));
+        for (int i = size; i--;) {
+            QWidget* widget = createWidget(type);
+            widget->setVisible(false);
+            m_cache->push(type, widget);
+        }
     }
-    for (int i = size; i--;)
-        m_cache->push(new QTreeWidgetItem);
+    for (int i = size; i--;) {
+        auto item = new QTreeWidgetItem;
+        item->setHidden(true);
+        m_cache->push(item);
+    }
 }
 
 int PropertiesDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
@@ -346,7 +396,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
     widget->setVisible(true);
     setValues(widget, type, index.data(ValuesRole));
     setInitialValue(widget, type, index.data(InitialValueRole));
-    addConnection(widget, type, index.data(PropertyNameRole).toString());
+    setConnection(widget, type, index.data(CallbackRole).value<Callback>());
     return widget;
 }
 
@@ -359,7 +409,9 @@ void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index
     if (type == Invalid)
         return QStyledItemDelegate::destroyEditor(editor, index);
 
-    clearConnection(editor);
+    disconnect(editor, 0, 0, 0);
+    editor->setParent(nullptr);
+    editor->setVisible(false);
     m_cache->push(type, editor);
 }
 
@@ -372,54 +424,10 @@ QTreeWidgetItem* PropertiesDelegate::createItem() const
 
 void PropertiesDelegate::destroyItem(QTreeWidgetItem* item) const
 {
+    if (QTreeWidgetItem* parent = item->parent())
+        parent->takeChild(parent->indexOfChild(item));
+    else if (QTreeWidget* tree = item->treeWidget())
+        tree->takeTopLevelItem(tree->indexOfTopLevelItem(item));
+    item->setHidden(true);
     m_cache->push(item);
-}
-
-void PropertiesDelegate::addConnection(QWidget* widget, int type, const QString& propertyName) const
-{
-    switch (type) {
-    case String: {
-        auto lineEdit = static_cast<QLineEdit*>(widget);
-        connect(lineEdit, &QLineEdit::editingFinished,
-                [=] { emit propertyEdited(type, propertyName, lineEdit->text()); });
-    } break;
-    case Enum: {
-        auto comboBox = static_cast<QComboBox*>(widget);
-        connect(comboBox, qOverload<int>(&QComboBox::activated),
-                [=] { emit propertyEdited(type, propertyName, comboBox->currentText()); });
-    } break;
-    case Bool: {
-        auto checkBox = static_cast<QCheckBox*>(widget);
-        connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
-                [=] { emit propertyEdited(type, propertyName, checkBox->isChecked()); });
-    } break;
-//    case Color:
-//        propertyName = "color";
-//        break;
-//    case Int:
-//        propertyName = "value";
-//        break;
-//    case Real:
-//        propertyName = "value";
-//        break;
-//    case FontSize:
-//        propertyName = "value";
-//        break;
-//    case FontFamily:
-//        propertyName = "currentText";
-//        break;
-//    case FontWeight:
-//        propertyName = "currentText";
-//        break;
-//    case FontCapitalization:
-//        propertyName = "currentText";
-//        break;
-    default:
-        break;
-    }
-}
-
-void PropertiesDelegate::clearConnection(QWidget* widget) const
-{
-    disconnect(widget, 0, 0, 0);
 }

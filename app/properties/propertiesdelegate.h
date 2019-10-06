@@ -38,6 +38,13 @@ public:
         ModificationRole
     };
 
+    struct Callback {
+        std::function<void(const QVariant&)> call;
+        QVariant toVariant() const {
+            return QVariant::fromValue<Callback>(*this);
+        }
+    };
+
 public:
     explicit PropertiesDelegate(PropertiesTree* propertiesTree);
     ~PropertiesDelegate() override;
@@ -57,16 +64,19 @@ public:
     QTreeWidgetItem* createItem() const;
     void destroyItem(QTreeWidgetItem* item) const;
 
-private:
-    void addConnection(QWidget* widget, int type, const QString& propertyName) const;
-    void clearConnection(QWidget* widget) const;
-
-signals:
-    void propertyEdited(int type, const QString& propertyName, const QVariant& value) const;
+    template <typename... Args>
+    static Callback makeCallback(Args&&... args)
+    {
+        Callback callback;
+        callback.call = std::bind(std::forward<Args>(args)..., std::placeholders::_1);
+        return callback;
+    }
 
 private:
     PropertiesTree* m_propertiesTree;
     PropertiesDelegateCache* m_cache;
 };
+
+Q_DECLARE_METATYPE(PropertiesDelegate::Callback)
 
 #endif // PROPERTIESDELEGATE_H

@@ -1,7 +1,7 @@
 #ifndef PROPERTIESCONTROLLER_H
 #define PROPERTIESCONTROLLER_H
 
-#include <QObject>
+#include <renderinfo.h>
 
 class Control;
 class PropertiesPane;
@@ -20,7 +20,7 @@ public slots:
     void discharge();
     void clear();
 
-private slots:
+public slots:
     void onSearchEditEditingFinish();
     void onSceneSelectionChange();
     void onControlZChange(Control*);
@@ -32,10 +32,9 @@ private slots:
     void onControlIdEditingFinish();
     void onControlIndexEditingFinish();
 
-    void onPropertyEdit(int type, const QString& propertyName, const QVariant& value);
-    void onStringPropertyEditingFinish(const QString& propertyName, const QString& text);
-    void onEnumPropertyEditingFinish(const QString& propertyName, const QString& currentText);
-    void onBoolPropertyEditingFinish(const QString& propertyName, bool checked);
+    void onStringPropertyEdit(const QString& propertyName, const QVariant& value);
+    void onBoolPropertyEdit(const QString& propertyName, const QVariant& value);
+    void onEnumPropertyEdit(const QString& propertyName, const Enum& _enum, const QVariant& value);
 
 private:
     Control* control() const;

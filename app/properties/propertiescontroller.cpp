@@ -28,6 +28,11 @@
 #include <QHBoxLayout>
 #include <QApplication>
 
+template<typename C, typename Ret, typename... Args, typename... BArgs>
+auto toFunction(Ret (C::*f)(Args...), BArgs&&... bargs) {
+    return std::function<Ret(Args...)>(std::bind(f, std::forward<BArgs>(bargs)...));
+}
+
 static bool isXProperty(const QString& propertyName)
 {
     return propertyName == "x";
@@ -427,8 +432,6 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
   , m_propertiesPane(propertiesPane)
   , m_designerScene(designerScene)
 {
-    connect(m_propertiesPane->propertiesTree()->delegate(), &PropertiesDelegate::propertyEdited,
-            this, &PropertiesController::onPropertyEdit);
     connect(m_propertiesPane->idEdit(), &QLineEdit::editingFinished,
             this, &PropertiesController::onControlIdEditingFinish);
     connect(m_propertiesPane->indexEdit(), &QSpinBox::editingFinished,
@@ -507,9 +510,7 @@ void PropertiesController::onSearchEditEditingFinish()
     //        topLevelItem->setHidden(!v);
     //    }
 }
-#include <QDebug>
 
-Q_DECLARE_METATYPE(std::function<void()>)
 // FIXME: This function has severe performance issues.
 void PropertiesController::onSceneSelectionChange()
 {
@@ -678,6 +679,8 @@ void PropertiesController::onSceneSelectionChange()
                 }
 
                 case QVariant::Bool: {
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                     this, propertyName);
                     const bool checked = propertyName == "visible"
                             ? selectedControl->visible()
                             : propertyValue.value<bool>();
@@ -687,11 +690,14 @@ void PropertiesController::onSceneSelectionChange()
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesDelegate::InitialValueRole, checked);
                     item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     children.append(item);
                     break;
                 }
 
                 case QVariant::String: {
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onStringPropertyEdit,
+                                                                     this, propertyName);
                     const QString& text = propertyValue.value<QString>();
                     auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     item->setText(1, QString());
@@ -699,6 +705,7 @@ void PropertiesController::onSceneSelectionChange()
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesDelegate::InitialValueRole, text);
                     item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::String);
+                    item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     children.append(item);
                     break;
                 }
@@ -862,29 +869,29 @@ void PropertiesController::onSceneSelectionChange()
                 }
             }
 
-            for (const Enum& enumm : enumList) {
-                QString value = enumm.value;
-                if (selectedControl->window() && enumm.name == "visibility") {
+            for (const Enum& _enum : enumList) {
+                const QString& propertyName = _enum.name;
+                QString value = _enum.value;
+                if (selectedControl->window() && propertyName == "visibility") {
                     value = "AutomaticVisibility";
-                    const QString& visibility = ParserUtils::property(selectedControl->dir(), enumm.name);
+                    const QString& visibility = ParserUtils::property(selectedControl->dir(), propertyName);
                     if (!visibility.isEmpty()) {
-                        for (const QString& key : enumm.keys.keys()) {
+                        for (const QString& key : _enum.keys.keys()) {
                             if (visibility.contains(key))
                                 value = key;
                         }
                     }
                 }
+                auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onEnumPropertyEdit,
+                                                                 this, propertyName, _enum);
                 auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
                 item->setText(1, QString());
-                item->setText(0, enumm.name);
-                item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), enumm.name));
-                item->setData(1, PropertiesDelegate::ValuesRole, QVariant(enumm.keys.keys()));
+                item->setText(0, propertyName);
+                item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
+                item->setData(1, PropertiesDelegate::ValuesRole, QVariant(_enum.keys.keys()));
                 item->setData(1, PropertiesDelegate::InitialValueRole, value);
                 item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Enum);
-                item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Enum);
-
-                std::function<void()> s = std::bind(&PropertiesController::onEnumPropertyEditingFinish, this, "ss", "ff");
-                QVariant::fromValue<std::function<void()>>(s);
+                item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                 children.append(item);
             }
 
@@ -1139,56 +1146,17 @@ void PropertiesController::onControlIndexEditingFinish()
                                      ControlPropertyManager::UpdateRenderer);
 }
 
-void PropertiesController::onPropertyEdit(int type, const QString& propertyName, const QVariant& value)
-{
-    switch (type) {
-    case PropertiesDelegate::String:
-        onStringPropertyEditingFinish(propertyName, value.toString());
-        break;
-        //    case PropertiesDelegate::Enum:
-        //        propertyName = "currentText";
-        //        break;
-        //    case PropertiesDelegate::Bool: {
-        //        auto checkBox = static_cast<QCheckBox*>(widget);
-        //        connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
-        //                [=] { emit propertyEdited(type, propertyName, checkBox->isChecked()); });
-        //    } break;
-        //    case PropertiesDelegate::Color:
-        //        propertyName = "color";
-        //        break;
-        //    case PropertiesDelegate::Int:
-        //        propertyName = "value";
-        //        break;
-        //    case PropertiesDelegate::Real:
-        //        propertyName = "value";
-        //        break;
-        //    case PropertiesDelegate::FontSize:
-        //        propertyName = "value";
-        //        break;
-        //    case PropertiesDelegate::FontFamily:
-        //        propertyName = "currentText";
-        //        break;
-        //    case PropertiesDelegate::FontWeight:
-        //        propertyName = "currentText";
-        //        break;
-        //    case PropertiesDelegate::FontCapitalization:
-        //        propertyName = "currentText";
-        //        break;
-    default:
-        break;
-    }
-}
-
-void PropertiesController::onStringPropertyEditingFinish(const QString& propertyName, const QString& text)
+void PropertiesController::onStringPropertyEdit(const QString& propertyName, const QVariant& value)
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
 
     if (Control* selectedControl = this->control()) {
-        const QString& previousValue
+        const QString& text = value.toString();
+        const QString& previousText
                 = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QString>();
 
-        if (previousValue == text)
+        if (previousText == text)
             return;
 
         ControlPropertyManager::setProperty(selectedControl, propertyName,
@@ -1198,15 +1166,16 @@ void PropertiesController::onStringPropertyEditingFinish(const QString& property
     }
 }
 
-void PropertiesController::onEnumPropertyEditingFinish(const QString& propertyName, const QString& currentText)
+void PropertiesController::onEnumPropertyEdit(const QString& propertyName, const Enum& _enum, const QVariant& value)
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
 
     if (Control* selectedControl = this->control()) {
-        const QString& previousValue = UtilityFunctions::getEnum(propertyName, selectedControl->properties()).value;
+        const QString& currentText = value.toString();
+        const QString& previousText = UtilityFunctions::getEnum(propertyName, selectedControl->properties()).value;
 
-        if (previousValue == currentText)
+        if (previousText == currentText)
             return;
 
         QFile file(SaveUtils::toControlMainQmlFile(selectedControl->dir()));
@@ -1215,22 +1184,22 @@ void PropertiesController::onEnumPropertyEditingFinish(const QString& propertyNa
             return;
         }
 
-//        QString fixedScope = enumm.scope;
-//        if (selectedControl->window() && fixedScope == "Window") {
-//            if (!file.readAll().contains("import QtQuick.Window"))
-//                fixedScope = "ApplicationWindow";
-//        }
-//        file.close();
+        QString fixedScope = _enum.scope;
+        if (selectedControl->window() && fixedScope == "Window") {
+            if (!file.readAll().contains("import QtQuick.Window"))
+                fixedScope = "ApplicationWindow";
+        }
+        file.close();
 
-//        ControlPropertyManager::setProperty(selectedControl,
-//                                            propertyName, fixedScope + "." + currentText,
-//                                            enumm.keys.value(currentText),
-//                                            ControlPropertyManager::SaveChanges |
-//                                            ControlPropertyManager::UpdateRenderer);
+        ControlPropertyManager::setProperty(selectedControl,
+                                            propertyName, fixedScope + "." + currentText,
+                                            _enum.keys.value(currentText),
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
     }
 }
 
-void PropertiesController::onBoolPropertyEditingFinish(const QString& propertyName, bool checked)
+void PropertiesController::onBoolPropertyEdit(const QString& propertyName, const QVariant& value)
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1238,6 +1207,7 @@ void PropertiesController::onBoolPropertyEditingFinish(const QString& propertyNa
     if (Control* selectedControl = this->control()) {
         // NOTE: No need for previous value equality check, since this
         // signal is only emitted when the value is changed/toggled
+        bool checked = value.toBool();
         ControlPropertyManager::setProperty(selectedControl, propertyName,
                                             checked ? "true" : "false", checked,
                                             ControlPropertyManager::SaveChanges |
