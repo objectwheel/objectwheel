@@ -3,35 +3,29 @@
 
 #include <QHash>
 #include <QStack>
-#include <QObject>
 
 class QWidget;
 class QTreeWidgetItem;
 
-class PropertiesDelegateCache final : public QObject
+class PropertiesDelegateCache final
 {
-    Q_OBJECT
-    Q_DISABLE_COPY(PropertiesDelegateCache)
-
-public:
-    explicit PropertiesDelegateCache(QObject* parent = nullptr);
-    ~PropertiesDelegateCache() override;
-
-    void clear();
-    void reserve(int size);
-    void push(int type, QWidget* widget);
-    void push(QTreeWidgetItem* item);
-    QWidget* pop(int type);
-    QTreeWidgetItem* pop();
-
-private:
-    QWidget* createWidget(int type);
-
-private:
     using WidgetStack = QStack<QWidget*>;
     using WidgetHash = QHash<int, WidgetStack*>;
     using ItemStack = QStack<QTreeWidgetItem*>;
 
+public:
+    PropertiesDelegateCache() = default;
+    PropertiesDelegateCache(const PropertiesDelegateCache&) = delete;
+    PropertiesDelegateCache& operator=(const PropertiesDelegateCache&) = delete;
+    ~PropertiesDelegateCache();
+
+    void push(int type, QWidget* widget);
+    void push(QTreeWidgetItem* item);
+
+    QWidget* pop(int type);
+    QTreeWidgetItem* pop();
+
+private:
     WidgetHash m_widgets;
     ItemStack m_items;
 };

@@ -507,7 +507,9 @@ void PropertiesController::onSearchEditEditingFinish()
     //        topLevelItem->setHidden(!v);
     //    }
 }
+#include <QDebug>
 
+Q_DECLARE_METATYPE(std::function<void()>)
 // FIXME: This function has severe performance issues.
 void PropertiesController::onSceneSelectionChange()
 {
@@ -882,6 +884,10 @@ void PropertiesController::onSceneSelectionChange()
                 item->setData(1, PropertiesDelegate::ValuesRole, QVariant(enumm.keys.keys()));
                 item->setData(1, PropertiesDelegate::InitialValueRole, value);
                 item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Enum);
+                item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Enum);
+
+                std::function<void()> s = std::bind(&PropertiesController::onEnumPropertyEditingFinish, this, "ss", "ff");
+                QVariant::fromValue<std::function<void()>>(s);
                 children.append(item);
             }
 

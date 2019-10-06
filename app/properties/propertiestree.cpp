@@ -6,6 +6,7 @@
 PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
   , m_delegate(new PropertiesDelegate(this))
 {
+    m_delegate->reserve(20);
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);

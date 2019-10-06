@@ -14,6 +14,7 @@ class PropertiesDelegate final : public QStyledItemDelegate
 
 public:
     enum { ROW_HEIGHT = 21 };
+
     enum Type {
         Invalid,
         String,
@@ -31,15 +32,17 @@ public:
 
     enum Roles {
         TypeRole = Qt::UserRole + 1,
+        CallbackRole,
         ValuesRole,
         InitialValueRole,
-        PropertyNameRole,
         ModificationRole
     };
 
 public:
     explicit PropertiesDelegate(PropertiesTree* propertiesTree);
+    ~PropertiesDelegate() override;
 
+    void reserve(int size);
     int calculateVisibleRow(const QTreeWidgetItem* item) const;
     void paintBackground(QPainter* painter, const QStyleOptionViewItem& option, int rowNumber,
                          bool isClassRow, bool hasVerticalLine) const;
@@ -55,6 +58,7 @@ public:
     void destroyItem(QTreeWidgetItem* item) const;
 
 private:
+    QWidget* createWidget(int type) const;
     void addConnection(QWidget* widget, int type, const QString& propertyName) const;
     void clearConnection(QWidget* widget) const;
 
