@@ -1,5 +1,7 @@
 Designer Core TODOs
 
+propertiespane'de her bir widget için de setUpdatesEnabled = false yapılsın ilk başta, sonraden enable edilsin
+    performans artışı sağlanmaya çalışılsın, ayrıca blockSignals() kullanımı da her şey üzerinde denenebilir belki
 propertiespane açıkken yapılan değişiklikler, mesela "ilgili propertinin modified" özelliği gibi anında
     işlenecek propertiespane in yeniden açılıp kapanması gerekmeyecek
 propertiespane'e bir resetleme mekanizması ekle, her modified property resetlenebilsin, Qt ninkine bezet

@@ -73,6 +73,11 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         QObject::connect(lineEdit, &QLineEdit::editingFinished,
                          [=] { callback.call(lineEdit->text()); });
     } break;
+    case PropertiesDelegate::FontSize: {
+        auto spinBox = static_cast<QSpinBox*>(widget);
+        QObject::connect(spinBox, &QSpinBox::editingFinished,
+                         [=] { callback.call(QVariant::fromValue<QSpinBox*>(spinBox)); });
+    } break;
     case PropertiesDelegate::FontFamily:
     case PropertiesDelegate::FontWeight:
     case PropertiesDelegate::FontCapitalization:

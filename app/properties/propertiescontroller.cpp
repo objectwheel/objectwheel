@@ -162,56 +162,6 @@ static QWidget* createNumberHandlerWidget(const QString& propertyName, double nu
     return abstractSpinBox;
 }
 
-static QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control, QTreeWidgetItem* fontItem)
-{
-    QSpinBox* spinBox = new QSpinBox;
-    TransparentStyle::attach(spinBox);
-    spinBox->setCursor(Qt::PointingHandCursor);
-    spinBox->setFocusPolicy(Qt::StrongFocus);
-    spinBox->setMinimum(0);
-    spinBox->setMaximum(72);
-    spinBox->setValue(size < 0 ? 0 : size);
-    spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
-    spinBox->setMinimumWidth(1);
-    UtilityFunctions::disableWheelEvent(spinBox);
-
-    QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), [=]
-    {
-        bool isPx = propertyName == "pixelSize" ? true : false;
-        QFont font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
-
-        // NOTE: No need for previous value equality check, since this signal is only emitted
-        // when the value is changed
-
-        if (spinBox->value() == 0) {
-            spinBox->blockSignals(true);
-            spinBox->setValue(isPx ? font.pixelSize() : font.pointSize());
-            spinBox->blockSignals(false);
-            return;
-        }
-
-        if (isPx)
-            font.setPixelSize(spinBox->value());
-        else
-            font.setPointSize(spinBox->value());
-
-        fixFontItemText(fontItem, font, isPx);
-
-        // FIXME: Remove related property instead of setting its value to 0
-        ControlPropertyManager::setProperty(control, QString::fromUtf8("font.") +
-                                            (isPx ? "pointSize" : "pixelSize"),
-                                            QString::number(0), 0,
-                                            ControlPropertyManager::SaveChanges);
-        ControlPropertyManager::setProperty(control, "font." + propertyName,
-                                            QString::number(spinBox->value()), spinBox->value(),
-                                            ControlPropertyManager::SaveChanges);
-        ControlPropertyManager::setProperty(control, "font", QString(), font,
-                                            ControlPropertyManager::UpdateRenderer);
-    });
-
-    return spinBox;
-}
-
 PropertiesController::PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
                                            QObject* parent) : QObject(parent)
   , m_propertiesPane(propertiesPane)
@@ -350,7 +300,7 @@ void PropertiesController::onSceneSelectionChange()
                     const bool bChanged    = ParserUtils::exists(selectedControl->dir(), "font.bold");
                     const bool iChanged    = ParserUtils::exists(selectedControl->dir(), "font.italic");
                     const bool uChanged    = ParserUtils::exists(selectedControl->dir(), "font.underline");
-                    const bool poChanged   = ParserUtils::exists(selectedControl->dir(), "font.pointSize");
+                    const bool ptChanged   = ParserUtils::exists(selectedControl->dir(), "font.pointSize");
                     const bool piChanged   = ParserUtils::exists(selectedControl->dir(), "font.pixelSize");
                     const bool wChanged    = ParserUtils::exists(selectedControl->dir(), "font.weight");
                     const bool oChanged    = ParserUtils::exists(selectedControl->dir(), "font.overline");
@@ -358,7 +308,7 @@ void PropertiesController::onSceneSelectionChange()
                     const bool cChanged    = ParserUtils::exists(selectedControl->dir(), "font.capitalization");
                     const bool kChanged    = ParserUtils::exists(selectedControl->dir(), "font.kerning");
                     const bool prChanged   = ParserUtils::exists(selectedControl->dir(), "font.preferShaping");
-                    const bool fontChanged = fChanged || bChanged || iChanged || uChanged || poChanged || piChanged
+                    const bool fontChanged = fChanged || bChanged || iChanged || uChanged || ptChanged || piChanged
                             || wChanged || oChanged || sChanged || cChanged || kChanged || prChanged;
 
                     auto fontItem = new QTreeWidgetItem;
@@ -366,20 +316,6 @@ void PropertiesController::onSceneSelectionChange()
                     fontItem->setText(1, fontText);
                     fontItem->setData(0, PropertiesDelegate::ModificationRole, fontChanged);
                     classItem->addChild(fontItem);
-
-                    auto poItem = new QTreeWidgetItem;
-                    poItem->setText(0, "pointSize");
-                    poItem->setData(0, PropertiesDelegate::ModificationRole, poChanged);
-                    fontItem->addChild(poItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                poItem, 1, createFontSizeHandlerWidget("pointSize", font.pointSize(), selectedControl, fontItem));
-
-                    auto pxItem = new QTreeWidgetItem;
-                    pxItem->setText(0, "pixelSize");
-                    pxItem->setData(0, PropertiesDelegate::ModificationRole, piChanged);
-                    fontItem->addChild(pxItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), selectedControl, fontItem));
 
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit, this, fontItem);
                     auto fItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
@@ -413,7 +349,29 @@ void PropertiesController::onSceneSelectionChange()
                     cItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(cItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.bold");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
+                                                                     this, fontItem, QStringLiteral("font.pointSize"));
+                    auto ptItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    ptItem->setText(1, QString());
+                    ptItem->setText(0, QStringLiteral("pointSize"));
+                    ptItem->setData(0, PropertiesDelegate::ModificationRole, ptChanged);
+                    ptItem->setData(1, PropertiesDelegate::InitialValueRole, font.pointSize() < 0 ? 0 : font.pointSize());
+                    ptItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::FontSize);
+                    ptItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(ptItem);
+
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
+                                                                this, fontItem, QStringLiteral("font.pixelSize"));
+                    auto pxItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    pxItem->setText(1, QString());
+                    pxItem->setText(0, QStringLiteral("pixelSize"));
+                    pxItem->setData(0, PropertiesDelegate::ModificationRole, piChanged);
+                    pxItem->setData(1, PropertiesDelegate::InitialValueRole, font.pixelSize() < 0 ? 0 : font.pixelSize());
+                    pxItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::FontSize);
+                    pxItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(pxItem);
+
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.bold"));
                     auto bItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     bItem->setText(1, QString());
                     bItem->setText(0, QStringLiteral("bold"));
@@ -423,7 +381,7 @@ void PropertiesController::onSceneSelectionChange()
                     bItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(bItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.italic");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.italic"));
                     auto iItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     iItem->setText(1, QString());
                     iItem->setText(0, QStringLiteral("italic"));
@@ -433,7 +391,7 @@ void PropertiesController::onSceneSelectionChange()
                     iItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(iItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.underline");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.underline"));
                     auto uItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     uItem->setText(1, QString());
                     uItem->setText(0, QStringLiteral("underline"));
@@ -443,7 +401,7 @@ void PropertiesController::onSceneSelectionChange()
                     uItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(uItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.overline");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.overline"));
                     auto oItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     oItem->setText(1, QString());
                     oItem->setText(0, QStringLiteral("overline"));
@@ -453,7 +411,7 @@ void PropertiesController::onSceneSelectionChange()
                     oItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(oItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.strikeout");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.strikeout"));
                     auto sItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     sItem->setText(1, QString());
                     sItem->setText(0, QStringLiteral("strikeout"));
@@ -463,7 +421,7 @@ void PropertiesController::onSceneSelectionChange()
                     sItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(sItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.kerning");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.kerning"));
                     auto kItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     kItem->setText(1, QString());
                     kItem->setText(0, QStringLiteral("kerning"));
@@ -473,7 +431,7 @@ void PropertiesController::onSceneSelectionChange()
                     kItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(kItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.preferShaping");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.preferShaping"));
                     auto prItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     prItem->setText(1, QString());
                     prItem->setText(0, QStringLiteral("preferShaping"));
@@ -974,6 +932,46 @@ void PropertiesController::onControlIndexEditingFinish()
     ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
                                      ControlPropertyManager::SaveChanges |
                                      ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        bool isPx = propertyName.contains("pixelSize") ? true : false;
+        QFont font = UtilityFunctions::getProperty("font", selectedControl->properties()).value<QFont>();
+        QSpinBox* spinBox = value.value<QSpinBox*>();
+
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed
+
+        if (spinBox->value() == 0) {
+            spinBox->blockSignals(true);
+            spinBox->setValue(isPx ? font.pixelSize() : font.pointSize());
+            spinBox->blockSignals(false);
+            return;
+        }
+
+        if (isPx)
+            font.setPixelSize(spinBox->value());
+        else
+            font.setPointSize(spinBox->value());
+
+        fixFontItemText(fontClassItem, font, isPx);
+
+        // FIXME: Remove related property instead of setting its value to 0
+        ControlPropertyManager::setProperty(selectedControl, QString::fromUtf8("font.") +
+                                            (isPx ? "pointSize" : "pixelSize"),
+                                            QString::number(0), 0,
+                                            ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            QString::number(spinBox->value()), spinBox->value(),
+                                            ControlPropertyManager::SaveChanges);
+        ControlPropertyManager::setProperty(selectedControl, "font", QString(), font,
+                                            ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value)
