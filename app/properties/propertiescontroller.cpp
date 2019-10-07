@@ -168,73 +168,6 @@ static QWidget* createNumberHandlerWidget(const QString& propertyName, double nu
     return abstractSpinBox;
 }
 
-static QWidget* createFontWeightHandlerWidget(int weight, Control* control)
-{
-    auto comboBox = new QComboBox;
-    TransparentStyle::attach(comboBox);
-    comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-    comboBox->setCursor(Qt::PointingHandCursor);
-    comboBox->setFocusPolicy(Qt::ClickFocus);
-    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-    comboBox->setMinimumWidth(1);
-
-    const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
-    for (int i = 0; i < e.keyCount(); ++i)
-        comboBox->addItem(e.key(i));
-
-    comboBox->setCurrentText(e.valueToKey(weight));
-
-    QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
-    {
-        int weightValue = e.keyToValue(comboBox->currentText().toUtf8().constData());
-        const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
-
-        if (weightValue == font.weight())
-            return;
-
-        ControlPropertyManager::setProperty(control, "font.weight",
-                                            "Font." + comboBox->currentText(), weightValue,
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    return comboBox;
-}
-
-static QWidget* createFontCapitalizationHandlerWidget(QFont::Capitalization capitalization, Control* control)
-{
-    auto comboBox = new QComboBox;
-    TransparentStyle::attach(comboBox);
-    comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-    comboBox->setCursor(Qt::PointingHandCursor);
-    comboBox->setFocusPolicy(Qt::ClickFocus);
-    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-    comboBox->setMinimumWidth(1);
-
-    const QMetaEnum& e = QMetaEnum::fromType<QFont::Capitalization>();
-    for (int i = 0; i < e.keyCount(); ++i)
-        comboBox->addItem(e.key(i));
-
-    comboBox->setCurrentText(e.valueToKey(capitalization));
-
-    QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
-    {
-        int capitalizationValue = e.keyToValue(comboBox->currentText().toUtf8().constData());
-        const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
-
-        if (capitalizationValue == font.capitalization())
-            return;
-
-        ControlPropertyManager::setProperty(control, "font.capitalization",
-                                            "Font." + comboBox->currentText(),
-                                            QFont::Capitalization(capitalizationValue),
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    return comboBox;
-}
-
 static QWidget* createFontSizeHandlerWidget(const QString& propertyName, int size, Control* control, QTreeWidgetItem* fontItem)
 {
     QSpinBox* spinBox = new QSpinBox;
@@ -488,9 +421,7 @@ void PropertiesController::onSceneSelectionChange()
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), selectedControl, fontItem));
 
-
-                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit, this,
-                                                                     fontItem);
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit, this, fontItem);
                     auto fItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     fItem->setText(1, QString());
                     fItem->setText(0, QStringLiteral("family"));
@@ -500,19 +431,27 @@ void PropertiesController::onSceneSelectionChange()
                     fItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(fItem);
 
-
-                    auto wItem = new QTreeWidgetItem;
-                    wItem->setText(0, "weight");
+                    const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontWeightPropertyEdit, this, e);
+                    auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    wItem->setText(1, QString());
+                    wItem->setText(0, QStringLiteral("weight"));
                     wItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
-                    fontItem->addChild(wItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(wItem, 1, createFontWeightHandlerWidget(font.weight(), selectedControl));
+                    wItem->setData(1, PropertiesDelegate::InitialValueRole, e.valueToKey(font.weight()));
+                    wItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::FontWeight);
+                    wItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(wItem);
 
-                    auto cItem = new QTreeWidgetItem;
-                    cItem->setText(0, "capitalization");
+                    const QMetaEnum& e2 = QMetaEnum::fromType<QFont::Capitalization>();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontCapitalizationPropertyEdit, this, e2);
+                    auto cItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    cItem->setText(1, QString());
+                    cItem->setText(0, QStringLiteral("capitalization"));
                     cItem->setData(0, PropertiesDelegate::ModificationRole, cChanged);
-                    fontItem->addChild(cItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(cItem, 1,
-                                                                      createFontCapitalizationHandlerWidget(font.capitalization(), selectedControl));
+                    cItem->setData(1, PropertiesDelegate::InitialValueRole, e2.valueToKey(font.capitalization()));
+                    cItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::FontCapitalization);
+                    cItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(cItem);
 
                     auto bItem = new QTreeWidgetItem;
                     bItem->setText(0, "bold");
@@ -1075,6 +1014,46 @@ void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassIt
 
         ControlPropertyManager::setProperty(selectedControl, "font.family",
                                             UtilityFunctions::stringify(currentText), currentText,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
+}
+
+void PropertiesController::onFontWeightPropertyEdit(const QMetaEnum& _enum, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        const QString& currentText = value.toString();
+        const QFont& font = UtilityFunctions::getProperty("font", selectedControl->properties()).value<QFont>();
+        const int weightValue = _enum.keyToValue(currentText.toUtf8().constData());
+
+        if (weightValue == font.weight())
+            return;
+
+        ControlPropertyManager::setProperty(selectedControl, "font.weight",
+                                            "Font." + currentText, weightValue,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
+}
+
+void PropertiesController::onFontCapitalizationPropertyEdit(const QMetaEnum& _enum, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        const QString& currentText = value.toString();
+        const QFont& font = UtilityFunctions::getProperty("font", selectedControl->properties()).value<QFont>();
+        const int capitalizationValue = _enum.keyToValue(currentText.toUtf8().constData());
+
+        if (capitalizationValue == font.capitalization())
+            return;
+
+        ControlPropertyManager::setProperty(selectedControl, "font.capitalization",
+                                            "Font." + currentText, capitalizationValue,
                                             ControlPropertyManager::SaveChanges |
                                             ControlPropertyManager::UpdateRenderer);
     }

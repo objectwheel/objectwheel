@@ -21,8 +21,6 @@ static void setValues(QWidget* widget, PropertiesDelegate::Type type, const QVar
 {
     switch (type) {
     case PropertiesDelegate::Enum:
-    case PropertiesDelegate::FontWeight:
-    case PropertiesDelegate::FontCapitalization:
         static_cast<QComboBox*>(widget)->addItems(value.value<QStringList>());
         break;
     default:
@@ -75,6 +73,9 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         QObject::connect(lineEdit, &QLineEdit::editingFinished,
                          [=] { callback.call(lineEdit->text()); });
     } break;
+    case PropertiesDelegate::FontFamily:
+    case PropertiesDelegate::FontWeight:
+    case PropertiesDelegate::FontCapitalization:
     case PropertiesDelegate::Enum: {
         auto comboBox = static_cast<QComboBox*>(widget);
         QObject::connect(comboBox, qOverload<int>(&QComboBox::activated),
@@ -89,11 +90,6 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         auto toolButton = static_cast<QToolButton*>(widget);
         QObject::connect(toolButton, qOverload<bool>(&QToolButton::clicked),
                          [=] { callback.call(QVariant::fromValue<QToolButton*>(toolButton)); });
-    } break;
-    case PropertiesDelegate::FontFamily: {
-        auto comboBox = static_cast<QComboBox*>(widget);
-        QObject::connect(comboBox, qOverload<int>(&QComboBox::activated),
-                         [=] { callback.call(comboBox->currentText()); });
     } break;
         //    case Color:
         //        propertyName = "color";
@@ -284,7 +280,7 @@ void PropertiesDelegate::reserve(int size)
             m_cache->push(type, widget);
         }
     }
-    for (int i = size; i--;) {
+    for (int i = size * e.keyCount(); i--;) {
         auto item = new QTreeWidgetItem;
         item->setHidden(true);
         m_cache->push(item);
