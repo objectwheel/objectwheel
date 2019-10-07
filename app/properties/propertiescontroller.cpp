@@ -168,38 +168,6 @@ static QWidget* createNumberHandlerWidget(const QString& propertyName, double nu
     return abstractSpinBox;
 }
 
-static QWidget* createFontFamilyHandlerWidget(const QString& family, Control* control, QTreeWidgetItem* fontItem)
-{
-    auto comboBox = new QComboBox;
-    TransparentStyle::attach(comboBox);
-    comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-    comboBox->addItems(QFontDatabase().families());
-    comboBox->setCurrentText(family);
-    comboBox->setCursor(Qt::PointingHandCursor);
-    comboBox->setFocusPolicy(Qt::ClickFocus);
-    comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-    comboBox->setMinimumWidth(1);
-
-    QObject::connect(comboBox, qOverload<int>(&QComboBox::activated), [=]
-    {
-        const QFont& font = UtilityFunctions::getProperty("font", control->properties()).value<QFont>();
-
-        if (comboBox->currentText() == QFontInfo(font).family())
-            return;
-
-        const QString& previousFamily = QFontInfo(font).family();
-        QString fontText = fontItem->text(1);
-        fontText.replace(previousFamily, comboBox->currentText());
-        fontItem->setText(1, fontText);
-
-        ControlPropertyManager::setProperty(control, "font.family", UtilityFunctions::stringify(comboBox->currentText()),
-                                            comboBox->currentText(), ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    return comboBox;
-}
-
 static QWidget* createFontWeightHandlerWidget(int weight, Control* control)
 {
     auto comboBox = new QComboBox;
@@ -476,10 +444,12 @@ void PropertiesController::onSceneSelectionChange()
 
                 switch (propertyValue.type()) {
                 case QVariant::Font: {
+                    QList<QTreeWidgetItem*> fontChildren;
                     const QFont& font = propertyValue.value<QFont>();
+                    const QString& family = QFontInfo(font).family();
                     const bool isPx = font.pixelSize() > 0 ? true : false;
                     const QString& fontText = QString::fromUtf8("[%1, %2%3]")
-                            .arg(QFontInfo(font).family())
+                            .arg(family)
                             .arg(isPx ? font.pixelSize() : font.pointSize())
                             .arg(isPx ? "px" : "pt");
 
@@ -518,12 +488,18 @@ void PropertiesController::onSceneSelectionChange()
                     m_propertiesPane->propertiesTree()->setItemWidget(
                                 pxItem, 1, createFontSizeHandlerWidget("pixelSize", font.pixelSize(), selectedControl, fontItem));
 
-                    auto fItem = new QTreeWidgetItem;
-                    fItem->setText(0, "family");
+
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit, this,
+                                                                     fontItem);
+                    auto fItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    fItem->setText(1, QString());
+                    fItem->setText(0, QStringLiteral("family"));
                     fItem->setData(0, PropertiesDelegate::ModificationRole, fChanged);
-                    fontItem->addChild(fItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                fItem, 1, createFontFamilyHandlerWidget(QFontInfo(font).family(), selectedControl, fontItem));
+                    fItem->setData(1, PropertiesDelegate::InitialValueRole, family);
+                    fItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::FontFamily);
+                    fItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(fItem);
+
 
                     auto wItem = new QTreeWidgetItem;
                     wItem->setText(0, "weight");
@@ -587,6 +563,9 @@ void PropertiesController::onSceneSelectionChange()
                                                                           "font.preferShaping",
                                                                           !(font.styleStrategy() & QFont::PreferNoShaping), selectedControl));
 
+                    fontItem->addChildren(fontChildren);
+                    for (auto i : fontChildren)
+                        m_propertiesPane->propertiesTree()->openPersistentEditor(i, 1);
                     m_propertiesPane->propertiesTree()->expandItem(fontItem);
                     break;
                 }
@@ -1075,6 +1054,30 @@ void PropertiesController::onControlIndexEditingFinish()
     ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
                                      ControlPropertyManager::SaveChanges |
                                      ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        const QFont& font = UtilityFunctions::getProperty("font", selectedControl->properties()).value<QFont>();
+        const QString& previousFamily = QFontInfo(font).family();
+        const QString& currentText = value.toString();
+
+        if (currentText == previousFamily)
+            return;
+
+        QString fontText = fontClassItem->text(1);
+        fontText.replace(previousFamily, currentText);
+        fontClassItem->setText(1, fontText);
+
+        ControlPropertyManager::setProperty(selectedControl, "font.family",
+                                            UtilityFunctions::stringify(currentText), currentText,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 void PropertiesController::onUrlPropertyEdit(const QString& propertyName, const QVariant& value)

@@ -21,7 +21,6 @@ static void setValues(QWidget* widget, PropertiesDelegate::Type type, const QVar
 {
     switch (type) {
     case PropertiesDelegate::Enum:
-    case PropertiesDelegate::FontFamily:
     case PropertiesDelegate::FontWeight:
     case PropertiesDelegate::FontCapitalization:
         static_cast<QComboBox*>(widget)->addItems(value.value<QStringList>());
@@ -90,6 +89,11 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         auto toolButton = static_cast<QToolButton*>(widget);
         QObject::connect(toolButton, qOverload<bool>(&QToolButton::clicked),
                          [=] { callback.call(QVariant::fromValue<QToolButton*>(toolButton)); });
+    } break;
+    case PropertiesDelegate::FontFamily: {
+        auto comboBox = static_cast<QComboBox*>(widget);
+        QObject::connect(comboBox, qOverload<int>(&QComboBox::activated),
+                         [=] { callback.call(comboBox->currentText()); });
     } break;
         //    case Color:
         //        propertyName = "color";
@@ -216,8 +220,8 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         comboBox->setFocusPolicy(Qt::ClickFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
-        TransparentStyle::attach(comboBox);
         comboBox->addItems(QFontDatabase().families());
+        TransparentStyle::attach(comboBox);
         return comboBox;
     }
 

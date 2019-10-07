@@ -6,6 +6,7 @@
 class Control;
 class PropertiesPane;
 class DesignerScene;
+class QTreeWidgetItem;
 
 class PropertiesController final : public QObject
 {
@@ -32,6 +33,7 @@ public slots:
     void onControlIdEditingFinish();
     void onControlIndexEditingFinish();
 
+    void onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value);
     void onUrlPropertyEdit(const QString& propertyName, const QVariant& value);
     void onColorPropertyEdit(const QString& propertyName, const QVariant& value);
     void onStringPropertyEdit(const QString& propertyName, const QVariant& value);
