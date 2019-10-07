@@ -52,12 +52,6 @@ static void fixPosForForm(const Control* control, const QString& propertyName, S
     }
 }
 
-static void fixVisible(Control* control, const QString& propertyName, QCheckBox* checkBox)
-{
-    if (propertyName == "visible")
-        checkBox->setChecked(control->visible());
-}
-
 static void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
 {
     QTreeWidget* treeWidget = fontItem->treeWidget();
@@ -216,40 +210,6 @@ static QWidget* createFontSizeHandlerWidget(const QString& propertyName, int siz
     });
 
     return spinBox;
-}
-
-static QWidget* createBoolHandlerWidget(const QString& propertyName, bool checked, Control* control)
-{
-    auto checkBox = new QCheckBox;
-    checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-    checkBox->setCursor(Qt::PointingHandCursor);
-    checkBox->setChecked(checked);
-    checkBox->setFocusPolicy(Qt::ClickFocus);
-    checkBox->setMinimumWidth(1);
-    fixVisible(control, propertyName, checkBox);
-
-    QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked), [=]
-    {
-        // NOTE: No need for previous value equality check, since this signal is only emitted
-        // when the value is changed/toggled
-        ControlPropertyManager::setProperty(control,
-                                            propertyName, checkBox->isChecked() ? "true" : "false",
-                                            checkBox->isChecked(),
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    auto widget = new QWidget;
-    widget->setMinimumWidth(1);
-    widget->setAttribute(Qt::WA_MacShowFocusRect, false);
-    widget->setFocusPolicy(Qt::ClickFocus);
-    widget->setSizePolicy(QSizePolicy::Ignored, widget->sizePolicy().verticalPolicy());
-    auto layout = new QHBoxLayout(widget);
-    layout->addWidget(checkBox);
-    layout->addStretch();
-    layout->setSpacing(0);
-    layout->setContentsMargins(2, 0, 0, 0);
-    return widget;
 }
 
 PropertiesController::PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
@@ -453,54 +413,75 @@ void PropertiesController::onSceneSelectionChange()
                     cItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(cItem);
 
-                    auto bItem = new QTreeWidgetItem;
-                    bItem->setText(0, "bold");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.bold");
+                    auto bItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    bItem->setText(1, QString());
+                    bItem->setText(0, QStringLiteral("bold"));
                     bItem->setData(0, PropertiesDelegate::ModificationRole, bChanged);
-                    fontItem->addChild(bItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(bItem, 1, createBoolHandlerWidget("font.bold", font.bold(), selectedControl));
+                    bItem->setData(1, PropertiesDelegate::InitialValueRole, font.bold());
+                    bItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    bItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(bItem);
 
-                    auto iItem = new QTreeWidgetItem;
-                    iItem->setText(0, "italic");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.italic");
+                    auto iItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    iItem->setText(1, QString());
+                    iItem->setText(0, QStringLiteral("italic"));
                     iItem->setData(0, PropertiesDelegate::ModificationRole, iChanged);
-                    fontItem->addChild(iItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                iItem, 1, createBoolHandlerWidget("font.italic", font.italic(), selectedControl));
+                    iItem->setData(1, PropertiesDelegate::InitialValueRole, font.italic());
+                    iItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    iItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(iItem);
 
-                    auto uItem = new QTreeWidgetItem;
-                    uItem->setText(0, "underline");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.underline");
+                    auto uItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    uItem->setText(1, QString());
+                    uItem->setText(0, QStringLiteral("underline"));
                     uItem->setData(0, PropertiesDelegate::ModificationRole, uChanged);
-                    fontItem->addChild(uItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                uItem, 1, createBoolHandlerWidget("font.underline", font.underline(), selectedControl));
+                    uItem->setData(1, PropertiesDelegate::InitialValueRole, font.underline());
+                    uItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    uItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(uItem);
 
-                    auto oItem = new QTreeWidgetItem;
-                    oItem->setText(0, "overline");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.overline");
+                    auto oItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    oItem->setText(1, QString());
+                    oItem->setText(0, QStringLiteral("overline"));
                     oItem->setData(0, PropertiesDelegate::ModificationRole, oChanged);
-                    fontItem->addChild(oItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                oItem, 1, createBoolHandlerWidget("font.overline", font.overline(), selectedControl));
+                    oItem->setData(1, PropertiesDelegate::InitialValueRole, font.overline());
+                    oItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    oItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(oItem);
 
-                    auto sItem = new QTreeWidgetItem;
-                    sItem->setText(0, "strikeout");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.strikeout");
+                    auto sItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    sItem->setText(1, QString());
+                    sItem->setText(0, QStringLiteral("strikeout"));
                     sItem->setData(0, PropertiesDelegate::ModificationRole, sChanged);
-                    fontItem->addChild(sItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                sItem, 1, createBoolHandlerWidget("font.strikeout", font.strikeOut(), selectedControl));
+                    sItem->setData(1, PropertiesDelegate::InitialValueRole, font.strikeOut());
+                    sItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    sItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(sItem);
 
-                    auto kItem = new QTreeWidgetItem;
-                    kItem->setText(0, "kerning");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.kerning");
+                    auto kItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    kItem->setText(1, QString());
+                    kItem->setText(0, QStringLiteral("kerning"));
                     kItem->setData(0, PropertiesDelegate::ModificationRole, kChanged);
-                    fontItem->addChild(kItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(
-                                kItem, 1, createBoolHandlerWidget("font.kerning", font.kerning(), selectedControl));
+                    kItem->setData(1, PropertiesDelegate::InitialValueRole, font.kerning());
+                    kItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    kItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(kItem);
 
-                    auto prItem = new QTreeWidgetItem;
-                    prItem->setText(0, "preferShaping");
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, "font.preferShaping");
+                    auto prItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    prItem->setText(1, QString());
+                    prItem->setText(0, QStringLiteral("preferShaping"));
                     prItem->setData(0, PropertiesDelegate::ModificationRole, prChanged);
-                    fontItem->addChild(prItem);
-                    m_propertiesPane->propertiesTree()->setItemWidget(prItem, 1, createBoolHandlerWidget(
-                                                                          "font.preferShaping",
-                                                                          !(font.styleStrategy() & QFont::PreferNoShaping), selectedControl));
+                    prItem->setData(1, PropertiesDelegate::InitialValueRole, !(font.styleStrategy() & QFont::PreferNoShaping));
+                    prItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Bool);
+                    prItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    fontChildren.append(prItem);
 
                     fontItem->addChildren(fontChildren);
                     for (auto i : fontChildren)

@@ -91,30 +91,35 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         QObject::connect(toolButton, qOverload<bool>(&QToolButton::clicked),
                          [=] { callback.call(QVariant::fromValue<QToolButton*>(toolButton)); });
     } break;
-        //    case Color:
-        //        propertyName = "color";
-        //        break;
-        //    case Int:
-        //        propertyName = "value";
-        //        break;
-        //    case Real:
-        //        propertyName = "value";
-        //        break;
-        //    case FontSize:
-        //        propertyName = "value";
-        //        break;
-        //    case FontFamily:
-        //        propertyName = "currentText";
-        //        break;
-        //    case FontWeight:
-        //        propertyName = "currentText";
-        //        break;
-        //    case FontCapitalization:
-        //        propertyName = "currentText";
-        //        break;
     default:
         break;
     }
+}
+
+void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
+{
+    switch (type) {
+    case PropertiesDelegate::Url:
+    case PropertiesDelegate::String: {
+        auto lineEdit = static_cast<QLineEdit*>(widget);
+        lineEdit->deselect();
+        lineEdit->clear();
+    } break;
+    case PropertiesDelegate::FontFamily:
+    case PropertiesDelegate::FontWeight:
+    case PropertiesDelegate::FontCapitalization:
+    case PropertiesDelegate::Enum: {
+        auto comboBox = static_cast<QComboBox*>(widget);
+        comboBox->clear();
+    } break;
+    case PropertiesDelegate::Bool: {
+        auto checkBox = static_cast<QCheckBox*>(widget);
+        checkBox->setChecked(false);
+    } break;
+    default:
+        break;
+    }
+    widget->clearFocus();
 }
 
 static QWidget* createWidget(PropertiesDelegate::Type type)
@@ -125,7 +130,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         auto lineEdit = new QLineEdit;
         lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
         lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-        lineEdit->setFocusPolicy(Qt::StrongFocus);
+        lineEdit->setFocusPolicy(Qt::ClickFocus);
         lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
         lineEdit->setMinimumWidth(1);
         return lineEdit;
@@ -170,7 +175,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     case PropertiesDelegate::Int: {
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::StrongFocus);
+        spinBox->setFocusPolicy(Qt::ClickFocus);
         spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
         spinBox->setMaximum(std::numeric_limits<int>::max());
@@ -184,7 +189,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     case PropertiesDelegate::Real: {
         auto spinBox = new QDoubleSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::StrongFocus);
+        spinBox->setFocusPolicy(Qt::ClickFocus);
         spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
         spinBox->setMaximum(std::numeric_limits<qreal>::max());
@@ -198,7 +203,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     case PropertiesDelegate::FontSize: {
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::StrongFocus);
+        spinBox->setFocusPolicy(Qt::ClickFocus);
         spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setMinimum(0);
         spinBox->setMaximum(9999);
@@ -423,6 +428,7 @@ void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index
         return QStyledItemDelegate::destroyEditor(editor, index);
 
     disconnect(editor, 0, 0, 0);
+    clearWidget(editor, type);
     editor->setParent(nullptr);
     editor->setVisible(false);
     m_cache->push(type, editor);

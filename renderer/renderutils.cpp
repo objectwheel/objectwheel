@@ -852,9 +852,7 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
 {
     Q_ASSERT(instance);
 
-    QVector<Enum> enums;
     QVector<PropertyNode> propertyNodes;
-    QMap<QString, QVariant> properties;
 
     if (!instance->errors.isEmpty())
         return propertyNodes;
@@ -871,11 +869,13 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
             continue;
         }
 
+        QVector<Enum> enums;
+        QMap<QString, QVariant> properties;
         QString className = cleanClassName(metaObject);
         for (int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); i++) {
             const auto& property = metaObject->property(i);
 
-            enums << subEnums(property, object);
+            enums.append(subEnums(property, object));
             properties.unite(subProperties(property, object));
 
             if (property.isReadable()
@@ -884,7 +884,6 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
                     && !propertyExistsInNodes(propertyNodes, property.name())) {
                 if (property.isEnumType() && !property.isFlagType()) {
                     auto metaEnum = property.enumerator();
-
                     Enum e;
                     e.name = property.name();
                     e.scope = cleanScopeName(metaEnum.scope());
@@ -895,7 +894,7 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
                             e.keys[metaEnum.key(i)] = metaEnum.value(i);
                     }
 
-                    enums << e;
+                    enums.append(e);
                 } else if (!property.isFlagType()) {
                     properties[property.name()] = property.read(object);
                 }
@@ -907,7 +906,7 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
             propertyNode.cleanClassName = className;
             propertyNode.properties = properties;
             propertyNode.enums = enums;
-            propertyNodes << propertyNode;
+            propertyNodes.append(propertyNode);
         }
 
         metaObject = metaObject->superClass();

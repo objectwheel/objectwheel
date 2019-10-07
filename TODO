@@ -1,5 +1,9 @@
 Designer Core TODOs
 
+propertiespane açıkken yapılan değişiklikler, mesela "ilgili propertinin modified" özelliği gibi anında
+    işlenecek propertiespane in yeniden açılıp kapanması gerekmeyecek
+propertiespane'e bir resetleme mekanizması ekle, her modified property resetlenebilsin, Qt ninkine bezet
+propertiespane'de widget'ler, özellikle Qlineeditler neden içindeki yazılar seçili olarak başlıyor?
 IconWidget diye bir class ekle, ikon gösterebilen, bak bakalım Qt de öyle bişey varmı önce, böylece tüm ikonları svg yap
 FormsPane'de add tuşuna basınca bir drop down menü açılıp
     Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
