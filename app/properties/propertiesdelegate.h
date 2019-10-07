@@ -17,6 +17,7 @@ public:
 
     enum Type {
         Invalid,
+        Url,
         String,
         Enum,
         Bool,

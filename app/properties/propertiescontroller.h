@@ -32,6 +32,7 @@ public slots:
     void onControlIdEditingFinish();
     void onControlIndexEditingFinish();
 
+    void onUrlPropertyEdit(const QString& propertyName, const QVariant& value);
     void onColorPropertyEdit(const QString& propertyName, const QVariant& value);
     void onStringPropertyEdit(const QString& propertyName, const QVariant& value);
     void onBoolPropertyEdit(const QString& propertyName, const QVariant& value);

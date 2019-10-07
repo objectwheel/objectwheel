@@ -35,6 +35,7 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
 {
     const char* propertyName = 0;
     switch (type) {
+    case PropertiesDelegate::Url:
     case PropertiesDelegate::String:
         propertyName = "text";
         break;
@@ -69,6 +70,7 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
 void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
 {
     switch (type) {
+    case PropertiesDelegate::Url:
     case PropertiesDelegate::String: {
         auto lineEdit = static_cast<QLineEdit*>(widget);
         QObject::connect(lineEdit, &QLineEdit::editingFinished,
@@ -118,6 +120,7 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
 static QWidget* createWidget(PropertiesDelegate::Type type)
 {
     switch (type) {
+    case PropertiesDelegate::Url:
     case PropertiesDelegate::String: {
         auto lineEdit = new QLineEdit;
         lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");

@@ -83,7 +83,7 @@ static void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool i
     }
 }
 
-static QString urlToDisplayText(const QUrl& url, const QString& controlDir)
+static QString cleanUrl(const QUrl& url, const QString& controlDir)
 {
     QString displayText = url.toDisplayString();
     if (url.isLocalFile()) {
@@ -91,37 +91,6 @@ static QString urlToDisplayText(const QUrl& url, const QString& controlDir)
                     SaveUtils::toControlThisDir(controlDir) + '/');
     }
     return displayText;
-}
-
-static QWidget* createUrlHandlerWidget(const QString& propertyName, const QString& url,
-                                       Control* control)
-{
-    auto lineEdit = new QLineEdit;
-    lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
-    lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    lineEdit->setText(url);
-    lineEdit->setFocusPolicy(Qt::StrongFocus);
-    lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
-    lineEdit->setMinimumWidth(1);
-
-    QObject::connect(lineEdit, &QLineEdit::editingFinished, [=]
-    {
-        // TODO: Clear whitespaces in the url
-        const QUrl& url = QUrl::fromUserInput(lineEdit->text(),
-                                              SaveUtils::toControlThisDir(control->dir()),
-                                              QUrl::AssumeLocalFile);
-        const QString& displayText = urlToDisplayText(url, control->dir());
-        const QUrl& previousUrl = UtilityFunctions::getProperty(propertyName, control->properties()).value<QUrl>();
-
-        if (url == previousUrl)
-            return;
-
-        ControlPropertyManager::setProperty(control, propertyName, UtilityFunctions::stringify(displayText), url,
-                                            ControlPropertyManager::SaveChanges
-                                            | ControlPropertyManager::UpdateRenderer);
-    });
-
-    return lineEdit;
 }
 
 static QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
@@ -670,14 +639,17 @@ void PropertiesController::onSceneSelectionChange()
                 }
 
                 case QVariant::Url: {
-                    const QUrl& url = propertyValue.value<QUrl>();
-                    const QString& displayText = urlToDisplayText(url, selectedControl->dir());
-                    auto item = new QTreeWidgetItem;
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onUrlPropertyEdit,
+                                                                     this, propertyName);
+                    const QString& displayText = cleanUrl(propertyValue.value<QUrl>(), selectedControl->dir());
+                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    item->setText(1, QString());
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                    classItem->addChild(item);
-                    m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                                                      createUrlHandlerWidget(propertyName, displayText, selectedControl));
+                    item->setData(1, PropertiesDelegate::InitialValueRole, displayText);
+                    item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::String);
+                    item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                    children.append(item);
                     break;
                 }
 
@@ -1103,6 +1075,28 @@ void PropertiesController::onControlIndexEditingFinish()
     ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
                                      ControlPropertyManager::SaveChanges |
                                      ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onUrlPropertyEdit(const QString& propertyName, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        // TODO: Clear whitespaces in the url
+        const QUrl& url = QUrl::fromUserInput(value.toString(), SaveUtils::toControlThisDir(selectedControl->dir()),
+                                              QUrl::AssumeLocalFile);
+        const QString& displayText = cleanUrl(url, selectedControl->dir());
+        const QUrl& previousUrl = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QUrl>();
+
+        if (url == previousUrl)
+            return;
+
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            UtilityFunctions::stringify(displayText), url,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
 }
 
 void PropertiesController::onColorPropertyEdit(const QString& propertyName, const QVariant& value)
