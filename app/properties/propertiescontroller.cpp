@@ -52,31 +52,6 @@ static void fixPosForForm(const Control* control, const QString& propertyName, S
     }
 }
 
-static void fixFontItemText(QTreeWidgetItem* fontItem, const QFont& font, bool isPx)
-{
-    QTreeWidget* treeWidget = fontItem->treeWidget();
-    Q_ASSERT(treeWidget);
-
-    QString fontText = fontItem->text(1);
-    if (isPx)
-        fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pixelSize()) + "px]");
-    else
-        fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pointSize()) + "pt]");
-    fontItem->setText(1, fontText);
-
-    for (int i = 0; i < fontItem->childCount(); ++i) {
-        QTreeWidgetItem* chilItem = fontItem->child(i);
-        if (chilItem->text(0) == (isPx ? "pointSize" : "pixelSize")) {
-            QSpinBox* spinBox = qobject_cast<QSpinBox*>(treeWidget->itemWidget(chilItem, 1));
-            Q_ASSERT(spinBox);
-            spinBox->blockSignals(true);
-            spinBox->setValue(0);
-            spinBox->blockSignals(false);
-            break;
-        }
-    }
-}
-
 static QString cleanUrl(const QUrl& url, const QString& controlDir)
 {
     QString displayText = url.toDisplayString();
@@ -959,7 +934,23 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem
         else
             font.setPointSize(spinBox->value());
 
-        fixFontItemText(fontClassItem, font, isPx);
+        QString fontText = fontClassItem->text(1);
+        if (isPx)
+            fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pixelSize()) + "px]");
+        else
+            fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pointSize()) + "pt]");
+        fontClassItem->setText(1, fontText);
+        for (int i = 0; i < fontClassItem->childCount(); ++i) {
+            QTreeWidgetItem* chilItem = fontClassItem->child(i);
+            if (chilItem->text(0) == (isPx ? "pointSize" : "pixelSize")) {
+                auto spinBox = qobject_cast<QSpinBox*>(m_propertiesPane->propertiesTree()->itemWidget(chilItem, 1));
+                Q_ASSERT(spinBox);
+                spinBox->blockSignals(true);
+                spinBox->setValue(0);
+                spinBox->blockSignals(false);
+                break;
+            }
+        }
 
         // FIXME: Remove related property instead of setting its value to 0
         ControlPropertyManager::setProperty(selectedControl, QString::fromUtf8("font.") +
