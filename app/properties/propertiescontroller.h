@@ -33,7 +33,8 @@ public slots:
     void onControlIdEditingFinish();
     void onControlIndexEditingFinish();
 
-
+    void onRealPropertyEdit(const QString& propertyName, const QVariant& value);
+    void onIntPropertyEdit(const QString& propertyName, const QVariant& value);
     void onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value);
     void onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value);
     void onFontWeightPropertyEdit(const QMetaEnum& _enum, const QVariant& value);

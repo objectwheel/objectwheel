@@ -62,81 +62,6 @@ static QString cleanUrl(const QUrl& url, const QString& controlDir)
     return displayText;
 }
 
-static QWidget* createNumberHandlerWidget(const QString& propertyName, double number,
-                                          Control* control, bool integer)
-{
-    QAbstractSpinBox* abstractSpinBox;
-    if (integer)
-        abstractSpinBox = new QSpinBox;
-    else
-        abstractSpinBox = new QDoubleSpinBox;
-
-    TransparentStyle::attach(abstractSpinBox);
-    abstractSpinBox->setCursor(Qt::PointingHandCursor);
-    abstractSpinBox->setFocusPolicy(Qt::StrongFocus);
-    abstractSpinBox->setSizePolicy(QSizePolicy::Ignored, abstractSpinBox->sizePolicy().verticalPolicy());
-    abstractSpinBox->setMinimumWidth(1);
-    UtilityFunctions::disableWheelEvent(abstractSpinBox);
-
-    const auto& updateFunction = [=]
-    {
-        double value;
-        QString parserValue;
-
-        if (integer) {
-            QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
-            value = spinBox->value();
-            parserValue = QString::number(spinBox->value());
-        } else {
-            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
-            value = spinBox->value();
-            parserValue = QString::number(spinBox->value());
-        }
-
-        // NOTE: No need for previous value equality check, since this signal is only emitted
-        // when the value is changed
-
-        ControlPropertyManager::Options options =
-                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
-
-        if (control->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
-            options |= ControlPropertyManager::DontApplyDesigner;
-
-        if (propertyName == "x") {
-            ControlPropertyManager::setX(control, value, options);
-        } else if (propertyName == "y") {
-            ControlPropertyManager::setY(control, value, options);
-        } else if (propertyName == "z") {
-            ControlPropertyManager::setZ(control, value, options);
-        } else if (propertyName == "width") {
-            ControlPropertyManager::setWidth(control, value, options);
-        } else if (propertyName == "height") {
-            ControlPropertyManager::setHeight(control, value, options);
-        } else {
-            ControlPropertyManager::setProperty(control, propertyName, parserValue,
-                                                integer ? int(value) : value, options);
-        }
-    };
-
-    if (integer) {
-        QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
-        spinBox->setMaximum(std::numeric_limits<int>::max());
-        spinBox->setMinimum(std::numeric_limits<int>::lowest());
-        spinBox->setValue(number);
-        fixPosForForm(control, propertyName, spinBox);
-        QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), updateFunction);
-    } else {
-        QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
-        spinBox->setMaximum(std::numeric_limits<double>::max());
-        spinBox->setMinimum(std::numeric_limits<double>::lowest());
-        spinBox->setValue(number);
-        fixPosForForm(control, propertyName, spinBox);
-        QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), updateFunction);
-    }
-
-    return abstractSpinBox;
-}
-
 PropertiesController::PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
                                            QObject* parent) : QObject(parent)
   , m_propertiesPane(propertiesPane)
@@ -264,33 +189,33 @@ void PropertiesController::onSceneSelectionChange()
                 case QVariant::Font: {
                     QList<QTreeWidgetItem*> fontChildren;
                     const QFont& font = propertyValue.value<QFont>();
-                    const QString& family = QFontInfo(font).family();
                     const bool isPx = font.pixelSize() > 0 ? true : false;
+                    const QString& family = QFontInfo(font).family();
                     const QString& fontText = QString::fromUtf8("[%1, %2%3]")
                             .arg(family)
                             .arg(isPx ? font.pixelSize() : font.pointSize())
                             .arg(isPx ? "px" : "pt");
 
-                    const bool fChanged    = ParserUtils::exists(selectedControl->dir(), "font.family");
-                    const bool bChanged    = ParserUtils::exists(selectedControl->dir(), "font.bold");
-                    const bool iChanged    = ParserUtils::exists(selectedControl->dir(), "font.italic");
-                    const bool uChanged    = ParserUtils::exists(selectedControl->dir(), "font.underline");
-                    const bool ptChanged   = ParserUtils::exists(selectedControl->dir(), "font.pointSize");
-                    const bool piChanged   = ParserUtils::exists(selectedControl->dir(), "font.pixelSize");
-                    const bool wChanged    = ParserUtils::exists(selectedControl->dir(), "font.weight");
-                    const bool oChanged    = ParserUtils::exists(selectedControl->dir(), "font.overline");
-                    const bool sChanged    = ParserUtils::exists(selectedControl->dir(), "font.strikeout");
-                    const bool cChanged    = ParserUtils::exists(selectedControl->dir(), "font.capitalization");
-                    const bool kChanged    = ParserUtils::exists(selectedControl->dir(), "font.kerning");
-                    const bool prChanged   = ParserUtils::exists(selectedControl->dir(), "font.preferShaping");
+                    const bool fChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.family"));
+                    const bool bChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.bold"));
+                    const bool iChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.italic"));
+                    const bool uChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.underline"));
+                    const bool ptChanged   = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.pointSize"));
+                    const bool piChanged   = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.pixelSize"));
+                    const bool wChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.weight"));
+                    const bool oChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.overline"));
+                    const bool sChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.strikeout"));
+                    const bool cChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.capitalization"));
+                    const bool kChanged    = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.kerning"));
+                    const bool prChanged   = ParserUtils::exists(selectedControl->dir(), QStringLiteral("font.preferShaping"));
                     const bool fontChanged = fChanged || bChanged || iChanged || uChanged || ptChanged || piChanged
                             || wChanged || oChanged || sChanged || cChanged || kChanged || prChanged;
 
-                    auto fontItem = new QTreeWidgetItem;
-                    fontItem->setText(0, "font");
+                    auto fontItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    fontItem->setText(0, QStringLiteral("font"));
                     fontItem->setText(1, fontText);
                     fontItem->setData(0, PropertiesDelegate::ModificationRole, fontChanged);
-                    classItem->addChild(fontItem);
+                    children.append(item);
 
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit, this, fontItem);
                     auto fItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
@@ -325,7 +250,7 @@ void PropertiesController::onSceneSelectionChange()
                     fontChildren.append(cItem);
 
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
-                                                                     this, fontItem, QStringLiteral("font.pointSize"));
+                                                                this, fontItem, QStringLiteral("font.pointSize"));
                     auto ptItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     ptItem->setText(1, QString());
                     ptItem->setText(0, QStringLiteral("pointSize"));
@@ -512,12 +437,41 @@ void PropertiesController::onSceneSelectionChange()
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
                         classItem->addChild(geometryItem);
 
-                        auto xItem = new QTreeWidgetItem;
-                        xItem->setText(0, "x");
-                        xItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
+
+
+
+
+
+
+
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                         this,  QStringLiteral("x"));
+                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        item->setText(1, QString());
+                        item->setText(0, QStringLiteral("x"));
+                        item->setData(0, PropertiesDelegate::ModificationRole, xChanged);
+                        item->setData(1, PropertiesDelegate::InitialValueRole, displayText);
+                        item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::String);
+                        item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        children.append(item);
+                        break;
+
+
                         geometryItem->addChild(xItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, false));
+
+
+                            spinBox->setValue(number);
+                            fixPosForForm(control, propertyName, spinBox);
+
+
+
+
+
+
+
+
 
                         auto yItem = new QTreeWidgetItem;
                         yItem->setText(0, "y");
@@ -583,12 +537,68 @@ void PropertiesController::onSceneSelectionChange()
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
                         classItem->addChild(geometryItem);
 
+
+
+
+
+
+
+
+
+
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                         this,  QStringLiteral("x"));
+                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        item->setText(1, QString());
+                        item->setText(0, QStringLiteral("x"));
+                        item->setData(0, PropertiesDelegate::ModificationRole, xChanged);
+                        item->setData(1, PropertiesDelegate::InitialValueRole, displayText);
+                        item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::String);
+                        item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        children.append(item);
+                        break;
+
+
+                        geometryItem->addChild(xItem);
+                        m_propertiesPane->propertiesTree()->setItemWidget(
+                                    xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, false));
+
+                        if (integer) {
+                            QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+                            spinBox->setMaximum(std::numeric_limits<int>::max());
+                            spinBox->setMinimum(std::numeric_limits<int>::lowest());
+                            spinBox->setValue(number);
+                            fixPosForForm(control, propertyName, spinBox);
+                            QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), updateFunction);
+                        } else {
+                            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+                            spinBox->setMaximum(std::numeric_limits<double>::max());
+                            spinBox->setMinimum(std::numeric_limits<double>::lowest());
+                            spinBox->setValue(number);
+                            fixPosForForm(control, propertyName, spinBox);
+                            QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), updateFunction);
+                        }
                         auto xItem = new QTreeWidgetItem;
                         xItem->setText(0, "x");
                         xItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
                         geometryItem->addChild(xItem);
                         m_propertiesPane->propertiesTree()->setItemWidget(
                                     xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, true));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                         auto yItem = new QTreeWidgetItem;
                         yItem->setText(0, "y");
@@ -907,6 +917,82 @@ void PropertiesController::onControlIndexEditingFinish()
     ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
                                      ControlPropertyManager::SaveChanges |
                                      ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onIntPropertyEdit(const QString& propertyName, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        double value;
+        QString parserValue;
+
+        QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
+        value = spinBox->value();
+        parserValue = QString::number(spinBox->value());
+
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed
+
+        ControlPropertyManager::Options options =
+                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
+
+        if (control->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
+            options |= ControlPropertyManager::DontApplyDesigner;
+
+        if (propertyName == "x") {
+            ControlPropertyManager::setX(control, value, options);
+        } else if (propertyName == "y") {
+            ControlPropertyManager::setY(control, value, options);
+        } else if (propertyName == "z") {
+            ControlPropertyManager::setZ(control, value, options);
+        } else if (propertyName == "width") {
+            ControlPropertyManager::setWidth(control, value, options);
+        } else if (propertyName == "height") {
+            ControlPropertyManager::setHeight(control, value, options);
+        } else {
+            ControlPropertyManager::setProperty(control, propertyName, parserValue, int(value), options);
+        }
+    }
+}
+
+void PropertiesController::onRealPropertyEdit(const QString& propertyName, const QVariant& value)
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        double value;
+        QString parserValue;
+
+        QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
+        value = spinBox->value();
+        parserValue = QString::number(spinBox->value());
+
+        // NOTE: No need for previous value equality check, since this signal is only emitted
+        // when the value is changed
+
+        ControlPropertyManager::Options options =
+                ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
+
+        if (control->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
+            options |= ControlPropertyManager::DontApplyDesigner;
+
+        if (propertyName == "x") {
+            ControlPropertyManager::setX(control, value, options);
+        } else if (propertyName == "y") {
+            ControlPropertyManager::setY(control, value, options);
+        } else if (propertyName == "z") {
+            ControlPropertyManager::setZ(control, value, options);
+        } else if (propertyName == "width") {
+            ControlPropertyManager::setWidth(control, value, options);
+        } else if (propertyName == "height") {
+            ControlPropertyManager::setHeight(control, value, options);
+        } else {
+            ControlPropertyManager::setProperty(control, propertyName, parserValue, value, options);
+        }
+    }
 }
 
 void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value)

@@ -75,7 +75,7 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
     } break;
     case PropertiesDelegate::FontSize: {
         auto spinBox = static_cast<QSpinBox*>(widget);
-        QObject::connect(spinBox, &QSpinBox::editingFinished,
+        QObject::connect(spinBox, &QSpinBox::valueChanged,
                          [=] { callback.call(QVariant::fromValue<QSpinBox*>(spinBox)); });
     } break;
     case PropertiesDelegate::FontFamily:
