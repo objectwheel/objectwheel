@@ -35,10 +35,10 @@ static bool isXProperty(const QString& propertyName)
 
 static bool isGeometryProperty(const QString& propertyName)
 {
-    return propertyName == "x"
-            || propertyName == "y"
-            || propertyName == "width"
-            || propertyName == "height";
+    return propertyName == QStringLiteral("x")
+            || propertyName == QStringLiteral("y")
+            || propertyName == QStringLiteral("width")
+            || propertyName == QStringLiteral("height");
 }
 
 template<typename SpinBox>
@@ -170,6 +170,7 @@ void PropertiesController::onSceneSelectionChange()
         m_propertiesPane->idItem()->setHidden(false);
         m_propertiesPane->indexItem()->setHidden(false);
 
+        bool isGeometryHandled = false;
         for (const PropertyNode& propertyNode : properties) {
             const QVector<Enum>& enumList = propertyNode.enums;
             const QMap<QString, QVariant>& propertyMap = propertyNode.properties;
@@ -411,7 +412,9 @@ void PropertiesController::onSceneSelectionChange()
                 }
 
                 case QVariant::Double: {
-                    if (isXProperty(propertyName)) {
+                    if (isGeometryProperty(propertyName) && !isGeometryHandled) {
+                        isGeometryHandled = true;
+                        QList<QTreeWidgetItem*> geometryChildren;
                         const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
                         bool xUnknown = false, yUnknown = false;
                         if (selectedControl->type() == Form::Type) {
@@ -431,87 +434,90 @@ void PropertiesController::onSceneSelectionChange()
                         const bool hChanged = ParserUtils::exists(selectedControl->dir(), "height");
                         const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
 
-                        auto geometryItem = new QTreeWidgetItem;
-                        geometryItem->setText(0, "geometry");
+                        qreal x = geometry.x();
+                        if (selectedControl->type() == Form::Type
+                                && !ParserUtils::exists(selectedControl->dir(), propertyName)) {
+                            x = 0;
+                        }
+                        qreal y = geometry.y();
+                        if (selectedControl->type() == Form::Type
+                                && !ParserUtils::exists(selectedControl->dir(), propertyName)) {
+                            y = 0;
+                        }
+
+                        auto geometryItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        geometryItem->setText(0, QStringLiteral("geometry"));
                         geometryItem->setText(1, geometryText);
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
-                        classItem->addChild(geometryItem);
-
-
-
-
-
-
-
+                        children.append(geometryItem);
 
                         auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
                                                                          this,  QStringLiteral("x"));
-                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
-                        item->setText(1, QString());
-                        item->setText(0, QStringLiteral("x"));
-                        item->setData(0, PropertiesDelegate::ModificationRole, xChanged);
-                        item->setData(1, PropertiesDelegate::InitialValueRole, displayText);
-                        item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::String);
-                        item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
-                        children.append(item);
-                        break;
+                        auto xItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        xItem->setText(1, QString());
+                        xItem->setText(0, QStringLiteral("x"));
+                        xItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
+                        xItem->setData(1, PropertiesDelegate::InitialValueRole, x);
+                        xItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Real);
+                        xItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(xItem);
 
-
-                        geometryItem->addChild(xItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, false));
-
-
-                            spinBox->setValue(number);
-                            fixPosForForm(control, propertyName, spinBox);
-
-
-
-
-
-
-
-
-
-                        auto yItem = new QTreeWidgetItem;
-                        yItem->setText(0, "y");
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                    this,  QStringLiteral("y"));
+                        auto yItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        yItem->setText(1, QString());
+                        yItem->setText(0, QStringLiteral("y"));
                         yItem->setData(0, PropertiesDelegate::ModificationRole, yChanged);
-                        geometryItem->addChild(yItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, false));
+                        yItem->setData(1, PropertiesDelegate::InitialValueRole, y);
+                        yItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Real);
+                        yItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(yItem);
 
-                        auto wItem = new QTreeWidgetItem;
-                        wItem->setText(0, "width");
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                    this,  QStringLiteral("width"));
+                        auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        wItem->setText(1, QString());
+                        wItem->setText(0, QStringLiteral("width"));
                         wItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
-                        geometryItem->addChild(wItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, false));
+                        wItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.width());
+                        wItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Real);
+                        wItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(wItem);
 
-                        auto hItem = new QTreeWidgetItem;
-                        hItem->setText(0, "height");
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                    this,  QStringLiteral("height"));
+                        auto hItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        hItem->setText(1, QString());
+                        hItem->setText(0, QStringLiteral("height"));
                         hItem->setData(0, PropertiesDelegate::ModificationRole, hChanged);
-                        geometryItem->addChild(hItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, false));
+                        hItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.height());
+                        hItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Real);
+                        hItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(hItem);
 
+                        geometryItem->addChildren(geometryChildren);
+                        for (auto i : geometryChildren)
+                            m_propertiesPane->propertiesTree()->openPersistentEditor(i, 1);
                         m_propertiesPane->propertiesTree()->expandItem(geometryItem);
                     } else {
-                        if (isGeometryProperty(propertyName))
-                            break;
-
-                        double number = propertyValue.value<double>();
-                        auto item = new QTreeWidgetItem;
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                         this, propertyName);
+                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        item->setText(1, QString());
                         item->setText(0, propertyName);
                         item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                        classItem->addChild(item);
-                        m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                                                          createNumberHandlerWidget(propertyName, number, selectedControl, false));
+                        item->setData(1, PropertiesDelegate::InitialValueRole, propertyValue.value<qreal>());
+                        item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Real);
+                        item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        children.append(item);
                     }
                     break;
                 }
 
                 case QVariant::Int: {
-                    if (isXProperty(propertyName)) {
+                    if (isGeometryProperty(propertyName) && !isGeometryHandled) {
+                        isGeometryHandled = true;
+                        QList<QTreeWidgetItem*> geometryChildren;
                         const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
                         bool xUnknown = false, yUnknown = false;
                         if (selectedControl->type() == Form::Type) {
@@ -531,108 +537,82 @@ void PropertiesController::onSceneSelectionChange()
                         const bool hChanged = ParserUtils::exists(selectedControl->dir(), "height");
                         const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
 
-                        auto geometryItem = new QTreeWidgetItem;
-                        geometryItem->setText(0, "geometry");
+                        qreal x = geometry.x();
+                        if (selectedControl->type() == Form::Type
+                                && !ParserUtils::exists(selectedControl->dir(), propertyName)) {
+                            x = 0;
+                        }
+                        qreal y = geometry.y();
+                        if (selectedControl->type() == Form::Type
+                                && !ParserUtils::exists(selectedControl->dir(), propertyName)) {
+                            y = 0;
+                        }
+
+                        auto geometryItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        geometryItem->setText(0, QStringLiteral("geometry"));
                         geometryItem->setText(1, geometryText);
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
-                        classItem->addChild(geometryItem);
+                        children.append(geometryItem);
 
-
-
-
-
-
-
-
-
-
-                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
                                                                          this,  QStringLiteral("x"));
-                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
-                        item->setText(1, QString());
-                        item->setText(0, QStringLiteral("x"));
-                        item->setData(0, PropertiesDelegate::ModificationRole, xChanged);
-                        item->setData(1, PropertiesDelegate::InitialValueRole, displayText);
-                        item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::String);
-                        item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
-                        children.append(item);
-                        break;
-
-
-                        geometryItem->addChild(xItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, false));
-
-                        if (integer) {
-                            QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
-                            spinBox->setMaximum(std::numeric_limits<int>::max());
-                            spinBox->setMinimum(std::numeric_limits<int>::lowest());
-                            spinBox->setValue(number);
-                            fixPosForForm(control, propertyName, spinBox);
-                            QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), updateFunction);
-                        } else {
-                            QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
-                            spinBox->setMaximum(std::numeric_limits<double>::max());
-                            spinBox->setMinimum(std::numeric_limits<double>::lowest());
-                            spinBox->setValue(number);
-                            fixPosForForm(control, propertyName, spinBox);
-                            QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged), updateFunction);
-                        }
-                        auto xItem = new QTreeWidgetItem;
-                        xItem->setText(0, "x");
+                        auto xItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        xItem->setText(1, QString());
+                        xItem->setText(0, QStringLiteral("x"));
                         xItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
-                        geometryItem->addChild(xItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    xItem, 1, createNumberHandlerWidget("x", geometry.x(), selectedControl, true));
+                        xItem->setData(1, PropertiesDelegate::InitialValueRole, x);
+                        xItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Int);
+                        xItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(xItem);
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                        auto yItem = new QTreeWidgetItem;
-                        yItem->setText(0, "y");
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                    this,  QStringLiteral("y"));
+                        auto yItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        yItem->setText(1, QString());
+                        yItem->setText(0, QStringLiteral("y"));
                         yItem->setData(0, PropertiesDelegate::ModificationRole, yChanged);
-                        geometryItem->addChild(yItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    yItem, 1, createNumberHandlerWidget("y", geometry.y(), selectedControl, true));
+                        yItem->setData(1, PropertiesDelegate::InitialValueRole, y);
+                        yItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Int);
+                        yItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(yItem);
 
-                        auto wItem = new QTreeWidgetItem;
-                        wItem->setText(0, "width");
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                    this,  QStringLiteral("width"));
+                        auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        wItem->setText(1, QString());
+                        wItem->setText(0, QStringLiteral("width"));
                         wItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
-                        geometryItem->addChild(wItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    wItem, 1, createNumberHandlerWidget("width", geometry.width(), selectedControl, true));
+                        wItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.width());
+                        wItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Int);
+                        wItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(wItem);
 
-                        auto hItem = new QTreeWidgetItem;
-                        hItem->setText(0, "height");
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                    this,  QStringLiteral("height"));
+                        auto hItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        hItem->setText(1, QString());
+                        hItem->setText(0, QStringLiteral("height"));
                         hItem->setData(0, PropertiesDelegate::ModificationRole, hChanged);
-                        geometryItem->addChild(hItem);
-                        m_propertiesPane->propertiesTree()->setItemWidget(
-                                    hItem, 1, createNumberHandlerWidget("height", geometry.height(), selectedControl, true));
+                        hItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.height());
+                        hItem->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Int);
+                        hItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        geometryChildren.append(hItem);
 
+                        geometryItem->addChildren(geometryChildren);
+                        for (auto i : geometryChildren)
+                            m_propertiesPane->propertiesTree()->openPersistentEditor(i, 1);
                         m_propertiesPane->propertiesTree()->expandItem(geometryItem);
                     } else {
-                        if (isGeometryProperty(propertyName))
-                            break;
-
-                        int number = propertyValue.value<int>();
-                        auto item = new QTreeWidgetItem;
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                         this, propertyName);
+                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        item->setText(1, QString());
                         item->setText(0, propertyName);
                         item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
-                        classItem->addChild(item);
-                        m_propertiesPane->propertiesTree()->setItemWidget(item, 1,
-                                                                          createNumberHandlerWidget(propertyName, number, selectedControl, true));
+                        item->setData(1, PropertiesDelegate::InitialValueRole, propertyValue.value<int>());
+                        item->setData(1, PropertiesDelegate::TypeRole, PropertiesDelegate::Int);
+                        item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
+                        children.append(item);
                     }
                     break;
                 }
