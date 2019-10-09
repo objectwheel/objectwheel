@@ -29,7 +29,7 @@ static void setValues(QWidget* widget, PropertiesDelegate::Type type, const QVar
 }
 
 static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value)
-{
+{            
     const char* propertyName = 0;
     switch (type) {
     case PropertiesDelegate::Url:
@@ -65,7 +65,7 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
 }
 
 void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
-{
+{           
     switch (type) {
     case PropertiesDelegate::Url:
     case PropertiesDelegate::String: {
@@ -73,10 +73,10 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         QObject::connect(lineEdit, &QLineEdit::editingFinished,
                          [=] { callback.call(lineEdit->text()); });
     } break;
-    case PropertiesDelegate::FontSize: {
-        auto spinBox = static_cast<QSpinBox*>(widget);
-        QObject::connect(spinBox, &QSpinBox::valueChanged,
-                         [=] { callback.call(QVariant::fromValue<QSpinBox*>(spinBox)); });
+    case PropertiesDelegate::Bool: {
+        auto checkBox = static_cast<QCheckBox*>(widget);
+        QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
+                         [=] { callback.call(checkBox->isChecked()); });
     } break;
     case PropertiesDelegate::FontFamily:
     case PropertiesDelegate::FontWeight:
@@ -86,10 +86,16 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
         QObject::connect(comboBox, qOverload<int>(&QComboBox::activated),
                          [=] { callback.call(comboBox->currentText()); });
     } break;
-    case PropertiesDelegate::Bool: {
-        auto checkBox = static_cast<QCheckBox*>(widget);
-        QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
-                         [=] { callback.call(checkBox->isChecked()); });
+    case PropertiesDelegate::FontSize:
+    case PropertiesDelegate::Int: {
+        auto spinBox = static_cast<QSpinBox*>(widget);
+        QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
+                         [=] { callback.call(QVariant::fromValue<QSpinBox*>(spinBox)); });
+    } break;
+    case PropertiesDelegate::Real: {
+        auto spinBox = static_cast<QDoubleSpinBox*>(widget);
+        QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+                         [=] { callback.call(QVariant::fromValue<QDoubleSpinBox*>(spinBox)); });
     } break;
     case PropertiesDelegate::Color: {
         auto toolButton = static_cast<QToolButton*>(widget);
@@ -102,13 +108,22 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
 }
 
 void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
-{
+{    
     switch (type) {
     case PropertiesDelegate::Url:
     case PropertiesDelegate::String: {
         auto lineEdit = static_cast<QLineEdit*>(widget);
         lineEdit->deselect();
         lineEdit->clear();
+    } break;
+    case PropertiesDelegate::FontSize:
+    case PropertiesDelegate::Int: {
+        auto spinBox = static_cast<QSpinBox*>(widget);
+        spinBox->clear();
+    } break;
+    case PropertiesDelegate::Real: {
+        auto spinBox = static_cast<QDoubleSpinBox*>(widget);
+        spinBox->clear();
     } break;
     case PropertiesDelegate::FontFamily:
     case PropertiesDelegate::FontWeight:
@@ -124,7 +139,6 @@ void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
     default:
         break;
     }
-    widget->clearFocus();
 }
 
 static QWidget* createWidget(PropertiesDelegate::Type type)
@@ -135,7 +149,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         auto lineEdit = new QLineEdit;
         lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
         lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-        lineEdit->setFocusPolicy(Qt::ClickFocus);
+        lineEdit->setFocusPolicy(Qt::StrongFocus);
         lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
         lineEdit->setMinimumWidth(1);
         return lineEdit;
@@ -145,7 +159,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::ClickFocus);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
@@ -156,7 +170,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         auto checkBox = new QCheckBox;
         checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         checkBox->setCursor(Qt::PointingHandCursor);
-        checkBox->setFocusPolicy(Qt::ClickFocus);
+        checkBox->setFocusPolicy(Qt::StrongFocus);
         checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
         checkBox->setMinimumWidth(1);
         checkBox->setFixedWidth(checkBox->style()->pixelMetric(QStyle::PM_IndicatorWidth) + 3);
@@ -171,7 +185,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
         toolButton->setIconSize({12, 12});
         toolButton->setCursor(Qt::PointingHandCursor);
-        toolButton->setFocusPolicy(Qt::ClickFocus);
+        toolButton->setFocusPolicy(Qt::StrongFocus);
         toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
         toolButton->setMinimumWidth(1);
         return toolButton;
@@ -180,7 +194,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     case PropertiesDelegate::Int: {
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::ClickFocus);
+        spinBox->setFocusPolicy(Qt::StrongFocus);
         spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
         spinBox->setMaximum(std::numeric_limits<int>::max());
@@ -194,7 +208,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     case PropertiesDelegate::Real: {
         auto spinBox = new QDoubleSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::ClickFocus);
+        spinBox->setFocusPolicy(Qt::StrongFocus);
         spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
         spinBox->setMaximum(std::numeric_limits<qreal>::max());
@@ -208,7 +222,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     case PropertiesDelegate::FontSize: {
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::ClickFocus);
+        spinBox->setFocusPolicy(Qt::StrongFocus);
         spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setMinimum(0);
         spinBox->setMaximum(9999);
@@ -223,7 +237,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::ClickFocus);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         comboBox->addItems(QFontDatabase().families());
@@ -235,7 +249,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::ClickFocus);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);
@@ -249,7 +263,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
         auto comboBox = new QComboBox;
         comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::ClickFocus);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
         TransparentStyle::attach(comboBox);

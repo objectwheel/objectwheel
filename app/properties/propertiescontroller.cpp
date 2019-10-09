@@ -28,11 +28,6 @@
 #include <QHBoxLayout>
 #include <QApplication>
 
-static bool isXProperty(const QString& propertyName)
-{
-    return propertyName == "x";
-}
-
 static bool isGeometryProperty(const QString& propertyName)
 {
     return propertyName == QStringLiteral("x")
@@ -178,9 +173,8 @@ void PropertiesController::onSceneSelectionChange()
             if (propertyMap.isEmpty() && enumList.isEmpty())
                 continue;
 
-            auto classItem = new QTreeWidgetItem;
+            auto classItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
             classItem->setText(0, propertyNode.cleanClassName);
-            m_propertiesPane->propertiesTree()->addTopLevelItem(classItem);
 
             QList<QTreeWidgetItem*> children;
             for (const QString& propertyName : propertyMap.keys()) {
@@ -216,7 +210,7 @@ void PropertiesController::onSceneSelectionChange()
                     fontItem->setText(0, QStringLiteral("font"));
                     fontItem->setText(1, fontText);
                     fontItem->setData(0, PropertiesDelegate::ModificationRole, fontChanged);
-                    children.append(item);
+                    children.append(fontItem);
 
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit, this, fontItem);
                     auto fItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
@@ -652,6 +646,7 @@ void PropertiesController::onSceneSelectionChange()
             for (auto i : children)
                 m_propertiesPane->propertiesTree()->openPersistentEditor(i, 1);
             m_propertiesPane->propertiesTree()->expandItem(classItem);
+            m_propertiesPane->propertiesTree()->addTopLevelItem(classItem);
         }
 
         onSearchEditEditingFinish();
@@ -905,12 +900,9 @@ void PropertiesController::onIntPropertyEdit(const QString& propertyName, const 
         return;
 
     if (Control* selectedControl = this->control()) {
-        double value;
-        QString parserValue;
-
-        QSpinBox* spinBox = static_cast<QSpinBox*>(abstractSpinBox);
-        value = spinBox->value();
-        parserValue = QString::number(spinBox->value());
+        const QSpinBox* spinBox = static_cast<QSpinBox*>(value.value<QSpinBox*>());
+        const int value = spinBox->value();
+        const QString& parserValue = QString::number(spinBox->value());
 
         // NOTE: No need for previous value equality check, since this signal is only emitted
         // when the value is changed
@@ -918,21 +910,21 @@ void PropertiesController::onIntPropertyEdit(const QString& propertyName, const 
         ControlPropertyManager::Options options =
                 ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
 
-        if (control->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
+        if (selectedControl->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
             options |= ControlPropertyManager::DontApplyDesigner;
 
         if (propertyName == "x") {
-            ControlPropertyManager::setX(control, value, options);
+            ControlPropertyManager::setX(selectedControl, value, options);
         } else if (propertyName == "y") {
-            ControlPropertyManager::setY(control, value, options);
+            ControlPropertyManager::setY(selectedControl, value, options);
         } else if (propertyName == "z") {
-            ControlPropertyManager::setZ(control, value, options);
+            ControlPropertyManager::setZ(selectedControl, value, options);
         } else if (propertyName == "width") {
-            ControlPropertyManager::setWidth(control, value, options);
+            ControlPropertyManager::setWidth(selectedControl, value, options);
         } else if (propertyName == "height") {
-            ControlPropertyManager::setHeight(control, value, options);
+            ControlPropertyManager::setHeight(selectedControl, value, options);
         } else {
-            ControlPropertyManager::setProperty(control, propertyName, parserValue, int(value), options);
+            ControlPropertyManager::setProperty(selectedControl, propertyName, parserValue, int(value), options);
         }
     }
 }
@@ -943,12 +935,9 @@ void PropertiesController::onRealPropertyEdit(const QString& propertyName, const
         return;
 
     if (Control* selectedControl = this->control()) {
-        double value;
-        QString parserValue;
-
-        QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(abstractSpinBox);
-        value = spinBox->value();
-        parserValue = QString::number(spinBox->value());
+        const QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(value.value<QDoubleSpinBox*>());
+        const qreal value = spinBox->value();
+        const QString& parserValue = QString::number(spinBox->value());
 
         // NOTE: No need for previous value equality check, since this signal is only emitted
         // when the value is changed
@@ -956,21 +945,21 @@ void PropertiesController::onRealPropertyEdit(const QString& propertyName, const
         ControlPropertyManager::Options options =
                 ControlPropertyManager::SaveChanges | ControlPropertyManager::UpdateRenderer;
 
-        if (control->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
+        if (selectedControl->type() == Form::Type && (propertyName == "x" || propertyName == "y"))
             options |= ControlPropertyManager::DontApplyDesigner;
 
         if (propertyName == "x") {
-            ControlPropertyManager::setX(control, value, options);
+            ControlPropertyManager::setX(selectedControl, value, options);
         } else if (propertyName == "y") {
-            ControlPropertyManager::setY(control, value, options);
+            ControlPropertyManager::setY(selectedControl, value, options);
         } else if (propertyName == "z") {
-            ControlPropertyManager::setZ(control, value, options);
+            ControlPropertyManager::setZ(selectedControl, value, options);
         } else if (propertyName == "width") {
-            ControlPropertyManager::setWidth(control, value, options);
+            ControlPropertyManager::setWidth(selectedControl, value, options);
         } else if (propertyName == "height") {
-            ControlPropertyManager::setHeight(control, value, options);
+            ControlPropertyManager::setHeight(selectedControl, value, options);
         } else {
-            ControlPropertyManager::setProperty(control, propertyName, parserValue, value, options);
+            ControlPropertyManager::setProperty(selectedControl, propertyName, parserValue, value, options);
         }
     }
 }

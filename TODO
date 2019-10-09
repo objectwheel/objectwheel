@@ -1,7 +1,12 @@
 Designer Core TODOs
 
+designerview'i strong focus yaparsak acaba shortcutların bozulma olayı düzelirmi? yada NoFocus mo yaptık orada?
+propertiespane tüm itemler expand başlasın ve "openPersistentEditor" vs yerleri bi yeniden düşünülsün
+propertiespane neden spinbox ve line editler hep selected bir şekilde kuruluyor?
+propertiespane neden aynı iteme ikinci kez tıklanınca donup kalıyor?
 propertiespane'de her bir widget için de setUpdatesEnabled = false yapılsın ilk başta, sonraden enable edilsin
     performans artışı sağlanmaya çalışılsın, ayrıca blockSignals() kullanımı da her şey üzerinde denenebilir belki
+    ayrıca setEnabled setDisabled de eklenebilir
 propertiespane açıkken yapılan değişiklikler, mesela "ilgili propertinin modified" özelliği gibi anında
     işlenecek propertiespane in yeniden açılıp kapanması gerekmeyecek
 propertiespane'e bir resetleme mekanizması ekle, her modified property resetlenebilsin, Qt ninkine bezet
