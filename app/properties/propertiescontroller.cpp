@@ -109,46 +109,39 @@ void PropertiesController::clear()
 
 void PropertiesController::onSearchEditEditingFinish()
 {
-    //    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
-    //    const QString& searchTerm = m_propertiesPane->searchEdit()->text();
-    //    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-    //        auto tlv = false;
-    //        for (int j = 0; j < topLevelItem->childCount(); j++) {
-    //            auto tci = topLevelItem->child(j);
-    //            auto tcv = false;
-    //            auto vv = tci->text(0).contains(searchTerm, Qt::CaseInsensitive);
+    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
+    const QString& searchTerm = m_propertiesPane->searchEdit()->text();
+    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
+        auto tlv = false;
+        for (int j = 0; j < topLevelItem->childCount(); j++) {
+            auto tci = topLevelItem->child(j);
+            auto tcv = false;
+            auto vv = tci->text(0).contains(searchTerm, Qt::CaseInsensitive);
 
-    //            for (int z = 0; z < tci->childCount(); z++) {
-    //                auto tdi = tci->child(z);
-    //                auto v = (searchTerm.isEmpty() || vv)
-    //                        ? true
-    //                        : tdi->text(0).contains(searchTerm, Qt::CaseInsensitive);
+            for (int z = 0; z < tci->childCount(); z++) {
+                auto tdi = tci->child(z);
+                auto v = (searchTerm.isEmpty() || vv)
+                        ? true
+                        : tdi->text(0).contains(searchTerm, Qt::CaseInsensitive);
 
-    //                tdi->setHidden(!v);
-    //                if (v)
-    //                    tcv = v;
-    //            }
+                tdi->setHidden(!v);
+                if (v)
+                    tcv = v;
+            }
 
-    //            auto v = searchTerm.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
-    //            tci->setHidden(!v);
-    //            if (v)
-    //                tlv = v;
-    //        }
+            auto v = searchTerm.isEmpty() ? true : (tci->childCount() > 0 ? tcv : vv);
+            tci->setHidden(!v);
+            if (v)
+                tlv = v;
+        }
 
-    //        auto v = searchTerm.isEmpty() ? true : tlv;
-    //        topLevelItem->setHidden(!v);
-    //    }
+        auto v = searchTerm.isEmpty() ? true : tlv;
+        topLevelItem->setHidden(!v);
+    }
 }
 
-#include <QElapsedTimer>
-#include <QTimer>
-#include <QDebug>
-#include <propertiesdelegatecache.h>
-// FIXME: This function has severe performance issues.
 void PropertiesController::onSceneSelectionChange()
 {
-    QElapsedTimer t; t.start();
-
     clear();
 
     if (Control* selectedControl = control()) {
@@ -158,7 +151,6 @@ void PropertiesController::onSceneSelectionChange()
         if (properties.isEmpty())
             return;
 
-//        qDebug() << "1";
         m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
         m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
         m_propertiesPane->idEdit()->setText(selectedControl->id());
@@ -167,7 +159,7 @@ void PropertiesController::onSceneSelectionChange()
         m_propertiesPane->uidItem()->setHidden(false);
         m_propertiesPane->idItem()->setHidden(false);
         m_propertiesPane->indexItem()->setHidden(false);
-//        qDebug() << "2";
+
         bool isGeometryHandled = false;
         QList<QTreeWidgetItem*> classItems;
         for (const PropertyNode& propertyNode : properties) {
@@ -187,8 +179,6 @@ void PropertiesController::onSceneSelectionChange()
 
             classItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
             classItem->setText(0, propertyNode.cleanClassName);
-
-//            qDebug() << "2.1";
 
             const QList<QString>& propertyKeys = propertyMap.keys();
             for (const QString& propertyName : propertyKeys) {
@@ -585,8 +575,6 @@ void PropertiesController::onSceneSelectionChange()
                 }
             }
 
-//            qDebug() << "2.2";
-
             for (const Enum& _enum : qAsConst(enumList)) {
                 const QString& propertyName = _enum.name;
                 QString value = _enum.value;
@@ -612,24 +600,18 @@ void PropertiesController::onSceneSelectionChange()
                 item->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                 children.append(item);
             }
-//            qDebug() << "2.3";
-            if (fontItem /*&& !fontChildren.isEmpty()*/)
+
+            if (fontItem)
                 fontItem->addChildren(fontChildren);
-//            qDebug() << "2.31";
-            if (geometryItem /*&& !geometryChildren.isEmpty()*/)
+            if (geometryItem)
                 geometryItem->addChildren(geometryChildren);
-//            qDebug() << "2.32";
             if (!children.isEmpty())
                 classItem->addChildren(children);
-//            qDebug() << "2.33";
             classItems.append(classItem);
-//            qDebug() << "2.4";
         }
 
         m_propertiesPane->propertiesTree()->addTopLevelItems(classItems);
         m_propertiesPane->propertiesTree()->expandAll();
-
-//        qDebug() << "3";
 
         int editorCount = 0;
         for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
@@ -642,23 +624,9 @@ void PropertiesController::onSceneSelectionChange()
                 }
             }
         }
-        qDebug() << "?  opened editor count = " << editorCount;
-
-//        qDebug() << "4";
 
         onSearchEditEditingFinish();
-
-//        qDebug() << "5";
-
-//        qDebug() << t.elapsed();
     }
-
-
-
-        QTimer::singleShot(1000, this, [=]{
-            qDebug() << "#  total items = " << m_propertiesPane->propertiesTree()->delegate()->m_cache->countItems();
-            qDebug() << "#  total widgets = " << m_propertiesPane->propertiesTree()->delegate()->m_cache->countWidgets();
-        });
 }
 
 void PropertiesController::onControlZChange(Control* control)

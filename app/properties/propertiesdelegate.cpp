@@ -64,8 +64,6 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
     }
     if (propertyName)
         widget->setProperty(propertyName, value);
-    if (auto lineEdit = qobject_cast<QLineEdit*>(widget))
-        lineEdit->deselect();
 }
 
 void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
@@ -144,12 +142,9 @@ void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
         break;
     }
 }
-#include <QDebug>
+
 static QWidget* createWidget(PropertiesDelegate::Type type)
 {
-    static int c = 0;
-    qDebug() << "*  widgets created in total: " << (++c);
-
     switch (type) {
     case PropertiesDelegate::Url:
     case PropertiesDelegate::String: {
@@ -283,8 +278,35 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     default:
         break;
     }
-    --c;
     return nullptr;
+}
+
+static int smartSize(PropertiesDelegate::Type type)
+{
+    switch (type) {
+    case PropertiesDelegate::Url:
+        return 3;
+    case PropertiesDelegate::Enum:
+        return 12;
+    case PropertiesDelegate::Int:
+        return 7;
+    case PropertiesDelegate::String:
+        return 8;
+    case PropertiesDelegate::Bool:
+        return 30;
+    case PropertiesDelegate::Real:
+        return 35;
+    case PropertiesDelegate::Color:
+        return 5;
+    case PropertiesDelegate::FontSize:
+        return 4;
+    case PropertiesDelegate::FontFamily:
+    case PropertiesDelegate::FontWeight:
+    case PropertiesDelegate::FontCapitalization:
+        return 2;
+    default:
+        return 0;
+    }
 }
 
 PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyledItemDelegate(propertiesTree)
@@ -297,25 +319,24 @@ PropertiesDelegate::~PropertiesDelegate()
 {
     delete m_cache;
 }
-static int ccc = 0;
-void PropertiesDelegate::reserve(int size)
+
+void PropertiesDelegate::reserveSmart()
 {
     const QMetaEnum& e = QMetaEnum::fromType<Type>();
     for (int i = 0; i < e.keyCount(); ++i) {
         Type type = Type(e.value(i));
         if (type == Type::Invalid)
             continue;
-        for (int i = size; i--;) {
+        for (int i = smartSize(type); i--;) {
             QWidget* widget = createWidget(type);
             widget->setVisible(false);
             m_cache->push(type, widget);
         }
     }
-    for (int i = size * e.keyCount(); i--;) {
+    for (int i = 110; i--;) {
         auto item = new QTreeWidgetItem;
         item->setHidden(true);
         m_cache->push(item);
-        qDebug() << "*  items created in total: " << (++ccc);
     }
 }
 
@@ -469,7 +490,6 @@ QTreeWidgetItem* PropertiesDelegate::createItem() const
     if (QTreeWidgetItem* item = m_cache->pop())
         return item;
 
-    qDebug() << "*  items created in total: " << (++ccc);
     return new QTreeWidgetItem;
 }
 

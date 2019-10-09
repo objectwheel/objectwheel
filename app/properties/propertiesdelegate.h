@@ -50,7 +50,7 @@ public:
     explicit PropertiesDelegate(PropertiesTree* propertiesTree);
     ~PropertiesDelegate() override;
 
-    void reserve(int size);
+    void reserveSmart();
     int calculateVisibleRow(const QTreeWidgetItem* item) const;
     void paintBackground(QPainter* painter, const QStyleOptionViewItem& option, int rowNumber,
                          bool isClassRow, bool hasVerticalLine) const;
