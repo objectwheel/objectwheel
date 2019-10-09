@@ -73,7 +73,7 @@ public:
         return callback;
     }
 
-private:
+//private:
     PropertiesTree* m_propertiesTree;
     PropertiesDelegateCache* m_cache;
 };

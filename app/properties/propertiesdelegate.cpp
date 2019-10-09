@@ -17,6 +17,8 @@
 #include <QSpinBox>
 #include <QFontDatabase>
 
+static const char typeProperty[] = "_q_PropertiesDelegate_type";
+
 static void setValues(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value)
 {
     switch (type) {
@@ -62,6 +64,8 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
     }
     if (propertyName)
         widget->setProperty(propertyName, value);
+    if (auto lineEdit = qobject_cast<QLineEdit*>(widget))
+        lineEdit->deselect();
 }
 
 void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
@@ -140,9 +144,12 @@ void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
         break;
     }
 }
-
+#include <QDebug>
 static QWidget* createWidget(PropertiesDelegate::Type type)
 {
+    static int c = 0;
+    qDebug() << "*  widgets created in total: " << (++c);
+
     switch (type) {
     case PropertiesDelegate::Url:
     case PropertiesDelegate::String: {
@@ -276,7 +283,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     default:
         break;
     }
-
+    --c;
     return nullptr;
 }
 
@@ -290,7 +297,7 @@ PropertiesDelegate::~PropertiesDelegate()
 {
     delete m_cache;
 }
-
+static int ccc = 0;
 void PropertiesDelegate::reserve(int size)
 {
     const QMetaEnum& e = QMetaEnum::fromType<Type>();
@@ -308,6 +315,7 @@ void PropertiesDelegate::reserve(int size)
         auto item = new QTreeWidgetItem;
         item->setHidden(true);
         m_cache->push(item);
+        qDebug() << "*  items created in total: " << (++ccc);
     }
 }
 
@@ -382,7 +390,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 
     // Draw text
     if (isClassRow) {
-        painter->setPen(option.palette.highlightedText().color());
+        painter->setPen(option.palette.brightText().color());
     } else {
         if (index.column() == 0 && index.data(ModificationRole).toBool()) {
             QFont font (option.font);
@@ -431,6 +439,7 @@ QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionVie
         widget = createWidget(type);
     widget->setParent(parent);
     widget->setVisible(true);
+    widget->setProperty(typeProperty, type);
     setValues(widget, type, index.data(ValuesRole));
     setInitialValue(widget, type, index.data(InitialValueRole));
     setConnection(widget, type, index.data(CallbackRole).value<Callback>());
@@ -442,7 +451,9 @@ void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index
     if (index.column() == 0)
         return editor->deleteLater();
 
-    auto type = index.data(TypeRole).value<Type>();
+    // Using typeProperty because the item is invalidated and
+    // index.data(TypeRole) is invalid already at this point
+    auto type = editor->property(typeProperty).value<Type>();
     if (type == Invalid)
         return QStyledItemDelegate::destroyEditor(editor, index);
 
@@ -457,6 +468,8 @@ QTreeWidgetItem* PropertiesDelegate::createItem() const
 {
     if (QTreeWidgetItem* item = m_cache->pop())
         return item;
+
+    qDebug() << "*  items created in total: " << (++ccc);
     return new QTreeWidgetItem;
 }
 
@@ -467,5 +480,12 @@ void PropertiesDelegate::destroyItem(QTreeWidgetItem* item) const
     else if (QTreeWidget* tree = item->treeWidget())
         tree->takeTopLevelItem(tree->indexOfTopLevelItem(item));
     item->setHidden(true);
+    item->setText(0, QString());
+    item->setText(1, QString());
+    item->setData(0, PropertiesDelegate::ModificationRole, QVariant());
+    item->setData(1, PropertiesDelegate::ValuesRole, QVariant());
+    item->setData(1, PropertiesDelegate::InitialValueRole, QVariant());
+    item->setData(1, PropertiesDelegate::TypeRole, QVariant());
+    item->setData(1, PropertiesDelegate::CallbackRole, QVariant());
     m_cache->push(item);
 }

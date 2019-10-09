@@ -25,6 +25,16 @@ public:
     QWidget* pop(int type);
     QTreeWidgetItem* pop();
 
+    int countItems() const {
+        return m_items.size();
+    }
+    int countWidgets() const {
+        int total = 0;
+        for (auto stack : m_widgets)
+            total += stack->size();
+        return total;
+    }
+
 private:
     WidgetHash m_widgets;
     ItemStack m_items;

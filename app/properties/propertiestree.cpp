@@ -6,7 +6,8 @@
 PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
   , m_delegate(new PropertiesDelegate(this))
 {
-    m_delegate->reserve(20);
+    m_delegate->reserve(10);
+
     header()->setFixedHeight(23);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
@@ -187,7 +188,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     if (hasChild) {
         QPen pen;
         pen.setWidthF(1.2);
-        pen.setColor(isClassRow ? palette().highlightedText().color() : palette().text().color());
+        pen.setColor(isClassRow ? palette().brightText().color() : palette().text().color());
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
