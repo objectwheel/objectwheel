@@ -617,7 +617,7 @@ void PropertiesController::onSceneSelectionChange()
         for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
             if (m_propertiesPane->isPermanentItem(topLevelItem))
                 continue;
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem, false, true, true)) {
                 if (childItem->childCount() == 0) {
                     m_propertiesPane->propertiesTree()->openPersistentEditor(childItem, 1);
                     QWidget *focusWidget = m_propertiesPane->propertiesTree()->itemWidget(childItem, 1);

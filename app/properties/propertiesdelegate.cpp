@@ -10,9 +10,6 @@
 #include <QCheckBox>
 #include <QComboBox>
 #include <QMetaEnum>
-#include <QTreeWidgetItem>
-#include <QMetaEnum>
-#include <QStack>
 #include <QToolButton>
 #include <QSpinBox>
 #include <QFontDatabase>
@@ -66,7 +63,7 @@ static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, cons
         widget->setProperty(propertyName, value);
 }
 
-void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
+static void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
 {           
     switch (type) {
     case PropertiesDelegate::Url:
@@ -109,7 +106,7 @@ void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDel
     }
 }
 
-void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
+static void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
 {    
     switch (type) {
     case PropertiesDelegate::Url:
@@ -278,6 +275,7 @@ static QWidget* createWidget(PropertiesDelegate::Type type)
     default:
         break;
     }
+
     return nullptr;
 }
 
@@ -338,6 +336,80 @@ void PropertiesDelegate::reserveSmart()
         item->setHidden(true);
         m_cache->push(item);
     }
+}
+
+void PropertiesDelegate::setEditorData(QWidget*, const QModelIndex&) const
+{
+    // do nothing
+}
+
+void PropertiesDelegate::setModelData(QWidget*, QAbstractItemModel*, const QModelIndex&) const
+{
+    // do nothing
+}
+
+void PropertiesDelegate::destroyItem(QTreeWidgetItem* item) const
+{
+    if (QTreeWidgetItem* parent = item->parent())
+        parent->takeChild(parent->indexOfChild(item));
+    else if (QTreeWidget* tree = item->treeWidget())
+        tree->takeTopLevelItem(tree->indexOfTopLevelItem(item));
+    item->setHidden(true);
+    item->setText(0, QString());
+    item->setText(1, QString());
+    item->setData(0, PropertiesDelegate::ModificationRole, QVariant());
+    item->setData(1, PropertiesDelegate::ValuesRole, QVariant());
+    item->setData(1, PropertiesDelegate::InitialValueRole, QVariant());
+    item->setData(1, PropertiesDelegate::TypeRole, QVariant());
+    item->setData(1, PropertiesDelegate::CallbackRole, QVariant());
+    m_cache->push(item);
+}
+
+void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
+{
+    if (index.column() == 0)
+        return editor->deleteLater();
+
+    // Using typeProperty because the item is invalidated and
+    // index.data(TypeRole) is invalid already at this point
+    auto type = editor->property(typeProperty).value<Type>();
+    if (type == Invalid)
+        return QStyledItemDelegate::destroyEditor(editor, index);
+
+    disconnect(editor, 0, 0, 0);
+    clearWidget(editor, type);
+    editor->setParent(nullptr);
+    editor->setVisible(false);
+    m_cache->push(type, editor);
+}
+
+QTreeWidgetItem* PropertiesDelegate::createItem() const
+{
+    if (QTreeWidgetItem* item = m_cache->pop())
+        return item;
+    return new QTreeWidgetItem;
+}
+
+QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option,
+                                          const QModelIndex& index) const
+{
+    if (index.column() == 0)
+        return nullptr;
+
+    auto type = index.data(TypeRole).value<Type>();
+    if (type == Invalid)
+        return QStyledItemDelegate::createEditor(parent, option, index);
+
+    QWidget* widget = m_cache->pop(type);
+    if (widget == 0)
+        widget = createWidget(type);
+    widget->setParent(parent);
+    widget->setVisible(true);
+    widget->setProperty(typeProperty, type);
+    setValues(widget, type, index.data(ValuesRole));
+    setInitialValue(widget, type, index.data(InitialValueRole));
+    setConnection(widget, type, index.data(CallbackRole).value<Callback>());
+    return widget;
 }
 
 int PropertiesDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
@@ -433,79 +505,4 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
 QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     return QSize(QStyledItemDelegate::sizeHint(option, index).width(), ROW_HEIGHT);
-}
-
-void PropertiesDelegate::setModelData(QWidget*, QAbstractItemModel*, const QModelIndex&) const
-{
-    // do nothing
-}
-
-void PropertiesDelegate::setEditorData(QWidget*, const QModelIndex&) const
-{
-    // do nothing
-}
-
-QWidget* PropertiesDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option,
-                                          const QModelIndex& index) const
-{
-    if (index.column() == 0)
-        return nullptr;
-
-    auto type = index.data(TypeRole).value<Type>();
-    if (type == Invalid)
-        return QStyledItemDelegate::createEditor(parent, option, index);
-
-    QWidget* widget = m_cache->pop(type);
-    if (widget == 0)
-        widget = createWidget(type);
-    widget->setParent(parent);
-    widget->setVisible(true);
-    widget->setProperty(typeProperty, type);
-    setValues(widget, type, index.data(ValuesRole));
-    setInitialValue(widget, type, index.data(InitialValueRole));
-    setConnection(widget, type, index.data(CallbackRole).value<Callback>());
-    return widget;
-}
-
-void PropertiesDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
-{
-    if (index.column() == 0)
-        return editor->deleteLater();
-
-    // Using typeProperty because the item is invalidated and
-    // index.data(TypeRole) is invalid already at this point
-    auto type = editor->property(typeProperty).value<Type>();
-    if (type == Invalid)
-        return QStyledItemDelegate::destroyEditor(editor, index);
-
-    disconnect(editor, 0, 0, 0);
-    clearWidget(editor, type);
-    editor->setParent(nullptr);
-    editor->setVisible(false);
-    m_cache->push(type, editor);
-}
-
-QTreeWidgetItem* PropertiesDelegate::createItem() const
-{
-    if (QTreeWidgetItem* item = m_cache->pop())
-        return item;
-
-    return new QTreeWidgetItem;
-}
-
-void PropertiesDelegate::destroyItem(QTreeWidgetItem* item) const
-{
-    if (QTreeWidgetItem* parent = item->parent())
-        parent->takeChild(parent->indexOfChild(item));
-    else if (QTreeWidget* tree = item->treeWidget())
-        tree->takeTopLevelItem(tree->indexOfTopLevelItem(item));
-    item->setHidden(true);
-    item->setText(0, QString());
-    item->setText(1, QString());
-    item->setData(0, PropertiesDelegate::ModificationRole, QVariant());
-    item->setData(1, PropertiesDelegate::ValuesRole, QVariant());
-    item->setData(1, PropertiesDelegate::InitialValueRole, QVariant());
-    item->setData(1, PropertiesDelegate::TypeRole, QVariant());
-    item->setData(1, PropertiesDelegate::CallbackRole, QVariant());
-    m_cache->push(item);
 }

@@ -3,8 +3,8 @@
 
 #include <QStyledItemDelegate>
 
-class PropertiesTree;
 class QTreeWidgetItem;
+class PropertiesTree;
 class PropertiesDelegateCache;
 
 class PropertiesDelegate final : public QStyledItemDelegate
@@ -51,19 +51,20 @@ public:
     ~PropertiesDelegate() override;
 
     void reserveSmart();
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+    void destroyItem(QTreeWidgetItem* item) const;
+    void destroyEditor(QWidget* editor, const QModelIndex& index) const override;
+    QTreeWidgetItem* createItem() const;
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
+                          const QModelIndex& index) const override;
+
     int calculateVisibleRow(const QTreeWidgetItem* item) const;
     void paintBackground(QPainter* painter, const QStyleOptionViewItem& option, int rowNumber,
                          bool isClassRow, bool hasVerticalLine) const;
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override;
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
-    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
-    QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option,
-                          const QModelIndex &index) const override;
-    void destroyEditor(QWidget* editor, const QModelIndex& index) const override;
-    QTreeWidgetItem* createItem() const;
-    void destroyItem(QTreeWidgetItem* item) const;
 
     template <typename... Args>
     static Callback makeCallback(Args&&... args)
@@ -73,7 +74,7 @@ public:
         return callback;
     }
 
-//private:
+private:
     PropertiesTree* m_propertiesTree;
     PropertiesDelegateCache* m_cache;
 };
