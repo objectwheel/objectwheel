@@ -70,6 +70,11 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
                 .arg(palette().brightText().color().name()));
 }
 
+void PropertiesTree::setDesignerScene(DesignerScene* designerScene)
+{
+    m_designerScene = designerScene;
+}
+
 PropertiesDelegate* PropertiesTree::delegate() const
 {
     return m_delegate;
@@ -206,9 +211,4 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     }
 
     painter->restore();
-}
-
-void PropertiesTree::setDesignerScene(DesignerScene* designerScene)
-{
-    m_designerScene = designerScene;
 }

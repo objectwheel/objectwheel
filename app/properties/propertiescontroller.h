@@ -16,34 +16,33 @@ class PropertiesController final : public QObject
 public:
     explicit PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
                                   QObject* parent = nullptr);
-
 public slots:
-    void discharge();
-    void clear();
+    void discharge() const;
+    void clear() const;
 
-public slots:
-    void onSearchEditEditingFinish();
-    void onSceneSelectionChange();
-    void onControlZChange(Control*);
-    void onControlRenderInfoChange(Control*, bool codeChanged);
-    void onControlGeometryChange(const Control*);
-    void onControlIndexChange(Control*);
-    void onControlIdChange(Control*, const QString& previousId);
-    void onControlPropertyChange();
-    void onControlIdEditingFinish();
-    void onControlIndexEditingFinish();
+private slots:
+    void onSearchEditEditingFinish() const;
+    void onControlZChange(Control*) const;
+    void onControlRenderInfoChange(Control*, bool codeChanged) const;
+    void onControlGeometryChange(const Control*) const;
+    void onControlIndexChange(Control*) const;
+    void onControlIdChange(Control*, const QString& previousId) const;
+    void onControlPropertyChange() const;
+    void onControlIdEditingFinish() const;
+    void onControlIndexEditingFinish() const;
+    void onSceneSelectionChange() const;
 
-    void onRealPropertyEdit(const QString& propertyName, const QVariant& value);
-    void onIntPropertyEdit(const QString& propertyName, const QVariant& value);
-    void onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value);
-    void onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value);
-    void onFontWeightPropertyEdit(const QMetaEnum& _enum, const QVariant& value);
-    void onFontCapitalizationPropertyEdit(const QMetaEnum& _enum, const QVariant& value);
-    void onUrlPropertyEdit(const QString& propertyName, const QVariant& value);
-    void onColorPropertyEdit(const QString& propertyName, const QVariant& value);
-    void onStringPropertyEdit(const QString& propertyName, const QVariant& value);
-    void onBoolPropertyEdit(const QString& propertyName, const QVariant& value);
-    void onEnumPropertyEdit(const QString& propertyName, const Enum& _enum, const QVariant& value);
+    void onIntPropertyEdit(const QString& propertyName, const QVariant& value) const;
+    void onRealPropertyEdit(const QString& propertyName, const QVariant& value) const;
+    void onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value) const;
+    void onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value) const;
+    void onFontWeightPropertyEdit(const QMetaEnum& _enum, const QVariant& value) const;
+    void onFontCapitalizationPropertyEdit(const QMetaEnum& _enum, const QVariant& value) const;
+    void onEnumPropertyEdit(const QString& propertyName, const Enum& _enum, const QVariant& value) const;
+    void onUrlPropertyEdit(const QString& propertyName, const QVariant& value) const;
+    void onStringPropertyEdit(const QString& propertyName, const QVariant& value) const;
+    void onBoolPropertyEdit(const QString& propertyName, const QVariant& value) const;
+    void onColorPropertyEdit(const QString& propertyName, const QVariant& value) const;
 
 private:
     Control* control() const;

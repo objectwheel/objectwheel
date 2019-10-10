@@ -1,28 +1,12 @@
 #include <propertiespane.h>
+#include <propertiestree.h>
 #include <lineedit.h>
-#include <saveutils.h>
-#include <controlpropertymanager.h>
-#include <designerscene.h>
-#include <parserutils.h>
 #include <transparentstyle.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
-#include <form.h>
-#include <propertiestree.h>
 
-#include <QStyledItemDelegate>
-#include <QPainter>
-#include <QHeaderView>
-#include <QScrollBar>
-#include <QCheckBox>
-#include <QToolButton>
-#include <QColorDialog>
 #include <QSpinBox>
-#include <QFontDatabase>
-#include <QMetaEnum>
-#include <QComboBox>
-#include <QHBoxLayout>
-#include <QApplication>
+#include <QBoxLayout>
 
 PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
   , m_propertiesTree(new PropertiesTree(this))
@@ -80,21 +64,6 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_searchEdit);
 }
 
-PropertiesTree* PropertiesPane::propertiesTree() const
-{
-    return m_propertiesTree;
-}
-
-QSize PropertiesPane::sizeHint() const
-{
-    return QSize{310, 530};
-}
-
-QSpinBox* PropertiesPane::indexEdit() const
-{
-    return m_indexEdit;
-}
-
 bool PropertiesPane::isPermanentItem(QTreeWidgetItem* item) const
 {
     return item == m_indexItem
@@ -103,24 +72,14 @@ bool PropertiesPane::isPermanentItem(QTreeWidgetItem* item) const
             || item == m_typeItem;
 }
 
-QLineEdit* PropertiesPane::idEdit() const
+PropertiesTree* PropertiesPane::propertiesTree() const
 {
-    return m_idEdit;
+    return m_propertiesTree;
 }
 
-QTreeWidgetItem* PropertiesPane::indexItem() const
+LineEdit* PropertiesPane::searchEdit() const
 {
-    return m_indexItem;
-}
-
-QTreeWidgetItem* PropertiesPane::idItem() const
-{
-    return m_idItem;
-}
-
-QTreeWidgetItem* PropertiesPane::uidItem() const
-{
-    return m_uidItem;
+    return m_searchEdit;
 }
 
 QTreeWidgetItem* PropertiesPane::typeItem() const
@@ -128,7 +87,32 @@ QTreeWidgetItem* PropertiesPane::typeItem() const
     return m_typeItem;
 }
 
-LineEdit* PropertiesPane::searchEdit() const
+QTreeWidgetItem* PropertiesPane::uidItem() const
 {
-    return m_searchEdit;
+    return m_uidItem;
+}
+
+QTreeWidgetItem* PropertiesPane::idItem() const
+{
+    return m_idItem;
+}
+
+QTreeWidgetItem* PropertiesPane::indexItem() const
+{
+    return m_indexItem;
+}
+
+QLineEdit* PropertiesPane::idEdit() const
+{
+    return m_idEdit;
+}
+
+QSpinBox* PropertiesPane::indexEdit() const
+{
+    return m_indexEdit;
+}
+
+QSize PropertiesPane::sizeHint() const
+{
+    return {310, 530};
 }

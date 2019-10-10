@@ -2,31 +2,20 @@
 #include <propertiespane.h>
 #include <propertiestree.h>
 #include <propertiesdelegate.h>
-
 #include <lineedit.h>
-
-#include <saveutils.h>
-#include <controlpropertymanager.h>
 #include <designerscene.h>
+#include <form.h>
+#include <controlpropertymanager.h>
+#include <saveutils.h>
 #include <parserutils.h>
-#include <transparentstyle.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
-#include <form.h>
 
-#include <QStyledItemDelegate>
-#include <QPainter>
-#include <QHeaderView>
-#include <QScrollBar>
-#include <QCheckBox>
+
 #include <QToolButton>
 #include <QColorDialog>
 #include <QSpinBox>
-#include <QFontDatabase>
 #include <QMetaEnum>
-#include <QComboBox>
-#include <QHBoxLayout>
-#include <QApplication>
 
 static bool isGeometryProperty(const QString& propertyName)
 {
@@ -87,13 +76,13 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
             this, &PropertiesController::onControlIndexChange);
 }
 
-void PropertiesController::discharge()
+void PropertiesController::discharge() const
 {
     clear();
     m_propertiesPane->searchEdit()->clear();
 }
 
-void PropertiesController::clear()
+void PropertiesController::clear() const
 {
     m_propertiesPane->typeItem()->setHidden(true);
     m_propertiesPane->uidItem()->setHidden(true);
@@ -108,7 +97,7 @@ void PropertiesController::clear()
     }
 }
 
-void PropertiesController::onSearchEditEditingFinish()
+void PropertiesController::onSearchEditEditingFinish() const
 {
     const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
     const QString& searchTerm = m_propertiesPane->searchEdit()->text();
@@ -141,7 +130,244 @@ void PropertiesController::onSearchEditEditingFinish()
     }
 }
 
-void PropertiesController::onSceneSelectionChange()
+void PropertiesController::onControlZChange(Control* control) const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        if (selectedControl != control)
+            return;
+        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+                if (childItem->text(0) == "z") {
+                    QTreeWidget* treeWidget = childItem->treeWidget();
+                    Q_ASSERT(treeWidget);
+                    QSpinBox* iSpinBox
+                            = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                    QDoubleSpinBox* dSpinBox
+                            = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                    Q_ASSERT(iSpinBox || dSpinBox);
+
+                    childItem->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(control->dir(), "z"));
+                    if (dSpinBox) {
+                        dSpinBox->blockSignals(true);
+                        dSpinBox->setValue(control->zValue());
+                        dSpinBox->blockSignals(false);
+                    } else {
+                        iSpinBox->blockSignals(true);
+                        iSpinBox->setValue(control->zValue());
+                        iSpinBox->blockSignals(false);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void PropertiesController::onControlRenderInfoChange(Control* control, bool codeChanged) const
+{
+    if (Control* selectedControl = this->control()) {
+        if (selectedControl != control)
+            return;
+        if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+            return onSceneSelectionChange();
+        if (codeChanged)
+            return onSceneSelectionChange();
+        else
+            return onControlGeometryChange(control);
+    }
+}
+
+void PropertiesController::onControlGeometryChange(const Control* control) const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        if (selectedControl != control)
+            return;
+
+        const QRectF& geometry = control->geometry();
+
+        bool xUnknown = false, yUnknown = false;
+        if (control->type() == Form::Type) {
+            xUnknown = !ParserUtils::exists(control->dir(), "x");
+            yUnknown = !ParserUtils::exists(control->dir(), "y");
+        }
+
+        const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
+                .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
+                .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
+                .arg(int(geometry.width()))
+                .arg(int(geometry.height()));
+
+        const bool xChanged = ParserUtils::exists(control->dir(), "x");
+        const bool yChanged = ParserUtils::exists(control->dir(), "y");
+        const bool wChanged = ParserUtils::exists(control->dir(), "width");
+        const bool hChanged = ParserUtils::exists(control->dir(), "height");
+        const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
+
+        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+                if (childItem->text(0) == "geometry") {
+                    childItem->setText(1, geometryText);
+                    childItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
+                }
+                if (!isGeometryProperty(childItem->text(0)))
+                    continue;
+
+                QTreeWidget* treeWidget = childItem->treeWidget();
+                Q_ASSERT(treeWidget);
+                QSpinBox* iSpinBox
+                        = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                QDoubleSpinBox* dSpinBox
+                        = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                Q_ASSERT(iSpinBox || dSpinBox);
+
+                if (dSpinBox)
+                    dSpinBox->blockSignals(true);
+                else
+                    iSpinBox->blockSignals(true);
+
+                if (childItem->text(0) == "x") {
+                    childItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
+                    if (dSpinBox) {
+                        dSpinBox->setValue(geometry.x());
+                        fixPosForForm(control, "x", dSpinBox);
+                    } else {
+                        iSpinBox->setValue(geometry.x());
+                        fixPosForForm(control, "x", iSpinBox);
+                    }
+                } else if (childItem->text(0) == "y") {
+                    childItem->setData(0, PropertiesDelegate::ModificationRole, yChanged);
+                    if (dSpinBox) {
+                        dSpinBox->setValue(geometry.y());
+                        fixPosForForm(control, "y", dSpinBox);
+                    } else {
+                        iSpinBox->setValue(geometry.y());
+                        fixPosForForm(control, "y", iSpinBox);
+                    }
+                } else if (childItem->text(0) == "width") {
+                    childItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
+                    if (dSpinBox)
+                        dSpinBox->setValue(control->width());
+                    else
+                        iSpinBox->setValue(control->width());
+                } else if (childItem->text(0) == "height") {
+                    childItem->setData(0, PropertiesDelegate::ModificationRole, hChanged);
+                    if (dSpinBox)
+                        dSpinBox->setValue(control->height());
+                    else
+                        iSpinBox->setValue(control->height());
+                }
+
+                if (dSpinBox)
+                    dSpinBox->blockSignals(false);
+                else
+                    iSpinBox->blockSignals(false);
+            }
+        }
+    }
+}
+
+void PropertiesController::onControlIndexChange(Control* control) const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+
+        QList<Control*> affectedControls({control});
+        affectedControls.append(control->siblings());
+        if (!affectedControls.contains(selectedControl))
+            return;
+
+        Control* issuedControl = nullptr;
+        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+                if (childItem->text(0) == "uid") {
+                    const QString& uid = childItem->text(1);
+                    for (Control* ctrl : affectedControls) {
+                        if (ctrl->uid() == uid)
+                            issuedControl = ctrl;
+                    }
+                } else if (childItem->text(0) == "index") {
+                    Q_ASSERT(issuedControl);
+                    QTreeWidget* treeWidget = childItem->treeWidget();
+                    Q_ASSERT(treeWidget);
+                    QSpinBox* spinBox
+                            = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                    Q_ASSERT(spinBox);
+                    spinBox->setValue(control->index());
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void PropertiesController::onControlIdChange(Control* control, const QString& /*previousId*/) const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        if (selectedControl != control)
+            return;
+
+        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+                if (childItem->text(0) == "id") {
+                    QTreeWidget* treeWidget = childItem->treeWidget();
+                    Q_ASSERT(treeWidget);
+                    QLineEdit* lineEdit
+                            = qobject_cast<QLineEdit*>(treeWidget->itemWidget(childItem, 1));
+                    Q_ASSERT(lineEdit);
+                    lineEdit->setText(control->id());
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void PropertiesController::onControlPropertyChange() const
+{
+    Q_UNUSED(0)
+    /*
+        FIXME: Empty for now, because the only user of the setProperty function of
+               ControlPropertyManager is this class. Hence no need to handle property
+               changes which made by us already.
+    */
+}
+
+void PropertiesController::onControlIdEditingFinish() const
+{
+    if (Control* selectedControl = control()) {
+        if (selectedControl->id() != m_propertiesPane->idEdit()->text()) {
+            if (m_propertiesPane->idEdit()->text().isEmpty()) {
+                m_propertiesPane->idEdit()->setText(selectedControl->id());
+            } else {
+                ControlPropertyManager::setId(selectedControl, m_propertiesPane->idEdit()->text(),
+                                              ControlPropertyManager::SaveChanges |
+                                              ControlPropertyManager::UpdateRenderer);
+            }
+        }
+    }
+}
+
+void PropertiesController::onControlIndexEditingFinish() const
+{
+    // NOTE: No need for previous value equality check, since this signal is only emitted
+    // when the value is changed
+    ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
+                                     ControlPropertyManager::SaveChanges |
+                                     ControlPropertyManager::UpdateRenderer);
+}
+
+void PropertiesController::onSceneSelectionChange() const
 {
     clear();
 
@@ -637,244 +863,7 @@ void PropertiesController::onSceneSelectionChange()
     }
 }
 
-void PropertiesController::onControlZChange(Control* control)
-{
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-        return;
-
-    if (Control* selectedControl = this->control()) {
-        if (selectedControl != control)
-            return;
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
-                if (childItem->text(0) == "z") {
-                    QTreeWidget* treeWidget = childItem->treeWidget();
-                    Q_ASSERT(treeWidget);
-                    QSpinBox* iSpinBox
-                            = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
-                    QDoubleSpinBox* dSpinBox
-                            = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
-                    Q_ASSERT(iSpinBox || dSpinBox);
-
-                    childItem->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(control->dir(), "z"));
-                    if (dSpinBox) {
-                        dSpinBox->blockSignals(true);
-                        dSpinBox->setValue(control->zValue());
-                        dSpinBox->blockSignals(false);
-                    } else {
-                        iSpinBox->blockSignals(true);
-                        iSpinBox->setValue(control->zValue());
-                        iSpinBox->blockSignals(false);
-                    }
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void PropertiesController::onControlRenderInfoChange(Control* control, bool codeChanged)
-{
-    if (Control* selectedControl = this->control()) {
-        if (selectedControl != control)
-            return;
-        if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-            return onSceneSelectionChange();
-        if (codeChanged)
-            return onSceneSelectionChange();
-        else
-            return onControlGeometryChange(control);
-    }
-}
-
-void PropertiesController::onControlGeometryChange(const Control* control)
-{
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-        return;
-
-    if (Control* selectedControl = this->control()) {
-        if (selectedControl != control)
-            return;
-
-        const QRectF& geometry = control->geometry();
-
-        bool xUnknown = false, yUnknown = false;
-        if (control->type() == Form::Type) {
-            xUnknown = !ParserUtils::exists(control->dir(), "x");
-            yUnknown = !ParserUtils::exists(control->dir(), "y");
-        }
-
-        const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 x %4]")
-                .arg(xUnknown ? "?" : QString::number(int(geometry.x())))
-                .arg(yUnknown ? "?" : QString::number(int(geometry.y())))
-                .arg(int(geometry.width()))
-                .arg(int(geometry.height()));
-
-        const bool xChanged = ParserUtils::exists(control->dir(), "x");
-        const bool yChanged = ParserUtils::exists(control->dir(), "y");
-        const bool wChanged = ParserUtils::exists(control->dir(), "width");
-        const bool hChanged = ParserUtils::exists(control->dir(), "height");
-        const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
-
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
-                if (childItem->text(0) == "geometry") {
-                    childItem->setText(1, geometryText);
-                    childItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
-                }
-                if (!isGeometryProperty(childItem->text(0)))
-                    continue;
-
-                QTreeWidget* treeWidget = childItem->treeWidget();
-                Q_ASSERT(treeWidget);
-                QSpinBox* iSpinBox
-                        = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
-                QDoubleSpinBox* dSpinBox
-                        = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
-                Q_ASSERT(iSpinBox || dSpinBox);
-
-                if (dSpinBox)
-                    dSpinBox->blockSignals(true);
-                else
-                    iSpinBox->blockSignals(true);
-
-                if (childItem->text(0) == "x") {
-                    childItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
-                    if (dSpinBox) {
-                        dSpinBox->setValue(geometry.x());
-                        fixPosForForm(control, "x", dSpinBox);
-                    } else {
-                        iSpinBox->setValue(geometry.x());
-                        fixPosForForm(control, "x", iSpinBox);
-                    }
-                } else if (childItem->text(0) == "y") {
-                    childItem->setData(0, PropertiesDelegate::ModificationRole, yChanged);
-                    if (dSpinBox) {
-                        dSpinBox->setValue(geometry.y());
-                        fixPosForForm(control, "y", dSpinBox);
-                    } else {
-                        iSpinBox->setValue(geometry.y());
-                        fixPosForForm(control, "y", iSpinBox);
-                    }
-                } else if (childItem->text(0) == "width") {
-                    childItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
-                    if (dSpinBox)
-                        dSpinBox->setValue(control->width());
-                    else
-                        iSpinBox->setValue(control->width());
-                } else if (childItem->text(0) == "height") {
-                    childItem->setData(0, PropertiesDelegate::ModificationRole, hChanged);
-                    if (dSpinBox)
-                        dSpinBox->setValue(control->height());
-                    else
-                        iSpinBox->setValue(control->height());
-                }
-
-                if (dSpinBox)
-                    dSpinBox->blockSignals(false);
-                else
-                    iSpinBox->blockSignals(false);
-            }
-        }
-    }
-}
-
-void PropertiesController::onControlIndexChange(Control* control)
-{
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-        return;
-
-    if (Control* selectedControl = this->control()) {
-
-        QList<Control*> affectedControls({control});
-        affectedControls.append(control->siblings());
-        if (!affectedControls.contains(selectedControl))
-            return;
-
-        Control* issuedControl = nullptr;
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
-                if (childItem->text(0) == "uid") {
-                    const QString& uid = childItem->text(1);
-                    for (Control* ctrl : affectedControls) {
-                        if (ctrl->uid() == uid)
-                            issuedControl = ctrl;
-                    }
-                } else if (childItem->text(0) == "index") {
-                    Q_ASSERT(issuedControl);
-                    QTreeWidget* treeWidget = childItem->treeWidget();
-                    Q_ASSERT(treeWidget);
-                    QSpinBox* spinBox
-                            = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
-                    Q_ASSERT(spinBox);
-                    spinBox->setValue(control->index());
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void PropertiesController::onControlIdChange(Control* control, const QString& /*previousId*/)
-{
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-        return;
-
-    if (Control* selectedControl = this->control()) {
-        if (selectedControl != control)
-            return;
-
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
-                if (childItem->text(0) == "id") {
-                    QTreeWidget* treeWidget = childItem->treeWidget();
-                    Q_ASSERT(treeWidget);
-                    QLineEdit* lineEdit
-                            = qobject_cast<QLineEdit*>(treeWidget->itemWidget(childItem, 1));
-                    Q_ASSERT(lineEdit);
-                    lineEdit->setText(control->id());
-                    break;
-                }
-            }
-        }
-    }
-}
-
-void PropertiesController::onControlPropertyChange()
-{
-    Q_UNUSED(0)
-    /*
-        FIXME: Empty for now, because the only user of the setProperty function of
-               ControlPropertyManager is this class. Hence no need to handle property
-               changes which made by us already.
-    */
-}
-
-void PropertiesController::onControlIdEditingFinish()
-{
-    if (Control* selectedControl = control()) {
-        if (selectedControl->id() != m_propertiesPane->idEdit()->text()) {
-            if (m_propertiesPane->idEdit()->text().isEmpty()) {
-                m_propertiesPane->idEdit()->setText(selectedControl->id());
-            } else {
-                ControlPropertyManager::setId(selectedControl, m_propertiesPane->idEdit()->text(),
-                                              ControlPropertyManager::SaveChanges |
-                                              ControlPropertyManager::UpdateRenderer);
-            }
-        }
-    }
-}
-
-void PropertiesController::onControlIndexEditingFinish()
-{
-    // NOTE: No need for previous value equality check, since this signal is only emitted
-    // when the value is changed
-    ControlPropertyManager::setIndex(control(), m_propertiesPane->indexEdit()->value(),
-                                     ControlPropertyManager::SaveChanges |
-                                     ControlPropertyManager::UpdateRenderer);
-}
-
-void PropertiesController::onIntPropertyEdit(const QString& propertyName, const QVariant& value)
+void PropertiesController::onIntPropertyEdit(const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -909,7 +898,7 @@ void PropertiesController::onIntPropertyEdit(const QString& propertyName, const 
     }
 }
 
-void PropertiesController::onRealPropertyEdit(const QString& propertyName, const QVariant& value)
+void PropertiesController::onRealPropertyEdit(const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -944,7 +933,7 @@ void PropertiesController::onRealPropertyEdit(const QString& propertyName, const
     }
 }
 
-void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value)
+void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1000,7 +989,7 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem
     }
 }
 
-void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value)
+void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1024,7 +1013,7 @@ void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassIt
     }
 }
 
-void PropertiesController::onFontWeightPropertyEdit(const QMetaEnum& _enum, const QVariant& value)
+void PropertiesController::onFontWeightPropertyEdit(const QMetaEnum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1044,7 +1033,7 @@ void PropertiesController::onFontWeightPropertyEdit(const QMetaEnum& _enum, cons
     }
 }
 
-void PropertiesController::onFontCapitalizationPropertyEdit(const QMetaEnum& _enum, const QVariant& value)
+void PropertiesController::onFontCapitalizationPropertyEdit(const QMetaEnum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1064,77 +1053,7 @@ void PropertiesController::onFontCapitalizationPropertyEdit(const QMetaEnum& _en
     }
 }
 
-void PropertiesController::onUrlPropertyEdit(const QString& propertyName, const QVariant& value)
-{
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-        return;
-
-    if (Control* selectedControl = this->control()) {
-        // TODO: Clear whitespaces in the url
-        const QUrl& url = QUrl::fromUserInput(value.toString(), SaveUtils::toControlThisDir(selectedControl->dir()),
-                                              QUrl::AssumeLocalFile);
-        const QString& displayText = cleanUrl(url, selectedControl->dir());
-        const QUrl& previousUrl = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QUrl>();
-
-        if (url == previousUrl)
-            return;
-
-        ControlPropertyManager::setProperty(selectedControl, propertyName,
-                                            UtilityFunctions::stringify(displayText), url,
-                                            ControlPropertyManager::SaveChanges |
-                                            ControlPropertyManager::UpdateRenderer);
-    }
-}
-
-void PropertiesController::onColorPropertyEdit(const QString& propertyName, const QVariant& value)
-{
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-        return;
-
-    if (Control* selectedControl = this->control()) {
-        QToolButton* toolButton = value.value<QToolButton*>();
-        const QColor& previousColor = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QColor>();
-
-        QColorDialog cDialog;
-        cDialog.setWindowTitle(QObject::tr("Select Color"));
-        cDialog.setOptions(QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
-        cDialog.setCurrentColor(previousColor);
-        cDialog.exec();
-
-        const QColor& color = cDialog.currentColor();
-        if (color == previousColor || !color.isValid())
-            return;
-
-        toolButton->setText(color.name(QColor::HexArgb));
-        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black}, toolButton->devicePixelRatioF())));
-        ControlPropertyManager::setProperty(selectedControl, propertyName,
-                                            UtilityFunctions::stringify(color.name(QColor::HexArgb)), color,
-                                            ControlPropertyManager::SaveChanges |
-                                            ControlPropertyManager::UpdateRenderer);
-    }
-}
-
-void PropertiesController::onStringPropertyEdit(const QString& propertyName, const QVariant& value)
-{
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
-        return;
-
-    if (Control* selectedControl = this->control()) {
-        const QString& text = value.toString();
-        const QString& previousText
-                = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QString>();
-
-        if (previousText == text)
-            return;
-
-        ControlPropertyManager::setProperty(selectedControl, propertyName,
-                                            UtilityFunctions::stringify(text), text,
-                                            ControlPropertyManager::SaveChanges |
-                                            ControlPropertyManager::UpdateRenderer);
-    }
-}
-
-void PropertiesController::onEnumPropertyEdit(const QString& propertyName, const Enum& _enum, const QVariant& value)
+void PropertiesController::onEnumPropertyEdit(const QString& propertyName, const Enum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1167,7 +1086,49 @@ void PropertiesController::onEnumPropertyEdit(const QString& propertyName, const
     }
 }
 
-void PropertiesController::onBoolPropertyEdit(const QString& propertyName, const QVariant& value)
+void PropertiesController::onUrlPropertyEdit(const QString& propertyName, const QVariant& value) const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        // TODO: Clear whitespaces in the url
+        const QUrl& url = QUrl::fromUserInput(value.toString(), SaveUtils::toControlThisDir(selectedControl->dir()),
+                                              QUrl::AssumeLocalFile);
+        const QString& displayText = cleanUrl(url, selectedControl->dir());
+        const QUrl& previousUrl = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QUrl>();
+
+        if (url == previousUrl)
+            return;
+
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            UtilityFunctions::stringify(displayText), url,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
+}
+
+void PropertiesController::onStringPropertyEdit(const QString& propertyName, const QVariant& value) const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        const QString& text = value.toString();
+        const QString& previousText
+                = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QString>();
+
+        if (previousText == text)
+            return;
+
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            UtilityFunctions::stringify(text), text,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
+}
+
+void PropertiesController::onBoolPropertyEdit(const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1178,6 +1139,34 @@ void PropertiesController::onBoolPropertyEdit(const QString& propertyName, const
         bool checked = value.toBool();
         ControlPropertyManager::setProperty(selectedControl, propertyName,
                                             checked ? "true" : "false", checked,
+                                            ControlPropertyManager::SaveChanges |
+                                            ControlPropertyManager::UpdateRenderer);
+    }
+}
+
+void PropertiesController::onColorPropertyEdit(const QString& propertyName, const QVariant& value) const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        QToolButton* toolButton = value.value<QToolButton*>();
+        const QColor& previousColor = UtilityFunctions::getProperty(propertyName, selectedControl->properties()).value<QColor>();
+
+        QColorDialog cDialog;
+        cDialog.setWindowTitle(QObject::tr("Select Color"));
+        cDialog.setOptions(QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+        cDialog.setCurrentColor(previousColor);
+        cDialog.exec();
+
+        const QColor& color = cDialog.currentColor();
+        if (color == previousColor || !color.isValid())
+            return;
+
+        toolButton->setText(color.name(QColor::HexArgb));
+        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black}, toolButton->devicePixelRatioF())));
+        ControlPropertyManager::setProperty(selectedControl, propertyName,
+                                            UtilityFunctions::stringify(color.name(QColor::HexArgb)), color,
                                             ControlPropertyManager::SaveChanges |
                                             ControlPropertyManager::UpdateRenderer);
     }

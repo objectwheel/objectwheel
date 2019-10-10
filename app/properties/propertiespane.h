@@ -17,6 +17,8 @@ class PropertiesPane final : public QWidget
 public:
     explicit PropertiesPane(QWidget* parent = nullptr);
 
+    bool isPermanentItem(QTreeWidgetItem* item) const;
+
     PropertiesTree* propertiesTree() const;
     LineEdit* searchEdit() const;
     QTreeWidgetItem* typeItem() const;
@@ -25,8 +27,6 @@ public:
     QTreeWidgetItem* indexItem() const;
     QLineEdit* idEdit() const;
     QSpinBox* indexEdit() const;
-    bool isPermanentItem(QTreeWidgetItem* item) const;
-
     QSize sizeHint() const override;
 
 public:

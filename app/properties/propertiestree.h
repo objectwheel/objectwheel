@@ -3,9 +3,8 @@
 
 #include <QTreeWidget>
 
-class PropertiesDelegate;
-class PropertiesDelegateCache;
 class DesignerScene;
+class PropertiesDelegate;
 
 class PropertiesTree final : public QTreeWidget
 {
@@ -17,15 +16,14 @@ class PropertiesTree final : public QTreeWidget
 public:
     explicit PropertiesTree(QWidget* parent = nullptr);
 
+    void setDesignerScene(DesignerScene* designerScene);
+
     PropertiesDelegate* delegate() const;
     QList<QTreeWidgetItem*> topLevelItems() const;
     QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem,
                                              bool includeParent = true,
                                              bool includeCollapsed = true,
                                              bool includeHidden = false) const;
-
-    void setDesignerScene(DesignerScene* designerScene);
-
 private:
     void paintEvent(QPaintEvent* event);
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const;

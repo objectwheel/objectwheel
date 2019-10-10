@@ -287,9 +287,9 @@ static int smartSize(PropertiesDelegate::Type type)
     case PropertiesDelegate::Enum:
         return 12;
     case PropertiesDelegate::Int:
-        return 7;
-    case PropertiesDelegate::String:
         return 8;
+    case PropertiesDelegate::String:
+        return 7;
     case PropertiesDelegate::Bool:
         return 30;
     case PropertiesDelegate::Real:
