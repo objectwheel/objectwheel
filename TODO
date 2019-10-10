@@ -1,6 +1,5 @@
 Designer Core TODOs
 
-propertiespane akıllı reserve edilecek
 designerview'i strong focus yaparsak acaba shortcutların bozulma olayı düzelirmi? yada NoFocus mo yaptık orada?
 propertiespane tüm itemler expand başlasın ve "openPersistentEditor" vs yerleri bi yeniden düşünülsün
 propertiespane neden spinbox ve line editler hep selected bir şekilde kuruluyor?

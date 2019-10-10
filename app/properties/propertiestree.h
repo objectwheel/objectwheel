@@ -5,6 +5,7 @@
 
 class PropertiesDelegate;
 class PropertiesDelegateCache;
+class DesignerScene;
 
 class PropertiesTree final : public QTreeWidget
 {
@@ -23,11 +24,14 @@ public:
                                              bool includeCollapsed = true,
                                              bool includeHidden = false) const;
 
+    void setDesignerScene(DesignerScene* designerScene);
+
 private:
     void paintEvent(QPaintEvent* event);
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const;
 
 private:
+    DesignerScene* m_designerScene;
     PropertiesDelegate* m_delegate;
 };
 

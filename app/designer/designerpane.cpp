@@ -48,8 +48,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_moveUpAction(new QAction(this))
   , m_moveDownAction(new QAction(this))
 {
-    setFocusPolicy(Qt::NoFocus);
-
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {
         m_toolBar->setContentsMargins(0, 0, 0, 0);

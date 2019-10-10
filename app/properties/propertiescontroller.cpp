@@ -62,6 +62,7 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
   , m_propertiesPane(propertiesPane)
   , m_designerScene(designerScene)
 {
+    m_propertiesPane->propertiesTree()->setDesignerScene(designerScene);
     connect(m_propertiesPane->idEdit(), &QLineEdit::editingFinished,
             this, &PropertiesController::onControlIdEditingFinish);
     connect(m_propertiesPane->indexEdit(), &QSpinBox::editingFinished,
@@ -613,14 +614,21 @@ void PropertiesController::onSceneSelectionChange()
         m_propertiesPane->propertiesTree()->addTopLevelItems(classItems);
         m_propertiesPane->propertiesTree()->expandAll();
 
-        int editorCount = 0;
         for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
             if (m_propertiesPane->isPermanentItem(topLevelItem))
                 continue;
             for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
                 if (childItem->childCount() == 0) {
                     m_propertiesPane->propertiesTree()->openPersistentEditor(childItem, 1);
-                    editorCount++;
+                    QWidget *focusWidget = m_propertiesPane->propertiesTree()->itemWidget(childItem, 1);
+                    while (QWidget *fp = focusWidget->focusProxy())
+                        focusWidget = fp;
+                    if (QLineEdit *le = qobject_cast<QLineEdit*>(focusWidget))
+                        le->deselect();
+                    if (QAbstractSpinBox *sb = qobject_cast<QAbstractSpinBox*>(focusWidget)) {
+                        if (QLineEdit* le = sb->findChild<QLineEdit*>())
+                            le->deselect();
+                    }
                 }
             }
         }

@@ -1,9 +1,12 @@
 #include <propertiestree.h>
 #include <propertiesdelegate.h>
+#include <designerscene.h>
+
 #include <QHeaderView>
 #include <QPainter>
 
 PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
+  , m_designerScene(nullptr)
   , m_delegate(new PropertiesDelegate(this))
 {
     m_delegate->reserveSmart();
@@ -122,42 +125,42 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
 
     qreal height = PropertiesDelegate::ROW_HEIGHT;
     qreal rowCount = viewport()->height() / height;
-//    const QList<Control*>& selectedControls = m_designerScene->selectedControls();
-//    for (int i = 0; i < rowCount; ++i) {
-//        painter.save();
-//        QRectF rect(0, i * height, viewport()->width(), height);
-//        QPainterPath path;
-//        path.addRect(rect);
-//        painter.setClipPath(path);
+    const QList<Control*>& selectedControls = m_designerScene->selectedControls();
+    for (int i = 0; i < rowCount; ++i) {
+        painter.save();
+        QRectF rect(0, i * height, viewport()->width(), height);
+        QPainterPath path;
+        path.addRect(rect);
+        painter.setClipPath(path);
 
-//        if (i % 2) {
-//            painter.fillRect(rect, palette().alternateBase());
-//        } else if (topLevelItemCount() == 0) {
-//            if (i == int((rowCount - 1) / 2.0) || i == int((rowCount - 1)/ 2.0) + 1) {
-//                QString message;
-//                if (selectedControls.size() == 0)
-//                    message = tr("No controls selected");
-//                else if (selectedControls.size() == 1)
-//                    message = tr("Control has errors");
-//                else
-//                    message = tr("Multiple controls selected");
+        if (i % 2) {
+            painter.fillRect(rect, palette().alternateBase());
+        } else if (topLevelItemCount() == 4) { // WARNING: Number of permanent items
+            if (i == int((rowCount - 1) / 2.0) || i == int((rowCount - 1)/ 2.0) + 1) {
+                QString message;
+                if (selectedControls.size() == 0)
+                    message = tr("No controls selected");
+                else if (selectedControls.size() == 1)
+                    message = tr("Control has errors");
+                else
+                    message = tr("Multiple controls selected");
 
-//                QColor messageColor = selectedControls.size() == 1
-//                        ? palette().linkVisited().color()
-//                        : palette().dark().color();
-//                messageColor.setAlpha(180);
+                QColor messageColor = selectedControls.size() == 1
+                        ? palette().linkVisited().color()
+                        : palette().dark().color();
+                messageColor.setAlpha(180);
 
-//                painter.setPen(messageColor);
-//                painter.drawText(rect, Qt::AlignCenter, message);
-//                painter.setPen(lineColor);
-//            }
-//        }
+                painter.setPen(messageColor);
+                painter.drawText(rect, Qt::AlignCenter, message);
+                painter.setPen(lineColor);
+            }
+        }
 
-//        // Draw top and bottom lines
-//        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-//        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-//        painter.restore();
-//    }
+        // Draw top and bottom lines
+        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
+        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+        painter.restore();
+    }
 
     QTreeWidget::paintEvent(event);
 }
@@ -203,4 +206,9 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     }
 
     painter->restore();
+}
+
+void PropertiesTree::setDesignerScene(DesignerScene* designerScene)
+{
+    m_designerScene = designerScene;
 }
