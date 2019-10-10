@@ -124,9 +124,6 @@ static void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
         auto spinBox = static_cast<QDoubleSpinBox*>(widget);
         spinBox->clear();
     } break;
-    case PropertiesDelegate::FontFamily:
-    case PropertiesDelegate::FontWeight:
-    case PropertiesDelegate::FontCapitalization:
     case PropertiesDelegate::Enum: {
         auto comboBox = static_cast<QComboBox*>(widget);
         comboBox->clear();

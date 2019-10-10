@@ -460,8 +460,9 @@ void PropertiesController::onSceneSelectionChange() const
                     fontChildren.append(cItem);
 
                     auto ptItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto pxItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
-                                                                this, ptItem, fontItem, QStringLiteral("font.pointSize"));
+                                                                this, ptItem, pxItem, fontItem, QStringLiteral("font.pointSize"));
                     ptItem->setText(0, QStringLiteral("pointSize"));
                     ptItem->setData(0, PropertiesDelegate::ModificationRole, ptChanged);
                     ptItem->setData(1, PropertiesDelegate::InitialValueRole, font.pointSize() < 0 ? 0 : font.pointSize());
@@ -469,9 +470,8 @@ void PropertiesController::onSceneSelectionChange() const
                     ptItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(ptItem);
 
-                    auto pxItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
-                                                                this, pxItem, fontItem, QStringLiteral("font.pixelSize"));
+                                                                this, pxItem, ptItem, fontItem, QStringLiteral("font.pixelSize"));
                     pxItem->setText(0, QStringLiteral("pixelSize"));
                     pxItem->setData(0, PropertiesDelegate::ModificationRole, piChanged);
                     pxItem->setData(1, PropertiesDelegate::InitialValueRole, font.pixelSize() < 0 ? 0 : font.pixelSize());
@@ -859,7 +859,8 @@ void PropertiesController::onSceneSelectionChange() const
     }
 }
 
-void PropertiesController::onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                             const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -898,7 +899,8 @@ void PropertiesController::onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetI
     }
 }
 
-void PropertiesController::onRealPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onRealPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                              const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -937,7 +939,9 @@ void PropertiesController::onRealPropertyEdit(QTreeWidgetItem* item, QTreeWidget
     }
 }
 
-void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* opponentItem,
+                                                  QTreeWidgetItem* classItem, const QString& propertyName,
+                                                  const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -947,6 +951,7 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
         QFont font = UtilityFunctions::getProperty("font", selectedControl->properties()).value<QFont>();
         QSpinBox* spinBox = value.value<QSpinBox*>();
 
+        opponentItem->setData(0, PropertiesDelegate::ModificationRole, false);
         item->setData(0, PropertiesDelegate::ModificationRole, true);
         if (classItem)
             classItem->setData(0, PropertiesDelegate::ModificationRole, true);
@@ -984,11 +989,9 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
             }
         }
 
-        // FIXME: Remove related property instead of setting its value to 0
-        ControlPropertyManager::setProperty(selectedControl, QString::fromUtf8("font.") +
+        ControlPropertyManager::setBinding(selectedControl, QString::fromUtf8("font.") +
                                             (isPx ? "pointSize" : "pixelSize"),
-                                            QString::number(0), 0,
-                                            ControlPropertyManager::SaveChanges);
+                                            QString(), ControlPropertyManager::SaveChanges);
         ControlPropertyManager::setProperty(selectedControl, propertyName,
                                             QString::number(spinBox->value()), spinBox->value(),
                                             ControlPropertyManager::SaveChanges);
@@ -997,7 +1000,8 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
     }
 }
 
-void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QVariant& value) const
+void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                                    const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1025,7 +1029,8 @@ void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* item, QTree
     }
 }
 
-void PropertiesController::onFontWeightPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QMetaEnum& _enum, const QVariant& value) const
+void PropertiesController::onFontWeightPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                                    const QMetaEnum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1049,7 +1054,10 @@ void PropertiesController::onFontWeightPropertyEdit(QTreeWidgetItem* item, QTree
     }
 }
 
-void PropertiesController::onFontCapitalizationPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QMetaEnum& _enum, const QVariant& value) const
+void PropertiesController::onFontCapitalizationPropertyEdit(QTreeWidgetItem* item,
+                                                            QTreeWidgetItem* classItem,
+                                                            const QMetaEnum& _enum,
+                                                            const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1073,7 +1081,8 @@ void PropertiesController::onFontCapitalizationPropertyEdit(QTreeWidgetItem* ite
     }
 }
 
-void PropertiesController::onEnumPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const Enum& _enum, const QVariant& value) const
+void PropertiesController::onEnumPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                              const QString& propertyName, const Enum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1110,7 +1119,8 @@ void PropertiesController::onEnumPropertyEdit(QTreeWidgetItem* item, QTreeWidget
     }
 }
 
-void PropertiesController::onUrlPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onUrlPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                             const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1136,7 +1146,8 @@ void PropertiesController::onUrlPropertyEdit(QTreeWidgetItem* item, QTreeWidgetI
     }
 }
 
-void PropertiesController::onStringPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onStringPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                                const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1160,7 +1171,8 @@ void PropertiesController::onStringPropertyEdit(QTreeWidgetItem* item, QTreeWidg
     }
 }
 
-void PropertiesController::onBoolPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onBoolPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                              const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1179,7 +1191,8 @@ void PropertiesController::onBoolPropertyEdit(QTreeWidgetItem* item, QTreeWidget
     }
 }
 
-void PropertiesController::onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
+                                               const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
