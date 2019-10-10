@@ -8,6 +8,7 @@ class LineEdit;
 class QLineEdit;
 class QSpinBox;
 class QTreeWidgetItem;
+class QToolButton;
 
 class PropertiesPane final : public QWidget
 {
@@ -27,6 +28,7 @@ public:
     QTreeWidgetItem* indexItem() const;
     QLineEdit* idEdit() const;
     QSpinBox* indexEdit() const;
+    QToolButton* resetButton() const;
     QSize sizeHint() const override;
 
 public:
@@ -38,6 +40,7 @@ public:
     QTreeWidgetItem* m_indexItem;
     QLineEdit* m_idEdit;
     QSpinBox* m_indexEdit;
+    QToolButton* m_resetButton;
 };
 
 #endif // PROPERTIESPANE_H

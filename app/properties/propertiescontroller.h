@@ -21,6 +21,7 @@ public slots:
     void clear() const;
 
 private slots:
+    void onResetButtonClick() const;
     void onSearchEditEditingFinish() const;
     void onControlZChange(Control*) const;
     void onControlRenderInfoChange(Control*, bool codeChanged) const;
@@ -54,6 +55,9 @@ private slots:
                             const QString& propertyName, const QVariant& value) const;
     void onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                              const QString& propertyName, const QVariant& value) const;
+
+private:
+    bool eventFilter(QObject* watched, QEvent* event) override;
 
 private:
     Control* control() const;

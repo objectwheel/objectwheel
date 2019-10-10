@@ -13,8 +13,6 @@ class PropertiesDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY(PropertiesDelegate)
 
 public:
-    enum { ROW_HEIGHT = 21 };
-
     enum Type {
         Invalid,
         Url,
@@ -64,7 +62,6 @@ public:
                          bool isClassRow, bool hasVerticalLine) const;
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override;
-    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
 
     template <typename... Args>
     static Callback makeCallback(Args&&... args)

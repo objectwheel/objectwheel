@@ -498,8 +498,3 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
                       QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
     painter->restore();
 }
-
-QSize PropertiesDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-    return QSize(QStyledItemDelegate::sizeHint(option, index).width(), ROW_HEIGHT);
-}

@@ -635,6 +635,9 @@ void RenderUtils::setInstancePropertyBinding(const RenderEngine::ControlInstance
     Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(instance->object);
 
+    // WARNING: Don't use for visible, visibility, x, y, width, height properties,
+    // or implement it like how setInstancePropertyVariant does implement them
+
     if (expression == "Overlay.overlay") {
         QObject* parent = instance->object->parent();
         while (parent) {
@@ -648,10 +651,13 @@ void RenderUtils::setInstancePropertyBinding(const RenderEngine::ControlInstance
                                 instance->context);
         }
     } else {
-        // WARNING: Don't use for visible, visibility, x, y, width, height properties,
-        // or implement it like how setInstancePropertyVariant does implement them
-        QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
-                                                            bindingName.toUtf8(), expression);
+        if (expression.isEmpty()) {
+            QQuickDesignerSupportProperties::doResetProperty(instance->object, instance->context,
+                                                             bindingName.toUtf8());
+        } else {
+            QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
+                                                                bindingName.toUtf8(), expression);
+        }
     }
 
     // TODO: Remove this. This is a workaround for a bug that an

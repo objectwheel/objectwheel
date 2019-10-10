@@ -9,7 +9,7 @@ Map {
     zoomLevel: 14
     copyrightsVisible: false
     activeMapType: supportedMapTypes[0]
-    center: QtPositioning.coordinate(41.009, 28.965) // Istanbul
+    center: QtPositioning.coordinate(40.779, 30.403) // Sakarya
     gesture.flickDeceleration: 3000
     gesture.enabled: true
     gesture.acceptedGestures: MapGestureArea.PanGesture

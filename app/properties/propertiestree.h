@@ -10,6 +10,7 @@ class PropertiesTree final : public QTreeWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY(PropertiesTree)
+    Q_DECLARE_PRIVATE(QTreeWidget)
 
     friend class PropertiesDelegate; // For itemFromIndex()
 

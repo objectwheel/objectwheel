@@ -1,6 +1,7 @@
 #include <propertiestree.h>
 #include <propertiesdelegate.h>
 #include <designerscene.h>
+#include <private/qtreewidget_p.h>
 
 #include <QHeaderView>
 #include <QPainter>
@@ -120,6 +121,8 @@ QList<QTreeWidgetItem*> PropertiesTree::allSubChildItems(QTreeWidgetItem* parent
 
 void PropertiesTree::paintEvent(QPaintEvent* event)
 {
+    Q_D(const QTreeWidget);
+
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
@@ -128,7 +131,7 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
-    qreal height = PropertiesDelegate::ROW_HEIGHT;
+    qreal height = d->defaultItemHeight;
     qreal rowCount = viewport()->height() / height;
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
     for (int i = 0; i < rowCount; ++i) {

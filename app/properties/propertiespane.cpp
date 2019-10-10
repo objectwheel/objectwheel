@@ -7,6 +7,7 @@
 
 #include <QSpinBox>
 #include <QBoxLayout>
+#include <QToolButton>
 
 PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
   , m_propertiesTree(new PropertiesTree(this))
@@ -17,6 +18,7 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
   , m_indexItem(new QTreeWidgetItem)
   , m_idEdit(new QLineEdit(this))
   , m_indexEdit(new QSpinBox(this))
+  , m_resetButton(new QToolButton(m_propertiesTree->viewport()))
 {
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -62,6 +64,15 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     layout->setContentsMargins(3, 3, 3, 3);
     layout->addWidget(m_propertiesTree);
     layout->addWidget(m_searchEdit);
+
+    m_propertiesTree->viewport()->setMouseTracking(true);
+    m_resetButton->setVisible(false);
+    m_resetButton->setAutoRaise(true);
+    m_resetButton->setCursor(Qt::PointingHandCursor);
+    m_resetButton->setToolTip(tr("Clear property"));
+    m_resetButton->setFixedSize(QSize(16, 16));
+    m_resetButton->setIconSize(QSize(16, 16));
+    m_resetButton->setIcon(QIcon(QStringLiteral(":/images/designer/delete-all.svg")));
 }
 
 bool PropertiesPane::isPermanentItem(QTreeWidgetItem* item) const
@@ -110,6 +121,11 @@ QLineEdit* PropertiesPane::idEdit() const
 QSpinBox* PropertiesPane::indexEdit() const
 {
     return m_indexEdit;
+}
+
+QToolButton* PropertiesPane::resetButton() const
+{
+    return m_resetButton;
 }
 
 QSize PropertiesPane::sizeHint() const

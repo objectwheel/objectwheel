@@ -40,6 +40,10 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
   , m_designerScene(designerScene)
 {
     m_propertiesPane->propertiesTree()->setDesignerScene(designerScene);
+    m_propertiesPane->propertiesTree()->viewport()->installEventFilter(this);
+
+    connect(m_propertiesPane->resetButton(), &QToolButton::clicked,
+            this, &PropertiesController::onResetButtonClick);
     connect(m_propertiesPane->idEdit(), &QLineEdit::editingFinished,
             this, &PropertiesController::onControlIdEditingFinish);
     connect(m_propertiesPane->indexEdit(), &QSpinBox::editingFinished,
@@ -82,6 +86,26 @@ void PropertiesController::clear() const
             continue;
         for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem, true, true, true))
             m_propertiesPane->propertiesTree()->delegate()->destroyItem(childItem);
+    }
+}
+
+void PropertiesController::onResetButtonClick() const
+{
+    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        return;
+
+    if (Control* selectedControl = this->control()) {
+        const PropertiesTree* tree = m_propertiesPane->propertiesTree();
+        QTreeWidgetItem* item = tree->itemAt(m_propertiesPane->resetButton()->geometry().center());
+        Q_ASSERT(item);
+        if (item) {
+            QString propertyName = item->text(0);
+            ControlPropertyManager::setBinding(selectedControl, propertyName, QString(),
+                                               ControlPropertyManager::UpdateRenderer |
+                                               ControlPropertyManager::SaveChanges);
+            item->setData(0, PropertiesDelegate::ModificationRole, false);
+            m_propertiesPane->resetButton()->setVisible(false);
+        }
     }
 }
 
@@ -860,6 +884,8 @@ void PropertiesController::onSceneSelectionChange() const
         }
 
         onSearchEditEditingFinish();
+    } else {
+        m_propertiesPane->resetButton()->setVisible(false);
     }
 }
 
@@ -994,8 +1020,8 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
         }
 
         ControlPropertyManager::setBinding(selectedControl, QString::fromUtf8("font.") +
-                                            (isPx ? "pointSize" : "pixelSize"),
-                                            QString(), ControlPropertyManager::SaveChanges);
+                                           (isPx ? "pointSize" : "pixelSize"),
+                                           QString(), ControlPropertyManager::SaveChanges);
         ControlPropertyManager::setProperty(selectedControl, propertyName,
                                             QString::number(spinBox->value()), spinBox->value(),
                                             ControlPropertyManager::SaveChanges);
@@ -1226,6 +1252,26 @@ void PropertiesController::onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidge
                                             ControlPropertyManager::SaveChanges |
                                             ControlPropertyManager::UpdateRenderer);
     }
+}
+
+bool PropertiesController::eventFilter(QObject* watched, QEvent* event)
+{
+    const PropertiesTree* tree = m_propertiesPane->propertiesTree();
+    if (watched == tree->viewport() && event->type() == QEvent::MouseMove) {
+        bool buttonVisible = false;
+        const QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
+        const QTreeWidgetItem* item = tree->itemAt(mouseEvent->pos());
+        if (item) {
+            const QRect& itemRect = tree->visualItemRect(item);
+            QRect resetButtonRect = m_propertiesPane->resetButton()->geometry();
+            resetButtonRect.moveCenter({8, itemRect.center().y()});
+            m_propertiesPane->resetButton()->setGeometry(resetButtonRect);
+            buttonVisible = item->data(0, PropertiesDelegate::ModificationRole).toBool();
+        }
+        m_propertiesPane->resetButton()->setVisible(buttonVisible);
+        return false;
+    }
+    return QObject::eventFilter(watched, event);
 }
 
 Control* PropertiesController::control() const
