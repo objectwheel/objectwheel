@@ -11,7 +11,6 @@
 #include <paintutils.h>
 #include <utilityfunctions.h>
 
-
 #include <QToolButton>
 #include <QColorDialog>
 #include <QSpinBox>
@@ -23,17 +22,6 @@ static bool isGeometryProperty(const QString& propertyName)
             || propertyName == QStringLiteral("y")
             || propertyName == QStringLiteral("width")
             || propertyName == QStringLiteral("height");
-}
-
-template<typename SpinBox>
-static void fixPosForForm(const Control* control, const QString& propertyName, SpinBox spinBox)
-{
-    if (control->type() == Form::Type) {
-        if ((propertyName == "x" || propertyName == "y")
-                && !ParserUtils::exists(control->dir(), propertyName)) {
-            spinBox->setValue(0);
-        }
-    }
 }
 
 static QString cleanUrl(const QUrl& url, const QString& controlDir)
@@ -218,12 +206,10 @@ void PropertiesController::onControlGeometryChange(const Control* control) const
                 if (!isGeometryProperty(childItem->text(0)))
                     continue;
 
-                QTreeWidget* treeWidget = childItem->treeWidget();
-                Q_ASSERT(treeWidget);
                 QSpinBox* iSpinBox
-                        = qobject_cast<QSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                        = qobject_cast<QSpinBox*>(m_propertiesPane->propertiesTree()->itemWidget(childItem, 1));
                 QDoubleSpinBox* dSpinBox
-                        = qobject_cast<QDoubleSpinBox*>(treeWidget->itemWidget(childItem, 1));
+                        = qobject_cast<QDoubleSpinBox*>(m_propertiesPane->propertiesTree()->itemWidget(childItem, 1));
                 Q_ASSERT(iSpinBox || dSpinBox);
 
                 if (dSpinBox)
@@ -233,22 +219,22 @@ void PropertiesController::onControlGeometryChange(const Control* control) const
 
                 if (childItem->text(0) == "x") {
                     childItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
-                    if (dSpinBox) {
-                        dSpinBox->setValue(geometry.x());
-                        fixPosForForm(control, "x", dSpinBox);
-                    } else {
-                        iSpinBox->setValue(geometry.x());
-                        fixPosForForm(control, "x", iSpinBox);
-                    }
+                    qreal value = geometry.x();
+                    if (control->type() == Form::Type && !ParserUtils::exists(control->dir(), "x"))
+                        value = 0;
+                    if (dSpinBox)
+                        dSpinBox->setValue(value);
+                    else
+                        iSpinBox->setValue(value);
                 } else if (childItem->text(0) == "y") {
                     childItem->setData(0, PropertiesDelegate::ModificationRole, yChanged);
-                    if (dSpinBox) {
-                        dSpinBox->setValue(geometry.y());
-                        fixPosForForm(control, "y", dSpinBox);
-                    } else {
-                        iSpinBox->setValue(geometry.y());
-                        fixPosForForm(control, "y", iSpinBox);
-                    }
+                    qreal value = geometry.y();
+                    if (control->type() == Form::Type && !ParserUtils::exists(control->dir(), "y"))
+                        value = 0;
+                    if (dSpinBox)
+                        dSpinBox->setValue(value);
+                    else
+                        iSpinBox->setValue(value);
                 } else if (childItem->text(0) == "width") {
                     childItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
                     if (dSpinBox)
@@ -441,8 +427,9 @@ void PropertiesController::onSceneSelectionChange() const
                     fontItem->setData(0, PropertiesDelegate::ModificationRole, fontChanged);
                     children.append(fontItem);
 
-                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit, this, fontItem);
                     auto fItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit,
+                                                                     this, fItem, fontItem);
                     fItem->setText(0, QStringLiteral("family"));
                     fItem->setData(0, PropertiesDelegate::ModificationRole, fChanged);
                     fItem->setData(1, PropertiesDelegate::InitialValueRole, family);
@@ -451,8 +438,9 @@ void PropertiesController::onSceneSelectionChange() const
                     fontChildren.append(fItem);
 
                     const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontWeightPropertyEdit, this, e);
                     auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontWeightPropertyEdit,
+                                                                this, wItem, fontItem, e);
                     wItem->setText(0, QStringLiteral("weight"));
                     wItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
                     wItem->setData(1, PropertiesDelegate::InitialValueRole, e.valueToKey(font.weight()));
@@ -461,8 +449,9 @@ void PropertiesController::onSceneSelectionChange() const
                     fontChildren.append(wItem);
 
                     const QMetaEnum& e2 = QMetaEnum::fromType<QFont::Capitalization>();
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontCapitalizationPropertyEdit, this, e2);
                     auto cItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontCapitalizationPropertyEdit,
+                                                                this, cItem, fontItem, e2);
                     cItem->setText(0, QStringLiteral("capitalization"));
                     cItem->setData(0, PropertiesDelegate::ModificationRole, cChanged);
                     cItem->setData(1, PropertiesDelegate::InitialValueRole, e2.valueToKey(font.capitalization()));
@@ -470,9 +459,9 @@ void PropertiesController::onSceneSelectionChange() const
                     cItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(cItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
-                                                                this, fontItem, QStringLiteral("font.pointSize"));
                     auto ptItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
+                                                                this, ptItem, fontItem, QStringLiteral("font.pointSize"));
                     ptItem->setText(0, QStringLiteral("pointSize"));
                     ptItem->setData(0, PropertiesDelegate::ModificationRole, ptChanged);
                     ptItem->setData(1, PropertiesDelegate::InitialValueRole, font.pointSize() < 0 ? 0 : font.pointSize());
@@ -480,9 +469,9 @@ void PropertiesController::onSceneSelectionChange() const
                     ptItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(ptItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
-                                                                this, fontItem, QStringLiteral("font.pixelSize"));
                     auto pxItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
+                                                                this, pxItem, fontItem, QStringLiteral("font.pixelSize"));
                     pxItem->setText(0, QStringLiteral("pixelSize"));
                     pxItem->setData(0, PropertiesDelegate::ModificationRole, piChanged);
                     pxItem->setData(1, PropertiesDelegate::InitialValueRole, font.pixelSize() < 0 ? 0 : font.pixelSize());
@@ -490,8 +479,9 @@ void PropertiesController::onSceneSelectionChange() const
                     pxItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(pxItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.bold"));
                     auto bItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                this, bItem, fontItem, QStringLiteral("font.bold"));
                     bItem->setText(0, QStringLiteral("bold"));
                     bItem->setData(0, PropertiesDelegate::ModificationRole, bChanged);
                     bItem->setData(1, PropertiesDelegate::InitialValueRole, font.bold());
@@ -499,8 +489,9 @@ void PropertiesController::onSceneSelectionChange() const
                     bItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(bItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.italic"));
                     auto iItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                this, iItem, fontItem, QStringLiteral("font.italic"));
                     iItem->setText(0, QStringLiteral("italic"));
                     iItem->setData(0, PropertiesDelegate::ModificationRole, iChanged);
                     iItem->setData(1, PropertiesDelegate::InitialValueRole, font.italic());
@@ -508,8 +499,9 @@ void PropertiesController::onSceneSelectionChange() const
                     iItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(iItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.underline"));
                     auto uItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                this, uItem, fontItem, QStringLiteral("font.underline"));
                     uItem->setText(0, QStringLiteral("underline"));
                     uItem->setData(0, PropertiesDelegate::ModificationRole, uChanged);
                     uItem->setData(1, PropertiesDelegate::InitialValueRole, font.underline());
@@ -517,8 +509,9 @@ void PropertiesController::onSceneSelectionChange() const
                     uItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(uItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.overline"));
                     auto oItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                this, oItem, fontItem, QStringLiteral("font.overline"));
                     oItem->setText(0, QStringLiteral("overline"));
                     oItem->setData(0, PropertiesDelegate::ModificationRole, oChanged);
                     oItem->setData(1, PropertiesDelegate::InitialValueRole, font.overline());
@@ -526,8 +519,9 @@ void PropertiesController::onSceneSelectionChange() const
                     oItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(oItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.strikeout"));
                     auto sItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                this, sItem, fontItem, QStringLiteral("font.strikeout"));
                     sItem->setText(0, QStringLiteral("strikeout"));
                     sItem->setData(0, PropertiesDelegate::ModificationRole, sChanged);
                     sItem->setData(1, PropertiesDelegate::InitialValueRole, font.strikeOut());
@@ -535,8 +529,9 @@ void PropertiesController::onSceneSelectionChange() const
                     sItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(sItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.kerning"));
                     auto kItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                this, kItem, fontItem, QStringLiteral("font.kerning"));
                     kItem->setText(0, QStringLiteral("kerning"));
                     kItem->setData(0, PropertiesDelegate::ModificationRole, kChanged);
                     kItem->setData(1, PropertiesDelegate::InitialValueRole, font.kerning());
@@ -544,8 +539,9 @@ void PropertiesController::onSceneSelectionChange() const
                     kItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(kItem);
 
-                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit, this, QStringLiteral("font.preferShaping"));
                     auto prItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
+                                                                this, prItem, fontItem, QStringLiteral("font.preferShaping"));
                     prItem->setText(0, QStringLiteral("preferShaping"));
                     prItem->setData(0, PropertiesDelegate::ModificationRole, prChanged);
                     prItem->setData(1, PropertiesDelegate::InitialValueRole, !(font.styleStrategy() & QFont::PreferNoShaping));
@@ -556,10 +552,10 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Color: {
-                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onColorPropertyEdit,
-                                                                     this, propertyName);
-                    const QColor& color = propertyValue.value<QColor>();
                     auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onColorPropertyEdit,
+                                                                     this, item, nullptr, propertyName);
+                    const QColor& color = propertyValue.value<QColor>();
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesDelegate::InitialValueRole, color);
@@ -570,12 +566,12 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Bool: {
+                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
-                                                                     this, propertyName);
+                                                                     this, item, nullptr, propertyName);
                     const bool checked = propertyName == "visible"
                             ? selectedControl->visible()
                             : propertyValue.value<bool>();
-                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesDelegate::InitialValueRole, checked);
@@ -586,10 +582,10 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::String: {
-                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onStringPropertyEdit,
-                                                                     this, propertyName);
-                    const QString& text = propertyValue.value<QString>();
                     auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onStringPropertyEdit,
+                                                                     this, item, nullptr, propertyName);
+                    const QString& text = propertyValue.value<QString>();
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesDelegate::InitialValueRole, text);
@@ -600,10 +596,10 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Url: {
-                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onUrlPropertyEdit,
-                                                                     this, propertyName);
-                    const QString& displayText = cleanUrl(propertyValue.value<QUrl>(), selectedControl->dir());
                     auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onUrlPropertyEdit,
+                                                                     this, item, nullptr, propertyName);
+                    const QString& displayText = cleanUrl(propertyValue.value<QUrl>(), selectedControl->dir());
                     item->setText(0, propertyName);
                     item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                     item->setData(1, PropertiesDelegate::InitialValueRole, displayText);
@@ -652,9 +648,9 @@ void PropertiesController::onSceneSelectionChange() const
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
                         children.append(geometryItem);
 
-                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
-                                                                         this,  QStringLiteral("x"));
                         auto xItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                         this, xItem, geometryItem, QStringLiteral("x"));
                         xItem->setText(0, QStringLiteral("x"));
                         xItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
                         xItem->setData(1, PropertiesDelegate::InitialValueRole, x);
@@ -662,9 +658,9 @@ void PropertiesController::onSceneSelectionChange() const
                         xItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(xItem);
 
-                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
-                                                                    this,  QStringLiteral("y"));
                         auto yItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                    this, yItem, geometryItem, QStringLiteral("y"));
                         yItem->setText(0, QStringLiteral("y"));
                         yItem->setData(0, PropertiesDelegate::ModificationRole, yChanged);
                         yItem->setData(1, PropertiesDelegate::InitialValueRole, y);
@@ -672,9 +668,9 @@ void PropertiesController::onSceneSelectionChange() const
                         yItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(yItem);
 
-                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
-                                                                    this,  QStringLiteral("width"));
                         auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                    this, wItem, geometryItem, QStringLiteral("width"));
                         wItem->setText(0, QStringLiteral("width"));
                         wItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
                         wItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.width());
@@ -682,9 +678,9 @@ void PropertiesController::onSceneSelectionChange() const
                         wItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(wItem);
 
-                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
-                                                                    this,  QStringLiteral("height"));
                         auto hItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                    this, hItem, geometryItem, QStringLiteral("height"));
                         hItem->setText(0, QStringLiteral("height"));
                         hItem->setData(0, PropertiesDelegate::ModificationRole, hChanged);
                         hItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.height());
@@ -692,9 +688,9 @@ void PropertiesController::onSceneSelectionChange() const
                         hItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(hItem);
                     } else {
-                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
-                                                                         this, propertyName);
                         auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
+                                                                         this, item, nullptr, propertyName);
                         item->setText(0, propertyName);
                         item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                         item->setData(1, PropertiesDelegate::InitialValueRole, propertyValue.value<qreal>());
@@ -744,9 +740,9 @@ void PropertiesController::onSceneSelectionChange() const
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
                         children.append(geometryItem);
 
-                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
-                                                                         this,  QStringLiteral("x"));
                         auto xItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                         this, xItem, geometryItem, QStringLiteral("x"));
                         xItem->setText(0, QStringLiteral("x"));
                         xItem->setData(0, PropertiesDelegate::ModificationRole, xChanged);
                         xItem->setData(1, PropertiesDelegate::InitialValueRole, x);
@@ -754,9 +750,9 @@ void PropertiesController::onSceneSelectionChange() const
                         xItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(xItem);
 
-                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
-                                                                    this,  QStringLiteral("y"));
                         auto yItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                    this, yItem, geometryItem, QStringLiteral("y"));
                         yItem->setText(0, QStringLiteral("y"));
                         yItem->setData(0, PropertiesDelegate::ModificationRole, yChanged);
                         yItem->setData(1, PropertiesDelegate::InitialValueRole, y);
@@ -764,9 +760,9 @@ void PropertiesController::onSceneSelectionChange() const
                         yItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(yItem);
 
-                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
-                                                                    this,  QStringLiteral("width"));
                         auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                    this, wItem, geometryItem, QStringLiteral("width"));
                         wItem->setText(0, QStringLiteral("width"));
                         wItem->setData(0, PropertiesDelegate::ModificationRole, wChanged);
                         wItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.width());
@@ -774,9 +770,9 @@ void PropertiesController::onSceneSelectionChange() const
                         wItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(wItem);
 
-                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
-                                                                    this,  QStringLiteral("height"));
                         auto hItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                    this, hItem, geometryItem, QStringLiteral("height"));
                         hItem->setText(0, QStringLiteral("height"));
                         hItem->setData(0, PropertiesDelegate::ModificationRole, hChanged);
                         hItem->setData(1, PropertiesDelegate::InitialValueRole, geometry.height());
@@ -784,9 +780,9 @@ void PropertiesController::onSceneSelectionChange() const
                         hItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(hItem);
                     } else {
-                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
-                                                                         this, propertyName);
                         auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
+                                                                         this, item, nullptr, propertyName);
                         item->setText(0, propertyName);
                         item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                         item->setData(1, PropertiesDelegate::InitialValueRole, propertyValue.value<int>());
@@ -816,9 +812,9 @@ void PropertiesController::onSceneSelectionChange() const
                         }
                     }
                 }
-                auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onEnumPropertyEdit,
-                                                                 this, propertyName, _enum);
                 auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onEnumPropertyEdit,
+                                                                 this, item, nullptr, propertyName, _enum);
                 item->setText(0, propertyName);
                 item->setData(0, PropertiesDelegate::ModificationRole, ParserUtils::exists(selectedControl->dir(), propertyName));
                 item->setData(1, PropertiesDelegate::ValuesRole, QVariant(_enum.keys.keys()));
@@ -863,7 +859,7 @@ void PropertiesController::onSceneSelectionChange() const
     }
 }
 
-void PropertiesController::onIntPropertyEdit(const QString& propertyName, const QVariant& value) const
+void PropertiesController::onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -872,6 +868,10 @@ void PropertiesController::onIntPropertyEdit(const QString& propertyName, const 
         const QSpinBox* spinBox = static_cast<QSpinBox*>(value.value<QSpinBox*>());
         const int value = spinBox->value();
         const QString& parserValue = QString::number(spinBox->value());
+
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
 
         // NOTE: No need for previous value equality check, since this signal is only emitted
         // when the value is changed
@@ -898,7 +898,7 @@ void PropertiesController::onIntPropertyEdit(const QString& propertyName, const 
     }
 }
 
-void PropertiesController::onRealPropertyEdit(const QString& propertyName, const QVariant& value) const
+void PropertiesController::onRealPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -907,6 +907,10 @@ void PropertiesController::onRealPropertyEdit(const QString& propertyName, const
         const QDoubleSpinBox* spinBox = static_cast<QDoubleSpinBox*>(value.value<QDoubleSpinBox*>());
         const qreal value = spinBox->value();
         const QString& parserValue = QString::number(spinBox->value());
+
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
 
         // NOTE: No need for previous value equality check, since this signal is only emitted
         // when the value is changed
@@ -933,7 +937,7 @@ void PropertiesController::onRealPropertyEdit(const QString& propertyName, const
     }
 }
 
-void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem, const QString& propertyName, const QVariant& value) const
+void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -942,6 +946,10 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem
         bool isPx = propertyName.contains("pixelSize") ? true : false;
         QFont font = UtilityFunctions::getProperty("font", selectedControl->properties()).value<QFont>();
         QSpinBox* spinBox = value.value<QSpinBox*>();
+
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
 
         // NOTE: No need for previous value equality check, since this signal is only emitted
         // when the value is changed
@@ -958,14 +966,14 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem
         else
             font.setPointSize(spinBox->value());
 
-        QString fontText = fontClassItem->text(1);
+        QString fontText = classItem->text(1);
         if (isPx)
             fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pixelSize()) + "px]");
         else
             fontText.replace(QRegExp(",.*"), ", " + QString::number(font.pointSize()) + "pt]");
-        fontClassItem->setText(1, fontText);
-        for (int i = 0; i < fontClassItem->childCount(); ++i) {
-            QTreeWidgetItem* chilItem = fontClassItem->child(i);
+        classItem->setText(1, fontText);
+        for (int i = 0; i < classItem->childCount(); ++i) {
+            QTreeWidgetItem* chilItem = classItem->child(i);
             if (chilItem->text(0) == (isPx ? "pointSize" : "pixelSize")) {
                 auto spinBox = qobject_cast<QSpinBox*>(m_propertiesPane->propertiesTree()->itemWidget(chilItem, 1));
                 Q_ASSERT(spinBox);
@@ -989,7 +997,7 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* fontClassItem
     }
 }
 
-void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassItem, const QVariant& value) const
+void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1002,9 +1010,13 @@ void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassIt
         if (currentText == previousFamily)
             return;
 
-        QString fontText = fontClassItem->text(1);
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
+
+        QString fontText = classItem->text(1);
         fontText.replace(previousFamily, currentText);
-        fontClassItem->setText(1, fontText);
+        classItem->setText(1, fontText);
 
         ControlPropertyManager::setProperty(selectedControl, "font.family",
                                             UtilityFunctions::stringify(currentText), currentText,
@@ -1013,7 +1025,7 @@ void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* fontClassIt
     }
 }
 
-void PropertiesController::onFontWeightPropertyEdit(const QMetaEnum& _enum, const QVariant& value) const
+void PropertiesController::onFontWeightPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QMetaEnum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1026,6 +1038,10 @@ void PropertiesController::onFontWeightPropertyEdit(const QMetaEnum& _enum, cons
         if (weightValue == font.weight())
             return;
 
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
+
         ControlPropertyManager::setProperty(selectedControl, "font.weight",
                                             "Font." + currentText, weightValue,
                                             ControlPropertyManager::SaveChanges |
@@ -1033,7 +1049,7 @@ void PropertiesController::onFontWeightPropertyEdit(const QMetaEnum& _enum, cons
     }
 }
 
-void PropertiesController::onFontCapitalizationPropertyEdit(const QMetaEnum& _enum, const QVariant& value) const
+void PropertiesController::onFontCapitalizationPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QMetaEnum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1046,6 +1062,10 @@ void PropertiesController::onFontCapitalizationPropertyEdit(const QMetaEnum& _en
         if (capitalizationValue == font.capitalization())
             return;
 
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
+
         ControlPropertyManager::setProperty(selectedControl, "font.capitalization",
                                             "Font." + currentText, capitalizationValue,
                                             ControlPropertyManager::SaveChanges |
@@ -1053,7 +1073,7 @@ void PropertiesController::onFontCapitalizationPropertyEdit(const QMetaEnum& _en
     }
 }
 
-void PropertiesController::onEnumPropertyEdit(const QString& propertyName, const Enum& _enum, const QVariant& value) const
+void PropertiesController::onEnumPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const Enum& _enum, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1061,6 +1081,10 @@ void PropertiesController::onEnumPropertyEdit(const QString& propertyName, const
     if (Control* selectedControl = this->control()) {
         const QString& currentText = value.toString();
         const QString& previousText = UtilityFunctions::getEnum(propertyName, selectedControl->properties()).value;
+
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
 
         if (previousText == currentText)
             return;
@@ -1086,7 +1110,7 @@ void PropertiesController::onEnumPropertyEdit(const QString& propertyName, const
     }
 }
 
-void PropertiesController::onUrlPropertyEdit(const QString& propertyName, const QVariant& value) const
+void PropertiesController::onUrlPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1101,6 +1125,10 @@ void PropertiesController::onUrlPropertyEdit(const QString& propertyName, const 
         if (url == previousUrl)
             return;
 
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
+
         ControlPropertyManager::setProperty(selectedControl, propertyName,
                                             UtilityFunctions::stringify(displayText), url,
                                             ControlPropertyManager::SaveChanges |
@@ -1108,7 +1136,7 @@ void PropertiesController::onUrlPropertyEdit(const QString& propertyName, const 
     }
 }
 
-void PropertiesController::onStringPropertyEdit(const QString& propertyName, const QVariant& value) const
+void PropertiesController::onStringPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1121,6 +1149,10 @@ void PropertiesController::onStringPropertyEdit(const QString& propertyName, con
         if (previousText == text)
             return;
 
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
+
         ControlPropertyManager::setProperty(selectedControl, propertyName,
                                             UtilityFunctions::stringify(text), text,
                                             ControlPropertyManager::SaveChanges |
@@ -1128,12 +1160,15 @@ void PropertiesController::onStringPropertyEdit(const QString& propertyName, con
     }
 }
 
-void PropertiesController::onBoolPropertyEdit(const QString& propertyName, const QVariant& value) const
+void PropertiesController::onBoolPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
 
     if (Control* selectedControl = this->control()) {
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
         // NOTE: No need for previous value equality check, since this
         // signal is only emitted when the value is changed/toggled
         bool checked = value.toBool();
@@ -1144,7 +1179,7 @@ void PropertiesController::onBoolPropertyEdit(const QString& propertyName, const
     }
 }
 
-void PropertiesController::onColorPropertyEdit(const QString& propertyName, const QVariant& value) const
+void PropertiesController::onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const
 {
     if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
         return;
@@ -1162,6 +1197,10 @@ void PropertiesController::onColorPropertyEdit(const QString& propertyName, cons
         const QColor& color = cDialog.currentColor();
         if (color == previousColor || !color.isValid())
             return;
+
+        item->setData(0, PropertiesDelegate::ModificationRole, true);
+        if (classItem)
+            classItem->setData(0, PropertiesDelegate::ModificationRole, true);
 
         toolButton->setText(color.name(QColor::HexArgb));
         toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black}, toolButton->devicePixelRatioF())));

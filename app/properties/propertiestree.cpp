@@ -178,7 +178,7 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     const qreal width = 10;
     const QAbstractItemModel* model = index.model();
     const bool hasChild = itemFromIndex(index)->childCount();
-    const bool isClassRow = !model->parent(index).isValid() && index.row() > 3; // FIXME: For Temporary "index" entry, should be 2 otherwise
+    const bool isClassRow = !model->parent(index).isValid() && index.row() > 3; // NOTE: For Temporary "index" entry, should be 2 otherwise
 
     QRectF handleRect(0, 0, width, width);
     handleRect.moveCenter(rect.center());
