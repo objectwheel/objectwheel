@@ -610,7 +610,9 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Double: {
-                    if (isGeometryProperty(propertyName) && !isGeometryHandled) {
+                    if (isGeometryProperty(propertyName)) {
+                        if (isGeometryHandled)
+                            break;
                         isGeometryHandled = true;
                         const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
                         bool xUnknown = false, yUnknown = false;
@@ -702,7 +704,9 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Int: {
-                    if (isGeometryProperty(propertyName) && !isGeometryHandled) {
+                    if (isGeometryProperty(propertyName)) {
+                        if (isGeometryHandled)
+                            break;
                         isGeometryHandled = true;
                         const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(properties);
                         bool xUnknown = false, yUnknown = false;

@@ -189,9 +189,10 @@ void Control::setRenderInfo(const RenderInfo& info)
 
     // FIXME: Fix this whenever we are able to manage raising or lowering
     // Controls based on their indexes,
-    setFlag(ItemStacksBehindParent,
-            property("z").toDouble() < 0
-            && !(parentControl() && (parentControl()->window() || parentControl()->popup())));
+    setFlag(ItemStacksBehindParent, property("z").toDouble() < 0
+            && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
+                                     parentControl()->window() ||
+                                     parentControl()->popup())));
 
     updateAnchors();
     setResizable(gui());
@@ -272,6 +273,11 @@ void Control::syncGeometry()
 
     if (!geometrySyncEnabled())
         return;
+
+    setFlag(ItemStacksBehindParent, property("z").toDouble() < 0
+            && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
+                                     parentControl()->window() ||
+                                     parentControl()->popup())));
 
     const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(m_renderInfo.properties);
     if (geometry.isValid()) {
