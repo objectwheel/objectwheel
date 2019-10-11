@@ -458,7 +458,10 @@ void Control::updateAnchors()
 
 QVariant Control::property(const QString& propertyName) const
 {
-    return UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);
+    auto val = UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);
+    if (val.isValid())
+        return val;
+    return QVariant::fromValue<Enum>(UtilityFunctions::getEnum(propertyName, m_renderInfo.properties));
 }
 
 Control* Control::parentControl() const

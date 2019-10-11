@@ -282,7 +282,12 @@ void PropertiesController::onResetButtonClick() const
                     if (auto w = tree->itemWidget(item, 1)) {
                         auto val = selectedControl->property(propertyName);
                         auto type = item->data(1, PropertiesDelegate::TypeRole).value<PropertiesDelegate::Type>();
-                        tree->delegate()->setInitialValue(w, type, val);
+                        if (type == PropertiesDelegate::Enum) {
+                            auto e = val.value<Enum>();
+                            tree->delegate()->setInitialValue(w, type, e.value);
+                        } else {
+                            tree->delegate()->setInitialValue(w, type, val);
+                        }
                     }
                 });
             }
@@ -580,6 +585,8 @@ void PropertiesController::onSceneSelectionChange() const
 
         bool isGeometryHandled = false;
         QList<QTreeWidgetItem*> classItems;
+        QTreeWidgetItem* fontItemCopy = nullptr;
+        QTreeWidgetItem* geometryItemCopy = nullptr;
         for (const PropertyNode& propertyNode : properties) {
             const QVector<Enum>& enumList = propertyNode.enums;
             const QMap<QString, QVariant>& propertyMap = propertyNode.properties;
@@ -1033,10 +1040,14 @@ void PropertiesController::onSceneSelectionChange() const
                 children.append(item);
             }
 
-            if (fontItem)
+            if (fontItem) {
                 fontItem->addChildren(fontChildren);
-            if (geometryItem)
+                fontItemCopy = fontItem;
+            }
+            if (geometryItem) {
                 geometryItem->addChildren(geometryChildren);
+                geometryItemCopy = geometryItem;
+            }
             if (!children.isEmpty())
                 classItem->addChildren(children);
             classItems.append(classItem);
@@ -1044,6 +1055,11 @@ void PropertiesController::onSceneSelectionChange() const
 
         m_propertiesPane->propertiesTree()->addTopLevelItems(classItems);
         m_propertiesPane->propertiesTree()->expandAll();
+
+        if (fontItemCopy)
+            m_propertiesPane->propertiesTree()->collapseItem(fontItemCopy);
+        if (geometryItemCopy)
+            m_propertiesPane->propertiesTree()->collapseItem(geometryItemCopy);
 
         for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
             if (m_propertiesPane->isPermanentItem(topLevelItem))
