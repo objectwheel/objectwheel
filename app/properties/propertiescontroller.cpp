@@ -11,10 +11,13 @@
 #include <paintutils.h>
 #include <utilityfunctions.h>
 
+#include <QTimer>
 #include <QToolButton>
 #include <QColorDialog>
 #include <QSpinBox>
 #include <QMetaEnum>
+
+// FIXME: Fix all QTimer usages
 
 static bool isGeometryProperty(const QString& propertyName)
 {
@@ -22,6 +25,22 @@ static bool isGeometryProperty(const QString& propertyName)
             || propertyName == QStringLiteral("y")
             || propertyName == QStringLiteral("width")
             || propertyName == QStringLiteral("height");
+}
+
+static bool isFontProperty(const QString& propertyName)
+{
+    return propertyName == QStringLiteral("font.family")
+            || propertyName == QStringLiteral("font.bold")
+            || propertyName == QStringLiteral("font.italic")
+            || propertyName == QStringLiteral("font.underline")
+            || propertyName == QStringLiteral("font.pointSize")
+            || propertyName == QStringLiteral("font.pixelSize")
+            || propertyName == QStringLiteral("font.weight")
+            || propertyName == QStringLiteral("font.overline")
+            || propertyName == QStringLiteral("font.strikeout")
+            || propertyName == QStringLiteral("font.capitalization")
+            || propertyName == QStringLiteral("font.kerning")
+            || propertyName == QStringLiteral("font.preferShaping");
 }
 
 static QString cleanUrl(const QUrl& url, const QString& controlDir)
@@ -99,12 +118,174 @@ void PropertiesController::onResetButtonClick() const
         QTreeWidgetItem* item = tree->itemAt(m_propertiesPane->resetButton()->geometry().center());
         Q_ASSERT(item);
         if (item) {
-            QString propertyName = item->text(0);
-            ControlPropertyManager::setBinding(selectedControl, propertyName, QString(),
-                                               ControlPropertyManager::UpdateRenderer |
-                                               ControlPropertyManager::SaveChanges);
-            item->setData(0, PropertiesDelegate::ModificationRole, false);
+            const QString& propertyName = item->text(0);
             m_propertiesPane->resetButton()->setVisible(false);
+            item->setData(0, PropertiesDelegate::ModificationRole, false);
+
+            if (propertyName == "z") {
+                // Only to emit zChanged signal of the ControlPropertyManager
+                ControlPropertyManager::setZ(selectedControl, 0, ControlPropertyManager::DontApplyDesigner);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("z"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                QTimer::singleShot(200, [=] { onControlZChange(selectedControl); });
+            }
+            // NOTE: geometryItem (parent item) is going to be handled, because
+            // onControlGeometryChange is going to be called due to control
+            // syncGeometry stuff. Also no worries for geometryChanged signal of
+            // the ControlPropertyManager since it is also, naturally, will be  called
+            else if (isGeometryProperty(propertyName)) {
+                ControlPropertyManager::setBinding(selectedControl, propertyName, QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+            } else if (propertyName == "geometry") {
+                ControlPropertyManager::setBinding(selectedControl, "x", QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, "y", QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, "width", QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, "height", QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+            } else if (isFontProperty(QStringLiteral("font.") + propertyName)) {
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.") + propertyName, QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                if (auto classItem = item->parent()) {
+                    bool clearModificationFlag = true;
+                    for (int i = 0; i < classItem->childCount(); ++i) {
+                        auto child = classItem->child(i);
+                        if (child != item && child->data(0, PropertiesDelegate::ModificationRole).toBool())
+                            clearModificationFlag = false;
+                    }
+                    if (clearModificationFlag)
+                        classItem->setData(0, PropertiesDelegate::ModificationRole, false);
+                }
+                QTimer::singleShot(200, this, [=] {
+                    if (auto w = tree->itemWidget(item, 1)) {
+                        auto font = selectedControl->property("font").value<QFont>();
+                        const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
+                        const QMetaEnum& e2 = QMetaEnum::fromType<QFont::Capitalization>();
+                        w->blockSignals(true);
+                        if (propertyName == "family")
+                            w->setProperty("currentText", font.family());
+                        else if (propertyName == "bold")
+                            w->setProperty("checked", font.bold());
+                        else if (propertyName == "italic")
+                            w->setProperty("checked", font.italic());
+                        else if (propertyName == "underline")
+                            w->setProperty("checked", font.underline());
+                        else if (propertyName == "pointSize")
+                            w->setProperty("value", font.pointSize());
+                        else if (propertyName == "pixelSize")
+                            w->setProperty("value", font.pixelSize());
+                        else if (propertyName == "weight")
+                            w->setProperty("currentText", e.valueToKey(font.weight()));
+                        else if (propertyName == "overline")
+                            w->setProperty("checked", font.overline());
+                        else if (propertyName == "strikeout")
+                            w->setProperty("checked", font.strikeOut());
+                        else if (propertyName == "capitalization")
+                            w->setProperty("currentText", e2.valueToKey(font.capitalization()));
+                        else if (propertyName == "kerning")
+                            w->setProperty("checked", font.kerning());
+                        else if (propertyName == "preferShaping")
+                            w->setProperty("checked", !(font.styleStrategy() & QFont::PreferNoShaping));
+                        w->blockSignals(false);
+                    }
+                });
+            } else if (propertyName == QStringLiteral("font")) {
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.family"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.bold"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.italic"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.underline"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.pointSize"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.pixelSize"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.weight"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.overline"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.strikeout"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.capitalization"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.kerning"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                ControlPropertyManager::setBinding(selectedControl, QStringLiteral("font.preferShaping"), QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                for (int i = 0; i < item->childCount(); ++i)
+                    item->child(i)->setData(0, PropertiesDelegate::ModificationRole, false);
+                QTimer::singleShot(600, this, [=] {
+                    for (int i = 0; i < item->childCount(); ++i) {
+                        auto child = item->child(i);
+                        if (auto w = tree->itemWidget(child, 1)) {
+                            auto propertyName = child->text(0);
+                            auto font = selectedControl->property("font").value<QFont>();
+                            const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
+                            const QMetaEnum& e2 = QMetaEnum::fromType<QFont::Capitalization>();
+                            w->blockSignals(true);
+                            if (propertyName == "family")
+                                w->setProperty("currentText", font.family());
+                            else if (propertyName == "bold")
+                                w->setProperty("checked", font.bold());
+                            else if (propertyName == "italic")
+                                w->setProperty("checked", font.italic());
+                            else if (propertyName == "underline")
+                                w->setProperty("checked", font.underline());
+                            else if (propertyName == "pointSize")
+                                w->setProperty("value", font.pointSize());
+                            else if (propertyName == "pixelSize")
+                                w->setProperty("value", font.pixelSize());
+                            else if (propertyName == "weight")
+                                w->setProperty("currentText", e.valueToKey(font.weight()));
+                            else if (propertyName == "overline")
+                                w->setProperty("checked", font.overline());
+                            else if (propertyName == "strikeout")
+                                w->setProperty("checked", font.strikeOut());
+                            else if (propertyName == "capitalization")
+                                w->setProperty("currentText", e2.valueToKey(font.capitalization()));
+                            else if (propertyName == "kerning")
+                                w->setProperty("checked", font.kerning());
+                            else if (propertyName == "preferShaping")
+                                w->setProperty("checked", !(font.styleStrategy() & QFont::PreferNoShaping));
+                            w->blockSignals(false);
+                        }
+                    }
+                });
+            } else {
+                ControlPropertyManager::setBinding(selectedControl, propertyName, QString(),
+                                                   ControlPropertyManager::UpdateRenderer |
+                                                   ControlPropertyManager::SaveChanges);
+                QTimer::singleShot(200, this, [=] {
+                    if (auto w = tree->itemWidget(item, 1)) {
+                        auto val = selectedControl->property(propertyName);
+                        auto type = item->data(1, PropertiesDelegate::TypeRole).value<PropertiesDelegate::Type>();
+                        tree->delegate()->setInitialValue(w, type, val);
+                    }
+                });
+            }
         }
     }
 }

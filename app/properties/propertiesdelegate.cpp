@@ -16,294 +16,6 @@
 
 static const char typeProperty[] = "_q_PropertiesDelegate_type";
 
-static void setValues(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value)
-{
-    switch (type) {
-    case PropertiesDelegate::Enum:
-        static_cast<QComboBox*>(widget)->addItems(value.value<QStringList>());
-        break;
-    default:
-        break;
-    }
-}
-
-static void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value)
-{            
-    const char* propertyName = 0;
-    switch (type) {
-    case PropertiesDelegate::Url:
-    case PropertiesDelegate::String:
-        propertyName = "text";
-        break;
-    case PropertiesDelegate::Bool:
-        propertyName = "checked";
-        break;
-    case PropertiesDelegate::Color: {
-        const QColor& color = value.value<QColor>();
-        auto toolButton = static_cast<QToolButton*>(widget);
-        toolButton->setText(color.name(QColor::HexArgb));
-        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black},
-                                                                        toolButton->devicePixelRatioF())));
-    } break;
-    case PropertiesDelegate::Int:
-    case PropertiesDelegate::Real:
-    case PropertiesDelegate::FontSize:
-        propertyName = "value";
-        break;
-    case PropertiesDelegate::Enum:
-    case PropertiesDelegate::FontFamily:
-    case PropertiesDelegate::FontWeight:
-    case PropertiesDelegate::FontCapitalization:
-        propertyName = "currentText";
-        break;
-    default:
-        break;
-    }
-    if (propertyName)
-        widget->setProperty(propertyName, value);
-}
-
-static void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback)
-{           
-    switch (type) {
-    case PropertiesDelegate::Url:
-    case PropertiesDelegate::String: {
-        auto lineEdit = static_cast<QLineEdit*>(widget);
-        QObject::connect(lineEdit, &QLineEdit::editingFinished,
-                         [=] { callback.call(lineEdit->text()); });
-    } break;
-    case PropertiesDelegate::Bool: {
-        auto checkBox = static_cast<QCheckBox*>(widget);
-        QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
-                         [=] { callback.call(checkBox->isChecked()); });
-    } break;
-    case PropertiesDelegate::FontFamily:
-    case PropertiesDelegate::FontWeight:
-    case PropertiesDelegate::FontCapitalization:
-    case PropertiesDelegate::Enum: {
-        auto comboBox = static_cast<QComboBox*>(widget);
-        QObject::connect(comboBox, qOverload<int>(&QComboBox::activated),
-                         [=] { callback.call(comboBox->currentText()); });
-    } break;
-    case PropertiesDelegate::FontSize:
-    case PropertiesDelegate::Int: {
-        auto spinBox = static_cast<QSpinBox*>(widget);
-        QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
-                         [=] { callback.call(QVariant::fromValue<QSpinBox*>(spinBox)); });
-    } break;
-    case PropertiesDelegate::Real: {
-        auto spinBox = static_cast<QDoubleSpinBox*>(widget);
-        QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
-                         [=] { callback.call(QVariant::fromValue<QDoubleSpinBox*>(spinBox)); });
-    } break;
-    case PropertiesDelegate::Color: {
-        auto toolButton = static_cast<QToolButton*>(widget);
-        QObject::connect(toolButton, qOverload<bool>(&QToolButton::clicked),
-                         [=] { callback.call(QVariant::fromValue<QToolButton*>(toolButton)); });
-    } break;
-    default:
-        break;
-    }
-}
-
-static void clearWidget(QWidget* widget, PropertiesDelegate::Type type)
-{    
-    switch (type) {
-    case PropertiesDelegate::Url:
-    case PropertiesDelegate::String: {
-        auto lineEdit = static_cast<QLineEdit*>(widget);
-        lineEdit->deselect();
-        lineEdit->clear();
-    } break;
-    case PropertiesDelegate::FontSize:
-    case PropertiesDelegate::Int: {
-        auto spinBox = static_cast<QSpinBox*>(widget);
-        spinBox->clear();
-    } break;
-    case PropertiesDelegate::Real: {
-        auto spinBox = static_cast<QDoubleSpinBox*>(widget);
-        spinBox->clear();
-    } break;
-    case PropertiesDelegate::Enum: {
-        auto comboBox = static_cast<QComboBox*>(widget);
-        comboBox->clear();
-    } break;
-    case PropertiesDelegate::Bool: {
-        auto checkBox = static_cast<QCheckBox*>(widget);
-        checkBox->setChecked(false);
-    } break;
-    default:
-        break;
-    }
-}
-
-static QWidget* createWidget(PropertiesDelegate::Type type)
-{
-    switch (type) {
-    case PropertiesDelegate::Url:
-    case PropertiesDelegate::String: {
-        auto lineEdit = new QLineEdit;
-        lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
-        lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-        lineEdit->setFocusPolicy(Qt::StrongFocus);
-        lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
-        lineEdit->setMinimumWidth(1);
-        return lineEdit;
-    }
-
-    case PropertiesDelegate::Enum: {
-        auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::StrongFocus);
-        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-        comboBox->setMinimumWidth(1);
-        TransparentStyle::attach(comboBox);
-        return comboBox;
-    }
-
-    case PropertiesDelegate::Bool: {
-        auto checkBox = new QCheckBox;
-        checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        checkBox->setCursor(Qt::PointingHandCursor);
-        checkBox->setFocusPolicy(Qt::StrongFocus);
-        checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
-        checkBox->setMinimumWidth(1);
-        checkBox->setFixedWidth(checkBox->style()->pixelMetric(QStyle::PM_IndicatorWidth) + 3);
-        checkBox->setStyleSheet("QCheckBox { margin-left: 2px; }");
-        return checkBox;
-    }
-
-    case PropertiesDelegate::Color: {
-        auto toolButton = new QToolButton;
-        toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
-        toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-        toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
-        toolButton->setIconSize({12, 12});
-        toolButton->setCursor(Qt::PointingHandCursor);
-        toolButton->setFocusPolicy(Qt::StrongFocus);
-        toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
-        toolButton->setMinimumWidth(1);
-        return toolButton;
-    }
-
-    case PropertiesDelegate::Int: {
-        auto spinBox = new QSpinBox;
-        spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::StrongFocus);
-        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
-        spinBox->setMaximum(std::numeric_limits<int>::max());
-        spinBox->setMinimum(std::numeric_limits<int>::lowest());
-        spinBox->setMinimumWidth(1);
-        TransparentStyle::attach(spinBox);
-        UtilityFunctions::disableWheelEvent(spinBox);
-        return spinBox;
-    }
-
-    case PropertiesDelegate::Real: {
-        auto spinBox = new QDoubleSpinBox;
-        spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::StrongFocus);
-        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
-        spinBox->setMaximum(std::numeric_limits<qreal>::max());
-        spinBox->setMinimum(std::numeric_limits<qreal>::lowest());
-        spinBox->setMinimumWidth(1);
-        TransparentStyle::attach(spinBox);
-        UtilityFunctions::disableWheelEvent(spinBox);
-        return spinBox;
-    }
-
-    case PropertiesDelegate::FontSize: {
-        auto spinBox = new QSpinBox;
-        spinBox->setCursor(Qt::PointingHandCursor);
-        spinBox->setFocusPolicy(Qt::StrongFocus);
-        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        spinBox->setMinimum(0);
-        spinBox->setMaximum(9999);
-        spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
-        spinBox->setMinimumWidth(1);
-        TransparentStyle::attach(spinBox);
-        UtilityFunctions::disableWheelEvent(spinBox);
-        return spinBox;
-    }
-
-    case PropertiesDelegate::FontFamily: {
-        auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::StrongFocus);
-        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-        comboBox->setMinimumWidth(1);
-        comboBox->addItems(QFontDatabase().families());
-        TransparentStyle::attach(comboBox);
-        return comboBox;
-    }
-
-    case PropertiesDelegate::FontWeight: {
-        auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::StrongFocus);
-        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-        comboBox->setMinimumWidth(1);
-        TransparentStyle::attach(comboBox);
-        const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
-        for (int i = 0; i < e.keyCount(); ++i)
-            comboBox->addItem(e.key(i));
-        return comboBox;
-    }
-
-    case PropertiesDelegate::FontCapitalization: {
-        auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
-        comboBox->setCursor(Qt::PointingHandCursor);
-        comboBox->setFocusPolicy(Qt::StrongFocus);
-        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
-        comboBox->setMinimumWidth(1);
-        TransparentStyle::attach(comboBox);
-        const QMetaEnum& e = QMetaEnum::fromType<QFont::Capitalization>();
-        for (int i = 0; i < e.keyCount(); ++i)
-            comboBox->addItem(e.key(i));
-        return comboBox;
-    }
-
-    default:
-        break;
-    }
-
-    return nullptr;
-}
-
-static int smartSize(PropertiesDelegate::Type type)
-{
-    switch (type) {
-    case PropertiesDelegate::Url:
-        return 3;
-    case PropertiesDelegate::Enum:
-        return 12;
-    case PropertiesDelegate::Int:
-        return 8;
-    case PropertiesDelegate::String:
-        return 7;
-    case PropertiesDelegate::Bool:
-        return 30;
-    case PropertiesDelegate::Real:
-        return 35;
-    case PropertiesDelegate::Color:
-        return 5;
-    case PropertiesDelegate::FontSize:
-        return 4;
-    case PropertiesDelegate::FontFamily:
-    case PropertiesDelegate::FontWeight:
-    case PropertiesDelegate::FontCapitalization:
-        return 2;
-    default:
-        return 0;
-    }
-}
-
 PropertiesDelegate::PropertiesDelegate(PropertiesTree* propertiesTree) : QStyledItemDelegate(propertiesTree)
   , m_propertiesTree(propertiesTree)
   , m_cache(new PropertiesDelegateCache)
@@ -497,4 +209,292 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
     painter->drawText(textRect, option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                       QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
     painter->restore();
+}
+
+void PropertiesDelegate::setValues(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value) const
+{
+    switch (type) {
+    case Enum:
+        static_cast<QComboBox*>(widget)->addItems(value.value<QStringList>());
+        break;
+    default:
+        break;
+    }
+}
+
+void PropertiesDelegate::setInitialValue(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value) const
+{
+    const char* propertyName = 0;
+    switch (type) {
+    case Url:
+    case String:
+        propertyName = "text";
+        break;
+    case Bool:
+        propertyName = "checked";
+        break;
+    case Color: {
+        const QColor& color = value.value<QColor>();
+        auto toolButton = static_cast<QToolButton*>(widget);
+        toolButton->setText(color.name(QColor::HexArgb));
+        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black},
+                                                                        toolButton->devicePixelRatioF())));
+    } break;
+    case Int:
+    case Real:
+    case FontSize:
+        propertyName = "value";
+        break;
+    case Enum:
+    case FontFamily:
+    case FontWeight:
+    case FontCapitalization:
+        propertyName = "currentText";
+        break;
+    default:
+        break;
+    }
+    if (propertyName)
+        widget->setProperty(propertyName, value);
+}
+
+void PropertiesDelegate::setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback) const
+{
+    switch (type) {
+    case Url:
+    case String: {
+        auto lineEdit = static_cast<QLineEdit*>(widget);
+        QObject::connect(lineEdit, &QLineEdit::editingFinished,
+                         [=] { callback.call(lineEdit->text()); });
+    } break;
+    case Bool: {
+        auto checkBox = static_cast<QCheckBox*>(widget);
+        QObject::connect(checkBox, qOverload<bool>(&QCheckBox::clicked),
+                         [=] { callback.call(checkBox->isChecked()); });
+    } break;
+    case FontFamily:
+    case FontWeight:
+    case FontCapitalization:
+    case Enum: {
+        auto comboBox = static_cast<QComboBox*>(widget);
+        QObject::connect(comboBox, qOverload<int>(&QComboBox::activated),
+                         [=] { callback.call(comboBox->currentText()); });
+    } break;
+    case FontSize:
+    case Int: {
+        auto spinBox = static_cast<QSpinBox*>(widget);
+        QObject::connect(spinBox, qOverload<int>(&QSpinBox::valueChanged),
+                         [=] { callback.call(QVariant::fromValue<QSpinBox*>(spinBox)); });
+    } break;
+    case Real: {
+        auto spinBox = static_cast<QDoubleSpinBox*>(widget);
+        QObject::connect(spinBox, qOverload<double>(&QDoubleSpinBox::valueChanged),
+                         [=] { callback.call(QVariant::fromValue<QDoubleSpinBox*>(spinBox)); });
+    } break;
+    case Color: {
+        auto toolButton = static_cast<QToolButton*>(widget);
+        QObject::connect(toolButton, qOverload<bool>(&QToolButton::clicked),
+                         [=] { callback.call(QVariant::fromValue<QToolButton*>(toolButton)); });
+    } break;
+    default:
+        break;
+    }
+}
+
+void PropertiesDelegate::clearWidget(QWidget* widget, PropertiesDelegate::Type type) const
+{
+    switch (type) {
+    case Url:
+    case String: {
+        auto lineEdit = static_cast<QLineEdit*>(widget);
+        lineEdit->deselect();
+        lineEdit->clear();
+    } break;
+    case FontSize:
+    case Int: {
+        auto spinBox = static_cast<QSpinBox*>(widget);
+        spinBox->clear();
+    } break;
+    case Real: {
+        auto spinBox = static_cast<QDoubleSpinBox*>(widget);
+        spinBox->clear();
+    } break;
+    case Enum: {
+        auto comboBox = static_cast<QComboBox*>(widget);
+        comboBox->clear();
+    } break;
+    case Bool: {
+        auto checkBox = static_cast<QCheckBox*>(widget);
+        checkBox->setChecked(false);
+    } break;
+    default:
+        break;
+    }
+}
+
+int PropertiesDelegate::smartSize(PropertiesDelegate::Type type) const
+{
+    switch (type) {
+    case Url:
+        return 3;
+    case Enum:
+        return 12;
+    case Int:
+        return 8;
+    case String:
+        return 7;
+    case Bool:
+        return 30;
+    case Real:
+        return 35;
+    case Color:
+        return 5;
+    case FontSize:
+        return 4;
+    case FontFamily:
+    case FontWeight:
+    case FontCapitalization:
+        return 2;
+    default:
+        return 0;
+    }
+}
+
+QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
+{
+    switch (type) {
+    case Url:
+    case String: {
+        auto lineEdit = new QLineEdit;
+        lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
+        lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+        lineEdit->setFocusPolicy(Qt::StrongFocus);
+        lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
+        lineEdit->setMinimumWidth(1);
+        return lineEdit;
+    }
+
+    case Enum: {
+        auto comboBox = new QComboBox;
+        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        comboBox->setCursor(Qt::PointingHandCursor);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
+        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+        comboBox->setMinimumWidth(1);
+        TransparentStyle::attach(comboBox);
+        return comboBox;
+    }
+
+    case Bool: {
+        auto checkBox = new QCheckBox;
+        checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        checkBox->setCursor(Qt::PointingHandCursor);
+        checkBox->setFocusPolicy(Qt::StrongFocus);
+        checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
+        checkBox->setMinimumWidth(1);
+        checkBox->setFixedWidth(checkBox->style()->pixelMetric(QStyle::PM_IndicatorWidth) + 3);
+        checkBox->setStyleSheet("QCheckBox { margin-left: 2px; }");
+        return checkBox;
+    }
+
+    case Color: {
+        auto toolButton = new QToolButton;
+        toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
+        toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+        toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
+        toolButton->setIconSize({12, 12});
+        toolButton->setCursor(Qt::PointingHandCursor);
+        toolButton->setFocusPolicy(Qt::StrongFocus);
+        toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
+        toolButton->setMinimumWidth(1);
+        return toolButton;
+    }
+
+    case Int: {
+        auto spinBox = new QSpinBox;
+        spinBox->setCursor(Qt::PointingHandCursor);
+        spinBox->setFocusPolicy(Qt::StrongFocus);
+        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
+        spinBox->setMaximum(std::numeric_limits<int>::max());
+        spinBox->setMinimum(std::numeric_limits<int>::lowest());
+        spinBox->setMinimumWidth(1);
+        TransparentStyle::attach(spinBox);
+        UtilityFunctions::disableWheelEvent(spinBox);
+        return spinBox;
+    }
+
+    case Real: {
+        auto spinBox = new QDoubleSpinBox;
+        spinBox->setCursor(Qt::PointingHandCursor);
+        spinBox->setFocusPolicy(Qt::StrongFocus);
+        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
+        spinBox->setMaximum(std::numeric_limits<qreal>::max());
+        spinBox->setMinimum(std::numeric_limits<qreal>::lowest());
+        spinBox->setMinimumWidth(1);
+        TransparentStyle::attach(spinBox);
+        UtilityFunctions::disableWheelEvent(spinBox);
+        return spinBox;
+    }
+
+    case FontSize: {
+        auto spinBox = new QSpinBox;
+        spinBox->setCursor(Qt::PointingHandCursor);
+        spinBox->setFocusPolicy(Qt::StrongFocus);
+        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        spinBox->setMinimum(0);
+        spinBox->setMaximum(9999);
+        spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
+        spinBox->setMinimumWidth(1);
+        TransparentStyle::attach(spinBox);
+        UtilityFunctions::disableWheelEvent(spinBox);
+        return spinBox;
+    }
+
+    case FontFamily: {
+        auto comboBox = new QComboBox;
+        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        comboBox->setCursor(Qt::PointingHandCursor);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
+        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+        comboBox->setMinimumWidth(1);
+        comboBox->addItems(QFontDatabase().families());
+        TransparentStyle::attach(comboBox);
+        return comboBox;
+    }
+
+    case FontWeight: {
+        auto comboBox = new QComboBox;
+        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        comboBox->setCursor(Qt::PointingHandCursor);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
+        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+        comboBox->setMinimumWidth(1);
+        TransparentStyle::attach(comboBox);
+        const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
+        for (int i = 0; i < e.keyCount(); ++i)
+            comboBox->addItem(e.key(i));
+        return comboBox;
+    }
+
+    case FontCapitalization: {
+        auto comboBox = new QComboBox;
+        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
+        comboBox->setCursor(Qt::PointingHandCursor);
+        comboBox->setFocusPolicy(Qt::StrongFocus);
+        comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
+        comboBox->setMinimumWidth(1);
+        TransparentStyle::attach(comboBox);
+        const QMetaEnum& e = QMetaEnum::fromType<QFont::Capitalization>();
+        for (int i = 0; i < e.keyCount(); ++i)
+            comboBox->addItem(e.key(i));
+        return comboBox;
+    }
+
+    default:
+        break;
+    }
+
+    return nullptr;
 }

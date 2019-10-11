@@ -12,6 +12,9 @@ class PropertiesDelegate final : public QStyledItemDelegate
     Q_OBJECT
     Q_DISABLE_COPY(PropertiesDelegate)
 
+    friend class PropertiesTree; // For paintBackground
+    friend class PropertiesController; // For lots of things
+
 public:
     enum Type {
         Invalid,
@@ -49,6 +52,8 @@ public:
     ~PropertiesDelegate() override;
 
     void reserveSmart();
+
+private:
     void setEditorData(QWidget* editor, const QModelIndex& index) const override;
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
     void destroyItem(QTreeWidgetItem* item) const;
@@ -70,6 +75,14 @@ public:
         callback.call = std::bind(std::forward<Args>(args)..., std::placeholders::_1);
         return callback;
     }
+
+private:
+    void setValues(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value) const;
+    void setInitialValue(QWidget* widget, PropertiesDelegate::Type type, const QVariant& value) const;
+    void setConnection(QWidget* widget, PropertiesDelegate::Type type, PropertiesDelegate::Callback callback) const;
+    void clearWidget(QWidget* widget, PropertiesDelegate::Type type) const;
+    int smartSize(PropertiesDelegate::Type type) const;
+    QWidget* createWidget(PropertiesDelegate::Type type) const;
 
 private:
     PropertiesTree* m_propertiesTree;

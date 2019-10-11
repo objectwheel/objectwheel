@@ -408,8 +408,8 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
         // FIXME: Fix this whenever we are able to manage raising or lowering
         // Controls based on their indexes,
         control->setFlag(Control::ItemStacksBehindParent,
-                control->property("z").toDouble() < 0
-                && !(parentControl && (parentControl->window() || parentControl->popup())));
+                         control->property("z").toDouble() < 0
+                         && !(parentControl && (parentControl->window() || parentControl->popup())));
 
     }
 
@@ -433,7 +433,7 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
 
         if (options & UpdateRenderer) {
             ControlRenderingManager::scheduleParentUpdate(control->dir(),
-                                                           control->uid(), parentControl->uid());
+                                                          control->uid(), parentControl->uid());
         }
 
         emit instance()->parentChanged(control);
@@ -479,7 +479,7 @@ void ControlPropertyManager::setIndex(Control* control, quint32 index, ControlPr
 }
 
 void ControlPropertyManager::setBinding(Control* control, const QString& bindingName,
-                                         const QString& expression, Options options)
+                                        const QString& expression, Options options)
 {
     Q_ASSERT(!control->hasErrors());
 
@@ -489,12 +489,13 @@ void ControlPropertyManager::setBinding(Control* control, const QString& binding
     if (bindingName.isEmpty())
         return;
 
-    Q_ASSERT(bindingName != "id"
+    Q_ASSERT(expression.isEmpty()
+             || (bindingName != "id"
             && bindingName != "x"
             && bindingName != "y"
             && bindingName != "z"
             && bindingName != "width"
-            && bindingName != "height");
+            && bindingName != "height"));
 
     if (options & SaveChanges)
         SaveManager::setProperty(control, bindingName, expression);
