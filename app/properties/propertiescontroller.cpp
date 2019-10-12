@@ -645,7 +645,10 @@ void PropertiesController::onSceneSelectionChange() const
         m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
         m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
         m_propertiesPane->idEdit()->setText(selectedControl->id());
+        m_propertiesPane->indexEdit()->blockSignals(true);
         m_propertiesPane->indexEdit()->setValue(selectedControl->index());
+        m_propertiesPane->indexEdit()->blockSignals(false);
+
         m_propertiesPane->typeItem()->setHidden(false);
         m_propertiesPane->uidItem()->setHidden(false);
         m_propertiesPane->idItem()->setHidden(false);
