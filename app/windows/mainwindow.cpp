@@ -71,17 +71,17 @@ QDockWidget* assetsDockWidget;
 QDockWidget* propertiesDockWidget;
 QDockWidget* formsDockWidget;
 QDockWidget* toolboxDockWidget;
-QDockWidget* inspectorDockWidget;
+QDockWidget* navigatorDockWidget;
 QToolBar* assetsTitleBar;
 QToolBar* propertiesTitleBar;
 QToolBar* formsTitleBar;
 QToolBar* toolboxTitleBar;
-QToolBar* inspectorTitleBar;
+QToolBar* navigatorTitleBar;
 bool assetsDockWidgetVisible;
 bool propertiesDockWidgetVisible;
 bool formsDockWidgetVisible;
 bool toolboxDockWidgetVisible;
-bool inspectorDockWidgetVisible;
+bool navigatorDockWidgetVisible;
 }
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
@@ -130,34 +130,34 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addToolBar(Qt::TopToolBarArea, m_modeSelectorPane);
 
     /** Set Dock Widgets **/
-    /* Add Inspector Pane */
-    auto inspectorTitleLabel = new QLabel;
-    inspectorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    inspectorTitleLabel->setText("   " + tr("Control Inspector"));
+    /* Add Navigator Pane */
+    auto navigatorTitleLabel = new QLabel;
+    navigatorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    navigatorTitleLabel->setText("   " + tr("Navigator"));
 
-    auto inspectorTitlePinButton = new QToolButton;
-    inspectorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    inspectorTitlePinButton->setCursor(Qt::PointingHandCursor);
-    inspectorTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
-    connect(inspectorTitlePinButton, &QToolButton::clicked,
+    auto navigatorTitlePinButton = new QToolButton;
+    navigatorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
+    navigatorTitlePinButton->setCursor(Qt::PointingHandCursor);
+    navigatorTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
+    connect(navigatorTitlePinButton, &QToolButton::clicked,
             this, [] {
-        inspectorDockWidget->setFloating(!inspectorDockWidget->isFloating());
+        navigatorDockWidget->setFloating(!navigatorDockWidget->isFloating());
     });
 
-    inspectorTitleBar = new QToolBar;
-    inspectorTitleBar->addWidget(inspectorTitleLabel);
-    inspectorTitleBar->addWidget(inspectorTitlePinButton);
-    inspectorTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    inspectorTitleBar->setIconSize(QSize(11, 11));
-    inspectorTitleBar->setFixedHeight(24);
+    navigatorTitleBar = new QToolBar;
+    navigatorTitleBar->addWidget(navigatorTitleLabel);
+    navigatorTitleBar->addWidget(navigatorTitlePinButton);
+    navigatorTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
+    navigatorTitleBar->setIconSize(QSize(11, 11));
+    navigatorTitleBar->setFixedHeight(24);
 
-    inspectorDockWidget = new QDockWidget;
-    inspectorDockWidget->setObjectName("inspectorDockWidget");
-    inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
-    inspectorDockWidget->setWidget(m_navigatorPane);
-    inspectorDockWidget->setWindowTitle(tr("Control Inspector"));
-    inspectorDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, inspectorDockWidget);
+    navigatorDockWidget = new QDockWidget;
+    navigatorDockWidget->setObjectName("navigatorDockWidget");
+    navigatorDockWidget->setTitleBarWidget(navigatorTitleBar);
+    navigatorDockWidget->setWidget(m_navigatorPane);
+    navigatorDockWidget->setWindowTitle(tr("Navigator"));
+    navigatorDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
+    addDockWidget(Qt::RightDockWidgetArea, navigatorDockWidget);
 
     /* Add Properties Pane */
     auto propertiesTitleLabel = new QLabel;
@@ -381,9 +381,9 @@ void MainWindow::showLeftPanes(bool show)
         formsDockWidget->setVisible(show);
         formsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(inspectorDockWidget) == Qt::LeftDockWidgetArea) {
-        inspectorDockWidget->setVisible(show);
-        inspectorDockWidgetVisible = show;
+    if (dockWidgetArea(navigatorDockWidget) == Qt::LeftDockWidgetArea) {
+        navigatorDockWidget->setVisible(show);
+        navigatorDockWidgetVisible = show;
     }
     if (dockWidgetArea(toolboxDockWidget) == Qt::LeftDockWidgetArea) {
         toolboxDockWidget->setVisible(show);
@@ -405,9 +405,9 @@ void MainWindow::showRightPanes(bool show)
         formsDockWidget->setVisible(show);
         formsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(inspectorDockWidget) == Qt::RightDockWidgetArea) {
-        inspectorDockWidget->setVisible(show);
-        inspectorDockWidgetVisible = show;
+    if (dockWidgetArea(navigatorDockWidget) == Qt::RightDockWidgetArea) {
+        navigatorDockWidget->setVisible(show);
+        navigatorDockWidgetVisible = show;
     }
     if (dockWidgetArea(toolboxDockWidget) == Qt::RightDockWidgetArea) {
         toolboxDockWidget->setVisible(show);
@@ -420,7 +420,7 @@ void MainWindow::hideDocks()
     assetsDockWidget->hide();
     propertiesDockWidget->hide();
     formsDockWidget->hide();
-    inspectorDockWidget->hide();
+    navigatorDockWidget->hide();
     toolboxDockWidget->hide();
 }
 
@@ -429,7 +429,7 @@ void MainWindow::showDocks()
     assetsDockWidget->show();
     propertiesDockWidget->show();
     formsDockWidget->show();
-    inspectorDockWidget->show();
+    navigatorDockWidget->show();
     toolboxDockWidget->show();
 }
 
@@ -438,7 +438,7 @@ void MainWindow::restoreDocks()
     assetsDockWidget->setVisible(assetsDockWidgetVisible);
     propertiesDockWidget->setVisible(propertiesDockWidgetVisible);
     formsDockWidget->setVisible(formsDockWidgetVisible);
-    inspectorDockWidget->setVisible(inspectorDockWidgetVisible);
+    navigatorDockWidget->setVisible(navigatorDockWidgetVisible);
     toolboxDockWidget->setVisible(toolboxDockWidgetVisible);
 }
 

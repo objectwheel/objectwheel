@@ -1,4 +1,6 @@
+#include <navigatorcontroller.h>
 #include <navigatorpane.h>
+#include <navigatortree.h>
 #include <saveutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
@@ -10,66 +12,10 @@
 #include <utilityfunctions.h>
 #include <toolutils.h>
 
-#include <QStyledItemDelegate>
-#include <QPainter>
-#include <QHeaderView>
-#include <QScrollBar>
-
 // FIXME: Make sure you check all currentForm() usages if they are null or not before using them
 
-namespace {
-
-const int ROW_HEIGHT = 21;
 bool isProjectStarted = false;
 bool isSelectionHandlingBlocked = false;
-
-void initPalette(QWidget* widget)
-{
-    QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#62A558");
-    palette.setColor(QPalette::Dark, "#599750");
-    palette.setColor(QPalette::AlternateBase, "#e8f7e6");
-    widget->setPalette(palette);
-}
-
-void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool verticalLine)
-{
-    painter->save();
-
-    bool isSelected = option.state & QStyle::State_Selected;
-    const QPalette& pal = option.palette;
-    const QRectF& rect = option.rect;
-
-    QPainterPath path;
-    path.addRect(rect);
-    painter->setClipPath(path);
-    painter->setClipping(true);
-
-    // Fill background
-    if (isSelected) {
-        painter->fillRect(rect, pal.highlight());
-    } else {
-        if (row % 2)
-            painter->fillRect(rect, pal.alternateBase());
-        else
-            painter->fillRect(rect, pal.base());
-    }
-
-    // Draw top and bottom lines
-    QColor lineColor(pal.dark().color());
-    lineColor.setAlpha(50);
-    painter->setPen(lineColor);
-    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-
-    // Draw vertical line
-    if (verticalLine) {
-        painter->drawLine(rect.topRight() + QPointF(-0.5, 0.5),
-                          rect.bottomRight() + QPointF(-0.5, -0.5));
-    }
-
-    painter->restore();
-}
 
 void expandAllChildren(QTreeWidget* treeWidget, QTreeWidgetItem* parentItem)
 {
@@ -91,21 +37,6 @@ Control* controlFromItem(const QTreeWidgetItem* item, Form* form)
     }
 
     return nullptr;
-}
-
-int calculateVisibleRow(const QTreeWidgetItem* item, const QTreeWidget* treeWidget)
-{
-    int count = 0;
-    for (QTreeWidgetItem* topLevelItem : topLevelItems(treeWidget)) {
-        for (QTreeWidgetItem* childItem : allSubChildItems(topLevelItem, true, false)) {
-            if (childItem == item)
-                return count;
-
-            ++count;
-        }
-    }
-
-    return count;
 }
 
 void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& childItems)
@@ -130,247 +61,55 @@ void addChildrenIntoItem(QTreeWidgetItem* parentItem, const QList<Control*>& chi
         addChildrenIntoItem(item, child->childControls(false));
     }
 }
-}
 
-class InspectorListDelegate: public QStyledItemDelegate
-{
-    Q_OBJECT
-
-public:
-    explicit InspectorListDelegate(InspectorPane* parent) : QStyledItemDelegate(parent)
-      , m_inspectorPane(parent)
-    {}
-
-    void paint(QPainter* painter, const QStyleOptionViewItem& option,
-               const QModelIndex& index) const override
-    {
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-
-        const bool isSelected = option.state & QStyle::State_Selected;
-        const QAbstractItemModel* model = index.model();
-        const QIcon& icon = model->data(index, Qt::DecorationRole).value<QIcon>();
-
-        QRectF iconRect({}, QSizeF{option.decorationSize});
-        iconRect.moveCenter(option.rect.center());
-        iconRect.moveLeft(option.rect.left() + 5);
-
-        fillBackground(painter, option,
-                       calculateVisibleRow(m_inspectorPane->itemFromIndex(index), m_inspectorPane),
-                       index.column() == 0);
-
-        // Draw icon
-        Q_ASSERT(UtilityFunctions::window(m_inspectorPane));
-        const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_inspectorPane),
-                                                option.decorationSize,
-                                                isSelected ? QIcon::Selected : QIcon::Normal);
-        painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
-
-        // Draw text
-        if (model->data(index, Qt::UserRole).toBool() && isSelected)
-            painter->setPen(option.palette.linkVisited().color().lighter(140));
-        else if (model->data(index, Qt::UserRole).toBool() && !isSelected)
-            painter->setPen(option.palette.linkVisited().color());
-        else if (isSelected)
-            painter->setPen(option.palette.highlightedText().color());
-        else
-            painter->setPen(option.palette.text().color());
-
-        const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
-        const QString& text = index.data(Qt::DisplayRole).toString();
-        painter->drawText(textRect,
-                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
-                          QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
-
-        painter->restore();
-    }
-
-    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
-    {
-        const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
-        return QSize(size.width(), ROW_HEIGHT);
-    }
-
-private:
-    InspectorPane* m_inspectorPane;
-};
-
-InspectorPane::InspectorPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
+NavigatorController::NavigatorController(NavigatorPane* navigatorPane, DesignerScene* designerScene, QObject* parent) : QObject(parent)
+  , m_navigatorPane(navigatorPane)
   , m_designerScene(designerScene)
 {
-    initPalette(this);
-
-    header()->setFixedHeight(23);
-    header()->setDefaultSectionSize(1);
-    header()->setMinimumSectionSize(1);
-    header()->resizeSection(0, 220); // Don't resize the last (stretched) column
-
-    headerItem()->setText(0, tr("Controls"));
-    headerItem()->setText(1, tr("Ui"));
-
-    setColumnCount(2);
-    setIndentation(16);
-    setIconSize({15, 15});
-    setDragEnabled(false);
-    setUniformRowHeights(true);
-    setDropIndicatorShown(false);
-    setExpandsOnDoubleClick(false);
-    setItemDelegate(new InspectorListDelegate(this));
-    setFocusPolicy(Qt::NoFocus);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
-    setSelectionBehavior(QTreeWidget::SelectRows);
-    setSelectionMode(QTreeWidget::ExtendedSelection);
-    setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
-    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setStyleSheet(
-                QString {
-                    "QTreeView {"
-                    "    border: 1px solid %1;"
-                    "} QHeaderView::section {"
-                    "    color: %4;"
-                    "    padding-left: 5px;"
-                    "    padding-top: 3px;"
-                    "    padding-bottom: 3px;"
-                    "    border-style: solid;"
-                    "    border-left-width: 0px;"
-                    "    border-top-width: 0px;"
-                    "    border-bottom-color: %1;"
-                    "    border-bottom-width: 1px;"
-                    "    border-right-color: %1; "
-                    "    border-right-width: 1px;"
-                    "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
-                    "                                stop:0 %2, stop:1 %3);"
-                    "}"
-                    "QHeaderView::section:last{"
-                    "    border-left-width: 0px;"
-                    "    border-right-width: 0px;"
-                    "}"
-                }
-                .arg(palette().dark().color().darker(120).name())
-                .arg(palette().light().color().name())
-                .arg(palette().dark().color().name())
-                .arg(palette().brightText().color().name())
-                );
-
     // WARNING: Beware, ControlPropertyManager signals are emitted everytime a setProperty called
     // no matter what. I think we should consider reviewing related slots against possible miscalls
-    connect(this, &InspectorPane::itemSelectionChanged,
-            this, &InspectorPane::onItemSelectionChange);
+    connect(m_navigatorPane->navigatorTree(), &NavigatorTree::itemSelectionChanged,
+            this, &NavigatorController::onItemSelectionChange);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
-            this, &InspectorPane::onCurrentFormChange);
+            this, &NavigatorController::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-            this, &InspectorPane::onControlRemove);
+            this, &NavigatorController::onControlRemove);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-            this, &InspectorPane::onFormRemove);
+            this, &NavigatorController::onFormRemove);
     connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &InspectorPane::onProjectStart);
+            this, &NavigatorController::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
-            this, &InspectorPane::onSceneSelectionChange);
+            this, &NavigatorController::onSceneSelectionChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
-            this, &InspectorPane::onControlRenderInfoChange);
+            this, &NavigatorController::onControlRenderInfoChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
-            this, &InspectorPane::onControlIdChange);
+            this, &NavigatorController::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
-            this, &InspectorPane::onControlIndexChange);
+            this, &NavigatorController::onControlIndexChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::parentChanged,
-            this, &InspectorPane::onControlParentChange);
+            this, &NavigatorController::onControlParentChange);
 }
 
-void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
-{
-    painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
-
-    const qreal width = 10;
-    const bool hasChild = itemFromIndex(index)->childCount();
-    const bool isSelected = itemFromIndex(index)->isSelected();
-
-    QRectF handleRect(0, 0, width, width);
-    handleRect.moveCenter(rect.center());
-    handleRect.moveRight(rect.right() - 0.5);
-
-    QStyleOptionViewItem option;
-    option.initFrom(this);
-    option.rect = rect;
-    if (isSelected)
-        option.state |= QStyle::State_Selected;
-    else if (option.state & QStyle::State_Selected)
-        option.state &= ~QStyle::State_Selected;
-
-    fillBackground(painter, option, calculateVisibleRow(itemFromIndex(index), this), false);
-
-    // Draw handle
-    if (hasChild) {
-        QPen pen;
-        pen.setWidthF(1.2);
-        pen.setColor(isSelected ? palette().highlightedText().color() : palette().text().color());
-        painter->setPen(pen);
-        painter->setBrush(Qt::NoBrush);
-        painter->drawRoundedRect(handleRect, 0, 0);
-
-        painter->drawLine(QPointF(handleRect.left() + 2.5, handleRect.center().y()),
-                          QPointF(handleRect.right() - 2.5, handleRect.center().y()));
-
-        if (!isExpanded(index)) {
-            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2.5),
-                              QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
-        }
-    }
-
-    painter->restore();
-}
-
-void InspectorPane::paintEvent(QPaintEvent* e)
-{
-    QPainter painter(viewport());
-    painter.fillRect(rect(), palette().base());
-    painter.setClipping(true);
-
-    QColor lineColor(palette().dark().color());
-    lineColor.setAlpha(50);
-    painter.setPen(lineColor);
-
-    for (int i = 0; i < viewport()->height() / qreal(ROW_HEIGHT); ++i) {
-        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
-        QPainterPath path;
-        path.addRect(rect);
-        painter.setClipPath(path);
-
-        // Fill background
-        if (i % 2)
-            painter.fillRect(rect, palette().alternateBase());
-
-        // Draw vertical line
-        QRectF cell(rect);
-        cell.setSize(QSizeF(header()->sectionSize(0), rect.height()));
-        painter.drawLine(cell.topRight() + QPointF(-0.5, 0.5),
-                         cell.bottomRight() + QPointF(-0.5, -0.5));
-
-        // Draw top and bottom lines
-        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-    }
-
-    QTreeWidget::paintEvent(e);
-}
-
-void InspectorPane::discharge()
+void NavigatorController::discharge()
 {
     isProjectStarted = false;
     m_formStates.clear();
     clear();
 }
 
-void InspectorPane::onProjectStart()
+void NavigatorController::clear()
+{
+
+}
+
+void NavigatorController::onProjectStart()
 {
     Q_ASSERT(!isProjectStarted);
     isProjectStarted = true;
     onCurrentFormChange(m_designerScene->currentForm());
 }
 
-void InspectorPane::onCurrentFormChange(Form* currentForm)
+void NavigatorController::onCurrentFormChange(Form* currentForm)
 {
     if (!isProjectStarted)
         return;
@@ -441,11 +180,11 @@ void InspectorPane::onCurrentFormChange(Form* currentForm)
         }
     }
 
-    verticalScrollBar()->setSliderPosition(state.verticalScrollBarPosition);
-    horizontalScrollBar()->setSliderPosition(state.horizontalScrollBarPosition);
+    m_navigatorPane->navigatorTree()->verticalScrollBar()->setSliderPosition(state.verticalScrollBarPosition);
+    m_navigatorPane->navigatorTree()->horizontalScrollBar()->setSliderPosition(state.horizontalScrollBarPosition);
 }
 
-void InspectorPane::onFormRemove(Control* control)
+void NavigatorController::onFormRemove(Control* control)
 {
     if (!isProjectStarted)
         return;
@@ -457,7 +196,7 @@ void InspectorPane::onFormRemove(Control* control)
 }
 
 // FIXME: FFFF
-void InspectorPane::onControlCreation(Control* control)
+void NavigatorController::onControlCreation(Control* control)
 {
     if (!isProjectStarted)
         return;
@@ -476,7 +215,7 @@ void InspectorPane::onControlCreation(Control* control)
     }
 }
 
-void InspectorPane::onControlRemove(Control* control)
+void NavigatorController::onControlRemove(Control* control)
 {
     if (!isProjectStarted)
         return;
@@ -498,7 +237,7 @@ void InspectorPane::onControlRemove(Control* control)
 }
 
 // FIXME: FFFF
-void InspectorPane::onControlParentChange(Control* control)
+void NavigatorController::onControlParentChange(Control* control)
 {
     if (!isProjectStarted)
         return;
@@ -539,7 +278,7 @@ void InspectorPane::onControlParentChange(Control* control)
     }
 }
 
-void InspectorPane::onControlRenderInfoChange(Control* control, bool codeChanged)
+void NavigatorController::onControlRenderInfoChange(Control* control, bool codeChanged)
 {
     if (!isProjectStarted)
         return;
@@ -579,7 +318,7 @@ void InspectorPane::onControlRenderInfoChange(Control* control, bool codeChanged
 }
 
 // FIXME: FFFF
-void InspectorPane::onControlIndexChange(Control* control)
+void NavigatorController::onControlIndexChange(Control* control)
 {
 //    if (!isProjectStarted)
 //        return;
@@ -612,7 +351,7 @@ void InspectorPane::onControlIndexChange(Control* control)
 //    }
 }
 
-void InspectorPane::onControlIdChange(Control* control, const QString& previousId)
+void NavigatorController::onControlIdChange(Control* control, const QString& previousId)
 {
     if (!isProjectStarted)
         return;
@@ -639,7 +378,7 @@ void InspectorPane::onControlIdChange(Control* control, const QString& previousI
     }
 }
 
-void InspectorPane::onSceneSelectionChange()
+void NavigatorController::onSceneSelectionChange()
 {
     if (!isProjectStarted)
         return;
@@ -672,7 +411,7 @@ void InspectorPane::onSceneSelectionChange()
     isSelectionHandlingBlocked = false;
 }
 
-void InspectorPane::onItemSelectionChange()
+void NavigatorController::onItemSelectionChange()
 {
     if (!isProjectStarted)
         return;
@@ -693,10 +432,3 @@ void InspectorPane::onItemSelectionChange()
     emit controlSelectionChanged(selectedControls);
     isSelectionHandlingBlocked = false;
 }
-
-QSize InspectorPane::sizeHint() const
-{
-    return QSize{310, 220};
-}
-
-#include "inspectorpane.moc"

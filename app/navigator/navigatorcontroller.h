@@ -4,36 +4,37 @@
 #include <QTreeWidget>
 #include <QHash>
 #include <QPointer>
+#include <navigatorpane.h>
 
 class Form;
 class Control;
 class DesignerScene;
 
-class InspectorPane : public QTreeWidget
+class NavigatorController final : public QObject
 {
     Q_OBJECT
-
-    friend class InspectorListDelegate; // For itemFromIndex()
+    Q_DISABLE_COPY(NavigatorController)
 
     struct FormState {
         QList<QString> selectedIds;
         QList<QString> collapsedIds;
-
         int verticalScrollBarPosition = 0;
         int horizontalScrollBarPosition = 0;
     };
 
 public:
-    explicit InspectorPane(DesignerScene* designerScene, QWidget* parent = nullptr);
-
+    explicit NavigatorController(NavigatorPane* navigatorPane, DesignerScene* designerScene,
+                                 QObject* parent = nullptr);
 public slots:
     void discharge();
+    void clear();
+
+private slots:
     void onControlParentChange(Control* control);
     void onControlIndexChange(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);
     void onControlRenderInfoChange(Control* control, bool codeChanged);
 
-private slots:
     void onProjectStart();
     void onSceneSelectionChange();
     void onControlCreation(Control* control);
@@ -42,15 +43,11 @@ private slots:
     void onCurrentFormChange(Form* currentForm);
     void onItemSelectionChange();
 
-private:
-    void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
-    void paintEvent(QPaintEvent* e) override;
-    QSize sizeHint() const override;
-
 signals:
     void controlSelectionChanged(const QList<Control*>& selectedControls);
 
 private:
+    NavigatorPane* m_navigatorPane;
     DesignerScene* m_designerScene;
     QHash<Form*, FormState> m_formStates;
     QPointer<Form> m_currentForm;

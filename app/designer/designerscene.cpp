@@ -115,9 +115,9 @@ void DesignerScene::setCurrentForm(Form* currentForm)
         return;
 
     /*
-        NOTE: InspectorPane dependency: We emit currentFormChanged signal before actually showing
+        NOTE: NavigatorPane dependency: We emit currentFormChanged signal before actually showing
               it thus "selectionChanged" signal is being emitted afterwards. Otherwise selectionChanged
-              signal getting emitted before currentFormChanged signal, hence InspectorPane clears
+              signal getting emitted before currentFormChanged signal, hence NavigatorPane clears
               the selection before saving selection state of a form in currentFormChanged signal.
     */
 
