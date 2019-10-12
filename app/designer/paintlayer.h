@@ -40,7 +40,7 @@ private:
     void paintHoverOutline(QPainter* painter);
     void paintGuidelines(QPainter* painter);
     void paintSelectionOutlines(QPainter* painter);
-    void paintMovingSelectionOutline(QPainter* painter);
+    void paintMultipleSelectionOutline(QPainter* painter);
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 
 private:

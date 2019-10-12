@@ -83,6 +83,11 @@ bool PropertiesPane::isPermanentItem(QTreeWidgetItem* item) const
             || item == m_typeItem;
 }
 
+int PropertiesPane::permanentItemCount() const
+{
+    return 4;
+}
+
 PropertiesTree* PropertiesPane::propertiesTree() const
 {
     return m_propertiesTree;

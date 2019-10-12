@@ -1,7 +1,7 @@
 #ifndef PROPERTIESCONTROLLER_H
 #define PROPERTIESCONTROLLER_H
 
-#include <renderinfo.h>
+#include <QObject>
 
 class Control;
 class PropertiesPane;
@@ -38,15 +38,16 @@ private slots:
     void onRealPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                             const QString& propertyName, const QVariant& value) const;
     void onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* opponentItem,
-                                QTreeWidgetItem* classItem, const QString& propertyName, const QVariant& value) const;
+                                QTreeWidgetItem* classItem, const QString& propertyName,
+                                const QVariant& value) const;
     void onFontFamilyPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                   const QVariant& value) const;
     void onFontWeightPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
-                                  const QMetaEnum& _enum, const QVariant& value) const;
+                                  const QVariant& value) const;
     void onFontCapitalizationPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* fontClassItem,
-                                          const QMetaEnum& _enum, const QVariant& value) const;
+                                          const QVariant& value) const;
     void onEnumPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
-                            const QString& propertyName, const Enum& _enum, const QVariant& value) const;
+                            const QString& propertyName, const QVariant& value) const;
     void onUrlPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                            const QString& propertyName, const QVariant& value) const;
     void onStringPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
@@ -67,8 +68,9 @@ private:
     DesignerScene* m_designerScene;
     int m_verticalScrollPosition;
     int m_horizontalScrollPosition;
-    bool m_fontItemExpanded;
-    bool m_geometryItemExpanded;
+    bool m_fontItemOpen;
+    bool m_geometryItemOpen;
+    mutable bool m_isExpandCollapseSignalsBlocked;
 };
 
 #endif // PROPERTIESCONTROLLER_H

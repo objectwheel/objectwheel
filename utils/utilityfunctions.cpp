@@ -346,11 +346,12 @@ QString toToolTip(const QString& str)
     return QStringLiteral(R"(<span style="font-size:12px !important;">%1</span>)").arg(str);
 }
 
-QRectF getGeometryFromProperties(const QVector<PropertyNode>& properties)
+QRectF itemGeometry(const QVector<PropertyNode>& properties)
 {
     QRectF geometry;
     for (const PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
+        const QList<QString>& propertyKeys = propertyNode.properties.keys();
+        for (const QString& propertyName : propertyKeys) {
             if (propertyName == "x")
                 geometry.moveLeft(propertyNode.properties.value(propertyName).toReal());
             else if (propertyName == "y")
@@ -364,26 +365,20 @@ QRectF getGeometryFromProperties(const QVector<PropertyNode>& properties)
     return geometry;
 }
 
-QVariant getProperty(const QString& property, const QVector<PropertyNode>& properties)
+QVariant itemProperty(const QString& propertyName, const QVector<PropertyNode>& properties)
 {
     for (const PropertyNode& propertyNode : properties) {
-        for (const QString& propertyName : propertyNode.properties.keys()) {
-            if (propertyName == property)
-                return propertyNode.properties.value(propertyName);
+        const QList<QString>& propertyKeys = propertyNode.properties.keys();
+        for (const QString& name : propertyKeys) {
+            if (name == propertyName)
+                return propertyNode.properties.value(name);
+        }
+        for (const Enum& _enum : qAsConst(propertyNode.enums)) {
+            if (_enum.name == propertyName)
+                return QVariant::fromValue<Enum>(_enum);
         }
     }
     return QVariant();
-}
-
-Enum getEnum(const QString& name, const QVector<PropertyNode>& properties)
-{
-    for (const PropertyNode& propertyNode : properties) {
-        for (const Enum& enumm : propertyNode.enums) {
-            if (enumm.name == name)
-                return enumm;
-        }
-    }
-    return Enum();
 }
 
 QVariantMap localDeviceInfo()

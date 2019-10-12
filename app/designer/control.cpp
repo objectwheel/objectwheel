@@ -187,18 +187,22 @@ void Control::setRenderInfo(const RenderInfo& info)
 
     m_renderInfo = info;
 
+    const QVariant& scale = itemProperty("scale");
+    const QVariant& rotation = itemProperty("rotation");
+    const QVariant& transformOrigin = itemProperty("transformOrigin");
+
     // FIXME: Fix this whenever we are able to manage raising or lowering
     // Controls based on their indexes,
-    setFlag(ItemStacksBehindParent, property("z").toDouble() < 0
+    setFlag(ItemStacksBehindParent, itemProperty("z").toDouble() < 0
             && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
                                      parentControl()->window() ||
                                      parentControl()->popup())));
 
     updateAnchors();
-    setResizable(gui());
-    setZValue(property("z").toDouble());
-    setFlag(ItemClipsChildrenToShape, !settings->showClippedControls && property("clip").toBool());
-    setOpacity(property("opacity").isValid() ? property("opacity").toDouble() : 1);
+    setResizable(gui() && (!rotation.isValid() || rotation.toReal() == 0));
+    setZValue(itemProperty("z").toDouble());
+    setFlag(ItemClipsChildrenToShape, !settings->showClippedControls && itemProperty("clip").toBool());
+    setOpacity(itemProperty("opacity").isValid() ? itemProperty("opacity").toDouble() : 1);
 
     if (info.codeChanged) {
         for (Control* childControl : childControls(false))
@@ -254,8 +258,42 @@ void Control::setRenderInfo(const RenderInfo& info)
         }
     }
 
+
     m_renderInfo.image.setDevicePixelRatio(devicePixelRatio()); // QDataStream cannot write dpr
     setPixmap(UtilityFunctions::imageToPixmap(m_renderInfo.image));
+
+    // Make sure this is called after setting size of the control
+    if (transformOrigin.isValid()) {
+        const Enum& e = transformOrigin.value<Enum>();
+        if (e.value == QStringLiteral("TopLeft"))
+            setTransformOriginPoint(rect().topLeft());
+        else if (e.value == QStringLiteral("Top"))
+            setTransformOriginPoint(UtilityFunctions::topCenter(rect()));
+        else if (e.value == QStringLiteral("TopRight"))
+            setTransformOriginPoint(rect().topRight());
+        else if (e.value == QStringLiteral("Left"))
+            setTransformOriginPoint(UtilityFunctions::leftCenter(rect()));
+        else if (e.value == QStringLiteral("Center"))
+            setTransformOriginPoint(rect().center());
+        else if (e.value == QStringLiteral("Right"))
+            setTransformOriginPoint(UtilityFunctions::rightCenter(rect()));
+        else if (e.value == QStringLiteral("BottomLeft"))
+            setTransformOriginPoint(rect().bottomLeft());
+        else if (e.value == QStringLiteral("Botttom"))
+            setTransformOriginPoint(UtilityFunctions::bottomCenter(rect()));
+        else if (e.value == QStringLiteral("BottomRight"))
+            setTransformOriginPoint(rect().bottomRight());
+    } else {
+        setTransformOriginPoint(QPointF(0, 0));
+    }
+    if (scale.isValid())
+        setScale(scale.toReal());
+    else
+        setScale(1);
+    if (rotation.isValid())
+        setRotation(rotation.toReal());
+    else
+        setRotation(0);
 
     emit renderInfoChanged(info.codeChanged);
 }
@@ -274,12 +312,12 @@ void Control::syncGeometry()
     if (!geometrySyncEnabled())
         return;
 
-    setFlag(ItemStacksBehindParent, property("z").toDouble() < 0
+    setFlag(ItemStacksBehindParent, itemProperty("z").toDouble() < 0
             && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
                                      parentControl()->window() ||
                                      parentControl()->popup())));
 
-    const QRectF& geometry = UtilityFunctions::getGeometryFromProperties(m_renderInfo.properties);
+    const QRectF& geometry = UtilityFunctions::itemGeometry(m_renderInfo.properties);
     if (geometry.isValid()) {
         if (type() != Form::Type)
             ControlPropertyManager::setPos(this, geometry.topLeft(), ControlPropertyManager::NoOption);
@@ -456,12 +494,9 @@ void Control::updateAnchors()
     }
 }
 
-QVariant Control::property(const QString& propertyName) const
+QVariant Control::itemProperty(const QString& propertyName) const
 {
-    auto val = UtilityFunctions::getProperty(propertyName, m_renderInfo.properties);
-    if (val.isValid())
-        return val;
-    return QVariant::fromValue<Enum>(UtilityFunctions::getEnum(propertyName, m_renderInfo.properties));
+    return UtilityFunctions::itemProperty(propertyName, m_renderInfo.properties);
 }
 
 Control* Control::parentControl() const

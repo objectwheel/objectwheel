@@ -57,7 +57,7 @@ public:
     void setGeometrySyncEnabled(bool geometrySyncEnabled);
 
     void updateAnchors();
-    QVariant property(const QString& propertyName) const;
+    QVariant itemProperty(const QString& propertyName) const;
     Control* parentControl() const;
     Control* topLevelControl() const;
 

@@ -88,6 +88,7 @@ signals:
     void beingDraggedChanged();
     void beingResizedChanged();
     void beingHighlightedChanged();
+    void transformOriginPointChanged();
 
 private:
     bool m_raised;

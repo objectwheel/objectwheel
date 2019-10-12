@@ -63,7 +63,7 @@ void ResizerItem::updatePosition()
     if (targetItem() == 0)
         return;
 
-    const QRectF& targetRect = targetItem()->mapRectToScene(targetItem()->rect());
+    const QRectF& targetRect = targetItem()->sceneBoundingRect();
 
     switch (m_placement) {
     case ResizerItem::Top:

@@ -538,15 +538,10 @@ QSizeF DesignerScene::snapSize(const QPointF& pos, const QSizeF& size)
     return size;
 }
 
-QRectF DesignerScene::rect(const Control* control)
-{
-    return control->mapRectToScene(control->rect());
-}
-
 QRectF DesignerScene::contentRect(const Control* control)
 {
     const QMarginsF& margins = control->margins();
-    return rect(control).adjusted(margins.left(), margins.top(), -margins.right(), -margins.bottom());
+    return control->sceneBoundingRect().adjusted(margins.left(), margins.top(), -margins.right(), -margins.bottom());
 }
 
 QRectF DesignerScene::itemsBoundingRect(const QList<DesignerItem*>& items)

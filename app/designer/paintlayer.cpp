@@ -100,7 +100,7 @@ static QPointF createParentAnchorPoint(const Control* childControl, const Contro
                                        AnchorLine::Type anchorLineType)
 {
     const QRectF& parentBoundingRect = DesignerScene::contentRect(parentControl);
-    const QRectF& childBoundingRect = DesignerScene::rect(childControl);
+    const QRectF& childBoundingRect = childControl->sceneBoundingRect();
     switch (anchorLineType) {
     case AnchorLine::Baseline:
     case AnchorLine::Top:
@@ -122,7 +122,7 @@ static QPointF createParentAnchorPoint(const Control* childControl, const Contro
 
 static QPointF createAnchorPoint(const Control* control, AnchorLine::Type anchorLineType, bool source)
 {
-    const QRectF& boundingRect = source ? DesignerScene::rect(control)
+    const QRectF& boundingRect = source ? control->sceneBoundingRect()
                                         : DesignerScene::contentRect(control);
     switch (anchorLineType) {
     case AnchorLine::Baseline:
@@ -156,7 +156,7 @@ static QPointF createControlPoint(const QPointF& firstEditPoint, AnchorLine::Typ
 static void updateAnchorLinePoints(QPointF& firstPoint, QPointF& secondPoint,
                                    const AnchorLine& anchorLine, bool source)
 {
-    QRectF boundingRectangle = source ? DesignerScene::rect(anchorLine.control())
+    QRectF boundingRectangle = source ? anchorLine.control()->sceneBoundingRect()
                                       : DesignerScene::contentRect(anchorLine.control());
     switch (anchorLine.type()) {
     case AnchorLine::VerticalCenter:
@@ -217,12 +217,12 @@ static QPainterPath highlightPath(const Control* control, bool source)
     QPainterPath parentPath;
     if (!control->scene())
         return parentPath;
-    parentPath.addRect(control->scene()->outerRect(source ? DesignerScene::rect(control)
+    parentPath.addRect(control->scene()->outerRect(source ? control->sceneBoundingRect()
                                                           : DesignerScene::contentRect(control)));
     QPainterPath chilrenPath;
     chilrenPath.setFillRule(Qt::WindingFill);
     for (Control* childControl : control->childControls(false))
-        chilrenPath.addRect(control->scene()->outerRect(DesignerScene::rect(childControl)));
+        chilrenPath.addRect(control->scene()->outerRect(childControl->sceneBoundingRect()));
     return parentPath - chilrenPath;
 }
 
@@ -492,7 +492,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->setBrush(Qt::NoBrush);
     painter->setPen(DesignerScene::pen(settings->outlineColor));
     if (sourceControl)
-        painter->drawRect(scene()->outerRect(DesignerScene::rect(sourceControl)));
+        painter->drawRect(scene()->outerRect(sourceControl->sceneBoundingRect()));
     if (targetControl)
         painter->drawRect(scene()->outerRect(DesignerScene::contentRect(targetControl)));
 
@@ -550,7 +550,7 @@ void PaintLayer::paintHoverOutline(QPainter* painter)
             if (!item->isSelected()) {
                 painter->setBrush(Qt::NoBrush);
                 painter->setPen(DesignerScene::pen());
-                painter->drawRect(scene()->outerRect(item->mapRectToScene(item->rect())));
+                painter->drawRect(scene()->outerRect(item->sceneBoundingRect()));
             }
         }
     }
@@ -581,7 +581,7 @@ void PaintLayer::paintSelectionOutlines(QPainter* painter)
     QPainterPath outlinesPath, resizersPath;
     resizersPath.setFillRule(Qt::WindingFill);
     for (DesignerItem* selectedItem : scene()->selectedItems()) {
-        const QRectF& rect = selectedItem->mapRectToScene(selectedItem->rect());
+        const QRectF& rect = selectedItem->sceneBoundingRect();
         QPainterPath outlinePath;
         outlinePath.addRect(rect.adjusted(-m, -m, m, m));
         outlinePath.addRect(rect.adjusted(m, m, -m, -m));
@@ -598,7 +598,7 @@ void PaintLayer::paintSelectionOutlines(QPainter* painter)
     painter->drawPath(outlinesPath.subtracted(resizersPath));
 }
 
-void PaintLayer::paintMovingSelectionOutline(QPainter* painter)
+void PaintLayer::paintMultipleSelectionOutline(QPainter* painter)
 {
     Q_ASSERT(scene());
     // Only one item can be resized at a time, so this piece of code
@@ -615,7 +615,7 @@ void PaintLayer::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidg
 {
     paintHoverOutline(painter);
     paintSelectionOutlines(painter);
-    paintMovingSelectionOutline(painter);
+    paintMultipleSelectionOutline(painter);
     paintGuidelines(painter);
     paintAnchors(painter);
     paintAnchorConnection(painter);

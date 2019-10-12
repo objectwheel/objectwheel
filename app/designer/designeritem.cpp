@@ -371,6 +371,9 @@ QVariant DesignerItem::itemChange(int change, const QVariant& value)
         if (!m_inSetGeometry)
             emit geometryChanged();
         break;
+    case ItemTransformOriginPointHasChanged:
+        emit transformOriginPointChanged();
+        break;
     default:
         break;
     }

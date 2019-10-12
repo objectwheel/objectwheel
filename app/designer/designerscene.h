@@ -86,7 +86,6 @@ public:
     static QSizeF snapSize(qreal x, qreal y, qreal w, qreal h);
     static QSizeF snapSize(const QPointF& pos,const QSizeF& size);
 
-    static QRectF rect(const Control* control);
     static QRectF contentRect(const Control* control);
     static QRectF itemsBoundingRect(const QList<DesignerItem*>& items);
 

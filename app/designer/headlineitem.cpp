@@ -85,7 +85,7 @@ void HeadlineItem::updateGeometryNow()
         hstr.replace(QRegularExpression("\\d"), "9");
         width += fm.horizontalAdvance(dimensionsText(wstr.toDouble(), hstr.toDouble()));
     }
-    setPos(targetItem() ? targetItem()->scenePos() : QPointF());
+    setPos(targetItem() ? targetItem()->sceneBoundingRect().topLeft() : QPointF());
     setRect(-0.5, -ts.height(), qMin(ps.width(), width + MARGIN), ts.height());
     m_geometryUpdateScheduled = false;
 }

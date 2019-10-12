@@ -19,7 +19,7 @@ public:
     explicit PropertiesPane(QWidget* parent = nullptr);
 
     bool isPermanentItem(QTreeWidgetItem* item) const;
-
+    int permanentItemCount() const;
     PropertiesTree* propertiesTree() const;
     LineEdit* searchEdit() const;
     QTreeWidgetItem* typeItem() const;

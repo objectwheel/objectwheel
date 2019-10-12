@@ -62,11 +62,23 @@ void GadgetLayer::addResizers(DesignerItem* item)
         resizer->updatePosition();
         connect(item, &DesignerItem::geometryChanged,
                 resizer, &ResizerItem::updatePosition);
+        connect(item, &DesignerItem::scaleChanged,
+                resizer, &ResizerItem::updatePosition);
+        connect(item, &DesignerItem::rotationChanged,
+                resizer, &ResizerItem::updatePosition);
+        connect(item, &DesignerItem::transformOriginPointChanged,
+                resizer, &ResizerItem::updatePosition);
         connect(item, &DesignerItem::resizableChanged,
                 resizer, [=] { resizer->setVisible(item->isSelected() && item->resizable()); });
         resizers.append(resizer);
     }
     connect(item, &DesignerItem::geometryChanged,
+            this, [=] { updateResizerPositions(item); });
+    connect(item, &DesignerItem::scaleChanged,
+            this, [=] { updateResizerPositions(item); });
+    connect(item, &DesignerItem::rotationChanged,
+            this, [=] { updateResizerPositions(item); });
+    connect(item, &DesignerItem::transformOriginPointChanged,
             this, [=] { updateResizerPositions(item); });
 
     m_resizerHash.insert(item, resizers);
@@ -117,7 +129,19 @@ void GadgetLayer::handleSceneSelectionChange()
         // Move headline even if the form of the selected item moves
         connect(selectedItem->topLevelItem(), &DesignerItem::geometryChanged,
                 m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
+        connect(selectedItem->topLevelItem(), &DesignerItem::scaleChanged,
+                m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
+        connect(selectedItem->topLevelItem(), &DesignerItem::rotationChanged,
+                m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
+        connect(selectedItem->topLevelItem(), &DesignerItem::transformOriginPointChanged,
+                m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
         connect(selectedItem, &DesignerItem::geometryChanged,
+                m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
+        connect(selectedItem, &DesignerItem::scaleChanged,
+                m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
+        connect(selectedItem, &DesignerItem::rotationChanged,
+                m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
+        connect(selectedItem, &DesignerItem::transformOriginPointChanged,
                 m_headlineItem, [=] { m_headlineItem->updateGeometry(); });
         connect(selectedItem, &DesignerItem::objectNameChanged,
                 m_headlineItem, &HeadlineItem::setText);
@@ -139,7 +163,19 @@ void GadgetLayer::handleSceneCurrentFormChange(DesignerItem* formItem)
                 m_formHeadlineItem, &HeadlineItem::setText);
         connect(formItem, &DesignerItem::geometryChanged,
                 m_formHeadlineItem, [=] { m_formHeadlineItem->updateGeometry(); });
+        connect(formItem, &DesignerItem::scaleChanged,
+                m_formHeadlineItem, [=] { m_formHeadlineItem->updateGeometry(); });
+        connect(formItem, &DesignerItem::rotationChanged,
+                m_formHeadlineItem, [=] { m_formHeadlineItem->updateGeometry(); });
+        connect(formItem, &DesignerItem::transformOriginPointChanged,
+                m_formHeadlineItem, [=] { m_formHeadlineItem->updateGeometry(); });
         connect(formItem, &DesignerItem::geometryChanged,
+                m_formHeadlineItem, [=] { m_formHeadlineItem->setDimensions(formItem->size()); });
+        connect(formItem, &DesignerItem::scaleChanged,
+                m_formHeadlineItem, [=] { m_formHeadlineItem->setDimensions(formItem->size()); });
+        connect(formItem, &DesignerItem::rotationChanged,
+                m_formHeadlineItem, [=] { m_formHeadlineItem->setDimensions(formItem->size()); });
+        connect(formItem, &DesignerItem::transformOriginPointChanged,
                 m_formHeadlineItem, [=] { m_formHeadlineItem->setDimensions(formItem->size()); });
         m_formHeadlineItem->setTargetItem(formItem);
         m_formHeadlineItem->setText(formItem->objectName()); // id
