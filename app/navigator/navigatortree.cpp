@@ -74,15 +74,12 @@ NavigatorDelegate* NavigatorTree::delegate() const
     return m_delegate;
 }
 
-QList<QTreeWidgetItem*> NavigatorTree::topLevelItems(const QTreeWidget* treeWidget)
+QList<QTreeWidgetItem*> NavigatorTree::topLevelItems()
 {
     QList<QTreeWidgetItem*> items;
 
-    if (!treeWidget)
-        return items;
-
-    for (int i = 0; i < treeWidget->topLevelItemCount(); ++i)
-        items.append(treeWidget->topLevelItem(i));
+    for (int i = 0; i < topLevelItemCount(); ++i)
+        items.append(topLevelItem(i));
 
     return items;
 }
@@ -135,7 +132,7 @@ void NavigatorTree::drawBranches(QPainter* painter, const QRect& rect, const QMo
         option.state ^= QStyle::State_Selected;
 
     m_delegate->paintBackground(painter, option,
-                                m_delegate->calculateVisibleRow(itemFromIndex(index), this),
+                                m_delegate->calculateVisibleRow(itemFromIndex(index)),
                                 false);
 
     // Draw handle

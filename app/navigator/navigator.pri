@@ -2,11 +2,13 @@ DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/navigatorpane.h \
-           $$PWD/navigatorcontroller.h \
+           $$PWD/navigatortree.h \
            $$PWD/navigatordelegate.h \
-           $$PWD/navigatortree.h
+           $$PWD/navigatordelegatecache.h \
+#           $$PWD/navigatorcontroller.h \
 
 SOURCES += $$PWD/navigatorpane.cpp \
-           $$PWD/navigatorcontroller.cpp \
+           $$PWD/navigatortree.cpp \
            $$PWD/navigatordelegate.cpp \
-           $$PWD/navigatortree.cpp
+           $$PWD/navigatordelegatecache.cpp \
+#           $$PWD/navigatorcontroller.cpp \

@@ -10,11 +10,13 @@ class NavigatorTree final : public QTreeWidget
     Q_DISABLE_COPY(NavigatorTree)
     Q_DECLARE_PRIVATE(QTreeWidget)
 
+    friend class NavigatorDelegate;
+
 public:
     explicit NavigatorTree(QWidget* parent = nullptr);
 
     NavigatorDelegate* delegate() const;
-    QList<QTreeWidgetItem*> topLevelItems(const QTreeWidget* treeWidget);
+    QList<QTreeWidgetItem*> topLevelItems();
     QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
                                              bool includeCollapsed = true);
 

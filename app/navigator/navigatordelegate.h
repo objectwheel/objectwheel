@@ -12,6 +12,8 @@ class NavigatorDelegate final : public QStyledItemDelegate
     Q_OBJECT
     Q_DISABLE_COPY(NavigatorDelegate)
 
+    friend class NavigatorTree;
+
 public:
     explicit NavigatorDelegate(NavigatorTree* navigatorTree);
     ~NavigatorDelegate() override;
@@ -27,7 +29,6 @@ private:
                          bool hasVerticalLine) const;
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override;
-
 private:
     NavigatorTree* m_navigatorTree;
     NavigatorDelegateCache* m_cache;

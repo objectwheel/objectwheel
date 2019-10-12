@@ -1,4 +1,4 @@
-#include <inspectorpane.h>
+#include <navigatorpane.h>
 #include <saveutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
