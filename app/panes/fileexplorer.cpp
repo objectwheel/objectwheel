@@ -788,7 +788,7 @@ void FileExplorer::drawBranches(QPainter* painter, const QRect& rect,
     if (isSelected)
         option.state |= QStyle::State_Selected;
     else if (option.state & QStyle::State_Selected)
-        option.state ^= QStyle::State_Selected;
+        option.state &= ~QStyle::State_Selected;
 
     fillBackground(painter, option, d->viewIndex(index), false);
 

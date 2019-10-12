@@ -12,8 +12,9 @@ class ToolboxPane;
 class ToolboxController;
 class PropertiesPane;
 class PropertiesController;
+class NavigatorPane;
+class NavigatorController;
 class FormsPane;
-class InspectorPane;
 class CentralWidget;
 class AssetsPane;
 
@@ -27,7 +28,7 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
 
     CentralWidget* centralWidget() const;
-    InspectorPane* inspectorPane() const;
+    NavigatorPane* navigatorPane() const;
     PropertiesPane* propertiesPane() const;
     AssetsPane* assetsPane() const;
     ToolboxPane* toolboxPane() const;
@@ -68,8 +69,9 @@ private:
     ToolboxController* m_toolboxController;
     PropertiesPane* m_propertiesPane;
     PropertiesController* m_propertiesController;
+    NavigatorPane* m_navigatorPane;
+    NavigatorController* m_navigatorController;
     FormsPane* m_formsPane;
-    InspectorPane* m_inspectorPane;
     AssetsPane* m_assetsPane;
 };
 

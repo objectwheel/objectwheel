@@ -129,7 +129,7 @@ void NavigatorTree::drawBranches(QPainter* painter, const QRect& rect, const QMo
     if (isSelected)
         option.state |= QStyle::State_Selected;
     else if (option.state & QStyle::State_Selected)
-        option.state ^= QStyle::State_Selected;
+        option.state &= ~QStyle::State_Selected;
 
     m_delegate->paintBackground(painter, option,
                                 m_delegate->calculateVisibleRow(itemFromIndex(index)),

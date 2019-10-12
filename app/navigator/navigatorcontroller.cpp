@@ -1,4 +1,4 @@
-#include <inspectorpane.h>
+#include <navigatorpane.h>
 #include <saveutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
@@ -297,7 +297,7 @@ void InspectorPane::drawBranches(QPainter* painter, const QRect& rect, const QMo
     if (isSelected)
         option.state |= QStyle::State_Selected;
     else if (option.state & QStyle::State_Selected)
-        option.state ^= QStyle::State_Selected;
+        option.state &= ~QStyle::State_Selected;
 
     fillBackground(painter, option, calculateVisibleRow(itemFromIndex(index), this), false);
 

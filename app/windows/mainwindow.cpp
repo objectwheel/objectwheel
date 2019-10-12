@@ -7,9 +7,10 @@
 #include <toolboxcontroller.h>
 #include <propertiespane.h>
 #include <propertiescontroller.h>
+#include <navigatorpane.h>
+#include <navigatorcontroller.h>
 #include <assetspane.h>
 #include <formspane.h>
-#include <inspectorpane.h>
 #include <centralwidget.h>
 #include <designerview.h>
 #include <controlcreationmanager.h>
@@ -93,8 +94,9 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_toolboxController(new ToolboxController(m_toolboxPane, this))
   , m_propertiesPane(new PropertiesPane)
   , m_propertiesController(new PropertiesController(m_propertiesPane, m_centralWidget->designerPane()->designerView()->scene(), this))
+  , m_navigatorPane(new NavigatorPane)
+  , m_navigatorController(new NavigatorController(m_navigatorPane, m_centralWidget->designerPane()->designerView()->scene(), this))
   , m_formsPane(new FormsPane(m_centralWidget->designerPane()->designerView()->scene()))
-  , m_inspectorPane(new InspectorPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_assetsPane(new AssetsPane)
 {
     setWindowTitle(APP_NAME);
@@ -152,7 +154,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     inspectorDockWidget = new QDockWidget;
     inspectorDockWidget->setObjectName("inspectorDockWidget");
     inspectorDockWidget->setTitleBarWidget(inspectorTitleBar);
-    inspectorDockWidget->setWidget(m_inspectorPane);
+    inspectorDockWidget->setWidget(m_navigatorPane);
     inspectorDockWidget->setWindowTitle(tr("Control Inspector"));
     inspectorDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::RightDockWidgetArea, inspectorDockWidget);
@@ -285,7 +287,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &MainWindow::onModeChange);
-    connect(m_inspectorPane, &InspectorPane::controlSelectionChanged,
+    connect(m_navigatorController, &NavigatorController::controlSelectionChanged,
             [=] (const QList<Control*>& selectedControls) {
         m_centralWidget->designerPane()->designerView()->scene()->clearSelection();
         for (Control* control : selectedControls)
@@ -356,9 +358,9 @@ void MainWindow::discharge()
     m_modeSelectorController->discharge();
     m_toolboxController->discharge();
     m_propertiesController->discharge();
+    m_navigatorController->discharge();
     m_centralWidget->discharge();
     m_formsPane->discharge();
-    m_inspectorPane->discharge();
     m_assetsPane->discharge();
 
     showLeftPanes(true);
@@ -484,9 +486,9 @@ PropertiesPane* MainWindow::propertiesPane() const
     return m_propertiesPane;
 }
 
-InspectorPane* MainWindow::inspectorPane() const
+NavigatorPane* MainWindow::navigatorPane() const
 {
-    return m_inspectorPane;
+    return m_navigatorPane;
 }
 
 void MainWindow::resetSettings()
