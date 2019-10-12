@@ -58,8 +58,6 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
                                            QObject* parent) : QObject(parent)
   , m_propertiesPane(propertiesPane)
   , m_designerScene(designerScene)
-  , m_verticalScrollPosition(9999)
-  , m_horizontalScrollPosition(9999)
   , m_fontItemOpen(false)
   , m_geometryItemOpen(false)
   , m_isExpandCollapseSignalsBlocked(false)
@@ -110,27 +108,13 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
     });
     connect(tree->verticalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
     {
-        if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount()) {
-            m_verticalScrollPosition = tree->verticalScrollBar()->maximum()
-                    - tree->verticalScrollBar()->minimum() - value;
-        }
+        if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount() && !m_selectedQmlType.isEmpty())
+            m_verticalScrollPositions.insert(m_selectedQmlType, value);
     });
     connect(tree->horizontalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
     {
-        if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount()) {
-            m_horizontalScrollPosition = tree->horizontalScrollBar()->maximum()
-                    - tree->horizontalScrollBar()->minimum() - value;
-        }
-    });
-    connect(tree->verticalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
-    {
-        if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount())
-            m_verticalScrollPosition = max - min - tree->verticalScrollBar()->value();
-    });
-    connect(tree->horizontalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
-    {
-        if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount())
-            m_horizontalScrollPosition = max - min - tree->horizontalScrollBar()->value();
+        if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount() && !m_selectedQmlType.isEmpty())
+            m_horizontalScrollPositions.insert(m_selectedQmlType, value);
     });
 }
 
@@ -138,8 +122,8 @@ void PropertiesController::discharge()
 {
     clear();
     m_propertiesPane->searchEdit()->clear();
-    m_verticalScrollPosition = 9999;
-    m_horizontalScrollPosition = 9999;
+    m_verticalScrollPositions.clear();
+    m_horizontalScrollPositions.clear();
     m_fontItemOpen = false;
     m_geometryItemOpen = false;
 }
@@ -422,7 +406,7 @@ void PropertiesController::onControlZChange(Control* control) const
     }
 }
 
-void PropertiesController::onControlRenderInfoChange(Control* control, bool codeChanged) const
+void PropertiesController::onControlRenderInfoChange(Control* control, bool codeChanged)
 {
     PropertiesTree* tree = m_propertiesPane->propertiesTree();
     if (Control* selectedControl = this->control()) {
@@ -628,21 +612,22 @@ void PropertiesController::onControlIndexValueChange() const
                                      ControlPropertyManager::UpdateRenderer);
 }
 
-void PropertiesController::onSceneSelectionChange() const
+void PropertiesController::onSceneSelectionChange()
 {
     clear();
 
     PropertiesTree* tree = m_propertiesPane->propertiesTree();
-    const int verticalScrollPosition = m_verticalScrollPosition;
-    const int horizontalScrollPosition = m_horizontalScrollPosition;
-
     if (Control* selectedControl = control()) {
-        m_propertiesPane->setDisabled(selectedControl->hasErrors());
         const QVector<PropertyNode>& properties = selectedControl->properties();
 
         if (properties.isEmpty())
             return;
 
+        m_selectedQmlType = properties.first().cleanClassName;
+        const int verticalScrollPosition = m_verticalScrollPositions.value(m_selectedQmlType, 0);
+        const int horizontalScrollPosition = m_horizontalScrollPositions.value(m_selectedQmlType, 0);
+
+        m_propertiesPane->setDisabled(selectedControl->hasErrors());
         m_propertiesPane->typeItem()->setText(1, properties.first().cleanClassName);
         m_propertiesPane->uidItem()->setText(1, selectedControl->uid());
         m_propertiesPane->idEdit()->setText(selectedControl->id());
@@ -1154,20 +1139,14 @@ void PropertiesController::onSceneSelectionChange() const
             }
         }
 
+        if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount()) {
+            tree->verticalScrollBar()->setSliderPosition(verticalScrollPosition);
+            tree->horizontalScrollBar()->setSliderPosition(horizontalScrollPosition);
+        }
+
         onSearchEditEditingFinish();
     } else {
         m_propertiesPane->resetButton()->setVisible(false);
-    }
-
-    if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount()) {
-        tree->verticalScrollBar()->setSliderPosition(
-                    tree->verticalScrollBar()->maximum() -
-                    tree->verticalScrollBar()->minimum() -
-                    verticalScrollPosition);
-        tree->horizontalScrollBar()->setSliderPosition(
-                    tree->horizontalScrollBar()->maximum() -
-                    tree->horizontalScrollBar()->minimum() -
-                    horizontalScrollPosition);
     }
 }
 

@@ -2,6 +2,7 @@
 #define PROPERTIESCONTROLLER_H
 
 #include <QObject>
+#include <QHash>
 
 class Control;
 class PropertiesPane;
@@ -24,14 +25,14 @@ private slots:
     void onResetButtonClick() const;
     void onSearchEditEditingFinish() const;
     void onControlZChange(Control*) const;
-    void onControlRenderInfoChange(Control*, bool codeChanged) const;
+    void onControlRenderInfoChange(Control*, bool codeChanged);
     void onControlGeometryChange(const Control*) const;
     void onControlIndexChange(Control*) const;
     void onControlIdChange(Control*, const QString& previousId) const;
     void onControlPropertyChange() const;
     void onControlIdEditingFinish() const;
     void onControlIndexValueChange() const;
-    void onSceneSelectionChange() const;
+    void onSceneSelectionChange();
 
     void onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                            const QString& propertyName, const QVariant& value) const;
@@ -66,11 +67,12 @@ private:
 private:
     PropertiesPane* m_propertiesPane;
     DesignerScene* m_designerScene;
-    int m_verticalScrollPosition;
-    int m_horizontalScrollPosition;
+    QString m_selectedQmlType;
+    QHash<QString, int> m_verticalScrollPositions;
+    QHash<QString, int> m_horizontalScrollPositions;
     bool m_fontItemOpen;
     bool m_geometryItemOpen;
-    mutable bool m_isExpandCollapseSignalsBlocked;
+    bool m_isExpandCollapseSignalsBlocked;
 };
 
 #endif // PROPERTIESCONTROLLER_H
