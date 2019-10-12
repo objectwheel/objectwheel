@@ -634,6 +634,7 @@ void RenderUtils::setInstancePropertyBinding(const RenderEngine::ControlInstance
     Q_ASSERT(instance);
     Q_ASSERT(instance->errors.isEmpty());
     Q_ASSERT(instance->object);
+    Q_ASSERT(!expression.isEmpty());
 
     // WARNING: Don't use for visible, visibility, x, y, width, height properties,
     // or implement it like how setInstancePropertyVariant does implement them
@@ -651,13 +652,8 @@ void RenderUtils::setInstancePropertyBinding(const RenderEngine::ControlInstance
                                 instance->context);
         }
     } else {
-        if (expression.isEmpty()) {
-            QQuickDesignerSupportProperties::doResetProperty(instance->object, instance->context,
-                                                             bindingName.toUtf8());
-        } else {
-            QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
-                                                                bindingName.toUtf8(), expression);
-        }
+        QQuickDesignerSupportProperties::setPropertyBinding(instance->object, instance->context,
+                                                            bindingName.toUtf8(), expression);
     }
 
     // TODO: Remove this. This is a workaround for a bug that an

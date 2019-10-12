@@ -17,7 +17,7 @@ public:
     explicit PropertiesController(PropertiesPane* propertiesPane, DesignerScene* designerScene,
                                   QObject* parent = nullptr);
 public slots:
-    void discharge() const;
+    void discharge();
     void clear() const;
 
 private slots:
@@ -65,6 +65,10 @@ private:
 private:
     PropertiesPane* m_propertiesPane;
     DesignerScene* m_designerScene;
+    int m_verticalScrollPosition;
+    int m_horizontalScrollPosition;
+    bool m_fontItemExpanded;
+    bool m_geometryItemExpanded;
 };
 
 #endif // PROPERTIESCONTROLLER_H

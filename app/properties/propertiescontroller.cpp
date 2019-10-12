@@ -16,6 +16,7 @@
 #include <QColorDialog>
 #include <QSpinBox>
 #include <QMetaEnum>
+#include <QScrollBar>
 
 // FIXME: Fix all QTimer usages
 
@@ -57,9 +58,14 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
                                            QObject* parent) : QObject(parent)
   , m_propertiesPane(propertiesPane)
   , m_designerScene(designerScene)
+  , m_verticalScrollPosition(9999)
+  , m_horizontalScrollPosition(9999)
+  , m_fontItemExpanded(false)
+  , m_geometryItemExpanded(false)
 {
-    m_propertiesPane->propertiesTree()->setDesignerScene(designerScene);
-    m_propertiesPane->propertiesTree()->viewport()->installEventFilter(this);
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+    tree->setDesignerScene(designerScene);
+    tree->viewport()->installEventFilter(this);
 
     connect(m_propertiesPane->resetButton(), &QToolButton::clicked,
             this, &PropertiesController::onResetButtonClick);
@@ -85,36 +91,68 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
             this, &PropertiesController::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
             this, &PropertiesController::onControlIndexChange);
+
+
+    connect(tree->verticalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
+    {
+        if (tree->topLevelItemCount() > 4) {
+            m_verticalScrollPosition = tree->verticalScrollBar()->maximum()
+                    - tree->verticalScrollBar()->minimum() - value;
+        }
+    });
+    connect(tree->horizontalScrollBar(), &QScrollBar::valueChanged, [=] (int value)
+    {
+        if (tree->topLevelItemCount() > 4) {
+            m_horizontalScrollPosition = tree->horizontalScrollBar()->maximum()
+                    - tree->horizontalScrollBar()->minimum() - value;
+        }
+    });
+    connect(tree->verticalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
+    {
+        if (tree->topLevelItemCount() > 4)
+            m_verticalScrollPosition = max - min - tree->verticalScrollBar()->value();
+    });
+    connect(tree->horizontalScrollBar(), &QScrollBar::rangeChanged, [=] (int min, int max)
+    {
+        if (tree->topLevelItemCount() > 4)
+            m_horizontalScrollPosition = max - min - tree->horizontalScrollBar()->value();
+    });
+
 }
 
-void PropertiesController::discharge() const
+void PropertiesController::discharge()
 {
     clear();
     m_propertiesPane->searchEdit()->clear();
+    m_verticalScrollPosition = 9999;
+    m_horizontalScrollPosition = 9999;
 }
 
 void PropertiesController::clear() const
 {
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
     m_propertiesPane->typeItem()->setHidden(true);
     m_propertiesPane->uidItem()->setHidden(true);
     m_propertiesPane->idItem()->setHidden(true);
     m_propertiesPane->indexItem()->setHidden(true);
 
-    for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
+    for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
         if (m_propertiesPane->isPermanentItem(topLevelItem))
             continue;
-        for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem, true, true, true))
-            m_propertiesPane->propertiesTree()->delegate()->destroyItem(childItem);
+        for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem, true, true, true))
+            tree->delegate()->destroyItem(childItem);
     }
 }
 
 void PropertiesController::onResetButtonClick() const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
-        const PropertiesTree* tree = m_propertiesPane->propertiesTree();
         QTreeWidgetItem* item = tree->itemAt(m_propertiesPane->resetButton()->geometry().center());
         Q_ASSERT(item);
         if (item) {
@@ -297,7 +335,8 @@ void PropertiesController::onResetButtonClick() const
 
 void PropertiesController::onSearchEditEditingFinish() const
 {
-    const QList<QTreeWidgetItem*>& topLevelItems = m_propertiesPane->propertiesTree()->topLevelItems();
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+    const QList<QTreeWidgetItem*>& topLevelItems = tree->topLevelItems();
     const QString& searchTerm = m_propertiesPane->searchEdit()->text();
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
         auto tlv = false;
@@ -330,14 +369,16 @@ void PropertiesController::onSearchEditEditingFinish() const
 
 void PropertiesController::onControlZChange(Control* control) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
         if (selectedControl != control)
             return;
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem)) {
                 if (childItem->text(0) == "z") {
                     QTreeWidget* treeWidget = childItem->treeWidget();
                     Q_ASSERT(treeWidget);
@@ -366,10 +407,11 @@ void PropertiesController::onControlZChange(Control* control) const
 
 void PropertiesController::onControlRenderInfoChange(Control* control, bool codeChanged) const
 {
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
     if (Control* selectedControl = this->control()) {
         if (selectedControl != control)
             return;
-        if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+        if (tree->topLevelItemCount() <= 4)
             return onSceneSelectionChange();
         if (codeChanged)
             return onSceneSelectionChange();
@@ -380,7 +422,9 @@ void PropertiesController::onControlRenderInfoChange(Control* control, bool code
 
 void PropertiesController::onControlGeometryChange(const Control* control) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -407,8 +451,8 @@ void PropertiesController::onControlGeometryChange(const Control* control) const
         const bool hChanged = ParserUtils::exists(control->dir(), "height");
         const bool geometryChanged = xChanged || yChanged || wChanged || hChanged;
 
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem)) {
                 if (childItem->text(0) == "geometry") {
                     childItem->setText(1, geometryText);
                     childItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
@@ -417,9 +461,9 @@ void PropertiesController::onControlGeometryChange(const Control* control) const
                     continue;
 
                 QSpinBox* iSpinBox
-                        = qobject_cast<QSpinBox*>(m_propertiesPane->propertiesTree()->itemWidget(childItem, 1));
+                        = qobject_cast<QSpinBox*>(tree->itemWidget(childItem, 1));
                 QDoubleSpinBox* dSpinBox
-                        = qobject_cast<QDoubleSpinBox*>(m_propertiesPane->propertiesTree()->itemWidget(childItem, 1));
+                        = qobject_cast<QDoubleSpinBox*>(tree->itemWidget(childItem, 1));
                 Q_ASSERT(iSpinBox || dSpinBox);
 
                 if (dSpinBox)
@@ -470,7 +514,9 @@ void PropertiesController::onControlGeometryChange(const Control* control) const
 
 void PropertiesController::onControlIndexChange(Control* control) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -481,8 +527,8 @@ void PropertiesController::onControlIndexChange(Control* control) const
             return;
 
         Control* issuedControl = nullptr;
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem)) {
                 if (childItem->text(0) == "uid") {
                     const QString& uid = childItem->text(1);
                     for (Control* ctrl : affectedControls) {
@@ -506,15 +552,17 @@ void PropertiesController::onControlIndexChange(Control* control) const
 
 void PropertiesController::onControlIdChange(Control* control, const QString& /*previousId*/) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
         if (selectedControl != control)
             return;
 
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem)) {
+        for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
+            for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem)) {
                 if (childItem->text(0) == "id") {
                     QTreeWidget* treeWidget = childItem->treeWidget();
                     Q_ASSERT(treeWidget);
@@ -567,6 +615,10 @@ void PropertiesController::onSceneSelectionChange() const
 {
     clear();
 
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+    const int verticalScrollPosition = m_verticalScrollPosition;
+    const int horizontalScrollPosition = m_horizontalScrollPosition;
+
     if (Control* selectedControl = control()) {
         m_propertiesPane->setDisabled(selectedControl->hasErrors());
         const QVector<PropertyNode>& properties = selectedControl->properties();
@@ -602,7 +654,7 @@ void PropertiesController::onSceneSelectionChange() const
             QTreeWidgetItem* fontItem = nullptr;
             QTreeWidgetItem* geometryItem = nullptr;
 
-            classItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+            classItem = tree->delegate()->createItem();
             classItem->setText(0, propertyNode.cleanClassName);
 
             const QList<QString>& propertyKeys = propertyMap.keys();
@@ -633,13 +685,13 @@ void PropertiesController::onSceneSelectionChange() const
                     const bool fontChanged = fChanged || bChanged || iChanged || uChanged || ptChanged || piChanged
                             || wChanged || oChanged || sChanged || cChanged || kChanged || prChanged;
 
-                    fontItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    fontItem = tree->delegate()->createItem();
                     fontItem->setText(0, QStringLiteral("font"));
                     fontItem->setText(1, fontText);
                     fontItem->setData(0, PropertiesDelegate::ModificationRole, fontChanged);
                     children.append(fontItem);
 
-                    auto fItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto fItem = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontFamilyPropertyEdit,
                                                                      this, fItem, fontItem);
                     fItem->setText(0, QStringLiteral("family"));
@@ -650,7 +702,7 @@ void PropertiesController::onSceneSelectionChange() const
                     fontChildren.append(fItem);
 
                     const QMetaEnum& e = QMetaEnum::fromType<QFont::Weight>();
-                    auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto wItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontWeightPropertyEdit,
                                                                 this, wItem, fontItem, e);
                     wItem->setText(0, QStringLiteral("weight"));
@@ -661,7 +713,7 @@ void PropertiesController::onSceneSelectionChange() const
                     fontChildren.append(wItem);
 
                     const QMetaEnum& e2 = QMetaEnum::fromType<QFont::Capitalization>();
-                    auto cItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto cItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontCapitalizationPropertyEdit,
                                                                 this, cItem, fontItem, e2);
                     cItem->setText(0, QStringLiteral("capitalization"));
@@ -671,8 +723,8 @@ void PropertiesController::onSceneSelectionChange() const
                     cItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(cItem);
 
-                    auto ptItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
-                    auto pxItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto ptItem = tree->delegate()->createItem();
+                    auto pxItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onFontSizePropertyEdit,
                                                                 this, ptItem, pxItem, fontItem, QStringLiteral("font.pointSize"));
                     ptItem->setText(0, QStringLiteral("pointSize"));
@@ -691,7 +743,7 @@ void PropertiesController::onSceneSelectionChange() const
                     pxItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(pxItem);
 
-                    auto bItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto bItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                 this, bItem, fontItem, QStringLiteral("font.bold"));
                     bItem->setText(0, QStringLiteral("bold"));
@@ -701,7 +753,7 @@ void PropertiesController::onSceneSelectionChange() const
                     bItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(bItem);
 
-                    auto iItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto iItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                 this, iItem, fontItem, QStringLiteral("font.italic"));
                     iItem->setText(0, QStringLiteral("italic"));
@@ -711,7 +763,7 @@ void PropertiesController::onSceneSelectionChange() const
                     iItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(iItem);
 
-                    auto uItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto uItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                 this, uItem, fontItem, QStringLiteral("font.underline"));
                     uItem->setText(0, QStringLiteral("underline"));
@@ -721,7 +773,7 @@ void PropertiesController::onSceneSelectionChange() const
                     uItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(uItem);
 
-                    auto oItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto oItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                 this, oItem, fontItem, QStringLiteral("font.overline"));
                     oItem->setText(0, QStringLiteral("overline"));
@@ -731,7 +783,7 @@ void PropertiesController::onSceneSelectionChange() const
                     oItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(oItem);
 
-                    auto sItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto sItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                 this, sItem, fontItem, QStringLiteral("font.strikeout"));
                     sItem->setText(0, QStringLiteral("strikeout"));
@@ -741,7 +793,7 @@ void PropertiesController::onSceneSelectionChange() const
                     sItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(sItem);
 
-                    auto kItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto kItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                 this, kItem, fontItem, QStringLiteral("font.kerning"));
                     kItem->setText(0, QStringLiteral("kerning"));
@@ -751,7 +803,7 @@ void PropertiesController::onSceneSelectionChange() const
                     kItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                     fontChildren.append(kItem);
 
-                    auto prItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto prItem = tree->delegate()->createItem();
                     callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                 this, prItem, fontItem, QStringLiteral("font.preferShaping"));
                     prItem->setText(0, QStringLiteral("preferShaping"));
@@ -764,7 +816,7 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Color: {
-                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onColorPropertyEdit,
                                                                      this, item, nullptr, propertyName);
                     const QColor& color = propertyValue.value<QColor>();
@@ -778,7 +830,7 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Bool: {
-                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                      this, item, nullptr, propertyName);
                     const bool checked = propertyName == "visible"
@@ -794,7 +846,7 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::String: {
-                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onStringPropertyEdit,
                                                                      this, item, nullptr, propertyName);
                     const QString& text = propertyValue.value<QString>();
@@ -808,7 +860,7 @@ void PropertiesController::onSceneSelectionChange() const
                 }
 
                 case QVariant::Url: {
-                    auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                    auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onUrlPropertyEdit,
                                                                      this, item, nullptr, propertyName);
                     const QString& displayText = cleanUrl(propertyValue.value<QUrl>(), selectedControl->dir());
@@ -856,13 +908,13 @@ void PropertiesController::onSceneSelectionChange() const
                             y = 0;
                         }
 
-                        geometryItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        geometryItem = tree->delegate()->createItem();
                         geometryItem->setText(0, QStringLiteral("geometry"));
                         geometryItem->setText(1, geometryText);
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
                         children.append(geometryItem);
 
-                        auto xItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto xItem = tree->delegate()->createItem();
                         auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
                                                                          this, xItem, geometryItem, QStringLiteral("x"));
                         xItem->setText(0, QStringLiteral("x"));
@@ -872,7 +924,7 @@ void PropertiesController::onSceneSelectionChange() const
                         xItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(xItem);
 
-                        auto yItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto yItem = tree->delegate()->createItem();
                         callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
                                                                     this, yItem, geometryItem, QStringLiteral("y"));
                         yItem->setText(0, QStringLiteral("y"));
@@ -882,7 +934,7 @@ void PropertiesController::onSceneSelectionChange() const
                         yItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(yItem);
 
-                        auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto wItem = tree->delegate()->createItem();
                         callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
                                                                     this, wItem, geometryItem, QStringLiteral("width"));
                         wItem->setText(0, QStringLiteral("width"));
@@ -892,7 +944,7 @@ void PropertiesController::onSceneSelectionChange() const
                         wItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(wItem);
 
-                        auto hItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto hItem = tree->delegate()->createItem();
                         callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
                                                                     this, hItem, geometryItem, QStringLiteral("height"));
                         hItem->setText(0, QStringLiteral("height"));
@@ -902,7 +954,7 @@ void PropertiesController::onSceneSelectionChange() const
                         hItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(hItem);
                     } else {
-                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto item = tree->delegate()->createItem();
                         auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onRealPropertyEdit,
                                                                          this, item, nullptr, propertyName);
                         item->setText(0, propertyName);
@@ -950,13 +1002,13 @@ void PropertiesController::onSceneSelectionChange() const
                             y = 0;
                         }
 
-                        geometryItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        geometryItem = tree->delegate()->createItem();
                         geometryItem->setText(0, QStringLiteral("geometry"));
                         geometryItem->setText(1, geometryText);
                         geometryItem->setData(0, PropertiesDelegate::ModificationRole, geometryChanged);
                         children.append(geometryItem);
 
-                        auto xItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto xItem = tree->delegate()->createItem();
                         auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
                                                                          this, xItem, geometryItem, QStringLiteral("x"));
                         xItem->setText(0, QStringLiteral("x"));
@@ -966,7 +1018,7 @@ void PropertiesController::onSceneSelectionChange() const
                         xItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(xItem);
 
-                        auto yItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto yItem = tree->delegate()->createItem();
                         callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
                                                                     this, yItem, geometryItem, QStringLiteral("y"));
                         yItem->setText(0, QStringLiteral("y"));
@@ -976,7 +1028,7 @@ void PropertiesController::onSceneSelectionChange() const
                         yItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(yItem);
 
-                        auto wItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto wItem = tree->delegate()->createItem();
                         callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
                                                                     this, wItem, geometryItem, QStringLiteral("width"));
                         wItem->setText(0, QStringLiteral("width"));
@@ -986,7 +1038,7 @@ void PropertiesController::onSceneSelectionChange() const
                         wItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(wItem);
 
-                        auto hItem = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto hItem = tree->delegate()->createItem();
                         callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
                                                                     this, hItem, geometryItem, QStringLiteral("height"));
                         hItem->setText(0, QStringLiteral("height"));
@@ -996,7 +1048,7 @@ void PropertiesController::onSceneSelectionChange() const
                         hItem->setData(1, PropertiesDelegate::CallbackRole, callback.toVariant());
                         geometryChildren.append(hItem);
                     } else {
-                        auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                        auto item = tree->delegate()->createItem();
                         auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onIntPropertyEdit,
                                                                          this, item, nullptr, propertyName);
                         item->setText(0, propertyName);
@@ -1028,7 +1080,7 @@ void PropertiesController::onSceneSelectionChange() const
                         }
                     }
                 }
-                auto item = m_propertiesPane->propertiesTree()->delegate()->createItem();
+                auto item = tree->delegate()->createItem();
                 auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onEnumPropertyEdit,
                                                                  this, item, nullptr, propertyName, _enum);
                 item->setText(0, propertyName);
@@ -1053,21 +1105,21 @@ void PropertiesController::onSceneSelectionChange() const
             classItems.append(classItem);
         }
 
-        m_propertiesPane->propertiesTree()->addTopLevelItems(classItems);
-        m_propertiesPane->propertiesTree()->expandAll();
+        tree->addTopLevelItems(classItems);
+        tree->expandAll();
 
         if (fontItemCopy)
-            m_propertiesPane->propertiesTree()->collapseItem(fontItemCopy);
+            tree->collapseItem(fontItemCopy);
         if (geometryItemCopy)
-            m_propertiesPane->propertiesTree()->collapseItem(geometryItemCopy);
+            tree->collapseItem(geometryItemCopy);
 
-        for (QTreeWidgetItem* topLevelItem : m_propertiesPane->propertiesTree()->topLevelItems()) {
+        for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
             if (m_propertiesPane->isPermanentItem(topLevelItem))
                 continue;
-            for (QTreeWidgetItem* childItem : m_propertiesPane->propertiesTree()->allSubChildItems(topLevelItem, false, true, true)) {
+            for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem, false, true, true)) {
                 if (childItem->childCount() == 0) {
-                    m_propertiesPane->propertiesTree()->openPersistentEditor(childItem, 1);
-                    QWidget *focusWidget = m_propertiesPane->propertiesTree()->itemWidget(childItem, 1);
+                    tree->openPersistentEditor(childItem, 1);
+                    QWidget *focusWidget = tree->itemWidget(childItem, 1);
                     while (QWidget *fp = focusWidget->focusProxy())
                         focusWidget = fp;
                     if (QLineEdit *le = qobject_cast<QLineEdit*>(focusWidget))
@@ -1084,12 +1136,23 @@ void PropertiesController::onSceneSelectionChange() const
     } else {
         m_propertiesPane->resetButton()->setVisible(false);
     }
+
+    if (tree->topLevelItemCount() > 4) {
+        tree->verticalScrollBar()->setSliderPosition(tree->verticalScrollBar()->maximum()
+                                                                                   - tree->verticalScrollBar()->minimum()
+                                                                                   - verticalScrollPosition);
+        tree->horizontalScrollBar()->setSliderPosition(tree->horizontalScrollBar()->maximum()
+                                                                                     - tree->horizontalScrollBar()->minimum()
+                                                                                     - horizontalScrollPosition);
+    }
 }
 
 void PropertiesController::onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                              const QString& propertyName, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1129,7 +1192,9 @@ void PropertiesController::onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetI
 void PropertiesController::onRealPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                               const QString& propertyName, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1170,7 +1235,9 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
                                                   QTreeWidgetItem* classItem, const QString& propertyName,
                                                   const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1207,7 +1274,7 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
         for (int i = 0; i < classItem->childCount(); ++i) {
             QTreeWidgetItem* chilItem = classItem->child(i);
             if (chilItem->text(0) == (isPx ? "pointSize" : "pixelSize")) {
-                auto spinBox = qobject_cast<QSpinBox*>(m_propertiesPane->propertiesTree()->itemWidget(chilItem, 1));
+                auto spinBox = qobject_cast<QSpinBox*>(tree->itemWidget(chilItem, 1));
                 Q_ASSERT(spinBox);
                 spinBox->blockSignals(true);
                 spinBox->setValue(0);
@@ -1230,7 +1297,9 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
 void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                                     const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1259,7 +1328,9 @@ void PropertiesController::onFontFamilyPropertyEdit(QTreeWidgetItem* item, QTree
 void PropertiesController::onFontWeightPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                                     const QMetaEnum& _enum, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1286,7 +1357,9 @@ void PropertiesController::onFontCapitalizationPropertyEdit(QTreeWidgetItem* ite
                                                             const QMetaEnum& _enum,
                                                             const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1311,7 +1384,9 @@ void PropertiesController::onFontCapitalizationPropertyEdit(QTreeWidgetItem* ite
 void PropertiesController::onEnumPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                               const QString& propertyName, const Enum& _enum, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1349,7 +1424,9 @@ void PropertiesController::onEnumPropertyEdit(QTreeWidgetItem* item, QTreeWidget
 void PropertiesController::onUrlPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                              const QString& propertyName, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1376,7 +1453,9 @@ void PropertiesController::onUrlPropertyEdit(QTreeWidgetItem* item, QTreeWidgetI
 void PropertiesController::onStringPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                                 const QString& propertyName, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1401,7 +1480,9 @@ void PropertiesController::onStringPropertyEdit(QTreeWidgetItem* item, QTreeWidg
 void PropertiesController::onBoolPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                               const QString& propertyName, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1421,7 +1502,9 @@ void PropertiesController::onBoolPropertyEdit(QTreeWidgetItem* item, QTreeWidget
 void PropertiesController::onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,
                                                const QString& propertyName, const QVariant& value) const
 {
-    if (m_propertiesPane->propertiesTree()->topLevelItemCount() <= 0)
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
+    if (tree->topLevelItemCount() <= 4)
         return;
 
     if (Control* selectedControl = this->control()) {
@@ -1453,7 +1536,8 @@ void PropertiesController::onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidge
 
 bool PropertiesController::eventFilter(QObject* watched, QEvent* event)
 {
-    const PropertiesTree* tree = m_propertiesPane->propertiesTree();
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+
     if (watched == tree->viewport() && event->type() == QEvent::MouseMove) {
         bool buttonVisible = false;
         const QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);

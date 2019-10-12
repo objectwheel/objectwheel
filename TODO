@@ -1,17 +1,11 @@
 Designer Core TODOs
 
+geometry ve font top level itemleri açık ise bir daha ki selection'da da açık olsun
+propertiespane scroll posizyonu korunsun her selection change de
+üzeri tam dolu olan bir nesneyi anchorlamak için üstünde boş yer yoksa sıkıntı çıkıyor, headline'da anchorlama için kullanılabilmeli
+Şu modeselectorpane'de ki tıklanınca arkaplanın kararması meselesini düzelt
 Tüm ...Controller classlarında tüm fonksiyonlar const yapılmayha çalışılacak
 designerview'i strong focus yaparsak acaba shortcutların bozulma olayı düzelirmi? yada NoFocus mo yaptık orada?
-propertiespane tüm itemler expand başlasın ve "openPersistentEditor" vs yerleri bi yeniden düşünülsün
-propertiespane neden spinbox ve line editler hep selected bir şekilde kuruluyor?
-propertiespane neden aynı iteme ikinci kez tıklanınca donup kalıyor?
-propertiespane'de her bir widget için de setUpdatesEnabled = false yapılsın ilk başta, sonraden enable edilsin
-    performans artışı sağlanmaya çalışılsın, ayrıca blockSignals() kullanımı da her şey üzerinde denenebilir belki
-    ayrıca setEnabled setDisabled de eklenebilir
-propertiespane açıkken yapılan değişiklikler, mesela "ilgili propertinin modified" özelliği gibi anında
-    işlenecek propertiespane in yeniden açılıp kapanması gerekmeyecek
-propertiespane'e bir resetleme mekanizması ekle, her modified property resetlenebilsin, Qt ninkine bezet
-propertiespane'de widget'ler, özellikle Qlineeditler neden içindeki yazılar seçili olarak başlıyor?
 IconWidget diye bir class ekle, ikon gösterebilen, bak bakalım Qt de öyle bişey varmı önce, böylece tüm ikonları svg yap
 FormsPane'de add tuşuna basınca bir drop down menü açılıp
     Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
