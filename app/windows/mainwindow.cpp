@@ -249,7 +249,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Forms Pane */
     auto formsTitleLabel = new QLabel;
     formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    formsTitleLabel->setText("   " + tr("Form Navigator"));
+    formsTitleLabel->setText("   " + tr("Forms"));
 
     auto formsTitlePinButton = new QToolButton;
     formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -271,7 +271,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsDockWidget->setObjectName("formsDockWidget");
     formsDockWidget->setTitleBarWidget(formsTitleBar);
     formsDockWidget->setWidget(m_formsPane);
-    formsDockWidget->setWindowTitle(tr("Form Navigator"));
+    formsDockWidget->setWindowTitle(tr("Forms"));
     formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
 

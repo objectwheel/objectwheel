@@ -12,7 +12,7 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
 {
     m_delegate->reserveSmart();
 
-    header()->setFixedHeight(23);
+    header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
     header()->resizeSection(0, 165); // Don't resize the last (stretched) column
@@ -132,7 +132,7 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
     painter.setPen(lineColor);
 
     qreal height = d->defaultItemHeight;
-    qreal rowCount = viewport()->height() / height;
+    int rowCount = viewport()->height() / height;
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
     for (int i = 0; i < rowCount; ++i) {
         painter.save();
@@ -191,8 +191,8 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
     option.initFrom(this);
     option.rect = rect;
 
-    delegate()->paintBackground(painter, option,
-                                delegate()->calculateVisibleRow(itemFromIndex(index)),
+    m_delegate->paintBackground(painter, option,
+                                m_delegate->calculateVisibleRow(itemFromIndex(index)),
                                 isClassRow, false);
 
     // Draw handle
