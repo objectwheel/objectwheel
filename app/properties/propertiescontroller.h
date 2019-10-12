@@ -30,7 +30,7 @@ private slots:
     void onControlIdChange(Control*, const QString& previousId) const;
     void onControlPropertyChange() const;
     void onControlIdEditingFinish() const;
-    void onControlIndexEditingFinish() const;
+    void onControlIndexValueChange() const;
     void onSceneSelectionChange() const;
 
     void onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,

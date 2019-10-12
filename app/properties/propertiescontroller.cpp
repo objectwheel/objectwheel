@@ -72,8 +72,8 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
             this, &PropertiesController::onResetButtonClick);
     connect(m_propertiesPane->idEdit(), &QLineEdit::editingFinished,
             this, &PropertiesController::onControlIdEditingFinish);
-    connect(m_propertiesPane->indexEdit(), &QSpinBox::editingFinished,
-            this, &PropertiesController::onControlIndexEditingFinish);
+    connect(m_propertiesPane->indexEdit(), qOverload<int>(&QSpinBox::valueChanged),
+            this, &PropertiesController::onControlIndexValueChange);
     connect(m_propertiesPane->searchEdit(), &LineEdit::editingFinished,
             this, &PropertiesController::onSearchEditEditingFinish);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
@@ -618,7 +618,7 @@ void PropertiesController::onControlIdEditingFinish() const
     }
 }
 
-void PropertiesController::onControlIndexEditingFinish() const
+void PropertiesController::onControlIndexValueChange() const
 {
     // NOTE: No need for previous value equality check, since this signal is only emitted
     // when the value is changed
