@@ -6,6 +6,7 @@
 class QTreeWidgetItem;
 class NavigatorTree;
 class NavigatorDelegateCache;
+class Control;
 
 class NavigatorDelegate final : public QStyledItemDelegate
 {
@@ -16,7 +17,9 @@ class NavigatorDelegate final : public QStyledItemDelegate
     friend class NavigatorController; // For createItem() and destroyItem()
 
 public:
-    enum Roles { HasErrorRole = Qt::UserRole + 1 };
+    enum Roles {
+        ControlRole = Qt::UserRole + 1
+    };
 
 public:
     explicit NavigatorDelegate(NavigatorTree* navigatorTree);
@@ -26,7 +29,7 @@ public:
 
 private:
     void destroyItem(QTreeWidgetItem* item) const;
-    QTreeWidgetItem* createItem() const;
+    QTreeWidgetItem* createItem(Control* control) const;
 
     int calculateVisibleRow(const QTreeWidgetItem* item) const;
     void paintBackground(QPainter* painter, const QStyleOptionViewItem& option, int rowNumber,

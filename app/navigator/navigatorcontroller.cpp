@@ -38,20 +38,6 @@ static void expandAllChildren(QTreeWidget* treeWidget, QTreeWidgetItem* parentIt
         expandAllChildren(treeWidget, parentItem->child(i));
 }
 
-static Control* controlFromItem(const QTreeWidgetItem* item, Form* form)
-{
-    QList<Control*> allControls;
-    allControls.append(form);
-    allControls.append(form->childControls());
-
-    for (Control* childControl : allControls) {
-        if (childControl->id() == item->text(0))
-            return childControl;
-    }
-
-    return nullptr;
-}
-
 NavigatorController::NavigatorController(NavigatorPane* navigatorPane, DesignerScene* designerScene, QObject* parent) : QObject(parent)
   , m_navigatorPane(navigatorPane)
   , m_designerScene(designerScene)
@@ -130,7 +116,11 @@ void NavigatorController::onSearchEditReturnPress()
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
         const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
         for (QTreeWidgetItem* childItem : childs) {
-            if (QString::compare(childItem->text(0), searchTerm, Qt::CaseInsensitive) == 0) {
+            const auto& control = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+            Q_ASSERT(control);
+            if (control.isNull())
+                continue;
+            if (QString::compare(control->id(), searchTerm, Qt::CaseInsensitive) == 0) {
                 m_isSelectionHandlingBlocked = true;
                 tree->clearSelection();
                 m_isSelectionHandlingBlocked = false;
@@ -162,11 +152,14 @@ void NavigatorController::onCurrentFormChange(Form* currentForm)
         for (QTreeWidgetItem* topLevelItem : topLevelItems) {
             const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
             for (QTreeWidgetItem* childItem : childs) {
+                const auto& control = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+                Q_ASSERT(control);
+                if (control.isNull())
+                    continue;
                 if (childItem->isSelected())
-                    state.selectedIds << childItem->text(0);
-
+                    state.selectedIds.append(control->id());
                 if (!childItem->isExpanded())
-                    state.collapsedIds << childItem->text(0);
+                    state.collapsedIds.append(control->id());
             }
         }
 
@@ -179,16 +172,8 @@ void NavigatorController::onCurrentFormChange(Form* currentForm)
     m_designerScene->clearSelection();
 
     /* Create items for incoming form */
-    auto formItem = tree->delegate()->createItem();
-    formItem->setText(0, currentForm->id());
-    formItem->setData(0, NavigatorDelegate::HasErrorRole, currentForm->hasErrors());
-    formItem->setData(1, NavigatorDelegate::HasErrorRole, currentForm->hasErrors());
+    auto formItem = tree->delegate()->createItem(m_currentForm);
     formItem->setIcon(0, QIcon(":/images/tools/Form.svg"));
-
-    if (currentForm->gui() && !currentForm->hasErrors())
-        formItem->setText(1, tr("Yes"));
-    else
-        formItem->setText(1, tr("No"));
 
     tree->addTopLevelItem(formItem);
     addCompleterEntry(m_searchCompleterModel, currentForm->id());
@@ -203,8 +188,12 @@ void NavigatorController::onCurrentFormChange(Form* currentForm)
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
         const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
         for (QTreeWidgetItem* childItem : childs) {
+            const auto& control = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+            Q_ASSERT(control);
+            if (control.isNull())
+                continue;
             for (const QString& id : state.selectedIds) {
-                if (id == childItem->text(0)) {
+                if (id == control->id()) {
                     childItem->setSelected(true);
                     if (!scrolled) {
                         tree->scrollToItem(childItem);
@@ -214,7 +203,7 @@ void NavigatorController::onCurrentFormChange(Form* currentForm)
             }
 
             for (const QString& id : state.collapsedIds) {
-                if (id == childItem->text(0))
+                if (id == control->id())
                     childItem->setExpanded(false);
             }
         }
@@ -248,7 +237,11 @@ void NavigatorController::onControlCreation(Control* control)
         for (QTreeWidgetItem* topLevelItem : topLevelItems) {
             const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
             for (QTreeWidgetItem* childItem : childs) {
-                if (parentControl->id() == childItem->text(0)) {
+                const auto& control = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+                Q_ASSERT(control);
+                if (control.isNull())
+                    continue;
+                if (parentControl->id() == control->id()) {
                     appendChilds(childItem, QList<Control*>() << control);
                     expandAllChildren(tree, childItem);
                     tree->sortItems(0, Qt::AscendingOrder);
@@ -273,10 +266,18 @@ void NavigatorController::onControlRemove(Control* control)
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
         const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
         for (QTreeWidgetItem* childItem : childs) {
-            if (control->id() == childItem->text(0)) {
+            const auto& control2 = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+            Q_ASSERT(control2);
+            if (control2.isNull())
+                continue;
+            if (control->id() == control2->id()) {
                 const QList<QTreeWidgetItem*>& _childs = tree->allSubChildItems(childItem);
                 for (QTreeWidgetItem* child : _childs) {
-                    removeCompleterEntry(m_searchCompleterModel, child->text(0));
+                    const auto& control3 = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+                    Q_ASSERT(control3);
+                    if (control3.isNull())
+                        continue;
+                    removeCompleterEntry(m_searchCompleterModel, control3->id());
                     tree->delegate()->destroyItem(child);
                 }
                 // No need to following, because the order is preserved after the deletion already.
@@ -304,7 +305,11 @@ void NavigatorController::onControlParentChange(Control* control)
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
         const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
         for (QTreeWidgetItem* childItem : childs) {
-            if (control->id() == childItem->text(0))
+            const auto& control2 = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+            Q_ASSERT(control2);
+            if (control2.isNull())
+                continue;
+            if (control->id() == control2->id())
                 found = true;
         }
     }
@@ -360,17 +365,6 @@ void NavigatorController::onControlRenderInfoChange(Control* control, bool codeC
         const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
         for (QTreeWidgetItem* childItem : childs) {
             if (control->id() == childItem->text(0)) {
-                // No need to following, onControlIdChange takes place before the render operation
-                // childItem->setText(0, control->id());
-                // Hence no need to this too: sortItems(0, Qt::AscendingOrder);
-                childItem->setData(0, NavigatorDelegate::HasErrorRole, control->hasErrors());
-                childItem->setData(1, NavigatorDelegate::HasErrorRole, control->hasErrors());
-
-                if (control->gui() && !control->hasErrors())
-                    childItem->setText(1, tr("Yes"));
-                else
-                    childItem->setText(1, tr("No"));
-
                 childItem->setIcon(0, QIcon(control->type() == Form::Type
                                             ? ":/images/tools/Form.svg"
                                             : ToolUtils::toolIconPath(control->dir())));
@@ -386,8 +380,8 @@ void NavigatorController::appendChilds(QTreeWidgetItem* parentItem, const QList<
     for (const Control* child : childItems) {
         QTreeWidgetItem* item = tree->delegate()->createItem();
         item->setText(0, child->id());
-        item->setData(0, NavigatorDelegate::HasErrorRole, child->hasErrors());
-        item->setData(1, NavigatorDelegate::HasErrorRole, child->hasErrors());
+        item->setData(0, NavigatorDelegate::HasErrorRole, QVariant::fromValue(QPointer<Control>(child)));
+        item->setData(1, NavigatorDelegate::HasErrorRole, QVariant::fromValue(QPointer<Control>(child)));
         item->setExpanded(true);
 
         if (child->gui() && !child->hasErrors())

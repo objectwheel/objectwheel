@@ -2,7 +2,22 @@
 #include <navigatortree.h>
 #include <navigatordelegatecache.h>
 #include <utilityfunctions.h>
+#include <control.h>
+
+#include <QPointer>
 #include <QPainter>
+
+class NavigatorItem final : public QTreeWidgetItem {
+    bool operator<(const QTreeWidgetItem& other) const {
+        const auto& myControl = data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+        const auto& otherControl = other.data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+        Q_ASSERT(myControl);
+        Q_ASSERT(otherControl);
+        if (myControl && otherControl)
+            return myControl->index() < otherControl->index();
+        return false;
+    }
+};
 
 NavigatorDelegate::NavigatorDelegate(NavigatorTree* navigatorTree) : QStyledItemDelegate(navigatorTree)
   , m_navigatorTree(navigatorTree)
@@ -31,18 +46,20 @@ void NavigatorDelegate::destroyItem(QTreeWidgetItem* item) const
     else if (QTreeWidget* tree = item->treeWidget())
         tree->takeTopLevelItem(tree->indexOfTopLevelItem(item));
     item->setHidden(true);
-    item->setText(0, QString());
-    item->setText(1, QString());
-    item->setData(0, NavigatorDelegate::HasErrorRole, QVariant());
-    item->setData(1, NavigatorDelegate::HasErrorRole, QVariant());
+    item->setData(0, ControlRole, QVariant());
+    item->setData(1, ControlRole, QVariant());
+    item->setIcon(0, QIcon());
     m_cache->push(item);
 }
 
-QTreeWidgetItem* NavigatorDelegate::createItem() const
+QTreeWidgetItem* NavigatorDelegate::createItem(Control* control) const
 {
-    if (QTreeWidgetItem* item = m_cache->pop())
-        return item;
-    return new QTreeWidgetItem;
+    QTreeWidgetItem* item = m_cache->pop();
+    if (item == 0)
+        item = new QTreeWidgetItem;
+    item->setData(0, ControlRole, QVariant::fromValue(QPointer<Control>(control)));
+    item->setData(1, ControlRole, QVariant::fromValue(QPointer<Control>(control)));
+    return item;
 }
 
 int NavigatorDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
@@ -125,19 +142,25 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
     painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 
     // Draw text
-    if (model->data(index, HasErrorRole).toBool() && isSelected)
+    const auto& control = model->data(index, ControlRole).value<QPointer<Control>>();
+    Q_ASSERT(control);
+    if (control && control->hasErrors() && isSelected)
         painter->setPen(option.palette.linkVisited().color().lighter(140));
-    else if (model->data(index, HasErrorRole).toBool() && !isSelected)
+    else if (control && control->hasErrors() && !isSelected)
         painter->setPen(option.palette.linkVisited().color());
     else if (isSelected)
         painter->setPen(option.palette.highlightedText().color());
     else
         painter->setPen(option.palette.text().color());
 
-    const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
-    const QString& text = index.data(Qt::DisplayRole).toString();
-    painter->drawText(textRect, option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
-                      QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
-
+    if (control) {
+        const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
+        const QString& text = index.column() == 1
+                ? control->gui() && !control->hasErrors() ? tr("Yes") : tr("No")
+                : control->id();
+        painter->drawText(textRect,
+                          option.fontMetrics.elidedText(control->id(), Qt::ElideMiddle, textRect.width()),
+                          QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+    }
     painter->restore();
 }
