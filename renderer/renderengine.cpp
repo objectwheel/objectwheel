@@ -126,10 +126,14 @@ void RenderEngine::updateBinding(const QString& uid, const QString& bindingName,
 
     Q_ASSERT(formInstance);
 
-    if (expression.isEmpty())
-        updateControlCode(uid);
-    else
+    if (expression.isEmpty()) {
+        if (m_formInstances.contains(instance))
+            updateFormCode(uid);
+        else
+            updateControlCode(uid);
+    } else {
         RenderUtils::setInstancePropertyBinding(instance, bindingName, expression);
+    }
 
     if (instance->parent && instance->parent->object)
         RenderUtils::refreshLayoutable(instance->parent);
