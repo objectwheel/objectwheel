@@ -51,6 +51,8 @@ private:
     DesignerScene* m_designerScene;
     QHash<Form*, FormState> m_formStates;
     QPointer<Form> m_currentForm;
+    bool m_isSelectionHandlingBlocked;
+    bool m_isProjectStarted;
 };
 
 #endif // INSPECTORPANE_H

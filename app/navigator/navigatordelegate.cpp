@@ -33,11 +33,8 @@ void NavigatorDelegate::destroyItem(QTreeWidgetItem* item) const
     item->setHidden(true);
     item->setText(0, QString());
     item->setText(1, QString());
-//    item->setData(0, NavigatorDelegate::ModificationRole, QVariant());
-//    item->setData(1, NavigatorDelegate::ValuesRole, QVariant());
-//    item->setData(1, NavigatorDelegate::InitialValueRole, QVariant());
-//    item->setData(1, NavigatorDelegate::TypeRole, QVariant());
-//    item->setData(1, NavigatorDelegate::CallbackRole, QVariant());
+    item->setData(0, NavigatorDelegate::HasErrorRole, QVariant());
+    item->setData(1, NavigatorDelegate::HasErrorRole, QVariant());
     m_cache->push(item);
 }
 
@@ -130,9 +127,9 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
     painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 
     // Draw text
-    if (model->data(index, Qt::UserRole).toBool() && isSelected)
+    if (model->data(index, HasErrorRole).toBool() && isSelected)
         painter->setPen(option.palette.linkVisited().color().lighter(140));
-    else if (model->data(index, Qt::UserRole).toBool() && !isSelected)
+    else if (model->data(index, HasErrorRole).toBool() && !isSelected)
         painter->setPen(option.palette.linkVisited().color());
     else if (isSelected)
         painter->setPen(option.palette.highlightedText().color());

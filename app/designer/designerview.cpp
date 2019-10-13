@@ -5,11 +5,11 @@
 #include <QMouseEvent>
 #include <QScrollBar>
 #include <QCoreApplication>
+#include <QPainter>
 
 DesignerView::DesignerView(QWidget* parent) : QGraphicsView(new DesignerScene(parent), parent)
   , m_panningState(Panning::NotStarted)
 {
-    setFrameShape(NoFrame);
     setDragMode(RubberBandDrag);
     setResizeAnchor(AnchorViewCenter);
     setTransformationAnchor(AnchorUnderMouse);
@@ -18,7 +18,6 @@ DesignerView::DesignerView(QWidget* parent) : QGraphicsView(new DesignerScene(pa
     setRubberBandSelectionMode(Qt::IntersectsItemBoundingRect);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setBackgroundRole(QPalette::Window);
-    setAutoFillBackground(true);
 
     // as mousetracking only works for mouse key it is better to handle it in the
     // eventFilter method so it works also for the space scrolling case as expected
@@ -52,6 +51,19 @@ void DesignerView::stopPanning(QEvent* event)
     m_panningStartPosition = QPoint();
     viewport()->unsetCursor();
     event->accept();
+}
+
+bool DesignerView::event(QEvent* event)
+{
+    if (event->type() == QEvent::Paint) {
+        QRectF r(rect());
+        QPainter p(this);
+        p.setPen("#b6b6b6");
+        p.drawLine(r.topLeft(), r.bottomLeft());
+        p.drawLine(r.topRight(), r.bottomRight());
+        return true;
+    }
+    return QGraphicsView::event(event);
 }
 
 void DesignerView::keyPressEvent(QKeyEvent* event)

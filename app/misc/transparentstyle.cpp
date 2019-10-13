@@ -10,20 +10,9 @@
 #include <QAbstractScrollArea>
 
 namespace {
-
 const int PushButtonLeftOffset  = 6;
 const int PushButtonRightOffset = 12;
-
-const qreal pushButtonDefaultHeight[3] = {
-    32, 28, 16
-};
-
-QColor outlineColor(const QPalette &pal)
-{
-    if (pal.window().style() == Qt::TexturePattern)
-        return QColor(0, 0, 0, 125);
-    return pal.window().color().darker(125);
-}
+const qreal pushButtonDefaultHeight[3] = { 32, 28, 16 };
 }
 
 QRectF comboboxEditBounds(const QRectF& outerBounds);
@@ -354,7 +343,7 @@ void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleO
             g.setColorAt(0, option->palette.window().color().lighter(130));
             g.setColorAt(1, option->palette.window().color());
             painter->setBrush(g);
-            painter->setPen(outlineColor(option->palette));
+            painter->setPen("#b6b6b6");
             painter->drawRect(cb->rect);
             painter->restore();
         } break;

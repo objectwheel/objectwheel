@@ -13,6 +13,12 @@ class NavigatorDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY(NavigatorDelegate)
 
     friend class NavigatorTree;
+    friend class NavigatorController;
+
+public:
+    enum Roles {
+        HasErrorRole = Qt::UserRole + 1
+    };
 
 public:
     explicit NavigatorDelegate(NavigatorTree* navigatorTree);

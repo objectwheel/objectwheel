@@ -304,6 +304,8 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 12;
     case PM_DockWidgetSeparatorExtent:
         return 1;
+    case PM_TreeViewIndentation:
+        return 16;
     case PM_SmallIconSize:
         if (widget && widget->inherits("LineEdit"))
             return 13;

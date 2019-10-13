@@ -21,7 +21,6 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
     headerItem()->setText(0, tr("Property"));
 
     setColumnCount(2);
-    setIndentation(16);
     setDragEnabled(false);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);

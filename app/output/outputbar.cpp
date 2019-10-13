@@ -46,7 +46,7 @@ void OutputBar::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(rect(), palette().window());
-    painter.setPen("#c4c4c4");
+    painter.setPen("#b6b6b6");
     painter.drawLine(rect().topLeft() + QPointF(0.5, 0.0),
                      rect().topRight() + QPointF(0.5, 0.0));
     painter.drawLine(rect().topLeft() + QPointF(0.0, 0.5),

@@ -26,6 +26,7 @@ public:
 private:
     void startPanning(QEvent* event);
     void stopPanning(QEvent* event);
+    bool event(QEvent* event) override;
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;

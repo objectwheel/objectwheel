@@ -19,7 +19,6 @@ NavigatorTree::NavigatorTree(QWidget* parent) : QTreeWidget(parent)
     headerItem()->setText(1, tr("Ui"));
 
     setColumnCount(2);
-    setIndentation(16);
     setDragEnabled(false);
     setUniformRowHeights(true);
     setDropIndicatorShown(false);
