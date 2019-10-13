@@ -59,10 +59,10 @@ QToolBar { \
     border-top: 1px solid  #c4c4c4;\
     border-bottom: 1px solid #c4c4c4;\
     border-right: 1px solid #c4c4c4;\
-    border-left: 3px solid #0D74C8;\
+    border-left: 2px solid #0D74C8;\
 margin: 0px;\
 background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #ffffff, stop:1 #e3e3e3); \
-spacing: 5px; \
+spacing: 2px; \
 }"
 
 namespace {
@@ -133,7 +133,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Navigator Pane */
     auto navigatorTitleLabel = new QLabel;
     navigatorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    navigatorTitleLabel->setText("   " + tr("Navigator"));
+    navigatorTitleLabel->setText("  " + tr("Navigator"));
 
     auto navigatorTitlePinButton = new QToolButton;
     navigatorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -149,7 +149,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     navigatorTitleBar->addWidget(navigatorTitlePinButton);
     navigatorTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     navigatorTitleBar->setIconSize(QSize(11, 11));
-    navigatorTitleBar->setFixedHeight(24);
+    navigatorTitleBar->setFixedHeight(20);
 
     navigatorDockWidget = new QDockWidget;
     navigatorDockWidget->setObjectName("navigatorDockWidget");
@@ -162,7 +162,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Properties Pane */
     auto propertiesTitleLabel = new QLabel;
     propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    propertiesTitleLabel->setText("   " + tr("Properties"));
+    propertiesTitleLabel->setText("  " + tr("Properties"));
 
     auto propertiesTitlePinButton = new QToolButton;
     propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -178,7 +178,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     propertiesTitleBar->addWidget(propertiesTitlePinButton);
     propertiesTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     propertiesTitleBar->setIconSize(QSize(11, 11));
-    propertiesTitleBar->setFixedHeight(24);
+    propertiesTitleBar->setFixedHeight(20);
 
     propertiesDockWidget = new QDockWidget;
     propertiesDockWidget->setObjectName("propertiesDockWidget");
@@ -191,7 +191,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Assets Pane */
     auto assetsTitleLabel = new QLabel;
     assetsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    assetsTitleLabel->setText("   " + tr("Assets"));
+    assetsTitleLabel->setText("  " + tr("Assets"));
 
     auto assetsTitlePinButton = new QToolButton;
     assetsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -207,7 +207,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     assetsTitleBar->addWidget(assetsTitlePinButton);
     assetsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     assetsTitleBar->setIconSize(QSize(11, 11));
-    assetsTitleBar->setFixedHeight(24);
+    assetsTitleBar->setFixedHeight(20);
 
     assetsDockWidget = new QDockWidget;
     assetsDockWidget->setObjectName("assetsDockWidget");
@@ -222,7 +222,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Toolbox Pane */
     auto toolboxTitleLabel = new QLabel;
     toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    toolboxTitleLabel->setText("   " + tr("Toolbox"));
+    toolboxTitleLabel->setText("  " + tr("Toolbox"));
 
     auto toolboxTitlePinButton = new QToolButton;
     toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -238,7 +238,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     toolboxTitleBar->addWidget(toolboxTitlePinButton);
     toolboxTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     toolboxTitleBar->setIconSize(QSize(11, 11));
-    toolboxTitleBar->setFixedHeight(24);
+    toolboxTitleBar->setFixedHeight(20);
 
     toolboxDockWidget = new QDockWidget;
     toolboxDockWidget->setObjectName("toolboxDockWidget");
@@ -251,7 +251,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Forms Pane */
     auto formsTitleLabel = new QLabel;
     formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    formsTitleLabel->setText("   " + tr("Forms"));
+    formsTitleLabel->setText("  " + tr("Forms"));
 
     auto formsTitlePinButton = new QToolButton;
     formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
@@ -267,7 +267,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     formsTitleBar->addWidget(formsTitlePinButton);
     formsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
     formsTitleBar->setIconSize(QSize(11, 11));
-    formsTitleBar->setFixedHeight(24);
+    formsTitleBar->setFixedHeight(20);
 
     formsDockWidget = new QDockWidget;
     formsDockWidget->setObjectName("formsDockWidget");

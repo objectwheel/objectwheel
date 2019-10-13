@@ -18,7 +18,7 @@ NavigatorPane::NavigatorPane(QWidget* parent) : QWidget(parent)
                             QLineEdit::LeadingPosition);
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(2);
-    layout->setContentsMargins(3, 3, 3, 3);
+    layout->setContentsMargins(2, 2, 2, 2);
     layout->addWidget(m_navigatorTree);
     layout->addWidget(m_searchEdit);
 }

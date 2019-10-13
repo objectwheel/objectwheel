@@ -23,7 +23,7 @@ ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
 
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(2);
-    layout->setContentsMargins(3, 3, 3, 3);
+    layout->setContentsMargins(2, 2, 2, 2);
     layout->addWidget(m_toolboxTree);
     layout->addWidget(m_searchEdit);
 }
