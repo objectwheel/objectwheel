@@ -91,12 +91,6 @@
         <file>images/anchors/top.svg</file>
         <file>images/anchors/horizontal.svg</file>
         <file>images/anchors/vertical.svg</file>
-        <file>images/modes/builds-active.svg</file>
-        <file>images/modes/designer-active.svg</file>
-        <file>images/modes/documents-active.svg</file>
-        <file>images/modes/editor-active.svg</file>
-        <file>images/modes/options-active.svg</file>
-        <file>images/modes/split-active.svg</file>
         <file>images/designer/bring-to-front.svg</file>
         <file>images/designer/copy.svg</file>
         <file>images/designer/cut.svg</file>
@@ -318,5 +312,11 @@
         <file>images/tools/ExclusiveGroup.svg</file>
         <file>images/settings/toolbox.svg</file>
         <file>images/tools/Form.svg</file>
+        <file>images/modes/builds-on.svg</file>
+        <file>images/modes/designer-on.svg</file>
+        <file>images/modes/documents-on.svg</file>
+        <file>images/modes/editor-on.svg</file>
+        <file>images/modes/options-on.svg</file>
+        <file>images/modes/split-on.svg</file>
     </qresource>
 </RCC>

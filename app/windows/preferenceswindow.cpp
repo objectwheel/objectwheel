@@ -53,7 +53,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_dialogButtonBox, 2, 0, 1, 2);
 
     m_listWidget->setFixedWidth(150);
-    m_listWidget->setIconSize({24, 24});
     m_listWidget->setDragEnabled(false);
     m_listWidget->setSortingEnabled(true);
     m_listWidget->setFocusPolicy(Qt::NoFocus);

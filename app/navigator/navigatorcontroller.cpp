@@ -17,8 +17,6 @@
 #include <QScrollBar>
 #include <QCompleter>
 
-// FIXME: Make sure you check all currentForm() usages if they are null or not before using them
-
 static void addCompleterEntry(QStringListModel& model, const QString& entry)
 {
     QStringList list(model.stringList());
@@ -33,15 +31,14 @@ static void removeCompleterEntry(QStringListModel& model, const QString& entry)
     model.setStringList(list);
 }
 
-void expandAllChildren(QTreeWidget* treeWidget, QTreeWidgetItem* parentItem)
+static void expandAllChildren(QTreeWidget* treeWidget, QTreeWidgetItem* parentItem)
 {
     treeWidget->expandItem(parentItem);
-
     for (int i = 0; i < parentItem->childCount(); ++i)
         expandAllChildren(treeWidget, parentItem->child(i));
 }
 
-Control* controlFromItem(const QTreeWidgetItem* item, Form* form)
+static Control* controlFromItem(const QTreeWidgetItem* item, Form* form)
 {
     QList<Control*> allControls;
     allControls.append(form);
@@ -69,10 +66,8 @@ NavigatorController::NavigatorController(NavigatorPane* navigatorPane, DesignerS
     completer->setCompletionMode(QCompleter::InlineCompletion);
     m_navigatorPane->searchEdit()->setCompleter(completer);
 
-    // WARNING: Beware, ControlPropertyManager signals are emitted everytime a setProperty called
-    // no matter what. I think we should consider reviewing related slots against possible miscalls
-    connect(m_navigatorPane->searchEdit(), &LineEdit::editingFinished,
-            this, &NavigatorController::onSearchEditEditingFinish);
+    connect(m_navigatorPane->searchEdit(), &LineEdit::returnPressed,
+            this, &NavigatorController::onSearchEditReturnPress);
     connect(tree, &NavigatorTree::itemSelectionChanged,
             this, &NavigatorController::onItemSelectionChange);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
@@ -123,7 +118,7 @@ void NavigatorController::onProjectStart()
     onCurrentFormChange(m_designerScene->currentForm());
 }
 
-void NavigatorController::onSearchEditEditingFinish()
+void NavigatorController::onSearchEditReturnPress()
 {
     if (!m_isProjectStarted)
         return;

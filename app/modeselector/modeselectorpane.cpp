@@ -9,7 +9,7 @@ static QIcon icon(const QString& fileName)
 {
     QIcon icon;
     icon.addFile(":/images/modes/" + fileName + ".svg", QSize(), QIcon::Normal, QIcon::Off);
-    icon.addFile(":/images/modes/" + fileName + "-active.svg", QSize(), QIcon::Normal, QIcon::On);
+    icon.addFile(":/images/modes/" + fileName + "-on.svg", QSize(), QIcon::Normal, QIcon::On);
     return icon;
 }
 
@@ -21,28 +21,10 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
   , m_buildsAction(new QAction(this))
   , m_documentsAction(new QAction(this))
 {
+    setObjectName("_q_ModeSelectorPane");
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
     setIconSize({16, 16});
-    setStyleSheet(R"qss(
-        QToolButton {
-            border: none;
-            padding-left: 4px;
-            border-radius: 7px;
-            background-color: transparent;
-        }
-        QToolButton:pressed {
-            color: white;
-            background-color: #80000000;
-        }
-        QToolButton:checked {
-            color: white;
-            background-color: #60000000;
-        }
-        QToolButton:!checked:!pressed:hover {
-            background-color: #20000000;
-        }
-    )qss");
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {

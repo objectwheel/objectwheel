@@ -32,7 +32,7 @@ public slots:
 
 private slots:
     void onProjectStart();
-    void onSearchEditEditingFinish();
+    void onSearchEditReturnPress();
     void onSceneSelectionChange();
     void onItemSelectionChange();
     void onCurrentFormChange(Form* currentForm);
