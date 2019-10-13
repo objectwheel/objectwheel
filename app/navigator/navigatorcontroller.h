@@ -4,11 +4,12 @@
 #include <QTreeWidget>
 #include <QHash>
 #include <QPointer>
-#include <navigatorpane.h>
+#include <QStringListModel>
 
 class Form;
 class Control;
 class DesignerScene;
+class NavigatorPane;
 
 class NavigatorController final : public QObject
 {
@@ -30,18 +31,21 @@ public slots:
     void clear();
 
 private slots:
+    void onProjectStart();
+    void onSearchEditEditingFinish();
+    void onSceneSelectionChange();
+    void onItemSelectionChange();
+    void onCurrentFormChange(Form* currentForm);
+    void onControlCreation(Control* control);
+    void onControlRemove(Control* control);
+    void onFormRemove(Control* control);
     void onControlParentChange(Control* control);
     void onControlIndexChange(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);
     void onControlRenderInfoChange(Control* control, bool codeChanged);
 
-    void onProjectStart();
-    void onSceneSelectionChange();
-    void onControlCreation(Control* control);
-    void onControlRemove(Control* control);
-    void onFormRemove(Control* control);
-    void onCurrentFormChange(Form* currentForm);
-    void onItemSelectionChange();
+private:
+    void appendChilds(QTreeWidgetItem* parentItem, const QList<Control*>& childItems);
 
 signals:
     void controlSelectionChanged(const QList<Control*>& selectedControls);
@@ -51,6 +55,7 @@ private:
     DesignerScene* m_designerScene;
     QHash<Form*, FormState> m_formStates;
     QPointer<Form> m_currentForm;
+    QStringListModel m_searchCompleterModel;
     bool m_isSelectionHandlingBlocked;
     bool m_isProjectStarted;
 };
