@@ -57,7 +57,8 @@ int NavigatorDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
             ++count;
         }
     }
-    return count;
+    Q_ASSERT(false);
+    return -1;
 }
 
 void NavigatorDelegate::paintBackground(QPainter* painter, const QStyleOptionViewItem& option,
@@ -69,10 +70,7 @@ void NavigatorDelegate::paintBackground(QPainter* painter, const QStyleOptionVie
     const QPalette& pal = option.palette;
     const QRectF& rect = option.rect;
 
-    QPainterPath path;
-    path.addRect(rect);
-    painter->setClipPath(path);
-    painter->setClipping(true);
+    painter->setClipRect(rect);
 
     // Fill background
     if (isSelected) {
@@ -138,8 +136,7 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
 
     const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
     const QString& text = index.data(Qt::DisplayRole).toString();
-    painter->drawText(textRect,
-                      option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
+    painter->drawText(textRect, option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                       QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
 
     painter->restore();

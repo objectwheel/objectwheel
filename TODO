@@ -1,5 +1,11 @@
 Designer Core TODOs
 
+"creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
+runpane doğru dürüst çalışmıyor
+InspectorPane'e de aynı kontrol sağ tık menüsünden ekle, ayrıca InspectorPane için de settings'e
+    çift tıklanınca varsayılan olarak neyin açılacağı sorulsun, kod mu, SignalEditor mü vs
+
+
 scale > 1 (belki rotation > 0) olan parentlerden childler taşınırken, setBeingRaised yapılca kontrol kayıyor, bunu düzelt
 aynı şekilde resize etmede scale > 1 (belki rotation > 0) durumunda sıkıntı çıkarıyor
 üzeri tam dolu olan bir nesneyi anchorlamak için üstünde boş yer yoksa sıkıntı çıkıyor, headline'da anchorlama için kullanılabilmeli
@@ -46,7 +52,6 @@ tüm png tool ikonlarını ve images.qrc leri ve tool-icons.json ları sil
 ayrıca toolbox üzerine bir settings ikonu koy ve toolbox ayarlarna yönlendirsin
 toolbox içinde bir sürü tool sürüklenmek isteyince patlıyor
 Menu, MenuBar, ToolBar, TabBar gibi bazı (özellikle Container bazlı) toollar, içinde "c" klasörü olsun ve içinde hazır çocukları olsun arsayılan olarak, çocuk derken mesela MenuBarItem, MenuItem, TabButton vs vs
-Inspector Pane ikonları ayvayı yemiş, onları yeni ikon sistemine uygun olarak restore et
 Yukarıdaki çocuk olarak sayılan elemanlar için designer şu özellikleri desteklemeli:
     Eğer babaları kendi özel konteynerleri ise (MenuBar, TabBar gibi), ilgili çocukların x, y, width, height gibi özellikleri set edilememeli, mesela designera x, y uygulanır ama UpdateRenderer ve Save edilmez. Resizerlar bu gibi kontroller için pasif olmalı. Ancak ilgili kontrol headline ile yada doğal olarak sürüklenebilmeli ve reparent edilebilmeli, ancak dediğimiz gibi eğer kendi doğal konteynerları babaları ise x, y, w, h set edilmemeli eski yerlerine geri dönmeliler, ayrıca belki properties pane de x, y, w, h propertilerini babaları uygun olduğunda göstermemeli gizlemeli
 engine crash mesajına "dont ask again" ekle
@@ -395,8 +400,6 @@ qmlcodeeditorwidget'in bir sürü todo su halen duruyor, özellikle kontrol silm
 tema değiştirme ve controlpreviewmanager'in init olayı doğru dürüst çalışmıyor, ve birbirleri ile çelişiyor karışıyorlar
 nongui itemlerin x,y set etme problemi, ama set etmesek bu seferde ilk oluşumda set edemiyoruz, çünkü ilk oluşumda gri/nongui durumu daha belli değil
 ayrı bir gri düzenleme aracında tool oluşturulabilmeli, bu da son flaw
-"creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
-runpane doğru dürüst çalışmıyor
 qmlcodeeditor yatay scrollbar kaydırılıp içerik sola gidince, ve sol tarafta gizlenince uygulamanın cpu kullanımı deli bir şekilde artıyor
 propertiespane'de yeşil indikatörlerle ilgili hatalar var, todoları bi gözden geçir
 açık olan bir sekme, altta outputpane'de, sweep'den sonra orda takılı kalıyor ancak başka sekmeyi gösteriyor, consolebox ile dene gör, aç konsolebox'u sonra çalıştır bir app, sonra projeyi değiştir ve yine çalıştır ve gör, konsolebox'da takılı kalıyor

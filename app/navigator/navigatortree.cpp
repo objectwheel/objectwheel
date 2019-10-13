@@ -161,19 +161,16 @@ void NavigatorTree::paintEvent(QPaintEvent* event)
 
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());
-    painter.setClipping(true);
 
     QColor lineColor(palette().dark().color());
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
     qreal height = d->defaultItemHeight;
-    int rowCount = viewport()->height() / height;
+    qreal rowCount = viewport()->height() / height;
     for (int i = 0; i < rowCount; ++i) {
         QRectF rect(0, i * height, viewport()->width(), height);
-        QPainterPath path;
-        path.addRect(rect);
-        painter.setClipPath(path);
+        painter.setClipRect(rect);
 
         // Fill background
         if (i % 2)
@@ -186,8 +183,10 @@ void NavigatorTree::paintEvent(QPaintEvent* event)
                          cell.bottomRight() + QPointF(-0.5, -0.5));
 
         // Draw top and bottom lines
-        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+        painter.drawLine(rect.topLeft() + QPointF(0.5, 0.0),
+                         rect.topRight() - QPointF(0.5, 0.0));
+        painter.drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
+                         rect.bottomRight() - QPointF(0.5, 0.0));
     }
 
     QTreeWidget::paintEvent(event);

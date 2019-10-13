@@ -10,7 +10,7 @@ class NavigatorTree final : public QTreeWidget
     Q_DISABLE_COPY(NavigatorTree)
     Q_DECLARE_PRIVATE(QTreeWidget)
 
-    friend class NavigatorDelegate;
+    friend class NavigatorDelegate; // For itemFromIndex()
 
 public:
     explicit NavigatorTree(QWidget* parent = nullptr);

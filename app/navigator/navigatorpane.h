@@ -18,7 +18,7 @@ public:
     LineEdit* searchEdit() const;
     QSize sizeHint() const override;
 
-public:
+private:
     NavigatorTree* m_navigatorTree;
     LineEdit* m_searchEdit;
 };
