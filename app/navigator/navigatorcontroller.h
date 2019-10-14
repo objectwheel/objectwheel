@@ -17,8 +17,7 @@ class NavigatorController final : public QObject
     Q_DISABLE_COPY(NavigatorController)
 
     struct FormState {
-        QList<QString> selectedIds;
-        QList<QString> collapsedIds;
+        QList<Control*> collapsedControls;
         int verticalScrollBarPosition = 0;
         int horizontalScrollBarPosition = 0;
     };
@@ -42,10 +41,11 @@ private slots:
     void onControlParentChange(Control* control);
     void onControlIndexChange(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);
-    void onControlRenderInfoChange(Control* control, bool codeChanged);
 
 private:
-    void appendChilds(QTreeWidgetItem* parentItem, const QList<Control*>& childItems);
+    Control* controlFromItem(const QTreeWidgetItem* item) const;
+    QTreeWidgetItem* itemFromControl(const Control* control) const;
+    void addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls);
 
 signals:
     void controlSelectionChanged(const QList<Control*>& selectedControls);

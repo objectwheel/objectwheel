@@ -1,6 +1,7 @@
 #ifndef CONTROL_H
 #define CONTROL_H
 
+#include <QIcon>
 #include <anchors.h>
 #include <renderinfo.h>
 #include <designeritem.h>
@@ -28,7 +29,6 @@ public:
     bool overlayPopup() const;
     bool hasWindowAncestor() const;
 
-    Anchors* anchors() const;
     QMarginsF margins() const;
     QVector<QString> events() const;
     QVector<QmlError> errors() const;
@@ -46,17 +46,22 @@ public:
     QString dir() const;
     void setDir(const QString& dir);
 
+    QIcon icon() const;
+    void updateIcon();
+
     QPixmap pixmap() const;
     void setPixmap(const QPixmap& pixmap);
 
     RenderInfo renderInfo() const;
     void setRenderInfo(const RenderInfo& info);
 
+    Anchors* anchors() const;
+    void updateAnchors();
+
     void syncGeometry();
     bool geometrySyncEnabled() const;
     void setGeometrySyncEnabled(bool geometrySyncEnabled);
 
-    void updateAnchors();
     QVariant itemProperty(const QString& propertyName) const;
     Control* parentControl() const;
     Control* topLevelControl() const;
@@ -83,6 +88,7 @@ private:
     QString m_id;
     QString m_uid;
     QString m_dir;
+    QIcon m_icon;
     QPixmap m_pixmap;
     Anchors* m_anchors;
     RenderInfo m_renderInfo;

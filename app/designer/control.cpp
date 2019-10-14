@@ -87,11 +87,6 @@ bool Control::hasWindowAncestor() const
     return false;
 }
 
-Anchors* Control::anchors() const
-{
-    return m_anchors;
-}
-
 QMarginsF Control::margins() const
 {
     return m_renderInfo.margins;
@@ -154,7 +149,20 @@ QString Control::dir() const
 
 void Control::setDir(const QString& dir)
 {
-    m_dir = dir;
+    if (m_dir != dir) {
+        m_dir = dir;
+        updateIcon();
+    }
+}
+
+QIcon Control::icon() const
+{
+    return m_icon;
+}
+
+void Control::updateIcon()
+{
+    m_icon = QIcon(ToolUtils::toolIconPath(m_dir));
 }
 
 QPixmap Control::pixmap() const
@@ -205,6 +213,7 @@ void Control::setRenderInfo(const RenderInfo& info)
     setOpacity(itemProperty("opacity").isValid() ? itemProperty("opacity").toDouble() : 1);
 
     if (info.codeChanged) {
+        updateIcon();
         for (Control* childControl : childControls(false))
             childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
     } else {
@@ -302,45 +311,6 @@ void Control::setRenderInfo(const RenderInfo& info)
     emit renderInfoChanged(info.codeChanged);
 }
 
-void Control::syncGeometry()
-{
-    if (!gui())
-        return;
-
-    if (beingDragged())
-        return;
-
-    if (beingResized())
-        return;
-
-    if (!geometrySyncEnabled())
-        return;
-
-    setFlag(ItemStacksBehindParent, itemProperty("z").toDouble() < 0
-            && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
-                                     parentControl()->window() ||
-                                     parentControl()->popup())));
-
-    const QRectF& geometry = UtilityFunctions::itemGeometry(m_renderInfo.properties);
-    if (geometry.isValid()) {
-        if (type() != Form::Type)
-            ControlPropertyManager::setPos(this, geometry.topLeft(), ControlPropertyManager::NoOption);
-        ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
-    }
-
-    setGeometrySyncEnabled(false);
-}
-
-bool Control::geometrySyncEnabled() const
-{
-    return m_geometrySyncEnabled;
-}
-
-void Control::setGeometrySyncEnabled(bool geometrySyncEnabled)
-{
-    m_geometrySyncEnabled = geometrySyncEnabled;
-}
-
 static AnchorLine::Type anchorType(const QString& anchorName)
 {
     if (anchorName == "top")
@@ -358,6 +328,11 @@ static AnchorLine::Type anchorType(const QString& anchorName)
     if (anchorName == "baseline")
         return AnchorLine::Baseline;
     return AnchorLine::Invalid;
+}
+
+Anchors* Control::anchors() const
+{
+    return m_anchors;
 }
 
 void Control::updateAnchors()
@@ -496,6 +471,45 @@ void Control::updateAnchors()
         else if (name == "anchors.baseline")
             m_anchors->setBaseline(AnchorLine(m_anchors->baseline().type(), control));
     }
+}
+
+void Control::syncGeometry()
+{
+    if (!gui())
+        return;
+
+    if (beingDragged())
+        return;
+
+    if (beingResized())
+        return;
+
+    if (!geometrySyncEnabled())
+        return;
+
+    setFlag(ItemStacksBehindParent, itemProperty("z").toDouble() < 0
+            && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
+                                     parentControl()->window() ||
+                                     parentControl()->popup())));
+
+    const QRectF& geometry = UtilityFunctions::itemGeometry(m_renderInfo.properties);
+    if (geometry.isValid()) {
+        if (type() != Form::Type)
+            ControlPropertyManager::setPos(this, geometry.topLeft(), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setSize(this, geometry.size(), ControlPropertyManager::NoOption);
+    }
+
+    setGeometrySyncEnabled(false);
+}
+
+bool Control::geometrySyncEnabled() const
+{
+    return m_geometrySyncEnabled;
+}
+
+void Control::setGeometrySyncEnabled(bool geometrySyncEnabled)
+{
+    m_geometrySyncEnabled = geometrySyncEnabled;
 }
 
 QVariant Control::itemProperty(const QString& propertyName) const
