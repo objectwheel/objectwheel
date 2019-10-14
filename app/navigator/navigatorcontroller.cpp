@@ -82,13 +82,9 @@ Control* NavigatorController::controlFromItem(const QTreeWidgetItem* item) const
 QTreeWidgetItem* NavigatorController::itemFromControl(const Control* control) const
 {
     NavigatorTree* tree = m_navigatorPane->navigatorTree();
-    const QList<QTreeWidgetItem*>& topLevelItems = tree->topLevelItems();
-    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-        const QList<QTreeWidgetItem*>& children = tree->allSubChildItems(topLevelItem);
-        for (QTreeWidgetItem* childItem : children) {
-            if (controlFromItem(childItem) == control)
-                return childItem;
-        }
+    EVERYTHING(QTreeWidgetItem* item, tree) {
+        if (controlFromItem(item) == control)
+            return item;
     }
     return nullptr;
 }
@@ -106,7 +102,7 @@ void NavigatorController::clear()
     m_isSelectionHandlingBlocked = true;
     NavigatorTree* tree = m_navigatorPane->navigatorTree();
     EVERYTHING(QTreeWidgetItem* item, tree)
-        tree->delegate()->destroyItem(item);
+            tree->delegate()->destroyItem(item);
     m_searchCompleterModel.setStringList({});
     m_isSelectionHandlingBlocked = false;
 }
@@ -218,17 +214,11 @@ void NavigatorController::onControlCreation(Control* control)
     NavigatorTree* tree = m_navigatorPane->navigatorTree();
 
     if (const Control* parentControl = control->parentControl()) {
-        const QList<QTreeWidgetItem*>& topLevelItems = tree->topLevelItems();
-        for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-            const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(topLevelItem);
-            for (QTreeWidgetItem* childItem : childs) {
-                const auto& control = childItem->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
-                Q_ASSERT(control);
-                if (control.isNull())
-                    continue;
-                if (parentControl->id() == control->id()) {
-                    addControls(childItem, QList<Control*>() << control);
-                    expandAllChildren(tree, childItem);
+        EVERYTHING(QTreeWidgetItem* item, tree) {
+            if (const Control* ctrl = controlFromItem(item)) {
+                if (ctrl == parentControl) {
+                    addControls(item, QList<Control*>{control});
+                    expandAllChildren(tree, item);
                     tree->sortItems(0, Qt::AscendingOrder);
                     return;
                 }
@@ -392,13 +382,11 @@ void NavigatorController::onSceneSelectionChange()
     if (m_isSelectionHandlingBlocked)
         return;
 
+    NavigatorTree* tree = m_navigatorPane->navigatorTree();
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
-    if (selectedControls.isEmpty())
-        return;
 
     m_isSelectionHandlingBlocked = true;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
     tree->clearSelection();
 
     QTreeWidgetItem* firstItem = nullptr;
@@ -409,6 +397,7 @@ void NavigatorController::onSceneSelectionChange()
                 firstItem = item;
         }
     }
+
     tree->scrollToItem(firstItem);
 
     m_isSelectionHandlingBlocked = false;
