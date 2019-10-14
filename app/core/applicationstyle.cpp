@@ -639,10 +639,10 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 = qstyleoption_cast<const QStyleOptionToolButton *>(option)) {
             QStyleOptionToolButton copy(*opt);
             QStyleOptionToolButton* toolbutton = &copy;
-            toolbutton->rect.adjust(4, 0, 0, 0);
-            if (widget && widget->parent() && widget->parent()->objectName() == "_q_ModeSelectorPane"
-                    && (toolbutton->state & State_On || toolbutton->state & State_Sunken)) {
-                toolbutton->palette.setColor(QPalette::ButtonText, Qt::white);
+            if (widget && widget->parent() && widget->parent()->objectName() == "_q_ModeSelectorPane") {
+                toolbutton->rect.adjust(4, 0, 0, 0);
+                if (toolbutton->state & State_On || toolbutton->state & State_Sunken)
+                    toolbutton->palette.setColor(QPalette::ButtonText, Qt::white);
             }
             QRect rect = toolbutton->rect;
             int shiftX = 0;

@@ -111,15 +111,15 @@ QList<QTreeWidgetItem*> NavigatorTree::allSubChildItems(QTreeWidgetItem* parentI
 void NavigatorTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
     painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
 
     const qreal width = 10;
     const bool hasChild = itemFromIndex(index)->childCount();
     const bool isSelected = itemFromIndex(index)->isSelected();
 
+    const QRectF r(rect);
     QRectF handleRect(0, 0, width, width);
-    handleRect.moveCenter(rect.center());
-    handleRect.moveRight(rect.right() - 0.5);
+    handleRect.moveCenter(r.center());
+    handleRect.moveRight(r.right() - 0.5);
 
     QStyleOptionViewItem option;
     option.initFrom(this);
@@ -130,24 +130,19 @@ void NavigatorTree::drawBranches(QPainter* painter, const QRect& rect, const QMo
         option.state &= ~QStyle::State_Selected;
 
     m_delegate->paintBackground(painter, option,
-                                m_delegate->calculateVisibleRow(itemFromIndex(index)),
-                                false);
+                                m_delegate->calculateVisibleRow(itemFromIndex(index)), false);
 
     // Draw handle
     if (hasChild) {
-        QPen pen;
-        pen.setWidthF(1.2);
-        pen.setColor(isSelected ? palette().highlightedText().color() : palette().text().color());
-        painter->setPen(pen);
+        const QColor c = isSelected ? palette().brightText().color() : palette().text().color();
+        painter->setPen(QPen(c, 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
-
-        painter->drawLine(QPointF(handleRect.left() + 2.5, handleRect.center().y()),
-                          QPointF(handleRect.right() - 2.5, handleRect.center().y()));
-
+        painter->drawLine(QPointF(handleRect.left() + 2, handleRect.center().y()),
+                          QPointF(handleRect.right() - 2, handleRect.center().y()));
         if (!isExpanded(index)) {
-            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2.5),
-                              QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
+            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2),
+                              QPointF(handleRect.center().x(), handleRect.bottom() - 2));
         }
     }
 

@@ -148,10 +148,7 @@ void PropertiesDelegate::paintBackground(QPainter* painter, const QStyleOptionVi
 
     const QRectF& rect = option.rect;
 
-    QPainterPath path;
-    path.addRect(rect);
-    painter->setClipPath(path);
-    painter->setClipping(true);
+    painter->setClipRect(rect);
 
     // Fill background
     if (isClassRow)
@@ -182,7 +179,6 @@ void PropertiesDelegate::paintBackground(QPainter* painter, const QStyleOptionVi
 void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
 
     const QAbstractItemModel* model = index.model();
     const bool isClassRow = !model->parent(index).isValid() && index.row() > 3;

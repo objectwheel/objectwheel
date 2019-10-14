@@ -41,4 +41,8 @@ private:
     NavigatorDelegateCache* m_cache;
 };
 
+#define EVERYTHING(variable, tree)                                    \
+    Q_FOREACH(QTreeWidgetItem* _topLevelItem_, tree->topLevelItems()) \
+    Q_FOREACH(variable, tree->allSubChildItems(_topLevelItem_))
+
 #endif // NAVIGATORDELEGATE_H

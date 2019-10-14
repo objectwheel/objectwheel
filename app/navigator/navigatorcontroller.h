@@ -25,6 +25,10 @@ class NavigatorController final : public QObject
 public:
     explicit NavigatorController(NavigatorPane* navigatorPane, DesignerScene* designerScene,
                                  QObject* parent = nullptr);
+
+    Control* controlFromItem(const QTreeWidgetItem* item) const;
+    QTreeWidgetItem* itemFromControl(const Control* control) const;
+
 public slots:
     void discharge();
     void clear();
@@ -43,8 +47,6 @@ private slots:
     void onControlIdChange(Control* control, const QString& previousId);
 
 private:
-    Control* controlFromItem(const QTreeWidgetItem* item) const;
-    QTreeWidgetItem* itemFromControl(const Control* control) const;
     void addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls);
 
 signals:

@@ -17,10 +17,6 @@
 #include <QScrollBar>
 #include <QCompleter>
 
-#define EVERYTHING(variable, tree)                                     \
-    Q_FOREACH(QTreeWidgetItem* _topLevelItem_, tree->topLevelItems()) \
-    Q_FOREACH(variable, tree->allSubChildItems(_topLevelItem_))
-
 static void addCompleterEntry(QStringListModel& model, const QString& entry)
 {
     QStringList list(model.stringList());
@@ -76,6 +72,25 @@ NavigatorController::NavigatorController(NavigatorPane* navigatorPane, DesignerS
             this, &NavigatorController::onControlIndexChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::parentChanged,
             this, &NavigatorController::onControlParentChange);
+}
+
+Control* NavigatorController::controlFromItem(const QTreeWidgetItem* item) const
+{
+    return item->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>().data();
+}
+
+QTreeWidgetItem* NavigatorController::itemFromControl(const Control* control) const
+{
+    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    const QList<QTreeWidgetItem*>& topLevelItems = tree->topLevelItems();
+    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
+        const QList<QTreeWidgetItem*>& children = tree->allSubChildItems(topLevelItem);
+        for (QTreeWidgetItem* childItem : children) {
+            if (controlFromItem(childItem) == control)
+                return childItem;
+        }
+    }
+    return nullptr;
 }
 
 void NavigatorController::discharge()
@@ -418,25 +433,6 @@ void NavigatorController::onItemSelectionChange()
     m_isSelectionHandlingBlocked = true;
     emit controlSelectionChanged(selectedControls);
     m_isSelectionHandlingBlocked = false;
-}
-
-Control* NavigatorController::controlFromItem(const QTreeWidgetItem* item) const
-{
-    return item->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>().data();
-}
-
-QTreeWidgetItem* NavigatorController::itemFromControl(const Control* control) const
-{
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
-    const QList<QTreeWidgetItem*>& topLevelItems = tree->topLevelItems();
-    for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-        const QList<QTreeWidgetItem*>& children = tree->allSubChildItems(topLevelItem);
-        for (QTreeWidgetItem* childItem : children) {
-            if (controlFromItem(childItem) == control)
-                return childItem;
-        }
-    }
-    return nullptr;
 }
 
 void NavigatorController::addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls)

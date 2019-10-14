@@ -123,7 +123,6 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
 
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());
-    painter.setClipping(true);
 
     QColor lineColor(palette().dark().color());
     lineColor.setAlpha(50);
@@ -135,9 +134,7 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
     for (int i = 0; i < rowCount; ++i) {
         painter.save();
         QRectF rect(0, i * height, viewport()->width(), height);
-        QPainterPath path;
-        path.addRect(rect);
-        painter.setClipPath(path);
+        painter.setClipRect(rect);
 
         if (i % 2) {
             painter.fillRect(rect, palette().alternateBase());
@@ -174,16 +171,16 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
 void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
     painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
 
     const qreal width = 10;
     const QAbstractItemModel* model = index.model();
     const bool hasChild = itemFromIndex(index)->childCount();
     const bool isClassRow = !model->parent(index).isValid() && index.row() > 3; // NOTE: For Temporary "index" entry, should be 2 otherwise
 
+    const QRectF r(rect);
     QRectF handleRect(0, 0, width, width);
-    handleRect.moveCenter(rect.center());
-    handleRect.moveRight(rect.right() - 0.5);
+    handleRect.moveCenter(r.center());
+    handleRect.moveRight(r.right() - 0.5);
 
     QStyleOptionViewItem option;
     option.initFrom(this);
@@ -195,19 +192,15 @@ void PropertiesTree::drawBranches(QPainter* painter, const QRect& rect, const QM
 
     // Draw handle
     if (hasChild) {
-        QPen pen;
-        pen.setWidthF(1.2);
-        pen.setColor(isClassRow ? palette().brightText().color() : palette().text().color());
-        painter->setPen(pen);
+        const QColor c = isClassRow ? palette().brightText().color() : palette().text().color();
+        painter->setPen(QPen(c, 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
-
-        painter->drawLine(QPointF(handleRect.left() + 2.5, handleRect.center().y()),
-                          QPointF(handleRect.right() - 2.5, handleRect.center().y()));
-
+        painter->drawLine(QPointF(handleRect.left() + 2, handleRect.center().y()),
+                          QPointF(handleRect.right() - 2, handleRect.center().y()));
         if (!isExpanded(index)) {
-            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2.5),
-                              QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
+            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2),
+                              QPointF(handleRect.center().x(), handleRect.bottom() - 2));
         }
     }
 

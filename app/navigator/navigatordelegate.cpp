@@ -48,7 +48,6 @@ void NavigatorDelegate::destroyItem(QTreeWidgetItem* item) const
     item->setHidden(true);
     item->setData(0, ControlRole, QVariant());
     item->setData(1, ControlRole, QVariant());
-    item->setIcon(0, QIcon());
     m_cache->push(item);
 }
 
@@ -121,29 +120,27 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
                               const QModelIndex& index) const
 {
     painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
 
     const bool isSelected = option.state & QStyle::State_Selected;
     const QAbstractItemModel* model = index.model();
-    const QIcon& icon = model->data(index, Qt::DecorationRole).value<QIcon>();
-
-    QRectF iconRect({}, QSizeF{option.decorationSize});
-    iconRect.moveCenter(option.rect.center());
-    iconRect.moveLeft(option.rect.left() + 5);
+    const QRectF r = option.rect;
+    const auto& control = model->data(index, ControlRole).value<QPointer<Control>>();
+    Q_ASSERT(control);
 
     paintBackground(painter, option, calculateVisibleRow(m_navigatorTree->itemFromIndex(index)),
                     index.column() == 0);
 
     // Draw icon
     Q_ASSERT(UtilityFunctions::window(m_navigatorTree));
-    const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_navigatorTree),
-                                            option.decorationSize,
-                                            isSelected ? QIcon::Selected : QIcon::Normal);
+    const QPixmap& iconPixmap = control->icon().pixmap(UtilityFunctions::window(m_navigatorTree),
+                                                       option.decorationSize,
+                                                       isSelected ? QIcon::Selected : QIcon::Normal);
+    QRectF iconRect({}, iconPixmap.size() / m_navigatorTree->devicePixelRatioF());
+    iconRect.moveCenter(r.center());
+    iconRect.moveLeft(r.left() + 5);
     painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 
     // Draw text
-    const auto& control = model->data(index, ControlRole).value<QPointer<Control>>();
-    Q_ASSERT(control);
     if (control && control->hasErrors() && isSelected)
         painter->setPen(option.palette.linkVisited().color().lighter(140));
     else if (control && control->hasErrors() && !isSelected)
@@ -154,13 +151,14 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
         painter->setPen(option.palette.text().color());
 
     if (control) {
-        const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
+        const QRectF& textRect = r.adjusted(iconRect.width() + 10, 0, 0, 0);
         const QString& text = index.column() == 1
                 ? control->gui() && !control->hasErrors() ? tr("Yes") : tr("No")
                 : control->id();
         painter->drawText(textRect,
-                          option.fontMetrics.elidedText(control->id(), Qt::ElideMiddle, textRect.width()),
+                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
     }
+
     painter->restore();
 }
