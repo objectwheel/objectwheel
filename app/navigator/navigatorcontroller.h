@@ -47,6 +47,8 @@ private slots:
     void onControlIdChange(Control* control, const QString& previousId);
 
 private:
+    void addCompleterEntry(const QString& entry);
+    void removeCompleterEntry(const QString& entry);
     void addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls);
 
 signals:

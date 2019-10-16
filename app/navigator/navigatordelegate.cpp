@@ -131,14 +131,17 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
                     index.column() == 0);
 
     // Draw icon
-    Q_ASSERT(UtilityFunctions::window(m_navigatorTree));
-    const QPixmap& iconPixmap = control->icon().pixmap(UtilityFunctions::window(m_navigatorTree),
-                                                       option.decorationSize,
-                                                       isSelected ? QIcon::Selected : QIcon::Normal);
-    QRectF iconRect({}, iconPixmap.size() / m_navigatorTree->devicePixelRatioF());
-    iconRect.moveCenter(r.center());
-    iconRect.moveLeft(r.left() + 5);
-    painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
+    QRectF iconRect(0, 0, -5, 0);
+    if (index.column() == 0) {
+        Q_ASSERT(UtilityFunctions::window(m_navigatorTree));
+        const QPixmap& iconPixmap = control->icon().pixmap(UtilityFunctions::window(m_navigatorTree),
+                                                           option.decorationSize,
+                                                           isSelected ? QIcon::Selected : QIcon::Normal);
+        iconRect = QRectF({}, iconPixmap.size() / m_navigatorTree->devicePixelRatioF());
+        iconRect.moveCenter(r.center());
+        iconRect.moveLeft(r.left() + 5);
+        painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
+    }
 
     // Draw text
     if (control && control->hasErrors() && isSelected)
@@ -152,9 +155,9 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
 
     if (control) {
         const QRectF& textRect = r.adjusted(iconRect.width() + 10, 0, 0, 0);
-        const QString& text = index.column() == 1
-                ? control->gui() && !control->hasErrors() ? tr("Yes") : tr("No")
-                : control->id();
+        const QString& text = index.column() == 0
+                ? control->id()
+                : control->gui() && !control->hasErrors() ? tr("Yes") : tr("No");
         painter->drawText(textRect,
                           option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));

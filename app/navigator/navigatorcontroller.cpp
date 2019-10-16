@@ -17,20 +17,6 @@
 #include <QScrollBar>
 #include <QCompleter>
 
-static void addCompleterEntry(QStringListModel& model, const QString& entry)
-{
-    QStringList list(model.stringList());
-    list.append(entry);
-    model.setStringList(list);
-}
-
-static void removeCompleterEntry(QStringListModel& model, const QString& entry)
-{
-    QStringList list(model.stringList());
-    list.removeOne(entry);
-    model.setStringList(list);
-}
-
 static void expandAllChildren(QTreeWidget* treeWidget, QTreeWidgetItem* parentItem)
 {
     treeWidget->expandItem(parentItem);
@@ -102,7 +88,7 @@ void NavigatorController::clear()
     m_isSelectionHandlingBlocked = true;
     NavigatorTree* tree = m_navigatorPane->navigatorTree();
     EVERYTHING(QTreeWidgetItem* item, tree)
-            tree->delegate()->destroyItem(item);
+        tree->delegate()->destroyItem(item);
     m_searchCompleterModel.setStringList({});
     m_isSelectionHandlingBlocked = false;
 }
@@ -140,9 +126,6 @@ void NavigatorController::onCurrentFormChange(Form* currentForm)
     if (!m_isProjectStarted)
         return;
 
-    if (!currentForm)
-        return;
-
     NavigatorTree* tree = m_navigatorPane->navigatorTree();
 
     /* Save outgoing form's state */
@@ -163,33 +146,40 @@ void NavigatorController::onCurrentFormChange(Form* currentForm)
     m_currentForm = currentForm;
     clear();
 
+    if (m_currentForm == 0)
+        return;
+
     /* Create items for incoming form */
     auto formItem = tree->delegate()->createItem(m_currentForm);
-    addCompleterEntry(m_searchCompleterModel, currentForm->id());
-    addControls(formItem, currentForm->childControls(false));
+    addCompleterEntry(m_currentForm->id());
+    addControls(formItem, m_currentForm->childControls(false));
 
     tree->addTopLevelItem(formItem);
     tree->sortItems(0, Qt::AscendingOrder);
     tree->expandAll();
 
     /* Restore incoming form's state */
-    QTreeWidgetItem* firstItem = nullptr;
+    QTreeWidgetItem* firstSelectedItem = nullptr;
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
-    const FormState& state = m_formStates.value(currentForm);
+    const FormState& state = m_formStates.value(m_currentForm);
+
+    m_isSelectionHandlingBlocked = true;
 
     EVERYTHING(QTreeWidgetItem* item, tree) {
         if (Control* control = controlFromItem(item)) {
             if (selectedControls.contains(control)) {
                 item->setSelected(true);
-                if (firstItem == 0)
-                    firstItem = item;
+                if (firstSelectedItem == 0)
+                    firstSelectedItem = item;
             }
             if (state.collapsedControls.contains(control))
                 item->setExpanded(false);
         }
     }
 
-    tree->scrollToItem(firstItem);
+    m_isSelectionHandlingBlocked = false;
+
+    tree->scrollToItem(firstSelectedItem);
     tree->verticalScrollBar()->setSliderPosition(state.verticalScrollBarPosition);
     tree->horizontalScrollBar()->setSliderPosition(state.horizontalScrollBarPosition);
 }
@@ -203,9 +193,11 @@ void NavigatorController::onFormRemove(Control* control)
         return;
 
     m_formStates.remove(static_cast<Form*>(control));
+
+    // Form items will be cleared right after this slot,
+    // when onCurrentFormChange slot is called.
 }
 
-// FIXME: FFFF
 void NavigatorController::onControlCreation(Control* control)
 {
     if (!m_isProjectStarted)
@@ -252,7 +244,7 @@ void NavigatorController::onControlRemove(Control* control)
                     Q_ASSERT(control3);
                     if (control3.isNull())
                         continue;
-                    removeCompleterEntry(m_searchCompleterModel, control3->id());
+                    removeCompleterEntry(control3->id());
                     tree->delegate()->destroyItem(child);
                 }
                 // No need to following, because the order is preserved after the deletion already.
@@ -362,16 +354,14 @@ void NavigatorController::onControlIdChange(Control* control, const QString& pre
     if (control->id() == previousId)
         return;
 
-    if (control->type() == Form::Type && m_designerScene->currentForm() != control)
+    if (control->type() == Form::Type && control != m_currentForm)
         return;
 
-    if (m_designerScene->currentForm() != control
-            && !m_designerScene->currentForm()->isAncestorOf(control)) {
+    if (control != m_currentForm && !m_currentForm->isAncestorOf(control))
         return;
-    }
 
-    removeCompleterEntry(m_searchCompleterModel, previousId);
-    addCompleterEntry(m_searchCompleterModel, control->id());
+    removeCompleterEntry(previousId);
+    addCompleterEntry(control->id());
 }
 
 void NavigatorController::onSceneSelectionChange()
@@ -388,19 +378,18 @@ void NavigatorController::onSceneSelectionChange()
     m_isSelectionHandlingBlocked = true;
 
     tree->clearSelection();
-
-    QTreeWidgetItem* firstItem = nullptr;
+    QTreeWidgetItem* firstSelectedItem = nullptr;
     for (const Control* selectedControl : selectedControls) {
         if (QTreeWidgetItem* item = itemFromControl(selectedControl)) {
             item->setSelected(true);
-            if (firstItem == 0)
-                firstItem = item;
+            if (firstSelectedItem == 0)
+                firstSelectedItem = item;
         }
     }
 
-    tree->scrollToItem(firstItem);
-
     m_isSelectionHandlingBlocked = false;
+
+    tree->scrollToItem(firstSelectedItem);
 }
 
 void NavigatorController::onItemSelectionChange()
@@ -424,14 +413,27 @@ void NavigatorController::onItemSelectionChange()
     m_isSelectionHandlingBlocked = false;
 }
 
+void NavigatorController::addCompleterEntry(const QString& entry)
+{
+    QStringList list(m_searchCompleterModel.stringList());
+    list.append(entry);
+    m_searchCompleterModel.setStringList(list);
+}
+
+void NavigatorController::removeCompleterEntry(const QString& entry)
+{
+    QStringList list(m_searchCompleterModel.stringList());
+    list.removeOne(entry);
+    m_searchCompleterModel.setStringList(list);
+}
+
 void NavigatorController::addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls)
 {
     NavigatorTree* tree = m_navigatorPane->navigatorTree();
     for (Control* control : controls) {
         QTreeWidgetItem* item = tree->delegate()->createItem(control);
-        item->setExpanded(true);
         parentItem->addChild(item);
-        addCompleterEntry(m_searchCompleterModel, control->id());
+        addCompleterEntry(control->id());
         addControls(item, control->childControls(false));
     }
 }

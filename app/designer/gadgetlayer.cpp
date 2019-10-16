@@ -109,7 +109,7 @@ void GadgetLayer::handleSceneSelectionChange()
     for (DesignerItem* item : m_resizerHash.keys()) {
         for (ResizerItem* resizer : resizers(item)) {
             if (item->isVisible()) {
-                bool show = item->isSelected() && item->resizable();
+                bool show = item->scene() && item->isSelected() && item->resizable();
                 resizer->setVisible(show);
                 if (show)
                     resizer->updatePosition();
