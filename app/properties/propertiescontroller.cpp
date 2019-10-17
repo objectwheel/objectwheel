@@ -72,8 +72,8 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
             this, &PropertiesController::onControlIdEditingFinish);
     connect(m_propertiesPane->indexEdit(), qOverload<int>(&QSpinBox::valueChanged),
             this, &PropertiesController::onControlIndexValueChange);
-    connect(m_propertiesPane->searchEdit(), &LineEdit::editingFinished,
-            this, &PropertiesController::onSearchEditEditingFinish);
+    connect(m_propertiesPane->searchEdit(), &LineEdit::textEdited,
+            this, &PropertiesController::onSearchEditEdit);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
             this, &PropertiesController::onSceneSelectionChange);
     connect(m_designerScene, &DesignerScene::selectionChanged,
@@ -143,6 +143,24 @@ void PropertiesController::clear() const
         for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem, true, true, true))
             tree->delegate()->destroyItem(childItem);
     }
+}
+
+void PropertiesController::expand()
+{
+    PropertiesTree* tree = m_propertiesPane->propertiesTree();
+    m_isExpandCollapseSignalsBlocked = true;
+    tree->expandAll();
+    for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
+        if (m_propertiesPane->isPermanentItem(topLevelItem))
+            continue;
+        for (QTreeWidgetItem* childItem : tree->allSubChildItems(topLevelItem, true, true, true)) {
+            if (childItem->text(0) == QStringLiteral("font") && !m_fontItemOpen)
+                tree->collapseItem(childItem);
+            if (childItem->text(0) == QStringLiteral("geometry") && !m_geometryItemOpen)
+                tree->collapseItem(childItem);
+        }
+    }
+    m_isExpandCollapseSignalsBlocked = false;
 }
 
 void PropertiesController::onResetButtonClick() const
@@ -333,11 +351,10 @@ void PropertiesController::onResetButtonClick() const
     }
 }
 
-void PropertiesController::onSearchEditEditingFinish() const
+void PropertiesController::onSearchEditEdit(const QString& searchTerm)
 {
     PropertiesTree* tree = m_propertiesPane->propertiesTree();
     const QList<QTreeWidgetItem*>& topLevelItems = tree->topLevelItems();
-    const QString& searchTerm = m_propertiesPane->searchEdit()->text();
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
         auto tlv = false;
         for (int j = 0; j < topLevelItem->childCount(); j++) {
@@ -365,6 +382,7 @@ void PropertiesController::onSearchEditEditingFinish() const
         auto v = searchTerm.isEmpty() ? true : tlv;
         topLevelItem->setHidden(!v);
     }
+    expand();
 }
 
 void PropertiesController::onControlZChange(Control* control) const
@@ -1112,14 +1130,6 @@ void PropertiesController::onSceneSelectionChange()
 
         tree->addTopLevelItems(classItems);
 
-        m_isExpandCollapseSignalsBlocked = true;
-        tree->expandAll();
-        if (fontItemCopy && !m_fontItemOpen)
-            tree->collapseItem(fontItemCopy);
-        if (geometryItemCopy && !m_geometryItemOpen)
-            tree->collapseItem(geometryItemCopy);
-        m_isExpandCollapseSignalsBlocked = false;
-
         for (QTreeWidgetItem* topLevelItem : tree->topLevelItems()) {
             if (m_propertiesPane->isPermanentItem(topLevelItem))
                 continue;
@@ -1139,12 +1149,12 @@ void PropertiesController::onSceneSelectionChange()
             }
         }
 
+        onSearchEditEdit(m_propertiesPane->searchEdit()->text());
+
         if (tree->topLevelItemCount() > m_propertiesPane->permanentItemCount()) {
             tree->verticalScrollBar()->setSliderPosition(verticalScrollPosition);
             tree->horizontalScrollBar()->setSliderPosition(horizontalScrollPosition);
         }
-
-        onSearchEditEditingFinish();
     } else {
         m_propertiesPane->resetButton()->setVisible(false);
     }

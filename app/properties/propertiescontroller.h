@@ -1,8 +1,7 @@
 #ifndef PROPERTIESCONTROLLER_H
 #define PROPERTIESCONTROLLER_H
 
-#include <QObject>
-#include <QHash>
+#include <QStringListModel>
 
 class Control;
 class PropertiesPane;
@@ -20,10 +19,11 @@ public:
 public slots:
     void discharge();
     void clear() const;
+    void expand();
 
 private slots:
     void onResetButtonClick() const;
-    void onSearchEditEditingFinish() const;
+    void onSearchEditEdit(const QString& searchTerm);
     void onControlZChange(Control*) const;
     void onControlRenderInfoChange(Control*, bool codeChanged);
     void onControlGeometryChange(const Control*) const;
@@ -67,6 +67,7 @@ private:
 private:
     PropertiesPane* m_propertiesPane;
     DesignerScene* m_designerScene;
+    QStringListModel m_searchCompleterModel;
     QString m_selectedQmlType;
     QHash<QString, int> m_verticalScrollPositions;
     QHash<QString, int> m_horizontalScrollPositions;

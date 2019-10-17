@@ -26,8 +26,8 @@ ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) 
             this, &ToolboxController::onProjectInfoUpdate);
     connect(m_toolboxPane->toolboxTree(), &ToolboxTree::itemPressed,
             this, &ToolboxController::onToolboxItemPress);
-    connect(m_toolboxPane->searchEdit(), &LineEdit::editingFinished,
-            this, &ToolboxController::onSearchEditEditingFinish);
+    connect(m_toolboxPane->searchEdit(), &LineEdit::textEdited,
+            this, &ToolboxController::onSearchEditEdit);
     connect(DesignerSettings::instance(), &DesignerSettings::toolboxSettingsChanged,
             this, &ToolboxController::onToolboxSettingsChange);
 }
@@ -60,9 +60,8 @@ void ToolboxController::onProjectInfoUpdate()
     toolboxTree->sortByColumn(0, Qt::AscendingOrder); // Make the lower index to be at top
 }
 
-void ToolboxController::onSearchEditEditingFinish()
+void ToolboxController::onSearchEditEdit(const QString& searchTerm)
 {
-    const QString& searchTerm = m_toolboxPane->searchEdit()->text();
     for (int i = 0; i < m_toolboxPane->toolboxTree()->topLevelItemCount(); ++i) {
         bool categoryItemVisible = false;
         QTreeWidgetItem* categoryItem = m_toolboxPane->toolboxTree()->topLevelItem(i);
