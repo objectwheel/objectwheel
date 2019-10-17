@@ -319,5 +319,6 @@
         <file>images/modes/split-on.svg</file>
         <file>images/designer/error.svg</file>
         <file>images/tools/ApplicationWindow.svg</file>
+        <file>images/settings/navigator.svg</file>
     </qresource>
 </RCC>

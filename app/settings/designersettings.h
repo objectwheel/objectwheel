@@ -5,6 +5,7 @@
 
 struct SceneSettings;
 struct ToolboxSettings;
+struct NavigatorSettings;
 
 class DesignerSettings final : public GroupSettings
 {
@@ -20,11 +21,13 @@ public:
     static void reset();
     static SceneSettings* sceneSettings();
     static ToolboxSettings* toolboxSettings();
+    static NavigatorSettings* navigatorSettings();
     const char* group() const override;
 
 signals:
     void sceneSettingsChanged();
     void toolboxSettingsChanged();
+    void navigatorSettingsChanged();
 
 private:
     explicit DesignerSettings(QObject* parent = nullptr);
@@ -34,6 +37,7 @@ private:
     static DesignerSettings* s_instance;
     static SceneSettings* s_sceneSettings;
     static ToolboxSettings* s_toolboxSettings;
+    static NavigatorSettings* s_navigatorSettings;
 };
 
 #endif // DESIGNERSETTINGS_H

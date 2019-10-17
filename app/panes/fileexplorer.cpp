@@ -260,7 +260,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
         m_fileSystemProxyModel->setDynamicSortFilter(false);
         m_fileSystemProxyModel->setDynamicSortFilter(true);
     });
-    connect(m_searchEdit, qOverload<>(&LineEdit::editingFinished), this, &FileExplorer::filterList);
+    connect(m_searchEdit, qOverload<>(&LineEdit::returnPressed), this, &FileExplorer::filterList);
     connect(m_pathIndicator, &PathIndicator::pathUpdated, this, &FileExplorer::goToRelativePath);
 
     connect(this, &FileExplorer::doubleClicked,

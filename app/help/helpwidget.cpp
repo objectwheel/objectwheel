@@ -123,8 +123,8 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
     connect(m_typeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &HelpWidget::onTypeChange);
-    connect(m_indexFilterEdit, &LineEdit::textChanged,
-            this, &HelpWidget::onIndexFilterTextChange);
+    connect(m_indexFilterEdit, &LineEdit::textEdited,
+            this, &HelpWidget::onIndexFilterTextEdit);
     connect(m_indexFilterEdit, &LineEdit::returnPressed,
             engine->indexWidget(), &QHelpIndexWidget::activateCurrentItem);
     connect(engine->contentWidget(), qOverload<const QUrl&>(&QHelpContentWidget::linkActivated),
@@ -209,7 +209,7 @@ void HelpWidget::onTitleChange()
     m_titleLabel->setText(tr("<b>Topic: </b>") + m_helpViewer->title());
 }
 
-void HelpWidget::onIndexFilterTextChange(const QString& filterText)
+void HelpWidget::onIndexFilterTextEdit(const QString& filterText)
 {
     QHelpEngine* engine = HelpManager::helpEngine();
     engine->indexWidget()->filterIndices(filterText);

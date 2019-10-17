@@ -33,7 +33,7 @@ private slots:
     void onHomeButtonClick();
     void onTypeChange();
     void onTitleChange();
-    void onIndexFilterTextChange(const QString& filterText);
+    void onIndexFilterTextEdit(const QString& filterText);
     void onUrlChange(const QUrl& url);
     void onUrlChange(const QUrl& link, const QString&);
     void onUrlChange(const QMap<QString, QUrl> &links, const QString &keyword);
