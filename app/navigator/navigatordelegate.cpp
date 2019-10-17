@@ -33,7 +33,7 @@ NavigatorDelegate::~NavigatorDelegate()
 void NavigatorDelegate::reserve()
 {
     for (int i = 200; i--;) {
-        auto item = new QTreeWidgetItem;
+        auto item = new NavigatorItem;
         item->setHidden(true);
         m_cache->push(item);
     }
@@ -55,7 +55,7 @@ QTreeWidgetItem* NavigatorDelegate::createItem(Control* control) const
 {
     QTreeWidgetItem* item = m_cache->pop();
     if (item == 0)
-        item = new QTreeWidgetItem;
+        item = new NavigatorItem;
     item->setData(0, ControlRole, QVariant::fromValue(QPointer<Control>(control)));
     item->setData(1, ControlRole, QVariant::fromValue(QPointer<Control>(control)));
     return item;

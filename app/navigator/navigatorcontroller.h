@@ -1,7 +1,6 @@
-#ifndef INSPECTORPANE_H
-#define INSPECTORPANE_H
+#ifndef NAVIGATORCONTROLLER_H
+#define NAVIGATORCONTROLLER_H
 
-#include <QTreeWidget>
 #include <QHash>
 #include <QPointer>
 #include <QStringListModel>
@@ -10,6 +9,7 @@ class Form;
 class Control;
 class DesignerScene;
 class NavigatorPane;
+class QTreeWidgetItem;
 
 class NavigatorController final : public QObject
 {
@@ -36,19 +36,21 @@ public slots:
 private slots:
     void onProjectStart();
     void onSearchEditReturnPress();
-    void onSceneSelectionChange();
     void onItemSelectionChange();
-    void onCurrentFormChange(Form* currentForm);
+    void onSceneSelectionChange();
+
     void onControlCreation(Control* control);
     void onControlRemove(Control* control);
     void onFormRemove(Control* control);
+    void onCurrentFormChange(Form* currentForm);
     void onControlParentChange(Control* control);
-    void onControlIndexChange(Control* control);
+    void onControlIndexChange(Control* control) const;
     void onControlIdChange(Control* control, const QString& previousId);
 
 private:
     void addCompleterEntry(const QString& entry);
     void removeCompleterEntry(const QString& entry);
+    void expandRecursive(const QTreeWidgetItem* parentItem);
     void addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls);
 
 signals:
@@ -57,11 +59,11 @@ signals:
 private:
     NavigatorPane* m_navigatorPane;
     DesignerScene* m_designerScene;
-    QHash<Form*, FormState> m_formStates;
     QPointer<Form> m_currentForm;
     QStringListModel m_searchCompleterModel;
+    QHash<Form*, FormState> m_formStates;
     bool m_isSelectionHandlingBlocked;
     bool m_isProjectStarted;
 };
 
-#endif // INSPECTORPANE_H
+#endif // NAVIGATORCONTROLLER_H

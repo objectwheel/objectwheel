@@ -317,6 +317,7 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
 
 void PaintLayer::paintFillAnchor(QPainter* painter, Control* control)
 {
+    Q_ASSERT(scene());
     auto fill = new Anchors;
     fill->setTop(AnchorLine(AnchorLine::Top, control->anchors()->fill()));
     fill->setBottom(AnchorLine(AnchorLine::Bottom, control->anchors()->fill()));

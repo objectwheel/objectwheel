@@ -33,6 +33,7 @@ GadgetLayer::GadgetLayer(DesignerItem* parent) : DesignerItem(parent)
     });
     connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
             this, [=] {
+        Q_ASSERT(scene());
         m_headlineItem->setBrush(DesignerSettings::sceneSettings()->outlineColor);
         if (const DesignerItem* currentForm = scene()->currentForm()) {
             m_formHeadlineItem->setBrush(currentForm->isSelected()

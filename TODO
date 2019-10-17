@@ -1,10 +1,12 @@
 Designer Core TODOs
 
+toollardan patlayanları pasifleştir, toolbox'dan şimdilik sil
+toollar için qml cache yi aç ve qmlcompiler çıktısı olam qmlc dosyalarını da tools.qrc ye ekle
+control.cpp'de ki scene() kullanımı ile alakalı fixme leri temizle
+ana ekren toolbarına render engine durumunu gösterir bir buton ekle ve eğer kapalı ise aktif olup render engini açmaya izin ersin
 "creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
-runpane doğru dürüst çalışmıyor
 InspectorPane'e de aynı kontrol sağ tık menüsünden ekle, ayrıca InspectorPane için de settings'e
     çift tıklanınca varsayılan olarak neyin açılacağı sorulsun, kod mu, SignalEditor mü vs
-
 
 scale > 1 (belki rotation > 0) olan parentlerden childler taşınırken, setBeingRaised yapılca kontrol kayıyor, bunu düzelt
 aynı şekilde resize etmede scale > 1 (belki rotation > 0) durumunda sıkıntı çıkarıyor

@@ -201,6 +201,7 @@ void Control::setRenderInfo(const RenderInfo& info)
 
     // FIXME: Fix this whenever we are able to manage raising or lowering
     // Controls based on their indexes,
+    // FIXME: Fix scene() usage and test
     setFlag(ItemStacksBehindParent, itemProperty("z").toDouble() < 0
             && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
                                      parentControl()->window() ||
@@ -265,6 +266,7 @@ void Control::setRenderInfo(const RenderInfo& info)
                         QColor(203, 54, 59));
         }
 
+        // FIXME: Fix scene() usage and test
         if (m_renderInfo.image.isNull() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderNonGuiControlImage(
                         ToolUtils::toolIconPath(dir()), size(), scene()->view());
@@ -487,6 +489,7 @@ void Control::syncGeometry()
     if (!geometrySyncEnabled())
         return;
 
+    // FIXME: Fix scene() usage and test
     setFlag(ItemStacksBehindParent, itemProperty("z").toDouble() < 0
             && !(parentControl() && (scene()->isLayerItem(parentControl()) ||
                                      parentControl()->window() ||
@@ -533,6 +536,7 @@ QList<Control*> Control::siblings() const
 {
     QList<Control*> siblings;
     if (type() == Form::Type) {
+        // FIXME: Fix scene() usage and test
         Q_ASSERT(scene());
         if (!scene())
             return siblings;

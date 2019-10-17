@@ -198,13 +198,13 @@ void WelcomeWindow::readSettings()
 
 void WelcomeWindow::writeSettings()
 {
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    settings->begin();
-    settings->setValue("WelcomeWindow.Size", size());
-    settings->setValue("WelcomeWindow.Position", pos());
-    settings->setValue("WelcomeWindow.Maximized", isMaximized());
-    settings->setValue("WelcomeWindow.Fullscreen", isFullScreen());
-    settings->end();
+//    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+//    settings->begin();
+//    settings->setValue("WelcomeWindow.Size", size());
+//    settings->setValue("WelcomeWindow.Position", pos());
+//    settings->setValue("WelcomeWindow.Maximized", isMaximized());
+//    settings->setValue("WelcomeWindow.Fullscreen", isFullScreen());
+//    settings->end();
 }
 
 void WelcomeWindow::showEvent(QShowEvent* event)
