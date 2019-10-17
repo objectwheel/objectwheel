@@ -40,8 +40,29 @@ QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSiz
     sourceRect.moveCenter(destRect.center());
 
     QPainter p(&dest);
-    p.setRenderHint(QPainter::Antialiasing);
     p.drawImage(sourceRect, source, source.rect()); // Note: The image is scaled to fit the rectangle
+    p.end();
+
+    return dest;
+}
+
+QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id,
+                                           const QBrush& brush, const QPen& pen, void* widget)
+{
+    QWindow* window = UtilityFunctions::window((QWidget*)widget);
+    const qreal dpr = window ? window->devicePixelRatio() : qApp->devicePixelRatio();
+    const QSize iconSize(16, 16);
+
+    QImage dest = renderBlankControlImage(QRectF(QPointF(), size), id, dpr, brush, pen);
+    QImage source(QIcon(":/images/designer/error.svg").pixmap(window, iconSize).toImage());
+    source.setDevicePixelRatio(dpr);
+
+    QRectF destRect{{}, size};
+    QRectF sourceRect{{}, iconSize};
+    sourceRect.moveCenter(destRect.center());
+
+    QPainter p(&dest);
+    p.drawImage(sourceRect, source, source.rect());
     p.end();
 
     return dest;
@@ -295,26 +316,6 @@ static void paintDecorationInPlaceHolderForInvisbleItem(QPainter* painter,
     painter->setClipPath(path);
     painter->setClipping(true);
     painter->fillRect(boundingRect.adjusted(1, 1, -1, -1), brush);
-}
-
-QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id, qreal dpr,
-                                           const QBrush& brush, const QPen& pen)
-{
-    QImage dest = renderBlankControlImage(QRectF(QPointF(), size), id, dpr, brush, pen);
-
-    QImage source(":/images/error.png");
-    source.setDevicePixelRatio(dpr);
-
-    QRectF destRect{{}, size};
-    QRectF sourceRect{{}, QSizeF{24, 24}};
-    sourceRect.moveCenter(destRect.center());
-
-    QPainter p(&dest);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.drawImage(sourceRect, source, source.rect());
-    p.end();
-
-    return dest;
 }
 
 QImage PaintUtils::renderBlankControlImage(const QRectF& rect, const QString& id, qreal dpr,

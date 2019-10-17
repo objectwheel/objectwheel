@@ -26,7 +26,6 @@
         <file>images/portrait.png</file>
         <file>images/delete.png</file>
         <file>images/newfile.png</file>
-        <file>images/error.png</file>
         <file>images/android-default.png</file>
         <file>images/qt.png</file>
         <file>images/register.png</file>
@@ -318,5 +317,7 @@
         <file>images/modes/editor-on.svg</file>
         <file>images/modes/options-on.svg</file>
         <file>images/modes/split-on.svg</file>
+        <file>images/designer/error.svg</file>
+        <file>images/tools/ApplicationWindow.svg</file>
     </qresource>
 </RCC>

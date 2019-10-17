@@ -32,9 +32,9 @@ QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const 
 QImage renderFilledImage(const QSizeF& size, const QColor& fillColor, qreal dpr);
 QImage renderTransparentImage(const QSizeF& size, qreal dpr);
 QImage renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, void* widget);
-QImage renderErrorControlImage(const QSizeF& size, const QString& id, qreal dpr,
+QImage renderErrorControlImage(const QSizeF& size, const QString& id,
                                const QBrush& brush,
-                               const QPen& pen);
+                               const QPen& pen, void* widget);
 QImage renderBlankControlImage(const QRectF& rect, const QString& id, qreal dpr,
                                const QBrush& brush,
                                const QPen& pen);

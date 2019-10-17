@@ -40,6 +40,8 @@ NavigatorController::NavigatorController(NavigatorPane* navigatorPane, DesignerS
             this, &NavigatorController::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
             this, &NavigatorController::onSceneSelectionChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+            tree, qOverload<>(&NavigatorTree::update));
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &NavigatorController::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
@@ -355,6 +357,7 @@ void NavigatorController::onControlIdChange(Control* control, const QString& pre
 
     removeCompleterEntry(previousId);
     addCompleterEntry(control->id());
+    m_navigatorPane->navigatorTree()->update();
 }
 
 void NavigatorController::addCompleterEntry(const QString& entry)

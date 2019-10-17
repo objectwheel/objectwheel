@@ -259,11 +259,12 @@ void Control::setRenderInfo(const RenderInfo& info)
             }
         }
 
+        // FIXME: Fix scene() usage and test
         if (hasErrors() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderErrorControlImage(
-                        size(), id(), devicePixelRatio(),
+                        size(), id(),
                         settings->toBlankControlDecorationBrush(QColor(203, 54, 59)),
-                        QColor(203, 54, 59));
+                        QColor(203, 54, 59), scene()->view());
         }
 
         // FIXME: Fix scene() usage and test

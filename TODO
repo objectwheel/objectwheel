@@ -1,5 +1,10 @@
 Designer Core TODOs
 
+şu search editlerin tümü için bi düşün bakalım, return pressmi editfinishedmi
+    yoksa valuechanged mi yapmalı
+aşağı, bayağı aşağı doğru bi son son kontrol et bakalım başka ne buglar
+    var çıkıştan önce halletmek isteyebileceğimiz, ayrıca todoyu azıcık temizle
+navigator'a çift tıklanınca ne olmalı bunu kodla, settings ekle
 toollardan patlayanları pasifleştir, toolbox'dan şimdilik sil
 toollar için qml cache yi aç ve qmlcompiler çıktısı olam qmlc dosyalarını da tools.qrc ye ekle
 control.cpp'de ki scene() kullanımı ile alakalı fixme leri temizle
