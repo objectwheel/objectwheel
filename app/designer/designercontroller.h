@@ -10,6 +10,8 @@ class DesignerController final : public QObject
     Q_OBJECT
     Q_DISABLE_COPY(DesignerController)
 
+    friend class MainWindow; // For connecting other controller signals to our slots
+
 public:
     explicit DesignerController(DesignerPane* designerPane, QObject* parent = nullptr);
 

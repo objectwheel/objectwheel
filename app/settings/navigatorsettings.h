@@ -12,7 +12,7 @@ struct NavigatorSettings final : public Settings
     void reset() override;
     const char* category() const override;
 
-    bool itemDoubleClickAction;
+    int itemDoubleClickAction;
 };
 
 #endif // NAVIGATORSETTINGS_H

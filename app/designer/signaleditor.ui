@@ -32,7 +32,7 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Select a &lt;b&gt;signal&lt;/b&gt; for going to its slot:</string>
+      <string>Select a &lt;b&gt;signal&lt;/b&gt; corresponding to your slot:</string>
      </property>
     </widget>
    </item>

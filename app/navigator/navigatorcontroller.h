@@ -36,6 +36,7 @@ public slots:
 private slots:
     void onProjectStart();
     void onSearchEditReturnPress();
+    void onItemDoubleClick(QTreeWidgetItem* item, int column);
     void onItemSelectionChange();
     void onSceneSelectionChange();
 
@@ -54,6 +55,9 @@ private:
     void addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls);
 
 signals:
+    void goToSlotActionTriggered();
+    void editAnchorsActionTriggered();
+    void viewSourceCodeActionTriggered();
     void controlSelectionChanged(const QList<Control*>& selectedControls);
 
 private:

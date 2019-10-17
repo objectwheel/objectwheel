@@ -38,6 +38,7 @@
 #include <designerpane.h>
 #include <designerscene.h>
 #include <parserutils.h>
+#include <designercontroller.h>
 
 #include <QWindow>
 #include <QProcess>
@@ -293,6 +294,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         for (Control* control : selectedControls)
             control->setSelected(true);
     });
+    connect(m_navigatorController, &NavigatorController::goToSlotActionTriggered,
+            m_centralWidget->designerController(), &DesignerController::onGoToSlotActionTrigger);
+    connect(m_navigatorController, &NavigatorController::editAnchorsActionTriggered,
+            m_centralWidget->designerController(), &DesignerController::onEditAnchorsActionTrigger);
+    connect(m_navigatorController, &NavigatorController::viewSourceCodeActionTriggered,
+            m_centralWidget->designerController(), &DesignerController::onViewSourceCodeActionTrigger);
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
         if (m_centralWidget->qmlCodeEditorWidget()->count() <= 0

@@ -8,6 +8,8 @@
 #include <form.h>
 #include <projectmanager.h>
 #include <lineedit.h>
+#include <designersettings.h>
+#include <navigatorsettings.h>
 
 #include <QScrollBar>
 #include <QCompleter>
@@ -28,6 +30,8 @@ NavigatorController::NavigatorController(NavigatorPane* navigatorPane, DesignerS
 
     connect(m_navigatorPane->searchEdit(), &LineEdit::returnPressed,
             this, &NavigatorController::onSearchEditReturnPress);
+    connect(tree, &NavigatorTree::itemDoubleClicked,
+            this, &NavigatorController::onItemDoubleClick);
     connect(tree, &NavigatorTree::itemSelectionChanged,
             this, &NavigatorController::onItemSelectionChange);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
@@ -109,6 +113,29 @@ void NavigatorController::onSearchEditReturnPress()
             }
         }
     }
+}
+
+void NavigatorController::onItemDoubleClick(QTreeWidgetItem* item, int)
+{
+    if (!m_isProjectStarted)
+        return;
+
+    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    m_isSelectionHandlingBlocked = true;
+    tree->clearSelection();
+    m_isSelectionHandlingBlocked = false;
+    item->setSelected(true);
+    tree->scrollToItem(item);
+
+    const NavigatorSettings* settings = DesignerSettings::navigatorSettings();
+    if (QGraphicsItem* mouseGrabber = m_designerScene->mouseGrabberItem())
+        mouseGrabber->ungrabMouse();
+    if (settings->itemDoubleClickAction == 0)
+        emit editAnchorsActionTriggered();
+    else if (settings->itemDoubleClickAction == 1)
+        emit viewSourceCodeActionTriggered();
+    else
+        emit goToSlotActionTriggered();
 }
 
 void NavigatorController::onItemSelectionChange()
