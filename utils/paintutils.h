@@ -28,6 +28,8 @@ bool isBlankImage(const QImage& image);
 QIcon renderButtonIcon(const QString& fileName, const QPalette& palette);
 QPixmap pixmap(const QString& imagePath, const QSize& size, const QWidget* widget = nullptr,
                QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
+QPixmap pixmap(const QIcon& icon, const QSize& size, const QWidget* widget = nullptr,
+               QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, qreal dpr);
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QString& fileName, const QPen& pen, qreal dpr);

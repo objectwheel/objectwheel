@@ -17,6 +17,7 @@ class NavigatorController;
 class FormsPane;
 class CentralWidget;
 class AssetsPane;
+class DockBar;
 
 class MainWindow : public QMainWindow
 {
@@ -79,6 +80,8 @@ private:
     QDockWidget* m_assetsDockWidget;
     QDockWidget* m_toolboxDockWidget;
     QDockWidget* m_formsDockWidget;
+    DockBar* m_leftDockBar;
+    DockBar* m_rightDockBar;
     bool m_assetsDockWidgetVisible;
     bool m_propertiesDockWidgetVisible;
     bool m_formsDockWidgetVisible;

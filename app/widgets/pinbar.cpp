@@ -49,34 +49,40 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
             this, &PinBar::onDockWidgetTopLevelChange);
 }
 
-void PinBar::setIcon(const QString& icon)
+QIcon PinBar::icon() const
 {
-    m_iconLabel->setPixmap(PaintUtils::pixmap(icon, QSize(16, 16)));
+    return m_icon;
+}
+
+void PinBar::setIcon(const QIcon& icon)
+{
+    if (m_icon.cacheKey() != icon.cacheKey()) {
+        m_icon = icon;
+        m_iconLabel->setPixmap(PaintUtils::pixmap(icon, QSize(16, 16)));
+    }
+}
+
+QString PinBar::title() const
+{
+    return m_title;
 }
 
 void PinBar::setTitle(const QString& title)
 {
-    m_titleLabel->setText(title);
+    if (m_title != title) {
+        m_title = title;
+        m_titleLabel->setText(title);
+    }
 }
 
 QSize PinBar::sizeHint() const
 {
-    const int height = 20;
-    const int width = 6
-            + m_iconLabel->sizeHint().width()
-            + m_titleLabel->sizeHint().width()
-            + m_detachButton->sizeHint().width();
-    return QSize(width, height);
+    return QSize(QWidget::sizeHint().width(), 20);
 }
 
 QSize PinBar::minimumSizeHint() const
 {
-    const int height = 18;
-    const int width = 6
-            + m_iconLabel->minimumSizeHint().width()
-            + m_titleLabel->minimumSizeHint().width()
-            + m_detachButton->minimumSizeHint().width();
-    return QSize(width, height);
+    return QSize(QWidget::minimumSizeHint().width(), 20);
 }
 
 void PinBar::onDetachButtonClick()
@@ -97,7 +103,6 @@ void PinBar::onDockWidgetTopLevelChange()
 void PinBar::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.fillRect(rect(), Qt::red);
     QLinearGradient gradient(0, 0, 0, 1);
     gradient.setCoordinateMode(QGradient::ObjectMode);
     gradient.setColorAt(0, QStringLiteral("#ffffff"));

@@ -339,3 +339,12 @@ QPixmap PaintUtils::pixmap(const QString& imagePath, const QSize& size, const QW
     QWindow fakeWindow; // This makes QIcon to use primary screen's dpr
     return icon.pixmap(&fakeWindow, size, mode, state);
 }
+
+QPixmap PaintUtils::pixmap(const QIcon& icon, const QSize& size, const QWidget* widget,
+                           QIcon::Mode mode, QIcon::State state)
+{
+    if (QWindow* window = widget ? UtilityFunctions::window(widget) : nullptr)
+        return icon.pixmap(window, size, mode, state);
+    QWindow fakeWindow; // This makes QIcon to use primary screen's dpr
+    return icon.pixmap(&fakeWindow, size, mode, state);
+}

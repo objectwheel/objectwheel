@@ -2,6 +2,7 @@
 #define PINBAR_H
 
 #include <QWidget>
+#include <QIcon>
 
 class QLabel;
 class QToolButton;
@@ -15,7 +16,10 @@ class PinBar final : public QWidget
 public:
     explicit PinBar(QDockWidget* dockWidget);
 
-    void setIcon(const QString& icon);
+    QIcon icon() const;
+    void setIcon(const QIcon& icon);
+
+    QString title() const;
     void setTitle(const QString& title);
 
     QSize sizeHint() const override;
@@ -29,6 +33,8 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
+    QIcon m_icon;
+    QString m_title;
     QDockWidget* m_dockWidget;
     QLabel* m_iconLabel;
     QLabel* m_titleLabel;
