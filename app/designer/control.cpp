@@ -264,13 +264,13 @@ void Control::setRenderInfo(const RenderInfo& info)
             m_renderInfo.image = PaintUtils::renderErrorControlImage(
                         size(), id(),
                         settings->toBlankControlDecorationBrush(QColor(203, 54, 59)),
-                        QColor(203, 54, 59), scene()->view());
+                        QColor(203, 54, 59), (QWidget*) scene()->view());
         }
 
         // FIXME: Fix scene() usage and test
         if (m_renderInfo.image.isNull() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderNonGuiControlImage(
-                        ToolUtils::toolIconPath(dir()), size(), scene()->view());
+                        ToolUtils::toolIconPath(dir()), size(), (QWidget*) scene()->view());
         }
     }
 

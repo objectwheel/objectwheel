@@ -379,10 +379,18 @@ void PropertiesController::onSearchEditEdit(const QString& searchTerm)
                 tlv = v;
         }
 
+        if (m_propertiesPane->isPermanentItem(topLevelItem)
+                && topLevelItem->text(0).contains(searchTerm, Qt::CaseInsensitive)) {
+            tlv = true;
+        }
+
         auto v = searchTerm.isEmpty() ? true : tlv;
         topLevelItem->setHidden(!v);
     }
+
     expand();
+
+    m_propertiesPane->resetButton()->setVisible(false);
 }
 
 void PropertiesController::onControlZChange(Control* control) const
@@ -1155,9 +1163,9 @@ void PropertiesController::onSceneSelectionChange()
             tree->verticalScrollBar()->setSliderPosition(verticalScrollPosition);
             tree->horizontalScrollBar()->setSliderPosition(horizontalScrollPosition);
         }
-    } else {
-        m_propertiesPane->resetButton()->setVisible(false);
     }
+
+    m_propertiesPane->resetButton()->setVisible(false);
 }
 
 void PropertiesController::onIntPropertyEdit(QTreeWidgetItem* item, QTreeWidgetItem* classItem,

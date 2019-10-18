@@ -1,1 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#66798f" d="M11,5.5h-1v-2C10,3.2,9.8,3,9.5,3h-3C6.2,3,6,3.2,6,3.5v2H5v-2C5,2.7,5.7,2,6.5,2h3 C10.3,2,11,2.7,11,3.5V5.5z"></path><path fill="#ffeea3" d="M1.5 8.5H14.5V13.5H1.5z"></path><path fill="#ba9b48" d="M14,9v4H2V9H14 M15,8H1v6h14V8L15,8z"></path><path fill="#e1ebf2" d="M1.5,8.5V6.2c0-0.4,0.2-0.7,0.5-0.7h12c0.3,0,0.5,0.3,0.5,0.7v2.3H1.5z"></path><path fill="#788b9c" d="M14,6c0,0,0,0.1,0,0.2V8H2V6.2C2,6.1,2,6,2,6H14 M14,5H2C1.4,5,1,5.5,1,6.2V9h14V6.2 C15,5.5,14.6,5,14,5L14,5z"></path><g><path fill="#fff" d="M4.5 7.5H5.5V9.5H4.5z"></path><path fill="#788b9c" d="M5,8v1V8 M6,7H4v3h2V7L6,7z"></path></g><g><path fill="#fff" d="M10.5 7.5H11.5V9.5H10.5z"></path><path fill="#788b9c" d="M11,8v1V8 M12,7h-2v3h2V7L12,7z"></path></g></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.2" baseProfile="tiny" id="katman_1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16"
+	 xml:space="preserve">
+<path fill="#66798F" d="M12,4.5h-1v-2C11,2.2,10.8,2,10.5,2h-5C5.2,2,5,2.2,5,2.5v2H4v-2C4,1.7,4.7,1,5.5,1h5C11.3,1,12,1.7,12,2.5
+	V4.5z"/>
+<path fill="#FFEEA3" d="M0.5,8.5h15v6h-15V8.5z"/>
+<path fill="#BA9B48" d="M15,9v5H1V9H15 M16,8H0v7h16V8L16,8z"/>
+<path fill="#E1EBF2" d="M0.5,8.5V5.2c0-0.4,0.2-0.7,0.5-0.7h14c0.3,0,0.5,0.3,0.5,0.7v3.3H0.5z"/>
+<path fill="#788B9C" d="M15,5c0,0,0,0.1,0,0.2V8H1V5.2C1,5.1,1,5,1,5H15 M15,4H1C0.4,4,0,4.5,0,5.2V9h16V5.2C16,4.5,15.6,4,15,4
+	L15,4z"/>
+<g>
+	<path fill="#FFFFFF" d="M3.5,7.5h1v2h-1V7.5z"/>
+	<path fill="#788B9C" d="M4,8v1V8 M5,7H3v3h2V7L5,7z"/>
+</g>
+<g>
+	<path fill="#FFFFFF" d="M11.5,7.5h1v2h-1V7.5z"/>
+	<path fill="#788B9C" d="M12,8v1V8 M13,7h-2v3h2V7L13,7z"/>
+</g>
+</svg>

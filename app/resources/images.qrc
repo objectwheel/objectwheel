@@ -310,7 +310,6 @@
         <file>images/tools/StatusBar.svg</file>
         <file>images/tools/ExclusiveGroup.svg</file>
         <file>images/settings/toolbox.svg</file>
-        <file>images/tools/Form.svg</file>
         <file>images/modes/builds-on.svg</file>
         <file>images/modes/designer-on.svg</file>
         <file>images/modes/documents-on.svg</file>
@@ -320,5 +319,8 @@
         <file>images/designer/error.svg</file>
         <file>images/tools/ApplicationWindow.svg</file>
         <file>images/settings/navigator.svg</file>
+        <file>images/designer/forms.svg</file>
+        <file>images/designer/properties.svg</file>
+        <file>images/designer/form.svg</file>
     </qresource>
 </RCC>

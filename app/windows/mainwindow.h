@@ -60,6 +60,7 @@ signals:
     void done();
 
 private:
+    QByteArray m_resetState;
     CentralWidget* m_centralWidget;
     RunPane* m_runPane;
     RunController* m_runController;
@@ -73,6 +74,16 @@ private:
     NavigatorController* m_navigatorController;
     FormsPane* m_formsPane;
     AssetsPane* m_assetsPane;
+    QDockWidget* m_navigatorDockWidget;
+    QDockWidget* m_propertiesDockWidget;
+    QDockWidget* m_assetsDockWidget;
+    QDockWidget* m_toolboxDockWidget;
+    QDockWidget* m_formsDockWidget;
+    bool m_assetsDockWidgetVisible;
+    bool m_propertiesDockWidgetVisible;
+    bool m_formsDockWidgetVisible;
+    bool m_toolboxDockWidgetVisible;
+    bool m_navigatorDockWidgetVisible;
 };
 
 #endif // MAINWINDOW_H

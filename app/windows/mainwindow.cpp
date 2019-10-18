@@ -39,6 +39,7 @@
 #include <designerscene.h>
 #include <parserutils.h>
 #include <designercontroller.h>
+#include <pinbar.h>
 
 #include <QWindow>
 #include <QProcess>
@@ -55,36 +56,6 @@
 #include <windowoperations.h>
 #endif
 
-#define CSS_DESIGNER_PINBAR "\
-QToolBar { \
-    border-top: 1px solid  #c4c4c4;\
-    border-bottom: 1px solid #c4c4c4;\
-    border-right: 1px solid #c4c4c4;\
-    border-left: 2px solid #0D74C8;\
-margin: 0px;\
-background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1, stop:0 #ffffff, stop:1 #e3e3e3); \
-spacing: 2px; \
-}"
-
-namespace {
-QByteArray resetState;
-QDockWidget* assetsDockWidget;
-QDockWidget* propertiesDockWidget;
-QDockWidget* formsDockWidget;
-QDockWidget* toolboxDockWidget;
-QDockWidget* navigatorDockWidget;
-QToolBar* assetsTitleBar;
-QToolBar* propertiesTitleBar;
-QToolBar* formsTitleBar;
-QToolBar* toolboxTitleBar;
-QToolBar* navigatorTitleBar;
-bool assetsDockWidgetVisible;
-bool propertiesDockWidgetVisible;
-bool formsDockWidgetVisible;
-bool toolboxDockWidgetVisible;
-bool navigatorDockWidgetVisible;
-}
-
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_centralWidget(new CentralWidget)
   , m_runPane(new RunPane(this))
@@ -99,6 +70,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_navigatorController(new NavigatorController(m_navigatorPane, m_centralWidget->designerPane()->designerView()->scene(), this))
   , m_formsPane(new FormsPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_assetsPane(new AssetsPane)
+  , m_navigatorDockWidget(new QDockWidget(this))
+  , m_propertiesDockWidget(new QDockWidget(this))
+  , m_assetsDockWidget(new QDockWidget(this))
+  , m_toolboxDockWidget(new QDockWidget(this))
+  , m_formsDockWidget(new QDockWidget(this))
 {
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
@@ -110,6 +86,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 #endif
 
     QPalette palette(this->palette());
+    palette.setColor(QPalette::Active, QPalette::Text, "#505050");
+    palette.setColor(QPalette::Inactive, QPalette::Text, "#505050");
+    palette.setColor(QPalette::Disabled, QPalette::Text, "#9c9c9c");
+    palette.setColor(QPalette::Active, QPalette::WindowText, "#505050");
+    palette.setColor(QPalette::Inactive, QPalette::WindowText, "#505050");
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, "#9c9c9c");
     palette.setColor(QPalette::Active, QPalette::ButtonText, "#505050");
     palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#505050");
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#9c9c9c");
@@ -132,151 +114,66 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Set Dock Widgets **/
     /* Add Navigator Pane */
-    auto navigatorTitleLabel = new QLabel;
-    navigatorTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    navigatorTitleLabel->setText("  " + tr("Navigator"));
-
-    auto navigatorTitlePinButton = new QToolButton;
-    navigatorTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    navigatorTitlePinButton->setCursor(Qt::PointingHandCursor);
-    navigatorTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
-    connect(navigatorTitlePinButton, &QToolButton::clicked,
-            this, [] {
-        navigatorDockWidget->setFloating(!navigatorDockWidget->isFloating());
-    });
-
-    navigatorTitleBar = new QToolBar;
-    navigatorTitleBar->addWidget(navigatorTitleLabel);
-    navigatorTitleBar->addWidget(navigatorTitlePinButton);
-    navigatorTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    navigatorTitleBar->setIconSize(QSize(11, 11));
-    navigatorTitleBar->setFixedHeight(20);
-
-    navigatorDockWidget = new QDockWidget;
-    navigatorDockWidget->setObjectName("navigatorDockWidget");
-    navigatorDockWidget->setTitleBarWidget(navigatorTitleBar);
-    navigatorDockWidget->setWidget(m_navigatorPane);
-    navigatorDockWidget->setWindowTitle(tr("Navigator"));
-    navigatorDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, navigatorDockWidget);
+    auto navigatorPinBar = new PinBar(m_navigatorDockWidget);
+    navigatorPinBar->setPalette(palette);
+    navigatorPinBar->setTitle(tr("Navigator"));
+    navigatorPinBar->setIcon(QStringLiteral(":/images/settings/navigator.svg"));
+    m_navigatorDockWidget->setObjectName("navigatorDockWidget");
+    m_navigatorDockWidget->setTitleBarWidget(navigatorPinBar);
+    m_navigatorDockWidget->setWidget(m_navigatorPane);
+    m_navigatorDockWidget->setWindowTitle(tr("Navigator"));
+    m_navigatorDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    addDockWidget(Qt::RightDockWidgetArea, m_navigatorDockWidget);
 
     /* Add Properties Pane */
-    auto propertiesTitleLabel = new QLabel;
-    propertiesTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    propertiesTitleLabel->setText("  " + tr("Properties"));
-
-    auto propertiesTitlePinButton = new QToolButton;
-    propertiesTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    propertiesTitlePinButton->setCursor(Qt::PointingHandCursor);
-    propertiesTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
-    connect(propertiesTitlePinButton, &QToolButton::clicked,
-            this, [] {
-        propertiesDockWidget->setFloating(!propertiesDockWidget->isFloating());
-    });
-
-    propertiesTitleBar = new QToolBar;
-    propertiesTitleBar->addWidget(propertiesTitleLabel);
-    propertiesTitleBar->addWidget(propertiesTitlePinButton);
-    propertiesTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    propertiesTitleBar->setIconSize(QSize(11, 11));
-    propertiesTitleBar->setFixedHeight(20);
-
-    propertiesDockWidget = new QDockWidget;
-    propertiesDockWidget->setObjectName("propertiesDockWidget");
-    propertiesDockWidget->setTitleBarWidget(propertiesTitleBar);
-    propertiesDockWidget->setWidget(m_propertiesPane);
-    propertiesDockWidget->setWindowTitle(tr("Properties"));
-    propertiesDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, propertiesDockWidget);
+    auto propertiesPinBar = new PinBar(m_propertiesDockWidget);
+    propertiesPinBar->setPalette(palette);
+    propertiesPinBar->setTitle(tr("Properties"));
+    propertiesPinBar->setIcon(QStringLiteral(":/images/designer/properties.svg"));
+    m_propertiesDockWidget->setObjectName("propertiesDockWidget");
+    m_propertiesDockWidget->setTitleBarWidget(propertiesPinBar);
+    m_propertiesDockWidget->setWidget(m_propertiesPane);
+    m_propertiesDockWidget->setWindowTitle(tr("Properties"));
+    m_propertiesDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    addDockWidget(Qt::RightDockWidgetArea, m_propertiesDockWidget);
 
     /* Add Assets Pane */
-    auto assetsTitleLabel = new QLabel;
-    assetsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    assetsTitleLabel->setText("  " + tr("Assets"));
-
-    auto assetsTitlePinButton = new QToolButton;
-    assetsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    assetsTitlePinButton->setCursor(Qt::PointingHandCursor);
-    assetsTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
-    connect(assetsTitlePinButton, &QToolButton::clicked,
-            this, [] {
-        assetsDockWidget->setFloating(!assetsDockWidget->isFloating());
-    });
-
-    assetsTitleBar = new QToolBar;
-    assetsTitleBar->addWidget(assetsTitleLabel);
-    assetsTitleBar->addWidget(assetsTitlePinButton);
-    assetsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    assetsTitleBar->setIconSize(QSize(11, 11));
-    assetsTitleBar->setFixedHeight(20);
-
-    assetsDockWidget = new QDockWidget;
-    assetsDockWidget->setObjectName("assetsDockWidget");
-    assetsDockWidget->setTitleBarWidget(assetsTitleBar);
-    assetsDockWidget->setWidget(m_assetsPane);
-    assetsDockWidget->setWindowTitle(tr("Assets"));
-    assetsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::RightDockWidgetArea, assetsDockWidget);
+    auto assetsPinBar = new PinBar(m_assetsDockWidget);
+    assetsPinBar->setPalette(palette);
+    assetsPinBar->setTitle(tr("Assets"));
+    assetsPinBar->setIcon(QStringLiteral(":/images/designer/assets.svg"));
+    m_assetsDockWidget->setObjectName("assetsDockWidget");
+    m_assetsDockWidget->setTitleBarWidget(assetsPinBar);
+    m_assetsDockWidget->setWidget(m_assetsPane);
+    m_assetsDockWidget->setWindowTitle(tr("Assets"));
+    m_assetsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    addDockWidget(Qt::RightDockWidgetArea, m_assetsDockWidget);
     connect(m_assetsPane, &AssetsPane::fileOpened,
             centralWidget()->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openAssets);
 
     /* Add Toolbox Pane */
-    auto toolboxTitleLabel = new QLabel;
-    toolboxTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    toolboxTitleLabel->setText("  " + tr("Toolbox"));
-
-    auto toolboxTitlePinButton = new QToolButton;
-    toolboxTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    toolboxTitlePinButton->setCursor(Qt::PointingHandCursor);
-    toolboxTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
-    connect(toolboxTitlePinButton, &QToolButton::clicked,
-            this, [] {
-        toolboxDockWidget->setFloating(!toolboxDockWidget->isFloating());
-    });
-
-    toolboxTitleBar = new QToolBar;
-    toolboxTitleBar->addWidget(toolboxTitleLabel);
-    toolboxTitleBar->addWidget(toolboxTitlePinButton);
-    toolboxTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    toolboxTitleBar->setIconSize(QSize(11, 11));
-    toolboxTitleBar->setFixedHeight(20);
-
-    toolboxDockWidget = new QDockWidget;
-    toolboxDockWidget->setObjectName("toolboxDockWidget");
-    toolboxDockWidget->setTitleBarWidget(toolboxTitleBar);
-    toolboxDockWidget->setWidget(m_toolboxPane);
-    toolboxDockWidget->setWindowTitle(tr("Toolbox"));
-    toolboxDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::LeftDockWidgetArea, toolboxDockWidget);
+    auto toolboxPinBar = new PinBar(m_toolboxDockWidget);
+    toolboxPinBar->setPalette(palette);
+    toolboxPinBar->setTitle(tr("Toolbox"));
+    toolboxPinBar->setIcon(QStringLiteral(":/images/settings/toolbox.svg"));
+    m_toolboxDockWidget->setObjectName("toolboxDockWidget");
+    m_toolboxDockWidget->setTitleBarWidget(toolboxPinBar);
+    m_toolboxDockWidget->setWidget(m_toolboxPane);
+    m_toolboxDockWidget->setWindowTitle(tr("Toolbox"));
+    m_toolboxDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    addDockWidget(Qt::LeftDockWidgetArea, m_toolboxDockWidget);
 
     /* Add Forms Pane */
-    auto formsTitleLabel = new QLabel;
-    formsTitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
-    formsTitleLabel->setText("  " + tr("Forms"));
-
-    auto formsTitlePinButton = new QToolButton;
-    formsTitlePinButton->setToolTip(tr("Pin/Unpin pane."));
-    formsTitlePinButton->setCursor(Qt::PointingHandCursor);
-    formsTitlePinButton->setIcon(QIcon(QStringLiteral(":/images/detach.svg")));
-    connect(formsTitlePinButton, &QToolButton::clicked,
-            this, [] {
-        formsDockWidget->setFloating(!formsDockWidget->isFloating());
-    });
-
-    formsTitleBar = new QToolBar;
-    formsTitleBar->addWidget(formsTitleLabel);
-    formsTitleBar->addWidget(formsTitlePinButton);
-    formsTitleBar->setStyleSheet(CSS_DESIGNER_PINBAR);
-    formsTitleBar->setIconSize(QSize(11, 11));
-    formsTitleBar->setFixedHeight(20);
-
-    formsDockWidget = new QDockWidget;
-    formsDockWidget->setObjectName("formsDockWidget");
-    formsDockWidget->setTitleBarWidget(formsTitleBar);
-    formsDockWidget->setWidget(m_formsPane);
-    formsDockWidget->setWindowTitle(tr("Forms"));
-    formsDockWidget->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    addDockWidget(Qt::LeftDockWidgetArea, formsDockWidget);
+    auto formsPinBar = new PinBar(m_formsDockWidget);
+    formsPinBar->setPalette(palette);
+    formsPinBar->setTitle(tr("Forms"));
+    formsPinBar->setIcon(QStringLiteral(":/images/designer/forms.svg"));
+    m_formsDockWidget->setObjectName("formsDockWidget");
+    m_formsDockWidget->setTitleBarWidget(formsPinBar);
+    m_formsDockWidget->setWidget(m_formsPane);
+    m_formsDockWidget->setWindowTitle(tr("Forms"));
+    m_formsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    addDockWidget(Qt::LeftDockWidgetArea, m_formsDockWidget);
 
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, [=] (ModeManager::Mode mode) {
@@ -376,77 +273,77 @@ void MainWindow::discharge()
 
 void MainWindow::showLeftPanes(bool show)
 {
-    if (dockWidgetArea(assetsDockWidget) == Qt::LeftDockWidgetArea) {
-        assetsDockWidget->setVisible(show);
-        assetsDockWidgetVisible = show;
+    if (dockWidgetArea(m_assetsDockWidget) == Qt::LeftDockWidgetArea) {
+        m_assetsDockWidget->setVisible(show);
+        m_assetsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(propertiesDockWidget) == Qt::LeftDockWidgetArea) {
-        propertiesDockWidget->setVisible(show);
-        propertiesDockWidgetVisible = show;
+    if (dockWidgetArea(m_propertiesDockWidget) == Qt::LeftDockWidgetArea) {
+        m_propertiesDockWidget->setVisible(show);
+        m_propertiesDockWidgetVisible = show;
     }
-    if (dockWidgetArea(formsDockWidget) == Qt::LeftDockWidgetArea) {
-        formsDockWidget->setVisible(show);
-        formsDockWidgetVisible = show;
+    if (dockWidgetArea(m_formsDockWidget) == Qt::LeftDockWidgetArea) {
+        m_formsDockWidget->setVisible(show);
+        m_formsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(navigatorDockWidget) == Qt::LeftDockWidgetArea) {
-        navigatorDockWidget->setVisible(show);
-        navigatorDockWidgetVisible = show;
+    if (dockWidgetArea(m_navigatorDockWidget) == Qt::LeftDockWidgetArea) {
+        m_navigatorDockWidget->setVisible(show);
+        m_navigatorDockWidgetVisible = show;
     }
-    if (dockWidgetArea(toolboxDockWidget) == Qt::LeftDockWidgetArea) {
-        toolboxDockWidget->setVisible(show);
-        toolboxDockWidgetVisible = show;
+    if (dockWidgetArea(m_toolboxDockWidget) == Qt::LeftDockWidgetArea) {
+        m_toolboxDockWidget->setVisible(show);
+        m_toolboxDockWidgetVisible = show;
     }
 }
 
 void MainWindow::showRightPanes(bool show)
 {
-    if (dockWidgetArea(assetsDockWidget) == Qt::RightDockWidgetArea) {
-        assetsDockWidget->setVisible(show);
-        assetsDockWidgetVisible = show;
+    if (dockWidgetArea(m_assetsDockWidget) == Qt::RightDockWidgetArea) {
+        m_assetsDockWidget->setVisible(show);
+        m_assetsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(propertiesDockWidget) == Qt::RightDockWidgetArea) {
-        propertiesDockWidget->setVisible(show);
-        propertiesDockWidgetVisible = show;
+    if (dockWidgetArea(m_propertiesDockWidget) == Qt::RightDockWidgetArea) {
+        m_propertiesDockWidget->setVisible(show);
+        m_propertiesDockWidgetVisible = show;
     }
-    if (dockWidgetArea(formsDockWidget) == Qt::RightDockWidgetArea) {
-        formsDockWidget->setVisible(show);
-        formsDockWidgetVisible = show;
+    if (dockWidgetArea(m_formsDockWidget) == Qt::RightDockWidgetArea) {
+        m_formsDockWidget->setVisible(show);
+        m_formsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(navigatorDockWidget) == Qt::RightDockWidgetArea) {
-        navigatorDockWidget->setVisible(show);
-        navigatorDockWidgetVisible = show;
+    if (dockWidgetArea(m_navigatorDockWidget) == Qt::RightDockWidgetArea) {
+        m_navigatorDockWidget->setVisible(show);
+        m_navigatorDockWidgetVisible = show;
     }
-    if (dockWidgetArea(toolboxDockWidget) == Qt::RightDockWidgetArea) {
-        toolboxDockWidget->setVisible(show);
-        toolboxDockWidgetVisible = show;
+    if (dockWidgetArea(m_toolboxDockWidget) == Qt::RightDockWidgetArea) {
+        m_toolboxDockWidget->setVisible(show);
+        m_toolboxDockWidgetVisible = show;
     }
 }
 
 void MainWindow::hideDocks()
 {
-    assetsDockWidget->hide();
-    propertiesDockWidget->hide();
-    formsDockWidget->hide();
-    navigatorDockWidget->hide();
-    toolboxDockWidget->hide();
+    m_assetsDockWidget->hide();
+    m_propertiesDockWidget->hide();
+    m_formsDockWidget->hide();
+    m_navigatorDockWidget->hide();
+    m_toolboxDockWidget->hide();
 }
 
 void MainWindow::showDocks()
 {
-    assetsDockWidget->show();
-    propertiesDockWidget->show();
-    formsDockWidget->show();
-    navigatorDockWidget->show();
-    toolboxDockWidget->show();
+    m_assetsDockWidget->show();
+    m_propertiesDockWidget->show();
+    m_formsDockWidget->show();
+    m_navigatorDockWidget->show();
+    m_toolboxDockWidget->show();
 }
 
 void MainWindow::restoreDocks()
 {
-    assetsDockWidget->setVisible(assetsDockWidgetVisible);
-    propertiesDockWidget->setVisible(propertiesDockWidgetVisible);
-    formsDockWidget->setVisible(formsDockWidgetVisible);
-    navigatorDockWidget->setVisible(navigatorDockWidgetVisible);
-    toolboxDockWidget->setVisible(toolboxDockWidgetVisible);
+    m_assetsDockWidget->setVisible(m_assetsDockWidgetVisible);
+    m_propertiesDockWidget->setVisible(m_propertiesDockWidgetVisible);
+    m_formsDockWidget->setVisible(m_formsDockWidgetVisible);
+    m_navigatorDockWidget->setVisible(m_navigatorDockWidgetVisible);
+    m_toolboxDockWidget->setVisible(m_toolboxDockWidgetVisible);
 }
 
 void MainWindow::onModeChange(ModeManager::Mode mode)
@@ -506,7 +403,7 @@ void MainWindow::resetSettings()
     settings->setValue("MainWindow.Position", UtilityFunctions::centerPos(sizeHint()));
     settings->setValue("MainWindow.Maximized", false);
     settings->setValue("MainWindow.Fullscreen", false);
-    settings->setValue("MainWindow.WindowState", resetState);
+    settings->setValue("MainWindow.WindowState", m_resetState);
     settings->end();
 
     if (isVisible())

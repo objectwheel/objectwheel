@@ -263,7 +263,7 @@ void FormsPane::refresh()
 
         auto item = new QTreeWidgetItem;
         item->setText(0, id);
-        item->setIcon(0, QIcon(":/images/tools/Form.svg"));
+        item->setIcon(0, QIcon(":/images/designer/form.svg"));
 
         addTopLevelItem(item);
 

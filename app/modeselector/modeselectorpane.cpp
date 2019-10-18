@@ -134,10 +134,6 @@ void ModeSelectorPane::paintEvent(QPaintEvent*)
     gradient.setColorAt(0, "#d6d6d6");
     gradient.setColorAt(1, "#cdcdcd");
     painter.fillRect(rect(), gradient);
-    painter.setPen("#bdbdbd");
-    painter.drawLine(QRectF(rect()).bottomLeft() - QPointF(0, 0.5),
-                     QRectF(rect()).bottomRight() - QPointF(0, 0.5));
     painter.setPen("#a7a7a7");
     painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
-    // FIXME: hardcoded, what happens if it is vertical toolbar?
 }

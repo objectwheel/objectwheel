@@ -11,6 +11,7 @@
 #include <QPalette>
 #include <QFileInfo>
 #include <QWindow>
+#include <QScreen>
 
 QImage PaintUtils::renderFilledImage(const QSizeF& size, const QColor& fillColor, qreal dpr)
 {
@@ -25,14 +26,12 @@ QImage PaintUtils::renderTransparentImage(const QSizeF& size, qreal dpr)
     return renderFilledImage(size, Qt::transparent, dpr);
 }
 
-QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, void* widget)
+QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSizeF& size, const QWidget* widget)
 {
-    QWindow* window = UtilityFunctions::window((QWidget*)widget);
-    const qreal dpr = window ? window->devicePixelRatio() : qApp->devicePixelRatio();
+    const qreal dpr = widget ? widget->devicePixelRatio() : QApplication::primaryScreen()->devicePixelRatio();
     const QSize iconSize(16, 16);
-
     QImage dest = renderTransparentImage(size, dpr);
-    QImage source(QIcon(imagePath).pixmap(window, iconSize).toImage());
+    QImage source(pixmap(imagePath, iconSize, widget).toImage());
     source.setDevicePixelRatio(dpr);
 
     QRectF destRect({}, size);
@@ -47,14 +46,13 @@ QImage PaintUtils::renderNonGuiControlImage(const QString& imagePath, const QSiz
 }
 
 QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id,
-                                           const QBrush& brush, const QPen& pen, void* widget)
+                                           const QBrush& brush, const QPen& pen, const QWidget* widget)
 {
-    QWindow* window = UtilityFunctions::window((QWidget*)widget);
-    const qreal dpr = window ? window->devicePixelRatio() : qApp->devicePixelRatio();
+    const qreal dpr = widget ? widget->devicePixelRatio() : QApplication::primaryScreen()->devicePixelRatio();
     const QSize iconSize(16, 16);
 
     QImage dest = renderBlankControlImage(QRectF(QPointF(), size), id, dpr, brush, pen);
-    QImage source(QIcon(":/images/designer/error.svg").pixmap(window, iconSize).toImage());
+    QImage source(pixmap(":/images/designer/error.svg", iconSize, widget).toImage());
     source.setDevicePixelRatio(dpr);
 
     QRectF destRect{{}, size};
@@ -330,4 +328,14 @@ QImage PaintUtils::renderBlankControlImage(const QRectF& rect, const QString& id
     p.end();
 
     return dest;
+}
+
+QPixmap PaintUtils::pixmap(const QString& imagePath, const QSize& size, const QWidget* widget,
+                           QIcon::Mode mode, QIcon::State state)
+{
+    const QIcon icon(imagePath);
+    if (QWindow* window = widget ? UtilityFunctions::window(widget) : nullptr)
+        return icon.pixmap(window, size, mode, state);
+    QWindow fakeWindow; // This makes QIcon to use primary screen's dpr
+    return icon.pixmap(&fakeWindow, size, mode, state);
 }
