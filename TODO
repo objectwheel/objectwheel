@@ -1,5 +1,32 @@
 Designer Core TODOs
 
+AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
+    tree widget daha içe alınacak
+PreferencesWindow daki ListView ikonlarının boyutu büyütülecek, 20? 24? alternatifler düşünülsün
+Tüm toolbar çizimleri tek bir yerden, applicationstyle içindeki CE_ToolBAr dan yapılacak, ona
+    benzer tüm özelleştirilmiş toolbarlar paintEventleri silinecek (gerekmedikçe alayını sil)
+Tüm toolbarlar bir standarda bağlanacak, ikon sizeları 16 olacak. ikonları icons8'den alınacak.
+    kendi fixedHeight'leri 20 olacak.
+BottomPane dediğimiz yerdeki tüm ikonları icons8'den alınacak şekilde ve boyutları değişecek şekilde ayarla
+    ayrıca issueswidget dahil, qmlcodeeditor dahil hata ve error ve warning ikonları değiştirilecek icons8 ile
+qfusionstyle'ın combobox, checkbox, button vs gibi temel kontrollerinin konturları inceltilip belirgin
+    olarak iyice güzel çizilecek, ayrıca adamların örnek verdiği blog postdaki renkler düşünülerek
+    güzelce paletlerde değişikliğe gidilebilir, buton mid, shape, window vs colorları daha modern renklerden
+    seçilebilir https://www.qt.io/blog/2012/10/30/cleaning-up-styles-in-qt5-and-adding-fusion
+Yukardaki mevzunun düzeltilmesi akabinde Tüm uygulama için son bir highlighted palette rengi belirlenecek
+Yukarıdaki halledilince de NavigatorPane'de errorlu kontrollerin kırmızı çizim rengi güzelleştirilecek
+    ayrıca hem seçiliyken ilgili item, hemde seçisizken güzel gözükecek
+fileexplorer üzerindeki comboboxun filtre ikonu icons8'den alınacak, ayrıca sitilide transparentstyle
+    olmayabilir, değiştirilebilir
+dockbar'ı bitir
+modeselectorpane ve qmlcodeeditarwidget toolbarları dahil, helpwidget toolbarları vs tüm toolbar kullanımları
+    kontrol edilecek, file explorer dahil, bozukluklar giderilecek
+fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
+    entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
+    öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
+    olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
+properties pane'de ki color propertisinin toolbuttonu neden sapıttı?
+setFixedSize diye aratıp tüm projede çıkan sonuçları düzelt, en son fileexplorer de mi ne kalmıştık
 tüm pane ikonlarını settings ikon klasörüne taşı, designerdan al
 formspane'de ki ekle çıkart butonlarını QToolButton a çevir, ikon boyutları ve buton fixed
     boyutlarını PinBar daki pin butonları ile birebir aynı yap, ve ikonları icons8 den al

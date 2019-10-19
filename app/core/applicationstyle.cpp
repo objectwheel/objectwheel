@@ -766,13 +766,13 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_ToolBar:
         if (const auto *cb = qstyleoption_cast<const QStyleOptionToolBar*>(option)) {
             painter->save();
-            QLinearGradient g(cb->rect.topLeft(), (cb->state & State_Horizontal)
-                              ? cb->rect.bottomLeft()
-                              : cb->rect.topRight());
-            g.setColorAt(0, option->palette.window().color().lighter(130));
-            g.setColorAt(1, option->palette.window().color());
-            painter->setBrush(g);
-            painter->setPen("#b6b6b6");
+            const QPointF finalPoint = (cb->state & State_Horizontal) ? QPointF(0, 1) : QPointF(1, 0);
+            QLinearGradient gradient(QPointF(), finalPoint);
+            gradient.setCoordinateMode(QGradient::ObjectMode);
+            gradient.setColorAt(0, QStringLiteral("#ffffff"));
+            gradient.setColorAt(1, QStringLiteral("#e3e3e3"));
+            painter->setBrush(gradient);
+            painter->setPen(QPen(QColor(QStringLiteral("#b6b6b6")), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
             painter->drawRect(cb->rect);
             painter->restore();
         } break;

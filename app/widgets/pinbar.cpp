@@ -6,6 +6,7 @@
 #include <QBoxLayout>
 #include <QPainter>
 #include <QDockWidget>
+#include <QStyleOption>
 
 PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
   , m_dockWidget(dockWidget)
@@ -103,12 +104,9 @@ void PinBar::onDockWidgetTopLevelChange()
 void PinBar::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    QLinearGradient gradient(0, 0, 0, 1);
-    gradient.setCoordinateMode(QGradient::ObjectMode);
-    gradient.setColorAt(0, QStringLiteral("#ffffff"));
-    gradient.setColorAt(1, QStringLiteral("#e3e3e3"));
-    painter.setBrush(gradient);
-    painter.setPen(QPen(QColor(QStringLiteral("#b6b6b6")), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
-    painter.drawRect(rect());
+    QStyleOptionToolBar option;
+    option.initFrom(this);
+    option.state |= QStyle::State_Horizontal;
+    style()->drawControl(QStyle::CE_ToolBar, &option, &painter, this);
     painter.fillRect(QRectF(0, 0, 2.5, height()), Qt::darkGray);
 }
