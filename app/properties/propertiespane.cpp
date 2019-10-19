@@ -70,8 +70,7 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     m_resetButton->setAutoRaise(true);
     m_resetButton->setCursor(Qt::PointingHandCursor);
     m_resetButton->setToolTip(tr("Clear property"));
-    m_resetButton->setFixedSize(QSize(16, 16));
-    m_resetButton->setIconSize(QSize(16, 16));
+    m_resetButton->setFixedSize(QSize(18, 18));
     m_resetButton->setIcon(QIcon(QStringLiteral(":/images/designer/delete-all.svg")));
 }
 

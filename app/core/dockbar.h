@@ -21,8 +21,8 @@ public:
 
     void addDockWidget(QDockWidget* dockWidget);
 
-//    QSize sizeHint() const override;
-//    QSize minimumSizeHint() const override;
+    QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     QList<DockData> m_dockWidgets;

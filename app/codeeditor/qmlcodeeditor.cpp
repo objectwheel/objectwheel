@@ -4,7 +4,6 @@
 #include <qtcassert.h>
 #include <qmlcodedocument.h>
 #include <bracketband.h>
-#include <transparentstyle.h>
 #include <codeeditorsettings.h>
 #include <fontcolorssettings.h>
 
@@ -462,7 +461,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_codeAssistant->configure(this);
     m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
 
-    TransparentStyle::attach(m_toolBar);
     ModelManagerInterface::instance()->activateScan();
 
     updateViewportMargins();

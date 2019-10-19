@@ -194,10 +194,8 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
 
     m_leftCombo->setDuplicatesEnabled(true);
     m_rightCombo->setDuplicatesEnabled(true);
-    QTimer::singleShot(1000, [=] { // FIXME: This fixes a weird bug on TransparentStyle
-        m_leftCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-        m_rightCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    });
+    m_leftCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    m_rightCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
 
     connect(m_pinButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onPinButtonClick);

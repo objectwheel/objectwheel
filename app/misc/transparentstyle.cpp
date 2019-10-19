@@ -329,31 +329,6 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     }
 }
 
-void TransparentStyle::drawControl(QStyle::ControlElement element, const QStyleOption* option,
-                                   QPainter* painter, const QWidget* widget) const
-{
-    switch (element) {
-    case CE_ToolBar:
-        if (const auto *cb
-                = qstyleoption_cast<const QStyleOptionToolBar*>(option)) {
-            painter->save();
-            QLinearGradient g(cb->rect.topLeft(), (cb->state & State_Horizontal)
-                              ? cb->rect.bottomLeft()
-                              : cb->rect.topRight());
-            g.setColorAt(0, option->palette.window().color().lighter(130));
-            g.setColorAt(1, option->palette.window().color());
-            painter->setBrush(g);
-            painter->setPen("#b6b6b6");
-            painter->drawRect(cb->rect);
-            painter->restore();
-        } break;
-        break;
-    default:
-        ApplicationStyle::drawControl(element, option, painter, widget);
-        break;
-    }
-}
-
 void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                                           const QStyleOptionComplex* option, QPainter* painter,
                                           const QWidget* widget) const

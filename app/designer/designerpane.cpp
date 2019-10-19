@@ -2,7 +2,6 @@
 #include <designerview.h>
 #include <anchoreditor.h>
 #include <signaleditor.h>
-#include <transparentstyle.h>
 
 #include <QMenu>
 #include <QToolBar>
@@ -61,7 +60,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_toolBar);
     layout->addWidget(m_designerView);
 
-    m_toolBar->setFixedHeight(24);
     m_toolBar->addWidget(m_refreshButton);
     m_toolBar->addWidget(m_shrinkSceneButton);
     m_toolBar->addWidget(m_clearButton);
@@ -117,19 +115,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeComboBox1->setFixedHeight(20);
     m_themeSettingsButton->setFixedSize(QSize(20, 20));
 
-    m_refreshButton->setIconSize(QSize(16, 16));
-    m_shrinkSceneButton->setIconSize(QSize(16, 16));
-    m_clearButton->setIconSize(QSize(16, 16));
-    m_anchorsButton->setIconSize(QSize(16, 16));
-    m_snappingButton->setIconSize(QSize(16, 16));
-    m_gridViewButton->setIconSize(QSize(16, 16));
-    m_guidelinesButton->setIconSize(QSize(16, 16));
-    m_zoomLevelComboBox->setIconSize(QSize(16, 16));
-    m_sceneSettingsButton->setIconSize(QSize(16, 16));
-    m_themeComboBox->setIconSize(QSize(16, 16));
-    m_themeComboBox1->setIconSize(QSize(16, 16));
-    m_themeSettingsButton->setIconSize(QSize(16, 16));
-
     m_refreshButton->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
     m_shrinkSceneButton->setIcon(QIcon(QStringLiteral(":/images/designer/shrink-scene.svg")));
     m_clearButton->setIcon(QIcon(QStringLiteral(":/images/designer/delete-all.svg")));
@@ -144,8 +129,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_snappingButton->setCheckable(true);
     m_gridViewButton->setCheckable(true);
     m_guidelinesButton->setCheckable(true);
-
-    TransparentStyle::attach(m_toolBar);
 
     m_selectAllAction->setShortcutVisibleInContextMenu(true);
     m_refreshAction->setShortcutVisibleInContextMenu(true);

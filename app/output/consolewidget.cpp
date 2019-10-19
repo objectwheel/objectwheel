@@ -1,7 +1,6 @@
 #include <consolewidget.h>
 #include <utilityfunctions.h>
 #include <utilsicons.h>
-#include <transparentstyle.h>
 
 #include <QScrollBar>
 #include <QTextBlock>
@@ -44,8 +43,6 @@ ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
     m_toolBar->addWidget(m_minimizeButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->setIconSize({14, 14});
-
-    TransparentStyle::attach(m_toolBar);
 
     m_clearButton->setFixedSize({18, 18});
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());

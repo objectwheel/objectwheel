@@ -19,8 +19,6 @@ public:
                     const QWidget *widget = nullptr) const override;
     void drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption* option,
                        QPainter* painter, const QWidget* widget = nullptr) const override;
-    void drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter,
-                     const QWidget *widget = nullptr) const override;
     void drawComplexControl(QStyle::ComplexControl control, const QStyleOptionComplex* option,
                             QPainter* painter, const QWidget* widget = nullptr) const override;
     QStyle::SubControl hitTestComplexControl(ComplexControl control, const QStyleOptionComplex* option,

@@ -304,6 +304,8 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
                                 const QWidget* widget, QStyleHintReturn* returnData) const
 {
     switch (hint) {
+    case SH_ToolButtonStyle:
+        return Qt::ToolButtonTextBesideIcon;
     case SH_ToolTipLabel_Opacity:
         return 242; // About 95%
     case SH_ComboBox_AllowWheelScrolling:
@@ -332,7 +334,11 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
 int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option, const QWidget* widget) const
 {
     switch (metric) {
+    case PM_ButtonIconSize:
     case PM_ToolBarIconSize:
+    case PM_TreeViewIndentation:
+    case PM_ListViewIconSize:
+    case PM_TabBarIconSize:
         return 16;
     case PM_ToolBarExtensionExtent:
         return 18;
@@ -346,12 +352,6 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 12;
     case PM_DockWidgetSeparatorExtent:
         return 1;
-    case PM_TreeViewIndentation:
-        return 16;
-    case PM_ListViewIconSize:
-        return 20;
-    case PM_TabBarIconSize:
-        return 16;
     case PM_SmallIconSize:
         if (widget && widget->inherits("LineEdit"))
             return 13;
@@ -761,6 +761,19 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     }
                 }
             }
+            painter->restore();
+        } break;
+    case CE_ToolBar:
+        if (const auto *cb = qstyleoption_cast<const QStyleOptionToolBar*>(option)) {
+            painter->save();
+            QLinearGradient g(cb->rect.topLeft(), (cb->state & State_Horizontal)
+                              ? cb->rect.bottomLeft()
+                              : cb->rect.topRight());
+            g.setColorAt(0, option->palette.window().color().lighter(130));
+            g.setColorAt(1, option->palette.window().color());
+            painter->setBrush(g);
+            painter->setPen("#b6b6b6");
+            painter->drawRect(cb->rect);
             painter->restore();
         } break;
     case CE_RubberBand:

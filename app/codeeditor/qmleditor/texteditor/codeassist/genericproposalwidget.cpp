@@ -229,7 +229,6 @@ public:
 GenericProposalWidgetPrivate::GenericProposalWidgetPrivate(QWidget *completionWidget)
     : m_completionListView(new GenericProposalListView(completionWidget))
 {
-    m_completionListView->setIconSize(QSize(16, 16));
     connect(m_completionListView, &QAbstractItemView::activated,
             this, &GenericProposalWidgetPrivate::handleActivation);
 

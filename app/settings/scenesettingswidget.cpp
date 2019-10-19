@@ -199,7 +199,6 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     m_outlineColorButton->setCursor(Qt::PointingHandCursor);
     m_outlineColorResetButton->setCursor(Qt::PointingHandCursor);
 
-    m_controlDoubleClickActionBox->setIconSize({16, 16});
     m_outlineColorButton->setFixedWidth(64);
 
     /****/

@@ -396,7 +396,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
     case Color: {
         auto toolButton = new QToolButton;
         toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
-        toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
         toolButton->setIconSize({12, 12});
         toolButton->setCursor(Qt::PointingHandCursor);

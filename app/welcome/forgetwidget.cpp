@@ -64,8 +64,6 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     m_buttons->get(Back)->setText(tr("Back"));
     m_buttons->get(Next)->setIcon(QIcon(":/images/load.png"));
     m_buttons->get(Back)->setIcon(QIcon(":/images/unload.png"));
-    m_buttons->get(Next)->setIconSize(QSize(16, 16));
-    m_buttons->get(Back)->setIconSize(QSize(16, 16));
     m_buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     m_buttons->settings().cellWidth = 175;

@@ -118,7 +118,6 @@
         <file>images/settings/general.svg</file>
         <file>images/settings/interface.svg</file>
         <file>images/settings/scene.svg</file>
-        <file>images/question.png</file>
         <file>images/toolbox.png</file>
         <file>images/designer/invert-selection.svg</file>
         <file>images/designer/shrink-scene.svg</file>
@@ -322,5 +321,6 @@
         <file>images/designer/forms.svg</file>
         <file>images/designer/properties.svg</file>
         <file>images/designer/form.svg</file>
+        <file>images/welcome/question.svg</file>
     </qresource>
 </RCC>

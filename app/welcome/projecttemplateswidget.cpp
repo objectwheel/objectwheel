@@ -208,8 +208,6 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_buttons->get(Back)->setText(tr("Back"));
     m_buttons->get(Next)->setIcon(QIcon(PATH_NICON));
     m_buttons->get(Back)->setIcon(QIcon(PATH_BICON));
-    m_buttons->get(Next)->setIconSize(QSize(16, 16));
-    m_buttons->get(Back)->setIconSize(QSize(16, 16));
     m_buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     m_buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;

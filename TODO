@@ -1,5 +1,14 @@
 Designer Core TODOs
 
+tüm pane ikonlarını settings ikon klasörüne taşı, designerdan al
+formspane'de ki ekle çıkart butonlarını QToolButton a çevir, ikon boyutları ve buton fixed
+    boyutlarını PinBar daki pin butonları ile birebir aynı yap, ve ikonları icons8 den al
+pinleme ikon rengine kırmızı dışında bişey yap
+tüm QToolBar kullanımlarını kontrol et, setIconSize, setFixedSize, vs vs alayına bak
+tüm welcome ikonlarını png den svg ye çevir, ayrıca programdaki diğer tüm resimler içinde
+    aynısını bi düşün
+çift tıklama ile kod editörün splitview ile mi yoksa full code editor modda mı açılacağını belirleyebilmek
+    için settingslere yeni bir settings ekle
 dockwidget pinbarlarına uygun ikonlar ekle
 modeselectorpane toolbar'ının alt çizgi/kontur'u ile kesişen/yan yana gelen diğer tüm çizgileri temizle
 Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explorer modu buraya ekle

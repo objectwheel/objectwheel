@@ -19,7 +19,7 @@
 
 namespace {
 bool isProjectStarted = false;
-const int ROW_HEIGHT = 21;
+const int ROW_HEIGHT = 20;
 
 void initPalette(QWidget* widget)
 {
@@ -128,7 +128,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
 {
     initPalette(this);
 
-    header()->setFixedHeight(23);
+    header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
 
@@ -136,7 +136,6 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
 
     setColumnCount(1);
     setIndentation(0);
-    setIconSize({15, 15});
     setDragEnabled(false);
     setRootIsDecorated(false);
     setUniformRowHeights(true);
@@ -175,7 +174,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_addButton->setCursor(Qt::PointingHandCursor);
     m_addButton->setToolTip(tr("Add new form to the project"));
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_addButton->setFixedSize(18, 18);
+    m_addButton->setFixedSize(16, 16);
     m_addButton->setIconSize(QSize(12, 12));
     m_addButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/plus.png", palette().text().color(), devicePixelRatioF())));
     connect(m_addButton, &PushButton::clicked, this, &FormsPane::onAddButtonClick);
@@ -183,7 +182,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_removeButton->setCursor(Qt::PointingHandCursor);
     m_removeButton->setToolTip(tr("Remove selected form from the project"));
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_removeButton->setFixedSize(18, 18);
+    m_removeButton->setFixedSize(16, 16);
     m_removeButton->setIconSize(QSize(12, 12));
     m_removeButton->setIcon(QIcon(PaintUtils::renderOverlaidPixmap(":/images/minus.png", palette().text().color(), devicePixelRatioF())));
     connect(m_removeButton, &PushButton::clicked, this, &FormsPane::onRemoveButtonClick);

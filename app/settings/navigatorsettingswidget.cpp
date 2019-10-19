@@ -35,7 +35,6 @@ NavigatorSettingsWidget::NavigatorSettingsWidget(QWidget* parent) : SettingsWidg
     m_itemDoubleClickActionBox->setToolTip(tr("Change default action for the double clicks on items"));
 
     m_itemDoubleClickActionBox->setCursor(Qt::PointingHandCursor);
-    m_itemDoubleClickActionBox->setIconSize({16, 16});
     /****/
 
     fill();

@@ -103,8 +103,6 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _buttons->get(Apply)->setText(tr("Apply"));
     _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
     _buttons->get(Apply)->setIcon(QIcon(PATH_VICON));
-    _buttons->get(Cancel)->setIconSize(QSize(16, 16));
-    _buttons->get(Apply)->setIconSize(QSize(16, 16));
     _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     _buttons->get(Apply)->setCursor(Qt::PointingHandCursor);
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;

@@ -1,6 +1,5 @@
 #include <helpwidget.h>
 #include <lineedit.h>
-#include <transparentstyle.h>
 #include <utilsicons.h>
 #include <utilityfunctions.h>
 #include <textbrowserhelpviewer.h>
@@ -115,8 +114,6 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_indexLayout->setContentsMargins(5, 5, 5, 5);
     m_indexLayout->addWidget(m_indexFilterEdit);
     m_indexLayout->addWidget(engine->indexWidget());
-
-    TransparentStyle::attach(m_toolBar);
 
     engine->indexWidget()->installEventFilter(this);
     engine->contentWidget()->viewport()->installEventFilter(this);

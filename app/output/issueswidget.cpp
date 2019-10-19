@@ -2,7 +2,6 @@
 #include <control.h>
 #include <utilsicons.h>
 #include <pathfinder.h>
-#include <transparentstyle.h>
 #include <utilityfunctions.h>
 #include <saveutils.h>
 #include <projectmanager.h>
@@ -37,7 +36,6 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
     setObjectName("m_listWidget");
     setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"
                   "border-top: none; border-bottom: none;}");
-    setIconSize({16, 16});
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setFocusPolicy(Qt::NoFocus);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -57,7 +55,6 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
     m_toolBar->addWidget(m_minimizeButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->setIconSize({14, 14});
-    TransparentStyle::attach(m_toolBar);
 
     m_clearButton->setFixedSize({18, 18});
     m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());

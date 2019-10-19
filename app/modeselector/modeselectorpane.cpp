@@ -24,7 +24,6 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     setObjectName("_q_ModeSelectorPane");
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    setIconSize({16, 16});
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {

@@ -392,10 +392,6 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->get(Load)->setIcon(QIcon(PATH_LICON));
     m_buttons->get(Import)->setIcon(QIcon(PATH_IICON));
     m_buttons->get(Export)->setIcon(QIcon(PATH_EICON));
-    m_buttons->get(New)->setIconSize(QSize(16, 16));
-    m_buttons->get(Load)->setIconSize(QSize(16, 16));
-    m_buttons->get(Import)->setIconSize(QSize(16, 16));
-    m_buttons->get(Export)->setIconSize(QSize(16, 16));
     m_buttons->get(New)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Load)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Import)->setCursor(Qt::PointingHandCursor);

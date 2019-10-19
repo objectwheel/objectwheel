@@ -33,27 +33,22 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
 
     m_runDevicesButton->setCursor(Qt::PointingHandCursor);
     m_runDevicesButton->setText(tr("Devices"));
-    m_runDevicesButton->setIconSize({16, 16});
 
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
     m_runButton->setFixedWidth(38);
-    m_runButton->setIconSize({16, 16});
 
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setToolTip(tr("Stop"));
     m_stopButton->setFixedWidth(38);
-    m_stopButton->setIconSize({16, 16});
 
     m_preferencesButton->setCursor(Qt::PointingHandCursor);
     m_preferencesButton->setToolTip(tr("Show Preferences"));
     m_preferencesButton->setFixedWidth(38);
-    m_preferencesButton->setIconSize({16, 16});
 
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
     m_projectsButton->setFixedWidth(38);
-    m_projectsButton->setIconSize({16, 16});
 
     m_segmentedBar->setCursor(Qt::PointingHandCursor);
     m_segmentedBar->setIconSize({18, 18});

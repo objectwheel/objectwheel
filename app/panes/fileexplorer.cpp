@@ -46,7 +46,7 @@ using namespace Utils;
 namespace {
 
 QLabel* g_modeIFilterIconLabel;
-const int ROW_HEIGHT = 21;
+const int ROW_HEIGHT = 20;
 int lastVScrollerPosOfViewer = 0;
 int lastHScrollerPosOfViewer = 0;
 int lastVScrollerPosOfExplorer = 0;
@@ -100,12 +100,11 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
 
     setPalette(initPalette(this));
 
-    header()->setFixedHeight(23);
+    header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
     header()->setSectionsMovable(false);
 
-    setIconSize({15, 15});
     setDragEnabled(false);
     setSortingEnabled(true);
     setUniformRowHeights(true);
@@ -196,20 +195,20 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     connect(m_modeComboBox, qOverload<const QString&>(&QComboBox::activated),
             this, &FileExplorer::onModeChange);
 
-    m_upButton->setFixedHeight(20);
-    m_backButton->setFixedHeight(20);
-    m_forthButton->setFixedHeight(20);
-    m_homeButton->setFixedHeight(20);
-    m_copyButton->setFixedHeight(20);
-    m_pasteButton->setFixedHeight(20);
-    m_deleteButton->setFixedHeight(20);
-    m_renameButton->setFixedHeight(20);
-    m_newFileButton->setFixedHeight(20);
-    m_newFolderButton->setFixedHeight(20);
-    m_modeComboBox->setFixedHeight(20);
+    m_upButton->setFixedSize(18, 18);
+    m_backButton->setFixedSize(18, 18);
+    m_forthButton->setFixedSize(18, 18);
+    m_homeButton->setFixedSize(18, 18);
+    m_copyButton->setFixedSize(18, 18);
+    m_pasteButton->setFixedSize(18, 18);
+    m_deleteButton->setFixedSize(18, 18);
+    m_renameButton->setFixedSize(18, 18);
+    m_newFileButton->setFixedSize(18, 18);
+    m_newFolderButton->setFixedSize(18, 18);
+    m_modeComboBox->setFixedHeight(18);
 
-    m_pathIndicator->setFixedHeight(17);
-    m_toolBar->setFixedHeight(24);
+    m_pathIndicator->setFixedHeight(16);
+    m_toolBar->setFixedHeight(20);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_homeButton);
     m_toolBar->addWidget(m_backButton);
@@ -242,7 +241,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_searchEditCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_searchEditCompleter->setCaseSensitivity(Qt::CaseInsensitive);
     m_searchEditCompleter->setModel(m_searchEditCompleterModel);
-    m_searchEditCompleter->popup()->setIconSize({15, 15});
 
     m_searchEdit->setCompleter(m_searchEditCompleter);
     m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit->devicePixelRatioF())),
