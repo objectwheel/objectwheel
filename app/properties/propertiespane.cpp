@@ -69,9 +69,9 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     m_resetButton->setVisible(false);
     m_resetButton->setAutoRaise(true);
     m_resetButton->setCursor(Qt::PointingHandCursor);
-    m_resetButton->setToolTip(tr("Clear property"));
+    m_resetButton->setToolTip(tr("Erase property"));
     m_resetButton->setFixedSize(QSize(18, 18));
-    m_resetButton->setIcon(QIcon(QStringLiteral(":/images/designer/delete-all.svg")));
+    m_resetButton->setIcon(QIcon(QStringLiteral(":/images/designer/erase-property.svg")));
 }
 
 bool PropertiesPane::isPermanentItem(QTreeWidgetItem* item) const

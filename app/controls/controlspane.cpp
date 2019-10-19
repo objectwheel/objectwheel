@@ -1,11 +1,11 @@
-#include <navigatorpane.h>
-#include <navigatortree.h>
+#include <controlspane.h>
+#include <controlstree.h>
 #include <lineedit.h>
 #include <paintutils.h>
 #include <QBoxLayout>
 
-NavigatorPane::NavigatorPane(QWidget* parent) : QWidget(parent)
-  , m_navigatorTree(new NavigatorTree(this))
+ControlsPane::ControlsPane(QWidget* parent) : QWidget(parent)
+  , m_controlsTree(new ControlsTree(this))
   , m_searchEdit(new LineEdit(this))
 {
     setFocusPolicy(Qt::NoFocus);
@@ -19,21 +19,21 @@ NavigatorPane::NavigatorPane(QWidget* parent) : QWidget(parent)
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(2);
     layout->setContentsMargins(2, 2, 2, 2);
-    layout->addWidget(m_navigatorTree);
+    layout->addWidget(m_controlsTree);
     layout->addWidget(m_searchEdit);
 }
 
-NavigatorTree* NavigatorPane::navigatorTree() const
+ControlsTree* ControlsPane::controlsTree() const
 {
-    return m_navigatorTree;
+    return m_controlsTree;
 }
 
-LineEdit* NavigatorPane::searchEdit() const
+LineEdit* ControlsPane::searchEdit() const
 {
     return m_searchEdit;
 }
 
-QSize NavigatorPane::sizeHint() const
+QSize ControlsPane::sizeHint() const
 {
     return {310, 220};
 }

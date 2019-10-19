@@ -1,21 +1,21 @@
-#ifndef NAVIGATORTREE_H
-#define NAVIGATORTREE_H
+#ifndef CONTROLSTREE_H
+#define CONTROLSTREE_H
 
 #include <QTreeWidget>
 
-class NavigatorDelegate;
-class NavigatorTree final : public QTreeWidget
+class ControlsDelegate;
+class ControlsTree final : public QTreeWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(NavigatorTree)
+    Q_DISABLE_COPY(ControlsTree)
     Q_DECLARE_PRIVATE(QTreeWidget)
 
-    friend class NavigatorDelegate; // For itemFromIndex()
+    friend class ControlsDelegate; // For itemFromIndex()
 
 public:
-    explicit NavigatorTree(QWidget* parent = nullptr);
+    explicit ControlsTree(QWidget* parent = nullptr);
 
-    NavigatorDelegate* delegate() const;
+    ControlsDelegate* delegate() const;
     QList<QTreeWidgetItem*> topLevelItems();
     QList<QTreeWidgetItem*> allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent = true,
                                              bool includeCollapsed = true);
@@ -25,7 +25,7 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    NavigatorDelegate* m_delegate;
+    ControlsDelegate* m_delegate;
 };
 
-#endif // NAVIGATORTREE_H
+#endif // CONTROLSTREE_H

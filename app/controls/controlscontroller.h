@@ -1,5 +1,5 @@
-#ifndef NAVIGATORCONTROLLER_H
-#define NAVIGATORCONTROLLER_H
+#ifndef CONTROLSCONTROLLER_H
+#define CONTROLSCONTROLLER_H
 
 #include <QHash>
 #include <QPointer>
@@ -8,13 +8,13 @@
 class Form;
 class Control;
 class DesignerScene;
-class NavigatorPane;
+class ControlsPane;
 class QTreeWidgetItem;
 
-class NavigatorController final : public QObject
+class ControlsController final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(NavigatorController)
+    Q_DISABLE_COPY(ControlsController)
 
     struct FormState {
         QList<Control*> collapsedControls;
@@ -23,7 +23,7 @@ class NavigatorController final : public QObject
     };
 
 public:
-    explicit NavigatorController(NavigatorPane* navigatorPane, DesignerScene* designerScene,
+    explicit ControlsController(ControlsPane* controlsPane, DesignerScene* designerScene,
                                  QObject* parent = nullptr);
 
     Control* controlFromItem(const QTreeWidgetItem* item) const;
@@ -61,7 +61,7 @@ signals:
     void controlSelectionChanged(const QList<Control*>& selectedControls);
 
 private:
-    NavigatorPane* m_navigatorPane;
+    ControlsPane* m_controlsPane;
     DesignerScene* m_designerScene;
     QPointer<Form> m_currentForm;
     QStringListModel m_searchCompleterModel;
@@ -70,4 +70,4 @@ private:
     bool m_isProjectStarted;
 };
 
-#endif // NAVIGATORCONTROLLER_H
+#endif // CONTROLSCONTROLLER_H

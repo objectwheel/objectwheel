@@ -1,12 +1,12 @@
-#include <navigatortree.h>
-#include <navigatordelegate.h>
+#include <controlstree.h>
+#include <controlsdelegate.h>
 #include <private/qtreewidget_p.h>
 
 #include <QHeaderView>
 #include <QPainter>
 
-NavigatorTree::NavigatorTree(QWidget* parent) : QTreeWidget(parent)
-  , m_delegate(new NavigatorDelegate(this))
+ControlsTree::ControlsTree(QWidget* parent) : QTreeWidget(parent)
+  , m_delegate(new ControlsDelegate(this))
 {
     m_delegate->reserve();
 
@@ -15,7 +15,7 @@ NavigatorTree::NavigatorTree(QWidget* parent) : QTreeWidget(parent)
     header()->setMinimumSectionSize(1);
     header()->resizeSection(0, 220); // Don't resize the last (stretched) column
 
-    headerItem()->setText(0, tr("Controls"));
+    headerItem()->setText(0, tr("Id"));
     headerItem()->setText(1, tr("Ui"));
 
     setColumnCount(2);
@@ -67,12 +67,12 @@ NavigatorTree::NavigatorTree(QWidget* parent) : QTreeWidget(parent)
                 .arg(palette().brightText().color().name()));
 }
 
-NavigatorDelegate* NavigatorTree::delegate() const
+ControlsDelegate* ControlsTree::delegate() const
 {
     return m_delegate;
 }
 
-QList<QTreeWidgetItem*> NavigatorTree::topLevelItems()
+QList<QTreeWidgetItem*> ControlsTree::topLevelItems()
 {
     QList<QTreeWidgetItem*> items;
 
@@ -82,7 +82,7 @@ QList<QTreeWidgetItem*> NavigatorTree::topLevelItems()
     return items;
 }
 
-QList<QTreeWidgetItem*> NavigatorTree::allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent,
+QList<QTreeWidgetItem*> ControlsTree::allSubChildItems(QTreeWidgetItem* parentItem, bool includeParent,
                                                         bool includeCollapsed)
 {
     QList<QTreeWidgetItem*> items;
@@ -108,7 +108,7 @@ QList<QTreeWidgetItem*> NavigatorTree::allSubChildItems(QTreeWidgetItem* parentI
     return items;
 }
 
-void NavigatorTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
+void ControlsTree::drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const
 {
     painter->save();
 
@@ -149,7 +149,7 @@ void NavigatorTree::drawBranches(QPainter* painter, const QRect& rect, const QMo
     painter->restore();
 }
 
-void NavigatorTree::paintEvent(QPaintEvent* event)
+void ControlsTree::paintEvent(QPaintEvent* event)
 {
     Q_D(const QTreeWidget);
 

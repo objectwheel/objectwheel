@@ -1,16 +1,16 @@
-#include <navigatordelegate.h>
-#include <navigatortree.h>
-#include <navigatordelegatecache.h>
+#include <controlsdelegate.h>
+#include <controlstree.h>
+#include <controlsdelegatecache.h>
 #include <utilityfunctions.h>
 #include <control.h>
 
 #include <QPointer>
 #include <QPainter>
 
-class NavigatorItem final : public QTreeWidgetItem {
+class ControlsItem final : public QTreeWidgetItem {
     bool operator<(const QTreeWidgetItem& other) const {
-        const auto& myControl = data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
-        const auto& otherControl = other.data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>();
+        const auto& myControl = data(0, ControlsDelegate::ControlRole).value<QPointer<Control>>();
+        const auto& otherControl = other.data(0, ControlsDelegate::ControlRole).value<QPointer<Control>>();
         Q_ASSERT(myControl);
         Q_ASSERT(otherControl);
         if (myControl && otherControl)
@@ -19,27 +19,27 @@ class NavigatorItem final : public QTreeWidgetItem {
     }
 };
 
-NavigatorDelegate::NavigatorDelegate(NavigatorTree* navigatorTree) : QStyledItemDelegate(navigatorTree)
-  , m_navigatorTree(navigatorTree)
-  , m_cache(new NavigatorDelegateCache)
+ControlsDelegate::ControlsDelegate(ControlsTree* controlsTree) : QStyledItemDelegate(controlsTree)
+  , m_controlsTree(controlsTree)
+  , m_cache(new ControlsDelegateCache)
 {
 }
 
-NavigatorDelegate::~NavigatorDelegate()
+ControlsDelegate::~ControlsDelegate()
 {
     delete m_cache;
 }
 
-void NavigatorDelegate::reserve()
+void ControlsDelegate::reserve()
 {
     for (int i = 200; i--;) {
-        auto item = new NavigatorItem;
+        auto item = new ControlsItem;
         item->setHidden(true);
         m_cache->push(item);
     }
 }
 
-void NavigatorDelegate::destroyItem(QTreeWidgetItem* item) const
+void ControlsDelegate::destroyItem(QTreeWidgetItem* item) const
 {
     if (QTreeWidgetItem* parent = item->parent())
         parent->takeChild(parent->indexOfChild(item));
@@ -51,22 +51,22 @@ void NavigatorDelegate::destroyItem(QTreeWidgetItem* item) const
     m_cache->push(item);
 }
 
-QTreeWidgetItem* NavigatorDelegate::createItem(Control* control) const
+QTreeWidgetItem* ControlsDelegate::createItem(Control* control) const
 {
     QTreeWidgetItem* item = m_cache->pop();
     if (item == 0)
-        item = new NavigatorItem;
+        item = new ControlsItem;
     item->setData(0, ControlRole, QVariant::fromValue(QPointer<Control>(control)));
     item->setData(1, ControlRole, QVariant::fromValue(QPointer<Control>(control)));
     return item;
 }
 
-int NavigatorDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
+int ControlsDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
 {
     int count = 0;
-    const QList<QTreeWidgetItem*>& topLevelItems = m_navigatorTree->topLevelItems();
+    const QList<QTreeWidgetItem*>& topLevelItems = m_controlsTree->topLevelItems();
     for (QTreeWidgetItem* topLevelItem : topLevelItems) {
-        const QList<QTreeWidgetItem*>& subs = m_navigatorTree->allSubChildItems(topLevelItem, true, false);
+        const QList<QTreeWidgetItem*>& subs = m_controlsTree->allSubChildItems(topLevelItem, true, false);
         for (QTreeWidgetItem* childItem : subs) {
             if (childItem == item)
                 return count;
@@ -77,7 +77,7 @@ int NavigatorDelegate::calculateVisibleRow(const QTreeWidgetItem* item) const
     return -1;
 }
 
-void NavigatorDelegate::paintBackground(QPainter* painter, const QStyleOptionViewItem& option,
+void ControlsDelegate::paintBackground(QPainter* painter, const QStyleOptionViewItem& option,
                                         int rowNumber, bool hasVerticalLine) const
 {
     painter->save();
@@ -116,7 +116,7 @@ void NavigatorDelegate::paintBackground(QPainter* painter, const QStyleOptionVie
     painter->restore();
 }
 
-void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
+void ControlsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
                               const QModelIndex& index) const
 {
     painter->save();
@@ -127,17 +127,17 @@ void NavigatorDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
     const auto& control = model->data(index, ControlRole).value<QPointer<Control>>();
     Q_ASSERT(control);
 
-    paintBackground(painter, option, calculateVisibleRow(m_navigatorTree->itemFromIndex(index)),
+    paintBackground(painter, option, calculateVisibleRow(m_controlsTree->itemFromIndex(index)),
                     index.column() == 0);
 
     // Draw icon
     QRectF iconRect(0, 0, -5, 0);
     if (index.column() == 0) {
-        Q_ASSERT(UtilityFunctions::window(m_navigatorTree));
-        const QPixmap& iconPixmap = control->icon().pixmap(UtilityFunctions::window(m_navigatorTree),
+        Q_ASSERT(UtilityFunctions::window(m_controlsTree));
+        const QPixmap& iconPixmap = control->icon().pixmap(UtilityFunctions::window(m_controlsTree),
                                                            option.decorationSize,
                                                            isSelected ? QIcon::Selected : QIcon::Normal);
-        iconRect = QRectF({}, iconPixmap.size() / m_navigatorTree->devicePixelRatioF());
+        iconRect = QRectF({}, iconPixmap.size() / m_controlsTree->devicePixelRatioF());
         iconRect.moveCenter(r.center());
         iconRect.moveLeft(r.left() + 5);
         painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());

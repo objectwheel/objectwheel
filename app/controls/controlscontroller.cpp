@@ -1,7 +1,7 @@
-#include <navigatorcontroller.h>
-#include <navigatorpane.h>
-#include <navigatortree.h>
-#include <navigatordelegate.h>
+#include <controlscontroller.h>
+#include <controlspane.h>
+#include <controlstree.h>
+#include <controlsdelegate.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
 #include <designerscene.h>
@@ -9,59 +9,59 @@
 #include <projectmanager.h>
 #include <lineedit.h>
 #include <designersettings.h>
-#include <navigatorsettings.h>
+#include <controlssettings.h>
 
 #include <QScrollBar>
 #include <QCompleter>
 
-NavigatorController::NavigatorController(NavigatorPane* navigatorPane, DesignerScene* designerScene, QObject* parent) : QObject(parent)
-  , m_navigatorPane(navigatorPane)
+ControlsController::ControlsController(ControlsPane* controlsPane, DesignerScene* designerScene, QObject* parent) : QObject(parent)
+  , m_controlsPane(controlsPane)
   , m_designerScene(designerScene)
   , m_isSelectionHandlingBlocked(false)
   , m_isProjectStarted(false)
 {
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
 
     auto completer = new QCompleter(this);
     completer->setModel(&m_searchCompleterModel);
     completer->setCaseSensitivity(Qt::CaseInsensitive);
     completer->setCompletionMode(QCompleter::InlineCompletion);
-    m_navigatorPane->searchEdit()->setCompleter(completer);
+    m_controlsPane->searchEdit()->setCompleter(completer);
 
-    connect(m_navigatorPane->searchEdit(), &LineEdit::returnPressed,
-            this, &NavigatorController::onSearchEditReturnPress);
-    connect(tree, &NavigatorTree::itemDoubleClicked,
-            this, &NavigatorController::onItemDoubleClick);
-    connect(tree, &NavigatorTree::itemSelectionChanged,
-            this, &NavigatorController::onItemSelectionChange);
+    connect(m_controlsPane->searchEdit(), &LineEdit::returnPressed,
+            this, &ControlsController::onSearchEditReturnPress);
+    connect(tree, &ControlsTree::itemDoubleClicked,
+            this, &ControlsController::onItemDoubleClick);
+    connect(tree, &ControlsTree::itemSelectionChanged,
+            this, &ControlsController::onItemSelectionChange);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
-            this, &NavigatorController::onCurrentFormChange);
+            this, &ControlsController::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-            this, &NavigatorController::onControlRemove);
+            this, &ControlsController::onControlRemove);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-            this, &NavigatorController::onFormRemove);
+            this, &ControlsController::onFormRemove);
     connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &NavigatorController::onProjectStart);
+            this, &ControlsController::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
-            this, &NavigatorController::onSceneSelectionChange);
+            this, &ControlsController::onSceneSelectionChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
-            tree, qOverload<>(&NavigatorTree::update));
+            tree, qOverload<>(&ControlsTree::update));
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
-            this, &NavigatorController::onControlIdChange);
+            this, &ControlsController::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
-            this, &NavigatorController::onControlIndexChange);
+            this, &ControlsController::onControlIndexChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::parentChanged,
-            this, &NavigatorController::onControlParentChange);
+            this, &ControlsController::onControlParentChange);
 }
 
-Control* NavigatorController::controlFromItem(const QTreeWidgetItem* item) const
+Control* ControlsController::controlFromItem(const QTreeWidgetItem* item) const
 {
-    return item->data(0, NavigatorDelegate::ControlRole).value<QPointer<Control>>().data();
+    return item->data(0, ControlsDelegate::ControlRole).value<QPointer<Control>>().data();
 }
 
-QTreeWidgetItem* NavigatorController::itemFromControl(const Control* control) const
+QTreeWidgetItem* ControlsController::itemFromControl(const Control* control) const
 {
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
     EVERYTHING(QTreeWidgetItem* item, tree) {
         if (controlFromItem(item) == control)
             return item;
@@ -69,25 +69,25 @@ QTreeWidgetItem* NavigatorController::itemFromControl(const Control* control) co
     return nullptr;
 }
 
-void NavigatorController::discharge()
+void ControlsController::discharge()
 {
     m_isProjectStarted = false;
     m_formStates.clear();
-    m_navigatorPane->searchEdit()->clear();
+    m_controlsPane->searchEdit()->clear();
     clear();
 }
 
-void NavigatorController::clear()
+void ControlsController::clear()
 {
     m_isSelectionHandlingBlocked = true;
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
     EVERYTHING(QTreeWidgetItem* item, tree)
             tree->delegate()->destroyItem(item);
     m_searchCompleterModel.setStringList({});
     m_isSelectionHandlingBlocked = false;
 }
 
-void NavigatorController::onProjectStart()
+void ControlsController::onProjectStart()
 {
     Q_ASSERT(!m_isProjectStarted);
     Q_ASSERT(m_designerScene->currentForm());
@@ -95,15 +95,15 @@ void NavigatorController::onProjectStart()
     onCurrentFormChange(m_designerScene->currentForm());
 }
 
-void NavigatorController::onSearchEditReturnPress()
+void ControlsController::onSearchEditReturnPress()
 {
     if (!m_isProjectStarted)
         return;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
     EVERYTHING(QTreeWidgetItem* item, tree) {
         if (const Control* control = controlFromItem(item)) {
-            if (QString::compare(control->id(), m_navigatorPane->searchEdit()->text(), Qt::CaseInsensitive) == 0) {
+            if (QString::compare(control->id(), m_controlsPane->searchEdit()->text(), Qt::CaseInsensitive) == 0) {
                 m_isSelectionHandlingBlocked = true;
                 tree->clearSelection();
                 m_isSelectionHandlingBlocked = false;
@@ -115,19 +115,19 @@ void NavigatorController::onSearchEditReturnPress()
     }
 }
 
-void NavigatorController::onItemDoubleClick(QTreeWidgetItem* item, int)
+void ControlsController::onItemDoubleClick(QTreeWidgetItem* item, int)
 {
     if (!m_isProjectStarted)
         return;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
     m_isSelectionHandlingBlocked = true;
     tree->clearSelection();
     m_isSelectionHandlingBlocked = false;
     item->setSelected(true);
     tree->scrollToItem(item);
 
-    const NavigatorSettings* settings = DesignerSettings::navigatorSettings();
+    const ControlsSettings* settings = DesignerSettings::controlsSettings();
     if (QGraphicsItem* mouseGrabber = m_designerScene->mouseGrabberItem())
         mouseGrabber->ungrabMouse();
     if (settings->itemDoubleClickAction == 0)
@@ -138,7 +138,7 @@ void NavigatorController::onItemDoubleClick(QTreeWidgetItem* item, int)
         emit goToSlotActionTriggered();
 }
 
-void NavigatorController::onItemSelectionChange()
+void ControlsController::onItemSelectionChange()
 {
     if (!m_isProjectStarted)
         return;
@@ -146,7 +146,7 @@ void NavigatorController::onItemSelectionChange()
     if (m_isSelectionHandlingBlocked)
         return;
 
-    const QList<QTreeWidgetItem*>& selectedItems = m_navigatorPane->navigatorTree()->selectedItems();
+    const QList<QTreeWidgetItem*>& selectedItems = m_controlsPane->controlsTree()->selectedItems();
 
     QList<Control*> selectedControls;
     for (QTreeWidgetItem* item : selectedItems) {
@@ -159,7 +159,7 @@ void NavigatorController::onItemSelectionChange()
     m_isSelectionHandlingBlocked = false;
 }
 
-void NavigatorController::onSceneSelectionChange()
+void ControlsController::onSceneSelectionChange()
 {
     if (!m_isProjectStarted)
         return;
@@ -167,7 +167,7 @@ void NavigatorController::onSceneSelectionChange()
     if (m_isSelectionHandlingBlocked)
         return;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
 
     m_isSelectionHandlingBlocked = true;
@@ -187,7 +187,7 @@ void NavigatorController::onSceneSelectionChange()
     tree->scrollToItem(firstSelectedItem);
 }
 
-void NavigatorController::onControlCreation(Control* control)
+void ControlsController::onControlCreation(Control* control)
 {
     if (!m_isProjectStarted)
         return;
@@ -195,7 +195,7 @@ void NavigatorController::onControlCreation(Control* control)
     if (control->scene() == 0)
         return;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
 
     if (const Control* parentControl = control->parentControl()) {
         EVERYTHING(QTreeWidgetItem* item, tree) {
@@ -211,7 +211,7 @@ void NavigatorController::onControlCreation(Control* control)
     }
 }
 
-void NavigatorController::onControlRemove(Control* control)
+void ControlsController::onControlRemove(Control* control)
 {
     if (!m_isProjectStarted)
         return;
@@ -225,7 +225,7 @@ void NavigatorController::onControlRemove(Control* control)
     if (!m_currentForm->isAncestorOf(control))
         return;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
 
     EVERYTHING(QTreeWidgetItem* item, tree) {
         if (const Control* ctrl = controlFromItem(item)) {
@@ -245,7 +245,7 @@ void NavigatorController::onControlRemove(Control* control)
     }
 }
 
-void NavigatorController::onFormRemove(Control* control)
+void ControlsController::onFormRemove(Control* control)
 {
     if (!m_isProjectStarted)
         return;
@@ -259,12 +259,12 @@ void NavigatorController::onFormRemove(Control* control)
     // when onCurrentFormChange slot is called.
 }
 
-void NavigatorController::onCurrentFormChange(Form* currentForm)
+void ControlsController::onCurrentFormChange(Form* currentForm)
 {
     if (!m_isProjectStarted)
         return;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
 
     /* Save outgoing form's state */
     if (m_currentForm) {
@@ -322,7 +322,7 @@ void NavigatorController::onCurrentFormChange(Form* currentForm)
     tree->horizontalScrollBar()->setSliderPosition(state.horizontalScrollBarPosition);
 }
 
-void NavigatorController::onControlParentChange(Control* control)
+void ControlsController::onControlParentChange(Control* control)
 {
     if (!m_isProjectStarted)
         return;
@@ -330,7 +330,7 @@ void NavigatorController::onControlParentChange(Control* control)
     if (!control->parentControl())
         return;
 
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
 
     // Check if already exists, if not --reparented from
     // another form or a tool dropped-- add it to the list
@@ -348,7 +348,7 @@ void NavigatorController::onControlParentChange(Control* control)
     }
 }
 
-void NavigatorController::onControlIndexChange(Control* control) const
+void ControlsController::onControlIndexChange(Control* control) const
 {
     if (!m_isProjectStarted)
         return;
@@ -362,10 +362,10 @@ void NavigatorController::onControlIndexChange(Control* control) const
     if (!m_currentForm->isAncestorOf(control))
         return;
 
-    m_navigatorPane->navigatorTree()->sortItems(0, Qt::AscendingOrder);
+    m_controlsPane->controlsTree()->sortItems(0, Qt::AscendingOrder);
 }
 
-void NavigatorController::onControlIdChange(Control* control, const QString& previousId)
+void ControlsController::onControlIdChange(Control* control, const QString& previousId)
 {
     if (!m_isProjectStarted)
         return;
@@ -384,33 +384,33 @@ void NavigatorController::onControlIdChange(Control* control, const QString& pre
 
     removeCompleterEntry(previousId);
     addCompleterEntry(control->id());
-    m_navigatorPane->navigatorTree()->update();
+    m_controlsPane->controlsTree()->update();
 }
 
-void NavigatorController::addCompleterEntry(const QString& entry)
+void ControlsController::addCompleterEntry(const QString& entry)
 {
     QStringList list(m_searchCompleterModel.stringList());
     list.append(entry);
     m_searchCompleterModel.setStringList(list);
 }
 
-void NavigatorController::removeCompleterEntry(const QString& entry)
+void ControlsController::removeCompleterEntry(const QString& entry)
 {
     QStringList list(m_searchCompleterModel.stringList());
     list.removeOne(entry);
     m_searchCompleterModel.setStringList(list);
 }
 
-void NavigatorController::expandRecursive(const QTreeWidgetItem* parentItem)
+void ControlsController::expandRecursive(const QTreeWidgetItem* parentItem)
 {
-    m_navigatorPane->navigatorTree()->expandItem(parentItem);
+    m_controlsPane->controlsTree()->expandItem(parentItem);
     for (int i = 0; i < parentItem->childCount(); ++i)
         expandRecursive(parentItem->child(i));
 }
 
-void NavigatorController::addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls)
+void ControlsController::addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls)
 {
-    NavigatorTree* tree = m_navigatorPane->navigatorTree();
+    ControlsTree* tree = m_controlsPane->controlsTree();
     for (Control* control : controls) {
         QTreeWidgetItem* item = tree->delegate()->createItem(control);
         parentItem->addChild(item);

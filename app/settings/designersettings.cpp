@@ -1,19 +1,19 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <toolboxsettings.h>
-#include <navigatorsettings.h>
+#include <controlssettings.h>
 
 DesignerSettings* DesignerSettings::s_instance = nullptr;
 SceneSettings* DesignerSettings::s_sceneSettings = nullptr;
 ToolboxSettings* DesignerSettings::s_toolboxSettings = nullptr;
-NavigatorSettings* DesignerSettings::s_navigatorSettings = nullptr;
+ControlsSettings* DesignerSettings::s_controlsSettings = nullptr;
 
 DesignerSettings::DesignerSettings(QObject* parent) : GroupSettings(parent)
 {
     s_instance = this;
     s_sceneSettings = new SceneSettings(this);
     s_toolboxSettings = new ToolboxSettings(this);
-    s_navigatorSettings = new NavigatorSettings(this);
+    s_controlsSettings = new ControlsSettings(this);
 }
 
 DesignerSettings::~DesignerSettings()
@@ -36,9 +36,9 @@ ToolboxSettings* DesignerSettings::toolboxSettings()
     return s_toolboxSettings;
 }
 
-NavigatorSettings* DesignerSettings::navigatorSettings()
+ControlsSettings* DesignerSettings::controlsSettings()
 {
-    return s_navigatorSettings;
+    return s_controlsSettings;
 }
 
 const char* DesignerSettings::group() const
@@ -50,19 +50,19 @@ void DesignerSettings::read()
 {
     s_sceneSettings->read();
     s_toolboxSettings->read();
-    s_navigatorSettings->read();
+    s_controlsSettings->read();
 }
 
 void DesignerSettings::write()
 {
     s_sceneSettings->write();
     s_toolboxSettings->write();
-    s_navigatorSettings->write();
+    s_controlsSettings->write();
 }
 
 void DesignerSettings::reset()
 {
     s_sceneSettings->reset();
     s_toolboxSettings->reset();
-    s_navigatorSettings->reset();
+    s_controlsSettings->reset();
 }

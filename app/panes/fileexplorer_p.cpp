@@ -146,7 +146,7 @@ bool FileSystemProxyModel::lessThan(const QModelIndex &left, const QModelIndex &
 QVariant FileSystemProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (section == 0 && role == Qt::DisplayRole)
-        return "  " + tr("Files");
+        return "  " + tr("Files and Folders");
     if (role == Qt::DecorationRole)
         return QPixmap();
     return QSortFilterProxyModel::headerData(section, orientation, role);

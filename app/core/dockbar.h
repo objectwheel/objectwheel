@@ -3,7 +3,7 @@
 
 #include <QToolBar>
 
-class QAction;
+class QToolButton;
 class QDockWidget;
 
 class DockBar final : public QToolBar
@@ -12,7 +12,7 @@ class DockBar final : public QToolBar
     Q_DISABLE_COPY(DockBar)
 
     struct DockData {
-        QAction* action;
+        QToolButton* button;
         QDockWidget* dockWidget;
     };
 

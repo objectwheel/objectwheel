@@ -25,15 +25,14 @@ void DockBar::addDockWidget(QDockWidget* dockWidget)
     if (pinBar == 0)
         return;
 
-    auto button = new QToolButton(this);
-    button->setIcon(pinBar->icon());
-    button->setText(pinBar->title());
-    button->setCursor(Qt::PointingHandCursor);
     DockData data;
     data.dockWidget = dockWidget;
-    data.action = addWidget(button);
-//    data.action->setFixedWidth(18);
-    data.action->setToolTip(UtilityFunctions::toToolTip(tr("Show <b>%1 Pane</b>").arg(pinBar->title())));
+    data.button = new QToolButton(this);
+    data.button->setIcon(pinBar->icon());
+    data.button->setText(pinBar->title());
+    data.button->setCursor(Qt::PointingHandCursor);
+//    data.button->setFixedWidth(18);
+    data.button->setToolTip(UtilityFunctions::toToolTip(tr("Show <b>%1 Pane</b>").arg(pinBar->title())));
 //    if (dockWidget->isVisible())
         m_dockWidgets.append(data);
 }

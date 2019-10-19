@@ -317,10 +317,11 @@
         <file>images/modes/split-on.svg</file>
         <file>images/designer/error.svg</file>
         <file>images/tools/ApplicationWindow.svg</file>
-        <file>images/settings/navigator.svg</file>
         <file>images/designer/forms.svg</file>
         <file>images/designer/properties.svg</file>
         <file>images/designer/form.svg</file>
         <file>images/welcome/question.svg</file>
+        <file>images/settings/controls.svg</file>
+        <file>images/designer/erase-property.svg</file>
     </qresource>
 </RCC>

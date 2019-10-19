@@ -1,14 +1,1 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.2" baseProfile="tiny" id="katman_1"
-	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16"
-	 xml:space="preserve">
-<path fill="#F5CE85" d="M1.5,15.5V3.2l1.4-1.7h10.2l1.4,1.7v12.3H1.5z"/>
-<path fill="#967A44" d="M12.9,2L14,3.4V15H2V3.4L3.1,2H12.9 M13.4,1H2.6L1,3v13h14V3L13.4,1L13.4,1z"/>
-<path fill="#967A44" d="M15,4H1V3l1.6-2h10.8L15,3V4z"/>
-<path fill="#8BB7F0" d="M2.5,3.5V3.3l3.6-2.7l3.5,1.8l0.6,1.1H2.5z"/>
-<path fill="#4E7AB5" d="M6.1,1.2l3.1,1.6L9.4,3H3.7L6.1,1.2 M6,0L2,3v1h9l-1-2L6,0L6,0z"/>
-<path fill="#8BB7F0" d="M6.5,3.5V3.3L10,0.6l3.5,2.7v0.2H6.5z"/>
-<path fill="#4E7AB5" d="M10,1.3L12.3,3H7.7L10,1.3 M10,0L6,3v1h8V3L10,0L10,0z"/>
-<path fill="#967A44" d="M1.5,3h13v1h-13V3z M10,6H6C5.7,6,5.5,5.8,5.5,5.5S5.7,5,6,5h4c0.3,0,0.5,0.2,0.5,0.5S10.3,6,10,6z"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#ffeea3" d="M2.5 0.5H13.5V14.5H2.5z"></path><path fill="#ba9b48" d="M13,1v13H3V1H13 M14,0H2v15h12V0L14,0z"></path><path fill="#ba9b48" d="M9.5 2L8 2 7 1 9.5 1z"></path><path fill="#ba9b48" d="M9.5 1A.5.5 0 1 0 9.5 2 .5.5 0 1 0 9.5 1zM6.5 3L8 3 9 2 6.5 2z"></path><path fill="#ba9b48" d="M6.5 2A.5.5 0 1 0 6.5 3 .5.5 0 1 0 6.5 2zM9.5 4L8 4 7 3 9.5 3z"></path><path fill="#ba9b48" d="M9.5 3A.5.5 0 1 0 9.5 4 .5.5 0 1 0 9.5 3zM6.5 5L8 5 9 4 6.5 4z"></path><path fill="#ba9b48" d="M6.5 4A.5.5 0 1 0 6.5 5 .5.5 0 1 0 6.5 4zM9.5 6L8 6 7 5 9.5 5z"></path><path fill="#ba9b48" d="M9.5 5A.5.5 0 1 0 9.5 6 .5.5 0 1 0 9.5 5zM6.5 7L8 7 9 6 6.5 6z"></path><path fill="#ba9b48" d="M6.5 6A.5.5 0 1 0 6.5 7 .5.5 0 1 0 6.5 6zM8.2 7H7.8c-.5 0-.9.3-1 .8C6.7 8.4 6.5 9.2 6.5 9.5 6.5 10.3 7.2 11 8 11s1.5-.7 1.5-1.5c0-.3-.2-1.1-.3-1.7C9.1 7.3 8.7 7 8.2 7zM8 10c-.3 0-.6-.3-.6-.6h1.2C8.6 9.7 8.3 10 8 10z"></path><path fill="#5e9c76" d="M11.5 7A4.5 4.5 0 1 0 11.5 16A4.5 4.5 0 1 0 11.5 7Z"></path><path fill="#fff" d="M11 9H12V14H11z"></path><path fill="#fff" d="M9 11H14V12H9z"></path></svg>

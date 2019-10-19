@@ -1,20 +1,20 @@
-#include <navigatordelegatecache.h>
+#include <controlsdelegatecache.h>
 #include <QTreeWidgetItem>
 
-NavigatorDelegateCache::~NavigatorDelegateCache()
+ControlsDelegateCache::~ControlsDelegateCache()
 {
     for (QTreeWidgetItem* item : qAsConst(m_items))
         delete item;
     m_items.clear();
 }
 
-void NavigatorDelegateCache::push(QTreeWidgetItem* item)
+void ControlsDelegateCache::push(QTreeWidgetItem* item)
 {
     Q_ASSERT(item);
     m_items.push(item);
 }
 
-QTreeWidgetItem* NavigatorDelegateCache::pop()
+QTreeWidgetItem* ControlsDelegateCache::pop()
 {
     if (m_items.isEmpty())
         return nullptr;

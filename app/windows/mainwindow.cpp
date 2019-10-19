@@ -7,8 +7,8 @@
 #include <toolboxcontroller.h>
 #include <propertiespane.h>
 #include <propertiescontroller.h>
-#include <navigatorpane.h>
-#include <navigatorcontroller.h>
+#include <controlspane.h>
+#include <controlscontroller.h>
 #include <assetspane.h>
 #include <formspane.h>
 #include <centralwidget.h>
@@ -67,11 +67,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_toolboxController(new ToolboxController(m_toolboxPane, this))
   , m_propertiesPane(new PropertiesPane)
   , m_propertiesController(new PropertiesController(m_propertiesPane, m_centralWidget->designerPane()->designerView()->scene(), this))
-  , m_navigatorPane(new NavigatorPane)
-  , m_navigatorController(new NavigatorController(m_navigatorPane, m_centralWidget->designerPane()->designerView()->scene(), this))
+  , m_controlsPane(new ControlsPane)
+  , m_controlsController(new ControlsController(m_controlsPane, m_centralWidget->designerPane()->designerView()->scene(), this))
   , m_formsPane(new FormsPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_assetsPane(new AssetsPane)
-  , m_navigatorDockWidget(new QDockWidget(this))
+  , m_controlsDockWidget(new QDockWidget(this))
   , m_propertiesDockWidget(new QDockWidget(this))
   , m_assetsDockWidget(new QDockWidget(this))
   , m_toolboxDockWidget(new QDockWidget(this))
@@ -79,6 +79,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_leftDockBar(new DockBar(this))
   , m_rightDockBar(new DockBar(this))
 {
+    setAnimated(false);
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
@@ -129,19 +130,19 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addToolBar(Qt::RightToolBarArea, m_rightDockBar);
 
     /** Setup Dock Widgets **/
-    /* Add Navigator Pane */
-    auto navigatorPinBar = new PinBar(m_navigatorDockWidget);
-    navigatorPinBar->setPalette(palette);
-    navigatorPinBar->setTitle(tr("Navigator"));
-    navigatorPinBar->setIcon(QIcon(QStringLiteral(":/images/settings/navigator.svg")));
-    m_navigatorDockWidget->setObjectName("navigatorDockWidget");
-    m_navigatorDockWidget->setTitleBarWidget(navigatorPinBar);
-    m_navigatorDockWidget->setWidget(m_navigatorPane);
-    m_navigatorDockWidget->setWindowTitle(tr("Navigator"));
-    m_navigatorDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
-    m_navigatorDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    addDockWidget(Qt::RightDockWidgetArea, m_navigatorDockWidget);
-    m_rightDockBar->addDockWidget(m_navigatorDockWidget);
+    /* Add Controls Pane */
+    auto controlsPinBar = new PinBar(m_controlsDockWidget);
+    controlsPinBar->setPalette(palette);
+    controlsPinBar->setTitle(tr("Controls"));
+    controlsPinBar->setIcon(QIcon(QStringLiteral(":/images/settings/controls.svg")));
+    m_controlsDockWidget->setObjectName("controlsDockWidget");
+    m_controlsDockWidget->setTitleBarWidget(controlsPinBar);
+    m_controlsDockWidget->setWidget(m_controlsPane);
+    m_controlsDockWidget->setWindowTitle(tr("Controls"));
+    m_controlsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    m_controlsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    addDockWidget(Qt::RightDockWidgetArea, m_controlsDockWidget);
+    m_rightDockBar->addDockWidget(m_controlsDockWidget);
 
     /* Add Properties Pane */
     auto propertiesPinBar = new PinBar(m_propertiesDockWidget);
@@ -210,17 +211,17 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &MainWindow::onModeChange);
-    connect(m_navigatorController, &NavigatorController::controlSelectionChanged,
+    connect(m_controlsController, &ControlsController::controlSelectionChanged,
             [=] (const QList<Control*>& selectedControls) {
         m_centralWidget->designerPane()->designerView()->scene()->clearSelection();
         for (Control* control : selectedControls)
             control->setSelected(true);
     });
-    connect(m_navigatorController, &NavigatorController::goToSlotActionTriggered,
+    connect(m_controlsController, &ControlsController::goToSlotActionTriggered,
             m_centralWidget->designerController(), &DesignerController::onGoToSlotActionTrigger);
-    connect(m_navigatorController, &NavigatorController::editAnchorsActionTriggered,
+    connect(m_controlsController, &ControlsController::editAnchorsActionTriggered,
             m_centralWidget->designerController(), &DesignerController::onEditAnchorsActionTrigger);
-    connect(m_navigatorController, &NavigatorController::viewSourceCodeActionTriggered,
+    connect(m_controlsController, &ControlsController::viewSourceCodeActionTriggered,
             m_centralWidget->designerController(), &DesignerController::onViewSourceCodeActionTrigger);
     connect(m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::opened,
             [=] {
@@ -287,7 +288,7 @@ void MainWindow::discharge()
     m_modeSelectorController->discharge();
     m_toolboxController->discharge();
     m_propertiesController->discharge();
-    m_navigatorController->discharge();
+    m_controlsController->discharge();
     m_centralWidget->discharge();
     m_formsPane->discharge();
     m_assetsPane->discharge();
@@ -310,9 +311,9 @@ void MainWindow::showLeftPanes(bool show)
         m_formsDockWidget->setVisible(show);
         m_formsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(m_navigatorDockWidget) == Qt::LeftDockWidgetArea) {
-        m_navigatorDockWidget->setVisible(show);
-        m_navigatorDockWidgetVisible = show;
+    if (dockWidgetArea(m_controlsDockWidget) == Qt::LeftDockWidgetArea) {
+        m_controlsDockWidget->setVisible(show);
+        m_controlsDockWidgetVisible = show;
     }
     if (dockWidgetArea(m_toolboxDockWidget) == Qt::LeftDockWidgetArea) {
         m_toolboxDockWidget->setVisible(show);
@@ -334,9 +335,9 @@ void MainWindow::showRightPanes(bool show)
         m_formsDockWidget->setVisible(show);
         m_formsDockWidgetVisible = show;
     }
-    if (dockWidgetArea(m_navigatorDockWidget) == Qt::RightDockWidgetArea) {
-        m_navigatorDockWidget->setVisible(show);
-        m_navigatorDockWidgetVisible = show;
+    if (dockWidgetArea(m_controlsDockWidget) == Qt::RightDockWidgetArea) {
+        m_controlsDockWidget->setVisible(show);
+        m_controlsDockWidgetVisible = show;
     }
     if (dockWidgetArea(m_toolboxDockWidget) == Qt::RightDockWidgetArea) {
         m_toolboxDockWidget->setVisible(show);
@@ -349,7 +350,7 @@ void MainWindow::hideDocks()
     m_assetsDockWidget->hide();
     m_propertiesDockWidget->hide();
     m_formsDockWidget->hide();
-    m_navigatorDockWidget->hide();
+    m_controlsDockWidget->hide();
     m_toolboxDockWidget->hide();
 }
 
@@ -358,7 +359,7 @@ void MainWindow::showDocks()
     m_assetsDockWidget->show();
     m_propertiesDockWidget->show();
     m_formsDockWidget->show();
-    m_navigatorDockWidget->show();
+    m_controlsDockWidget->show();
     m_toolboxDockWidget->show();
 }
 
@@ -367,7 +368,7 @@ void MainWindow::restoreDocks()
     m_assetsDockWidget->setVisible(m_assetsDockWidgetVisible);
     m_propertiesDockWidget->setVisible(m_propertiesDockWidgetVisible);
     m_formsDockWidget->setVisible(m_formsDockWidgetVisible);
-    m_navigatorDockWidget->setVisible(m_navigatorDockWidgetVisible);
+    m_controlsDockWidget->setVisible(m_controlsDockWidgetVisible);
     m_toolboxDockWidget->setVisible(m_toolboxDockWidgetVisible);
 }
 
@@ -415,9 +416,9 @@ PropertiesPane* MainWindow::propertiesPane() const
     return m_propertiesPane;
 }
 
-NavigatorPane* MainWindow::navigatorPane() const
+ControlsPane* MainWindow::controlsPane() const
 {
-    return m_navigatorPane;
+    return m_controlsPane;
 }
 
 void MainWindow::resetSettings()

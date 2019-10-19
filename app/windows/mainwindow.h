@@ -12,8 +12,8 @@ class ToolboxPane;
 class ToolboxController;
 class PropertiesPane;
 class PropertiesController;
-class NavigatorPane;
-class NavigatorController;
+class ControlsPane;
+class ControlsController;
 class FormsPane;
 class CentralWidget;
 class AssetsPane;
@@ -29,7 +29,7 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
 
     CentralWidget* centralWidget() const;
-    NavigatorPane* navigatorPane() const;
+    ControlsPane* controlsPane() const;
     PropertiesPane* propertiesPane() const;
     AssetsPane* assetsPane() const;
     ToolboxPane* toolboxPane() const;
@@ -71,11 +71,11 @@ private:
     ToolboxController* m_toolboxController;
     PropertiesPane* m_propertiesPane;
     PropertiesController* m_propertiesController;
-    NavigatorPane* m_navigatorPane;
-    NavigatorController* m_navigatorController;
+    ControlsPane* m_controlsPane;
+    ControlsController* m_controlsController;
     FormsPane* m_formsPane;
     AssetsPane* m_assetsPane;
-    QDockWidget* m_navigatorDockWidget;
+    QDockWidget* m_controlsDockWidget;
     QDockWidget* m_propertiesDockWidget;
     QDockWidget* m_assetsDockWidget;
     QDockWidget* m_toolboxDockWidget;
@@ -86,7 +86,7 @@ private:
     bool m_propertiesDockWidgetVisible;
     bool m_formsDockWidgetVisible;
     bool m_toolboxDockWidgetVisible;
-    bool m_navigatorDockWidgetVisible;
+    bool m_controlsDockWidgetVisible;
 };
 
 #endif // MAINWINDOW_H

@@ -32,7 +32,7 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
     m_closeButton->setIconSize(QSize(12, 12));
     m_closeButton->setToolTip(tr("Close the pane"));
     m_closeButton->setCursor(Qt::PointingHandCursor);
-    m_closeButton->setIcon(QIcon(QStringLiteral(":/images/designer/delete.svg")));
+    m_closeButton->setIcon(QIcon(QStringLiteral(":/images/designer/close.svg")));
 
     auto layout = new QHBoxLayout(this);
     layout->setSpacing(4);
@@ -108,5 +108,5 @@ void PinBar::paintEvent(QPaintEvent*)
     option.initFrom(this);
     option.state |= QStyle::State_Horizontal;
     style()->drawControl(QStyle::CE_ToolBar, &option, &painter, this);
-    painter.fillRect(QRectF(0, 0, 2.5, height()), Qt::darkGray);
+    painter.fillRect(QRectF(0, 0, 2.5, height()), "#507bb3");
 }

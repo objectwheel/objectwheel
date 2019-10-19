@@ -1,20 +1,20 @@
-#ifndef NAVIGATORDELEGATE_H
-#define NAVIGATORDELEGATE_H
+#ifndef CONTROLSDELEGATE_H
+#define CONTROLSDELEGATE_H
 
 #include <QStyledItemDelegate>
 
 class QTreeWidgetItem;
-class NavigatorTree;
-class NavigatorDelegateCache;
+class ControlsTree;
+class ControlsDelegateCache;
 class Control;
 
-class NavigatorDelegate final : public QStyledItemDelegate
+class ControlsDelegate final : public QStyledItemDelegate
 {
     Q_OBJECT
-    Q_DISABLE_COPY(NavigatorDelegate)
+    Q_DISABLE_COPY(ControlsDelegate)
 
-    friend class NavigatorTree; // For paintBackground() and calculateVisibleRow()
-    friend class NavigatorController; // For createItem() and destroyItem()
+    friend class ControlsTree; // For paintBackground() and calculateVisibleRow()
+    friend class ControlsController; // For createItem() and destroyItem()
 
 public:
     enum Roles {
@@ -22,8 +22,8 @@ public:
     };
 
 public:
-    explicit NavigatorDelegate(NavigatorTree* navigatorTree);
-    ~NavigatorDelegate() override;
+    explicit ControlsDelegate(ControlsTree* controlsTree);
+    ~ControlsDelegate() override;
 
     void reserve();
 
@@ -37,12 +37,12 @@ private:
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override;
 private:
-    NavigatorTree* m_navigatorTree;
-    NavigatorDelegateCache* m_cache;
+    ControlsTree* m_controlsTree;
+    ControlsDelegateCache* m_cache;
 };
 
 #define EVERYTHING(variable, tree)                                    \
     Q_FOREACH(QTreeWidgetItem* _topLevelItem_, tree->topLevelItems()) \
     Q_FOREACH(variable, tree->allSubChildItems(_topLevelItem_))
 
-#endif // NAVIGATORDELEGATE_H
+#endif // CONTROLSDELEGATE_H

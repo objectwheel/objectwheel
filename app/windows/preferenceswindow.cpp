@@ -52,6 +52,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_listWidget, 1, 0, 1, 1);
     m_layout->addWidget(m_dialogButtonBox, 2, 0, 1, 2);
 
+    m_listWidget->setIconSize(QSize(20, 20));
     m_listWidget->setFixedWidth(150);
     m_listWidget->setDragEnabled(false);
     m_listWidget->setSortingEnabled(true);

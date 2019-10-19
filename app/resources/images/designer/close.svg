@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#c2e8ff" d="M1.5 1.5H14.5V14.5H1.5z"></path><path fill="#7496c4" d="M14,2v12H2V2H14 M15,1H1v14h14V1L15,1z"></path><path fill="#36404d" d="M7.5 3.4H8.5V12.5H7.5z" transform="rotate(-45.001 8 8)"></path><path fill="#36404d" d="M3.4 7.5H12.5V8.5H3.4z" transform="rotate(-45.001 8 8)"></path></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.2" baseProfile="tiny" id="katman_1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 16 16"
+	 xml:space="preserve">
+<g>
+	<g>
+		<polygon fill="#E58888" points="2.3,11.9 6.3,8 2.3,4.1 4.1,2.3 8,6.3 11.9,2.3 13.7,4.1 9.7,8 13.7,11.9 11.9,13.7 8,9.7 
+			4.1,13.7 		"/>
+		<path fill="#C74343" d="M11.9,2.9l1.2,1.2L9.7,7.5L9.1,8l0.6,0.5l3.5,3.4L12,13.1L8.5,9.7L8,9.1L7.5,9.7l-3.4,3.5L2.9,12l3.5-3.4
+			L6.9,8L6.3,7.5L2.9,4.1l1.2-1.2l3.4,3.5L8,6.9l0.5-0.6L11.9,2.9 M11.9,1.8L8,5.8l-3.9-4L1.8,4.1l4,3.9l-4,3.9l2.3,2.3l3.9-4l3.9,4
+			l2.3-2.3l-4-3.9l4-3.9L11.9,1.8L11.9,1.8z"/>
+	</g>
+</g>
+</svg>

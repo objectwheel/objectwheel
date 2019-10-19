@@ -21,8 +21,8 @@ HEADERS += $$PWD/settingspage.h \
            $$PWD/toolboxsettingswidget.h \
            $$PWD/behaviorsettings.h \
            $$PWD/behaviorsettingswidget.h \
-           $$PWD/navigatorsettings.h \
-           $$PWD/navigatorsettingswidget.h
+           $$PWD/controlssettings.h \
+           $$PWD/controlssettingswidget.h
 
 SOURCES += $$PWD/settingspage.cpp \
            $$PWD/generalsettingspage.cpp \
@@ -44,5 +44,5 @@ SOURCES += $$PWD/settingspage.cpp \
            $$PWD/toolboxsettingswidget.cpp \
            $$PWD/behaviorsettings.cpp \
            $$PWD/behaviorsettingswidget.cpp \
-           $$PWD/navigatorsettingswidget.cpp \
-           $$PWD/navigatorsettings.cpp
+           $$PWD/controlssettingswidget.cpp \
+           $$PWD/controlssettings.cpp
