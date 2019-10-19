@@ -63,6 +63,17 @@ void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
     arrowOpt.rect = rect;
     style->drawPrimitive(pe, &arrowOpt, painter, widget);
 }
+
+bool hasVerticalParentToolBar(const QWidget* widget)
+{
+    if (widget == 0)
+        return false;
+
+    if (auto toolBar = qobject_cast<QToolBar*>(widget->parentWidget()))
+        return toolBar->orientation() == Qt::Vertical;
+
+    return false;
+}
 }
 
 QRectF comboboxEditBounds(const QRectF& outerBounds) // Used by transparentstyle.cpp
@@ -160,11 +171,16 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             sz = QFusionStyle::sizeFromContents(type, vopt, contentsSize, widget);
             sz.setHeight(sz.height() + 2);
         } break;
+
+    case CT_ToolButton:
+        sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
+        if (hasVerticalParentToolBar(widget))
+            sz = sz.transposed();
+        break;
     default:
         sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
         break;
     }
-
     return sz;
 }
 
@@ -221,7 +237,11 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
                 break;
             }
         } break;
-
+    case CC_ToolButton:
+        ret = QFusionStyle::subControlRect(control, option, subControl, widget);
+        if (hasVerticalParentToolBar(widget))
+            ret = ret.transposed();
+        break;
     default:
         ret = QFusionStyle::subControlRect(control, option, subControl, widget);
         break;
@@ -418,6 +438,14 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             else if (option->state & State_MouseOver)
                 painter->setBrush(QColor("#20000000"));
             painter->drawRoundedRect(QRectF(option->rect), 7, 7);
+            painter->restore();
+            break;
+        }
+        if (hasVerticalParentToolBar(widget)) {
+            painter->save();
+            painter->translate(0, widget->height());
+            painter->rotate(-90);
+            QFusionStyle::drawPrimitive(element, option, painter, widget);
             painter->restore();
             break;
         }
@@ -637,8 +665,13 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_ToolButtonLabel:
         if (const QStyleOptionToolButton* opt
                 = qstyleoption_cast<const QStyleOptionToolButton *>(option)) {
+            painter->save();
             QStyleOptionToolButton copy(*opt);
             QStyleOptionToolButton* toolbutton = &copy;
+            if (hasVerticalParentToolBar(widget)) {
+                painter->translate(0, widget->height());
+                painter->rotate(-90);
+            }
             if (widget && widget->parent() && widget->parent()->objectName() == "_q_ModeSelectorPane") {
                 toolbutton->rect.adjust(4, 0, 0, 0);
                 if (toolbutton->state & State_On || toolbutton->state & State_Sunken)
@@ -728,6 +761,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     }
                 }
             }
+            painter->restore();
         } break;
     case CE_RubberBand:
         if (qstyleoption_cast<const QStyleOptionRubberBand *>(option)) {

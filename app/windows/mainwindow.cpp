@@ -120,7 +120,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_leftDockBar->setFloatable(false);
     m_leftDockBar->setPalette(palette);
     m_leftDockBar->setOrientation(Qt::Vertical);
-    m_leftDockBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     addToolBar(Qt::LeftToolBarArea, m_leftDockBar);
 
     /* Add Right Dock Bar */
@@ -128,7 +127,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_rightDockBar->setFloatable(false);
     m_rightDockBar->setPalette(palette);
     m_rightDockBar->setOrientation(Qt::Vertical);
-    m_rightDockBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
     addToolBar(Qt::RightToolBarArea, m_rightDockBar);
 
     /** Setup Dock Widgets **/

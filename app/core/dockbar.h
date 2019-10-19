@@ -3,7 +3,7 @@
 
 #include <QToolBar>
 
-class QToolButton;
+class QAction;
 class QDockWidget;
 
 class DockBar final : public QToolBar
@@ -12,7 +12,7 @@ class DockBar final : public QToolBar
     Q_DISABLE_COPY(DockBar)
 
     struct DockData {
-        QToolButton* button;
+        QAction* action;
         QDockWidget* dockWidget;
     };
 
@@ -21,8 +21,8 @@ public:
 
     void addDockWidget(QDockWidget* dockWidget);
 
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
+//    QSize sizeHint() const override;
+//    QSize minimumSizeHint() const override;
 
 private:
     QList<DockData> m_dockWidgets;
