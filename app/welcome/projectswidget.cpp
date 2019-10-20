@@ -28,6 +28,7 @@
 #include <QCheckBox>
 #include <QSortFilterProxyModel>
 #include <QDateTime>
+#include <QApplication>
 
 #define SIZE_LIST        (QSize(450, 300))
 #define BUTTONS_WIDTH    (450)
@@ -314,9 +315,13 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
         updateGadgetPositions();
     });
 
-    QPalette p1;
-    p1.setColor(QPalette::Highlight, "#15000000");
-    m_listWidget->setPalette(p1);
+    auto updatePalette = [=] {
+        QPalette p(m_listWidget->palette());
+        p.setColor(QPalette::Highlight, "#16000000");
+        m_listWidget->setPalette(p);
+    };
+    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+    updatePalette();
     m_listWidget->viewport()->installEventFilter(this);
     m_listWidget->setIconSize(SIZE_FILEICON);
     m_listWidget->setMinimumWidth(400);
@@ -325,7 +330,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setFixedSize(SIZE_LIST);
     m_listWidget->verticalScrollBar()->setStyleSheet(
-                tr(
+                QString {
                     "QScrollBar:vertical {"
                     "    background: transparent;"
                     "    width: %2px;"
@@ -342,21 +347,19 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
                     "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
                     "    background: none;"
                     "}"
-                    ).
-                arg(15).
-                arg(6).
-                arg(2.5)
-                );
+                }
+                .arg(15)
+                .arg(6)
+                .arg(2.5));
     m_listWidget->setStyleSheet(
-                tr(
+                QString {
                     "QListWidget {"
                     "    background: #12000000;"
                     "    border: 1px solid #22000000;"
                     "    border-radius: %1px;"
                     "}"
-                    )
-                .arg(8)
-                );
+                }
+                .arg(8));
 
     m_progressBar->setFixedWidth(WIDTH_PROGRESS);
 

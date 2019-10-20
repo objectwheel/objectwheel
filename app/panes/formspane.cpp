@@ -16,19 +16,11 @@
 #include <QHeaderView>
 #include <QDir>
 #include <QTemporaryDir>
+#include <QApplication>
 
 namespace {
 bool isProjectStarted = false;
 const int ROW_HEIGHT = 20;
-
-void initPalette(QWidget* widget)
-{
-    QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#bf5861");
-    palette.setColor(QPalette::Dark, "#b05159");
-    palette.setColor(QPalette::AlternateBase, "#f7e6e8");
-    widget->setPalette(palette);
-}
 
 void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row)
 {
@@ -126,8 +118,6 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
   , m_addButton(new PushButton(this))
   , m_removeButton(new PushButton(this))
 {
-    initPalette(this);
-
     header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
@@ -152,24 +142,34 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    setStyleSheet(
-                QString {
-                    "QTreeView {"
-                    "    border: 1px solid %1;"
-                    "} QHeaderView::section {"
-                    "    padding-left: 5px;"
-                    "    color: %4;"
-                    "    border: none;"
-                    "    border-bottom: 1px solid %1;"
-                    "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
-                    "                                stop:0 %2, stop:1 %3);"
-                    "}"
-                }
-                .arg(palette().dark().color().darker(140).name())
-                .arg(palette().light().color().name())
-                .arg(palette().dark().color().name())
-                .arg(palette().brightText().color().name())
-    );
+
+    auto updatePalette = [=] {
+        QPalette p(palette());
+        p.setColor(QPalette::Light, "#bf5861");
+        p.setColor(QPalette::Dark, "#b05159");
+        p.setColor(QPalette::AlternateBase, "#f7e6e8");
+        setPalette(p);
+        setStyleSheet(
+                    QString {
+                        "QTreeView {"
+                        "    border: 1px solid %1;"
+                        "} QHeaderView::section {"
+                        "    padding-left: 5px;"
+                        "    color: %4;"
+                        "    border: none;"
+                        "    border-bottom: 1px solid %1;"
+                        "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+                        "                                stop:0 %2, stop:1 %3);"
+                        "}"
+                    }
+                    .arg(palette().dark().color().darker(140).name())
+                    .arg(palette().light().color().name())
+                    .arg(palette().dark().color().name())
+                    .arg(palette().brightText().color().name())
+        );
+    };
+    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+    updatePalette();
 
     m_addButton->setCursor(Qt::PointingHandCursor);
     m_addButton->setToolTip(tr("Add new form to the project"));

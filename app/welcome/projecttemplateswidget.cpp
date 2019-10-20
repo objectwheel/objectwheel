@@ -20,6 +20,7 @@
 #include <QDateTime>
 #include <QScreen>
 #include <QFileDialog>
+#include <QApplication>
 
 #define SIZE_LIST        (QSize(450, 315))
 #define BUTTONS_WIDTH    (450)
@@ -148,10 +149,14 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
 
     m_templatesLabel->setText(tr("Templates"));
 
-    QPalette p1;
-    p1.setColor(QPalette::Highlight, "#15000000");
+    auto updatePalette = [=] {
+        QPalette p(m_listWidget->palette());
+        p.setColor(QPalette::Highlight, "#16000000");
+        m_listWidget->setPalette(p);
+    };
+    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+    updatePalette();
     m_listWidget->viewport()->installEventFilter(this);
-    m_listWidget->setPalette(p1);
     m_listWidget->setIconSize(SIZE_TEMPLCON);
     m_listWidget->setMinimumWidth(400);
     m_listWidget->setItemDelegate(new ProjectTemplatesDelegate(m_listWidget, m_listWidget));

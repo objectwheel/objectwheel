@@ -108,5 +108,5 @@ void PinBar::paintEvent(QPaintEvent*)
     option.initFrom(this);
     option.state |= QStyle::State_Horizontal;
     style()->drawControl(QStyle::CE_ToolBar, &option, &painter, this);
-    painter.fillRect(QRectF(0, 0, 2.5, height()), "#507bb3");
+    painter.fillRect(QRectF(0, 0, 2.5, height()), palette().highlight());
 }

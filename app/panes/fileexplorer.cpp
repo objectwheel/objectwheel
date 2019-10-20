@@ -57,18 +57,6 @@ QSet<QPersistentModelIndex> lastExpandedIndexesOfViewer;
 QString lastPathofExplorer;
 QStack<QString> backPathStack;
 QStack<QString> forthPathStack;
-
-QPalette initPalette(QWidget* widget)
-{
-    QPalette palette(widget->palette());
-    palette.setColor(QPalette::Light, "#ffffff");
-    palette.setColor(QPalette::Dark, "#f0f0f0");
-    palette.setColor(QPalette::AlternateBase, "#f7f7f7");
-    palette.setColor(QPalette::Mid, palette.text().color().lighter()); // For line and "empty folder" color
-    palette.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
-    palette.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
-    return palette;
-}
 }
 
 FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
@@ -93,8 +81,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_newFileButton(new QToolButton)
   , m_newFolderButton(new QToolButton)
 {
-    setPalette(initPalette(this));
-
     header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
@@ -113,6 +99,19 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     setVerticalScrollMode(QTreeView::ScrollPerPixel);
     setHorizontalScrollMode(QTreeView::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    auto updatePalette = [=] {
+        QPalette p(palette());
+        p.setColor(QPalette::Light, "#ffffff");
+        p.setColor(QPalette::Dark, "#f0f0f0");
+        p.setColor(QPalette::AlternateBase, "#f7f7f7");
+        p.setColor(QPalette::Mid, p.text().color().lighter()); // For line and "empty folder" color
+        p.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
+        p.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
+        setPalette(p);
+    };
+    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+    updatePalette();
 
     g_modeIFilterIconLabel = new QLabel(m_modeComboBox);
     g_modeIFilterIconLabel->setFixedSize(16, 16);

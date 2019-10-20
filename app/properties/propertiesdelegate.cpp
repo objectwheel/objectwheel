@@ -190,14 +190,10 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
     if (isClassRow) {
         painter->setPen(option.palette.brightText().color());
     } else {
-        if (index.column() == 0 && index.data(ModificationRole).toBool()) {
-            QFont font (option.font);
-            font.setWeight(QFont::Medium);
-            painter->setFont(font);
-            painter->setPen(option.palette.highlight().color());
-        } else {
+        if (index.column() == 0 && index.data(ModificationRole).toBool())
+            painter->setPen(option.palette.link().color());
+        else
             painter->setPen(option.palette.text().color());
-        }
     }
 
     const QRectF& textRect = option.rect.adjusted(5, 0, 0, 0);

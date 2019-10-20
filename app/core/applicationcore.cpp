@@ -91,15 +91,16 @@ ApplicationCore::ApplicationCore(QApplication* app)
     DesignerSettings::read();
     CodeEditorSettings::read();
 
-    /* Set application ui settings */
+    /* Set application's default palette */
     QApplication::setPalette(palette());
     QObject::connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged, [=]{
         QApplication::setPalette(palette());
     });
+
+    /* Set application ui settings */
     QApplication::setFont(GeneralSettings::interfaceSettings()->toFont());
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
     QApplication::setStartDragDistance(8);
-
 
     /* Show splash screen */
     QPixmap pixmap(":/images/splash.png");

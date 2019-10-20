@@ -70,7 +70,7 @@ QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QPalette& pale
 {
     QIcon icon;
     QColor up = palette.color(QPalette::Normal, QPalette::ButtonText);
-    QColor down("#157efb");
+    QColor down = palette.color(QPalette::Normal, QPalette::Highlight);
     icon.addPixmap(renderOverlaidPixmap(fileName, up, 1), QIcon::Normal, QIcon::Off);
     icon.addPixmap(renderOverlaidPixmap(fileName, down, 1), QIcon::Normal, QIcon::On);
     return icon;
