@@ -304,6 +304,8 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
                                 const QWidget* widget, QStyleHintReturn* returnData) const
 {
     switch (hint) {
+    case SH_Widget_Animation_Duration:
+        return 0; // No animation
     case SH_ToolButtonStyle:
         return Qt::ToolButtonTextBesideIcon;
     case SH_ToolTipLabel_Opacity:

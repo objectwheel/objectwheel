@@ -3,10 +3,9 @@ Designer Core TODOs
 proje template lerine bir el at, controls 1, controls 2 appları, plain window appı vs olsun, multipage
     applarda olsun, multiwindow applarda Qt yi temel al, ayrıca ikonlarını değiştir templatelerin
     isimlerini de, sonra applicationWindow.js gibi olsun isimler
-tüm setPalette leri düzelt (palettechanged sinyali ile ilgili ilişkiyi düzelt)
-DockWidget hareketleri varsayılan olarak "animated" oluyor, bunu bir general settings olarak ekle
 AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
     tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
+Yukarıdakinin aynısı forms pane için de yapılacak
 Tüm toolbar çizimleri tek bir yerden, applicationstyle içindeki CE_ToolBAr dan yapılacak, ona
     benzer tüm özelleştirilmiş toolbarlar paintEventleri silinecek (gerekmedikçe alayını sil)
 Tüm toolbarlar bir standarda bağlanacak, ikon sizeları 16 olacak. ikonları icons8'den alınacak.
