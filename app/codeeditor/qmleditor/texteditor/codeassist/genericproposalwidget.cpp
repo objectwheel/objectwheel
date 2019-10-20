@@ -108,7 +108,7 @@ public:
         : FakeToolTip(parent), m_label(new QLabel(this))
     {
         QVBoxLayout *layout = new QVBoxLayout(this);
-        layout->setMargin(0);
+        layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
         layout->addWidget(m_label);
 
@@ -299,7 +299,7 @@ GenericProposalWidget::GenericProposalWidget()
             this, &GenericProposalWidget::turnOnAutoWidth);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(d->m_completionListView);
 
     d->m_completionListView->installEventFilter(this);

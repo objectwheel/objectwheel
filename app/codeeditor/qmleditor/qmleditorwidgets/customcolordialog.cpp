@@ -62,7 +62,6 @@ CustomColorDialog::CustomColorDialog(QWidget *parent) : QFrame(parent )
     QVBoxLayout* vBox = new QVBoxLayout(colorFrameWidget);
     colorFrameWidget->setLayout(vBox);
     vBox->setSpacing(0);
-    vBox->setMargin(0);
     vBox->setContentsMargins(0,5,0,28);
 
     m_beforeColorWidget = new QFrame(colorFrameWidget);
@@ -85,7 +84,7 @@ CustomColorDialog::CustomColorDialog(QWidget *parent) : QFrame(parent )
     QGridLayout *gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(4);
     gridLayout->setVerticalSpacing(4);
-    gridLayout->setMargin(4);
+    gridLayout->setContentsMargins(4, 4, 4, 4);
     setLayout(gridLayout);
 
     gridLayout->addWidget(m_colorBox, 0, 0, 4, 1);
@@ -145,7 +144,7 @@ CustomColorDialog::CustomColorDialog(QWidget *parent) : QFrame(parent )
 void CustomColorDialog::setupColor(const QColor &color)
 {
     QPalette pal;
-    pal.setColor(QPalette::Background, color);
+    pal.setColor(QPalette::Window, color);
     m_beforeColorWidget->setPalette(pal);
     setColor(color);
 }
@@ -180,7 +179,7 @@ void CustomColorDialog::setupWidgets()
     m_bSpinBox->setValue(m_color.blueF());
     m_colorBox->setColor(m_color);
     QPalette pal;
-    pal.setColor(QPalette::Background, m_color);
+    pal.setColor(QPalette::Window, m_color);
     m_currentColorWidget->setPalette(pal);
     m_blockUpdate = false;
 }

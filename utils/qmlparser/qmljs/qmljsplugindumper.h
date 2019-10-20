@@ -59,7 +59,7 @@ private:
                                        const QString &importUri, const QString &importVersion);
     Q_INVOKABLE void dumpBuiltins(const QmlJS::ModelManagerInterface::ProjectInfo &info);
     Q_INVOKABLE void dumpAllPlugins();
-    void qmlPluginTypeDumpDone(int exitCode);
+    void qmlPluginTypeDumpDone(int exitCode, QProcess::ExitStatus status);
     void qmlPluginTypeDumpError(QProcess::ProcessError error);
     void pluginChanged(const QString &pluginLibrary);
 

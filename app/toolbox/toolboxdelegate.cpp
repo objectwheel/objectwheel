@@ -63,9 +63,9 @@ void ToolboxDelegate::paint(QPainter* painter, const QStyleOptionViewItem& optio
         painter->restore();
 
         // Draw text
-        QRect textRect(rect.left() + 20, rect.top(), rect.width() - 25, rect.height());
-        QString text = elidedText(option.fontMetrics, textRect.width(), Qt::ElideMiddle,
-                                  model->data(index, Qt::DisplayRole).toString());
+        const QRect textRect(rect.left() + 20, rect.top(), rect.width() - 25, rect.height());
+        const QString& text = option.fontMetrics.elidedText(model->data(index, Qt::DisplayRole).toString(),
+                                                            Qt::ElideMiddle, textRect.width());
         m_view->style()->drawItemText(painter, textRect, Qt::AlignCenter,
                                       option.palette, m_view->isEnabled(), text);
     } else {

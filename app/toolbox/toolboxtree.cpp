@@ -61,7 +61,7 @@ void ToolboxTree::onItemPress(QTreeWidgetItem* item, int column)
         return;
 
     if (item->parent() == 0) {
-        setItemExpanded(item, !isItemExpanded(item));
+        item->setExpanded(!item->isExpanded());
         return;
     }
 

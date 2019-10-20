@@ -618,7 +618,7 @@ void ThemeChooserWidget::refresh()
                   << tmpFile.fileName());
 
     QEventLoop loop;
-    connect(&process, qOverload<int>(&QProcess::finished), &loop, &QEventLoop::quit);
+    connect(&process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), &loop, &QEventLoop::quit);
     QTimer::singleShot(10000, &loop, &QEventLoop::quit);
     loop.exec();
 

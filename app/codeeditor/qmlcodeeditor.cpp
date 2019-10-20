@@ -190,7 +190,7 @@ struct PaintEventData
         , searchResultFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_SEARCH_RESULT))
         , visualWhitespaceFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_VISUAL_WHITESPACE))
         , ifdefedOutFormat(CodeEditorSettings::fontColorsSettings()->toTextCharFormat(C_DISABLED_CODE))
-        , suppressSyntaxInIfdefedOutBlock(ifdefedOutFormat.foreground() != editor->palette().foreground())
+        , suppressSyntaxInIfdefedOutBlock(ifdefedOutFormat.foreground() != editor->palette().windowText())
     { }
     QPointF offset;
     const QRect viewportRect;
@@ -1631,7 +1631,7 @@ void QmlCodeEditor::applyFontSettings()
     const QColor background = textFormat.background().color();
     QPalette p = palette();
     p.setColor(QPalette::Text, foreground);
-    p.setColor(QPalette::Foreground, foreground);
+    p.setColor(QPalette::WindowText, foreground);
     p.setColor(QPalette::Base, background);
     p.setColor(QPalette::Highlight, (selectionFormat.background().style() != Qt::NoBrush) ?
                    selectionFormat.background().color() :
@@ -1649,7 +1649,7 @@ void QmlCodeEditor::applyFontSettings()
     // Line numbers
     QPalette ep;
     ep.setColor(QPalette::Dark, lineNumberFormat.foreground().color());
-    ep.setColor(QPalette::Background, lineNumberFormat.background().style() != Qt::NoBrush ?
+    ep.setColor(QPalette::Window, lineNumberFormat.background().style() != Qt::NoBrush ?
                 lineNumberFormat.background().color() : background);
     m_rowBar->setPalette(ep);
 
@@ -3230,7 +3230,7 @@ void QmlCodeEditor::paintWidgetBackground(const PaintEventData &data,
             && (centerOnScroll() || verticalScrollBar()->maximum() == verticalScrollBar()->minimum())) {
         const QRect backGroundRect(QPoint(data.eventRect.left(), int(data.offset.y())),
                                    data.eventRect.bottomRight());
-        painter.fillRect(backGroundRect, palette().background());
+        painter.fillRect(backGroundRect, palette().window());
     }
 }
 

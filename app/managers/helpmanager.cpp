@@ -49,6 +49,8 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QUrl>
+#include <QHelpFilterEngine>
+#include <QHelpFilterData>
 
 //static const char kUserDocumentationKey[] = "Help/UserDocumentation";
 //static const char kUpdateDocumentationTask[] = "UpdateDocumentationTask";
@@ -429,9 +431,9 @@ HelpManager::Filters HelpManager::filters()
     QTC_ASSERT(!d->m_needsSetup, return Filters());
 
     Filters filters;
-    const QStringList &customFilters = d->m_helpEngine->customFilters();
+    const QStringList &customFilters = d->m_helpEngine->filterEngine()->filters();
     for (const QString &filter : customFilters)
-        filters.insert(filter, d->m_helpEngine->filterAttributes(filter));
+        filters.insert(filter, d->m_helpEngine->filterEngine()->filterData(filter).components());
     return filters;
 }
 
@@ -455,7 +457,7 @@ HelpManager::Filters HelpManager::fixedFilters()
                 query.exec(QLatin1String("SELECT Name FROM FilterNameTable"));
                 while (query.next()) {
                     const QString &filter = query.value(0).toString();
-                    fixedFilters.insert(filter, d->m_helpEngine->filterAttributes(filter));
+                    fixedFilters.insert(filter, d->m_helpEngine->filterEngine()->filterData(filter).components());
                 }
             }
         }
@@ -478,7 +480,7 @@ void HelpManager::removeUserDefinedFilter(const QString &filter)
 {
     QTC_ASSERT(!d->m_needsSetup, return);
 
-    if (d->m_helpEngine->removeCustomFilter(filter))
+    if (d->m_helpEngine->filterEngine()->removeFilter(filter))
         emit m_instance->collectionFileChanged();
 }
 
@@ -486,7 +488,9 @@ void HelpManager::addUserDefinedFilter(const QString &filter, const QStringList 
 {
     QTC_ASSERT(!d->m_needsSetup, return);
 
-    if (d->m_helpEngine->addCustomFilter(filter, attr))
+    QHelpFilterData data;
+    data.setComponents(attr);
+    if (d->m_helpEngine->filterEngine()->setFilterData(filter, data))
         emit m_instance->collectionFileChanged();
 }
 

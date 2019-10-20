@@ -280,7 +280,7 @@ static QString qmlPluginDumpErrorMessage(QProcess *process)
     return errorMessage;
 }
 
-void PluginDumper::qmlPluginTypeDumpDone(int exitCode)
+void PluginDumper::qmlPluginTypeDumpDone(int exitCode, QProcess::ExitStatus /*status*/)
 {
     QProcess *process = qobject_cast<QProcess *>(sender());
     if (!process)
@@ -503,7 +503,7 @@ void PluginDumper::runQmlDump(const QmlJS::ModelManagerInterface::ProjectInfo &i
     process->setEnvironment(info.qmlDumpEnvironment.toStringList());
     QString workingDir = wd.canonicalPath();
     process->setWorkingDirectory(workingDir);
-    connect(process, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
+    connect(process, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
             this, &PluginDumper::qmlPluginTypeDumpDone);
     connect(process, &QProcess::errorOccurred, this, &PluginDumper::qmlPluginTypeDumpError);
     process->start(info.qmlDumpPath, arguments);
