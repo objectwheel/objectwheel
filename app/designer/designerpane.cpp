@@ -2,6 +2,7 @@
 #include <designerview.h>
 #include <anchoreditor.h>
 #include <signaleditor.h>
+#include <utilityfunctions.h>
 
 #include <QMenu>
 #include <QToolBar>
@@ -51,7 +52,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     QMetaObject::invokeMethod(this, [=] {
         m_toolBar->setContentsMargins(0, 0, 0, 0);
         m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
-        m_toolBar->layout()->setSpacing(1);
+        m_toolBar->layout()->setSpacing(2);
     }, Qt::QueuedConnection);
 
     auto layout = new QVBoxLayout(this);
@@ -60,6 +61,8 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_toolBar);
     layout->addWidget(m_designerView);
 
+    m_toolBar->setFixedHeight(20);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_refreshButton);
     m_toolBar->addWidget(m_shrinkSceneButton);
     m_toolBar->addWidget(m_clearButton);
@@ -74,7 +77,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addWidget(m_themeSettingsButton);
     m_toolBar->addWidget(m_themeComboBox);
     m_toolBar->addWidget(m_themeComboBox1);
-    m_toolBar->addSeparator();
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_shrinkSceneButton->setCursor(Qt::PointingHandCursor);
@@ -102,22 +104,22 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeComboBox1->setToolTip(tr("Change Quick Controls v1 theme"));
     m_themeSettingsButton->setToolTip(tr("Open project theme settings"));
 
-    m_refreshButton->setFixedSize(QSize(20, 20));
-    m_shrinkSceneButton->setFixedSize(QSize(20, 20));
-    m_clearButton->setFixedSize(QSize(20, 20));
-    m_anchorsButton->setFixedSize(QSize(20, 20));
-    m_snappingButton->setFixedSize(QSize(20, 20));
-    m_gridViewButton->setFixedSize(QSize(20, 20));
-    m_guidelinesButton->setFixedSize(QSize(20, 20));
-    m_zoomLevelComboBox->setFixedHeight(20);
-    m_sceneSettingsButton->setFixedSize(QSize(20, 20));
-    m_themeComboBox->setFixedHeight(20);
-    m_themeComboBox1->setFixedHeight(20);
-    m_themeSettingsButton->setFixedSize(QSize(20, 20));
+    m_refreshButton->setFixedSize(QSize(18, 18));
+    m_shrinkSceneButton->setFixedSize(QSize(18, 18));
+    m_clearButton->setFixedSize(QSize(18, 18));
+    m_anchorsButton->setFixedSize(QSize(18, 18));
+    m_snappingButton->setFixedSize(QSize(18, 18));
+    m_gridViewButton->setFixedSize(QSize(18, 18));
+    m_guidelinesButton->setFixedSize(QSize(18, 18));
+    m_sceneSettingsButton->setFixedSize(QSize(18, 18));
+    m_themeSettingsButton->setFixedSize(QSize(18, 18));
+    m_zoomLevelComboBox->setFixedHeight(18);
+    m_themeComboBox->setFixedHeight(18);
+    m_themeComboBox1->setFixedHeight(18);
 
     m_refreshButton->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
     m_shrinkSceneButton->setIcon(QIcon(QStringLiteral(":/images/designer/shrink-scene.svg")));
-    m_clearButton->setIcon(QIcon(QStringLiteral(":/images/designer/delete-all.svg")));
+    m_clearButton->setIcon(QIcon(QStringLiteral(":/images/designer/clear.svg")));
     m_anchorsButton->setIcon(QIcon(QStringLiteral(":/images/designer/anchors.svg")));
     m_snappingButton->setIcon(QIcon(QStringLiteral(":/images/designer/snapping.svg")));
     m_gridViewButton->setIcon(QIcon(QStringLiteral(":/images/designer/grid-view.svg")));
@@ -173,7 +175,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_copyAction->setIcon(QIcon(QStringLiteral(":/images/designer/copy.svg")));
     m_pasteAction->setIcon(QIcon(QStringLiteral(":/images/designer/paste.svg")));
     m_deleteAction->setIcon(QIcon(QStringLiteral(":/images/designer/delete.svg")));
-    m_deleteAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/delete-all.svg")));
+    m_deleteAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/clear.svg")));
     m_moveLeftAction->setIcon(QIcon(QStringLiteral(":/images/designer/move-left.svg")));
     m_moveRightAction->setIcon(QIcon(QStringLiteral(":/images/designer/move-right.svg")));
     m_moveUpAction->setIcon(QIcon(QStringLiteral(":/images/designer/move-up.svg")));

@@ -2,6 +2,8 @@
 #include <designerview.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 #include <form.h>
 #include <gadgetlayer.h>
 #include <mouselayer.h>
@@ -576,7 +578,7 @@ qreal DesignerScene::higherZ(const DesignerItem* parentItem)
 
 QPen DesignerScene::pen(const QColor& color, qreal width, bool cosmetic)
 {
-    QPen pen(color.isValid() ? color : DesignerSettings::sceneSettings()->outlineColor, width,
+    QPen pen(color.isValid() ? color : GeneralSettings::interfaceSettings()->highlightColor, width,
              Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin);
     pen.setCosmetic(cosmetic);
     return pen;

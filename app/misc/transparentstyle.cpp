@@ -200,8 +200,6 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     switch (metric) {
     case PM_ToolBarHandleExtent:
         return 0;
-    case PM_ToolBarSeparatorExtent:
-        return 1;
     case PM_ToolBarItemSpacing:
         return 0;
     case PM_ToolBarFrameWidth:
@@ -287,23 +285,6 @@ void TransparentStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     switch (element) {
     case PE_PanelLineEdit:
         break; // Skip for transparent spinbox line edit
-    case PE_IndicatorToolBarSeparator: {
-        QPainterPath path;
-        if (option->state & State_Horizontal) {
-            int xpoint = option->rect.center().x();
-            path.moveTo(xpoint + 0.5, option->rect.top() + 4);
-            path.lineTo(xpoint + 0.5, option->rect.bottom() - 3);
-        } else {
-            int ypoint = option->rect.center().y();
-            path.moveTo(option->rect.left() + 2 , ypoint + 0.5);
-            path.lineTo(option->rect.right() + 1, ypoint + 0.5);
-        }
-        QPainterPathStroker theStroker;
-        theStroker.setCapStyle(Qt::FlatCap);
-        // theStroker.setDashPattern(QVector<qreal>() << 1 << 2);
-        path = theStroker.createStroke(path);
-        painter->fillPath(path, QColor("#30000000"));
-    } break;
     case PE_PanelButtonTool:
         if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
             painter->save();

@@ -8,6 +8,7 @@ static const char g_fontPreferThick[] = "FontPreferThick";
 static const char g_fontPreferAntialiasing[] = "FontPreferAntialiasing";
 static const char g_language[] = "Language";
 static const char g_hdpiEnabled[] = "HdpiEnabled";
+static const char g_highlightColor[] = "HighlightColor";
 static const char g_outputPanePops[] = "OutputPanePops";
 static const char g_preserveDesignerState[] = "PreserveDesignerState";
 static const char g_visibleOutputWidget[] = "VisibleOutputWidget";
@@ -25,6 +26,7 @@ void InterfaceSettings::read()
     hdpiEnabled = value<bool>(g_hdpiEnabled, hdpiEnabled);
     theme = value<int>(g_theme, theme);
     language = value<int>(g_language, language);
+    highlightColor = value<QColor>(g_highlightColor, highlightColor);
     /****/
     fontPreferThick = value<bool>(g_fontPreferThick, fontPreferThick);
     fontPreferAntialiasing = value<bool>(g_fontPreferAntialiasing, fontPreferAntialiasing);
@@ -43,6 +45,7 @@ void InterfaceSettings::write()
     setValue(g_hdpiEnabled, hdpiEnabled);
     setValue(g_theme, theme);
     setValue(g_language, language);
+    setValue(g_highlightColor, highlightColor);
     /****/
     setValue(g_fontPreferThick, fontPreferThick);
     setValue(g_fontPreferAntialiasing, fontPreferAntialiasing);
@@ -62,6 +65,7 @@ void InterfaceSettings::reset()
     hdpiEnabled = true;
     theme = 0;
     language = 0;
+    highlightColor = "#2483ec";
     /****/
     fontPreferThick = false;
     fontPreferAntialiasing = true;

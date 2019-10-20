@@ -72,7 +72,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
     QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
-    QApplication::setPalette(palette());
 
     const QString fontPath = ":/fonts";
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
@@ -93,9 +92,14 @@ ApplicationCore::ApplicationCore(QApplication* app)
     CodeEditorSettings::read();
 
     /* Set application ui settings */
+    QApplication::setPalette(palette());
+    QObject::connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged, [=]{
+        QApplication::setPalette(palette());
+    });
     QApplication::setFont(GeneralSettings::interfaceSettings()->toFont());
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
     QApplication::setStartDragDistance(8);
+
 
     /* Show splash screen */
     QPixmap pixmap(":/images/splash.png");
@@ -223,9 +227,9 @@ QPalette ApplicationCore::palette()
     palette.setColor(QPalette::AlternateBase, "#f5f5f5");
     palette.setColor(QPalette::Button, "#ececec");
     palette.setColor(QPalette::Window, "#ececec");
-    palette.setColor(QPalette::Highlight, "#b3d7ff");
+    palette.setColor(QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
     palette.setColor(QPalette::BrightText, "#ffffff");
-    palette.setColor(QPalette::HighlightedText, "#2f2f2f");
+    palette.setColor(QPalette::HighlightedText, "#ffffff");
     palette.setColor(QPalette::ToolTipText, "#2f2f2f");
     palette.setColor(QPalette::ToolTipBase, "#ececec");
     palette.setColor(QPalette::Link, "#025dbf");

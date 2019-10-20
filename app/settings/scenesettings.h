@@ -31,7 +31,6 @@ struct SceneSettings final : public Settings
     int blankControlDecoration;
     int controlOutlineDecoration;
     int controlDoubleClickAction;
-    QColor outlineColor;
 };
 
 #endif // SCENESETTINGS_H

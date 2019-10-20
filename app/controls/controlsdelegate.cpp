@@ -144,10 +144,8 @@ void ControlsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     }
 
     // Draw text
-    if (control && control->hasErrors() && isSelected)
-        painter->setPen(option.palette.linkVisited().color().lighter(140));
-    else if (control && control->hasErrors() && !isSelected)
-        painter->setPen(option.palette.linkVisited().color());
+    if (control && control->hasErrors() && !isSelected)
+        painter->setPen(option.palette.link().color());
     else if (isSelected)
         painter->setPen(option.palette.highlightedText().color());
     else

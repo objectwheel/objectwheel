@@ -19,11 +19,11 @@
 #include <fileexplorer_p.h>
 #include <lineedit.h>
 #include <utilityfunctions.h>
-#include <transparentstyle.h>
 #include <utilsicons.h>
 #include <paintutils.h>
 #include <filesystemutils.h>
 
+#include <QLayout>
 #include <QComboBox>
 #include <QHeaderView>
 #include <QFileSystemModel>
@@ -93,11 +93,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_newFileButton(new QToolButton)
   , m_newFolderButton(new QToolButton)
 {
-    g_modeIFilterIconLabel = new QLabel(m_modeComboBox);
-    g_modeIFilterIconLabel->setFixedSize(16, 16);
-    g_modeIFilterIconLabel->move(0, 3);
-    m_modeComboBox->setContentsMargins(16, 0, 0, 0);
-
     setPalette(initPalette(this));
 
     header()->setFixedHeight(20);
@@ -119,6 +114,15 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     setHorizontalScrollMode(QTreeView::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+    g_modeIFilterIconLabel = new QLabel(m_modeComboBox);
+    g_modeIFilterIconLabel->setFixedSize(16, 16);
+    g_modeIFilterIconLabel->move(58, 2);
+    g_modeIFilterIconLabel->setPixmap(PaintUtils::pixmap(":/images/designer/filter.svg", QSize(12, 12), this));
+
+    m_modeComboBox->setFixedSize(76, 19);
+    m_modeComboBox->addItem(tr("Viewer")); // First must be the Viewer, the index is important
+    m_modeComboBox->addItem(tr("Explorer"));
+
     QPixmap p(":/images/drop.png");
     p.setDevicePixelRatio(devicePixelRatioF());
     m_dropHereLabel->setHidden(true);
@@ -132,9 +136,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_droppingBlurEffect->setEnabled(false);
     m_droppingBlurEffect->setBlurRadius(40);
     viewport()->setGraphicsEffect(m_droppingBlurEffect);
-
-    m_modeComboBox->addItem(tr("Viewer")); // First must be the Viewer, the index is important
-    m_modeComboBox->addItem(tr("Explorer"));
 
     m_upButton->setCursor(Qt::PointingHandCursor);
     m_backButton->setCursor(Qt::PointingHandCursor);
@@ -205,31 +206,28 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_renameButton->setFixedSize(18, 18);
     m_newFileButton->setFixedSize(18, 18);
     m_newFolderButton->setFixedSize(18, 18);
-    m_modeComboBox->setFixedHeight(18);
+
+    // Workaround for QToolBarLayout's obsolote serMargin function usage
+    QMetaObject::invokeMethod(this, [=] {
+        m_toolBar->setContentsMargins(0, 0, 0, 0);
+        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
+        m_toolBar->layout()->setSpacing(2);
+    }, Qt::QueuedConnection);
 
     m_pathIndicator->setFixedHeight(16);
     m_toolBar->setFixedHeight(20);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_homeButton);
     m_toolBar->addWidget(m_backButton);
     m_toolBar->addWidget(m_forthButton);
     m_toolBar->addWidget(m_upButton);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addWidget(m_renameButton);
     m_toolBar->addWidget(m_deleteButton);
     m_toolBar->addWidget(m_copyButton);
     m_toolBar->addWidget(m_pasteButton);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addWidget(m_newFileButton);
     m_toolBar->addWidget(m_newFolderButton);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
-
-    TransparentStyle::attach(m_toolBar);
-    TransparentStyle::attach(m_pathIndicator);
 
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
     m_fileSystemProxyModel->setDynamicSortFilter(true);
@@ -244,7 +242,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
 
     m_searchEdit->setCompleter(m_searchEditCompleter);
     m_searchEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchEdit->devicePixelRatioF())),
-                           QLineEdit::LeadingPosition);
+                            QLineEdit::LeadingPosition);
     m_searchEdit->setPlaceholderText(tr("Search"));
     m_searchEdit->setClearButtonEnabled(true);
     // Since FileExplorer (parent of the m_searchEdit) has
@@ -570,46 +568,28 @@ void FileExplorer::setPalette(const QPalette& pal)
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
 
-    QPixmap icon = PaintUtils::renderOverlaidPixmap(":images/filter.svg",
-                                                    pal.buttonText().color(),
-                                                    devicePixelRatioF());
-    g_modeIFilterIconLabel->setPixmap(icon.scaled(16 * devicePixelRatioF(),
-                                                  16 * devicePixelRatioF(),
-                                                  Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
-    QPalette mp(m_modeComboBox->palette());
-    mp.setColor(QPalette::Text, pal.text().color());
-    mp.setColor(QPalette::WindowText, pal.windowText().color());
-    mp.setColor(QPalette::ButtonText, pal.buttonText().color());
-    m_modeComboBox->setPalette(mp);
-
-    TransparentStyle::attach(m_modeComboBox);
-
-    QString styleSheet = {
-        "QTreeView {"
-        "    border: 1px solid %1;"
-        "} QHeaderView::down-arrow {"
-        "    image: none;"
-        "} QHeaderView::up-arrow {"
-        "    image: none;"
-        "} QHeaderView::section {"
-        "    padding-left: 0px;"
-        "    padding-top: 3px;"
-        "    padding-bottom: 3px;"
-        "    color: %4;"
-        "    border: none;"
-        "    border-bottom: 1px solid %1;"
-        "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
-        "                                stop:0 %2, stop:1 %3);"
-        "}"
-    };
-
-    styleSheet = styleSheet
-            .arg(palette().dark().color().darker(120).name())
-            .arg(palette().light().color().name())
-            .arg(palette().dark().color().name())
-            .arg(palette().buttonText().color().name());
-
-    setStyleSheet(styleSheet);
+    setStyleSheet(QString {
+                      "QTreeView {"
+                      "    border: 1px solid %1;"
+                      "} QHeaderView::down-arrow {"
+                      "    image: none;"
+                      "} QHeaderView::up-arrow {"
+                      "    image: none;"
+                      "} QHeaderView::section {"
+                      "    padding-left: 0px;"
+                      "    padding-top: 3px;"
+                      "    padding-bottom: 3px;"
+                      "    color: %4;"
+                      "    border: none;"
+                      "    border-bottom: 1px solid %1;"
+                      "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
+                      "                                stop:0 %2, stop:1 %3);"
+                      "}"
+                  }
+                  .arg(palette().dark().color().darker(120).name())
+                  .arg(palette().light().color().name())
+                  .arg(palette().dark().color().name())
+                  .arg(palette().buttonText().color().name()));
 
     update();
 }
@@ -864,16 +844,10 @@ void FileExplorer::updateGeometries()
     header()->setGeometry(vg.left(), 1, vg.width(), header()->height());
     m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
                          header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
-    if (width() < m_modeComboBox->width() + 40) {
+    if (width() < m_modeComboBox->width() + 40)
         m_modeComboBox->hide();
-    } else if (m_modeComboBox->isHidden()) {
+    else if (m_modeComboBox->isHidden())
         m_modeComboBox->show();
-        QPalette mp(m_modeComboBox->palette());
-        mp.setColor(QPalette::Text, palette().text().color());
-        mp.setColor(QPalette::WindowText, palette().windowText().color());
-        mp.setColor(QPalette::ButtonText, palette().buttonText().color());
-        m_modeComboBox->setPalette(mp); // TODO: Remove that, it's a weird workaround however
-    }
 
     int ds = qMin(qMin(vg.width() - 5, vg.height() - 5), 100);
     QRect dg;

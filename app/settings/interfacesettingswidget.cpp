@@ -2,6 +2,7 @@
 #include <interfacesettings.h>
 #include <generalsettings.h>
 #include <utilityfunctions.h>
+#include <qtcolorbutton.h>
 
 #include <QLabel>
 #include <QGroupBox>
@@ -21,9 +22,12 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
   , m_themeLabel(new QLabel(m_interfaceGroup))
   , m_languageLabel(new QLabel(m_interfaceGroup))
   , m_hdpiLabel(new QLabel(m_interfaceGroup))
+  , m_highlightColorLabel(new QLabel(m_interfaceGroup))
   , m_themeBox(new QComboBox(m_interfaceGroup))
   , m_languageBox(new QComboBox(m_interfaceGroup))
   , m_hdpiCheckBox(new QCheckBox(m_interfaceGroup))
+  , m_highlightColorButton(new Utils::QtColorButton(m_interfaceGroup))
+  , m_highlightColorResetButton(new QPushButton(m_interfaceGroup))
   /****/
   , m_fontGroup(new QGroupBox(contentWidget()))
   , m_fontFamilyLabel(new QLabel(m_fontGroup))
@@ -55,9 +59,12 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     interfaceLayout->addWidget(m_themeLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     interfaceLayout->addWidget(m_languageLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
     interfaceLayout->addWidget(m_hdpiLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    interfaceLayout->addWidget(m_highlightColorLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
     interfaceLayout->addWidget(m_themeBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     interfaceLayout->addWidget(m_languageBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     interfaceLayout->addWidget(m_hdpiCheckBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    interfaceLayout->addWidget(m_highlightColorButton, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    interfaceLayout->addWidget(m_highlightColorResetButton, 3, 2, Qt::AlignRight | Qt::AlignVCenter);
     interfaceLayout->setColumnStretch(3, 1);
     interfaceLayout->setColumnMinimumWidth(1, 20);
 
@@ -66,15 +73,22 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     m_themeLabel->setText(tr("Theme") + ":");
     m_languageLabel->setText(tr("Language") + ":");
     m_hdpiLabel->setText(tr("High DPI scaling") + ":");
+    m_highlightColorLabel->setText(tr("Highlight color") + ":");
+    m_highlightColorResetButton->setText(tr("Reset"));
 
     m_themeBox->setToolTip(tr("Change gui theme"));
     m_languageBox->setToolTip(tr("Change language"));
     m_hdpiCheckBox->setToolTip(tr("Enable high DPI scaling"));
+    m_highlightColorButton->setToolTip(tr("Change highlight color"));
+    m_highlightColorResetButton->setToolTip(tr("Reset highlight color to default"));
 
     m_themeBox->setCursor(Qt::PointingHandCursor);
     m_languageBox->setCursor(Qt::PointingHandCursor);
     m_hdpiCheckBox->setCursor(Qt::PointingHandCursor);
+    m_highlightColorButton->setCursor(Qt::PointingHandCursor);
+    m_highlightColorResetButton->setCursor(Qt::PointingHandCursor);
 
+    m_highlightColorButton->setFixedWidth(64);
     m_languageBox->setIconSize({14, 14});
 
     /****/
@@ -162,6 +176,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
 
     fill();
 
+    connect(m_highlightColorResetButton, &QPushButton::clicked, this, [=] {
+        m_highlightColorButton->setColor(InterfaceSettings(0).highlightColor);
+    });
     connect(m_fontResetButton, &QPushButton::clicked, this, [=] {
         const InterfaceSettings settings(0);
         m_fontFamilyBox->setCurrentText(settings.fontFamily);
@@ -263,6 +280,7 @@ void InterfaceSettingsWidget::apply()
     settings->theme = m_themeBox->currentIndex();
     settings->language = m_languageBox->currentIndex();
     settings->hdpiEnabled = m_hdpiCheckBox->isChecked();
+    settings->highlightColor = m_highlightColorButton->color();
     /****/
     settings->fontFamily = m_fontFamilyBox->currentText();
     settings->fontPixelSize = m_fontSizeBox->currentText().toInt();
@@ -293,6 +311,7 @@ void InterfaceSettingsWidget::revert()
     m_themeBox->setCurrentIndex(settings->theme);
     m_languageBox->setCurrentIndex(settings->language);
     m_hdpiCheckBox->setChecked(settings->hdpiEnabled);
+    m_highlightColorButton->setColor(settings->highlightColor);
     /****/
     m_fontFamilyBox->setCurrentText(settings->fontFamily);
     m_fontSizeBox->setCurrentText(QString::number(settings->fontPixelSize));
@@ -330,6 +349,7 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
             || m_themeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_languageLabel->text().contains(word, Qt::CaseInsensitive)
             || m_hdpiLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_highlightColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_hdpiCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_fontFamilyLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)

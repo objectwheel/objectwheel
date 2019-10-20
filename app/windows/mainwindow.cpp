@@ -44,7 +44,6 @@
 
 #include <QWindow>
 #include <QProcess>
-#include <QToolBar>
 #include <QLabel>
 #include <QToolButton>
 #include <QDockWidget>
@@ -79,7 +78,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_leftDockBar(new DockBar(this))
   , m_rightDockBar(new DockBar(this))
 {
-    setAnimated(false);
     setWindowTitle(APP_NAME);
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
@@ -88,22 +86,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     WindowOperations::removeTitleBar(this);
 #endif
 
-    QPalette palette(this->palette());
-    palette.setColor(QPalette::Active, QPalette::Text, "#505050");
-    palette.setColor(QPalette::Inactive, QPalette::Text, "#505050");
-    palette.setColor(QPalette::Disabled, QPalette::Text, "#9c9c9c");
-    palette.setColor(QPalette::Active, QPalette::WindowText, "#505050");
-    palette.setColor(QPalette::Inactive, QPalette::WindowText, "#505050");
-    palette.setColor(QPalette::Disabled, QPalette::WindowText, "#9c9c9c");
-    palette.setColor(QPalette::Active, QPalette::ButtonText, "#505050");
-    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#505050");
-    palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#9c9c9c");
-
     /** Setup Tool Bars **/
     /* Add Run Pane */
     m_runPane->setMovable(false);
     m_runPane->setFloatable(false);
-    m_runPane->setPalette(palette);
     m_runPane->setOrientation(Qt::Horizontal);
     addToolBar(Qt::TopToolBarArea, m_runPane);
     addToolBarBreak(Qt::TopToolBarArea);
@@ -111,28 +97,24 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     /* Add Mode Selector Pane */
     m_modeSelectorPane->setMovable(false);
     m_modeSelectorPane->setFloatable(false);
-    m_modeSelectorPane->setPalette(palette);
     m_modeSelectorPane->setOrientation(Qt::Horizontal);
     addToolBar(Qt::TopToolBarArea, m_modeSelectorPane);
 
     /* Add Left Dock Bar */
     m_leftDockBar->setMovable(false);
     m_leftDockBar->setFloatable(false);
-    m_leftDockBar->setPalette(palette);
     m_leftDockBar->setOrientation(Qt::Vertical);
     addToolBar(Qt::LeftToolBarArea, m_leftDockBar);
 
     /* Add Right Dock Bar */
     m_rightDockBar->setMovable(false);
     m_rightDockBar->setFloatable(false);
-    m_rightDockBar->setPalette(palette);
     m_rightDockBar->setOrientation(Qt::Vertical);
     addToolBar(Qt::RightToolBarArea, m_rightDockBar);
 
     /** Setup Dock Widgets **/
     /* Add Controls Pane */
     auto controlsPinBar = new PinBar(m_controlsDockWidget);
-    controlsPinBar->setPalette(palette);
     controlsPinBar->setTitle(tr("Controls"));
     controlsPinBar->setIcon(QIcon(QStringLiteral(":/images/settings/controls.svg")));
     m_controlsDockWidget->setObjectName("controlsDockWidget");
@@ -146,7 +128,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /* Add Properties Pane */
     auto propertiesPinBar = new PinBar(m_propertiesDockWidget);
-    propertiesPinBar->setPalette(palette);
     propertiesPinBar->setTitle(tr("Properties"));
     propertiesPinBar->setIcon(QIcon(QStringLiteral(":/images/designer/properties.svg")));
     m_propertiesDockWidget->setObjectName("propertiesDockWidget");
@@ -160,7 +141,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /* Add Assets Pane */
     auto assetsPinBar = new PinBar(m_assetsDockWidget);
-    assetsPinBar->setPalette(palette);
     assetsPinBar->setTitle(tr("Assets"));
     assetsPinBar->setIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
     m_assetsDockWidget->setObjectName("assetsDockWidget");
@@ -174,7 +154,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /* Add Toolbox Pane */
     auto toolboxPinBar = new PinBar(m_toolboxDockWidget);
-    toolboxPinBar->setPalette(palette);
     toolboxPinBar->setTitle(tr("Toolbox"));
     toolboxPinBar->setIcon(QIcon(QStringLiteral(":/images/settings/toolbox.svg")));
     m_toolboxDockWidget->setObjectName("toolboxDockWidget");
@@ -188,7 +167,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /* Add Forms Pane */
     auto formsPinBar = new PinBar(m_formsDockWidget);
-    formsPinBar->setPalette(palette);
     formsPinBar->setTitle(tr("Forms"));
     formsPinBar->setIcon(QIcon(QStringLiteral(":/images/designer/forms.svg")));
     m_formsDockWidget->setObjectName("formsDockWidget");
@@ -199,6 +177,30 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_formsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     addDockWidget(Qt::LeftDockWidgetArea, m_formsDockWidget);
     m_leftDockBar->addDockWidget(m_formsDockWidget);
+
+    auto updatePalette = [=] {
+        QPalette p(palette());
+        p.setColor(QPalette::Active, QPalette::Text, "#505050");
+        p.setColor(QPalette::Inactive, QPalette::Text, "#505050");
+        p.setColor(QPalette::Disabled, QPalette::Text, "#9c9c9c");
+        p.setColor(QPalette::Active, QPalette::WindowText, "#505050");
+        p.setColor(QPalette::Inactive, QPalette::WindowText, "#505050");
+        p.setColor(QPalette::Disabled, QPalette::WindowText, "#9c9c9c");
+        p.setColor(QPalette::Active, QPalette::ButtonText, "#505050");
+        p.setColor(QPalette::Inactive, QPalette::ButtonText, "#505050");
+        p.setColor(QPalette::Disabled, QPalette::ButtonText, "#9c9c9c");
+        m_runPane->setPalette(p);
+        m_modeSelectorPane->setPalette(p);
+        m_leftDockBar->setPalette(p);
+        m_rightDockBar->setPalette(p);
+        controlsPinBar->setPalette(p);
+        propertiesPinBar->setPalette(p);
+        assetsPinBar->setPalette(p);
+        toolboxPinBar->setPalette(p);
+        formsPinBar->setPalette(p);
+    };
+    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+    updatePalette();
 
     connect(m_assetsPane, &AssetsPane::fileOpened,
             centralWidget()->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openAssets);

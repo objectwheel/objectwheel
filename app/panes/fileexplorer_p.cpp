@@ -41,9 +41,7 @@ void FileExplorerListDelegate::paint(QPainter* painter, const QStyleOptionViewIt
     painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
 
     // Draw text
-    if (model->data(index, Qt::UserRole).toBool())
-        painter->setPen(option.palette.link().color());
-    else if (isSelected)
+    if (isSelected)
         painter->setPen(option.palette.highlightedText().color());
     else
         painter->setPen(option.palette.text().color());

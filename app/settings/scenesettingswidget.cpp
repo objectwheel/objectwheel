@@ -45,14 +45,11 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
   , m_blankControlDecorationLabel(new QLabel(m_controlsGroup))
   , m_controlOutlineDecorationLabel(new QLabel(m_controlsGroup))
   , m_controlDoubleClickActionLabel(new QLabel(m_controlsGroup))
-  , m_outlineColorLabel(new QLabel(m_controlsGroup))
   , m_showMouseoverOutlineCheckBox(new QCheckBox(m_controlsGroup))
   , m_showClippedControlsCheckBox(new QCheckBox(m_controlsGroup))
   , m_blankControlDecorationBox(new QComboBox(m_controlsGroup))
   , m_controlOutlineDecorationBox(new QComboBox(m_controlsGroup))
   , m_controlDoubleClickActionBox(new QComboBox(m_controlsGroup))
-  , m_outlineColorButton(new Utils::QtColorButton(m_controlsGroup))
-  , m_outlineColorResetButton(new QPushButton(m_controlsGroup))
 {
     contentLayout()->addWidget(m_designGroup);
     contentLayout()->addWidget(m_gridViewGroup);
@@ -161,14 +158,12 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     controlsLayout->addWidget(m_blankControlDecorationLabel, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_controlOutlineDecorationLabel, 3, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_controlDoubleClickActionLabel, 4, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_outlineColorLabel, 5, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_showMouseoverOutlineCheckBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_showClippedControlsCheckBox, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_blankControlDecorationBox, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_controlOutlineDecorationBox, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_controlDoubleClickActionBox, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_outlineColorButton, 5, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    controlsLayout->addWidget(m_outlineColorResetButton, 5, 2, Qt::AlignRight | Qt::AlignVCenter);
+
     controlsLayout->setColumnStretch(3, 1);
     controlsLayout->setColumnMinimumWidth(1, 20);
 
@@ -178,28 +173,20 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     m_blankControlDecorationLabel->setText(tr("Blank control decoration") + ":");
     m_controlOutlineDecorationLabel->setText(tr("Control outline decoration") + ":");
     m_controlDoubleClickActionLabel->setText(tr("Control double click action") + ":");
-    m_outlineColorLabel->setText(tr("Outline color") + ":");
     m_showMouseoverOutlineCheckBox->setText(tr("Show mouseover outline"));
     m_showClippedControlsCheckBox->setText(tr("Show clipped controls"));
-    m_outlineColorResetButton->setText(tr("Reset"));
 
     m_showMouseoverOutlineCheckBox->setToolTip(tr("Show an outline around controls when moving mouse cursor over them"));
     m_showClippedControlsCheckBox->setToolTip(tr("Show controls even if they are clipped out by their parent control"));
     m_blankControlDecorationBox->setToolTip(tr("Change decoration for blank controls with transparent content"));
     m_controlOutlineDecorationBox->setToolTip(tr("Change decoration for control outlines"));
     m_controlDoubleClickActionBox->setToolTip(tr("Change default action for the double clicks on controls"));
-    m_outlineColorButton->setToolTip(tr("Change outline color of controls"));
-    m_outlineColorResetButton->setToolTip(tr("Reset outline color to default"));
 
     m_showMouseoverOutlineCheckBox->setCursor(Qt::PointingHandCursor);
     m_showClippedControlsCheckBox->setCursor(Qt::PointingHandCursor);
     m_blankControlDecorationBox->setCursor(Qt::PointingHandCursor);
     m_controlOutlineDecorationBox->setCursor(Qt::PointingHandCursor);
     m_controlDoubleClickActionBox->setCursor(Qt::PointingHandCursor);
-    m_outlineColorButton->setCursor(Qt::PointingHandCursor);
-    m_outlineColorResetButton->setCursor(Qt::PointingHandCursor);
-
-    m_outlineColorButton->setFixedWidth(64);
 
     /****/
 
@@ -214,10 +201,6 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
 
     connect(m_anchorColorResetButton, &QPushButton::clicked, this, [=] {
         m_anchorColorButton->setColor(SceneSettings(0).anchorColor);
-    });
-
-    connect(m_outlineColorResetButton, &QPushButton::clicked, this, [=] {
-        m_outlineColorButton->setColor(SceneSettings(0).outlineColor);
     });
 
     connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged, this, [=] {
@@ -254,7 +237,6 @@ void SceneSettingsWidget::apply()
     settings->blankControlDecoration = m_blankControlDecorationBox->currentIndex();
     settings->controlOutlineDecoration = m_controlOutlineDecorationBox->currentIndex();
     settings->controlDoubleClickAction = m_controlDoubleClickActionBox->currentIndex();
-    settings->outlineColor = m_outlineColorButton->color();
     settings->write();
 }
 
@@ -283,7 +265,6 @@ void SceneSettingsWidget::revert()
     m_blankControlDecorationBox->setCurrentIndex(settings->blankControlDecoration);
     m_controlOutlineDecorationBox->setCurrentIndex(settings->controlOutlineDecoration);
     m_controlDoubleClickActionBox->setCurrentIndex(settings->controlDoubleClickAction);
-    m_outlineColorButton->setColor(settings->outlineColor);
 }
 
 void SceneSettingsWidget::reset()
@@ -324,7 +305,6 @@ bool SceneSettingsWidget::containsWord(const QString& word) const
             || m_blankControlDecorationLabel->text().contains(word, Qt::CaseInsensitive)
             || m_controlOutlineDecorationLabel->text().contains(word, Qt::CaseInsensitive)
             || m_controlDoubleClickActionLabel->text().contains(word, Qt::CaseInsensitive)
-            || m_outlineColorLabel->text().contains(word, Qt::CaseInsensitive)
             || m_showGuideLinesCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showAllAnchorsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_showGridViewDotsCheckBox->text().contains(word, Qt::CaseInsensitive)

@@ -194,7 +194,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
             QFont font (option.font);
             font.setWeight(QFont::Medium);
             painter->setFont(font);
-            painter->setPen(option.palette.link().color());
+            painter->setPen(option.palette.highlight().color());
         } else {
             painter->setPen(option.palette.text().color());
         }

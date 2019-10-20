@@ -8,6 +8,8 @@
 #include <control.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 
 #include <QPainter>
 #include <QtMath>
@@ -474,7 +476,6 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
 
     painter->save();
 
-    SceneSettings* settings = DesignerSettings::sceneSettings();
     const Control* sourceControl = scene()->mouseLayer()->mouseStartControl();
     const Control* targetControl = scene()->mouseLayer()->mouseEndControl();
 
@@ -491,7 +492,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->fillPath(scenePath - highlightedPath, QColor(0, 0, 0, 35));
 
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen(settings->outlineColor));
+    painter->setPen(DesignerScene::pen(GeneralSettings::interfaceSettings()->highlightColor));
     if (sourceControl)
         painter->drawRect(scene()->outerRect(sourceControl->sceneBoundingRect()));
     if (targetControl)
@@ -509,7 +510,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     curve.moveTo(line.p1());
     curve.cubicTo(normal.p2(), normal.p1(), line.p2());
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(DesignerScene::pen(settings->outlineColor, 2));
+    painter->setPen(DesignerScene::pen(GeneralSettings::interfaceSettings()->highlightColor, 2));
     painter->setRenderHint(QPainter::Antialiasing); // No SmoothPixmapTransform
     painter->drawPath(curve);
 
@@ -520,7 +521,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     QRectF bumpRectangle(0, 0, m/z, m/z);
 
     bumpRectangle.moveTo(line.p1().x() - m/2/z, line.p1().y() - m/2/z);
-    painter->setPen(DesignerScene::pen(settings->outlineColor, 2));
+    painter->setPen(DesignerScene::pen(GeneralSettings::interfaceSettings()->highlightColor, 2));
     painter->setBrush(Qt::white);
     bumpRectangle.adjust(2/z, 2/z, -2/z, -2/z);
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
@@ -563,7 +564,7 @@ void PaintLayer::paintGuidelines(QPainter* painter)
     if (DesignerSettings::sceneSettings()->showGuideLines) {
         const QVector<QLineF>& lines = scene()->guidelines();
         if (!lines.isEmpty()) {
-            painter->setBrush(DesignerSettings::sceneSettings()->outlineColor);
+            painter->setBrush(GeneralSettings::interfaceSettings()->highlightColor);
             painter->setPen(DesignerScene::pen());
             painter->drawLines(lines);
             for (const QLineF& line : lines) {
@@ -595,7 +596,7 @@ void PaintLayer::paintSelectionOutlines(QPainter* painter)
         }
     }
     painter->setPen(Qt::NoPen);
-    painter->setBrush(DesignerSettings::sceneSettings()->outlineColor);
+    painter->setBrush(GeneralSettings::interfaceSettings()->highlightColor);
     painter->drawPath(outlinesPath.subtracted(resizersPath));
 }
 

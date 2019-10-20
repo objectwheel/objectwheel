@@ -77,7 +77,6 @@
         <file>images/right.svg</file>
         <file>images/left.svg</file>
         <file>images/settings.svg</file>
-        <file>images/filter.svg</file>
         <file>images/texture.svg</file>
         <file>images/prohibited.svg</file>
         <file>images/extension.svg</file>
@@ -101,7 +100,6 @@
         <file>images/designer/paste.svg</file>
         <file>images/designer/select-all.svg</file>
         <file>images/designer/send-to-back.svg</file>
-        <file>images/designer/delete-all.svg</file>
         <file>images/devices.svg</file>
         <file>images/computer.svg</file>
         <file>images/designer/anchors.svg</file>
@@ -323,5 +321,11 @@
         <file>images/welcome/question.svg</file>
         <file>images/settings/controls.svg</file>
         <file>images/designer/erase-property.svg</file>
+        <file>images/designer/filter.svg</file>
+        <file>images/designer/clear.svg</file>
+        <file>images/designer/down.svg</file>
+        <file>images/designer/font-decrease.svg</file>
+        <file>images/designer/font-increase.svg</file>
+        <file>images/designer/up.svg</file>
     </qresource>
 </RCC>

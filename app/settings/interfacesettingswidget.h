@@ -8,6 +8,7 @@ class QGroupBox;
 class QComboBox;
 class QCheckBox;
 class QPushButton;
+namespace Utils { class QtColorButton; }
 
 class InterfaceSettingsWidget final : public SettingsWidget
 {
@@ -36,9 +37,12 @@ private:
     QLabel* m_themeLabel;
     QLabel* m_languageLabel;
     QLabel* m_hdpiLabel;
+    QLabel* m_highlightColorLabel;
     QComboBox* m_themeBox;
     QComboBox* m_languageBox;
     QCheckBox* m_hdpiCheckBox;
+    Utils::QtColorButton* m_highlightColorButton;
+    QPushButton* m_highlightColorResetButton;
     /****/
     QGroupBox* m_fontGroup;
     QLabel* m_fontFamilyLabel;

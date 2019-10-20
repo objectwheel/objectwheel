@@ -1,5 +1,6 @@
 Designer Core TODOs
 
+tüm setPalette leri düzelt (palettechanged sinyali ile ilgili ilişkiyi düzelt)
 DockWidget hareketleri varsayılan olarak "animated" oluyor, bunu bir general settings olarak ekle
 AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
     tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek

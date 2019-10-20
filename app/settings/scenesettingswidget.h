@@ -59,14 +59,11 @@ private:
     QLabel* m_blankControlDecorationLabel;
     QLabel* m_controlOutlineDecorationLabel;
     QLabel* m_controlDoubleClickActionLabel;
-    QLabel* m_outlineColorLabel;
     QCheckBox* m_showMouseoverOutlineCheckBox;
     QCheckBox* m_showClippedControlsCheckBox;
     QComboBox* m_blankControlDecorationBox;
     QComboBox* m_controlOutlineDecorationBox;
     QComboBox* m_controlDoubleClickActionBox;
-    Utils::QtColorButton* m_outlineColorButton;
-    QPushButton* m_outlineColorResetButton;
 };
 
 #endif // SCENESETTINGSWIDGET_H

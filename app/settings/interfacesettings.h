@@ -3,6 +3,7 @@
 
 #include <settings.h>
 #include <QFont>
+#include <QColor>
 
 class GeneralSettings;
 struct InterfaceSettings final : public Settings
@@ -21,6 +22,7 @@ struct InterfaceSettings final : public Settings
     bool hdpiEnabled;
     int theme;
     int language;
+    QColor highlightColor;
     /****/
     bool fontPreferThick;
     bool fontPreferAntialiasing;

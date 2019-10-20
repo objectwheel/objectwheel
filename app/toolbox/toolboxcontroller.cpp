@@ -12,6 +12,8 @@
 #include <designersettings.h>
 #include <scenesettings.h>
 #include <toolboxsettings.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 
 #include <QDir>
 #include <QMimeData>
@@ -112,7 +114,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
                     m_toolboxPane->toolboxTree()->currentItem()->text(0),
                     m_toolboxPane->devicePixelRatioF(),
                     DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(Qt::darkGray),
-                    DesignerSettings::sceneSettings()->outlineColor)));
+                    GeneralSettings::interfaceSettings()->highlightColor)));
             }
             info.image = drag->pixmap().toImage();
             drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-info"),

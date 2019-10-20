@@ -33,11 +33,16 @@ ControlsTree::ControlsTree(QWidget* parent) : QTreeWidget(parent)
     setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    QPalette p(palette());
-    p.setColor(QPalette::Light, "#62A558");
-    p.setColor(QPalette::Dark, "#599750");
-    p.setColor(QPalette::AlternateBase, "#e8f7e6");
-    setPalette(p);
+    auto updatePalette = [=] {
+        QPalette p(palette());
+        p.setColor(QPalette::Light, "#62A558");
+        p.setColor(QPalette::Dark, "#599750");
+        p.setColor(QPalette::AlternateBase, "#e8f7e6");
+        p.setColor(QPalette::Link, "#bb0000");
+        setPalette(p);
+    };
+    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+    updatePalette();
     setStyleSheet(QString { R"qss(
                     QTreeView {
                         border: 1px solid %1;

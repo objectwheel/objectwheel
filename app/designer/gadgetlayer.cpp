@@ -4,6 +4,8 @@
 #include <resizeritem.h>
 #include <designersettings.h>
 #include <scenesettings.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 #include <form.h>
 #include <QCursor>
 
@@ -17,7 +19,7 @@ GadgetLayer::GadgetLayer(DesignerItem* parent) : DesignerItem(parent)
     m_formHeadlineItem->setMousePressCursorShape(Qt::ClosedHandCursor);
 
     m_headlineItem->setPen(QPen(Qt::white));
-    m_headlineItem->setBrush(DesignerSettings::sceneSettings()->outlineColor);
+    m_headlineItem->setBrush(GeneralSettings::interfaceSettings()->highlightColor);
     m_headlineItem->setCursor(Qt::OpenHandCursor);
     m_headlineItem->setMousePressCursorShape(Qt::ClosedHandCursor);
 
@@ -31,13 +33,13 @@ GadgetLayer::GadgetLayer(DesignerItem* parent) : DesignerItem(parent)
         if (DesignerItem* targetItem = m_headlineItem->targetItem())
             emit targetItem->doubleClicked(buttons);
     });
-    connect(DesignerSettings::instance(), &DesignerSettings::sceneSettingsChanged,
+    connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged,
             this, [=] {
         Q_ASSERT(scene());
-        m_headlineItem->setBrush(DesignerSettings::sceneSettings()->outlineColor);
+        m_headlineItem->setBrush(GeneralSettings::interfaceSettings()->highlightColor);
         if (const DesignerItem* currentForm = scene()->currentForm()) {
             m_formHeadlineItem->setBrush(currentForm->isSelected()
-                                         ? DesignerSettings::sceneSettings()->outlineColor
+                                         ? GeneralSettings::interfaceSettings()->highlightColor
                                          : Qt::darkGray);
         }
         const QList<Control*>& allControls = Control::controls();
@@ -104,7 +106,7 @@ void GadgetLayer::handleSceneSelectionChange()
     DesignerItem* currentForm = scene()->currentForm();
     if (currentForm) {
         m_formHeadlineItem->setBrush(currentForm->isSelected()
-                                     ? DesignerSettings::sceneSettings()->outlineColor
+                                     ? GeneralSettings::interfaceSettings()->highlightColor
                                      : Qt::darkGray);
     }
     for (DesignerItem* item : m_resizerHash.keys()) {

@@ -351,6 +351,7 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_MenuButtonIndicator:
         return 12;
     case PM_DockWidgetSeparatorExtent:
+    case PM_ToolBarSeparatorExtent:
         return 1;
     case PM_SmallIconSize:
         if (widget && widget->inherits("LineEdit"))
@@ -422,6 +423,24 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->setBrush(textColor);
         painter->drawPolygon(points, 3);
         painter->restore();
+    } break;
+    case PE_IndicatorToolBarSeparator: {
+        QPainterPath path;
+        QRectF r(option->rect);
+        if (option->state & State_Horizontal) {
+            qreal xpoint = r.center().x();
+            path.moveTo(xpoint + 0.5, r.top() + 3);
+            path.lineTo(xpoint + 0.5, r.bottom() - 3);
+        } else {
+            qreal ypoint = r.center().y();
+            path.moveTo(r.left() + 2 , ypoint + 0.5);
+            path.lineTo(r.right() + 1, ypoint + 0.5);
+        }
+        QPainterPathStroker theStroker;
+        theStroker.setCapStyle(Qt::FlatCap);
+        // theStroker.setDashPattern(QVector<qreal>() << 1 << 2);
+        path = theStroker.createStroke(path);
+        painter->fillPath(path, QColor("#50000000"));
     } break;
     case PE_PanelButtonTool:
         if (widget && widget->objectName() == "qt_toolbar_ext_button")
