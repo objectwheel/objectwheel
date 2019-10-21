@@ -206,14 +206,8 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_newFileButton->setFixedSize(18, 18);
     m_newFolderButton->setFixedSize(18, 18);
 
-    // Workaround for QToolBarLayout's obsolote serMargin function usage
-    QMetaObject::invokeMethod(this, [=] {
-        m_toolBar->setContentsMargins(0, 0, 0, 0);
-        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
-        m_toolBar->layout()->setSpacing(2);
-    }, Qt::QueuedConnection);
-
     m_pathIndicator->setFixedHeight(16);
+    m_toolBar->layout()->setSpacing(2);
     m_toolBar->setFixedHeight(20);
     m_toolBar->addWidget(m_homeButton);
     m_toolBar->addWidget(m_backButton);

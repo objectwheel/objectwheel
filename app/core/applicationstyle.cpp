@@ -343,9 +343,9 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_ToolBarExtensionExtent:
         return 18;
     case PM_ToolBarSeparatorExtent:
-    case PM_ToolBarFrameWidth:
     case PM_DockWidgetSeparatorExtent:
         return 1;
+    case PM_ToolBarFrameWidth: // QToolBar's contentMargins
     case PM_SplitterWidth:
         return 0;
     case PM_ToolBarItemSpacing:

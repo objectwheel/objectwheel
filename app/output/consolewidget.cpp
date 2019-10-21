@@ -1,6 +1,6 @@
 #include <consolewidget.h>
 #include <utilityfunctions.h>
-#include <utilsicons.h>
+#include <paintutils.h>
 
 #include <QScrollBar>
 #include <QTextBlock>
@@ -13,6 +13,7 @@
 
 ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
   , m_toolBar(new QToolBar(this))
+  , m_iconLabel(new QLabel(this))
   , m_titleLabel(new QLabel(this))
   , m_clearButton(new QToolButton(this))
   , m_fontSizeUpButton(new QToolButton(this))
@@ -23,70 +24,70 @@ ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
     viewport()->installEventFilter(this);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
     setAttribute(Qt::WA_MacShowFocusRect, false);
-    setWordWrapMode(QTextOption::WordWrap);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setObjectName("m_plainTextEdit");
     setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"
                   "border-top: none; border-bottom: none;}");
+    setWordWrapMode(QTextOption::WordWrap);
     UtilityFunctions::adjustFontPixelSize(this, -1);
 
-    m_titleLabel->setText("   " + tr("Console") + "   ");
-    m_titleLabel->setFixedHeight(20);
+    m_toolBar->layout()->setSpacing(3);
+    m_toolBar->layout()->setContentsMargins(1, 1, 1, 1);
 
+    m_toolBar->setFixedHeight(20);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget(QSize(1, 1)));
+    m_toolBar->addWidget(m_iconLabel);
     m_toolBar->addWidget(m_titleLabel);
     m_toolBar->addSeparator();
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({4, 4}));
     m_toolBar->addWidget(m_clearButton);
     m_toolBar->addWidget(m_fontSizeUpButton);
     m_toolBar->addWidget(m_fontSizeDownButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolBar->addWidget(m_minimizeButton);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
-    m_toolBar->setIconSize({14, 14});
+
+    m_iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/designer/console.svg"), QSize(16, 16), this));
+    m_iconLabel->setFixedHeight(16);
+
+    m_titleLabel->setText(tr("Console"));
+    m_titleLabel->setFixedSize(50, 18);
 
     m_clearButton->setFixedSize({18, 18});
-    m_clearButton->setIcon(Utils::Icons::CLEAN_TOOLBAR.icon());
+    m_clearButton->setIcon(QIcon(":/images/designer/clear.svg"));
     m_clearButton->setToolTip(tr("Clean console output"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
-    connect(m_clearButton, &QToolButton::clicked,
-            this, &ConsoleWidget::clear);
 
     m_fontSizeUpButton->setFixedSize({18, 18});
-    m_fontSizeUpButton->setIcon(Utils::Icons::PLUS_TOOLBAR.icon());
+    m_fontSizeUpButton->setIcon(QIcon(":/images/designer/font-increase.svg"));
     m_fontSizeUpButton->setToolTip(tr("Increase font size"));
     m_fontSizeUpButton->setCursor(Qt::PointingHandCursor);
-    connect(m_fontSizeUpButton, &QToolButton::clicked,
-            this, [=] { // TODO: Change this with zoomIn
-        UtilityFunctions::adjustFontPixelSize(this, 1);
-        updateViewportMargins();
-    });
 
     m_fontSizeDownButton->setFixedSize({18, 18});
-    m_fontSizeDownButton->setIcon(Utils::Icons::MINUS.icon());
+    m_fontSizeDownButton->setIcon(QIcon(":/images/designer/font-decrease.svg"));
     m_fontSizeDownButton->setToolTip(tr("Decrease font size"));
     m_fontSizeDownButton->setCursor(Qt::PointingHandCursor);
+
+    m_minimizeButton->setFixedSize({18, 18});
+    m_minimizeButton->setIcon(QIcon(":/images/designer/down.svg"));
+    m_minimizeButton->setToolTip(tr("Minimize the pane"));
+    m_minimizeButton->setCursor(Qt::PointingHandCursor);
+
     connect(m_fontSizeDownButton, &QToolButton::clicked,
             this, [=] { // TODO: Change this with zoomOut
         UtilityFunctions::adjustFontPixelSize(this, -1);
         updateViewportMargins();
     });
-
-    m_minimizeButton->setFixedSize({18, 18});
-    m_minimizeButton->setIcon(Utils::Icons::CLOSE_SPLIT_BOTTOM.icon());
-    m_minimizeButton->setToolTip(tr("Minimize the pane"));
-    m_minimizeButton->setCursor(Qt::PointingHandCursor);
     connect(m_minimizeButton, &QToolButton::clicked,
             this, &ConsoleWidget::minimized);
     connect(this, &ConsoleWidget::blockCountChanged,
             this, &ConsoleWidget::updateViewportMargins);
-
-    QTimer::singleShot(200, [=] { // Workaround for QToolBarLayout's obsolote serMargin function usage
-        m_toolBar->setContentsMargins(0, 0, 0, 0);
-        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
-        m_toolBar->layout()->setSpacing(0);
-        m_toolBar->setFixedHeight(22);
+    connect(m_fontSizeUpButton, &QToolButton::clicked,
+            this, [=] { // TODO: Change this with zoomIn
+        UtilityFunctions::adjustFontPixelSize(this, 1);
         updateViewportMargins();
     });
+    connect(m_clearButton, &QToolButton::clicked,
+            this, &ConsoleWidget::clear);
+    updateViewportMargins();
 }
 
 void ConsoleWidget::fade()

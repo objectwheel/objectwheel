@@ -5,6 +5,7 @@
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <issueslistdelegate.h>
+#include <paintutils.h>
 
 #include <QDir>
 #include <QLabel>
@@ -22,31 +23,30 @@ enum Roles {
 
 IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
   , m_toolBar(new QToolBar(this))
+  , m_iconLabel(new QLabel(this))
   , m_titleLabel(new QLabel(this))
   , m_clearButton(new QToolButton(this))
   , m_fontSizeUpButton(new QToolButton(this))
   , m_fontSizeDownButton(new QToolButton(this))
   , m_minimizeButton(new QToolButton(this))
 {
+    setItemDelegate(new IssuesListDelegate(this));
     setSelectionMode(NoSelection);
     setTextElideMode(Qt::ElideRight);
-    setItemDelegate(new IssuesListDelegate(this));
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
+    setAttribute(Qt::WA_MacShowFocusRect, false);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setObjectName("m_listWidget");
     setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"
                   "border-top: none; border-bottom: none;}");
-    setAttribute(Qt::WA_MacShowFocusRect, false);
     setFocusPolicy(Qt::NoFocus);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // Workaround for QToolBarLayout's obsolote serMargin function usage
-    QMetaObject::invokeMethod(this, [=] {
-        m_toolBar->setContentsMargins(0, 0, 0, 0);
-        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
-        m_toolBar->layout()->setSpacing(4);
-    }, Qt::QueuedConnection);
+    m_toolBar->layout()->setSpacing(3);
+    m_toolBar->layout()->setContentsMargins(1, 1, 1, 1);
 
     m_toolBar->setFixedHeight(20);
+    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget(QSize(1, 1)));
+    m_toolBar->addWidget(m_iconLabel);
     m_toolBar->addWidget(m_titleLabel);
     m_toolBar->addSeparator();
     m_toolBar->addWidget(m_clearButton);
@@ -54,10 +54,12 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
     m_toolBar->addWidget(m_fontSizeDownButton);
     m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolBar->addWidget(m_minimizeButton);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
 
-    m_titleLabel->setText("   " + tr("Issues") + "   ");
-    m_titleLabel->setFixedHeight(20);
+    m_iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/designer/warning.svg"), QSize(16, 16), this));
+    m_iconLabel->setFixedHeight(16);
+
+    m_titleLabel->setText(tr("Issues"));
+    m_titleLabel->setFixedSize(50, 18);
 
     m_clearButton->setFixedSize({18, 18});
     m_clearButton->setIcon(QIcon(":/images/designer/clear.svg"));

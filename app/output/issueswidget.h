@@ -44,6 +44,7 @@ signals:
 
 private:
     QToolBar* m_toolBar;
+    QLabel* m_iconLabel;
     QLabel* m_titleLabel;
     QToolButton* m_clearButton;
     QToolButton* m_fontSizeUpButton;

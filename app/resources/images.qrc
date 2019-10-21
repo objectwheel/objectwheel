@@ -327,5 +327,7 @@
         <file>images/designer/font-decrease.svg</file>
         <file>images/designer/font-increase.svg</file>
         <file>images/designer/up.svg</file>
+        <file>images/designer/console.svg</file>
+        <file>images/designer/warning.svg</file>
     </qresource>
 </RCC>
