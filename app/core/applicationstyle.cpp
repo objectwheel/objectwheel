@@ -306,8 +306,6 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
     switch (hint) {
     case SH_Widget_Animation_Duration:
         return 0; // No animation
-    case SH_ToolButtonStyle:
-        return Qt::ToolButtonTextBesideIcon;
     case SH_ToolTipLabel_Opacity:
         return 242; // About 95%
     case SH_ComboBox_AllowWheelScrolling:
@@ -337,13 +335,25 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
 {
     switch (metric) {
     case PM_ButtonIconSize:
-    case PM_ToolBarIconSize:
     case PM_TreeViewIndentation:
     case PM_ListViewIconSize:
     case PM_TabBarIconSize:
+    case PM_ToolBarIconSize:
         return 16;
     case PM_ToolBarExtensionExtent:
         return 18;
+    case PM_ToolBarSeparatorExtent:
+    case PM_ToolBarFrameWidth:
+    case PM_DockWidgetSeparatorExtent:
+        return 1;
+    case PM_SplitterWidth:
+        return 0;
+    case PM_ToolBarItemSpacing:
+        return 2;
+    case PM_ToolBarItemMargin:
+        return 0;
+    case PM_ToolBarHandleExtent:
+        return 9;
     case PM_ToolTipLabelFrameWidth:
         return 1;
     case PM_MenuVMargin:
@@ -352,9 +362,6 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 15;
     case PM_MenuButtonIndicator:
         return 12;
-    case PM_DockWidgetSeparatorExtent:
-    case PM_ToolBarSeparatorExtent:
-        return 1;
     case PM_SmallIconSize:
         if (widget && widget->inherits("LineEdit"))
             return 13;
@@ -808,6 +815,16 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             painter->drawRect(option->rect);
             painter->restore();
         } break;
+    case CE_Splitter: {
+        QRectF r(option->rect);
+        if (option->state & State_Horizontal) {
+            for (int i = -6; i < 12; i += 3)
+                painter->fillRect(r.center().x(), r.center().y() + i, 1, 1, QColor(0, 0, 0, 150));
+        } else {
+            for (int i = -6; i < 12; i += 3)
+                painter->fillRect(r.center().x() + i, r.center().y(), 1, 1, QColor(0, 0, 0, 150));
+        }
+    } break;
     default:
         QFusionStyle::drawControl(element, option, painter, widget);
         break;

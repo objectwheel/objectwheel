@@ -22,12 +22,8 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    // Workaround for QToolBarLayout's obsolote serMargin function usage
-    QMetaObject::invokeMethod(this, [=] {
-        setContentsMargins(0, 0, 0, 0);
-        layout()->setContentsMargins(7, 7, 7, 7); // They must be all same
-        layout()->setSpacing(7);
-    }, Qt::QueuedConnection);
+    layout()->setSpacing(7);
+    layout()->setContentsMargins(7, 7, 7, 7);
 
     m_runProgressBar->setAttribute(Qt::WA_TransparentForMouseEvents);
 

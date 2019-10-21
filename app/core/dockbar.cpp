@@ -9,6 +9,7 @@
 DockBar::DockBar(QWidget* parent) : QToolBar(parent)
 {
     setFocusPolicy(Qt::NoFocus);
+    setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
     // Workaround for QToolBarLayout's obsolote serMargin function usage
     QMetaObject::invokeMethod(this, [=] {

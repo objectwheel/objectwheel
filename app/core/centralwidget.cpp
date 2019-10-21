@@ -62,7 +62,6 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
 {
-    setHandleWidth(0);
     setFrameShape(QFrame::NoFrame);
     setOrientation(Qt::Vertical);
     addWidget(m_splitterIn);
@@ -80,7 +79,6 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     g_editorContainer->layout()->addWidget(UtilityFunctions::createSeparatorWidget(Qt::Vertical));
     g_editorContainer->layout()->addWidget(m_qmlCodeEditorWidget);
 
-    m_splitterIn->setHandleWidth(0);
     m_splitterIn->setFrameShape(QFrame::NoFrame);
     m_splitterIn->setOrientation(Qt::Horizontal);
     m_splitterIn->addWidget(m_designerPane);

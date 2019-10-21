@@ -45,7 +45,6 @@
 #include <QWindow>
 #include <QProcess>
 #include <QLabel>
-#include <QToolButton>
 #include <QDockWidget>
 #include <QLayout>
 #include <QScrollBar>
@@ -82,6 +81,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
+    setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 #if defined(Q_OS_MACOS)
     WindowOperations::removeTitleBar(this);
 #endif

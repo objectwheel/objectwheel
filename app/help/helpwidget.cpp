@@ -88,7 +88,6 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_backButton->setIcon(Utils::Icons::PREV_TOOLBAR.icon());
     m_forthButton->setIcon(Utils::Icons::NEXT_TOOLBAR.icon());
 
-    m_splitter->setHandleWidth(0);
     m_splitter->setChildrenCollapsible(false);
     m_splitter->setOrientation(Qt::Horizontal);
     m_splitter->addWidget(m_indexWidget);

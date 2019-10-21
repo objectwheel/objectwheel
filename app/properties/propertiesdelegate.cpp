@@ -397,6 +397,7 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
         toolButton->setCursor(Qt::PointingHandCursor);
         toolButton->setFocusPolicy(Qt::StrongFocus);
         toolButton->setSizePolicy(QSizePolicy::Ignored, toolButton->sizePolicy().verticalPolicy());
+        toolButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
         toolButton->setMinimumWidth(1);
         return toolButton;
     }
