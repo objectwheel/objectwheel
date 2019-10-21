@@ -10,7 +10,6 @@
 
 #include <QTimer>
 #include <QApplication>
-#include <QToolBar>
 #include <QSplitter>
 #include <QLayout>
 #include <QMimeDatabase>

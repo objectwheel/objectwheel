@@ -68,6 +68,7 @@ signals:
 
 private:
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     QmlCodeEditor* m_codeEditor;
