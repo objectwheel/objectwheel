@@ -52,7 +52,7 @@ QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id
     const QSize iconSize(16, 16);
 
     QImage dest = renderBlankControlImage(QRectF(QPointF(), size), id, dpr, brush, pen);
-    QImage source(pixmap(":/images/designer/error.svg", iconSize, widget).toImage());
+    QImage source(pixmap(":/images/output/issue.svg", iconSize, widget).toImage());
     source.setDevicePixelRatio(dpr);
 
     QRectF destRect{{}, size};
@@ -66,13 +66,13 @@ QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id
     return dest;
 }
 
-QIcon PaintUtils::renderButtonIcon(const QString& fileName, const QPalette& palette)
+QIcon PaintUtils::renderButtonIcon(const QString& imagePath, const QSize& size, const QWidget* widget)
 {
     QIcon icon;
-    QColor up = palette.color(QPalette::Normal, QPalette::ButtonText);
-    QColor down = palette.color(QPalette::Normal, QPalette::Highlight);
-    icon.addPixmap(renderOverlaidPixmap(fileName, up, 1), QIcon::Normal, QIcon::Off);
-    icon.addPixmap(renderOverlaidPixmap(fileName, down, 1), QIcon::Normal, QIcon::On);
+    QColor up = widget ? widget->palette().color(QPalette::Active, QPalette::ButtonText) : Qt::black;
+    QColor down = widget ? widget->palette().color(QPalette::Active, QPalette::Highlight) : Qt::white;
+    icon.addPixmap(renderOverlaidPixmap(pixmap(imagePath, size, widget), up), QIcon::Normal, QIcon::Off);
+    icon.addPixmap(renderOverlaidPixmap(pixmap(imagePath, size, widget), down), QIcon::Normal, QIcon::On);
     return icon;
 }
 

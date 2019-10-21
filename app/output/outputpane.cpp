@@ -35,18 +35,14 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setText(tr("Issues") + " [0]");
     m_issuesButton->setToolTip(tr("Activate issues list"));
-    m_issuesButton->setIconSize({14, 14});
-    m_issuesButton->setIcon(PaintUtils::renderButtonIcon(":/images/issues.svg",
-                                                         m_issuesButton->palette()));
 
     m_consoleButton->setCheckable(true);
     m_consoleButton->setFixedHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
     m_consoleButton->setText(tr("Console"));
     m_consoleButton->setToolTip(tr("Activate console output"));
-    m_consoleButton->setIconSize({14, 14});
-    m_consoleButton->setIcon(PaintUtils::renderButtonIcon(":/images/console.svg",
-                                                          m_consoleButton->palette()));
+
+    updateIcons();
 }
 
 QStackedWidget* OutputPane::stackedWidget() const
@@ -95,4 +91,21 @@ QAbstractButton* OutputPane::buttonForWidget(const QWidget* widget) const
     if (widget == m_consoleWidget)
         return m_consoleButton;
     return nullptr;
+}
+
+void OutputPane::updateIcons()
+{
+    m_issuesButton->setIcon(PaintUtils::renderButtonIcon(QStringLiteral(":/images/output/issue-plain.svg"),
+                                                         m_issuesButton->iconSize(), this));
+    m_consoleButton->setIcon(PaintUtils::renderButtonIcon(QStringLiteral(":/images/output/console-plain.svg"),
+                                                          m_consoleButton->iconSize(), this));
+}
+
+void OutputPane::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::ApplicationFontChange
+            || event->type() == QEvent::PaletteChange) {
+        updateIcons();
+    }
+    QWidget::changeEvent(event);
 }

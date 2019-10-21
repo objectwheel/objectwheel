@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_propertiesDockWidget->setObjectName("propertiesDockWidget");
     m_propertiesDockWidget->setWidget(m_propertiesPane);
     m_propertiesDockWidget->setWindowTitle(tr("Properties"));
-    m_propertiesDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/designer/properties.svg")));
+    m_propertiesDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/settings/properties.svg")));
     m_propertiesDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_propertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     m_propertiesDockWidget->setTitleBarWidget(new PinBar(m_propertiesDockWidget));
@@ -138,7 +138,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_assetsDockWidget->setObjectName("assetsDockWidget");
     m_assetsDockWidget->setWidget(m_assetsPane);
     m_assetsDockWidget->setWindowTitle(tr("Assets"));
-    m_assetsDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
+    m_assetsDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/settings/assets.svg")));
     m_assetsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_assetsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     m_assetsDockWidget->setTitleBarWidget(new PinBar(m_assetsDockWidget));
@@ -160,7 +160,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_formsDockWidget->setObjectName("formsDockWidget");
     m_formsDockWidget->setWidget(m_formsPane);
     m_formsDockWidget->setWindowTitle(tr("Forms"));
-    m_formsDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/designer/forms.svg")));
+    m_formsDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/settings/forms.svg")));
     m_formsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_formsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     m_formsDockWidget->setTitleBarWidget(new PinBar(m_formsDockWidget));
@@ -187,6 +187,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         m_assetsDockWidget->titleBarWidget()->setPalette(p);
         m_toolboxDockWidget->titleBarWidget()->setPalette(p);
         m_formsDockWidget->titleBarWidget()->setPalette(p);
+        m_centralWidget->outputPane()->setPalette(p);
     };
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();

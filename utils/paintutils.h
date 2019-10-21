@@ -25,7 +25,7 @@ namespace PaintUtils {
 void drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option);
 void drawSearchEditBevel(QPainter* painter, const QStyleOption& option);
 bool isBlankImage(const QImage& image);
-QIcon renderButtonIcon(const QString& fileName, const QPalette& palette);
+QIcon renderButtonIcon(const QString& imagePath, const QSize& size, const QWidget* widget);
 QPixmap pixmap(const QString& imagePath, const QSize& size, const QWidget* widget = nullptr,
                QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
 QPixmap pixmap(const QIcon& icon, const QSize& size, const QWidget* widget = nullptr,

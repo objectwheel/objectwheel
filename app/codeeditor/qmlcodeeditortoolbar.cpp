@@ -161,7 +161,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     group->addAction(g_designsAction);
     group->addAction(g_othersAction);
 
-    g_assetsAction->setIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
+    g_assetsAction->setIcon(QIcon(QStringLiteral(":/images/settings/assets.svg")));
     g_assetsAction->setCheckable(true);
     g_assetsAction->setProperty("ow_scope", Assets);
 
@@ -266,7 +266,7 @@ void QmlCodeEditorToolBar::setScope(QmlCodeEditorToolBar::Scope scope)
     m_scopeButton->setProperty("ow_scope", scope);
 
     if (scope == Assets)
-        m_scopeButton->setIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
+        m_scopeButton->setIcon(QIcon(QStringLiteral(":/images/settings/assets.svg")));
     else if (scope == Designs)
         m_scopeButton->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
     else

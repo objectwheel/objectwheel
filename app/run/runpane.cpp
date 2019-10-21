@@ -132,20 +132,20 @@ QSize RunPane::minimumSizeHint() const
 void RunPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_runDevicesButton->setIcon(QIcon(":/images/devices.svg"));
-    m_runButton->setIcon(renderButtonIcon(":/images/run.svg", palette()));
-    m_stopButton->setIcon(renderButtonIcon(":/images/stop.svg", palette()));
-    m_preferencesButton->setIcon(renderButtonIcon(":/images/settings.svg", palette()));
-    m_projectsButton->setIcon(renderButtonIcon(":/images/projects.svg", palette()));
+    m_runDevicesButton->setIcon(QIcon(":/images/run/devices.svg"));
+    m_runButton->setIcon(renderButtonIcon(":/images/run/run.svg", m_runButton->iconSize(), this));
+    m_stopButton->setIcon(renderButtonIcon(":/images/run/stop.svg", m_stopButton->iconSize(), this));
+    m_preferencesButton->setIcon(renderButtonIcon(":/images/run/settings.svg", m_preferencesButton->iconSize(), this));
+    m_projectsButton->setIcon(renderButtonIcon(":/images/run/projects.svg", m_projectsButton->iconSize(), this));
 
     QStringList iconFileNames {
-        ":/images/left.svg",
-        ":/images/bottom.svg",
-        ":/images/right.svg"
+        ":/images/run/left.svg",
+        ":/images/run/bottom.svg",
+        ":/images/run/right.svg"
     };
     for (int i = 0; i < iconFileNames.size(); ++i) {
         QAction* action = m_segmentedBar->actions().at(i);
-        action->setIcon(renderButtonIcon(iconFileNames.at(i), palette()));
+        action->setIcon(renderButtonIcon(iconFileNames.at(i), m_segmentedBar->iconSize(), this));
     }
 }
 

@@ -27,6 +27,12 @@ public:
     QWidget* widgetForButton(const QAbstractButton* button) const;
     QAbstractButton* buttonForWidget(const QWidget* widget) const;
 
+private slots:
+    void updateIcons();
+
+private:
+    void changeEvent(QEvent* event);
+
 private:
     QStackedWidget* m_stackedWidget;
     OutputBar* m_outputBar;

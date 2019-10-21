@@ -45,7 +45,7 @@ ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
     m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolBar->addWidget(m_minimizeButton);
 
-    m_iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/designer/console.svg"), QSize(16, 16), this));
+    m_iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/output/console.svg"), QSize(16, 16), this));
     m_iconLabel->setFixedHeight(16);
 
     m_titleLabel->setText(tr("Console"));

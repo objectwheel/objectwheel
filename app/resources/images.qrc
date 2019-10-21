@@ -55,28 +55,13 @@
         <file>images/drop.png</file>
         <file>images/splash.png</file>
         <file>images/flags/en.png</file>
-        <file>images/android.svg</file>
-        <file>images/ios.svg</file>
-        <file>images/ipad.svg</file>
-        <file>images/macbook.svg</file>
-        <file>images/imac.svg</file>
-        <file>images/console.svg</file>
-        <file>images/issues.svg</file>
         <file>images/search.svg</file>
-        <file>images/projects.svg</file>
         <file>images/modes/builds.svg</file>
         <file>images/modes/designer.svg</file>
         <file>images/modes/documents.svg</file>
         <file>images/modes/editor.svg</file>
         <file>images/modes/options.svg</file>
         <file>images/modes/split.svg</file>
-        <file>images/stop.svg</file>
-        <file>images/run.svg</file>
-        <file>images/bottom.svg</file>
-        <file>images/top.svg</file>
-        <file>images/right.svg</file>
-        <file>images/left.svg</file>
-        <file>images/settings.svg</file>
         <file>images/texture.svg</file>
         <file>images/prohibited.svg</file>
         <file>images/extension.svg</file>
@@ -100,8 +85,6 @@
         <file>images/designer/paste.svg</file>
         <file>images/designer/select-all.svg</file>
         <file>images/designer/send-to-back.svg</file>
-        <file>images/devices.svg</file>
-        <file>images/computer.svg</file>
         <file>images/designer/anchors.svg</file>
         <file>images/designer/grid-view.svg</file>
         <file>images/designer/guidelines.svg</file>
@@ -130,7 +113,6 @@
         <file>images/designer/unpin.svg</file>
         <file>images/designer/add-file.svg</file>
         <file>images/designer/new-file.svg</file>
-        <file>images/designer/assets.svg</file>
         <file>images/designer/external-files.svg</file>
         <file>images/designer/left.svg</file>
         <file>images/designer/right.svg</file>
@@ -313,10 +295,7 @@
         <file>images/modes/editor-on.svg</file>
         <file>images/modes/options-on.svg</file>
         <file>images/modes/split-on.svg</file>
-        <file>images/designer/error.svg</file>
         <file>images/tools/ApplicationWindow.svg</file>
-        <file>images/designer/forms.svg</file>
-        <file>images/designer/properties.svg</file>
         <file>images/designer/form.svg</file>
         <file>images/welcome/question.svg</file>
         <file>images/settings/controls.svg</file>
@@ -327,10 +306,29 @@
         <file>images/designer/font-decrease.svg</file>
         <file>images/designer/font-increase.svg</file>
         <file>images/designer/up.svg</file>
-        <file>images/designer/console.svg</file>
-        <file>images/designer/warning.svg</file>
         <file>images/help/back.svg</file>
         <file>images/help/forth.svg</file>
         <file>images/help/home.svg</file>
+        <file>images/settings/assets.svg</file>
+        <file>images/settings/forms.svg</file>
+        <file>images/settings/properties.svg</file>
+        <file>images/output/console.svg</file>
+        <file>images/run/android.svg</file>
+        <file>images/run/bottom.svg</file>
+        <file>images/run/computer.svg</file>
+        <file>images/run/devices.svg</file>
+        <file>images/run/imac.svg</file>
+        <file>images/run/ios.svg</file>
+        <file>images/run/ipad.svg</file>
+        <file>images/run/left.svg</file>
+        <file>images/run/macbook.svg</file>
+        <file>images/run/projects.svg</file>
+        <file>images/run/right.svg</file>
+        <file>images/run/run.svg</file>
+        <file>images/run/settings.svg</file>
+        <file>images/run/stop.svg</file>
+        <file>images/output/console-plain.svg</file>
+        <file>images/output/issue-plain.svg</file>
+        <file>images/output/issue.svg</file>
     </qresource>
 </RCC>

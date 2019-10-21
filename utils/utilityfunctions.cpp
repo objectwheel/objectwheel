@@ -404,20 +404,20 @@ QIcon deviceIcon(const QVariantMap& deviceInfo)
     const QString deviceUid = deviceInfo.value("deviceUid").toString();
 
     if (deviceUid == localDeviceInfo().value("deviceUid"))
-        return QIcon(":/images/computer.svg");
+        return QIcon(":/images/run/computer.svg");
     if (productType == "ios") {
         if (deviceName.contains("ipad", Qt::CaseInsensitive))
-            return QIcon(":/images/ipad.svg");
-        return QIcon(":/images/ios.svg");
+            return QIcon(":/images/run/ipad.svg");
+        return QIcon(":/images/run/ios.svg");
     }
     if (productType == "android")
-        return QIcon(":/images/android.svg");
+        return QIcon(":/images/run/android.svg");
     if (productType == "osx") {
         if (deviceName.contains("macbook", Qt::CaseInsensitive))
-            return QIcon(":/images/macbook.svg");
-        return QIcon(":/images/imac.svg");
+            return QIcon(":/images/run/macbook.svg");
+        return QIcon(":/images/run/imac.svg");
     }
-    return QIcon(":/images/computer.svg");
+    return QIcon(":/images/run/computer.svg");
 }
 
 QString deviceUid(const QVariantMap& deviceInfo)
