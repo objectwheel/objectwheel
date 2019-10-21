@@ -113,67 +113,57 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Setup Dock Widgets **/
     /* Add Controls Pane */
-    auto controlsPinBar = new PinBar(m_controlsDockWidget);
-    controlsPinBar->setTitle(tr("Controls"));
-    controlsPinBar->setIcon(QIcon(QStringLiteral(":/images/settings/controls.svg")));
     m_controlsDockWidget->setObjectName("controlsDockWidget");
-    m_controlsDockWidget->setTitleBarWidget(controlsPinBar);
     m_controlsDockWidget->setWidget(m_controlsPane);
     m_controlsDockWidget->setWindowTitle(tr("Controls"));
+    m_controlsDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/settings/controls.svg")));
     m_controlsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_controlsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_controlsDockWidget->setTitleBarWidget(new PinBar(m_controlsDockWidget));
     addDockWidget(Qt::RightDockWidgetArea, m_controlsDockWidget);
     m_rightDockBar->addDockWidget(m_controlsDockWidget);
 
     /* Add Properties Pane */
-    auto propertiesPinBar = new PinBar(m_propertiesDockWidget);
-    propertiesPinBar->setTitle(tr("Properties"));
-    propertiesPinBar->setIcon(QIcon(QStringLiteral(":/images/designer/properties.svg")));
     m_propertiesDockWidget->setObjectName("propertiesDockWidget");
-    m_propertiesDockWidget->setTitleBarWidget(propertiesPinBar);
     m_propertiesDockWidget->setWidget(m_propertiesPane);
     m_propertiesDockWidget->setWindowTitle(tr("Properties"));
+    m_propertiesDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/designer/properties.svg")));
     m_propertiesDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_propertiesDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_propertiesDockWidget->setTitleBarWidget(new PinBar(m_propertiesDockWidget));
     addDockWidget(Qt::RightDockWidgetArea, m_propertiesDockWidget);
     m_rightDockBar->addDockWidget(m_propertiesDockWidget);
 
     /* Add Assets Pane */
-    auto assetsPinBar = new PinBar(m_assetsDockWidget);
-    assetsPinBar->setTitle(tr("Assets"));
-    assetsPinBar->setIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
     m_assetsDockWidget->setObjectName("assetsDockWidget");
-    m_assetsDockWidget->setTitleBarWidget(assetsPinBar);
     m_assetsDockWidget->setWidget(m_assetsPane);
     m_assetsDockWidget->setWindowTitle(tr("Assets"));
+    m_assetsDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/designer/assets.svg")));
     m_assetsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_assetsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_assetsDockWidget->setTitleBarWidget(new PinBar(m_assetsDockWidget));
     addDockWidget(Qt::RightDockWidgetArea, m_assetsDockWidget);
     m_rightDockBar->addDockWidget(m_assetsDockWidget);
 
     /* Add Toolbox Pane */
-    auto toolboxPinBar = new PinBar(m_toolboxDockWidget);
-    toolboxPinBar->setTitle(tr("Toolbox"));
-    toolboxPinBar->setIcon(QIcon(QStringLiteral(":/images/settings/toolbox.svg")));
     m_toolboxDockWidget->setObjectName("toolboxDockWidget");
-    m_toolboxDockWidget->setTitleBarWidget(toolboxPinBar);
     m_toolboxDockWidget->setWidget(m_toolboxPane);
     m_toolboxDockWidget->setWindowTitle(tr("Toolbox"));
+    m_toolboxDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/settings/toolbox.svg")));
     m_toolboxDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_toolboxDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_toolboxDockWidget->setTitleBarWidget(new PinBar(m_toolboxDockWidget));
     addDockWidget(Qt::LeftDockWidgetArea, m_toolboxDockWidget);
     m_leftDockBar->addDockWidget(m_toolboxDockWidget);
 
     /* Add Forms Pane */
-    auto formsPinBar = new PinBar(m_formsDockWidget);
-    formsPinBar->setTitle(tr("Forms"));
-    formsPinBar->setIcon(QIcon(QStringLiteral(":/images/designer/forms.svg")));
     m_formsDockWidget->setObjectName("formsDockWidget");
-    m_formsDockWidget->setTitleBarWidget(formsPinBar);
     m_formsDockWidget->setWidget(m_formsPane);
     m_formsDockWidget->setWindowTitle(tr("Forms"));
+    m_formsDockWidget->setWindowIcon(QIcon(QStringLiteral(":/images/designer/forms.svg")));
     m_formsDockWidget->setFeatures(QDockWidget::AllDockWidgetFeatures);
     m_formsDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    m_formsDockWidget->setTitleBarWidget(new PinBar(m_formsDockWidget));
     addDockWidget(Qt::LeftDockWidgetArea, m_formsDockWidget);
     m_leftDockBar->addDockWidget(m_formsDockWidget);
 
@@ -192,11 +182,11 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         m_modeSelectorPane->setPalette(p);
         m_leftDockBar->setPalette(p);
         m_rightDockBar->setPalette(p);
-        controlsPinBar->setPalette(p);
-        propertiesPinBar->setPalette(p);
-        assetsPinBar->setPalette(p);
-        toolboxPinBar->setPalette(p);
-        formsPinBar->setPalette(p);
+        m_controlsDockWidget->titleBarWidget()->setPalette(p);
+        m_propertiesDockWidget->titleBarWidget()->setPalette(p);
+        m_assetsDockWidget->titleBarWidget()->setPalette(p);
+        m_toolboxDockWidget->titleBarWidget()->setPalette(p);
+        m_formsDockWidget->titleBarWidget()->setPalette(p);
     };
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();

@@ -329,5 +329,8 @@
         <file>images/designer/up.svg</file>
         <file>images/designer/console.svg</file>
         <file>images/designer/warning.svg</file>
+        <file>images/help/back.svg</file>
+        <file>images/help/forth.svg</file>
+        <file>images/help/home.svg</file>
     </qresource>
 </RCC>

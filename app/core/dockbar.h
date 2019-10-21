@@ -25,6 +25,9 @@ public:
     QSize minimumSizeHint() const override;
 
 private:
+    void paintEvent(QPaintEvent* event) override;
+
+private:
     QList<DockData> m_dockWidgets;
 };
 

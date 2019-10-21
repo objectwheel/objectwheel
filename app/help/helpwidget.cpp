@@ -1,6 +1,5 @@
 #include <helpwidget.h>
 #include <lineedit.h>
-#include <utilsicons.h>
 #include <utilityfunctions.h>
 #include <textbrowserhelpviewer.h>
 #include <helpmanager.h>
@@ -48,14 +47,16 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_splitter);
 
-    m_homeButton->setFixedHeight(20);
-    m_backButton->setFixedHeight(20);
-    m_forthButton->setFixedHeight(20);
-    m_titleLabel->setFixedHeight(20);
-    m_typeCombo->setFixedHeight(20);
+    m_homeButton->setFixedSize({18, 18});
+    m_backButton->setFixedSize({18, 18});
+    m_forthButton->setFixedSize({18, 18});
+    m_typeCombo->setFixedSize({222, 18});
+    m_titleLabel->setFixedHeight(18);
 
-    m_toolBar->setFixedHeight(24);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
+    m_toolBar->layout()->setSpacing(3);
+    m_toolBar->layout()->setContentsMargins(1, 1, 1, 1);
+
+    m_toolBar->setFixedHeight(20);
     m_toolBar->addWidget(m_typeCombo);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();
@@ -71,7 +72,6 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     UtilityFunctions::adjustFontPixelSize(m_titleLabel, -1);
     m_titleLabel->setTextFormat(Qt::RichText);
 
-    m_typeCombo->setFixedWidth(220);
     m_typeCombo->addItem("Index");
     m_typeCombo->addItem("Contents");
 
@@ -84,9 +84,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_backButton->setToolTip(tr("Go Back"));
     m_forthButton->setToolTip(tr("Go Forth"));
 
-    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
-    m_backButton->setIcon(Utils::Icons::PREV_TOOLBAR.icon());
-    m_forthButton->setIcon(Utils::Icons::NEXT_TOOLBAR.icon());
+    m_homeButton->setIcon(QIcon(QStringLiteral(":/images/help/home.svg")));
+    m_backButton->setIcon(QIcon(QStringLiteral(":/images/help/back.svg")));
+    m_forthButton->setIcon(QIcon(QStringLiteral(":/images/help/forth.svg")));
 
     m_splitter->setChildrenCollapsible(false);
     m_splitter->setOrientation(Qt::Horizontal);

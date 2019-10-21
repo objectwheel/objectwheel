@@ -19,8 +19,10 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     m_iconLabel->setFixedSize(16, 16);
+    m_iconLabel->setPixmap(PaintUtils::pixmap(dockWidget->windowIcon(), QSize(16, 16)));
 
     m_titleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_titleLabel->setText(dockWidget->windowTitle());
 
     m_detachButton->setFixedSize(16, 16);
     m_detachButton->setIconSize(QSize(12, 12));
@@ -48,32 +50,6 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
             this, &PinBar::onDetachButtonClick);
     connect(m_dockWidget, &QDockWidget::topLevelChanged,
             this, &PinBar::onDockWidgetTopLevelChange);
-}
-
-QIcon PinBar::icon() const
-{
-    return m_icon;
-}
-
-void PinBar::setIcon(const QIcon& icon)
-{
-    if (m_icon.cacheKey() != icon.cacheKey()) {
-        m_icon = icon;
-        m_iconLabel->setPixmap(PaintUtils::pixmap(icon, QSize(16, 16)));
-    }
-}
-
-QString PinBar::title() const
-{
-    return m_title;
-}
-
-void PinBar::setTitle(const QString& title)
-{
-    if (m_title != title) {
-        m_title = title;
-        m_titleLabel->setText(title);
-    }
 }
 
 QSize PinBar::sizeHint() const

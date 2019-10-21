@@ -48,21 +48,16 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_moveUpAction(new QAction(this))
   , m_moveDownAction(new QAction(this))
 {
-    // Workaround for QToolBarLayout's obsolote serMargin function usage
-    QMetaObject::invokeMethod(this, [=] {
-        m_toolBar->setContentsMargins(0, 0, 0, 0);
-        m_toolBar->layout()->setContentsMargins(0, 0, 0, 0); // They must be all same
-        m_toolBar->layout()->setSpacing(2);
-    }, Qt::QueuedConnection);
-
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->addWidget(m_toolBar);
     layout->addWidget(m_designerView);
 
+    m_toolBar->layout()->setSpacing(3);
+    m_toolBar->layout()->setContentsMargins(1, 1, 1, 1);
+
     m_toolBar->setFixedHeight(20);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({2, 2}));
     m_toolBar->addWidget(m_refreshButton);
     m_toolBar->addWidget(m_shrinkSceneButton);
     m_toolBar->addWidget(m_clearButton);
@@ -77,6 +72,19 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addWidget(m_themeSettingsButton);
     m_toolBar->addWidget(m_themeComboBox);
     m_toolBar->addWidget(m_themeComboBox1);
+
+    m_refreshButton->setFixedSize(QSize(18, 18));
+    m_shrinkSceneButton->setFixedSize(QSize(18, 18));
+    m_clearButton->setFixedSize(QSize(18, 18));
+    m_anchorsButton->setFixedSize(QSize(18, 18));
+    m_snappingButton->setFixedSize(QSize(18, 18));
+    m_gridViewButton->setFixedSize(QSize(18, 18));
+    m_guidelinesButton->setFixedSize(QSize(18, 18));
+    m_sceneSettingsButton->setFixedSize(QSize(18, 18));
+    m_themeSettingsButton->setFixedSize(QSize(18, 18));
+    m_zoomLevelComboBox->setFixedHeight(18);
+    m_themeComboBox->setFixedHeight(18);
+    m_themeComboBox1->setFixedHeight(18);
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_shrinkSceneButton->setCursor(Qt::PointingHandCursor);
@@ -103,19 +111,6 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeComboBox->setToolTip(tr("Change Quick Controls v2 theme"));
     m_themeComboBox1->setToolTip(tr("Change Quick Controls v1 theme"));
     m_themeSettingsButton->setToolTip(tr("Open project theme settings"));
-
-    m_refreshButton->setFixedSize(QSize(18, 18));
-    m_shrinkSceneButton->setFixedSize(QSize(18, 18));
-    m_clearButton->setFixedSize(QSize(18, 18));
-    m_anchorsButton->setFixedSize(QSize(18, 18));
-    m_snappingButton->setFixedSize(QSize(18, 18));
-    m_gridViewButton->setFixedSize(QSize(18, 18));
-    m_guidelinesButton->setFixedSize(QSize(18, 18));
-    m_sceneSettingsButton->setFixedSize(QSize(18, 18));
-    m_themeSettingsButton->setFixedSize(QSize(18, 18));
-    m_zoomLevelComboBox->setFixedHeight(18);
-    m_themeComboBox->setFixedHeight(18);
-    m_themeComboBox1->setFixedHeight(18);
 
     m_refreshButton->setIcon(QIcon(QStringLiteral(":/images/designer/refresh.svg")));
     m_shrinkSceneButton->setIcon(QIcon(QStringLiteral(":/images/designer/shrink-scene.svg")));
