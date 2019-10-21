@@ -3,6 +3,7 @@
 
 #include <QToolBar>
 
+class QToolButton;
 class ModeSelectorPane final : public QToolBar
 {
     Q_OBJECT
@@ -11,12 +12,12 @@ class ModeSelectorPane final : public QToolBar
 public:
     explicit ModeSelectorPane(QWidget* parent = nullptr);
 
-    QAction* designerAction() const;
-    QAction* editorAction() const;
-    QAction* splitAction() const;
-    QAction* optionsAction() const;
-    QAction* buildsAction() const;
-    QAction* documentsAction() const;
+    QToolButton* designerButton() const;
+    QToolButton* editorButton() const;
+    QToolButton* splitButton() const;
+    QToolButton* optionsButton() const;
+    QToolButton* buildsButton() const;
+    QToolButton* documentsButton() const;
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
@@ -26,12 +27,12 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    QAction* m_designerAction;
-    QAction* m_editorAction;
-    QAction* m_splitAction;
-    QAction* m_optionsAction;
-    QAction* m_buildsAction;
-    QAction* m_documentsAction;
+    QToolButton* m_designerButton;
+    QToolButton* m_editorButton;
+    QToolButton* m_splitButton;
+    QToolButton* m_optionsButton;
+    QToolButton* m_buildsButton;
+    QToolButton* m_documentsButton;
 };
 
 #endif // MODESELECTORPANE_H

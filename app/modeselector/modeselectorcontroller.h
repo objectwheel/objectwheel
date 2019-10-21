@@ -17,12 +17,12 @@ public slots:
 
 private slots:
     void onModeChange(ModeManager::Mode mode);
-    void onDesignerActionTriggered(bool checked);
-    void onEditorActionTriggered(bool checked);
-    void onSplitActionTriggered(bool checked);
-    void onOptionsActionTriggered(bool checked);
-    void onBuildsActionTriggered(bool checked);
-    void onDocumentsActionTriggered(bool checked);
+    void onDesignerButtonClick(bool checked);
+    void onEditorButtonClick(bool checked);
+    void onSplitButtonClick(bool checked);
+    void onOptionsButtonClick(bool checked);
+    void onBuildsButtonClick(bool checked);
+    void onDocumentsButtonClick(bool checked);
 
 private:
     ModeSelectorPane* m_modeSelectorPane;

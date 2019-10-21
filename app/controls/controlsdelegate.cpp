@@ -153,11 +153,12 @@ void ControlsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
 
     if (control) {
         const QRectF& textRect = r.adjusted(iconRect.width() + 10, 0, 0, 0);
-        const QString& text = index.column() == 0
+        QString text = index.column() == 0
                 ? control->id()
                 : control->gui() && !control->hasErrors() ? tr("Yes") : tr("No");
-        painter->drawText(textRect,
-                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
+        if (index.column() == 0 && control->hasErrors())
+            text.append('!');
+        painter->drawText(textRect, option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                           QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
     }
 

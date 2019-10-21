@@ -4,6 +4,8 @@
 
 #include <QPainter>
 #include <QLayout>
+#include <QButtonGroup>
+#include <QToolButton>
 
 static QIcon icon(const QString& fileName)
 {
@@ -14,94 +16,111 @@ static QIcon icon(const QString& fileName)
 }
 
 ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
-  , m_designerAction(new QAction(this))
-  , m_editorAction(new QAction(this))
-  , m_splitAction(new QAction(this))
-  , m_optionsAction(new QAction(this))
-  , m_buildsAction(new QAction(this))
-  , m_documentsAction(new QAction(this))
+  , m_designerButton(new QToolButton(this))
+  , m_editorButton(new QToolButton(this))
+  , m_splitButton(new QToolButton(this))
+  , m_optionsButton(new QToolButton(this))
+  , m_buildsButton(new QToolButton(this))
+  , m_documentsButton(new QToolButton(this))
 {
     setObjectName("_q_ModeSelectorPane");
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    // Workaround for QToolBarLayout's obsolote serMargin function usage
-    QMetaObject::invokeMethod(this, [=] {
-        setContentsMargins(0, 0, 0, 0);
-        layout()->setContentsMargins(2, 2, 2, 2); // They must be all same
-        layout()->setSpacing(7);
-    }, Qt::QueuedConnection);
+    layout()->setContentsMargins(2, 2, 2, 2);
+    layout()->setSpacing(7);
 
     using namespace UtilityFunctions;
-    m_designerAction->setCheckable(true);
-    m_designerAction->setText(tr("Designer"));
-    m_designerAction->setToolTip(toToolTip(tr("Switch to <b>Designer</b>")));
+    m_designerButton->setCheckable(true);
+    m_designerButton->setText(tr("Designer"));
+    m_designerButton->setToolTip(toToolTip(tr("Switch to <b>Designer</b>")));
 
-    m_editorAction->setCheckable(true);
-    m_editorAction->setText(tr("Code Editor"));
-    m_editorAction->setToolTip(toToolTip(tr("Switch to <b>Code Editor</b>")));
+    m_editorButton->setCheckable(true);
+    m_editorButton->setText(tr("Code Editor"));
+    m_editorButton->setToolTip(toToolTip(tr("Switch to <b>Code Editor</b>")));
 
-    m_splitAction->setCheckable(true);
-    m_splitAction->setText(tr("Split View"));
-    m_splitAction->setToolTip(toToolTip(tr("Switch to <b>Split View</b>")));
+    m_splitButton->setCheckable(true);
+    m_splitButton->setText(tr("Split View"));
+    m_splitButton->setToolTip(toToolTip(tr("Switch to <b>Split View</b>")));
 
-    m_optionsAction->setCheckable(true);
-    m_optionsAction->setText(tr("Project Options"));
-    m_optionsAction->setToolTip(toToolTip(tr("Switch to <b>Project Options</b>")));
+    m_optionsButton->setCheckable(true);
+    m_optionsButton->setText(tr("Project Options"));
+    m_optionsButton->setToolTip(toToolTip(tr("Switch to <b>Project Options</b>")));
 
-    m_buildsAction->setCheckable(true);
-    m_buildsAction->setText(tr("Cloud Builds"));
-    m_buildsAction->setToolTip(toToolTip(tr("Switch to <b>Cloud Builds</b>")));
+    m_buildsButton->setCheckable(true);
+    m_buildsButton->setText(tr("Cloud Builds"));
+    m_buildsButton->setToolTip(toToolTip(tr("Switch to <b>Cloud Builds</b>")));
 
-    m_documentsAction->setCheckable(true);
-    m_documentsAction->setText(tr("Documents"));
-    m_documentsAction->setToolTip(toToolTip(tr("Switch to <b>Documents</b>")));
+    m_documentsButton->setCheckable(true);
+    m_documentsButton->setText(tr("Documents"));
+    m_documentsButton->setToolTip(toToolTip(tr("Switch to <b>Documents</b>")));
 
-    auto actionGroup = new QActionGroup(this);
-    actionGroup->addAction(m_designerAction);
-    actionGroup->addAction(m_editorAction);
-    actionGroup->addAction(m_splitAction);
-    actionGroup->addAction(m_optionsAction);
-    actionGroup->addAction(m_buildsAction);
-    actionGroup->addAction(m_documentsAction);
+    m_designerButton->setCursor(Qt::PointingHandCursor);
+    m_editorButton->setCursor(Qt::PointingHandCursor);
+    m_splitButton->setCursor(Qt::PointingHandCursor);
+    m_optionsButton->setCursor(Qt::PointingHandCursor);
+    m_buildsButton->setCursor(Qt::PointingHandCursor);
+    m_documentsButton->setCursor(Qt::PointingHandCursor);
 
-    addAction(m_designerAction);
-    addAction(m_editorAction);
-    addAction(m_splitAction);
-    addAction(m_optionsAction);
-    addAction(m_buildsAction);
-    addAction(m_documentsAction);
+    m_designerButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_editorButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_splitButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_optionsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_buildsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    m_documentsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+
+    m_designerButton->setFixedHeight(18);
+    m_editorButton->setFixedHeight(18);
+    m_splitButton->setFixedHeight(18);
+    m_optionsButton->setFixedHeight(18);
+    m_buildsButton->setFixedHeight(18);
+    m_documentsButton->setFixedHeight(18);
+
+    auto buttonGroup = new QButtonGroup(this);
+    buttonGroup->addButton(m_designerButton);
+    buttonGroup->addButton(m_editorButton);
+    buttonGroup->addButton(m_splitButton);
+    buttonGroup->addButton(m_optionsButton);
+    buttonGroup->addButton(m_buildsButton);
+    buttonGroup->addButton(m_documentsButton);
+
+    addWidget(m_designerButton);
+    addWidget(m_editorButton);
+    addWidget(m_splitButton);
+    addWidget(m_optionsButton);
+    addWidget(m_buildsButton);
+    addWidget(m_documentsButton);
     updateIcons();
 }
 
-QAction* ModeSelectorPane::designerAction() const
+QToolButton* ModeSelectorPane::designerButton() const
 {
-    return m_designerAction;
+    return m_designerButton;
 }
 
-QAction* ModeSelectorPane::editorAction() const
+QToolButton* ModeSelectorPane::editorButton() const
 {
-    return m_editorAction;
+    return m_editorButton;
 }
 
-QAction* ModeSelectorPane::splitAction() const
+QToolButton* ModeSelectorPane::splitButton() const
 {
-    return m_splitAction;
+    return m_splitButton;
 }
 
-QAction* ModeSelectorPane::optionsAction() const
+QToolButton* ModeSelectorPane::optionsButton() const
 {
-    return m_optionsAction;
+    return m_optionsButton;
 }
 
-QAction* ModeSelectorPane::buildsAction() const
+QToolButton* ModeSelectorPane::buildsButton() const
 {
-    return m_buildsAction;
+    return m_buildsButton;
 }
 
-QAction* ModeSelectorPane::documentsAction() const
+QToolButton* ModeSelectorPane::documentsButton() const
 {
-    return m_documentsAction;
+    return m_documentsButton;
 }
 
 QSize ModeSelectorPane::sizeHint() const
@@ -117,12 +136,12 @@ QSize ModeSelectorPane::minimumSizeHint() const
 void ModeSelectorPane::updateIcons()
 {
     using namespace PaintUtils;
-    m_designerAction->setIcon(icon("designer"));
-    m_editorAction->setIcon(icon("editor"));
-    m_splitAction->setIcon(icon("split"));
-    m_optionsAction->setIcon(icon("options"));
-    m_buildsAction->setIcon(icon("builds"));
-    m_documentsAction->setIcon(icon("documents"));
+    m_designerButton->setIcon(icon("designer"));
+    m_editorButton->setIcon(icon("editor"));
+    m_splitButton->setIcon(icon("split"));
+    m_optionsButton->setIcon(icon("options"));
+    m_buildsButton->setIcon(icon("builds"));
+    m_documentsButton->setIcon(icon("documents"));
 }
 
 void ModeSelectorPane::paintEvent(QPaintEvent*)

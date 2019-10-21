@@ -74,6 +74,16 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_saveButton->setFixedWidth(150);
     m_resetButton->setFixedWidth(150);
 
+    m_backgroundColorButton->setCursor(Qt::PointingHandCursor);
+    m_foregroundColorButton->setCursor(Qt::PointingHandCursor);
+    m_primaryColorButton->setCursor(Qt::PointingHandCursor);
+    m_accentColorButton->setCursor(Qt::PointingHandCursor);
+    m_backgroundColorsCombo->setCursor(Qt::PointingHandCursor);
+    m_foregroundColorsCombo->setCursor(Qt::PointingHandCursor);
+    m_primaryColorsCombo->setCursor(Qt::PointingHandCursor);
+    m_accentColorsCombo->setCursor(Qt::PointingHandCursor);
+    m_themesCombo->setCursor(Qt::PointingHandCursor);
+    m_stylesCombo->setCursor(Qt::PointingHandCursor);
     m_seeRunningButton->setCursor(Qt::PointingHandCursor);
     m_saveButton->setCursor(Qt::PointingHandCursor);
     m_resetButton->setCursor(Qt::PointingHandCursor);

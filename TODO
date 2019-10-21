@@ -1,5 +1,6 @@
 Designer Core TODOs
 
+bak bakem bundan kalmış mı: // Workaround for QToolBarLayout's obsolote serMargin fun
 proje template lerine bir el at, controls 1, controls 2 appları, plain window appı vs olsun, multipage
     applarda olsun, multiwindow applarda Qt yi temel al, ayrıca ikonlarını değiştir templatelerin
     isimlerini de, sonra applicationWindow.js gibi olsun isimler
