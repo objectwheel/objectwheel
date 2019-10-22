@@ -436,18 +436,16 @@ QString deviceName(const QVariantMap& deviceInfo)
 
 QString deviceInfoToolTip(const QVariantMap& deviceInfo)
 {
-    return QString(
-                R"(
+    return QString(R"(
                 <html><body><table>
-                <tr style='white-space:pre'><th><img src=":/images/info.png" width="16"/></th><th>%1</th><th></th></tr>
+                <tr style='white-space:pre'><th><img src=":/images/info.svg" width="16"/></th><th>%1</th><th></th></tr>
                 <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
                 <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
                 <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>
                 <tr style='white-space:pre'><td></td><td>%8</td><td>: %9</td></tr>
                 <tr style='white-space:pre'><td></td><td>%10</td><td>: %11</td></tr>
                 <tr style='white-space:pre'><td></td><td>%12</td><td>: %13</td></tr>
-                </table></body></html>
-                )")
+                </table></body></html>)")
             .arg(QObject::tr("Device Information"))
             .arg(QObject::tr("Name")).arg(deviceName(deviceInfo))
             .arg(QObject::tr("Unique ID")).arg(deviceInfo["deviceUid"].toString())

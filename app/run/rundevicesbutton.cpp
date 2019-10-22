@@ -6,8 +6,8 @@
 #include <QPainter>
 #include <QStyleOption>
 
-RunDevicesButton::RunDevicesButton(QWidget* parent) : QPushButton(parent)
-  , m_menu(new QMenu(this))
+RunDevicesButton::RunDevicesButton(QWidget* parent) : ToolTipWidget<QPushButton>(parent)
+  , m_menu(new ToolTipWidget<QMenu>(this))
 {
     setMenu(m_menu);
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);

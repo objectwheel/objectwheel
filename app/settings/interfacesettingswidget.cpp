@@ -89,7 +89,6 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     m_highlightColorResetButton->setCursor(Qt::PointingHandCursor);
 
     m_highlightColorButton->setFixedWidth(64);
-    m_languageBox->setIconSize({14, 14});
 
     /****/
 
@@ -169,8 +168,6 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     m_designerStateResetButton->setCursor(Qt::PointingHandCursor);
     m_preserveDesignerStateCheckBox->setCursor(Qt::PointingHandCursor);
     m_visibleOutputWidgetBox->setCursor(Qt::PointingHandCursor);
-
-    m_visibleOutputWidgetBox->setIconSize({14, 14});
 
     /****/
 
@@ -369,8 +366,8 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
 void InterfaceSettingsWidget::fill()
 {
     m_themeBox->addItem(tr("Light"));
-    m_languageBox->addItem(QIcon(":/images/flags/en.png"), tr("English"));
-    m_visibleOutputWidgetBox->addItem(QIcon(":/images/prohibited.svg"), tr("None"));
+    m_languageBox->addItem(QIcon(":/images/flags/en.svg"), tr("English"));
+    m_visibleOutputWidgetBox->addItem(QIcon(":/images/unavailable.svg"), tr("None"));
     m_visibleOutputWidgetBox->addItem(QIcon(":/images/output/issue.svg"), tr("Issues"));
     m_visibleOutputWidgetBox->addItem(QIcon(":/images/output/console.svg"), tr("Console"));
     m_fontFamilyBox->addItems(QFontDatabase().families());

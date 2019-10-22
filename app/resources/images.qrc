@@ -5,7 +5,6 @@
         <file>images/logo.png</file>
         <file>images/reset.png</file>
         <file>images/cancel.png</file>
-        <file>images/info.png</file>
         <file>images/load.png</file>
         <file>images/new.png</file>
         <file>images/ok.png</file>
@@ -54,7 +53,6 @@
         <file>images/template9.png</file>
         <file>images/drop.png</file>
         <file>images/splash.png</file>
-        <file>images/flags/en.png</file>
         <file>images/search.svg</file>
         <file>images/modes/builds.svg</file>
         <file>images/modes/designer.svg</file>
@@ -63,7 +61,6 @@
         <file>images/modes/options.svg</file>
         <file>images/modes/split.svg</file>
         <file>images/texture.svg</file>
-        <file>images/prohibited.svg</file>
         <file>images/extension.svg</file>
         <file>images/anchor.svg</file>
         <file>images/anchors/bottom.svg</file>
@@ -330,5 +327,8 @@
         <file>images/output/console-plain.svg</file>
         <file>images/output/issue-plain.svg</file>
         <file>images/output/issue.svg</file>
+        <file>images/flags/en.svg</file>
+        <file>images/unavailable.svg</file>
+        <file>images/info.svg</file>
     </qresource>
 </RCC>

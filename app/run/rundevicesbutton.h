@@ -2,8 +2,9 @@
 #define RUNDEVICESBUTTON_H
 
 #include <QPushButton>
+#include <tooltipwidget.h>
 
-class RunDevicesButton final : public QPushButton
+class RunDevicesButton final : public ToolTipWidget<QPushButton>
 {
     Q_OBJECT
     Q_DISABLE_COPY(RunDevicesButton)

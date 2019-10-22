@@ -10,6 +10,7 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/pushbutton.h \
            $$PWD/segmentedbar.h \
            $$PWD/switch.h \
+           $$PWD/tooltipwidget.h \
            $$PWD/view.h \
            $$PWD/waitingspinnerwidget.h
 
@@ -22,5 +23,6 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/pushbutton.cpp \
            $$PWD/segmentedbar.cpp \
            $$PWD/switch.cpp \
+           $$PWD/tooltipwidget.cpp \
            $$PWD/view.cpp \
            $$PWD/waitingspinnerwidget.cpp
