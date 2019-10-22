@@ -15,10 +15,10 @@
 
 #define BUTTONS_WIDTH    (338)
 #define SIZE_ICON        (QSize(48, 48))
-#define PATH_ICON        (":/images/options.png")
-#define PATH_SICON       (":/images/load.png")
-#define PATH_CICON       (":/images/unload.png")
-#define PATH_DICON       (":/images/cancel.png")
+#define PATH_ICON        (":/images/welcome/options.png")
+#define PATH_SICON       (":/images/welcome/load.png")
+#define PATH_CICON       (":/images/welcome/unload.png")
+#define PATH_DICON       (":/images/welcome/cancel.png")
 
 enum Fields { Name, Description, CreationDate, ModificationDate, Size };
 enum Buttons { Back, Save, Delete };

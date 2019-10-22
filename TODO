@@ -1,5 +1,9 @@
 Designer Core TODOs
 
+TÜM SVG LERİN KULLANIMINI ONTROL ET, ÖZELLİKLE PaintUtils fonksiyonları ile pixel boyutu uyumunu kontrol et
+    ayrıcal tüm setIcon ları ve tüm setPixmap, setImage leri paletle ilişki olanları palet değişimlerine karşı
+    diğer tümünü de devicePixelRatioF değişimlerine karşı kontrol et, uyumlu yap
+formspane'i hallet, search da ekle aynı controlspane de ki gibi
 hasErrors olan bir kontrole klavye yön tuşları ile ileri geri hareket ettirince render engine patlıyor
 proje template lerine bir el at, controls 1, controls 2 appları, plain window appı vs olsun, multipage
     applarda olsun, multiwindow applarda Qt yi temel al, ayrıca ikonlarını değiştir templatelerin

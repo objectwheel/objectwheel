@@ -27,6 +27,9 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
+    void changeEvent(QEvent* event) override;
+
+private:
     QToolButton* m_designerButton;
     QToolButton* m_editorButton;
     QToolButton* m_splitButton;

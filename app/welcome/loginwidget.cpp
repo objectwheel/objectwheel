@@ -70,7 +70,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
                           .arg(QDate::currentDate().year()).arg(APP_CORP));
 
-    m_helpButton->setIcon(QIcon(":/images/welcome/question.svg"));
+    m_helpButton->setIcon(QIcon(":/images/question.svg"));
     m_helpButton->setFixedSize(18, 18);
     m_helpButton->setCursor(Qt::PointingHandCursor);
     m_helpButton->setFlat(true);
@@ -97,8 +97,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_buttons->add(Login, "#8BBB56", "#6EA045");
     m_buttons->get(Register)->setText(tr("Sign Up"));
     m_buttons->get(Login)->setText(tr("Log In"));
-    m_buttons->get(Register)->setIcon(QIcon(":/images/new.png"));
-    m_buttons->get(Login)->setIcon(QIcon(":/images/load.png"));
+    m_buttons->get(Register)->setIcon(QIcon(":/images/welcome/new.png"));
+    m_buttons->get(Login)->setIcon(QIcon(":/images/welcome/load.png"));
     m_buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Login)->setCursor(Qt::PointingHandCursor);
 

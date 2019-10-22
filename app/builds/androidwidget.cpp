@@ -414,7 +414,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 //    _btnBack.settings().textColor = Qt::white;
 //    _btnBack.setFixedSize(200,28);
 //    _btnBack.setIconSize(QSize(14,14));
-//    _btnBack.setIcon(QIcon(":/images/unload.png"));
+//    _btnBack.setIcon(QIcon(":/images/welcome/unload.png"));
 //    _btnBack.setText("Back");
 //  FIXME  connect(&_btnBack, &FlarButton::clicked, [&]{
 //        emit backClicked();
@@ -426,7 +426,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 //    _btnBuild.settings().textColor = Qt::white;
 //    _btnBuild.setFixedSize(200,28);
 //    _btnBuild.setIconSize(QSize(14,14));
-//    _btnBuild.setIcon(QIcon(":/images/load.png"));
+//    _btnBuild.setIcon(QIcon(":/images/welcome/load.png"));
 //    _btnBuild.setText("Build");
 // FIXME   connect(&_btnBuild, &FlarButton::clicked, this, &AndroidWidget::handleBtnBuildClicked);
 }

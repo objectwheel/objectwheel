@@ -6,6 +6,7 @@
 #include <QLayout>
 #include <QButtonGroup>
 #include <QToolButton>
+#include <QEvent>
 
 static QIcon icon(const QString& fileName)
 {
@@ -90,6 +91,7 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     addWidget(m_optionsButton);
     addWidget(m_buildsButton);
     addWidget(m_documentsButton);
+
     updateIcons();
 }
 
@@ -154,4 +156,13 @@ void ModeSelectorPane::paintEvent(QPaintEvent*)
     painter.fillRect(rect(), gradient);
     painter.setPen("#a7a7a7");
     painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
+}
+
+void ModeSelectorPane::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::ApplicationFontChange
+            || event->type() == QEvent::PaletteChange) {
+        updateIcons();
+    }
+    QToolBar::changeEvent(event);
 }

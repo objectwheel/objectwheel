@@ -26,10 +26,10 @@
 #define BUTTONS_WIDTH    (450)
 #define SIZE_LOGO        (QSize(48, 48))
 #define SIZE_TEMPLCON    (QSize(48, 48))
-#define PATH_LOGO        (":/images/templates.png")
-#define PATH_TEMPLATE    (":/images/template%1.png")
-#define PATH_NICON       (":/images/load.png")
-#define PATH_BICON       (":/images/unload.png")
+#define PATH_LOGO        (":/images/welcome/templates.png")
+#define PATH_TEMPLATE    (":/images/welcome/template%1.png")
+#define PATH_NICON       (":/images/welcome/load.png")
+#define PATH_BICON       (":/images/welcome/unload.png")
 
 namespace {
 enum Buttons { Back, Next };

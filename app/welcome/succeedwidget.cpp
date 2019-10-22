@@ -11,8 +11,8 @@
 
 #define BUTTONS_WIDTH    (150)
 #define SIZE_GIF        (QSize(100, 100))
-#define PATH_GIF         (":/images/complete.gif")
-#define PATH_OICON       (":/images/ok.png")
+#define PATH_GIF         (":/images/welcome/complete.gif")
+#define PATH_OICON       (":/images/welcome/ok.png")
 
 enum Buttons { Ok };
 

@@ -34,13 +34,13 @@
 #define BUTTONS_WIDTH    (450)
 #define SIZE_LOGO        (QSize(48, 48))
 #define SIZE_FILEICON    (QSize(48, 48))
-#define PATH_LOGO        (":/images/toolbox.png")
-#define PATH_FILEICON    (":/images/fileicon.png")
-#define PATH_NICON       (":/images/new.png")
-#define PATH_LICON       (":/images/ok.png")
-#define PATH_IICON       (":/images/load.png")
-#define PATH_EICON       (":/images/unload.png")
-#define PATH_SICON       (":/images/dots.png")
+#define PATH_LOGO        (":/images/welcome/toolbox.png")
+#define PATH_FILEICON    (":/images/welcome/fileicon.png")
+#define PATH_NICON       (":/images/welcome/new.png")
+#define PATH_LICON       (":/images/welcome/ok.png")
+#define PATH_IICON       (":/images/welcome/load.png")
+#define PATH_EICON       (":/images/welcome/unload.png")
+#define PATH_SICON       (":/images/welcome/dots.png")
 #define WIDTH_PROGRESS   80
 
 enum Buttons { Load, New, Import, Export, Settings };

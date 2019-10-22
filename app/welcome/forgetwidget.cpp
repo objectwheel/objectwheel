@@ -35,7 +35,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_loadingIndicator, 0 , Qt::AlignCenter);
     m_layout->addStretch();
 
-    QPixmap p(":/images/forgot.png");
+    QPixmap p(":/images/welcome/forgot.png");
     p.setDevicePixelRatio(devicePixelRatioF());
 
     m_iconLabel->setFixedSize(QSize(48, 48));
@@ -62,8 +62,8 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     m_buttons->add(Next, "#8BBB56", "#6EA045");
     m_buttons->get(Next)->setText(tr("Next"));
     m_buttons->get(Back)->setText(tr("Back"));
-    m_buttons->get(Next)->setIcon(QIcon(":/images/load.png"));
-    m_buttons->get(Back)->setIcon(QIcon(":/images/unload.png"));
+    m_buttons->get(Next)->setIcon(QIcon(":/images/welcome/load.png"));
+    m_buttons->get(Back)->setIcon(QIcon(":/images/welcome/unload.png"));
     m_buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     m_buttons->settings().cellWidth = 175;

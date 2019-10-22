@@ -81,6 +81,7 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     addWidget(m_projectsButton);
     addWidget(m_preferencesButton);
     addWidget(m_segmentedBar);
+
     updateIcons();
 }
 
@@ -155,7 +156,7 @@ void RunPane::changeEvent(QEvent* event)
             || event->type() == QEvent::PaletteChange) {
         updateIcons();
     }
-    QWidget::changeEvent(event);
+    QToolBar::changeEvent(event);
 }
 
 void RunPane::paintEvent(QPaintEvent*)

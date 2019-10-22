@@ -294,7 +294,6 @@
         <file>images/designer/plus.svg</file>
         <file>images/welcome/new.png</file>
         <file>images/welcome/register.png</file>
-        <file>images/welcome/splash.png</file>
         <file>images/welcome/template0.png</file>
         <file>images/welcome/template1.png</file>
         <file>images/welcome/template2.png</file>
@@ -310,5 +309,6 @@
         <file>images/welcome/unload.png</file>
         <file>images/welcome/verification.png</file>
         <file>images/question.svg</file>
+        <file>images/app/splash.png</file>
     </qresource>
 </RCC>

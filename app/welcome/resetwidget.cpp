@@ -16,9 +16,9 @@
 #define COUNTDOWN        300
 #define BUTTONS_WIDTH    (300)
 #define SIZE_ICON        (QSize(48, 48))
-#define PATH_ICON        (":/images/lock.png")
-#define PATH_VICON       (":/images/ok.png")
-#define PATH_CICON       (":/images/cancel.png")
+#define PATH_ICON        (":/images/welcome/lock.png")
+#define PATH_VICON       (":/images/welcome/ok.png")
+#define PATH_CICON       (":/images/welcome/cancel.png")
 
 enum Fields { Password, ConfirmPassword, Code };
 enum Buttons { Apply, Cancel };

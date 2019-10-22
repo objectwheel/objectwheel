@@ -19,9 +19,9 @@
 #define TERMS_WIDTH      (350)
 #define SIZE_ICON        (QSize(48, 48))
 #define PATH_COUNTRIES   (":/resources/other/countries.txt")
-#define PATH_ICON        (":/images/register.png")
-#define PATH_OICON       (":/images/load.png")
-#define PATH_BICON       (":/images/unload.png")
+#define PATH_ICON        (":/images/welcome/register.png")
+#define PATH_OICON       (":/images/welcome/load.png")
+#define PATH_BICON       (":/images/welcome/unload.png")
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
 enum Buttons { Next, Back };
@@ -143,7 +143,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
         border: none;\
     }\
     QComboBox::down-arrow {\
-        image: url(:/images/downarrow.png);\
+        image: url(:/images/welcome/downarrow.png);\
     }");
 
     _termsWidget->setObjectName("termsWidget");

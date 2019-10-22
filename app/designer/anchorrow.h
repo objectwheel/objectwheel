@@ -46,6 +46,10 @@ private slots:
     void onTargetLineTypeChange();
     void onSourceButtonCheckedChange(bool checked);
     void onTargetButtonClick(QAbstractButton* button, bool checked);
+    void updateIcons();
+
+private:
+    void changeEvent(QEvent* event) override;
 
 signals:
     void targetLineTypeChanged();

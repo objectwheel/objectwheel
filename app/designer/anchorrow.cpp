@@ -8,6 +8,7 @@
 #include <QLabel>
 #include <QDoubleSpinBox>
 #include <QPushButton>
+#include <QEvent>
 
 static QString anchorLineText(AnchorLine::Type type)
 {
@@ -39,21 +40,21 @@ static QPixmap anchorLinePixmap(AnchorLine::Type type, QWidget* widget)
     const QColor& color = widget->palette().buttonText().color();
     switch (type) {
     case AnchorLine::Left:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/left.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/left.svg"), {15, 15}, widget), color);
     case AnchorLine::Right:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/right.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/right.svg"), {15, 15}, widget), color);
     case AnchorLine::Top:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/top.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/top.svg"), {15, 15}, widget), color);
     case AnchorLine::Bottom:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/bottom.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/bottom.svg"), {15, 15}, widget), color);
     case AnchorLine::HorizontalCenter:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/horizontal.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/horizontal.svg"), {15, 15}, widget), color);
     case AnchorLine::VerticalCenter:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/vertical.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/vertical.svg"), {15, 15}, widget), color);
     case AnchorLine::Fill:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/fill.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/fill.svg"), {15, 15}, widget), color);
     case AnchorLine::Center:
-        return renderOverlaidPixmap(QPixmap(QStringLiteral(":/images/anchors/center.svg")), color);
+        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/center.svg"), {15, 15}, widget), color);
     default:
         return QPixmap();
     }
@@ -93,9 +94,8 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_layout->addWidget(m_marginOffsetSpinBox);
     m_layout->addStretch();
 
-    m_sourceButton->setFixedSize(QSize(24, 24));
-    m_sourceButton->setIconSize({12, 12});
-    m_sourceButton->setIcon(anchorLinePixmap(m_sourceLineType, this));
+    m_sourceButton->setFixedSize({23, 23});
+    m_sourceButton->setIconSize({15, 15});
     m_sourceButton->setToolTip(anchorLineText(m_sourceLineType));
 
     arrowIcon->setFixedSize(8, 8);
@@ -103,14 +103,14 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     arrowIcon->setPixmap(QPixmap(":/images/extension.svg"));
 
     m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
-    m_targetControlComboBox->setFixedSize(QSize(140, 24));
+    m_targetControlComboBox->setFixedSize(QSize(140, 23));
     m_targetControlComboBox->setToolTip(tr("Target control"));
     m_targetControlComboBox->setEnabled(false);
 
     m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) +
                                       (AnchorLine::isOffset(m_sourceLineType) ? " offset" : " margin"));
     m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
-    m_marginOffsetSpinBox->setFixedSize(QSize(80, 24));
+    m_marginOffsetSpinBox->setFixedSize(QSize(80, 23));
     m_marginOffsetSpinBox->setRange(-999.99, 999.99);
     m_marginOffsetSpinBox->setDecimals(2);
 
@@ -121,31 +121,24 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     targetButtonLayout->addWidget(m_targetLineButton3);
 
     m_targetLineButton1->setCursor(Qt::PointingHandCursor);
-    m_targetLineButton1->setFixedSize(QSize(24, 24));
-    m_targetLineButton1->setIconSize({12, 12});
+    m_targetLineButton1->setFixedSize({23, 23});
+    m_targetLineButton1->setIconSize({15, 15});
     m_targetLineButton1->setCheckable(true);
-    m_targetLineButton1->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
-                                                  ? AnchorLine::Left : AnchorLine::Top, this));
     m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
                                                    ? AnchorLine::Left : AnchorLine::Top));
 
     m_targetLineButton2->setCursor(Qt::PointingHandCursor);
-    m_targetLineButton2->setFixedSize(QSize(24, 24));
-    m_targetLineButton2->setIconSize({12, 12});
+    m_targetLineButton2->setFixedSize({23, 23});
+    m_targetLineButton2->setIconSize({15, 15});
     m_targetLineButton2->setCheckable(true);
-    m_targetLineButton2->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
-                                                  ? AnchorLine::HorizontalCenter
-                                                  : AnchorLine::VerticalCenter, this));
     m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
                                                    ? AnchorLine::HorizontalCenter
                                                    : AnchorLine::VerticalCenter));
 
     m_targetLineButton3->setCursor(Qt::PointingHandCursor);
-    m_targetLineButton3->setFixedSize(QSize(24, 24));
-    m_targetLineButton3->setIconSize({12, 12});
+    m_targetLineButton3->setFixedSize({23, 23});
+    m_targetLineButton3->setIconSize({15, 15});
     m_targetLineButton3->setCheckable(true);
-    m_targetLineButton3->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
-                                                  ? AnchorLine::Right : AnchorLine::Bottom, this));
     m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
                                                    ? AnchorLine::Right : AnchorLine::Bottom));
 
@@ -178,6 +171,8 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
             this, &AnchorRow::marginOffsetEditingFinished);
     connect(m_targetControlComboBox, qOverload<int>(&QComboBox::activated),
             this, &AnchorRow::targetControlActivated);
+
+    updateIcons();
 }
 
 AnchorLine::Type AnchorRow::sourceLineType() const
@@ -366,3 +361,23 @@ void AnchorRow::onTargetButtonClick(QAbstractButton* button, bool checked)
     }
 }
 
+void AnchorRow::updateIcons()
+{
+    m_sourceButton->setIcon(anchorLinePixmap(m_sourceLineType, this));
+    m_targetLineButton1->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
+                                                  ? AnchorLine::Left : AnchorLine::Top, this));
+    m_targetLineButton2->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
+                                                  ? AnchorLine::HorizontalCenter
+                                                  : AnchorLine::VerticalCenter, this));
+    m_targetLineButton3->setIcon(anchorLinePixmap(AnchorLine::isVertical(m_sourceLineType)
+                                                  ? AnchorLine::Right : AnchorLine::Bottom, this));
+}
+
+void AnchorRow::changeEvent(QEvent* event)
+{
+    if(event->type() == QEvent::ApplicationFontChange
+            || event->type() == QEvent::PaletteChange) {
+        updateIcons();
+    }
+    QWidget::changeEvent(event);
+}

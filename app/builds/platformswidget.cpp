@@ -113,7 +113,7 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
 //    _btnNext.settings().textColor = Qt::white;
 //    _btnNext.setFixedSize(200,28);
 //    _btnNext.setIconSize(QSize(14,14));
-//    _btnNext.setIcon(QIcon(":/images/load.png"));
+//    _btnNext.setIcon(QIcon(":/images/welcome/load.png"));
 //    _btnNext.setText("Next");
 //  FIXME  connect(&_btnNext, &FlarButton::clicked, this, &PlatformsWidget::handleBtnNextClicked);
 

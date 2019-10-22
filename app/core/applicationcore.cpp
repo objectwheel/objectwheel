@@ -103,7 +103,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setStartDragDistance(8);
 
     /* Show splash screen */
-    QPixmap pixmap(":/images/splash.png");
+    QPixmap pixmap(":/images/app/splash.png");
     pixmap.setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
     pixmap = pixmap.scaled(int(512 * QApplication::primaryScreen()->devicePixelRatio()),
                             int(280 * QApplication::primaryScreen()->devicePixelRatio()),
