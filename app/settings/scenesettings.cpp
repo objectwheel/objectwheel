@@ -99,7 +99,7 @@ QBrush SceneSettings::toBackgroundBrush() const
 {
     QBrush brush(Qt::SolidPattern);
     if (sceneBackgroundTexture == 0)
-        brush.setTexture(QPixmap(":/images/texture.svg"));
+        brush.setTexture(QPixmap(":/images/settings/texture.svg"));
     else if (sceneBackgroundTexture == 1)
         brush.setColor(Qt::black);
     else if (sceneBackgroundTexture == 2)

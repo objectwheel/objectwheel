@@ -261,18 +261,16 @@ void Control::setRenderInfo(const RenderInfo& info)
             }
         }
 
-        // FIXME: Fix scene() usage and test
         if (hasErrors() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderErrorControlImage(
                         size(), id(),
                         settings->toBlankControlDecorationBrush(QColor(203, 54, 59)),
-                        QColor(203, 54, 59), (QWidget*) scene()->view());
+                        QColor(203, 54, 59), scene() ? (QWidget*) scene()->view() : 0);
         }
 
-        // FIXME: Fix scene() usage and test
         if (m_renderInfo.image.isNull() && size().isValid()) {
             m_renderInfo.image = PaintUtils::renderNonGuiControlImage(
-                        ToolUtils::toolIconPath(dir()), size(), (QWidget*) scene()->view());
+                        ToolUtils::toolIconPath(dir()), size(), scene() ? (QWidget*) scene()->view() : 0);
         }
     }
 

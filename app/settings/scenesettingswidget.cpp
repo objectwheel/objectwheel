@@ -347,7 +347,7 @@ void SceneSettingsWidget::fill()
                                            tr("Go to Slot Action"));
 
     m_sceneBackgroundTextureBox->addItem(
-    {renderPropertyColorPixmap(size, QString(":/images/texture.svg"), pen, dpr)}, tr("Checkered"));
+    {renderPropertyColorPixmap(size, QString(":/images/settings/texture.svg"), pen, dpr)}, tr("Checkered"));
     m_sceneBackgroundTextureBox->addItem(
     {renderPropertyColorPixmap(size, Qt::black, pen, dpr)}, tr("Black"));
     m_sceneBackgroundTextureBox->addItem(

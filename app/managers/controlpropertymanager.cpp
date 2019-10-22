@@ -427,7 +427,6 @@ void ControlPropertyManager::setParent(Control* control, Control* parentControl,
     } else {
         if (options & SaveChanges) {
             SaveManager::moveControl(control, parentControl);
-            // FIXME: Should we also add UpdateRenderer here?
             setIndex(control, control->siblings().size(), SaveChanges);
         }
 

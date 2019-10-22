@@ -295,7 +295,9 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
     DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+    // FIXME: Fix this
+    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg",
+                                                                          Qt::white, devicePixelRatio());
     const qreal z = scene()->zoomLevel();
     const qreal m = 10;
     QRectF bumpRectangle(0, 0, m/z, m/z);
@@ -368,7 +370,9 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
     DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+    // FIXME: Fix this
+    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg",
+                                                                          Qt::white, devicePixelRatio());
     const qreal z = scene()->zoomLevel();
     const qreal m = 10;
     QRectF bumpRectangle(0, 0, m/z, m/z);
@@ -514,7 +518,9 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->setRenderHint(QPainter::Antialiasing); // No SmoothPixmapTransform
     painter->drawPath(curve);
 
-    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/anchor.svg", Qt::white, devicePixelRatio());
+    // FIXME: Fix this
+    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg",
+                                                                          Qt::white, devicePixelRatio());
     const qreal z = scene()->zoomLevel();
     const qreal m = 10;
     const qreal angle = -90 - line.angle() - 45 * qSin(M_PI * (int(line.angle()) % 90) / 90.) * (twist ? -1 : 1);

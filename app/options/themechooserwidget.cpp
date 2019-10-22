@@ -476,11 +476,11 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
         if (m_stylesCombo->currentText() == "Material") {
             m_themesCombo->addItems(MATERIAL_THEMES);
-            QPixmap p(":/images/material.png");
+            QPixmap p(":/images/options/material.png");
             p.setDevicePixelRatio(devicePixelRatioF());
             m_customizationPicture->setPixmap(p);
         } else {
-            QPixmap p(":/images/universal.png");
+            QPixmap p(":/images/options/universal.png");
             p.setDevicePixelRatio(devicePixelRatioF());
             m_customizationPicture->setPixmap(p);
             m_themesCombo->addItems(UNIVERSAL_THEMES);
