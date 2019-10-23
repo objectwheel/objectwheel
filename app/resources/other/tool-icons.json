@@ -132,7 +132,6 @@
     "QtQuick.Extras1.Gauge"                  : ":/images/tools/Gauge.svg",
     "QtQuick.Extras1.StatusIndicator"        : ":/images/tools/StatusIndicator.svg",
     "QtQuick.Extras1.ToggleButton"           : ":/images/tools/ToggleButton.svg",
-    "QtQuick.Extras1.Picture"                : ":/images/tools/Picture.svg",
     "QtQuick.Extras1.PieMenu"                : ":/images/tools/PieMenu.svg",
     "QtQuick.Extras1.Tumbler"                : ":/images/tools/Tumbler2.svg",
     "QtQuick.Layouts1.RowLayout"             : ":/images/tools/RowLayout.svg",

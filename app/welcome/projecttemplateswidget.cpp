@@ -187,7 +187,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
 
     for (int i = 0; i < NAMES.size(); i++) {
         auto item = new QListWidgetItem("Test");
-        item->setIcon(QIcon(QStringLiteral(":/images/welcome/template%1.png").arg(i)));
+        item->setIcon(QIcon(QStringLiteral(":/images/welcome/template%1.svg").arg(i)));
         item->setData(Name, NAMES[i]);
         item->setData(Description, DESCRIPTIONS[i]);
         m_listWidget->addItem(item);
@@ -246,28 +246,18 @@ namespace {
 // TODO: Finish other templates
 const QStringList NAMES = {
     QObject::tr("Blank Project"),
-    QObject::tr("Plain Application Project")/*,
-    QObject::tr("Hello World Application Project"),
-    QObject::tr("Multi-page Application Project"),
-    QObject::tr("Multi-window Application Project"),
-    QObject::tr("Desktop Oriented Application Project"),
-    QObject::tr("Simple Database Application Project"),
-    QObject::tr("Advanced Application Project"),
-    QObject::tr("Dummy Project (Quick Controls)"),
-    QObject::tr("Dummy Project 2 (Quick Controls 2)")*/
+    QObject::tr("Application Project v2"),
+    QObject::tr("Application Project v1"),
+    QObject::tr("Full-featured Application Project v2"),
+    QObject::tr("Full-featured Application Project v1")
 };
 
 const QStringList DESCRIPTIONS = {
-    QObject::tr("A pure and clean project template with an empty 'Window'."),
-    QObject::tr("A base project template for applications with an empty 'ApplicationWindow'.")/*,
-    QObject::tr("A simple application project template with a 'hello world' setup."),
-    QObject::tr("A base project template for multi-page applications."),
-    QObject::tr("A base project template for multi-window applications."),
-    QObject::tr("A base project template for desktop oriented applications."),
-    QObject::tr("A simple application project template with a simple database setup."),
-    QObject::tr("An advanced application project template with full of features loaded."),
-    QObject::tr("A dummy project template to test and see Quick Controls v1"),
-    QObject::tr("A dummy project template to test and see Quick Controls v2")*/
+    QObject::tr("A blank project with an empty Window"),
+    QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 2"),
+    QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 1"),
+    QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 2"),
+    QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 1")
 };
 } // Anonymous Namespace
 

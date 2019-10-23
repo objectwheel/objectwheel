@@ -294,16 +294,11 @@
         <file>images/designer/plus.svg</file>
         <file>images/welcome/new.png</file>
         <file>images/welcome/register.svg</file>
-        <file>images/welcome/template0.png</file>
-        <file>images/welcome/template1.png</file>
-        <file>images/welcome/template2.png</file>
-        <file>images/welcome/template3.png</file>
-        <file>images/welcome/template4.png</file>
-        <file>images/welcome/template5.png</file>
-        <file>images/welcome/template6.png</file>
-        <file>images/welcome/template7.png</file>
-        <file>images/welcome/template8.png</file>
-        <file>images/welcome/template9.png</file>
+        <file>images/welcome/template0.svg</file>
+        <file>images/welcome/template1.svg</file>
+        <file>images/welcome/template2.svg</file>
+        <file>images/welcome/template3.svg</file>
+        <file>images/welcome/template4.svg</file>
         <file>images/welcome/templates.svg</file>
         <file>images/welcome/hammer.svg</file>
         <file>images/welcome/unload.png</file>

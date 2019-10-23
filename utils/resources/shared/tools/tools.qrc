@@ -166,8 +166,6 @@
         <file>VideoOutput/t/main.qml</file>
         <file>PieMenu/m/control.meta</file>
         <file>PieMenu/t/main.qml</file>
-        <file>Picture/m/control.meta</file>
-        <file>Picture/t/main.qml</file>
         <file>WebView/m/control.meta</file>
         <file>WebView/t/main.qml</file>
         <file>WebSocket/m/control.meta</file>
