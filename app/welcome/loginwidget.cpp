@@ -75,11 +75,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_helpButton->setCursor(Qt::PointingHandCursor);
     m_helpButton->setFlat(true);
 
-    QPixmap p(":/images/logo.png");
-    p.setDevicePixelRatio(devicePixelRatioF());
     m_logoLabel->setFixedSize(QSize(160, 80));
-    m_logoLabel->setPixmap(p.scaled(QSize(160, 80) * devicePixelRatioF(), Qt::IgnoreAspectRatio,
-                                    Qt::SmoothTransformation));
+    m_logoLabel->setPixmap(PaintUtils::pixmap(":/images/logo.svg", QSize(160, 80), this));
 
     QFont f;
     f.setWeight(QFont::Light);

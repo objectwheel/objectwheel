@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationDomain("objectwheel.com");
     QApplication::setApplicationName("themer");
     QApplication::setApplicationVersion("1.0.0");
-    QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+    QApplication::setWindowIcon(QIcon(":/images/icon.png"));
 
     QQmlApplicationEngine engine;
 

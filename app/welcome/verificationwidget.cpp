@@ -4,6 +4,7 @@
 #include <waitingspinnerwidget.h>
 #include <registrationapimanager.h>
 #include <countdown.h>
+#include <paintutils.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -14,8 +15,6 @@
 
 #define COUNTDOWN        300
 #define BUTTONS_WIDTH    (300)
-#define SIZE_ICON        (QSize(48, 48))
-#define PATH_ICON        (":/images/welcome/verification.png")
 #define PATH_VICON       (":/images/welcome/ok.png")
 #define PATH_RICON       (":/images/welcome/reset.png")
 #define PATH_CICON       (":/images/welcome/cancel.png")
@@ -61,17 +60,8 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     _layout->setAlignment(_buttons, Qt::AlignCenter);
     _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
 
-    QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(devicePixelRatioF());
-
-    _iconLabel->setFixedSize(SIZE_ICON);
-    _iconLabel->setPixmap(
-        p.scaled(
-            SIZE_ICON * devicePixelRatioF(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
+    _iconLabel->setFixedSize(QSize(60, 60));
+    _iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/verification.svg", QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);

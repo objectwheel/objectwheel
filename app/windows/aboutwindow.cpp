@@ -1,4 +1,6 @@
 #include <aboutwindow.h>
+#include <paintutils.h>
+
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QDate>
@@ -24,12 +26,8 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_legalLabel, 0, Qt::AlignCenter);
     m_layout->setSpacing(20);
 
-    QPixmap px(":/images/logo.png");
-    px.setDevicePixelRatio(devicePixelRatioF());
     m_logoLabel->setFixedSize(QSize(160, 80));
-    m_logoLabel->setPixmap(px.scaled(QSize(160, 80) * devicePixelRatioF(),
-                                     Qt::IgnoreAspectRatio,
-                                     Qt::SmoothTransformation));
+    m_logoLabel->setPixmap(PaintUtils::pixmap(":/images/logo.svg", QSize(160, 80), this));
 
     m_versionLabel->setAlignment(Qt::AlignCenter);
     m_versionLabel->setText(QStringLiteral("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b>"

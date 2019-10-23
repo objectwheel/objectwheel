@@ -71,7 +71,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setApplicationVersion(APP_VER);
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME);
-    QApplication::setWindowIcon(QIcon(":/images/owicon.png"));
+    QApplication::setWindowIcon(QIcon(":/images/icon.png"));
 
     const QString fontPath = ":/fonts";
     const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";

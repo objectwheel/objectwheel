@@ -5,6 +5,7 @@
 #include <waitingspinnerwidget.h>
 #include <registrationapimanager.h>
 #include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -17,9 +18,7 @@
 
 #define TERMS_HEIGHT     (35)
 #define TERMS_WIDTH      (350)
-#define SIZE_ICON        (QSize(48, 48))
 #define PATH_COUNTRIES   (":/resources/other/countries.txt")
-#define PATH_ICON        (":/images/welcome/register.png")
 #define PATH_OICON       (":/images/welcome/load.png")
 #define PATH_BICON       (":/images/welcome/unload.png")
 
@@ -79,17 +78,8 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLayout->setAlignment(_termsSwitch, Qt::AlignVCenter);
     _termsLayout->addStretch();
 
-    QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(devicePixelRatioF());
-
-    _iconLabel->setFixedSize(SIZE_ICON);
-    _iconLabel->setPixmap(
-        p.scaled(
-            SIZE_ICON * devicePixelRatioF(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
+    _iconLabel->setFixedSize(QSize(60, 60));
+    _iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/register.svg", QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);

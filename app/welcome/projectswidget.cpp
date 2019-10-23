@@ -10,6 +10,7 @@
 #include <utilityfunctions.h>
 #include <transparentstyle.h>
 #include <planmanager.h>
+#include <paintutils.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -32,15 +33,10 @@
 
 #define SIZE_LIST        (QSize(450, 300))
 #define BUTTONS_WIDTH    (450)
-#define SIZE_LOGO        (QSize(48, 48))
-#define SIZE_FILEICON    (QSize(48, 48))
-#define PATH_LOGO        (":/images/welcome/toolbox.png")
-#define PATH_FILEICON    (":/images/welcome/fileicon.png")
 #define PATH_NICON       (":/images/welcome/new.png")
 #define PATH_LICON       (":/images/welcome/ok.png")
 #define PATH_IICON       (":/images/welcome/load.png")
 #define PATH_EICON       (":/images/welcome/unload.png")
-#define PATH_SICON       (":/images/welcome/dots.png")
 #define WIDTH_PROGRESS   80
 
 enum Buttons { Load, New, Import, Export, Settings };
@@ -281,17 +277,8 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_progressBar->adjustSize();
     m_progressBar->hide();
 
-    QPixmap p(PATH_LOGO);
-    p.setDevicePixelRatio(devicePixelRatioF());
-
-    m_iconLabel->setFixedSize(SIZE_LOGO);
-    m_iconLabel->setPixmap(
-                p.scaled(
-                    SIZE_LOGO * devicePixelRatioF(),
-                    Qt::IgnoreAspectRatio,
-                    Qt::SmoothTransformation
-                    )
-                );
+    m_iconLabel->setFixedSize(QSize(60, 60));
+    m_iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/hammer.svg", QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
@@ -323,7 +310,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
     m_listWidget->viewport()->installEventFilter(this);
-    m_listWidget->setIconSize(SIZE_FILEICON);
+    m_listWidget->setIconSize(QSize(48, 48));
     m_listWidget->setMinimumWidth(400);
     m_listWidget->setItemDelegate(new ProjectsDelegate(m_listWidget, m_listWidget));
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -366,7 +353,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons_2->setFixedSize(20, 20);
     m_buttons_2->add(Settings, "#55A6F6", "#448DDE");
     m_buttons_2->get(Settings)->setIconSize(QSize(12, 12));
-    m_buttons_2->get(Settings)->setIcon(QIcon(PATH_SICON));
+    m_buttons_2->get(Settings)->setIcon(QIcon(":/images/welcome/dots.svg"));
     m_buttons_2->get(Settings)->setCursor(Qt::PointingHandCursor);
     m_buttons_2->hide();
     m_buttons_2->settings().cellWidth = m_buttons_2->height();
@@ -472,7 +459,7 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
 
     for (auto uid : projects) {
         auto item = new ProjectListWidgetItem(this);
-        item->setIcon(QIcon(PATH_FILEICON));
+        item->setIcon(QIcon(":/images/welcome/project.svg"));
         item->setData(Uid, uid);
         item->setData(Name, ProjectManager::name(uid));
         item->setData(LastEdit, ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
@@ -514,7 +501,7 @@ void ProjectsWidget::onNewButtonClick()
         projectName = UtilityFunctions::increasedNumberedText(projectName, true, true);
 
     auto item = new ProjectListWidgetItem(this);
-    item->setIcon(QIcon(PATH_FILEICON));
+    item->setIcon(QIcon(":/images/welcome/project.svg"));
     item->setData(Name, projectName);
     item->setData(LastEdit, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
     item->setData(Active, false);

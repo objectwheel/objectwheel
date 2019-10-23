@@ -1,7 +1,7 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/logo.png</file>
-        <file>images/owicon.png</file>
+        <file>images/logo.svg</file>
+        <file>images/icon.png</file>
         <file>images/drop.png</file>
         <file>images/search.svg</file>
         <file>images/modes/builds.svg</file>
@@ -280,20 +280,20 @@
         <file>images/designer/anchor.svg</file>
         <file>images/welcome/cancel.png</file>
         <file>images/welcome/complete.gif</file>
-        <file>images/welcome/dots.png</file>
+        <file>images/welcome/dots.svg</file>
         <file>images/welcome/downarrow.png</file>
         <file>images/welcome/downarrow@2x.png</file>
-        <file>images/welcome/fileicon.png</file>
-        <file>images/welcome/forgot.png</file>
+        <file>images/welcome/project.svg</file>
+        <file>images/welcome/forget.svg</file>
         <file>images/welcome/load.png</file>
-        <file>images/welcome/lock.png</file>
+        <file>images/welcome/password.svg</file>
         <file>images/welcome/ok.png</file>
-        <file>images/welcome/options.png</file>
+        <file>images/welcome/settings.svg</file>
         <file>images/welcome/reset.png</file>
         <file>images/designer/minus.svg</file>
         <file>images/designer/plus.svg</file>
         <file>images/welcome/new.png</file>
-        <file>images/welcome/register.png</file>
+        <file>images/welcome/register.svg</file>
         <file>images/welcome/template0.png</file>
         <file>images/welcome/template1.png</file>
         <file>images/welcome/template2.png</file>
@@ -304,10 +304,10 @@
         <file>images/welcome/template7.png</file>
         <file>images/welcome/template8.png</file>
         <file>images/welcome/template9.png</file>
-        <file>images/welcome/templates.png</file>
-        <file>images/welcome/toolbox.png</file>
+        <file>images/welcome/templates.svg</file>
+        <file>images/welcome/hammer.svg</file>
         <file>images/welcome/unload.png</file>
-        <file>images/welcome/verification.png</file>
+        <file>images/welcome/verification.svg</file>
         <file>images/question.svg</file>
         <file>images/app/splash.png</file>
     </qresource>

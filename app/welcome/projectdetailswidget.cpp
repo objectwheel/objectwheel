@@ -4,6 +4,7 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -14,8 +15,6 @@
 #include <QDateTime>
 
 #define BUTTONS_WIDTH    (338)
-#define SIZE_ICON        (QSize(48, 48))
-#define PATH_ICON        (":/images/welcome/options.png")
 #define PATH_SICON       (":/images/welcome/load.png")
 #define PATH_CICON       (":/images/welcome/unload.png")
 #define PATH_DICON       (":/images/welcome/cancel.png")
@@ -41,17 +40,8 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
     m_layout->addStretch();
 
-    QPixmap p(PATH_ICON);
-    p.setDevicePixelRatio(devicePixelRatioF());
-
-    m_iconLabel->setFixedSize(SIZE_ICON);
-    m_iconLabel->setPixmap(
-        p.scaled(
-            SIZE_ICON * devicePixelRatioF(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
+    m_iconLabel->setFixedSize(QSize(60, 60));
+    m_iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/settings.svg", QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);

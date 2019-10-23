@@ -6,6 +6,7 @@
 #include <progressbar.h>
 #include <windowmanager.h>
 #include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -24,10 +25,6 @@
 
 #define SIZE_LIST        (QSize(450, 315))
 #define BUTTONS_WIDTH    (450)
-#define SIZE_LOGO        (QSize(48, 48))
-#define SIZE_TEMPLCON    (QSize(48, 48))
-#define PATH_LOGO        (":/images/welcome/templates.png")
-#define PATH_TEMPLATE    (":/images/welcome/template%1.png")
 #define PATH_NICON       (":/images/welcome/load.png")
 #define PATH_BICON       (":/images/welcome/unload.png")
 
@@ -122,17 +119,8 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_layout->addWidget(m_buttons, 0, Qt::AlignCenter);
     m_layout->addStretch();
 
-    QPixmap p(PATH_LOGO);
-    p.setDevicePixelRatio(devicePixelRatioF());
-
-    m_iconLabel->setFixedSize(SIZE_LOGO);
-    m_iconLabel->setPixmap(
-        p.scaled(
-            SIZE_LOGO * devicePixelRatioF(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
+    m_iconLabel->setFixedSize(QSize(60, 60));
+    m_iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/templates.svg", QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
@@ -157,7 +145,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
     m_listWidget->viewport()->installEventFilter(this);
-    m_listWidget->setIconSize(SIZE_TEMPLCON);
+    m_listWidget->setIconSize(QSize(48, 48));
     m_listWidget->setMinimumWidth(400);
     m_listWidget->setItemDelegate(new ProjectTemplatesDelegate(m_listWidget, m_listWidget));
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -199,7 +187,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
 
     for (int i = 0; i < NAMES.size(); i++) {
         auto item = new QListWidgetItem("Test");
-        item->setIcon(QIcon(QString(PATH_TEMPLATE).arg(i)));
+        item->setIcon(QIcon(QStringLiteral(":/images/welcome/template%1.png").arg(i)));
         item->setData(Name, NAMES[i]);
         item->setData(Description, DESCRIPTIONS[i]);
         m_listWidget->addItem(item);

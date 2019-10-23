@@ -4,6 +4,7 @@
 #include <waitingspinnerwidget.h>
 #include <registrationapimanager.h>
 #include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -35,17 +36,11 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
     m_layout->addWidget(m_loadingIndicator, 0 , Qt::AlignCenter);
     m_layout->addStretch();
 
-    QPixmap p(":/images/welcome/forgot.png");
+    QPixmap p(":/images/welcome/forget.svg");
     p.setDevicePixelRatio(devicePixelRatioF());
 
-    m_iconLabel->setFixedSize(QSize(48, 48));
-    m_iconLabel->setPixmap(
-        p.scaled(
-            QSize(48, 48) * devicePixelRatioF(),
-            Qt::IgnoreAspectRatio,
-            Qt::SmoothTransformation
-        )
-    );
+    m_iconLabel->setFixedSize(QSize(60, 60));
+    m_iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/forget.svg", QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);

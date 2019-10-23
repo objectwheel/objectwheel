@@ -2,6 +2,6 @@
     <qresource prefix="/">
         <file>theme.qml</file>
         <file>theme2.qml</file>
-        <file>images/owicon.png</file>
+        <file>images/icon.png</file>
     </qresource>
 </RCC>

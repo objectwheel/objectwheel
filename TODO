@@ -279,16 +279,6 @@ Her previewer update gerektiren ControlPropertyManager::setVsVs ve PreviewManage
 
 Programdaki tüm icon ve pixmap'lar screenChanged sinyali ile yenilenecek
 
-Aşağıdaki gibi olan label'e ikon atayan kodları toplu şekilde set edecek kolay bir kısayol
-fonksiyonu oluştur ve bunu utility functions içine koy
-    QPixmap px(":/images/logo.png");
-    px.setDevicePixelRatio(devicePixelRatioF());
-    m_logoLabel->setFixedSize(QSize(160, 80));
-    m_logoLabel->setPixmap(px.scaled(QSize(160, 80) * devicePixelRatioF(),
-                                     Qt::IgnoreAspectRatio,
-                                     Qt::SmoothTransformation));
-
-
 https://stackoverflow.com/questions/31498114/how-to-programmatically-prevent-linux-computer-from-sleeping-or-turning-on-scree
 https://developer.apple.com/library/archive/qa/qa1340/_index.html
 qt prevent app going sleep

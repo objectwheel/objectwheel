@@ -17,7 +17,7 @@ Countdown::Countdown(QWidget *parent) : QWidget(parent)
     _settings.dotColor = "#50000000";
     _settings.textColor = Qt::white;
     _settings.screwColor = "#70000000";
-    _settings.lineColor = "#70000000";
+    _settings.lineColor = "#40000000";
 
     _settings.borderRadius = 4;
     _settings.digitRadius = 4;

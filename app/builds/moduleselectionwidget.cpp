@@ -51,7 +51,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
 //    lblLogoQt->setScaledContents(true);
 
 //    lblLogoOw->setFixedSize(50, 50);
-////    lblLogoOw->setPixmap(QPixmap(":/images/owicon.png"));
+////    lblLogoOw->setPixmap(QPixmap(":/images/icon.png"));
 //    lblLogoOw->setScaledContents(true);
 
 //    QFont f;
