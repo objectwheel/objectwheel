@@ -31,7 +31,7 @@ QLineEditPrivate::SideWidgetParameters QLineEditPrivate::sideWidgetParameters() 
     SideWidgetParameters result;
     result.iconSize = q->style()->pixelMetric(QStyle::PM_SmallIconSize, 0, q);
     result.margin = result.iconSize / 4;
-    result.widgetWidth = result.iconSize + 6;
+    result.widgetWidth = result.iconSize + 2;
     result.widgetHeight = result.iconSize + 2;
     return result;
 }
@@ -189,10 +189,10 @@ void LineEdit::mousePressEvent(QMouseEvent* event)
 
 QSize LineEdit::sizeHint() const
 {
-    return QSize(QLineEdit::sizeHint().width(), 21);
+    return QSize(QLineEdit::sizeHint().width(), 20);
 }
 
 QSize LineEdit::minimumSizeHint() const
 {
-    return QSize(QLineEdit::minimumSizeHint().width(), 21);
+    return QSize(QLineEdit::minimumSizeHint().width(), 20);
 }

@@ -230,6 +230,7 @@ static QPainterPath highlightPath(const Control* control, bool source)
 
 PaintLayer::PaintLayer(DesignerItem* parent) : DesignerItem(parent)
   , m_geometryUpdateScheduled(false)
+  , m_anchorPixmap(PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg", Qt::white, QSize(11, 11), 0))
 {
 }
 
@@ -295,11 +296,8 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
     DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-    // FIXME: Fix this
-    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg",
-                                                                          Qt::white, devicePixelRatio());
     const qreal z = scene()->zoomLevel();
-    const qreal m = 10;
+    const qreal m = 11;
     QRectF bumpRectangle(0, 0, m/z, m/z);
 
     painter->setPen(Qt::NoPen);
@@ -315,7 +313,7 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     painter->translate(bumpRectangle.center());
     painter->rotate(targetAngle(data));
     painter->scale(1/z, 1/z);
-    painter->drawPixmap(QRect(-m/2, -m/2, m, m), anchorPixmap, anchorPixmap.rect());
+    painter->drawPixmap(QRectF(-m/2, -m/2, m, m), m_anchorPixmap, m_anchorPixmap.rect());
     painter->restore();
 }
 
@@ -370,11 +368,8 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     DesignerScene::drawDashLine(painter, {data.firstControlPoint, data.secondControlPoint});
     DesignerScene::drawDashLine(painter, {data.secondControlPoint, data.endPoint});
 
-    // FIXME: Fix this
-    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg",
-                                                                          Qt::white, devicePixelRatio());
     const qreal z = scene()->zoomLevel();
-    const qreal m = 10;
+    const qreal m = 11;
     QRectF bumpRectangle(0, 0, m/z, m/z);
 
     painter->setPen(Qt::NoPen);
@@ -400,7 +395,7 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     painter->translate(bumpRectangle.center());
     painter->rotate(targetAngle(data));
     painter->scale(1/z, 1/z);
-    painter->drawPixmap(QRect(-m/2, -m/2, m, m), anchorPixmap, anchorPixmap.rect());
+    painter->drawPixmap(QRectF(-m/2, -m/2, m, m), m_anchorPixmap, m_anchorPixmap.rect());
     painter->restore();
 
     painter->save();
@@ -518,11 +513,8 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->setRenderHint(QPainter::Antialiasing); // No SmoothPixmapTransform
     painter->drawPath(curve);
 
-    // FIXME: Fix this
-    static const QPixmap& anchorPixmap = PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg",
-                                                                          Qt::white, devicePixelRatio());
     const qreal z = scene()->zoomLevel();
-    const qreal m = 10;
+    const qreal m = 11;
     const qreal angle = -90 - line.angle() - 45 * qSin(M_PI * (int(line.angle()) % 90) / 90.) * (twist ? -1 : 1);
     QRectF bumpRectangle(0, 0, m/z, m/z);
 
@@ -540,7 +532,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     painter->rotate(angle);
     if (targetControl) {
         painter->scale(1/z, 1/z);
-        painter->drawPixmap(QRect(-m/2, -m/2, m, m), anchorPixmap, anchorPixmap.rect());
+        painter->drawPixmap(QRectF(-m/2, -m/2, m, m), m_anchorPixmap, m_anchorPixmap.rect());
     } else {
         painter->setBrush(Qt::white);
         painter->setPen(DesignerScene::pen("#c00000", 3));

@@ -45,6 +45,7 @@ private:
 
 private:
     bool m_geometryUpdateScheduled;
+    const QPixmap m_anchorPixmap;
 };
 
 #endif // PAINTLAYER_H

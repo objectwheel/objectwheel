@@ -76,10 +76,9 @@ QIcon PaintUtils::renderButtonIcon(const QString& imagePath, const QSize& size, 
     return icon;
 }
 
-QPixmap PaintUtils::renderOverlaidPixmap(const QString& fileName, const QColor& color, qreal dpr)
+QPixmap PaintUtils::renderOverlaidPixmap(const QString& fileName, const QColor& color, const QSize& size, const QWidget* widget)
 {
-    QPixmap source(fileName);
-    source.setDevicePixelRatio(dpr);
+    QPixmap source(pixmap(fileName, size, widget));
     return renderOverlaidPixmap(source, color);
 }
 

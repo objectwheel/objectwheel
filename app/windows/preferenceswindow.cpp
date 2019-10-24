@@ -64,13 +64,11 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     m_listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
-    m_searchLineEdit->addAction(QIcon(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", m_searchLineEdit->devicePixelRatioF())),
-                                QLineEdit::LeadingPosition);
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setPlaceholderText(tr("Search"));
     m_searchLineEdit->setClearButtonEnabled(true);
-    connect(m_searchLineEdit, &LineEdit::textEdited,
-            this, [=] { search(m_searchLineEdit->text()); });
+    m_searchLineEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", QSize(16, 16), this),
+                            QLineEdit::LeadingPosition);
 
     m_dialogButtonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Reset
                                           | QDialogButtonBox::Apply | QDialogButtonBox::Ok);
@@ -79,6 +77,8 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_dialogButtonBox->button(QDialogButtonBox::Reset)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
 
+    connect(m_searchLineEdit, &LineEdit::textEdited,
+            this, [=] { search(m_searchLineEdit->text()); });
     connect(m_listWidget, &QListWidget::currentItemChanged,
             this, [=] (QListWidgetItem* curr, QListWidgetItem* prev) {
         SettingsPage* current = curr ? curr->data(SettingsPageRole).value<SettingsPage*>() : nullptr;
@@ -88,7 +88,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
 
         setCurrentPage(current, previous);
     });
-
     connect(m_dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked,
             this, &PreferencesWindow::done);
     connect(m_dialogButtonBox->button(QDialogButtonBox::Cancel), &QPushButton::clicked,

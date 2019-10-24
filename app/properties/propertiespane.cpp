@@ -25,8 +25,7 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
 
     m_searchEdit->setClearButtonEnabled(true);
     m_searchEdit->setPlaceholderText(tr("Search"));
-    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959",
-                                                             m_searchEdit->devicePixelRatioF()),
+    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", QSize(16, 16), this),
                             QLineEdit::LeadingPosition);
 
     m_idEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), m_idEdit));

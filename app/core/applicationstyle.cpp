@@ -334,6 +334,7 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
 int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option, const QWidget* widget) const
 {
     switch (metric) {
+    case PM_SmallIconSize:
     case PM_ButtonIconSize:
     case PM_TreeViewIndentation:
     case PM_ListViewIconSize:
@@ -362,10 +363,6 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         return 15;
     case PM_MenuButtonIndicator:
         return 12;
-    case PM_SmallIconSize:
-        if (widget && widget->inherits("LineEdit"))
-            return 13;
-        return 16;
     default:
         return QFusionStyle::pixelMetric(metric, option, widget);
     }
