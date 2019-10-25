@@ -13,6 +13,7 @@
 #include <QMdiSubWindow>
 #include <QFocusFrame>
 #include <QToolBar>
+#include <QToolButton>
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
@@ -261,9 +262,12 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
     case SP_LineEditClearButton:
         pixmap = Utils::Icons::EDIT_CLEAR.icon().pixmap(UtilityFunctions::window(widget), {64, 64});
         break;
-    case SP_ToolBarHorizontalExtensionButton:
-        pixmap = PaintUtils::renderOverlaidPixmap(QPixmap(":/images/extension.svg"), QColor("#505050"));
-        break;
+    case SP_ToolBarHorizontalExtensionButton: {
+        QSize size(16, 16); // Default toolbar icon size
+        if (auto btn = qobject_cast<const QToolButton*>(widget))
+            size = btn->iconSize();
+        pixmap = PaintUtils::renderOverlaidPixmap(":/images/extension.svg", "#505050", size, widget);
+    } break;
     default:
         pixmap = QFusionStyle::standardPixmap(standardPixmap, option, widget);
         break;
@@ -342,7 +346,9 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_ToolBarIconSize:
         return 16;
     case PM_ToolBarExtensionExtent:
-        return 18;
+        return 22; // FIXME: Make this 18 and check if ModeSelectorPane extension icon
+        // Minimum geometry for the button, not icon size,
+        // icon size is determined by the toolbar's setIconSize
     case PM_ToolBarSeparatorExtent:
     case PM_DockWidgetSeparatorExtent:
         return 1;

@@ -98,9 +98,8 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_sourceButton->setIconSize({15, 15});
     m_sourceButton->setToolTip(anchorLineText(m_sourceLineType));
 
-    arrowIcon->setFixedSize(8, 8);
-    arrowIcon->setScaledContents(true);
-    arrowIcon->setPixmap(QPixmap(":/images/extension.svg"));
+    arrowIcon->setFixedSize(16, 16);
+    arrowIcon->setPixmap(PaintUtils::renderOverlaidPixmap(":/images/extension.svg", Qt::darkGray, QSize(16, 16), this));
 
     m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
     m_targetControlComboBox->setFixedSize(QSize(140, 23));

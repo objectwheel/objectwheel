@@ -194,8 +194,8 @@ QIcon PaintUtils::renderButtonIcon(const QString& imagePath, const QSize& size, 
     QIcon icon;
     QColor up = widget ? widget->palette().color(QPalette::Active, QPalette::ButtonText) : Qt::black;
     QColor down = widget ? widget->palette().color(QPalette::Active, QPalette::Highlight) : Qt::white;
-    icon.addPixmap(renderOverlaidPixmap(pixmap(imagePath, size, widget), up), QIcon::Normal, QIcon::Off);
-    icon.addPixmap(renderOverlaidPixmap(pixmap(imagePath, size, widget), down), QIcon::Normal, QIcon::On);
+    icon.addPixmap(renderOverlaidPixmap(imagePath, up, size, widget), QIcon::Normal, QIcon::Off);
+    icon.addPixmap(renderOverlaidPixmap(imagePath, down, size, widget), QIcon::Normal, QIcon::On);
     return icon;
 }
 
@@ -244,8 +244,7 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
 QPixmap PaintUtils::renderOverlaidPixmap(const QString& fileName, const QColor& color,
                                          const QSize& size, const QWidget* widget)
 {
-    QPixmap source(pixmap(fileName, size, widget));
-    return renderOverlaidPixmap(source, color);
+    return renderOverlaidPixmap(pixmap(fileName, size, widget), color);
 }
 
 QImage PaintUtils::renderErrorControlImage(const QSizeF& size, const QString& id,
