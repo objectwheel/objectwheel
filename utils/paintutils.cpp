@@ -109,21 +109,6 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     return dest;
 }
 
-QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QString& fileName, const QPen& pen, qreal dpr)
-{
-    QImage dest = renderTransparentImage(size, dpr);
-
-    QPainter p(&dest);
-    p.setRenderHint(QPainter::Antialiasing);
-    p.setBrush(Qt::NoBrush);
-    p.setPen(pen);
-    p.drawPixmap(QRect({}, dest.size() / dest.devicePixelRatio()), QPixmap(fileName));
-    p.drawRect(QRectF{{}, size}.adjusted(0.5, 0.5, -0.5, -0.5));
-    p.end();
-
-    return UtilityFunctions::imageToPixmap(dest);
-}
-
 QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, qreal dpr)
 {
     QImage dest = renderFilledImage(size, color, dpr);

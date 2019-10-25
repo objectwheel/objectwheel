@@ -305,5 +305,6 @@
         <file>images/welcome/verification.svg</file>
         <file>images/question.svg</file>
         <file>images/app/splash.png</file>
+        <file>images/settings/texture.svg</file>
     </qresource>
 </RCC>

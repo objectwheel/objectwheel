@@ -13,6 +13,19 @@
 #include <QGridLayout>
 #include <QSpinBox>
 #include <QPen>
+#include <QPainter>
+
+static QPixmap textureImage(const QString& fileName, const QPen& pen, const QSize& size, const QWidget* widget)
+{
+    QPixmap pixmap(PaintUtils::pixmap(fileName, size, widget));
+    QPainter p(&pixmap);
+    p.setRenderHint(QPainter::Antialiasing);
+    p.setPen(pen);
+    p.setBrush(Qt::NoBrush);
+    p.drawRect(QRectF({}, size).adjusted(0.5, 0.5, -0.5, -0.5));
+    p.end();
+    return pixmap;
+}
 
 SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(parent)
   , m_designGroup(new QGroupBox(contentWidget()))
@@ -347,7 +360,7 @@ void SceneSettingsWidget::fill()
                                            tr("Go to Slot Action"));
 
     m_sceneBackgroundTextureBox->addItem(
-    {renderPropertyColorPixmap(size, QString(":/images/settings/texture.svg"), pen, dpr)}, tr("Checkered"));
+    {textureImage(":/images/settings/texture.svg", pen, size, this)}, tr("Checkered"));
     m_sceneBackgroundTextureBox->addItem(
     {renderPropertyColorPixmap(size, Qt::black, pen, dpr)}, tr("Black"));
     m_sceneBackgroundTextureBox->addItem(

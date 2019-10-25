@@ -1,5 +1,6 @@
 #include <scenesettings.h>
 #include <designersettings.h>
+#include <paintutils.h>
 #include <QBrush>
 
 static const char g_showGuideLines[] = "ShowGuideLines";
@@ -99,7 +100,7 @@ QBrush SceneSettings::toBackgroundBrush() const
 {
     QBrush brush(Qt::SolidPattern);
     if (sceneBackgroundTexture == 0)
-        brush.setTexture(QPixmap(":/images/settings/texture.svg"));
+        brush.setTexture(PaintUtils::pixmap(":/images/settings/texture.svg", QSize(16, 16)));
     else if (sceneBackgroundTexture == 1)
         brush.setColor(Qt::black);
     else if (sceneBackgroundTexture == 2)

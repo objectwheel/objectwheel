@@ -32,7 +32,6 @@ QPixmap pixmap(const QIcon& icon, const QSize& size, const QWidget* widget = nul
                QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color, const QSize& size, const QWidget* widget);
 QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color);
-QPixmap renderPropertyColorPixmap(const QSize& size, const QString& fileName, const QPen& pen, qreal dpr);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, qreal dpr);
 QImage renderFilledImage(const QSizeF& size, const QColor& fillColor, qreal dpr);
 QImage renderTransparentImage(const QSizeF& size, qreal dpr);
