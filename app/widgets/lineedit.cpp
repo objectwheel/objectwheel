@@ -60,7 +60,22 @@ void LineEdit::paintEvent(QPaintEvent*)
     // Draw background
     QStyleOptionFrame option;
     initStyleOption(&option);
-    PaintUtils::drawSearchEditBevel(&p, option);
+    // Draw outline
+    QPainterPath outlinePath;
+    outlinePath.addRoundedRect(option.rect, 4, 4);
+    p.setPen(Qt::NoPen);
+    p.setBrush(QColor("#b1b1b1"));
+    p.drawPath(outlinePath);
+    // Draw inline
+    QPainterPath inlinePath;
+    inlinePath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5), 3.5, 3.5);
+    p.setBrush(QColor("#f0f0f0"));
+    p.drawPath(inlinePath);
+    // Draw body
+    QPainterPath bodyPath;
+    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(1, 1, -1, -1), 3, 3);
+    p.setBrush(QColor("#ffffff"));
+    p.drawPath(bodyPath);
 
     // Draw text and selection
     QRect r = style()->subElementRect(QStyle::SE_LineEditContents, &option, this);

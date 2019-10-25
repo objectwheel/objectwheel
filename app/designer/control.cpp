@@ -268,9 +268,10 @@ void Control::setRenderInfo(const RenderInfo& info)
                         QColor(203, 54, 59), scene() ? (QWidget*) scene()->view() : 0);
         }
 
+        // Non-gui image
         if (m_renderInfo.image.isNull() && size().isValid()) {
-            m_renderInfo.image = PaintUtils::renderNonGuiControlImage(
-                        ToolUtils::toolIconPath(dir()), size(), scene() ? (QWidget*) scene()->view() : 0);
+            m_renderInfo.image = PaintUtils::pixmap(m_icon, QSize(16, 16), scene()
+                                                    ? (QWidget*) scene()->view() : 0).toImage();
         }
     }
 
@@ -602,6 +603,8 @@ void Control::paintContent(QPainter* painter)
             || qAbs(surroundingRect().height() - pixmapSize.height()) > 2) {
         rect.moveTopLeft(QPointF());
     }
+    if (!gui())
+        rect.moveCenter(surroundingRect().center());
     painter->drawPixmap(rect, m_pixmap, m_pixmap.rect());
 }
 
