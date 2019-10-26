@@ -26,7 +26,7 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 signals:
-    void dockWidgetHid(QDockWidget* dockWidget);
+    void dockWidgetCloseButtonClicked(QDockWidget* dockWidget);
 
 private:
     QDockWidget* m_dockWidget;

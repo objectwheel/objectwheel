@@ -19,6 +19,7 @@ public:
 
     void addDockWidget(QDockWidget* dockWidget);
     void removeDockWidget(QDockWidget* dockWidget);
+    void setDockWidgetButtonChecked(QDockWidget* dockWidget, bool checked);
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
@@ -27,7 +28,7 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 signals:
-    void dockWidgetShown(QDockWidget* dockWidget);
+    void dockWidgetButtonClicked(QDockWidget* dockWidget, bool checked);
 
 private:
     QList<DockData> m_dockDataList;

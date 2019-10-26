@@ -8,7 +8,6 @@
 
 DockBar::DockBar(QWidget* parent) : QToolBar(parent)
 {
-    setVisible(false);
     setFocusPolicy(Qt::NoFocus);
     layout()->setSpacing(2);
     layout()->setContentsMargins(1, 1, 1, 1);
@@ -17,19 +16,18 @@ DockBar::DockBar(QWidget* parent) : QToolBar(parent)
 void DockBar::addDockWidget(QDockWidget* dockWidget)
 {
     auto button = new QToolButton(this);
+    button->setCheckable(true);
     button->setFixedWidth(18);
     button->setIcon(dockWidget->windowIcon());
     button->setText(dockWidget->windowTitle());
     button->setCursor(Qt::PointingHandCursor);
     button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     button->setToolTip(UtilityFunctions::toToolTip(tr("Show <b>%1 Pane</b>").arg(dockWidget->windowTitle())));
-    connect(button, &QToolButton::clicked, dockWidget, &QDockWidget::show);
-    connect(button, &QToolButton::clicked, this, [=] { emit dockWidgetShown(dockWidget); });
+    connect(button, &QToolButton::clicked, this, [=] { emit dockWidgetButtonClicked(dockWidget, button->isChecked()); });
     DockData data;
     data.dockWidget = dockWidget;
     data.action = addWidget(button);
     m_dockDataList.append(data);
-    setVisible(true);
 }
 
 void DockBar::removeDockWidget(QDockWidget* dockWidget)
@@ -45,8 +43,18 @@ void DockBar::removeDockWidget(QDockWidget* dockWidget)
             break;
         }
     }
-    if (m_dockDataList.isEmpty())
-        setVisible(false);
+}
+
+void DockBar::setDockWidgetButtonChecked(QDockWidget* dockWidget, bool checked)
+{
+    for (int i = 0; i < m_dockDataList.size(); ++i) {
+        const DockData& data = m_dockDataList.at(i);
+        if (data.dockWidget == dockWidget) {
+            if (auto button = static_cast<QToolButton*>(widgetForAction(data.action)))
+                button->setChecked(checked);
+            break;
+        }
+    }
 }
 
 QSize DockBar::sizeHint() const

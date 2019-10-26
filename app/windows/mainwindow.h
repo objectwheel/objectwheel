@@ -43,8 +43,8 @@ public slots:
 private slots:
     void onModeChange(ModeManager::Mode mode);
     void onScreenChange(QScreen* screen);
-    void onPinBarDockWidgetHid(QDockWidget* dockWidget);
-    void onDockBarDockWidgetShown(QDockWidget* dockWidget);
+    void onPinBarDockWidgetCloseButtonClick(QDockWidget* dockWidget);
+    void onDockBarDockWidgetButtonClick(QDockWidget* dockWidget, bool checked);
 
 protected:
     QSize sizeHint() const override;
