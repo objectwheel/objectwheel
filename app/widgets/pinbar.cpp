@@ -46,6 +46,8 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
 
     connect(m_closeButton, &QToolButton::clicked,
             m_dockWidget, &QDockWidget::hide);
+    connect(m_closeButton, &QToolButton::clicked,
+            this, [=] { emit dockWidgetHid(dockWidget); });
     connect(m_detachButton, &QToolButton::clicked,
             this, &PinBar::onDetachButtonClick);
     connect(m_dockWidget, &QDockWidget::topLevelChanged,

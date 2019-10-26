@@ -29,10 +29,10 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
 
     CentralWidget* centralWidget() const;
-    ControlsPane* controlsPane() const;
-    PropertiesPane* propertiesPane() const;
     AssetsPane* assetsPane() const;
     ToolboxPane* toolboxPane() const;
+    PropertiesPane* propertiesPane() const;
+    ControlsPane* controlsPane() const;
 
 public slots:
     void charge();
@@ -41,11 +41,10 @@ public slots:
     void showRightPanes(bool);
 
 private slots:
-    void hideDocks();
-    void showDocks();
-    void restoreDocks();
     void onModeChange(ModeManager::Mode mode);
     void onScreenChange(QScreen* screen);
+    void onPinBarDockWidgetHid(QDockWidget* dockWidget);
+    void onDockBarDockWidgetShown(QDockWidget* dockWidget);
 
 protected:
     QSize sizeHint() const override;

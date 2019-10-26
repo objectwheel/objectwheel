@@ -25,6 +25,9 @@ private slots:
 private:
     void paintEvent(QPaintEvent* event) override;
 
+signals:
+    void dockWidgetHid(QDockWidget* dockWidget);
+
 private:
     QDockWidget* m_dockWidget;
     QLabel* m_iconLabel;
