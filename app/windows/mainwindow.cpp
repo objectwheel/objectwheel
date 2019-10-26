@@ -406,6 +406,10 @@ void MainWindow::onScreenChange(QScreen* screen)
 void MainWindow::onDockWidgetLocationChange(Qt::DockWidgetArea area)
 {
     auto dockWidget = static_cast<QDockWidget*>(sender());
+    if (area == Qt::LeftDockWidgetArea && m_leftDockBar->buttonExists(dockWidget))
+        return;
+    if (area == Qt::RightDockWidgetArea && m_rightDockBar->buttonExists(dockWidget))
+        return;
     m_leftDockBar->removeDockWidget(dockWidget);
     m_rightDockBar->removeDockWidget(dockWidget);
     if (area == Qt::LeftDockWidgetArea) {

@@ -13,6 +13,15 @@ DockBar::DockBar(QWidget* parent) : QToolBar(parent)
     layout()->setContentsMargins(1, 1, 1, 1);
 }
 
+bool DockBar::buttonExists(QDockWidget* dockWidget) const
+{
+    for (const DockData& data : qAsConst(m_dockDataList)) {
+        if (data.dockWidget == dockWidget)
+            return true;
+    }
+    return false;
+}
+
 void DockBar::addDockWidget(QDockWidget* dockWidget)
 {
     using namespace UtilityFunctions;
@@ -54,10 +63,9 @@ void DockBar::removeDockWidget(QDockWidget* dockWidget)
     }
 }
 
-void DockBar::setDockWidgetButtonChecked(QDockWidget* dockWidget, bool checked)
+void DockBar::setDockWidgetButtonChecked(QDockWidget* dockWidget, bool checked) const
 {
-    for (int i = 0; i < m_dockDataList.size(); ++i) {
-        const DockData& data = m_dockDataList.at(i);
+    for (const DockData& data : qAsConst(m_dockDataList)) {
         if (data.dockWidget == dockWidget) {
             if (auto button = static_cast<QToolButton*>(widgetForAction(data.action)))
                 button->setChecked(checked);

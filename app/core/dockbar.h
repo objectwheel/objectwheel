@@ -17,9 +17,10 @@ class DockBar final : public QToolBar
 public:
     explicit DockBar(QWidget* parent = nullptr);
 
+    bool buttonExists(QDockWidget* dockWidget) const;
     void addDockWidget(QDockWidget* dockWidget);
     void removeDockWidget(QDockWidget* dockWidget);
-    void setDockWidgetButtonChecked(QDockWidget* dockWidget, bool checked);
+    void setDockWidgetButtonChecked(QDockWidget* dockWidget, bool checked) const;
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
