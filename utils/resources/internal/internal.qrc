@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>images/error.png</file>
         <file>fonts/Roboto-Black.ttf</file>
         <file>fonts/Roboto-BlackItalic.ttf</file>
         <file>fonts/Roboto-Bold.ttf</file>
@@ -15,5 +14,6 @@
         <file>fonts/Roboto-ThinItalic.ttf</file>
         <file>fonts/Inconsolata-Bold.ttf</file>
         <file>fonts/Inconsolata-Regular.ttf</file>
+        <file>images/f1.svg</file>
     </qresource>
 </RCC>

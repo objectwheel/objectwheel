@@ -2,7 +2,7 @@
 TEMPLATE = lib
 CONFIG  += plugin c++14 strict_c++
 TARGET   = utils
-QT      += core-private widgets qml quick websockets multimedia quickcontrols2
+QT      += core-private widgets-private widgets qml quick websockets multimedia quickcontrols2
 DEFINES += UTILS_LIBRARY
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
@@ -25,7 +25,8 @@ HEADERS += \
     $$PWD/utilityfunctions.h \
     $$PWD/filesystemutils.h \
     $$PWD/serializeenum.h \
-    $$PWD/qmlerror.h
+    $$PWD/qmlerror.h \
+    textimagehandler.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -37,7 +38,8 @@ SOURCES += \
     $$PWD/paintutils.cpp \
     $$PWD/utilityfunctions.cpp \
     $$PWD/filesystemutils.cpp \
-    $$PWD/qmlerror.cpp
+    $$PWD/qmlerror.cpp \
+    textimagehandler.cpp
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \

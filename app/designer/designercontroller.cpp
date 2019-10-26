@@ -262,13 +262,14 @@ void DesignerController::onContextMenuRequest(const QPoint& scenePos)
     const QList<Control*>& selectedControls = scene->selectedControls();
     int selectedSize = selectedControls.size();
     bool onlyForm = selectedSize == 1 && selectedControls.first()->type() == Form::Type;
+    bool hasErrors = selectedSize == 1 && selectedControls.first()->hasErrors();
 
     m_copyPaste.setPos(scenePos);
     m_designerPane->sendBackAction()->setEnabled(selectedSize == 1 && !onlyForm);
     m_designerPane->bringFrontAction()->setEnabled(selectedSize == 1 && !onlyForm);
-    m_designerPane->editAnchorsAction()->setEnabled(selectedSize == 1 && !onlyForm);
+    m_designerPane->editAnchorsAction()->setEnabled(selectedSize == 1 && !onlyForm && !hasErrors);
     m_designerPane->viewSourceCodeAction()->setEnabled(selectedSize == 1);
-    m_designerPane->goToSlotAction()->setEnabled(selectedSize == 1);
+    m_designerPane->goToSlotAction()->setEnabled(selectedSize == 1 && !hasErrors);
     m_designerPane->cutAction()->setEnabled(selectedSize > 0 && !onlyForm);
     m_designerPane->copyAction()->setEnabled(selectedSize > 0 && !onlyForm);
     m_designerPane->pasteAction()->setEnabled(m_copyPaste.isValid());
@@ -626,6 +627,13 @@ void DesignerController::onEditAnchorsActionTrigger()
 
     Control* sourceControl = selectedControls.first();
     Control* targetControl = sourceControl->parentControl();
+
+    if (sourceControl->hasErrors()) {
+        UtilityFunctions::showMessage(m_designerPane, tr("Oops"),
+                                      tr("Control has got errors, solve these problems first."));
+        return;
+    }
+
     if (DesignerScene::isAnchorViable(sourceControl, targetControl)) {
         scene->setAnchorVisibility(scene->anchorVisibility() | DesignerScene::VisibleForAllControlsDueToAnchorEditor);
         m_designerPane->anchorEditor()->setSourceControl(sourceControl);
@@ -783,7 +791,7 @@ void DesignerController::onMoveLeftActionTrigger()
     const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
     for (Control* control : controls) {
         ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
-        if (control->type() != Form::Type) {
+        if (control->gui() && control->type() != Form::Type) {
             options = ControlPropertyManager::SaveChanges
                     | ControlPropertyManager::UpdateRenderer
                     | ControlPropertyManager::CompressedCall
@@ -801,7 +809,7 @@ void DesignerController::onMoveRightActionTrigger()
     const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
     for (Control* control : controls) {
         ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
-        if (control->type() != Form::Type) {
+        if (control->gui() && control->type() != Form::Type) {
             options = ControlPropertyManager::SaveChanges
                     | ControlPropertyManager::UpdateRenderer
                     | ControlPropertyManager::CompressedCall
@@ -819,7 +827,7 @@ void DesignerController::onMoveUpActionTrigger()
     const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
     for (Control* control : controls) {
         ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
-        if (control->type() != Form::Type) {
+        if (control->gui() && control->type() != Form::Type) {
             options = ControlPropertyManager::SaveChanges
                     | ControlPropertyManager::UpdateRenderer
                     | ControlPropertyManager::CompressedCall
@@ -837,7 +845,7 @@ void DesignerController::onMoveDownActionTrigger()
     const QList<Control*>& controls = movableSelectedAncestorControls(scene->selectedControls());
     for (Control* control : controls) {
         ControlPropertyManager::Options options = ControlPropertyManager::NoOption;
-        if (control->type() != Form::Type) {
+        if (control->gui() && control->type() != Form::Type) {
             options = ControlPropertyManager::SaveChanges
                     | ControlPropertyManager::UpdateRenderer
                     | ControlPropertyManager::CompressedCall

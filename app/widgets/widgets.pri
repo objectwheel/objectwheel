@@ -23,6 +23,5 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/pushbutton.cpp \
            $$PWD/segmentedbar.cpp \
            $$PWD/switch.cpp \
-           $$PWD/tooltipwidget.cpp \
            $$PWD/view.cpp \
            $$PWD/waitingspinnerwidget.cpp

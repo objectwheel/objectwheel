@@ -79,7 +79,6 @@ QWidget* createSeparatorWidget(Qt::Orientation orientation);
 QWindow* window(const QWidget* widget);
 QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left = 0);
 QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top = 0);
-QIcon iconForQmlError(const QmlError& error, const QAbstractItemView* view);
 QPoint centerPos(const QSize& size);
 QString increasedNumberedText(const QString& text, bool addSpace, bool trim);
 QString toPrettyBytesString(qint64 bytes);

@@ -274,7 +274,6 @@
         <file>images/output/issue.svg</file>
         <file>images/flags/en.svg</file>
         <file>images/unavailable.svg</file>
-        <file>images/info.svg</file>
         <file>images/options/material.png</file>
         <file>images/options/universal.png</file>
         <file>images/designer/anchor.svg</file>
@@ -306,5 +305,7 @@
         <file>images/question.svg</file>
         <file>images/app/splash.png</file>
         <file>images/settings/texture.svg</file>
+        <file>images/output/info.svg</file>
+        <file>images/output/warning.svg</file>
     </qresource>
 </RCC>

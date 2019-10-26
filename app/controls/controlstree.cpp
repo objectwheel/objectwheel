@@ -38,7 +38,7 @@ ControlsTree::ControlsTree(QWidget* parent) : QTreeWidget(parent)
         p.setColor(QPalette::Light, "#62A558");
         p.setColor(QPalette::Dark, "#599750");
         p.setColor(QPalette::AlternateBase, "#e8f7e6");
-        p.setColor(QPalette::Link, "#bb0000");
+        p.setColor(QPalette::Link, "#cb363b");
         setPalette(p);
         setStyleSheet(QString { R"qss(
                         QTreeView {

@@ -21,6 +21,25 @@ enum Roles {
     QmlErrorIndexRole,
 };
 
+QIcon iconForQmlError(const QmlError& error)
+{
+    static QIcon info(":/images/output/info.svg"),
+            warning(":/images/output/warning.svg"),
+            critical(":/images/output/issue.svg");
+    switch (error.messageType()) {
+    case QtInfoMsg:
+    case QtDebugMsg:
+        return info;
+    case QtCriticalMsg:
+    case QtFatalMsg:
+        return critical;
+    case QtWarningMsg: // FIXME: Fix this when Qt has a proper fix
+        return /*warning*/critical;
+    default:
+        return info;
+    }
+}
+
 IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
   , m_toolBar(new QToolBar(this))
   , m_iconLabel(new QLabel(this))
@@ -166,7 +185,7 @@ void IssuesWidget::refresh(Control* control)
         item->setData(ControlErrorsRole, QVariant::fromValue<const ControlErrors*>(controlErrors));
         item->setData(Qt::ToolTipRole, PathFinder::locallyCleansed(error.toString()));
         item->setData(Qt::DisplayRole, PathFinder::locallyCleansed(error.toString()));
-        item->setIcon(UtilityFunctions::iconForQmlError(error, this));
+        item->setIcon(iconForQmlError(error));
         addItem(item);
     }
 

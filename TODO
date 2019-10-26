@@ -1,29 +1,15 @@
 Designer Core TODOs
 
-TÜM SVG LERİN KULLANIMINI ONTROL ET, ÖZELLİKLE PaintUtils fonksiyonları ile pixel boyutu uyumunu kontrol et
-    ayrıcal tüm setIcon ları ve tüm setPixmap, setImage leri paletle ilişki olanları palet değişimlerine karşı
-    diğer tümünü de devicePixelRatioF değişimlerine karşı kontrol et, uyumlu yap
+comboboxlar toolbar üzerinde çirkin duruyor bunları düzeltelim gerekirse transparentstyle yapalı
+proje templatelerini bitir, sonra applicationWindow.js gibi olsun isimler
 formspane'i hallet, search da ekle aynı controlspane de ki gibi
-hasErrors olan bir kontrole klavye yön tuşları ile ileri geri hareket ettirince render engine patlıyor
-proje template lerine bir el at, controls 1, controls 2 appları, plain window appı vs olsun, multipage
-    applarda olsun, multiwindow applarda Qt yi temel al, ayrıca ikonlarını değiştir templatelerin
-    isimlerini de, sonra applicationWindow.js gibi olsun isimler
 AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
     tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
 Yukarıdakinin aynısı forms pane için de yapılacak
-Tüm toolbarlar bir standarda bağlanacak, ikon sizeları 16 olacak. ikonları icons8'den alınacak.
-    kendi fixedHeight'leri 20 olacak.
-BottomPane dediğimiz yerdeki tüm ikonları icons8'den alınacak şekilde ve boyutları değişecek şekilde ayarla
-    ayrıca issueswidget dahil, qmlcodeeditor dahil hata ve error ve warning ikonları değiştirilecek icons8 ile
 qfusionstyle'ın combobox, checkbox, button vs gibi temel kontrollerinin konturları inceltilip belirgin
     olarak iyice güzel çizilecek, ayrıca adamların örnek verdiği blog postdaki renkler düşünülerek
     güzelce paletlerde değişikliğe gidilebilir, buton mid, shape, window vs colorları daha modern renklerden
     seçilebilir https://www.qt.io/blog/2012/10/30/cleaning-up-styles-in-qt5-and-adding-fusion
-Yukardaki mevzunun düzeltilmesi akabinde Tüm uygulama için son bir highlighted palette rengi belirlenecek
-Yukarıdaki halledilince de NavigatorPane'de errorlu kontrollerin kırmızı çizim rengi güzelleştirilecek
-    ayrıca hem seçiliyken ilgili item, hemde seçisizken güzel gözükecek
-fileexplorer üzerindeki comboboxun filtre ikonu icons8'den alınacak, ayrıca sitilide transparentstyle
-    olmayabilir, değiştirilebilir
 dockbar'ı bitir
 modeselectorpane ve qmlcodeeditarwidget toolbarları dahil, helpwidget toolbarları vs tüm toolbar kullanımları
     kontrol edilecek, file explorer dahil, bozukluklar giderilecek
@@ -32,30 +18,25 @@ fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu co
     öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
     olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
 properties pane'de ki color propertisinin toolbuttonu neden sapıttı?
-setFixedSize diye aratıp tüm projede çıkan sonuçları düzelt, en son fileexplorer de mi ne kalmıştık
-tüm pane ikonlarını settings ikon klasörüne taşı, designerdan al
 formspane'de ki ekle çıkart butonlarını QToolButton a çevir, ikon boyutları ve buton fixed
     boyutlarını PinBar daki pin butonları ile birebir aynı yap, ve ikonları icons8 den al
-pinleme ikon rengine kırmızı dışında bişey yap
-tüm QToolBar kullanımlarını kontrol et, setIconSize, setFixedSize, vs vs alayına bak
-tüm welcome ikonlarını png den svg ye çevir, ayrıca programdaki diğer tüm resimler içinde
-    aynısını bi düşün
+
 çift tıklama ile kod editörün splitview ile mi yoksa full code editor modda mı açılacağını belirleyebilmek
     için settingslere yeni bir settings ekle
-dockwidget pinbarlarına uygun ikonlar ekle
-modeselectorpane toolbar'ının alt çizgi/kontur'u ile kesişen/yan yana gelen diğer tüm çizgileri temizle
-Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explorer modu buraya ekle
+Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explorer modu buraya ekle,
+    ayrıca tüm dock widgetler vs ve splitview genişlik oranları vs gibi tüm ayarlar program kapatılınca da hatırlanacak
+    şekilde general settings vs şeklinde kayıt edilsin
 aşağı, bayağı aşağı doğru bi son son kontrol et bakalım başka ne buglar
     var çıkıştan önce halletmek isteyebileceğimiz, ayrıca todoyu azıcık temizle
-navigator'a çift tıklanınca ne olmalı bunu kodla, settings ekle
 toollardan patlayanları pasifleştir, toolbox'dan şimdilik sil
 toollar için qml cache yi aç ve qmlcompiler çıktısı olam qmlc dosyalarını da tools.qrc ye ekle
 control.cpp'de ki scene() kullanımı ile alakalı fixme leri temizle
 ana ekren toolbarına render engine durumunu gösterir bir buton ekle ve eğer kapalı ise aktif olup render engini açmaya izin ersin
 "creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
-InspectorPane'e de aynı kontrol sağ tık menüsünden ekle, ayrıca InspectorPane için de settings'e
-    çift tıklanınca varsayılan olarak neyin açılacağı sorulsun, kod mu, SignalEditor mü vs
+InspectorPane'e de aynı kontrol sağ tık menüsünden ekle
 
+TÜM tüm setIcon ları ve tüm setPixmap, setImage leri paletle ilişki olanları palet değişimlerine karşı
+    diğer tümünü de devicePixelRatioF değişimlerine karşı kontrol et, uyumlu yap
 scale > 1 (belki rotation > 0) olan parentlerden childler taşınırken, setBeingRaised yapılca kontrol kayıyor, bunu düzelt
 aynı şekilde resize etmede scale > 1 (belki rotation > 0) durumunda sıkıntı çıkarıyor
 üzeri tam dolu olan bir nesneyi anchorlamak için üstünde boş yer yoksa sıkıntı çıkıyor, headline'da anchorlama için kullanılabilmeli

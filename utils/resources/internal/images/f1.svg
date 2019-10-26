@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.0.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="katman_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 24 24" enable-background="new 0 0 24 24" xml:space="preserve">
+<path fill-rule="evenodd" clip-rule="evenodd" fill="#B0B0B0" d="M3.6,0h16.9c2,0,3.6,1.6,3.6,3.6v16.9c0,2-1.6,3.6-3.6,3.6H3.6
+	c-2,0-3.6-1.6-3.6-3.6V3.6C0,1.6,1.6,0,3.6,0z"/>
+<linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="10429.7773" y1="6971.2197" x2="10307.7188" y2="6849.2183" gradientTransform="matrix(0.1598 0 0 0.1598 -1645.1244 -1092.4514)">
+	<stop  offset="0" style="stop-color:#9D9D9F"/>
+	<stop  offset="1" style="stop-color:#E5E5E5"/>
+</linearGradient>
+<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#SVGID_1_)" d="M3.9,0.5h16.2c1.9,0,3.4,1.5,3.4,3.4v16.2
+	c0,1.9-1.5,3.4-3.4,3.4H3.9c-1.9,0-3.4-1.5-3.4-3.4V3.9C0.5,2,2,0.5,3.9,0.5z"/>
+<linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="9878.1641" y1="6588.1719" x2="9782.6797" y2="6588.1719" gradientTransform="matrix(0.1676 0 0 0.1677 -1635.4188 -1092.8821)">
+	<stop  offset="0" style="stop-color:#CFCFCF"/>
+	<stop  offset="1" style="stop-color:#EFEFEF"/>
+</linearGradient>
+<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#SVGID_2_)" d="M4.5,3h15C20.3,3,21,3.8,21,4.7v14.5c0,1-0.7,1.7-1.5,1.7
+	h-15C3.7,21,3,20.2,3,19.3V4.7C3,3.8,3.7,3,4.5,3z"/>
+<linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="10445.6084" y1="6918.3291" x2="10537.1865" y2="7009.895" gradientTransform="matrix(0.1583 0 0 0.1584 -1649.0698 -1091.3972)">
+	<stop  offset="0" style="stop-color:#CFCFCF"/>
+	<stop  offset="1" style="stop-color:#EFEFEF"/>
+</linearGradient>
+<path fill-rule="evenodd" clip-rule="evenodd" fill="url(#SVGID_3_)" d="M4.5,3.5h15c0.6,0,1,0.5,1,1.1v14.8c0,0.6-0.4,1.1-1,1.1
+	h-15c-0.6,0-1-0.5-1-1.1V4.6C3.5,4,3.9,3.5,4.5,3.5z"/>
+<path d="M6,13V6h4v1H7v2h2v1H7v3H6z M14,13h-1V7.9c-0.6,0.4-1,0.8-2,1.1V8.2c0.5-0.1,1.5-0.9,1.8-1.3c0.3-0.3,0.6-0.6,0.7-0.9H14V13
+	z"/>
+</svg>

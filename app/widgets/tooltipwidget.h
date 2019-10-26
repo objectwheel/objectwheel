@@ -1,18 +1,12 @@
 #ifndef TOOLTIPWIDGET_H
 #define TOOLTIPWIDGET_H
 
+#include <textimagehandler.h>
+
 #include <QEvent>
 #include <QApplication>
 
 #include <private/qwidgettextcontrol_p.h>
-#include <private/qtextimagehandler_p.h>
-
-class TextImageHandler final : public QTextImageHandler
-{
-public:
-    explicit TextImageHandler(QObject* parent = nullptr);
-    void drawObject(QPainter* p, const QRectF& r, QTextDocument* d, int o, const QTextFormat& f) override;
-};
 
 template <typename Class>
 class ToolTipWidget : public Class

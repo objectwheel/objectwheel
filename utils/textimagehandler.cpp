@@ -1,9 +1,11 @@
-#include <tooltipwidget.h>
+#include <textimagehandler.h>
 #include <paintutils.h>
 
 #include <QThread>
 #include <QPainter>
 #include <QFileInfo>
+#include <QApplication>
+#include <QWidget>
 
 TextImageHandler::TextImageHandler(QObject* parent) : QTextImageHandler(parent)
 {

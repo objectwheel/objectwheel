@@ -1,6 +1,5 @@
 #include <utilityfunctions.h>
 #include <delayer.h>
-#include <utils/utilsicons.h>
 #include <paintutils.h>
 #include <crossplatform.h>
 #include <async.h>
@@ -243,33 +242,6 @@ QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top)
     return ret;
 }
 
-QIcon iconForQmlError(const QmlError& error, const QAbstractItemView* view)
-{
-    static QIcon info, warning, critical;
-    if (info.isNull()) {
-        info = Utils::Icons::INFO.icon();
-        warning = Utils::Icons::WARNING.icon();
-        critical = Utils::Icons::CRITICAL.icon();
-        Q_ASSERT(window(view));
-        info.addPixmap(info.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
-        warning.addPixmap(warning.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
-        critical.addPixmap(critical.pixmap(window(view), view->iconSize(), QIcon::Normal), QIcon::Selected);
-    }
-
-    switch (error.messageType()) {
-    case QtInfoMsg:
-    case QtDebugMsg:
-        return info;
-    case QtCriticalMsg:
-    case QtFatalMsg:
-        return critical;
-    case QtWarningMsg: // TODO: Fix this when Qt has a proper fix
-        return /*warning*/critical;
-    default:
-        return info;
-    }
-}
-
 bool comboContainsWord(QComboBox* comboBox, const QString& word)
 {
     for (int i = 0; i < comboBox->count(); ++i) {
@@ -438,7 +410,7 @@ QString deviceInfoToolTip(const QVariantMap& deviceInfo)
 {
     return QString(R"(
                 <html><body><table>
-                <tr style='white-space:pre'><th><img src=":/images/info.svg" width="16"/></th><th>%1</th><th></th></tr>
+                <tr style='white-space:pre'><th><img src=":/images/output/info.svg" width="16"/></th><th>%1</th><th></th></tr>
                 <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
                 <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
                 <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>

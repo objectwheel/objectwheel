@@ -43,6 +43,9 @@
 #include <QPaintEvent>
 #include <QVBoxLayout>
 
+#include <textimagehandler.h>
+#include <private/qwidgettextcontrol_p.h>
+
 namespace Utils {
 namespace Internal {
 
@@ -125,6 +128,16 @@ TextTip::TextTip(QWidget *parent) : QTipLabel(parent)
     setAlignment(Qt::AlignLeft);
     setIndent(1);
     setWindowOpacity(style()->styleHint(QStyle::SH_ToolTipLabel_Opacity, 0, this) / 255.0);
+
+    // NOTE: Tooltip blurry image bug fix
+    setText("<html></html>"); // Make sure it creates QWidgetTextControl
+    if (auto control = findChild<QWidgetTextControl*>()) {
+        QAbstractTextDocumentLayout* layout = control->document()->documentLayout();
+        if (auto object = dynamic_cast<QObject*>(layout->handlerForObject(QTextFormat::ImageObject))) {
+            if (!object->inherits("TextImageHandler"))
+                layout->registerHandler(QTextFormat::ImageObject, new TextImageHandler(layout));
+        }
+    }
 }
 
 static bool likelyContainsLink(const QString &s)
@@ -150,7 +163,7 @@ void TextTip::configure(const QPoint &pos, QWidget *w)
         setText(m_text);
     else
         setText(QString::fromLatin1("<table><tr><td valign=middle>%1</td><td>&nbsp;&nbsp;"
-                                    "<img src=\":/utils/tooltip/images/f1.png\"></td>"
+                                    "<img src=\":/images/f1.svg\"></td>"
                                     "</tr></table>").arg(m_text));
 
     // Make it look good with the default ToolTip font on Mac, which has a small descent.
