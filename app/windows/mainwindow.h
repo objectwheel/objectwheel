@@ -43,6 +43,7 @@ public slots:
 private slots:
     void onModeChange(ModeManager::Mode mode);
     void onScreenChange(QScreen* screen);
+    void onDockWidgetLocationChange(Qt::DockWidgetArea area);
     void onPinBarDockWidgetCloseButtonClick(QDockWidget* dockWidget);
     void onDockBarDockWidgetButtonClick(QDockWidget* dockWidget, bool checked);
 
