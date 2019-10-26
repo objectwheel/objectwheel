@@ -34,11 +34,11 @@ public:
     PropertiesPane* propertiesPane() const;
     ControlsPane* controlsPane() const;
 
+    void setDockWidgetAreasVisible(Qt::DockWidgetAreas areas, bool visible);
+
 public slots:
     void charge();
     void discharge();
-    void showLeftPanes(bool);
-    void showRightPanes(bool);
 
 private slots:
     void onModeChange(ModeManager::Mode mode);

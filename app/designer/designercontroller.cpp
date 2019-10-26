@@ -630,7 +630,7 @@ void DesignerController::onEditAnchorsActionTrigger()
 
     if (sourceControl->hasErrors()) {
         UtilityFunctions::showMessage(m_designerPane, tr("Oops"),
-                                      tr("Control has got errors, solve these problems first."));
+                                      tr("The control has got errors, solve these problems first."));
         return;
     }
 
@@ -663,7 +663,7 @@ void DesignerController::onGoToSlotActionTrigger()
 
     if (control->hasErrors()) {
         UtilityFunctions::showMessage(m_designerPane, tr("Oops"),
-                                      tr("Control has got errors, solve these problems first."));
+                                      tr("The control has got errors, solve these problems first."));
         return;
     }
 

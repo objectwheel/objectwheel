@@ -149,13 +149,11 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
                 if (selectedControls.size() == 0)
                     message = tr("No controls selected");
                 else if (selectedControls.size() == 1)
-                    message = tr("Control has errors");
+                    message = tr("The control has got errors");
                 else
                     message = tr("Multiple controls selected");
 
-                QColor messageColor = selectedControls.size() == 1
-                        ? palette().linkVisited().color()
-                        : palette().dark().color();
+                QColor messageColor = palette().dark().color();
                 messageColor.setAlpha(180);
 
                 painter.setPen(messageColor);

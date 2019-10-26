@@ -258,13 +258,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(m_runController, &RunController::segmentedBarActionTriggered,
             [=] (int index, bool checked) {
-        if (index == 0) {
-            showLeftPanes(checked);
-        } else if (index == 1) {
+        if (index == 0)
+            setDockWidgetAreasVisible(Qt::LeftDockWidgetArea, checked);
+        else if (index == 1)
             m_centralWidget->outputController()->setPaneVisible(checked);
-        } else {
-            showRightPanes(checked);
-        }
+        else
+            setDockWidgetAreasVisible(Qt::RightDockWidgetArea, checked);
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { m_assetsPane->setRootPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir())); });
@@ -321,57 +320,31 @@ void MainWindow::discharge()
     m_formsPane->discharge();
     m_assetsPane->discharge();
 
-    showLeftPanes(true);
-    showRightPanes(true);
+    m_assetsDockWidgetVisible = true;
+    m_propertiesDockWidgetVisible = true;
+    m_formsDockWidgetVisible = true;
+    m_controlsDockWidgetVisible = true;
+    m_toolboxDockWidgetVisible = true;
+
+    setDockWidgetAreasVisible(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, true);
 }
 
-void MainWindow::showLeftPanes(bool show)
+void MainWindow::setDockWidgetAreasVisible(Qt::DockWidgetAreas areas, bool visible)
 {
-    if (dockWidgetArea(m_assetsDockWidget) == Qt::LeftDockWidgetArea) {
-        m_assetsDockWidget->setVisible(show);
-        m_assetsDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_propertiesDockWidget) == Qt::LeftDockWidgetArea) {
-        m_propertiesDockWidget->setVisible(show);
-        m_propertiesDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_formsDockWidget) == Qt::LeftDockWidgetArea) {
-        m_formsDockWidget->setVisible(show);
-        m_formsDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_controlsDockWidget) == Qt::LeftDockWidgetArea) {
-        m_controlsDockWidget->setVisible(show);
-        m_controlsDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_toolboxDockWidget) == Qt::LeftDockWidgetArea) {
-        m_toolboxDockWidget->setVisible(show);
-        m_toolboxDockWidgetVisible = show;
-    }
-}
-
-void MainWindow::showRightPanes(bool show)
-{
-    if (dockWidgetArea(m_assetsDockWidget) == Qt::RightDockWidgetArea) {
-        m_assetsDockWidget->setVisible(show);
-        m_assetsDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_propertiesDockWidget) == Qt::RightDockWidgetArea) {
-        m_propertiesDockWidget->setVisible(show);
-        m_propertiesDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_formsDockWidget) == Qt::RightDockWidgetArea) {
-        m_formsDockWidget->setVisible(show);
-        m_formsDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_controlsDockWidget) == Qt::RightDockWidgetArea) {
-        m_controlsDockWidget->setVisible(show);
-        m_controlsDockWidgetVisible = show;
-    }
-    if (dockWidgetArea(m_toolboxDockWidget) == Qt::RightDockWidgetArea) {
-        m_toolboxDockWidget->setVisible(show);
-        m_toolboxDockWidgetVisible = show;
-    }
-    m_rightDockBar->setEnabled(true);
+    if (dockWidgetArea(m_assetsDockWidget) & areas)
+        m_assetsDockWidget->setVisible(visible && m_assetsDockWidgetVisible);
+    if (dockWidgetArea(m_propertiesDockWidget) & areas)
+        m_propertiesDockWidget->setVisible(visible && m_propertiesDockWidgetVisible);
+    if (dockWidgetArea(m_formsDockWidget) & areas)
+        m_formsDockWidget->setVisible(visible && m_formsDockWidgetVisible);
+    if (dockWidgetArea(m_controlsDockWidget) & areas)
+        m_controlsDockWidget->setVisible(visible && m_controlsDockWidgetVisible);
+    if (dockWidgetArea(m_toolboxDockWidget) & areas)
+        m_toolboxDockWidget->setVisible(visible && m_toolboxDockWidgetVisible);
+    if (areas & Qt::LeftDockWidgetArea)
+        m_leftDockBar->setEnabled(visible);
+    if (areas & Qt::RightDockWidgetArea)
+        m_rightDockBar->setEnabled(visible);
 }
 
 void MainWindow::onModeChange(ModeManager::Mode mode)
@@ -381,23 +354,11 @@ void MainWindow::onModeChange(ModeManager::Mode mode)
     case ModeManager::Documents:
     case ModeManager::Editor:
     case ModeManager::Options:
-        m_assetsDockWidget->hide();
-        m_propertiesDockWidget->hide();
-        m_formsDockWidget->hide();
-        m_controlsDockWidget->hide();
-        m_toolboxDockWidget->hide();
-        m_leftDockBar->setEnabled(false);
-        m_rightDockBar->setEnabled(false);
+        setDockWidgetAreasVisible(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, false);
         break;
     case ModeManager::Designer:
     case ModeManager::Split:
-        m_assetsDockWidget->setVisible(m_assetsDockWidgetVisible);
-        m_propertiesDockWidget->setVisible(m_propertiesDockWidgetVisible);
-        m_formsDockWidget->setVisible(m_formsDockWidgetVisible);
-        m_controlsDockWidget->setVisible(m_controlsDockWidgetVisible);
-        m_toolboxDockWidget->setVisible(m_toolboxDockWidgetVisible);
-        m_leftDockBar->setEnabled(true);
-        m_rightDockBar->setEnabled(true);
+        setDockWidgetAreasVisible(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, true);
         break;
     default:
         break;
