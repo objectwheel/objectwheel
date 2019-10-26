@@ -537,7 +537,7 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
         painter->setBrush(Qt::white);
         painter->setPen(DesignerScene::pen("#c00000", 3));
         painter->drawRoundedRect(QRect(-m/2/z, -m/2/z, m/z, m/z), m/2/z, m/2/z);
-        painter->drawLine(QPointF(-m/2/z + 2/z, -m/2/z + 2/z), QPointF(m/2/z - 2/z, m/2/z - 2/z));
+        painter->drawLine(QPointF(-m/2/z + 2/z, -m/2/z + 2/z), QPointF(m/2/z - 1/z, m/2/z - 1/z));
     }
     painter->restore();
 }
