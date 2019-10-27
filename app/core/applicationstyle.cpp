@@ -109,16 +109,16 @@ ApplicationStyle::ApplicationStyle() : QFusionStyle()
 
 QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption* option, const QSize& contentsSize, const QWidget* widget) const
 {
-    QSize sz(contentsSize);
+    QSize sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
 
     switch (type) {
     case CT_MenuItem:
         if (const QStyleOptionMenuItem *mi
                 = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
+            sz = contentsSize;
             int maxpmw = mi->maxIconWidth;
             const QComboBox *comboBox = qobject_cast<const QComboBox*>(widget);
-            int w = sz.width(),
-                    h = sz.height();
+            int w = sz.width(), h = sz.height();
             if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
                 w = 10;
                 h = 2; // Menu separator height
@@ -159,38 +159,32 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             sz = QSize(w, h);
         } break;
     case CT_MenuBarItem:
+        sz = contentsSize;
         if (!sz.isEmpty())
             sz += QSize(12, 4); // Constants from QWindowsStyle
         break;
-    case CT_Menu:
-        if (proxy() == this) {
-            sz = contentsSize;
-        } else {
-            QStyleHintReturnMask menuMask;
-            QStyleOption myOption = *option;
-            myOption.rect.setSize(sz);
-            if (proxy()->styleHint(SH_Menu_Mask, &myOption, widget, &menuMask))
-                sz = menuMask.region.boundingRect().size();
-        } break;
+    case CT_Menu: {
+        sz = contentsSize;
+        QStyleHintReturnMask menuMask;
+        QStyleOption myOption = *option;
+        myOption.rect.setSize(sz);
+        if (proxy()->styleHint(SH_Menu_Mask, &myOption, widget, &menuMask))
+            sz = menuMask.region.boundingRect().size();
+    } break;
     case CT_ItemViewItem:
-        if (const QStyleOptionViewItem *vopt
-                = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
-            sz = QFusionStyle::sizeFromContents(type, vopt, contentsSize, widget);
-            sz.setHeight(sz.height() + 2);
-        } break;
-
+        sz.setHeight(sz.height() + 2);
+        break;
     case CT_ToolButton:
-        sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
         if (hasVerticalParentToolBar(widget))
             sz = sz.transposed();
         break;
     case CT_PushButton:
-        if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(option)) {
-            sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
-            sz.setHeight(21);
-        } break;
+        sz.setHeight(21);
+        break;
+    case CT_ComboBox:
+        sz.setHeight(21);
+        break;
     default:
-        sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
         break;
     }
     return sz;

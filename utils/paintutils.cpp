@@ -287,7 +287,7 @@ void PaintUtils::drawPushButtonBevel(QPainter* painter, const QStyleOption* opti
     const QRectF rect = option->rect;
     const bool hasHover = option->state & QStyle::State_MouseOver;
     const bool isEnabled = option->state & QStyle::State_Enabled;
-    const bool isDown = (option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On);
+    const bool isDown = option->state & QStyle::State_Sunken;
 
     bool hasMenu = false;
     bool isFlat = false;
@@ -300,37 +300,38 @@ void PaintUtils::drawPushButtonBevel(QPainter* painter, const QStyleOption* opti
     }
 
     painter->save();
+    painter->setRenderHint(QPainter::Antialiasing);
 
     if (!isFlat || isDown) {
         // Draw shadows
         QLinearGradient shadowGrad(0, 0, 0, 1);
         shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-        shadowGrad.setColorAt(0.0, "#07000000");
-        shadowGrad.setColorAt(0.1, "#07000000");
-        shadowGrad.setColorAt(0.9, "#07000000");
-        shadowGrad.setColorAt(1.0, "#15000000");
+        shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
+        shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
+        shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
+        shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
         painter->setPen(Qt::NoPen);
         painter->setBrush(shadowGrad);
         painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-        painter->setBrush(QColor("#09000000"));
+        painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
         painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
         // Draw border
         QLinearGradient borderGrad(0, 0, 0, 1);
         borderGrad.setCoordinateMode(QGradient::ObjectMode);
-        borderGrad.setColorAt(0.0, isDown ? "#3280f7" : (isDefault ? "#5094f7" : "#d8d8d8"));
-        borderGrad.setColorAt(0.1, isDown ? "#2e7bf3" : (isDefault ? "#468ef8" : "#d0d0d0"));
-        borderGrad.setColorAt(0.9, isDown ? "#1a5fda" : (isDefault ? "#196dfb" : "#d0d0d0"));
-        borderGrad.setColorAt(1.0, isDown ? "#1659d5" : (isDefault ? "#1367fb" : "#bcbcbc"));
+        borderGrad.setColorAt(0.0, isEnabled ? isDown ? "#3280f7" : (isDefault ? "#5094f7" : "#d8d8d8") : "#ebebeb");
+        borderGrad.setColorAt(0.1, isEnabled ? isDown ? "#2e7bf3" : (isDefault ? "#468ef8" : "#d0d0d0") : "#e7e7e7");
+        borderGrad.setColorAt(0.9, isEnabled ? isDown ? "#1a5fda" : (isDefault ? "#196dfb" : "#d0d0d0") : "#e7e7e7");
+        borderGrad.setColorAt(1.0, isEnabled ? isDown ? "#1659d5" : (isDefault ? "#1367fb" : "#bcbcbc") : "#dddddd");
         painter->setBrush(borderGrad);
         painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
 
         // Draw body
         QLinearGradient bodyGrad(0, 0, 0, 1);
         bodyGrad.setCoordinateMode(QGradient::ObjectMode);
-        bodyGrad.setColorAt(0.0, isDown ? "#5496f9" : (isDefault ? "#6fa7f8" : "white"));
-        bodyGrad.setColorAt(0.9, isDown ? "#1c65dd" : (isDefault ? "#176ffb" : "white"));
-        bodyGrad.setColorAt(1.0, isDown ? "#1c65dd" : (isDefault ? "#176ffb" : "white"));
+        bodyGrad.setColorAt(0.0, isEnabled ? isDown ? "#5496f9" : (isDefault ? "#6fa7f8" : "white") : "white");
+        bodyGrad.setColorAt(0.9, isEnabled ? isDown ? "#1c65dd" : (isDefault ? "#176ffb" : "white") : "white");
+        bodyGrad.setColorAt(1.0, isEnabled ? isDown ? "#1c65dd" : (isDefault ? "#176ffb" : "white") : "white");
         painter->setBrush(bodyGrad);
         painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
     }
