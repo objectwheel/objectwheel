@@ -36,24 +36,25 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     ApplicationStyle::setButtonStyle(m_runButton, ApplicationStyle::TexturedRounded);
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
-    m_runButton->setFixedWidth(38);
+    m_runButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_stopButton, ApplicationStyle::TexturedRounded);
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setToolTip(tr("Stop"));
-    m_stopButton->setFixedWidth(38);
+    m_stopButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_preferencesButton, ApplicationStyle::TexturedRounded);
     m_preferencesButton->setCursor(Qt::PointingHandCursor);
     m_preferencesButton->setToolTip(tr("Show Preferences"));
-    m_preferencesButton->setFixedWidth(38);
+    m_preferencesButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_projectsButton, ApplicationStyle::TexturedRounded);
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
-    m_projectsButton->setFixedWidth(38);
+    m_projectsButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_segmentedBar, ApplicationStyle::TexturedRounded);
+    ApplicationStyle::setHighlightingDisabledForCheckedState(m_segmentedBar, true);
     m_segmentedBar->setCursor(Qt::PointingHandCursor);
     m_segmentedBar->setIconSize({18, 18});
 

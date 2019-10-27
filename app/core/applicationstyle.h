@@ -11,8 +11,8 @@ class ApplicationStyle : public QFusionStyle
 
 public:
     enum ButtonStyle {
-        Push, // Active by default
-        Disclosure,
+        Push, // Default for push buttons
+        Disclosure,  // Default for anything else
         Help,
         TexturedRounded
     };
@@ -20,10 +20,10 @@ public:
 
     static ButtonStyle buttonStyle(const QWidget* widget);
     static void setButtonStyle(QWidget* widget, ButtonStyle buttonStyle);
-
+    static bool highlightingDisabledForCheckedState(const QWidget* widget);
+    static void setHighlightingDisabledForCheckedState(QWidget* widget, bool highlightDisabled);
     static QPointF visualPos(Qt::LayoutDirection direction, const QRectF& boundingRect,
                              const QPointF& logicalPos);
-
 public:
     ApplicationStyle();
     QSize sizeFromContents(QStyle::ContentsType type, const QStyleOption* option,

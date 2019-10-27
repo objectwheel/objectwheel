@@ -14,6 +14,7 @@
 #include <QFocusFrame>
 #include <QToolBar>
 #include <QToolButton>
+#include <QPushButton>
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
@@ -25,7 +26,8 @@ const int macItemFrame          = 2;    // menu item frame width
 const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
 const qreal comboBoxDefaultHeight[3] = { 26, 22, 19 };
-static const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
+const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
+const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
 
 void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect,
                           Qt::LayoutDirection dir)
@@ -106,12 +108,36 @@ QRectF adjustedControlFrame(const QRectF& rect) // Used by transparentstyle.cpp
 
 ApplicationStyle::ButtonStyle ApplicationStyle::buttonStyle(const QWidget* widget)
 {
-    return widget->property(buttonStyleProperty).value<ButtonStyle>();
+    if (widget == 0) {
+        qWarning() << "ApplicationStyle: Null widget pointer passed through";
+        return Disclosure;
+    }
+    const QVariant& val = widget->property(buttonStyleProperty);
+    if (val.isValid())
+        return val.value<ButtonStyle>();
+    if (qobject_cast<const QPushButton*>(widget))
+        return Push;
+    else
+        return Disclosure;
 }
 
 void ApplicationStyle::setButtonStyle(QWidget* widget, ApplicationStyle::ButtonStyle buttonStyle)
 {
     widget->setProperty(buttonStyleProperty, buttonStyle);
+}
+
+bool ApplicationStyle::highlightingDisabledForCheckedState(const QWidget* widget)
+{
+    if (widget == 0) {
+        qWarning() << "ApplicationStyle: Null widget pointer passed through";
+        return false;
+    }
+    return widget->property(highlightingDisabledForCheckedStateProperty).value<bool>();
+}
+
+void ApplicationStyle::setHighlightingDisabledForCheckedState(QWidget* widget, bool highlightingDisabledForCheckedState)
+{
+    widget->setProperty(highlightingDisabledForCheckedStateProperty, highlightingDisabledForCheckedState);
 }
 
 QPointF ApplicationStyle::visualPos(Qt::LayoutDirection direction, const QRectF& boundingRect,
@@ -398,7 +424,8 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     }
 }
 
-void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
+void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption* option,
+                                     QPainter* painter, const QWidget* widget) const
 {
     switch (element) {
     case PE_Frame: {
@@ -509,16 +536,15 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             break;
         }
     case PE_PanelButtonCommand: {
+        QRectF rect(option->rect);
+        ButtonStyle style = buttonStyle(widget);
         bool hasMenu = false;
         bool isFlat = false;
         bool isDefault = false;
         bool hasHover = option->state & QStyle::State_MouseOver;
         bool isEnabled = option->state & QStyle::State_Enabled;
-        bool isDown = (option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On);
+        bool isDown = (option->state & QStyle::State_Sunken) || (!highlightingDisabledForCheckedState(widget) && option->state & QStyle::State_On);
         bool hasFocus = (option->state & QStyle::State_HasFocus) && (option->state & QStyle::State_KeyboardFocusChange);
-
-        QRectF rect(option->rect);
-        ButtonStyle style = buttonStyle(widget);
 
         if (const QStyleOptionButton* button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
             hasMenu = button->features & QStyleOptionButton::HasMenu;
@@ -552,19 +578,19 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw border
                 QLinearGradient borderGrad(0, 0, 0, 1);
                 borderGrad.setCoordinateMode(QGradient::ObjectMode);
-                borderGrad.setColorAt(0.0, isEnabled ? isDown ? "#3280f7" : ((isDefault | hasFocus) ? "#5094f7" : "#d8d8d8") : "#ebebeb");
-                borderGrad.setColorAt(0.1, isEnabled ? isDown ? "#2e7bf3" : ((isDefault | hasFocus) ? "#468ef8" : "#d0d0d0") : "#e7e7e7");
-                borderGrad.setColorAt(0.9, isEnabled ? isDown ? "#1a5fda" : ((isDefault | hasFocus) ? "#196dfb" : "#d0d0d0") : "#e7e7e7");
-                borderGrad.setColorAt(1.0, isEnabled ? isDown ? "#1659d5" : ((isDefault | hasFocus) ? "#1367fb" : "#bcbcbc") : "#dddddd");
+                borderGrad.setColorAt(0.0, isEnabled ? isDown ? "#3280f7" : ((isDefault || hasFocus) ? "#5094f7" : "#d8d8d8") : "#ebebeb");
+                borderGrad.setColorAt(0.1, isEnabled ? isDown ? "#2e7bf3" : ((isDefault || hasFocus) ? "#468ef8" : "#d0d0d0") : "#e7e7e7");
+                borderGrad.setColorAt(0.9, isEnabled ? isDown ? "#1a5fda" : ((isDefault || hasFocus) ? "#196dfb" : "#d0d0d0") : "#e7e7e7");
+                borderGrad.setColorAt(1.0, isEnabled ? isDown ? "#1659d5" : ((isDefault || hasFocus) ? "#1367fb" : "#bcbcbc") : "#dddddd");
                 painter->setBrush(borderGrad);
                 painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
 
                 // Draw body
                 QLinearGradient bodyGrad(0, 0, 0, 1);
                 bodyGrad.setCoordinateMode(QGradient::ObjectMode);
-                bodyGrad.setColorAt(0.0, isEnabled ? isDown ? "#5496f9" : ((isDefault | hasFocus) ? "#6fa7f8" : "white") : "white");
-                bodyGrad.setColorAt(0.9, isEnabled ? isDown ? "#1c65dd" : ((isDefault | hasFocus) ? "#176ffb" : "white") : "white");
-                bodyGrad.setColorAt(1.0, isEnabled ? isDown ? "#1c65dd" : ((isDefault | hasFocus) ? "#176ffb" : "white") : "white");
+                bodyGrad.setColorAt(0.0, isEnabled ? isDown ? "#5496f9" : ((isDefault || hasFocus) ? "#6fa7f8" : "white") : "white");
+                bodyGrad.setColorAt(0.9, isEnabled ? isDown ? "#1c65dd" : ((isDefault || hasFocus) ? "#176ffb" : "white") : "white");
+                bodyGrad.setColorAt(1.0, isEnabled ? isDown ? "#1c65dd" : ((isDefault || hasFocus) ? "#176ffb" : "white") : "white");
                 painter->setBrush(bodyGrad);
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
             } break;
@@ -629,6 +655,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             } break;
             case TexturedRounded: {
                 // Draw drop shadow
+                rect.adjust(0.5, 0, -0.5, 0);
                 QLinearGradient shadowGrad(0, 0, 1, 0);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
                 shadowGrad.setColorAt(0, "#12202020");
@@ -887,7 +914,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 if (!button->text.isEmpty())
                     w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 3;
                 point = QPointF(ir.x() + ir.width() / 2 - w / 2,
-                               ir.y() + ir.height() / 2 - h / 2);
+                                ir.y() + ir.height() / 2 - h / 2);
                 w = pixmap.width() / pixmap.devicePixelRatio();
                 if (button->direction == Qt::RightToLeft)
                     point.rx() += w;
@@ -907,8 +934,25 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
             // Draw item text
             QStyleOptionButton copy(*button);
-            if (copy.state & State_Sunken)
-                copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
+            if (buttonStyle(widget) == Push) {
+                bool isFlat = false;
+                bool isDefault = false;
+                bool isEnabled = option->state & QStyle::State_Enabled;
+                bool isDown = (option->state & QStyle::State_Sunken) || (!highlightingDisabledForCheckedState(widget) && option->state & QStyle::State_On);
+                bool hasFocus = (option->state & QStyle::State_HasFocus) && (option->state & QStyle::State_KeyboardFocusChange);
+
+                if (const QStyleOptionButton* button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
+                    isFlat = button->features & QStyleOptionButton::Flat;
+                    isDefault = button->features & QStyleOptionButton::DefaultButton;
+                }
+
+                if (isEnabled && (!isFlat || isDown)) {
+                    if (isDown)
+                        copy.palette.setColor(QPalette::ButtonText, "#e0ebfb");
+                    else if (isDefault || hasFocus)
+                        copy.palette.setColor(QPalette::ButtonText, Qt::white);
+                }
+            }
             drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
                          copy.text, QPalette::ButtonText);
         } break;

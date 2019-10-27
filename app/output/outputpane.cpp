@@ -32,6 +32,7 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_stackedWidget->addWidget(m_consoleWidget);
 
     ApplicationStyle::setButtonStyle(m_issuesButton, ApplicationStyle::Disclosure);
+    ApplicationStyle::setHighlightingDisabledForCheckedState(m_issuesButton, true);
     m_issuesButton->setCheckable(true);
     m_issuesButton->setFixedHeight(22);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
@@ -39,6 +40,7 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_issuesButton->setToolTip(tr("Activate issues list"));
 
     ApplicationStyle::setButtonStyle(m_consoleButton, ApplicationStyle::Disclosure);
+    ApplicationStyle::setHighlightingDisabledForCheckedState(m_consoleButton, true);
     m_consoleButton->setCheckable(true);
     m_consoleButton->setFixedHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);

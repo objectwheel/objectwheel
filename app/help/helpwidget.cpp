@@ -50,7 +50,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_homeButton->setFixedSize({20, 20});
     m_backButton->setFixedSize({20, 20});
     m_forthButton->setFixedSize({20, 20});
-    m_typeCombo->setFixedSize({222, 20});
+    m_typeCombo->setFixedSize({225, 20});
     m_titleLabel->setFixedHeight(20);
 
     m_toolBar->layout()->setSpacing(2);
@@ -72,8 +72,8 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     UtilityFunctions::adjustFontPixelSize(m_titleLabel, -1);
     m_titleLabel->setTextFormat(Qt::RichText);
 
-    m_typeCombo->addItem("Index");
     m_typeCombo->addItem("Contents");
+    m_typeCombo->addItem("Index");
 
     m_typeCombo->setCursor(Qt::PointingHandCursor);
     m_homeButton->setCursor(Qt::PointingHandCursor);
@@ -90,7 +90,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
     m_splitter->setChildrenCollapsible(false);
     m_splitter->setOrientation(Qt::Horizontal);
-    m_splitter->addWidget(m_indexWidget);
+    m_splitter->addWidget(m_contentsWidget);
     m_splitter->addWidget(m_helpViewer);
     m_splitter->setSizes(QList<int>() << 140 << 600);
 
@@ -193,9 +193,9 @@ void HelpWidget::discharge()
 void HelpWidget::onTypeChange()
 {
     if (m_typeCombo->currentIndex() == 0)
-        m_splitter->replaceWidget(0, m_indexWidget);
-    else
         m_splitter->replaceWidget(0, m_contentsWidget);
+    else
+        m_splitter->replaceWidget(0, m_indexWidget);
 }
 
 void HelpWidget::onTitleChange()
