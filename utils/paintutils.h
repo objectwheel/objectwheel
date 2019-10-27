@@ -9,7 +9,6 @@ class QStyleOptionButton;
 namespace PaintUtils {
 
 bool isBlankImage(const QImage& image);
-void drawPushButtonBevel(QPainter* painter, const QStyleOption* option);
 void drawPanelButtonBevel(QPainter* painter, const QStyleOptionButton& option);
 QPixmap pixmap(const QString& imagePath, const QSize& size, const QWidget* widget = nullptr,
                QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
