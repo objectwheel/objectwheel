@@ -1,7 +1,7 @@
 #include <outputbar.h>
 #include <buttonflasher.h>
-#include <pushbutton.h>
 
+#include <QPushButton>
 #include <QPainter>
 #include <QBoxLayout>
 
@@ -27,7 +27,7 @@ QList<QAbstractButton*> OutputBar::buttons() const
 
 QAbstractButton* OutputBar::addButton()
 {
-    auto button = new PushButton(this);
+    auto button = new QPushButton(this);
     button->setProperty(flasherProperty, qintptr(new ButtonFlasher(button)));
     static_cast<QHBoxLayout*>(layout())->insertWidget(layout()->count() - 1, button, 0, Qt::AlignVCenter);
     return button;

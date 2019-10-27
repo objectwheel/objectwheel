@@ -105,8 +105,6 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     // Settings
     QStyleOptionButton option;
     initStyleOption(&option);
-    if (!UtilityFunctions::hasHover(this)) // FIXME: This is a workaround for QTBUG-44400
-        option.state &= ~QStyle::State_MouseOver;
 
     int left = LEFT_PADDING;
     int textWidth = fontMetrics().horizontalAdvance(text());
@@ -122,7 +120,7 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     arrowPen.setJoinStyle(Qt::MiterJoin);
 
     // Draw background
-    PaintUtils::drawPanelButtonBevel(&painter, option);
+    style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &option, &painter, this);
 
     // Draw icon
     QPixmap pixmap = icon().pixmap(UtilityFunctions::window(this), iconSize(), iconMode, iconState);

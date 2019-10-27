@@ -25,6 +25,7 @@ const int macItemFrame          = 2;    // menu item frame width
 const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
 const qreal comboBoxDefaultHeight[3] = { 26, 22, 19 };
+static const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
 
 void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect,
                           Qt::LayoutDirection dir)
@@ -103,6 +104,24 @@ QRectF adjustedControlFrame(const QRectF& rect) // Used by transparentstyle.cpp
     return frameRect;
 }
 
+ApplicationStyle::ButtonStyle ApplicationStyle::buttonStyle(const QWidget* widget)
+{
+    return widget->property(buttonStyleProperty).value<ButtonStyle>();
+}
+
+void ApplicationStyle::setButtonStyle(QWidget* widget, ApplicationStyle::ButtonStyle buttonStyle)
+{
+    widget->setProperty(buttonStyleProperty, buttonStyle);
+}
+
+QPointF ApplicationStyle::visualPos(Qt::LayoutDirection direction, const QRectF& boundingRect,
+                                    const QPointF& logicalPos)
+{
+    if (direction == Qt::LeftToRight)
+        return logicalPos;
+    return QPointF(boundingRect.right() - logicalPos.x(), logicalPos.y());
+}
+
 ApplicationStyle::ApplicationStyle() : QFusionStyle()
 {
 }
@@ -126,7 +145,7 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
                 h = mi->fontMetrics.height() + 2;
                 if (!mi->icon.isNull()) {
                     if (comboBox) {
-                        const QSize &iconSize = comboBox->iconSize();
+                        const QSize& iconSize = comboBox->iconSize();
                         h = qMax(h, iconSize.height() + 4);
                         maxpmw = qMax(maxpmw, iconSize.width());
                     } else
@@ -490,7 +509,6 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             break;
         }
     case PE_PanelButtonCommand: {
-        const QRectF rect = QRectF(option->rect).adjusted(0, 0.5, 0, 0);
         bool hasMenu = false;
         bool isFlat = false;
         bool isDefault = false;
@@ -499,47 +517,175 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         bool isDown = (option->state & QStyle::State_Sunken) || (option->state & QStyle::State_On);
         bool hasFocus = (option->state & QStyle::State_HasFocus) && (option->state & QStyle::State_KeyboardFocusChange);
 
+        QRectF rect(option->rect);
+        ButtonStyle style = buttonStyle(widget);
+
         if (const QStyleOptionButton* button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
             hasMenu = button->features & QStyleOptionButton::HasMenu;
             isFlat = button->features & QStyleOptionButton::Flat;
             isDefault = button->features & QStyleOptionButton::DefaultButton;
         }
 
+        if (widget && !UtilityFunctions::hasHover(widget)) // FIXME: This is a workaround for QTBUG-44400
+            hasHover = false;
+
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
 
         if (!isFlat || isDown) {
-            // Draw shadows
-            QLinearGradient shadowGrad(0, 0, 0, 1);
-            shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-            shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
-            shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
-            shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
-            shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
-            painter->setPen(Qt::NoPen);
-            painter->setBrush(shadowGrad);
-            painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-            painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
-            painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
+            switch (style) {
+            case Push: {
+                rect.adjust(0.5, 0.5, -0.5, 0);
+                // Draw shadows
+                QLinearGradient shadowGrad(0, 0, 0, 1);
+                shadowGrad.setCoordinateMode(QGradient::ObjectMode);
+                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(shadowGrad);
+                painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
+                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
-            // Draw border
-            QLinearGradient borderGrad(0, 0, 0, 1);
-            borderGrad.setCoordinateMode(QGradient::ObjectMode);
-            borderGrad.setColorAt(0.0, isEnabled ? isDown ? "#3280f7" : ((isDefault | hasFocus) ? "#5094f7" : "#d8d8d8") : "#ebebeb");
-            borderGrad.setColorAt(0.1, isEnabled ? isDown ? "#2e7bf3" : ((isDefault | hasFocus) ? "#468ef8" : "#d0d0d0") : "#e7e7e7");
-            borderGrad.setColorAt(0.9, isEnabled ? isDown ? "#1a5fda" : ((isDefault | hasFocus) ? "#196dfb" : "#d0d0d0") : "#e7e7e7");
-            borderGrad.setColorAt(1.0, isEnabled ? isDown ? "#1659d5" : ((isDefault | hasFocus) ? "#1367fb" : "#bcbcbc") : "#dddddd");
-            painter->setBrush(borderGrad);
-            painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
+                // Draw border
+                QLinearGradient borderGrad(0, 0, 0, 1);
+                borderGrad.setCoordinateMode(QGradient::ObjectMode);
+                borderGrad.setColorAt(0.0, isEnabled ? isDown ? "#3280f7" : ((isDefault | hasFocus) ? "#5094f7" : "#d8d8d8") : "#ebebeb");
+                borderGrad.setColorAt(0.1, isEnabled ? isDown ? "#2e7bf3" : ((isDefault | hasFocus) ? "#468ef8" : "#d0d0d0") : "#e7e7e7");
+                borderGrad.setColorAt(0.9, isEnabled ? isDown ? "#1a5fda" : ((isDefault | hasFocus) ? "#196dfb" : "#d0d0d0") : "#e7e7e7");
+                borderGrad.setColorAt(1.0, isEnabled ? isDown ? "#1659d5" : ((isDefault | hasFocus) ? "#1367fb" : "#bcbcbc") : "#dddddd");
+                painter->setBrush(borderGrad);
+                painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
 
-            // Draw body
-            QLinearGradient bodyGrad(0, 0, 0, 1);
-            bodyGrad.setCoordinateMode(QGradient::ObjectMode);
-            bodyGrad.setColorAt(0.0, isEnabled ? isDown ? "#5496f9" : ((isDefault | hasFocus) ? "#6fa7f8" : "white") : "white");
-            bodyGrad.setColorAt(0.9, isEnabled ? isDown ? "#1c65dd" : ((isDefault | hasFocus) ? "#176ffb" : "white") : "white");
-            bodyGrad.setColorAt(1.0, isEnabled ? isDown ? "#1c65dd" : ((isDefault | hasFocus) ? "#176ffb" : "white") : "white");
-            painter->setBrush(bodyGrad);
-            painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
+                // Draw body
+                QLinearGradient bodyGrad(0, 0, 0, 1);
+                bodyGrad.setCoordinateMode(QGradient::ObjectMode);
+                bodyGrad.setColorAt(0.0, isEnabled ? isDown ? "#5496f9" : ((isDefault | hasFocus) ? "#6fa7f8" : "white") : "white");
+                bodyGrad.setColorAt(0.9, isEnabled ? isDown ? "#1c65dd" : ((isDefault | hasFocus) ? "#176ffb" : "white") : "white");
+                bodyGrad.setColorAt(1.0, isEnabled ? isDown ? "#1c65dd" : ((isDefault | hasFocus) ? "#176ffb" : "white") : "white");
+                painter->setBrush(bodyGrad);
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
+            } break;
+            case Disclosure: {
+                rect.adjust(0.5, 0.5, -0.5, 0);
+                // Draw shadows
+                QLinearGradient shadowGrad(0, 0, 0, 1);
+                shadowGrad.setCoordinateMode(QGradient::ObjectMode);
+                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(shadowGrad);
+                painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
+                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
+
+                // Draw border
+                QLinearGradient borderGrad(0, 0, 0, 1);
+                borderGrad.setCoordinateMode(QGradient::ObjectMode);
+                borderGrad.setColorAt(0.0, isEnabled ? "#d8d8d8" : "#ebebeb");
+                borderGrad.setColorAt(0.1, isEnabled ? "#d0d0d0" : "#e7e7e7");
+                borderGrad.setColorAt(0.9, isEnabled ? "#d0d0d0" : "#e7e7e7");
+                borderGrad.setColorAt(1.0, isEnabled ? "#bcbcbc" : "#dddddd");
+                painter->setBrush(borderGrad);
+                painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
+
+                // Draw body
+                painter->setBrush(QColor(isEnabled ? isDown ? "#f0f0f0" : "white" : "white"));
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
+            } break;
+            case Help: {
+                rect.adjust(0.5, 0.5, -0.5, 0);
+                // Draw shadows
+                qreal radius = qMin(rect.width() - 1, rect.height() - 1.5) / 2.0;
+                QLinearGradient shadowGrad(0, 0, 0, 1);
+                shadowGrad.setCoordinateMode(QGradient::ObjectMode);
+                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(shadowGrad);
+                painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), radius + 0.5, radius + 0.5);
+                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), radius + 0.5, radius + 0.5);
+
+                // Draw border
+                QLinearGradient borderGrad(0, 0, 0, 1);
+                borderGrad.setCoordinateMode(QGradient::ObjectMode);
+                borderGrad.setColorAt(0.0, isEnabled ? "#d8d8d8" : "#ebebeb");
+                borderGrad.setColorAt(0.1, isEnabled ? "#d0d0d0" : "#e7e7e7");
+                borderGrad.setColorAt(0.9, isEnabled ? "#d0d0d0" : "#e7e7e7");
+                borderGrad.setColorAt(1.0, isEnabled ? "#bcbcbc" : "#dddddd");
+                painter->setBrush(borderGrad);
+                painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), radius, radius);
+
+                // Draw body
+                painter->setBrush(QColor(isEnabled ? isDown ? "#f0f0f0" : "white" : "white"));
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5),  radius - 0.5,  radius - 0.5);
+            } break;
+            case TexturedRounded: {
+                // Draw drop shadow
+                QLinearGradient shadowGrad(0, 0, 1, 0);
+                shadowGrad.setCoordinateMode(QGradient::ObjectMode);
+                shadowGrad.setColorAt(0, "#12202020");
+                shadowGrad.setColorAt(0.05, "#10202020");
+                shadowGrad.setColorAt(0.5, "#10202020");
+                shadowGrad.setColorAt(0.95, "#10202020");
+                shadowGrad.setColorAt(1, "#12202020");
+                QPainterPath dropShadowPath;
+                dropShadowPath.addRect(3.5, option->rect.bottom() + 0.5, option->rect.width() - 7, 1);
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(shadowGrad);
+                painter->drawPath(dropShadowPath);
+
+                // Draw shadow
+                QLinearGradient darkGrad(0, 0, 0, 1);
+                darkGrad.setCoordinateMode(QGradient::ObjectMode);
+                darkGrad.setColorAt(0.85, "#20303030");
+                darkGrad.setColorAt(1, "#3f000000");
+                QPainterPath shadowPath;
+                shadowPath.addRoundedRect(rect.adjusted(0, 0.5, 0, -0.5), 4, 4);
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(darkGrad);
+                painter->drawPath(shadowPath);
+
+                // Draw body
+                QLinearGradient midGrad(0, 0, 0, 1);
+                midGrad.setCoordinateMode(QGradient::ObjectMode);
+                midGrad.setColorAt(0, "#e4e4e4");
+                midGrad.setColorAt(1, "#dedede");
+                QLinearGradient buttonGrad(0, 0, 0, 1);
+                buttonGrad.setCoordinateMode(QGradient::ObjectMode);
+                buttonGrad.setColorAt(0, "#fdfdfd");
+                buttonGrad.setColorAt(1, "#f3f3f3");
+                QPainterPath bodyPath;
+                bodyPath.addRoundedRect(rect.adjusted(0.5, 1, -0.5, -1), 3.5, 3.5);
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(isDown ? midGrad : buttonGrad);
+                painter->drawPath(bodyPath);
+                // NOTE: QRect's bottom() and bottomLeft()... are different from QRectF, for historical reasons
+                // as stated in the docs, those functions return top() + height() - 1 (QRect)
+
+                // Draw glowing for pressed state
+                if (isDown) {
+                    QPainterPath glowPathUp;
+                    glowPathUp.addRoundedRect(rect.adjusted(0, 1.5, 0, 1), 4.5, 4.5);
+                    QPainterPath glowPathDown;
+                    glowPathDown.addRoundedRect(rect.adjusted(0, 2, 0, 1), 4.5, 4.5);
+                    painter->setPen(Qt::NoPen);
+                    painter->setBrush(QColor("#ebebeb"));
+                    painter->drawPath(bodyPath.subtracted(glowPathDown));
+                    painter->setBrush(QColor("#f3f3f3"));
+                    painter->drawPath(bodyPath.subtracted(glowPathUp));
+                }
+            } break;
+            default:
+                break;
+            }
         }
 
         if (isEnabled && hasMenu && (hasHover || isDown)) {
@@ -716,7 +862,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         } break;
     case CE_PushButtonLabel:
         if (const QStyleOptionButton *button = qstyleoption_cast<const QStyleOptionButton *>(option)) {
-            QRect ir = button->rect;
+            QRectF ir = button->rect;
             uint tf = Qt::AlignVCenter;
             if (styleHint(SH_UnderlineShortcut, button, widget))
                 tf |= Qt::TextShowMnemonic;
@@ -724,7 +870,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 tf |= Qt::TextHideMnemonic;
             if (!button->icon.isNull()) {
                 //Center both icon and text
-                QPoint point;
+                QPointF point;
                 QIcon::Mode mode = button->state & State_Enabled ? QIcon::Normal
                                                                  : QIcon::Disabled;
                 if (mode == QIcon::Normal && button->state & State_HasFocus)
@@ -736,16 +882,16 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 QPixmap pixmap = button->icon.pixmap(UtilityFunctions::window(widget), button->iconSize, mode, state);
                 if (button->state & State_Sunken)
                     pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
-                int w = pixmap.width() / pixmap.devicePixelRatio();
-                int h = pixmap.height() / pixmap.devicePixelRatio();
+                qreal w = pixmap.width() / pixmap.devicePixelRatio();
+                qreal h = pixmap.height() / pixmap.devicePixelRatio();
                 if (!button->text.isEmpty())
                     w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 3;
-                point = QPoint(ir.x() + ir.width() / 2 - w / 2,
+                point = QPointF(ir.x() + ir.width() / 2 - w / 2,
                                ir.y() + ir.height() / 2 - h / 2);
                 w = pixmap.width() / pixmap.devicePixelRatio();
                 if (button->direction == Qt::RightToLeft)
                     point.rx() += w;
-                painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap);
+                painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap, pixmap.rect());
                 if (button->direction == Qt::RightToLeft)
                     ir.translate(ir.x() - point.x() - 2, 0);
                 else
@@ -763,8 +909,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             QStyleOptionButton copy(*button);
             if (copy.state & State_Sunken)
                 copy.palette.setColor(QPalette::ButtonText, copy.palette.buttonText().color().darker());
-            proxy()->drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
-                                  copy.text, QPalette::ButtonText);
+            drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
+                         copy.text, QPalette::ButtonText);
         } break;
     case CE_ToolButtonLabel:
         if (const QStyleOptionToolButton* opt
@@ -940,6 +1086,13 @@ void ApplicationStyle::drawComplexControl(QStyle::ComplexControl control,
 }
 
 void ApplicationStyle::drawItemText(QPainter* painter, const QRect& rect, int alignment,
+                                    const QPalette& pal, bool enabled, const QString& text,
+                                    QPalette::ColorRole textRole) const
+{
+    drawItemText(painter, QRectF(rect), alignment, pal, enabled, text, textRole);
+}
+
+void ApplicationStyle::drawItemText(QPainter* painter, const QRectF& rect, int alignment,
                                     const QPalette& pal, bool enabled, const QString& text,
                                     QPalette::ColorRole textRole) const
 {

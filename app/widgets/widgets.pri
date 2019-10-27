@@ -7,7 +7,6 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/lineedit.h \
            $$PWD/pinbar.h \
            $$PWD/progressbar.h \
-           $$PWD/pushbutton.h \
            $$PWD/segmentedbar.h \
            $$PWD/switch.h \
            $$PWD/tooltipwidget.h \
@@ -20,7 +19,6 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/lineedit.cpp \
            $$PWD/pinbar.cpp \
            $$PWD/progressbar.cpp \
-           $$PWD/pushbutton.cpp \
            $$PWD/segmentedbar.cpp \
            $$PWD/switch.cpp \
            $$PWD/view.cpp \

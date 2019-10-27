@@ -9,8 +9,9 @@
 #include <servermanager.h>
 #include <applicationcore.h>
 #include <paintutils.h>
-#include <pushbutton.h>
+#include <applicationstyle.h>
 
+#include <QPushButton>
 #include <QSettings>
 #include <QGridLayout>
 
@@ -25,7 +26,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
   , m_rememberMeSwitch(new Switch(this))
   , m_rememberMeLabel(new QLabel(this))
   , m_buttons(new ButtonSlice(this))
-  , m_helpButton(new PushButton(this))
+  , m_helpButton(new QPushButton(this))
   , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
   , m_legalLabel(new QLabel(this))
 {
@@ -70,10 +71,10 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
                           .arg(QDate::currentDate().year()).arg(APP_CORP));
 
+    ApplicationStyle::setButtonStyle(m_helpButton, ApplicationStyle::Help);
     m_helpButton->setIcon(QIcon(":/images/question.svg"));
-    m_helpButton->setFixedSize(20, 20);
+    m_helpButton->setFixedSize(22, 22);
     m_helpButton->setCursor(Qt::PointingHandCursor);
-    m_helpButton->setFlat(true);
 
     m_logoLabel->setFixedSize(QSize(160, 80));
     m_logoLabel->setPixmap(PaintUtils::pixmap(":/images/logo.svg", QSize(160, 80), this));

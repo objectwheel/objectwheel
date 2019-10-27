@@ -1,20 +1,21 @@
 #include <runpane.h>
-#include <pushbutton.h>
 #include <rundevicesbutton.h>
 #include <runprogressbar.h>
 #include <segmentedbar.h>
 #include <smartspacer.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
+#include <applicationstyle.h>
 
+#include <QPushButton>
 #include <QLayout>
 #include <QPainter>
 
 RunPane::RunPane(QWidget* parent) : QToolBar(parent)
-  , m_runButton(new PushButton(this))
-  , m_stopButton(new PushButton(this))
-  , m_projectsButton(new PushButton(this))
-  , m_preferencesButton(new PushButton(this))
+  , m_runButton(new QPushButton(this))
+  , m_stopButton(new QPushButton(this))
+  , m_projectsButton(new QPushButton(this))
+  , m_preferencesButton(new QPushButton(this))
   , m_segmentedBar(new SegmentedBar(this))
   , m_runProgressBar(new RunProgressBar(this))
   , m_runDevicesButton(new RunDevicesButton(this))
@@ -25,27 +26,34 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     layout()->setSpacing(7);
     layout()->setContentsMargins(7, 7, 7, 7);
 
+    ApplicationStyle::setButtonStyle(m_runProgressBar, ApplicationStyle::TexturedRounded);
     m_runProgressBar->setAttribute(Qt::WA_TransparentForMouseEvents);
 
+    ApplicationStyle::setButtonStyle(m_runDevicesButton, ApplicationStyle::TexturedRounded);
     m_runDevicesButton->setCursor(Qt::PointingHandCursor);
     m_runDevicesButton->setText(tr("Devices"));
 
+    ApplicationStyle::setButtonStyle(m_runButton, ApplicationStyle::TexturedRounded);
     m_runButton->setCursor(Qt::PointingHandCursor);
     m_runButton->setToolTip(tr("Run"));
     m_runButton->setFixedWidth(38);
 
+    ApplicationStyle::setButtonStyle(m_stopButton, ApplicationStyle::TexturedRounded);
     m_stopButton->setCursor(Qt::PointingHandCursor);
     m_stopButton->setToolTip(tr("Stop"));
     m_stopButton->setFixedWidth(38);
 
+    ApplicationStyle::setButtonStyle(m_preferencesButton, ApplicationStyle::TexturedRounded);
     m_preferencesButton->setCursor(Qt::PointingHandCursor);
     m_preferencesButton->setToolTip(tr("Show Preferences"));
     m_preferencesButton->setFixedWidth(38);
 
+    ApplicationStyle::setButtonStyle(m_projectsButton, ApplicationStyle::TexturedRounded);
     m_projectsButton->setCursor(Qt::PointingHandCursor);
     m_projectsButton->setToolTip(tr("Show Projects"));
     m_projectsButton->setFixedWidth(38);
 
+    ApplicationStyle::setButtonStyle(m_segmentedBar, ApplicationStyle::TexturedRounded);
     m_segmentedBar->setCursor(Qt::PointingHandCursor);
     m_segmentedBar->setIconSize({18, 18});
 
@@ -85,22 +93,22 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
     updateIcons();
 }
 
-PushButton* RunPane::runButton() const
+QPushButton* RunPane::runButton() const
 {
     return m_runButton;
 }
 
-PushButton* RunPane::stopButton() const
+QPushButton* RunPane::stopButton() const
 {
     return m_stopButton;
 }
 
-PushButton* RunPane::projectsButton() const
+QPushButton* RunPane::projectsButton() const
 {
     return m_projectsButton;
 }
 
-PushButton* RunPane::preferencesButton() const
+QPushButton* RunPane::preferencesButton() const
 {
     return m_preferencesButton;
 }

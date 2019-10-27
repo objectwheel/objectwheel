@@ -3,7 +3,7 @@
 
 #include <QToolBar>
 
-class PushButton;
+class QPushButton;
 class RunProgressBar;
 class RunDevicesButton;
 class SegmentedBar;
@@ -16,10 +16,10 @@ class RunPane final : public QToolBar
 public:
     explicit RunPane(QWidget* parent = nullptr);
 
-    PushButton* runButton() const;
-    PushButton* stopButton() const;
-    PushButton* projectsButton() const;
-    PushButton* preferencesButton() const;
+    QPushButton* runButton() const;
+    QPushButton* stopButton() const;
+    QPushButton* projectsButton() const;
+    QPushButton* preferencesButton() const;
     SegmentedBar* segmentedBar() const;
     RunProgressBar* runProgressBar() const;
     RunDevicesButton* runDevicesButton() const;
@@ -33,10 +33,10 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    PushButton* m_runButton;
-    PushButton* m_stopButton;
-    PushButton* m_projectsButton;
-    PushButton* m_preferencesButton;
+    QPushButton* m_runButton;
+    QPushButton* m_stopButton;
+    QPushButton* m_projectsButton;
+    QPushButton* m_preferencesButton;
     SegmentedBar* m_segmentedBar;
     RunProgressBar* m_runProgressBar;
     RunDevicesButton* m_runDevicesButton;

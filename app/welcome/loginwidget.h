@@ -5,7 +5,7 @@
 
 class Switch;
 class BulkEdit;
-class PushButton;
+class QPushButton;
 class ButtonSlice;
 class QGridLayout;
 class WaitingSpinnerWidget;
@@ -45,7 +45,7 @@ private:
     Switch* m_rememberMeSwitch;
     QLabel* m_rememberMeLabel;
     ButtonSlice* m_buttons;
-    PushButton* m_helpButton;
+    QPushButton* m_helpButton;
     WaitingSpinnerWidget* m_loadingIndicator;
     QLabel* m_legalLabel;
 };

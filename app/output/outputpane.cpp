@@ -3,6 +3,7 @@
 #include <consolewidget.h>
 #include <outputbar.h>
 #include <paintutils.h>
+#include <applicationstyle.h>
 
 #include <QStackedWidget>
 #include <QBoxLayout>
@@ -30,12 +31,14 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_stackedWidget->addWidget(m_issuesWidget);
     m_stackedWidget->addWidget(m_consoleWidget);
 
+    ApplicationStyle::setButtonStyle(m_issuesButton, ApplicationStyle::Disclosure);
     m_issuesButton->setCheckable(true);
     m_issuesButton->setFixedHeight(22);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setText(tr("Issues") + " [0]");
     m_issuesButton->setToolTip(tr("Activate issues list"));
 
+    ApplicationStyle::setButtonStyle(m_consoleButton, ApplicationStyle::Disclosure);
     m_consoleButton->setCheckable(true);
     m_consoleButton->setFixedHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);

@@ -1,5 +1,4 @@
 #include <formspane.h>
-#include <pushbutton.h>
 #include <saveutils.h>
 #include <projectmanager.h>
 #include <designerscene.h>
@@ -9,7 +8,9 @@
 #include <controlremovingmanager.h>
 #include <filesystemutils.h>
 #include <form.h>
+#include <applicationstyle.h>
 
+#include <QPushButton>
 #include <QStandardPaths>
 #include <QPainter>
 #include <QStyledItemDelegate>
@@ -115,8 +116,8 @@ private:
 
 FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
   , m_designerScene(designerScene)
-  , m_addButton(new PushButton(this))
-  , m_removeButton(new PushButton(this))
+  , m_addButton(new QPushButton(this))
+  , m_removeButton(new QPushButton(this))
 {
     header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
@@ -171,21 +172,21 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 
+    ApplicationStyle::setButtonStyle(m_addButton, ApplicationStyle::Help);
     m_addButton->setCursor(Qt::PointingHandCursor);
     m_addButton->setToolTip(tr("Add new form to the project"));
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_addButton->setFixedSize(18, 18);
-    m_addButton->setIconSize(QSize(12, 12));
-    m_addButton->setIcon(QIcon(":/images/designer/plus.svg"));
-    connect(m_addButton, &PushButton::clicked, this, &FormsPane::onAddButtonClick);
+    m_addButton->setIcon(QIcon(":/images/plus.svg"));
+    connect(m_addButton, &QPushButton::clicked, this, &FormsPane::onAddButtonClick);
 
+    ApplicationStyle::setButtonStyle(m_removeButton, ApplicationStyle::Help);
     m_removeButton->setCursor(Qt::PointingHandCursor);
     m_removeButton->setToolTip(tr("Remove selected form from the project"));
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_removeButton->setFixedSize(18, 18);
-    m_removeButton->setIconSize(QSize(12, 12));
-    m_removeButton->setIcon(QIcon(":/images/designer/minus.svg"));
-    connect(m_removeButton, &PushButton::clicked, this, &FormsPane::onRemoveButtonClick);
+    m_removeButton->setIcon(QIcon(":/images/minus.svg"));
+    connect(m_removeButton, &QPushButton::clicked, this, &FormsPane::onRemoveButtonClick);
 
     /*
         NOTE: No need to catch any signals about form creation or deletion from ControlRemovingManager
@@ -308,13 +309,13 @@ void FormsPane::updateGeometries()
 {
     QTreeWidget::updateGeometries();
     QRect vg = viewport()->geometry();
-    m_addButton->move(vg.topRight() + QPoint(-38, -21));
-    m_removeButton->move(vg.topRight() + QPoint(-19, -21));
+    m_addButton->move(vg.topRight() + QPoint(-38, -20));
+    m_removeButton->move(vg.topRight() + QPoint(-19, -20));
 }
 
 QSize FormsPane::sizeHint() const
 {
-    return QSize{190, 200};
+    return QSize(190, 200);
 }
 
 #include "formspane.moc"

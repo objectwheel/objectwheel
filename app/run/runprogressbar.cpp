@@ -1,6 +1,5 @@
 #include <runprogressbar.h>
 #include <waitingspinnerwidget.h>
-#include <paintutils.h>
 
 #include <QtMath>
 #include <QPainter>
@@ -270,7 +269,7 @@ void RunProgressBar::paintEvent(QPaintEvent*)
     // aren't important, we just want to paint a raised button bevel
     QStyleOptionButton option;
     option.initFrom(this);
-    PaintUtils::drawPanelButtonBevel(&painter, option);
+    style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &option, &painter, this);
 
     // Draw text
     if (m_line.isValid()) {

@@ -1,6 +1,5 @@
 #include <runcontroller.h>
 #include <runpane.h>
-#include <pushbutton.h>
 #include <rundevicesbutton.h>
 #include <runprogressbar.h>
 #include <runmanager.h>
@@ -10,7 +9,9 @@
 #include <preferenceswindow.h>
 #include <utilityfunctions.h>
 #include <segmentedbar.h>
+
 #include <QTime>
+#include <QPushButton>
 
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
   , m_runScheduled(false)
@@ -19,13 +20,13 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
 {
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &RunController::discharge);
-    connect(m_runPane->projectsButton(), &PushButton::clicked,
+    connect(m_runPane->projectsButton(), &QPushButton::clicked,
             this, &RunController::onProjectsButtonClick);
-    connect(m_runPane->preferencesButton(), &PushButton::clicked,
+    connect(m_runPane->preferencesButton(), &QPushButton::clicked,
             this, &RunController::onPreferencesButtonClick);
-    connect(m_runPane->runButton(), &PushButton::clicked,
+    connect(m_runPane->runButton(), &QPushButton::clicked,
             this, &RunController::onRunButtonClick);
-    connect(m_runPane->stopButton(), &PushButton::clicked,
+    connect(m_runPane->stopButton(), &QPushButton::clicked,
             this, &RunController::onStopButtonClick);
     connect(m_runPane->segmentedBar(), &SegmentedBar::actionTriggered,
             this, &RunController::onSegmentedBarActionTrigger);

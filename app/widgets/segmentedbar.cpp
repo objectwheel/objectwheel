@@ -1,5 +1,4 @@
 #include <segmentedbar.h>
-#include <paintutils.h>
 #include <private/qwidget_p.h>
 
 #include <QStyleOption>
@@ -308,7 +307,7 @@ void SegmentedBar::paintEvent(QPaintEvent*)
         // Draw background
         QStyleOptionButton copy(option);
         copy.rect = rect();
-        PaintUtils::drawPanelButtonBevel(&painter, copy);
+        style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &copy, &painter, this);
 
         // Draw menu indicator, which is cropped by "clip rect"
         if (action != visibleActions().last()
