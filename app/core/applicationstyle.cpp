@@ -40,11 +40,11 @@ QRect comboboxInnerBounds(const QRect& outerBounds)
     return outerBounds.adjusted(3, 3, -1, -5);
 }
 
-void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
+void drawArrow(Qt::ArrowType arrowType, const QStyle *style, const QStyleOption *option,
                const QRect &rect, QPainter *painter, const QWidget *widget = 0)
 {
     QStyle::PrimitiveElement pe;
-    switch (toolbutton->arrowType) {
+    switch (arrowType) {
     case Qt::LeftArrow:
         pe = QStyle::PE_IndicatorArrowLeft;
         break;
@@ -60,9 +60,15 @@ void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
     default:
         return;
     }
-    QStyleOption arrowOpt = *toolbutton;
+    QStyleOption arrowOpt = *option;
     arrowOpt.rect = rect;
     style->drawPrimitive(pe, &arrowOpt, painter, widget);
+}
+
+void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
+               const QRect &rect, QPainter *painter, const QWidget *widget = 0)
+{
+    drawArrow(toolbutton->arrowType, style, toolbutton, rect, painter, widget);
 }
 
 bool hasVerticalParentToolBar(const QWidget* widget)
@@ -178,6 +184,11 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
         if (hasVerticalParentToolBar(widget))
             sz = sz.transposed();
         break;
+    case CT_PushButton:
+        if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(option)) {
+            sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
+            sz.setHeight(21);
+        } break;
     default:
         sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
         break;
@@ -374,15 +385,75 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     }
 }
 
+enum Direction {
+    TopDown,
+    FromLeft,
+    BottomUp,
+    FromRight
+};
+
+
+static QColor mergedColors(const QColor &colorA, const QColor &colorB, int factor = 50)
+{
+    const int maxFactor = 100;
+    QColor tmp = colorA;
+    tmp.setRed((tmp.red() * factor) / maxFactor + (colorB.red() * (maxFactor - factor)) / maxFactor);
+    tmp.setGreen((tmp.green() * factor) / maxFactor + (colorB.green() * (maxFactor - factor)) / maxFactor);
+    tmp.setBlue((tmp.blue() * factor) / maxFactor + (colorB.blue() * (maxFactor - factor)) / maxFactor);
+    return tmp;
+}
+
+static QLinearGradient qt_fusion_gradient(const QRect &rect, const QBrush &baseColor, Direction direction = TopDown)
+{
+    int x = rect.center().x();
+    int y = rect.center().y();
+    QLinearGradient gradient;
+    switch (direction) {
+    case FromLeft:
+        gradient = QLinearGradient(rect.left(), y, rect.right(), y);
+        break;
+    case FromRight:
+        gradient = QLinearGradient(rect.right(), y, rect.left(), y);
+        break;
+    case BottomUp:
+        gradient = QLinearGradient(x, rect.bottom(), x, rect.top());
+        break;
+    case TopDown:
+    default:
+        gradient = QLinearGradient(x, rect.top(), x, rect.bottom());
+        break;
+    }
+    if (baseColor.gradient())
+        gradient.setStops(baseColor.gradient()->stops());
+    else {
+        QColor gradientStartColor = baseColor.color().lighter(124);
+        QColor gradientStopColor = baseColor.color().lighter(102);
+        gradient.setColorAt(0, gradientStartColor);
+        gradient.setColorAt(1, gradientStopColor);
+        //          Uncomment for adding shiny shading
+        QColor midColor1 = mergedColors(gradientStartColor, gradientStopColor, 55);
+        QColor midColor2 = mergedColors(gradientStartColor, gradientStopColor, 45);
+        gradient.setColorAt(0.5, midColor1);
+        gradient.setColorAt(0.501, midColor2);
+    }
+    return gradient;
+}
+#include <paintutils.h>
 void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
 {
+    Q_D(const QFusionStyle);
+
     switch (element) {
     case PE_Frame: {
+        if (widget && widget->inherits("QComboBoxPrivateContainer")){
+            QStyleOption copy = *option;
+            copy.state |= State_Raised;
+            proxy()->drawPrimitive(PE_PanelMenu, &copy, painter, widget);
+            break;
+        }
         painter->save();
-        painter->setPen(option->palette.base().color().darker(140));
-        painter->drawRect(option->rect.adjusted(0, 0, -1, -1));
-        painter->setPen(option->palette.base().color().darker(180));
-        painter->drawLine(option->rect.topLeft(), option->rect.topRight());
+        painter->setPen(QPen(QColor(QStringLiteral("#b6b6b6")), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+        painter->drawRect(QRectF(option->rect).adjusted(0, 0, -0.5, -0.5));
         painter->restore();
     } break;
     case PE_PanelTipLabel: {
@@ -480,6 +551,83 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             painter->restore();
             break;
         }
+    case PE_PanelButtonCommand: {
+        PaintUtils::drawPushButtonBevel(painter, option);
+        break;
+        QColor outline = d->outline(option->palette);
+        QColor highlightedOutline = d->highlightedOutline(option->palette);
+        QRect rect = option->rect;
+
+        bool isDefault = false;
+        bool isFlat = false;
+        bool isDown = (option->state & State_Sunken) || (option->state & State_On);
+        QRect r;
+
+        if (const QStyleOptionButton *button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
+            isDefault = (button->features & QStyleOptionButton::DefaultButton) && (button->state & State_Enabled);
+            isFlat = (button->features & QStyleOptionButton::Flat);
+        }
+
+        if (isFlat && !isDown) {
+            if (isDefault) {
+                r = option->rect.adjusted(0, 1, 0, -1);
+                painter->setPen(QPen(Qt::black));
+                const QLine lines[4] = {
+                    QLine(QPoint(r.left() + 2, r.top()),
+                    QPoint(r.right() - 2, r.top())),
+                    QLine(QPoint(r.left(), r.top() + 2),
+                    QPoint(r.left(), r.bottom() - 2)),
+                    QLine(QPoint(r.right(), r.top() + 2),
+                    QPoint(r.right(), r.bottom() - 2)),
+                    QLine(QPoint(r.left() + 2, r.bottom()),
+                    QPoint(r.right() - 2, r.bottom()))
+                };
+                painter->drawLines(lines, 4);
+                const QPoint points[4] = {
+                    QPoint(r.right() - 1, r.bottom() - 1),
+                    QPoint(r.right() - 1, r.top() + 1),
+                    QPoint(r.left() + 1, r.bottom() - 1),
+                    QPoint(r.left() + 1, r.top() + 1)
+                };
+                painter->drawPoints(points, 4);
+            }
+            return;
+        }
+
+
+        bool isEnabled = option->state & State_Enabled;
+        bool hasFocus = (option->state & State_HasFocus && option->state & State_KeyboardFocusChange);
+        QColor buttonColor = d->buttonColor(option->palette);
+
+        QColor darkOutline = outline;
+        if (hasFocus | isDefault) {
+            darkOutline = highlightedOutline;
+        }
+
+        if (isDefault)
+            buttonColor = mergedColors(buttonColor, highlightedOutline.lighter(130), 90);
+
+        //        BEGIN_STYLE_PIXMAPCACHE(QStringLiteral("pushbutton-") + buttonColor.name(QColor::HexArgb))
+        r = rect.adjusted(0, 1, -1, 0);
+
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->translate(0.5, -0.5);
+
+        QLinearGradient gradient = qt_fusion_gradient(rect, (isEnabled && option->state & State_MouseOver ) ? buttonColor : buttonColor.darker(104));
+        painter->setPen(Qt::transparent);
+        painter->setBrush(isDown ? QBrush(buttonColor.darker(110)) : gradient);
+        painter->drawRoundedRect(r, 2.0, 2.0);
+        painter->setBrush(Qt::NoBrush);
+
+        // Outline
+        painter->setPen(!isEnabled ? QPen(darkOutline.lighter(115)) : QPen(darkOutline));
+        painter->drawRoundedRect(r, 2.0, 2.0);
+
+        painter->setPen(d->innerContrastLine());
+        painter->drawRoundedRect(r.adjusted(1, 1, -1, -1), 2.0, 2.0);
+
+        //        END_STYLE_PIXMAPCACHE
+    } break;
     default:
         QFusionStyle::drawPrimitive(element, option, painter, widget);
         break;
