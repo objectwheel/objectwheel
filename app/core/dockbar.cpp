@@ -27,7 +27,7 @@ void DockBar::addDockWidget(QDockWidget* dockWidget)
     using namespace UtilityFunctions;
     auto button = new QToolButton(this);
     button->setCheckable(true);
-    button->setFixedWidth(18);
+    button->setFixedWidth(20);
     button->setIcon(dockWidget->windowIcon());
     button->setText(dockWidget->windowTitle());
     button->setCursor(Qt::PointingHandCursor);
@@ -76,12 +76,12 @@ void DockBar::setDockWidgetButtonChecked(QDockWidget* dockWidget, bool checked) 
 
 QSize DockBar::sizeHint() const
 {
-    return QSize(20, QToolBar::sizeHint().height());
+    return QSize(22, QToolBar::sizeHint().height());
 }
 
 QSize DockBar::minimumSizeHint() const
 {
-    return QSize(20, QToolBar::minimumSizeHint().height());
+    return QSize(22, QToolBar::minimumSizeHint().height());
 }
 
 void DockBar::paintEvent(QPaintEvent*)

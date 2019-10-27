@@ -179,10 +179,10 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             sz = sz.transposed();
         break;
     case CT_PushButton:
-        sz.setHeight(21);
+        sz.setHeight(22);
         break;
     case CT_ComboBox:
-        sz.setHeight(21);
+        sz.setHeight(22);
         break;
     default:
         break;

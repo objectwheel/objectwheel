@@ -18,26 +18,26 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    m_iconLabel->setFixedSize(16, 16);
+    m_iconLabel->setFixedSize(18, 18);
     m_iconLabel->setPixmap(PaintUtils::pixmap(dockWidget->windowIcon(), QSize(16, 16)));
 
     m_titleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_titleLabel->setText(dockWidget->windowTitle());
 
-    m_detachButton->setFixedSize(16, 16);
+    m_detachButton->setFixedSize(18, 18);
     m_detachButton->setIconSize(QSize(12, 12));
     m_detachButton->setToolTip(tr("Unpin the pane"));
     m_detachButton->setCursor(Qt::PointingHandCursor);
     m_detachButton->setIcon(QIcon(QStringLiteral(":/images/designer/unpin.svg")));
 
-    m_closeButton->setFixedSize(16, 16);
+    m_closeButton->setFixedSize(18, 18);
     m_closeButton->setIconSize(QSize(12, 12));
     m_closeButton->setToolTip(tr("Close the pane"));
     m_closeButton->setCursor(Qt::PointingHandCursor);
     m_closeButton->setIcon(QIcon(QStringLiteral(":/images/designer/close.svg")));
 
     auto layout = new QHBoxLayout(this);
-    layout->setSpacing(4);
+    layout->setSpacing(2);
     layout->setContentsMargins(6, 0, 2, 0);
     layout->addWidget(m_iconLabel, 0, Qt::AlignVCenter);
     layout->addWidget(m_titleLabel, 0, Qt::AlignVCenter);
@@ -54,12 +54,12 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
 
 QSize PinBar::sizeHint() const
 {
-    return QSize(QWidget::sizeHint().width(), 20);
+    return QSize(QWidget::sizeHint().width(), 22);
 }
 
 QSize PinBar::minimumSizeHint() const
 {
-    return QSize(QWidget::minimumSizeHint().width(), 20);
+    return QSize(QWidget::minimumSizeHint().width(), 22);
 }
 
 void PinBar::onDetachButtonClick()

@@ -94,7 +94,7 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     m_layout->addWidget(m_marginOffsetSpinBox);
     m_layout->addStretch();
 
-    m_sourceButton->setFixedSize({23, 23});
+    m_sourceButton->setFixedSize({22, 22});
     m_sourceButton->setIconSize({15, 15});
     m_sourceButton->setToolTip(anchorLineText(m_sourceLineType));
 
@@ -102,14 +102,14 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     arrowIcon->setPixmap(PaintUtils::renderOverlaidPixmap(":/images/extension.svg", Qt::darkGray, QSize(16, 16), this));
 
     m_targetControlComboBox->setCursor(Qt::PointingHandCursor);
-    m_targetControlComboBox->setFixedSize(QSize(140, 23));
+    m_targetControlComboBox->setFixedSize(QSize(140, 22));
     m_targetControlComboBox->setToolTip(tr("Target control"));
     m_targetControlComboBox->setEnabled(false);
 
     m_marginOffsetSpinBox->setToolTip(anchorLineText(m_sourceLineType) +
                                       (AnchorLine::isOffset(m_sourceLineType) ? " offset" : " margin"));
     m_marginOffsetSpinBox->setCursor(Qt::PointingHandCursor);
-    m_marginOffsetSpinBox->setFixedSize(QSize(80, 23));
+    m_marginOffsetSpinBox->setFixedSize(QSize(80, 22));
     m_marginOffsetSpinBox->setRange(-999.99, 999.99);
     m_marginOffsetSpinBox->setDecimals(2);
 
@@ -120,14 +120,14 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
     targetButtonLayout->addWidget(m_targetLineButton3);
 
     m_targetLineButton1->setCursor(Qt::PointingHandCursor);
-    m_targetLineButton1->setFixedSize({23, 23});
+    m_targetLineButton1->setFixedSize({22, 22});
     m_targetLineButton1->setIconSize({15, 15});
     m_targetLineButton1->setCheckable(true);
     m_targetLineButton1->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
                                                    ? AnchorLine::Left : AnchorLine::Top));
 
     m_targetLineButton2->setCursor(Qt::PointingHandCursor);
-    m_targetLineButton2->setFixedSize({23, 23});
+    m_targetLineButton2->setFixedSize({22, 22});
     m_targetLineButton2->setIconSize({15, 15});
     m_targetLineButton2->setCheckable(true);
     m_targetLineButton2->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)
@@ -135,7 +135,7 @@ AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget
                                                    : AnchorLine::VerticalCenter));
 
     m_targetLineButton3->setCursor(Qt::PointingHandCursor);
-    m_targetLineButton3->setFixedSize({23, 23});
+    m_targetLineButton3->setFixedSize({22, 22});
     m_targetLineButton3->setIconSize({15, 15});
     m_targetLineButton3->setCheckable(true);
     m_targetLineButton3->setToolTip(anchorLineText(AnchorLine::isVertical(m_sourceLineType)

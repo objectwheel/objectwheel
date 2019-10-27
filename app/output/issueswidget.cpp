@@ -60,10 +60,10 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
                   "border-top: none; border-bottom: none;}");
     setFocusPolicy(Qt::NoFocus);
 
-    m_toolBar->layout()->setSpacing(3);
+    m_toolBar->layout()->setSpacing(2);
     m_toolBar->layout()->setContentsMargins(1, 1, 1, 1);
 
-    m_toolBar->setFixedHeight(20);
+    m_toolBar->setFixedHeight(22);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget(QSize(1, 1)));
     m_toolBar->addWidget(m_iconLabel);
     m_toolBar->addWidget(m_titleLabel);
@@ -78,24 +78,24 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
     m_iconLabel->setFixedHeight(16);
 
     m_titleLabel->setText(tr("Issues"));
-    m_titleLabel->setFixedSize(50, 18);
+    m_titleLabel->setFixedSize(50, 20);
 
-    m_clearButton->setFixedSize({18, 18});
+    m_clearButton->setFixedSize({20, 20});
     m_clearButton->setIcon(QIcon(":/images/designer/clear.svg"));
     m_clearButton->setToolTip(tr("Clean issues list"));
     m_clearButton->setCursor(Qt::PointingHandCursor);
 
-    m_fontSizeUpButton->setFixedSize({18, 18});
+    m_fontSizeUpButton->setFixedSize({20, 20});
     m_fontSizeUpButton->setIcon(QIcon(":/images/designer/font-increase.svg"));
     m_fontSizeUpButton->setToolTip(tr("Increase font size"));
     m_fontSizeUpButton->setCursor(Qt::PointingHandCursor);
 
-    m_fontSizeDownButton->setFixedSize({18, 18});
+    m_fontSizeDownButton->setFixedSize({20, 20});
     m_fontSizeDownButton->setIcon(QIcon(":/images/designer/font-decrease.svg"));
     m_fontSizeDownButton->setToolTip(tr("Decrease font size"));
     m_fontSizeDownButton->setCursor(Qt::PointingHandCursor);
 
-    m_minimizeButton->setFixedSize({18, 18});
+    m_minimizeButton->setFixedSize({20, 20});
     m_minimizeButton->setIcon(QIcon(":/images/designer/down.svg"));
     m_minimizeButton->setToolTip(tr("Minimize the pane"));
     m_minimizeButton->setCursor(Qt::PointingHandCursor);

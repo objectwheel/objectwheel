@@ -174,7 +174,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_addButton->setCursor(Qt::PointingHandCursor);
     m_addButton->setToolTip(tr("Add new form to the project"));
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_addButton->setFixedSize(16, 16);
+    m_addButton->setFixedSize(18, 18);
     m_addButton->setIconSize(QSize(12, 12));
     m_addButton->setIcon(QIcon(":/images/designer/plus.svg"));
     connect(m_addButton, &PushButton::clicked, this, &FormsPane::onAddButtonClick);
@@ -182,7 +182,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_removeButton->setCursor(Qt::PointingHandCursor);
     m_removeButton->setToolTip(tr("Remove selected form from the project"));
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_removeButton->setFixedSize(16, 16);
+    m_removeButton->setFixedSize(18, 18);
     m_removeButton->setIconSize(QSize(12, 12));
     m_removeButton->setIcon(QIcon(":/images/designer/minus.svg"));
     connect(m_removeButton, &PushButton::clicked, this, &FormsPane::onRemoveButtonClick);

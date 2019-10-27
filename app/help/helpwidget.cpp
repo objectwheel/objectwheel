@@ -47,16 +47,16 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_layout->addWidget(m_toolBar);
     m_layout->addWidget(m_splitter);
 
-    m_homeButton->setFixedSize({18, 18});
-    m_backButton->setFixedSize({18, 18});
-    m_forthButton->setFixedSize({18, 18});
-    m_typeCombo->setFixedSize({222, 18});
-    m_titleLabel->setFixedHeight(18);
+    m_homeButton->setFixedSize({20, 20});
+    m_backButton->setFixedSize({20, 20});
+    m_forthButton->setFixedSize({20, 20});
+    m_typeCombo->setFixedSize({222, 20});
+    m_titleLabel->setFixedHeight(20);
 
-    m_toolBar->layout()->setSpacing(3);
+    m_toolBar->layout()->setSpacing(2);
     m_toolBar->layout()->setContentsMargins(1, 1, 1, 1);
 
-    m_toolBar->setFixedHeight(20);
+    m_toolBar->setFixedHeight(22);
     m_toolBar->addWidget(m_typeCombo);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addSeparator();

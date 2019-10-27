@@ -56,7 +56,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_toolBar->layout()->setSpacing(3);
 
-    m_toolBar->setFixedHeight(20);
+    m_toolBar->setFixedHeight(22);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     m_toolBar->addWidget(m_refreshButton);
     m_toolBar->addWidget(m_shrinkSceneButton);
@@ -74,18 +74,18 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addWidget(m_themeComboBox1);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
 
-    m_refreshButton->setFixedSize(QSize(18, 18));
-    m_shrinkSceneButton->setFixedSize(QSize(18, 18));
-    m_clearButton->setFixedSize(QSize(18, 18));
-    m_anchorsButton->setFixedSize(QSize(18, 18));
-    m_snappingButton->setFixedSize(QSize(18, 18));
-    m_gridViewButton->setFixedSize(QSize(18, 18));
-    m_guidelinesButton->setFixedSize(QSize(18, 18));
-    m_sceneSettingsButton->setFixedSize(QSize(18, 18));
-    m_themeSettingsButton->setFixedSize(QSize(18, 18));
-    m_zoomLevelComboBox->setFixedHeight(18);
-    m_themeComboBox->setFixedHeight(18);
-    m_themeComboBox1->setFixedHeight(18);
+    m_refreshButton->setFixedSize(QSize(20, 20));
+    m_shrinkSceneButton->setFixedSize(QSize(20, 20));
+    m_clearButton->setFixedSize(QSize(20, 20));
+    m_anchorsButton->setFixedSize(QSize(20, 20));
+    m_snappingButton->setFixedSize(QSize(20, 20));
+    m_gridViewButton->setFixedSize(QSize(20, 20));
+    m_guidelinesButton->setFixedSize(QSize(20, 20));
+    m_sceneSettingsButton->setFixedSize(QSize(20, 20));
+    m_themeSettingsButton->setFixedSize(QSize(20, 20));
+    m_zoomLevelComboBox->setFixedHeight(20);
+    m_themeComboBox->setFixedHeight(20);
+    m_themeComboBox1->setFixedHeight(20);
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_shrinkSceneButton->setCursor(Qt::PointingHandCursor);

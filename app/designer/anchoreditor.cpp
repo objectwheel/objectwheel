@@ -91,7 +91,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
     sourceControlLayout->addStretch();
 
     m_sourceControlComboBox->setCursor(Qt::PointingHandCursor);
-    m_sourceControlComboBox->setFixedSize(QSize(140, 23));
+    m_sourceControlComboBox->setFixedSize(QSize(140, 22));
     m_sourceControlComboBox->setToolTip(tr("Source control"));
 
     marginsLayout->setContentsMargins(0, 0, 0, 0);
@@ -104,7 +104,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
     m_marginsSpinBox->setToolTip(tr("Generic margins for left, right, top and bottom sides. It "
                                     "can be overridden via setting individual margins from below."));
     m_marginsSpinBox->setCursor(Qt::PointingHandCursor);
-    m_marginsSpinBox->setFixedSize(QSize(80, 23));
+    m_marginsSpinBox->setFixedSize(QSize(80, 22));
     m_marginsSpinBox->setRange(-999.99, 999.99);
     m_marginsSpinBox->setDecimals(2);
 
@@ -116,7 +116,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
     alignmentLayout->addStretch();
 
     m_alignWhenCenteredCheckBox->setCursor(Qt::PointingHandCursor);
-    m_alignWhenCenteredCheckBox->setFixedHeight(23);
+    m_alignWhenCenteredCheckBox->setFixedHeight(22);
     m_alignWhenCenteredCheckBox->setChecked(true);
     m_alignWhenCenteredCheckBox->setText(tr("Align when centered"));
     m_alignWhenCenteredCheckBox->setToolTip(tr("This forces centered anchors to align to a whole "
@@ -166,7 +166,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
     categoriesLayout2->addWidget(marginLabel2);
     categoriesLayout2->addStretch();
 
-    m_dialogButtonBox->setFixedHeight(23);
+    m_dialogButtonBox->setFixedHeight(22);
 
     closeButton->setToolTip(tr("Close the Anchor Editor"));
     closeButton->setCursor(Qt::PointingHandCursor);

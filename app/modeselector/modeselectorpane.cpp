@@ -70,12 +70,12 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     m_buildsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     m_documentsButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-    m_designerButton->setFixedHeight(18);
-    m_editorButton->setFixedHeight(18);
-    m_splitButton->setFixedHeight(18);
-    m_optionsButton->setFixedHeight(18);
-    m_buildsButton->setFixedHeight(18);
-    m_documentsButton->setFixedHeight(18);
+    m_designerButton->setFixedHeight(20);
+    m_editorButton->setFixedHeight(20);
+    m_splitButton->setFixedHeight(20);
+    m_optionsButton->setFixedHeight(20);
+    m_buildsButton->setFixedHeight(20);
+    m_documentsButton->setFixedHeight(20);
 
     auto buttonGroup = new QButtonGroup(this);
     buttonGroup->addButton(m_designerButton);

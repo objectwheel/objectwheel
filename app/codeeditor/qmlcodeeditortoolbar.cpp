@@ -57,7 +57,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 
-    layout()->setSpacing(3);
+    layout()->setSpacing(2);
 
     addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
     addWidget(m_pinButton);
@@ -90,22 +90,22 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_actions.append(addWidget(m_showButton));                                  // 12
     addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
 
-    m_pinButton->setFixedSize({18, 18});
-    m_undoButton->setFixedSize({18, 18});
-    m_redoButton->setFixedSize({18, 18});
-    m_closeButton->setFixedSize({18, 18});
-    m_newFileButton->setFixedSize({18, 18});
-    m_addFileButton->setFixedSize({18, 18});
-    m_saveButton->setFixedSize({18, 18});
-    m_saveAllButton->setFixedSize({18, 18});
-    m_cutButton->setFixedSize({18, 18});
-    m_copyButton->setFixedSize({18, 18});
-    m_pasteButton->setFixedSize({18, 18});
-    m_showButton->setFixedSize({18, 18});
-    m_scopeButton->setFixedSize({18, 18});
-    m_leftCombo->setFixedHeight(18);
-    m_rightCombo->setFixedHeight(18);
-    m_lineColumnLabel->setFixedHeight(18);
+    m_pinButton->setFixedSize({20, 20});
+    m_undoButton->setFixedSize({20, 20});
+    m_redoButton->setFixedSize({20, 20});
+    m_closeButton->setFixedSize({20, 20});
+    m_newFileButton->setFixedSize({20, 20});
+    m_addFileButton->setFixedSize({20, 20});
+    m_saveButton->setFixedSize({20, 20});
+    m_saveAllButton->setFixedSize({20, 20});
+    m_cutButton->setFixedSize({20, 20});
+    m_copyButton->setFixedSize({20, 20});
+    m_pasteButton->setFixedSize({20, 20});
+    m_showButton->setFixedSize({20, 20});
+    m_scopeButton->setFixedSize({20, 20});
+    m_leftCombo->setFixedHeight(20);
+    m_rightCombo->setFixedHeight(20);
+    m_lineColumnLabel->setFixedHeight(20);
 
     m_pinButton->setCursor(Qt::PointingHandCursor);
     m_undoButton->setCursor(Qt::PointingHandCursor);
@@ -427,11 +427,11 @@ QComboBox* QmlCodeEditorToolBar::combo(QmlCodeEditorToolBar::Combo combo) const
 
 QSize QmlCodeEditorToolBar::sizeHint() const
 {
-    return {100, 20};
+    return {100, 22};
 }
 
 QSize QmlCodeEditorToolBar::minimumSizeHint() const
 {
-    return {0, 20};
+    return {0, 22};
 }
 
