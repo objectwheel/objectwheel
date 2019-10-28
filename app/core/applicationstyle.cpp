@@ -29,15 +29,6 @@ const qreal comboBoxDefaultHeight[3] = { 26, 22, 19 };
 const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
 const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
 
-void setLayoutItemMargins(int left, int top, int right, int bottom, QRect *rect,
-                          Qt::LayoutDirection dir)
-{
-    if (dir == Qt::RightToLeft)
-        rect->adjust(-right, top, -left, bottom);
-    else
-        rect->adjust(left, top, right, bottom);
-}
-
 QRect comboboxInnerBounds(const QRect& outerBounds)
 {
     return outerBounds.adjusted(3, 3, -1, -5);
@@ -235,29 +226,6 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
         break;
     }
     return sz;
-}
-
-QRect ApplicationStyle::subElementRect(QStyle::SubElement element, const QStyleOption* option,
-                                       const QWidget* widget) const
-{
-    QRect rect;
-
-    switch (element) {
-    case SE_ComboBoxLayoutItem:
-        if (widget && qobject_cast<QToolBar*>(widget->parentWidget())) {
-            // Do nothing, because QToolbar needs the entire widget rect.
-            // Otherwise it will be clipped. Equivalent to
-            // widget->setAttribute(Qt::WA_LayoutUsesWidgetRect), but without
-            // all the hassle.
-        } else {
-            rect = option->rect;
-            setLayoutItemMargins(+2, +1, -3, -4, &rect, option->direction);
-        } break;
-    default:
-        rect = QFusionStyle::subElementRect(element, option, widget);
-    }
-
-    return rect;
 }
 
 QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,

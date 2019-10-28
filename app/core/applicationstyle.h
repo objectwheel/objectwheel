@@ -29,8 +29,6 @@ public:
     ApplicationStyle();
     QSize sizeFromContents(QStyle::ContentsType type, const QStyleOption* option,
                            const QSize& contentsSize, const QWidget* widget) const override;
-    QRect subElementRect(QStyle::SubElement element, const QStyleOption* option,
-                         const QWidget* widget) const override;
     QRect subControlRect(QStyle::ComplexControl control, const QStyleOptionComplex* option,
                          QStyle::SubControl subControl, const QWidget* widget) const override;
     QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt,
