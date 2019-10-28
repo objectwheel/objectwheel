@@ -14,7 +14,8 @@ public:
         Push, // Default for push buttons
         Disclosure,  // Default for anything else
         Help,
-        TexturedRounded
+        TexturedRounded,
+        Combo // Default for combo boxes
     };
     Q_ENUM(ButtonStyle)
 

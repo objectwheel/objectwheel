@@ -15,6 +15,9 @@ class PinBar final : public QWidget
 public:
     explicit PinBar(QDockWidget* dockWidget);
 
+    void addSeparator();
+    void addWidget(QWidget* widget);
+
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 

@@ -117,6 +117,8 @@ ApplicationStyle::ButtonStyle ApplicationStyle::buttonStyle(const QWidget* widge
         return val.value<ButtonStyle>();
     if (qobject_cast<const QPushButton*>(widget))
         return Push;
+    if (qobject_cast<const QComboBox*>(widget))
+        return Combo;
     else
         return Disclosure;
 }
@@ -283,6 +285,11 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
                                 editRect.width() + 10 + 11,
                                 1);
                 } break;
+            case SC_ComboBoxArrow: {
+                QRectF r(option->rect);
+                r.adjust(0.5, 0.5, -0.5, 0);
+                ret = QRectF(r.left() + r.width() - 16.5, r.top() + 0.5, 16, r.height() - 1.5).toRect();
+            } break;
             default:
                 ret = QFusionStyle::subControlRect(control, option, subControl, widget);
                 break;
@@ -496,12 +503,12 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         QRectF r(option->rect);
         if (option->state & State_Horizontal) {
             qreal xpoint = r.center().x();
-            path.moveTo(xpoint + 0.5, r.top() + 3);
-            path.lineTo(xpoint + 0.5, r.bottom() - 3);
+            path.moveTo(xpoint + 0.5, r.top() + 4);
+            path.lineTo(xpoint + 0.5, r.bottom() - 4);
         } else {
             qreal ypoint = r.center().y();
-            path.moveTo(r.left() + 2 , ypoint + 0.5);
-            path.lineTo(r.right() + 1, ypoint + 0.5);
+            path.moveTo(r.left() + 4 , ypoint + 0.5);
+            path.lineTo(r.right() - 4, ypoint + 0.5);
         }
         QPainterPathStroker theStroker;
         theStroker.setCapStyle(Qt::FlatCap);
@@ -708,6 +715,81 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                     painter->drawPath(bodyPath.subtracted(glowPathDown));
                     painter->setBrush(QColor("#f3f3f3"));
                     painter->drawPath(bodyPath.subtracted(glowPathUp));
+                }
+            } break;
+            case Combo: {
+                rect.adjust(0.5, 0.5, -0.5, 0);
+                // Draw shadows
+                QLinearGradient shadowGrad(0, 0, 0, 1);
+                shadowGrad.setCoordinateMode(QGradient::ObjectMode);
+                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
+                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(shadowGrad);
+                painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
+                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
+
+                // Draw border
+                QLinearGradient borderGrad(0, 0, 0, 1);
+                borderGrad.setCoordinateMode(QGradient::ObjectMode);
+                borderGrad.setColorAt(0.0, isEnabled ? "#d8d8d8" : "#ebebeb");
+                borderGrad.setColorAt(0.1, isEnabled ? "#d0d0d0" : "#e7e7e7");
+                borderGrad.setColorAt(0.9, isEnabled ? "#d0d0d0" : "#e7e7e7");
+                borderGrad.setColorAt(1.0, isEnabled ? "#bcbcbc" : "#dddddd");
+                painter->setBrush(borderGrad);
+                painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
+
+                // Draw body
+                painter->setBrush(QColor(isEnabled ? isDown ? "#f0f0f0" : "white" : "white"));
+                painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
+
+                // Draw handle
+                if (isEnabled) {
+                    QRectF hr(rect.left() + rect.width() - 16.5, rect.top() + 0.5, 16, rect.height() - 1.5);
+                    painter->setClipRect(hr);
+                    // Draw border
+                    QPainterPath hp;
+                    hp.moveTo(hr.topLeft() - QPointF(1, 0));
+                    hp.lineTo(hr.topRight() - QPointF(7, 0));
+                    hp.cubicTo(hr.topRight(), hr.topRight(),
+                               hr.topRight() + QPointF(0, 7));
+                    hp.lineTo(hr.bottomRight() - QPointF(0, 7));
+                    hp.cubicTo(hr.bottomRight(), hr.bottomRight(),
+                               hr.bottomRight() - QPointF(7, 0));
+                    hp.lineTo(hr.bottomLeft() - QPointF(1, 0));
+                    hp.lineTo(hr.topLeft() - QPointF(1, 0));
+                    QLinearGradient borderGrad(0, 0, 0, 1);
+                    borderGrad.setCoordinateMode(QGradient::ObjectMode);
+                    borderGrad.setColorAt(0.0, isDown ? "#3280f7" : "#5496f4");
+                    borderGrad.setColorAt(0.1, isDown ? "#2e7bf3" : "#4a91f5");
+                    borderGrad.setColorAt(0.9, isDown ? "#195cd3" : "#2271f7");
+                    borderGrad.setColorAt(1.0, isDown ? "#1450bf" : "#1d6cf7");
+                    painter->setBrush(borderGrad);
+                    painter->drawPath(hp);
+
+                    // Draw body
+                    hp.clear();
+                    hr.adjust(0, 0.5, -0.5, -0.5);
+                    hp.moveTo(hr.topLeft() - QPointF(1, 0));
+                    hp.lineTo(hr.topRight() - QPointF(6, 0));
+                    hp.cubicTo(hr.topRight(), hr.topRight(),
+                               hr.topRight() + QPointF(0, 6));
+                    hp.lineTo(hr.bottomRight() - QPointF(0, 6));
+                    hp.cubicTo(hr.bottomRight(), hr.bottomRight(),
+                               hr.bottomRight() - QPointF(6, 0));
+                    hp.lineTo(hr.bottomLeft() - QPointF(1, 0));
+                    hp.lineTo(hr.topLeft() - QPointF(1, 0));
+                    QLinearGradient bodyGrad(0, 0, 0, 1);
+                    bodyGrad.setCoordinateMode(QGradient::ObjectMode);
+                    bodyGrad.setColorAt(0.0, isDown ? "#5496f9" : "#71a9f5");
+                    bodyGrad.setColorAt(0.9, isDown ? "#1a5ece" : "#2173f7");
+                    bodyGrad.setColorAt(1.0, isDown ? "#1a5ece" : "#2173f7");
+                    painter->setBrush(bodyGrad);
+                    painter->drawPath(hp);
+                    painter->setClipping(false);
                 }
             } break;
             default:
@@ -1112,14 +1194,23 @@ void ApplicationStyle::drawComplexControl(QStyle::ComplexControl control,
                 QFusionStyle::drawComplexControl(control, &copy, painter, widget);
                 QColor arrowColor = option->palette.buttonText().color();
                 arrowColor.setAlpha(230);
+                if (buttonStyle(widget) == Combo)
+                    arrowColor = Qt::white;
                 QRectF dr = proxy()->subControlRect(CC_ComboBox, combo, SC_ComboBoxArrow, widget);
-                QPainterPath path;
-                path.moveTo(0.5, 0.5);
-                path.lineTo(3.5, 3.5);
-                path.lineTo(6.5, 0.5);
-                painter->translate(dr.topLeft() + QPointF(dr.width() / 2.0 - 3.5, dr.height() / 2.0 - 2.25));
+                QPainterPath pathDown;
+                pathDown.moveTo(0.5, 0.5);
+                pathDown.lineTo(3.5, 3.5);
+                pathDown.lineTo(6.5, 0.5);
+                QPainterPath pathUp;
+                pathUp.moveTo(0.5, 3.5);
+                pathUp.lineTo(3.5, 0.5);
+                pathUp.lineTo(6.5, 3.5);
                 painter->setPen(QPen(arrowColor, 1.4, Qt::SolidLine, Qt::RoundCap, Qt::MiterJoin));
-                painter->drawPath(path);
+                QPointF tl(dr.topLeft() + QPointF(dr.width() / 2.0 - 3.5, dr.height() / 2.0 - 2.25));
+                painter->translate(tl - QPointF(0, 3.5));
+                painter->drawPath(pathUp);
+                painter->translate(QPointF(0, 7.5));
+                painter->drawPath(pathDown);
                 painter->restore();
             }
         } break;

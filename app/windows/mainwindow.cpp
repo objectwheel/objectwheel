@@ -42,6 +42,8 @@
 #include <pinbar.h>
 #include <dockbar.h>
 
+#include <QComboBox>
+#include <QPushButton>
 #include <QWindow>
 #include <QProcess>
 #include <QLabel>
@@ -176,6 +178,12 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addDockWidget(Qt::LeftDockWidgetArea, m_formsDockWidget);
     m_leftDockBar->addDockWidget(m_formsDockWidget);
     m_leftDockBar->setDockWidgetButtonChecked(m_formsDockWidget, false);
+
+    static_cast<PinBar*>(m_assetsDockWidget->titleBarWidget())->addWidget(m_assetsPane->modeComboBox());
+    static_cast<PinBar*>(m_assetsDockWidget->titleBarWidget())->addSeparator();
+    static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->addButton());
+    static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->removeButton());
+    static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addSeparator();
 
     auto updatePalette = [=] {
         QPalette p(palette());

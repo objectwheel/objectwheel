@@ -23,6 +23,7 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
 
     m_titleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_titleLabel->setText(dockWidget->windowTitle());
+    m_titleLabel->setFixedHeight(18);
 
     m_detachButton->setFixedSize(18, 18);
     m_detachButton->setIconSize(QSize(12, 12));
@@ -50,6 +51,25 @@ PinBar::PinBar(QDockWidget* dockWidget) : QWidget(dockWidget)
             this, &PinBar::onDetachButtonClick);
     connect(m_dockWidget, &QDockWidget::topLevelChanged,
             this, &PinBar::onDockWidgetTopLevelChange);
+}
+
+void PinBar::addSeparator()
+{
+    class Separator final : public QWidget {
+    public: explicit Separator(QWidget* parent = nullptr) : QWidget(parent) {}
+        QSize sizeHint() const override { return {1, 12}; }
+        void paintEvent(QPaintEvent*) override {
+            QPainter p(this);
+            p.setPen(QPen(QColor("#50000000"), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+            p.drawLine(QRectF(rect()).topLeft(), QRectF(rect()).bottomLeft()); }
+    };
+    addWidget(new Separator(this));
+}
+
+void PinBar::addWidget(QWidget* widget)
+{
+    int index = layout()->count() - 2;
+    static_cast<QBoxLayout*>(layout())->insertWidget(index, widget, 0, Qt::AlignVCenter);
 }
 
 QSize PinBar::sizeHint() const

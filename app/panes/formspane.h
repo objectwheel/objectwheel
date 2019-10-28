@@ -13,6 +13,9 @@ class FormsPane : public QTreeWidget
 public:
     explicit FormsPane(DesignerScene* designerScene, QWidget* parent = nullptr);
 
+    QPushButton* addButton() const;
+    QPushButton* removeButton() const;
+
 public slots:
     void discharge();
     void refresh();
@@ -24,7 +27,6 @@ private slots:
 
 private:
     void paintEvent(QPaintEvent* e) override;
-    void updateGeometries() override;
     QSize sizeHint() const override;
 
 private:

@@ -242,7 +242,6 @@
         <file>images/designer/form.svg</file>
         <file>images/settings/controls.svg</file>
         <file>images/designer/erase-property.svg</file>
-        <file>images/designer/filter.svg</file>
         <file>images/designer/clear.svg</file>
         <file>images/designer/down.svg</file>
         <file>images/designer/font-decrease.svg</file>
@@ -305,7 +304,7 @@
         <file>images/settings/texture.svg</file>
         <file>images/output/info.svg</file>
         <file>images/output/warning.svg</file>
-        <file>images/minus.svg</file>
-        <file>images/plus.svg</file>
+        <file>images/designer/plus.svg</file>
+        <file>images/designer/minus.svg</file>
     </qresource>
 </RCC>

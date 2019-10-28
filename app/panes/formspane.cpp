@@ -177,16 +177,14 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
     m_addButton->setToolTip(tr("Add new form to the project"));
     m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_addButton->setFixedSize(18, 18);
-    m_addButton->setIcon(QIcon(":/images/plus.svg"));
-    connect(m_addButton, &QPushButton::clicked, this, &FormsPane::onAddButtonClick);
+    m_addButton->setIcon(QIcon(":/images/designer/plus.svg"));
 
     ApplicationStyle::setButtonStyle(m_removeButton, ApplicationStyle::Help);
     m_removeButton->setCursor(Qt::PointingHandCursor);
     m_removeButton->setToolTip(tr("Remove selected form from the project"));
     m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     m_removeButton->setFixedSize(18, 18);
-    m_removeButton->setIcon(QIcon(":/images/minus.svg"));
-    connect(m_removeButton, &QPushButton::clicked, this, &FormsPane::onRemoveButtonClick);
+    m_removeButton->setIcon(QIcon(":/images/designer/minus.svg"));
 
     /*
         NOTE: No need to catch any signals about form creation or deletion from ControlRemovingManager
@@ -194,6 +192,8 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
               private members and only used by FormsPane.
     */
 
+    connect(m_addButton, &QPushButton::clicked, this, &FormsPane::onAddButtonClick);
+    connect(m_removeButton, &QPushButton::clicked, this, &FormsPane::onRemoveButtonClick);
     connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refresh); // FIXME: This function has severe performance issues.
     connect(this, &FormsPane::currentItemChanged, this, &FormsPane::onCurrentItemChange);
     connect(ProjectManager::instance(), &ProjectManager::started, this, [=] {
@@ -305,17 +305,19 @@ void FormsPane::paintEvent(QPaintEvent* e)
     QTreeWidget::paintEvent(e);
 }
 
-void FormsPane::updateGeometries()
-{
-    QTreeWidget::updateGeometries();
-    QRect vg = viewport()->geometry();
-    m_addButton->move(vg.topRight() + QPoint(-38, -20));
-    m_removeButton->move(vg.topRight() + QPoint(-19, -20));
-}
-
 QSize FormsPane::sizeHint() const
 {
     return QSize(190, 200);
+}
+
+QPushButton* FormsPane::removeButton() const
+{
+    return m_removeButton;
+}
+
+QPushButton* FormsPane::addButton() const
+{
+    return m_addButton;
 }
 
 #include "formspane.moc"

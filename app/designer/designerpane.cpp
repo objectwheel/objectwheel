@@ -54,7 +54,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_toolBar);
     layout->addWidget(m_designerView);
 
-    m_toolBar->layout()->setSpacing(3);
+    m_toolBar->layout()->setSpacing(2);
 
     m_toolBar->setFixedHeight(22);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));

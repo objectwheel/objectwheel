@@ -27,6 +27,7 @@ public:
     explicit FileExplorer(QWidget* parent = nullptr);
     void setRootPath(const QString& rootPath);
     QString rootPath() const;
+    QComboBox* modeComboBox() const;
 
 public slots:
     void discharge();

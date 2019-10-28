@@ -45,7 +45,6 @@ using namespace Utils;
 
 namespace {
 
-QLabel* g_modeIFilterIconLabel;
 const int ROW_HEIGHT = 20;
 int lastVScrollerPosOfViewer = 0;
 int lastHScrollerPosOfViewer = 0;
@@ -113,12 +112,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 
-    g_modeIFilterIconLabel = new QLabel(m_modeComboBox);
-    g_modeIFilterIconLabel->setFixedSize(16, 16);
-    g_modeIFilterIconLabel->move(58, 2);
-    g_modeIFilterIconLabel->setPixmap(PaintUtils::pixmap(":/images/designer/filter.svg", QSize(12, 12), this));
-
-    m_modeComboBox->setFixedSize(76, 19);
+    m_modeComboBox->setFixedHeight(18);
     m_modeComboBox->addItem(tr("Viewer")); // First must be the Viewer, the index is important
     m_modeComboBox->addItem(tr("Explorer"));
 
@@ -331,6 +325,11 @@ void FileExplorer::setRootPath(const QString& rootPath)
 QString FileExplorer::rootPath() const
 {
     return m_fileSystemModel->rootPath();
+}
+
+QComboBox* FileExplorer::modeComboBox() const
+{
+    return m_modeComboBox;
 }
 
 void FileExplorer::onModeChange()
@@ -835,13 +834,14 @@ void FileExplorer::updateGeometries()
     m_searchEdit->setGeometry(sg);
 
     header()->setGeometry(vg.left(), 1, vg.width(), header()->height());
-    m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
-                         header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
-    if (width() < m_modeComboBox->width() + 40)
-        m_modeComboBox->hide();
-    else if (m_modeComboBox->isHidden())
-        m_modeComboBox->show();
-
+    if (m_modeComboBox->parentWidget() == header()) {
+        m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
+                             header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
+        if (width() < m_modeComboBox->width() + 40)
+            m_modeComboBox->hide();
+        else if (m_modeComboBox->isHidden())
+            m_modeComboBox->show();
+    }
     int ds = qMin(qMin(vg.width() - 5, vg.height() - 5), 100);
     QRect dg;
     dg.setSize({ds, ds});
