@@ -19,6 +19,7 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
   , m_formsPane(formsPane)
   , m_designerScene(designerScene)
   , m_isProjectStarted(false)
+  , m_isSelectionHandlingBlocked(false)
 {
     FormsTree* tree = m_formsPane->formsTree();
 
@@ -66,9 +67,16 @@ void FormsController::onProjectStart()
 void FormsController::discharge()
 {
     m_isProjectStarted = false;
-    blockSignals(true);
-    m_formsPane->formsTree()->clear();
-    blockSignals(false);
+    clear();
+}
+
+void FormsController::clear()
+{
+    m_isSelectionHandlingBlocked = true;
+    EVERYTHING(QTreeWidgetItem* item, tree)
+        tree->delegate()->destroyItem(item);
+    m_searchCompleterModel.setStringList({});
+    m_isSelectionHandlingBlocked = false;
 }
 
 void FormsController::onAddButtonClick()
@@ -97,6 +105,12 @@ void FormsController::onRemoveButtonClick()
 
 void FormsController::onItemSelectionChange()
 {
+    if (!m_isProjectStarted)
+        return;
+
+    if (m_isSelectionHandlingBlocked)
+        return;
+
     Q_ASSERT(m_formsPane->formsTree()->currentItem());
 
     const QString& id = m_formsPane->formsTree()->currentItem()->text(0);
@@ -111,12 +125,11 @@ void FormsController::refresh() // FIXME: This function has severe performance i
     if (!m_isProjectStarted)
         return;
 
-    blockSignals(true);
+    clear();
 
-    m_formsPane->formsTree()->clear();
-
+    // FIXME: Should we use scene->forms() instead? --but if
+    // you do, make sure you order forms with their indexes--
     QTreeWidgetItem* selectionItem = nullptr;
-    // FIXME: Should we use scene->forms() instead? --but if you do, make sure you order forms with their indexes--
     for (const QString& path : SaveUtils::formPaths(ProjectManager::dir())) {
         const QString& id = SaveUtils::controlId(path);
         Q_ASSERT(!id.isEmpty());
@@ -131,10 +144,10 @@ void FormsController::refresh() // FIXME: This function has severe performance i
             selectionItem = item;
     }
 
+    m_isSelectionHandlingBlocked = true;
     if (selectionItem)
         selectionItem->setSelected(true);
-
-    blockSignals(false);
+    m_isSelectionHandlingBlocked = false;
 }
 
 void FormsController::onSearchEditReturnPress()

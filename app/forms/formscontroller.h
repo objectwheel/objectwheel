@@ -22,6 +22,7 @@ public:
 
 public slots:
     void discharge();
+    void clear();
     void refresh();
 
 private slots:
@@ -40,6 +41,7 @@ private:
     DesignerScene* m_designerScene;
     QStringListModel m_searchCompleterModel;
     bool m_isProjectStarted;
+    bool m_isSelectionHandlingBlocked;
 };
 
 #endif // FORMSCONTROLLER_H

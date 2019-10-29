@@ -17,8 +17,8 @@
 ControlsController::ControlsController(ControlsPane* controlsPane, DesignerScene* designerScene, QObject* parent) : QObject(parent)
   , m_controlsPane(controlsPane)
   , m_designerScene(designerScene)
-  , m_isSelectionHandlingBlocked(false)
   , m_isProjectStarted(false)
+  , m_isSelectionHandlingBlocked(false)
 {
     ControlsTree* tree = m_controlsPane->controlsTree();
 

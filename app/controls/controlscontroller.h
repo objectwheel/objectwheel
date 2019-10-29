@@ -66,8 +66,8 @@ private:
     QPointer<Form> m_currentForm;
     QStringListModel m_searchCompleterModel;
     QHash<Form*, FormState> m_formStates;
-    bool m_isSelectionHandlingBlocked;
     bool m_isProjectStarted;
+    bool m_isSelectionHandlingBlocked;
 };
 
 #endif // CONTROLSCONTROLLER_H

@@ -148,8 +148,10 @@ void OutputController::setCurrentWidget(QWidget* widget)
 
     if (QAbstractButton* button = m_outputPane->buttonForWidget(widget)) {
         button->setChecked(true);
+        m_outputPane->setUpdatesEnabled(false);
         m_outputPane->stackedWidget()->setCurrentWidget(widget);
         m_outputPane->stackedWidget()->show();
+        m_outputPane->setUpdatesEnabled(true);
         emit currentWidgetChanged(widget);
     }
 }
