@@ -23,14 +23,18 @@ public:
 public slots:
     void discharge();
     void clear();
-    void refresh();
 
 private slots:
     void onProjectStart();
     void onAddButtonClick();
     void onRemoveButtonClick();
-    void onItemSelectionChange();
     void onSearchEditReturnPress();
+
+    void onControlRemove();
+    void onControlIdChange();
+    void onControlIndexChange();
+    void onCurrentFormChange();
+    void onItemSelectionChange();
 
 private:
     void addCompleterEntry(const QString& entry);

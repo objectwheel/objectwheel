@@ -38,8 +38,6 @@ ControlsController::ControlsController(ControlsPane* controlsPane, DesignerScene
             this, &ControlsController::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &ControlsController::onControlRemove);
-    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-            this, &ControlsController::onFormRemove);
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &ControlsController::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
@@ -216,47 +214,37 @@ void ControlsController::onControlRemove(Control* control)
     if (!m_isProjectStarted)
         return;
 
-    if (control->type() == Form::Type)
-        return;
+    if (control->type() == Form::Type) {
+        m_formStates.remove(static_cast<Form*>(control));
 
-    if (m_currentForm == 0)
-        return;
+        // Form items will be cleared right after this slot,
+        // when onCurrentFormChange slot is called.
+    } else {
+        if (m_currentForm == 0)
+            return;
 
-    if (!m_currentForm->isAncestorOf(control))
-        return;
+        if (!m_currentForm->isAncestorOf(control))
+            return;
 
-    ControlsTree* tree = m_controlsPane->controlsTree();
+        ControlsTree* tree = m_controlsPane->controlsTree();
 
-    EVERYTHING(QTreeWidgetItem* item, tree) {
-        if (const Control* ctrl = controlFromItem(item)) {
-            if (ctrl == control) {
-                const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(item);
-                for (QTreeWidgetItem* child : childs) {
-                    if (const Control* ctrl2 = controlFromItem(child)) {
-                        removeCompleterEntry(ctrl2->id());
-                        tree->delegate()->destroyItem(child);
+        EVERYTHING(QTreeWidgetItem* item, tree) {
+            if (const Control* ctrl = controlFromItem(item)) {
+                if (ctrl == control) {
+                    const QList<QTreeWidgetItem*>& childs = tree->allSubChildItems(item);
+                    for (QTreeWidgetItem* child : childs) {
+                        if (const Control* ctrl2 = controlFromItem(child)) {
+                            removeCompleterEntry(ctrl2->id());
+                            tree->delegate()->destroyItem(child);
+                        }
                     }
+                    // No need to sort, because the order is
+                    // already preserved after the deletion
+                    return;
                 }
-                // No need to sort, because the order is
-                // already preserved after the deletion
-                return;
             }
         }
     }
-}
-
-void ControlsController::onFormRemove(Control* control)
-{
-    if (!m_isProjectStarted)
-        return;
-
-    if (control->type() != Form::Type)
-        return;
-
-    m_formStates.remove(static_cast<Form*>(control));
-
-    // Form items will be cleared right after this slot,
-    // when onCurrentFormChange slot is called.
 }
 
 void ControlsController::onCurrentFormChange(Form* currentForm)

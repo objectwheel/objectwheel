@@ -42,7 +42,6 @@ private slots:
 
     void onControlCreation(Control* control);
     void onControlRemove(Control* control);
-    void onFormRemove(Control* control);
     void onCurrentFormChange(Form* currentForm);
     void onControlParentChange(Control* control);
     void onControlIndexChange(Control* control) const;

@@ -9,6 +9,7 @@
 #include <filesystemutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
+#include <controlpropertymanager.h>
 #include <form.h>
 
 #include <QPushButton>
@@ -36,11 +37,19 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
     connect(formsPane->removeButton(), &QPushButton::clicked,
             this, &FormsController::onRemoveButtonClick);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
-            this, &FormsController::refresh);
+            this, &FormsController::onCurrentFormChange);
     connect(tree, &FormsTree::itemSelectionChanged,
             this, &FormsController::onItemSelectionChange);
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &FormsController::onProjectStart);
+    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
+            this, &FormsController::onControlRemove);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
+            tree, qOverload<>(&FormsTree::update));
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
+            this, &FormsController::onControlIdChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
+            this, &FormsController::onControlIndexChange);
 }
 
 Control* FormsController::controlFromItem(const QTreeWidgetItem* item) const
@@ -58,12 +67,6 @@ QTreeWidgetItem* FormsController::itemFromControl(const Control* control) const
     return nullptr;
 }
 
-void FormsController::onProjectStart()
-{
-    m_isProjectStarted = true;
-    refresh();
-}
-
 void FormsController::discharge()
 {
     m_isProjectStarted = false;
@@ -73,55 +76,18 @@ void FormsController::discharge()
 void FormsController::clear()
 {
     m_isSelectionHandlingBlocked = true;
-    EVERYTHING(QTreeWidgetItem* item, tree)
-        tree->delegate()->destroyItem(item);
+    m_formsPane->formsTree()->clear();
     m_searchCompleterModel.setStringList({});
     m_isSelectionHandlingBlocked = false;
 }
 
-void FormsController::onAddButtonClick()
+void FormsController::onProjectStart()
 {
-    QTemporaryDir temp;
-    Q_ASSERT(temp.isValid());
+    m_isProjectStarted = true;
 
-    SaveUtils::initControlMeta(temp.path());
 
-    const QString& thisDir = SaveUtils::toControlThisDir(temp.path());
 
-    QDir(thisDir).mkpath(".");
-    FileSystemUtils::copy(":/resources/qmls/form.qml", thisDir, true, true);
-    QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
-    ControlCreationManager::createForm(temp.path());
 
-    refresh(); // FIXME: This function has severe performance issues.
-}
-
-void FormsController::onRemoveButtonClick()
-{
-    if (m_formsPane->formsTree()->topLevelItemCount() > 1) // FIXME
-        ControlRemovingManager::removeControl(m_designerScene->currentForm(), true);
-    // refresh(); // Not needed, m_designerScene already emits currentFormChanged signal
-}
-
-void FormsController::onItemSelectionChange()
-{
-    if (!m_isProjectStarted)
-        return;
-
-    if (m_isSelectionHandlingBlocked)
-        return;
-
-    Q_ASSERT(m_formsPane->formsTree()->currentItem());
-
-    const QString& id = m_formsPane->formsTree()->currentItem()->text(0);
-    for (Form* form : m_designerScene->forms()) {
-        if (form->id() == id)
-            m_designerScene->setCurrentForm(form);
-    }
-}
-
-void FormsController::refresh() // FIXME: This function has severe performance issues
-{
     if (!m_isProjectStarted)
         return;
 
@@ -150,6 +116,30 @@ void FormsController::refresh() // FIXME: This function has severe performance i
     m_isSelectionHandlingBlocked = false;
 }
 
+void FormsController::onAddButtonClick()
+{
+    QTemporaryDir temp;
+    Q_ASSERT(temp.isValid());
+
+    SaveUtils::initControlMeta(temp.path());
+
+    const QString& thisDir = SaveUtils::toControlThisDir(temp.path());
+
+    QDir(thisDir).mkpath(".");
+    FileSystemUtils::copy(":/resources/qmls/form.qml", thisDir, true, true);
+    QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
+    ControlCreationManager::createForm(temp.path());
+
+    refresh(); // FIXME: This function has severe performance issues.
+}
+
+void FormsController::onRemoveButtonClick()
+{
+    if (m_formsPane->formsTree()->topLevelItemCount() > 1) // FIXME
+        ControlRemovingManager::removeControl(m_designerScene->currentForm(), true);
+    // refresh(); // Not needed, m_designerScene already emits currentFormChanged signal
+}
+
 void FormsController::onSearchEditReturnPress()
 {
     if (!m_isProjectStarted)
@@ -168,4 +158,55 @@ void FormsController::onSearchEditReturnPress()
             }
         }
     }
+}
+
+void FormsController::onControlRemove()
+{
+
+}
+
+void FormsController::onControlIdChange()
+{
+
+}
+
+void FormsController::onControlIndexChange()
+{
+
+}
+
+void FormsController::onCurrentFormChange()
+{
+
+}
+
+void FormsController::onItemSelectionChange()
+{
+    if (!m_isProjectStarted)
+        return;
+
+    if (m_isSelectionHandlingBlocked)
+        return;
+
+    Q_ASSERT(m_formsPane->formsTree()->currentItem());
+
+    const QString& id = m_formsPane->formsTree()->currentItem()->text(0);
+    for (Form* form : m_designerScene->forms()) {
+        if (form->id() == id)
+            m_designerScene->setCurrentForm(form);
+    }
+}
+
+void FormsController::addCompleterEntry(const QString& entry)
+{
+    QStringList list(m_searchCompleterModel.stringList());
+    list.append(entry);
+    m_searchCompleterModel.setStringList(list);
+}
+
+void FormsController::removeCompleterEntry(const QString& entry)
+{
+    QStringList list(m_searchCompleterModel.stringList());
+    list.removeOne(entry);
+    m_searchCompleterModel.setStringList(list);
 }

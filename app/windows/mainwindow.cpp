@@ -297,8 +297,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { m_assetsPane->setRootPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir())); });
-    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
-            m_formsController, &FormsController::refresh);
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, &MainWindow::resetSettings);
 
