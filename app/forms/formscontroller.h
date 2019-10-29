@@ -1,73 +1,39 @@
-#ifndef CONTROLSCONTROLLER_H
-#define CONTROLSCONTROLLER_H
+#ifndef FORMSCONTROLLER_H
+#define FORMSCONTROLLER_H
 
-#include <QHash>
-#include <QPointer>
 #include <QStringListModel>
 
-class Form;
-class Control;
 class DesignerScene;
-class ControlsPane;
-class QTreeWidgetItem;
+class FormsPane;
 
-class ControlsController final : public QObject
+class FormsController final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(ControlsController)
-
-    struct FormState {
-        QList<Control*> collapsedControls;
-        int verticalScrollBarPosition = 0;
-        int horizontalScrollBarPosition = 0;
-    };
+    Q_DISABLE_COPY(FormsController)
 
 public:
-    explicit ControlsController(ControlsPane* controlsPane, DesignerScene* designerScene,
-                                 QObject* parent = nullptr);
-
-    Control* controlFromItem(const QTreeWidgetItem* item) const;
-    QTreeWidgetItem* itemFromControl(const Control* control) const;
+    explicit FormsController(FormsPane* formsPane, DesignerScene* designerScene,
+                             QObject* parent = nullptr);
 
 public slots:
     void discharge();
-    void clear();
+    void refresh();
 
 private slots:
-    void onProjectStart();
+    void onAddButtonClick();
+    void onRemoveButtonClick();
+    void onCurrentItemChange();
     void onSearchEditReturnPress();
-    void onItemDoubleClick(QTreeWidgetItem* item, int column);
-    void onItemSelectionChange();
-    void onSceneSelectionChange();
-
-    void onControlCreation(Control* control);
-    void onControlRemove(Control* control);
-    void onFormRemove(Control* control);
-    void onCurrentFormChange(Form* currentForm);
-    void onControlParentChange(Control* control);
-    void onControlIndexChange(Control* control) const;
-    void onControlIdChange(Control* control, const QString& previousId);
 
 private:
     void addCompleterEntry(const QString& entry);
     void removeCompleterEntry(const QString& entry);
-    void expandRecursive(const QTreeWidgetItem* parentItem);
-    void addControls(QTreeWidgetItem* parentItem, const QList<Control*>& controls);
-
-signals:
-    void goToSlotActionTriggered();
-    void editAnchorsActionTriggered();
-    void viewSourceCodeActionTriggered();
-    void controlSelectionChanged(const QList<Control*>& selectedControls);
 
 private:
-    ControlsPane* m_controlsPane;
+    FormsPane* m_formsPane;
     DesignerScene* m_designerScene;
-    QPointer<Form> m_currentForm;
     QStringListModel m_searchCompleterModel;
-    QHash<Form*, FormState> m_formStates;
-    bool m_isSelectionHandlingBlocked;
     bool m_isProjectStarted;
 };
 
-#endif // CONTROLSCONTROLLER_H
+#endif // FORMSCONTROLLER_H

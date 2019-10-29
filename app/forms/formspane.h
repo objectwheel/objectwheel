@@ -1,36 +1,29 @@
 #ifndef FORMSPANE_H
 #define FORMSPANE_H
 
-#include <QTreeWidget>
+#include <QWidget>
 
+class FormsTree;
+class LineEdit;
 class QPushButton;
-class DesignerScene;
 
-class FormsPane : public QTreeWidget
+class FormsPane final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(FormsPane)
 
 public:
-    explicit FormsPane(DesignerScene* designerScene, QWidget* parent = nullptr);
+    explicit FormsPane(QWidget* parent = nullptr);
 
+    FormsTree* formsTree() const;
+    LineEdit* searchEdit() const;
     QPushButton* addButton() const;
     QPushButton* removeButton() const;
-
-public slots:
-    void discharge();
-    void refresh();
-
-private slots:
-    void onAddButtonClick();
-    void onRemoveButtonClick();
-    void onCurrentItemChange();
-
-private:
-    void paintEvent(QPaintEvent* e) override;
     QSize sizeHint() const override;
 
 private:
-    DesignerScene* m_designerScene;
+    FormsTree* m_formsTree;
+    LineEdit* m_searchEdit;
     QPushButton* m_addButton;
     QPushButton* m_removeButton;
 };

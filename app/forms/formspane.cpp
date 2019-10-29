@@ -1,316 +1,55 @@
 #include <formspane.h>
-#include <saveutils.h>
-#include <projectmanager.h>
-#include <designerscene.h>
+#include <formstree.h>
+#include <lineedit.h>
 #include <paintutils.h>
-#include <utilityfunctions.h>
-#include <controlcreationmanager.h>
-#include <controlremovingmanager.h>
-#include <filesystemutils.h>
-#include <form.h>
 #include <applicationstyle.h>
 
+#include <QBoxLayout>
 #include <QPushButton>
-#include <QStandardPaths>
-#include <QPainter>
-#include <QStyledItemDelegate>
-#include <QHeaderView>
-#include <QDir>
-#include <QTemporaryDir>
-#include <QApplication>
 
-namespace {
-bool isProjectStarted = false;
-const int ROW_HEIGHT = 20;
-
-void fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row)
-{
-    painter->save();
-
-    bool isSelected = option.state & QStyle::State_Selected;
-    const QPalette& pal = option.palette;
-    const QRectF& rect = option.rect;
-
-    QPainterPath path;
-    path.addRect(rect);
-    painter->setClipPath(path);
-    painter->setClipping(true);
-
-    // Fill background
-    if (isSelected) {
-        painter->fillRect(rect, pal.highlight());
-    } else {
-        if (row % 2)
-            painter->fillRect(rect, pal.alternateBase());
-        else
-            painter->fillRect(rect, pal.base());
-    }
-
-    // Draw top and bottom lines
-    QColor lineColor(pal.dark().color());
-    lineColor.setAlpha(50);
-    painter->setPen(lineColor);
-    painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-
-    painter->restore();
-}
-}
-
-class FormsListDelegate: public QStyledItemDelegate
-{
-    Q_OBJECT
-
-public:
-    explicit FormsListDelegate(FormsPane* parent) : QStyledItemDelegate(parent)
-      , m_formsPane(parent)
-    {}
-
-    void paint(QPainter* painter, const QStyleOptionViewItem& option,
-               const QModelIndex& index) const override
-    {
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-
-        const bool isSelected = option.state & QStyle::State_Selected;
-        const QAbstractItemModel* model = index.model();
-        const QIcon& icon = model->data(index, Qt::DecorationRole).value<QIcon>();
-
-        QRectF iconRect({}, QSizeF{option.decorationSize});
-        iconRect.moveCenter(option.rect.center());
-        iconRect.moveLeft(option.rect.left() + 5);
-
-        fillBackground(painter, option, index.row());
-
-        // Draw icon
-        QPixmap pixmap(PaintUtils::pixmap(icon, option.decorationSize, m_formsPane,
-                                          isSelected ? QIcon::Selected : QIcon::Normal));
-        painter->drawPixmap(iconRect, pixmap, pixmap.rect());
-
-        if (isSelected)
-            painter->setPen(option.palette.highlightedText().color());
-        else
-            painter->setPen(option.palette.text().color());
-
-        // Draw text
-        const QRectF& textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
-        const QString& text = index.data(Qt::DisplayRole).toString();
-        painter->drawText(textRect,
-                          option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
-                          QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
-
-        painter->restore();
-    }
-
-    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override
-    {
-        const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
-        return QSize(size.width(), ROW_HEIGHT);
-    }
-
-private:
-    FormsPane* m_formsPane;
-};
-
-FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidget(parent)
-  , m_designerScene(designerScene)
+FormsPane::FormsPane(QWidget* parent) : QWidget(parent)
+  , m_formsTree(new FormsTree(this))
+  , m_searchEdit(new LineEdit(this))
   , m_addButton(new QPushButton(this))
   , m_removeButton(new QPushButton(this))
 {
-    header()->setFixedHeight(20);
-    header()->setDefaultSectionSize(1);
-    header()->setMinimumSectionSize(1);
-
-    headerItem()->setText(0, tr("Forms"));
-
-    setColumnCount(1);
-    setIndentation(0);
-    setDragEnabled(false);
-    setRootIsDecorated(false);
-    setUniformRowHeights(true);
-    setDropIndicatorShown(false);
-    setExpandsOnDoubleClick(false);
-    setItemDelegate(new FormsListDelegate(this));
     setFocusPolicy(Qt::NoFocus);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
-    setSelectionBehavior(QTreeWidget::SelectRows);
-    setSelectionMode(QTreeWidget::SingleSelection);
-    setDragDropMode(QAbstractItemView::NoDragDrop);
-    setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    auto updatePalette = [=] {
-        QPalette p(palette());
-        p.setColor(QPalette::Light, "#bf5861");
-        p.setColor(QPalette::Dark, "#b05159");
-        p.setColor(QPalette::AlternateBase, "#f7e6e8");
-        setPalette(p);
-        setStyleSheet(
-                    QString {
-                        "QTreeView {"
-                        "    border: 1px solid %1;"
-                        "} QHeaderView::section {"
-                        "    padding-left: 5px;"
-                        "    color: %4;"
-                        "    border: none;"
-                        "    border-bottom: 1px solid %1;"
-                        "    background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,"
-                        "                                stop:0 %2, stop:1 %3);"
-                        "}"
-                    }
-                    .arg(palette().dark().color().darker(140).name())
-                    .arg(palette().light().color().name())
-                    .arg(palette().dark().color().name())
-                    .arg(palette().brightText().color().name())
-                    );
-    };
-    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
-    updatePalette();
+    m_searchEdit->setClearButtonEnabled(true);
+    m_searchEdit->setPlaceholderText(tr("Search"));
+    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", QSize(16, 16), this),
+                            QLineEdit::LeadingPosition);
 
     ApplicationStyle::setButtonStyle(m_addButton, ApplicationStyle::Help);
+    m_addButton->setFixedSize(18, 18);
     m_addButton->setCursor(Qt::PointingHandCursor);
     m_addButton->setToolTip(tr("Add new form to the project"));
-    m_addButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_addButton->setFixedSize(18, 18);
     m_addButton->setIcon(QIcon(":/images/designer/plus.svg"));
 
     ApplicationStyle::setButtonStyle(m_removeButton, ApplicationStyle::Help);
+    m_removeButton->setFixedSize(18, 18);
     m_removeButton->setCursor(Qt::PointingHandCursor);
     m_removeButton->setToolTip(tr("Remove selected form from the project"));
-    m_removeButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    m_removeButton->setFixedSize(18, 18);
     m_removeButton->setIcon(QIcon(":/images/designer/minus.svg"));
 
-    /*
-        NOTE: No need to catch any signals about form creation or deletion from ControlRemovingManager
-              or ControlCreatingManager since the member functions that are operating on forms are
-              private members and only used by FormsPane.
-    */
-
-    connect(m_addButton, &QPushButton::clicked, this, &FormsPane::onAddButtonClick);
-    connect(m_removeButton, &QPushButton::clicked, this, &FormsPane::onRemoveButtonClick);
-    connect(m_designerScene, &DesignerScene::currentFormChanged, this, &FormsPane::refresh); // FIXME: This function has severe performance issues.
-    connect(this, &FormsPane::currentItemChanged, this, &FormsPane::onCurrentItemChange);
-    connect(ProjectManager::instance(), &ProjectManager::started, this, [=] {
-        Q_ASSERT(!isProjectStarted);
-        isProjectStarted = true;
-        refresh(); // FIXME: This function has severe performance issues.
-    });
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(2);
+    layout->setContentsMargins(2, 2, 2, 2);
+    layout->addWidget(m_formsTree);
+    layout->addWidget(m_searchEdit);
+    // Do not add buttons, since they will be put
+    // under pinbar of the pane by the MainWindow
 }
 
-void FormsPane::discharge()
+FormsTree* FormsPane::formsTree() const
 {
-    isProjectStarted = false;
-    blockSignals(true);
-    clear();
-    blockSignals(false);
+    return m_formsTree;
 }
 
-void FormsPane::onAddButtonClick()
+LineEdit* FormsPane::searchEdit() const
 {
-    QTemporaryDir temp;
-    Q_ASSERT(temp.isValid());
-
-    SaveUtils::initControlMeta(temp.path());
-
-    const QString& thisDir = SaveUtils::toControlThisDir(temp.path());
-
-    QDir(thisDir).mkpath(".");
-    FileSystemUtils::copy(":/resources/qmls/form.qml", thisDir, true, true);
-    QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
-    ControlCreationManager::createForm(temp.path());
-
-    refresh(); // FIXME: This function has severe performance issues.
-}
-
-void FormsPane::onRemoveButtonClick()
-{
-    if (topLevelItemCount() > 1) // FIXME
-        ControlRemovingManager::removeControl(m_designerScene->currentForm(), true);
-    // refresh(); // Not needed, m_designerScene already emits currentFormChanged signal
-}
-
-void FormsPane::onCurrentItemChange()
-{
-    Q_ASSERT(currentItem());
-
-    const QString& id = currentItem()->text(0);
-    for (Form* form : m_designerScene->forms()) {
-        if (form->id() == id)
-            m_designerScene->setCurrentForm(form);
-    }
-}
-
-void FormsPane::refresh()
-{
-    if (!isProjectStarted)
-        return;
-
-    blockSignals(true);
-
-    clear();
-
-    QTreeWidgetItem* selectionItem = nullptr;
-    // FIXME: Should we use scene->forms() instead? --but if you do, make sure you order forms with their indexes--
-    for (const QString& path : SaveUtils::formPaths(ProjectManager::dir())) {
-        const QString& id = SaveUtils::controlId(path);
-        Q_ASSERT(!id.isEmpty());
-
-        auto item = new QTreeWidgetItem;
-        item->setText(0, id);
-        item->setIcon(0, QIcon(":/images/designer/form.svg"));
-
-        addTopLevelItem(item);
-
-        if (m_designerScene->currentForm() && m_designerScene->currentForm()->id() == id)
-            selectionItem = item;
-    }
-
-    if (selectionItem)
-        selectionItem->setSelected(true);
-
-    blockSignals(false);
-}
-
-void FormsPane::paintEvent(QPaintEvent* e)
-{
-    QPainter painter(viewport());
-    painter.fillRect(rect(), palette().base());
-    painter.setClipping(true);
-
-    QColor lineColor(palette().dark().color());
-    lineColor.setAlpha(50);
-    painter.setPen(lineColor);
-
-    for (int i = 0; i < viewport()->height() / qreal(ROW_HEIGHT); ++i) {
-        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
-        QPainterPath path;
-        path.addRect(rect);
-        painter.setClipPath(path);
-
-        // Fill background
-        if (i % 2)
-            painter.fillRect(rect, palette().alternateBase());
-
-        // Draw top and bottom lines
-        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-    }
-
-    QTreeWidget::paintEvent(e);
-}
-
-QSize FormsPane::sizeHint() const
-{
-    return QSize(190, 200);
-}
-
-QPushButton* FormsPane::removeButton() const
-{
-    return m_removeButton;
+    return m_searchEdit;
 }
 
 QPushButton* FormsPane::addButton() const
@@ -318,4 +57,12 @@ QPushButton* FormsPane::addButton() const
     return m_addButton;
 }
 
-#include "formspane.moc"
+QPushButton* FormsPane::removeButton() const
+{
+    return m_removeButton;
+}
+
+QSize FormsPane::sizeHint() const
+{
+    return QSize(190, 200);
+}

@@ -1,5 +1,6 @@
 #include <formstree.h>
 #include <formsdelegate.h>
+#include <private/qtreewidget_p.h>
 
 #include <QHeaderView>
 #include <QPainter>
@@ -45,8 +46,8 @@ FormsTree::FormsTree(QWidget* parent) : QTreeWidget(parent)
                             color: %4;
                             border: none;
                             border-bottom: 1px solid %1;
-                            background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5, y2:1,
-                                                        stop:0 %2, stop:1 %3);
+                            background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5,
+                                                        y2:1, stop:0 %2, stop:1 %3);
                         }
                     )qss"}
                     .arg(palette().dark().color().darker(140).name())
@@ -66,66 +67,31 @@ FormsDelegate* FormsTree::delegate() const
 
 void FormsTree::paintEvent(QPaintEvent* e)
 {
-//    Q_D(const QTreeWidget);
+    Q_D(const QTreeWidget);
 
-//    QPainter painter(viewport());
-//    painter.fillRect(rect(), palette().base());
+    QPainter painter(viewport());
+    painter.fillRect(rect(), palette().base());
 
-//    QColor lineColor(palette().dark().color());
-//    lineColor.setAlpha(50);
-//    painter.setPen(lineColor);
+    QColor lineColor(palette().dark().color());
+    lineColor.setAlpha(50);
+    painter.setPen(lineColor);
 
-//    qreal height = d->defaultItemHeight;
-//    qreal rowCount = viewport()->height() / height;
-//    for (int i = 0; i < rowCount; ++i) {
-//        QRectF rect(0, i * height, viewport()->width(), height);
-//        painter.setClipRect(rect);
+    qreal height = d->defaultItemHeight;
+    qreal rowCount = viewport()->height() / height;
+    for (int i = 0; i < rowCount; ++i) {
+        QRectF rect(0, i * height, viewport()->width(), height);
+        painter.setClipRect(rect);
 
-//        // Fill background
-//        if (i % 2)
-//            painter.fillRect(rect, palette().alternateBase());
+        // Fill background
+        if (i % 2)
+            painter.fillRect(rect, palette().alternateBase());
 
-//        // Draw vertical line
-//        QRectF cell(rect);
-//        cell.setSize(QSizeF(header()->sectionSize(0), rect.height()));
-//        painter.drawLine(cell.topRight() + QPointF(-0.5, 0.5),
-//                         cell.bottomRight() + QPointF(-0.5, -0.5));
-
-//        // Draw top and bottom lines
-//        painter.drawLine(rect.topLeft() + QPointF(0.5, 0.0),
-//                         rect.topRight() - QPointF(0.5, 0.0));
-//        painter.drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
-//                         rect.bottomRight() - QPointF(0.5, 0.0));
-//    }
-
-//    QTreeWidget::paintEvent(e);
-
-
-
-
-
-//    QPainter painter(viewport());
-//    painter.fillRect(rect(), palette().base());
-//    painter.setClipping(true);
-
-//    QColor lineColor(palette().dark().color());
-//    lineColor.setAlpha(50);
-//    painter.setPen(lineColor);
-
-//    for (int i = 0; i < viewport()->height() / qreal(ROW_HEIGHT); ++i) {
-//        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
-//        QPainterPath path;
-//        path.addRect(rect);
-//        painter.setClipPath(path);
-
-//        // Fill background
-//        if (i % 2)
-//            painter.fillRect(rect, palette().alternateBase());
-
-//        // Draw top and bottom lines
-//        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-//        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
-//    }
+        // Draw top and bottom lines
+        painter.drawLine(rect.topLeft() + QPointF(0.5, 0.0),
+                         rect.topRight() - QPointF(0.5, 0.0));
+        painter.drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
+                         rect.bottomRight() - QPointF(0.5, 0.0));
+    }
 
     QTreeWidget::paintEvent(e);
 }

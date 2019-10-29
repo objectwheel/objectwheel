@@ -9,8 +9,9 @@
 #include <propertiescontroller.h>
 #include <controlspane.h>
 #include <controlscontroller.h>
-#include <assetspane.h>
 #include <formspane.h>
+#include <formscontroller.h>
+#include <assetspane.h>
 #include <centralwidget.h>
 #include <designerview.h>
 #include <controlcreationmanager.h>
@@ -69,6 +70,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_propertiesController(new PropertiesController(m_propertiesPane, m_centralWidget->designerPane()->designerView()->scene(), this))
   , m_controlsPane(new ControlsPane)
   , m_controlsController(new ControlsController(m_controlsPane, m_centralWidget->designerPane()->designerView()->scene(), this))
+  , m_formsPane(new FormsPane)
+  , m_formsController(new FormsController(m_formsPane, m_centralWidget->designerPane()->designerView()->scene(), this))
   , m_formsPane(new FormsPane(m_centralWidget->designerPane()->designerView()->scene()))
   , m_assetsPane(new AssetsPane)
   , m_controlsDockWidget(new QDockWidget(this))
@@ -296,7 +299,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, [=] { m_assetsPane->setRootPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir())); });
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
-            m_formsPane, &FormsPane::refresh);
+            m_formsController, &FormsController::refresh);
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, &MainWindow::resetSettings);
 
@@ -344,8 +347,8 @@ void MainWindow::discharge()
     m_toolboxController->discharge();
     m_propertiesController->discharge();
     m_controlsController->discharge();
+    m_formsController->discharge();
     m_centralWidget->discharge();
-    m_formsPane->discharge();
     m_assetsPane->discharge();
 
     m_assetsDockWidgetVisible = true;

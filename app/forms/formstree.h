@@ -8,6 +8,7 @@ class FormsTree final : public QTreeWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY(FormsTree)
+    Q_DECLARE_PRIVATE(QTreeWidget)
 
 public:
     explicit FormsTree(QWidget* parent = nullptr);
