@@ -14,6 +14,7 @@ public:
     explicit FormsTree(QWidget* parent = nullptr);
 
     FormsDelegate* delegate() const;
+    QList<QTreeWidgetItem*> topLevelItems();
 
 private:
     void paintEvent(QPaintEvent* event) override;

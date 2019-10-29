@@ -26,4 +26,7 @@ private:
     FormsTree* m_formsTree;
 };
 
+#define EVERYTHING(variable, tree) \
+    Q_FOREACH(variable, tree->topLevelItems())
+
 #endif // FORMSDELEGATE_H

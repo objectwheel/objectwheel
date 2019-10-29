@@ -18,7 +18,7 @@ class ControlCreationManager final : public QObject
     Q_DISABLE_COPY(ControlCreationManager)
 
     friend class ApplicationCore; // For construction
-    friend class FormsPane; // For createForm
+    friend class FormsController; // For createForm
     friend class DesignerController; // For createControl
     friend class DesignerScene; // For createControl
 
@@ -30,7 +30,7 @@ private:
     ~ControlCreationManager() override;
 
     static void init(DesignerScene* designerScene);
-    static Form* createForm(const QString& formRootPath); // FormsPane dependency: Should be a private member
+    static Form* createForm(const QString& formRootPath); // FormsController dependency: Should be a private member
     static Control* createControl(Control* targetParentControl,
                                   const QString& controlRootPath,
                                   const QPointF& pos,

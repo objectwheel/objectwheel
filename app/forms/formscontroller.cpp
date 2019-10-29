@@ -1,52 +1,19 @@
 #include <formscontroller.h>
+#include <formsdelegate.h>
+#include <formstree.h>
 #include <formspane.h>
-#include <saveutils.h>
-#include <projectmanager.h>
+#include <lineedit.h>
 #include <designerscene.h>
-#include <paintutils.h>
-#include <utilityfunctions.h>
+#include <projectmanager.h>
+#include <saveutils.h>
+#include <filesystemutils.h>
 #include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
-#include <filesystemutils.h>
 #include <form.h>
-#include <applicationstyle.h>
-#include <lineedit.h>
 
 #include <QPushButton>
-#include <QStandardPaths>
-#include <QPainter>
-#include <QStyledItemDelegate>
-#include <QHeaderView>
-#include <QDir>
-#include <QTemporaryDir>
-#include <QApplication>
 #include <QCompleter>
-
-//{
-
-//    connect(tree, &ControlsTree::itemDoubleClicked,
-//            this, &ControlsController::onItemDoubleClick);
-//    connect(tree, &ControlsTree::itemSelectionChanged,
-//            this, &ControlsController::onItemSelectionChange);
-//    connect(m_designerScene, &DesignerScene::currentFormChanged,
-//            this, &ControlsController::onCurrentFormChange);
-//    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-//            this, &ControlsController::onControlRemove);
-//    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
-//            this, &ControlsController::onFormRemove);
-//    connect(ProjectManager::instance(), &ProjectManager::started,
-//            this, &ControlsController::onProjectStart);
-//    connect(m_designerScene, &DesignerScene::selectionChanged,
-//            this, &ControlsController::onSceneSelectionChange);
-//    connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
-//            tree, qOverload<>(&ControlsTree::update));
-//    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
-//            this, &ControlsController::onControlIdChange);
-//    connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,
-//            this, &ControlsController::onControlIndexChange);
-//    connect(ControlPropertyManager::instance(), &ControlPropertyManager::parentChanged,
-//            this, &ControlsController::onControlParentChange);
-//    }
+#include <QTemporaryDir>
 
 FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerScene, QObject* parent) : QObject(parent)
   , m_formsPane(formsPane)
@@ -64,30 +31,47 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
     connect(m_formsPane->searchEdit(), &LineEdit::returnPressed,
             this, &FormsController::onSearchEditReturnPress);
     connect(formsPane->addButton(), &QPushButton::clicked,
-            this, &FormsPane::onAddButtonClick);
+            this, &FormsController::onAddButtonClick);
     connect(formsPane->removeButton(), &QPushButton::clicked,
-            this, &FormsPane::onRemoveButtonClick);
+            this, &FormsController::onRemoveButtonClick);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
-            this, &FormsPane::refresh);
-    connect(this, &FormsPane::currentItemChanged,
-            this, &FormsPane::onCurrentItemChange);
+            this, &FormsController::refresh);
+    connect(tree, &FormsTree::itemSelectionChanged,
+            this, &FormsController::onItemSelectionChange);
     connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] {
-        Q_ASSERT(!isProjectStarted);
-        isProjectStarted = true;
-        refresh(); // FIXME: This function has severe performance issues.
-    });
+            this, &FormsController::onProjectStart);
 }
 
-void FormsPane::discharge()
+Control* FormsController::controlFromItem(const QTreeWidgetItem* item) const
 {
-    isProjectStarted = false;
+    return item->data(0, FormsDelegate::ControlRole).value<QPointer<Control>>().data();
+}
+
+QTreeWidgetItem* FormsController::itemFromControl(const Control* control) const
+{
+    FormsTree* tree = m_formsPane->formsTree();
+    EVERYTHING(QTreeWidgetItem* item, tree) {
+        if (controlFromItem(item) == control)
+            return item;
+    }
+    return nullptr;
+}
+
+void FormsController::onProjectStart()
+{
+    m_isProjectStarted = true;
+    refresh();
+}
+
+void FormsController::discharge()
+{
+    m_isProjectStarted = false;
     blockSignals(true);
-    clear();
+    m_formsPane->formsTree()->clear();
     blockSignals(false);
 }
 
-void FormsPane::onAddButtonClick()
+void FormsController::onAddButtonClick()
 {
     QTemporaryDir temp;
     Q_ASSERT(temp.isValid());
@@ -104,32 +88,32 @@ void FormsPane::onAddButtonClick()
     refresh(); // FIXME: This function has severe performance issues.
 }
 
-void FormsPane::onRemoveButtonClick()
+void FormsController::onRemoveButtonClick()
 {
-    if (topLevelItemCount() > 1) // FIXME
+    if (m_formsPane->formsTree()->topLevelItemCount() > 1) // FIXME
         ControlRemovingManager::removeControl(m_designerScene->currentForm(), true);
     // refresh(); // Not needed, m_designerScene already emits currentFormChanged signal
 }
 
-void FormsPane::onCurrentItemChange()
+void FormsController::onItemSelectionChange()
 {
-    Q_ASSERT(currentItem());
+    Q_ASSERT(m_formsPane->formsTree()->currentItem());
 
-    const QString& id = currentItem()->text(0);
+    const QString& id = m_formsPane->formsTree()->currentItem()->text(0);
     for (Form* form : m_designerScene->forms()) {
         if (form->id() == id)
             m_designerScene->setCurrentForm(form);
     }
 }
 
-void FormsPane::refresh() // FIXME: This function has severe performance issues
+void FormsController::refresh() // FIXME: This function has severe performance issues
 {
-    if (!isProjectStarted)
+    if (!m_isProjectStarted)
         return;
 
     blockSignals(true);
 
-    clear();
+    m_formsPane->formsTree()->clear();
 
     QTreeWidgetItem* selectionItem = nullptr;
     // FIXME: Should we use scene->forms() instead? --but if you do, make sure you order forms with their indexes--
@@ -141,7 +125,7 @@ void FormsPane::refresh() // FIXME: This function has severe performance issues
         item->setText(0, id);
         item->setIcon(0, QIcon(":/images/designer/form.svg"));
 
-        addTopLevelItem(item);
+        m_formsPane->formsTree()->addTopLevelItem(item);
 
         if (m_designerScene->currentForm() && m_designerScene->currentForm()->id() == id)
             selectionItem = item;
@@ -158,10 +142,10 @@ void FormsController::onSearchEditReturnPress()
     if (!m_isProjectStarted)
         return;
 
-    ControlsTree* tree = m_controlsPane->controlsTree();
+    FormsTree* tree = m_formsPane->formsTree();
     EVERYTHING(QTreeWidgetItem* item, tree) {
         if (const Control* control = controlFromItem(item)) {
-            if (QString::compare(control->id(), m_controlsPane->searchEdit()->text(), Qt::CaseInsensitive) == 0) {
+            if (QString::compare(control->id(), m_formsPane->searchEdit()->text(), Qt::CaseInsensitive) == 0) {
                 m_isSelectionHandlingBlocked = true;
                 tree->clearSelection();
                 m_isSelectionHandlingBlocked = false;

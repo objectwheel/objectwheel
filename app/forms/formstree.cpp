@@ -65,6 +65,16 @@ FormsDelegate* FormsTree::delegate() const
     return m_delegate;
 }
 
+QList<QTreeWidgetItem*> FormsTree::topLevelItems()
+{
+    QList<QTreeWidgetItem*> items;
+
+    for (int i = 0; i < topLevelItemCount(); ++i)
+        items.append(topLevelItem(i));
+
+    return items;
+}
+
 void FormsTree::paintEvent(QPaintEvent* e)
 {
     Q_D(const QTreeWidget);

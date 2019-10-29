@@ -5,6 +5,8 @@
 
 class DesignerScene;
 class FormsPane;
+class Control;
+class QTreeWidgetItem;
 
 class FormsController final : public QObject
 {
@@ -15,14 +17,18 @@ public:
     explicit FormsController(FormsPane* formsPane, DesignerScene* designerScene,
                              QObject* parent = nullptr);
 
+    Control* controlFromItem(const QTreeWidgetItem* item) const;
+    QTreeWidgetItem* itemFromControl(const Control* control) const;
+
 public slots:
     void discharge();
     void refresh();
 
 private slots:
+    void onProjectStart();
     void onAddButtonClick();
     void onRemoveButtonClick();
-    void onCurrentItemChange();
+    void onItemSelectionChange();
     void onSearchEditReturnPress();
 
 private:
