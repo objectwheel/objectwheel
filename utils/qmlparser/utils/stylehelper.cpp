@@ -457,7 +457,7 @@ void StyleHelper::drawIconWithShadow(const QIcon &icon, const QRect &rect,
     }
 
     QRect targetRect = cache.rect();
-    targetRect.setSize(targetRect.size() / cache.devicePixelRatio());
+    targetRect.setSize(targetRect.size() / cache.devicePixelRatioF());
     targetRect.moveCenter(rect.center() - dipOffset);
     p->drawPixmap(targetRect, cache);
 }

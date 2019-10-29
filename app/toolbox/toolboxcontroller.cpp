@@ -144,9 +144,7 @@ QDrag* ToolboxController::establishDrag(ToolboxItem* item)
     mimeData->setData(QStringLiteral("application/x-objectwheel-tool"),
                       UtilityFunctions::push(item->dir()));
 
-    QPixmap pixmap(item->icon().pixmap(UtilityFunctions::window(m_toolboxPane), m_toolboxPane->toolboxTree()->iconSize()));
-    pixmap.setDevicePixelRatio(m_toolboxPane->devicePixelRatioF());
-
+    QPixmap pixmap(PaintUtils::pixmap(item->icon(), m_toolboxPane->toolboxTree()->iconSize(), m_toolboxPane));
     QPointer<QDrag> drag = new QDrag(this);
     drag->setMimeData(mimeData);
     drag->setPixmap(pixmap);

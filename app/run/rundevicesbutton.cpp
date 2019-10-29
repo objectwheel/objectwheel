@@ -123,12 +123,12 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
     style()->drawPrimitive(QStyle::PE_PanelButtonCommand, &option, &painter, this);
 
     // Draw icon
-    QPixmap pixmap = icon().pixmap(UtilityFunctions::window(this), iconSize(), iconMode, iconState);
+    QPixmap pixmap(PaintUtils::pixmap(icon(), iconSize(), this, iconMode, iconState));
     if (option.state & QStyle::State_Sunken)
         pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
     QRect ir(left, 0, iconSize().width(), height());
-    int w = pixmap.width() / pixmap.devicePixelRatio();
-    int h = pixmap.height() / pixmap.devicePixelRatio();
+    int w = pixmap.width() / pixmap.devicePixelRatioF();
+    int h = pixmap.height() / pixmap.devicePixelRatioF();
     QPoint point(ir.x() + ir.width() / 2 - w / 2,
                  ir.y() + ir.height() / 2 - h / 2);
     painter.drawPixmap(style()->visualPos(layoutDirection(), ir, point), pixmap);
@@ -148,12 +148,12 @@ void RunDevicesButton::paintEvent(QPaintEvent*)
 
     // Draw device icon
     left += FORWARD_ARROW_LENGTH + SPACING;
-    pixmap = m_menu->icon().pixmap(UtilityFunctions::window(this), iconSize(), iconMode, iconState);
+    pixmap = PaintUtils::pixmap(m_menu->icon(), iconSize(), this, iconMode, iconState);
     if (option.state & QStyle::State_Sunken)
         pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
     ir = QRect(left, 0, iconSize().width(), height());
-    w = pixmap.width() / pixmap.devicePixelRatio();
-    h = pixmap.height() / pixmap.devicePixelRatio();
+    w = pixmap.width() / pixmap.devicePixelRatioF();
+    h = pixmap.height() / pixmap.devicePixelRatioF();
     point = QPoint(ir.x() + ir.width() / 2 - w / 2,
                    ir.y() + ir.height() / 2 - h / 2);
     painter.drawPixmap(style()->visualPos(layoutDirection(), ir, point), pixmap);

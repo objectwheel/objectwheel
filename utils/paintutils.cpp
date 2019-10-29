@@ -100,11 +100,7 @@ bool PaintUtils::isBlankImage(const QImage& image)
 QPixmap PaintUtils::pixmap(const QString& imagePath, const QSize& size, const QWidget* widget,
                            QIcon::Mode mode, QIcon::State state)
 {
-    const QIcon icon(imagePath);
-    if (QWindow* window = widget ? UtilityFunctions::window(widget) : nullptr)
-        return icon.pixmap(window, size, mode, state);
-    QWindow fakeWindow; // This makes QIcon to use primary screen's dpr
-    return icon.pixmap(&fakeWindow, size, mode, state);
+    return pixmap(QIcon(imagePath), size, widget, mode, state);
 }
 
 QPixmap PaintUtils::pixmap(const QIcon& icon, const QSize& size, const QWidget* widget,
@@ -147,13 +143,13 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     QColor opaque(color);
     opaque.setAlphaF(1);
 
-    QImage overlay = renderFilledImage(pixmap.size() / pixmap.devicePixelRatio(),
-                                       opaque, pixmap.devicePixelRatio());
+    QImage overlay = renderFilledImage(pixmap.size() / pixmap.devicePixelRatioF(),
+                                       opaque, pixmap.devicePixelRatioF());
     {
         QPainter p(&overlay);
         p.setRenderHint(QPainter::Antialiasing);
         p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        p.drawPixmap(QRectF({}, pixmap.size() / pixmap.devicePixelRatio()), pixmap, pixmap.rect());
+        p.drawPixmap(QRectF({}, pixmap.size() / pixmap.devicePixelRatioF()), pixmap, pixmap.rect());
     }
 
     if (color.alphaF() == 1)
@@ -162,7 +158,7 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
     p.setOpacity(color.alphaF());
-    p.drawImage(QRectF({}, dest.size() / pixmap.devicePixelRatio()), overlay, overlay.rect());
+    p.drawImage(QRectF({}, dest.size() / pixmap.devicePixelRatioF()), overlay, overlay.rect());
     p.end();
 
     return dest;

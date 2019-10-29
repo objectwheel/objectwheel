@@ -83,11 +83,9 @@ public:
         fillBackground(painter, option, index.row());
 
         // Draw icon
-        Q_ASSERT(UtilityFunctions::window(m_formsPane));
-        const QPixmap& iconPixmap = icon.pixmap(UtilityFunctions::window(m_formsPane),
-                                                option.decorationSize,
-                                                isSelected ? QIcon::Selected : QIcon::Normal);
-        painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
+        QPixmap pixmap(PaintUtils::pixmap(icon, option.decorationSize, m_formsPane,
+                                          isSelected ? QIcon::Selected : QIcon::Normal));
+        painter->drawPixmap(iconRect, pixmap, pixmap.rect());
 
         if (isSelected)
             painter->setPen(option.palette.highlightedText().color());
@@ -167,7 +165,7 @@ FormsPane::FormsPane(DesignerScene* designerScene, QWidget* parent) : QTreeWidge
                     .arg(palette().light().color().name())
                     .arg(palette().dark().color().name())
                     .arg(palette().brightText().color().name())
-        );
+                    );
     };
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();

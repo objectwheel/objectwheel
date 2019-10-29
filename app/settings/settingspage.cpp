@@ -25,7 +25,8 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
     connect(m_tabWidget, &QTabWidget::currentChanged, this, [=] (int index) {
         if (index < 0)
             return;
-        if (!UtilityFunctions::window(this) || !UtilityFunctions::window(this)->isVisible())
+        const QWindow* window = UtilityFunctions::window(this);
+        if (window == 0 || !window->isVisible())
             return;
         if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->widget(index)))
             widget->activate();

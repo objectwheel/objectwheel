@@ -1,6 +1,6 @@
 #include <platformswidget.h>
 #include <build.h>
-#include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QStyledItemDelegate>
 #include <QPainter>
@@ -17,16 +17,16 @@ enum {
 
 class PlatformDelegate: public QStyledItemDelegate
 {
-        Q_OBJECT
+    Q_OBJECT
 
-    public:
-        PlatformDelegate(QListWidget* view, QWidget* parent);
+public:
+    PlatformDelegate(QListWidget* view, QWidget* parent);
 
-        void paint(QPainter* painter, const QStyleOptionViewItem &option,
-          const QModelIndex &index) const override;
+    void paint(QPainter* painter, const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override;
 
-    private:
-        QListWidget* m_view;
+private:
+    QListWidget* m_view;
 };
 
 PlatformDelegate::PlatformDelegate(QListWidget* view, QWidget* parent)
@@ -36,21 +36,19 @@ PlatformDelegate::PlatformDelegate(QListWidget* view, QWidget* parent)
 }
 
 void PlatformDelegate::paint(QPainter* painter, const QStyleOptionViewItem &option,
-    const QModelIndex &index) const
+                             const QModelIndex &index) const
 {
-   auto item = m_view->item(index.row());
-   Q_ASSERT(item);
+    auto item = m_view->item(index.row());
+    Q_ASSERT(item);
 
-   auto utext = item->text();
-   auto ltext = item->data(Arch).toString();
-   auto rutext = option.rect.adjusted(option.rect.height(),
-     7, 0, - option.rect.height() / 2.0);
-   auto rltext = option.rect.adjusted(option.rect.height(),
-     option.rect.height() / 2.0, 0, - 7);
-   auto ricon = option.rect.adjusted(7, 7,
-     - option.rect.width() + option.rect.height() - 7, - 7);
-   Q_ASSERT(UtilityFunctions::window(m_view));
-   auto icon = item->icon().pixmap(UtilityFunctions::window(m_view), ricon.size());
+    auto utext = item->text();
+    auto ltext = item->data(Arch).toString();
+    auto rutext = option.rect.adjusted(option.rect.height(),
+                                       7, 0, - option.rect.height() / 2.0);
+    auto rltext = option.rect.adjusted(option.rect.height(),
+                                       option.rect.height() / 2.0, 0, - 7);
+    auto ricon = option.rect.adjusted(7, 7, - option.rect.width() + option.rect.height() - 7, - 7);
+    auto icon = PaintUtils::pixmap(item->icon(), ricon.size(), m_view);
     painter->setRenderHint(QPainter::Antialiasing);
 
     QFont f;
@@ -85,15 +83,15 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _layout.addWidget(&_lblTitle);
     _layout.addWidget(&_lblMsg);
     _layout.addWidget(&_listWidget);
-//    _layout.addWidget(&_btnNext);
+    //    _layout.addWidget(&_btnNext);
     _layout.setAlignment(&_lblLogo, Qt::AlignHCenter);
     _layout.setAlignment(&_lblTitle, Qt::AlignHCenter);
     _layout.setAlignment(&_lblMsg, Qt::AlignHCenter);
     _layout.setAlignment(&_listWidget, Qt::AlignHCenter);
-//    _layout.setAlignment(&_btnNext, Qt::AlignHCenter);
+    //    _layout.setAlignment(&_btnNext, Qt::AlignHCenter);
 
     _lblLogo.setFixedSize(50, 50);
-// FIXME   _lblLogo.setPixmap(QPixmap(":/images/helmet.png"));
+    // FIXME   _lblLogo.setPixmap(QPixmap(":/images/helmet.png"));
     _lblLogo.setScaledContents(true);
 
     QFont f;
@@ -107,24 +105,24 @@ PlatformsWidget::PlatformsWidget(QWidget *parent)
     _lblMsg.setFont(f);
     _lblMsg.setText("Select your target platform");
 
-//    _btnNext.settings().topColor = "#F4BA48";
-//    _btnNext.settings().bottomColor = _btnNext.settings().topColor.darker(120);
-//    _btnNext.settings().borderRadius = 7.5;
-//    _btnNext.settings().textColor = Qt::white;
-//    _btnNext.setFixedSize(200,28);
-//    _btnNext.setIconSize(QSize(14,14));
-//    _btnNext.setIcon(QIcon(":/images/welcome/load.png"));
-//    _btnNext.setText("Next");
-//  FIXME  connect(&_btnNext, &FlarButton::clicked, this, &PlatformsWidget::handleBtnNextClicked);
+    //    _btnNext.settings().topColor = "#F4BA48";
+    //    _btnNext.settings().bottomColor = _btnNext.settings().topColor.darker(120);
+    //    _btnNext.settings().borderRadius = 7.5;
+    //    _btnNext.settings().textColor = Qt::white;
+    //    _btnNext.setFixedSize(200,28);
+    //    _btnNext.setIconSize(QSize(14,14));
+    //    _btnNext.setIcon(QIcon(":/images/welcome/load.png"));
+    //    _btnNext.setText("Next");
+    //  FIXME  connect(&_btnNext, &FlarButton::clicked, this, &PlatformsWidget::handleBtnNextClicked);
 
     _listWidget.setIconSize({52, 52});
     _listWidget.setMinimumWidth(400);
     _listWidget.setItemDelegate(new PlatformDelegate(&_listWidget, &_listWidget));
     _listWidget.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     _listWidget.setFocusPolicy(Qt::NoFocus);
-//    connect(&_listWidget, &QListWidget::itemSelectionChanged, [&] {
-//       _btnNext.setEnabled(_listWidget.currentItem());
-//    });
+    //    connect(&_listWidget, &QListWidget::itemSelectionChanged, [&] {
+    //       _btnNext.setEnabled(_listWidget.currentItem());
+    //    });
 
     auto android = new QListWidgetItem;
     android->setText("Android 4.0+");
@@ -195,7 +193,7 @@ void PlatformsWidget::handleBtnNextClicked()
 {
     if (_listWidget.currentItem()) {
         OTargets::Targets target = (OTargets::Targets)_listWidget.
-          currentItem()->data(Key).toInt();
+                currentItem()->data(Key).toInt();
         Build::set(TAG_TARGET, target);
         emit platformSelected(target);
     }

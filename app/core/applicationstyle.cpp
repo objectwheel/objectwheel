@@ -282,10 +282,10 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
     QPixmap pixmap;
     switch (standardPixmap) {
     case SP_DockWidgetCloseButton:
-        pixmap = Utils::Icons::CLOSE_TOOLBAR.icon().pixmap(UtilityFunctions::window(widget), {64, 64});
+        pixmap = PaintUtils::pixmap(Utils::Icons::CLOSE_TOOLBAR.icon(), QSize(64, 64), widget);
         break;
     case SP_LineEditClearButton:
-        pixmap = Utils::Icons::EDIT_CLEAR.icon().pixmap(UtilityFunctions::window(widget), {64, 64});
+        pixmap = PaintUtils::pixmap(Utils::Icons::EDIT_CLEAR.icon(), QSize(64, 64), widget);
         break;
     case SP_ToolBarHorizontalExtensionButton: {
         QSize size(16, 16); // Default toolbar icon size
@@ -880,15 +880,10 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 if (const QComboBox *combo = qobject_cast<const QComboBox*>(widget))
                     iconSize = combo->iconSize();
 
-                QWindow* window = nullptr;
-                if (widget)
-                    window = UtilityFunctions::window(widget);
-                if (mi.checked)
-                    pixmap = mi.icon.pixmap(window, iconSize, mode, QIcon::On);
-                else
-                    pixmap = mi.icon.pixmap(window, iconSize, mode);
-                int pixw = pixmap.width() / pixmap.devicePixelRatio();
-                int pixh = pixmap.height() / pixmap.devicePixelRatio();
+                pixmap = PaintUtils::pixmap(mi.icon, iconSize, widget,
+                                            mode, mi.checked ? QIcon::On : QIcon::Off);
+                int pixw = pixmap.width() / pixmap.devicePixelRatioF();
+                int pixh = pixmap.height() / pixmap.devicePixelRatioF();
                 QRect cr(xpos, mi.rect.y(), checkcol, mi.rect.height());
                 QRect pmr(0, 0, pixw, pixh);
                 pmr.moveCenter(cr.center());
@@ -956,16 +951,16 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 if (button->state & State_On)
                     state = QIcon::On;
 
-                QPixmap pixmap = button->icon.pixmap(UtilityFunctions::window(widget), button->iconSize, mode, state);
+                QPixmap pixmap = PaintUtils::pixmap(button->icon, button->iconSize, widget, mode, state);
                 if (button->state & State_Sunken)
                     pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
-                qreal w = pixmap.width() / pixmap.devicePixelRatio();
-                qreal h = pixmap.height() / pixmap.devicePixelRatio();
+                qreal w = pixmap.width() / pixmap.devicePixelRatioF();
+                qreal h = pixmap.height() / pixmap.devicePixelRatioF();
                 if (!button->text.isEmpty())
                     w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 3;
                 point = QPointF(ir.x() + ir.width() / 2 - w / 2,
                                 ir.y() + ir.height() / 2 - h / 2);
-                w = pixmap.width() / pixmap.devicePixelRatio();
+                w = pixmap.width() / pixmap.devicePixelRatioF();
                 if (button->direction == Qt::RightToLeft)
                     point.rx() += w;
                 painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap, pixmap.rect());
@@ -1056,10 +1051,9 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                         mode = QIcon::Active;
                     else
                         mode = QIcon::Normal;
-                    pm = toolbutton->icon.pixmap(UtilityFunctions::window(widget),
-                                                 toolbutton->rect.size().boundedTo(toolbutton->iconSize),
-                                                 mode, state);
-                    pmSize = pm.size() / pm.devicePixelRatio();
+                    pm = PaintUtils::pixmap(toolbutton->icon, toolbutton->rect.size().boundedTo(toolbutton->iconSize),
+                                            widget, mode, state);
+                    pmSize = pm.size() / pm.devicePixelRatioF();
                 }
 
                 if (toolbutton->toolButtonStyle != Qt::ToolButtonIconOnly) {

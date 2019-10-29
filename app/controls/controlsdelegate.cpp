@@ -1,7 +1,7 @@
 #include <controlsdelegate.h>
 #include <controlstree.h>
 #include <controlsdelegatecache.h>
-#include <utilityfunctions.h>
+#include <paintutils.h>
 #include <control.h>
 
 #include <QPointer>
@@ -133,14 +133,12 @@ void ControlsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     // Draw icon
     QRectF iconRect(0, 0, -5, 0);
     if (index.column() == 0) {
-        Q_ASSERT(UtilityFunctions::window(m_controlsTree));
-        const QPixmap& iconPixmap = control->icon().pixmap(UtilityFunctions::window(m_controlsTree),
-                                                           option.decorationSize,
-                                                           isSelected ? QIcon::Selected : QIcon::Normal);
-        iconRect = QRectF({}, iconPixmap.size() / m_controlsTree->devicePixelRatioF());
+        QPixmap pixmap(PaintUtils::pixmap(control->icon(), option.decorationSize, m_controlsTree,
+                                          isSelected ? QIcon::Selected : QIcon::Normal));
+        iconRect = QRectF({}, pixmap.size() / pixmap.devicePixelRatioF());
         iconRect.moveCenter(r.center());
         iconRect.moveLeft(r.left() + 5);
-        painter->drawPixmap(iconRect, iconPixmap, iconPixmap.rect());
+        painter->drawPixmap(iconRect, pixmap, pixmap.rect());
     }
 
     // Draw text

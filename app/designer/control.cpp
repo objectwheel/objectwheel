@@ -597,7 +597,7 @@ void Control::paintContent(QPainter* painter)
 {
     if (m_pixmap.isNull())
         return;
-    const QSizeF pixmapSize(m_pixmap.size() / m_pixmap.devicePixelRatio());
+    const QSizeF pixmapSize(m_pixmap.size() / m_pixmap.devicePixelRatioF());
     QRectF rect(surroundingRect().topLeft(), pixmapSize);
     if (qAbs(surroundingRect().width() - pixmapSize.width()) > 2
             || qAbs(surroundingRect().height() - pixmapSize.height()) > 2) {

@@ -47,7 +47,7 @@ static const qreal PunchEdgeIntensity = 0.6;
 static QPixmap maskToColorAndAlpha(const QPixmap &mask, const QColor &color)
 {
     QImage result(mask.toImage().convertToFormat(QImage::Format_ARGB32));
-    result.setDevicePixelRatio(mask.devicePixelRatio());
+    result.setDevicePixelRatio(mask.devicePixelRatioF());
     QRgb *bitsStart = reinterpret_cast<QRgb*>(result.bits());
     const QRgb *bitsEnd = bitsStart + result.width() * result.height();
     const QRgb tint = color.rgb() & 0x00ffffff;
@@ -120,7 +120,7 @@ static QPixmap combinedMask(const MasksAndColors &masks, Icon::IconStyleOptions 
 static QPixmap masksToIcon(const MasksAndColors &masks, const QPixmap &combinedMask, Icon::IconStyleOptions style)
 {
     QPixmap result(combinedMask.size());
-    result.setDevicePixelRatio(combinedMask.devicePixelRatio());
+    result.setDevicePixelRatio(combinedMask.devicePixelRatioF());
     result.fill(Qt::transparent);
     QPainter p(&result);
 

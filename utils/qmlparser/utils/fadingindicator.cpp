@@ -78,7 +78,7 @@ public:
         m_label->hide();
         m_pixmap.load(Utils::StyleHelper::dpiSpecificImageFile(uri));
         layout()->setSizeConstraint(QLayout::SetNoConstraint);
-        resize(m_pixmap.size() / m_pixmap.devicePixelRatio());
+        resize(m_pixmap.size() / m_pixmap.devicePixelRatioF());
         if (QWidget *parent = parentWidget())
             move(parent->rect().center() - rect().center());
     }
