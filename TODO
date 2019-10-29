@@ -1,5 +1,16 @@
 Designer Core TODOs
 
+## Sorunlu elemanlar
+Repeater'a çocuk ekleyince patlıyor
+Quick Controls - 2  -  Dialog patlıyor
+Quick Controls - 2  -  Drawer patlıyor
+Quick Controls - 2  -  Menu patlıyor
+Quick Controls - 2  -  Popup patlıyor
+WebView  -  WebView patlıyor
+Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
+
+projectoptions da save yada discard gibi herangi bi butona tıklayınca neden scroll bar kayıyor?
+previewer serverla ilgili toolbara konulacak green red light yanında bir de loading de koy
 tüm dock ayarları kalıcı olsun, diğer ayarlar için de bi beyin fırtınası yapılsın
 comboboxlar toolbar üzerinde çirkin duruyor bunları düzeltelim gerekirse transparentstyle yapalı
 proje templatelerini bitir, sonra applicationWindow.js gibi olsun isimler

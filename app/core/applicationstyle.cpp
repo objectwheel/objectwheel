@@ -998,7 +998,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
                 if (isEnabled && (!isFlat || isDown)) {
                     if (isDown)
-                        copy.palette.setColor(QPalette::ButtonText, "#e0ebfb");
+                        copy.palette.setColor(QPalette::ButtonText, "#e4effe");
                     else if (isDefault || hasFocus)
                         copy.palette.setColor(QPalette::ButtonText, Qt::white);
                 }

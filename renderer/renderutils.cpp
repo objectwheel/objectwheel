@@ -517,21 +517,20 @@ void RenderUtils::setInstanceParent(RenderEngine::ControlInstance* instance, QOb
     instance->object->setParent(parentObject);
 
     QQmlProperty defaultProperty(parentObject);
-    Q_ASSERT(defaultProperty.isValid());
+    if (defaultProperty.isValid()) {
+        QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+        Q_ASSERT(!instance->gui || childList.canAppend());
 
-    QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-    Q_ASSERT(!instance->gui || childList.canAppend());
-
-    // Workaround against QQuickContainer's insertItem() bug
-    if (childList.canAppend()) {
-        const bool completeDisabled = !QQmlVME::componentCompleteEnabled();
-        if (completeDisabled)
-            QQmlVME::enableComponentComplete();
-        childList.append(instance->object);
-        if (completeDisabled)
-            QQmlVME::disableComponentComplete();
+        // Workaround against QQuickContainer's insertItem() bug
+        if (childList.canAppend()) {
+            const bool completeDisabled = !QQmlVME::componentCompleteEnabled();
+            if (completeDisabled)
+                QQmlVME::enableComponentComplete();
+            childList.append(instance->object);
+            if (completeDisabled)
+                QQmlVME::disableComponentComplete();
+        }
     }
-
     Q_ASSERT(!instance->gui || guiItem(instance->object)->parentItem());
 }
 
@@ -931,19 +930,20 @@ QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
         Q_ASSERT(item);
         // For calculating QQuickContainer margins right
         QQuickItemPrivate::get(item)->setTransparentForPositioner(true);
-        QQmlProperty defaultProperty(instance->object);
-        Q_ASSERT(defaultProperty.isValid());
-        QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
         QMarginsF margins;
-        //Q_ASSERT(childList.isValid() && childList.canAppend());
-        if (childList.isValid() && childList.canAppend()) {
-            childList.append(item);
-            const QRectF rect(item->mapRectToItem(parentItem, QRectF(QPointF(), item->size())));
-            margins = QMarginsF(rect.left(), rect.top(), parentItem->width() - rect.right(),
-                                parentItem->height() - rect.bottom());
+        QQmlProperty defaultProperty(instance->object);
+        if (defaultProperty.isValid()) {
+            QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
+            //Q_ASSERT(childList.isValid() && childList.canAppend());
+            if (childList.isValid() && childList.canAppend()) {
+                childList.append(item);
+                const QRectF rect(item->mapRectToItem(parentItem, QRectF(QPointF(), item->size())));
+                margins = QMarginsF(rect.left(), rect.top(), parentItem->width() - rect.right(),
+                                    parentItem->height() - rect.bottom());
+            }
+            item->setParentItem(nullptr);
+            delete item;
         }
-        item->setParentItem(nullptr);
-        delete item;
         if (completeDisabled)
             QQmlVME::disableComponentComplete();
         return margins;
