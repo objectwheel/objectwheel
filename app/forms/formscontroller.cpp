@@ -89,37 +89,34 @@ void FormsController::clear()
 
 void FormsController::onProjectStart()
 {
+    Q_ASSERT(!m_isProjectStarted);
+
     m_isProjectStarted = true;
-
-
-
-
-    if (!m_isProjectStarted)
-        return;
 
     clear();
 
-    // FIXME: Should we use scene->forms() instead? --but if
-    // you do, make sure you order forms with their indexes--
+    FormsTree* tree = m_formsPane->formsTree();
+    QList<QTreeWidgetItem*> items;
     QTreeWidgetItem* selectionItem = nullptr;
-    for (const QString& path : SaveUtils::formPaths(ProjectManager::dir())) {
-        const QString& id = SaveUtils::controlId(path);
-        Q_ASSERT(!id.isEmpty());
 
-        auto item = new QTreeWidgetItem;
-        item->setText(0, id);
-        item->setIcon(0, QIcon(":/images/designer/form.svg"));
-
-        m_formsPane->formsTree()->addTopLevelItem(item);
-
-        if (m_designerScene->currentForm() && m_designerScene->currentForm()->id() == id)
+    const QList<Form*>& forms = m_designerScene->forms();
+    for (Form* form : forms) {
+        QTreeWidgetItem* item = tree->delegate()->createItem(form);
+        addCompleterEntry(form->id());
+        items.append(item);
+        if (form == m_designerScene->currentForm())
             selectionItem = item;
     }
+
+    tree->addTopLevelItems(items);
+    tree->sortItems(0, Qt::AscendingOrder);
 
     m_isSelectionHandlingBlocked = true;
     if (selectionItem)
         selectionItem->setSelected(true);
     m_isSelectionHandlingBlocked = false;
+
+    tree->scrollToItem(selectionItem);
 }
 
 void FormsController::onAddButtonClick()
