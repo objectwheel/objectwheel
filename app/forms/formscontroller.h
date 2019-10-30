@@ -30,9 +30,10 @@ private slots:
     void onRemoveButtonClick();
     void onSearchEditReturnPress();
 
-    void onControlRemove();
-    void onControlIdChange();
-    void onControlIndexChange();
+    void onControlCreation(Control* control);
+    void onControlRemove(Control* control);
+    void onControlIdChange(Control* control, const QString& previousId);
+    void onControlIndexChange(Control* control) const;
     void onCurrentFormChange();
     void onItemSelectionChange();
 

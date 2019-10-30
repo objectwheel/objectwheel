@@ -42,6 +42,8 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
             this, &FormsController::onItemSelectionChange);
     connect(ProjectManager::instance(), &ProjectManager::started,
             this, &FormsController::onProjectStart);
+    connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
+            this, &FormsController::onControlCreation);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &FormsController::onControlRemove);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
@@ -129,15 +131,14 @@ void FormsController::onAddButtonClick()
     FileSystemUtils::copy(":/resources/qmls/form.qml", thisDir, true, true);
     QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
     ControlCreationManager::createForm(temp.path());
-
-    refresh(); // FIXME: This function has severe performance issues.
+    // onControlCreation(); Not needed, ControlCreationManager::controlCreated will be emitted
 }
 
 void FormsController::onRemoveButtonClick()
 {
     if (m_formsPane->formsTree()->topLevelItemCount() > 1) // FIXME
         ControlRemovingManager::removeControl(m_designerScene->currentForm(), true);
-    // refresh(); // Not needed, m_designerScene already emits currentFormChanged signal
+    // onControlRemove(); Not needed, ControlRemovingManager::controlAboutToBeRemoved will be emitted
 }
 
 void FormsController::onSearchEditReturnPress()
@@ -146,6 +147,7 @@ void FormsController::onSearchEditReturnPress()
         return;
 
     FormsTree* tree = m_formsPane->formsTree();
+
     EVERYTHING(QTreeWidgetItem* item, tree) {
         if (const Control* control = controlFromItem(item)) {
             if (QString::compare(control->id(), m_formsPane->searchEdit()->text(), Qt::CaseInsensitive) == 0) {
@@ -160,24 +162,101 @@ void FormsController::onSearchEditReturnPress()
     }
 }
 
-void FormsController::onControlRemove()
+void FormsController::onControlCreation(Control* control)
 {
+    if (!m_isProjectStarted)
+        return;
 
+    if (control->type() != Form::Type)
+        return;
+
+    FormsTree* tree = m_formsPane->formsTree();
+    QTreeWidgetItem* item = tree->delegate()->createItem(control);
+    tree->addTopLevelItem(item);
+    addCompleterEntry(control->id());
+    tree->sortItems(0, Qt::AscendingOrder);
 }
 
-void FormsController::onControlIdChange()
+void FormsController::onControlRemove(Control* control)
 {
+    if (!m_isProjectStarted)
+        return;
 
+    if (control->type() != Form::Type)
+        return;
+
+    FormsTree* tree = m_formsPane->formsTree();
+
+    EVERYTHING(QTreeWidgetItem* item, tree) {
+        if (const Control* ctrl = controlFromItem(item)) {
+            if (ctrl == control) {
+                removeCompleterEntry(ctrl->id());
+                m_isSelectionHandlingBlocked = true;
+                tree->delegate()->destroyItem(item);
+                m_isSelectionHandlingBlocked = false;
+                // No need to sort, because the order is
+                // already preserved after the deletion
+                return;
+            }
+        }
+    }
 }
 
-void FormsController::onControlIndexChange()
+void FormsController::onControlIdChange(Control* control, const QString& previousId)
 {
+    if (!m_isProjectStarted)
+        return;
 
+    if (previousId.isEmpty())
+        return;
+
+    if (control->id() == previousId)
+        return;
+
+    if (control->type() != Form::Type)
+        return;
+
+    removeCompleterEntry(previousId);
+    addCompleterEntry(control->id());
+    m_formsPane->formsTree()->update();
+}
+
+void FormsController::onControlIndexChange(Control* control) const
+{
+    if (!m_isProjectStarted)
+        return;
+
+    if (control->type() != Form::Type)
+        return;
+
+    m_formsPane->formsTree()->sortItems(0, Qt::AscendingOrder);
 }
 
 void FormsController::onCurrentFormChange()
 {
+    if (!m_isProjectStarted)
+        return;
 
+    if (m_isSelectionHandlingBlocked)
+        return;
+
+    if (m_designerScene->currentForm() == 0)
+        return;
+
+    FormsTree* tree = m_formsPane->formsTree();
+
+    EVERYTHING(QTreeWidgetItem* item, tree) {
+        if (const Control* control = controlFromItem(item)) {
+            if (control == m_designerScene->currentForm()) {
+                m_isSelectionHandlingBlocked = true;
+                tree->clearSelection();
+                item->setSelected(true);
+                m_isSelectionHandlingBlocked = false;
+                tree->scrollToItem(item);
+                return;
+            }
+        }
+    }
 }
 
 void FormsController::onItemSelectionChange()
@@ -188,12 +267,18 @@ void FormsController::onItemSelectionChange()
     if (m_isSelectionHandlingBlocked)
         return;
 
-    Q_ASSERT(m_formsPane->formsTree()->currentItem());
+    FormsTree* tree = m_formsPane->formsTree();
+    Q_ASSERT(tree->currentItem());
 
-    const QString& id = m_formsPane->formsTree()->currentItem()->text(0);
-    for (Form* form : m_designerScene->forms()) {
-        if (form->id() == id)
-            m_designerScene->setCurrentForm(form);
+    if (auto control = controlFromItem(tree->currentItem())) {
+        const QList<Form*>& forms = m_designerScene->forms();
+        for (Form* form : forms) {
+            if (form == control) {
+                m_isSelectionHandlingBlocked = true;
+                m_designerScene->setCurrentForm(form);
+                m_isSelectionHandlingBlocked = false;
+            }
+        }
     }
 }
 

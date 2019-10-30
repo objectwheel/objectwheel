@@ -235,7 +235,9 @@ void ControlsController::onControlRemove(Control* control)
                     for (QTreeWidgetItem* child : childs) {
                         if (const Control* ctrl2 = controlFromItem(child)) {
                             removeCompleterEntry(ctrl2->id());
+                            m_isSelectionHandlingBlocked = true;
                             tree->delegate()->destroyItem(child);
+                            m_isSelectionHandlingBlocked = false;
                         }
                     }
                     // No need to sort, because the order is
