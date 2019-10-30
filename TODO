@@ -9,8 +9,13 @@ Quick Controls - 2  -  Popup patlıyor
 WebView  -  WebView patlıyor
 Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
 
+hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
+    bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı
+çift tıklama ile forms pane üzerinden form isimleri değiştirilebilmeli ayrıca özel bir buton da ekle
 projectoptions da save yada discard gibi herangi bi butona tıklayınca neden scroll bar kayıyor?
-previewer serverla ilgili toolbara konulacak green red light yanında bir de loading de koy
+render engine serverla ilgili toolbara konulacak green red light yanında bir de loading de koy ve server
+    crash iletişim kutusu son 10 saniye içinde iki kez crash olursa gözüksün, onun gibi bişey işte
+    hemde problemli projelerin de projeyi yükleme ekranında patlatmaması lazım, bunu kesin çözmek lazım
 tüm dock ayarları kalıcı olsun, diğer ayarlar için de bi beyin fırtınası yapılsın
 comboboxlar toolbar üzerinde çirkin duruyor bunları düzeltelim gerekirse transparentstyle yapalı
 proje templatelerini bitir, sonra applicationWindow.js gibi olsun isimler

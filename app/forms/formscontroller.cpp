@@ -176,6 +176,10 @@ void FormsController::onControlCreation(Control* control)
     tree->addTopLevelItem(item);
     addCompleterEntry(control->id());
     tree->sortItems(0, Qt::AscendingOrder);
+
+    // We are calling this manually because ControlCreationManager::controlCreated
+    // is called later and DesignerScene::currentFormChanged is called first
+    onCurrentFormChange();
 }
 
 void FormsController::onControlRemove(Control* control)
@@ -269,9 +273,9 @@ void FormsController::onItemSelectionChange()
         return;
 
     FormsTree* tree = m_formsPane->formsTree();
-    Q_ASSERT(tree->currentItem());
+    Q_ASSERT(!tree->selectedItems().isEmpty());
 
-    if (auto control = controlFromItem(tree->currentItem())) {
+    if (auto control = controlFromItem(tree->selectedItems().first())) {
         const QList<Form*>& forms = m_designerScene->forms();
         for (Form* form : forms) {
             if (form == control) {
