@@ -2,13 +2,51 @@
 #include <formstree.h>
 #include <paintutils.h>
 #include <control.h>
+#include <controlitemcache.h>
 
 #include <QPointer>
 #include <QPainter>
 
 FormsDelegate::FormsDelegate(FormsTree* formsTree) : QStyledItemDelegate(formsTree)
   , m_formsTree(formsTree)
+  , m_cache(new ControlItemCache)
 {
+}
+
+FormsDelegate::~FormsDelegate()
+{
+    delete m_cache;
+}
+
+void FormsDelegate::reserve()
+{
+    for (int i = 20; i--;) {
+        auto item = new ControlItem;
+        item->setHidden(true);
+        m_cache->push(item);
+    }
+}
+
+void FormsDelegate::destroyItem(QTreeWidgetItem* item) const
+{
+    if (QTreeWidgetItem* parent = item->parent())
+        parent->takeChild(parent->indexOfChild(item));
+    else if (QTreeWidget* tree = item->treeWidget())
+        tree->takeTopLevelItem(tree->indexOfTopLevelItem(item));
+    item->setHidden(true);
+    item->setData(0, ControlItem::ControlRole, QVariant());
+    item->setData(1, ControlItem::ControlRole, QVariant());
+    m_cache->push(item);
+}
+
+QTreeWidgetItem* FormsDelegate::createItem(Control* control) const
+{
+    QTreeWidgetItem* item = m_cache->pop();
+    if (item == 0)
+        item = new ControlItem;
+    item->setData(0, ControlItem::ControlRole, QVariant::fromValue(QPointer<Control>(control)));
+    item->setData(1, ControlItem::ControlRole, QVariant::fromValue(QPointer<Control>(control)));
+    return item;
 }
 
 void FormsDelegate::paintBackground(QPainter* painter, const QStyleOptionViewItem& option,
@@ -52,7 +90,7 @@ void FormsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     const bool isSelected = option.state & QStyle::State_Selected;
     const QAbstractItemModel* model = index.model();
     const QRectF r = option.rect;
-    const auto& control = model->data(index, ControlRole).value<QPointer<Control>>();
+    const auto& control = model->data(index, ControlItem::ControlRole).value<QPointer<Control>>();
     Q_ASSERT(control);
 
     paintBackground(painter, option, index.row());

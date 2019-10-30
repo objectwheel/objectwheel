@@ -5,7 +5,7 @@
 
 class QTreeWidgetItem;
 class ControlsTree;
-class ControlsDelegateCache;
+class ControlItemCache;
 class Control;
 
 class ControlsDelegate final : public QStyledItemDelegate
@@ -15,11 +15,6 @@ class ControlsDelegate final : public QStyledItemDelegate
 
     friend class ControlsTree; // For paintBackground() and calculateVisibleRow()
     friend class ControlsController; // For createItem() and destroyItem()
-
-public:
-    enum Roles {
-        ControlRole = Qt::UserRole + 1
-    };
 
 public:
     explicit ControlsDelegate(ControlsTree* controlsTree);
@@ -38,7 +33,7 @@ private:
                const QModelIndex& index) const override;
 private:
     ControlsTree* m_controlsTree;
-    ControlsDelegateCache* m_cache;
+    ControlItemCache* m_cache;
 };
 
 #define EVERYTHING(variable, tree)                                    \

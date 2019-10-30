@@ -10,6 +10,7 @@
 #include <lineedit.h>
 #include <designersettings.h>
 #include <controlssettings.h>
+#include <controlitemcache.h>
 
 #include <QScrollBar>
 #include <QCompleter>
@@ -54,7 +55,7 @@ ControlsController::ControlsController(ControlsPane* controlsPane, DesignerScene
 
 Control* ControlsController::controlFromItem(const QTreeWidgetItem* item) const
 {
-    return item->data(0, ControlsDelegate::ControlRole).value<QPointer<Control>>().data();
+    return item->data(0, ControlItem::ControlRole).value<QPointer<Control>>().data();
 }
 
 QTreeWidgetItem* ControlsController::itemFromControl(const Control* control) const

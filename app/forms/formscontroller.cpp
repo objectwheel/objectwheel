@@ -11,6 +11,7 @@
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
 #include <form.h>
+#include <controlitemcache.h>
 
 #include <QPushButton>
 #include <QCompleter>
@@ -56,7 +57,7 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
 
 Control* FormsController::controlFromItem(const QTreeWidgetItem* item) const
 {
-    return item->data(0, FormsDelegate::ControlRole).value<QPointer<Control>>().data();
+    return item->data(0, ControlItem::ControlRole).value<QPointer<Control>>().data();
 }
 
 QTreeWidgetItem* FormsController::itemFromControl(const Control* control) const
@@ -72,13 +73,16 @@ QTreeWidgetItem* FormsController::itemFromControl(const Control* control) const
 void FormsController::discharge()
 {
     m_isProjectStarted = false;
+    m_formsPane->searchEdit()->clear();
     clear();
 }
 
 void FormsController::clear()
 {
     m_isSelectionHandlingBlocked = true;
-    m_formsPane->formsTree()->clear();
+    FormsTree* tree = m_formsPane->formsTree();
+    EVERYTHING(QTreeWidgetItem* item, tree)
+        tree->delegate()->destroyItem(item);
     m_searchCompleterModel.setStringList({});
     m_isSelectionHandlingBlocked = false;
 }

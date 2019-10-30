@@ -9,6 +9,8 @@
 FormsTree::FormsTree(QWidget* parent) : QTreeWidget(parent)
   , m_delegate(new FormsDelegate(this))
 {
+    m_delegate->reserve();
+
     header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
     header()->setMinimumSectionSize(1);
