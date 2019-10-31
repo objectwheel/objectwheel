@@ -306,5 +306,6 @@
         <file>images/output/warning.svg</file>
         <file>images/designer/plus.svg</file>
         <file>images/designer/minus.svg</file>
+        <file>images/designer/rename.svg</file>
     </qresource>
 </RCC>

@@ -183,6 +183,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     static_cast<PinBar*>(m_assetsDockWidget->titleBarWidget())->addWidget(m_assetsPane->modeComboBox());
     static_cast<PinBar*>(m_assetsDockWidget->titleBarWidget())->addSeparator();
+    static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->renameButton());
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->addButton());
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->removeButton());
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addSeparator();

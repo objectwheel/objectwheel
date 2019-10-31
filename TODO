@@ -9,6 +9,12 @@ Quick Controls - 2  -  Popup patlıyor
 WebView  -  WebView patlıyor
 Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
 
+form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin ayrıca uyarı da versin bi kereye
+    mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
+ayrıca yukarıdakinin benzeri olaacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin
+    ve eğer açık ise bu assetlerdeki herhangi bir dosya, açık halleri de düzeltilsin
+applicationstyle:panelbuttoncommand çizimlerindeki tüm kontur ve gölge çizimleri transparan
+    siyah bazlı olmalı, sabit renk kullanımlarından kaçınılmalı
 hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
     bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı
 çift tıklama ile forms pane üzerinden form isimleri değiştirilebilmeli ayrıca özel bir buton da ekle

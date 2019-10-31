@@ -28,8 +28,8 @@ private slots:
     void onProjectStart();
     void onAddButtonClick();
     void onRemoveButtonClick();
+    void onRenameButtonClick();
     void onSearchEditReturnPress();
-
     void onControlCreation(Control* control);
     void onControlRemove(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);

@@ -12,6 +12,7 @@ FormsPane::FormsPane(QWidget* parent) : QWidget(parent)
   , m_searchEdit(new LineEdit(this))
   , m_addButton(new QPushButton(this))
   , m_removeButton(new QPushButton(this))
+  , m_renameButton(new QPushButton(this))
 {
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -32,6 +33,12 @@ FormsPane::FormsPane(QWidget* parent) : QWidget(parent)
     m_removeButton->setCursor(Qt::PointingHandCursor);
     m_removeButton->setToolTip(tr("Remove selected form from the project"));
     m_removeButton->setIcon(QIcon(":/images/designer/minus.svg"));
+
+    ApplicationStyle::setButtonStyle(m_renameButton, ApplicationStyle::Help);
+    m_renameButton->setFixedSize(18, 18);
+    m_renameButton->setCursor(Qt::PointingHandCursor);
+    m_renameButton->setToolTip(tr("Rename selected form"));
+    m_renameButton->setIcon(QIcon(":/images/designer/rename.svg"));
 
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(2);
@@ -60,6 +67,11 @@ QPushButton* FormsPane::addButton() const
 QPushButton* FormsPane::removeButton() const
 {
     return m_removeButton;
+}
+
+QPushButton* FormsPane::renameButton() const
+{
+    return m_renameButton;
 }
 
 QSize FormsPane::sizeHint() const

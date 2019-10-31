@@ -19,6 +19,7 @@ public:
     LineEdit* searchEdit() const;
     QPushButton* addButton() const;
     QPushButton* removeButton() const;
+    QPushButton* renameButton() const;
     QSize sizeHint() const override;
 
 private:
@@ -26,6 +27,7 @@ private:
     LineEdit* m_searchEdit;
     QPushButton* m_addButton;
     QPushButton* m_removeButton;
+    QPushButton* m_renameButton;
 };
 
 #endif // FORMSPANE_H

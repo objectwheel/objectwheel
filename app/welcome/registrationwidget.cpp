@@ -152,7 +152,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setFocusPolicy(Qt::NoFocus);
     _termsLabel->setTextFormat(Qt::RichText);
     _termsLabel->setText(tr(
-        "I accept <a href=\"http://objectwheel.com/\">the terms and conditions</a>"
+        "I accept <a href=\"http://objectwheel.com/terms-and-conditions/\">the terms and conditions</a>"
     ));
 
     _termsLabel->setOpenExternalLinks(true);
