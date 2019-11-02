@@ -7,14 +7,15 @@ int main(int argc, char* argv[])
     // Parse commandline arguments
     CommandlineParser::init(argc, argv);
 
-    // Apply boot settings
+    // Prepare core
     ApplicationCore::prepare();
 
     // Initialize application
     QApplication app(argc, argv);
 
-    // Initialize application core
-    ApplicationCore::init(&app);
+    // Run core
+    ApplicationCore core;
+    core.run();
 
     // Start main event loop
     return app.exec();

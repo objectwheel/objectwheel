@@ -13,24 +13,22 @@ class ApplicationCore final : public QObject
     Q_DISABLE_COPY(ApplicationCore)
 
 public:
-    static void init(QObject* parent);
+    explicit ApplicationCore(QObject* parent = nullptr);
+    ~ApplicationCore() override;
+
+    void run();
+
     static void prepare();
 
 private slots:
     void startQuitCountdown(int msec);
+    void quitIfDisconnected();
 
 private:
-    static void quitIfDisconnected();
-
-private:
-    explicit ApplicationCore(QObject* parent = nullptr);
-    ~ApplicationCore() override;
-
-private:
-    static RenderSocket* s_renderSocket;
-    static QThread* s_socketThread;
-    static CommandDispatcher* s_commandDispatcher;
-    static RenderEngine* s_renderEngine;
+    RenderSocket* m_renderSocket;
+    QThread* m_socketThread;
+    CommandDispatcher* m_commandDispatcher;
+    RenderEngine* m_renderEngine;
 };
 
 #endif // APPLICATIONCORE_H

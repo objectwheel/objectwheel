@@ -25,7 +25,6 @@ import Qt.labs.qmlmodels 1.0
 import Qt.labs.location 1.0
 import Qt.labs.sharedimage 1.0
 import Qt.labs.wavefrontmesh 1.12
-import QtTest 1.12
 import QtSensors 5.12
 import QtPurchasing 1.12
 import QtPositioning 5.12
@@ -40,16 +39,9 @@ import QtCharts 2.3
 import QtGamepad 1.12
 import QtAudioEngine 1.1
 import QtScxml 5.8
-import QtRemoteObjects 5.12
-import QtQuick.VirtualKeyboard 2.4
-import QtQuick.VirtualKeyboard.Styles 2.2
-import QtQuick.VirtualKeyboard.Settings 2.2
 import QtWebView 1.1
 import QtWebChannel 1.0
 import QtWebEngine 1.8
 import QtWebSockets 1.1
-
-// import QtWayland.Compositor 1.3 -- disabled by default
-// import QtWinExtras 1.0 -- win spesific
 
 Item {}

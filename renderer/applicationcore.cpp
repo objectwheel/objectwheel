@@ -12,6 +12,7 @@
 
 #include <QTimer>
 #include <QtWebView>
+#include <QtWebEngine>
 #include <QApplication>
 
 #if defined(Q_OS_UNIX)
@@ -20,12 +21,81 @@
 #include <windows.h>
 #endif
 
-RenderSocket* ApplicationCore::s_renderSocket = nullptr;
-QThread* ApplicationCore::s_socketThread = nullptr;
-CommandDispatcher* ApplicationCore::s_commandDispatcher = nullptr;
-RenderEngine* ApplicationCore::s_renderEngine = nullptr;
-
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
+{
+    DesignerSupport::activateDesignerWindowManager();
+    DesignerSupport::activateDesignerMode();
+    RenderUtils::stopUnifiedTimer();
+    qRegisterMetaType<RendererCommands>("RendererCommands");
+
+    m_renderSocket = new RenderSocket;
+    m_socketThread = new QThread(this);
+
+    Components::init();
+
+    m_renderSocket->moveToThread(m_socketThread);
+    m_socketThread->start();
+
+    m_commandDispatcher = new CommandDispatcher(m_renderSocket, this);
+    m_renderEngine = new RenderEngine(this);
+
+    connect(m_renderSocket, &RenderSocket::disconnected,
+            std::bind(&ApplicationCore::startQuitCountdown, this, 1200));
+    connect(m_commandDispatcher, &CommandDispatcher::init,
+            m_renderEngine, &RenderEngine::init);
+    connect(m_commandDispatcher, &CommandDispatcher::bindingUpdate,
+            m_renderEngine, &RenderEngine::updateBinding);
+    connect(m_commandDispatcher, &CommandDispatcher::propertyUpdate,
+            m_renderEngine, &RenderEngine::updateProperty);
+    connect(m_commandDispatcher, &CommandDispatcher::controlCreation,
+            m_renderEngine, &RenderEngine::createControl);
+    connect(m_commandDispatcher, &CommandDispatcher::preview,
+            m_renderEngine, &RenderEngine::preview);
+    connect(m_commandDispatcher, &CommandDispatcher::refresh,
+            m_renderEngine, &RenderEngine::refresh);
+    connect(m_commandDispatcher, &CommandDispatcher::parentUpdate,
+            m_renderEngine, &RenderEngine::updateParent);
+    connect(m_commandDispatcher, &CommandDispatcher::indexUpdate,
+            m_renderEngine, &RenderEngine::updateIndex);
+    connect(m_commandDispatcher, &CommandDispatcher::idUpdate,
+            m_renderEngine, &RenderEngine::updateId);
+    connect(m_commandDispatcher, &CommandDispatcher::controlDeletion,
+            m_renderEngine, &RenderEngine::deleteControl);
+    connect(m_commandDispatcher, &CommandDispatcher::formDeletion,
+            m_renderEngine, &RenderEngine::deleteForm);
+    connect(m_commandDispatcher, &CommandDispatcher::formCreation,
+            m_renderEngine, &RenderEngine::createForm);
+    connect(m_commandDispatcher, &CommandDispatcher::controlCodeUpdate,
+            m_renderEngine, &RenderEngine::updateControlCode);
+    connect(m_commandDispatcher, &CommandDispatcher::formCodeUpdate,
+            m_renderEngine, &RenderEngine::updateFormCode);
+    connect(m_commandDispatcher, &CommandDispatcher::devicePixelRatioUpdate,
+            m_renderEngine, &RenderEngine::setDevicePixelRatio);
+    connect(m_renderEngine, &RenderEngine::initializationProgressChanged,
+            m_commandDispatcher, &CommandDispatcher::scheduleInitializationProgress);
+    connect(m_renderEngine, &RenderEngine::renderDone,
+            m_commandDispatcher, &CommandDispatcher::scheduleRenderDone);
+    connect(m_renderEngine, &RenderEngine::previewDone,
+            m_commandDispatcher, &CommandDispatcher::schedulePreviewDone);
+}
+
+ApplicationCore::~ApplicationCore()
+{    
+    m_socketThread->quit();
+    m_socketThread->wait();
+    delete m_renderSocket;
+}
+
+void ApplicationCore::run()
+{
+    // Caution! Receiver is living on another thread
+    QMetaObject::invokeMethod(m_renderSocket, "start", Qt::QueuedConnection,
+                              Q_ARG(QString, CommandlineParser::serverName()));
+
+    startQuitCountdown(30000);
+}
+
+void ApplicationCore::prepare()
 {
     /* Prioritize down */
 #if defined(Q_OS_UNIX)
@@ -35,88 +105,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
 #endif
 
-    DesignerSupport::activateDesignerWindowManager();
-    DesignerSupport::activateDesignerMode();
-    RenderUtils::stopUnifiedTimer();
-    QtWebView::initialize();
-    qRegisterMetaType<RendererCommands>("RendererCommands");
-
-    s_renderSocket = new RenderSocket;
-    s_socketThread = new QThread(this);
-
-    Components::init();
-
-    s_renderSocket->moveToThread(s_socketThread);
-    s_socketThread->start();
-
-    s_commandDispatcher = new CommandDispatcher(s_renderSocket, this);
-    s_renderEngine = new RenderEngine(this);
-
-    connect(s_renderSocket, &RenderSocket::disconnected,
-            std::bind(&ApplicationCore::startQuitCountdown, this, 1200));
-
-    connect(s_commandDispatcher, &CommandDispatcher::init,
-            s_renderEngine, &RenderEngine::init);
-    connect(s_commandDispatcher, &CommandDispatcher::bindingUpdate,
-            s_renderEngine, &RenderEngine::updateBinding);
-    connect(s_commandDispatcher, &CommandDispatcher::propertyUpdate,
-            s_renderEngine, &RenderEngine::updateProperty);
-    connect(s_commandDispatcher, &CommandDispatcher::controlCreation,
-            s_renderEngine, &RenderEngine::createControl);
-    connect(s_commandDispatcher, &CommandDispatcher::preview,
-            s_renderEngine, &RenderEngine::preview);
-    connect(s_commandDispatcher, &CommandDispatcher::refresh,
-            s_renderEngine, &RenderEngine::refresh);
-    connect(s_commandDispatcher, &CommandDispatcher::parentUpdate,
-            s_renderEngine, &RenderEngine::updateParent);
-    connect(s_commandDispatcher, &CommandDispatcher::indexUpdate,
-            s_renderEngine, &RenderEngine::updateIndex);
-    connect(s_commandDispatcher, &CommandDispatcher::idUpdate,
-            s_renderEngine, &RenderEngine::updateId);
-    connect(s_commandDispatcher, &CommandDispatcher::controlDeletion,
-            s_renderEngine, &RenderEngine::deleteControl);
-    connect(s_commandDispatcher, &CommandDispatcher::formDeletion,
-            s_renderEngine, &RenderEngine::deleteForm);
-    connect(s_commandDispatcher, &CommandDispatcher::formCreation,
-            s_renderEngine, &RenderEngine::createForm);
-    connect(s_commandDispatcher, &CommandDispatcher::controlCodeUpdate,
-            s_renderEngine, &RenderEngine::updateControlCode);
-    connect(s_commandDispatcher, &CommandDispatcher::formCodeUpdate,
-            s_renderEngine, &RenderEngine::updateFormCode);
-    connect(s_commandDispatcher, &CommandDispatcher::devicePixelRatioUpdate,
-            s_renderEngine, &RenderEngine::setDevicePixelRatio);
-
-    connect(s_renderEngine, &RenderEngine::initializationProgressChanged,
-            s_commandDispatcher, &CommandDispatcher::scheduleInitializationProgress);
-    connect(s_renderEngine, &RenderEngine::renderDone,
-            s_commandDispatcher, &CommandDispatcher::scheduleRenderDone);
-    connect(s_renderEngine, &RenderEngine::previewDone,
-            s_commandDispatcher, &CommandDispatcher::schedulePreviewDone);
-
-    // Caution! Receiver is living on another thread
-    QMetaObject::invokeMethod(s_renderSocket, "start", Qt::QueuedConnection,
-                              Q_ARG(QString, CommandlineParser::serverName()));
-
-    startQuitCountdown(30000);
-}
-
-ApplicationCore::~ApplicationCore()
-{    
-    s_socketThread->quit();
-    s_socketThread->wait();
-}
-
-void ApplicationCore::init(QObject* parent)
-{
-    static ApplicationCore* instance = nullptr;
-    if (instance)
-        return;
-
-    instance = new ApplicationCore(parent);
-}
-
-void ApplicationCore::prepare()
-{
     QApplication::setOrganizationName("Objectwheel");
     QApplication::setOrganizationDomain("objectwheel.com");
     QApplication::setApplicationName("renderer");
@@ -137,6 +125,15 @@ void ApplicationCore::prepare()
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qputenv("QT_QUICK_CONTROLS_CONF",
             SaveUtils::toProjectAssetsDir(CommandlineParser::projectDirectory()).toUtf8());
+    // Not needed on desktop platforms since it
+    // is already called by QtWebView::initialize()
+    // QtWebEngine::initialize();
+    // Also we are calling following before
+    // Constructing the QApplication because
+    // It uses QtWebEngine as the backend on
+    // desktop platforms and it must be initialized
+    // before the QApplication constructor
+    QtWebView::initialize();
 }
 
 void ApplicationCore::startQuitCountdown(int msec)
@@ -146,7 +143,7 @@ void ApplicationCore::startQuitCountdown(int msec)
 
 void ApplicationCore::quitIfDisconnected()
 {
-    if (s_renderSocket->state() != QLocalSocket::ConnectedState) {
+    if (m_renderSocket->state() != QLocalSocket::ConnectedState) {
         qWarning() << tr("No connection, quitting...");
         QMetaObject::invokeMethod(qApp, [] { qApp->exit(EXIT_FAILURE); }, Qt::QueuedConnection);
         qApp->exit(EXIT_FAILURE);
