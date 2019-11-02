@@ -118,6 +118,7 @@ QPixmap imageToPixmap(const QImage& image);
 QStringList anchorLineNames();
 QStringList anchorPropertyNames();
 void disableWheelEvent(QWidget* widget);
+QFont defaultFont();
 
 } // UtilityFunctions
 

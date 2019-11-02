@@ -656,4 +656,17 @@ void disableWheelEvent(QWidget* widget)
     widget->installEventFilter(&disabler);
 }
 
+QFont defaultFont()
+{
+#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
+    QFont font(".SF NS Display");
+#elif defined(Q_OS_WIN)
+    QFont font("Segoe UI");
+#else
+    QFont font("Roboto");
+#endif
+    font.setPixelSize(13);
+    return font;
+}
+
 } // UtilityFunctions

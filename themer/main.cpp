@@ -1,10 +1,15 @@
 #include <delayer.h>
 #include <saveutils.h>
 #include <quicktheme.h>
+#include <utilityfunctions.h>
 
 #include <QtQml>
 #include <QtQuick>
 #include <QtWidgets>
+
+#ifdef Q_OS_MACOS
+#include <windowoperations.h>
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -24,11 +29,29 @@ int main(int argc, char *argv[])
 
     // Initialize application
     QApplication a(argc, argv);
-    QApplication::setOrganizationName("Objectwheel");
-    QApplication::setOrganizationDomain("objectwheel.com");
-    QApplication::setApplicationName("themer");
-    QApplication::setApplicationVersion("1.0.0");
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationDisplayName(APP_NAME + QObject::tr(" Themer"));
     QApplication::setWindowIcon(QIcon(":/images/icon.png"));
+
+    /* Load default fonts */
+    const QString fontPath = ":/fonts";
+    for (const QString& fontName : QDir(fontPath).entryList(QDir::Files))
+        QFontDatabase::addApplicationFont(fontPath + '/' + fontName);
+
+    /* Set application ui settings */
+    QApplication::setFont(UtilityFunctions::defaultFont());
+    QApplication::setStyle("fusion");
+    QApplication::setStartDragDistance(8);
+
+#ifdef Q_OS_MACOS // Show/hide dock icon
+    if (argc > 1 && argv[1] == QString("capture"))
+        WindowOperations::setDockIconVisible(false);
+    else
+        WindowOperations::setDockIconVisible(true);
+#endif
 
     QQmlApplicationEngine engine;
 

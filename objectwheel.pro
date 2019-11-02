@@ -7,4 +7,4 @@ SUBDIRS      = $$PWD/utils/utils.pro \
                $$PWD/interpreter/interpreter.pro \
                $$PWD/renderer/renderer.pro \
                $$PWD/themer/themer.pro \
-               $$PWD/app/app.pro
+               $$PWD/objectwheel/objectwheel.pro

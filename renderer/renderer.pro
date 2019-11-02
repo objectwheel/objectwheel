@@ -5,7 +5,8 @@ include($$PWD/platform/platform.pri)
 TEMPLATE = app
 CONFIG  -= app_bundle
 CONFIG  += console c++14 strict_c++
-TARGET   = renderer
+TARGET   = Renderer
+DEFINES += QT_QML_DEBUG_NO_WARNING
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += RENDERER_DEBUG
@@ -18,8 +19,6 @@ QT += quick-private quicktemplates2-private
 ### Sources
 INCLUDEPATH += $$PWD
 DEPENDPATH  += $$PWD
-
-DEFINES += QT_QML_DEBUG_NO_WARNING
 
 SOURCES += $$PWD/main.cpp \
            $$PWD/rendersocket.cpp \
@@ -38,6 +37,7 @@ HEADERS += $$PWD/rendersocket.h \
 
 
 ### Utils Settings
+include($$PWD/../objectwheel.pri)
 INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/zipasync
 INCLUDEPATH += $$PWD/../utils/zipasync/async

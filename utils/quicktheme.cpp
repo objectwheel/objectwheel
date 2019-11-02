@@ -18,7 +18,6 @@ void setTheme(const QString& projectDir, int* version)
     const QString& background = object.value("background").toString();
 
     qputenv("QT_QUICK_CONTROLS_1_STYLE", stylev1.toUtf8());
-    // qputenv("QT_QUICK_CONTROLS_STYLE", stylev2.toUtf8());
     QQuickStyle::setStyle(stylev2.toUtf8());
     qputenv("QT_LABS_CONTROLS_STYLE", stylev2.toUtf8());
 

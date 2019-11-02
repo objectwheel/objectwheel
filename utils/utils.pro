@@ -4,6 +4,7 @@ CONFIG  += plugin c++14 strict_c++
 TARGET   = utils
 QT      += core-private widgets-private widgets qml quick websockets multimedia quickcontrols2
 DEFINES += UTILS_LIBRARY
+DEFINES += QT_QML_DEBUG_NO_WARNING
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
@@ -26,7 +27,7 @@ HEADERS += \
     $$PWD/filesystemutils.h \
     $$PWD/serializeenum.h \
     $$PWD/qmlerror.h \
-    textimagehandler.h
+    $$PWD/textimagehandler.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -39,7 +40,7 @@ SOURCES += \
     $$PWD/utilityfunctions.cpp \
     $$PWD/filesystemutils.cpp \
     $$PWD/qmlerror.cpp \
-    textimagehandler.cpp
+    $$PWD/textimagehandler.cpp
 
 RESOURCES += \
     $$PWD/resources/internal/internal.qrc \
@@ -47,7 +48,7 @@ RESOURCES += \
     $$PWD/resources/shared/moduleresolver/moduleresolver.qrc
 
 ###Includes
-include($$PWD/vpfs/vpfs.pri)
+include($$PWD/../objectwheel.pri)
 include($$PWD/zipasync/zipasync.pri)
 include($$PWD/platform/platform.pri)
 include($$PWD/qmlparser/qmlparser.pri)

@@ -7,12 +7,12 @@
 #include <commanddispatcher.h>
 #include <quicktheme.h>
 #include <saveutils.h>
+#include <utilityfunctions.h>
 
 #include <private/qquickdesignersupport_p.h>
 
 #include <QTimer>
 #include <QtWebView>
-#include <QtWebEngine>
 #include <QApplication>
 
 #if defined(Q_OS_UNIX)
@@ -23,6 +23,24 @@
 
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 {
+    /** Core initialization **/
+    QApplication::setQuitOnLastWindowClosed(false);
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationDisplayName(APP_NAME + QObject::tr(" Renderer"));
+
+    /* Load default fonts */
+    const QString fontPath = ":/fonts";
+    for (const QString& fontName : QDir(fontPath).entryList(QDir::Files))
+        QFontDatabase::addApplicationFont(fontPath + '/' + fontName);
+
+    /* Set application ui settings */
+    QApplication::setFont(UtilityFunctions::defaultFont());
+    QApplication::setStyle("fusion");
+    QApplication::setStartDragDistance(8);
+
     DesignerSupport::activateDesignerWindowManager();
     DesignerSupport::activateDesignerMode();
     RenderUtils::stopUnifiedTimer();
@@ -105,11 +123,6 @@ void ApplicationCore::prepare()
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
 #endif
 
-    QApplication::setOrganizationName("Objectwheel");
-    QApplication::setOrganizationDomain("objectwheel.com");
-    QApplication::setApplicationName("renderer");
-    QApplication::setApplicationVersion("1.1.0");
-    QApplication::setQuitOnLastWindowClosed(false);
     QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QuickTheme::setTheme(CommandlineParser::projectDirectory());
