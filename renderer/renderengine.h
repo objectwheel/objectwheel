@@ -10,6 +10,7 @@ class QmlError;
 class QQuickWindow;
 class QTimer;
 struct RenderInfo;
+struct InitInfo;
 
 // Due to possible margins on an ApplicationWindow the rendering order is important
 // And a parent must always be rendered first.
@@ -39,6 +40,7 @@ public:
         QString id;
         QString uid;
         QString dir;
+        QString module;
         QString geometrySyncKey;
         QObject* object;
         QQmlContext* context;
@@ -65,20 +67,20 @@ public:
     void setDevicePixelRatio(qreal devicePixelRatio);
 
 public slots:
-    void init();
+    void init(const InitInfo& initInfo);
     void refresh(const QString& formUid);
     void deleteForm(const QString& uid); // NOTE: Deletes form and its children
     void deleteControl(const QString& uid); // NOTE: Deletes control and its children
-    void createForm(const QString& dir); // NOTE: It doesn't create children
-    void createControl(const QString& dir, const QString& parentUid); // NOTE: It doesn't create children
+    void createForm(const QString& dir, const QString& module); // NOTE: It doesn't create children
+    void createControl(const QString& dir, const QString& module, const QString& parentUid); // NOTE: It doesn't create children
     void updateIndex(const QString& uid);
     void updateId(const QString& uid, const QString& newId);
     void updateParent(const QString& newDir, const QString& uid, const QString& parentUid);
     void updateBinding(const QString& uid, const QString& bindingName, const QString& expression);
     void updateProperty(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
-    void updateControlCode(const QString& uid);
-    void updateFormCode(const QString& uid);
-    void preview(const QString& url);
+    void updateControlCode(const QString& uid, const QString& module);
+    void updateFormCode(const QString& uid, const QString& module);
+    void preview(const QString& url, const QString& module);
 
 private slots:
     void flushRenders();
@@ -98,8 +100,9 @@ private:
     QImage renderItem(QQuickItem* item, QRectF& boundingRect, bool preview, const QColor& bgColor);
 
     QList<RenderInfo> renderDirtyInstances(const QList<ControlInstance*>& instances);
-    RenderEngine::ControlInstance* createInstance(const QString& url);
-    RenderEngine::ControlInstance* createInstance(const QString& dir, ControlInstance* parentInstance,
+    RenderEngine::ControlInstance* createInstance(const QString& url, const QString& module);
+    RenderEngine::ControlInstance* createInstance(const QString& dir, const QString& module,
+                                                  ControlInstance* parentInstance,
                                                   QQmlContext* oldFormContext = nullptr);
 
 signals:

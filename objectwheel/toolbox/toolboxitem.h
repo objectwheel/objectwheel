@@ -17,10 +17,14 @@ public:
     QString dir() const;
     void setDir(const QString& dir);
 
+    QString module() const;
+    void setModule(const QString& module);
+
     bool operator<(const QTreeWidgetItem& other) const override;
 
 private:
     QString m_dir;
+    QString m_module;
 };
 
 #endif // TOOLBOXITEM_H

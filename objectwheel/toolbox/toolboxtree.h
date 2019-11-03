@@ -12,8 +12,7 @@ class ToolboxTree final : public QTreeWidget
 public:
     explicit ToolboxTree(QWidget* parent = nullptr);
 
-    void addTool(const QString& name, const QString& category,
-                 const QString& dir, const QIcon& icon);
+    void addTool(const QString& dir);
 
 private:
     ToolboxItem* categoryItem(const QString& category);

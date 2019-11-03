@@ -26,6 +26,16 @@ void ToolboxItem::setDir(const QString& dir)
     m_dir = dir;
 }
 
+QString ToolboxItem::module() const
+{
+    return m_module;
+}
+
+void ToolboxItem::setModule(const QString& module)
+{
+    m_module = module;
+}
+
 bool ToolboxItem::operator<(const QTreeWidgetItem& other) const
 {
     if (isCategory())

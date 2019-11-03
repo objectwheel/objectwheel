@@ -58,7 +58,7 @@ RenderEngine::~RenderEngine()
     delete m_view;
 }
 
-void RenderEngine::init()
+void RenderEngine::init(const InitInfo& initInfo)
 {
     if (m_initialized) {
         qWarning("RenderEngine: Re-initialization request rejected");
@@ -69,20 +69,22 @@ void RenderEngine::init()
 
     /* Create instances, handle parent-child relationship, set ids, save form instances */
     QMap<QString, ControlInstance*> instanceTree;
-    const QVector<QString>& fps = SaveUtils::formPaths(CommandlineParser::projectDirectory());
-    for (const QString& formPath : fps) {
-        ControlInstance* formInstance = createInstance(formPath, nullptr);
+    for (const QPair<QString, QString>& formPair : qAsConst(initInfo.forms)) {
+        const QString& formPath = formPair.first;
+        const QString& module = formPair.second;
+        ControlInstance* formInstance = createInstance(formPath, module, nullptr);
         Q_ASSERT(formInstance);
 
         m_formInstances.append(formInstance);
         instanceTree.insert(formPath, formInstance);
 
-        // TODO: What if a child is a master-control?
-        const QVector<QString>& cps = SaveUtils::childrenPaths(formPath);
-        for (const QString& childPath : cps) {
+        const QVector<QPair<QString, QString>>& children = initInfo.children.value(formPath);
+        for (const QPair<QString, QString>& childPair : children) {
+            const QString& childPath = childPair.first;
+            const QString& mmodule = childPair.second;
             ControlInstance* parentInstance = instanceTree.value(SaveUtils::toDoubleUp(childPath));
             Q_ASSERT(parentInstance);
-            ControlInstance* childInstance = createInstance(childPath, parentInstance);
+            ControlInstance* childInstance = createInstance(childPath, mmodule, parentInstance);
             Q_ASSERT(childInstance);
             instanceTree.insert(childPath, childInstance);
         }
@@ -130,9 +132,9 @@ void RenderEngine::updateBinding(const QString& uid, const QString& bindingName,
 
     if (expression.isEmpty()) {
         if (m_formInstances.contains(instance))
-            updateFormCode(uid);
+            updateFormCode(uid, instance->module);
         else
-            updateControlCode(uid);
+            updateControlCode(uid, instance->module);
     } else {
         RenderUtils::setInstancePropertyBinding(instance, bindingName, expression);
     }
@@ -199,7 +201,7 @@ void RenderEngine::updateParent(const QString& newDir, const QString& uid, const
     scheduleRender(formInstance);
 }
 
-void RenderEngine::updateControlCode(const QString& uid)
+void RenderEngine::updateControlCode(const QString& uid, const QString& module)
 {
     ControlInstance* oldInstance = instanceForUid(uid);
 
@@ -221,8 +223,9 @@ void RenderEngine::updateControlCode(const QString& uid)
 
     RenderUtils::setId(oldInstance->context, nullptr, oldInstance->id, QString());
 
-    ControlInstance* instance = createInstance(oldInstance->dir, oldInstance->parent);
+    ControlInstance* instance = createInstance(oldInstance->dir, module, oldInstance->parent);
     oldInstance->gui = instance->gui;
+    oldInstance->module = instance->module;
     oldInstance->layout = instance->layout;
     oldInstance->popup = instance->popup;
     oldInstance->window = instance->window;
@@ -267,7 +270,7 @@ void RenderEngine::updateControlCode(const QString& uid)
     scheduleRender(formInstance);
 }
 
-void RenderEngine::updateFormCode(const QString& uid)
+void RenderEngine::updateFormCode(const QString& uid, const QString& module)
 {
     ControlInstance* oldFormInstance = instanceForUid(uid);
 
@@ -285,8 +288,9 @@ void RenderEngine::updateFormCode(const QString& uid)
     if (item)
         m_designerSupport.derefFromEffectItem(item);
 
-    ControlInstance* instance = createInstance(oldFormInstance->dir, nullptr, oldFormInstance->context);
+    ControlInstance* instance = createInstance(oldFormInstance->dir, module, nullptr, oldFormInstance->context);
     oldFormInstance->gui = instance->gui;
+    oldFormInstance->module = instance->module;
     oldFormInstance->layout = instance->layout;
     oldFormInstance->popup = instance->popup;
     oldFormInstance->window = instance->window;
@@ -340,11 +344,11 @@ void RenderEngine::updateFormCode(const QString& uid)
     scheduleRender(oldFormInstance);
 }
 
-void RenderEngine::preview(const QString& url)
+void RenderEngine::preview(const QString& url, const QString& module)
 {
     Q_ASSERT(!url.isEmpty());
 
-    ControlInstance* instance = createInstance(url);
+    ControlInstance* instance = createInstance(url, module);
 
     RenderUtils::doComplete(instance, this);
 
@@ -433,7 +437,7 @@ void RenderEngine::updateId(const QString& uid, const QString& newId)
     scheduleRender(formInstance);
 }
 
-void RenderEngine::createControl(const QString& dir, const QString& parentUid)
+void RenderEngine::createControl(const QString& dir, const QString& module, const QString& parentUid)
 {
     ControlInstance* parentInstance = instanceForUid(parentUid);
 
@@ -443,7 +447,7 @@ void RenderEngine::createControl(const QString& dir, const QString& parentUid)
 
     Q_ASSERT(formInstance);
 
-    ControlInstance* instance = createInstance(dir, parentInstance);
+    ControlInstance* instance = createInstance(dir, module, parentInstance);
 
     RenderUtils::doComplete(instance, this);
 
@@ -453,9 +457,9 @@ void RenderEngine::createControl(const QString& dir, const QString& parentUid)
     scheduleRender(formInstance);
 }
 
-void RenderEngine::createForm(const QString& dir)
+void RenderEngine::createForm(const QString& dir, const QString& module)
 {
-    ControlInstance* formInstance = createInstance(dir, nullptr);
+    ControlInstance* formInstance = createInstance(dir, module, nullptr);
 
     m_formInstances.append(formInstance);
     RenderUtils::doComplete(formInstance, this);
@@ -854,7 +858,7 @@ void RenderEngine::repairIndexes(ControlInstance* parentInstance)
     }
 }
 
-RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
+RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, const QString& module)
 {
     ComponentCompleteDisabler disabler;
     Q_UNUSED(disabler)
@@ -863,7 +867,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     instance->context = new QQmlContext(m_view->engine());
 
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromUserInput(RenderUtils::mockUrl(url)));
+    component.loadUrl(QUrl::fromUserInput(RenderUtils::mockUrl(url, module)));
 
     QObject* object = component.beginCreate(instance->context);
 
@@ -927,7 +931,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     return instance;
 }
 
-RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
+RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir, const QString& module,
                                                             ControlInstance* parentInstance,
                                                             QQmlContext* oldFormContext)
 {
@@ -936,6 +940,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
     const QString& url = SaveUtils::toControlMainQmlFile(dir);
 
     auto instance = new RenderEngine::ControlInstance;
+    instance->module = module;
     instance->dir = dir;
     instance->id = SaveUtils::controlId(dir);
     instance->uid = SaveUtils::controlUid(dir);
@@ -958,7 +963,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
 
     m_view->engine()->clearComponentCache();
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromLocalFile(RenderUtils::mockUrl(url)));
+    component.loadUrl(QUrl::fromLocalFile(RenderUtils::mockUrl(url, module)));
 
     QObject* object = component.beginCreate(instance->context);
 

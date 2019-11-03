@@ -59,42 +59,27 @@ const QList<QString>& toolCategoriesOrder()
 }
 } // Internal
 
-QString toolName(const QString& controlDir)
+QString toolNameFromModule(const QString& module)
 {
-    Q_ASSERT(SaveUtils::isControlValid(controlDir));
-    return toolNameFromUrl(SaveUtils::toControlMainQmlFile(controlDir));
-}
-
-QString toolNameFromUrl(const QString& url)
-{
-    const QString& module = ParserUtils::moduleFromUrl(url);
     const QStringList& pieces = module.split('.');
-
     QString name(QObject::tr("Tool"));
     if (pieces.size() > 1)
         name = pieces.last();
-
     return name;
 }
 
-QString toolIconPath(const QString& controlDir)
+QString toolIconPathFromModule(const QString& module)
 {
-    Q_ASSERT(SaveUtils::isControlValid(controlDir));
-
     const QJsonObject& icons(Internal::toolIcons());
-    const QString& module = ParserUtils::module(controlDir);
     const QString& iconPath = icons.contains(module)
             ? icons.value(module).toString()
             : QStringLiteral(":/images/tools/Unknown.svg");
     return iconPath;
 }
 
-QString toolCetegory(const QString& controlDir)
+QString toolCetegoryFromModule(const QString& module)
 {
-    Q_ASSERT(SaveUtils::isControlValid(controlDir));
-
     const QJsonObject& categories(Internal::toolCategories());
-    const QString& module = ParserUtils::module(controlDir);
     QStringList pieces = module.split('.');
 
     QString category(QObject::tr("Others"));

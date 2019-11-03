@@ -43,8 +43,10 @@ void ControlSaveFilter::afterSave(QmlCodeEditorWidget::Document* document)
             ControlPropertyManager::setId(control, m_id, ControlPropertyManager::SaveChanges); // For refactorId
     }
 
+    const QString& module = ParserUtils::module(control->dir());
+    control->setModule(module);
     if (control->type() == Form::Type)
-        ControlRenderingManager::scheduleFormCodeUpdate(control->uid());
+        ControlRenderingManager::scheduleFormCodeUpdate(control->uid(), module);
     else
-        ControlRenderingManager::scheduleControlCodeUpdate(control->uid());
+        ControlRenderingManager::scheduleControlCodeUpdate(control->uid(), module);
 }

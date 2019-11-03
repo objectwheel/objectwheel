@@ -40,6 +40,7 @@ void ProjectExposingManager::exposeProject()
     for (const QString& formPath : SaveUtils::formPaths(ProjectManager::dir())) {
         auto form = new Form;
         form->setDir(formPath);
+        form->setModule(ParserUtils::module(formPath));
         form->setUid(SaveUtils::controlUid(form->dir()));
         ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(form, SaveUtils::controlIndex(form->dir()), ControlPropertyManager::NoOption);
@@ -85,6 +86,7 @@ void ProjectExposingManager::exposeProject()
 
             auto control = new Control;
             control->setDir(childPath);
+            control->setModule(ParserUtils::module(childPath));
             control->setUid(SaveUtils::controlUid(control->dir()));
             ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
             ControlPropertyManager::setIndex(control, SaveUtils::controlIndex(control->dir()), ControlPropertyManager::NoOption);

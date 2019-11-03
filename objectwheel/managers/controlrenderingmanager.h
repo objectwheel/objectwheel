@@ -19,13 +19,13 @@ public:
     static ControlRenderingManager* instance();
 
     static void scheduleDevicePixelRatioUpdate(const qreal& value);
-    static void scheduleControlCodeUpdate(const QString& uid);
-    static void scheduleFormCodeUpdate(const QString& uid);
+    static void scheduleControlCodeUpdate(const QString& uid, const QString& module);
+    static void scheduleFormCodeUpdate(const QString& uid, const QString& module);
     static void scheduleFormDeletion(const QString& uid);
-    static void scheduleFormCreation(const QString& dir);
+    static void scheduleFormCreation(const QString& dir, const QString& module);
     static void scheduleControlDeletion(const QString& uid);
-    static void schedulePreview(const QString& url);
-    static void scheduleControlCreation(const QString& dir, const QString& parentUid);
+    static void schedulePreview(const QString& url, const QString& module);
+    static void scheduleControlCreation(const QString& dir, const QString& module, const QString& parentUid);
     static void scheduleIndexUpdate(const QString& uid);
     static void scheduleIdUpdate(const QString& uid, const QString& newId);
     static void scheduleParentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);

@@ -659,8 +659,11 @@ void DesignerScene::onSceneSettingsChange()
 void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
 {
     QString dir;
+    QString module;
     RenderInfo info;
+
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-tool")), dir);
+    UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-module")), module);
     UtilityFunctions::pull(event->mimeData()->data(QStringLiteral("application/x-objectwheel-render-info")), info);
 
     info.image.setDevicePixelRatio(devicePixelRatio()); // QDataStream cannot write dpr
@@ -671,7 +674,8 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
     Control* newControl = ControlCreationManager::createControl(
                 parentControl,
-                dir, DesignerScene::snapPosition(parentControl->mapFromScene(event->scenePos() - QPointF(3, 3) - margins)),
+                dir, module,
+                DesignerScene::snapPosition(parentControl->mapFromScene(event->scenePos() - QPointF(3, 3) - margins)),
                 info.surroundingRect.size(), UtilityFunctions::imageToPixmap(info.image));
     if (newControl) {
         clearSelection();

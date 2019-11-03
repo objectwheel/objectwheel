@@ -39,6 +39,13 @@ struct RenderInfo {
     QVector<PropertyNode> properties;
 };
 
+struct InitInfo {
+    // Path, Module
+    QVector<QPair<QString, QString>> forms;
+    // Form path, Children
+    QHash<QString, QVector<QPair<QString, QString>>> children;
+};
+
 inline QDataStream& operator>> (QDataStream& in, QmlError& error)
 {
     QUrl u;
@@ -140,6 +147,20 @@ inline QDataStream& operator<< (QDataStream& out, const Enum& e)
     out << e.scope;
     out << e.value;
     out << e.keys;
+    return out;
+}
+
+inline QDataStream& operator>> (QDataStream& in, InitInfo& info)
+{
+    in >> info.forms;
+    in >> info.children;
+    return in;
+}
+
+inline QDataStream& operator<< (QDataStream& out, const InitInfo& info)
+{
+    out << info.forms;
+    out << info.children;
     return out;
 }
 

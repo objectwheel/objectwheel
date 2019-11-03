@@ -5,6 +5,7 @@
 #include <renderercommands.h>
 
 struct RenderInfo;
+struct InitInfo;
 class RenderSocket;
 
 class CommandDispatcher final : public QObject
@@ -25,20 +26,20 @@ private:
     void send(RenderSocket* socket, RendererCommands command, const QByteArray& data = QByteArray());
 
 signals:
-    void init();
+    void init(const InitInfo& initInfo);
     void bindingUpdate(const QString& uid, const QString& bindingName, const QString& expression);
     void propertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
-    void formCreation(const QString& dir);
-    void preview(const QString& url);
-    void controlCreation(const QString& dir, const QString& parentUid);
+    void formCreation(const QString& dir, const QString& module);
+    void preview(const QString& url, const QString& module);
+    void controlCreation(const QString& dir, const QString& module, const QString& parentUid);
     void refresh(const QString& formUid);
     void parentUpdate(const QString& newDir, const QString& uid, const QString& parentUid);
     void indexUpdate(const QString& uid);
     void idUpdate(const QString& uid, const QString& newId);
     void controlDeletion(const QString& uid);
     void formDeletion(const QString& uid);
-    void controlCodeUpdate(const QString& uid);
-    void formCodeUpdate(const QString& uid);
+    void controlCodeUpdate(const QString& uid, const QString& module);
+    void formCodeUpdate(const QString& uid, const QString& module);
     void devicePixelRatioUpdate(qreal devicePixelRatio);
 
 private:

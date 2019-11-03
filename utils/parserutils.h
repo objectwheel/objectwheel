@@ -11,7 +11,6 @@ bool exists(const QString& controlDir, const QString& property);
 
 QString id(const QString& controlDir);
 QString module(const QString& controlDir);
-QString moduleFromUrl(const QString& url);
 QString property(const QString& controlDir, const QString& property);
 QString property(QTextDocument* document, const QString& controlDir, const QString& property);
 

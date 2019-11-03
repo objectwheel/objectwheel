@@ -14,7 +14,7 @@ class RenderUtils final
     Q_DISABLE_COPY(RenderUtils)
 
 public:
-    static QString mockUrl(const QString& url);
+    static QString mockUrl(const QString& url, const QString& module);
     static QObject* parentObject(const RenderEngine::ControlInstance* parentInstance, const QQuickView* m_view);
     static QQuickItem* guiItem(const RenderEngine::ControlInstance* instance);
     static QQuickItem* guiItem(QObject* object);

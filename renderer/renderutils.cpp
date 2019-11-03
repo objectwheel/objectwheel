@@ -4,6 +4,7 @@
 #include <utilityfunctions.h>
 #include <parserutils.h>
 #include <toolutils.h>
+
 #include <QAnimationDriver>
 #include <QQuickView>
 #include <QQmlContext>
@@ -795,17 +796,13 @@ void RenderUtils::setId(QQmlContext* context, QObject* object, const QString& ol
         context->setContextProperty(newId, object);
 }
 
-QString RenderUtils::mockUrl(const QString& url)
+QString RenderUtils::mockUrl(const QString& url, const QString& module)
 {
-//    static const QStringList& mockFiles = QDir(QStringLiteral(":/mockfiles/")).entryList(QDir::Files);
-    const QString& toolName = ToolUtils::toolNameFromUrl(url);
-//    qDebug() << QStringLiteral(":/mockfiles/") + toolName + QStringLiteral(".qml");
-//    qApp->processEvents();
-
-//    if (mockFiles.contains(toolName)) {
-//        qDebug() << QStringLiteral(":/mockfiles/") + toolName + QStringLiteral(".qml");
-//        return QStringLiteral(":/mockfiles/") + toolName + QStringLiteral(".qml");
-//    }
+    static const QString& mockBase = QStringLiteral(":/mockfiles/");
+    static const QStringList& mockFiles = QDir(mockBase).entryList(QDir::Files);
+    const QString& toolName = ToolUtils::toolNameFromModule(module);
+    if (mockFiles.contains(toolName + QStringLiteral(".qml"), Qt::CaseInsensitive))
+        return mockBase + toolName + QStringLiteral(".qml");
     return url;
 }
 

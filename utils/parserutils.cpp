@@ -513,12 +513,7 @@ QString id(const QString& controlDir)
 
 QString module(const QString& controlDir)
 {
-    return moduleFromUrl(SaveUtils::toControlMainQmlFile(controlDir));
-}
-
-QString moduleFromUrl(const QString& url)
-{
-    const QString& mainQmlFilePath = url;
+    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
     QFile file(mainQmlFilePath);
     if (!file.open(QFile::ReadOnly)) {
         qWarning("ParserUtils: Cannot open file");
@@ -565,12 +560,11 @@ QString moduleFromUrl(const QString& url)
     auto qualifiedId = cast<UiQualifiedId *>(uiObjectDefinition->qualifiedTypeNameId);
 
     if (!qualifiedId) {
-        qWarning() << "Property couldn't read. Bad file format 0x1.";
+        qWarning() << "Property couldn't read. Bad file format 0x2.";
         return QString();
     }
 
     UiHeaderItemList* header = uiHeaderItemList;
-
     QStringList modules;
     do {
         auto import = cast<UiImport*>(header->headerItem);

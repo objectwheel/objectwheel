@@ -9,6 +9,7 @@
 #include <scenesettings.h>
 #include <generalsettings.h>
 #include <interfacesettings.h>
+#include <parserutils.h>
 
 #include <QPainter>
 #include <QStyleOption>
@@ -151,8 +152,19 @@ QString Control::dir() const
 
 void Control::setDir(const QString& dir)
 {
-    if (m_dir != dir) {
+    if (m_dir != dir)
         m_dir = dir;
+}
+
+QString Control::module() const
+{
+    return m_module;
+}
+
+void Control::setModule(const QString& module)
+{
+    if (m_module != module) {
+        m_module = module;
         updateIcon();
     }
 }
@@ -164,7 +176,7 @@ QIcon Control::icon() const
 
 void Control::updateIcon()
 {
-    m_icon = QIcon(ToolUtils::toolIconPath(m_dir));
+    m_icon = QIcon(ToolUtils::toolIconPathFromModule(m_module));
 }
 
 QPixmap Control::pixmap() const
@@ -216,7 +228,6 @@ void Control::setRenderInfo(const RenderInfo& info)
     setOpacity(itemProperty("opacity").isValid() ? itemProperty("opacity").toDouble() : 1);
 
     if (info.codeChanged) {
-        updateIcon();
         for (Control* childControl : childControls(false))
             childControl->setTransform(QTransform::fromTranslate(margins().left(), margins().top()));
     } else {

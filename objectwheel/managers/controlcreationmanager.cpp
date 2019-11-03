@@ -32,7 +32,7 @@ void ControlCreationManager::init(DesignerScene* designerScene)
     s_designerScene = designerScene;
 }
 
-Form* ControlCreationManager::createForm(const QString& formRootPath)
+Form* ControlCreationManager::createForm(const QString& formRootPath, const QString& module)
 {
     const QString& newFormRootPath = SaveManager::addForm(formRootPath);
     if (newFormRootPath.isEmpty()) {
@@ -42,6 +42,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
 
     auto form = new Form;
     form->setDir(newFormRootPath);
+    form->setModule(module);
     form->setUid(SaveUtils::controlUid(form->dir()));
     ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
 
@@ -71,7 +72,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
             form, &Control::syncGeometry, Qt::QueuedConnection);
     connect(form, &Control::beingResizedChanged,
             form, &Control::syncGeometry, Qt::QueuedConnection);
-    ControlRenderingManager::scheduleFormCreation(form->dir());
+    ControlRenderingManager::scheduleFormCreation(form->dir(), form->module());
 
     // NOTE: We don't have to worry about possible child controls since createForm is only
     // called from FormsPane
@@ -93,6 +94,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath)
 
 Control* ControlCreationManager::createControl(Control* targetParentControl,
                                                const QString& controlRootPath,
+                                               const QString& module,
                                                const QPointF& pos,
                                                const QSizeF& initialSize,
                                                const QPixmap& initialPixmap)
@@ -118,6 +120,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
 
     auto control = new Control;
     control->setDir(newControlRootPath);
+    control->setModule(module);
     control->setUid(SaveUtils::controlUid(control->dir()));
     ControlPropertyManager::setId(control, ParserUtils::id(control->dir()), ControlPropertyManager::NoOption);
     ControlPropertyManager::setParent(control, targetParentControl, ControlPropertyManager::NoOption);
@@ -157,7 +160,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     connect(control, &Control::beingResizedChanged,
             control, &Control::syncGeometry, Qt::QueuedConnection);
 
-    ControlRenderingManager::scheduleControlCreation(control->dir(), targetParentControl->uid());
+    ControlRenderingManager::scheduleControlCreation(control->dir(), control->module(), targetParentControl->uid());
 
     QPointer<Control> ptr(control);
     auto conn = new QMetaObject::Connection;
@@ -184,6 +187,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
 
         auto childControl = new Control;
         childControl->setDir(childPath);
+        childControl->setModule(mmodule);
         childControl->setUid(SaveUtils::controlUid(childControl->dir()));
         ControlPropertyManager::setId(childControl, ParserUtils::id(childControl->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);
@@ -211,7 +215,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         connect(childControl, &Control::beingResizedChanged,
                 childControl, &Control::syncGeometry, Qt::QueuedConnection);
 
-        ControlRenderingManager::scheduleControlCreation(childControl->dir(), parentControl->uid());
+        ControlRenderingManager::scheduleControlCreation(childControl->dir(), childControl->module(), parentControl->uid());
 
         controlTree.insert(childPath, childControl);
 

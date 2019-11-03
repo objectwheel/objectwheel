@@ -30,9 +30,10 @@ private:
     ~ControlCreationManager() override;
 
     static void init(DesignerScene* designerScene);
-    static Form* createForm(const QString& formRootPath); // FormsController dependency: Should be a private member
+    static Form* createForm(const QString& formRootPath, const QString& module); // FormsController dependency: Should be a private member
     static Control* createControl(Control* targetParentControl,
                                   const QString& controlRootPath,
+                                  const QString& module,
                                   const QPointF& pos,
                                   const QSizeF& initialSize,
                                   const QPixmap& initialPixmap);

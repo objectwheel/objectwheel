@@ -4,7 +4,6 @@
 #include <toolboxtree.h>
 #include <lineedit.h>
 #include <saveutils.h>
-#include <toolutils.h>
 #include <documentmanager.h>
 #include <utilityfunctions.h>
 #include <controlrenderingmanager.h>
@@ -55,9 +54,7 @@ void ToolboxController::onProjectInfoUpdate()
     for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& toolPath = ":/tools/" + toolDirName;
         Q_ASSERT(SaveUtils::isControlValid(toolPath));
-        toolboxTree->addTool(ToolUtils::toolName(toolPath),
-                             ToolUtils::toolCetegory(toolPath), toolPath,
-                             QIcon(ToolUtils::toolIconPath(toolPath)));
+        toolboxTree->addTool(toolPath);
     }
     toolboxTree->sortByColumn(0, Qt::AscendingOrder); // Make the lower index to be at top
 }
@@ -111,12 +108,14 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
             } else if (info.gui && info.visible && PaintUtils::isBlankImage(info.image)) {
                 drag->setPixmap(UtilityFunctions::imageToPixmap(PaintUtils::renderBlankControlImage(
                     info.surroundingRect,
-                    m_toolboxPane->toolboxTree()->currentItem()->text(0),
+                    item->text(0),
                     m_toolboxPane->devicePixelRatioF(),
                     DesignerSettings::sceneSettings()->toBlankControlDecorationBrush(Qt::darkGray),
                     GeneralSettings::interfaceSettings()->highlightColor)));
             }
             info.image = drag->pixmap().toImage();
+            drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-module"),
+                                      UtilityFunctions::push(item->module()));
             drag->mimeData()->setData(QStringLiteral("application/x-objectwheel-render-info"),
                                       UtilityFunctions::push(info));
             locked = false;
@@ -135,7 +134,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
         }
     });
 
-    ControlRenderingManager::schedulePreview(SaveUtils::toControlMainQmlFile(item->dir()));
+    ControlRenderingManager::schedulePreview(SaveUtils::toControlMainQmlFile(item->dir()), item->module());
 }
 
 QDrag* ToolboxController::establishDrag(ToolboxItem* item)

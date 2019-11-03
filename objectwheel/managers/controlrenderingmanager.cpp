@@ -93,19 +93,19 @@ void ControlRenderingManager::scheduleDevicePixelRatioUpdate(const qreal& value)
     qputenv("RENDERER_DEVICE_PIXEL_RATIO", QByteArray::number(value));
 }
 
-void ControlRenderingManager::scheduleControlCodeUpdate(const QString& uid)
+void ControlRenderingManager::scheduleControlCodeUpdate(const QString& uid, const QString& module)
 {
-    s_commandDispatcher->scheduleControlCodeUpdate(uid);
+    s_commandDispatcher->scheduleControlCodeUpdate(uid, module);
 }
 
-void ControlRenderingManager::scheduleFormCodeUpdate(const QString& uid)
+void ControlRenderingManager::scheduleFormCodeUpdate(const QString& uid, const QString& module)
 {
-    s_commandDispatcher->scheduleFormCodeUpdate(uid);
+    s_commandDispatcher->scheduleFormCodeUpdate(uid, module);
 }
 
-void ControlRenderingManager::scheduleFormCreation(const QString& dir)
+void ControlRenderingManager::scheduleFormCreation(const QString& dir, const QString& module)
 {
-    s_commandDispatcher->scheduleFormCreation(dir);
+    s_commandDispatcher->scheduleFormCreation(dir, module);
 }
 
 void ControlRenderingManager::scheduleFormDeletion(const QString& uid)
@@ -118,9 +118,9 @@ void ControlRenderingManager::scheduleControlDeletion(const QString& uid)
     s_commandDispatcher->scheduleControlDeletion(uid);
 }
 
-void ControlRenderingManager::schedulePreview(const QString& url)
+void ControlRenderingManager::schedulePreview(const QString& url, const QString& module)
 {
-    s_commandDispatcher->schedulePreview(url);
+    s_commandDispatcher->schedulePreview(url, module);
 }
 
 void ControlRenderingManager::scheduleIndexUpdate(const QString& uid)
@@ -143,9 +143,9 @@ void ControlRenderingManager::scheduleParentUpdate(const QString& newDir, const 
     s_commandDispatcher->scheduleParentUpdate(newDir, uid, parentUid);
 }
 
-void ControlRenderingManager::scheduleControlCreation(const QString& dir, const QString& parentUid)
+void ControlRenderingManager::scheduleControlCreation(const QString& dir, const QString& module, const QString& parentUid)
 {
-    s_commandDispatcher->scheduleControlCreation(dir, parentUid);
+    s_commandDispatcher->scheduleControlCreation(dir, module, parentUid);
 }
 
 void ControlRenderingManager::scheduleBindingUpdate(const QString& uid, const QString& bindingName, const QString& expression)

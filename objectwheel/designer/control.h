@@ -46,6 +46,9 @@ public:
     QString dir() const;
     void setDir(const QString& dir);
 
+    QString module() const;
+    void setModule(const QString& dir);
+
     QIcon icon() const;
     void updateIcon();
 
@@ -88,6 +91,7 @@ private:
     QString m_id;
     QString m_uid;
     QString m_dir;
+    QString m_module;
     QIcon m_icon;
     QPixmap m_pixmap;
     Anchors* m_anchors;

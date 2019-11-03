@@ -1,6 +1,8 @@
 #include <toolboxtree.h>
 #include <toolboxitem.h>
 #include <toolboxdelegate.h>
+#include <toolutils.h>
+#include <parserutils.h>
 
 #include <QApplication>
 #include <QHeaderView>
@@ -21,9 +23,11 @@ ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
     connect(this, &QTreeWidget::itemPressed, this, &ToolboxTree::onItemPress);
 }
 
-void ToolboxTree::addTool(const QString& name, const QString& category, const QString& dir,
-                          const QIcon& icon)
+void ToolboxTree::addTool(const QString& dir)
 {
+    const QString& module = ParserUtils::module(dir);
+    const QString& category = ToolUtils::toolCetegoryFromModule(module);
+
     ToolboxItem* topItem = categoryItem(category);
     if (topItem == 0) {
         topItem = new ToolboxItem;
@@ -31,10 +35,12 @@ void ToolboxTree::addTool(const QString& name, const QString& category, const QS
         addTopLevelItem(topItem);
         topItem->setExpanded(true);
     }
+
     ToolboxItem* item = new ToolboxItem;
     item->setDir(dir);
-    item->setText(0, name);
-    item->setIcon(0, icon);
+    item->setModule(module);
+    item->setText(0, ToolUtils::toolNameFromModule(module));
+    item->setIcon(0, QIcon(ToolUtils::toolIconPathFromModule(module)));
     topItem->addChild(item);
 }
 

@@ -16,9 +16,9 @@ void CommandDispatcher::send(RenderServer* server, RendererCommands command, con
     QMetaObject::invokeMethod(server, "send", Q_ARG(RendererCommands, command), Q_ARG(QByteArray, data));
 }
 
-void CommandDispatcher::scheduleInit()
+void CommandDispatcher::scheduleInit(const InitInfo& initInfo)
 {
-    send(m_server, RendererCommands::Init);
+    send(m_server, RendererCommands::Init, push(initInfo));
 }
 
 void CommandDispatcher::scheduleDevicePixelRatioUpdate(qreal devicePixelRatio)
@@ -36,19 +36,19 @@ void CommandDispatcher::schedulePropertyUpdate(const QString& uid, const QString
     send(m_server, RendererCommands::PropertyUpdate, push(uid, propertyName, propertyValue));
 }
 
-void CommandDispatcher::scheduleControlCreation(const QString& dir, const QString& parentUid)
+void CommandDispatcher::scheduleControlCreation(const QString& dir, const QString& module, const QString& parentUid)
 {
-    send(m_server, RendererCommands::ControlCreation, push(dir, parentUid));
+    send(m_server, RendererCommands::ControlCreation, push(dir, module, parentUid));
 }
 
-void CommandDispatcher::schedulePreview(const QString& url)
+void CommandDispatcher::schedulePreview(const QString& url, const QString& module)
 {
-    send(m_server, RendererCommands::Preview, push(url));
+    send(m_server, RendererCommands::Preview, push(url, module));
 }
 
-void CommandDispatcher::scheduleFormCreation(const QString& dir)
+void CommandDispatcher::scheduleFormCreation(const QString& dir, const QString& module)
 {
-    send(m_server, RendererCommands::FormCreation, push(dir));
+    send(m_server, RendererCommands::FormCreation, push(dir, module));
 }
 
 void CommandDispatcher::scheduleRefresh(const QString& formUid)
@@ -81,14 +81,14 @@ void CommandDispatcher::scheduleFormDeletion(const QString& uid)
     send(m_server, RendererCommands::FormDeletion, push(uid));
 }
 
-void CommandDispatcher::scheduleControlCodeUpdate(const QString& uid)
+void CommandDispatcher::scheduleControlCodeUpdate(const QString& uid, const QString& module)
 {
-    send(m_server, RendererCommands::ControlCodeUpdate, push(uid));
+    send(m_server, RendererCommands::ControlCodeUpdate, push(uid, module));
 }
 
-void CommandDispatcher::scheduleFormCodeUpdate(const QString& uid)
+void CommandDispatcher::scheduleFormCodeUpdate(const QString& uid, const QString& module)
 {
-    send(m_server, RendererCommands::FormCodeUpdate, push(uid));
+    send(m_server, RendererCommands::FormCodeUpdate, push(uid, module));
 }
 
 void CommandDispatcher::onDataReceived(const RendererCommands& command, const QByteArray& data)
