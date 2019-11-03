@@ -164,9 +164,9 @@ void SaveManager::setupFormConnections(const QString& formRootPath)
     file.close();
 
     const QString& assetsJSPath = SaveUtils::toProjectAssetsDir(ProjectManager::dir()) + '/' + id + ".js";
-    file.setFileName(":/resources/other/form.js");
+    file.setFileName(":/other/form.js");
     if (!file.open(QFile::ReadOnly)) {
-        qWarning("SaveManager: Cannot open :/resources/other/form.js");
+        qWarning("SaveManager: Cannot open :/other/form.js");
         return;
     }
     QString js = file.readAll();

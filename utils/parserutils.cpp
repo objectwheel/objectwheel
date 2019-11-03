@@ -23,7 +23,7 @@ QString getModuleName(const Document::Ptr &qmlDocument, const QString& typeName,
 {
     static QSharedPointer<Document> doc;
     if (doc.isNull()) {
-        const QString ff = ":/shared/moduleresolver/moduleresolver.qml";
+        const QString ff = ":/moduleresolver/moduleresolver.qml";
         QFile file(ff);
         if (!file.open(QFile::ReadOnly)) {
             qWarning("ParserUtils: Cannot open file");
@@ -513,7 +513,12 @@ QString id(const QString& controlDir)
 
 QString module(const QString& controlDir)
 {
-    const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
+    return moduleFromUrl(SaveUtils::toControlMainQmlFile(controlDir));
+}
+
+QString moduleFromUrl(const QString& url)
+{
+    const QString& mainQmlFilePath = url;
     QFile file(mainQmlFilePath);
     if (!file.open(QFile::ReadOnly)) {
         qWarning("ParserUtils: Cannot open file");

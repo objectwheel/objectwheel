@@ -262,7 +262,7 @@ AndroidWidget::AndroidWidget(QWidget *parent)
 //    _chkSign.setToolTip("You don't have to sign debugging apps, for debugging purpose\n"
 //                        "for instance if you wont release it on Google Play Store.");
 ////  FIXME  QString line;
-////    QTextStream stream(rdfile(":/resources/other/android-permissions.txt"));
+////    QTextStream stream(rdfile(":/other/android-permissions.txt"));
 ////    while (stream.readLineInto(&line))
 ////        _cmbPermissions.addItem(line);
 //    _cmbPermissions.setFixedWidth(400);

@@ -3,10 +3,11 @@
 #include <renderinfo.h>
 #include <utilityfunctions.h>
 #include <parserutils.h>
-
+#include <toolutils.h>
 #include <QAnimationDriver>
 #include <QQuickView>
 #include <QQmlContext>
+#include <QDir>
 
 #include <private/qqmltimer_p.h>
 #include <private/qquicktext_p.h>
@@ -792,6 +793,20 @@ void RenderUtils::setId(QQmlContext* context, QObject* object, const QString& ol
 
     if (!newId.isEmpty() && context)
         context->setContextProperty(newId, object);
+}
+
+QString RenderUtils::mockUrl(const QString& url)
+{
+//    static const QStringList& mockFiles = QDir(QStringLiteral(":/mockfiles/")).entryList(QDir::Files);
+    const QString& toolName = ToolUtils::toolNameFromUrl(url);
+//    qDebug() << QStringLiteral(":/mockfiles/") + toolName + QStringLiteral(".qml");
+//    qApp->processEvents();
+
+//    if (mockFiles.contains(toolName)) {
+//        qDebug() << QStringLiteral(":/mockfiles/") + toolName + QStringLiteral(".qml");
+//        return QStringLiteral(":/mockfiles/") + toolName + QStringLiteral(".qml");
+//    }
+    return url;
 }
 
 QObject* RenderUtils::parentObject(const RenderEngine::ControlInstance* parentInstance,

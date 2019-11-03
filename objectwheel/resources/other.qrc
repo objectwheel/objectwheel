@@ -1,12 +1,10 @@
 <RCC>
-    <qresource prefix="/resources">
+    <qresource prefix="/">
         <file>other/android-permissions.txt</file>
         <file>other/ow-modules.txt</file>
         <file>other/qt-modules.txt</file>
         <file>other/countries.txt</file>
         <file>other/form.js</file>
-        <file>qmls/form.qml</file>
-        <file>other/tool-categories.json</file>
-        <file>other/tool-icons.json</file>
+        <file>other/form.qml</file>
     </qresource>
 </RCC>

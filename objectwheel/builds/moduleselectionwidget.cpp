@@ -98,7 +98,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
 //    qtScArea->setStyleSheet("QScrollArea {background: transparent;}");
 
 // FIXME   QString line, lastModule;
-//    QTextStream stream(rdfile(":/resources/other/ow-modules.txt"));
+//    QTextStream stream(rdfile(":/other/ow-modules.txt"));
 //    while (stream.readLineInto(&line)) {
 //        if (line.startsWith(" ")) {
 //            line.remove(0, 1);
@@ -140,7 +140,7 @@ ModuleSelectionWidget::ModuleSelectionWidget(QWidget *parent)
 //        }
 //    }
 
-// FIXME   QTextStream stream2(rdfile(":/resources/other/qt-modules.txt"));
+// FIXME   QTextStream stream2(rdfile(":/other/qt-modules.txt"));
 //    stream2.readLineInto(&line);
 //    int dcount = line.toInt();
 //    while (stream2.readLineInto(&line)) {

@@ -1,5 +1,0 @@
-<RCC>
-    <qresource prefix="/shared/moduleresolver">
-        <file>moduleresolver.qml</file>
-    </qresource>
-</RCC>

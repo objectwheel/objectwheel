@@ -15,6 +15,7 @@ DEPENDPATH += $$PWD
 HEADERS += \
     $$PWD/delayer.h \
     $$PWD/saveutils.h \
+    $$PWD/toolutils.h \
     $$PWD/parserutils.h \
     $$PWD/qmlformatter.h \
     $$PWD/renderinfo.h \
@@ -32,6 +33,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/delayer.cpp \
     $$PWD/saveutils.cpp \
+    $$PWD/toolutils.cpp \
     $$PWD/parserutils.cpp \
     $$PWD/qmlformatter.cpp \
     $$PWD/hashfactory.cpp \
@@ -42,10 +44,7 @@ SOURCES += \
     $$PWD/qmlerror.cpp \
     $$PWD/textimagehandler.cpp
 
-RESOURCES += \
-    $$PWD/resources/internal/internal.qrc \
-    $$PWD/resources/shared/tools/tools.qrc \
-    $$PWD/resources/shared/moduleresolver/moduleresolver.qrc
+RESOURCES += $$PWD/resources/resources.qrc
 
 ###Includes
 include($$PWD/../objectwheel.pri)

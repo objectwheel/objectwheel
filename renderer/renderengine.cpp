@@ -863,7 +863,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url)
     instance->context = new QQmlContext(m_view->engine());
 
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromUserInput(url));
+    component.loadUrl(QUrl::fromUserInput(RenderUtils::mockUrl(url)));
 
     QObject* object = component.beginCreate(instance->context);
 
@@ -958,7 +958,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir,
 
     m_view->engine()->clearComponentCache();
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromLocalFile(url));
+    component.loadUrl(QUrl::fromLocalFile(RenderUtils::mockUrl(url)));
 
     QObject* object = component.beginCreate(instance->context);
 

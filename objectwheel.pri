@@ -44,8 +44,6 @@ macx {
     equals(TEMPLATE, "app") {
         PLIST_PATH = $$shell_quote($${PWD}/$$lower($${TARGET})/platform/macx/Info.plist)
         QMAKE_POST_LINK += /usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $${CONF_VERSION}\" -c \"Set :CFBundleInfoDictionaryVersion $${CONF_VERSION}\" $${PLIST_PATH}
-
-message($$PLIST_PATH)
     }
 }
 

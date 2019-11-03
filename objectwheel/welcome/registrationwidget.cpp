@@ -18,7 +18,7 @@
 
 #define TERMS_HEIGHT     (35)
 #define TERMS_WIDTH      (350)
-#define PATH_COUNTRIES   (":/resources/other/countries.txt")
+#define PATH_COUNTRIES   (":/other/countries.txt")
 #define PATH_OICON       (":/images/welcome/load.png")
 #define PATH_BICON       (":/images/welcome/unload.png")
 

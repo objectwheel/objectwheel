@@ -16,7 +16,7 @@ const QJsonObject& toolIcons()
 {
     static QJsonObject icons;
     if (icons.isEmpty()) {
-        QFile file(":/resources/other/tool-icons.json");
+        QFile file(":/other/tool-icons.json");
         if (!file.open(QFile::ReadOnly)) {
             qWarning("ToolUtils: Failed to read reference json file for tool icons");
             return icons;
@@ -31,7 +31,7 @@ const QJsonObject& toolCategories()
 {
     static QJsonObject categories;
     if (categories.isEmpty()) {
-        QFile file(":/resources/other/tool-categories.json");
+        QFile file(":/other/tool-categories.json");
         if (!file.open(QFile::ReadOnly)) {
             qWarning("ToolUtils: Failed to read reference json file for tool categories");
             return categories;
@@ -46,7 +46,7 @@ const QList<QString>& toolCategoriesOrder()
 {
     static QList<QString> order;
     if (order.isEmpty()) {
-        QFile file(":/resources/other/tool-categories.json");
+        QFile file(":/other/tool-categories.json");
         if (!file.open(QFile::ReadOnly)) {
             qWarning("ToolUtils: Failed to read reference json file for tool order");
             return order;
@@ -62,8 +62,12 @@ const QList<QString>& toolCategoriesOrder()
 QString toolName(const QString& controlDir)
 {
     Q_ASSERT(SaveUtils::isControlValid(controlDir));
+    return toolNameFromUrl(SaveUtils::toControlMainQmlFile(controlDir));
+}
 
-    const QString& module = ParserUtils::module(controlDir);
+QString toolNameFromUrl(const QString& url)
+{
+    const QString& module = ParserUtils::moduleFromUrl(url);
     const QStringList& pieces = module.split('.');
 
     QString name(QObject::tr("Tool"));

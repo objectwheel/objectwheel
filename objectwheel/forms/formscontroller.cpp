@@ -129,7 +129,7 @@ void FormsController::onAddButtonClick()
     const QString& thisDir = SaveUtils::toControlThisDir(temp.path());
 
     QDir(thisDir).mkpath(".");
-    FileSystemUtils::copy(":/resources/qmls/form.qml", thisDir, true, true);
+    FileSystemUtils::copy(":/other/form.qml", thisDir, true, true);
     QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
     ControlCreationManager::createForm(temp.path());
     // onControlCreation(); Not needed, ControlCreationManager::controlCreated will be emitted

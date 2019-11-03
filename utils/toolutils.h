@@ -7,6 +7,7 @@ class QPixmap;
 namespace ToolUtils {
 
 QString toolName(const QString& controlDir);
+QString toolNameFromUrl(const QString& url);
 QString toolIconPath(const QString& controlDir);
 QString toolCetegory(const QString& controlDir);
 int toolCetegoryIndex(const QString& category);
