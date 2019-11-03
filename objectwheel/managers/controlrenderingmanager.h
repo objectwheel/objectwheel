@@ -6,6 +6,7 @@
 class RenderServer;
 class CommandDispatcher;
 class QProcess;
+class DesignerScene;
 struct RenderInfo;
 
 class ControlRenderingManager final : public QObject
@@ -18,6 +19,7 @@ class ControlRenderingManager final : public QObject
 public:
     static ControlRenderingManager* instance();
 
+    static void init(DesignerScene* designerScene);
     static void scheduleDevicePixelRatioUpdate(const qreal& value);
     static void scheduleControlCodeUpdate(const QString& uid, const QString& module);
     static void scheduleFormCodeUpdate(const QString& uid, const QString& module);
@@ -54,6 +56,7 @@ private:
 
 private:
     static ControlRenderingManager* s_instance;
+    static DesignerScene* s_designerScene;
     static RenderServer* s_renderServer;
     static QThread* s_serverThread;
     static CommandDispatcher* s_commandDispatcher;

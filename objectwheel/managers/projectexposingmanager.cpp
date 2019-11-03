@@ -146,16 +146,17 @@ void ProjectExposingManager::exposeProject()
     auto conn = new QMetaObject::Connection;
     *conn = connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
                     ControlPropertyManager::instance(), [conn] (Control* ctrl, bool) {
-        if (ctrl == s_designerScene->currentForm()) {
+            if (ctrl == s_designerScene->currentForm()) {
             QObject::disconnect(*conn);
             delete conn;
             s_designerScene->shrinkSceneRect();
-        }
-    }, Qt::QueuedConnection);
+}
+}, Qt::QueuedConnection);
 }
 
 void ProjectExposingManager::removeProject()
 {
-    for (Form* form : s_designerScene->forms())
+    const QList<Form*>& forms = s_designerScene->forms();
+    for (Form* form : forms)
         ControlRemovingManager::removeControl(form, false);
 }

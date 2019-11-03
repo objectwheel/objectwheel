@@ -5,6 +5,8 @@
 #include <hashfactory.h>
 #include <renderinfo.h>
 #include <utilityfunctions.h>
+#include <designerscene.h>
+#include <form.h>
 
 #include <QThread>
 #include <QProcess>
@@ -13,6 +15,7 @@
 #include <QMessageBox>
 
 ControlRenderingManager* ControlRenderingManager::s_instance = nullptr;
+DesignerScene* ControlRenderingManager::s_designerScene = nullptr;
 RenderServer* ControlRenderingManager::s_renderServer = nullptr;
 QThread* ControlRenderingManager::s_serverThread = nullptr;
 CommandDispatcher* ControlRenderingManager::s_commandDispatcher = nullptr;
@@ -85,6 +88,11 @@ ControlRenderingManager::~ControlRenderingManager()
 ControlRenderingManager* ControlRenderingManager::instance()
 {
     return s_instance;
+}
+
+void ControlRenderingManager::init(DesignerScene* designerScene)
+{
+    s_designerScene = designerScene;
 }
 
 void ControlRenderingManager::scheduleDevicePixelRatioUpdate(const qreal& value)
@@ -179,7 +187,20 @@ void ControlRenderingManager::terminate()
 void ControlRenderingManager::onConnected()
 {
     s_terminatedKnowingly = false;
-    s_commandDispatcher->scheduleInit();
+    InitInfo initInfo;
+    QList<Form*> forms = s_designerScene->forms();
+    std::sort(forms.begin(), forms.end(), [] (const Control* left, const Control* right) {
+        return left->index() < right->index();
+    });
+    for (Form* form : qAsConst(forms)) {
+        QVector<QPair<QString, QString>> childrenInfo;
+        const QList<Control*>& children = form->childControls();
+        for (Control* childControl : children)
+            childrenInfo.append(QPair<QString, QString>(childControl->dir(), childControl->module()));
+        initInfo.children.insert(form->dir(), childrenInfo);
+        initInfo.forms.append(QPair<QString, QString>(form->dir(), form->module()));
+    }
+    s_commandDispatcher->scheduleInit(initInfo);
     emit connected();
 }
 

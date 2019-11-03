@@ -764,7 +764,7 @@ void DesignerController::onPasteActionTrigger()
                 pos += moveGap - margins;
             }
             Control* newControl = ControlCreationManager::createControl(
-                        parentControl, control->dir(), DesignerScene::snapPosition(pos),
+                        parentControl, control->dir(), control->module(), DesignerScene::snapPosition(pos),
                         control->size(), control->pixmap());
             if (newControl) {
                 clearSelection = true;

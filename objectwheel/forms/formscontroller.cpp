@@ -12,6 +12,7 @@
 #include <controlpropertymanager.h>
 #include <form.h>
 #include <controlitemcache.h>
+#include <parserutils.h>
 
 #include <QPushButton>
 #include <QCompleter>
@@ -131,7 +132,7 @@ void FormsController::onAddButtonClick()
     QDir(thisDir).mkpath(".");
     FileSystemUtils::copy(":/other/form.qml", thisDir, true, true);
     QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
-    ControlCreationManager::createForm(temp.path());
+    ControlCreationManager::createForm(temp.path(), QStringLiteral("QtQuick.Controls2.Page"));
     // onControlCreation(); Not needed, ControlCreationManager::controlCreated will be emitted
 }
 

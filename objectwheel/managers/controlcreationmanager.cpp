@@ -187,7 +187,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
 
         auto childControl = new Control;
         childControl->setDir(childPath);
-        childControl->setModule(mmodule);
+        childControl->setModule(ParserUtils::module(childPath));
         childControl->setUid(SaveUtils::controlUid(childControl->dir()));
         ControlPropertyManager::setId(childControl, ParserUtils::id(childControl->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setParent(childControl, parentControl, ControlPropertyManager::NoOption);

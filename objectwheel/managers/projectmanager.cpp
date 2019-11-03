@@ -235,12 +235,11 @@ bool ProjectManager::start(const QString& uid)
 
     s_uid = uid;
 
+    DocumentManager::updateProjectInfo();
     // Must be executed before running render engine
     // Because it might fix broken id and indexes
     ProjectExposingManager::exposeProject();
-
     ControlRenderingManager::start();
-    DocumentManager::updateProjectInfo();
     updateLastModification(s_uid);
 
     emit instance()->started();
