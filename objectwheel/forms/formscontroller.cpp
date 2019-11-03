@@ -37,8 +37,6 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
             this, &FormsController::onAddButtonClick);
     connect(formsPane->removeButton(), &QPushButton::clicked,
             this, &FormsController::onRemoveButtonClick);
-    connect(formsPane->renameButton(), &QPushButton::clicked,
-            this, &FormsController::onRenameButtonClick);
     connect(m_designerScene, &DesignerScene::currentFormChanged,
             this, &FormsController::onCurrentFormChange);
     connect(tree, &FormsTree::itemSelectionChanged,
@@ -142,15 +140,6 @@ void FormsController::onRemoveButtonClick()
     if (m_formsPane->formsTree()->topLevelItemCount() > 1) // FIXME
         ControlRemovingManager::removeControl(m_designerScene->currentForm(), true);
     // onControlRemove(); Not needed, ControlRemovingManager::controlAboutToBeRemoved will be emitted
-}
-
-void FormsController::onRenameButtonClick()
-{
-    FormsTree* tree = m_formsPane->formsTree();
-    Q_ASSERT(!tree->selectedItems().isEmpty());
-    QTreeWidgetItem* selectedItem = tree->selectedItems().first();
-    tree->scrollToItem(selectedItem);
-    tree->editItem(selectedItem);
 }
 
 void FormsController::onSearchEditReturnPress()

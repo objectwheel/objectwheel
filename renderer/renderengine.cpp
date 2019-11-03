@@ -69,7 +69,8 @@ void RenderEngine::init()
 
     /* Create instances, handle parent-child relationship, set ids, save form instances */
     QMap<QString, ControlInstance*> instanceTree;
-    for (const QString& formPath : SaveUtils::formPaths(CommandlineParser::projectDirectory())) {
+    const QVector<QString>& fps = SaveUtils::formPaths(CommandlineParser::projectDirectory());
+    for (const QString& formPath : fps) {
         ControlInstance* formInstance = createInstance(formPath, nullptr);
         Q_ASSERT(formInstance);
 
@@ -77,7 +78,8 @@ void RenderEngine::init()
         instanceTree.insert(formPath, formInstance);
 
         // TODO: What if a child is a master-control?
-        for (const QString& childPath : SaveUtils::childrenPaths(formPath)) {
+        const QVector<QString>& cps = SaveUtils::childrenPaths(formPath);
+        for (const QString& childPath : cps) {
             ControlInstance* parentInstance = instanceTree.value(SaveUtils::toDoubleUp(childPath));
             Q_ASSERT(parentInstance);
             ControlInstance* childInstance = createInstance(childPath, parentInstance);
@@ -91,10 +93,10 @@ void RenderEngine::init()
     // FIXME: Object completetion order must be parent -> to -> child
     // according to Qt's internal completion order read here:
     // stackoverflow.com/questions/46196831
-    for (ControlInstance* instance : instanceTree)
+    for (ControlInstance* instance : qAsConst(instanceTree))
         RenderUtils::doComplete(instance, this);
 
-    for (ControlInstance* instance : instanceTree) {
+    for (ControlInstance* instance : qAsConst(instanceTree)) {
         if (QQuickItem* item = RenderUtils::guiItem(instance))
             DesignerSupport::addDirty(item, DesignerSupport::AllMask);
     }
@@ -106,11 +108,11 @@ void RenderEngine::init()
 
     /* Render */
     int totalInstanceCount = 0;
-    for (RenderEngine::ControlInstance* formInstance : m_formInstances)
+    for (RenderEngine::ControlInstance* formInstance : qAsConst(m_formInstances))
         totalInstanceCount += RenderUtils::countAllSubInstance(formInstance);
     g_progressPerInstance = qreal(g_progress_4 - g_progress_3) / totalInstanceCount;
     g_progress = g_progress_3;
-    for (ControlInstance* formInstance : m_formInstances)
+    for (ControlInstance* formInstance : qAsConst(m_formInstances))
         scheduleRender(formInstance);
 }
 
@@ -242,7 +244,7 @@ void RenderEngine::updateControlCode(const QString& uid)
         return SaveUtils::controlIndex(left->dir) < SaveUtils::controlIndex(right->dir);
     });
 
-    for (ControlInstance* childInstance : oldInstance->children) {
+    for (ControlInstance* childInstance : qAsConst(oldInstance->children)) {
         if (!childInstance->errors.isEmpty())
             continue;
         RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldInstance, m_view));
@@ -307,7 +309,7 @@ void RenderEngine::updateFormCode(const QString& uid)
         return SaveUtils::controlIndex(left->dir) < SaveUtils::controlIndex(right->dir);
     });
 
-    for (ControlInstance* childInstance : oldFormInstance->children) {
+    for (ControlInstance* childInstance : qAsConst(oldFormInstance->children)) {
         if (!childInstance->errors.isEmpty())
             continue;
         RenderUtils::setInstanceParent(childInstance, RenderUtils::parentObject(oldFormInstance, m_view));
@@ -329,7 +331,7 @@ void RenderEngine::updateFormCode(const QString& uid)
     // But since we have a "margin" problem, all the (first) sub-childs should be updated in the first place
     // In order to let chilren to know if there were any "header", "footer" (therefore margin) changes.
     m_dirtyInstanceSet.insert(oldFormInstance);
-    for (ControlInstance* instance : oldFormInstance->children)
+    for (ControlInstance* instance : qAsConst(oldFormInstance->children))
         m_dirtyInstanceSet.insert(instance);
 
     // Form indexes ignored, since they are put upon rootObject of the engine
@@ -351,7 +353,8 @@ void RenderEngine::preview(const QString& url)
     QTimer::singleShot(RENDER_TIMEOUT, [=] {
         DesignerSupport::polishItems(m_view);
 
-        for (QQuickItem* item : RenderUtils::allItems(instance)) {
+        const QList<QQuickItem*>& ais = RenderUtils::allItems(instance);
+        for (QQuickItem* item : ais) {
             if (item)
                 DesignerSupport::updateDirtyNode(item);
         }
@@ -385,7 +388,7 @@ void RenderEngine::preview(const QString& url)
 void RenderEngine::refreshAllBindings()
 {
     DesignerSupport::refreshExpressions(m_view->rootContext());
-    for (ControlInstance* formInstance : m_formInstances)
+    for (ControlInstance* formInstance : qAsConst(m_formInstances))
         DesignerSupport::refreshExpressions(formInstance->context);
     DesignerSupport::refreshExpressions(m_view->rootContext());
 }
@@ -477,7 +480,7 @@ void RenderEngine::deleteForm(const QString& uid)
     // because they are put upon rootObject of the engine
     refreshAllBindings();
 
-    for (ControlInstance* formInstance : m_formInstances)
+    for (ControlInstance* formInstance : qAsConst(m_formInstances))
         scheduleRender(formInstance);
 }
 
@@ -503,7 +506,7 @@ void RenderEngine::deleteControl(const QString& uid)
 void RenderEngine::refresh(const QString& formUid)
 {
     if (formUid.isEmpty()) {
-        for (ControlInstance* formInstance : m_formInstances) {
+        for (ControlInstance* formInstance : qAsConst(m_formInstances)) {
             RenderUtils::makeDirtyRecursive(formInstance);
             refreshBindings(formInstance->context);
             scheduleRender(formInstance);
@@ -523,8 +526,9 @@ void RenderEngine::refresh(const QString& formUid)
 bool RenderEngine::hasInstanceForObject(const QObject* object) const
 {
     Q_ASSERT(object);
-    for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+    for (ControlInstance* formInstance : qAsConst(m_formInstances)) {
+        const QList<ControlInstance*>& asis = RenderUtils::allSubInstance(formInstance);
+        for (ControlInstance* instance : asis) {
             if (instance->object == object)
                 return true;
             if (instance->window && RenderUtils::guiItem(instance) == object)
@@ -538,13 +542,13 @@ bool RenderEngine::hasInstanceForObject(const QObject* object) const
 
 bool RenderEngine::hasInstanceForUid(const QString& uid) const
 {
-    for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+    for (ControlInstance* formInstance : qAsConst(m_formInstances)) {
+        const QList<ControlInstance*>& asis = RenderUtils::allSubInstance(formInstance);
+        for (ControlInstance* instance : asis) {
             if (instance->uid == uid)
                 return true;
         }
     }
-
     return false;
 }
 
@@ -552,8 +556,9 @@ RenderEngine::ControlInstance* RenderEngine::instanceForObject(const QObject* ob
 {
     if (object == 0)
         return nullptr;
-    for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+    for (ControlInstance* formInstance : qAsConst(m_formInstances)) {
+        const QList<ControlInstance*>& asis = RenderUtils::allSubInstance(formInstance);
+        for (ControlInstance* instance : asis) {
             if (instance->object == object)
                 return instance;
             if (instance->window && RenderUtils::guiItem(instance) == object)
@@ -568,8 +573,9 @@ RenderEngine::ControlInstance* RenderEngine::instanceForObject(const QObject* ob
 RenderEngine::ControlInstance* RenderEngine::instanceForUid(const QString& uid) const
 {
     Q_ASSERT(!uid.isEmpty());
-    for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+    for (ControlInstance* formInstance : qAsConst(m_formInstances)) {
+        const QList<ControlInstance*>& asis = RenderUtils::allSubInstance(formInstance);
+        for (ControlInstance* instance : asis) {
             if (instance->uid == uid)
                 return instance;
         }
@@ -580,8 +586,9 @@ RenderEngine::ControlInstance* RenderEngine::instanceForUid(const QString& uid) 
 
 RenderEngine::ControlInstance* RenderEngine::formInstanceFor(const RenderEngine::ControlInstance* instance)
 {
-    for (ControlInstance* formInstance : m_formInstances) {
-        for (ControlInstance* childInstance : RenderUtils::allSubInstance(formInstance)) {
+    for (ControlInstance* formInstance : qAsConst(m_formInstances)) {
+        const QList<ControlInstance*>& asis = RenderUtils::allSubInstance(formInstance);
+        for (ControlInstance* childInstance : asis) {
             if (instance == childInstance)
                 return formInstance;
         }
@@ -622,7 +629,7 @@ void RenderEngine::flushRenders()
 
     DesignerSupport::polishItems(m_view);
 
-    for (ControlInstance* formInstance : m_formInstanceSetForRender) {
+    for (ControlInstance* formInstance : qAsConst(m_formInstanceSetForRender)) {
         if (!m_formInstances.contains(formInstance))
             continue; // Skip possible deleted forms
 
@@ -634,7 +641,8 @@ void RenderEngine::flushRenders()
                     | DesignerSupport::OpacityValue
                     | DesignerSupport::AllMask);
 
-        for (QQuickItem* item : RenderUtils::allItems(formInstance)) {
+        const QList<QQuickItem*>& ais = RenderUtils::allItems(formInstance);
+        for (QQuickItem* item : ais) {
             if (item) {
                 if (hasInstanceForObject(item)) {
                     if (DesignerSupport::isDirty(item, dirty))
@@ -662,7 +670,7 @@ void RenderEngine::flushRenders()
             if (initializedInstances.size() == m_formInstances.size()) {
                 emit initializationProgressChanged(g_progress_4);
                 m_initialized = true;
-                for (ControlInstance* formInstance : m_formInstances)
+                for (ControlInstance* formInstance : qAsConst(m_formInstances))
                     scheduleRerenderForInvisibleInstances(formInstance);
             }
         }
@@ -673,12 +681,13 @@ void RenderEngine::flushRenders()
 void RenderEngine::flushReRenders()
 {
     m_reRenderTimer->stop();
-    for (ControlInstance* formInstance : m_formInstanceSetForReRender) {
+    for (ControlInstance* formInstance : qAsConst(m_formInstanceSetForReRender)) {
         if (!m_formInstances.contains(formInstance))
             continue; // Skip possible deleted forms
 
         OnlyOneInstanceList<ControlInstance*> rerenderDirtyInstanceSet;
-        for (ControlInstance* instance : RenderUtils::allSubInstance(formInstance)) {
+        const QList<ControlInstance*>& asis = RenderUtils::allSubInstance(formInstance);
+        for (ControlInstance* instance : asis) {
             if (!instance->errors.isEmpty())
                 continue;
 
@@ -698,7 +707,7 @@ void RenderEngine::flushReRenders()
         refreshBindings(formInstance->context);
         emit renderDone(renderDirtyInstances(rerenderDirtyInstanceSet));
 
-        for (ControlInstance* rerenderInstance : rerenderDirtyInstanceSet)
+        for (ControlInstance* rerenderInstance : qAsConst(rerenderDirtyInstanceSet))
             rerenderInstance->needsRerender = false;
     }
     m_formInstanceSetForReRender.clear();
@@ -745,7 +754,8 @@ QRectF RenderEngine::boundingRectWithStepChilds(QQuickItem* item)
 {
     QRectF boundingRect = item->clipRect();
 
-    for (QQuickItem *childItem : item->childItems()) {
+    const QList<QQuickItem*>& childs = item->childItems();
+    for (QQuickItem *childItem : childs) {
         if (!hasInstanceForObject(childItem)) {
             QRectF transformedRect = childItem->mapRectToItem(item, boundingRectWithStepChilds(childItem));
             if (RenderUtils::isRectangleSane(transformedRect))
@@ -838,7 +848,7 @@ void RenderEngine::repairIndexes(ControlInstance* parentInstance)
         return SaveUtils::controlIndex(left->dir) < SaveUtils::controlIndex(right->dir);
     });
 
-    for (ControlInstance* childInstance : parentInstance->children) {
+    for (ControlInstance* childInstance : qAsConst(parentInstance->children)) {
         if (parentInstance->object && childInstance->object)
             RenderUtils::setInstanceParent(childInstance, parentInstance->object);
     }

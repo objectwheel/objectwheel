@@ -153,19 +153,18 @@ static void doComponentCompleteRecursive(QObject* object, const RenderEngine* en
         if (item && DesignerSupport::isComponentComplete(item))
             return;
 
-        DesignerSupport::emitComponentCompleteSignalForAttachedProperty(object);
-
         QList<QObject*> childList = object->children();
         // TODO: Do we need that? allSubObject(object, childList);
 
         if (item) {
-            for (QQuickItem *childItem : item->childItems()) {
+            const QList<QQuickItem*>& childs = item->childItems();
+            for (QQuickItem *childItem : childs) {
                 if (!childList.contains(childItem))
                     childList.append(childItem);
             }
         }
 
-        for (QObject *child : childList) {
+        for (QObject *child : qAsConst(childList)) {
             if (!engine->hasInstanceForObject(child))
                 doComponentCompleteRecursive(child, engine);
         }
@@ -177,6 +176,9 @@ static void doComponentCompleteRecursive(QObject* object, const RenderEngine* en
             if (qmlParserStatus)
                 qmlParserStatus->componentComplete();
         }
+
+        // NOTE: Disabled
+        // DesignerSupport::emitComponentCompleteSignalForAttachedProperty(object);
     }
 }
 
