@@ -59,7 +59,22 @@ const QList<QString>& toolCategoriesOrder()
 }
 } // Internal
 
-QString toolNameFromModule(const QString& module)
+int toolMinor(const QString& module)
+{
+
+}
+
+int toolMajor(const QString& module)
+{
+
+}
+
+QString toolQualifiedName(const QString& module)
+{
+
+}
+
+QString toolName(const QString& module)
 {
     const QStringList& pieces = module.split('.');
     QString name(QObject::tr("Tool"));
@@ -68,7 +83,7 @@ QString toolNameFromModule(const QString& module)
     return name;
 }
 
-QString toolIconPathFromModule(const QString& module)
+QString toolIconPath(const QString& module)
 {
     const QJsonObject& icons(Internal::toolIcons());
     const QString& iconPath = icons.contains(module)
@@ -77,7 +92,7 @@ QString toolIconPathFromModule(const QString& module)
     return iconPath;
 }
 
-QString toolCetegoryFromModule(const QString& module)
+QString toolCetegory(const QString& module)
 {
     const QJsonObject& categories(Internal::toolCategories());
     QStringList pieces = module.split('.');

@@ -176,7 +176,7 @@ QIcon Control::icon() const
 
 void Control::updateIcon()
 {
-    m_icon = QIcon(ToolUtils::toolIconPathFromModule(m_module));
+    m_icon = QIcon(ToolUtils::toolIconPath(m_module));
 }
 
 QPixmap Control::pixmap() const

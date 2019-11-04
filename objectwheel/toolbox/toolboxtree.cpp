@@ -26,7 +26,7 @@ ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
 void ToolboxTree::addTool(const QString& dir)
 {
     const QString& module = ParserUtils::module(dir);
-    const QString& category = ToolUtils::toolCetegoryFromModule(module);
+    const QString& category = ToolUtils::toolCetegory(module);
 
     ToolboxItem* topItem = categoryItem(category);
     if (topItem == 0) {
@@ -39,8 +39,8 @@ void ToolboxTree::addTool(const QString& dir)
     ToolboxItem* item = new ToolboxItem;
     item->setDir(dir);
     item->setModule(module);
-    item->setText(0, ToolUtils::toolNameFromModule(module));
-    item->setIcon(0, QIcon(ToolUtils::toolIconPathFromModule(module)));
+    item->setText(0, ToolUtils::toolName(module));
+    item->setIcon(0, QIcon(ToolUtils::toolIconPath(module)));
     topItem->addChild(item);
 }
 

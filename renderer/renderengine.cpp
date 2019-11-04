@@ -6,6 +6,8 @@
 #include <utilityfunctions.h>
 #include <components.h>
 #include <paintutils.h>
+#include <parserutils.h>
+
 #include <private/qquickdesignersupportmetainfo_p.h>
 #include <private/qquickdesignersupportproperties_p.h>
 #include <private/qqmlengine_p.h>
@@ -867,7 +869,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, 
     instance->context = new QQmlContext(m_view->engine());
 
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromUserInput(RenderUtils::mockUrl(url, module)));
+    component.setData(ParserUtils::mockSource(url, module), QUrl::fromUserInput(url));
 
     QObject* object = component.beginCreate(instance->context);
 
@@ -963,7 +965,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir, 
 
     m_view->engine()->clearComponentCache();
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromLocalFile(RenderUtils::mockUrl(url, module)));
+    component.setData(ParserUtils::mockSource(url, module), QUrl::fromLocalFile(url));
 
     QObject* object = component.beginCreate(instance->context);
 

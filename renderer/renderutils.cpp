@@ -796,16 +796,6 @@ void RenderUtils::setId(QQmlContext* context, QObject* object, const QString& ol
         context->setContextProperty(newId, object);
 }
 
-QString RenderUtils::mockUrl(const QString& url, const QString& module)
-{
-    static const QString& mockBase = QStringLiteral(":/mockfiles/");
-    static const QStringList& mockFiles = QDir(mockBase).entryList(QDir::Files);
-    const QString& toolName = ToolUtils::toolNameFromModule(module);
-    if (mockFiles.contains(toolName + QStringLiteral(".qml"), Qt::CaseInsensitive))
-        return mockBase + toolName + QStringLiteral(".qml");
-    return url;
-}
-
 QObject* RenderUtils::parentObject(const RenderEngine::ControlInstance* parentInstance,
                                    const QQuickView* m_view)
 {
@@ -877,6 +867,7 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
 
     const QObject* object = instance->object;
     const QMetaObject* metaObject = object->metaObject();
+    qDebug() << QQmlMetaType::qmlType(instance->module).isValid();
 
     while (metaObject) {
         if (metaObject->propertyOffset() - metaObject->propertyCount() == 0) {
@@ -889,7 +880,6 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
         QString className = cleanClassName(metaObject);
         for (int i = metaObject->propertyOffset(); i < metaObject->propertyCount(); i++) {
             const auto& property = metaObject->property(i);
-
             enums.append(subEnums(property, object));
             properties.unite(subProperties(property, object));
 
