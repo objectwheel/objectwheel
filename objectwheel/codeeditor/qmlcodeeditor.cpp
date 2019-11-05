@@ -401,7 +401,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_noDocsLabel->setText(tr("No documents\nopen"));
     m_noDocsLabel->setStyleSheet("QLabel { background: #f0f0f0; color: #808080;}");
 
-
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,
             this, &QmlCodeEditor::highlightSearchResultsSlot);
@@ -460,8 +459,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     setCodeDocument(m_initialEmptyDocument);
     m_codeAssistant->configure(this);
     m_autoCompleter->setTabSettings(codeDocument()->tabSettings());
-
-    ModelManagerInterface::instance()->activateScan();
 
     m_toolBar->adjustSize();
     updateViewportMargins();

@@ -28,6 +28,7 @@ HEADERS += \
     $$PWD/filesystemutils.h \
     $$PWD/serializeenum.h \
     $$PWD/qmlerror.h \
+    $$PWD/tooltipwidget.h \
     $$PWD/textimagehandler.h
 
 SOURCES += \

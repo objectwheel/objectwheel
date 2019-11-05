@@ -512,7 +512,7 @@ void PluginDumper::runQmlDump(const QmlJS::ModelManagerInterface::ProjectInfo &i
 
 void PluginDumper::dump(const Plugin &plugin)
 {
-    ModelManagerInterface::ProjectInfo info = m_modelManager->defaultProjectInfo();
+    ModelManagerInterface::ProjectInfo info = m_modelManager->projectInfo();
     const Snapshot snapshot = m_modelManager->snapshot();
     LibraryInfo libraryInfo = snapshot.libraryInfo(plugin.qmldirPath);
 

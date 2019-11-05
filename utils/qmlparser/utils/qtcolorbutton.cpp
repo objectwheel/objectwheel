@@ -58,7 +58,7 @@ public:
 
 void QtColorButtonPrivate::slotEditColor()
 {
-    QColorDialog::ColorDialogOptions options = QColorDialog::DontUseNativeDialog;
+    QColorDialog::ColorDialogOptions options/* = QColorDialog::DontUseNativeDialog*/;
     if (m_alphaAllowed)
         options |= QColorDialog::ShowAlphaChannel;
     const QColor newColor = QColorDialog::getColor(m_color, q_ptr, QString(), options);

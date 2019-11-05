@@ -3,6 +3,9 @@
 #include <fileutils.h>
 #include <texteditor/texteditorsettings.h>
 
+#include <QLibraryInfo>
+#include <QFileInfo>
+
 DocumentManager* DocumentManager::s_instance = nullptr;
 QList<QmlCodeDocument*> DocumentManager::m_documents;
 
@@ -31,16 +34,19 @@ DocumentManager* DocumentManager::instance()
     return s_instance;
 }
 
-void DocumentManager::removeActiveProjectInfo()
+void DocumentManager::removeProjectInfo()
 {
-    s_instance->m_modelManager.removeActiveProjectInfo();
+    s_instance->m_modelManager.removeProjectInfo();
 }
 
-void DocumentManager::updateActiveProjectInfo(const QString& projectDir)
+void DocumentManager::updateProjectInfo(const QString& projectDir)
 {
     QmlJS::ModelManagerInterface::ProjectInfo projectInfo;
     projectInfo.qtVersionString = QLatin1String(qVersion());
-    projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toProjectImportsDir(projectDir)));
+    projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
+    projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
+    if (!projectDir.isEmpty())
+        projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(SaveUtils::toProjectImportsDir(projectDir)));
     s_instance->m_modelManager.setupProjectInfoQmlBundles(projectInfo);
-    s_instance->m_modelManager.updateActiveProjectInfo(projectInfo);
+    s_instance->m_modelManager.updateProjectInfo(projectInfo);
 }

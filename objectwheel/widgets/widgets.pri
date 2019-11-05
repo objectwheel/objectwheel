@@ -9,7 +9,6 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/progressbar.h \
            $$PWD/segmentedbar.h \
            $$PWD/switch.h \
-           $$PWD/tooltipwidget.h \
            $$PWD/view.h \
            $$PWD/waitingspinnerwidget.h
 

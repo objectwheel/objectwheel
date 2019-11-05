@@ -258,7 +258,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     connect(m_accentColorButton, &QToolButton::clicked, [=] {
         QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
                                               QColorDialog::ShowAlphaChannel
-                                              | QColorDialog::DontUseNativeDialog);
+                                              /*| QColorDialog::DontUseNativeDialog*/);
 
         if (color.isValid()) {
             m_accentColorsCombo->setItemText(m_accentColorsCombo->count() - 1,
@@ -274,7 +274,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     connect(m_foregroundColorButton, &QToolButton::clicked, [=] {
         QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
                                               QColorDialog::ShowAlphaChannel
-                                              | QColorDialog::DontUseNativeDialog);
+                                              /*| QColorDialog::DontUseNativeDialog*/);
 
         if (color.isValid()) {
             m_foregroundColorsCombo->setItemText(m_foregroundColorsCombo->count() - 1,
@@ -290,7 +290,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     connect(m_backgroundColorButton, &QToolButton::clicked, [=] {
         QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
                                               QColorDialog::ShowAlphaChannel
-                                              | QColorDialog::DontUseNativeDialog);
+                                              /*| QColorDialog::DontUseNativeDialog*/);
         if (color.isValid()) {
             m_backgroundColorsCombo->setItemText(m_backgroundColorsCombo->count() - 1,
                                                  QString("Custom (%1)").arg(color.name()));
@@ -305,7 +305,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     connect(m_primaryColorButton, &QToolButton::clicked, [=] {
         QColor color = QColorDialog::getColor(Qt::white, this, tr("Select Color"),
                                               QColorDialog::ShowAlphaChannel
-                                              | QColorDialog::DontUseNativeDialog);
+                                              /*| QColorDialog::DontUseNativeDialog*/);
 
         if (color.isValid()) {
             m_primaryColorsCombo->setItemText(m_primaryColorsCombo->count() - 1,

@@ -22,8 +22,8 @@ class DocumentManager final : public QObject
 public:
     static DocumentManager* instance();
 
-    static void removeActiveProjectInfo();
-    static void updateActiveProjectInfo(const QString& projectDir);
+    static void removeProjectInfo();
+    static void updateProjectInfo(const QString& projectDir);
 
     static QList<QmlCodeDocument*> documents()
     { return m_documents; }

@@ -137,7 +137,6 @@ void ModelManager::delayedInitialization()
     qbsVContext.maybeAddPath(ApplicationCore::resourcePath() + QLatin1String("/qbs"));
     setDefaultVContext(qbsVContext);
     loadDefaultQmlTypeDescriptions();
-    updateImportPaths();
 }
 
 void ModelManager::setupProjectInfoQmlBundles(ModelManagerInterface::ProjectInfo& projectInfo)

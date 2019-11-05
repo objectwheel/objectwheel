@@ -1542,7 +1542,7 @@ void PropertiesController::onColorPropertyEdit(QTreeWidgetItem* item, QTreeWidge
 
         QColorDialog cDialog;
         cDialog.setWindowTitle(tr("Select Color"));
-        cDialog.setOptions(QColorDialog::ShowAlphaChannel | QColorDialog::DontUseNativeDialog);
+        cDialog.setOptions(QColorDialog::ShowAlphaChannel/* | QColorDialog::DontUseNativeDialog*/);
         cDialog.setCurrentColor(previousColor);
         cDialog.exec();
 

@@ -114,9 +114,6 @@ ModelManagerInterface::ModelManagerInterface(QObject *parent)
     qRegisterMetaType<QmlJS::PathAndLanguage>("QmlJS::PathAndLanguage");
     qRegisterMetaType<QmlJS::PathsAndLanguages>("QmlJS::PathsAndLanguages");
 
-    m_defaultProjectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
-    m_defaultProjectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
-
     Q_ASSERT(! g_instance);
     g_instance = this;
 }
@@ -417,7 +414,7 @@ void ModelManagerInterface::iterateQrcFiles(QrcResourceSelector resources,
                                             std::function<void(QrcParser::ConstPtr)> callback)
 {
     QList<ProjectInfo> pInfos;
-    pInfos.append(activeProjectInfo());
+    pInfos.append(projectInfo());
 
     QSet<QString> pathsChecked;
     foreach (const ModelManagerInterface::ProjectInfo &pInfo, pInfos) {
@@ -472,13 +469,14 @@ QMap<QString, QStringList> ModelManagerInterface::filesInQrcPath(const QString &
     return res;
 }
 
-void ModelManagerInterface::updateActiveProjectInfo(const ProjectInfo &pinfo)
+void ModelManagerInterface::updateProjectInfo(const ProjectInfo &pinfo)
 {
+
     if (!m_indexerEnabled)
         return;
 
     Snapshot snapshot;
-    const ProjectInfo& oldInfo = activeProjectInfo();
+    const ProjectInfo& oldInfo = projectInfo();
     {
         QMutexLocker locker(&m_mutex);
         m_activeProjectInfo = pinfo;
@@ -539,51 +537,12 @@ void ModelManagerInterface::updateActiveProjectInfo(const ProjectInfo &pinfo)
 }
 
 
-void ModelManagerInterface::removeActiveProjectInfo()
+void ModelManagerInterface::removeProjectInfo()
 {
     ProjectInfo info;
     info.sourceFiles.clear();
     // update with an empty project info to clear data
-    updateActiveProjectInfo(info);
-}
-
-/*!
-    Returns project info with summarized info for \a path
-
-    \note Project pointer will be empty
- */
-ModelManagerInterface::ProjectInfo ModelManagerInterface::projectInfoForPath(const QString &path) const
-{
-    QList<ProjectInfo> infos = allProjectInfosForPath(path);
-
-    ProjectInfo res;
-    foreach (const ProjectInfo &pInfo, infos) {
-        if (res.qtImportsPath.isEmpty())
-            res.qtImportsPath = pInfo.qtImportsPath;
-        if (res.qtQmlPath.isEmpty())
-            res.qtQmlPath = pInfo.qtQmlPath;
-        for (int i = 0; i < pInfo.importPaths.size(); ++i)
-            res.importPaths.maybeInsert(pInfo.importPaths.at(i));
-    }
-    return res;
-}
-
-/*!
-    Returns list of project infos for \a path
- */
-QList<ModelManagerInterface::ProjectInfo> ModelManagerInterface::allProjectInfosForPath(const QString &path) const
-{
-    QList<ProjectInfo> infos;
-    const ProjectInfo& info = activeProjectInfo();
-    {
-        QMutexLocker locker(&m_mutex);
-        if (m_filesToProject.contains(path)
-                || m_filesToProject.contains(QFileInfo(path).canonicalFilePath())) {
-            infos.append(info);
-        }
-        infos.append(m_defaultProjectInfo);
-    }
-    return infos;
+    updateProjectInfo(info);
 }
 
 bool ModelManagerInterface::isIdle() const
@@ -592,7 +551,9 @@ bool ModelManagerInterface::isIdle() const
 }
 
 void ModelManagerInterface::emitDocumentChangedOnDisk(Document::Ptr doc)
-{ emit documentChangedOnDisk(doc); }
+{
+    emit documentChangedOnDisk(doc);
+}
 
 void ModelManagerInterface::updateQrcFile(const QString &path)
 {
@@ -1036,12 +997,13 @@ void ModelManagerInterface::updateImportPaths()
 {
     if (!m_indexerEnabled)
         return;
+
     PathsAndLanguages allImportPaths;
     QmlLanguageBundles activeBundles;
     QmlLanguageBundles extendedBundles;
     QHashIterator<Dialect, QmlJS::ViewerContext> vCtxsIter = m_defaultVContexts;
 
-    const PathsAndLanguages &iPaths = activeProjectInfo().importPaths;
+    const PathsAndLanguages &iPaths = projectInfo().importPaths;
     for (int i = 0; i < iPaths.size(); ++i) {
         PathAndLanguage pAndL = iPaths.at(i);
         const QString canonicalPath = pAndL.path().toFileInfo().canonicalFilePath();
@@ -1056,9 +1018,9 @@ void ModelManagerInterface::updateImportPaths()
             allImportPaths.maybeInsert(Utils::FileName::fromString(path), vCtxsIter.value().language);
     }
 
-    activeBundles.mergeLanguageBundles(activeProjectInfo().activeBundle);
-    foreach (Dialect l, activeProjectInfo().activeBundle.languages()) {
-        foreach (const QString &path, activeProjectInfo().activeBundle.bundleForLanguage(l)
+    activeBundles.mergeLanguageBundles(projectInfo().activeBundle);
+    foreach (Dialect l, projectInfo().activeBundle.languages()) {
+        foreach (const QString &path, projectInfo().activeBundle.bundleForLanguage(l)
                  .searchPaths().stringList()) {
             const QString canonicalPath = QFileInfo(path).canonicalFilePath();
             if (!canonicalPath.isEmpty())
@@ -1067,22 +1029,12 @@ void ModelManagerInterface::updateImportPaths()
     }
 
     {
-        QString pathAtt = defaultProjectInfo().qtQmlPath;
+        QString pathAtt = projectInfo().qtQmlPath;
         if (!pathAtt.isEmpty())
             allImportPaths.maybeInsert(Utils::FileName::fromString(pathAtt), Dialect::QmlQtQuick2);
     }
     {
-        QString pathAtt = activeProjectInfo().qtQmlPath;
-        if (!pathAtt.isEmpty())
-            allImportPaths.maybeInsert(Utils::FileName::fromString(pathAtt), Dialect::QmlQtQuick2);
-    }
-    {
-        QString pathAtt = defaultProjectInfo().qtImportsPath;
-        if (!pathAtt.isEmpty())
-            allImportPaths.maybeInsert(Utils::FileName::fromString(pathAtt), Dialect::QmlQtQuick1);
-    }
-    {
-        QString pathAtt = activeProjectInfo().qtImportsPath;
+        QString pathAtt = projectInfo().qtImportsPath;
         if (!pathAtt.isEmpty())
             allImportPaths.maybeInsert(Utils::FileName::fromString(pathAtt), Dialect::QmlQtQuick1);
     }
@@ -1282,9 +1234,9 @@ void ModelManagerInterface::asyncReset()
 //    return m_cppDataHash;
 //}
 
-LibraryInfo ModelManagerInterface::builtins(const Document::Ptr &doc) const
+LibraryInfo ModelManagerInterface::builtins(const Document::Ptr &/*doc*/) const
 {
-    ProjectInfo info = projectInfoForPath(doc->fileName());
+    ProjectInfo info = projectInfo();
     if (!info.qtQmlPath.isEmpty())
         return m_validSnapshot.libraryInfo(info.qtQmlPath);
     return m_validSnapshot.libraryInfo(info.qtImportsPath);
@@ -1304,13 +1256,8 @@ ViewerContext ModelManagerInterface::completeVContext(const ViewerContext &vCtx,
         res.language = doc->language();
     ProjectInfo info;
     if (!doc.isNull())
-        info = projectInfoForPath(doc->fileName());
+        info = projectInfo();
     ViewerContext defaultVCtx = defaultVContext(res.language, Document::Ptr(0), false);
-    ProjectInfo defaultInfo = defaultProjectInfo();
-    if (info.qtImportsPath.isEmpty())
-        info.qtImportsPath = defaultInfo.qtImportsPath;
-    if (info.qtQmlPath.isEmpty())
-        info.qtQmlPath = defaultInfo.qtQmlPath;
     switch (res.flags) {
     case ViewerContext::Complete:
         break;
@@ -1402,13 +1349,7 @@ ViewerContext ModelManagerInterface::defaultVContext(Dialect language,
         return defaultCtx;
 }
 
-ModelManagerInterface::ProjectInfo ModelManagerInterface::defaultProjectInfo() const
-{
-    QMutexLocker l(mutex());
-    return m_defaultProjectInfo;
-}
-
-ModelManagerInterface::ProjectInfo ModelManagerInterface::activeProjectInfo() const
+ModelManagerInterface::ProjectInfo ModelManagerInterface::projectInfo() const
 {
     QMutexLocker l(mutex());
     return m_activeProjectInfo;

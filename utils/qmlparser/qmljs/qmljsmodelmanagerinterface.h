@@ -132,8 +132,7 @@ public:
     QmlJS::Snapshot newestSnapshot() const;
 
     void activateScan();
-    void updateSourceFiles(const QStringList &files,
-                           bool emitDocumentOnDiskChanged);
+    void updateSourceFiles(const QStringList &files, bool emitDocumentOnDiskChanged);
     void fileChangedOnDisk(const QString &path);
     void removeFiles(const QStringList &files);
     QStringList qrcPathsForFile(const QString &file, const QLocale *locale = 0,
@@ -144,17 +143,14 @@ public:
                                              const QLocale *locale = 0,
                                              bool addDirs = false,
                                              QrcResourceSelector resources = AllQrcResources);
-    void removeActiveProjectInfo();
-    void updateActiveProjectInfo(const ProjectInfo &pinfo);
+    void removeProjectInfo();
+    void updateProjectInfo(const ProjectInfo &pinfo);
     void updateDocument(QmlJS::Document::Ptr doc);
     void updateLibraryInfo(const QString &path, const QmlJS::LibraryInfo &info);
     void emitDocumentChangedOnDisk(QmlJS::Document::Ptr doc);
     void updateQrcFile(const QString &path);
 
-    ProjectInfo defaultProjectInfo() const;
-    ProjectInfo activeProjectInfo() const;
-    ProjectInfo projectInfoForPath(const QString &path) const;
-    QList<ProjectInfo> allProjectInfosForPath(const QString &path) const;
+    ProjectInfo projectInfo() const;
 
     bool isIdle() const;
 
@@ -256,7 +252,6 @@ private:
 //    mutable QMutex m_cppDataMutex;
 
     // project integration
-    ProjectInfo m_defaultProjectInfo;
     ProjectInfo m_activeProjectInfo;
     QList<QString> m_filesToProject;
 
