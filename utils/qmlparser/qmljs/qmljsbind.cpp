@@ -202,9 +202,13 @@ bool Bind::visit(UiImport *ast)
             const QString importStr = import.name() + importId;
             if (ModelManagerInterface::instance()) {
                 QmlLanguageBundles langBundles = ModelManagerInterface::instance()->extendedBundles();
+                QmlBundle qq1 = langBundles.bundleForLanguage(Dialect::QmlQtQuick1);
                 QmlBundle qq2 = langBundles.bundleForLanguage(Dialect::QmlQtQuick2);
+                bool isQQ1 = qq1.supportedImports().contains(importStr);
                 bool isQQ2 = qq2.supportedImports().contains(importStr);
-                if (isQQ2)
+                if (isQQ1 && ! isQQ2)
+                    _doc->setLanguage(Dialect::QmlQtQuick1);
+                if (isQQ2 && ! isQQ1)
                     _doc->setLanguage(Dialect::QmlQtQuick2);
             }
         }
@@ -259,7 +263,7 @@ bool Bind::visit(UiObjectBinding *ast)
 //    const QString name = serialize(ast->qualifiedId);
     ObjectValue *value = bindObject(ast->qualifiedTypeNameId, ast->initializer);
     _qmlObjects.insert(ast, value);
-    // ### FIXME: we don't handle dot-properties correctly (i.e. font.size)
+    // ### fixme: we don't handle dot-properties correctly (i.e. font.size)
 //    _currentObjectValue->setProperty(name, value);
 
     return false;
@@ -288,7 +292,7 @@ bool Bind::visit(UiScriptBinding *ast)
 
 bool Bind::visit(UiArrayBinding *)
 {
-    // ### FIXME: do we need to store the members into the property? Or, maybe the property type is an JS Array?
+    // ### fixme: do we need to store the members into the property? Or, maybe the property type is an JS Array?
 
     return true;
 }
@@ -306,7 +310,7 @@ bool Bind::visit(VariableDeclaration *ast)
 
 bool Bind::visit(FunctionExpression *ast)
 {
-    // ### FIXME: the first declaration counts
+    // ### fixme: the first declaration counts
     //if (_currentObjectValue->property(ast->name->asString(), 0))
     //    return false;
 

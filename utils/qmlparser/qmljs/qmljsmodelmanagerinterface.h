@@ -56,6 +56,7 @@ public:
         ActiveQrcResources,
         AllQrcResources
     };
+
     class ProjectInfo
     {
     public:
@@ -89,7 +90,7 @@ public:
         typedef QHash<QString, QPair<QString, int> > Table;
 
         void insert(const QString &fileName, const QString &source, int revision = 0)
-        { _elements.insert(fileName, {source, revision}); }
+        { _elements.insert(fileName, qMakePair(source, revision)); }
 
         bool contains(const QString &fileName) const
         { return _elements.contains(fileName); }
@@ -143,17 +144,19 @@ public:
                                              const QLocale *locale = 0,
                                              bool addDirs = false,
                                              QrcResourceSelector resources = AllQrcResources);
-
-    ProjectInfo projectInfo() const;
-    void updateProjectInfo(const ProjectInfo &pinfo);
-
+    void removeActiveProjectInfo();
+    void updateActiveProjectInfo(const ProjectInfo &pinfo);
     void updateDocument(QmlJS::Document::Ptr doc);
     void updateLibraryInfo(const QString &path, const QmlJS::LibraryInfo &info);
     void emitDocumentChangedOnDisk(QmlJS::Document::Ptr doc);
     void updateQrcFile(const QString &path);
+
+    ProjectInfo defaultProjectInfo() const;
+    ProjectInfo activeProjectInfo() const;
     ProjectInfo projectInfoForPath(const QString &path) const;
     QList<ProjectInfo> allProjectInfosForPath(const QString &path) const;
-    bool isIdle() const ;
+
+    bool isIdle() const;
 
     QStringList importPathsNames() const;
     QmlJS::QmlLanguageBundles activeBundles() const;
@@ -170,9 +173,6 @@ public:
                                   const Document::Ptr &doc = Document::Ptr(0),
                                   bool autoComplete = true) const;
     void setDefaultVContext(const ViewerContext &vContext);
-    virtual ProjectInfo defaultProjectInfo() const;
-    virtual ProjectInfo defaultProjectInfoForProject() const;
-
 
     // Blocks until all parsing threads are done. Used for testing.
     void joinAllThreads();
@@ -182,10 +182,9 @@ public:
                     WorkingCopy workingCopyInternal,
                     PathsAndLanguages paths,
                     ModelManagerInterface *modelManager,
-                    bool emitDocChangedOnDisk, bool libOnly = true, bool forceRescan = false);
+                    bool emitDocChangedOnDisk, bool libOnly = true);
 
     virtual void resetCodeModel();
-    void removeProjectInfo();
 //    void maybeQueueCppQmlTypeUpdate(const CPlusPlus::Document::Ptr &doc);
 
 signals:
@@ -220,7 +219,7 @@ protected:
                       ModelManagerInterface *modelManager,
                       QmlJS::Dialect mainLanguage,
                       bool emitDocChangedOnDisk);
-//    static void updateCppQmlTypes(QFutureInterface<void> &futureInterface,
+//    static void updateCppQmlTypes(QFutureInterface<void> &interface,
 //                                  ModelManagerInterface *qmlModelManager,
 //                                  CPlusPlus::Snapshot snapshot,
 //                                  QHash<QString, QPair<CPlusPlus::Document::Ptr, bool> > documents);
@@ -228,7 +227,6 @@ protected:
     void maybeScan(const PathsAndLanguages &importPaths);
     void updateImportPaths();
     void loadQmlTypeDescriptionsInternal(const QString &path);
-    void setDefaultProject(const ProjectInfo &pInfo);
 
 private:
     void cleanupFutures();
@@ -239,7 +237,6 @@ private:
     QmlJS::Snapshot m_validSnapshot;
     QmlJS::Snapshot m_newestSnapshot;
     PathsAndLanguages m_allImportPaths;
-    QStringList m_defaultImportPaths;
     QmlJS::QmlLanguageBundles m_activeBundles;
     QmlJS::QmlLanguageBundles m_extendedBundles;
     QHash<Dialect, QmlJS::ViewerContext> m_defaultVContexts;
@@ -255,11 +252,12 @@ private:
     QHash<QString, QString> m_qrcContents;
 
 //    CppDataHash m_cppDataHash;
-//    QHash<QString, QList<CPlusPlus::Document::Ptr> > m_cppDeclarationFiles;
+//    QHash<QString, QStringList> m_cppDeclarationFiles;
 //    mutable QMutex m_cppDataMutex;
 
     // project integration
     ProjectInfo m_defaultProjectInfo;
+    ProjectInfo m_activeProjectInfo;
     QList<QString> m_filesToProject;
 
     PluginDumper *m_pluginDumper;

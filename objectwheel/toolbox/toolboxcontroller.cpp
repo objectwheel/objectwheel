@@ -23,8 +23,8 @@ ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) 
   , m_toolboxPane(toolboxPane)
 {
     onToolboxSettingsChange();
-    connect(DocumentManager::instance(), &DocumentManager::projectInfoUpdated,
-            this, &ToolboxController::onProjectInfoUpdate);
+    connect(DocumentManager::instance(), &DocumentManager::initialized,
+            this, &ToolboxController::onDocumentManagerInitialization);
     connect(m_toolboxPane->toolboxTree(), &ToolboxTree::itemPressed,
             this, &ToolboxController::onToolboxItemPress);
     connect(m_toolboxPane->searchEdit(), &LineEdit::textEdited,
@@ -47,9 +47,8 @@ void ToolboxController::onToolboxSettingsChange()
     tree->setIconSize(QSize(settings->iconSize, settings->iconSize));
 }
 
-void ToolboxController::onProjectInfoUpdate()
+void ToolboxController::onDocumentManagerInitialization()
 {
-    DocumentManager::instance()->disconnect(this);
     ToolboxTree* toolboxTree = m_toolboxPane->toolboxTree();
     for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& toolPath = ":/tools/" + toolDirName;

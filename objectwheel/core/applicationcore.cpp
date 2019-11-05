@@ -156,15 +156,11 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlRenderingManager->init(scene);
     s_controlRenderingManager->scheduleDevicePixelRatioUpdate(QApplication::primaryScreen()->devicePixelRatio());
 
-    auto conn = new QMetaObject::Connection;
-    *conn = QObject::connect(s_documentManager, &DocumentManager::projectInfoUpdated, [=] {
-        QObject::disconnect(*conn);
-        delete conn;
+    QObject::connect(s_documentManager, &DocumentManager::initialized, [=] {
         s_windowManager->welcomeWindow()->show();
         splash->finish(s_windowManager->welcomeWindow());
         QTimer::singleShot(2000, [=] { delete splash; });
     });
-    s_documentManager->updateProjectInfo(); // Needed for ParserUtils::typeName(), for ToolBoxPane
 }
 
 bool ApplicationCore::locked()

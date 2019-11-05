@@ -71,120 +71,12 @@
 #include <QLibraryInfo>
 #include <qglobal.h>
 
-#include <saveutils.h>
-#include <projectmanager.h>
-#include <utilityfunctions.h>
-
 using namespace Utils;
-//using namespace Core;
 using namespace ProjectExplorer;
 using namespace QmlJS;
 
 namespace QmlJSTools {
 namespace Internal {
-
-// BUG: Komple incelersin
-ModelManagerInterface::ProjectInfo ModelManager::defaultProjectInfoForProject() const
-{
-    ModelManagerInterface::ProjectInfo projectInfo/*(project)*/;
-    projectInfo.qmlDumpEnvironment = Utils::Environment::systemEnvironment();
-    //    Target *activeTarget = nullptr;
-    //    if (project) {
-    //        const QSet<QString> qmlTypeNames = { Constants::QML_MIMETYPE ,Constants::QBS_MIMETYPE,
-    //                                             Constants::QMLPROJECT_MIMETYPE,
-    //                                             Constants::QMLTYPES_MIMETYPE,
-    //                                             Constants::QMLUI_MIMETYPE };
-    //        projectInfo.sourceFiles = Utils::transform(project->files([&qmlTypeNames](const Node *n) {
-    //            if (!Project::SourceFiles(n))
-    //                return false;
-    //            const FileNode *fn = n->asFileNode();
-    //            return fn && fn->fileType() == FileType::QML
-    //                    && qmlTypeNames.contains(Utils::mimeTypeForFile(fn->filePath().toString(),
-    //                                                                    MimeMatchMode::MatchExtension).name());
-    //        }), &FileName::toString);
-    //        activeTarget = project->activeTarget();
-    //    }
-    //    Kit *activeKit = activeTarget ? activeTarget->kit() : KitManager::defaultKit();
-    //    QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(activeKit);
-
-    //    bool preferDebugDump = false;
-    //    bool setPreferDump = false;
-    //    projectInfo.tryQmlDump = false;
-
-    //    if (activeTarget) {
-    //        if (BuildConfiguration *bc = activeTarget->activeBuildConfiguration()) {
-    //            preferDebugDump = bc->buildType() == BuildConfiguration::Debug;
-    //            setPreferDump = true;
-    //            // Append QML2_IMPORT_PATH if it is defined in build configuration.
-    //            // It enables qmlplugindump to correctly dump custom plugins or other dependent
-    //            // plugins that are not installed in default Qt qml installation directory.
-    //            projectInfo.qmlDumpEnvironment.appendOrSet("QML2_IMPORT_PATH", bc->environment().value("QML2_IMPORT_PATH"), ":");
-    //        }
-    //    }
-    //    if (!setPreferDump && qtVersion)
-    //        preferDebugDump = (qtVersion->defaultBuildConfig() & QtSupport::BaseQtVersion::DebugBuild);
-    //    if (qtVersion && qtVersion->isValid()) {
-    //        projectInfo.tryQmlDump = project && qtVersion->type() == QLatin1String(QtSupport::Constants::DESKTOPQT);
-    //        projectInfo.qtQmlPath = qtVersion->qmlPath().toFileInfo().canonicalFilePath();
-    //        projectInfo.qtImportsPath = QFileInfo(qtVersion->qmakeProperty("QT_INSTALL_IMPORTS")).canonicalFilePath();
-    //        projectInfo.qtVersionString = qtVersion->qtVersionString();
-    //    } else {
-
-    if (ProjectManager::isStarted()) {
-        projectInfo.importPaths.maybeInsert(
-                    FileName::fromString(SaveUtils::toProjectImportsDir(ProjectManager::dir())));
-    }
-
-    projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
-    projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
-    projectInfo.qtVersionString = QLatin1String(qVersion());
-    //    }
-
-    //    if (projectInfo.tryQmlDump) {
-    //        QtSupport::QmlDumpTool::pathAndEnvironment(activeKit,
-    //                                                   preferDebugDump, &projectInfo.qmlDumpPath,
-    //                                                   &projectInfo.qmlDumpEnvironment);
-    //        projectInfo.qmlDumpHasRelocatableFlag = qtVersion->hasQmlDumpWithRelocatableFlag();
-    //    } else {
-    projectInfo.qmlDumpPath.clear();
-    projectInfo.qmlDumpEnvironment.clear();
-    projectInfo.qmlDumpHasRelocatableFlag = true;
-    //    }
-    setupProjectInfoQmlBundles(projectInfo);
-    return projectInfo;
-}
-
-} // namespace Internal
-
-void setupProjectInfoQmlBundles(ModelManagerInterface::ProjectInfo &projectInfo)
-{
-    //    Target *activeTarget = 0;
-    //    if (projectInfo.project)
-    //        activeTarget = projectInfo.project->activeTarget();
-    //    Kit *activeKit = activeTarget ? activeTarget->kit() : KitManager::defaultKit();
-    QHash<QString, QString> replacements;
-    replacements.insert(QLatin1String("$(QT_INSTALL_IMPORTS)"), projectInfo.qtImportsPath);
-    replacements.insert(QLatin1String("$(QT_INSTALL_QML)"), projectInfo.qtQmlPath);
-
-    for (IBundleProvider *bp : IBundleProvider::allBundleProviders())
-        bp->mergeBundlesForKit(/*activeKit*/ 0, projectInfo.activeBundle, replacements);
-
-    projectInfo.extendedBundle = projectInfo.activeBundle;
-
-    //    if (projectInfo.project) {
-    //        QSet<Kit *> currentKits;
-    //        foreach (const Target *t, projectInfo.project->targets())
-    //            currentKits.insert(t->kit());
-    //        currentKits.remove(activeKit);
-    //        foreach (Kit *kit, currentKits) {
-    //            for (IBundleProvider *bp : IBundleProvider::allBundleProviders())
-    //                bp->mergeBundlesForKit(kit, projectInfo.extendedBundle, replacements);
-    //        }
-    //    }
-}
-
-namespace Internal {
-
 
 QHash<QString,Dialect> ModelManager::initLanguageForSuffix() const
 {
@@ -221,7 +113,6 @@ QHash<QString,Dialect> ModelManager::languageForSuffix() const
 ModelManager::ModelManager()
 {
     qRegisterMetaType<QmlJSTools::SemanticInfo>("QmlJSTools::SemanticInfo");
-    loadDefaultQmlTypeDescriptions();
 }
 
 ModelManager::~ModelManager()
@@ -245,6 +136,35 @@ void ModelManager::delayedInitialization()
     qbsVContext.language = Dialect::QmlQbs;
     qbsVContext.maybeAddPath(ApplicationCore::resourcePath() + QLatin1String("/qbs"));
     setDefaultVContext(qbsVContext);
+    loadDefaultQmlTypeDescriptions();
+    updateImportPaths();
+}
+
+void ModelManager::setupProjectInfoQmlBundles(ModelManagerInterface::ProjectInfo& projectInfo)
+{
+    //    Target *activeTarget = 0;
+    //    if (projectInfo.project)
+    //        activeTarget = projectInfo.project->activeTarget();
+    //    Kit *activeKit = activeTarget ? activeTarget->kit() : KitManager::defaultKit();
+    QHash<QString, QString> replacements;
+    replacements.insert(QLatin1String("$(QT_INSTALL_IMPORTS)"), projectInfo.qtImportsPath);
+    replacements.insert(QLatin1String("$(QT_INSTALL_QML)"), projectInfo.qtQmlPath);
+
+    for (IBundleProvider *bp : IBundleProvider::allBundleProviders())
+        bp->mergeBundlesForKit(/*activeKit*/ 0, projectInfo.activeBundle, replacements);
+
+    projectInfo.extendedBundle = projectInfo.activeBundle;
+
+    //    if (projectInfo.project) {
+    //        QSet<Kit *> currentKits;
+    //        foreach (const Target *t, projectInfo.project->targets())
+    //            currentKits.insert(t->kit());
+    //        currentKits.remove(activeKit);
+    //        foreach (Kit *kit, currentKits) {
+    //            for (IBundleProvider *bp : IBundleProvider::allBundleProviders())
+    //                bp->mergeBundlesForKit(kit, projectInfo.extendedBundle, replacements);
+    //        }
+    //    }
 }
 
 void ModelManager::loadDefaultQmlTypeDescriptions()
@@ -294,19 +214,6 @@ ModelManagerInterface::WorkingCopy ModelManager::workingCopyInternal() const
 
     return workingCopy;
 }
-
-void ModelManager::updateDefaultProjectInfo()
-{
-    // needs to be performed in the ui thread
-    //    Project *currentProject = SessionManager::startupProject();
-    //    ProjectInfo newDefaultProjectInfo = projectInfo(currentProject,
-    //                                                    defaultProjectInfoForProject(currentProject));
-    //    setDefaultProject(projectInfo(currentProject,newDefaultProjectInfo), currentProject);
-
-    setDefaultProject(defaultProjectInfoForProject()); // Sonradan ekleme
-    updateImportPaths(); // Sonradan ekleme
-}
-
 
 void ModelManager::addTaskInternal(QFuture<void> /*result*/, const QString &/*msg*/, const char */*taskId*/) const
 {

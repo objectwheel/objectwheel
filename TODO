@@ -9,6 +9,9 @@ Quick Controls - 2  -  Popup patlıyor
 WebView  -  WebView patlıyor
 Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
 
+server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
+    server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
+plan pricing mevzularının limitlerini "beta" ya uygun düşecek şekilde gözden geçir
 form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin ayrıca uyarı da versin bi kereye
     mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
 ayrıca yukarıdakinin benzeri olaacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin

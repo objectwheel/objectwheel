@@ -235,7 +235,7 @@ bool ProjectManager::start(const QString& uid)
 
     s_uid = uid;
 
-    DocumentManager::updateProjectInfo();
+    DocumentManager::updateActiveProjectInfo(dir());
     // Must be executed before running render engine
     // Because it might fix broken id and indexes
     ProjectExposingManager::exposeProject();
@@ -251,6 +251,7 @@ void ProjectManager::stop()
 {
     ControlRenderingManager::terminate();
     ProjectExposingManager::removeProject();
+    DocumentManager::removeActiveProjectInfo();
     updateSize(s_uid);
     s_uid = "";
     emit instance()->stopped();

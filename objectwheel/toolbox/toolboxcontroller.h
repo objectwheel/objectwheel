@@ -20,7 +20,7 @@ public slots:
 
 private slots:
     void onToolboxSettingsChange();
-    void onProjectInfoUpdate();
+    void onDocumentManagerInitialization();
     void onSearchEditEdit(const QString& searchTerm);
     void onToolboxItemPress(ToolboxItem* item);
 
