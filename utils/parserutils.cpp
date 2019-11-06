@@ -7,6 +7,8 @@
 #include <qmljs/qmljsmodelmanagerinterface.h>
 #include <qmljs/qmljsscopechain.h>
 #include <qmljs/qmljslink.h>
+#include <qmljs/qmljsutils.h>
+#include <qmljs/qmljsbind.h>
 
 #include <QTextDocument>
 #include <QTextCursor>
@@ -20,48 +22,100 @@ namespace ParserUtils {
 
 namespace Internal {
 
-QString getModuleName(const Document::Ptr &qmlDocument, const QString& typeName, const QStringList& modules)
+QString moduleBodyForImportInfo(const ImportInfo& importInfo, const Document* qmlDocument)
 {
-    static QSharedPointer<Document> doc;
-    if (doc.isNull()) {
+    if (importInfo.isValid() && importInfo.type() == ImportType::Library) {
+        const QString moduleName = importInfo.name();
+        const int majorVersion = importInfo.version().majorVersion();
+        const int minorVersion = importInfo.version().minorVersion();
+        return moduleName + QString::number(majorVersion) + QLatin1Char('.')
+                + QString::number(minorVersion) ;
+    } else if (importInfo.isValid() && importInfo.type() == ImportType::Directory) {
+        const QString path = importInfo.path();
+        const QDir dir(qmlDocument->path());
+        // should probably try to make it relatve to some import path, not to the document path
+        QString relativeDir = dir.relativeFilePath(path);
+        const QString name = relativeDir.replace(QLatin1Char('/'), QLatin1Char('.'));
+        return name;
+    } else if (importInfo.isValid() && importInfo.type() == ImportType::QrcDirectory) {
+        QString path = QrcParser::normalizedQrcDirectoryPath(importInfo.path());
+        path = path.mid(1, path.size() - ((path.size() > 1) ? 2 : 1));
+        const QString name = path.replace(QLatin1Char('/'), QLatin1Char('.'));
+        return name;
+    }
+    return QString();
+//    if (importInfo.isValid() && importInfo.type() == ImportType::Library) {
+//        moduleNames.append(importInfo.name() + QStringLiteral("/") + importInfo.version().toString());
+//    } else if (importInfo.isValid() && importInfo.type() == ImportType::Directory) {
+//        const QString path = importInfo.path();
+//        const QDir dir(qmlDocument->path());
+//        // should probably try to make it relatve to some import path, not to the document path
+//        QString relativeDir = dir.relativeFilePath(path);
+//        moduleNames.append(relativeDir.replace(QLatin1Char('/'), QLatin1Char('.')));
+//    } else if (importInfo.isValid() && importInfo.type() == ImportType::QrcDirectory) {
+//        QString path = QrcParser::normalizedQrcDirectoryPath(importInfo.path());
+//        path = path.mid(1, path.size() - ((path.size() > 1) ? 2 : 1));
+//        moduleNames.append(path.replace(QLatin1Char('/'), QLatin1Char('.')));
+//    }
+}
+
+QStringList moduleBodiesForType(const Document* document, const QList<ImportInfo>& importInfos)
+{
+    QStringList modules;
+    foreach (const ImportInfo& importInfo, importInfos) {
+        const QString& module = moduleBodyForImportInfo(importInfo, document);
+        if (!module.isEmpty())
+            modules.append(module);
+    }
+    return modules;
+}
+
+QString importMatch(const QStringList& sourceImports, const QStringList& targetImports)
+{
+    int max = -1, index = -1;
+    for (int i = 0; i < sourceImports.size(); ++i) {
+        int x = targetImports.lastIndexOf(sourceImports.at(i));
+        if (x > max) {
+            max = x;
+            index = i;
+        }
+    }
+    if (index > -1)
+        return sourceImports.at(index);
+    return QString();
+}
+
+QString resolveModuleBody(const Document::Ptr document, const QString& typeName, const QStringList& modules)
+{
+    static Document::MutablePtr genericDocument;
+    static ContextPtr genericContext;
+    static ModelManagerInterface* manager = ModelManagerInterface::instance();
+
+    // Initialize generic context
+    if (genericDocument.isNull()) {
         const QString ff = ":/moduleresolver/moduleresolver.qml";
         QFile file(ff);
         if (!file.open(QFile::ReadOnly)) {
             qWarning("ParserUtils: Cannot open file");
             return {};
         }
-        doc = Document::create(ff, Dialect::Qml);
-        doc->setSource(file.readAll());
+        genericDocument = Document::create(ff, Dialect::Qml);
+        genericDocument->setSource(file.readAll());
         file.close();
-        if (!doc->parse()) {
+        if (!genericDocument->parse()) {
             qWarning() << "Property couldn't read. Unable to parse qml file.";
             return {};
         }
+        Link link(manager->snapshot(),
+                  manager->defaultVContext(genericDocument->language(),
+                                           genericDocument),
+                  manager->builtins(genericDocument));
+        genericContext = link(genericDocument, nullptr);
     }
 
-    static ModelManagerInterface* manager = ModelManagerInterface::instance();
-    static Link link(manager->snapshot(), manager->defaultVContext(doc->language(), doc), manager->builtins(doc));
-    static ContextPtr context(link(doc, nullptr));
-
-    QStringList moduleNames;
-    const Imports *imports = context->imports(doc.data());
-    const QList<ImportInfo>& importInfos = imports->infos(typeName, context.data());
-    for (const ImportInfo& importInfo : importInfos) {
-        if (importInfo.isValid() && importInfo.type() == ImportType::Library) {
-            moduleNames.append(importInfo.name() + QString::number(importInfo.version().majorVersion()));
-        } else if (importInfo.isValid() && importInfo.type() == ImportType::Directory) {
-            const QString path = importInfo.path();
-            const QDir dir(qmlDocument->path());
-            // should probably try to make it relatve to some import path, not to the document path
-            QString relativeDir = dir.relativeFilePath(path);
-            moduleNames.append(relativeDir.replace(QLatin1Char('/'), QLatin1Char('.')));
-        } else if (importInfo.isValid() && importInfo.type() == ImportType::QrcDirectory) {
-            QString path = QrcParser::normalizedQrcDirectoryPath(importInfo.path());
-            path = path.mid(1, path.size() - ((path.size() > 1) ? 2 : 1));
-            moduleNames.append(path.replace(QLatin1Char('/'), QLatin1Char('.')));
-        }
-    }
-
+    const QList<ImportInfo>& importInfos = genericContext->imports(document.data())->infos(typeName, genericContext.data());
+    const QStringList& moduleNames = moduleBodiesForType(genericDocument.data(), importInfos);
+//    const QString& moduleMatch =
     int max = -1, index = -1;
     for (int i = 0; i < moduleNames.size(); ++i) {
         int x = modules.lastIndexOf(moduleNames.at(i));
@@ -71,8 +125,18 @@ QString getModuleName(const Document::Ptr &qmlDocument, const QString& typeName,
         }
     }
 
-    if (index > -1)
+    // The type found within generic qml module imports
+    if (index > -1) {
+
         return moduleNames.at(index);
+    } else {
+        Link link(manager->snapshot(), manager->defaultVContext(document->language(), document), manager->builtins(document));
+        ContextPtr context(link(document, nullptr));
+        const QList<ImportInfo>& importInfos = context->imports(document.data())->infos(typeName, context.data());
+        const QStringList& moduleNames = moduleBodiesForType(document.data(), importInfos);
+        if (!moduleNames.isEmpty())
+            return moduleNames.last();
+    }
 
     return QString();
 }
@@ -530,69 +594,16 @@ QString module(const QString& controlDir)
         return QString();
     }
 
-    auto uiProgram = doc->qmlProgram();
-
-    if (!uiProgram) {
-        qWarning() << "Property couldn't read. Corrupted ui program.";
-        return QString();
+    if (auto type = QmlJS::qualifiedTypeNameId(doc->qmlProgram()->members->member)) {
+        const QString& typeName = type->name.toString();
+        const QString& moduleBody = Internal::resolveModuleBody(
+                    doc, typeName,
+                    Internal::moduleBodiesForType(doc.data(), doc->bind()->imports()));
+        if (!moduleBody.isEmpty())
+            return moduleBody + QStringLiteral("/") + typeName;
     }
 
-    auto uiObjectMemberList = uiProgram->members;
-
-    if (!uiObjectMemberList) {
-        qWarning() << "Property couldn't read. Empty source file.";
-        return QString();
-    }
-
-    auto uiHeaderItemList = uiProgram->headers;
-
-    if (!uiHeaderItemList) {
-        qWarning() << "Property couldn't read. Empty source file.";
-        return QString();
-    }
-
-    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
-
-    if (!uiObjectDefinition) {
-        qWarning() << "Property couldn't read. Bad file format 0x1.";
-        return QString();
-    }
-
-    auto qualifiedId = cast<UiQualifiedId *>(uiObjectDefinition->qualifiedTypeNameId);
-
-    if (!qualifiedId) {
-        qWarning() << "Property couldn't read. Bad file format 0x2.";
-        return QString();
-    }
-
-    UiHeaderItemList* header = uiHeaderItemList;
-    QStringList modules;
-    do {
-        auto import = cast<UiImport*>(header->headerItem);
-        if (!import) {
-            header = header->next;
-            continue;
-        }
-        QStringRef version(&source, import->versionToken.offset, import->versionToken.length);
-        if (UiQualifiedId* uri = import->importUri) {
-            QStringList pieces;
-            do {
-                pieces.append(uri->name.toString());
-                uri = uri->next;
-            } while(uri);
-            if (version.isEmpty())
-                modules.append(pieces.join('.'));
-            else
-                modules.append(pieces.join('.') + QString::number(int(version.toFloat())));
-        }
-        header = header->next;
-    } while(header);
-
-    QString typeName(qualifiedId->name.toString());
-    QString moduleName(typeName);
-    moduleName.prepend('.');
-    moduleName.prepend(Internal::getModuleName(doc, typeName, modules));
-    return moduleName;
+    return QString();
 }
 
 QByteArray mockSource(const QString& url, const QString& module)

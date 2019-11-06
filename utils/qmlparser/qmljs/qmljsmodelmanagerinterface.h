@@ -252,7 +252,7 @@ private:
 //    mutable QMutex m_cppDataMutex;
 
     // project integration
-    ProjectInfo m_activeProjectInfo;
+    ProjectInfo m_projectInfo;
     QList<QString> m_filesToProject;
 
     PluginDumper *m_pluginDumper;

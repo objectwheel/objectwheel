@@ -15,6 +15,7 @@ bool makeFile(const QString& filePath);
 qint64 directorySize(const QString& dirPath);
 
 QStringList searchFiles(const QString& fileName, const QString& dirPath);
+QStringList searchFilesBySuffix(const QStringList& suffixes, const QString& dirPath);
 
 } // FileSystemUtils
 

@@ -479,7 +479,7 @@ void ModelManagerInterface::updateProjectInfo(const ProjectInfo &pinfo)
     const ProjectInfo& oldInfo = projectInfo();
     {
         QMutexLocker locker(&m_mutex);
-        m_activeProjectInfo = pinfo;
+        m_projectInfo = pinfo;
         snapshot = m_validSnapshot;
     }
 
@@ -1284,7 +1284,7 @@ ViewerContext ModelManagerInterface::completeVContext(const ViewerContext &vCtx,
             QList<ProjectInfo> allProjects;
             {
                 QMutexLocker locker(&m_mutex);
-                allProjects.append(m_activeProjectInfo);
+                allProjects.append(m_projectInfo);
             }
             std::sort(allProjects.begin(), allProjects.end(), &pInfoLessThanImports);
             QList<Dialect> languages = res.language.companionLanguages();
@@ -1352,7 +1352,7 @@ ViewerContext ModelManagerInterface::defaultVContext(Dialect language,
 ModelManagerInterface::ProjectInfo ModelManagerInterface::projectInfo() const
 {
     QMutexLocker l(mutex());
-    return m_activeProjectInfo;
+    return m_projectInfo;
 }
 
 void ModelManagerInterface::setDefaultVContext(const ViewerContext &vContext)

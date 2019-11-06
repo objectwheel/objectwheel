@@ -140,8 +140,8 @@ Link::Link(const Snapshot &snapshot, const ViewerContext &vContext, const Librar
     d->diagnosticMessages = 0;
     d->allDiagnosticMessages = 0;
 
-    ModelManagerInterface *modelManager = ModelManagerInterface::instance();
-    if (modelManager) {
+//    ModelManagerInterface *modelManager = ModelManagerInterface::instance();
+//    if (modelManager) {
 //        ModelManagerInterface::CppDataHash cppDataHash = modelManager->cppData();
 //        {
 //            // populate engine with types from C++
@@ -169,7 +169,7 @@ Link::Link(const Snapshot &snapshot, const ViewerContext &vContext, const Librar
 //            }
 //        }
 //        d->valueOwner->cppQmlTypes().setCppContextProperties(cppContextProperties);
-    }
+//    }
 }
 
 ContextPtr Link::operator()(QHash<QString, QList<DiagnosticMessage> > *messages)

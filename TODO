@@ -9,6 +9,8 @@ Quick Controls - 2  -  Popup patlıyor
 WebView  -  WebView patlıyor
 Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
 
+Assetlerden import edilmiş bir qml objesinin ismi üzerine ctrl basılı tutularak tıklanınca ilgili dosya
+    qml code editor de açılamıyor, kaynak açılamıyor
 Objectwheel pluginleri/componentleri OW'nin versiyonu ile uyumlu olacak
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
