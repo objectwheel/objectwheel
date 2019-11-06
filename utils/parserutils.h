@@ -9,6 +9,11 @@ namespace ParserUtils {
 
 bool exists(const QString& controlDir, const QString& property);
 
+int moduleVersionMinor(const QString& module);
+int moduleVersionMajor(const QString& module);
+QString moduleBody(const QString& module); // without version
+QString moduleTypeName(const QString& module);
+
 QString id(const QString& controlDir);
 QString module(const QString& controlDir);
 QByteArray mockSource(const QString& url, const QString& module);
