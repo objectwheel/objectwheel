@@ -163,7 +163,7 @@ QString Control::module() const
 
 void Control::setModule(const QString& module)
 {
-    if (m_module != module) {
+    if (m_module != module || module.isEmpty()) {
         m_module = module;
         updateIcon();
     }
