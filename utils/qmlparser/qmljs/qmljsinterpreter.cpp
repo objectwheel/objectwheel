@@ -2552,6 +2552,16 @@ QList<ImportInfo> Imports::infos(const QString &name, const Context *context) co
     return infos;
 }
 
+QList<ImportInfo> Imports::allInfos() const
+{
+    QList<ImportInfo> infos;
+    QListIterator<Import> it(m_imports);
+    it.toBack();
+    while (it.hasPrevious())
+        infos.append(it.previous().info);
+    return infos;
+}
+
 QString Imports::nameForImportedObject(const ObjectValue *value, const Context *context) const
 {
     QListIterator<Import> it(m_imports);

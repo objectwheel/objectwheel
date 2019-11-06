@@ -14,6 +14,7 @@ int moduleVersionMajor(const QString& module);
 QString moduleBody(const QString& module); // without version
 QString moduleTypeName(const QString& module);
 QString moduleToMajorModule(const QString& module);
+QString moduleBodyPlusMajorVersion(const QString& module);
 
 QString id(const QString& controlDir);
 QString module(const QString& controlDir);

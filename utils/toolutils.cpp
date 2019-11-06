@@ -12,15 +12,6 @@ namespace ToolUtils {
 
 namespace Internal {
 
-QString majorModule(const QString& module)
-{
-    QString majorModule = module;
-    int majorVersion = ParserUtils::moduleVersionMajor(module);
-    if (majorVersion >= 0)
-        majorModule = ParserUtils::moduleBody(module) + QStringLiteral("/") + QString::number(majorVersion);
-    return majorModule;
-}
-
 const QJsonObject& toolIcons()
 {
     static QJsonObject icons;
@@ -80,7 +71,7 @@ QString toolIconPath(const QString& module)
 
 QString toolCetegory(const QString& module)
 {
-    const QString& majorModule = Internal::majorModule(module);
+    const QString& majorModule = ParserUtils::moduleBodyPlusMajorVersion(module);
     const QJsonObject& categories(Internal::toolCategories());
     QString category(QObject::tr("Others"));
 
