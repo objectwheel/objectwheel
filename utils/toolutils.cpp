@@ -12,6 +12,15 @@ namespace ToolUtils {
 
 namespace Internal {
 
+QString majorModule(const QString& module)
+{
+    QString majorModule = module;
+    int majorVersion = ParserUtils::moduleVersionMajor(module);
+    if (majorVersion >= 0)
+        majorModule = ParserUtils::moduleBody(module) + QStringLiteral("/") + QString::number(majorVersion);
+    return majorModule;
+}
+
 const QJsonObject& toolIcons()
 {
     static QJsonObject icons;
@@ -59,53 +68,24 @@ const QList<QString>& toolCategoriesOrder()
 }
 } // Internal
 
-int toolMinor(const QString& module)
-{
-
-}
-
-int toolMajor(const QString& module)
-{
-
-}
-
-QString toolQualifiedName(const QString& module)
-{
-
-}
-
-QString toolName(const QString& module)
-{
-    const QStringList& pieces = module.split('.');
-    QString name(QObject::tr("Tool"));
-    if (pieces.size() > 1)
-        name = pieces.last();
-    return name;
-}
-
 QString toolIconPath(const QString& module)
 {
+    const QString& majorModule = ParserUtils::moduleToMajorModule(module);
     const QJsonObject& icons(Internal::toolIcons());
-    const QString& iconPath = icons.contains(module)
-            ? icons.value(module).toString()
+    const QString& iconPath = icons.contains(majorModule)
+            ? icons.value(majorModule).toString()
             : QStringLiteral(":/images/tools/Unknown.svg");
     return iconPath;
 }
 
 QString toolCetegory(const QString& module)
 {
+    const QString& majorModule = Internal::majorModule(module);
     const QJsonObject& categories(Internal::toolCategories());
-    QStringList pieces = module.split('.');
-
     QString category(QObject::tr("Others"));
-    QString library;
-    if (pieces.size() > 1) {
-        pieces.removeLast();
-        library = pieces.join('.');
-    }
 
-    if (categories.contains(library))
-        category = categories.value(library).toString();
+    if (categories.contains(majorModule))
+        category = categories.value(majorModule).toString();
 
     return category;
 }

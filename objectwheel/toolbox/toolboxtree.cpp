@@ -39,7 +39,7 @@ void ToolboxTree::addTool(const QString& dir)
     ToolboxItem* item = new ToolboxItem;
     item->setDir(dir);
     item->setModule(module);
-    item->setText(0, ToolUtils::toolName(module));
+    item->setText(0, ParserUtils::moduleTypeName(module));
     item->setIcon(0, QIcon(ToolUtils::toolIconPath(module)));
     topItem->addChild(item);
 }

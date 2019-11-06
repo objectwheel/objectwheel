@@ -22,53 +22,69 @@ namespace ParserUtils {
 
 namespace Internal {
 
-QString moduleBodyForImportInfo(const ImportInfo& importInfo, const Document* document)
+QString moduleForImportInfo(const QString& typeName, const ImportInfo& importInfo, const Document* document)
 {
     if (importInfo.isValid() && importInfo.type() == ImportType::Library) {
-        return importInfo.name() + QStringLiteral("/") + importInfo.version().toString();
+        return importInfo.name() + QStringLiteral("/") +
+                importInfo.version().toString() + QStringLiteral("/") + typeName;
     } else if (importInfo.isValid() && importInfo.type() == ImportType::Directory) {
         const QString path = importInfo.path();
         const QDir dir(document->path());
         // should probably try to make it relatve to some import path, not to the document path
         QString relativeDir = dir.relativeFilePath(path);
         const QString name = relativeDir.replace(QLatin1Char('/'), QLatin1Char('.'));
-        return name;
+        return name + QStringLiteral("/") + typeName;
     } else if (importInfo.isValid() && importInfo.type() == ImportType::QrcDirectory) {
         QString path = QrcParser::normalizedQrcDirectoryPath(importInfo.path());
         path = path.mid(1, path.size() - ((path.size() > 1) ? 2 : 1));
         const QString name = path.replace(QLatin1Char('/'), QLatin1Char('.'));
-        return name;
+        return name + QStringLiteral("/") + typeName;
     }
     return QString();
 }
 
-QStringList allModuleBodies(const Document* document, const QList<ImportInfo>& importInfos)
+QStringList importsToModules(const QString& typeName, const Document* document, const QList<ImportInfo>& importInfos)
 {
-    QStringList moduleBodies;
+    QStringList modules;
     foreach (const ImportInfo& importInfo, importInfos) {
-        const QString& moduleBody = moduleBodyForImportInfo(importInfo, document);
-        if (!moduleBody.isEmpty())
-            moduleBodies.append(moduleBody);
+        const QString& module = moduleForImportInfo(typeName, importInfo, document);
+        if (!module.isEmpty())
+            modules.append(module);
     }
-    return moduleBodies;
+    return modules;
 }
 
-QString moduleMatch(const QStringList& sourceModules, const QStringList& targetModules)
+QString moduleMatch(const QStringList& originalModules, const QStringList& genericModules)
 {
-    int max = -1, index = -1;
-    for (int i = 0; i < sourceModules.size(); ++i) {
-        int x = targetModules.lastIndexOf(sourceModules.at(i));
-        if (x > max) {
-            max = x;
-            index = i;
+    {
+        int index = -1;
+        for (const QString& genericModule : genericModules) {
+            int pos = originalModules.lastIndexOf(genericModule);
+            if (pos > index)
+                index = pos;
         }
+        if (index > -1)
+            return originalModules.at(index);
     }
-    if (index > -1)
-        return sourceModules.at(index);
+
+    {
+        QStringList originalModulesMajor;
+        for (const QString& module : originalModules)
+            originalModulesMajor.append(ParserUtils::moduleToMajorModule(module));
+        int index = -1;
+        for (const QString& genericModule : genericModules) {
+            int pos = originalModulesMajor.lastIndexOf(ParserUtils::moduleToMajorModule(genericModule));
+            if (pos > index)
+                index = pos;
+        }
+        if (index > -1)
+            return originalModulesMajor.at(index);
+    }
+
     return QString();
 }
 
-QString resolveModuleBody(const Document::Ptr document, const QString& typeName, const QStringList& sourceModules)
+QString resolveModule(const Document::Ptr document, const QString& typeName, const QStringList& originalModules)
 {
     static Document::MutablePtr genericDocument;
     static ContextPtr genericContext;
@@ -98,7 +114,7 @@ QString resolveModuleBody(const Document::Ptr document, const QString& typeName,
 
     // Try finding a generic qml module match
     const QList<ImportInfo>& genericImportInfos = genericContext->imports(genericDocument.data())->infos(typeName, genericContext.data());
-    const QString& genericModuleMatch = moduleMatch(sourceModules, allModuleBodies(genericDocument.data(), genericImportInfos));
+    const QString& genericModuleMatch = moduleMatch(originalModules, importsToModules(typeName, genericDocument.data(), genericImportInfos));
 
     // If we can't find the type within generic qml module imports
     // continue with original qml file and its own module imports
@@ -106,7 +122,7 @@ QString resolveModuleBody(const Document::Ptr document, const QString& typeName,
         Link link(manager->snapshot(), manager->defaultVContext(document->language(), document), manager->builtins(document));
         ContextPtr context(link(document, nullptr));
         const QList<ImportInfo>& importInfos = context->imports(document.data())->infos(typeName, context.data());
-        const QStringList& moduleNames = allModuleBodies(document.data(), importInfos);
+        const QStringList& moduleNames = importsToModules(typeName, document.data(), importInfos);
         if (!moduleNames.isEmpty())
             return moduleNames.last();
     } else {
@@ -549,8 +565,8 @@ int moduleVersionMinor(const QString& module)
     const QStringList& pieces = module.split(QStringLiteral("/"));
     if (pieces.size() == 3) {
         const QStringList& versionPieces = pieces.at(1).split(QStringLiteral("."));
-        if (pieces.size() == 2)
-            return versionPieces.last();
+        if (versionPieces.size() == 2)
+            return versionPieces.last().toInt();
     }
     return -1;
 }
@@ -560,8 +576,8 @@ int moduleVersionMajor(const QString& module)
     const QStringList& pieces = module.split(QStringLiteral("/"));
     if (pieces.size() == 3) {
         const QStringList& versionPieces = pieces.at(1).split(QStringLiteral("."));
-        if (pieces.size() == 2)
-            return versionPieces.first();
+        if (versionPieces.size() == 2)
+            return versionPieces.first().toInt();
     }
     return -1;
 }
@@ -580,6 +596,17 @@ QString moduleTypeName(const QString& module)
     if (pieces.size() >= 2)
         return pieces.last();
     return QString();
+}
+
+QString moduleToMajorModule(const QString& module)
+{
+    int versionMajor = ParserUtils::moduleVersionMajor(module);
+    if (versionMajor >= 0) {
+        return ParserUtils::moduleBody(module) + QStringLiteral("/") +
+                QString::number(versionMajor) + QStringLiteral("/") +
+                ParserUtils::moduleTypeName(module);
+    }
+    return module;
 }
 
 QString id(const QString& controlDir)
@@ -616,11 +643,11 @@ QString module(const QString& controlDir)
     if (auto type = QmlJS::qualifiedTypeNameId(doc->qmlProgram()->members->member)) {
         const QString& typeName = type->name.toString();
         if (!typeName.isEmpty()) {
-            const QString& moduleBody = Internal::resolveModuleBody(
+            const QString& module = Internal::resolveModule(
                         doc, typeName,
-                        Internal::allModuleBodies(doc.data(), doc->bind()->imports()));
-            if (!moduleBody.isEmpty())
-                return moduleBody + QStringLiteral("/") + typeName;
+                        Internal::importsToModules(typeName, doc.data(), doc->bind()->imports()));
+            if (!module.isEmpty())
+                return module;
         }
     }
 
@@ -633,7 +660,7 @@ QByteArray mockSource(const QString& url, const QString& module)
     static const QString& mockBase = QStringLiteral(":/mockfiles");
     static const QStringList& mockFiles = QDir(mockBase).entryList(QDir::Files);
     static const QString& importStatement = QStringLiteral(";import \"qrc%1\" as %2;");
-    const QString& toolName = ToolUtils::toolName(module);
+    const QString& typeName = moduleTypeName(module);
 
     QFile file(url);
     if (!file.open(QFile::ReadOnly)) {
@@ -643,7 +670,7 @@ QByteArray mockSource(const QString& url, const QString& module)
     QString source = file.readAll();
     file.close();
 
-    if (!mockFiles.contains(toolName + QStringLiteral(".qml"), Qt::CaseInsensitive))
+    if (!mockFiles.contains(typeName + QStringLiteral(".qml"), Qt::CaseInsensitive))
         return source.toUtf8();
 
     QSharedPointer<Document> doc = Document::create(url, Dialect::Qml);
