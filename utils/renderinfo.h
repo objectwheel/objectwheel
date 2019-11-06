@@ -46,36 +46,6 @@ struct InitInfo {
     QHash<QString, QVector<QPair<QString, QString>>> children;
 };
 
-inline QDataStream& operator>> (QDataStream& in, QmlError& error)
-{
-    QUrl u;
-    QString d;
-    int c, l, m;
-
-    in >> c;
-    in >> d;
-    in >> l;
-    in >> m;
-    in >> u;
-
-    error.setColumn(c);
-    error.setDescription(d);
-    error.setLine(l);
-    error.setMessageType(QtMsgType(m));
-    error.setUrl(u);
-    return in;
-}
-
-inline QDataStream& operator<< (QDataStream& out, const QmlError& error)
-{
-    out << error.column();
-    out << error.description();
-    out << error.line();
-    out << int(error.messageType());
-    out << error.url();
-    return out;
-}
-
 inline QDataStream& operator>> (QDataStream& in, PropertyNode& node)
 {
     in >> node.cleanClassName;

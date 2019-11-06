@@ -882,8 +882,15 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, 
         instance->layout = false;
         instance->window = false;
         instance->object = nullptr;
-        for (const QQmlError& e : component.errors())
+        for (const QQmlError& err : component.errors()) {
+            QmlError e;
+            e.url = err.url();
+            e.description = err.description();
+            e.line = err.line();
+            e.column = err.column();
+            e.messageType = err.messageType();
             instance->errors.append(e);
+        }
         return instance;
     }
 
@@ -978,8 +985,15 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir, 
         instance->popup = false;
         instance->window = false;
         instance->object = nullptr;
-        for (const QQmlError& e : component.errors())
+        for (const QQmlError& err : component.errors()) {
+            QmlError e;
+            e.url = err.url();
+            e.description = err.description();
+            e.line = err.line();
+            e.column = err.column();
+            e.messageType = err.messageType();
             instance->errors.append(e);
+        }
 
         m_dirtyInstanceSet.insert(instance);
         return instance;

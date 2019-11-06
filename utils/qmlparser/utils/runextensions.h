@@ -444,7 +444,7 @@ template <typename Function, typename... Args,
 QFuture<ResultType>
 runAsync(QThread::Priority priority, Function &&function, Args&&... args)
 {
-    return runAsync(static_cast<QThreadPool *>(nullptr), priority,
+    return runAsync(QThreadPool::globalInstance()/*static_cast<QThreadPool *>(nullptr)*/, priority,
                     std::forward<Function>(function), std::forward<Args>(args)...);
 }
 
@@ -462,7 +462,7 @@ template <typename Function, typename... Args,
 QFuture<ResultType>
 runAsync(Function &&function, Args&&... args)
 {
-    return runAsync(static_cast<QThreadPool *>(nullptr),
+    return runAsync(QThreadPool::globalInstance()/*static_cast<QThreadPool *>(nullptr)*/,
                     QThread::InheritPriority, std::forward<Function>(function),
                     std::forward<Args>(args)...);
 }

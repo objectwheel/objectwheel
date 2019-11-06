@@ -1,4 +1,5 @@
 #include <qmlcodedocument.h>
+#include <delayer.h>
 
 #include <qmljs/qmljsmodelmanagerinterface.h>
 #include <qmljseditor/qmljssemanticinfoupdater.h>
@@ -466,7 +467,7 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
     m_semanticInfoUpdater->start();
 
     // library info changes
-    m_reupdateSemanticInfoTimer->setInterval(UPDATE_DOCUMENT_DEFAULT_INTERVAL);
+    m_reupdateSemanticInfoTimer->setInterval(UPDATE_DOCUMENT_DEFAULT_INTERVAL + 100);
     m_reupdateSemanticInfoTimer->setSingleShot(true);
     connect(m_reupdateSemanticInfoTimer, &QTimer::timeout,
             this, &QmlCodeDocument::reupdateSemanticInfo);
@@ -477,7 +478,6 @@ QmlCodeDocument::QmlCodeDocument(QPlainTextEdit* editor) : m_editor(editor)
         m_fontSettingsNeedsApply = true;
     });
 
-    modelManager->updateSourceFiles(QStringList(filePath()), false);
     applyFontSettings();
 }
 
@@ -506,6 +506,12 @@ void QmlCodeDocument::onDocumentUpdated(Document::Ptr doc)
 
     cleanDiagnosticMarks();
     if (doc->ast()) {
+        // NOTE: Make sure the worker threads of the model manager are
+        // done with processing libraries and imports before updating
+        // semantic info which makes use of model manager + context to
+        // resolve contextual information about the document.
+        Delayer::delay([] { return ModelManagerInterface::instance()->isIdle(); });
+
         // got a correctly parsed (or recovered) file.
         m_semanticInfoDocRevision = doc->editorRevision();
         m_semanticInfoUpdater->update(doc, ModelManagerInterface::instance()->snapshot());

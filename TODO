@@ -9,6 +9,10 @@ Quick Controls - 2  -  Popup patlıyor
 WebView  -  WebView patlıyor
 Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
 
+Controller silindiğinde, konumları değiştirildiğinde vs kontrol internal file explorer ile,
+    Assets explorer ile dosyalar üzerinde değişiklikler yapıldığında, he halükarda ModelManagerInterface
+    güncellenmeli, ilgili dosyaları kullanan code editörler hata falan göstermeli "bu qml türü silindi, yok" gibi vs
+    güncellemeyi belki qmlcodedocument'in yaptığı gibi (QmlCodeDocument::reparseDocument()) yapabiliriz
 Assetlerden import edilmiş bir qml objesinin ismi üzerine ctrl basılı tutularak tıklanınca ilgili dosya
     qml code editor de açılamıyor, kaynak açılamıyor
 Objectwheel pluginleri/componentleri OW'nin versiyonu ile uyumlu olacak

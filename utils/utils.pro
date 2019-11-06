@@ -27,9 +27,9 @@ HEADERS += \
     $$PWD/utilityfunctions.h \
     $$PWD/filesystemutils.h \
     $$PWD/serializeenum.h \
-    $$PWD/qmlerror.h \
     $$PWD/tooltipwidget.h \
-    $$PWD/textimagehandler.h
+    $$PWD/textimagehandler.h \
+    $$PWD/qmlerror.h
 
 SOURCES += \
     $$PWD/delayer.cpp \
@@ -42,7 +42,6 @@ SOURCES += \
     $$PWD/paintutils.cpp \
     $$PWD/utilityfunctions.cpp \
     $$PWD/filesystemutils.cpp \
-    $$PWD/qmlerror.cpp \
     $$PWD/textimagehandler.cpp
 
 RESOURCES += $$PWD/resources/resources.qrc

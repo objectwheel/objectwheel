@@ -24,8 +24,8 @@
 ****************************************************************************/
 
 #include "qmldirparser_p.h"
-#include "qmlerror.h"
 
+#include <qmlerror.h>
 #include <QtCore/QtDebug>
 
 QT_BEGIN_NAMESPACE
@@ -298,7 +298,7 @@ bool QmlDirParser::hasError() const
 void QmlDirParser::setError(const QmlError &e)
 {
     _errors.clear();
-    reportError(e.line(), e.column(), e.description());
+    reportError(e.line, e.column, e.description);
 }
 
 QList<QmlError> QmlDirParser::errors(const QString &uri) const
@@ -312,10 +312,10 @@ QList<QmlError> QmlDirParser::errors(const QString &uri) const
         QmlError e;
         QString description = msg.message;
         description.replace(QLatin1String("$$URI$$"), uri);
-        e.setDescription(description);
-        e.setUrl(url);
-        e.setLine(msg.loc.startLine);
-        e.setColumn(msg.loc.startColumn);
+        e.description = description;
+        e.url = url;
+        e.line = msg.loc.startLine;
+        e.column = msg.loc.startColumn;
         errors << e;
     }
     return errors;

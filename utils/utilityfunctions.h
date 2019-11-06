@@ -17,7 +17,6 @@ class QWindow;
 class QQmlEngine;
 class QAbstractButton;
 class QAbstractItemView;
-class QmlError;
 class QComboBox;
 class QMarginsF;
 class QAction;

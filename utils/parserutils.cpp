@@ -120,31 +120,34 @@ QString resolveModule(const Document::Ptr document, const QString& typeName, con
     const QStringList& allGenericModules = importsToModules(typeName, genericDocument.data(), allGenericImportInfos);
     const QStringList& appropriateGenericModules = importsToModules(typeName, genericDocument.data(), appropriateGenericImportInfos);
 
+    Q_UNUSED(document)
+    Q_UNUSED(allGenericModules)
+
     // Make sure original qml files doesn't contain
     // An import that is not available within generic
     // document; otherwise skip generic matching trial
     bool skipGenericMatch = false;
-    {
-        QStringList originalModulesBodyMajor;
-        for (const QString& module : originalModules)
-            originalModulesBodyMajor.append(ParserUtils::moduleBodyPlusMajorVersion(module));
-        QStringList genericModulesBodyMajor;
-        for (const QString& module : allGenericModules)
-            genericModulesBodyMajor.append(ParserUtils::moduleBodyPlusMajorVersion(module));
-        for (const QString& originalModuleMajor : qAsConst(originalModulesBodyMajor)) {
-            bool found = false;
-            for (const QString& genericModuleMajor : genericModulesBodyMajor) {
-                if (originalModuleMajor == genericModuleMajor) {
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                skipGenericMatch = true;
-                break;
-            }
-        }
-    }
+    // {
+    //     QStringList originalModulesBodyMajor;
+    //     for (const QString& module : originalModules)
+    //         originalModulesBodyMajor.append(ParserUtils::moduleBodyPlusMajorVersion(module));
+    //     QStringList genericModulesBodyMajor;
+    //     for (const QString& module : allGenericModules)
+    //         genericModulesBodyMajor.append(ParserUtils::moduleBodyPlusMajorVersion(module));
+    //     for (const QString& originalModuleMajor : qAsConst(originalModulesBodyMajor)) {
+    //         bool found = false;
+    //         for (const QString& genericModuleMajor : genericModulesBodyMajor) {
+    //             if (originalModuleMajor == genericModuleMajor) {
+    //                 found = true;
+    //                 break;
+    //             }
+    //         }
+    //         if (!found) {
+    //             skipGenericMatch = true;
+    //             break;
+    //         }
+    //     }
+    // }
 
     // Try finding a generic qml module match
     if (!skipGenericMatch) {
@@ -156,12 +159,12 @@ QString resolveModule(const Document::Ptr document, const QString& typeName, con
     // If we can't find the type within generic qml module imports
     // continue with original qml file and its own module imports
     // Expensive operation, approx 170 ms each
-    Link link(manager->snapshot(), manager->defaultVContext(document->language(), document), manager->builtins(document));
-    ContextPtr context(link(document, nullptr));
-    const QList<ImportInfo>& importInfos = context->imports(document.data())->infos(typeName, context.data());
-    const QStringList& moduleNames = importsToModules(typeName, document.data(), importInfos);
-    if (!moduleNames.isEmpty())
-        return moduleNames.last();
+    // Link link(manager->snapshot(), manager->defaultVContext(document->language(), document), manager->builtins(document));
+    // ContextPtr context(link(document, nullptr));
+    // const QList<ImportInfo>& importInfos = context->imports(document.data())->infos(typeName, context.data());
+    // const QStringList& moduleNames = importsToModules(typeName, document.data(), importInfos);
+    // if (!moduleNames.isEmpty())
+    //     return moduleNames.last();
 
     return QString();
 }

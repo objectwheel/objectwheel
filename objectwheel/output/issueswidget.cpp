@@ -26,7 +26,7 @@ QIcon iconForQmlError(const QmlError& error)
     static QIcon info(":/images/output/info.svg"),
             warning(":/images/output/warning.svg"),
             critical(":/images/output/issue.svg");
-    switch (error.messageType()) {
+    switch (error.messageType) {
     case QtInfoMsg:
     case QtDebugMsg:
         return info;
@@ -200,16 +200,18 @@ void IssuesWidget::onItemDoubleClick(QListWidgetItem* item)
     const int errorIndex = item->data(QmlErrorIndexRole).toInt();
     const ControlErrors* controlErrors = item->data(ControlErrorsRole).value<const ControlErrors*>();
     const QmlError& error = controlErrors->errors.at(errorIndex);
-    const QString& fullPath = error.url().toLocalFile();
+    const QString& fullPath = error.url.toLocalFile();
     const QString& assetsPath = SaveUtils::toProjectAssetsDir(ProjectManager::dir());
 
+    int line = error.line > 0 ? error.line : 0;
+    int column = error.column > 0 ? error.column : 0;
+
     if (fullPath.contains(assetsPath)) {
-        emit assetsFileOpened(QDir(assetsPath).relativeFilePath(fullPath), error.line(),
-                              error.column());
+        emit assetsFileOpened(QDir(assetsPath).relativeFilePath(fullPath), line, column);
     } else {
         emit designsFileOpened(controlErrors->control,
             QDir(SaveUtils::toControlThisDir(controlErrors->control->dir())).relativeFilePath(fullPath),
-            error.line(), error.column());
+                               line, column);
     }
 }
 
