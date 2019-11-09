@@ -195,7 +195,7 @@ QHelpEngine* HelpManager::helpEngine()
 
 QString HelpManager::collectionFilePath()
 {
-    return QApplication::applicationDirPath() + "/docs/docs.qhc";
+    return ApplicationCore::documentsPath() + "/docs.qhc";
 }
 
 void HelpManager::registerDocumentation(const QStringList &files)

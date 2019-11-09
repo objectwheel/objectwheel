@@ -21,16 +21,16 @@ public:
         const int minor = OW_MODULE_VERSION_MINOR;
 
         // 1.0 types
-        qmlRegisterSingletonType<Objectwheel>(uri, major, minor, "Objectwheel",
+        qmlRegisterSingletonType<Objectwheel>(uri, major, minor, Objectwheel::staticMetaObject.className(),
                                               [] (QQmlEngine* e, QJSEngine*) -> QObject* {
             return new Objectwheel(e);
         });
-        qmlRegisterSingletonType<Translation>(uri, major, minor, "Translation",
+        qmlRegisterSingletonType<Translation>(uri, major, minor, Translation::staticMetaObject.className(),
                                               [] (QQmlEngine* e, QJSEngine*) -> QObject* {
             return new Translation(e);
         });
 
-        qmlRegisterModule(uri, OW_MODULE_VERSION_MAJOR, OW_MODULE_VERSION_MINOR);
+        qmlRegisterModule(uri, major, minor);
     }
 };
 

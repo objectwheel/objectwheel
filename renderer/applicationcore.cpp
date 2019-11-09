@@ -101,6 +101,12 @@ ApplicationCore::~ApplicationCore()
     delete m_renderSocket;
 }
 
+QString ApplicationCore::modulesPath()
+{
+    // TODO : Think about unix and windows versions too
+    return QFileInfo(QApplication::applicationDirPath() + "/../Frameworks/modules").canonicalFilePath();
+}
+
 void ApplicationCore::run()
 {
     // Caution! Receiver is living on another thread

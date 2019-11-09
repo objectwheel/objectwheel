@@ -7,6 +7,7 @@
 #include <hashfactory.h>
 #include <cmath>
 
+#include <QOperatingSystemVersion>
 #include <QFileInfo>
 #include <QQmlEngine>
 #include <QTextDocument>
@@ -658,12 +659,16 @@ void disableWheelEvent(QWidget* widget)
 
 QFont defaultFont()
 {
-#if defined(Q_OS_MACOS) || defined(Q_OS_IOS)
-    QFont font(".SF NS Display");
+    QFont font;
+#if defined(Q_OS_MACOS)
+    if (QOperatingSystemVersion::current() >= QOperatingSystemVersion::MacOSCatalina)
+        font.setFamily("SF UI Display");
+    else
+        font.setFamily(".SF NS Display");
 #elif defined(Q_OS_WIN)
-    QFont font("Segoe UI");
+    font.setFamily("Segoe UI");
 #else
-    QFont font("Roboto");
+    font.setFamily("Roboto");
 #endif
     font.setPixelSize(13);
     return font;

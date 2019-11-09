@@ -240,9 +240,24 @@ QSettings* ApplicationCore::settings()
     return s_settings;
 }
 
+QString ApplicationCore::modulesPath()
+{
+    // TODO : Think about unix and windows versions too
+    return QFileInfo(QApplication::applicationDirPath() + "/../Frameworks/modules").canonicalFilePath();
+}
+
 QString ApplicationCore::resourcePath()
 {
     return ":";
+}
+
+QString ApplicationCore::documentsPath()
+{
+#if defined(Q_OS_MACOS)
+    return QFileInfo(QApplication::applicationDirPath() + "/../Resources/docs").canonicalFilePath();
+#else
+    return QFileInfo(QApplication::applicationDirPath() + "/docs").canonicalFilePath();
+#endif
 }
 
 QString ApplicationCore::appDataLocation()

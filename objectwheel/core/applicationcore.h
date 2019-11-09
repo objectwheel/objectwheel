@@ -33,7 +33,9 @@ public:
 
     static QPalette palette();
     static QSettings* settings();
+    static QString modulesPath();
     static QString resourcePath();
+    static QString documentsPath();
     static QString appDataLocation();
 
 private:

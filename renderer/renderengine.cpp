@@ -6,6 +6,7 @@
 #include <utilityfunctions.h>
 #include <paintutils.h>
 #include <parserutils.h>
+#include <applicationcore.h>
 
 #include <private/qquickdesignersupportmetainfo_p.h>
 #include <private/qquickdesignersupportproperties_p.h>
@@ -44,6 +45,7 @@ RenderEngine::RenderEngine(QObject* parent) : QObject(parent)
     DesignerSupport::setRootItem(m_view, RenderUtils::createDummyItem(m_view->engine()));
 
     m_view->engine()->setOutputWarningsToStandardError(false);
+    m_view->engine()->addImportPath(ApplicationCore::modulesPath());
     m_view->engine()->addImportPath(SaveUtils::toProjectImportsDir(CommandlineParser::projectDirectory()));
 
     m_renderTimer->setInterval(RENDER_TIMEOUT);

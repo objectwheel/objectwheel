@@ -1,6 +1,7 @@
 #include <documentmanager.h>
 #include <saveutils.h>
 #include <fileutils.h>
+#include <applicationcore.h>
 #include <texteditor/texteditorsettings.h>
 
 #include <QLibraryInfo>
@@ -51,6 +52,7 @@ void DocumentManager::updateProjectInfo(const QString& projectDir)
     projectInfo.qtVersionString = QLatin1String(qVersion());
     projectInfo.qtQmlPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::Qml2ImportsPath)).canonicalFilePath();
     projectInfo.qtImportsPath = QFileInfo(QLibraryInfo::location(QLibraryInfo::ImportsPath)).canonicalFilePath();
+    projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(ApplicationCore::modulesPath()));
     if (!importsDir.isEmpty()) {
         projectInfo.importPaths.maybeInsert(Utils::FileName::fromString(importsDir));
         // projectInfo.tryQmlDump = true;

@@ -16,6 +16,8 @@ public:
     explicit ApplicationCore(QObject* parent = nullptr);
     ~ApplicationCore() override;
 
+    static QString modulesPath();
+
     void run();
 
     static void prepare();
