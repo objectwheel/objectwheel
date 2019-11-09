@@ -2,7 +2,6 @@
 INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/zipasync
 INCLUDEPATH += $$PWD/../utils/zipasync/async
-INCLUDEPATH += $$PWD/../utils/components
 INCLUDEPATH += $$PWD/../utils/qmlparser
 INCLUDEPATH += $$PWD/../utils/qmlparser/utils
 RESOURCES   += $$PWD/../utils/resources/resources.qrc

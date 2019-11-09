@@ -3,13 +3,13 @@
 
 #include <QObject>
 
-class Ow : public QObject
+class Objectwheel : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(Ow)
+    Q_DISABLE_COPY(Objectwheel)
 
 public:
-    explicit Ow(QObject* parent = nullptr);
+    explicit Objectwheel(QObject* parent = nullptr);
 
 public slots:
     QString toLocalFile(const QUrl& url);

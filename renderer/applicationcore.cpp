@@ -1,6 +1,5 @@
 #include <applicationcore.h>
 #include <rendersocket.h>
-#include <components.h>
 #include <renderengine.h>
 #include <renderutils.h>
 #include <commandlineparser.h>
@@ -48,8 +47,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
     m_renderSocket = new RenderSocket;
     m_socketThread = new QThread(this);
-
-    Components::init();
 
     m_renderSocket->moveToThread(m_socketThread);
     m_socketThread->start();

@@ -4,7 +4,6 @@
 #include <renderutils.h>
 #include <renderinfo.h>
 #include <utilityfunctions.h>
-#include <components.h>
 #include <paintutils.h>
 #include <parserutils.h>
 

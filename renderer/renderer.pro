@@ -41,7 +41,6 @@ include($$PWD/../objectwheel.pri)
 INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/zipasync
 INCLUDEPATH += $$PWD/../utils/zipasync/async
-INCLUDEPATH += $$PWD/../utils/components
 LIBS        += -L$$OUT_PWD/../utils -lutils
 windows:CONFIG(release, debug | release):LIBS += -L$$OUT_PWD/../utils/release
 windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug
