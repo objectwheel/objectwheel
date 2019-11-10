@@ -186,7 +186,6 @@
         <file>images/tools/WebView.svg</file>
         <file>images/tools/WeekNumberColumn.svg</file>
         <file>images/tools/ZoomBlur.svg</file>
-        <file>mockfiles/Camera.qml</file>
         <file>moduleresolver/moduleresolver.qml</file>
         <file>tools/AnimatedImage/m/control.meta</file>
         <file>tools/AnimatedImage/t/main.qml</file>

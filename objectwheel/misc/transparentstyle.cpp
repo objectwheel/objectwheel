@@ -15,9 +15,6 @@ const int PushButtonRightOffset = 12;
 const qreal pushButtonDefaultHeight[3] = { 32, 28, 16 };
 }
 
-QRectF comboboxEditBounds(const QRectF& outerBounds);
-QRectF adjustedControlFrame(const QRectF& rect);
-
 TransparentStyle::TransparentStyle::TransparentStyle(QObject* parent) : ApplicationStyle()
 {
     setParent(parent);
@@ -104,77 +101,26 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
                                        const QStyleOptionComplex* option,
                                        QStyle::SubControl subControl, const QWidget* widget) const
 {
-    QRect ret;
+    QRect ret = ApplicationStyle::subControlRect(control, option, subControl, widget);
 
     switch (control) {
     case CC_ComboBox:
-        if (const QStyleOptionComboBox *combo
+        if (const QStyleOptionComboBox* combo
                 = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
-            auto editRect = comboboxEditBounds(adjustedControlFrame(combo->rect));
-            const QComboBox* cb = qobject_cast<const QComboBox*>(widget);
-
-            switch (subControl) {
-            case SC_ComboBoxEditField:
-                if (cb)
-                    editRect = editRect.marginsRemoved(cb->contentsMargins());
-
-                ret = editRect.toAlignedRect();
-                break;
-            case SC_ComboBoxArrow:
-                ret = editRect.toAlignedRect();
-                ret.setX(ret.x() + ret.width());
-                ret.setWidth(combo->rect.right() - ret.right());
-                break;
-            default:
-                ret = ApplicationStyle::subControlRect(control, option, subControl, widget);
-                break;
-            }
+            Q_UNUSED(combo)
+            if (subControl == SC_ComboBoxEditField)
+                ret.adjust(-3, 0, 0, 0);
+            else if (subControl == SC_ComboBoxArrow)
+                ret = QFusionStyle::subControlRect(control, option, subControl, widget);
         } break;
-
     case CC_SpinBox:
-        if (const QStyleOptionSpinBox *spinbox = qstyleoption_cast<const QStyleOptionSpinBox *>(option)) {
-            int center = spinbox->rect.height() / 2;
-            int fw = proxy()->pixelMetric(PM_SpinBoxFrameWidth, spinbox, widget);
-            int y = fw;
-            const int buttonWidth = QStyleHelper::dpiScaled(14);
-            int x, lx, rx;
-            x = spinbox->rect.width() - y - buttonWidth + 2;
-            lx = fw;
-            rx = x - fw;
-            switch (subControl) {
-            case SC_SpinBoxUp:
-                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
-                    return QRect();
-                if (spinbox->state & State_Sunken && (spinbox->activeSubControls & SC_SpinBoxUp))
-                    ret = QRect(x - 1, fw + 3, buttonWidth, center - fw);
-                else
-                    ret = QRect(x - 3, fw + 1, buttonWidth, center - fw);
-                break;
-            case SC_SpinBoxDown:
-                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
-                    return QRect();
-                if (spinbox->state & State_Sunken && (spinbox->activeSubControls & SC_SpinBoxDown))
-                    ret = QRect(x - 1, center + 1, buttonWidth, spinbox->rect.bottom() - center - fw + 1);
-                else
-                    ret = QRect(x - 3, center - 1, buttonWidth, spinbox->rect.bottom() - center - fw + 1);
-                break;
-            case SC_SpinBoxEditField:
-                if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons) {
-                    ret = QRect(lx, fw, spinbox->rect.width() - 2*fw, spinbox->rect.height() - 2*fw);
-                } else {
-                    ret = QRect(lx, fw, rx - qMax(fw - 1, 0), spinbox->rect.height() - 2*fw);
-                }
-                break;
-            case SC_SpinBoxFrame:
-                ret = spinbox->rect;
-            default:
-                break;
-            }
-            ret = visualRect(spinbox->direction, spinbox->rect, ret);
+        if (const QStyleOptionSpinBox* spinbox
+                = qstyleoption_cast<const QStyleOptionSpinBox *>(option)) {
+            Q_UNUSED(spinbox)
+            if (subControl == SC_SpinBoxEditField)
+                ret.adjust(-3, 0, 0, 0);
         } break;
-
     default:
-        ret = ApplicationStyle::subControlRect(control, option, subControl, widget);
         break;
     }
 

@@ -196,7 +196,7 @@ void PropertiesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& op
             painter->setPen(option.palette.text().color());
     }
 
-    const QRectF& textRect = option.rect.adjusted(5, 0, 0, 0);
+    const QRectF& textRect = option.rect.adjusted(3, 0, 0, 0);
     const QString& text = index.data(Qt::DisplayRole).toString();
     painter->drawText(textRect, option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
                       QTextOption(Qt::AlignLeft | Qt::AlignVCenter));

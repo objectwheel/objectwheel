@@ -23,6 +23,18 @@
 #include <private/qquickitem_p.h>
 #include <private/qquickoverlay_p.h>
 
+static bool isCompletionDisabled(const QObject* object)
+{
+    static const char* disabledClasses[] {
+        "QDeclarativeCamera"
+    };
+    for (const char* className : disabledClasses) {
+        if (object->inherits(className))
+            return true;
+    }
+    return false;
+}
+
 static void setWindowHidden(QObject* object)
 {
     if (object == 0)
@@ -170,6 +182,9 @@ static void doComponentCompleteRecursive(QObject* object, const RenderEngine* en
             if (!engine->hasInstanceForObject(child))
                 doComponentCompleteRecursive(child, engine);
         }
+
+        if (isCompletionDisabled(object))
+            return;
 
         if (item) {
             static_cast<QQmlParserStatus*>(item)->componentComplete();
@@ -867,7 +882,6 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
 
     const QObject* object = instance->object;
     const QMetaObject* metaObject = object->metaObject();
-    qDebug() << QQmlMetaType::qmlType(instance->module).isValid();
 
     while (metaObject) {
         if (metaObject->propertyOffset() - metaObject->propertyCount() == 0) {

@@ -25,14 +25,8 @@ namespace {
 const int macItemFrame          = 2;    // menu item frame width
 const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
-const qreal comboBoxDefaultHeight[3] = { 26, 22, 19 };
 const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
 const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
-
-QRect comboboxInnerBounds(const QRect& outerBounds)
-{
-    return outerBounds.adjusted(3, 3, -1, -5);
-}
 
 void drawArrow(Qt::ArrowType arrowType, const QStyle *style, const QStyleOption *option,
                const QRect &rect, QPainter *painter, const QWidget *widget = 0)
@@ -75,26 +69,6 @@ bool hasVerticalParentToolBar(const QWidget* widget)
 
     return false;
 }
-}
-
-QRectF comboboxEditBounds(const QRectF& outerBounds) // Used by transparentstyle.cpp
-{
-    QRectF ret = outerBounds;
-    ret = ret.adjusted(-5, 0, -24, 0).translated(3, 2);
-    ret.setHeight(14);
-    return ret;
-}
-
-QRectF adjustedControlFrame(const QRectF& rect) // Used by transparentstyle.cpp
-{
-    QRectF frameRect;
-    const auto frameSize = QSizeF(-1, comboBoxDefaultHeight[1]);
-    // Center in the style option's rect.
-    frameRect = QRectF(QPointF(0, (rect.height() - frameSize.height()) / 2.0),
-                       QSizeF(rect.width(), frameSize.height()));
-    frameRect = frameRect.translated(rect.topLeft());
-    frameRect = frameRect.adjusted(0, 0, -6, 0).translated(4, 0);
-    return frameRect;
 }
 
 ApplicationStyle::ButtonStyle ApplicationStyle::buttonStyle(const QWidget* widget)
@@ -232,44 +206,24 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
                                        const QStyleOptionComplex* option,
                                        QStyle::SubControl subControl, const QWidget* widget) const
 {
-    QRect ret;
+    QRect ret = QFusionStyle::subControlRect(control, option, subControl, widget);
 
     switch (control) {
     case CC_ComboBox:
         if (const QStyleOptionComboBox *combo
                 = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
-            auto editRect = comboboxEditBounds(adjustedControlFrame(combo->rect));
-            switch (subControl) {
-            case SC_ComboBoxListBoxPopup:
-                if (combo->editable) {
-                    const QRect inner = comboboxInnerBounds(combo->rect);
-                    const int comboTop = combo->rect.top();
-                    ret = QRect(inner.x(), comboTop,
-                                inner.x() - combo->rect.left() + inner.width(),
-                                editRect.bottom() - comboTop + 2);
-                } else {
-                    ret = QRect(combo->rect.x() + 4 - 11,
-                                combo->rect.y() + 1,
-                                editRect.width() + 10 + 11,
-                                1);
-                } break;
-            case SC_ComboBoxArrow: {
+            Q_UNUSED(combo)
+            if (subControl == SC_ComboBoxArrow) {
                 QRectF r(option->rect);
                 r.adjust(0.5, 0.5, -0.5, 0);
                 ret = QRectF(r.left() + r.width() - 16.5, r.top() + 0.5, 16, r.height() - 1.5).toRect();
-            } break;
-            default:
-                ret = QFusionStyle::subControlRect(control, option, subControl, widget);
-                break;
             }
         } break;
     case CC_ToolButton:
-        ret = QFusionStyle::subControlRect(control, option, subControl, widget);
         if (hasVerticalParentToolBar(widget))
             ret = ret.transposed();
         break;
     default:
-        ret = QFusionStyle::subControlRect(control, option, subControl, widget);
         break;
     }
 
