@@ -5,6 +5,7 @@ Masaüstündeki resimler
 WebView  -  WebView patlıyor
 Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
 
+AssetsPane neden kendini aşıp sürekli propertiespane'in alanının üzerine doğru genişliyor aq??
 Toolbox'dan filedialog vs gibi bazı itemler sürüklenip bırakılınca ne hikmetse ikonları "unknown" gözüküyor, neden?
 Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
     örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
@@ -48,6 +49,7 @@ fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu co
     entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
     öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
     olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
+    hatta toolbox'un hangi kategorilerinin açık kapalı olduğu bile settingsler ile kayıt edilip restore edilsin
 properties pane'de ki color propertisinin toolbuttonu neden sapıttı?
 formspane'de ki ekle çıkart butonlarını QToolButton a çevir, ikon boyutları ve buton fixed
     boyutlarını PinBar daki pin butonları ile birebir aynı yap, ve ikonları icons8 den al

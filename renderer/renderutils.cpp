@@ -26,7 +26,6 @@
 static bool isCompletionDisabled(const QObject* object)
 {
     static const char* disabledClasses[] {
-        "QDeclarativeCamera",
         "QQmlTimer",
         "QQuickLoader",
         "QQuickMenu1",
@@ -42,7 +41,32 @@ static bool isCompletionDisabled(const QObject* object)
         "QQuickWebEngineView",
         "QWebEngineWebViewPrivate",
         "QQmlWebSocket",
-        "QQmlWebSocketServer"
+        "QQmlWebSocketServer",
+        "QDeclarativeBluetoothService",
+        "QDeclarativeBluetoothSocket",
+        "QDeclarativeBluetoothDiscoveryModel",
+        "QDeclarativeCamera",
+        "QDeclarativeAudio",
+        "QDeclarativeVideoOutput",
+        "QDeclarativeRadio",
+        "QDeclarativeTorch",
+        "QDeclarativePositionSource",
+        "QDeclarativeGeoServiceProvider",
+        "QDeclarativeGeoMap",
+        "QDeclarativeGeoMapItemBase",
+        "QDeclarativeGeoMapItemGroup",
+        "QDeclarativeGeocodeModel",
+        "QDeclarativeGeoRouteModel",
+        "QDeclarativeGeoRouteQuery",
+        "QDeclarativeCategory",
+        "QDeclarativePlaceContentModel",
+        "QDeclarativePlace",
+        "QDeclarativeSupplier",
+        "QDeclarativeSearchModelBase",
+        "QDeclarativeSupportedCategoriesModel",
+        "QDeclarativeGeoMapParameter",
+        "QDeclarativeGeoWaypoint",
+        "QGeoMapObject"
     };
     for (const char* className : disabledClasses) {
         if (object->inherits(className))
