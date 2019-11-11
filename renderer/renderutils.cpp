@@ -37,7 +37,12 @@ static bool isCompletionDisabled(const QObject* object)
         "QQuickPlatformMenuBar",
         "QQuickPlatformIcon",
         "QQuickPlatformIconLoader",
-        "QQuickPlatformSystemTrayIcon"
+        "QQuickPlatformSystemTrayIcon",
+        "QWebViewInterface",
+        "QQuickWebEngineView",
+        "QWebEngineWebViewPrivate",
+        "QQmlWebSocket",
+        "QQmlWebSocketServer"
     };
     for (const char* className : disabledClasses) {
         if (object->inherits(className))

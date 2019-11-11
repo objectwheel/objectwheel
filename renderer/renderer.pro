@@ -11,10 +11,10 @@ DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += RENDERER_DEBUG
 
-QT += widgets network qml quick webview websockets datavisualization
-QT += sensors svg scxml purchasing positioning nfc location gamepad
-QT += charts multimedia webenginecore webengine webchannel bluetooth
-QT += quick-private quicktemplates2-private
+QT += widgets network qml quick datavisualization
+QT += sensors svg scxml purchasing positioning nfc
+QT += charts multimedia bluetooth gamepad location
+QT += quick-private quicktemplates2-private websockets
 
 ### Sources
 INCLUDEPATH += $$PWD

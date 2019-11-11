@@ -11,8 +11,10 @@
 #include <private/qquickdesignersupport_p.h>
 
 #include <QTimer>
-#include <QtWebView>
 #include <QApplication>
+#include <QDir>
+#include <QFontDatabase>
+#include <QThread>
 
 #if defined(Q_OS_UNIX)
 #include <unistd.h>
@@ -140,15 +142,6 @@ void ApplicationCore::prepare()
     qputenv("QML_DISABLE_DISK_CACHE", "true");
     qputenv("QT_QUICK_CONTROLS_CONF",
             SaveUtils::toProjectAssetsDir(CommandlineParser::projectDirectory()).toUtf8());
-    // Not needed on desktop platforms since it
-    // is already called by QtWebView::initialize()
-    // QtWebEngine::initialize();
-    // Also we are calling following before
-    // Constructing the QApplication because
-    // It uses QtWebEngine as the backend on
-    // desktop platforms and it must be initialized
-    // before the QApplication constructor
-    QtWebView::initialize();
 }
 
 void ApplicationCore::startQuitCountdown(int msec)

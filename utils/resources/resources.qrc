@@ -581,5 +581,6 @@
         <file>tools/ExclusiveGroup/t/main.qml</file>
         <file>other/tool-categories.json</file>
         <file>other/tool-icons.json</file>
+        <file>mockfiles/WebView.qml</file>
     </qresource>
 </RCC>

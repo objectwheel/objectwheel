@@ -655,6 +655,91 @@ QString moduleBodyPlusMajorVersion(const QString& module)
     return majorModule;
 }
 
+QByteArray mockSource(const QString& url, const QString& module)
+{
+    static const QString& mockSign = QStringLiteral("Objectwheel_MOCK_FILES_54");
+    static const QString& mockBase = QStringLiteral(":/mockfiles");
+    static const QStringList& mockFiles = QDir(mockBase).entryList(QDir::Files);
+    static const QString& importStatement = QStringLiteral(";import \"qrc%1\" as %2;");
+    const QString& typeName = moduleTypeName(module);
+
+    QFile file(url);
+    if (!file.open(QFile::ReadOnly)) {
+        qWarning("ParserUtils: Cannot open file");
+        return {};
+    }
+    QString source = file.readAll();
+    file.close();
+
+    if (!mockFiles.contains(typeName + QStringLiteral(".qml"), Qt::CaseInsensitive))
+        return source.toUtf8();
+
+    QSharedPointer<Document> doc = Document::create(url, Dialect::Qml);
+    doc->setSource(source);
+
+    if (!doc->parse()) {
+        qWarning() << "Property couldn't read. Unable to parse qml file.";
+        return source.toUtf8();
+    }
+
+    auto uiProgram = doc->qmlProgram();
+
+    if (!uiProgram) {
+        qWarning() << "Property couldn't read. Corrupted ui program.";
+        return source.toUtf8();
+    }
+
+    auto uiObjectMemberList = uiProgram->members;
+
+    if (!uiObjectMemberList) {
+        qWarning() << "Property couldn't read. Empty source file.";
+        return source.toUtf8();
+    }
+
+    auto uiHeaderItemList = uiProgram->headers;
+
+    if (!uiHeaderItemList) {
+        qWarning() << "Property couldn't read. Empty source file.";
+        return source.toUtf8();
+    }
+
+    quint32 typeBegin = 0;
+    quint32 lastImportEnd = 0;
+    UiHeaderItemList* header = uiHeaderItemList;
+    do {
+        auto import = cast<UiImport*>(header->headerItem);
+        if (!import) {
+            header = header->next;
+            continue;
+        }
+        lastImportEnd = import->lastSourceLocation().end();
+        header = header->next;
+    } while(header);
+
+    auto uiObjectDefinition = cast<UiObjectDefinition *>(uiObjectMemberList->member);
+
+    if (!uiObjectDefinition) {
+        qWarning() << "Property couldn't read. Bad file format 0x1.";
+        return source.toUtf8();
+    }
+
+    auto qualifiedId = cast<UiQualifiedId *>(uiObjectDefinition->qualifiedTypeNameId);
+
+    if (!qualifiedId) {
+        qWarning() << "Property couldn't read. Bad file format 0x2.";
+        return source.toUtf8();
+    }
+
+    typeBegin = qualifiedId->firstSourceLocation().begin();
+
+    if (typeBegin > 0 && lastImportEnd > 0) { // We edit lower statement first
+        source.insert(typeBegin, mockSign + QStringLiteral("."));
+        source.insert(lastImportEnd, importStatement.arg(mockBase).arg(mockSign));
+    }
+
+    return source.toUtf8();
+}
+
 QString id(const QString& controlDir)
 {
     if (Internal::canParse(controlDir))

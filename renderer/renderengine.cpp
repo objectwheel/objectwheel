@@ -855,7 +855,7 @@ void RenderEngine::repairIndexes(ControlInstance* parentInstance)
     }
 }
 
-RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, const QString& /*module*/)
+RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, const QString& module)
 {
     ComponentCompleteDisabler disabler;
     Q_UNUSED(disabler)
@@ -864,7 +864,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, 
     instance->context = new QQmlContext(m_view->engine());
 
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromUserInput(url));
+    component.setData(ParserUtils::mockSource(url, module), QUrl::fromUserInput(url));
 
     QObject* object = component.beginCreate(instance->context);
 
@@ -967,7 +967,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir, 
 
     m_view->engine()->clearComponentCache();
     QQmlComponent component(m_view->engine());
-    component.loadUrl(QUrl::fromLocalFile(url));
+    component.setData(ParserUtils::mockSource(url, module), QUrl::fromLocalFile(url));
 
     QObject* object = component.beginCreate(instance->context);
 
