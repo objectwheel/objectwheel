@@ -37,7 +37,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 
     /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::defaultFont());
-    QApplication::setStyle("fusion");
     QApplication::setStartDragDistance(8);
 
     DesignerSupport::activateDesignerWindowManager();

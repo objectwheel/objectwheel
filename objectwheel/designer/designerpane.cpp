@@ -72,6 +72,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addWidget(m_themeSettingsButton);
     m_toolBar->addWidget(m_themeComboBox);
     m_toolBar->addWidget(m_themeComboBox1);
+    m_toolBar->addSeparator();
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
 
     m_refreshButton->setFixedSize(QSize(20, 20));

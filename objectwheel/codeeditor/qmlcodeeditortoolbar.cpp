@@ -77,11 +77,11 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_actions.append(addWidget(m_newFileButton));                               // 0
     m_actions.append(addWidget(m_addFileButton));                               // 1
     m_actions.append(addSeparator());                                           // 2
-    m_actions.append(addWidget(m_leftCombo));                                   // 3
+    m_actions.append(addWidget(m_closeButton));                                 // 3
     m_actions.append(addSeparator());                                           // 4
-    m_actions.append(addWidget(m_rightCombo));                                  // 5
+    m_actions.append(addWidget(m_leftCombo));                                   // 5
     m_actions.append(addSeparator());                                           // 6
-    m_actions.append(addWidget(m_closeButton));                                 // 7
+    m_actions.append(addWidget(m_rightCombo));                                  // 7
     m_actions.append(addSeparator());                                           // 8
     addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_actions.append(addSeparator());                                           // 9
@@ -401,12 +401,12 @@ void QmlCodeEditorToolBar::setHiddenActions(QmlCodeEditorToolBar::DocumentAction
     m_actions.at(0)->setVisible(!(action & FileActions));
     m_actions.at(1)->setVisible(!(action & FileActions));
     m_actions.at(2)->setVisible(!(action & FileActions));
-    m_actions.at(3)->setVisible(!(action & LeftAction));
-    m_actions.at(4)->setVisible(!(action & LeftAction));
-    m_actions.at(5)->setVisible(!(action & RightAction));
-    m_actions.at(6)->setVisible(!(action & RightAction));
-    m_actions.at(7)->setVisible(!(action & CloseAction));
-    m_actions.at(8)->setVisible(!(action & CloseAction));
+    m_actions.at(3)->setVisible(!(action & CloseAction));
+    m_actions.at(4)->setVisible(!(action & CloseAction));
+    m_actions.at(5)->setVisible(!(action & LeftAction));
+    m_actions.at(6)->setVisible(!(action & LeftAction));
+    m_actions.at(7)->setVisible(!(action & RightAction));
+    m_actions.at(8)->setVisible(!(action & RightAction));
     m_actions.at(9)->setVisible(!(action & LineColAction));
     m_actions.at(10)->setVisible(!(action & LineColAction));
     m_actions.at(11)->setVisible(!(action & ShowAction));

@@ -494,7 +494,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
 void ThemeChooserWidget::setCurrentStyle(const QString& style)
 {
-    if (m_stylesCombo->currentText() != style) {
+    if (m_stylesCombo->currentText() != style || m_saveButton->isEnabled()) {
         m_stylesCombo->setCurrentText(style);
         QMetaObject::invokeMethod(this, [=] {
             refresh();

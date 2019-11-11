@@ -1,14 +1,13 @@
 Designer Core TODOs
 
 ## Sorunlu elemanlar
-Repeater'a çocuk ekleyince patlıyor
-Quick Controls - 2  -  Dialog patlıyor
-Quick Controls - 2  -  Drawer patlıyor
-Quick Controls - 2  -  Menu patlıyor
-Quick Controls - 2  -  Popup patlıyor
+Masaüstündeki resimler
 WebView  -  WebView patlıyor
 Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
 
+Toolbox'dan filedialog vs gibi bazı itemler sürüklenip bırakılınca ne hikmetse ikonları "unknown" gözüküyor, neden?
+Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
+    örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
 Controller silindiğinde, konumları değiştirildiğinde vs kontrol internal file explorer ile,
     Assets explorer ile dosyalar üzerinde değişiklikler yapıldığında, he halükarda ModelManagerInterface
     güncellenmeli, ilgili dosyaları kullanan code editörler hata falan göstermeli "bu qml türü silindi, yok" gibi vs

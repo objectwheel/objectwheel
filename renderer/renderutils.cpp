@@ -28,7 +28,16 @@ static bool isCompletionDisabled(const QObject* object)
     static const char* disabledClasses[] {
         "QDeclarativeCamera",
         "QQmlTimer",
-        "QQuickLoader"
+        "QQuickLoader",
+        "QQuickMenu1",
+        "QQuickMenuBar1",
+        "QQuickAbstractDialog",
+        "QQuickPlatformDialog",
+        "QQuickPlatformMenu",
+        "QQuickPlatformMenuBar",
+        "QQuickPlatformIcon",
+        "QQuickPlatformIconLoader",
+        "QQuickPlatformSystemTrayIcon"
     };
     for (const char* className : disabledClasses) {
         if (object->inherits(className))

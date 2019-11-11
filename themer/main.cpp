@@ -43,7 +43,6 @@ int main(int argc, char *argv[])
 
     /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::defaultFont());
-    QApplication::setStyle("fusion");
     QApplication::setStartDragDistance(8);
 
 #ifdef Q_OS_MACOS // Show/hide dock icon
