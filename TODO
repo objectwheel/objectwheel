@@ -1,10 +1,5 @@
 Designer Core TODOs
 
-## Sorunlu elemanlar
-Masaüstündeki resimler
-WebView  -  WebView patlıyor
-Multimedia - Camera kamerayı açıyor aq? aynı mevzu mapda da düşünülür
-
 AssetsPane neden kendini aşıp sürekli propertiespane'in alanının üzerine doğru genişliyor aq??
 Toolbox'dan filedialog vs gibi bazı itemler sürüklenip bırakılınca ne hikmetse ikonları "unknown" gözüküyor, neden?
 Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,

@@ -582,5 +582,8 @@
         <file>other/tool-categories.json</file>
         <file>other/tool-icons.json</file>
         <file>mockfiles/WebView.qml</file>
+        <file>images/tools/Plugin.svg</file>
+        <file>tools/Plugin/t/main.qml</file>
+        <file>tools/Plugin/m/control.meta</file>
     </qresource>
 </RCC>

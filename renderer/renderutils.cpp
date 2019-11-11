@@ -66,7 +66,9 @@ static bool isCompletionDisabled(const QObject* object)
         "QDeclarativeSupportedCategoriesModel",
         "QDeclarativeGeoMapParameter",
         "QDeclarativeGeoWaypoint",
-        "QGeoMapObject"
+        "QGeoMapObject",
+        "QmlSensor",
+        "QmlSensorGesture"
     };
     for (const char* className : disabledClasses) {
         if (object->inherits(className))

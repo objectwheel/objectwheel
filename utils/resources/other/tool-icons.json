@@ -157,6 +157,7 @@
     "QtMultimedia/5/SoundEffect"              : ":/images/tools/SoundEffect.svg",
     "QtMultimedia/5/Torch"                    : ":/images/tools/Torch.svg",
     "QtLocation/5/Map"                        : ":/images/tools/Map.svg",
+    "QtLocation/5/Plugin"                     : ":/images/tools/Plugin.svg",
     "QtPositioning/5/PositionSource"          : ":/images/tools/PositionSource.svg",
     "QtSensors/5/LidSensor"                   : ":/images/tools/LidSensor.svg",
     "QtSensors/5/RotationSensor"              : ":/images/tools/RotationSensor.svg",
