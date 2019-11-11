@@ -258,12 +258,9 @@ void RenderEngine::updateControlCode(const QString& uid, const QString& module)
 
     // We delete previous instance object after we reparent all of its children into the new instance
     if (oldObject) {
-        if (item) {
+        if (item)
             item->setParentItem(nullptr);
-            delete item;
-        }
-        if (oldObject != item)
-            delete oldObject;
+        delete oldObject;
     }
 
     RenderUtils::doComplete(oldInstance, this);
@@ -324,12 +321,9 @@ void RenderEngine::updateFormCode(const QString& uid, const QString& module)
 
     // We delete previous instance object after we reparent all of its children into the new instance
     if (oldObject) {
-        if (item) {
+        if (item)
             item->setParentItem(nullptr);
-            delete item;
-        }
-        if (oldObject != item)
-            delete oldObject;
+        delete oldObject;
     }
 
     RenderUtils::doComplete(oldFormInstance, this);

@@ -26,7 +26,9 @@
 static bool isCompletionDisabled(const QObject* object)
 {
     static const char* disabledClasses[] {
-        "QDeclarativeCamera"
+        "QDeclarativeCamera",
+        "QQmlTimer",
+        "QQuickLoader"
     };
     for (const char* className : disabledClasses) {
         if (object->inherits(className))
@@ -538,8 +540,7 @@ void RenderUtils::setInstanceParent(RenderEngine::ControlInstance* instance, QOb
     QQmlProperty defaultProperty(parentObject);
     if (defaultProperty.isValid()) {
         QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-        Q_ASSERT(!instance->gui || childList.canAppend());
-
+        // Q_ASSERT(!instance->gui || childList.canAppend());
         // Workaround against QQuickContainer's insertItem() bug
         if (childList.canAppend()) {
             const bool completeDisabled = !QQmlVME::componentCompleteEnabled();
@@ -758,13 +759,9 @@ void RenderUtils::deleteInstancesRecursive(RenderEngine::ControlInstance* instan
         designerSupport.derefFromEffectItem(item);
 
     if (instance->object) {
-        auto item = RenderUtils::guiItem(instance->object);
-        if (item) {
+        if (item)
             item->setParentItem(nullptr);
-            delete item;
-        }
-        if (instance->object != item)
-            delete instance->object;
+        delete instance->object;
     }
     delete instance;
 }
@@ -787,13 +784,9 @@ void RenderUtils::cleanUpFormInstances(const QList<RenderEngine::ControlInstance
             designerSupport.derefFromEffectItem(item);
 
         if (formInstance->object) {
-            auto item = RenderUtils::guiItem(formInstance->object);
-            if (item) {
+            if (item)
                 item->setParentItem(nullptr);
-                delete item;
-            }
-            if (formInstance->object != item)
-                delete formInstance->object;
+            delete formInstance->object;
         }
 
         delete formInstance->context;
@@ -952,16 +945,16 @@ QMarginsF RenderUtils::margins(const RenderEngine::ControlInstance* instance)
         QQmlProperty defaultProperty(instance->object);
         if (defaultProperty.isValid()) {
             QQmlListReference childList = defaultProperty.read().value<QQmlListReference>();
-            //Q_ASSERT(childList.isValid() && childList.canAppend());
+            // Q_ASSERT(childList.isValid() && childList.canAppend());
             if (childList.isValid() && childList.canAppend()) {
                 childList.append(item);
                 const QRectF rect(item->mapRectToItem(parentItem, QRectF(QPointF(), item->size())));
                 margins = QMarginsF(rect.left(), rect.top(), parentItem->width() - rect.right(),
                                     parentItem->height() - rect.bottom());
             }
-            item->setParentItem(nullptr);
-            delete item;
         }
+        item->setParentItem(nullptr);
+        delete item;
         if (completeDisabled)
             QQmlVME::disableComponentComplete();
         return margins;
