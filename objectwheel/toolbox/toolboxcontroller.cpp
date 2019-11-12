@@ -132,7 +132,7 @@ void ToolboxController::onToolboxItemPress(ToolboxItem* item)
         }
     });
 
-    QTimer::singleShot(100, [=] {
+    QTimer::singleShot(80, [=] {
         if (locked) {
             disconnect(*conn);
             delete conn;

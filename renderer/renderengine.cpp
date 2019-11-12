@@ -23,9 +23,9 @@
 namespace {
 qreal g_progress = 0;
 qreal g_progressPerInstance = 0;
-const int g_progress_1 = 2;
-const int g_progress_2 = 6;
-const int g_progress_3 = 10;
+const int g_progress_1 = 6;
+const int g_progress_2 = 15;
+const int g_progress_3 = 35;
 const int g_progress_4 = 100;
 }
 
@@ -68,13 +68,11 @@ void RenderEngine::init(const InitInfo& initInfo, const InitInfo& toolboxInitInf
         return;
     }
 
-    emit initializationProgressChanged(g_progress_1);
-
     // Create tool cache
     for (const QPair<QString, QString>& toolPair : qAsConst(toolboxInitInfo.forms)) {
         const QString& toolPath = toolPair.first;
         const QString& module = toolPair.second;
-        qDebug() << toolPath;
+
         ControlInstance* instance = createInstance(SaveUtils::toControlMainQmlFile(toolPath), module);
         RenderUtils::doComplete(instance, this);
 
@@ -82,6 +80,8 @@ void RenderEngine::init(const InitInfo& initInfo, const InitInfo& toolboxInitInf
         RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
         delete ctx;
     }
+
+    emit initializationProgressChanged(g_progress_1);
 
     /* Create instances, handle parent-child relationship, set ids, save form instances */
     QMap<QString, ControlInstance*> instanceTree;
@@ -918,7 +918,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, 
     instance->window = object->isWindowType();
     instance->layout = QQuickDesignerSupportMetaInfo::isSubclassOf(instance->object, "QQuickLayout");
     instance->gui = instance->window || instance->popup || object->inherits("QQuickItem");
-    instance->visible = RenderUtils::isVisible(instance);
 
     if (instance->gui) {
         QQuickItem* item = RenderUtils::guiItem(instance->object);

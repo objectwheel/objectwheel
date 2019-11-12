@@ -165,7 +165,8 @@ static void allSubObject(QObject* object, QObjectList& objectList)
         // search recursive in property object lists
         if (metaProperty.isReadable() && QQmlMetaType::isList(metaProperty.userType())) {
             QQmlListReference list(object, metaProperty.name());
-            if (list.canCount() && list.canAt()) {
+            // Workaround for QTBUG-79974
+            if (list.canCount() && list.canAt() && !object->inherits("QmlSensor")) {
                 for (int i = 0; i < list.count(); i++) {
                     QObject *propertyObject = list.at(i);
                     allSubObject(propertyObject, objectList);
