@@ -61,7 +61,7 @@ RenderEngine::~RenderEngine()
     delete m_view;
 }
 
-void RenderEngine::init(const InitInfo& initInfo)
+void RenderEngine::init(const InitInfo& initInfo, const InitInfo& toolboxInitInfo)
 {
     if (m_initialized) {
         qWarning("RenderEngine: Re-initialization request rejected");
@@ -69,6 +69,19 @@ void RenderEngine::init(const InitInfo& initInfo)
     }
 
     emit initializationProgressChanged(g_progress_1);
+
+    // Create tool cache
+    for (const QPair<QString, QString>& toolPair : qAsConst(toolboxInitInfo.forms)) {
+        const QString& toolPath = toolPair.first;
+        const QString& module = toolPair.second;
+        qDebug() << toolPath;
+        ControlInstance* instance = createInstance(SaveUtils::toControlMainQmlFile(toolPath), module);
+        RenderUtils::doComplete(instance, this);
+
+        auto ctx = instance->context;
+        RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
+        delete ctx;
+    }
 
     /* Create instances, handle parent-child relationship, set ids, save form instances */
     QMap<QString, ControlInstance*> instanceTree;
@@ -965,7 +978,10 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir, 
         instance->context = parentInstance->context;
     }
 
-    m_view->engine()->clearComponentCache();
+    // TODO : Remove this if it doesn't have any effect.
+    // Disabled it because it clears cache which we
+    // need for fast tool previewing.
+    // m_view->engine()->clearComponentCache();
     QQmlComponent component(m_view->engine());
     component.setData(ParserUtils::mockSource(url, module), QUrl::fromLocalFile(url));
 

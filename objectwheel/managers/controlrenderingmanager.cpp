@@ -3,7 +3,7 @@
 #include <renderserver.h>
 #include <commanddispatcher.h>
 #include <hashfactory.h>
-#include <renderinfo.h>
+#include <toolboxcontroller.h>
 #include <utilityfunctions.h>
 #include <designerscene.h>
 #include <form.h>
@@ -200,7 +200,7 @@ void ControlRenderingManager::onConnected()
         initInfo.children.insert(form->dir(), childrenInfo);
         initInfo.forms.append(QPair<QString, QString>(form->dir(), form->module()));
     }
-    s_commandDispatcher->scheduleInit(initInfo);
+    s_commandDispatcher->scheduleInit(initInfo, ToolboxController::toolboxInitInfo());
     emit connected();
 }
 

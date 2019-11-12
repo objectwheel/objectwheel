@@ -17,7 +17,7 @@ public:
     explicit CommandDispatcher(RenderServer* server, QObject* parent = nullptr);
 
 public slots:
-    void scheduleInit(const InitInfo& initInfo);
+    void scheduleInit(const InitInfo& initInfo, const InitInfo& toolboxInitInfo);
     void scheduleDevicePixelRatioUpdate(qreal devicePixelRatio);
     void scheduleBindingUpdate(const QString& uid, const QString& bindingName, const QString& expression);
     void schedulePropertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);

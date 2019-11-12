@@ -1,7 +1,7 @@
 #ifndef TOOLBOXCONTROLLER_H
 #define TOOLBOXCONTROLLER_H
 
-#include <QObject>
+#include <renderinfo.h>
 
 class ToolboxPane;
 class ToolboxItem;
@@ -14,6 +14,8 @@ class ToolboxController final : public QObject
 
 public:
     explicit ToolboxController(ToolboxPane* m_toolboxPane, QObject* parent = nullptr);
+
+    static InitInfo toolboxInitInfo();
 
 public slots:
     void discharge();
@@ -29,6 +31,8 @@ private:
 
 private:
     ToolboxPane* m_toolboxPane;
+
+    static InitInfo s_toolboxInitInfo;
 };
 
 #endif // TOOLBOXCONTROLLER_H

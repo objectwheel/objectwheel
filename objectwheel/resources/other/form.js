@@ -1,4 +1,4 @@
-// %1.js
+// name.js
 
-function %1_onCompleted() {
+function name_onCompleted() {
 }

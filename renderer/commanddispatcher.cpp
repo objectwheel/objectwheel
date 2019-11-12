@@ -35,9 +35,9 @@ void CommandDispatcher::onDataReceived(const RendererCommands& command, const QB
 {
     switch (command) {
     case Init: {
-        InitInfo initInfo;
-        pull(data, initInfo);
-        emit init(initInfo);
+        InitInfo initInfo, toolboxInitInfo;
+        pull(data, initInfo, toolboxInitInfo);
+        emit init(initInfo, toolboxInitInfo);
     } break;
 
     case FormCodeUpdate: {

@@ -171,7 +171,7 @@ void SaveManager::setupFormConnections(const QString& formRootPath)
     }
     QString js = file.readAll();
     file.close();
-    js = js.arg(id);
+    js.replace(QStringLiteral("name"), id);
     if (!QFileInfo::exists(assetsJSPath)) {
         file.setFileName(assetsJSPath);
         if (!file.open(QFile::WriteOnly)) {

@@ -19,6 +19,8 @@
 #include <QDrag>
 #include <QTimer>
 
+InitInfo ToolboxController::s_toolboxInitInfo;
+
 ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) : QObject(parent)
   , m_toolboxPane(toolboxPane)
 {
@@ -31,6 +33,11 @@ ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) 
             this, &ToolboxController::onSearchEditEdit);
     connect(DesignerSettings::instance(), &DesignerSettings::toolboxSettingsChanged,
             this, &ToolboxController::onToolboxSettingsChange);
+}
+
+InitInfo ToolboxController::toolboxInitInfo()
+{
+    return s_toolboxInitInfo;
 }
 
 void ToolboxController::discharge()
@@ -49,11 +56,13 @@ void ToolboxController::onToolboxSettingsChange()
 
 void ToolboxController::onDocumentManagerInitialization()
 {
+    Q_ASSERT(s_toolboxInitInfo.forms.isEmpty());
     ToolboxTree* toolboxTree = m_toolboxPane->toolboxTree();
     for (const QString& toolDirName : QDir(":/tools").entryList(QDir::AllDirs | QDir::NoDotAndDotDot)) {
         const QString& toolPath = ":/tools/" + toolDirName;
         Q_ASSERT(SaveUtils::isControlValid(toolPath));
-        toolboxTree->addTool(toolPath);
+        ToolboxItem* item = toolboxTree->addTool(toolPath);
+        s_toolboxInitInfo.forms.append(QPair<QString, QString>(item->dir(), item->module()));
     }
     toolboxTree->sortByColumn(0, Qt::AscendingOrder); // Make the lower index to be at top
 }

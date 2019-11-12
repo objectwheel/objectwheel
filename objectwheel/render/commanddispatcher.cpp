@@ -16,9 +16,9 @@ void CommandDispatcher::send(RenderServer* server, RendererCommands command, con
     QMetaObject::invokeMethod(server, "send", Q_ARG(RendererCommands, command), Q_ARG(QByteArray, data));
 }
 
-void CommandDispatcher::scheduleInit(const InitInfo& initInfo)
+void CommandDispatcher::scheduleInit(const InitInfo& initInfo, const InitInfo& toolboxInitInfo)
 {
-    send(m_server, RendererCommands::Init, push(initInfo));
+    send(m_server, RendererCommands::Init, push(initInfo, toolboxInitInfo));
 }
 
 void CommandDispatcher::scheduleDevicePixelRatioUpdate(qreal devicePixelRatio)

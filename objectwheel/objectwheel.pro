@@ -1,6 +1,5 @@
 ### App Settings
 TEMPLATE = app
-CONFIG  -= qtquickcompiler
 CONFIG  += c++14 strict_c++
 TARGET   = Objectwheel
 DEFINES += QT_QML_DEBUG_NO_WARNING

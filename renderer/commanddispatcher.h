@@ -26,7 +26,7 @@ private:
     void send(RenderSocket* socket, RendererCommands command, const QByteArray& data = QByteArray());
 
 signals:
-    void init(const InitInfo& initInfo);
+    void init(const InitInfo& initInfo, const InitInfo& toolboxInitInfo);
     void bindingUpdate(const QString& uid, const QString& bindingName, const QString& expression);
     void propertyUpdate(const QString& uid, const QString& propertyName, const QVariant& propertyValue);
     void formCreation(const QString& dir, const QString& module);

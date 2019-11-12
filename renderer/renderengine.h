@@ -67,7 +67,7 @@ public:
     void setDevicePixelRatio(qreal devicePixelRatio);
 
 public slots:
-    void init(const InitInfo& initInfo);
+    void init(const InitInfo& initInfo, const InitInfo& toolboxInitInfo);
     void refresh(const QString& formUid);
     void deleteForm(const QString& uid); // NOTE: Deletes form and its children
     void deleteControl(const QString& uid); // NOTE: Deletes control and its children

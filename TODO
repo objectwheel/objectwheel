@@ -58,11 +58,11 @@ aşağı, bayağı aşağı doğru bi son son kontrol et bakalım başka ne bugl
     var çıkıştan önce halletmek isteyebileceğimiz, ayrıca todoyu azıcık temizle
 toollardan patlayanları pasifleştir, toolbox'dan şimdilik sil
 toollar için qml cache yi aç ve qmlcompiler çıktısı olam qmlc dosyalarını da tools.qrc ye ekle
+
 control.cpp'de ki scene() kullanımı ile alakalı fixme leri temizle
 ana ekren toolbarına render engine durumunu gösterir bir buton ekle ve eğer kapalı ise aktif olup render engini açmaya izin ersin
 "creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
 InspectorPane'e de aynı kontrol sağ tık menüsünden ekle
-
 TÜM tüm setIcon ları ve tüm setPixmap, setImage leri paletle ilişki olanları palet değişimlerine karşı
     diğer tümünü de devicePixelRatioF değişimlerine karşı kontrol et, uyumlu yap
 scale > 1 (belki rotation > 0) olan parentlerden childler taşınırken, setBeingRaised yapılca kontrol kayıyor, bunu düzelt
