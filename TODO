@@ -1,16 +1,9 @@
 Designer Core TODOs
 
+Font kalınlıklarını düzelt, tüm setWeightleri düzelt
 AssetsPane neden kendini aşıp sürekli propertiespane'in alanının üzerine doğru genişliyor aq??
-Toolbox'dan filedialog vs gibi bazı itemler sürüklenip bırakılınca ne hikmetse ikonları "unknown" gözüküyor, neden?
 Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
     örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
-Controller silindiğinde, konumları değiştirildiğinde vs kontrol internal file explorer ile,
-    Assets explorer ile dosyalar üzerinde değişiklikler yapıldığında, he halükarda ModelManagerInterface
-    güncellenmeli, ilgili dosyaları kullanan code editörler hata falan göstermeli "bu qml türü silindi, yok" gibi vs
-    güncellemeyi belki qmlcodedocument'in yaptığı gibi (QmlCodeDocument::reparseDocument()) yapabiliriz
-Assetlerden import edilmiş bir qml objesinin ismi üzerine ctrl basılı tutularak tıklanınca ilgili dosya
-    qml code editor de açılamıyor, kaynak açılamıyor
-Objectwheel pluginleri/componentleri OW'nin versiyonu ile uyumlu olacak
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
 plan pricing mevzularının limitlerini "beta" ya uygun düşecek şekilde gözden geçir
@@ -18,12 +11,6 @@ form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin 
     mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
 ayrıca yukarıdakinin benzeri olaacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin
     ve eğer açık ise bu assetlerdeki herhangi bir dosya, açık halleri de düzeltilsin
-applicationstyle:panelbuttoncommand çizimlerindeki tüm kontur ve gölge çizimleri transparan
-    siyah bazlı olmalı, sabit renk kullanımlarından kaçınılmalı
-hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
-    bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı
-çift tıklama ile forms pane üzerinden form isimleri değiştirilebilmeli ayrıca özel bir buton da ekle
-projectoptions da save yada discard gibi herangi bi butona tıklayınca neden scroll bar kayıyor?
 render engine serverla ilgili toolbara konulacak green red light yanında bir de loading de koy ve server
     crash iletişim kutusu son 10 saniye içinde iki kez crash olursa gözüksün, onun gibi bişey işte
     hemde problemli projelerin de projeyi yükleme ekranında patlatmaması lazım, bunu kesin çözmek lazım
@@ -59,6 +46,17 @@ aşağı, bayağı aşağı doğru bi son son kontrol et bakalım başka ne bugl
 toollardan patlayanları pasifleştir, toolbox'dan şimdilik sil
 toollar için qml cache yi aç ve qmlcompiler çıktısı olam qmlc dosyalarını da tools.qrc ye ekle
 
+hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
+    bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı
+çift tıklama ile forms pane üzerinden form isimleri değiştirilebilmeli ayrıca özel bir buton da ekle
+applicationstyle:panelbuttoncommand çizimlerindeki tüm kontur ve gölge çizimleri transparan
+    siyah bazlı olmalı, sabit renk kullanımlarından kaçınılmalı
+Assetlerden import edilmiş bir qml objesinin ismi üzerine ctrl basılı tutularak tıklanınca ilgili dosya
+    qml code editor de açılamıyor, kaynak açılamıyor
+Controller silindiğinde, konumları değiştirildiğinde vs kontrol internal file explorer ile,
+    Assets explorer ile dosyalar üzerinde değişiklikler yapıldığında, he halükarda ModelManagerInterface
+    güncellenmeli, ilgili dosyaları kullanan code editörler hata falan göstermeli "bu qml türü silindi, yok" gibi vs
+    güncellemeyi belki qmlcodedocument'in yaptığı gibi (QmlCodeDocument::reparseDocument()) yapabiliriz
 control.cpp'de ki scene() kullanımı ile alakalı fixme leri temizle
 ana ekren toolbarına render engine durumunu gösterir bir buton ekle ve eğer kapalı ise aktif olup render engini açmaya izin ersin
 "creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak

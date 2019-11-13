@@ -29,6 +29,7 @@ private slots:
     void run();
     void save();
     void enable();
+    void disable();
     void refresh();
 
 signals:

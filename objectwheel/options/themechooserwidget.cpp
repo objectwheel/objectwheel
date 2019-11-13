@@ -88,6 +88,20 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     m_saveButton->setCursor(Qt::PointingHandCursor);
     m_resetButton->setCursor(Qt::PointingHandCursor);
 
+    m_stylesCombo->setFocusPolicy(Qt::NoFocus);
+    m_seeRunningButton->setFocusPolicy(Qt::NoFocus);
+    m_saveButton->setFocusPolicy(Qt::NoFocus);
+    m_resetButton->setFocusPolicy(Qt::NoFocus);
+    m_themesCombo->setFocusPolicy(Qt::NoFocus);
+    m_accentColorsCombo->setFocusPolicy(Qt::NoFocus);
+    m_primaryColorsCombo->setFocusPolicy(Qt::NoFocus);
+    m_foregroundColorsCombo->setFocusPolicy(Qt::NoFocus);
+    m_backgroundColorsCombo->setFocusPolicy(Qt::NoFocus);
+    m_accentColorButton->setFocusPolicy(Qt::NoFocus);
+    m_primaryColorButton->setFocusPolicy(Qt::NoFocus);
+    m_foregroundColorButton->setFocusPolicy(Qt::NoFocus);
+    m_backgroundColorButton->setFocusPolicy(Qt::NoFocus);
+
     m_seeRunningButton->setText(tr("See It Running"));
     m_saveButton->setText(tr("Save Changes"));
     m_resetButton->setText(tr("Discard Changes"));
@@ -205,22 +219,21 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
     if (m_version == V2) {
         m_themesCombo->addItem(tr("Unavailable"));
-        m_themesCombo->setDisabled(true);
-
         m_accentColorsCombo->addItem(tr("Unavailable"));
         m_primaryColorsCombo->addItem(tr("Unavailable"));
         m_foregroundColorsCombo->addItem(tr("Unavailable"));
         m_backgroundColorsCombo->addItem(tr("Unavailable"));
 
-        m_accentColorsCombo->setDisabled(true);
-        m_primaryColorsCombo->setDisabled(true);
-        m_foregroundColorsCombo->setDisabled(true);
-        m_backgroundColorsCombo->setDisabled(true);
+        m_themesCombo->setEnabled(false);
+        m_accentColorsCombo->setEnabled(false);
+        m_primaryColorsCombo->setEnabled(false);
+        m_foregroundColorsCombo->setEnabled(false);
+        m_backgroundColorsCombo->setEnabled(false);
 
-        m_accentColorButton->setDisabled(true);
-        m_primaryColorButton->setDisabled(true);
-        m_foregroundColorButton->setDisabled(true);
-        m_backgroundColorButton->setDisabled(true);
+        m_accentColorButton->setEnabled(false);
+        m_primaryColorButton->setEnabled(false);
+        m_foregroundColorButton->setEnabled(false);
+        m_backgroundColorButton->setEnabled(false);
     }
 
     m_customizationLabel->setHidden(true);
@@ -393,15 +406,15 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
                 m_foregroundColorsCombo->addItem(tr("Unavailable"));
                 m_backgroundColorsCombo->addItem(tr("Unavailable"));
 
-                m_accentColorsCombo->setDisabled(true);
-                m_primaryColorsCombo->setDisabled(true);
-                m_foregroundColorsCombo->setDisabled(true);
-                m_backgroundColorsCombo->setDisabled(true);
+                m_accentColorsCombo->setEnabled(false);
+                m_primaryColorsCombo->setEnabled(false);
+                m_foregroundColorsCombo->setEnabled(false);
+                m_backgroundColorsCombo->setEnabled(false);
 
-                m_accentColorButton->setDisabled(true);
-                m_primaryColorButton->setDisabled(true);
-                m_foregroundColorButton->setDisabled(true);
-                m_backgroundColorButton->setDisabled(true);
+                m_accentColorButton->setEnabled(false);
+                m_primaryColorButton->setEnabled(false);
+                m_foregroundColorButton->setEnabled(false);
+                m_backgroundColorButton->setEnabled(false);
                 return;
             } else {
                 m_accentColorsCombo->setEnabled(true);
@@ -437,8 +450,8 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
                 }
             } else if (m_stylesCombo->currentText() == "Universal") {
                 m_primaryColorsCombo->addItem(tr("Unavailable"));
-                m_primaryColorsCombo->setDisabled(true);
-                m_primaryColorButton->setDisabled(true);
+                m_primaryColorsCombo->setEnabled(false);
+                m_primaryColorButton->setEnabled(false);
 
                 m_accentColorsCombo->addItem(tr("Theme default"));
                 m_foregroundColorsCombo->addItem(tr("Theme default"));
@@ -465,7 +478,7 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
 
         if (m_stylesCombo->currentText() != "Material" && m_stylesCombo->currentText() != "Universal" ) {
             m_themesCombo->addItem(tr("Unavailable"));
-            m_themesCombo->setDisabled(true);
+            m_themesCombo->setEnabled(false);
             m_customizationLabel->setHidden(true);
             m_customizationPicture->clear();
             return;
@@ -512,8 +525,7 @@ void ThemeChooserWidget::charge()
     m_foregroundColorsCombo->setCurrentIndex(0);
     m_backgroundColorsCombo->setCurrentIndex(0);
 
-    m_saveButton->setDisabled(true);
-    m_resetButton->setDisabled(true);
+    disable();
 
     if (!ProjectManager::isStarted())
         return;
@@ -554,7 +566,7 @@ void ThemeChooserWidget::charge()
 
 void ThemeChooserWidget::run()
 {
-    setDisabled(true);
+    setEnabled(false);
     m_loadingIndicator->start();
 
     QTemporaryDir tmpDir;
@@ -580,14 +592,13 @@ void ThemeChooserWidget::run()
 
     Delayer::delay(400);
 
-    setDisabled(false);
+    setEnabled(true);
     m_loadingIndicator->stop();
 }
 
 void ThemeChooserWidget::save()
 {
-    m_saveButton->setDisabled(true);
-    m_resetButton->setDisabled(true);
+    disable();
 
     auto object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
     auto newObject = QJsonDocument::fromBinaryData(toJson()).object();
@@ -606,9 +617,15 @@ void ThemeChooserWidget::enable()
     m_resetButton->setEnabled(true);
 }
 
+void ThemeChooserWidget::disable()
+{
+    m_saveButton->setEnabled(false);
+    m_resetButton->setEnabled(false);
+}
+
 void ThemeChooserWidget::refresh()
 {    
-    setDisabled(true);
+    setEnabled(false);
     m_loadingIndicator->start();
 
     QTemporaryFile tmpFile;
@@ -636,7 +653,7 @@ void ThemeChooserWidget::refresh()
     preview.setDevicePixelRatio(devicePixelRatioF());
     m_previewPicture->setPixmap(preview);
 
-    setDisabled(false);
+    setEnabled(true);
     m_loadingIndicator->stop();
 }
 

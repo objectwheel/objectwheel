@@ -7,13 +7,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.objectwheel.Renderer</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>2.9.557.g716d6ab1</string>
+	<string>2.9.559.gdedebf21</string>
 	<key>CFBundleName</key>
 	<string>Renderer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.9.557.g716d6ab1</string>
+	<string>2.9.559.gdedebf21</string>
 	<key>LSBackgroundOnly</key>
 	<string>True</string>
 	<key>NSHighResolutionCapable</key>
