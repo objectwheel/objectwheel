@@ -132,7 +132,7 @@ void FormsController::onAddButtonClick()
     QDir(thisDir).mkpath(".");
     FileSystemUtils::copy(":/other/form.qml", thisDir, true, true);
     QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
-    ControlCreationManager::createForm(temp.path(), QStringLiteral("QtQuick.Controls2.Page"));
+    ControlCreationManager::createForm(temp.path(), QStringLiteral("QtQuick.Controls/2/Page"));
     // onControlCreation(); Not needed, ControlCreationManager::controlCreated will be emitted
 }
 

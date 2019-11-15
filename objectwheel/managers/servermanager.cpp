@@ -63,7 +63,7 @@ void ServerManager::onConnect()
 
 void ServerManager::onDisconnect()
 {
-    s_connectionTimer.start(CONNECTION_TIMEOUT, Qt::VeryCoarseTimer, this);
+    start();
 }
 
 void ServerManager::onError(QAbstractSocket::SocketError error)

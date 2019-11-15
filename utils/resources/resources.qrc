@@ -585,5 +585,6 @@
         <file>images/tools/Plugin.svg</file>
         <file>tools/Plugin/t/main.qml</file>
         <file>tools/Plugin/m/control.meta</file>
+        <file>images/tools/Window.svg</file>
     </qresource>
 </RCC>

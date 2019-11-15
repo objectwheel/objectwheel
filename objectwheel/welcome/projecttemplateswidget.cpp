@@ -246,17 +246,17 @@ namespace {
 const QStringList NAMES = {
     QObject::tr("Blank Project"),
     QObject::tr("Application Project v2"),
-    QObject::tr("Application Project v1"),
+    QObject::tr("Application Project v1")/*,
     QObject::tr("Full-featured Application Project v2"),
-    QObject::tr("Full-featured Application Project v1")
+    QObject::tr("Full-featured Application Project v1")*/
 };
 
 const QStringList DESCRIPTIONS = {
     QObject::tr("A blank project with an empty Window"),
     QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 2"),
-    QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 1"),
+    QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 1")/*,
     QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 2"),
-    QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 1")
+    QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 1")*/
 };
 } // Anonymous Namespace
 

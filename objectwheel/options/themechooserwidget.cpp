@@ -52,15 +52,15 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
   , m_loadingIndicator(new WaitingSpinnerWidget(m_previewPicture))
 {
     m_loadingIndicator->setStyleSheet("background: transparent;");
-    m_loadingIndicator->setColor("#333333");
+    m_loadingIndicator->setColor(palette().text().color());
     m_loadingIndicator->setRoundness(50);
     m_loadingIndicator->setMinimumTrailOpacity(5);
     m_loadingIndicator->setTrailFadePercentage(100);
     m_loadingIndicator->setRevolutionsPerSecond(2);
-    m_loadingIndicator->setNumberOfLines(13);
-    m_loadingIndicator->setLineLength(10);
+    m_loadingIndicator->setNumberOfLines(12);
+    m_loadingIndicator->setLineLength(7);
     m_loadingIndicator->setInnerRadius(5);
-    m_loadingIndicator->setLineWidth(3);
+    m_loadingIndicator->setLineWidth(2);
 
     m_stylesLabel->setText(m_version == V2 ? tr("Quick Controls Style:") : tr("Quick Controls 1 Style:"));
     UtilityFunctions::adjustFontWeight(m_stylesLabel, QFont::DemiBold);

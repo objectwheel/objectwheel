@@ -74,7 +74,7 @@ void InterfaceSettings::reset()
     fontPixelSize = df.pixelSize();
     fontFamily = df.family();
     /****/
-    outputPanePops = false;
+    outputPanePops = true;
     preserveDesignerState = true;
     visibleOutputWidget = 0;
 }

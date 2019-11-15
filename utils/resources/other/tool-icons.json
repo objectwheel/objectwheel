@@ -39,6 +39,7 @@
     "QtQuick/2/Text"                          : ":/images/tools/Text.svg",
     "QtQuick/2/TextEdit"                      : ":/images/tools/TextEdit.svg",
     "QtQuick/2/TextInput"                     : ":/images/tools/TextInput.svg",
+    "QtQuick.Window/2/Window"                 : ":/images/tools/Window.svg",
     "QtQuick.Controls/2/ApplicationWindow"    : ":/images/tools/ApplicationWindow.svg",
     "QtQuick.Controls/2/BusyIndicator"        : ":/images/tools/BusyIndicator.svg",
     "QtQuick.Controls/2/Button"               : ":/images/tools/Button.svg",
