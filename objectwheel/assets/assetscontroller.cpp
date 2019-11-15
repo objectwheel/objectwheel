@@ -16,7 +16,7 @@
 */
 
 #include <fileexplorer.h>
-#include <fileexplorer_p.h>
+#include <assetsdelegate.h>
 #include <lineedit.h>
 #include <utilityfunctions.h>
 #include <utilsicons.h>

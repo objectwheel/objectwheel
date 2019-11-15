@@ -5,6 +5,10 @@ Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişi
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar
 AssetsPane neden kendini aşıp sürekli propertiespane'in alanının üzerine doğru genişliyor aq??
+AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
+    tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
+Assets Pane i bitir
+
 Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
     örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
@@ -12,14 +16,12 @@ server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server i
 plan pricing mevzularının limitlerini "beta" ya uygun düşecek şekilde gözden geçir
 form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin ayrıca uyarı da versin bi kereye
     mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
-ayrıca yukarıdakinin benzeri olaacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin
+ayrıca yukarıdakinin benzeri olacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin
     ve eğer açık ise bu assetlerdeki herhangi bir dosya, açık halleri de düzeltilsin
 render engine serverla ilgili toolbara konulacak green red light yanında bir de loading de koy ve server
     crash iletişim kutusu son 10 saniye içinde iki kez crash olursa gözüksün, onun gibi bişey işte
     hemde problemli projelerin de projeyi yükleme ekranında patlatmaması lazım, bunu kesin çözmek lazım
 tüm dock ayarları kalıcı olsun, diğer ayarlar için de bi beyin fırtınası yapılsın
-AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
-    tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
 fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
     entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
     öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
@@ -34,7 +36,6 @@ Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explor
     şekilde general settings vs şeklinde kayıt edilsin
 aşağı, bayağı aşağı doğru bi son son kontrol et bakalım başka ne buglar
     var çıkıştan önce halletmek isteyebileceğimiz, ayrıca todoyu azıcık temizle
-toollardan patlayanları pasifleştir, toolbox'dan şimdilik sil
 
 hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
     bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı

@@ -1,7 +1,7 @@
 #ifndef ASSETSPANE_H
 #define ASSETSPANE_H
 
-#include <fileexplorer.h>
+#include <assetscontroller.h>
 
 class AssetsPane : public FileExplorer
 {

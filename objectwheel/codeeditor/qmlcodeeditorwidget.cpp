@@ -1,6 +1,6 @@
 #include <qmlcodeeditorwidget.h>
 #include <qmlcodeeditor.h>
-#include <fileexplorer.h>
+#include <assetscontroller.h>
 #include <qmlcodedocument.h>
 #include <saveutils.h>
 #include <projectmanager.h>
