@@ -10,7 +10,9 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/segmentedbar.h \
            $$PWD/switch.h \
            $$PWD/view.h \
-           $$PWD/waitingspinnerwidget.h
+           $$PWD/waitingspinnerwidget.h \
+           $$PWD/fileexplorer.h \
+           $$PWD/fileexplorer_p.h
 
 SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/buttonslice.cpp \
@@ -21,4 +23,6 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/segmentedbar.cpp \
            $$PWD/switch.cpp \
            $$PWD/view.cpp \
-           $$PWD/waitingspinnerwidget.cpp
+           $$PWD/waitingspinnerwidget.cpp \
+           $$PWD/fileexplorer.cpp \
+           $$PWD/fileexplorer_p.cpp

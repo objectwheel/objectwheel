@@ -1,4 +1,4 @@
-#include <assetscontroller.h>
+#include <fileexplorer.h>
 #include <fileexplorer_p.h>
 #include <paintutils.h>
 
