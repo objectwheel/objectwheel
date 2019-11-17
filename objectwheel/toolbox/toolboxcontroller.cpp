@@ -43,6 +43,7 @@ InitInfo ToolboxController::toolboxInitInfo()
 void ToolboxController::discharge()
 {
     m_toolboxPane->searchEdit()->clear();
+    onSearchEditEdit({});
 }
 
 void ToolboxController::onToolboxSettingsChange()

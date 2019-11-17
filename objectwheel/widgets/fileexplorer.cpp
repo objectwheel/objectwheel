@@ -22,24 +22,9 @@
 #include <utilsicons.h>
 #include <paintutils.h>
 #include <filesystemutils.h>
+#include <private/qtreeview_p.h>
 
-#include <QLayout>
-#include <QComboBox>
-#include <QHeaderView>
-#include <QFileSystemModel>
-#include <QToolBar>
-#include <QToolButton>
-#include <QLabel>
-#include <QMessageBox>
-#include <QScrollBar>
-#include <QClipboard>
-#include <QInputDialog>
-#include <QGraphicsBlurEffect>
-#include <QCompleter>
-#include <QTemporaryDir>
-#include <QApplication>
-#include <QStack>
-#include <QMimeData>
+#include <QtWidgets>
 
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
@@ -218,7 +203,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
         m_fileSystemProxyModel->setDynamicSortFilter(true);
     });
     connect(m_pathIndicator, &PathIndicator::pathUpdated,
-            this, &FileExplorer::goToRelativePath);
+            this, &FileExplorer::goToRelativeDir);
     connect(this, &FileExplorer::doubleClicked,
             this, &FileExplorer::onItemDoubleClick);
     connect(QApplication::clipboard(), &QClipboard::dataChanged, this, [=]
@@ -300,7 +285,7 @@ void FileExplorer::onUpButtonClick()
     const QString& rootPath = m_fileSystemModel->rootPath();
 
     if (upperDir.size() > rootPath.size() || upperDir == rootPath)
-        goToPath(upperDir);
+        goToDir(upperDir);
 }
 
 void FileExplorer::onBackButtonClick()
@@ -311,7 +296,7 @@ void FileExplorer::onBackButtonClick()
     const QStack<QString> cloneOfForth = forthPathStack;
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    goToPath(backPathStack.pop());
+    goToDir(backPathStack.pop());
     backPathStack.pop();
 
     forthPathStack = cloneOfForth;
@@ -328,7 +313,7 @@ void FileExplorer::onForthButtonClick()
         return;
 
     const QStack<QString> cloneOfForth = forthPathStack;
-    goToPath(forthPathStack.pop());
+    goToDir(forthPathStack.pop());
     forthPathStack = cloneOfForth;
     forthPathStack.pop();
     m_forthButton->setDisabled(forthPathStack.isEmpty());
@@ -336,7 +321,7 @@ void FileExplorer::onForthButtonClick()
 
 void FileExplorer::onHomeButtonClick()
 {
-    goToPath(m_fileSystemModel->rootPath());
+    goToDir(m_fileSystemModel->rootPath());
 }
 
 void FileExplorer::onCopyButtonClick()
@@ -438,7 +423,7 @@ void FileExplorer::onFileSelectionChange()
 void FileExplorer::onItemDoubleClick(const QModelIndex& index)
 {
     if (m_fileSystemModel->isDir(mt(index)) && m_mode == Explorer)
-        return goToPath(m_fileSystemModel->filePath(mt(index)));
+        return goToDir(m_fileSystemModel->filePath(mt(index)));
     if (!m_fileSystemModel->isDir(mt(index)))
         emit fileOpened(QDir(rootPath()).relativeFilePath(m_fileSystemModel->filePath(mt(index))));
 }
@@ -512,21 +497,21 @@ void FileExplorer::fillBackground(QPainter* painter, const QStyleOptionViewItem&
     painter->setClipping(false);
 }
 
-void FileExplorer::goToPath(const QString& path)
+void FileExplorer::goToDir(const QString& dir)
 {
     if (!model())
         return;
 
-    if (path.isEmpty())
+    if (dir.isEmpty())
         return;
 
-    if (!QFileInfo::exists(path) || !QFileInfo(path).isDir())
+    if (!QFileInfo::exists(dir) || !QFileInfo(dir).isDir())
         return;
 
-    const QString& previousPath = m_fileSystemModel->filePath(mt(rootIndex()));
-    const QModelIndex& index = m_fileSystemModel->index(path);
+    const QString& previousDir = m_fileSystemModel->filePath(mt(rootIndex()));
+    const QModelIndex& index = m_fileSystemModel->index(dir);
 
-    if (previousPath == QFileInfo(path).canonicalFilePath())
+    if (previousDir == QFileInfo(dir).canonicalFilePath())
         return;
 
     if (!index.isValid())
@@ -534,14 +519,14 @@ void FileExplorer::goToPath(const QString& path)
 
     setRootIndex(mf(index));
     selectionModel()->clear();
-    m_searchEditCompleterModel->setRootPath(path);
+//    m_searchEditCompleterModel->setRootPath(dir);
     m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_homeButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
-    m_pathIndicator->setPath(QDir(m_fileSystemModel->rootPath()).relativeFilePath(path));
+    m_pathIndicator->setPath(QDir(m_fileSystemModel->rootPath()).relativeFilePath(dir));
 
-    if (!previousPath.isEmpty()) {
-        if (backPathStack.isEmpty() || backPathStack.top() != previousPath)
-            backPathStack.push(previousPath);
+    if (!previousDir.isEmpty()) {
+        if (backPathStack.isEmpty() || backPathStack.top() != previousDir)
+            backPathStack.push(previousDir);
     }
 
     forthPathStack.clear();
@@ -550,47 +535,33 @@ void FileExplorer::goToPath(const QString& path)
     m_forthButton->setDisabled(forthPathStack.isEmpty());
 }
 
-void FileExplorer::goToRelativePath(const QString& relativePath)
+void FileExplorer::goToRelativeDir(const QString& relativeDir)
 {
-    const QString& path = m_fileSystemModel->rootPath() + '/' + relativePath;
+    const QString& dir = m_fileSystemModel->rootPath() + '/' + relativeDir;
 
-    if (!QFileInfo::exists(path) || !QFileInfo(path).isDir())
+    if (!QFileInfo::exists(dir) || !QFileInfo(dir).isDir())
         return;
 
-    if (!QFileInfo(path).canonicalFilePath().contains(m_fileSystemModel->rootPath(), Qt::CaseInsensitive))
+    if (!QFileInfo(dir).canonicalFilePath().contains(m_fileSystemModel->rootPath(), Qt::CaseInsensitive))
         return; // Protection against "rootPath/../../.." etc
 
-    goToPath(path);
+    goToDir(dir);
 }
 
-void FileExplorer::filterList()
+void FileExplorer::goToEntry(const QString& entry)
 {
-    if (!m_searchEditCompleter->currentIndex().isValid())
-        return;
+    if (QFileInfo(entry).isDir())
+        return goToDir(entry);
 
-    const QModelIndex& currentIndex = m_searchEditCompleter->popup()->currentIndex();
-
-    if (!currentIndex.isValid())
-        return;
-
-    const QString& fileName = currentIndex.data(Qt::EditRole).toString();
-    const QString& relativePath = currentIndex.data(Qt::DisplayRole).toString();
-
-    if (relativePath.isEmpty() || fileName.isEmpty())
-        return;
-
-    if (m_searchEdit->text() != fileName)
-        return;
-
-    const QString& path = QDir(m_fileSystemModel->filePath(mt(rootIndex()))).filePath(relativePath);
-    const QModelIndex& searchedIndex = mf(m_fileSystemModel->index(path));
+    const QModelIndex& index = mf(m_fileSystemModel->index(entry));
 
     if (m_mode == Viewer)
-        UtilityFunctions::expandUpToRoot(this, searchedIndex, rootIndex());
+        UtilityFunctions::expandUpToRoot(this, index, rootIndex());
     else
-        goToPath(QFileInfo(path).path());
-    selectionModel()->select(searchedIndex, QItemSelectionModel::ClearAndSelect);
-    scrollTo(searchedIndex, PositionAtCenter);
+        goToDir(QFileInfo(entry).path());
+
+    selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+    scrollTo(index, PositionAtCenter);
 }
 
 void FileExplorer::dropEvent(QDropEvent* event)
@@ -628,7 +599,7 @@ void FileExplorer::dragLeaveEvent(QDragLeaveEvent* event)
 void FileExplorer::drawBranches(QPainter* painter, const QRect& rect,
                                 const QModelIndex& index) const
 {
-    Q_D(const FileExplorer);
+    Q_D(const QTreeView);
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing);
 
@@ -713,14 +684,10 @@ void FileExplorer::updateGeometries()
 {
     QTreeView::updateGeometries();
     QMargins vm = viewportMargins();
-    vm.setBottom(m_searchEdit->height());
     vm.setTop(header()->height() + (m_mode == Explorer ? m_pathIndicator->height() + m_toolBar->height() - 2 : 0));
     setViewportMargins(vm);
 
     QRect vg = viewport()->geometry();
-    QRect sg(vg.left(), vg.bottom(), vg.width(), m_searchEdit->height());
-    m_searchEdit->setGeometry(sg);
-
     header()->setGeometry(vg.left(), 1, vg.width(), header()->height());
 
     int ds = qMin(qMin(vg.width() - 5, vg.height() - 5), 100);
@@ -744,7 +711,7 @@ FileExplorer::Mode FileExplorer::mode() const
 
 void FileExplorer::setMode(FileExplorer::Mode mode)
 {
-    Q_D(const FileExplorer);
+    Q_D(const QTreeView);
 
     if (m_mode != mode) {
         m_mode = mode;
@@ -787,7 +754,7 @@ void FileExplorer::setMode(FileExplorer::Mode mode)
             lastVScrollerPosOfViewer = verticalScrollBar()->sliderPosition();
             lastHScrollerPosOfViewer = horizontalScrollBar()->sliderPosition();;
 
-            goToPath(lastPathofExplorer);
+            goToDir(lastPathofExplorer);
 
             selectionModel()->clear();
             for (const QModelIndex& index : lastSelectedIndexesOfExplorer) {

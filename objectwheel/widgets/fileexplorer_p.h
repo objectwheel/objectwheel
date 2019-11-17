@@ -56,24 +56,5 @@ private:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 };
 
-class FileSearchModel : public QStringListModel
-{
-    Q_OBJECT
-
-public:
-    explicit FileSearchModel(QObject* parent = nullptr);
-    void setRootPath(const QString& rootPath);
-
-private slots:
-    void updateModel();
-
-private:
-    QVariant data(const QModelIndex &index, int role) const override;
-
-private:
-    QString m_rootPath;
-    QFileIconProvider m_fileIconProvider;
-    QFileSystemWatcher* m_fileSystemWatcher;
-};
 
 #endif // FILEEXPLORER_P_H

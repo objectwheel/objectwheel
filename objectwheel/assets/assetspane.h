@@ -7,7 +7,6 @@ class AssetsTree;
 class LineEdit;
 class QComboBox;
 class FileSearchModel;
-class QCompleter;
 
 class AssetsPane final : public QWidget
 {
@@ -25,8 +24,6 @@ public:
 private:
     AssetsTree* m_assetsTree;
     QComboBox* m_modeComboBox;
-    FileSearchModel* m_searchEditCompleterModel;
-    QCompleter* m_searchEditCompleter;
     LineEdit* m_searchEdit;
 };
 

@@ -57,9 +57,9 @@ protected:
                         int row, bool verticalLine) const;
 
 private:
-    void filterList();
-    void goToPath(const QString& path);
-    void goToRelativePath(const QString& relativePath);
+    void goToEntry(const QString& entry);
+    void goToDir(const QString& dir);
+    void goToRelativeDir(const QString& relativeDir);
     void dropEvent(QDropEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
