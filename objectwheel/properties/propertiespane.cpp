@@ -133,5 +133,5 @@ QToolButton* PropertiesPane::resetButton() const
 
 QSize PropertiesPane::sizeHint() const
 {
-    return {310, 530};
+    return {300, 350};
 }

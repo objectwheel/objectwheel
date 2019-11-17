@@ -12,6 +12,8 @@
 #include <formspane.h>
 #include <formscontroller.h>
 #include <assetspane.h>
+#include <assetstree.h>
+#include <assetscontroller.h>
 #include <centralwidget.h>
 #include <designerview.h>
 #include <controlcreationmanager.h>
@@ -73,6 +75,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_formsPane(new FormsPane)
   , m_formsController(new FormsController(m_formsPane, m_centralWidget->designerPane()->designerView()->scene(), this))
   , m_assetsPane(new AssetsPane)
+  , m_assetsController(new AssetsController(m_assetsPane))
   , m_controlsDockWidget(new QDockWidget(this))
   , m_propertiesDockWidget(new QDockWidget(this))
   , m_assetsDockWidget(new QDockWidget(this))
@@ -233,7 +236,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     connect((PinBar*) m_formsDockWidget->titleBarWidget(), &PinBar::dockWidgetCloseButtonClicked,
             this, &MainWindow::onPinBarDockWidgetCloseButtonClick);
 
-    connect(m_assetsPane, &AssetsPane::fileOpened,
+    connect(m_assetsPane->assetsTree(), &AssetsTree::fileOpened,
             centralWidget()->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openAssets);
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, [=] (ModeManager::Mode mode) {
@@ -296,7 +299,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             setDockWidgetAreasVisible(Qt::RightDockWidgetArea, checked);
     });
     connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] { m_assetsPane->setRootPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir())); });
+            this, [=] { m_assetsPane->assetsTree()->setRootPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir())); });
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, &MainWindow::resetSettings);
 
@@ -345,8 +348,8 @@ void MainWindow::discharge()
     m_propertiesController->discharge();
     m_controlsController->discharge();
     m_formsController->discharge();
+    m_assetsController->discharge();
     m_centralWidget->discharge();
-    m_assetsPane->discharge();
 
     m_assetsDockWidgetVisible = true;
     m_propertiesDockWidgetVisible = true;

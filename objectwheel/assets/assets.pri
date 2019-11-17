@@ -1,14 +1,10 @@
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
-HEADERS += \
-           $$PWD/assetscontroller.h \
-           $$PWD/assetsdelegate.h \
-           $$PWD/assetstree.h \
-           $$PWD/assetspane.h
+HEADERS += $$PWD/assetstree.h \
+           $$PWD/assetspane.h \
+           $$PWD/assetscontroller.h
 
-SOURCES += \
-           $$PWD/assetscontroller.cpp \
-           $$PWD/assetsdelegate.cpp \
-           $$PWD/assetstree.cpp \
-           $$PWD/assetspane.cpp
+SOURCES += $$PWD/assetstree.cpp \
+           $$PWD/assetspane.cpp \
+           $$PWD/assetscontroller.cpp

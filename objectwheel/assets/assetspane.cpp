@@ -1,28 +1,55 @@
 #include <assetspane.h>
-#include <utilityfunctions.h>
+#include <assetstree.h>
+#include <lineedit.h>
+#include <paintutils.h>
 
-#include <QHeaderView>
-#include <QApplication>
+#include <QBoxLayout>
+#include <QComboBox>
 
-AssetsPane::AssetsPane(QWidget* parent) : FileExplorer(parent)
+AssetsPane::AssetsPane(QWidget* parent) : QWidget(parent)
+  , m_assetsTree(new AssetsTree(this))
+  , m_modeComboBox(new QComboBox(this))
+  , m_searchEdit(new LineEdit(this))
 {
-    auto updatePalette = [=] {
-        QPalette p(palette());
-        p.setColor(QPalette::Light, "#a671bd");
-        p.setColor(QPalette::Dark, "#9968ad");
-        p.setColor(QPalette::AlternateBase, "#f6f2f7");
-        p.setColor(QPalette::ButtonText, "#ffffff");
-        p.setColor(QPalette::WindowText, "#ffffff");
-        p.setColor(QPalette::Mid, p.dark().color()); // For line color
-        p.setColor(QPalette::Midlight, "#f6f6f6"); // For PathIndicator's background
-        p.setColor(QPalette::Shadow, "#c4c4c4"); // For PathIndicator's border
-        setPalette(p);
-    };
-    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
-    updatePalette();
+    setFocusPolicy(Qt::NoFocus);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    m_searchEdit->setClearButtonEnabled(true);
+    m_searchEdit->setPlaceholderText(tr("Search"));
+    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", QSize(16, 16), this),
+                            QLineEdit::LeadingPosition);
+
+    m_modeComboBox->setFixedHeight(18);
+    m_modeComboBox->setCursor(Qt::PointingHandCursor);
+    m_modeComboBox->setToolTip(tr("Change view mode"));
+    m_modeComboBox->addItem(tr("Viewer"), QVariant::fromValue(AssetsTree::Viewer));
+    m_modeComboBox->addItem(tr("Explorer"), QVariant::fromValue(AssetsTree::Explorer));
+
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(2);
+    layout->setContentsMargins(2, 2, 2, 2);
+    layout->addWidget(m_assetsTree);
+    layout->addWidget(m_searchEdit);
+    // We are not adding the m_modeComboBox, so the main window
+    // controller can add it to the pin bar of the dock window
+}
+
+AssetsTree* AssetsPane::assetsTree() const
+{
+    return m_assetsTree;
+}
+
+QComboBox* AssetsPane::modeComboBox() const
+{
+    return m_modeComboBox;
+}
+
+LineEdit* AssetsPane::searchEdit() const
+{
+    return m_searchEdit;
 }
 
 QSize AssetsPane::sizeHint() const
 {
-    return QSize{310, 250};
+    return {300, 250};
 }

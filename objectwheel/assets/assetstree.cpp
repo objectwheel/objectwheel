@@ -1,4 +1,5 @@
 #include <assetstree.h>
+#include <QApplication>
 
 AssetsTree::AssetsTree(QWidget* parent) : FileExplorer(parent)
 {

@@ -59,6 +59,7 @@ QStack<QString> forthPathStack;
 }
 
 FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
+  , m_mode(Viewer)
   , m_dropHereLabel(new QLabel(this))
   , m_droppingBlurEffect(new QGraphicsBlurEffect(this))
   , m_searchEditCompleterModel(new FileSearchModel(this))
@@ -68,7 +69,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_fileSystemProxyModel(new FileSystemProxyModel(this))
   , m_toolBar(new QToolBar(this))
   , m_pathIndicator(new PathIndicator(this))
-  , m_modeComboBox(new QComboBox(header()))
   , m_upButton(new QToolButton)
   , m_backButton(new QToolButton)
   , m_forthButton(new QToolButton)
@@ -112,10 +112,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 
-    m_modeComboBox->setFixedHeight(18);
-    m_modeComboBox->addItem(tr("Viewer")); // First must be the Viewer, the index is important
-    m_modeComboBox->addItem(tr("Explorer"));
-
     QPixmap p(":/images/drop.png");
     p.setDevicePixelRatio(devicePixelRatioF());
     m_dropHereLabel->setHidden(true);
@@ -140,7 +136,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_renameButton->setCursor(Qt::PointingHandCursor);
     m_newFileButton->setCursor(Qt::PointingHandCursor);
     m_newFolderButton->setCursor(Qt::PointingHandCursor);
-    m_modeComboBox->setCursor(Qt::PointingHandCursor);
 
     m_upButton->setToolTip(tr("Go to the upper directory"));
     m_backButton->setToolTip(tr("Go to the previous directory"));
@@ -152,7 +147,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_renameButton->setToolTip(tr("Rename selected file/folder"));
     m_newFileButton->setToolTip(tr("Create an empty new file within the current directory"));
     m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
-    m_modeComboBox->setToolTip(tr("Change view mode"));
     m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
 
     m_upButton->setIcon(Icons::ARROW_UP.icon());
@@ -186,8 +180,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
             this, &FileExplorer::onNewFileButtonClick);
     connect(m_newFolderButton, &QToolButton::clicked,
             this, &FileExplorer::onNewFolderButtonClick);
-    connect(m_modeComboBox, qOverload<const QString&>(&QComboBox::activated),
-            this, &FileExplorer::onModeChange);
 
     m_upButton->setFixedSize(18, 18);
     m_backButton->setFixedSize(18, 18);
@@ -257,10 +249,6 @@ void FileExplorer::discharge()
     // TODO
     m_searchEdit->clear();
 
-    m_mode = Viewer;
-    m_modeComboBox->setCurrentIndex(0); // Viewer
-    onModeChange();
-
     lastSelectedIndexesOfExplorer.clear();
     lastSelectedIndexesOfViewer.clear();
     lastExpandedIndexesOfViewer.clear();
@@ -325,85 +313,6 @@ void FileExplorer::setRootPath(const QString& rootPath)
 QString FileExplorer::rootPath() const
 {
     return m_fileSystemModel->rootPath();
-}
-
-QComboBox* FileExplorer::modeComboBox() const
-{
-    return m_modeComboBox;
-}
-
-void FileExplorer::onModeChange()
-{
-    Q_D(FileExplorer);
-
-    if (m_modeComboBox->currentIndex() == 0)
-        m_mode = Viewer;
-    else
-        m_mode = Explorer;
-
-    if (m_mode == Viewer) {
-        lastPathofExplorer = m_fileSystemModel->filePath(mt(rootIndex()));
-        lastSelectedIndexesOfExplorer = selectedIndexes();
-        lastVScrollerPosOfExplorer = verticalScrollBar()->sliderPosition();
-        lastHScrollerPosOfExplorer = horizontalScrollBar()->sliderPosition();;
-
-        onHomeButtonClick();
-
-        for (const QPersistentModelIndex& index : lastExpandedIndexesOfViewer) {
-            if (index.isValid())
-                setExpanded(index, true);
-        }
-
-        selectionModel()->clear();
-        for (const QModelIndex& index : lastSelectedIndexesOfViewer) {
-            if (index.isValid())
-                selectionModel()->select(index, QItemSelectionModel::Select);
-        }
-
-        setIndentation(16);
-        setAcceptDrops(false);
-        setRootIsDecorated(true);
-        setItemsExpandable(true);
-        setExpandsOnDoubleClick(true);
-        setSelectionMode(QTreeView::SingleSelection);
-
-        m_fileSystemModel->setReadOnly(true);
-        m_toolBar->hide();
-        m_pathIndicator->hide();
-
-        verticalScrollBar()->setSliderPosition(lastVScrollerPosOfViewer);
-        horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfViewer);
-    } else {
-        lastExpandedIndexesOfViewer = d->expandedIndexes;
-        lastSelectedIndexesOfViewer = selectedIndexes();
-        lastVScrollerPosOfViewer = verticalScrollBar()->sliderPosition();
-        lastHScrollerPosOfViewer = horizontalScrollBar()->sliderPosition();;
-
-        goToPath(lastPathofExplorer);
-
-        selectionModel()->clear();
-        for (const QModelIndex& index : lastSelectedIndexesOfExplorer) {
-            if (index.isValid())
-                selectionModel()->select(index, QItemSelectionModel::Select);
-        }
-
-        collapseAll();
-        setIndentation(0);
-        setAcceptDrops(true);
-        setRootIsDecorated(false);
-        setItemsExpandable(false);
-        setExpandsOnDoubleClick(false);
-        setSelectionMode(QTreeView::ExtendedSelection);
-
-        m_fileSystemModel->setReadOnly(false);
-        m_toolBar->show();
-        m_pathIndicator->show();
-
-        verticalScrollBar()->setSliderPosition(lastVScrollerPosOfExplorer);
-        horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfExplorer);
-    }
-
-    updateGeometries();
 }
 
 void FileExplorer::onUpButtonClick()
@@ -834,14 +743,7 @@ void FileExplorer::updateGeometries()
     m_searchEdit->setGeometry(sg);
 
     header()->setGeometry(vg.left(), 1, vg.width(), header()->height());
-    if (m_modeComboBox->parentWidget() == header()) {
-        m_modeComboBox->move(header()->width() - m_modeComboBox->width(),
-                             header()->height() / 2.0 - m_modeComboBox->height() / 2.0);
-        if (width() < m_modeComboBox->width() + 40)
-            m_modeComboBox->hide();
-        else if (m_modeComboBox->isHidden())
-            m_modeComboBox->show();
-    }
+
     int ds = qMin(qMin(vg.width() - 5, vg.height() - 5), 100);
     QRect dg;
     dg.setSize({ds, ds});
@@ -853,5 +755,83 @@ void FileExplorer::updateGeometries()
         QRect pg(vg.left(), header()->height() + 1 + m_toolBar->height(), vg.width(), m_pathIndicator->height());
         m_toolBar->setGeometry(tg);
         m_pathIndicator->setGeometry(pg);
+    }
+}
+
+FileExplorer::Mode FileExplorer::mode() const
+{
+    return m_mode;
+}
+
+void FileExplorer::setMode(FileExplorer::Mode mode)
+{
+    Q_D(const FileExplorer);
+
+    if (m_mode != mode) {
+        m_mode = mode;
+
+        if (m_mode == Viewer) {
+            lastPathofExplorer = m_fileSystemModel->filePath(mt(rootIndex()));
+            lastSelectedIndexesOfExplorer = selectedIndexes();
+            lastVScrollerPosOfExplorer = verticalScrollBar()->sliderPosition();
+            lastHScrollerPosOfExplorer = horizontalScrollBar()->sliderPosition();;
+
+            onHomeButtonClick();
+
+            for (const QPersistentModelIndex& index : lastExpandedIndexesOfViewer) {
+                if (index.isValid())
+                    setExpanded(index, true);
+            }
+
+            selectionModel()->clear();
+            for (const QModelIndex& index : lastSelectedIndexesOfViewer) {
+                if (index.isValid())
+                    selectionModel()->select(index, QItemSelectionModel::Select);
+            }
+
+            setIndentation(16);
+            setAcceptDrops(false);
+            setRootIsDecorated(true);
+            setItemsExpandable(true);
+            setExpandsOnDoubleClick(true);
+            setSelectionMode(QTreeView::SingleSelection);
+
+            m_fileSystemModel->setReadOnly(true);
+            m_toolBar->hide();
+            m_pathIndicator->hide();
+
+            verticalScrollBar()->setSliderPosition(lastVScrollerPosOfViewer);
+            horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfViewer);
+        } else {
+            lastExpandedIndexesOfViewer = d->expandedIndexes;
+            lastSelectedIndexesOfViewer = selectedIndexes();
+            lastVScrollerPosOfViewer = verticalScrollBar()->sliderPosition();
+            lastHScrollerPosOfViewer = horizontalScrollBar()->sliderPosition();;
+
+            goToPath(lastPathofExplorer);
+
+            selectionModel()->clear();
+            for (const QModelIndex& index : lastSelectedIndexesOfExplorer) {
+                if (index.isValid())
+                    selectionModel()->select(index, QItemSelectionModel::Select);
+            }
+
+            collapseAll();
+            setIndentation(0);
+            setAcceptDrops(true);
+            setRootIsDecorated(false);
+            setItemsExpandable(false);
+            setExpandsOnDoubleClick(false);
+            setSelectionMode(QTreeView::ExtendedSelection);
+
+            m_fileSystemModel->setReadOnly(false);
+            m_toolBar->show();
+            m_pathIndicator->show();
+
+            verticalScrollBar()->setSliderPosition(lastVScrollerPosOfExplorer);
+            horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfExplorer);
+        }
+
+        updateGeometries();
     }
 }

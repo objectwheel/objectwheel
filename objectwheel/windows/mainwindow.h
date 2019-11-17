@@ -16,8 +16,9 @@ class ControlsPane;
 class ControlsController;
 class FormsPane;
 class FormsController;
-class CentralWidget;
 class AssetsPane;
+class AssetsController;
+class CentralWidget;
 class DockBar;
 
 class MainWindow : public QMainWindow
@@ -77,6 +78,7 @@ private:
     FormsPane* m_formsPane;
     FormsController* m_formsController;
     AssetsPane* m_assetsPane;
+    AssetsController* m_assetsController;
     QDockWidget* m_controlsDockWidget;
     QDockWidget* m_propertiesDockWidget;
     QDockWidget* m_assetsDockWidget;

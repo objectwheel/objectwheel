@@ -24,16 +24,21 @@ class FileExplorer : public QTreeView
     friend class FileExplorerListDelegate;
 
 public:
+    enum Mode { Viewer, Explorer };
+    Q_ENUM(Mode)
+
+public:
     explicit FileExplorer(QWidget* parent = nullptr);
     void setRootPath(const QString& rootPath);
     QString rootPath() const;
-    QComboBox* modeComboBox() const;
+
+    Mode mode() const;
+    void setMode(FileExplorer::Mode mode);
 
 public slots:
     void discharge();
 
 private slots:
-    void onModeChange();
     void onUpButtonClick();
     void onBackButtonClick();
     void onForthButtonClick();
@@ -69,6 +74,7 @@ signals:
     void filesDeleted(const QSet<QString>& pathes);
 
 private:
+    Mode m_mode;
     QLabel* m_dropHereLabel;
     QGraphicsBlurEffect* m_droppingBlurEffect;
     FileSearchModel* m_searchEditCompleterModel;
@@ -78,7 +84,6 @@ private:
     FileSystemProxyModel* m_fileSystemProxyModel;
     QToolBar* m_toolBar;
     PathIndicator* m_pathIndicator;
-    QComboBox* m_modeComboBox;
     QToolButton* m_upButton;
     QToolButton* m_backButton;
     QToolButton* m_forthButton;
@@ -89,7 +94,6 @@ private:
     QToolButton* m_renameButton;
     QToolButton* m_newFileButton;
     QToolButton* m_newFolderButton;
-    enum Modes { Viewer, Explorer} m_mode;
 };
 
 #endif // FILEEXPLORER_H

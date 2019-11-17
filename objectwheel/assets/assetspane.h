@@ -1,17 +1,29 @@
 #ifndef ASSETSPANE_H
 #define ASSETSPANE_H
 
-#include <assetscontroller.h>
+#include <QWidget>
 
-class AssetsPane : public FileExplorer
+class AssetsTree;
+class LineEdit;
+class QComboBox;
+
+class AssetsPane final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(AssetsPane)
 
 public:
     explicit AssetsPane(QWidget* parent = nullptr);
 
-private:
+    AssetsTree* assetsTree() const;
+    QComboBox* modeComboBox() const;
+    LineEdit* searchEdit() const;
     QSize sizeHint() const override;
+
+private:
+    AssetsTree* m_assetsTree;
+    QComboBox* m_modeComboBox;
+    LineEdit* m_searchEdit;
 };
 
 #endif // ASSETSPANE_H
