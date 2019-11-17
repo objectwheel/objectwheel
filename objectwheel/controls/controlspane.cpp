@@ -35,5 +35,5 @@ LineEdit* ControlsPane::searchEdit() const
 
 QSize ControlsPane::sizeHint() const
 {
-    return {300, 300};
+    return {300, 160};
 }

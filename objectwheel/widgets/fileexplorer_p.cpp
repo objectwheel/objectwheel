@@ -1,16 +1,12 @@
 #include <fileexplorer.h>
 #include <fileexplorer_p.h>
 #include <paintutils.h>
+#include <private/qtreeview_p.h>
 
 #include <QPainter>
 #include <QLineEdit>
 #include <QFileSystemModel>
 #include <QFileSystemWatcher>
-
-namespace {
-
-const int ROW_HEIGHT = 21;
-}
 
 FileExplorerListDelegate::FileExplorerListDelegate(FileExplorer* parent) : QStyledItemDelegate(parent)
   , m_fileExplorer(parent)
@@ -58,16 +54,11 @@ void FileExplorerListDelegate::paint(QPainter* painter, const QStyleOptionViewIt
     painter->restore();
 }
 
-QSize FileExplorerListDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const
-{
-    const QSize& size = QStyledItemDelegate::sizeHint(opt, index);
-    return QSize(size.width(), ROW_HEIGHT);
-}
-
 PathIndicator::PathIndicator(QWidget* parent) : QWidget(parent)
   , m_pathEdit(new QLineEdit(this))
 {
     m_pathEdit->hide();
+    m_pathEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     connect(m_pathEdit, &QLineEdit::editingFinished,
             m_pathEdit, &QLineEdit::hide);
     connect(m_pathEdit, &QLineEdit::editingFinished,

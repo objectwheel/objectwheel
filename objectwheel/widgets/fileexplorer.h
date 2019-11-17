@@ -13,18 +13,17 @@ class FileSystemProxyModel;
 class QLabel;
 class QCompleter;
 class FileSearchModel;
-class FileExplorerPrivate;
 class QGraphicsBlurEffect;
 
 class FileExplorer : public QTreeView
 {
     Q_OBJECT
-    Q_DECLARE_PRIVATE(FileExplorer)
+    Q_DECLARE_PRIVATE(QTreeView)
 
     friend class FileExplorerListDelegate;
 
 public:
-    enum Mode { Viewer, Explorer };
+    enum Mode { Invalid, Viewer, Explorer };
     Q_ENUM(Mode)
 
 public:
@@ -77,9 +76,6 @@ private:
     Mode m_mode;
     QLabel* m_dropHereLabel;
     QGraphicsBlurEffect* m_droppingBlurEffect;
-    FileSearchModel* m_searchEditCompleterModel;
-    QCompleter* m_searchEditCompleter;
-    LineEdit* m_searchEdit;
     QFileSystemModel* m_fileSystemModel;
     FileSystemProxyModel* m_fileSystemProxyModel;
     QToolBar* m_toolBar;

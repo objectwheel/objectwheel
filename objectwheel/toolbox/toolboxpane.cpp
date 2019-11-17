@@ -39,7 +39,7 @@ ToolboxTree* ToolboxPane::toolboxTree() const
 
 QSize ToolboxPane::sizeHint() const
 {
-    return {190, 710};
+    return {190, 720};
 }
 
 void ToolboxPane::dragEnterEvent(QDragEnterEvent* event)

@@ -2,17 +2,13 @@
 #define FILEEXPLORER_P_H
 
 #include <QTreeView>
-#include <private/qtreeview_p.h>
-
 #include <QStringListModel>
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 #include <QFileIconProvider>
 
-class FileExplorer;
 class QFileSystemWatcher;
-
-class FileExplorerPrivate : public QTreeViewPrivate {};
+class FileExplorer;
 
 class FileExplorerListDelegate : public QStyledItemDelegate
 {
@@ -20,7 +16,6 @@ class FileExplorerListDelegate : public QStyledItemDelegate
 
 public:
     explicit FileExplorerListDelegate(FileExplorer* parent);
-    QSize sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const override;
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override;
 

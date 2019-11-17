@@ -37,11 +37,12 @@
 #include <QGraphicsBlurEffect>
 #include <QCompleter>
 #include <QTemporaryDir>
+#include <QApplication>
+#include <QStack>
+#include <QMimeData>
 
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
-
-using namespace Utils;
 
 namespace {
 
@@ -59,12 +60,9 @@ QStack<QString> forthPathStack;
 }
 
 FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
-  , m_mode(Viewer)
+  , m_mode(Invalid)
   , m_dropHereLabel(new QLabel(this))
   , m_droppingBlurEffect(new QGraphicsBlurEffect(this))
-  , m_searchEditCompleterModel(new FileSearchModel(this))
-  , m_searchEditCompleter(new QCompleter(this))
-  , m_searchEdit(new LineEdit(this))
   , m_fileSystemModel(new QFileSystemModel(this))
   , m_fileSystemProxyModel(new FileSystemProxyModel(this))
   , m_toolBar(new QToolBar(this))
@@ -149,37 +147,16 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
     m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
 
-    m_upButton->setIcon(Icons::ARROW_UP.icon());
-    m_backButton->setIcon(Icons::ARROW_BACK.icon());
-    m_forthButton->setIcon(Icons::ARROW_FORTH.icon());
-    m_homeButton->setIcon(Icons::HOME_TOOLBAR.icon());
-    m_copyButton->setIcon(Icons::COPY_TOOLBAR.icon());
-    m_pasteButton->setIcon(Icons::PASTE_TOOLBAR.icon());
-    m_deleteButton->setIcon(Icons::DELETE_TOOLBAR.icon());
-    m_renameButton->setIcon(Icons::RENAME.icon());
-    m_newFileButton->setIcon(Icons::FILENEW.icon());
-    m_newFolderButton->setIcon(Icons::FOLDERNEW.icon());
-
-    connect(m_upButton, &QToolButton::clicked,
-            this, &FileExplorer::onUpButtonClick);
-    connect(m_backButton, &QToolButton::clicked,
-            this, &FileExplorer::onBackButtonClick);
-    connect(m_forthButton, &QToolButton::clicked,
-            this, &FileExplorer::onForthButtonClick);
-    connect(m_homeButton, &QToolButton::clicked,
-            this, &FileExplorer::onHomeButtonClick);
-    connect(m_copyButton, &QToolButton::clicked,
-            this, &FileExplorer::onCopyButtonClick);
-    connect(m_pasteButton, &QToolButton::clicked,
-            this, &FileExplorer::onPasteButtonClick);
-    connect(m_deleteButton, &QToolButton::clicked,
-            this, &FileExplorer::onDeleteButtonClick);
-    connect(m_renameButton, &QToolButton::clicked,
-            this, &FileExplorer::onRenameButtonClick);
-    connect(m_newFileButton, &QToolButton::clicked,
-            this, &FileExplorer::onNewFileButtonClick);
-    connect(m_newFolderButton, &QToolButton::clicked,
-            this, &FileExplorer::onNewFolderButtonClick);
+    m_upButton->setIcon(Utils::Icons::ARROW_UP.icon());
+    m_backButton->setIcon(Utils::Icons::ARROW_BACK.icon());
+    m_forthButton->setIcon(Utils::Icons::ARROW_FORTH.icon());
+    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
+    m_copyButton->setIcon(Utils::Icons::COPY_TOOLBAR.icon());
+    m_pasteButton->setIcon(Utils::Icons::PASTE_TOOLBAR.icon());
+    m_deleteButton->setIcon(Utils::Icons::DELETE_TOOLBAR.icon());
+    m_renameButton->setIcon(Utils::Icons::RENAME.icon());
+    m_newFileButton->setIcon(Utils::Icons::FILENEW.icon());
+    m_newFolderButton->setIcon(Utils::Icons::FOLDERNEW.icon());
 
     m_upButton->setFixedSize(18, 18);
     m_backButton->setFixedSize(18, 18);
@@ -213,31 +190,35 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_fileSystemProxyModel->setFilterKeyColumn(0);
     m_fileSystemProxyModel->setSourceModel(m_fileSystemModel);
     setModel(m_fileSystemProxyModel);
+    setMode(Viewer);
 
-    m_searchEditCompleter->setFilterMode(Qt::MatchContains);
-    m_searchEditCompleter->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    m_searchEditCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    m_searchEditCompleter->setModel(m_searchEditCompleterModel);
-
-    m_searchEdit->setClearButtonEnabled(true);
-    m_searchEdit->setCompleter(m_searchEditCompleter);
-    m_searchEdit->setPlaceholderText(tr("Search"));
-    m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", QSize(16, 16), this),
-                            QLineEdit::LeadingPosition);
-    // Since FileExplorer (parent of the m_searchEdit) has
-    // its own layout and we don't add m_searchEdit into it
-    // QWidget::setVisible does not adjust the size. So we
-    // must call it manually.
-    m_searchEdit->adjustSize();
-
-    connect(m_fileSystemModel, &QFileSystemModel::fileRenamed, this, [=]
-    {
+    connect(m_upButton, &QToolButton::clicked,
+            this, &FileExplorer::onUpButtonClick);
+    connect(m_backButton, &QToolButton::clicked,
+            this, &FileExplorer::onBackButtonClick);
+    connect(m_forthButton, &QToolButton::clicked,
+            this, &FileExplorer::onForthButtonClick);
+    connect(m_homeButton, &QToolButton::clicked,
+            this, &FileExplorer::onHomeButtonClick);
+    connect(m_copyButton, &QToolButton::clicked,
+            this, &FileExplorer::onCopyButtonClick);
+    connect(m_pasteButton, &QToolButton::clicked,
+            this, &FileExplorer::onPasteButtonClick);
+    connect(m_deleteButton, &QToolButton::clicked,
+            this, &FileExplorer::onDeleteButtonClick);
+    connect(m_renameButton, &QToolButton::clicked,
+            this, &FileExplorer::onRenameButtonClick);
+    connect(m_newFileButton, &QToolButton::clicked,
+            this, &FileExplorer::onNewFileButtonClick);
+    connect(m_newFolderButton, &QToolButton::clicked,
+            this, &FileExplorer::onNewFolderButtonClick);
+    connect(m_fileSystemModel, &QFileSystemModel::fileRenamed,
+            this, [=] {
         m_fileSystemProxyModel->setDynamicSortFilter(false);
         m_fileSystemProxyModel->setDynamicSortFilter(true);
     });
-    connect(m_searchEdit, qOverload<>(&LineEdit::returnPressed), this, &FileExplorer::filterList);
-    connect(m_pathIndicator, &PathIndicator::pathUpdated, this, &FileExplorer::goToRelativePath);
-
+    connect(m_pathIndicator, &PathIndicator::pathUpdated,
+            this, &FileExplorer::goToRelativePath);
     connect(this, &FileExplorer::doubleClicked,
             this, &FileExplorer::onItemDoubleClick);
     connect(QApplication::clipboard(), &QClipboard::dataChanged, this, [=]
@@ -247,8 +228,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
 void FileExplorer::discharge()
 {
     // TODO
-    m_searchEdit->clear();
-
     lastSelectedIndexesOfExplorer.clear();
     lastSelectedIndexesOfViewer.clear();
     lastExpandedIndexesOfViewer.clear();
