@@ -2,6 +2,7 @@
 #define FILEEXPLORER_H
 
 #include <QTreeView>
+#include <QStack>
 
 class LineEdit;
 class QFileSystemModel;
@@ -28,14 +29,18 @@ public:
 
 public:
     explicit FileExplorer(QWidget* parent = nullptr);
-    void setRootPath(const QString& rootPath);
+
     QString rootPath() const;
+    void setRootPath(const QString& rootPath);
 
     Mode mode() const;
     void setMode(FileExplorer::Mode mode);
 
 public slots:
     void discharge();
+    void goToEntry(const QString& entry);
+    void goToDir(const QString& dir);
+    void goToRelativeDir(const QString& relativeDir);
 
 private slots:
     void onUpButtonClick();
@@ -57,9 +62,6 @@ protected:
                         int row, bool verticalLine) const;
 
 private:
-    void goToEntry(const QString& entry);
-    void goToDir(const QString& dir);
-    void goToRelativeDir(const QString& relativeDir);
     void dropEvent(QDropEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
@@ -71,6 +73,7 @@ private:
 signals:
     void fileOpened(const QString& relativePath);
     void filesDeleted(const QSet<QString>& pathes);
+    void currentDirChanged(const QString& currentDir);
 
 private:
     Mode m_mode;
@@ -89,7 +92,18 @@ private:
     QToolButton* m_deleteButton;
     QToolButton* m_renameButton;
     QToolButton* m_newFileButton;
-    QToolButton* m_newFolderButton;
+    QToolButton* m_newFolderButton;    
+    // FIXME: Rename those
+    int lastVScrollerPosOfViewer = 0;
+    int lastHScrollerPosOfViewer = 0;
+    int lastVScrollerPosOfExplorer = 0;
+    int lastHScrollerPosOfExplorer = 0;
+    QModelIndexList lastSelectedIndexesOfViewer;
+    QModelIndexList lastSelectedIndexesOfExplorer;
+    QSet<QPersistentModelIndex> lastExpandedIndexesOfViewer;
+    QString lastPathofExplorer;
+    QStack<QString> backPathStack;
+    QStack<QString> forthPathStack;
 };
 
 #endif // FILEEXPLORER_H

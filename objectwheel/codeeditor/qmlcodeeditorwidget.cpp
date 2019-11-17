@@ -131,7 +131,7 @@ QList<Control*> controls(const QList<QmlCodeEditorWidget::DesignsDocument*>& doc
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
   , m_splitter(new QSplitter(this))
   , m_codeEditor(new QmlCodeEditor(this))
-  , m_fileExplorer(new FileExplorer(0))
+  , m_fileExplorer(new FileExplorer)
 {
     auto layout = new QVBoxLayout(this);
     layout->addWidget(m_splitter);

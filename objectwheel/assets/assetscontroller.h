@@ -4,6 +4,7 @@
 #include <QObject>
 
 class AssetsPane;
+class QCompleter;
 class FileSystemCompleterModel;
 
 class AssetsController final : public QObject
@@ -20,9 +21,11 @@ public slots:
 private slots:
     void onModeComboBoxActivation();
     void onSearchEditReturnPress();
+    void onCurrentDirChange(const QString& currentDir);
 
 private:
     AssetsPane* m_assetsPane;
+    QCompleter* m_completer;
     FileSystemCompleterModel* m_fileSystemCompleterModel;
 };
 

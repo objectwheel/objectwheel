@@ -77,7 +77,7 @@ QList<QTreeWidgetItem*> FormsTree::topLevelItems()
     return items;
 }
 
-void FormsTree::paintEvent(QPaintEvent* e)
+void FormsTree::paintEvent(QPaintEvent* event)
 {
     Q_D(const QTreeWidget);
 
@@ -104,6 +104,7 @@ void FormsTree::paintEvent(QPaintEvent* e)
         painter.drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
                          rect.bottomRight() - QPointF(0.5, 0.0));
     }
+    painter.end();
 
-    QTreeWidget::paintEvent(e);
+    QTreeWidget::paintEvent(event);
 }

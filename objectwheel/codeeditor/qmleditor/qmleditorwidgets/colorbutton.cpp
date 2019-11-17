@@ -106,6 +106,7 @@ QColor ColorButton::convertedColor() const
 void ColorButton::paintEvent(QPaintEvent *event)
 {
     QToolButton::paintEvent(event);
+
     if (!isEnabled())
         return;
 

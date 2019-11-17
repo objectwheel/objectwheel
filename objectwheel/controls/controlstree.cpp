@@ -187,6 +187,7 @@ void ControlsTree::paintEvent(QPaintEvent* event)
         painter.drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
                          rect.bottomRight() - QPointF(0.5, 0.0));
     }
+    painter.end();
 
     QTreeWidget::paintEvent(event);
 }

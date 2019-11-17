@@ -78,6 +78,7 @@ void SucceedWidget::update(const QString& title, const QString& description)
 void SucceedWidget::paintEvent(QPaintEvent* event)
 {
     QWidget::paintEvent(event);
+
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 

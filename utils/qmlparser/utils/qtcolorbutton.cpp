@@ -168,6 +168,7 @@ bool QtColorButton::isAlphaAllowed() const
 void QtColorButton::paintEvent(QPaintEvent *event)
 {
     QToolButton::paintEvent(event);
+
     if (!isEnabled())
         return;
 

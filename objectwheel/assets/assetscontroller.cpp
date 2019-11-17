@@ -6,22 +6,25 @@
 
 #include <QComboBox>
 #include <QCompleter>
+#include <QDir>
 
 AssetsController::AssetsController(AssetsPane* assetsPane, QObject* parent) : QObject(parent)
   , m_assetsPane(assetsPane)
+  , m_completer(new QCompleter(this))
   , m_fileSystemCompleterModel(new FileSystemCompleterModel(this))
 {
-    auto completer = new QCompleter(this);
-    completer->setFilterMode(Qt::MatchContains);
-    completer->setCaseSensitivity(Qt::CaseInsensitive);
-    completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
-    completer->setModel(m_fileSystemCompleterModel);
-    m_assetsPane->searchEdit()->setCompleter(completer);
+    m_completer->setFilterMode(Qt::MatchContains);
+    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+    m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+    m_completer->setModel(m_fileSystemCompleterModel);
+    m_assetsPane->searchEdit()->setCompleter(m_completer);
 
     connect(m_assetsPane->modeComboBox(), qOverload<int>(&QComboBox::activated),
             this, &AssetsController::onModeComboBoxActivation);
     connect(m_assetsPane->searchEdit(), &LineEdit::returnPressed,
             this, &AssetsController::onSearchEditReturnPress);
+    connect(m_assetsPane->assetsTree(), &AssetsTree::currentDirChanged,
+            this, &AssetsController::onCurrentDirChange);
 }
 
 void AssetsController::discharge()
@@ -38,24 +41,29 @@ void AssetsController::onModeComboBoxActivation()
 
 void AssetsController::onSearchEditReturnPress()
 {
-//    if (!m_searchEditCompleter->currentIndex().isValid())
-//        return;
+    if (!m_completer->currentIndex().isValid())
+        return;
 
-//    const QModelIndex& currentIndex = m_searchEditCompleter->popup()->currentIndex();
+    const QModelIndex& currentIndex = m_completer->popup()->currentIndex();
 
-//    if (!currentIndex.isValid())
-//        return;
+    if (!currentIndex.isValid())
+        return;
 
-//    const QString& fileName = currentIndex.data(Qt::EditRole).toString();
-//    const QString& relativePath = currentIndex.data(Qt::DisplayRole).toString();
+    const QString& fileName = currentIndex.data(Qt::EditRole).toString();
+    const QString& relativePath = currentIndex.data(Qt::DisplayRole).toString();
 
-//    if (relativePath.isEmpty() || fileName.isEmpty())
-//        return;
+    if (relativePath.isEmpty() || fileName.isEmpty())
+        return;
 
-//    if (m_searchEdit->text() != fileName)
-//        return;
+    if (QString::compare(m_assetsPane->searchEdit()->text(), fileName, Qt::CaseInsensitive) != 0)
+        return;
 
-//    const QString& path = QDir(m_fileSystemModel->filePath(mt(rootIndex()))).filePath(relativePath);
+    const QString& path = QDir(m_fileSystemCompleterModel->rootPath()).filePath(relativePath);
+
+    m_assetsPane->assetsTree()->goToEntry(path);
 }
 
-
+void AssetsController::onCurrentDirChange(const QString& currentDir)
+{
+    m_fileSystemCompleterModel->setRootPath(currentDir);
+}

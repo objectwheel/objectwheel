@@ -29,21 +29,6 @@
 #define mt(index) m_fileSystemProxyModel->mapToSource(index)
 #define mf(index) m_fileSystemProxyModel->mapFromSource(index)
 
-namespace {
-
-const int ROW_HEIGHT = 20;
-int lastVScrollerPosOfViewer = 0;
-int lastHScrollerPosOfViewer = 0;
-int lastVScrollerPosOfExplorer = 0;
-int lastHScrollerPosOfExplorer = 0;
-QModelIndexList lastSelectedIndexesOfViewer;
-QModelIndexList lastSelectedIndexesOfExplorer;
-QSet<QPersistentModelIndex> lastExpandedIndexesOfViewer;
-QString lastPathofExplorer;
-QStack<QString> backPathStack;
-QStack<QString> forthPathStack;
-}
-
 FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_mode(Invalid)
   , m_dropHereLabel(new QLabel(this))
@@ -234,6 +219,11 @@ void FileExplorer::discharge()
     setRootPath(QApplication::applicationDirPath());
 }
 
+QString FileExplorer::rootPath() const
+{
+    return m_fileSystemModel->rootPath();
+}
+
 void FileExplorer::setRootPath(const QString& rootPath)
 {
     if (m_fileSystemModel->rootPath() == rootPath)
@@ -272,11 +262,6 @@ void FileExplorer::setRootPath(const QString& rootPath)
     hideColumn(1);
     hideColumn(2);
     hideColumn(3);
-}
-
-QString FileExplorer::rootPath() const
-{
-    return m_fileSystemModel->rootPath();
 }
 
 void FileExplorer::onUpButtonClick()
@@ -433,6 +418,10 @@ void FileExplorer::setPalette(const QPalette& pal)
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
 
+    // Workaround for an issue caused by setting the style
+    // sheet more than once, this ensures the change happens
+    ensurePolished();
+
     setStyleSheet(QString {
                       "QTreeView {"
                       "    border: 1px solid %1;"
@@ -451,10 +440,10 @@ void FileExplorer::setPalette(const QPalette& pal)
                       "                                stop:0 %2, stop:1 %3);"
                       "}"
                   }
-                  .arg(palette().dark().color().darker(120).name())
-                  .arg(palette().light().color().name())
-                  .arg(palette().dark().color().name())
-                  .arg(palette().buttonText().color().name()));
+                  .arg(pal.dark().color().darker(120).name())
+                  .arg(pal.light().color().name())
+                  .arg(pal.dark().color().name())
+                  .arg(pal.buttonText().color().name()));
 
     update();
 }
@@ -519,7 +508,6 @@ void FileExplorer::goToDir(const QString& dir)
 
     setRootIndex(mf(index));
     selectionModel()->clear();
-//    m_searchEditCompleterModel->setRootPath(dir);
     m_upButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_homeButton->setDisabled(m_fileSystemModel->index(m_fileSystemModel->rootPath()) == index);
     m_pathIndicator->setPath(QDir(m_fileSystemModel->rootPath()).relativeFilePath(dir));
@@ -533,6 +521,8 @@ void FileExplorer::goToDir(const QString& dir)
 
     m_backButton->setDisabled(backPathStack.isEmpty());
     m_forthButton->setDisabled(forthPathStack.isEmpty());
+
+    emit currentDirChanged(dir);
 }
 
 void FileExplorer::goToRelativeDir(const QString& relativeDir)
@@ -642,9 +632,12 @@ void FileExplorer::drawBranches(QPainter* painter, const QRect& rect,
     painter->restore();
 }
 
-void FileExplorer::paintEvent(QPaintEvent* e)
+void FileExplorer::paintEvent(QPaintEvent* event)
 {
+    Q_D(const QTreeView);
+
     const bool folderHasChildren = m_fileSystemModel->QAbstractItemModel::hasChildren(mt(rootIndex()));
+
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());
     painter.setClipping(true);
@@ -653,12 +646,11 @@ void FileExplorer::paintEvent(QPaintEvent* e)
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
-    qreal rowCount = viewport()->height() / qreal(ROW_HEIGHT);
+    qreal height = d->defaultItemHeight;
+    qreal rowCount = viewport()->height() / height;
     for (int i = 0; i < rowCount; ++i) {
-        QRectF rect(0, i * ROW_HEIGHT, viewport()->width(), ROW_HEIGHT);
-        QPainterPath path;
-        path.addRect(rect);
-        painter.setClipPath(path);
+        QRectF rect(0, i * height, viewport()->width(), height);
+        painter.setClipRect(rect);
 
         // Fill background
         if (i % 2) {
@@ -672,12 +664,14 @@ void FileExplorer::paintEvent(QPaintEvent* e)
         }
 
         // Draw top and bottom lines
-        painter.drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-        painter.drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+        painter.drawLine(rect.topLeft() + QPointF(0.5, 0.0),
+                         rect.topRight() - QPointF(0.5, 0.0));
+        painter.drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
+                         rect.bottomRight() - QPointF(0.5, 0.0));
     }
     painter.end();
 
-    QTreeView::paintEvent(e);
+    QTreeView::paintEvent(event);
 }
 
 void FileExplorer::updateGeometries()
