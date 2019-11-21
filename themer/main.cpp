@@ -3,13 +3,13 @@
 #include <quicktheme.h>
 #include <utilityfunctions.h>
 
-#include <QtQml>
-#include <QtQuick>
-#include <QtWidgets>
-
 #ifdef Q_OS_MACOS
 #include <windowoperations.h>
 #endif
+
+#include <QApplication>
+#include <QQmlApplicationEngine>
+#include <QQuickWindow>
 
 int main(int argc, char *argv[])
 {
@@ -36,13 +36,8 @@ int main(int argc, char *argv[])
     QApplication::setApplicationDisplayName(APP_NAME + QObject::tr(" Themer"));
     QApplication::setWindowIcon(QIcon(":/images/icon.png"));
 
-    /* Load default fonts */
-    const QString fontPath = ":/fonts";
-    for (const QString& fontName : QDir(fontPath).entryList(QDir::Files))
-        QFontDatabase::addApplicationFont(fontPath + '/' + fontName);
-
     /* Set application ui settings */
-    QApplication::setFont(UtilityFunctions::defaultFont());
+    QApplication::setFont(UtilityFunctions::systemDefaultFont());
     QApplication::setStartDragDistance(8);
 
 #ifdef Q_OS_MACOS // Show/hide dock icon

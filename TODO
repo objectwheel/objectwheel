@@ -1,6 +1,10 @@
 Designer Core TODOs
+Attribitions Bölümü ekle ve şunlar için atıf ekle:
+- Built with Qt logosu
+- Thanks Icons8 for providing icons for this app (URL) (LICENSE)
+- Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
-Tüm dokumanları Qt 5.13'e geçir
+Tüm dokumanları Qt 5.13.2'ye geçir
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar
@@ -8,11 +12,40 @@ AssetsPane neden kendini aşıp sürekli propertiespane'in alanının üzerine d
 AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
     tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
 Assets Pane i bitir
-
-Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
-    örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
+Programdaki tüm textleri Roboto'ya göre yeniden ayarla ve bozuk olanları düzelt
+fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
+    entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
+    öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
+    olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
+    hatta toolbox'un hangi kategorilerinin açık kapalı olduğu bile settingsler ile kayıt edilip restore edilsin
+    hatta Help kısmındaki combobox için de bu yapılsın
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
+kodları collapse/expand yapma olayı bozuk kod editörde
+
+quick_controls_conf ve project options sayfası yeniden dizayn edilecek
+Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir
+belki saveutils veritabanı'da cbor'a çevrilmeli? nasıl olsa büyük veri saklanmicak artık
+tüm api işleri cbor'a taşınabilir olacak şekilde çevrilecek
+Objectwheel registration süreci çalışır hale getirilecek
+Feedback mekanizması eklenecek
+Share buttonu eklenecek
+videolar ve tutorialler eklenecek, bunlar için özel "learning page" tasarlanacak Objectwheel'e
+  entegre edilecek
+
+Çökme-raportu-9.txt, buraporlarla ilgilen
+form nongui yapılırsa renderer patlamasın
+dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
+neden bir kontrol içine başka bir kontrol koyunca dıştaki blank laşıyor?
+bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
+projeler ekranında renderer ile bağlantı koparsa ve kullanıcı "no" ya basarsa proje yüklenme olayı iptal edilsin
+f1 ile help açma mümkün olsun. Hem kod editörde hemde designer view'de seçili olan kontrol için
+qmlcode editor'e save all butonu ekle ve ayrıca CMD + R = run, CMD + Shift + S = save all vs klavye kısayollarını ekle
+Sağ tık menüsüne "bu obje ile ilgili yardım al" minvalinde "Go to Help" gibi bir seçenek de ekle
+    böylece ilgili kontrol ile ilgili kolayca documents sekmesine gidilebilsin
+qt quick extras'dan delay buttonlar vs siyah gözüküyor, neden?
+Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
+    örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
 plan pricing mevzularının limitlerini "beta" ya uygun düşecek şekilde gözden geçir
 form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin ayrıca uyarı da versin bi kereye
     mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
@@ -22,105 +55,35 @@ render engine serverla ilgili toolbara konulacak green red light yanında bir de
     crash iletişim kutusu son 10 saniye içinde iki kez crash olursa gözüksün, onun gibi bişey işte
     hemde problemli projelerin de projeyi yükleme ekranında patlatmaması lazım, bunu kesin çözmek lazım
 tüm dock ayarları kalıcı olsun, diğer ayarlar için de bi beyin fırtınası yapılsın
-fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
-    entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
-    öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
-    olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
-    hatta toolbox'un hangi kategorilerinin açık kapalı olduğu bile settingsler ile kayıt edilip restore edilsin
-properties pane'de ki color propertisinin toolbuttonu neden sapıttı?
-
-çift tıklama ile kod editörün splitview ile mi yoksa full code editor modda mı açılacağını belirleyebilmek
-    için settingslere yeni bir settings ekle
-Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explorer modu buraya ekle,
+    Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explorer modu buraya ekle,
     ayrıca tüm dock widgetler vs ve splitview genişlik oranları vs gibi tüm ayarlar program kapatılınca da hatırlanacak
     şekilde general settings vs şeklinde kayıt edilsin
-aşağı, bayağı aşağı doğru bi son son kontrol et bakalım başka ne buglar
-    var çıkıştan önce halletmek isteyebileceğimiz, ayrıca todoyu azıcık temizle
+çift tıklama ile kod editörün splitview ile mi yoksa full code editor modda mı açılacağını belirleyebilmek
+    için settingslere yeni bir settings ekle
+headlineların item genişliğine eşit olup olmayacağına dair scenesettings ekle, yada en azından nongui
+    controller için headline lar id genişliği kadar olsun, kırpılmaya izin verme, en azından nongui için
+Toollar arasına, Layouts katagorisine spacer özel itemleri ekle
 
-hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
-    bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı
-çift tıklama ile forms pane üzerinden form isimleri değiştirilebilmeli ayrıca özel bir buton da ekle
-applicationstyle:panelbuttoncommand çizimlerindeki tüm kontur ve gölge çizimleri transparan
-    siyah bazlı olmalı, sabit renk kullanımlarından kaçınılmalı
-Assetlerden import edilmiş bir qml objesinin ismi üzerine ctrl basılı tutularak tıklanınca ilgili dosya
-    qml code editor de açılamıyor, kaynak açılamıyor
-Controller silindiğinde, konumları değiştirildiğinde vs kontrol internal file explorer ile,
-    Assets explorer ile dosyalar üzerinde değişiklikler yapıldığında, he halükarda ModelManagerInterface
-    güncellenmeli, ilgili dosyaları kullanan code editörler hata falan göstermeli "bu qml türü silindi, yok" gibi vs
-    güncellemeyi belki qmlcodedocument'in yaptığı gibi (QmlCodeDocument::reparseDocument()) yapabiliriz
-control.cpp'de ki scene() kullanımı ile alakalı fixme leri temizle
-ana ekren toolbarına render engine durumunu gösterir bir buton ekle ve eğer kapalı ise aktif olup render engini açmaya izin ersin
-"creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
-InspectorPane'e de aynı kontrol sağ tık menüsünden ekle
-TÜM tüm setIcon ları ve tüm setPixmap, setImage leri paletle ilişki olanları palet değişimlerine karşı
-    diğer tümünü de devicePixelRatioF değişimlerine karşı kontrol et, uyumlu yap
-scale > 1 (belki rotation > 0) olan parentlerden childler taşınırken, setBeingRaised yapılca kontrol kayıyor, bunu düzelt
-aynı şekilde resize etmede scale > 1 (belki rotation > 0) durumunda sıkıntı çıkarıyor
-üzeri tam dolu olan bir nesneyi anchorlamak için üstünde boş yer yoksa sıkıntı çıkıyor, headline'da anchorlama için kullanılabilmeli
-Şu modeselectorpane'de ki tıklanınca arkaplanın kararması meselesini düzelt
-Tüm ...Controller classlarında tüm fonksiyonlar const yapılmayha çalışılacak
+static qpixmap olan yerleri düzelt
+toolbox settings bu bölüme tool kategorileme ve alfabetik sıralama vs ayarları da eklenir
+ayrıca toolbox üzerine bir settings ikonu koy ve toolbox ayarlarna yönlendirsin
+chartview ile tüm "barseries" tarzı toolları Qt Creator'e baka baka aynen kopya et ve toolbox'a ekle
+Menu, MenuBar, ToolBar, TabBar gibi bazı (özellikle Container bazlı) toollar için designer şu özellikleri desteklemeli:
+    Eğer babaları kendi özel konteynerleri ise (MenuBar, TabBar gibi), ilgili çocukların x, y, width, height gibi özellikleri set edilememeli, mesela designera x, y uygulanır ama UpdateRenderer ve Save edilmez. Resizerlar bu gibi kontroller için pasif olmalı. Ancak ilgili kontrol headline ile yada doğal olarak sürüklenebilmeli ve reparent edilebilmeli, ancak dediğimiz gibi eğer kendi doğal konteynerları babaları ise x, y, w, h set edilmemeli eski yerlerine geri dönmeliler, ayrıca belki properties pane de x, y, w, h propertilerini babaları uygun olduğunda göstermemeli gizlemeli
+engine crash mesajına "dont ask again" ekle
 designerview'i strong focus yaparsak acaba shortcutların bozulma olayı düzelirmi? yada NoFocus mo yaptık orada?
-IconWidget diye bir class ekle, ikon gösterebilen, bak bakalım Qt de öyle bişey varmı önce, böylece tüm ikonları svg yap
+    ayrıca aynı adobe premier gibi Designer View'in mi Kod Editörün mü focusa sahip olduğunu belirtmek
+    için ilgili widget'in etrafında bir mavi focus ring çizilmeli
+InspectorPane'e de aynı kontrol sağ tık menüsünden ekle, ayrıca InspectorPane için de settings'e
+    çift tıklanınca varsayılan olarak neyin açılacağı sorulsun, kod mu, SignalEditor mü vs
 FormsPane'de add tuşuna basınca bir drop down menü açılıp
     Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
     hangi elemana tıklanırsa yeni form olarak o eleman türünden oluşturulsun
-InspectorPane'e de aynı kontrol sağ tık menüsünden ekle, ayrıca InspectorPane için de settings'e
-    çift tıklanınca varsayılan olarak neyin açılacağı sorulsun, kod mu, SignalEditor mü vs
-Sağ tık menüsüne "bu obje ile ilgili yardım al" minvalinde "Go to Help" gibi bir seçenek de ekle
-    böylece ilgili kontrol ile ilgili kolayca documents sekmesine gidilebilsin
-f1 ile help açma olayını düzeltelim ayrıca f1 ikonu hover edince çıkan blurlu bozuk onu da düzelt
-qmlcodeeditor external, internal, global ikonlarını değiştir
-pin/unpin ikonlarını adam akıllı bir standarta bağla
-Preferences window ikonlarını eski haline getirmeyi bir düşün
+
 set Unset cursorda bi mallık oluyor, bi zoom yaptım, geri çıktım, tüm kontrolleri seçip deletleyince designer da form dışına mouse move yapınca sanki kontrol üzerine gelmiş gibi open hand cursor oluyor
 ayrıca shortcutlar yine saçmalıyor her nedense çalışmıyor, yukarıdaki mevzu olunca shortcutlar da aynı şekilde bozuldu ve örneğin delete çalışmıyor artık, bunu denemek için bir timer kur her saniye application'un global focus objecsini print etsin bakalım focus nereye kayıyorda böyle oluyor
-projeler ekranında renderer ile bağlantı koparsa ve kullanıcı "no" ya basarsa proje yüklenme olayı iptal edilsin
-form nongui yapılırsa renderer patlamasın
-bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
-toolboxdan extras kütüphanesinden kontroller sürükle bırak yaparken renderer patladı, neden?
-qmlcode editor'e save all butonu ekle ve ayrıca CMD + R = run, CMD + Shift + S = save all vs klavye kısayollarını ekle
-dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
-Popup toolboxdan sürüklenemiyor, render engine patlıyor, silerken de patlıyor aq, ya kod değişirken?
-...Dialog da aynı şekilde...
- quick controls 1 için tema değiştime neden saçmalıyor?
-neden bir kontrol içine başka bir kontrol koyunca dıştaki blank laşıyor?
-Tab için ASSERT: "childList.isValid() && childList.canAppend()" in file ../../../objectwheel/renderer/renderutils.cpp, line 939 aldık, neden???
-İNTERPRETER neden detached olarak ayrı bir ikon olarak dock üzerinde başlamıyor?
-non-gui kontrollerin gui çocuk edinmelerini engelle, ya çocuk nongui olursa ? bunu bi düşün
-chartview ile tüm "barseries" tarzı toolları Qt Creator'e baka baka aynen kopya et ve toolbox'a ekle
-drag drop olayları nedense ilk seferde çalışmıyor, itemin ikonu gözükmüyor
-kodları collapse/expand yapma olayı bozuk kod editörde
-tüm ikonları svg yapalım QIcon kullanarak, ayrıca QIcon ile dpi değişince ikonlar da pixmap fonksiyonu
-  yardımıyla güncellenebilir, bi daha bi daha yeniden aynı svg dosyasının yüklenmesine de gerek kalmaz
-  yani static qpixmap olan yerleri de bu mantığa uygun hale getirmeli
-toollar için qmlc cache dosyası da ekle bakalım ne olacak
-toolbox settings ekle, ikonları büyütme seçeneği ekle, ilerde bu bölüme tool kategorileme ve alfabetik sıralama vs ayarları da eklenir
-headlineların item genişliğine eşit olup olmayacağına dair scenesettings ekle
-tüm png tool ikonlarını ve images.qrc leri ve tool-icons.json ları sil
-ayrıca toolbox üzerine bir settings ikonu koy ve toolbox ayarlarna yönlendirsin
-toolbox içinde bir sürü tool sürüklenmek isteyince patlıyor
-Menu, MenuBar, ToolBar, TabBar gibi bazı (özellikle Container bazlı) toollar, içinde "c" klasörü olsun ve içinde hazır çocukları olsun arsayılan olarak, çocuk derken mesela MenuBarItem, MenuItem, TabButton vs vs
-Yukarıdaki çocuk olarak sayılan elemanlar için designer şu özellikleri desteklemeli:
-    Eğer babaları kendi özel konteynerleri ise (MenuBar, TabBar gibi), ilgili çocukların x, y, width, height gibi özellikleri set edilememeli, mesela designera x, y uygulanır ama UpdateRenderer ve Save edilmez. Resizerlar bu gibi kontroller için pasif olmalı. Ancak ilgili kontrol headline ile yada doğal olarak sürüklenebilmeli ve reparent edilebilmeli, ancak dediğimiz gibi eğer kendi doğal konteynerları babaları ise x, y, w, h set edilmemeli eski yerlerine geri dönmeliler, ayrıca belki properties pane de x, y, w, h propertilerini babaları uygun olduğunda göstermemeli gizlemeli
-engine crash mesajına "dont ask again" ekle
-
-ApplicationWindow'a
-header: TabBar {
-        TabButton {
-            text: "Text"
-        }
-        TabButton {
-            text: "Text"
-        }
-        TabButton {
-            text: "Text"
-        }
-    }
-Ekleyince bile render engine patlıyor aq?
-
 Her tool ikonu ayrı olsun, bir ikon birden fazla kullanılmasın
 FormsPane sağ tık menüsü olsun ve sağ tık ve drag drop desteklesin
-SystemTrayIcon gibi arkada çalışmaya başlayıp salak saçma aksiyon alan qml tiplerini aynı propertylere sahip bir QObjectle falan değiştir
 double click için varsayılan olarak hangisinin olacağı da scene settings içinden ayarlanabilsin
 Broadcasting ile ilgili bir settings sayfası ekle ayrıca ana ekrandaki "devices" listesinin sonuna "settings" menu elemanı ekle
 SignalEditor'de sinyalleri yukarıdan aşağıya doğru, class hiyerarşisine göre sırala, base class'ın propertileri en altta olacak şekilde
@@ -139,28 +102,36 @@ Pencere (window - popup) olan form'lar formspane de belli edilmeli
 PropertiesPane önemli olan propertyleri önde göstermeli ve Anchor ve Layout özelliklerini de yönetebilmeli, ayrıca
     itemlerin Layout attached propertileride eğer ilgili item bir layout içinde ise belirmeli ve yönetilebilmeli
     ayrıca itemlerin türüni/type'ını kolayca propertiespane aracılığı ile değiştirebilmeliyiz
-Çökme-raportu-9.txt, buraporlarla ilgilen
 Render Engine tüm assertlere karşı kontrol edilecek, assert yapan designer özellikleri assert etmeyecek
     şekilde pasifleştirilecek
-qt quick extras'dan delay buttonlar vs siyah gözüküyor, neden?
-Designer'ın Toolbar'ına resizelar sonrası genişleyen sceneyi "fitleme" butonu ekle, toolbardaki tüm butonları
 Containerlar (Column, Row, Grid, Layouts vs vs) için üzerine bir item sürükleyince hizalama çizgileri göster
-properties pane bok dolu, bir sürü saçma property var, bir propertiden on tane var, ve propertiler yanlış
-    yerlerde dizilmiş, QObject altında Item propertileri vs gözüküyor
-Menüler (popup) bir kaç kez açıldıktan sonra daha açılmamaya başlıyor
 Buttonlar, Radio buttonlar, checkboxlar, spinboxlar, tüm widgetları cross-platform bir şekilde macos sitili ile çiz
     applicationstyle.cpp yi geliştir, cizimlerde macstyle.cpp nin style hintlerini, pixelmetriklerini de aktar kopyala
-    quick_controls_conf ve project options sayfası yeniden dizayn edilecek
-    Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir
-    belki saveutils veritabanı'da cbor'a çevrilmeli? nasıl olsa büyük veri saklanmicak artık
-    designercore'a designerwidget, designerview, control.cpp vs ye dalınacak
-    server ayağı kaldırılacak hayata geçirilecek
-    tüm api işleri cbor'a taşınabilir olacak şekilde çevrilecek
-    Objectwheel registration süreci çalışır hale getirilecek
-    Feedback mekanizması eklenecek
-    Share buttonu eklenecek
-    videolar ve tutorialler eklenecek, bunlar için özel "learning page" tasarlanacak Objectwheel'e
-      entegre edilecek
+    applicationstyle:panelbuttoncommand çizimlerindeki tüm kontur ve gölge çizimleri transparan
+        siyah bazlı olmalı, sabit renk kullanımlarından kaçınılmalı
+
+hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
+    bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı
+çift tıklama ile forms pane üzerinden form isimleri değiştirilebilmeli ayrıca özel bir buton da ekle
+
+Assetlerden import edilmiş bir qml objesinin ismi üzerine ctrl basılı tutularak tıklanınca ilgili dosya
+    qml code editor de açılamıyor, kaynak açılamıyor
+Controller silindiğinde, konumları değiştirildiğinde vs kontrol internal file explorer ile,
+    Assets explorer ile dosyalar üzerinde değişiklikler yapıldığında, he halükarda ModelManagerInterface
+    güncellenmeli, ilgili dosyaları kullanan code editörler hata falan göstermeli "bu qml türü silindi, yok" gibi vs
+    güncellemeyi belki qmlcodedocument'in yaptığı gibi (QmlCodeDocument::reparseDocument()) yapabiliriz
+control.cpp'de ki scene() kullanımı ile alakalı fixme leri temizle
+ana ekran toolbarına render engine durumunu gösterir bir buton ekle ve eğer kapalı ise aktif olup render engini açmaya izin ersin
+"creation order flaw" için control inspector'ün yukarı aşağı drag drop yapma özelliği kullanılıp bu flaw kapatılacak
+ControlsPane'e de desginer viewin kinin aynısından kontrol sağ tık menüsü ekle
+TÜM tüm setIcon ları ve tüm setPixmap, setImage leri paletle ilişki olanları palet değişimlerine karşı
+    diğer tümünü de devicePixelRatioF değişimlerine karşı kontrol et, uyumlu yap
+scale > 1 (belki rotation > 0) olan parentlerden childler taşınırken, setBeingRaised yapılca kontrol kayıyor, bunu düzelt
+aynı şekilde resize etmede scale > 1 (belki rotation > 0) durumunda sıkıntı çıkarıyor
+üzeri tam dolu olan bir nesneyi anchorlamak için üstünde boş yer yoksa sıkıntı çıkıyor, headline'da anchorlama için kullanılabilmeli
+Tüm ...Controller classlarında tüm fonksiyonlar const yapılmaya çalışılacak
+IconWidget diye bir class ekle, ikon gösterebilen, bak bakalım Qt de öyle bişey varmı önce, böylece tüm ikonları svg yap
+
 
 GUI CORE V2 TODOS:
 

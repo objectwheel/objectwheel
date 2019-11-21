@@ -13,7 +13,6 @@
 #include <QTimer>
 #include <QApplication>
 #include <QDir>
-#include <QFontDatabase>
 #include <QThread>
 
 #if defined(Q_OS_UNIX)
@@ -32,13 +31,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME + QObject::tr(" Renderer"));
 
-    /* Load default fonts */
-    const QString fontPath = ":/fonts";
-    for (const QString& fontName : QDir(fontPath).entryList(QDir::Files))
-        QFontDatabase::addApplicationFont(fontPath + '/' + fontName);
-
     /* Set application ui settings */
-    QApplication::setFont(UtilityFunctions::defaultFont());
+    QApplication::setFont(UtilityFunctions::systemDefaultFont());
     QApplication::setStartDragDistance(8);
 
     DesignerSupport::activateDesignerWindowManager();

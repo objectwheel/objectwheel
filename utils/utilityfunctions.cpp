@@ -7,7 +7,6 @@
 #include <hashfactory.h>
 #include <cmath>
 
-#include <QOperatingSystemVersion>
 #include <QFileInfo>
 #include <QQmlEngine>
 #include <QTextDocument>
@@ -24,6 +23,7 @@
 #include <QJsonObject>
 #include <QDir>
 #include <QCryptographicHash>
+#include <QOperatingSystemVersion>
 #include <qpassworddigestor.h>
 
 namespace UtilityFunctions {
@@ -660,6 +660,14 @@ void disableWheelEvent(QWidget* widget)
 QFont defaultFont()
 {
     QFont font;
+    font.setFamily("Roboto");
+    font.setPixelSize(13);
+    return font;
+}
+
+QFont systemDefaultFont()
+{
+    QFont font;
 #if defined(Q_OS_MACOS)
     if (QOperatingSystemVersion::current() >= QOperatingSystemVersion::MacOSCatalina)
         font.setFamily("SF UI Display");
@@ -667,8 +675,6 @@ QFont defaultFont()
         font.setFamily(".SF NS Display");
 #elif defined(Q_OS_WIN)
     font.setFamily("Segoe UI");
-#else
-    font.setFamily("Roboto");
 #endif
     font.setPixelSize(13);
     return font;

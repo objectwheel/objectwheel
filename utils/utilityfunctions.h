@@ -118,6 +118,7 @@ QStringList anchorLineNames();
 QStringList anchorPropertyNames();
 void disableWheelEvent(QWidget* widget);
 QFont defaultFont();
+QFont systemDefaultFont();
 
 } // UtilityFunctions
 

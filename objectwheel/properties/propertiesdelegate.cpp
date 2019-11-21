@@ -228,9 +228,15 @@ void PropertiesDelegate::setInitialValue(QWidget* widget, PropertiesDelegate::Ty
     case Color: {
         const QColor& color = value.value<QColor>();
         auto toolButton = static_cast<QToolButton*>(widget);
-        toolButton->setText(color.name(QColor::HexArgb));
-        toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black},
-                                                                        toolButton->devicePixelRatioF())));
+        if (color.isValid()) {
+            toolButton->setText(color.name(QColor::HexArgb));
+            toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, color, {Qt::black},
+                                                                            toolButton->devicePixelRatioF())));
+        } else {
+            toolButton->setText("<unassigned>");
+            toolButton->setIcon(QIcon(PaintUtils::renderPropertyColorPixmap({12, 12}, Qt::transparent, {Qt::black},
+                                                                            toolButton->devicePixelRatioF())));
+        }
     } break;
     case Int:
     case Real:
