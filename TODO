@@ -22,6 +22,7 @@ fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu co
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
 kodları collapse/expand yapma olayı bozuk kod editörde
+Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
 
 quick_controls_conf ve project options sayfası yeniden dizayn edilecek
 Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir

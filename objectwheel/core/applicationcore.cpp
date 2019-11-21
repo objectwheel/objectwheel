@@ -66,22 +66,17 @@ MenuManager* ApplicationCore::s_menuManager = nullptr;
 ApplicationCore::ApplicationCore(QApplication* app)
 {
     /** Core initialization **/
-    QApplication::setApplicationName(APP_NAME);
-    QApplication::setOrganizationName(APP_CORP);
-    QApplication::setApplicationVersion(APP_VER);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
     QApplication::setApplicationDisplayName(APP_NAME + QStringLiteral(" (Beta)"));
     QApplication::setWindowIcon(QIcon(":/images/icon.png"));
 
     const QString fontPath = ":/fonts";
-    const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
 
     /* Load default fonts */
     for (const QString& fontName : QDir(fontPath).entryList(QDir::Files))
         QFontDatabase::addApplicationFont(fontPath + '/' + fontName);
 
     /* Prepare setting instances */
-    s_settings = new QSettings(settingsPath, QSettings::IniFormat, app);
+    s_settings = new QSettings(settingsPath(), QSettings::IniFormat, app);
     s_generalSettings = new GeneralSettings(app);
     s_designerSettings = new DesignerSettings(app);
     s_codeEditorSettings = new CodeEditorSettings(app);
@@ -179,17 +174,15 @@ bool ApplicationCore::locked()
     return false;
 }
 
-void ApplicationCore::run(QApplication* app)
+void ApplicationCore::prepare()
 {
-    static ApplicationCore instance(app);
-    Q_UNUSED(instance)
-}
+    // Set those here, needed by QStandardPaths
+    QApplication::setApplicationName(APP_NAME);
+    QApplication::setOrganizationName(APP_CORP);
+    QApplication::setApplicationVersion(APP_VER);
+    QApplication::setOrganizationDomain(APP_DOMAIN);
 
-void ApplicationCore::prepare(const char* filePath)
-{
-    // qputenv("QT_SCALE_FACTOR", "2");
-    const QString settingsPath = QFileInfo(filePath).path() + "/settings.ini";
-    QSettings settings(settingsPath, QSettings::IniFormat);
+    QSettings settings(settingsPath(), QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
@@ -203,10 +196,15 @@ void ApplicationCore::prepare(const char* filePath)
                                      "qtc*=false");
 }
 
+void ApplicationCore::run(QApplication* app)
+{
+    static ApplicationCore instance(app);
+    Q_UNUSED(instance)
+}
+
 QPalette ApplicationCore::palette()
 {
-//    const QString settingsPath = QApplication::applicationDirPath() + "/settings.ini";
-    //  FIXME  QSettings settings(settingsPath, QSettings::IniFormat);
+    //  FIXME  QSettings settings(settingsPath(), QSettings::IniFormat);
     //    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light")
     QPalette palette(QApplication::palette());
     palette.setColor(QPalette::Active, QPalette::Text, "#2f2f2f");
@@ -246,6 +244,11 @@ QString ApplicationCore::modulesPath()
     return QFileInfo(QApplication::applicationDirPath() + "/../Frameworks/modules").canonicalFilePath();
 }
 
+QString ApplicationCore::settingsPath()
+{
+    return appDataLocation() + "/Settings.ini";
+}
+
 QString ApplicationCore::resourcePath()
 {
     return ":";
@@ -254,9 +257,9 @@ QString ApplicationCore::resourcePath()
 QString ApplicationCore::documentsPath()
 {
 #if defined(Q_OS_MACOS)
-    return QFileInfo(QApplication::applicationDirPath() + "/../Resources/docs").canonicalFilePath();
+    return QFileInfo(QApplication::applicationDirPath() + "/../Resources/Documents").canonicalFilePath();
 #else
-    return QFileInfo(QApplication::applicationDirPath() + "/docs").canonicalFilePath();
+    return QFileInfo(QApplication::applicationDirPath() + "/Documents").canonicalFilePath();
 #endif
 }
 

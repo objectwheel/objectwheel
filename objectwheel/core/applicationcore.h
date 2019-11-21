@@ -28,12 +28,13 @@ class ApplicationCore final
 {
 public:
     static bool locked();
+    static void prepare();
     static void run(QApplication* app);
-    static void prepare(const char* filePath);
 
     static QPalette palette();
     static QSettings* settings();
     static QString modulesPath();
+    static QString settingsPath();
     static QString resourcePath();
     static QString documentsPath();
     static QString appDataLocation();

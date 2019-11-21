@@ -1,7 +1,7 @@
 TEMPLATE = lib
 CONFIG  += plugin c++14 strict_c++
 TARGET   = objectwheelmodule
-DESTDIR  = ../modules/Objectwheel
+DESTDIR  = ../Modules/Objectwheel
 QT      += qml
 DEFINES += QT_QML_DEBUG_NO_WARNING
 DEFINES += QT_DEPRECATED_WARNINGS

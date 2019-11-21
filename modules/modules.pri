@@ -9,5 +9,5 @@ for (FILE, FILES_TO_COPY) {
 }
 
 QMAKE_POST_LINK += qmlplugindump -nonrelocatable $$basename(DESTDIR) $$VERSION \
-                   $$shell_quote($$shell_path($$OUT_PWD/../modules)) > \
+                   $$shell_quote($$shell_path($$OUT_PWD/../Modules)) > \
                    $$shell_quote($$shell_path($$OUT_PWD/$$DESTDIR/plugins.qmltypes))

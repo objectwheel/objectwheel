@@ -36,7 +36,7 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
 
     s_commandDispatcher = new CommandDispatcher(s_renderServer, this);
 
-    s_process->setProgram(QCoreApplication::applicationDirPath() + "/renderer");
+    s_process->setProgram(QCoreApplication::applicationDirPath() + "/Renderer");
 #if defined(QT_DEBUG)
     s_process->setProcessChannelMode(QProcess::ForwardedChannels);
 #else

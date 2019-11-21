@@ -4,7 +4,7 @@
 int main(int argc, char* argv[])
 {
     // Prepare application core
-    ApplicationCore::prepare(argv[0]);
+    ApplicationCore::prepare();
 
     // Initialize application
     QApplication app(argc, argv);
