@@ -74,8 +74,9 @@ int warnIfModifiedContent(const QmlCodeEditorWidget::Document* document)
     if (qmlDoc->isModified()) {
         return UtilityFunctions::showMessage(nullptr,
                                              QObject::tr("Unsaved content"),
-                                             QObject::tr("The document contains unsaved content. "
-                                                         "What would you like to do with the document?"),
+                                             QObject::tr("The document you are about to close contains "
+                                                         "unsaved content. What would you like to do "
+                                                         "with the document?"),
                                              QMessageBox::Warning,
                                              QMessageBox::Discard | QMessageBox::Save | QMessageBox::Cancel,
                                              QMessageBox::Cancel);
