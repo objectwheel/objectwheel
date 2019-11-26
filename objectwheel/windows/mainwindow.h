@@ -48,6 +48,7 @@ private slots:
     void onDockWidgetLocationChange(Qt::DockWidgetArea area);
     void onPinBarDockWidgetCloseButtonClick(QDockWidget* dockWidget);
     void onDockBarDockWidgetButtonClick(QDockWidget* dockWidget, bool checked);
+    void onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout();
 
 protected:
     QSize sizeHint() const override;
@@ -86,6 +87,7 @@ private:
     QDockWidget* m_formsDockWidget;
     DockBar* m_leftDockBar;
     DockBar* m_rightDockBar;
+    QTimer* m_removeSizeRestrictionsOnDockWidgetsTimer;
     bool m_assetsDockWidgetVisible;
     bool m_propertiesDockWidgetVisible;
     bool m_formsDockWidgetVisible;

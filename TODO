@@ -23,6 +23,12 @@ server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server i
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
 kodları collapse/expand yapma olayı bozuk kod editörde
 Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
+Assets pane search düzgün çalışmıyor
+Assets pane de tüm fonksiyonelliği kontrol et, klasör çift tıklama programı donduruyor
+Formlardan herangi birinin indexini artırıp azaltınca neden render engine patlıyor?
+ASsetsPane'de ki PathIndicator line edit'i focus alıp bilgidiğin fusion line editi çiziyor çift
+    tıklanınca, arkası transparan olmalıydı
+anchorlama niye bozuldu amk ya? video output'u anchorlamayı denedim olmadı amk şeyi?
 
 quick_controls_conf ve project options sayfası yeniden dizayn edilecek
 Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir

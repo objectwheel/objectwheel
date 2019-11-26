@@ -133,7 +133,7 @@ void PropertiesTree::paintEvent(QPaintEvent* event)
     lineColor.setAlpha(50);
     painter.setPen(lineColor);
 
-    qreal height = d->defaultItemHeight;
+    qreal height = d->defaultItemHeight > 0 ? d->defaultItemHeight : 20;
     qreal rowCount = viewport()->height() / height;
     const QList<Control*>& selectedControls = m_designerScene->selectedControls();
     for (int i = 0; i < rowCount; ++i) {

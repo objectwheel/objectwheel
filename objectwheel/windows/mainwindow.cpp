@@ -55,6 +55,7 @@
 #include <QScrollBar>
 #include <QScreen>
 #include <QTime>
+#include <QTimer>
 
 #if defined(Q_OS_MACOS)
 #include <windowoperations.h>
@@ -83,6 +84,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_formsDockWidget(new QDockWidget(this))
   , m_leftDockBar(new DockBar(this))
   , m_rightDockBar(new DockBar(this))
+  , m_removeSizeRestrictionsOnDockWidgetsTimer(new QTimer(this))
   , m_assetsDockWidgetVisible(true)
   , m_propertiesDockWidgetVisible(true)
   , m_formsDockWidgetVisible(true)
@@ -305,7 +307,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     connect(windowHandle(), &QWindow::screenChanged,
             this, &MainWindow::onScreenChange);
-
+    connect(m_removeSizeRestrictionsOnDockWidgetsTimer, &QTimer::timeout,
+            this, &MainWindow::onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout);
     discharge();
     //resetState = saveState();
 }
@@ -374,20 +377,36 @@ void MainWindow::discharge()
 
 void MainWindow::setDockWidgetAreasVisible(Qt::DockWidgetAreas areas, bool visible)
 {
-    if (dockWidgetArea(m_assetsDockWidget) & areas)
-        m_assetsDockWidget->setVisible(visible && m_assetsDockWidgetVisible);
-    if (dockWidgetArea(m_propertiesDockWidget) & areas)
-        m_propertiesDockWidget->setVisible(visible && m_propertiesDockWidgetVisible);
-    if (dockWidgetArea(m_formsDockWidget) & areas)
-        m_formsDockWidget->setVisible(visible && m_formsDockWidgetVisible);
-    if (dockWidgetArea(m_controlsDockWidget) & areas)
-        m_controlsDockWidget->setVisible(visible && m_controlsDockWidgetVisible);
-    if (dockWidgetArea(m_toolboxDockWidget) & areas)
+    if (dockWidgetArea(m_toolboxDockWidget) & areas) {
+        if (m_toolboxDockWidget->isVisible())
+            m_toolboxDockWidget->setFixedSize(m_toolboxDockWidget->size());
         m_toolboxDockWidget->setVisible(visible && m_toolboxDockWidgetVisible);
+    }
+    if (dockWidgetArea(m_formsDockWidget) & areas) {
+        if (m_formsDockWidget->isVisible())
+            m_formsDockWidget->setFixedSize(m_formsDockWidget->size());
+        m_formsDockWidget->setVisible(visible && m_formsDockWidgetVisible);
+    }
+    if (dockWidgetArea(m_controlsDockWidget) & areas) {
+        if (m_controlsDockWidget->isVisible())
+            m_controlsDockWidget->setFixedSize(m_controlsDockWidget->size());
+        m_controlsDockWidget->setVisible(visible && m_controlsDockWidgetVisible);
+    }
+    if (dockWidgetArea(m_propertiesDockWidget) & areas) {
+        if (m_propertiesDockWidget->isVisible())
+            m_propertiesDockWidget->setFixedSize(m_propertiesDockWidget->size());
+        m_propertiesDockWidget->setVisible(visible && m_propertiesDockWidgetVisible);
+    }
+    if (dockWidgetArea(m_assetsDockWidget) & areas) {
+        if (m_assetsDockWidget->isVisible())
+            m_assetsDockWidget->setFixedSize(m_assetsDockWidget->size());
+        m_assetsDockWidget->setVisible(visible && m_assetsDockWidgetVisible);
+    }
     if (areas & Qt::LeftDockWidgetArea)
         m_leftDockBar->setVisible(visible);
     if (areas & Qt::RightDockWidgetArea)
         m_rightDockBar->setVisible(visible);
+    m_removeSizeRestrictionsOnDockWidgetsTimer->start(1000);
 }
 
 void MainWindow::onModeChange(ModeManager::Mode mode)
@@ -452,6 +471,15 @@ void MainWindow::onDockBarDockWidgetButtonClick(QDockWidget* dockWidget, bool ch
     else if (dockWidget == m_toolboxDockWidget)
         m_toolboxDockWidgetVisible = !checked;
     dockWidget->setVisible(!checked);
+}
+
+void MainWindow::onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout()
+{
+    m_toolboxDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    m_formsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    m_controlsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    m_propertiesDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    m_assetsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
 }
 
 void MainWindow::resetSettings()
