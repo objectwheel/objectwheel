@@ -20,6 +20,7 @@ public:
     QPushButton* addButton() const;
     QPushButton* removeButton() const;
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     FormsTree* m_formsTree;

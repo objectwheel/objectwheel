@@ -64,5 +64,10 @@ QPushButton* FormsPane::removeButton() const
 
 QSize FormsPane::sizeHint() const
 {
-    return {190, 180};
+    return {190, 170};
+}
+
+QSize FormsPane::minimumSizeHint() const
+{
+    return {0, 0};
 }

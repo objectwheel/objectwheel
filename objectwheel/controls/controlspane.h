@@ -17,6 +17,7 @@ public:
     ControlsTree* controlsTree() const;
     LineEdit* searchEdit() const;
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     ControlsTree* m_controlsTree;

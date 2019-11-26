@@ -30,6 +30,7 @@ public:
     QSpinBox* indexEdit() const;
     QToolButton* resetButton() const;
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 public:
     PropertiesTree* m_propertiesTree;

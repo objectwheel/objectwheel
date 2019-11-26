@@ -51,5 +51,10 @@ LineEdit* AssetsPane::searchEdit() const
 
 QSize AssetsPane::sizeHint() const
 {
-    return {300, 240};
+    return {300, 150};
+}
+
+QSize AssetsPane::minimumSizeHint() const
+{
+    return {0, 0};
 }

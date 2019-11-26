@@ -20,6 +20,7 @@ public:
     QComboBox* modeComboBox() const;
     LineEdit* searchEdit() const;
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     AssetsTree* m_assetsTree;

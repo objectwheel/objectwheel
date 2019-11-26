@@ -16,8 +16,8 @@ public:
 
     LineEdit* searchEdit() const;
     ToolboxTree* toolboxTree() const;
-
     QSize sizeHint() const override;
+    QSize minimumSizeHint() const override;
 
 private:
     void dragEnterEvent(QDragEnterEvent* event) override;
