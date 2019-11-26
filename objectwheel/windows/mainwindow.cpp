@@ -192,6 +192,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->removeButton());
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addSeparator();
 
+    m_removeSizeRestrictionsOnDockWidgetsTimer->setInterval(1000);
+
     auto updatePalette = [=] {
         QPalette p(palette());
         p.setColor(QPalette::Active, QPalette::Text, "#505050");
@@ -406,7 +408,7 @@ void MainWindow::setDockWidgetAreasVisible(Qt::DockWidgetAreas areas, bool visib
         m_leftDockBar->setVisible(visible);
     if (areas & Qt::RightDockWidgetArea)
         m_rightDockBar->setVisible(visible);
-    m_removeSizeRestrictionsOnDockWidgetsTimer->start(1000);
+    m_removeSizeRestrictionsOnDockWidgetsTimer->start();
 }
 
 void MainWindow::onModeChange(ModeManager::Mode mode)
@@ -475,11 +477,16 @@ void MainWindow::onDockBarDockWidgetButtonClick(QDockWidget* dockWidget, bool ch
 
 void MainWindow::onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout()
 {
-    m_toolboxDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
-    m_formsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
-    m_controlsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
-    m_propertiesDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
-    m_assetsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    if (m_toolboxDockWidget->isVisible())
+        m_toolboxDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    if (m_formsDockWidget->isVisible())
+        m_formsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    if (m_controlsDockWidget->isVisible())
+        m_controlsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    if (m_propertiesDockWidget->isVisible())
+        m_propertiesDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
+    if (m_assetsDockWidget->isVisible())
+        m_assetsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
 }
 
 void MainWindow::resetSettings()

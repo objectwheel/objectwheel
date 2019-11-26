@@ -27,7 +27,9 @@ macx {
     docs.path = Contents/Resources
     modules.files = $$OUT_PWD/../modules/Modules
     modules.path = Contents/Frameworks
-    QMAKE_BUNDLE_DATA += interpreter renderer themer utils docs modules
+    fonts.files = $$PWD/../utils/resources/Fonts
+    fonts.path = Contents/Resources
+    QMAKE_BUNDLE_DATA += interpreter renderer themer utils docs modules fonts
 } else:unix {
     interpreter.files = $$OUT_PWD/../interpreter/Interpreter
     interpreter.path = $$OUT_PWD/

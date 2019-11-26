@@ -7,20 +7,22 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.objectwheel.Renderer</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>2.9.570.g1d3d07b8</string>
+	<string>2.9.574.gab109910</string>
 	<key>CFBundleName</key>
 	<string>Renderer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.9.570.g1d3d07b8</string>
+	<string>2.9.574.gab109910</string>
 	<key>LSBackgroundOnly</key>
 	<string>True</string>
-	<key>NSHighResolutionCapable</key>
-	<string>True</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>NSRequiresAquaSystemAppearance</key>
+	<string>True</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<string>True</string>
 </dict>
 </plist>
