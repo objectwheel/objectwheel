@@ -34,30 +34,49 @@ static QString anchorLineText(AnchorLine::Type type)
     }
 }
 
-static QPixmap anchorLinePixmap(AnchorLine::Type type, QWidget* widget)
+static QIcon anchorLinePixmap(AnchorLine::Type type, QWidget* widget)
 {
     using namespace PaintUtils;
-    const QColor& color = widget->palette().buttonText().color();
+    const QColor& off = widget->palette().buttonText().color();
+    const QColor& on = widget->palette().highlightedText().color();
+
+    QIcon icon;
+    QPixmap pix;
+
     switch (type) {
     case AnchorLine::Left:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/left.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/left.svg"), {15, 15}, widget);
+        break;
     case AnchorLine::Right:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/right.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/right.svg"), {15, 15}, widget);
+        break;
     case AnchorLine::Top:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/top.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/top.svg"), {15, 15}, widget);
+        break;
     case AnchorLine::Bottom:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/bottom.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/bottom.svg"), {15, 15}, widget);
+        break;
     case AnchorLine::HorizontalCenter:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/horizontal.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/horizontal.svg"), {15, 15}, widget);
+        break;
     case AnchorLine::VerticalCenter:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/vertical.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/vertical.svg"), {15, 15}, widget);
+        break;
     case AnchorLine::Fill:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/fill.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/fill.svg"), {15, 15}, widget);
+        break;
     case AnchorLine::Center:
-        return renderOverlaidPixmap(pixmap(QStringLiteral(":/images/anchors/center.svg"), {15, 15}, widget), color);
+        pix = pixmap(QStringLiteral(":/images/anchors/center.svg"), {15, 15}, widget);
+        break;
     default:
-        return QPixmap();
+        break;
     }
+
+    icon.addPixmap(renderOverlaidPixmap(pix, off), QIcon::Normal, QIcon::Off);
+    icon.addPixmap(renderOverlaidPixmap(pix, on), QIcon::Normal, QIcon::On);
+    icon.addPixmap(renderOverlaidPixmap(pix, off.lighter(270)), QIcon::Disabled, QIcon::Off);
+    icon.addPixmap(renderOverlaidPixmap(pix, off.lighter(180)), QIcon::Disabled, QIcon::On);
+    return icon;
 }
 
 AnchorRow::AnchorRow(AnchorLine::Type sourceLineType, QWidget* parent) : QWidget(parent)

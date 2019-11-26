@@ -86,7 +86,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
     sourceControlLayout->setContentsMargins(0, 0, 0, 0);
     sourceControlLayout->setSpacing(2);
     sourceControlLayout->addWidget(sourceControlLabel);
-    sourceControlLayout->addSpacing(10);
+    sourceControlLayout->addSpacing(5);
     sourceControlLayout->addWidget(m_sourceControlComboBox);
     sourceControlLayout->addStretch();
 
@@ -111,7 +111,7 @@ AnchorEditor::AnchorEditor(DesignerScene* scene, QWidget* parent) : QDialog(pare
     alignmentLayout->setContentsMargins(0, 0, 0, 0);
     alignmentLayout->setSpacing(2);
     alignmentLayout->addWidget(alignmentLabel);
-    alignmentLayout->addSpacing(5);
+    alignmentLayout->addSpacing(2);
     alignmentLayout->addWidget(m_alignWhenCenteredCheckBox);
     alignmentLayout->addStretch();
 

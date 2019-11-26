@@ -5,6 +5,7 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
 Tüm dokumanları Qt 5.13.2'ye geçir
+Şu welcome window fontlarını düzelt artık
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar
@@ -28,7 +29,6 @@ Assets pane de tüm fonksiyonelliği kontrol et, klasör çift tıklama program�
 Formlardan herangi birinin indexini artırıp azaltınca neden render engine patlıyor?
 ASsetsPane'de ki PathIndicator line edit'i focus alıp bilgidiğin fusion line editi çiziyor çift
     tıklanınca, arkası transparan olmalıydı
-anchorlama niye bozuldu amk ya? video output'u anchorlamayı denedim olmadı amk şeyi?
 
 quick_controls_conf ve project options sayfası yeniden dizayn edilecek
 Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir

@@ -226,8 +226,20 @@ static void doComponentCompleteRecursive(QObject* object, const RenderEngine* en
                 doComponentCompleteRecursive(child, engine);
         }
 
-        if (isCompletionDisabled(object))
+        if (isCompletionDisabled(object)) {
+            if (item) {
+                // If the object is an item, we call base class's componentComplete
+                // Otherwise the item won't response to anchoring operations or
+                // probably other QQuickItem positioning operations at all.
+                class Hacker final : public QQuickItem {
+                public: static void complete(void* item) {
+                        static_cast<Hacker*>(item)->QQuickItem::componentComplete();
+                    }
+                };
+                Hacker::complete(item);
+            }
             return;
+        }
 
         if (item) {
             static_cast<QQmlParserStatus*>(item)->componentComplete();
