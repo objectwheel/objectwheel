@@ -4,7 +4,6 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Thanks Icons8 for providing icons for this app (URL) (LICENSE)
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
-Tüm dokumanları Qt 5.13.2'ye geçir
 Şu welcome window fontlarını düzelt artık
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle

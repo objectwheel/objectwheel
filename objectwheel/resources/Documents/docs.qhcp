@@ -4,7 +4,6 @@
         <register>
             <file>qt3d.qch</file>
             <file>qtbluetooth.qch</file>
-            <file>qtcanvas3d.qch</file>
             <file>qtcharts.qch</file>
             <file>qtcore.qch</file>
             <file>qtdatavis3d.qch</file>
@@ -16,6 +15,7 @@
             <file>qtlabscalendar.qch</file>
             <file>qtlabsplatform.qch</file>
             <file>qtlocation.qch</file>
+            <file>qtlottieanimation.qch</file>
             <file>qtmultimedia.qch</file>
             <file>qtnfc.qch</file>
             <file>qtpositioning.qch</file>
