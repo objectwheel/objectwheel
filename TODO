@@ -4,15 +4,17 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Thanks Icons8 for providing icons for this app (URL) (LICENSE)
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
-Şu welcome window fontlarını düzelt artık
+Formlardan herangi birinin indexini artırıp azaltınca neden render engine patlıyor?
+Qt LottieAnimation ile ilgili toolları ekle
+AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
+    tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
+    Assets pane search düzgün çalışmıyor
+    Assets pane de tüm fonksiyonelliği kontrol et, klasör çift tıklama programı donduruyor
+    ASsetsPane'de ki PathIndicator line edit'i focus alıp bilgidiğin fusion line editi çiziyor çift
+        tıklanınca, arkası transparan olmalıydı
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar
-AssetsPane neden kendini aşıp sürekli propertiespane'in alanının üzerine doğru genişliyor aq??
-AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
-    tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
-Assets Pane i bitir
-Programdaki tüm textleri Roboto'ya göre yeniden ayarla ve bozuk olanları düzelt
 fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
     entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
     öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
@@ -21,14 +23,9 @@ fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu co
     hatta Help kısmındaki combobox için de bu yapılsın
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
-kodları collapse/expand yapma olayı bozuk kod editörde
 Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
-Assets pane search düzgün çalışmıyor
-Assets pane de tüm fonksiyonelliği kontrol et, klasör çift tıklama programı donduruyor
-Formlardan herangi birinin indexini artırıp azaltınca neden render engine patlıyor?
-ASsetsPane'de ki PathIndicator line edit'i focus alıp bilgidiğin fusion line editi çiziyor çift
-    tıklanınca, arkası transparan olmalıydı
 
+qmlcodeeditorwidget'de kodları collapse/expand yapma olayı bozuk kod editörde
 quick_controls_conf ve project options sayfası yeniden dizayn edilecek
 Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir
 belki saveutils veritabanı'da cbor'a çevrilmeli? nasıl olsa büyük veri saklanmicak artık
