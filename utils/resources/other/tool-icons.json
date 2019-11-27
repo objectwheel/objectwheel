@@ -215,5 +215,6 @@
     "Qt.labs.platform/1/Menu"                 : ":/images/tools/Menu.svg",
     "Qt.labs.calendar/1/DayOfWeekRow"         : ":/images/tools/DayOfWeekRow.svg",
     "Qt.labs.calendar/1/WeekNumberColumn"     : ":/images/tools/WeekNumberColumn.svg",
-    "Qt.labs.calendar/1/MonthGrid"            : ":/images/tools/MonthGrid.svg"
+    "Qt.labs.calendar/1/MonthGrid"            : ":/images/tools/MonthGrid.svg",
+    "Qt.labs.lottieqt/1/LottieAnimation"      : ":/images/tools/LottieAnimation.svg"
 }

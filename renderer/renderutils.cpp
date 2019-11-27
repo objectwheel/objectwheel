@@ -122,6 +122,8 @@ static void stopAnimation(QObject* object)
         timer->blockSignals(true);
     } else if (animatedImage) {
         animatedImage->setProperty("playing", false);
+    } else if (object->inherits("LottieAnimation")) {
+        animatedImage->setProperty("autoPlay", false);
     }
 }
 

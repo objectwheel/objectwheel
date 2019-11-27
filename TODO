@@ -5,7 +5,6 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
 Formlardan herangi birinin indexini artırıp azaltınca neden render engine patlıyor?
-Qt LottieAnimation ile ilgili toolları ekle
 AssetsPane elden geçirilecek Model/View/Controller yapılacak ayrıca search edit kısmı alta alınacak,
     tree widget daha içe alınacak, dikkat edelim +, - gibi expanc collapse gibi paint hataları da giderilecek
     Assets pane search düzgün çalışmıyor

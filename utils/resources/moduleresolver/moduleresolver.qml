@@ -25,6 +25,7 @@ import Qt.labs.qmlmodels 1.0
 import Qt.labs.location 1.0
 import Qt.labs.sharedimage 1.0
 import Qt.labs.wavefrontmesh 1.12
+import Qt.labs.lottieqt 1.0
 import QtSensors 5.12
 import QtPurchasing 1.12
 import QtPositioning 5.12

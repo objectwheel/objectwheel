@@ -69,15 +69,9 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QApplication::setApplicationDisplayName(APP_NAME + QStringLiteral(" (Beta)"));
     QApplication::setWindowIcon(QIcon(":/images/icon.png"));
 
-    // After the macOS Catalina, QFontDatabase::addApplicationFont()
-    // function and derivatives started to mess with font weight. So
-    // we only use Apple's own font bundling/registering method defi-
-    // ned within objectwheel/app/app.pri and platform/macx/Info.plist
-#if !defined(Q_OS_MACOS)
     /* Load default fonts */
-    for (const QString& fontName : QDir(QStringLiteral(":/Fonts")).entryList(QDir::Files))
-        QFontDatabase::addApplicationFont(QStringLiteral(":/Fonts/") + fontName);
-#endif
+    for (const QString& fontName : QDir(QStringLiteral(":/fonts")).entryList(QDir::Files))
+        QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/") + fontName);
 
     /* Prepare setting instances */
     s_settings = new QSettings(settingsPath(), QSettings::IniFormat, app);
