@@ -589,5 +589,6 @@
         <file>fonts/Roboto-Regular.ttf</file>
         <file>fonts/Roboto-Thin.ttf</file>
         <file>fonts/Roboto-ThinItalic.ttf</file>
+        <file>mockfiles/VideoOutput.qml</file>
     </qresource>
 </RCC>

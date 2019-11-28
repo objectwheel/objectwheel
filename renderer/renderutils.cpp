@@ -77,6 +77,26 @@ static bool isCompletionDisabled(const QObject* object)
     return false;
 }
 
+// FIXME: Fix know enum values
+static bool isKnownEnum(const QString& identifier)
+{
+    static const QStringList knownIdentifiers /*{
+        "VideoOutput.fillMode"
+    }*/;
+    return knownIdentifiers.contains(identifier);
+}
+// FIXME: Fix know enum values
+static Enum getKnownEnum(const QString& identifier)
+{
+    Enum e;
+    if (identifier == "VideoOutput.fillMode") {
+        e.name = "fillMode";
+        e.scope = "FillMode";
+//        e.value = me.valueToKey(property.read(object).toInt());
+    }
+    return e;
+}
+
 static void setWindowHidden(QObject* object)
 {
     if (object == 0)
@@ -948,8 +968,9 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
             if (property.isReadable()
                     && property.isWritable()
                     && isPropertyValid(property)
+                    && !property.isFlagType()
                     && !propertyExistsInNodes(propertyNodes, property.name())) {
-                if (property.isEnumType() && !property.isFlagType()) {
+                if (property.isEnumType()) {
                     auto metaEnum = property.enumerator();
                     Enum e;
                     e.name = property.name();
@@ -960,9 +981,14 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
                         if (QString(metaEnum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
                             e.keys[metaEnum.key(i)] = metaEnum.value(i);
                     }
-
                     enums.append(e);
-                } else if (!property.isFlagType()) {
+                } else if (property.type() == QVariant::Int) {
+                    const QString& enumIdentifier = className + QStringLiteral(".") + property.name();
+                    if (isKnownEnum(enumIdentifier))
+                        enums.append(getKnownEnum(enumIdentifier));
+                    else
+                        properties[property.name()] = property.read(object);
+                } else {
                     properties[property.name()] = property.read(object);
                 }
             }
