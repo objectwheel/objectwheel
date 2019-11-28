@@ -123,7 +123,7 @@ static void stopAnimation(QObject* object)
     } else if (animatedImage) {
         animatedImage->setProperty("playing", false);
     } else if (object->inherits("LottieAnimation")) {
-        animatedImage->setProperty("autoPlay", false);
+        object->setProperty("autoPlay", false);
     }
 }
 

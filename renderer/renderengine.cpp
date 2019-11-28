@@ -412,13 +412,13 @@ void RenderEngine::updateIndex(const QString& uid)
     ControlInstance* instance = instanceForUid(uid);
 
     Q_ASSERT(instance);
-    Q_ASSERT(instance->parent);
 
     ControlInstance* formInstance = formInstanceFor(instance);
 
     Q_ASSERT(formInstance);
 
-    repairIndexes(instance->parent);
+    if (instance->parent) // The instance might also be a form
+        repairIndexes(instance->parent);
     refreshBindings(formInstance->context);
     scheduleRender(formInstance);
 }
@@ -510,8 +510,8 @@ void RenderEngine::deleteControl(const QString& uid)
 
     Q_ASSERT(formInstance);
 
-    RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
     instance->parent->children.remove(instance);
+    RenderUtils::deleteInstancesRecursive(instance, m_designerSupport);
 
     refreshBindings(formInstance->context);
     scheduleRender(formInstance);
