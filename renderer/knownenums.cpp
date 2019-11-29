@@ -2,7 +2,7 @@
 #include <QMetaObject>
 #include <QMetaEnum>
 #include <QRegularExpression>
-#include <QDebug>
+
 namespace KnownEnums {
 namespace Internal {
 
@@ -53,6 +53,7 @@ Enum extractEnum(const QMetaProperty& property, const QMetaEnum& me, const QObje
 bool isKnownEnum(const QString& identifier)
 {
     static const QStringList knownIdentifiers {
+        "VideoOutput.flushMode",
         "VideoOutput.fillMode"
     };
     return knownIdentifiers.contains(identifier);
@@ -60,6 +61,8 @@ bool isKnownEnum(const QString& identifier)
 
 Enum knownEnum(const QMetaProperty& property, const QObject* object, const QString& identifier)
 {
+    if (identifier == "VideoOutput.flushMode")
+        return extractEnum(property, QMetaEnum::fromType<Internal::VideoOutput::FlushMode>(), object);
     if (identifier == "VideoOutput.fillMode")
         return extractEnum(property, QMetaEnum::fromType<Internal::VideoOutput::FillMode>(), object);
     return Enum();
