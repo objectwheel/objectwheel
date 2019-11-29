@@ -448,22 +448,22 @@ void FileExplorer::setPalette(const QPalette& pal)
     update();
 }
 
-void FileExplorer::fillBackground(QPainter* painter, const QStyleOptionViewItem& option, int row, bool verticalLine) const
+void FileExplorer::paintBackground(QPainter* painter, const QStyleOptionViewItem& option, int rowNumber,
+                                   bool hasVerticalLine) const
 {
+    painter->save();
+
     bool isSelected = option.state & QStyle::State_Selected;
     const QPalette& pal = option.palette;
     const QRectF& rect = option.rect;
 
-    QPainterPath path;
-    path.addRect(rect);
-    painter->setClipPath(path);
-    painter->setClipping(true);
+    painter->setClipRect(rect);
 
     // Fill background
     if (isSelected) {
         painter->fillRect(rect, pal.highlight());
     } else {
-        if (row % 2)
+        if (rowNumber % 2)
             painter->fillRect(rect, pal.alternateBase());
         else
             painter->fillRect(rect, pal.base());
@@ -473,17 +473,20 @@ void FileExplorer::fillBackground(QPainter* painter, const QStyleOptionViewItem&
     QColor lineColor(pal.mid().color());
     lineColor.setAlpha(50);
     painter->setPen(lineColor);
-    if (row != 0)
-        painter->drawLine(rect.topLeft() + QPointF{0.5, 0.0}, rect.topRight() - QPointF{0.5, 0.0});
-    painter->drawLine(rect.bottomLeft() + QPointF{0.5, 0.0}, rect.bottomRight() - QPointF{0.5, 0.0});
+    if (rowNumber != 0) {
+        painter->drawLine(rect.topLeft() + QPointF(0.5, 0.0),
+                          rect.topRight() - QPointF(0.5, 0.0));
+    }
+    painter->drawLine(rect.bottomLeft() + QPointF(0.5, 0.0),
+                      rect.bottomRight() - QPointF(0.5, 0.0));
 
     // Draw vertical line
-    if (verticalLine) {
+    if (hasVerticalLine) {
         painter->drawLine(rect.topRight() + QPointF(-0.5, 0.5),
                           rect.bottomRight() + QPointF(-0.5, -0.5));
     }
 
-    painter->setClipping(false);
+    painter->restore();
 }
 
 void FileExplorer::goToDir(const QString& dir)
@@ -591,41 +594,36 @@ void FileExplorer::drawBranches(QPainter* painter, const QRect& rect,
 {
     Q_D(const QTreeView);
     painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
 
     const qreal width = 10;
     const bool hasChild = m_fileSystemModel->hasChildren(mt(index));
     const bool isSelected = selectionModel()->isSelected(index);
 
+    const QRectF r(rect);
     QRectF handleRect(0, 0, width, width);
-    handleRect.moveCenter(rect.center());
-    handleRect.moveRight(rect.right() - 0.5);
+    handleRect.moveCenter(r.center());
+    handleRect.moveRight(r.right() - 0.5);
 
     QStyleOptionViewItem option;
     option.initFrom(this);
     option.rect = rect;
+    option.state &= ~QStyle::State_Selected;
     if (isSelected)
         option.state |= QStyle::State_Selected;
-    else if (option.state & QStyle::State_Selected)
-        option.state &= ~QStyle::State_Selected;
 
-    fillBackground(painter, option, d->viewIndex(index), false);
+    paintBackground(painter, option, d->viewIndex(index), false);
 
     // Draw handle
     if (hasChild) {
-        QPen pen;
-        pen.setWidthF(1.2);
-        pen.setColor(isSelected ? palette().highlightedText().color() : palette().text().color());
-        painter->setPen(pen);
+        const QColor c = isSelected ? palette().highlightedText().color() : palette().text().color().lighter(220);
+        painter->setPen(QPen(c, 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);
-
-        painter->drawLine(QPointF(handleRect.left() + 2.5, handleRect.center().y()),
-                          QPointF(handleRect.right() - 2.5, handleRect.center().y()));
-
+        painter->drawLine(QPointF(handleRect.left() + 2, handleRect.center().y()),
+                          QPointF(handleRect.right() - 2, handleRect.center().y()));
         if (!isExpanded(index)) {
-            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2.5),
-                              QPointF(handleRect.center().x(), handleRect.bottom() - 2.5));
+            painter->drawLine(QPointF(handleRect.center().x(), handleRect.top() + 2),
+                              QPointF(handleRect.center().x(), handleRect.bottom() - 2));
         }
     }
 
@@ -640,7 +638,6 @@ void FileExplorer::paintEvent(QPaintEvent* event)
 
     QPainter painter(viewport());
     painter.fillRect(rect(), palette().base());
-    painter.setClipping(true);
 
     QColor lineColor(palette().mid().color());
     lineColor.setAlpha(50);

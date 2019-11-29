@@ -16,23 +16,26 @@ void FileExplorerListDelegate::paint(QPainter* painter, const QStyleOptionViewIt
                                      const QModelIndex& index) const
 {
     painter->save();
-    painter->setRenderHint(QPainter::Antialiasing);
 
     const bool isSelected = option.state & QStyle::State_Selected;
     const QAbstractItemModel* model = index.model();
     const QIcon& icon = model->data(index, Qt::DecorationRole).value<QIcon>();
-
-    QRectF iconRect({}, QSizeF{option.decorationSize});
-    iconRect.moveCenter(option.rect.center());
-    iconRect.moveLeft(option.rect.left() + 5);
+    const QRectF r = option.rect;
 
     // Fill background
-    m_fileExplorer->fillBackground(painter, option, m_fileExplorer->d_func()->viewIndex(index), index.column() == 0);
+    m_fileExplorer->paintBackground(painter, option, m_fileExplorer->d_func()->viewIndex(index),
+                                    index.column() == 0);
 
     // Draw icon
-    QPixmap pixmap(PaintUtils::pixmap(icon, option.decorationSize, m_fileExplorer,
-                                      isSelected ? QIcon::Selected : QIcon::Normal));
-    painter->drawPixmap(iconRect, pixmap, pixmap.rect());
+    QRectF iconRect(0, 0, -5, 0);
+    if (index.column() == 0) {
+        QPixmap pixmap(PaintUtils::pixmap(icon, option.decorationSize, m_fileExplorer,
+                                          isSelected ? QIcon::Selected : QIcon::Normal));
+        iconRect = QRectF({}, pixmap.size() / pixmap.devicePixelRatioF());
+        iconRect.moveCenter(r.center());
+        iconRect.moveLeft(r.left() + 5);
+        painter->drawPixmap(iconRect, pixmap, pixmap.rect());
+    }
 
     // Draw text
     if (isSelected)
@@ -40,12 +43,7 @@ void FileExplorerListDelegate::paint(QPainter* painter, const QStyleOptionViewIt
     else
         painter->setPen(option.palette.text().color());
 
-    QRectF textRect;
-    if (index.column() == 0)
-        textRect = option.rect.adjusted(option.decorationSize.width() + 10, 0, 0, 0);
-    else
-        textRect = option.rect.adjusted(5, 0, 0, 0);
-
+    const QRectF& textRect = r.adjusted(iconRect.width() + 8, 0, 0, 0);
     const QString& text = index.data(Qt::DisplayRole).toString();
     painter->drawText(textRect,
                       option.fontMetrics.elidedText(text, Qt::ElideMiddle, textRect.width()),
@@ -59,6 +57,7 @@ PathIndicator::PathIndicator(QWidget* parent) : QWidget(parent)
 {
     m_pathEdit->hide();
     m_pathEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
+    setStyleSheet("border: none; background: transparent;");
     connect(m_pathEdit, &QLineEdit::editingFinished,
             m_pathEdit, &QLineEdit::hide);
     connect(m_pathEdit, &QLineEdit::editingFinished,
@@ -78,9 +77,8 @@ void PathIndicator::setPath(const QString& path)
 void PathIndicator::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(rect(), palette().midlight().color());
-    painter.setPen(palette().color(QPalette::Shadow));
+    painter.setPen(palette().shadow().color());
     painter.drawLine(QRectF(rect()).bottomLeft(), QRectF(rect()).bottomRight());
     painter.setPen(palette().text().color());
 

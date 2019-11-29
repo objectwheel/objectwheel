@@ -139,7 +139,7 @@ void ControlsTree::drawBranches(QPainter* painter, const QRect& rect, const QMod
 
     // Draw handle
     if (hasChild) {
-        const QColor c = isSelected ? palette().brightText().color() : palette().text().color();
+        const QColor c = isSelected ? palette().brightText().color() : palette().text().color().lighter(220);
         painter->setPen(QPen(c, 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
         painter->setBrush(Qt::NoBrush);
         painter->drawRoundedRect(handleRect, 0, 0);

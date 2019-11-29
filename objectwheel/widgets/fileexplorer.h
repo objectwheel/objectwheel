@@ -58,15 +58,15 @@ private slots:
 
 protected:
     void setPalette(const QPalette& palette);
-    void fillBackground(QPainter* painter, const QStyleOptionViewItem& option,
-                        int row, bool verticalLine) const;
+    void paintBackground(QPainter* painter, const QStyleOptionViewItem& option, int rowNumber,
+                         bool hasVerticalLine) const;
 
 private:
     void dropEvent(QDropEvent* event) override;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dragMoveEvent(QDragMoveEvent* event) override;
     void dragLeaveEvent(QDragLeaveEvent* event) override;
-    void paintEvent(QPaintEvent* e) override;
+    void paintEvent(QPaintEvent* event) override;
     void drawBranches(QPainter* painter, const QRect& rect, const QModelIndex& index) const override;
     void updateGeometries() override;
 
