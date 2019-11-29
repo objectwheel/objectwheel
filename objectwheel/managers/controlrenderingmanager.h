@@ -37,6 +37,7 @@ public:
 
     static void start();
     static void terminate();
+    static bool isConnected();
 
 private slots:
     void onConnected();
@@ -45,7 +46,7 @@ private slots:
     void onRenderInfosReady(const QList<RenderInfo>& infos);
 
 signals:
-    void connected();
+    void connectedChanged(bool connected);
     void renderDone(const RenderInfo& info);
     void previewDone(const RenderInfo& info);
     void initializationProgressChanged(int progress);
@@ -62,6 +63,7 @@ private:
     static CommandDispatcher* s_commandDispatcher;
     static QProcess* s_process;
     static bool s_terminatedKnowingly;
+    static bool s_connected;
 };
 
 #endif // CONTROLRENDERINGMANAGER_H

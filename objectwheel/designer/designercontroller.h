@@ -23,6 +23,7 @@ private slots:
     void onSceneSettingsChange();
     void onContextMenuRequest(const QPoint& scenePos);
     void onControlDoubleClick(Control* control, Qt::MouseButtons buttons);
+    void onRenderEngineConnectionStatusChange(bool connected);
 
     void onAnchorClear();
     void onAnchorSourceControlActivation();
@@ -44,6 +45,7 @@ private slots:
     void onSceneSettingsButtonClick();
     void onThemeSettingsButtonClick();
     void onZoomLevelComboBoxActivation(const QString& currentText);
+    void onRendererStatusButtonClick();
 
     void onInvertSelectionActionTrigger();
     void onSelectAllActionTrigger();

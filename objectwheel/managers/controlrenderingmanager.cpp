@@ -21,6 +21,7 @@ QThread* ControlRenderingManager::s_serverThread = nullptr;
 CommandDispatcher* ControlRenderingManager::s_commandDispatcher = nullptr;
 QProcess* ControlRenderingManager::s_process = nullptr;
 bool ControlRenderingManager::s_terminatedKnowingly = false;
+bool ControlRenderingManager::s_connected = false;
 
 ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(parent)
 {
@@ -184,6 +185,11 @@ void ControlRenderingManager::terminate()
     s_process->waitForFinished(1000);
 }
 
+bool ControlRenderingManager::isConnected()
+{
+    return s_connected;
+}
+
 void ControlRenderingManager::onConnected()
 {
     s_terminatedKnowingly = false;
@@ -201,11 +207,15 @@ void ControlRenderingManager::onConnected()
         initInfo.forms.append(QPair<QString, QString>(form->dir(), form->module()));
     }
     s_commandDispatcher->scheduleInit(initInfo, ToolboxController::toolboxInitInfo());
-    emit connected();
+    s_connected = true;
+    emit connectedChanged(s_connected);
 }
 
 void ControlRenderingManager::onDisconnected()
 {
+    s_connected = false;
+    emit connectedChanged(s_connected);
+
     if (s_terminatedKnowingly) {
         s_terminatedKnowingly = false;
         return;

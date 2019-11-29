@@ -29,6 +29,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
   , m_zoomLevelComboBox(new QComboBox(this))
   , m_themeComboBox(new QComboBox(this))
   , m_themeComboBox1(new QComboBox(this))
+  , m_rendererStatusButton(new QToolButton(this))
   //
   , m_invertSelectionAction(new QAction(this))
   , m_selectAllAction(new QAction(this))
@@ -58,6 +59,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_toolBar->setFixedHeight(22);
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    m_toolBar->addWidget(m_rendererStatusButton);
     m_toolBar->addWidget(m_refreshButton);
     m_toolBar->addWidget(m_shrinkSceneButton);
     m_toolBar->addWidget(m_clearButton);
@@ -73,6 +75,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_toolBar->addWidget(m_themeComboBox);
     m_toolBar->addWidget(m_themeComboBox1);
     m_toolBar->addSeparator();
+    m_toolBar->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
 
     m_refreshButton->setFixedSize(QSize(20, 20));
@@ -87,6 +90,7 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_zoomLevelComboBox->setFixedHeight(20);
     m_themeComboBox->setFixedHeight(20);
     m_themeComboBox1->setFixedHeight(20);
+    m_rendererStatusButton->setFixedSize(QSize(20, 20));
 
     m_refreshButton->setCursor(Qt::PointingHandCursor);
     m_shrinkSceneButton->setCursor(Qt::PointingHandCursor);
@@ -100,8 +104,9 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_themeComboBox->setCursor(Qt::PointingHandCursor);
     m_themeComboBox1->setCursor(Qt::PointingHandCursor);
     m_themeSettingsButton->setCursor(Qt::PointingHandCursor);
+    m_rendererStatusButton->setCursor(Qt::PointingHandCursor);
 
-    m_refreshButton->setToolTip(tr("Refresh (R)"));
+    m_refreshButton->setToolTip(tr("Refresh images of the current form (R)"));
     m_shrinkSceneButton->setToolTip(tr("Shrink the Scene"));
     m_clearButton->setToolTip(tr("Clear controls on the form"));
     m_anchorsButton->setToolTip(tr("Enable/Disable painting all the anchors"));
@@ -319,6 +324,11 @@ QComboBox* DesignerPane::themeComboBox() const
 QComboBox* DesignerPane::themeComboBox1() const
 {
     return m_themeComboBox1;
+}
+
+QToolButton* DesignerPane::rendererStatusButton() const
+{
+    return m_rendererStatusButton;
 }
 
 QAction* DesignerPane::invertSelectionAction() const

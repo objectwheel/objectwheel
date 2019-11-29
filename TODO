@@ -7,18 +7,26 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 AssetsPane
     Assets pane search düzgün çalışmıyor
     Assets pane de tüm fonksiyonelliği kontrol et
-Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
-    ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
-    malca boyutsuzca sahnede duruyorlar
+projeler ekranında renderer ile bağlantı koparsa ve kullanıcı "no" ya basarsa proje yüklenme olayı iptal edilsin
+render engine serverla ilgili toolbara konulacak green red light yanında bir de loading de koy ve server
+    crash iletişim kutusu son 10 saniye içinde iki kez crash olursa gözüksün, onun gibi bişey işte
+    hemde problemli projelerin de projeyi yükleme ekranında patlatmaması lazım, bunu kesin çözmek lazım
 fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
     entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
     öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
     olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
     hatta toolbox'un hangi kategorilerinin açık kapalı olduğu bile settingsler ile kayıt edilip restore edilsin
     hatta Help kısmındaki combobox için de bu yapılsın
+bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
+Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
+    ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
+    malca boyutsuzca sahnede duruyorlar
+dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
+qt quick extras'dan delay buttonlar vs siyah gözüküyor, neden?
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
 Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
+Toollar arasına, Layouts katagorisine spacer özel itemleri ekle
 
 qmlcodeeditorwidget'de kodları collapse/expand yapma olayı bozuk kod editörde
 quick_controls_conf ve project options sayfası yeniden dizayn edilecek
@@ -33,15 +41,11 @@ videolar ve tutorialler eklenecek, bunlar için özel "learning page" tasarlanac
 
 Çökme-raportu-9.txt, buraporlarla ilgilen
 form nongui yapılırsa renderer patlamasın
-dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
 neden bir kontrol içine başka bir kontrol koyunca dıştaki blank laşıyor?
-bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
-projeler ekranında renderer ile bağlantı koparsa ve kullanıcı "no" ya basarsa proje yüklenme olayı iptal edilsin
 f1 ile help açma mümkün olsun. Hem kod editörde hemde designer view'de seçili olan kontrol için
 qmlcode editor'e save all butonu ekle ve ayrıca CMD + R = run, CMD + Shift + S = save all vs klavye kısayollarını ekle
 Sağ tık menüsüne "bu obje ile ilgili yardım al" minvalinde "Go to Help" gibi bir seçenek de ekle
     böylece ilgili kontrol ile ilgili kolayca documents sekmesine gidilebilsin
-qt quick extras'dan delay buttonlar vs siyah gözüküyor, neden?
 Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
     örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
 plan pricing mevzularının limitlerini "beta" ya uygun düşecek şekilde gözden geçir
@@ -49,9 +53,6 @@ form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin 
     mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
 ayrıca yukarıdakinin benzeri olacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin
     ve eğer açık ise bu assetlerdeki herhangi bir dosya, açık halleri de düzeltilsin
-render engine serverla ilgili toolbara konulacak green red light yanında bir de loading de koy ve server
-    crash iletişim kutusu son 10 saniye içinde iki kez crash olursa gözüksün, onun gibi bişey işte
-    hemde problemli projelerin de projeyi yükleme ekranında patlatmaması lazım, bunu kesin çözmek lazım
 tüm dock ayarları kalıcı olsun, diğer ayarlar için de bi beyin fırtınası yapılsın
     Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explorer modu buraya ekle,
     ayrıca tüm dock widgetler vs ve splitview genişlik oranları vs gibi tüm ayarlar program kapatılınca da hatırlanacak
@@ -60,7 +61,6 @@ tüm dock ayarları kalıcı olsun, diğer ayarlar için de bi beyin fırtınas�
     için settingslere yeni bir settings ekle
 headlineların item genişliğine eşit olup olmayacağına dair scenesettings ekle, yada en azından nongui
     controller için headline lar id genişliği kadar olsun, kırpılmaya izin verme, en azından nongui için
-Toollar arasına, Layouts katagorisine spacer özel itemleri ekle
 
 static qpixmap olan yerleri düzelt
 toolbox settings bu bölüme tool kategorileme ve alfabetik sıralama vs ayarları da eklenir

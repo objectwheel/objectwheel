@@ -29,6 +29,7 @@ private slots:
     void onSettingsButtonClick();
     void onProgressChange(int progress);
     void onSearchTextChange(const QString& text);
+    void onRenderEngineConnectionStatusChange(bool connected);
 
 private:
     void lock();
@@ -54,6 +55,7 @@ private:
     ButtonSlice* m_buttons;
     ButtonSlice* m_buttons_2;
     ProgressBar* m_progressBar;
+    bool m_locked;
 };
 
 #endif //  PROJECTSWIDGET_H

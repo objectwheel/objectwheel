@@ -164,6 +164,10 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::projectThemeActivated);
     connect(m_designerPane->themeComboBox1(), qOverload<const QString&>(&QComboBox::activated),
             this, &DesignerController::projectThemeActivated1);
+    connect(m_designerPane->rendererStatusButton(), &QToolButton::clicked,
+            this, &DesignerController::onRendererStatusButtonClick);
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::connectedChanged,
+            this, &DesignerController::onRenderEngineConnectionStatusChange);
 
     connect(m_designerPane->invertSelectionAction(), &QAction::triggered,
             this, &DesignerController::onInvertSelectionActionTrigger);
@@ -296,6 +300,21 @@ void DesignerController::onControlDoubleClick(Control*, Qt::MouseButtons buttons
         else
             onGoToSlotActionTrigger();
     }
+}
+
+void DesignerController::onRenderEngineConnectionStatusChange(bool connected)
+{
+    const QString& toolTip =
+            QStringLiteral(R"(%1<b>%2</b><br><span style="white-space:nowrap;font-size:10px;"><i>%3</i></span>)")
+            .arg(tr("Render Engine status: "))
+            .arg(connected ? tr("Active") : tr("Inactive"))
+            .arg(tr("Click the button if you want to restart the Render Engine."));
+    QToolButton* rendererStatusButton = m_designerPane->rendererStatusButton();
+    if (connected)
+        rendererStatusButton->setIcon(QIcon(QStringLiteral(":/images/designer/engine-on.svg")));
+    else
+        rendererStatusButton->setIcon(QIcon(QStringLiteral(":/images/designer/engine-off.svg")));
+    rendererStatusButton->setToolTip(UtilityFunctions::toToolTip(toolTip));
 }
 
 void DesignerController::onAnchorClear()
@@ -551,6 +570,12 @@ void DesignerController::onZoomLevelComboBoxActivation(const QString& currentTex
         settings->sceneZoomLevel = sceneZoomLevel;
         settings->write();
     }
+}
+
+void DesignerController::onRendererStatusButtonClick()
+{
+    ControlRenderingManager::terminate();
+    ControlRenderingManager::start();
 }
 
 void DesignerController::onInvertSelectionActionTrigger()

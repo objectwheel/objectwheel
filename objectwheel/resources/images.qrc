@@ -136,5 +136,7 @@
         <file>images/designer/plus.svg</file>
         <file>images/designer/minus.svg</file>
         <file>images/designer/rename.svg</file>
+        <file>images/designer/engine-off.svg</file>
+        <file>images/designer/engine-on.svg</file>
     </qresource>
 </RCC>

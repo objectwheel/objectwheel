@@ -254,6 +254,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
   , m_buttons(new ButtonSlice)
   , m_buttons_2(new ButtonSlice(m_listWidget->viewport()))
   , m_progressBar(new ProgressBar(m_listWidget->viewport()))
+  , m_locked(false)
 {
     setFocusPolicy(Qt::NoFocus);
 
@@ -402,6 +403,8 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     connect(ControlRenderingManager::instance(), &ControlRenderingManager::initializationProgressChanged,
             this, &ProjectsWidget::onProgressChange);
+    connect(ControlRenderingManager::instance(), &ControlRenderingManager::connectedChanged,
+            this, &ProjectsWidget::onRenderEngineConnectionStatusChange);
 }
 
 bool ProjectsWidget::eventFilter(QObject* watched, QEvent* event)
@@ -679,8 +682,15 @@ void ProjectsWidget::onSearchTextChange(const QString& text)
     m_buttons_2->setVisible(firstVisibleItem);
 }
 
+void ProjectsWidget::onRenderEngineConnectionStatusChange(bool connected)
+{
+    if (m_locked && !connected)
+        m_progressBar->setValue(m_progressBar->maximum()); // Quit the Delayer event loop
+}
+
 void ProjectsWidget::lock()
 {
+    m_locked = true;
     m_searchWidget->setDisabled(true);
     m_buttons->setDisabled(true);
     m_listWidget->setDisabled(true);
@@ -694,6 +704,7 @@ void ProjectsWidget::lock()
 
 void ProjectsWidget::unlock()
 {
+    m_locked = false;
     m_searchWidget->setEnabled(true);
     m_buttons->setEnabled(true);
     m_listWidget->setEnabled(true);
