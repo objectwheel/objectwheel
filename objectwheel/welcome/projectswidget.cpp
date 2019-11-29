@@ -561,6 +561,13 @@ void ProjectsWidget::onLoadButtonClick()
     //! Start sequance
     lock();
 
+    if (ProjectManager::isStarted()) {
+        ProjectManager::stop(); // Terminate render engine etc.
+        Delayer::delay(1000); // Make sure render engine disconnected and onRenderEngineConnectionStatusChange has called
+    }
+
+    m_locked = true;
+
     if (!ProjectManager::start(uid)) {
         UtilityFunctions::showMessage(this, tr("Oops"), tr("Project start unsuccessful."),
                                       QMessageBox::Critical);
@@ -589,6 +596,7 @@ void ProjectsWidget::onLoadButtonClick()
     updateGadgetPositions();
 
     unlock();
+    m_locked = false;
     emit done();
 }
 
@@ -690,7 +698,6 @@ void ProjectsWidget::onRenderEngineConnectionStatusChange(bool connected)
 
 void ProjectsWidget::lock()
 {
-    m_locked = true;
     m_searchWidget->setDisabled(true);
     m_buttons->setDisabled(true);
     m_listWidget->setDisabled(true);
@@ -704,7 +711,6 @@ void ProjectsWidget::lock()
 
 void ProjectsWidget::unlock()
 {
-    m_locked = false;
     m_searchWidget->setEnabled(true);
     m_buttons->setEnabled(true);
     m_listWidget->setEnabled(true);

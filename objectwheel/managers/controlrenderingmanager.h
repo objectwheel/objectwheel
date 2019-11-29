@@ -7,6 +7,7 @@ class RenderServer;
 class CommandDispatcher;
 class QProcess;
 class DesignerScene;
+class QTimer;
 struct RenderInfo;
 
 class ControlRenderingManager final : public QObject
@@ -43,6 +44,7 @@ private slots:
     void onConnected();
     void onDisconnected();
     void onConnectionTimeout();
+    void showRenderEngineCrashWarning();
     void onRenderInfosReady(const QList<RenderInfo>& infos);
 
 signals:
@@ -62,6 +64,7 @@ private:
     static QThread* s_serverThread;
     static CommandDispatcher* s_commandDispatcher;
     static QProcess* s_process;
+    static QTimer* s_warningMessageTimer;
     static bool s_terminatedKnowingly;
     static bool s_connected;
 };

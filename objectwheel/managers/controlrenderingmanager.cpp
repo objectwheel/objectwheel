@@ -4,14 +4,15 @@
 #include <commanddispatcher.h>
 #include <hashfactory.h>
 #include <toolboxcontroller.h>
-#include <utilityfunctions.h>
 #include <designerscene.h>
 #include <form.h>
+#include <utilityfunctions.h>
 
 #include <QThread>
 #include <QProcess>
 #include <QCoreApplication>
 #include <QLocalServer>
+#include <QTimer>
 #include <QMessageBox>
 
 ControlRenderingManager* ControlRenderingManager::s_instance = nullptr;
@@ -20,6 +21,7 @@ RenderServer* ControlRenderingManager::s_renderServer = nullptr;
 QThread* ControlRenderingManager::s_serverThread = nullptr;
 CommandDispatcher* ControlRenderingManager::s_commandDispatcher = nullptr;
 QProcess* ControlRenderingManager::s_process = nullptr;
+QTimer* ControlRenderingManager::s_warningMessageTimer = nullptr;
 bool ControlRenderingManager::s_terminatedKnowingly = false;
 bool ControlRenderingManager::s_connected = false;
 
@@ -31,6 +33,7 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
     s_renderServer = new RenderServer;
     s_serverThread = new QThread(this);
     s_process = new QProcess(this);
+    s_warningMessageTimer = new QTimer(this);
 
     s_renderServer->moveToThread(s_serverThread);
     s_serverThread->start();
@@ -45,6 +48,11 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
     s_process->setStandardErrorFile(QProcess::nullDevice());
 #endif
 
+    s_warningMessageTimer->setInterval(1000);
+    s_warningMessageTimer->setSingleShot(true);
+
+    connect(s_warningMessageTimer, &QTimer::timeout,
+            this, &ControlRenderingManager::showRenderEngineCrashWarning);
     connect(s_renderServer, &RenderServer::connected,
             this, &ControlRenderingManager::onConnected);
 
@@ -214,14 +222,28 @@ void ControlRenderingManager::onConnected()
 void ControlRenderingManager::onDisconnected()
 {
     s_connected = false;
-    emit connectedChanged(s_connected);
-
     if (s_terminatedKnowingly) {
         s_terminatedKnowingly = false;
+        emit connectedChanged(s_connected);
         return;
     }
     if (s_process->state() != QProcess::NotRunning)
         terminate();
+
+    // Give others some space to handle disconnection before warning user
+    s_warningMessageTimer->start();
+
+    emit connectedChanged(s_connected);
+}
+
+void ControlRenderingManager::onConnectionTimeout()
+{
+    // TODO
+    qWarning() << "Connection timeout, in" << __FILE__ << ":" << __LINE__;
+}
+
+void ControlRenderingManager::showRenderEngineCrashWarning()
+{
     if (ProjectManager::isStarted()) {
         QMessageBox::StandardButton result = UtilityFunctions::showMessage(
                     nullptr, tr("Rendering Engine Crashed"),
@@ -231,12 +253,6 @@ void ControlRenderingManager::onDisconnected()
         if (result == QMessageBox::Yes)
             start();
     }
-}
-
-void ControlRenderingManager::onConnectionTimeout()
-{
-    // TODO
-    qWarning() << "Connection timeout, in" << __FILE__ << ":" << __LINE__;
 }
 
 void ControlRenderingManager::onRenderInfosReady(const QList<RenderInfo>& infos)
