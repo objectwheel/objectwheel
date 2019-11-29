@@ -109,7 +109,7 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
                 = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
             Q_UNUSED(combo)
             if (subControl == SC_ComboBoxEditField)
-                ret.adjust(-3, 0, 0, 0);
+                ret.adjust(-3, 0, 8, 0);
             else if (subControl == SC_ComboBoxArrow)
                 ret = QFusionStyle::subControlRect(control, option, subControl, widget);
         } break;
@@ -343,6 +343,7 @@ void TransparentStyle::drawComplexControl(QStyle::ComplexControl control,
                 QStyleOption arrowOpt = *cmb;
                 arrowOpt.rect = ar.adjusted(3, 1, 4, -1);
                 arrowOpt.state = flags;
+                arrowOpt.palette.setColor(QPalette::ButtonText, arrowOpt.palette.buttonText().color().lighter(250));
                 proxy()->drawPrimitive(PE_IndicatorArrowDown, &arrowOpt, painter, widget);
             }
             painter->restore();

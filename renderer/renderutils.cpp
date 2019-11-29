@@ -3,7 +3,7 @@
 #include <renderinfo.h>
 #include <utilityfunctions.h>
 #include <parserutils.h>
-#include <toolutils.h>
+#include <knownenums.h>
 
 #include <QAnimationDriver>
 #include <QQuickView>
@@ -75,26 +75,6 @@ static bool isCompletionDisabled(const QObject* object)
             return true;
     }
     return false;
-}
-
-// FIXME: Fix know enum values
-static bool isKnownEnum(const QString& identifier)
-{
-    static const QStringList knownIdentifiers /*{
-        "VideoOutput.fillMode"
-    }*/;
-    return knownIdentifiers.contains(identifier);
-}
-// FIXME: Fix know enum values
-static Enum getKnownEnum(const QString& identifier)
-{
-    Enum e;
-    if (identifier == "VideoOutput.fillMode") {
-        e.name = "fillMode";
-        e.scope = "FillMode";
-//        e.value = me.valueToKey(property.read(object).toInt());
-    }
-    return e;
 }
 
 static void setWindowHidden(QObject* object)
@@ -289,16 +269,6 @@ static QString cleanClassName(const QMetaObject* metaObject)
     return className;
 }
 
-static QString cleanScopeName(QString scope)
-{
-    scope.replace("QQuickWindowQmlImpl", "Window");
-    scope.replace("QQuick", "");
-    scope.replace("QDeclarative", "");
-    scope.replace("QQml", "");
-    scope.replace("QWindow", "Window");
-    return scope;
-}
-
 static bool isPropertyValid(const QMetaProperty& property)
 {
     const QVariant::Type type = property.type();
@@ -429,18 +399,7 @@ static QVector<Enum> subEnums(QMetaProperty property, const QObject* parentObjec
                     && isPropertyValid(subproperty)) {
                 if (subproperty.isEnumType() && !subproperty.isFlagType()) {
                     auto metaEnum = subproperty.enumerator();
-
-                    Enum e;
-                    e.name = subproperty.name();
-                    e.scope = cleanScopeName(metaEnum.scope());
-                    e.value = metaEnum.valueToKey(subproperty.read(object).toInt());
-
-                    for (int i = metaEnum.keyCount(); i--;) {
-                        if (QString(metaEnum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
-                            e.keys[metaEnum.key(i)] = metaEnum.value(i);
-                    }
-
-                    enums << e;
+                    enums.append(KnownEnums::extractEnum(subproperty, metaEnum, object));
                 }
             }
         }
@@ -972,20 +931,11 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
                     && !propertyExistsInNodes(propertyNodes, property.name())) {
                 if (property.isEnumType()) {
                     auto metaEnum = property.enumerator();
-                    Enum e;
-                    e.name = property.name();
-                    e.scope = cleanScopeName(metaEnum.scope());
-                    e.value = metaEnum.valueToKey(property.read(object).toInt());
-
-                    for (int i = metaEnum.keyCount(); i--;) {
-                        if (QString(metaEnum.key(i)).contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
-                            e.keys[metaEnum.key(i)] = metaEnum.value(i);
-                    }
-                    enums.append(e);
+                    enums.append(KnownEnums::extractEnum(property, metaEnum, object));
                 } else if (property.type() == QVariant::Int) {
                     const QString& enumIdentifier = className + QStringLiteral(".") + property.name();
-                    if (isKnownEnum(enumIdentifier))
-                        enums.append(getKnownEnum(enumIdentifier));
+                    if (KnownEnums::isKnownEnum(enumIdentifier))
+                        enums.append(KnownEnums::knownEnum(property, object, enumIdentifier));
                     else
                         properties[property.name()] = property.read(object);
                 } else {

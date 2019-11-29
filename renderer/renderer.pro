@@ -26,14 +26,16 @@ SOURCES += $$PWD/main.cpp \
            $$PWD/renderengine.cpp \
            $$PWD/commanddispatcher.cpp \
            $$PWD/commandlineparser.cpp \
-           $$PWD/renderutils.cpp
+           $$PWD/renderutils.cpp \
+           $$PWD/knownenums.cpp
 
 HEADERS += $$PWD/rendersocket.h \
            $$PWD/applicationcore.h \
            $$PWD/renderengine.h \
            $$PWD/commanddispatcher.h \
            $$PWD/commandlineparser.h \
-           $$PWD/renderutils.h
+           $$PWD/renderutils.h \
+           $$PWD/knownenums.h
 
 
 ### Utils Settings

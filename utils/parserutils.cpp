@@ -1,6 +1,5 @@
 #include <parserutils.h>
 #include <saveutils.h>
-#include <toolutils.h>
 
 #include <qmljs/qmljsdocument.h>
 #include <qmljs/parser/qmljsast_p.h>
