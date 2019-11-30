@@ -119,6 +119,7 @@ QStringList anchorPropertyNames();
 void disableWheelEvent(QWidget* widget);
 QFont defaultFont();
 QFont systemDefaultFont();
+void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>& condition);
 
 } // UtilityFunctions
 

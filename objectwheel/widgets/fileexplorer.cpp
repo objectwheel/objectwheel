@@ -543,18 +543,19 @@ void FileExplorer::goToRelativeDir(const QString& relativeDir)
 
 void FileExplorer::goToEntry(const QString& entry)
 {
-    if (QFileInfo(entry).isDir())
-        return goToDir(entry);
-
+    const QFileInfo info(entry);
+    const bool isDir = info.isDir();
     const QModelIndex& index = mf(m_fileSystemModel->index(entry));
 
-    if (m_mode == Viewer)
-        UtilityFunctions::expandUpToRoot(this, index, rootIndex());
-    else
-        goToDir(QFileInfo(entry).path());
+    if (index.isValid() && (!isDir || index.parent().isValid())) {
+        if (m_mode == Viewer)
+            UtilityFunctions::expandUpToRoot(this, isDir ? index.parent() : index, rootIndex());
+        else
+            goToDir(isDir ? info.dir().path() : info.path());
 
-    selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
-    scrollTo(index, PositionAtCenter);
+        selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+        scrollTo(index, PositionAtCenter);
+    }
 }
 
 void FileExplorer::dropEvent(QDropEvent* event)

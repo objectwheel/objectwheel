@@ -25,6 +25,7 @@
 #include <QCryptographicHash>
 #include <QOperatingSystemVersion>
 #include <qpassworddigestor.h>
+#include <QKeyEvent>
 
 namespace UtilityFunctions {
 
@@ -678,6 +679,34 @@ QFont systemDefaultFont()
 #endif
     font.setPixelSize(13);
     return font;
+}
+
+// Shortcut events are sent based on the shortcut context that's set on the action/shortcut.
+// If shortcut context allows the shortcut to get triggered even if its window has the focus,
+// then there might be an ambiguity among all the other widgets who has shortcuts in the same
+// window shortcut context. In this case, the widget who has the focus gets the shortcut event.
+// But if the widget that has focus doesn't assign a shortcut on it, it might not even be able
+// to get key press events when if there are another widgets which have shortcuts for spesific
+// keys even though they didn't even had the focus. So, in such cases, if you override the
+// shortcut against one widget's good, then that widget will be getting the shortcut and key
+// press events. Others will only get key press events. In this way, shortcut event propagation
+// can be blocked against one widget's good.
+void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>& condition)
+{
+    static QMap<QObject*, std::function<bool(QKeyEvent*)>> objects;
+    class OverrideShortcut final : public QObject {
+        bool eventFilter(QObject* watched, QEvent* event) override {
+            if (objects.contains(watched) && event->type() == QEvent::ShortcutOverride) {
+                auto keyEvent = static_cast<QKeyEvent*>(event);
+                if (objects.value(watched)(keyEvent))
+                    event->accept();
+            }
+            return QObject::eventFilter(watched, event);
+        }
+    };
+    static OverrideShortcut shortcutOverrider;
+    widget->installEventFilter(&shortcutOverrider);
+    objects.insert(widget, condition);
 }
 
 } // UtilityFunctions

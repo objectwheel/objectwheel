@@ -22,7 +22,6 @@ qt quick extras'dan delay buttonlar vs siyah gözüküyor, neden?
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
 Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
-Toollar arasına, Layouts katagorisine spacer özel itemleri ekle
 
 qmlcodeeditorwidget'de kodları collapse/expand yapma olayı bozuk kod editörde
 quick_controls_conf ve project options sayfası yeniden dizayn edilecek

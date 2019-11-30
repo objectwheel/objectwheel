@@ -450,6 +450,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 
     QAction *completionAction = new QAction(tr("Trigger Completion"), this);
     completionAction->setShortcut(QKeySequence(HostOsInfo::isMacHost() ? tr("Alt+Space") : tr("Ctrl+Space")));
+    completionAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     addAction(completionAction);
 
     connect(completionAction, &QAction::triggered, [this]() {

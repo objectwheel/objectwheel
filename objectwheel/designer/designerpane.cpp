@@ -200,6 +200,19 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
     m_moveUpAction->setShortcut(Qt::Key_Up);
     m_moveDownAction->setShortcut(Qt::Key_Down);
 
+    m_selectAllAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_refreshAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_sendBackAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_bringFrontAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_cutAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_pasteAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_deleteAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_moveLeftAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_moveRightAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_moveUpAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_moveDownAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
     addAction(m_invertSelectionAction);
     addAction(m_selectAllAction);
     addAction(m_refreshAction);

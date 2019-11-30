@@ -18,6 +18,11 @@ AssetsController::AssetsController(AssetsPane* assetsPane, QObject* parent) : QO
     m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_completer->setModel(m_fileSystemCompleterModel);
     m_assetsPane->searchEdit()->setCompleter(m_completer);
+    // The following is unneeded since Up and Down shortcuts in the
+    // DesignerPane are defined in WidgetWithChildrenShortcut context
+    // UtilityFunctions::overrideShortcutFor(m_assetsPane->searchEdit(), [=] (QKeyEvent* event) {
+    //     return event->key() == Qt::Key_Up || event->key() == Qt::Key_Down;
+    // });
 
     connect(m_assetsPane->modeComboBox(), qOverload<int>(&QComboBox::activated),
             this, &AssetsController::onModeComboBoxActivation);
