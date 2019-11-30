@@ -20,6 +20,7 @@
 #include <QStandardPaths>
 #include <QWindow>
 #include <QScreen>
+#include <QPainter>
 
 // FIXME:
 // What happens if a assets open file get renamed
@@ -129,26 +130,19 @@ QList<Control*> controls(const QList<QmlCodeEditorWidget::DesignsDocument*>& doc
 }
 }
 
-QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QWidget(parent)
-  , m_splitter(new QSplitter(this))
+QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
   , m_codeEditor(new QmlCodeEditor(this))
-  , m_fileExplorer(new FileExplorer)
+  , m_fileExplorer(new FileExplorer(this))
 {
-    auto layout = new QVBoxLayout(this);
-    layout->addWidget(m_splitter);
-    layout->setSpacing(0);
-    layout->setContentsMargins(0, 0, 0, 0);
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    addWidget(m_codeEditor);
+    addWidget(m_fileExplorer);
+    setFrameShape(QFrame::NoFrame);
+    setChildrenCollapsible(false);
+    setAcceptDrops(true);
 
-    m_splitter->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-
-    m_splitter->addWidget(m_codeEditor);
-    m_splitter->addWidget(m_fileExplorer);
-    m_splitter->setFrameShape(QFrame::NoFrame);
-    m_splitter->setChildrenCollapsible(false);
-
-    setAcceptDrops(true);
 
     connect(toolBar(), &QmlCodeEditorToolBar::saved,
             this, &QmlCodeEditorWidget::saveOpen);
@@ -184,8 +178,8 @@ void QmlCodeEditorWidget::discharge()
     m_codeEditor->discharge();
     m_fileExplorer->discharge();
 
-    m_splitter->setStretchFactor(0, 30);
-    m_splitter->setStretchFactor(1, 9);
+    setStretchFactor(0, 30);
+    setStretchFactor(1, 9);
 
     m_openDocument = nullptr;
     g_fileExplorerHid = false;
@@ -215,7 +209,7 @@ void QmlCodeEditorWidget::discharge()
 
 void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
 {
-    m_splitter->handle(1)->setDisabled(!visible);
+    handle(1)->setDisabled(!visible);
     m_fileExplorer->setHidden(!visible);
 }
 

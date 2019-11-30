@@ -31,6 +31,8 @@ namespace UtilityFunctions {
 
 namespace Internal {
 
+const char showFocusRingProperty[] = "_q_Objectwheel_showFocusRing";
+
 void pushHelper(QDataStream&) {}
 void pullHelper(QDataStream&) {}
 
@@ -707,6 +709,16 @@ void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>&
     static OverrideShortcut shortcutOverrider;
     widget->installEventFilter(&shortcutOverrider);
     objects.insert(widget, condition);
+}
+
+void setShowFocusRing(QWidget* widget, bool showFocusRing)
+{
+    widget->setProperty(Internal::showFocusRingProperty, showFocusRing);
+}
+
+bool isShowFocusRingSet(QWidget* widget)
+{
+    return widget->property(Internal::showFocusRingProperty).toBool();
 }
 
 } // UtilityFunctions

@@ -409,7 +409,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 
     setAcceptDrops(false);
     setMouseTracking(true);
-    setFrameShape(QFrame::NoFrame);
 
     if (!m_qmlJsHoverHandler) {
         m_completionAssistProvider = new QmlJSCompletionAssistProvider;
@@ -1211,9 +1210,9 @@ TextEditor::AssistInterface* QmlCodeEditor::createAssistInterface(TextEditor::As
 void QmlCodeEditor::updateViewportMargins()
 {
     if (isLeftToRight())
-        setViewportMargins(m_rowBar->calculatedWidth(), m_toolBar->height(), 1, 0);
+        setViewportMargins(m_rowBar->calculatedWidth(), m_toolBar->height() - 1, 1, 0);
     else
-        setViewportMargins(1, m_toolBar->height(), m_rowBar->calculatedWidth(), 0);
+        setViewportMargins(1, m_toolBar->height() - 1, m_rowBar->calculatedWidth(), 0);
 }
 
 void QmlCodeEditor::updateRowBar(const QRect& rect, int dy)
@@ -1249,8 +1248,8 @@ void QmlCodeEditor::paintOverlays(const PaintEventData& data, QPainter& painter)
         //        if (m_snippetOverlay->isVisible())
         //            m_snippetOverlay->paint(&painter, data.eventRect);
 
-                if (!m_refactorOverlay->isEmpty())
-                    m_refactorOverlay->paint(&painter, data.eventRect);
+        if (!m_refactorOverlay->isEmpty())
+            m_refactorOverlay->paint(&painter, data.eventRect);
     }
 
     if (!m_searchResultOverlay->isEmpty()) {
@@ -1319,7 +1318,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                                            && */m_linkPressed
+                                                                                                                                                                            && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1503,7 +1502,7 @@ void QmlCodeEditor::mouseMoveEvent(QMouseEvent *e)
             m_foldedBlockTimer.start(40, this);
         }
 
-         const RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());
+        const RefactorMarker refactorMarker = m_refactorOverlay->markerAt(e->pos());
 
         // Update the mouse cursor
         if ((collapsedBlock.isValid() || refactorMarker.isValid()) && !m_mouseOnFoldedMarker) {
@@ -1642,7 +1641,8 @@ void QmlCodeEditor::applyFontSettings()
     p.setBrush(QPalette::Inactive, QPalette::HighlightedText, p.highlightedText());
     setPalette(p);
     viewport()->setPalette(p);
-    setFont(font);
+    viewport()->setFont(font);
+    m_rowBar->setFont(font);
     updateTabStops(); // update tab stops, they depend on the font
 
     // Line numbers
@@ -2880,6 +2880,14 @@ bool QmlCodeEditor::event(QEvent *e)
         applyFontSettings();
         return true;
     }
+    case QEvent::Paint: {
+        QRectF r(rect());
+        QPainter p(this);
+        p.setPen("#b6b6b6");
+        p.drawLine(r.topLeft(), r.bottomLeft());
+        p.drawLine(r.topRight(), r.bottomRight());
+        return true;
+    }
     default:
         break;
     }
@@ -3260,9 +3268,9 @@ void QmlCodeEditor::resizeEvent(QResizeEvent* e)
 
     int rcw = m_rowBar->calculatedWidth();
     QRect vg = viewport()->geometry();
-    m_toolBar->setGeometry(0, 0, rcw + vg.width() + 1, m_toolBar->height());
-    m_rowBar->setGeometry(0, vg.top(), rcw, vg.height());
-    m_noDocsLabel->setGeometry(0, vg.top(), rcw + vg.width() + 1, vg.height());
+    m_toolBar->setGeometry(0, 0, rcw + vg.width() + 3, m_toolBar->height());
+    m_rowBar->setGeometry(1, vg.top(), rcw, vg.height());
+    m_noDocsLabel->setGeometry(0, vg.top(), rcw + vg.width() + 3, vg.height());
 
     hideContextPane();
 }
@@ -3274,7 +3282,7 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
     ToolTip::hide();
 
     //    d->m_moveLineUndoHack = false;
-/*//        d->*/clearVisibleFoldedBlock();
+    /*//        d->*/clearVisibleFoldedBlock();
 
     //    if (e->key() == Qt::Key_Alt
     //            && d->m_behaviorSettings.m_keyboardTooltips) {

@@ -28,6 +28,8 @@
 #include "qmljseditorconstants.h"
 #include "qmlcodedocument.h"
 #include "qmlexpressionundercursor.h"
+#include <projectmanager.h>
+#include <saveutils.h>
 
 //#include <coreplugin/icore.h>
 //#include <coreplugin/editormanager/ieditor.h>
@@ -369,11 +371,15 @@ void QmlJSHoverHandler::handleImport(const ScopeChain &scopeChain, AST::UiImport
     if (!imports)
         return;
 
+    const QString& projectDir = ProjectManager::dir();
     foreach (const Import &import, imports->all()) {
         if (import.info.ast() == node) {
             if (import.info.type() == ImportType::Library
                     && !import.libraryPath.isEmpty()) {
-                QString msg = tr("Library at %1").arg(import.libraryPath);
+                QString libraryPath = import.libraryPath;
+                if (!projectDir.isEmpty())
+                    libraryPath.replace(SaveUtils::toProjectImportsDir(projectDir), ProjectManager::name());
+                QString msg = tr("Library at %1").arg(libraryPath);
                 const LibraryInfo &libraryInfo = scopeChain.context()->snapshot().libraryInfo(import.libraryPath);
                 if (libraryInfo.pluginTypeInfoStatus() == LibraryInfo::DumpDone) {
                     msg += QLatin1Char('\n');

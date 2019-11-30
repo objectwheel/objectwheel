@@ -1,7 +1,7 @@
 #ifndef QMLCODEEDITORWIDGET_H
 #define QMLCODEEDITORWIDGET_H
 
-#include <QWidget>
+#include <QSplitter>
 #include <QTextCursor>
 
 #include <qmlcodeeditortoolbar.h>
@@ -12,9 +12,10 @@ class QSplitter;
 class QmlCodeEditor;
 class FileExplorer;
 
-class QmlCodeEditorWidget : public QWidget
+class QmlCodeEditorWidget final : public QSplitter
 {
     Q_OBJECT
+    Q_DISABLE_COPY(QmlCodeEditorWidget)
 
 public:
     struct Document {
@@ -59,6 +60,7 @@ public:
 
     QmlCodeEditor* codeEditor() const;
     QmlCodeEditorToolBar* toolBar() const;
+    QSize sizeHint() const override;
 
     void addSaveFilter(SaveFilter* sf) { m_saveFilters.append(sf); }
 
@@ -85,7 +87,6 @@ protected:
     void dragLeaveEvent(QDragLeaveEvent* e) override;
     void dropEvent(QDropEvent* e) override;
     void closeEvent(QCloseEvent* e) override;
-    QSize sizeHint() const override;
 
 private:
     void showNoDocumentsOpen();
@@ -99,7 +100,6 @@ signals:
     void opened();
 
 private:
-    QSplitter* m_splitter;
     QmlCodeEditor* m_codeEditor;
     FileExplorer* m_fileExplorer;
 

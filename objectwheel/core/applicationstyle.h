@@ -3,6 +3,7 @@
 
 #include <private/qfusionstyle_p.h>
 
+class QFocusFrame;
 class ApplicationStyle : public QFusionStyle
 {
     Q_OBJECT
@@ -27,6 +28,8 @@ public:
                              const QPointF& logicalPos);
 public:
     ApplicationStyle();
+    ~ApplicationStyle() override;
+
     QSize sizeFromContents(QStyle::ContentsType type, const QStyleOption* option,
                            const QSize& contentsSize, const QWidget* widget) const override;
     QRect subControlRect(QStyle::ComplexControl control, const QStyleOptionComplex* option,
@@ -51,6 +54,10 @@ public:
                       bool enabled, const QString& text, QPalette::ColorRole textRole) const;
     void polish(QWidget* w) override;
     void unpolish(QWidget* w) override;
+    bool event(QEvent* event) override;
+
+private:
+    QFocusFrame* m_focusFrame;
 };
 
 #endif // APPLICATIONSTYLE_H

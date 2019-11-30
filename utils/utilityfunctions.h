@@ -120,6 +120,8 @@ void disableWheelEvent(QWidget* widget);
 QFont defaultFont();
 QFont systemDefaultFont();
 void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>& condition);
+void setShowFocusRing(QWidget* widget, bool showFocusRing);
+bool isShowFocusRingSet(QWidget* widget);
 
 } // UtilityFunctions
 

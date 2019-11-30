@@ -2,6 +2,7 @@
 #include <utilityfunctions.h>
 #include <utilsicons.h>
 #include <paintutils.h>
+#include <qmlcodeeditor.h>
 
 #include <QStyleFactory>
 #include <QApplication>
@@ -116,7 +117,13 @@ QPointF ApplicationStyle::visualPos(Qt::LayoutDirection direction, const QRectF&
 }
 
 ApplicationStyle::ApplicationStyle() : QFusionStyle()
+  , m_focusFrame(new QFocusFrame)
 {
+}
+
+ApplicationStyle::~ApplicationStyle()
+{
+    delete m_focusFrame;
 }
 
 QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption* option, const QSize& contentsSize, const QWidget* widget) const
@@ -309,6 +316,18 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
         return QFrame::NoFrame;
     case SH_Menu_FillScreenWithScroll:
         return false;
+    case SH_FocusFrame_AboveWidget:
+        return true;
+    case SH_FocusFrame_Mask:
+        if (widget) {
+            if(QStyleHintReturnMask* mask = qstyleoption_cast<QStyleHintReturnMask*>(returnData)) {
+                mask->region = widget->rect();
+                int vmargin = proxy()->pixelMetric(QStyle::PM_FocusFrameVMargin) + 1,
+                    hmargin = proxy()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
+                mask->region -= QRect(widget->rect().adjusted(hmargin, vmargin, -hmargin, -vmargin));
+            }
+        }
+        return true;
     default:
         return QFusionStyle::styleHint(hint, option, widget, returnData);
     }
@@ -330,6 +349,8 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
         // icon size is determined by the toolbar's setIconSize
     case PM_ToolBarSeparatorExtent:
     case PM_DockWidgetSeparatorExtent:
+    case PM_FocusFrameHMargin:
+    case PM_FocusFrameVMargin:
         return 1;
     case PM_ToolBarFrameWidth: // QToolBar's contentMargins
     case PM_SplitterWidth:
@@ -739,6 +760,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
 void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
 {
     Q_D (const QFusionStyle);
+    const QRectF r(option->rect);
 
     switch (element) {
     case CE_MenuItem:
@@ -1080,7 +1102,6 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             painter->restore();
         } break;
     case CE_Splitter: {
-        QRectF r(option->rect);
         if (option->state & State_Horizontal) {
             for (int i = -6; i < 12; i += 3)
                 painter->fillRect(r.center().x(), r.center().y() + i, 1, 1, QColor(0, 0, 0, 150));
@@ -1089,6 +1110,9 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 painter->fillRect(r.center().x() + i, r.center().y(), 1, 1, QColor(0, 0, 0, 150));
         }
     } break;
+    case CE_FocusFrame:
+        painter->fillRect(r.adjusted(1, 1, -1, -1), Qt::darkGray);
+        break;
     default:
         QFusionStyle::drawControl(element, option, painter, widget);
         break;
@@ -1229,4 +1253,22 @@ void ApplicationStyle::unpolish(QWidget* w)
         w->setAttribute(Qt::WA_Hover, false);
         w->setMouseTracking(false);
     }
+}
+
+bool ApplicationStyle::event(QEvent* event)
+{
+    if(event->type() == QEvent::FocusIn) {
+        QWidget* f = nullptr;
+        QWidget* focusWidget = QApplication::focusWidget();
+        if (auto graphicsView = qobject_cast<QGraphicsView*>(focusWidget))
+            focusWidget = graphicsView->parentWidget();
+        else if (auto codeEditor = qobject_cast<QmlCodeEditor*>(focusWidget))
+            focusWidget = codeEditor->parentWidget()->parentWidget();
+        if (focusWidget && UtilityFunctions::isShowFocusRingSet(focusWidget))
+            f = focusWidget;
+        m_focusFrame->setWidget(f);
+    } else if(event->type() == QEvent::FocusOut) {
+        m_focusFrame->setWidget(nullptr);
+    }
+    return false;
 }

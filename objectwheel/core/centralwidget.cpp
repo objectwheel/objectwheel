@@ -70,13 +70,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
-    g_editorContainer->setObjectName("g_editorContainer");
-    g_editorContainer->setText(tr("Editor window\nraised"));
-    g_editorContainer->setStyleSheet("#g_editorContainer { background: transparent; color: #808080;}");
+    g_editorContainer->setText(QStringLiteral(R"(<p style="color:#777777">%1</p>)").arg(tr("Editor window<br>raised")));
     g_editorContainer->setLayout(new QHBoxLayout);
     g_editorContainer->layout()->setSpacing(0);
     g_editorContainer->layout()->setContentsMargins(0, 0, 0, 0);
-    g_editorContainer->layout()->addWidget(UtilityFunctions::createSeparatorWidget(Qt::Vertical));
     g_editorContainer->layout()->addWidget(m_qmlCodeEditorWidget);
 
     m_splitterIn->setFrameShape(QFrame::NoFrame);
@@ -87,6 +84,10 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
     m_splitterIn->setChildrenCollapsible(false);
+    m_splitterIn->setHandleWidth(1);
+
+    UtilityFunctions::setShowFocusRing(m_designerPane, true);
+    UtilityFunctions::setShowFocusRing(g_editorContainer, true);
 
     onModeChange(ModeManager::mode());
 

@@ -18,6 +18,7 @@ DesignerView::DesignerView(QWidget* parent) : QGraphicsView(new DesignerScene(pa
     setRubberBandSelectionMode(Qt::IntersectsItemBoundingRect);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     setBackgroundRole(QPalette::Window);
+    viewport()->setAttribute(Qt::WA_AcceptTouchEvents, false); // Workaround for QTBUG-46351
 
     // as mousetracking only works for mouse key it is better to handle it in the
     // eventFilter method so it works also for the space scrolling case as expected
