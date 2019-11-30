@@ -7,10 +7,6 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 AssetsPane
     Assets pane search düzgün çalışmıyor
     Assets pane de tüm fonksiyonelliği kontrol et
-projeler ekranında renderer ile bağlantı koparsa ve kullanıcı "no" ya basarsa proje yüklenme olayı iptal edilsin
-render engine serverla ilgili toolbara konulacak green red light yanında bir de loading de koy ve server
-    crash iletişim kutusu son 10 saniye içinde iki kez crash olursa gözüksün, onun gibi bişey işte
-    hemde problemli projelerin de projeyi yükleme ekranında patlatmaması lazım, bunu kesin çözmek lazım
 fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
     entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
     öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı

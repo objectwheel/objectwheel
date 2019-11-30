@@ -5,6 +5,7 @@ include($$PWD/resources/resources.pri)
 ### App Settings
 TEMPLATE = app
 CONFIG  -= app_bundle
+CONFIG  -= qtquickcompiler
 CONFIG  += console c++14 strict_c++
 TARGET   = Themer
 DEFINES += QT_QML_DEBUG_NO_WARNING

@@ -61,9 +61,9 @@ CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {
         VERSION_DATA = PREVIOUS_VERSION=$$GIT_VERSION
         write_file($$VERSION_FILE, VERSION_DATA)
-        touch($$PWD/app/core/applicationcore.cpp, $$VERSION_FILE)
-        touch($$PWD/app/windows/aboutwindow.cpp, $$VERSION_FILE)
-        touch($$PWD/app/welcome/projectswidget.cpp, $$VERSION_FILE)
+        touch($$PWD/objectwheel/app/core/applicationcore.cpp, $$VERSION_FILE)
+        touch($$PWD/objectwheel/app/windows/aboutwindow.cpp, $$VERSION_FILE)
+        touch($$PWD/objectwheel/app/welcome/projectswidget.cpp, $$VERSION_FILE)
         touch($$PWD/themer/main.cpp, $$VERSION_FILE)
         touch($$PWD/renderer/applicationcore.cpp, $$VERSION_FILE)
         touch($$PWD/interpreter/applicationcore.cpp, $$VERSION_FILE)

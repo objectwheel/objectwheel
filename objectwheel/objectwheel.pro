@@ -1,6 +1,7 @@
 ### App Settings
 TEMPLATE = app
 CONFIG  += c++14 strict_c++
+CONFIG  -= qtquickcompiler
 TARGET   = Objectwheel
 DEFINES += QT_QML_DEBUG_NO_WARNING
 DEFINES += QT_DEPRECATED_WARNINGS
