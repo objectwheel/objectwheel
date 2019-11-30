@@ -44,6 +44,8 @@ void ProjectExposingManager::exposeProject()
         form->setUid(SaveUtils::controlUid(form->dir()));
         ControlPropertyManager::setId(form, ParserUtils::id(form->dir()), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(form, SaveUtils::controlIndex(form->dir()), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setSize(form, SaveUtils::designSize(formPath),
+                                        ControlPropertyManager::NoOption);
 
         // Since SaveUtils::formPaths sorts out the form paths based
         // on indexes, thus the first form is the one with lower index
@@ -97,6 +99,8 @@ void ProjectExposingManager::exposeProject()
             // way we expose non-gui items into right positions
             ControlPropertyManager::setPos(control, SaveUtils::designPosition(childPath),
                                            ControlPropertyManager::NoOption);
+            ControlPropertyManager::setSize(control, SaveUtils::designSize(childPath),
+                                            ControlPropertyManager::NoOption);
 
             // Since SaveUtils::childrenPaths sorts out the siblings based
             // on indexes, thus the first control is the one with lower index

@@ -75,6 +75,9 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
                 SaveManager::setProperty(control, "x", QString::number(x));
         }
 
+        if ((options & SaveChanges) || !(options & DontApplyDesigner))
+            SaveUtils::setProperty(control->dir(), SaveUtils::DesignPosition, QPointF(x, control->y()));
+
         if (options & UpdateRenderer) {
             if (isInt)
                 ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometrySyncValue(int(x), geometrySyncKey));
@@ -113,6 +116,9 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
             else
                 SaveManager::setProperty(control, "y", QString::number(y));
         }
+
+        if ((options & SaveChanges) || !(options & DontApplyDesigner))
+            SaveUtils::setProperty(control->dir(), SaveUtils::DesignPosition, QPointF(control->x(), y));
 
         if (options & UpdateRenderer) {
             if (isInt)
@@ -182,6 +188,9 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
                 SaveManager::setProperty(control, "width", QString::number(width));
         }
 
+        if ((options & SaveChanges) || !(options & DontApplyDesigner))
+            SaveUtils::setProperty(control->dir(), SaveUtils::DesignSize, QSizeF(width, control->height()));
+
         if (options & UpdateRenderer) {
             if (isInt)
                 ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometrySyncValue(int(width), geometrySyncKey));
@@ -220,6 +229,9 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
             else
                 SaveManager::setProperty(control, "height", QString::number(height));
         }
+
+        if ((options & SaveChanges) || !(options & DontApplyDesigner))
+            SaveUtils::setProperty(control->dir(), SaveUtils::DesignSize, QSizeF(control->width(), height));
 
         if (options & UpdateRenderer) {
             if (isInt)
@@ -264,6 +276,9 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos,
                 SaveManager::setProperty(control, "y", QString::number(pos.y()));
             }
         }
+
+        if ((options & SaveChanges) || !(options & DontApplyDesigner))
+            SaveUtils::setProperty(control->dir(), SaveUtils::DesignPosition, pos);
 
         if (options & UpdateRenderer) {
             if (isInt) {
@@ -315,6 +330,9 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size,
             }
         }
 
+        if ((options & SaveChanges) || !(options & DontApplyDesigner))
+            SaveUtils::setProperty(control->dir(), SaveUtils::DesignSize, size);
+
         if (options & UpdateRenderer) {
             if (isInt) {
                 ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometrySyncValue(int(size.width())));
@@ -322,62 +340,6 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size,
             } else {
                 ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometrySyncValue(size.width()));
                 ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometrySyncValue(size.height(), geometrySyncKey));
-            }
-        }
-
-        emit instance()->geometryChanged(control);
-    }
-}
-
-void ControlPropertyManager::setGeometry(Control* control, const QRectF& geometry, ControlPropertyManager::Options options, const QString& geometrySyncKey)
-{
-    if (!control)
-        return;
-
-    if (!geometry.isValid())
-        return;
-
-    bool isInt = control->itemProperty("x").type() == QVariant::Int;
-
-    if (!(options & DontApplyDesigner))
-        control->setGeometry(isInt ? geometry.toRect() : geometry);
-
-    if (options & CompressedCall) {
-        DirtyProperty dirtyProperty;
-        dirtyProperty.key = control->uid() + "setGeometry";
-        dirtyProperty.function = std::bind(&ControlPropertyManager::setGeometry, QPointer<Control>(control),
-                                           geometry, (options & ~CompressedCall) | DontApplyDesigner, geometrySyncKey);
-        s_dirtyProperties.removeAll(dirtyProperty);
-        s_dirtyProperties.append(dirtyProperty);
-
-        if (!s_dirtyPropertyProcessingTimer->isActive())
-            s_dirtyPropertyProcessingTimer->start();
-    } else {
-        if (options & SaveChanges) {
-            if (isInt) {
-                SaveManager::setProperty(control, "x", QString::number(int(geometry.x())));
-                SaveManager::setProperty(control, "y", QString::number(int(geometry.y())));
-                SaveManager::setProperty(control, "width", QString::number(int(geometry.width())));
-                SaveManager::setProperty(control, "height", QString::number(int(geometry.height())));
-            } else {
-                SaveManager::setProperty(control, "x", QString::number(geometry.x()));
-                SaveManager::setProperty(control, "y", QString::number(geometry.y()));
-                SaveManager::setProperty(control, "width", QString::number(geometry.width()));
-                SaveManager::setProperty(control, "height", QString::number(geometry.height()));
-            }
-        }
-
-        if (options & UpdateRenderer) {
-            if (isInt) {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometrySyncValue(int(geometry.x())));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometrySyncValue(int(geometry.y())));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometrySyncValue(int(geometry.width())));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometrySyncValue(int(geometry.height()), geometrySyncKey));
-            } else {
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "x", geometrySyncValue(geometry.x()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "y", geometrySyncValue(geometry.y()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "width", geometrySyncValue(geometry.width()));
-                ControlRenderingManager::schedulePropertyUpdate(control->uid(), "height", geometrySyncValue(geometry.height(), geometrySyncKey));
             }
         }
 

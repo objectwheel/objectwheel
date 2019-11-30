@@ -40,7 +40,6 @@ public:
     static void setHeight(Control* control, qreal height, Options options, const QString& geometrySyncKey = QString());
     static void setPos(Control* control, const QPointF& pos, Options options, const QString& geometrySyncKey = QString()); // Set pos, based on scene coord jargon
     static void setSize(Control* control, const QSizeF& size, Options options, const QString& geometrySyncKey = QString());
-    static void setGeometry(Control* control, const QRectF& geometry, Options options, const QString& geometrySyncKey = QString()); // Set geometry, based on scene coord jargon
     static void setParent(Control* control, Control* parentControl, Options options);
     static void setId(Control* control, const QString& id, Options options);
     static void setIndex(Control* control, quint32 index, Options options);

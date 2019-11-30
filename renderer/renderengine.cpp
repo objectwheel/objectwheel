@@ -1014,7 +1014,6 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir, 
     Q_ASSERT(!object->isWindowType() || object->inherits("QQuickWindow"));
 
     // Hides windows anyway, since we only need their contentItem to be visible
-    // FIXME: what if the component is a Component qml type or crashing type? and other possibilities
     ComponentCompleteDisabler disabler;
     Q_UNUSED(disabler)
     RenderUtils::tweakObjects(object);

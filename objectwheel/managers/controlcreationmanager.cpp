@@ -196,6 +196,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
         // but that doesn't happen for non-gui controls, in this
         // way we expose non-gui items into right positions
         ControlPropertyManager::setPos(childControl, SaveUtils::designPosition(childPath), ControlPropertyManager::NoOption);
+        ControlPropertyManager::setSize(childControl, SaveUtils::designSize(childPath), ControlPropertyManager::NoOption);
         ControlPropertyManager::setIndex(childControl, childControl->siblings().size(), ControlPropertyManager::SaveChanges);
         connect(ControlRenderingManager::instance(), &ControlRenderingManager::renderDone,
                 childControl, &Control::setRenderInfo);

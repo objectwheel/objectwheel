@@ -16,7 +16,8 @@ enum ControlProperties : quint32 { // ### Application related properties
 enum DesignProperties : quint32 { // ### Designer related properties
     DesignSignature = 0x4000,
     DesignVersion,
-    DesignPosition
+    DesignPosition,
+    DesignSize
 };
 
 enum ProjectProperties : quint32 { // ### Designer related properties
@@ -69,6 +70,7 @@ quint32 controlIndex(const QString& controlDir);
 QString controlId(const QString& controlDir);
 QString controlUid(const QString& controlDir);
 QPointF designPosition(const QString& controlDir);
+QSizeF designSize(const QString& controlDir);
 
 bool projectHdpiScaling(const QString& projectDir);
 qint64 projectSize(const QString& projectDir);
