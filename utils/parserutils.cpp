@@ -748,6 +748,11 @@ QString id(const QString& controlDir)
 
 QString module(const QString& controlDir)
 {
+    // NOTE: Exception for spacers
+    const QString& toolName = QFileInfo(controlDir).fileName();
+    if (toolName.contains("Spacer"))
+        return "QtQuick.Layouts/1.12/" + toolName;
+
     const QString& mainQmlFilePath = SaveUtils::toControlMainQmlFile(controlDir);
     QFile file(mainQmlFilePath);
     if (!file.open(QFile::ReadOnly)) {

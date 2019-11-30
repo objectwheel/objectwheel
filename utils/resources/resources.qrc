@@ -31,6 +31,9 @@
         <file>images/tools/ColorOverlay.svg</file>
         <file>images/tools/Column.svg</file>
         <file>images/tools/ColumnLayout.svg</file>
+        <file>images/tools/VerticalSpacer.svg</file>
+        <file>images/tools/HorizontalSpacer.svg</file>
+        <file>images/tools/BidirectionalSpacer.svg</file>
         <file>images/tools/ComboBox.svg</file>
         <file>images/tools/Compass.svg</file>
         <file>images/tools/Component.svg</file>
@@ -300,6 +303,12 @@
         <file>tools/GridLayout/t/main.qml</file>
         <file>tools/StackLayout/m/control.meta</file>
         <file>tools/StackLayout/t/main.qml</file>
+        <file>tools/VerticalSpacer/m/control.meta</file>
+        <file>tools/VerticalSpacer/t/main.qml</file>
+        <file>tools/HorizontalSpacer/m/control.meta</file>
+        <file>tools/HorizontalSpacer/t/main.qml</file>
+        <file>tools/BidirectionalSpacer/m/control.meta</file>
+        <file>tools/BidirectionalSpacer/t/main.qml</file>
         <file>tools/ColorDialog/m/control.meta</file>
         <file>tools/ColorDialog/t/main.qml</file>
         <file>tools/Dialog1/m/control.meta</file>
