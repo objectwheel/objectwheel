@@ -57,7 +57,7 @@ PathIndicator::PathIndicator(QWidget* parent) : QWidget(parent)
 {
     m_pathEdit->hide();
     m_pathEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
-    setStyleSheet("border: none; background: transparent;");
+    setStyleSheet("QLineEdit{border: none; background: transparent;}");
     connect(m_pathEdit, &QLineEdit::editingFinished,
             m_pathEdit, &QLineEdit::hide);
     connect(m_pathEdit, &QLineEdit::editingFinished,

@@ -4,21 +4,16 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Thanks Icons8 for providing icons for this app (URL) (LICENSE)
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
-AssetsPane
-    Assets pane search düzgün çalışmıyor
-    Assets pane de tüm fonksiyonelliği kontrol et
 fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
     entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
     öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
     olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
     hatta toolbox'un hangi kategorilerinin açık kapalı olduğu bile settingsler ile kayıt edilip restore edilsin
     hatta Help kısmındaki combobox için de bu yapılsın
-bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar
 dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
-qt quick extras'dan delay buttonlar vs siyah gözüküyor, neden?
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
 Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
@@ -34,6 +29,7 @@ Share buttonu eklenecek
 videolar ve tutorialler eklenecek, bunlar için özel "learning page" tasarlanacak Objectwheel'e
   entegre edilecek
 
+bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
 Çökme-raportu-9.txt, buraporlarla ilgilen
 form nongui yapılırsa renderer patlamasın
 neden bir kontrol içine başka bir kontrol koyunca dıştaki blank laşıyor?

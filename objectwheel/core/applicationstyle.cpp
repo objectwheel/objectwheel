@@ -1111,7 +1111,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         }
     } break;
     case CE_FocusFrame:
-        painter->fillRect(r.adjusted(1, 1, -1, -1), Qt::darkGray);
+        painter->fillRect(r.adjusted(1, 1, -1, -1), option->palette.highlight());
         break;
     default:
         QFusionStyle::drawControl(element, option, painter, widget);

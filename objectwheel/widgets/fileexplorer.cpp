@@ -332,9 +332,9 @@ void FileExplorer::onPasteButtonClick()
 
 void FileExplorer::onDeleteButtonClick()
 {
-    int result = UtilityFunctions::showMessage(this, tr("Files about to be deleted"),
+    int result = UtilityFunctions::showMessage(this, tr("Confirm file deletion"),
                                                tr("Do you want to delete the selected files? "
-                                                  "Changes made in Code Editor will also be discarded."),
+                                                  "The changes made in the Code Editor will also be discarded."),
                                                QMessageBox::Warning,
                                                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
 
@@ -655,7 +655,7 @@ void FileExplorer::paintEvent(QPaintEvent* event)
             painter.fillRect(rect, palette().alternateBase());
         } else if (!folderHasChildren) {
             if (i == int((rowCount - 1) / 2.0) || i == int((rowCount - 1) / 2.0) + 1) {
-                painter.setPen(palette().mid().color());
+                painter.setPen(palette().mid().color().lighter(220));
                 painter.drawText(rect, Qt::AlignCenter, tr("Empty folder"));
                 painter.setPen(lineColor);
             }
