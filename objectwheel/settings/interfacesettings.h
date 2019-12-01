@@ -8,10 +8,6 @@
 class GeneralSettings;
 struct InterfaceSettings final : public Settings
 {
-    friend class MainWindow;
-    friend class WelcomeWindow;
-    friend class PreferencesWindow;
-
     explicit InterfaceSettings(GeneralSettings* generalSettings);
     void read() override;
     void write() override;
