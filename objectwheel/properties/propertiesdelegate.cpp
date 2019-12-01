@@ -365,7 +365,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
     case String: {
         auto lineEdit = new QLineEdit;
         lineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
-        lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
         lineEdit->setFocusPolicy(Qt::StrongFocus);
         lineEdit->setSizePolicy(QSizePolicy::Ignored, lineEdit->sizePolicy().verticalPolicy());
         lineEdit->setMinimumWidth(1);
@@ -374,7 +373,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
 
     case Enum: {
         auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
         comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
@@ -385,7 +383,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
 
     case Bool: {
         auto checkBox = new QCheckBox;
-        checkBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         checkBox->setCursor(Qt::PointingHandCursor);
         checkBox->setFocusPolicy(Qt::StrongFocus);
         checkBox->setSizePolicy(QSizePolicy::Ignored, checkBox->sizePolicy().verticalPolicy());
@@ -398,7 +395,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
     case Color: {
         auto toolButton = new QToolButton;
         toolButton->setStyleSheet("QToolButton { border: none; background: transparent; }");
-        toolButton->setAttribute(Qt::WA_MacShowFocusRect, false);
         toolButton->setIconSize({12, 12});
         toolButton->setCursor(Qt::PointingHandCursor);
         toolButton->setFocusPolicy(Qt::StrongFocus);
@@ -412,7 +408,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
         spinBox->setFocusPolicy(Qt::StrongFocus);
-        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
         spinBox->setMaximum(std::numeric_limits<int>::max());
         spinBox->setMinimum(std::numeric_limits<int>::lowest());
@@ -426,7 +421,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
         auto spinBox = new QDoubleSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
         spinBox->setFocusPolicy(Qt::StrongFocus);
-        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
         spinBox->setMaximum(std::numeric_limits<qreal>::max());
         spinBox->setMinimum(std::numeric_limits<qreal>::lowest());
@@ -440,7 +434,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
         auto spinBox = new QSpinBox;
         spinBox->setCursor(Qt::PointingHandCursor);
         spinBox->setFocusPolicy(Qt::StrongFocus);
-        spinBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         spinBox->setMinimum(0);
         spinBox->setMaximum(9999);
         spinBox->setSizePolicy(QSizePolicy::Ignored, spinBox->sizePolicy().verticalPolicy());
@@ -452,7 +445,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
 
     case FontFamily: {
         auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
         comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
@@ -464,7 +456,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
 
     case FontWeight: {
         auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
         comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
@@ -478,7 +469,6 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
 
     case FontCapitalization: {
         auto comboBox = new QComboBox;
-        comboBox->setAttribute(Qt::WA_MacShowFocusRect, false);
         comboBox->setCursor(Qt::PointingHandCursor);
         comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());

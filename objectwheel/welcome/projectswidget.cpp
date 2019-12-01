@@ -81,7 +81,6 @@ public:
         m_searchLineEdit->setPlaceholderText(tr("Search"));
         m_searchLineEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
         m_searchLineEdit->setClearButtonEnabled(true);
-        m_searchLineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
         m_searchLineEdit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         m_searchLineEdit->setToolTip(tr("Search by name"));
 

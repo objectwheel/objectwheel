@@ -54,21 +54,6 @@ enum ComboDataRole { DocumentRole = Qt::UserRole + 1, ControlRole };
 
 namespace {
 
-bool g_fileExplorerHid = false;
-QmlCodeEditorWidget::AssetsDocument* g_lastAssetsDocument;
-QmlCodeEditorWidget::DesignsDocument* g_lastDesignsDocument;
-QmlCodeEditorWidget::OthersDocument* g_lastOthersDocument;
-
-void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document)
-{
-    if (document->scope == QmlCodeEditorToolBar::Assets)
-        g_lastAssetsDocument = assets(document);
-    else if (document->scope == QmlCodeEditorToolBar::Designs)
-        g_lastDesignsDocument = designs(document);
-    else
-        g_lastOthersDocument = others(document);
-}
-
 int warnIfModifiedContent(const QmlCodeEditorWidget::Document* document)
 {
     const QmlCodeDocument* qmlDoc = document->document;
@@ -131,8 +116,13 @@ QList<Control*> controls(const QList<QmlCodeEditorWidget::DesignsDocument*>& doc
 }
 
 QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
+  , m_fileExplorerHid(false)
   , m_codeEditor(new QmlCodeEditor(this))
   , m_fileExplorer(new FileExplorer(this))
+  , m_openDocument(nullptr)
+  , m_lastAssetsDocument(nullptr)
+  , m_lastDesignsDocument(nullptr)
+  , m_lastOthersDocument(nullptr)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     addWidget(m_codeEditor);
@@ -140,9 +130,14 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
     setFrameShape(QFrame::NoFrame);
     setChildrenCollapsible(false);
     setAcceptDrops(true);
+    setStretchFactor(0, 30);
+    setStretchFactor(1, 9);
+    setFileExplorerVisible(false);
+    toolBar()->setHiddenActions(QmlCodeEditorToolBar::AllActions);
 
     m_codeEditor->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_fileExplorer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_fileExplorer->setMode(FileExplorer::Explorer);
 
     connect(toolBar(), &QmlCodeEditorToolBar::saved,
             this, &QmlCodeEditorWidget::saveOpen);
@@ -170,22 +165,22 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
 
 int QmlCodeEditorWidget::count() const
 {
-    return m_assetsDocuments.size() + m_designsDocuments.size() + m_OthersDocuments.size();
+    return m_assetsDocuments.size() + m_designsDocuments.size() + m_othersDocuments.size();
 }
 
 void QmlCodeEditorWidget::discharge()
 {
+    m_fileExplorer->clean();
     m_codeEditor->discharge();
-    m_fileExplorer->discharge();
 
     setStretchFactor(0, 30);
     setStretchFactor(1, 9);
 
     m_openDocument = nullptr;
-    g_fileExplorerHid = false;
-    g_lastAssetsDocument = nullptr;
-    g_lastDesignsDocument = nullptr;
-    g_lastOthersDocument = nullptr;
+    m_fileExplorerHid = false;
+    m_lastAssetsDocument = nullptr;
+    m_lastDesignsDocument = nullptr;
+    m_lastOthersDocument = nullptr;
 
     setFileExplorerVisible(false);
     toolBar()->setHiddenActions(QmlCodeEditorToolBar::AllActions);
@@ -198,19 +193,29 @@ void QmlCodeEditorWidget::discharge()
         delete document->document;
         delete document;
     }
-    for (OthersDocument* document : m_OthersDocuments) {
+    for (OthersDocument* document : m_othersDocuments) {
         delete document->document;
         delete document;
     }
     m_assetsDocuments.clear();
     m_designsDocuments.clear();
-    m_OthersDocuments.clear();
+    m_othersDocuments.clear();
 }
 
 void QmlCodeEditorWidget::setFileExplorerVisible(bool visible)
 {
     handle(1)->setDisabled(!visible);
     m_fileExplorer->setHidden(!visible);
+}
+
+void QmlCodeEditorWidget::setupLastOpenedDocs(QmlCodeEditorWidget::Document* document)
+{
+    if (document->scope == QmlCodeEditorToolBar::Assets)
+        m_lastAssetsDocument = assets(document);
+    else if (document->scope == QmlCodeEditorToolBar::Designs)
+        m_lastDesignsDocument = designs(document);
+    else
+        m_lastOthersDocument = others(document);
 }
 
 void QmlCodeEditorWidget::onNewOthersFile()
@@ -318,7 +323,7 @@ void QmlCodeEditorWidget::saveAll()
         save(document);
     for (DesignsDocument* document : m_designsDocuments)
         save(document);
-    for (OthersDocument* document : m_OthersDocuments)
+    for (OthersDocument* document : m_othersDocuments)
         save(document);
 }
 
@@ -376,7 +381,7 @@ void QmlCodeEditorWidget::close()
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
     if (scope == QmlCodeEditorToolBar::Assets) {
-        g_lastAssetsDocument = nullptr;
+        m_lastAssetsDocument = nullptr;
         m_assetsDocuments.removeOne(assets(m_openDocument));
         for (int i = 0; i < leftCombo->count(); ++i) {
             if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == m_openDocument) {
@@ -390,7 +395,7 @@ void QmlCodeEditorWidget::close()
             nextDocument = leftCombo->itemData(0, DocumentRole).value<AssetsDocument*>();
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Assets, !m_assetsDocuments.isEmpty());
     } else if (scope == QmlCodeEditorToolBar::Designs) {
-        g_lastDesignsDocument = nullptr;
+        m_lastDesignsDocument = nullptr;
         m_designsDocuments.removeOne(designs(m_openDocument));
         for (int i = 0; i < rightCombo->count(); ++i) {
             if (rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>() == m_openDocument) {
@@ -419,8 +424,8 @@ void QmlCodeEditorWidget::close()
         }
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Designs, !m_designsDocuments.isEmpty());
     } else {
-        g_lastOthersDocument = nullptr;
-        m_OthersDocuments.removeOne(others(m_openDocument));
+        m_lastOthersDocument = nullptr;
+        m_othersDocuments.removeOne(others(m_openDocument));
         for (int i = 0; i < leftCombo->count(); ++i) {
             if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == m_openDocument) {
                 indexForRemoval = i;
@@ -431,7 +436,7 @@ void QmlCodeEditorWidget::close()
             leftCombo->removeItem(indexForRemoval);
         if (leftCombo->count() > 0)
             nextDocument = leftCombo->itemData(0, DocumentRole).value<OthersDocument*>();
-        toolBar()->setScopeWide(QmlCodeEditorToolBar::Others, !m_OthersDocuments.isEmpty());
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::Others, !m_othersDocuments.isEmpty());
     }
 
     Q_ASSERT(m_openDocument != nextDocument);
@@ -455,18 +460,18 @@ void QmlCodeEditorWidget::showNoDocumentsOpen()
     m_codeEditor->setNoDocsVisible(true);
     toolBar()->setHiddenActions(hiddenActions);
     if (m_fileExplorer->isVisible()) {
-        g_fileExplorerHid = true;
+        m_fileExplorerHid = true;
         setFileExplorerVisible(false);
     }
 }
 
 void QmlCodeEditorWidget::onScopeActivation(QmlCodeEditorToolBar::Scope scope)
 {
-    if (scope == QmlCodeEditorToolBar::Assets && g_lastAssetsDocument)
+    if (scope == QmlCodeEditorToolBar::Assets && m_lastAssetsDocument)
         return openAssets(QString());
-    if (scope == QmlCodeEditorToolBar::Designs && g_lastDesignsDocument)
+    if (scope == QmlCodeEditorToolBar::Designs && m_lastDesignsDocument)
         return openDesigns(nullptr, QString());
-    if (scope == QmlCodeEditorToolBar::Others && g_lastOthersDocument)
+    if (scope == QmlCodeEditorToolBar::Others && m_lastOthersDocument)
         return openOthers(QString());
     showNoDocumentsOpen();
 }
@@ -514,7 +519,7 @@ bool QmlCodeEditorWidget::documentExists(QmlCodeEditorWidget::Document* document
         if (doc == document)
             return true;
     }
-    for (OthersDocument* doc : m_OthersDocuments) {
+    for (OthersDocument* doc : m_othersDocuments) {
         if (doc == document)
             return true;
     }
@@ -524,7 +529,7 @@ bool QmlCodeEditorWidget::documentExists(QmlCodeEditorWidget::Document* document
 void QmlCodeEditorWidget::openAssets(const QString& relativePath)
 {
     if (relativePath.isEmpty())
-        return openDocument(g_lastAssetsDocument);
+        return openDocument(m_lastAssetsDocument);
     if (!QFileInfo::exists(fullPath(assetsDir(), relativePath)))
         return (void) (qWarning() << tr("openAssets: File not exists."));
     if (warnIfNotATextFile(fullPath(assetsDir(), relativePath)))
@@ -537,7 +542,7 @@ void QmlCodeEditorWidget::openAssets(const QString& relativePath)
 void QmlCodeEditorWidget::openDesigns(Control* control, const QString& relativePath)
 {
     if (!control || relativePath.isEmpty())
-        return openDocument(g_lastDesignsDocument);
+        return openDocument(m_lastDesignsDocument);
     if (!QFileInfo::exists(fullPath(SaveUtils::toControlThisDir(control->dir()), relativePath)))
         return (void) (qWarning() << tr("openDesigns: File not exists."));
     if (warnIfNotATextFile(fullPath(SaveUtils::toControlThisDir(control->dir()), relativePath)))
@@ -550,7 +555,7 @@ void QmlCodeEditorWidget::openDesigns(Control* control, const QString& relativeP
 void QmlCodeEditorWidget::openOthers(const QString& fullPath)
 {
     if (fullPath.isEmpty())
-        return openDocument(g_lastOthersDocument);
+        return openDocument(m_lastOthersDocument);
     if (!QFileInfo::exists(fullPath))
         return (void) (qWarning() << tr("openOthers: File not exists."));
     if (warnIfNotATextFile(fullPath))
@@ -580,7 +585,7 @@ bool QmlCodeEditorWidget::designsExists(Control* control, const QString& relativ
 
 bool QmlCodeEditorWidget::othersExists(const QString& fullPath) const
 {
-    for (OthersDocument* document : m_OthersDocuments) {
+    for (OthersDocument* document : m_othersDocuments) {
         if (document->fullPath == fullPath)
             return true;
     }
@@ -608,7 +613,7 @@ QmlCodeEditorWidget::DesignsDocument* QmlCodeEditorWidget::getDesigns(Control* c
 
 QmlCodeEditorWidget::OthersDocument*QmlCodeEditorWidget::getOthers(const QString& fullPath) const
 {
-    for (OthersDocument* document : m_OthersDocuments) {
+    for (OthersDocument* document : m_othersDocuments) {
         if (document->fullPath == fullPath)
             return document;
     }
@@ -712,7 +717,7 @@ QmlCodeEditorWidget::OthersDocument* QmlCodeEditorWidget::addOthers(const QStrin
     document->textCursor = QTextCursor(document->document);
     file.close();
 
-    m_OthersDocuments.append(document);
+    m_othersDocuments.append(document);
 
     if (toolBar()->scope() == QmlCodeEditorToolBar::Others) {
         QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
@@ -755,8 +760,8 @@ void QmlCodeEditorWidget::openDocument(Document* document)
 
 void QmlCodeEditorWidget::setupCodeEditor(QmlCodeEditorWidget::Document* document)
 {
-    if (g_fileExplorerHid) {
-        g_fileExplorerHid = false;
+    if (m_fileExplorerHid) {
+        m_fileExplorerHid = false;
         setFileExplorerVisible(true);
     }
     m_codeEditor->setNoDocsVisible(false);
@@ -871,7 +876,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
         case QmlCodeEditorToolBar::Others:
             toolBar()->setHiddenActions(QmlCodeEditorToolBar::RightAction);
             leftCombo->setToolTip(tr("File name of the open document"));
-            for (OthersDocument* doc : m_OthersDocuments) {
+            for (OthersDocument* doc : m_othersDocuments) {
                 int i = leftCombo->count();
                 leftCombo->addItem(modified(doc->document, QFileInfo(doc->fullPath).fileName()));
                 leftCombo->setItemData(i, doc->fullPath, Qt::ToolTipRole);

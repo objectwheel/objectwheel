@@ -53,7 +53,6 @@ IssuesWidget::IssuesWidget(QWidget* parent) : QListWidget(parent)
     setSelectionMode(NoSelection);
     setTextElideMode(Qt::ElideRight);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setObjectName("m_listWidget");
     setStyleSheet("#m_listWidget { border: 1px solid #c4c4c4;"

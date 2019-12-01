@@ -28,11 +28,6 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
     _view->show(Platforms);
 }
 
-void BuildsWidget::discharge()
-{
-    //TODO
-}
-
 QSize BuildsWidget::sizeHint() const
 {
     return QSize(680, 680);

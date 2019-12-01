@@ -95,9 +95,6 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_splitter->setSizes(QList<int>() << 140 << 600);
 
     QHelpEngine* engine = HelpManager::helpEngine();
-    engine->contentWidget()->setAttribute(Qt::WA_MacShowFocusRect, false);
-    engine->indexWidget()->setAttribute(Qt::WA_MacShowFocusRect, false);
-
     m_contentsLayout->setSpacing(5);
     m_contentsLayout->setContentsMargins(5, 5, 5, 5);
     m_contentsLayout->addWidget(engine->contentWidget());

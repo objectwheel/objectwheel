@@ -285,7 +285,6 @@ GenericProposalWidget::GenericProposalWidget()
         setFrameStyle(d->m_completionListView->frameStyle());
     }
     d->m_completionListView->setFrameStyle(QFrame::NoFrame);
-    d->m_completionListView->setAttribute(Qt::WA_MacShowFocusRect, false);
     d->m_completionListView->setUniformItemSizes(true);
     d->m_completionListView->setSelectionBehavior(QAbstractItemView::SelectItems);
     d->m_completionListView->setSelectionMode(QAbstractItemView::SingleSelection);

@@ -398,8 +398,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 {
     m_noDocsLabel->setVisible(false);
     m_noDocsLabel->setAlignment(Qt::AlignCenter);
-    m_noDocsLabel->setText(tr("No documents\nopen"));
-    m_noDocsLabel->setStyleSheet("QLabel { background: #f0f0f0; color: #808080;}");
+    m_noDocsLabel->setText(QStringLiteral(R"(<p style="margin-left:28px;font-size:12px;color:#888888">%1</p>)").arg(tr("No documents<br>open")));
 
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,
@@ -465,6 +464,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     setWordWrapMode(QTextOption::NoWrap);
     updateHighlights();
     createToolBar();
+    setNoDocsVisible(true);
 
     // That's how find results will be highlighted
     // Let's trig search on text editor after 4 seconds BUG

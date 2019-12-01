@@ -54,6 +54,8 @@ public:
                       bool enabled, const QString& text, QPalette::ColorRole textRole) const;
     void polish(QWidget* w) override;
     void unpolish(QWidget* w) override;
+
+protected:
     bool event(QEvent* event) override;
 
 private:

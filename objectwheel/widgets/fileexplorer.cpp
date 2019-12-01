@@ -47,6 +47,10 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
   , m_renameButton(new QToolButton)
   , m_newFileButton(new QToolButton)
   , m_newFolderButton(new QToolButton)
+  , m_lastVScrollerPosOfViewer(0)
+  , m_lastHScrollerPosOfViewer(0)
+  , m_lastVScrollerPosOfExplorer(0)
+  , m_lastHScrollerPosOfExplorer(0)
 {
     header()->setFixedHeight(20);
     header()->setDefaultSectionSize(1);
@@ -59,7 +63,6 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     setDropIndicatorShown(false);
     setItemDelegate(new FileExplorerListDelegate(this));
     setFocusPolicy(Qt::NoFocus);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeView::SelectRows);
     setDragDropMode(QAbstractItemView::NoDragDrop);
     setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -155,12 +158,21 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_toolBar->addWidget(m_newFileButton);
     m_toolBar->addWidget(m_newFolderButton);
 
+    m_copyButton->setDisabled(true);
+    m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls());
+    m_deleteButton->setDisabled(true);
+    m_renameButton->setDisabled(true);
+    m_backButton->setDisabled(true);
+    m_forthButton->setDisabled(true);
+
     m_fileSystemModel->setFilter(QDir::NoDotAndDotDot | QDir::Files | QDir::Dirs);
     m_fileSystemProxyModel->setDynamicSortFilter(true);
     m_fileSystemProxyModel->setFilterKeyColumn(0);
     m_fileSystemProxyModel->setSourceModel(m_fileSystemModel);
+
     setModel(m_fileSystemProxyModel);
     setMode(Viewer);
+    setRootPath(QApplication::applicationDirPath());
 
     connect(m_upButton, &QToolButton::clicked,
             this, &FileExplorer::onUpButtonClick);
@@ -195,19 +207,19 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     { m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls()); });
 }
 
-void FileExplorer::discharge()
+void FileExplorer::clean()
 {
-    // TODO
-    lastSelectedIndexesOfExplorer.clear();
-    lastSelectedIndexesOfViewer.clear();
-    lastExpandedIndexesOfViewer.clear();
-    lastPathofExplorer.clear();
-    lastVScrollerPosOfViewer = 0;
-    lastHScrollerPosOfViewer = 0;
-    lastVScrollerPosOfExplorer = 0;
-    lastHScrollerPosOfExplorer = 0;
-    backPathStack.clear();
-    forthPathStack.clear();
+    m_lastVScrollerPosOfViewer = 0;
+    m_lastHScrollerPosOfViewer = 0;
+    m_lastVScrollerPosOfExplorer = 0;
+    m_lastHScrollerPosOfExplorer = 0;
+
+    m_lastSelectedIndexesOfExplorer.clear();
+    m_lastSelectedIndexesOfViewer.clear();
+    m_lastExpandedIndexesOfViewer.clear();
+    m_lastPathofExplorer.clear();
+    m_backPathStack.clear();
+    m_forthPathStack.clear();
 
     m_copyButton->setDisabled(true);
     m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls());
@@ -237,16 +249,16 @@ void FileExplorer::setRootPath(const QString& rootPath)
     }
 
     setRootIndex(QModelIndex());
-    lastSelectedIndexesOfExplorer.clear();
-    lastSelectedIndexesOfViewer.clear();
-    lastExpandedIndexesOfViewer.clear();
-    lastPathofExplorer.clear();
-    lastVScrollerPosOfViewer = 0;
-    lastHScrollerPosOfViewer = 0;
-    lastVScrollerPosOfExplorer = 0;
-    lastHScrollerPosOfExplorer = 0;
-    backPathStack.clear();
-    forthPathStack.clear();
+    m_lastVScrollerPosOfViewer = 0;
+    m_lastHScrollerPosOfViewer = 0;
+    m_lastVScrollerPosOfExplorer = 0;
+    m_lastHScrollerPosOfExplorer = 0;
+    m_lastSelectedIndexesOfExplorer.clear();
+    m_lastSelectedIndexesOfViewer.clear();
+    m_lastExpandedIndexesOfViewer.clear();
+    m_lastPathofExplorer.clear();
+    m_backPathStack.clear();
+    m_forthPathStack.clear();
 
     m_copyButton->setDisabled(true);
     m_pasteButton->setEnabled(QApplication::clipboard()->mimeData()->hasUrls());
@@ -275,33 +287,33 @@ void FileExplorer::onUpButtonClick()
 
 void FileExplorer::onBackButtonClick()
 {
-    if (backPathStack.isEmpty())
+    if (m_backPathStack.isEmpty())
         return;
 
-    const QStack<QString> cloneOfForth = forthPathStack;
+    const QStack<QString> cloneOfForth = m_forthPathStack;
     const QString& rootPath = m_fileSystemModel->filePath(mt(rootIndex()));
 
-    goToDir(backPathStack.pop());
-    backPathStack.pop();
+    goToDir(m_backPathStack.pop());
+    m_backPathStack.pop();
 
-    forthPathStack = cloneOfForth;
+    m_forthPathStack = cloneOfForth;
     if (!rootPath.isEmpty())
-        forthPathStack.push(rootPath);
+        m_forthPathStack.push(rootPath);
 
-    m_backButton->setDisabled(backPathStack.isEmpty());
-    m_forthButton->setDisabled(forthPathStack.isEmpty());
+    m_backButton->setDisabled(m_backPathStack.isEmpty());
+    m_forthButton->setDisabled(m_forthPathStack.isEmpty());
 }
 
 void FileExplorer::onForthButtonClick()
 {
-    if (forthPathStack.isEmpty())
+    if (m_forthPathStack.isEmpty())
         return;
 
-    const QStack<QString> cloneOfForth = forthPathStack;
-    goToDir(forthPathStack.pop());
-    forthPathStack = cloneOfForth;
-    forthPathStack.pop();
-    m_forthButton->setDisabled(forthPathStack.isEmpty());
+    const QStack<QString> cloneOfForth = m_forthPathStack;
+    goToDir(m_forthPathStack.pop());
+    m_forthPathStack = cloneOfForth;
+    m_forthPathStack.pop();
+    m_forthButton->setDisabled(m_forthPathStack.isEmpty());
 }
 
 void FileExplorer::onHomeButtonClick()
@@ -516,14 +528,14 @@ void FileExplorer::goToDir(const QString& dir)
     m_pathIndicator->setPath(QDir(m_fileSystemModel->rootPath()).relativeFilePath(dir));
 
     if (!previousDir.isEmpty()) {
-        if (backPathStack.isEmpty() || backPathStack.top() != previousDir)
-            backPathStack.push(previousDir);
+        if (m_backPathStack.isEmpty() || m_backPathStack.top() != previousDir)
+            m_backPathStack.push(previousDir);
     }
 
-    forthPathStack.clear();
+    m_forthPathStack.clear();
 
-    m_backButton->setDisabled(backPathStack.isEmpty());
-    m_forthButton->setDisabled(forthPathStack.isEmpty());
+    m_backButton->setDisabled(m_backPathStack.isEmpty());
+    m_forthButton->setDisabled(m_forthPathStack.isEmpty());
 
     emit currentDirChanged(dir);
 }
@@ -709,20 +721,20 @@ void FileExplorer::setMode(FileExplorer::Mode mode)
         m_mode = mode;
 
         if (m_mode == Viewer) {
-            lastPathofExplorer = m_fileSystemModel->filePath(mt(rootIndex()));
-            lastSelectedIndexesOfExplorer = selectedIndexes();
-            lastVScrollerPosOfExplorer = verticalScrollBar()->sliderPosition();
-            lastHScrollerPosOfExplorer = horizontalScrollBar()->sliderPosition();;
+            m_lastPathofExplorer = m_fileSystemModel->filePath(mt(rootIndex()));
+            m_lastSelectedIndexesOfExplorer = selectedIndexes();
+            m_lastVScrollerPosOfExplorer = verticalScrollBar()->sliderPosition();
+            m_lastHScrollerPosOfExplorer = horizontalScrollBar()->sliderPosition();;
 
             onHomeButtonClick();
 
-            for (const QPersistentModelIndex& index : lastExpandedIndexesOfViewer) {
+            for (const QPersistentModelIndex& index : m_lastExpandedIndexesOfViewer) {
                 if (index.isValid())
                     setExpanded(index, true);
             }
 
             selectionModel()->clear();
-            for (const QModelIndex& index : lastSelectedIndexesOfViewer) {
+            for (const QModelIndex& index : m_lastSelectedIndexesOfViewer) {
                 if (index.isValid())
                     selectionModel()->select(index, QItemSelectionModel::Select);
             }
@@ -738,18 +750,18 @@ void FileExplorer::setMode(FileExplorer::Mode mode)
             m_toolBar->hide();
             m_pathIndicator->hide();
 
-            verticalScrollBar()->setSliderPosition(lastVScrollerPosOfViewer);
-            horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfViewer);
+            verticalScrollBar()->setSliderPosition(m_lastVScrollerPosOfViewer);
+            horizontalScrollBar()->setSliderPosition(m_lastHScrollerPosOfViewer);
         } else {
-            lastExpandedIndexesOfViewer = d->expandedIndexes;
-            lastSelectedIndexesOfViewer = selectedIndexes();
-            lastVScrollerPosOfViewer = verticalScrollBar()->sliderPosition();
-            lastHScrollerPosOfViewer = horizontalScrollBar()->sliderPosition();;
+            m_lastExpandedIndexesOfViewer = d->expandedIndexes;
+            m_lastSelectedIndexesOfViewer = selectedIndexes();
+            m_lastVScrollerPosOfViewer = verticalScrollBar()->sliderPosition();
+            m_lastHScrollerPosOfViewer = horizontalScrollBar()->sliderPosition();;
 
-            goToDir(lastPathofExplorer);
+            goToDir(m_lastPathofExplorer);
 
             selectionModel()->clear();
-            for (const QModelIndex& index : lastSelectedIndexesOfExplorer) {
+            for (const QModelIndex& index : m_lastSelectedIndexesOfExplorer) {
                 if (index.isValid())
                     selectionModel()->select(index, QItemSelectionModel::Select);
             }
@@ -766,8 +778,8 @@ void FileExplorer::setMode(FileExplorer::Mode mode)
             m_toolBar->show();
             m_pathIndicator->show();
 
-            verticalScrollBar()->setSliderPosition(lastVScrollerPosOfExplorer);
-            horizontalScrollBar()->setSliderPosition(lastHScrollerPosOfExplorer);
+            verticalScrollBar()->setSliderPosition(m_lastVScrollerPosOfExplorer);
+            horizontalScrollBar()->setSliderPosition(m_lastHScrollerPosOfExplorer);
         }
 
         updateGeometries();

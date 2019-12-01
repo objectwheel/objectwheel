@@ -70,7 +70,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
 
     g_editorContainer = new EditorContainer(this);
     g_editorContainer->setAlignment(Qt::AlignCenter);
-    g_editorContainer->setText(QStringLiteral(R"(<p style="color:#777777">%1</p>)").arg(tr("Editor window<br>raised")));
+    g_editorContainer->setText(QStringLiteral(R"(<p style="font-size: 12px; color:#777777">%1</p>)").arg(tr("Editor window<br>raised")));
     g_editorContainer->setLayout(new QHBoxLayout);
     g_editorContainer->layout()->setSpacing(0);
     g_editorContainer->layout()->setContentsMargins(0, 0, 0, 0);
@@ -86,8 +86,8 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     m_splitterIn->setChildrenCollapsible(false);
     m_splitterIn->setHandleWidth(1);
 
-    UtilityFunctions::setShowFocusRing(m_designerPane, true);
-    UtilityFunctions::setShowFocusRing(g_editorContainer, true);
+    UtilityFunctions::setFocusRing(m_designerPane, true);
+    UtilityFunctions::setFocusRing(m_qmlCodeEditorWidget->codeEditor(), true);
 
     onModeChange(ModeManager::mode());
 
@@ -245,7 +245,6 @@ void CentralWidget::discharge()
     m_outputController->discharge();
     m_designerController->discharge();
     m_qmlCodeEditorWidget->discharge();
-    m_buildsWidget->discharge();
     m_helpWidget->discharge();
 }
 

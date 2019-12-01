@@ -164,14 +164,17 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     g_assetsAction->setIcon(QIcon(QStringLiteral(":/images/settings/assets.svg")));
     g_assetsAction->setCheckable(true);
     g_assetsAction->setProperty("ow_scope", Assets);
+    g_assetsAction->setText(tr("Assets\t"));
 
     g_designsAction->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
     g_designsAction->setCheckable(true);
     g_designsAction->setProperty("ow_scope", Designs);
+    g_designsAction->setText(tr("Source Codes\t"));
 
     g_othersAction->setIcon(QIcon(QStringLiteral(":/images/designer/external-files.svg")));
     g_othersAction->setCheckable(true);
     g_othersAction->setProperty("ow_scope", Others);
+    g_othersAction->setText(tr("External Files\t"));
 
     m_scopeButton->setPopupMode(QToolButton::InstantPopup);
     m_scopeButton->setMenu(menu);
@@ -186,6 +189,12 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_rightCombo->setDuplicatesEnabled(true);
     m_leftCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     m_rightCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+
+    setPinned(true);
+    setShowed(false);
+    setDocument(nullptr);
+    setScope(Assets);
+    QMetaObject::invokeMethod(g_othersAction, &QAction::trigger, Qt::QueuedConnection);
 
     connect(m_pinButton, &QToolButton::clicked,
             this, &QmlCodeEditorToolBar::onPinButtonClick);
@@ -259,6 +268,7 @@ void QmlCodeEditorToolBar::discharge()
     m_rightCombo->clear();
 
     setScope(Assets);
+    QMetaObject::invokeMethod(g_othersAction, &QAction::trigger, Qt::QueuedConnection);
 }
 
 void QmlCodeEditorToolBar::setScope(QmlCodeEditorToolBar::Scope scope)

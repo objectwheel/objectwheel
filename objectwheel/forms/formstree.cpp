@@ -26,7 +26,6 @@ FormsTree::FormsTree(QWidget* parent) : QTreeWidget(parent)
     setExpandsOnDoubleClick(false);
     setItemDelegate(m_delegate);
     setFocusPolicy(Qt::NoFocus);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::SingleSelection);
     setEditTriggers(QAbstractItemView::NoEditTriggers);

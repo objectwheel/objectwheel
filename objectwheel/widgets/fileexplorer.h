@@ -37,7 +37,7 @@ public:
     void setMode(FileExplorer::Mode mode);
 
 public slots:
-    void discharge();
+    void clean();
     void goToEntry(const QString& entry);
     void goToDir(const QString& dir);
     void goToRelativeDir(const QString& relativeDir);
@@ -92,18 +92,19 @@ private:
     QToolButton* m_deleteButton;
     QToolButton* m_renameButton;
     QToolButton* m_newFileButton;
-    QToolButton* m_newFolderButton;    
-    // FIXME: Rename those
-    int lastVScrollerPosOfViewer = 0;
-    int lastHScrollerPosOfViewer = 0;
-    int lastVScrollerPosOfExplorer = 0;
-    int lastHScrollerPosOfExplorer = 0;
-    QModelIndexList lastSelectedIndexesOfViewer;
-    QModelIndexList lastSelectedIndexesOfExplorer;
-    QSet<QPersistentModelIndex> lastExpandedIndexesOfViewer;
-    QString lastPathofExplorer;
-    QStack<QString> backPathStack;
-    QStack<QString> forthPathStack;
+    QToolButton* m_newFolderButton;
+
+    int m_lastVScrollerPosOfViewer;
+    int m_lastHScrollerPosOfViewer;
+    int m_lastVScrollerPosOfExplorer;
+    int m_lastHScrollerPosOfExplorer;
+
+    QModelIndexList m_lastSelectedIndexesOfViewer;
+    QModelIndexList m_lastSelectedIndexesOfExplorer;
+    QSet<QPersistentModelIndex> m_lastExpandedIndexesOfViewer;
+    QString m_lastPathofExplorer;
+    QStack<QString> m_backPathStack;
+    QStack<QString> m_forthPathStack;
 };
 
 #endif // FILEEXPLORER_H

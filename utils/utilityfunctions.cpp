@@ -711,12 +711,12 @@ void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>&
     objects.insert(widget, condition);
 }
 
-void setShowFocusRing(QWidget* widget, bool showFocusRing)
+void setFocusRing(QWidget* widget, bool showFocusRing)
 {
     widget->setProperty(Internal::showFocusRingProperty, showFocusRing);
 }
 
-bool isShowFocusRingSet(QWidget* widget)
+bool isFocusRingSet(QWidget* widget)
 {
     return widget->property(Internal::showFocusRingProperty).toBool();
 }

@@ -27,7 +27,6 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
     setExpandsOnDoubleClick(true);
     setItemDelegate(m_delegate);
     setFocusPolicy(Qt::NoFocus);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionBehavior(QTreeWidget::SelectRows);
     setSelectionMode(QTreeWidget::NoSelection);
     setEditTriggers(QAbstractItemView::NoEditTriggers);

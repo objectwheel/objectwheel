@@ -3,6 +3,8 @@
 #include <assetstree.h>
 #include <lineedit.h>
 #include <filesystemcompletermodel.h>
+#include <projectmanager.h>
+#include <saveutils.h>
 
 #include <QComboBox>
 #include <QCompleter>
@@ -32,11 +34,15 @@ AssetsController::AssetsController(AssetsPane* assetsPane, QObject* parent) : QO
             this, &AssetsController::onCurrentDirChange);
 }
 
+void AssetsController::charge()
+{
+    m_assetsPane->assetsTree()->setRootPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir()));
+}
+
 void AssetsController::discharge()
 {
-    m_assetsPane->assetsTree()->discharge();
+    m_assetsPane->assetsTree()->clean();
     m_assetsPane->searchEdit()->clear();
-    onSearchEditReturnPress();
 }
 
 void AssetsController::onModeComboBoxActivation()

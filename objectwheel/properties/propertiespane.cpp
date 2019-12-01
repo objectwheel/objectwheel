@@ -30,7 +30,6 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
 
     m_idEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), m_idEdit));
     m_idEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
-    m_idEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
     m_idEdit->setFocusPolicy(Qt::StrongFocus);
     m_idEdit->setSizePolicy(QSizePolicy::Ignored, m_idEdit->sizePolicy().verticalPolicy());
     m_idEdit->setMinimumWidth(1);

@@ -25,9 +25,6 @@ public:
 public:
     explicit BuildsWidget(QWidget *parent = nullptr);
 
-public slots:
-    void discharge();
-
 protected:
     QSize sizeHint() const override;
 

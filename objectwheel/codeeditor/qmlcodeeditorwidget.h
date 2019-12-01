@@ -71,6 +71,7 @@ public slots:
     void save(Document* document);
     void close();
     void setFileExplorerVisible(bool visible);
+    void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document);
 
 private slots:
     void onNewOthersFile();
@@ -100,14 +101,20 @@ signals:
     void opened();
 
 private:
+    bool m_fileExplorerHid;
+
     QmlCodeEditor* m_codeEditor;
     FileExplorer* m_fileExplorer;
 
     Document* m_openDocument;
+    QmlCodeEditorWidget::AssetsDocument* m_lastAssetsDocument;
+    QmlCodeEditorWidget::DesignsDocument* m_lastDesignsDocument;
+    QmlCodeEditorWidget::OthersDocument* m_lastOthersDocument;
+
     QList<SaveFilter*> m_saveFilters;
     QList<AssetsDocument*> m_assetsDocuments;
     QList<DesignsDocument*> m_designsDocuments;
-    QList<OthersDocument*> m_OthersDocuments;
+    QList<OthersDocument*> m_othersDocuments;
 };
 
 Q_DECLARE_METATYPE(QmlCodeEditorWidget::Document*)

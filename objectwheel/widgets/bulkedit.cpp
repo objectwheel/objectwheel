@@ -31,7 +31,6 @@ void BulkEdit::add(int id, const QString& label, QWidget* widget)
     element.id = id;
     element.text = label;
     element.edit = widget;
-    element.edit->setAttribute(Qt::WA_MacShowFocusRect, false);
     element.edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     element.edit->setStyleSheet(QStringLiteral("QLineEdit {"
                                                "  border: none;"

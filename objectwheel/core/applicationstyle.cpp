@@ -1262,9 +1262,7 @@ bool ApplicationStyle::event(QEvent* event)
         QWidget* focusWidget = QApplication::focusWidget();
         if (auto graphicsView = qobject_cast<QGraphicsView*>(focusWidget))
             focusWidget = graphicsView->parentWidget();
-        else if (auto codeEditor = qobject_cast<QmlCodeEditor*>(focusWidget))
-            focusWidget = codeEditor->parentWidget()->parentWidget();
-        if (focusWidget && UtilityFunctions::isShowFocusRingSet(focusWidget))
+        if (focusWidget && UtilityFunctions::isFocusRingSet(focusWidget))
             f = focusWidget;
         m_focusFrame->setWidget(f);
     } else if(event->type() == QEvent::FocusOut) {

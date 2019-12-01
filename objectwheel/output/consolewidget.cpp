@@ -23,7 +23,6 @@ ConsoleWidget::ConsoleWidget(QWidget* parent) : QPlainTextEdit(parent)
     viewport()->setMouseTracking(true);
     viewport()->installEventFilter(this);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Minimum);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setObjectName("m_plainTextEdit");
     setStyleSheet("#m_plainTextEdit { border: 1px solid #c4c4c4;"

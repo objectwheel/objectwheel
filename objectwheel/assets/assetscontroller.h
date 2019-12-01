@@ -16,6 +16,7 @@ public:
     explicit AssetsController(AssetsPane* assetsPane, QObject* parent = nullptr);
 
 public slots:
+    void charge();
     void discharge();
 
 private slots:
