@@ -18,8 +18,6 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
   , m_appManuallyTerminated(false)
   , m_runPane(runPane)
 {
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &RunController::discharge);
     connect(m_runPane->projectsButton(), &QPushButton::clicked,
             this, &RunController::onProjectsButtonClick);
     connect(m_runPane->preferencesButton(), &QPushButton::clicked,
@@ -44,6 +42,13 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
             this, &RunController::onDeviceConnect);
     connect(RunManager::instance(), &RunManager::deviceDisconnected,
             this, &RunController::onDeviceDisconnect);
+
+    m_runPane->stopButton()->setDisabled(true);
+}
+
+void RunController::charge()
+{
+    m_runPane->runProgressBar()->setText(progressBarMessageFor(Welcome));
 }
 
 void RunController::discharge()
@@ -55,10 +60,6 @@ void RunController::discharge()
     m_runPane->runProgressBar()->setBusy(false);
     m_runPane->runProgressBar()->setProgress(0);
     m_runPane->runProgressBar()->setProgressColor(QColor());
-    m_runPane->runProgressBar()->setText(progressBarMessageFor(Welcome));
-
-    m_runPane->segmentedBar()->actions().at(0)->setChecked(true);
-    m_runPane->segmentedBar()->actions().at(2)->setChecked(true);
 }
 
 void RunController::onProjectsButtonClick()

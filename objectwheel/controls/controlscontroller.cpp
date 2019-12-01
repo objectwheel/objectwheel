@@ -6,7 +6,6 @@
 #include <controlpropertymanager.h>
 #include <designerscene.h>
 #include <form.h>
-#include <projectmanager.h>
 #include <lineedit.h>
 #include <designersettings.h>
 #include <controlssettings.h>
@@ -39,8 +38,6 @@ ControlsController::ControlsController(ControlsPane* controlsPane, DesignerScene
             this, &ControlsController::onCurrentFormChange);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &ControlsController::onControlRemove);
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &ControlsController::onProjectStart);
     connect(m_designerScene, &DesignerScene::selectionChanged,
             this, &ControlsController::onSceneSelectionChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
@@ -68,6 +65,14 @@ QTreeWidgetItem* ControlsController::itemFromControl(const Control* control) con
     return nullptr;
 }
 
+void ControlsController::charge()
+{
+    Q_ASSERT(!m_isProjectStarted);
+    Q_ASSERT(m_designerScene->currentForm());
+    m_isProjectStarted = true;
+    onCurrentFormChange(m_designerScene->currentForm());
+}
+
 void ControlsController::discharge()
 {
     m_isProjectStarted = false;
@@ -81,17 +86,9 @@ void ControlsController::clear()
     m_isSelectionHandlingBlocked = true;
     ControlsTree* tree = m_controlsPane->controlsTree();
     EVERYTHING(QTreeWidgetItem* item, tree)
-            tree->delegate()->destroyItem(item);
+        tree->delegate()->destroyItem(item);
     m_searchCompleterModel.setStringList({});
     m_isSelectionHandlingBlocked = false;
-}
-
-void ControlsController::onProjectStart()
-{
-    Q_ASSERT(!m_isProjectStarted);
-    Q_ASSERT(m_designerScene->currentForm());
-    m_isProjectStarted = true;
-    onCurrentFormChange(m_designerScene->currentForm());
 }
 
 void ControlsController::onSearchEditReturnPress()

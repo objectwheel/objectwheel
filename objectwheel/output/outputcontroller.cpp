@@ -4,9 +4,9 @@
 #include <issueswidget.h>
 #include <consolewidget.h>
 #include <controlpropertymanager.h>
-#include <interfacesettings.h>
-#include <generalsettings.h>
 #include <control.h>
+#include <generalsettings.h>
+#include <interfacesettings.h>
 #include <runmanager.h>
 #include <projectmanager.h>
 
@@ -39,19 +39,13 @@ OutputController::OutputController(OutputPane* outputPane, QObject* parent) : QO
             this, &OutputController::onApplicationFinish);
     connect(RunManager::instance(), &RunManager::applicationErrorOccurred,
             this, &OutputController::onApplicationErrorOccur);
+    setCurrentWidget(nullptr);
 }
 
 void OutputController::discharge()
 {
-    setCurrentWidget(nullptr);
-    m_outputPane->issuesWidget()->discharge();
+    m_outputPane->issuesWidget()->clean();
     m_outputPane->consoleWidget()->clear();
-
-    const InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    if (settings->visibleOutputWidget == 1)
-        setCurrentWidget(m_outputPane->issuesWidget());
-    else if (settings->visibleOutputWidget == 2)
-        setCurrentWidget(m_outputPane->consoleWidget());
 }
 
 void OutputController::setPaneVisible(bool visible)

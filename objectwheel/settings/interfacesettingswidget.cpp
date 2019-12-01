@@ -39,10 +39,8 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
   , m_fontResetButton(new QPushButton(m_fontGroup))
   /****/
   , m_behavioralGroup(new QGroupBox(contentWidget()))
-  , m_visibleOutputWidgetLabel(new QLabel(m_behavioralGroup))
   , m_outputPanePopsCheckBox(new QCheckBox(m_behavioralGroup))
   , m_preserveDesignerStateCheckBox(new QCheckBox(m_behavioralGroup))
-  , m_visibleOutputWidgetBox(new QComboBox(m_behavioralGroup))
   , m_designerStateResetButton(new QPushButton(m_behavioralGroup))
 {
     contentLayout()->addWidget(m_interfaceGroup);
@@ -145,29 +143,24 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     behavioralLayout->addWidget(m_outputPanePopsCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     behavioralLayout->addWidget(m_preserveDesignerStateCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    behavioralLayout->addWidget(m_visibleOutputWidgetLabel, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    behavioralLayout->addWidget(m_visibleOutputWidgetBox, 0, 3, Qt::AlignLeft | Qt::AlignVCenter);
     behavioralLayout->addWidget(m_designerStateResetButton, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
     behavioralLayout->setColumnStretch(4, 1);
     behavioralLayout->setColumnMinimumWidth(1, 20);
 
     m_behavioralGroup->setTitle(tr("Behavioral"));
     m_outputPanePopsCheckBox->setText(tr("Pop up output pane when it flashes"));
-    m_preserveDesignerStateCheckBox->setText(tr("Enable designer state saving"));
-    m_designerStateResetButton->setText(tr("Reset designer states to default"));
-    m_visibleOutputWidgetLabel->setText(tr("Show output widget at startup") + ":");
+    m_preserveDesignerStateCheckBox->setText(tr("Enable interface state saving"));
+    m_designerStateResetButton->setText(tr("Reset interface state"));
 
     m_outputPanePopsCheckBox->setToolTip(tr("Pop up output pane when it flashes"));
     m_preserveDesignerStateCheckBox->setToolTip(tr("Enabling this option leads preserving tool bars, dock widgets, pane "
                                                    "postions and other designer states between application starts"));
-    m_designerStateResetButton->setToolTip(tr("Resets tool bars, dock widgets, pane postions and other designer "
+    m_designerStateResetButton->setToolTip(tr("Resets tool bars, dock widgets, pane postions and other interface "
                                               "states to default"));
-    m_visibleOutputWidgetBox->setToolTip(tr("Bottom widget that will be open at startup by default"));
 
     m_outputPanePopsCheckBox->setCursor(Qt::PointingHandCursor);
     m_designerStateResetButton->setCursor(Qt::PointingHandCursor);
     m_preserveDesignerStateCheckBox->setCursor(Qt::PointingHandCursor);
-    m_visibleOutputWidgetBox->setCursor(Qt::PointingHandCursor);
 
     /****/
 
@@ -284,7 +277,6 @@ void InterfaceSettingsWidget::apply()
     settings->fontPreferThick = m_fontThickBox->isChecked();
     settings->fontPreferAntialiasing = m_fontAntialiasingBox->isChecked();
     /****/
-    settings->visibleOutputWidget = m_visibleOutputWidgetBox->currentIndex();
     settings->outputPanePops = m_outputPanePopsCheckBox->isChecked();
     settings->preserveDesignerState = m_preserveDesignerStateCheckBox->isChecked();
     /****/
@@ -315,7 +307,6 @@ void InterfaceSettingsWidget::revert()
     m_fontThickBox->setChecked(settings->fontPreferThick);
     m_fontAntialiasingBox->setChecked(settings->fontPreferAntialiasing);
     /****/
-    m_visibleOutputWidgetBox->setCurrentIndex(settings->visibleOutputWidget);
     m_outputPanePopsCheckBox->setChecked(settings->outputPanePops);
     m_preserveDesignerStateCheckBox->setChecked(settings->preserveDesignerState);
 }
@@ -352,24 +343,19 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
             || m_fontSizeLabel->text().contains(word, Qt::CaseInsensitive)
             || m_fontAntialiasingBox->text().contains(word, Qt::CaseInsensitive)
             || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
-            || m_visibleOutputWidgetLabel->text().contains(word, Qt::CaseInsensitive)
             || m_outputPanePopsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_preserveDesignerStateCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_preserveDesignerStateCheckBox->toolTip().contains(word, Qt::CaseInsensitive)
             || m_designerStateResetButton->text().contains(word, Qt::CaseInsensitive)
             || m_designerStateResetButton->toolTip().contains(word, Qt::CaseInsensitive)
             || UtilityFunctions::comboContainsWord(m_themeBox, word)
-            || UtilityFunctions::comboContainsWord(m_languageBox, word)
-            || UtilityFunctions::comboContainsWord(m_visibleOutputWidgetBox, word);
+            || UtilityFunctions::comboContainsWord(m_languageBox, word);
 }
 
 void InterfaceSettingsWidget::fill()
 {
     m_themeBox->addItem(tr("Light"));
     m_languageBox->addItem(QIcon(":/images/flags/en.svg"), tr("English"));
-    m_visibleOutputWidgetBox->addItem(QIcon(":/images/unavailable.svg"), tr("None"));
-    m_visibleOutputWidgetBox->addItem(QIcon(":/images/output/issue.svg"), tr("Issues"));
-    m_visibleOutputWidgetBox->addItem(QIcon(":/images/output/console.svg"), tr("Console"));
     m_fontFamilyBox->addItems(QFontDatabase().families());
     m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
                              "18", "24", "36", "48", "64", "72", "96", "144"});

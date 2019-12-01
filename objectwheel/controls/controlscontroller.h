@@ -30,11 +30,11 @@ public:
     QTreeWidgetItem* itemFromControl(const Control* control) const;
 
 public slots:
+    void charge();
     void discharge();
     void clear();
 
 private slots:
-    void onProjectStart();
     void onSearchEditReturnPress();
     void onItemDoubleClick(QTreeWidgetItem* item, int column);
     void onItemSelectionChange();

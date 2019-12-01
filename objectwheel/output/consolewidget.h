@@ -10,9 +10,10 @@ class QToolBar;
 class QLabel;
 class Control;
 
-class ConsoleWidget : public QPlainTextEdit
+class ConsoleWidget final : public QPlainTextEdit
 {
     Q_OBJECT
+    Q_DISABLE_COPY(ConsoleWidget)
 
 public:
     explicit ConsoleWidget(QWidget* widget = nullptr);

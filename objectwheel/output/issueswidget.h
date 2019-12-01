@@ -9,9 +9,10 @@ class QLabel;
 class QToolButton;
 class Control;
 
-class IssuesWidget : public QListWidget
+class IssuesWidget final : public QListWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(IssuesWidget)
 
     template <typename T> friend struct QMetaTypeId;
     struct ControlErrors {
@@ -23,7 +24,7 @@ public:
     explicit IssuesWidget(QWidget* parent = nullptr);
 
 public slots:
-    void discharge();
+    void clean();
     void refresh(Control* control);
 
 private slots:

@@ -54,10 +54,8 @@ private:
     QPushButton* m_fontResetButton;
     /****/
     QGroupBox* m_behavioralGroup;
-    QLabel* m_visibleOutputWidgetLabel;
     QCheckBox* m_outputPanePopsCheckBox;
     QCheckBox* m_preserveDesignerStateCheckBox;
-    QComboBox* m_visibleOutputWidgetBox;
     QPushButton* m_designerStateResetButton;
 };
 

@@ -4,7 +4,6 @@
 #include <formspane.h>
 #include <lineedit.h>
 #include <designerscene.h>
-#include <projectmanager.h>
 #include <saveutils.h>
 #include <filesystemutils.h>
 #include <controlcreationmanager.h>
@@ -42,8 +41,6 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
             this, &FormsController::onCurrentFormChange);
     connect(tree, &FormsTree::itemSelectionChanged,
             this, &FormsController::onItemSelectionChange);
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &FormsController::onProjectStart);
     connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
             this, &FormsController::onControlCreation);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
@@ -71,24 +68,7 @@ QTreeWidgetItem* FormsController::itemFromControl(const Control* control) const
     return nullptr;
 }
 
-void FormsController::discharge()
-{
-    m_isProjectStarted = false;
-    m_formsPane->searchEdit()->clear();
-    clear();
-}
-
-void FormsController::clear()
-{
-    m_isSelectionHandlingBlocked = true;
-    FormsTree* tree = m_formsPane->formsTree();
-    EVERYTHING(QTreeWidgetItem* item, tree)
-            tree->delegate()->destroyItem(item);
-    m_searchCompleterModel.setStringList({});
-    m_isSelectionHandlingBlocked = false;
-}
-
-void FormsController::onProjectStart()
+void FormsController::charge()
 {
     Q_ASSERT(!m_isProjectStarted);
 
@@ -118,6 +98,23 @@ void FormsController::onProjectStart()
     m_isSelectionHandlingBlocked = false;
 
     tree->scrollToItem(selectionItem);
+}
+
+void FormsController::discharge()
+{
+    m_isProjectStarted = false;
+    m_formsPane->searchEdit()->clear();
+    clear();
+}
+
+void FormsController::clear()
+{
+    m_isSelectionHandlingBlocked = true;
+    FormsTree* tree = m_formsPane->formsTree();
+    EVERYTHING(QTreeWidgetItem* item, tree)
+        tree->delegate()->destroyItem(item);
+    m_searchCompleterModel.setStringList({});
+    m_isSelectionHandlingBlocked = false;
 }
 
 void FormsController::onAddButtonClick()

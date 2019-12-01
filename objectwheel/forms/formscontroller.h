@@ -21,11 +21,11 @@ public:
     QTreeWidgetItem* itemFromControl(const Control* control) const;
 
 public slots:
+    void charge();
     void discharge();
     void clear();
 
 private slots:
-    void onProjectStart();
     void onAddButtonClick();
     void onRemoveButtonClick();
     void onSearchEditReturnPress();

@@ -27,7 +27,6 @@ struct InterfaceSettings final : public Settings
     /****/
     bool outputPanePops;
     bool preserveDesignerState;
-    int visibleOutputWidget;
 };
 
 #endif // INTERFACESETTINGS_H

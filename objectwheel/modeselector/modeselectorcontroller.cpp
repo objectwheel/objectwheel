@@ -1,15 +1,11 @@
 #include <modeselectorcontroller.h>
 #include <modeselectorpane.h>
-#include <projectmanager.h>
 #include <QToolButton>
 
 ModeSelectorController::ModeSelectorController(ModeSelectorPane* modeSelectorPane, QObject* parent) : QObject(parent)
   , m_modeSelectorPane(modeSelectorPane)
 {
     onModeChange(ModeManager::mode());
-
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, &ModeSelectorController::discharge);
 
     connect(ModeManager::instance(), &ModeManager::modeChanged,
             this, &ModeSelectorController::onModeChange);

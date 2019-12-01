@@ -26,6 +26,7 @@ public:
     explicit RunController(RunPane* runPane, QObject* parent = nullptr);
 
 public slots:
+    void charge();
     void discharge();
 
 private slots:
