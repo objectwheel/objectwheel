@@ -12,6 +12,7 @@ class OutputPane;
 class OutputController;
 class DesignerPane;
 class DesignerController;
+class EditorContainer;
 
 class CentralWidget final : public QSplitter
 {
@@ -40,6 +41,7 @@ private:
     OutputController* m_outputController;
     DesignerPane* m_designerPane;
     DesignerController* m_designerController;
+    EditorContainer* m_codeEditorContainer;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     ProjectOptionsWidget* m_projectOptionsWidget;
     BuildsWidget* m_buildsWidget;

@@ -27,13 +27,6 @@
 #include <QBoxLayout>
 #include <QLabel>
 
-class EditorContainer : public QLabel {
-public: explicit EditorContainer(QWidget* parent) : QLabel(parent) {}
-public: QSize sizeHint() const override { return {680, 680}; }
-};
-
-namespace { EditorContainer* g_editorContainer; }
-
 static QString methodName(const QString& signal)
 {
     QString method(signal);
@@ -51,12 +44,19 @@ static bool warnIfFileDoesNotExist(const QString& filePath)
     return false;
 }
 
+class EditorContainer final : public QLabel {
+public:
+    explicit EditorContainer(QWidget* parent = nullptr) : QLabel(parent) {}
+    QSize sizeHint() const override { return {640, 640}; }
+};
+
 CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_splitterIn(new QSplitter)
   , m_outputPane(new OutputPane)
   , m_outputController(new OutputController(m_outputPane, this))
   , m_designerPane(new DesignerPane)
   , m_designerController(new DesignerController(m_designerPane, this))
+  , m_codeEditorContainer(new EditorContainer)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_projectOptionsWidget(new ProjectOptionsWidget)
   , m_buildsWidget(new BuildsWidget)
@@ -68,18 +68,19 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     addWidget(m_outputPane);
     setChildrenCollapsible(false);
 
-    g_editorContainer = new EditorContainer(this);
-    g_editorContainer->setAlignment(Qt::AlignCenter);
-    g_editorContainer->setText(QStringLiteral(R"(<p style="font-size: 12px; color:#777777">%1</p>)").arg(tr("Editor window<br>raised")));
-    g_editorContainer->setLayout(new QHBoxLayout);
-    g_editorContainer->layout()->setSpacing(0);
-    g_editorContainer->layout()->setContentsMargins(0, 0, 0, 0);
-    g_editorContainer->layout()->addWidget(m_qmlCodeEditorWidget);
+    auto containerLayout = new QHBoxLayout(m_codeEditorContainer);
+    containerLayout->setSpacing(0);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
+    containerLayout->addWidget(m_qmlCodeEditorWidget);
+
+    m_codeEditorContainer->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
+    m_codeEditorContainer->setAlignment(Qt::AlignCenter);
+    m_codeEditorContainer->setText(QStringLiteral(R"(<p style="font-size: 12px; color:#777777">%1</p>)").arg(tr("Editor window<br>raised")));
 
     m_splitterIn->setFrameShape(QFrame::NoFrame);
     m_splitterIn->setOrientation(Qt::Horizontal);
     m_splitterIn->addWidget(m_designerPane);
-    m_splitterIn->addWidget(g_editorContainer);
+    m_splitterIn->addWidget(m_codeEditorContainer);
     m_splitterIn->addWidget(m_projectOptionsWidget);
     m_splitterIn->addWidget(m_buildsWidget);
     m_splitterIn->addWidget(m_helpWidget);
@@ -252,7 +253,7 @@ void CentralWidget::hideWidgets()
 {
     m_outputPane->hide();
     m_designerPane->hide();
-    g_editorContainer->hide();
+    m_codeEditorContainer->hide();
     m_projectOptionsWidget->hide();
     m_buildsWidget->hide();
     m_helpWidget->hide();
@@ -270,13 +271,13 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
 
     case ModeManager::Editor:
         m_outputPane->show();
-        g_editorContainer->show();
+        m_codeEditorContainer->show();
         break;
 
     case ModeManager::Split:
         m_outputPane->show();
         m_designerPane->show();
-        g_editorContainer->show();
+        m_codeEditorContainer->show();
         break;
 
     case ModeManager::Options:

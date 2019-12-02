@@ -431,7 +431,7 @@ QAction* DesignerPane::moveDownAction() const
 
 QSize DesignerPane::sizeHint() const
 {
-    return {680, 680};
+    return {640, 640};
 }
 
 QSize DesignerPane::minimumSizeHint() const

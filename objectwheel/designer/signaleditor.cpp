@@ -6,6 +6,7 @@ SignalEditor::SignalEditor(QWidget* parent) : QDialog(parent)
   , ui(new Ui::SignalEditor)
 {
     ui->setupUi(this);
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("Go"));
     ui->buttonBox->button(QDialogButtonBox::Ok)->setCursor(Qt::PointingHandCursor);
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
@@ -38,7 +39,7 @@ QString SignalEditor::currentSignal() const
 
 void SignalEditor::discharge()
 {
-    ui->buttonBox->button(QDialogButtonBox::Ok)->setDisabled(true);
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     ui->searchEdit->clear();
     ui->signalList->clear();
 }
