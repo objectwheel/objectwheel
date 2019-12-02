@@ -37,7 +37,7 @@ QString SignalEditor::currentSignal() const
     return ui->signalList->currentItem()->text();
 }
 
-void SignalEditor::discharge()
+void SignalEditor::clear()
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(false);
     ui->searchEdit->clear();

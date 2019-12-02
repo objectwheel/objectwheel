@@ -18,7 +18,7 @@ public:
     QString currentSignal() const;
 
 public slots:
-    void discharge();
+    void clear();
 
 private slots:
     void filterList();

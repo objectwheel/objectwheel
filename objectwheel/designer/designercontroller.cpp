@@ -235,7 +235,7 @@ void DesignerController::charge()
 void DesignerController::discharge()
 {
     m_designerPane->designerView()->scene()->clear();
-    m_designerPane->signalEditor()->discharge();
+    m_designerPane->signalEditor()->clear();
 }
 
 void DesignerController::onSceneSettingsChange()
