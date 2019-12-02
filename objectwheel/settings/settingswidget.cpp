@@ -11,8 +11,8 @@ SettingsWidget::SettingsWidget(QWidget* parent) : QScrollArea(parent)
     widget()->setAutoFillBackground(false);
 
     auto contentLayout = new QBoxLayout(QBoxLayout::TopToBottom, widget());
-    contentLayout->setSpacing(10);
-    contentLayout->setContentsMargins(6, 6, 6, 6);
+    contentLayout->setSpacing(6);
+    contentLayout->setContentsMargins(4, 4, 4, 4);
 }
 
 void SettingsWidget::activate(bool activate)

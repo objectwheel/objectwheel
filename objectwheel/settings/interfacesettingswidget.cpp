@@ -51,8 +51,8 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     /****/
 
     auto interfaceLayout = new QGridLayout(m_interfaceGroup);
-    interfaceLayout->setSpacing(8);
-    interfaceLayout->setContentsMargins(6, 6, 6, 6);
+    interfaceLayout->setSpacing(6);
+    interfaceLayout->setContentsMargins(4, 4, 4, 4);
     interfaceLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     interfaceLayout->addWidget(m_themeLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     interfaceLayout->addWidget(m_languageLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
@@ -91,7 +91,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     /****/
 
     auto hb1 = new QHBoxLayout;
-    hb1->setSpacing(8);
+    hb1->setSpacing(6);
     hb1->setContentsMargins(0, 0, 0, 0);
     hb1->addWidget(m_fontFamilyLabel);
     hb1->addWidget(m_fontFamilyBox);
@@ -103,15 +103,15 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     hb1->addStretch();
 
     auto hb2 = new QHBoxLayout;
-    hb2->setSpacing(8);
+    hb2->setSpacing(6);
     hb2->setContentsMargins(0, 0, 0, 0);
     hb2->addWidget(m_fontAntialiasingBox);
     hb2->addWidget(m_fontThickBox);
     hb2->addStretch();
 
     auto fontLayout = new QVBoxLayout(m_fontGroup);
-    fontLayout->setSpacing(8);
-    fontLayout->setContentsMargins(6, 6, 6, 6);
+    fontLayout->setSpacing(6);
+    fontLayout->setContentsMargins(4, 4, 4, 4);
     fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     fontLayout->addLayout(hb1);
     fontLayout->addLayout(hb2);
@@ -138,8 +138,8 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     /****/
 
     auto behavioralLayout = new QGridLayout(m_behavioralGroup);
-    behavioralLayout->setSpacing(8);
-    behavioralLayout->setContentsMargins(6, 6, 6, 6);
+    behavioralLayout->setSpacing(6);
+    behavioralLayout->setContentsMargins(4, 4, 4, 4);
     behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     behavioralLayout->addWidget(m_outputPanePopsCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     behavioralLayout->addWidget(m_preserveDesignerStateCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);

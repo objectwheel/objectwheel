@@ -16,8 +16,8 @@ BehaviorSettingsWidget::BehaviorSettingsWidget(QWidget* parent) : SettingsWidget
     /****/
 
     auto savingLayout = new QVBoxLayout(m_savingGroup);
-    savingLayout->setSpacing(8);
-    savingLayout->setContentsMargins(6, 6, 6, 6);
+    savingLayout->setSpacing(6);
+    savingLayout->setContentsMargins(4, 4, 4, 4);
     savingLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     savingLayout->addWidget(m_autoSaveBeforeRunningBox);
 

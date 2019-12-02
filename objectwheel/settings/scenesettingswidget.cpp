@@ -72,8 +72,8 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     /****/
 
     auto designLayout = new QGridLayout(m_designGroup);
-    designLayout->setSpacing(8);
-    designLayout->setContentsMargins(6, 6, 6, 6);
+    designLayout->setSpacing(6);
+    designLayout->setContentsMargins(4, 4, 4, 4);
     designLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     designLayout->addWidget(m_showGuideLinesLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     designLayout->addWidget(m_showAllAnchorsLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
@@ -126,8 +126,8 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     /****/
 
     auto gridViewLayout = new QGridLayout(m_gridViewGroup);
-    gridViewLayout->setSpacing(8);
-    gridViewLayout->setContentsMargins(6, 6, 6, 6);
+    gridViewLayout->setSpacing(6);
+    gridViewLayout->setContentsMargins(4, 4, 4, 4);
     gridViewLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     gridViewLayout->addWidget(m_showGridViewDotsLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     gridViewLayout->addWidget(m_snappingEnabledLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
@@ -163,8 +163,8 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     /****/
 
     auto controlsLayout = new QGridLayout(m_controlsGroup);
-    controlsLayout->setSpacing(8);
-    controlsLayout->setContentsMargins(6, 6, 6, 6);
+    controlsLayout->setSpacing(6);
+    controlsLayout->setContentsMargins(4, 4, 4, 4);
     controlsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     controlsLayout->addWidget(m_showMouseoverOutlineLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     controlsLayout->addWidget(m_showClippedControlsLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);

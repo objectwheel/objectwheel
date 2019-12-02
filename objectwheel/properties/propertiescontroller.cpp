@@ -66,6 +66,11 @@ PropertiesController::PropertiesController(PropertiesPane* propertiesPane, Desig
     tree->setDesignerScene(designerScene);
     tree->viewport()->installEventFilter(this);
 
+    m_propertiesPane->typeItem()->setHidden(true);
+    m_propertiesPane->uidItem()->setHidden(true);
+    m_propertiesPane->idItem()->setHidden(true);
+    m_propertiesPane->indexItem()->setHidden(true);
+
     connect(m_propertiesPane->resetButton(), &QToolButton::clicked,
             this, &PropertiesController::onResetButtonClick);
     connect(m_propertiesPane->idEdit(), &QLineEdit::editingFinished,

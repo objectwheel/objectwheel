@@ -88,6 +88,9 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
     m_backButton->setIcon(QIcon(QStringLiteral(":/images/help/back.svg")));
     m_forthButton->setIcon(QIcon(QStringLiteral(":/images/help/forth.svg")));
 
+    m_backButton->setDisabled(true);
+    m_forthButton->setDisabled(true);
+
     m_splitter->setChildrenCollapsible(false);
     m_splitter->setOrientation(Qt::Horizontal);
     m_splitter->addWidget(m_contentsWidget);
@@ -111,6 +114,8 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
     engine->indexWidget()->installEventFilter(this);
     engine->contentWidget()->viewport()->installEventFilter(this);
+
+    m_helpViewer->home();
 
     connect(m_typeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
             this, &HelpWidget::onTypeChange);

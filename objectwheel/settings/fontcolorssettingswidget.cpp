@@ -41,7 +41,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
     /****/
 
     auto hb1 = new QHBoxLayout;
-    hb1->setSpacing(8);
+    hb1->setSpacing(6);
     hb1->setContentsMargins(0, 0, 0, 0);
     hb1->addWidget(m_fontFamilyLabel);
     hb1->addWidget(m_fontFamilyBox);
@@ -53,15 +53,15 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
     hb1->addStretch();
 
     auto hb2 = new QHBoxLayout;
-    hb2->setSpacing(8);
+    hb2->setSpacing(6);
     hb2->setContentsMargins(0, 0, 0, 0);
     hb2->addWidget(m_fontAntialiasingBox);
     hb2->addWidget(m_fontThickBox);
     hb2->addStretch();
 
     auto fontLayout = new QVBoxLayout(m_fontGroup);
-    fontLayout->setSpacing(8);
-    fontLayout->setContentsMargins(6, 6, 6, 6);
+    fontLayout->setSpacing(6);
+    fontLayout->setContentsMargins(4, 4, 4, 4);
     fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     fontLayout->addLayout(hb1);
     fontLayout->addLayout(hb2);
@@ -88,7 +88,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
     /****/
 
     auto hb3 = new QHBoxLayout;
-    hb3->setSpacing(8);
+    hb3->setSpacing(6);
     hb3->setContentsMargins(0, 0, 0, 0);
     hb3->addWidget(m_colorSchemeBox);
     hb3->addWidget(m_colorSchemeCopyButton);
@@ -96,8 +96,8 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
     hb3->addStretch();
 
     auto colorSchemeLayout = new QVBoxLayout(m_colorSchemeGroup);
-    colorSchemeLayout->setSpacing(8);
-    colorSchemeLayout->setContentsMargins(6, 6, 6, 6);
+    colorSchemeLayout->setSpacing(6);
+    colorSchemeLayout->setContentsMargins(4, 4, 4, 4);
     colorSchemeLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     colorSchemeLayout->addLayout(hb3);
     colorSchemeLayout->addWidget(m_colorSchemeEdit);

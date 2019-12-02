@@ -1640,9 +1640,9 @@ void QmlCodeEditor::applyFontSettings()
     p.setBrush(QPalette::Inactive, QPalette::Highlight, p.highlight());
     p.setBrush(QPalette::Inactive, QPalette::HighlightedText, p.highlightedText());
     setPalette(p);
+    setFont(font);
     viewport()->setPalette(p);
     viewport()->setFont(font);
-    m_rowBar->setFont(font);
     updateTabStops(); // update tab stops, they depend on the font
 
     // Line numbers
@@ -1651,6 +1651,8 @@ void QmlCodeEditor::applyFontSettings()
     ep.setColor(QPalette::Window, lineNumberFormat.background().style() != Qt::NoBrush ?
                 lineNumberFormat.background().color() : background);
     m_rowBar->setPalette(ep);
+
+    m_toolBar->setFont(QApplication::font());
 
     updateViewportMargins();   // Adjust to new font width
     updateHighlights();

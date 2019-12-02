@@ -12,7 +12,7 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
   , m_titleLabel(new QLabel(this))
 {
     auto layout = new QVBoxLayout(this);
-    layout->setSpacing(10);
+    layout->setSpacing(6);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_titleLabel);
     layout->addWidget(m_tabWidget);
