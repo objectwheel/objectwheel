@@ -192,9 +192,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->removeButton());
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addSeparator();
 
-    m_runPane->segmentedBar()->actions().at(0)->setChecked(true);
-    m_runPane->segmentedBar()->actions().at(2)->setChecked(true);
-
+    m_removeSizeRestrictionsOnDockWidgetsTimer->setSingleShot(true);
     m_removeSizeRestrictionsOnDockWidgetsTimer->setInterval(1000);
 
     auto updatePalette = [=] {
@@ -305,9 +303,13 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             setDockWidgetAreasVisible(Qt::RightDockWidgetArea, checked);
     });
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
-            this, &MainWindow::resetWidget);
-    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
-            this, &MainWindow::writeSettings);
+            this, [=] {
+        resetWidget();
+        QTimer::singleShot(1000, this, [=] {
+            resetWidget();
+            writeSettings();
+        });
+    });
     connect(windowHandle(), &QWindow::screenChanged,
             this, &MainWindow::onScreenChange);
     connect(m_removeSizeRestrictionsOnDockWidgetsTimer, &QTimer::timeout,
@@ -485,51 +487,19 @@ void MainWindow::showEvent(QShowEvent* event)
 
         readSettings();
 
-        bool leftDockWidgetAreaVisible = false;
-        bool rightDockWidgetAreaVisible = false;
-
         m_controlsDockWidgetVisible = m_controlsDockWidget->isVisible();
         m_propertiesDockWidgetVisible = m_propertiesDockWidget->isVisible();
         m_assetsDockWidgetVisible = m_assetsDockWidget->isVisible();
         m_toolboxDockWidgetVisible = m_toolboxDockWidget->isVisible();
         m_formsDockWidgetVisible = m_formsDockWidget->isVisible();
 
-        if (m_controlsDockWidgetVisible) {
-            if (dockWidgetArea(m_controlsDockWidget) & Qt::LeftDockWidgetArea)
-                leftDockWidgetAreaVisible = true;
-            else
-                rightDockWidgetAreaVisible = true;
-        }
-        if (m_propertiesDockWidgetVisible) {
-            if (dockWidgetArea(m_propertiesDockWidget) & Qt::LeftDockWidgetArea)
-                leftDockWidgetAreaVisible = true;
-            else
-                rightDockWidgetAreaVisible = true;
-        }
-        if (m_assetsDockWidgetVisible) {
-            if (dockWidgetArea(m_assetsDockWidget) & Qt::LeftDockWidgetArea)
-                leftDockWidgetAreaVisible = true;
-            else
-                rightDockWidgetAreaVisible = true;
-        }
-        if (m_toolboxDockWidgetVisible) {
-            if (dockWidgetArea(m_toolboxDockWidget) & Qt::LeftDockWidgetArea)
-                leftDockWidgetAreaVisible = true;
-            else
-                rightDockWidgetAreaVisible = true;
-        }
-        if (m_formsDockWidgetVisible) {
-            if (dockWidgetArea(m_formsDockWidget) & Qt::LeftDockWidgetArea)
-                leftDockWidgetAreaVisible = true;
-            else
-                rightDockWidgetAreaVisible = true;
-        }
+        bool leftSideVisible = m_runPane->segmentedBar()->actions().at(0)->isChecked();
+        bool rightSideVisible = m_runPane->segmentedBar()->actions().at(2)->isChecked();
+        bool bottomSideVisible = m_runPane->segmentedBar()->actions().at(1)->isChecked();
 
-        m_leftDockBar->setVisible(leftDockWidgetAreaVisible);
-        m_rightDockBar->setVisible(rightDockWidgetAreaVisible);
-
-        m_runPane->segmentedBar()->actions().at(0)->setChecked(leftDockWidgetAreaVisible);
-        m_runPane->segmentedBar()->actions().at(2)->setChecked(rightDockWidgetAreaVisible);
+        setDockWidgetAreasVisible(Qt::LeftDockWidgetArea, leftSideVisible);
+        setDockWidgetAreasVisible(Qt::RightDockWidgetArea, rightSideVisible);
+        m_centralWidget->outputController()->setPaneVisible(bottomSideVisible);
 
         m_leftDockBar->removeDockWidget(m_controlsDockWidget);
         m_leftDockBar->removeDockWidget(m_propertiesDockWidget);
@@ -581,8 +551,7 @@ void MainWindow::showEvent(QShowEvent* event)
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (GeneralSettings::interfaceSettings()->preserveDesignerState) {
-        if (m_removeSizeRestrictionsOnDockWidgetsTimer->isActive())
-            onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout();
+        setDockWidgetAreasVisible(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, true);
         writeSettings();
     }
 
@@ -597,6 +566,49 @@ void MainWindow::resetWidget()
     setWindowState(windowState() & ~Qt::WindowMaximized);
     restoreState(m_initialInterfaceState);
     setVisible(wasVisible); // setWindowState might hide the window
+
+    m_controlsDockWidgetVisible = true;
+    m_propertiesDockWidgetVisible = true;
+    m_assetsDockWidgetVisible = true;
+    m_toolboxDockWidgetVisible = true;
+    m_formsDockWidgetVisible = true;
+
+    m_runPane->segmentedBar()->actions().at(0)->setChecked(true);
+    m_runPane->segmentedBar()->actions().at(2)->setChecked(true);
+    m_centralWidget->outputController()->setPaneVisible(false);
+
+    m_leftDockBar->removeDockWidget(m_controlsDockWidget);
+    m_leftDockBar->removeDockWidget(m_propertiesDockWidget);
+    m_leftDockBar->removeDockWidget(m_assetsDockWidget);
+    m_leftDockBar->removeDockWidget(m_toolboxDockWidget);
+    m_leftDockBar->removeDockWidget(m_formsDockWidget);
+
+    m_rightDockBar->removeDockWidget(m_controlsDockWidget);
+    m_rightDockBar->removeDockWidget(m_propertiesDockWidget);
+    m_rightDockBar->removeDockWidget(m_assetsDockWidget);
+    m_rightDockBar->removeDockWidget(m_toolboxDockWidget);
+    m_rightDockBar->removeDockWidget(m_formsDockWidget);
+
+    if (dockWidgetArea(m_controlsDockWidget) & Qt::LeftDockWidgetArea)
+        m_leftDockBar->addDockWidget(m_controlsDockWidget);
+    else
+        m_rightDockBar->addDockWidget(m_controlsDockWidget);
+    if (dockWidgetArea(m_propertiesDockWidget) & Qt::LeftDockWidgetArea)
+        m_leftDockBar->addDockWidget(m_propertiesDockWidget);
+    else
+        m_rightDockBar->addDockWidget(m_propertiesDockWidget);
+    if (dockWidgetArea(m_assetsDockWidget) & Qt::LeftDockWidgetArea)
+        m_leftDockBar->addDockWidget(m_assetsDockWidget);
+    else
+        m_rightDockBar->addDockWidget(m_assetsDockWidget);
+    if (dockWidgetArea(m_toolboxDockWidget) & Qt::LeftDockWidgetArea)
+        m_leftDockBar->addDockWidget(m_toolboxDockWidget);
+    else
+        m_rightDockBar->addDockWidget(m_toolboxDockWidget);
+    if (dockWidgetArea(m_formsDockWidget) & Qt::LeftDockWidgetArea)
+        m_leftDockBar->addDockWidget(m_formsDockWidget);
+    else
+        m_rightDockBar->addDockWidget(m_formsDockWidget);
 }
 
 void MainWindow::readSettings()
@@ -610,6 +622,9 @@ void MainWindow::readSettings()
                    ? (windowState() | Qt::WindowMaximized)
                    : (windowState() & ~Qt::WindowMaximized));
     restoreState(settings->value<QByteArray>("MainWindow.InterfaceState", QByteArray()));
+    m_runPane->segmentedBar()->actions().at(0)->setChecked(settings->value<bool>("MainWindow.LeftSideVisible", true));
+    m_runPane->segmentedBar()->actions().at(2)->setChecked(settings->value<bool>("MainWindow.RightSideVisible", true));
+    m_runPane->segmentedBar()->actions().at(1)->setChecked(settings->value<bool>("MainWindow.BottomSideVisible", false));
     settings->end();
     setVisible(wasVisible); // setWindowState might hide the window
 }
@@ -622,6 +637,9 @@ void MainWindow::writeSettings() const
     settings->setValue("MainWindow.Position", pos());
     settings->setValue("MainWindow.Maximized", isMaximized());
     settings->setValue("MainWindow.InterfaceState", saveState());
+    settings->setValue("MainWindow.LeftSideVisible", m_runPane->segmentedBar()->actions().at(0)->isChecked());
+    settings->setValue("MainWindow.RightSideVisible", m_runPane->segmentedBar()->actions().at(2)->isChecked());
+    settings->setValue("MainWindow.BottomSideVisible", m_runPane->segmentedBar()->actions().at(1)->isChecked());
     settings->end();
 }
 
