@@ -39,7 +39,23 @@ OutputController::OutputController(OutputPane* outputPane, QObject* parent) : QO
             this, &OutputController::onApplicationFinish);
     connect(RunManager::instance(), &RunManager::applicationErrorOccurred,
             this, &OutputController::onApplicationErrorOccur);
+    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
+            this, [=] {
+        InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+        settings->begin();
+        settings->setValue("OutputPane.CurrentWidget", 0);
+        settings->end();
+        m_outputPane->stackedWidget()->setCurrentWidget(m_outputPane->widgetForButton(m_outputPane->outputBar()->buttons().at(0)));
+    });
+
     setCurrentWidget(nullptr);
+
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    const int index = settings->value<int>("OutputPane.CurrentWidget", 0);
+    settings->end();
+    if (m_outputPane->outputBar()->buttons().size() > index && index >= 0)
+        m_outputPane->stackedWidget()->setCurrentWidget(m_outputPane->widgetForButton(m_outputPane->outputBar()->buttons().at(index)));
 }
 
 void OutputController::discharge()
@@ -146,6 +162,19 @@ void OutputController::setCurrentWidget(QWidget* widget)
         m_outputPane->stackedWidget()->setCurrentWidget(widget);
         m_outputPane->stackedWidget()->show();
         m_outputPane->setUpdatesEnabled(true);
+
+        if (GeneralSettings::interfaceSettings()->preserveDesignerState) {
+            InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+            settings->begin();
+            for (int i = 0; i < m_outputPane->outputBar()->buttons().size(); ++i) {
+                if (m_outputPane->outputBar()->buttons().at(i) == button) {
+                    settings->setValue("OutputPane.CurrentWidget", i);
+                    break;
+                }
+            }
+            settings->end();
+        }
+
         emit currentWidgetChanged(widget);
     }
 }
