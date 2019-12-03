@@ -6,8 +6,6 @@
 class GroupSettings;
 struct Settings
 {
-    friend class SettingsManager; // For setValue()
-
     explicit Settings(GroupSettings* groupSettings);
     virtual void read() = 0;
     virtual void write() = 0;
@@ -19,8 +17,6 @@ struct Settings
     void end() const;
     template<typename ReturnType>
     ReturnType value(const char* setting, const QVariant& defaultValue);
-
-protected:
     void setValue(const char* setting, const QVariant& value);
 
 private:

@@ -30,7 +30,7 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
 
 QSize BuildsWidget::sizeHint() const
 {
-    return QSize(640, 640);
+    return QSize(670, 640);
 }
 
 void BuildsWidget::showModules()

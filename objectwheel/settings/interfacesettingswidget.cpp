@@ -317,6 +317,7 @@ void InterfaceSettingsWidget::reset()
     GeneralSettings::interfaceSettings()->write();
     activate();
     revert();
+    emit GeneralSettings::instance()->designerStateReset();
 }
 
 QIcon InterfaceSettingsWidget::icon() const

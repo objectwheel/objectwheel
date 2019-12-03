@@ -31,7 +31,7 @@
 #include <QDateTime>
 #include <QApplication>
 
-#define SIZE_LIST        (QSize(450, 300))
+#define SIZE_LIST        (QSize(450, 250))
 #define BUTTONS_WIDTH    (450)
 #define PATH_NICON       (":/images/welcome/new.png")
 #define PATH_LICON       (":/images/welcome/ok.png")
@@ -195,7 +195,7 @@ public:
         }
 
         QFont f;
-        f.setWeight(QFont::DemiBold);
+        f.setWeight(QFont::Medium);
         painter->setFont(f);
         painter->setPen(option.palette.text().color());
         painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);

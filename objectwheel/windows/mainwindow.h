@@ -35,6 +35,7 @@ public:
     ToolboxPane* toolboxPane() const;
     PropertiesPane* propertiesPane() const;
     ControlsPane* controlsPane() const;
+    QSize sizeHint() const override;
 
     void setDockWidgetAreasVisible(Qt::DockWidgetAreas areas, bool visible);
 
@@ -51,20 +52,19 @@ private slots:
     void onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout();
 
 protected:
-    QSize sizeHint() const override;
     void showEvent(QShowEvent* event) override;
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    void resetSettings();
+    void resetWidget();
     void readSettings();
-    void writeSettings();
+    void writeSettings() const;
 
 signals:
     void done();
 
 private:
-    QByteArray m_resetState;
+    QByteArray m_initialInterfaceState;
     CentralWidget* m_centralWidget;
     RunPane* m_runPane;
     RunController* m_runController;
@@ -88,6 +88,7 @@ private:
     DockBar* m_leftDockBar;
     DockBar* m_rightDockBar;
     QTimer* m_removeSizeRestrictionsOnDockWidgetsTimer;
+    const bool m_shownForTheFirstTime;
     bool m_assetsDockWidgetVisible;
     bool m_propertiesDockWidgetVisible;
     bool m_formsDockWidgetVisible;

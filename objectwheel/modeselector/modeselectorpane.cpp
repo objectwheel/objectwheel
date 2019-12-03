@@ -24,7 +24,6 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
   , m_buildsButton(new QToolButton(this))
   , m_documentsButton(new QToolButton(this))
 {
-    setObjectName("_q_ModeSelectorPane");
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
 

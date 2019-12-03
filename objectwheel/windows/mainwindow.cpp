@@ -85,6 +85,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_leftDockBar(new DockBar(this))
   , m_rightDockBar(new DockBar(this))
   , m_removeSizeRestrictionsOnDockWidgetsTimer(new QTimer(this))
+  , m_shownForTheFirstTime(false)
   , m_assetsDockWidgetVisible(true)
   , m_propertiesDockWidgetVisible(true)
   , m_formsDockWidgetVisible(true)
@@ -101,6 +102,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
 
     /** Setup Tool Bars **/
     /* Add Run Pane */
+    m_runPane->setObjectName("runPane");
     m_runPane->setMovable(false);
     m_runPane->setFloatable(false);
     m_runPane->setOrientation(Qt::Horizontal);
@@ -108,18 +110,21 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     addToolBarBreak(Qt::TopToolBarArea);
 
     /* Add Mode Selector Pane */
+    m_modeSelectorPane->setObjectName("modeSelectorPane");
     m_modeSelectorPane->setMovable(false);
     m_modeSelectorPane->setFloatable(false);
     m_modeSelectorPane->setOrientation(Qt::Horizontal);
     addToolBar(Qt::TopToolBarArea, m_modeSelectorPane);
 
     /* Add Left Dock Bar */
+    m_leftDockBar->setObjectName("leftDockBar");
     m_leftDockBar->setMovable(false);
     m_leftDockBar->setFloatable(false);
     m_leftDockBar->setOrientation(Qt::Vertical);
     addToolBar(Qt::LeftToolBarArea, m_leftDockBar);
 
     /* Add Right Dock Bar */
+    m_rightDockBar->setObjectName("rightDockBar");
     m_rightDockBar->setMovable(false);
     m_rightDockBar->setFloatable(false);
     m_rightDockBar->setOrientation(Qt::Vertical);
@@ -136,7 +141,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_controlsDockWidget->setTitleBarWidget(new PinBar(m_controlsDockWidget));
     addDockWidget(Qt::RightDockWidgetArea, m_controlsDockWidget);
     m_rightDockBar->addDockWidget(m_controlsDockWidget);
-    m_rightDockBar->setDockWidgetButtonChecked(m_controlsDockWidget, false);
 
     /* Add Properties Pane */
     m_propertiesDockWidget->setObjectName("propertiesDockWidget");
@@ -148,7 +152,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_propertiesDockWidget->setTitleBarWidget(new PinBar(m_propertiesDockWidget));
     addDockWidget(Qt::RightDockWidgetArea, m_propertiesDockWidget);
     m_rightDockBar->addDockWidget(m_propertiesDockWidget);
-    m_rightDockBar->setDockWidgetButtonChecked(m_propertiesDockWidget, false);
 
     /* Add Assets Pane */
     m_assetsDockWidget->setObjectName("assetsDockWidget");
@@ -160,7 +163,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_assetsDockWidget->setTitleBarWidget(new PinBar(m_assetsDockWidget));
     addDockWidget(Qt::RightDockWidgetArea, m_assetsDockWidget);
     m_rightDockBar->addDockWidget(m_assetsDockWidget);
-    m_rightDockBar->setDockWidgetButtonChecked(m_assetsDockWidget, false);
 
     /* Add Toolbox Pane */
     m_toolboxDockWidget->setObjectName("toolboxDockWidget");
@@ -172,7 +174,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_toolboxDockWidget->setTitleBarWidget(new PinBar(m_toolboxDockWidget));
     addDockWidget(Qt::LeftDockWidgetArea, m_toolboxDockWidget);
     m_leftDockBar->addDockWidget(m_toolboxDockWidget);
-    m_leftDockBar->setDockWidgetButtonChecked(m_toolboxDockWidget, false);
 
     /* Add Forms Pane */
     m_formsDockWidget->setObjectName("formsDockWidget");
@@ -184,13 +185,15 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_formsDockWidget->setTitleBarWidget(new PinBar(m_formsDockWidget));
     addDockWidget(Qt::LeftDockWidgetArea, m_formsDockWidget);
     m_leftDockBar->addDockWidget(m_formsDockWidget);
-    m_leftDockBar->setDockWidgetButtonChecked(m_formsDockWidget, false);
 
     static_cast<PinBar*>(m_assetsDockWidget->titleBarWidget())->addWidget(m_assetsPane->modeComboBox());
     static_cast<PinBar*>(m_assetsDockWidget->titleBarWidget())->addSeparator();
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->addButton());
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addWidget(m_formsPane->removeButton());
     static_cast<PinBar*>(m_formsDockWidget->titleBarWidget())->addSeparator();
+
+    m_runPane->segmentedBar()->actions().at(0)->setChecked(true);
+    m_runPane->segmentedBar()->actions().at(2)->setChecked(true);
 
     m_removeSizeRestrictionsOnDockWidgetsTimer->setInterval(1000);
 
@@ -239,7 +242,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
             this, &MainWindow::onPinBarDockWidgetCloseButtonClick);
     connect((PinBar*) m_formsDockWidget->titleBarWidget(), &PinBar::dockWidgetCloseButtonClicked,
             this, &MainWindow::onPinBarDockWidgetCloseButtonClick);
-
     connect(m_assetsPane->assetsTree(), &AssetsTree::fileOpened,
             centralWidget()->qmlCodeEditorWidget(), &QmlCodeEditorWidget::openAssets);
     connect(ModeManager::instance(), &ModeManager::modeChanged,
@@ -302,17 +304,18 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         else
             setDockWidgetAreasVisible(Qt::RightDockWidgetArea, checked);
     });
-    connect(ProjectManager::instance(), &ProjectManager::started,
-            this, [=] { m_assetsPane->assetsTree()->setRootPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir())); });
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
-            this, &MainWindow::resetSettings);
-
+            this, &MainWindow::resetWidget);
+    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
+            this, &MainWindow::writeSettings);
     connect(windowHandle(), &QWindow::screenChanged,
             this, &MainWindow::onScreenChange);
     connect(m_removeSizeRestrictionsOnDockWidgetsTimer, &QTimer::timeout,
             this, &MainWindow::onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout);
-    discharge();
-    //resetState = saveState();
+
+    resetWidget();
+    grab(); // Ensures everything laid out http://stackoverflow.com/q/2427103
+    m_initialInterfaceState = saveState();
 }
 
 CentralWidget* MainWindow::centralWidget() const
@@ -342,6 +345,10 @@ ControlsPane* MainWindow::controlsPane() const
 
 void MainWindow::charge()
 {
+    m_runController->charge();
+    m_controlsController->charge();
+    m_formsController->charge();
+    m_assetsController->charge();
     m_centralWidget->charge();
 }
 
@@ -355,26 +362,6 @@ void MainWindow::discharge()
     m_formsController->discharge();
     m_assetsController->discharge();
     m_centralWidget->discharge();
-
-    m_assetsDockWidgetVisible = true;
-    m_propertiesDockWidgetVisible = true;
-    m_formsDockWidgetVisible = true;
-    m_controlsDockWidgetVisible = true;
-    m_toolboxDockWidgetVisible = true;
-
-    m_leftDockBar->setDockWidgetButtonChecked(m_assetsDockWidget, false);
-    m_leftDockBar->setDockWidgetButtonChecked(m_propertiesDockWidget, false);
-    m_leftDockBar->setDockWidgetButtonChecked(m_formsDockWidget, false);
-    m_leftDockBar->setDockWidgetButtonChecked(m_controlsDockWidget, false);
-    m_leftDockBar->setDockWidgetButtonChecked(m_toolboxDockWidget, false);
-
-    m_rightDockBar->setDockWidgetButtonChecked(m_assetsDockWidget, false);
-    m_rightDockBar->setDockWidgetButtonChecked(m_propertiesDockWidget, false);
-    m_rightDockBar->setDockWidgetButtonChecked(m_formsDockWidget, false);
-    m_rightDockBar->setDockWidgetButtonChecked(m_controlsDockWidget, false);
-    m_rightDockBar->setDockWidgetButtonChecked(m_toolboxDockWidget, false);
-
-    setDockWidgetAreasVisible(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea, true);
 }
 
 void MainWindow::setDockWidgetAreasVisible(Qt::DockWidgetAreas areas, bool visible)
@@ -489,66 +476,156 @@ void MainWindow::onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout()
         m_assetsDockWidget->setFixedSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
 }
 
-void MainWindow::resetSettings()
+void MainWindow::showEvent(QShowEvent* event)
 {
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    settings->begin();
-    settings->setValue("MainWindow.Size", sizeHint());
-    settings->setValue("MainWindow.Position", UtilityFunctions::centerPos(sizeHint()));
-    settings->setValue("MainWindow.Maximized", false);
-    settings->setValue("MainWindow.Fullscreen", false);
-    settings->setValue("MainWindow.WindowState", m_resetState);
-    settings->end();
+    QMainWindow::showEvent(event);
 
-    if (isVisible())
+    if (m_shownForTheFirstTime != true) {
+        const_cast<bool&>(m_shownForTheFirstTime) = true;
+
         readSettings();
+
+        bool leftDockWidgetAreaVisible = false;
+        bool rightDockWidgetAreaVisible = false;
+
+        m_controlsDockWidgetVisible = m_controlsDockWidget->isVisible();
+        m_propertiesDockWidgetVisible = m_propertiesDockWidget->isVisible();
+        m_assetsDockWidgetVisible = m_assetsDockWidget->isVisible();
+        m_toolboxDockWidgetVisible = m_toolboxDockWidget->isVisible();
+        m_formsDockWidgetVisible = m_formsDockWidget->isVisible();
+
+        if (m_controlsDockWidgetVisible) {
+            if (dockWidgetArea(m_controlsDockWidget) & Qt::LeftDockWidgetArea)
+                leftDockWidgetAreaVisible = true;
+            else
+                rightDockWidgetAreaVisible = true;
+        }
+        if (m_propertiesDockWidgetVisible) {
+            if (dockWidgetArea(m_propertiesDockWidget) & Qt::LeftDockWidgetArea)
+                leftDockWidgetAreaVisible = true;
+            else
+                rightDockWidgetAreaVisible = true;
+        }
+        if (m_assetsDockWidgetVisible) {
+            if (dockWidgetArea(m_assetsDockWidget) & Qt::LeftDockWidgetArea)
+                leftDockWidgetAreaVisible = true;
+            else
+                rightDockWidgetAreaVisible = true;
+        }
+        if (m_toolboxDockWidgetVisible) {
+            if (dockWidgetArea(m_toolboxDockWidget) & Qt::LeftDockWidgetArea)
+                leftDockWidgetAreaVisible = true;
+            else
+                rightDockWidgetAreaVisible = true;
+        }
+        if (m_formsDockWidgetVisible) {
+            if (dockWidgetArea(m_formsDockWidget) & Qt::LeftDockWidgetArea)
+                leftDockWidgetAreaVisible = true;
+            else
+                rightDockWidgetAreaVisible = true;
+        }
+
+        m_leftDockBar->setVisible(leftDockWidgetAreaVisible);
+        m_rightDockBar->setVisible(rightDockWidgetAreaVisible);
+
+        m_runPane->segmentedBar()->actions().at(0)->setChecked(leftDockWidgetAreaVisible);
+        m_runPane->segmentedBar()->actions().at(2)->setChecked(rightDockWidgetAreaVisible);
+
+        m_leftDockBar->removeDockWidget(m_controlsDockWidget);
+        m_leftDockBar->removeDockWidget(m_propertiesDockWidget);
+        m_leftDockBar->removeDockWidget(m_assetsDockWidget);
+        m_leftDockBar->removeDockWidget(m_toolboxDockWidget);
+        m_leftDockBar->removeDockWidget(m_formsDockWidget);
+
+        m_rightDockBar->removeDockWidget(m_controlsDockWidget);
+        m_rightDockBar->removeDockWidget(m_propertiesDockWidget);
+        m_rightDockBar->removeDockWidget(m_assetsDockWidget);
+        m_rightDockBar->removeDockWidget(m_toolboxDockWidget);
+        m_rightDockBar->removeDockWidget(m_formsDockWidget);
+
+        if (dockWidgetArea(m_controlsDockWidget) & Qt::LeftDockWidgetArea)
+            m_leftDockBar->addDockWidget(m_controlsDockWidget);
+        else
+            m_rightDockBar->addDockWidget(m_controlsDockWidget);
+        if (dockWidgetArea(m_propertiesDockWidget) & Qt::LeftDockWidgetArea)
+            m_leftDockBar->addDockWidget(m_propertiesDockWidget);
+        else
+            m_rightDockBar->addDockWidget(m_propertiesDockWidget);
+        if (dockWidgetArea(m_assetsDockWidget) & Qt::LeftDockWidgetArea)
+            m_leftDockBar->addDockWidget(m_assetsDockWidget);
+        else
+            m_rightDockBar->addDockWidget(m_assetsDockWidget);
+        if (dockWidgetArea(m_toolboxDockWidget) & Qt::LeftDockWidgetArea)
+            m_leftDockBar->addDockWidget(m_toolboxDockWidget);
+        else
+            m_rightDockBar->addDockWidget(m_toolboxDockWidget);
+        if (dockWidgetArea(m_formsDockWidget) & Qt::LeftDockWidgetArea)
+            m_leftDockBar->addDockWidget(m_formsDockWidget);
+        else
+            m_rightDockBar->addDockWidget(m_formsDockWidget);
+
+        m_leftDockBar->setDockWidgetButtonChecked(m_controlsDockWidget, !m_controlsDockWidgetVisible);
+        m_leftDockBar->setDockWidgetButtonChecked(m_propertiesDockWidget, !m_propertiesDockWidgetVisible);
+        m_leftDockBar->setDockWidgetButtonChecked(m_assetsDockWidget, !m_assetsDockWidgetVisible);
+        m_leftDockBar->setDockWidgetButtonChecked(m_toolboxDockWidget, !m_toolboxDockWidgetVisible);
+        m_leftDockBar->setDockWidgetButtonChecked(m_formsDockWidget, !m_formsDockWidgetVisible);
+
+        m_rightDockBar->setDockWidgetButtonChecked(m_controlsDockWidget, !m_controlsDockWidgetVisible);
+        m_rightDockBar->setDockWidgetButtonChecked(m_propertiesDockWidget, !m_propertiesDockWidgetVisible);
+        m_rightDockBar->setDockWidgetButtonChecked(m_assetsDockWidget, !m_assetsDockWidgetVisible);
+        m_rightDockBar->setDockWidgetButtonChecked(m_toolboxDockWidget, !m_toolboxDockWidgetVisible);
+        m_rightDockBar->setDockWidgetButtonChecked(m_formsDockWidget, !m_formsDockWidgetVisible);
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent* event)
+{
+    if (GeneralSettings::interfaceSettings()->preserveDesignerState) {
+        if (m_removeSizeRestrictionsOnDockWidgetsTimer->isActive())
+            onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout();
+        writeSettings();
+    }
+
+    QMainWindow::closeEvent(event);
+}
+
+void MainWindow::resetWidget()
+{
+    const bool wasVisible = isVisible();
+    resize(sizeHint());
+    move(UtilityFunctions::centerPos(size()));
+    setWindowState(windowState() & ~Qt::WindowMaximized);
+    restoreState(m_initialInterfaceState);
+    setVisible(wasVisible); // setWindowState might hide the window
 }
 
 void MainWindow::readSettings()
 {
+    const bool wasVisible = isVisible();
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->begin();
     resize(settings->value<QSize>("MainWindow.Size", sizeHint()));
     move(settings->value<QPoint>("MainWindow.Position", UtilityFunctions::centerPos(size())));
-    if (settings->value<bool>("MainWindow.Fullscreen", false))
-        showFullScreen();
-    else if (settings->value<bool>("MainWindow.Maximized", false))
-        showMaximized();
-    else
-        showNormal();
-    restoreState(settings->value<QByteArray>("MainWindow.WindowState", {}));
+    setWindowState(settings->value<bool>("MainWindow.Maximized", false)
+                   ? (windowState() | Qt::WindowMaximized)
+                   : (windowState() & ~Qt::WindowMaximized));
+    restoreState(settings->value<QByteArray>("MainWindow.InterfaceState", QByteArray()));
     settings->end();
+    setVisible(wasVisible); // setWindowState might hide the window
 }
 
-void MainWindow::writeSettings()
+void MainWindow::writeSettings() const
 {
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->begin();
     settings->setValue("MainWindow.Size", size());
     settings->setValue("MainWindow.Position", pos());
     settings->setValue("MainWindow.Maximized", isMaximized());
-    settings->setValue("MainWindow.Fullscreen", isFullScreen());
-    settings->setValue("MainWindow.WindowState", saveState());
+    settings->setValue("MainWindow.InterfaceState", saveState());
     settings->end();
-}
-
-void MainWindow::showEvent(QShowEvent* event)
-{
-    static bool firstShown = true;
-    if (firstShown)
-        readSettings();
-    firstShown = false;
-    event->accept();
-}
-
-void MainWindow::closeEvent(QCloseEvent* event)
-{
-    //if (GeneralSettings::interfaceSettings()->preserveDesignerState)
-    //    writeSettings();
-    QMainWindow::closeEvent(event);
 }
 
 QSize MainWindow::sizeHint() const
 {
-    return {1220, 720};
+    return {1200, 700};
 }

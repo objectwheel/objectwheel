@@ -40,7 +40,7 @@ ThemeChooserWidget* ProjectOptionsWidget::themeChooserWidget1() const
 
 QSize ProjectOptionsWidget::sizeHint() const
 {
-    return QSize(640, 640);
+    return QSize(670, 640);
 }
 
 void ProjectOptionsWidget::charge()

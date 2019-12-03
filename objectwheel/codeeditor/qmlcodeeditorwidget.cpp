@@ -954,5 +954,5 @@ QmlCodeEditorToolBar* QmlCodeEditorWidget::toolBar() const
 
 QSize QmlCodeEditorWidget::sizeHint() const
 {
-    return QSize(640, 640);
+    return QSize(670, 640);
 }

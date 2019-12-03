@@ -47,7 +47,7 @@ static bool warnIfFileDoesNotExist(const QString& filePath)
 class EditorContainer final : public QLabel {
 public:
     explicit EditorContainer(QWidget* parent = nullptr) : QLabel(parent) {}
-    QSize sizeHint() const override { return {640, 640}; }
+    QSize sizeHint() const override { return {670, 640}; }
 };
 
 CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)

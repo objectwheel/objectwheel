@@ -1653,6 +1653,7 @@ void QmlCodeEditor::applyFontSettings()
     m_rowBar->setPalette(ep);
 
     m_toolBar->setFont(QApplication::font());
+    m_noDocsLabel->setFont(QApplication::font());
 
     updateViewportMargins();   // Adjust to new font width
     updateHighlights();

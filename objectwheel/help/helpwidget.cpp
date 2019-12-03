@@ -153,7 +153,7 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
 
 QSize HelpWidget::sizeHint() const
 {
-    return QSize(640, 640);
+    return QSize(670, 640);
 }
 
 bool HelpWidget::eventFilter(QObject* watched, QEvent* event)

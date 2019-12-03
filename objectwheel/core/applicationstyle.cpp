@@ -462,7 +462,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     case PE_PanelButtonTool:
         if (widget && widget->objectName() == "qt_toolbar_ext_button")
             break;
-        if (widget && widget->parent() && widget->parent()->objectName() == "_q_ModeSelectorPane") {
+        if (widget && widget->parent() && widget->parent()->objectName() == "modeSelectorPane") {
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing);
             painter->setPen(Qt::NoPen);
@@ -987,7 +987,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 painter->translate(0, widget->height());
                 painter->rotate(-90);
             }
-            if (widget && widget->parent() && widget->parent()->objectName() == "_q_ModeSelectorPane") {
+            if (widget && widget->parent() && widget->parent()->objectName() == "modeSelectorPane") {
                 toolbutton->rect.adjust(4, 0, 0, 0);
                 if (toolbutton->state & State_On || toolbutton->state & State_Sunken)
                     toolbutton->palette.setColor(QPalette::ButtonText, Qt::white);
@@ -1018,7 +1018,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     QIcon::State state = toolbutton->state & State_On ? QIcon::On : QIcon::Off;
                     QIcon::Mode mode;
                     if (widget && widget->parent() && widget->parent()->objectName()
-                            == "_q_ModeSelectorPane" && toolbutton->state & State_Sunken) {
+                            == "modeSelectorPane" && toolbutton->state & State_Sunken) {
                         state = QIcon::On;
                     }
                     if (!(toolbutton->state & State_Enabled))

@@ -22,7 +22,6 @@
 #include <designersettings.h>
 #include <interfacesettings.h>
 #include <codeeditorsettings.h>
-#include <settingsmanager.h>
 #include <applicationstyle.h>
 #include <helpmanager.h>
 #include <paintutils.h>
@@ -47,7 +46,6 @@ QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 DesignerSettings* ApplicationCore::s_designerSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
-SettingsManager* ApplicationCore::s_settingsManager = nullptr;
 ModeManager* ApplicationCore::s_modeManager = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
 RegistrationApiManager* ApplicationCore::s_accountManager = nullptr;
@@ -80,13 +78,11 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_generalSettings = new GeneralSettings(app);
     s_designerSettings = new DesignerSettings(app);
     s_codeEditorSettings = new CodeEditorSettings(app);
-    s_settingsManager = new SettingsManager(app);
 
     /* Read settings */
     GeneralSettings::read();
     DesignerSettings::read();
     CodeEditorSettings::read();
-    SettingsManager::start(5000); // Saves settings each 5 secs
 
     /* Set application's default palette */
     QApplication::setPalette(palette());

@@ -14,7 +14,6 @@ HEADERS += $$PWD/controlcreationmanager.h \
            $$PWD/savemanager.h \
            $$PWD/servermanager.h \
            $$PWD/registrationapimanager.h \
-           $$PWD/settingsmanager.h \
            $$PWD/usermanager.h \
            $$PWD/windowmanager.h \
            $$PWD/helpmanager.h \
@@ -33,7 +32,6 @@ SOURCES += $$PWD/controlcreationmanager.cpp \
            $$PWD/savemanager.cpp \
            $$PWD/servermanager.cpp \
            $$PWD/registrationapimanager.cpp \
-           $$PWD/settingsmanager.cpp \
            $$PWD/usermanager.cpp \
            $$PWD/windowmanager.cpp \
            $$PWD/helpmanager.cpp \
