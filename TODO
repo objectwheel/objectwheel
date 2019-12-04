@@ -4,21 +4,18 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Thanks Icons8 for providing icons for this app (URL) (LICENSE)
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
-Ow menüsünü düzenle; Help, About, Support vs vs gibi temel şeyleri ekle,
-    Logout, ana ekrana dönme, projeler ekranına dönme vs vs alayını ekle işte
-    belki mod değiştirme bile eklemebilir
+Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
+qmlcodeeditorwidget'de kodları collapse/expand yapma olayı bozuk kod editörde
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar
 dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
-Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
 
-qmlcodeeditorwidget'de kodları collapse/expand yapma olayı bozuk kod editörde
-quick_controls_conf ve project options sayfası yeniden dizayn edilecek
-Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf dosyasını kullanabilir
-belki saveutils veritabanı'da cbor'a çevrilmeli? nasıl olsa büyük veri saklanmicak artık
+Ow menüsünü düzenle; Help, About, Support vs vs gibi temel şeyleri ekle,
+    Logout, ana ekrana dönme, projeler ekranına dönme vs vs alayını ekle işte
+    belki mod değiştirme bile eklemebilir
 tüm api işleri cbor'a taşınabilir olacak şekilde çevrilecek
 Objectwheel registration süreci çalışır hale getirilecek
 Feedback mekanizması eklenecek
@@ -96,6 +93,13 @@ Buttonlar, Radio buttonlar, checkboxlar, spinboxlar, tüm widgetları cross-plat
     applicationstyle:panelbuttoncommand çizimlerindeki tüm kontur ve gölge çizimleri transparan
         siyah bazlı olmalı, sabit renk kullanımlarından kaçınılmalı
 
+Project Options bölümünden assets:/ içine fontlar ve conf dosyası koymak için varsayılan konumu değiştirme
+    seçeneği verilecek. Yada fontlar için tek tek resource seçimi de yapıla bilir, assets içinden seçim
+    yapılan fontlar program açılınca otomatikman font database ye yüklenir, böylece qquickconf dosyası
+    ile yapılan font ataması geçerli olur ve sistem ilgili fontu başarıyla set edebilir. Conf içinse
+    "varsayılan conf dosyası yolu" seçtirilebilir, böylece project options backend olarak bu .conf
+    dosyasını kullanabilir
+quick_controls_conf ve project options sayfası yeniden dizayn edilecek
 hem controls pane'e hem forms pane'e indexi yukarı aşağı arttırıp azaltmak için iki buton eklenmeli
     bu butonlar yalnızca slection varken ve yukarı yada aşağı selection mümkün ken enabled olmalı
 çift tıklama ile forms pane üzerinden form isimleri değiştirilebilmeli ayrıca özel bir buton da ekle

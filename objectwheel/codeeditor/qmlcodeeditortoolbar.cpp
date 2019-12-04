@@ -133,7 +133,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_cutButton->setToolTip(tr("Cut selection"));
     m_copyButton->setToolTip(tr("Copy selection"));
     m_pasteButton->setToolTip(tr("Paste from clipboard"));
-    m_scopeButton->setToolTip(tr("Change the scope of open files"));
+    m_scopeButton->setToolTip(tr("Change code editor scope"));
     m_lineColumnLabel->setToolTip(tr("Cursor position"));
 
     m_undoButton->setIcon(QIcon(QStringLiteral(":/images/designer/undo.svg")));
@@ -169,7 +169,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     g_designsAction->setIcon(QIcon(QStringLiteral(":/images/designer/view-source-code.svg")));
     g_designsAction->setCheckable(true);
     g_designsAction->setProperty("ow_scope", Designs);
-    g_designsAction->setText(tr("Source Codes\t"));
+    g_designsAction->setText(tr("User Interface\t"));
 
     g_othersAction->setIcon(QIcon(QStringLiteral(":/images/designer/external-files.svg")));
     g_othersAction->setCheckable(true);
@@ -257,7 +257,7 @@ void QmlCodeEditorToolBar::setShowed(bool show)
 void QmlCodeEditorToolBar::discharge()
 {
     g_assetsAction->setText(tr("Assets\t"));
-    g_designsAction->setText(tr("Source Codes\t"));
+    g_designsAction->setText(tr("User Interface\t"));
     g_othersAction->setText(tr("External Files\t"));
 
     setPinned(true);
