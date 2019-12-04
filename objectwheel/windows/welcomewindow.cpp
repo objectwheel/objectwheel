@@ -11,8 +11,6 @@
 #include <resetwidget.h>
 #include <projecttemplateswidget.h>
 #include <aboutwindow.h>
-#include <generalsettings.h>
-#include <interfacesettings.h>
 #include <utilityfunctions.h>
 
 #include <QTimer>
@@ -46,6 +44,9 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     m_view->add(Reset, m_resetWidget);
     m_view->show(Login);
 
+    resize(sizeHint());
+    move(UtilityFunctions::centerPos(size()));
+
     /**** ForgetWidget settings ****/
     connect(m_forgetWidget, &ForgetWidget::done, m_resetWidget, &ResetWidget::setEmail);
     connect(m_forgetWidget, &ForgetWidget::back, [=]
@@ -56,7 +57,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(Reset, View::RightToLeft);
     });
-
     /**** ResetWidget settings ****/
     connect(m_resetWidget, &ResetWidget::cancel, [=]
     {
@@ -70,7 +70,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
           tr("Your password has been successfully changed.\n"
           "You can continue by logging into the application with your new password."));
     });
-
     /**** LoginWidget settings ****/
     connect(m_loginWidget, &LoginWidget::signup, [=]
     {
@@ -90,7 +89,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         m_projectsWidget->refreshProjectList();
         m_view->show(Projects, View::RightToLeft);
     });
-
     /**** ProjectsWidget settings ****/
     connect(m_projectsWidget, &ProjectsWidget::done,
             this, &WelcomeWindow::done);
@@ -106,7 +104,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(ProjectDetails, View::RightToLeft);
     });
-
     /**** ProjectTemplatesWidget settings ****/
     connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::newProject,
             m_projectDetailsWidget, &ProjectDetailsWidget::onNewProject);
@@ -119,7 +116,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(ProjectDetails, View::RightToLeft);
     });
-
     /**** ProjectDetailsWidget settings ****/
     connect(m_projectDetailsWidget, &ProjectDetailsWidget::back, [=]
     {
@@ -130,7 +126,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         m_projectsWidget->refreshProjectList(true);
         m_view->show(Projects, View::LeftToRight);
     });
-
     /**** RegistrationWidget settings ****/
     connect(m_registrationWidget, &RegistrationWidget::back, [=]
     {
@@ -142,7 +137,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_view->show(Verification, View::RightToLeft);
     });
-
     /**** VerificationWidget settings ****/
     connect(m_verificationWidget, &VerificationWidget::cancel, [=]
     {
@@ -157,67 +151,11 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
           tr("Your registration is completed. Thank you for choosing us.\n"
           "You can continue by logging into the application."));
     });
-
     /**** SucceedWidget settings ****/
     connect(m_succeedWidget, &SucceedWidget::done, [=]
     {
         m_view->show(Login, View::LeftToRight);
     });
-    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
-            this, &WelcomeWindow::resetSettings);
-}
-
-void WelcomeWindow::resetSettings()
-{
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    settings->begin();
-    settings->setValue("WelcomeWindow.Size", sizeHint());
-    settings->setValue("WelcomeWindow.Position", UtilityFunctions::centerPos(sizeHint()));
-    settings->setValue("WelcomeWindow.Maximized", false);
-    settings->setValue("WelcomeWindow.Fullscreen", false);
-    settings->end();
-
-    if (isVisible())
-        readSettings();
-}
-
-void WelcomeWindow::readSettings()
-{
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    settings->begin();
-    resize(settings->value<QSize>("WelcomeWindow.Size", sizeHint()));
-    move(settings->value<QPoint>("WelcomeWindow.Position", UtilityFunctions::centerPos(size())));
-    if (settings->value<bool>("WelcomeWindow.Fullscreen", false))
-        showFullScreen();
-    else if (settings->value<bool>("WelcomeWindow.Maximized", false))
-        showMaximized();
-    else
-        showNormal();
-    settings->end();
-}
-
-void WelcomeWindow::writeSettings()
-{
-//    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-//    settings->begin();
-//    settings->setValue("WelcomeWindow.Size", size());
-//    settings->setValue("WelcomeWindow.Position", pos());
-//    settings->setValue("WelcomeWindow.Maximized", isMaximized());
-//    settings->setValue("WelcomeWindow.Fullscreen", isFullScreen());
-//    settings->end();
-}
-
-void WelcomeWindow::showEvent(QShowEvent* event)
-{
-    readSettings();
-    event->accept();
-}
-
-void WelcomeWindow::closeEvent(QCloseEvent* event)
-{
-    if (GeneralSettings::interfaceSettings()->preserveDesignerState)
-        writeSettings();
-    QWidget::closeEvent(event);
 }
 
 QSize WelcomeWindow::sizeHint() const

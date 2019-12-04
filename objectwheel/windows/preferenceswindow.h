@@ -48,11 +48,6 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    void resetSettings();
-    void readSettings();
-    void writeSettings();
-
-private:
      void addPage(SettingsPage* page);
      void setCurrentPage(SettingsPage* page, SettingsPage* previous);
 

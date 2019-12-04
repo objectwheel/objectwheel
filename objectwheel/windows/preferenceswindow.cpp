@@ -3,8 +3,6 @@
 #include <generalsettingspage.h>
 #include <codeeditorsettingspage.h>
 #include <designersettingspage.h>
-#include <generalsettings.h>
-#include <interfacesettings.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
 
@@ -77,6 +75,9 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_dialogButtonBox->button(QDialogButtonBox::Reset)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
 
+    resize(sizeHint());
+    move(UtilityFunctions::centerPos(size()));
+
     connect(m_searchLineEdit, &LineEdit::textEdited,
             this, [=] { search(m_searchLineEdit->text()); });
     connect(m_listWidget, &QListWidget::currentItemChanged,
@@ -102,8 +103,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
             this, &PreferencesWindow::apply);
     connect(m_dialogButtonBox->button(QDialogButtonBox::Ok), &QPushButton::clicked,
             this, &PreferencesWindow::done);
-    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
-            this, &PreferencesWindow::resetSettings);
 }
 
 void PreferencesWindow::setCurrentWidget(PreferencesWindow::Widget w)
@@ -256,50 +255,10 @@ void PreferencesWindow::setCurrentPage(SettingsPage* page, SettingsPage* previou
     }
 }
 
-void PreferencesWindow::resetSettings()
-{
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    settings->begin();
-    settings->setValue("PreferencesWindow.Size", sizeHint());
-    settings->setValue("PreferencesWindow.Position", UtilityFunctions::centerPos(sizeHint()));
-    settings->setValue("PreferencesWindow.Maximized", false);
-    settings->setValue("PreferencesWindow.Fullscreen", false);
-    settings->end();
-
-    if (isVisible())
-        readSettings();
-}
-
-void PreferencesWindow::readSettings()
-{
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    settings->begin();
-    resize(settings->value<QSize>("PreferencesWindow.Size", sizeHint()));
-    move(settings->value<QPoint>("PreferencesWindow.Position", UtilityFunctions::centerPos(size())));
-    if (settings->value<bool>("PreferencesWindow.Fullscreen", false))
-        showFullScreen();
-    else if (settings->value<bool>("PreferencesWindow.Maximized", false))
-        showMaximized();
-    else
-        showNormal();
-    settings->end();
-}
-
-void PreferencesWindow::writeSettings()
-{
-    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
-    settings->begin();
-    settings->setValue("PreferencesWindow.Size", size());
-    settings->setValue("PreferencesWindow.Position", pos());
-    settings->setValue("PreferencesWindow.Maximized", isMaximized());
-    settings->setValue("PreferencesWindow.Fullscreen", isFullScreen());
-    settings->end();
-}
-
 void PreferencesWindow::showEvent(QShowEvent* event)
 {
-    readSettings();
     QWidget::showEvent(event);
+
     if (event->isAccepted()) {
         if (!m_listWidget->currentItem())
             m_listWidget->setCurrentRow(0);
@@ -309,13 +268,11 @@ void PreferencesWindow::showEvent(QShowEvent* event)
 
 void PreferencesWindow::closeEvent(QCloseEvent* event)
 {
-    if (GeneralSettings::interfaceSettings()->preserveDesignerState)
-        writeSettings();
     revert();
     QWidget::closeEvent(event);
 }
 
 QSize PreferencesWindow::sizeHint() const
 {
-    return {850, 480};
+    return {760, 440};
 }

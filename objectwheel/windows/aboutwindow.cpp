@@ -1,5 +1,6 @@
 #include <aboutwindow.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
 #include <QVBoxLayout>
 #include <QPushButton>
@@ -41,6 +42,9 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
                           .arg(QDate::currentDate().year()).arg(APP_CORP));
 
+    resize(sizeHint());
+    move(UtilityFunctions::centerPos(size()));
+
     connect(m_okButton, &QPushButton::clicked, this, &AboutWindow::done);
 }
 
@@ -48,4 +52,5 @@ QSize AboutWindow::sizeHint() const
 {
     return {700, 400};
 }
+
 
