@@ -12,6 +12,7 @@ static const char g_hdpiEnabled[] = "HdpiEnabled";
 static const char g_highlightColor[] = "HighlightColor";
 static const char g_outputPanePops[] = "OutputPanePops";
 static const char g_preserveDesignerState[] = "PreserveDesignerState";
+static const char g_outputPaneMinimizedStartupEnabled[] = "OutputPaneMinimizedStartupEnabled";
 
 InterfaceSettings::InterfaceSettings(GeneralSettings* generalSettings) : Settings(generalSettings)
 {
@@ -35,6 +36,7 @@ void InterfaceSettings::read()
     /****/
     outputPanePops = value<bool>(g_outputPanePops, outputPanePops);
     preserveDesignerState = value<bool>(g_preserveDesignerState, preserveDesignerState);
+    outputPaneMinimizedStartupEnabled = value<bool>(g_outputPaneMinimizedStartupEnabled, outputPaneMinimizedStartupEnabled);
     end();
 }
 
@@ -53,6 +55,7 @@ void InterfaceSettings::write()
     /****/
     setValue(g_outputPanePops, outputPanePops);
     setValue(g_preserveDesignerState, preserveDesignerState);
+    setValue(g_outputPaneMinimizedStartupEnabled, outputPaneMinimizedStartupEnabled);
     end();
 
     emit static_cast<GeneralSettings*>(groupSettings())->interfaceSettingsChanged();
@@ -73,6 +76,7 @@ void InterfaceSettings::reset()
     /****/
     outputPanePops = true;
     preserveDesignerState = true;
+    outputPaneMinimizedStartupEnabled = true;
 }
 
 const char* InterfaceSettings::category() const

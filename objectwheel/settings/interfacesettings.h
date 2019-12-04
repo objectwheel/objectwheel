@@ -27,6 +27,7 @@ struct InterfaceSettings final : public Settings
     /****/
     bool outputPanePops;
     bool preserveDesignerState;
+    bool outputPaneMinimizedStartupEnabled;
 };
 
 #endif // INTERFACESETTINGS_H

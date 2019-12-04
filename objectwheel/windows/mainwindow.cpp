@@ -365,6 +365,9 @@ void MainWindow::discharge()
     m_formsController->discharge();
     m_assetsController->discharge();
     m_centralWidget->discharge();
+
+    if (GeneralSettings::interfaceSettings()->outputPaneMinimizedStartupEnabled)
+        m_centralWidget->outputController()->setPaneVisible(false);
 }
 
 void MainWindow::setDockWidgetAreasVisible(Qt::DockWidgetAreas areas, bool visible)
@@ -500,7 +503,11 @@ void MainWindow::showEvent(QShowEvent* event)
 
         setDockWidgetAreasVisible(Qt::LeftDockWidgetArea, leftSideVisible);
         setDockWidgetAreasVisible(Qt::RightDockWidgetArea, rightSideVisible);
-        m_centralWidget->outputController()->setPaneVisible(bottomSideVisible);
+
+        if (GeneralSettings::interfaceSettings()->outputPaneMinimizedStartupEnabled)
+            m_centralWidget->outputController()->setPaneVisible(false);
+        else
+            m_centralWidget->outputController()->setPaneVisible(bottomSideVisible);
 
         m_leftDockBar->removeDockWidget(m_controlsDockWidget);
         m_leftDockBar->removeDockWidget(m_propertiesDockWidget);

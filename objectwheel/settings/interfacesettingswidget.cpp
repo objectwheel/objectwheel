@@ -42,6 +42,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
   , m_outputPanePopsCheckBox(new QCheckBox(m_behavioralGroup))
   , m_preserveDesignerStateCheckBox(new QCheckBox(m_behavioralGroup))
   , m_designerStateResetButton(new QPushButton(m_behavioralGroup))
+  , m_outputPaneMinimizedStartupCheckBox(new QCheckBox(m_behavioralGroup))
 {
     contentLayout()->addWidget(m_interfaceGroup);
     contentLayout()->addWidget(m_fontGroup);
@@ -142,8 +143,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     behavioralLayout->setContentsMargins(4, 4, 4, 4);
     behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     behavioralLayout->addWidget(m_outputPanePopsCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    behavioralLayout->addWidget(m_preserveDesignerStateCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
-    behavioralLayout->addWidget(m_designerStateResetButton, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    behavioralLayout->addWidget(m_outputPaneMinimizedStartupCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    behavioralLayout->addWidget(m_preserveDesignerStateCheckBox, 2, 0, Qt::AlignLeft | Qt::AlignVCenter);
+    behavioralLayout->addWidget(m_designerStateResetButton, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
     behavioralLayout->setColumnStretch(4, 1);
     behavioralLayout->setColumnMinimumWidth(1, 20);
 
@@ -151,16 +153,21 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     m_outputPanePopsCheckBox->setText(tr("Pop up output pane when it flashes"));
     m_preserveDesignerStateCheckBox->setText(tr("Enable interface state saving"));
     m_designerStateResetButton->setText(tr("Reset interface state"));
+    m_outputPaneMinimizedStartupCheckBox->setText(tr("Enable minimized output pane startup"));
 
-    m_outputPanePopsCheckBox->setToolTip(tr("Pop up output pane when it flashes"));
+    m_outputPanePopsCheckBox->setToolTip(tr("Pop up output pane when it flashes (ie. when a "
+                                            "console print happens)"));
     m_preserveDesignerStateCheckBox->setToolTip(tr("Enabling this option leads preserving tool bars, dock widgets, pane "
                                                    "postions and other designer states between application starts"));
     m_designerStateResetButton->setToolTip(tr("Resets tool bars, dock widgets, pane postions and other interface "
                                               "states to default"));
+    m_outputPaneMinimizedStartupCheckBox->setToolTip(tr("Do not pop up the output pane at startup even "
+                                                        "if it is left open in previous session"));
 
     m_outputPanePopsCheckBox->setCursor(Qt::PointingHandCursor);
     m_designerStateResetButton->setCursor(Qt::PointingHandCursor);
     m_preserveDesignerStateCheckBox->setCursor(Qt::PointingHandCursor);
+    m_outputPaneMinimizedStartupCheckBox->setCursor(Qt::PointingHandCursor);
 
     /****/
 
@@ -279,6 +286,7 @@ void InterfaceSettingsWidget::apply()
     /****/
     settings->outputPanePops = m_outputPanePopsCheckBox->isChecked();
     settings->preserveDesignerState = m_preserveDesignerStateCheckBox->isChecked();
+    settings->outputPaneMinimizedStartupEnabled = m_outputPaneMinimizedStartupCheckBox->isChecked();
     /****/
     settings->write();
 }
@@ -309,6 +317,7 @@ void InterfaceSettingsWidget::revert()
     /****/
     m_outputPanePopsCheckBox->setChecked(settings->outputPanePops);
     m_preserveDesignerStateCheckBox->setChecked(settings->preserveDesignerState);
+    m_outputPaneMinimizedStartupCheckBox->setChecked(settings->outputPaneMinimizedStartupEnabled);
 }
 
 void InterfaceSettingsWidget::reset()
@@ -346,6 +355,7 @@ bool InterfaceSettingsWidget::containsWord(const QString& word) const
             || m_fontThickBox->text().contains(word, Qt::CaseInsensitive)
             || m_outputPanePopsCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_preserveDesignerStateCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_outputPaneMinimizedStartupCheckBox->text().contains(word, Qt::CaseInsensitive)
             || m_preserveDesignerStateCheckBox->toolTip().contains(word, Qt::CaseInsensitive)
             || m_designerStateResetButton->text().contains(word, Qt::CaseInsensitive)
             || m_designerStateResetButton->toolTip().contains(word, Qt::CaseInsensitive)

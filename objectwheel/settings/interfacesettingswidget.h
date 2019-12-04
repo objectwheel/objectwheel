@@ -55,6 +55,7 @@ private:
     /****/
     QGroupBox* m_behavioralGroup;
     QCheckBox* m_outputPanePopsCheckBox;
+    QCheckBox* m_outputPaneMinimizedStartupCheckBox;
     QCheckBox* m_preserveDesignerStateCheckBox;
     QPushButton* m_designerStateResetButton;
 };

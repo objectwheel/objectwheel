@@ -274,5 +274,5 @@ void PreferencesWindow::closeEvent(QCloseEvent* event)
 
 QSize PreferencesWindow::sizeHint() const
 {
-    return {760, 440};
+    return {780, 460};
 }
