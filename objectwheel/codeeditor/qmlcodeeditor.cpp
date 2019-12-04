@@ -1877,6 +1877,11 @@ QmlCodeEditorToolBar* QmlCodeEditor::toolBar() const
     return m_toolBar;
 }
 
+QSize QmlCodeEditor::sizeHint() const
+{
+    return QSize(960, 640);
+}
+
 RefactorMarkers QmlCodeEditor::refactorMarkers() const
 {
     return m_refactorOverlay->markers();

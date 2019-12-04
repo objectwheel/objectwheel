@@ -785,3 +785,8 @@ void FileExplorer::setMode(FileExplorer::Mode mode)
         updateGeometries();
     }
 }
+
+QSize FileExplorer::sizeHint() const
+{
+    return QSize(230, 640);
+}

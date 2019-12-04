@@ -4,6 +4,8 @@
 #include <textbrowserhelpviewer.h>
 #include <helpmanager.h>
 #include <paintutils.h>
+#include <interfacesettings.h>
+#include <generalsettings.h>
 
 #include <QHelpContentWidget>
 #include <QHelpIndexWidget>
@@ -13,115 +15,113 @@
 #include <QComboBox>
 #include <QToolButton>
 #include <QLabel>
-#include <QSplitter>
 #include <QInputDialog>
 #include <QKeyEvent>
 #include <QMouseEvent>
-#include <QClipboard>
 
 // TODO: "Find" on help page
-// TODO: Copy/paste keyboard shortcuts
 
-HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
-  , m_layout(new QVBoxLayout(this))
-  , m_toolBar(new QToolBar)
-  , m_typeCombo(new QComboBox)
+HelpWidget::HelpWidget(QWidget* parent) : QSplitter(parent)
+  , m_mode(Invalid)
+  , m_helpModeComboBox(new QComboBox)
+  , m_indexListFilterEdit(new LineEdit)
+  , m_titleLabel(new QLabel)
   , m_homeButton(new QToolButton)
   , m_backButton(new QToolButton)
   , m_forthButton(new QToolButton)
-  , m_titleLabel(new QLabel)
-  , m_copyAction(new QAction(this))
-  , m_splitter(new QSplitter)
   , m_helpViewer(new Help::Internal::TextBrowserHelpViewer)
-  , m_contentsWidget(new QWidget)
-  , m_contentsLayout(new QVBoxLayout(m_contentsWidget))
-  , m_indexWidget(new QWidget)
-  , m_indexLayout(new QVBoxLayout(m_indexWidget))
-  , m_indexFilterEdit(new LineEdit)
 {
-    setFocusPolicy(Qt::NoFocus);
-    m_typeCombo->setFocusPolicy(Qt::NoFocus);
+    QHelpEngine* engine = HelpManager::helpEngine();
+    engine->indexWidget()->installEventFilter(this);
+    engine->contentWidget()->viewport()->installEventFilter(this);
 
-    m_layout->setSpacing(0);
-    m_layout->setContentsMargins(0, 0, 0, 0);
-    m_layout->addWidget(m_toolBar);
-    m_layout->addWidget(m_splitter);
+    m_helpModeComboBox->addItem("Contents");
+    m_helpModeComboBox->addItem("Index");
 
     m_homeButton->setFixedSize({20, 20});
     m_backButton->setFixedSize({20, 20});
     m_forthButton->setFixedSize({20, 20});
-    m_typeCombo->setFixedSize({225, 20});
     m_titleLabel->setFixedHeight(20);
+    m_helpModeComboBox->setFixedHeight(20);
 
-    m_toolBar->layout()->setSpacing(2);
-    m_toolBar->layout()->setContentsMargins(1, 1, 1, 1);
-
-    m_toolBar->setFixedHeight(22);
-    m_toolBar->addWidget(m_typeCombo);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
-    m_toolBar->addSeparator();
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
-    m_toolBar->addWidget(m_homeButton);
-    m_toolBar->addWidget(m_backButton);
-    m_toolBar->addWidget(m_forthButton);
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
-    m_toolBar->addSeparator();
-    m_toolBar->addWidget(UtilityFunctions::createSpacingWidget({10, 10}));
-    m_toolBar->addWidget(m_titleLabel);
-
-    UtilityFunctions::adjustFontPixelSize(m_titleLabel, -1);
-    m_titleLabel->setTextFormat(Qt::RichText);
-
-    m_typeCombo->addItem("Contents");
-    m_typeCombo->addItem("Index");
-
-    m_typeCombo->setCursor(Qt::PointingHandCursor);
     m_homeButton->setCursor(Qt::PointingHandCursor);
     m_backButton->setCursor(Qt::PointingHandCursor);
     m_forthButton->setCursor(Qt::PointingHandCursor);
+    m_helpModeComboBox->setCursor(Qt::PointingHandCursor);
 
-    m_homeButton->setToolTip(tr("Go Home"));
-    m_backButton->setToolTip(tr("Go Back"));
-    m_forthButton->setToolTip(tr("Go Forth"));
+    m_homeButton->setToolTip(tr("Go to home page"));
+    m_backButton->setToolTip(tr("Go back"));
+    m_forthButton->setToolTip(tr("Go forth"));
+    m_helpModeComboBox->setToolTip(tr("Change help mode"));
 
     m_homeButton->setIcon(QIcon(QStringLiteral(":/images/help/home.svg")));
     m_backButton->setIcon(QIcon(QStringLiteral(":/images/help/back.svg")));
     m_forthButton->setIcon(QIcon(QStringLiteral(":/images/help/forth.svg")));
 
+    m_titleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    m_helpModeComboBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+
+    m_indexListFilterEdit->setPlaceholderText(tr("Search"));
+    m_indexListFilterEdit->setClearButtonEnabled(true);
+    m_indexListFilterEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959",
+                                                                      QSize(16, 16), this),
+                                     QLineEdit::LeadingPosition);
+
     m_backButton->setDisabled(true);
     m_forthButton->setDisabled(true);
 
-    m_splitter->setChildrenCollapsible(false);
-    m_splitter->setOrientation(Qt::Horizontal);
-    m_splitter->addWidget(m_contentsWidget);
-    m_splitter->addWidget(m_helpViewer);
-    m_splitter->setSizes(QList<int>() << 140 << 600);
+    auto toolBar = new QToolBar;
+    toolBar->layout()->setSpacing(2);
+    toolBar->layout()->setContentsMargins(1, 1, 1, 1);
+    toolBar->setFixedHeight(22);
+    toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    toolBar->addWidget(m_homeButton);
+    toolBar->addWidget(m_backButton);
+    toolBar->addWidget(m_forthButton);
+    toolBar->addSeparator();
+    toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
+    toolBar->addWidget(m_titleLabel);
+    toolBar->addWidget(UtilityFunctions::createSpacingWidget({1, 1}));
 
-    QHelpEngine* engine = HelpManager::helpEngine();
-    m_contentsLayout->setSpacing(5);
-    m_contentsLayout->setContentsMargins(5, 5, 5, 5);
-    m_contentsLayout->addWidget(engine->contentWidget());
+    auto viewerContainer = new QWidget;
+    auto viewerContainerLayout = new QVBoxLayout(viewerContainer);
+    viewerContainerLayout->setContentsMargins(0, 0, 0, 0);
+    viewerContainerLayout->setSpacing(0);
+    viewerContainerLayout->addWidget(toolBar);
+    viewerContainerLayout->addWidget(m_helpViewer);
 
-    m_indexFilterEdit->setPlaceholderText(tr("Search"));
-    m_indexFilterEdit->setClearButtonEnabled(true);
-    m_indexFilterEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", QSize(16, 16), this),
-                            QLineEdit::LeadingPosition);
+    auto listToolBar = new QToolBar;
+    listToolBar->layout()->setSpacing(2);
+    listToolBar->layout()->setContentsMargins(1, 1, 1, 1);
+    listToolBar->setFixedHeight(22);
+    listToolBar->addWidget(m_helpModeComboBox);
 
-    m_indexLayout->setSpacing(5);
-    m_indexLayout->setContentsMargins(5, 5, 5, 5);
-    m_indexLayout->addWidget(m_indexFilterEdit);
-    m_indexLayout->addWidget(engine->indexWidget());
+    auto listContainerLayout = new QVBoxLayout;
+    listContainerLayout->setContentsMargins(4, 4, 4, 4);
+    listContainerLayout->setSpacing(4);
+    listContainerLayout->addWidget(m_indexListFilterEdit);
+    listContainerLayout->addWidget(engine->indexWidget());
+    listContainerLayout->addWidget(engine->contentWidget());
 
-    engine->indexWidget()->installEventFilter(this);
-    engine->contentWidget()->viewport()->installEventFilter(this);
+    auto menuContainer = new QWidget;
+    auto menuContainerLayout = new QVBoxLayout(menuContainer);
+    menuContainerLayout->setContentsMargins(0, 0, 0, 0);
+    menuContainerLayout->setSpacing(0);
+    menuContainerLayout->addWidget(listToolBar);
+    menuContainerLayout->addLayout(listContainerLayout);
 
-    m_helpViewer->home();
+    setFrameShape(QFrame::NoFrame);
+    setChildrenCollapsible(false);
+    setOrientation(Qt::Horizontal);
+    addWidget(menuContainer);
+    addWidget(viewerContainer);
+    setSizes(QList<int>() << 120 << 600);
 
-    connect(m_typeCombo, qOverload<int>(&QComboBox::currentIndexChanged),
-            this, &HelpWidget::onTypeChange);
-    connect(m_indexFilterEdit, &LineEdit::textEdited,
+    connect(m_helpModeComboBox, qOverload<int>(&QComboBox::activated),
+            this, &HelpWidget::onHelpModeComboBoxActivation);
+    connect(m_indexListFilterEdit, &LineEdit::textEdited,
             this, &HelpWidget::onIndexFilterTextEdit);
-    connect(m_indexFilterEdit, &LineEdit::returnPressed,
+    connect(m_indexListFilterEdit, &LineEdit::returnPressed,
             engine->indexWidget(), &QHelpIndexWidget::activateCurrentItem);
     connect(engine->contentWidget(), qOverload<const QUrl&>(&QHelpContentWidget::linkActivated),
             this, qOverload<const QUrl&>(&HelpWidget::onUrlChange));
@@ -141,14 +141,63 @@ HelpWidget::HelpWidget(QWidget *parent) : QWidget(parent)
             m_helpViewer, &Help::Internal::TextBrowserHelpViewer::backward);
     connect(m_forthButton, &QToolButton::clicked,
             m_helpViewer, &Help::Internal::TextBrowserHelpViewer::forward);
+    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
+            this, [=] {
+        InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+        settings->begin();
+        settings->setValue("HelpWidget.CurrentMode", 0);
+        settings->end();
+        setMode(ContentList);
+    });
 
-    m_copyAction->setText("Copy selected");
-    m_copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    m_copyAction->setShortcut(QKeySequence::Copy);
-//    m_helpViewer->webView()->addAction(m_copyAction);
-//    connect(m_copyAction, &QAction::triggered, this, [=] {
-//        QGuiApplication::clipboard()->setText(m_helpViewer->selectedText());
-//    });
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    const int index = settings->value<int>("HelpWidget.CurrentMode", 0);
+    settings->end();
+    switch (index) {
+    case 0:
+        setMode(ContentList);
+        break;
+    case 1:
+        setMode(IndexList);
+        break;
+    default:
+        break;
+    }
+
+    m_helpViewer->home();
+}
+
+HelpWidget::Mode HelpWidget::mode() const
+{
+    return m_mode;
+}
+
+void HelpWidget::setMode(HelpWidget::Mode mode)
+{
+    QHelpEngine* engine = HelpManager::helpEngine();
+
+    if (m_mode != mode) {
+        m_mode = mode;
+
+        m_indexListFilterEdit->hide();
+        engine->indexWidget()->hide();
+        engine->contentWidget()->hide();
+
+        switch (mode) {
+        case ContentList:
+            engine->contentWidget()->show();
+            m_helpModeComboBox->setCurrentText(tr("Contents"));
+            break;
+        case IndexList:
+            m_indexListFilterEdit->show();
+            engine->indexWidget()->show();
+            m_helpModeComboBox->setCurrentText(tr("Index"));
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 QSize HelpWidget::sizeHint() const
@@ -170,6 +219,21 @@ bool HelpWidget::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
+void HelpWidget::onHelpModeComboBoxActivation()
+{
+    if (m_helpModeComboBox->currentText() == tr("Contents"))
+        setMode(ContentList);
+    else if (m_helpModeComboBox->currentText() == tr("Index"))
+        setMode(IndexList);
+
+    if (GeneralSettings::interfaceSettings()->preserveDesignerState) {
+        InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+        settings->begin();
+        settings->setValue("HelpWidget.CurrentMode", m_helpModeComboBox->currentIndex());
+        settings->end();
+    }
+}
+
 void HelpWidget::onHomeButtonClick()
 {
     m_helpViewer->stop();
@@ -178,37 +242,28 @@ void HelpWidget::onHomeButtonClick()
 
 void HelpWidget::discharge()
 {
-    QHelpEngine* engine = HelpManager::helpEngine();
     m_helpViewer->stop();
     m_helpViewer->clearHistory();
     m_helpViewer->home();
-    m_typeCombo->setCurrentIndex(0);
-    m_indexFilterEdit->clear();
+    m_indexListFilterEdit->clear();
+    m_backButton->setDisabled(true);
+    m_forthButton->setDisabled(true);
+    QHelpEngine* engine = HelpManager::helpEngine();
     engine->indexWidget()->clearSelection();
     engine->contentWidget()->clearSelection();
     engine->indexWidget()->scrollToTop();
+    engine->contentWidget()->scrollToTop();
     engine->contentWidget()->collapseAll();
-    m_backButton->setDisabled(true);
-    m_forthButton->setDisabled(true);
-}
-
-void HelpWidget::onTypeChange()
-{
-    if (m_typeCombo->currentIndex() == 0)
-        m_splitter->replaceWidget(0, m_contentsWidget);
-    else
-        m_splitter->replaceWidget(0, m_indexWidget);
 }
 
 void HelpWidget::onTitleChange()
 {
-    m_titleLabel->setText(tr("<b>Topic: </b>") + m_helpViewer->title());
+    m_titleLabel->setText("<p = \"font-size:12px;\"><b>" + tr("Topic") + ":</b> " + m_helpViewer->title() + "</p>");
 }
 
 void HelpWidget::onIndexFilterTextEdit(const QString& filterText)
 {
-    QHelpEngine* engine = HelpManager::helpEngine();
-    engine->indexWidget()->filterIndices(filterText);
+    HelpManager::helpEngine()->indexWidget()->filterIndices(filterText);
 }
 
 void HelpWidget::onUrlChange(const QUrl& url)

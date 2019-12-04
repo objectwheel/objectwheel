@@ -1,26 +1,31 @@
 #ifndef HELPWIDGET_H
 #define HELPWIDGET_H
 
-#include <QWidget>
-#include <QFutureWatcher>
+#include <QSplitter>
 
-class QSplitter;
 class QComboBox;
-class QHelpEngine;
-class QVBoxLayout;
 class LineEdit;
-class QToolBar;
 class QToolButton;
 class QLabel;
-
 namespace Help { namespace Internal { class TextBrowserHelpViewer; }}
 
-class HelpWidget : public QWidget
+class HelpWidget final : public QSplitter
 {
     Q_OBJECT
+    Q_DISABLE_COPY(HelpWidget)
 
 public:
-    explicit HelpWidget(QWidget *parent = nullptr);
+    enum Mode {
+        Invalid,
+        ContentList,
+        IndexList
+    };
+
+public:
+    explicit HelpWidget(QWidget* parent = nullptr);
+
+    Mode mode() const;
+    void setMode(Mode mode);
 
 public slots:
     void discharge();
@@ -30,8 +35,8 @@ protected:
     bool eventFilter(QObject *watched, QEvent *event) override;
 
 private slots:
+    void onHelpModeComboBoxActivation();
     void onHomeButtonClick();
-    void onTypeChange();
     void onTitleChange();
     void onIndexFilterTextEdit(const QString& filterText);
     void onUrlChange(const QUrl& url);
@@ -39,21 +44,14 @@ private slots:
     void onUrlChange(const QMap<QString, QUrl> &links, const QString &keyword);
 
 private:
-    QVBoxLayout* m_layout;
-    QToolBar* m_toolBar;
-    QComboBox* m_typeCombo;
+    Mode m_mode;
+    QComboBox* m_helpModeComboBox;
+    LineEdit* m_indexListFilterEdit;
+    QLabel* m_titleLabel;
     QToolButton* m_homeButton;
     QToolButton* m_backButton;
     QToolButton* m_forthButton;
-    QLabel* m_titleLabel;
-    QAction* m_copyAction;
-    QSplitter* m_splitter;
     Help::Internal::TextBrowserHelpViewer* m_helpViewer;
-    QWidget* m_contentsWidget;
-    QVBoxLayout* m_contentsLayout;
-    QWidget* m_indexWidget;
-    QVBoxLayout* m_indexLayout;
-    LineEdit* m_indexFilterEdit;
 };
 
 #endif // HELPWIDGET_H

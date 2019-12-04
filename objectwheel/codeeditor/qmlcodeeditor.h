@@ -129,6 +129,8 @@ public:
     RowBar* rowBar() const;
     QmlCodeEditorToolBar* toolBar() const;
 
+    QSize sizeHint() const override;
+
     TextEditor::RefactorMarkers refactorMarkers() const;
     void setRefactorMarkers(const TextEditor::RefactorMarkers &markers);
 

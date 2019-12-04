@@ -304,6 +304,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, [=] {
+        ModeManager::setMode(ModeManager::Designer);
         resetWidget();
         QTimer::singleShot(1000, this, [=] {
             resetWidget();

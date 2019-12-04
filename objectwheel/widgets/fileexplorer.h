@@ -36,6 +36,8 @@ public:
     Mode mode() const;
     void setMode(FileExplorer::Mode mode);
 
+    QSize sizeHint() const override;
+
 public slots:
     void clean();
     void goToEntry(const QString& entry);
