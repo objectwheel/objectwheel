@@ -145,25 +145,15 @@ HelpWidget::HelpWidget(QWidget* parent) : QSplitter(parent)
             this, [=] {
         InterfaceSettings* settings = GeneralSettings::interfaceSettings();
         settings->begin();
-        settings->setValue("HelpWidget.CurrentMode", 0);
+        settings->setValue("HelpWidget.CurrentMode", ContentList);
         settings->end();
         setMode(ContentList);
     });
 
     InterfaceSettings* settings = GeneralSettings::interfaceSettings();
     settings->begin();
-    const int index = settings->value<int>("HelpWidget.CurrentMode", 0);
+    setMode(settings->value<Mode>("HelpWidget.CurrentMode", ContentList));
     settings->end();
-    switch (index) {
-    case 0:
-        setMode(ContentList);
-        break;
-    case 1:
-        setMode(IndexList);
-        break;
-    default:
-        break;
-    }
 
     m_helpViewer->home();
 }
@@ -229,7 +219,7 @@ void HelpWidget::onHelpModeComboBoxActivation()
     if (GeneralSettings::interfaceSettings()->preserveDesignerState) {
         InterfaceSettings* settings = GeneralSettings::interfaceSettings();
         settings->begin();
-        settings->setValue("HelpWidget.CurrentMode", m_helpModeComboBox->currentIndex());
+        settings->setValue("HelpWidget.CurrentMode", m_mode);
         settings->end();
     }
 }

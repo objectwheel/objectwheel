@@ -17,9 +17,10 @@ class HelpWidget final : public QSplitter
 public:
     enum Mode {
         Invalid,
-        ContentList,
+        ContentList = 0x10,
         IndexList
     };
+    Q_ENUM(Mode)
 
 public:
     explicit HelpWidget(QWidget* parent = nullptr);

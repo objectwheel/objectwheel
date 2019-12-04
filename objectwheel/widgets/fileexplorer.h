@@ -24,7 +24,11 @@ class FileExplorer : public QTreeView
     friend class FileExplorerListDelegate;
 
 public:
-    enum Mode { Invalid, Viewer, Explorer };
+    enum Mode {
+        Invalid,
+        Viewer = 0x10,
+        Explorer
+    };
     Q_ENUM(Mode)
 
 public:

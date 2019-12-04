@@ -7,12 +7,6 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 Ow menüsünü düzenle; Help, About, Support vs vs gibi temel şeyleri ekle,
     Logout, ana ekrana dönme, projeler ekranına dönme vs vs alayını ekle işte
     belki mod değiştirme bile eklemebilir
-fileexplorerde ki explorer/viewer modu için general settings ekle ayrına bu comboyu o settings ile
-    entegre olacak şekilde çalıştır ve bu ayar comboya tıklama ile değişsin ve kaydedilsin ve hep
-    öyle kalsın. ayrıca designerpane'de ki yukarodaki toolbar'dan general settings lere direk bağlı
-    olan combolardan örnek al, çift yönlü özellik güncellemesi olsun, designer pane çalışması bozulmasın
-    hatta toolbox'un hangi kategorilerinin açık kapalı olduğu bile settingsler ile kayıt edilip restore edilsin
-    hatta Help kısmındaki combobox için de bu yapılsın
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar

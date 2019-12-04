@@ -5,6 +5,8 @@
 #include <filesystemcompletermodel.h>
 #include <projectmanager.h>
 #include <saveutils.h>
+#include <interfacesettings.h>
+#include <generalsettings.h>
 
 #include <QComboBox>
 #include <QCompleter>
@@ -20,11 +22,6 @@ AssetsController::AssetsController(AssetsPane* assetsPane, QObject* parent) : QO
     m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
     m_completer->setModel(m_fileSystemCompleterModel);
     m_assetsPane->searchEdit()->setCompleter(m_completer);
-    // The following is unneeded since Up and Down shortcuts in the
-    // DesignerPane are defined in WidgetWithChildrenShortcut context
-    // UtilityFunctions::overrideShortcutFor(m_assetsPane->searchEdit(), [=] (QKeyEvent* event) {
-    //     return event->key() == Qt::Key_Up || event->key() == Qt::Key_Down;
-    // });
 
     connect(m_assetsPane->modeComboBox(), qOverload<int>(&QComboBox::activated),
             this, &AssetsController::onModeComboBoxActivation);
@@ -32,6 +29,22 @@ AssetsController::AssetsController(AssetsPane* assetsPane, QObject* parent) : QO
             this, &AssetsController::onSearchEditReturnPress);
     connect(m_assetsPane->assetsTree(), &AssetsTree::currentDirChanged,
             this, &AssetsController::onCurrentDirChange);
+    connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
+            this, [=] {
+        InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+        settings->begin();
+        settings->setValue("AssetsPane.CurrentMode", AssetsTree::Viewer);
+        settings->end();
+        m_assetsPane->assetsTree()->setMode(AssetsTree::Viewer);
+        m_assetsPane->modeComboBox()->setCurrentText(tr("Viewer"));
+    });
+
+    InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+    settings->begin();
+    m_assetsPane->assetsTree()->setMode(settings->value<AssetsTree::Mode>("AssetsPane.CurrentMode", AssetsTree::Viewer));
+    m_assetsPane->modeComboBox()->setCurrentText(m_assetsPane->assetsTree()->mode() == AssetsTree::Viewer ?
+                                                     tr("Viewer") : tr("Explorer"));
+    settings->end();
 }
 
 void AssetsController::charge()
@@ -48,6 +61,13 @@ void AssetsController::discharge()
 void AssetsController::onModeComboBoxActivation()
 {
     m_assetsPane->assetsTree()->setMode(m_assetsPane->modeComboBox()->currentData().value<AssetsTree::Mode>());
+
+    if (GeneralSettings::interfaceSettings()->preserveDesignerState) {
+        InterfaceSettings* settings = GeneralSettings::interfaceSettings();
+        settings->begin();
+        settings->setValue("AssetsPane.CurrentMode", m_assetsPane->assetsTree()->mode());
+        settings->end();
+    }
 }
 
 void AssetsController::onSearchEditReturnPress()
