@@ -75,6 +75,7 @@ public slots:
     void save(Document* document);
     void setFileExplorerVisible(bool visible);
     void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document);
+    void onAssetsFileExplorerFilesDeleted(const QSet<QString>& pathes);
 
 private slots:
     void onNewOthersFile();
@@ -84,6 +85,7 @@ private slots:
     void onScopeActivation(QmlCodeEditorToolBar::Scope);
     void onComboActivation(QmlCodeEditorToolBar::Combo);
     void onFileExplorerFileOpen(const QString& relativePath);
+    void onFileExplorerFilesDeleted(const QSet<QString>& pathes);
 
 protected:
     void dragEnterEvent(QDragEnterEvent* e) override;

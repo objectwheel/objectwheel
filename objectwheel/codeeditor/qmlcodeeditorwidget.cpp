@@ -25,17 +25,23 @@
 
 // FIXME:
 // What happens if a assets open file get renamed
-// What happens if a assets open file get deleted
+// DONE What happens if a assets open file get deleted
+// What happens if a assets open file's folder get renamed
+// What happens if a assets open file's folder get deleted
 // What happens if a assets open file get overwritten/content changed outside
 
 // What happens if a others open file get renamed
-// What happens if a others open file get deleted
+// DONE What happens if a others open file get deleted
+// What happens if a others open file's folder get renamed
+// What happens if a others open file's folder get deleted
 // What happens if a others open file get overwritten/content changed outside
 
 // What happens if a designs open file get renamed
-// What happens if a designs open file get deleted
+// DONE What happens if a designs open file get deleted
+// What happens if a designs open file's folder get renamed
+// What happens if a designs open file's folder get deleted
 // What happens if a designs open file get overwritten/content changed outside
-// What happens if a control get deleted
+// DONE What happens if a control get deleted
 // What happens if a control's dir changes
 // What happens if a control's id changes (within code editor/out of code editor)
 // What happens to the file explorer's root path if a control's dir changes
@@ -160,6 +166,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
             this, &QmlCodeEditorWidget::onAddOthersFile);
     connect(m_fileExplorer, &FileExplorer::fileOpened,
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
+    connect(m_fileExplorer, &FileExplorer::filesDeleted,
+            this, &QmlCodeEditorWidget::onFileExplorerFilesDeleted);
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
             this, [=] { onModificationChange(m_openDocument); }, Qt::QueuedConnection);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
@@ -518,6 +526,42 @@ void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
         return openDesigns(designs(m_openDocument)->control, relativePath);
     if (m_openDocument->scope == QmlCodeEditorToolBar::Others)
         return openOthers(fullPath(m_fileExplorer->rootPath(), relativePath));
+}
+
+void QmlCodeEditorWidget::onFileExplorerFilesDeleted(const QSet<QString>& pathes)
+{
+    for (const QString& path : pathes) {
+        QString finalPath = path;
+        if (m_openDocument->scope == QmlCodeEditorToolBar::Assets) {
+            finalPath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(path);
+            for (AssetsDocument* doc : m_assetsDocuments) {
+                if (doc->relativePath == finalPath)
+                    close(doc);
+            }
+        } else if (m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
+            finalPath = QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(path);
+            for (DesignsDocument* doc : m_designsDocuments) {
+                if (doc->relativePath == finalPath)
+                    close(doc);
+            }
+        } else {
+            for (OthersDocument* doc : m_othersDocuments) {
+                if (doc->fullPath == finalPath)
+                    close(doc);
+            }
+        }
+    }
+}
+
+void QmlCodeEditorWidget::onAssetsFileExplorerFilesDeleted(const QSet<QString>& pathes)
+{
+    for (const QString& path : pathes) {
+        const QString& finalPath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(path);
+        for (AssetsDocument* doc : m_assetsDocuments) {
+            if (doc->relativePath == finalPath)
+                close(doc);
+        }
+    }
 }
 
 bool QmlCodeEditorWidget::documentExists(QmlCodeEditorWidget::Document* document) const

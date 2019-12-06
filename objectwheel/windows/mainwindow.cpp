@@ -44,7 +44,9 @@
 #include <designercontroller.h>
 #include <pinbar.h>
 #include <dockbar.h>
+#include <issueswidget.h>
 
+#include <QStackedWidget>
 #include <QComboBox>
 #include <QPushButton>
 #include <QWindow>
@@ -302,6 +304,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         else
             setDockWidgetAreasVisible(Qt::RightDockWidgetArea, checked);
     });
+    connect(m_assetsPane->assetsTree(), &AssetsTree::filesDeleted,
+            m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::onAssetsFileExplorerFilesDeleted);
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, [=] {
         ModeManager::setMode(ModeManager::Designer);
@@ -504,10 +508,17 @@ void MainWindow::showEvent(QShowEvent* event)
         setDockWidgetAreasVisible(Qt::LeftDockWidgetArea, leftSideVisible);
         setDockWidgetAreasVisible(Qt::RightDockWidgetArea, rightSideVisible);
 
-        if (GeneralSettings::interfaceSettings()->outputPaneMinimizedStartupEnabled)
-            m_centralWidget->outputController()->setPaneVisible(false);
-        else
+        if (GeneralSettings::interfaceSettings()->outputPaneMinimizedStartupEnabled) {
+            // Make sure we are not hiding the issues widget which is already popped
+            // out due to flashing because of the erroneous controls the project has
+            if (!(m_centralWidget->outputPane()->stackedWidget()->currentWidget()
+                  == m_centralWidget->outputPane()->issuesWidget()
+                  && GeneralSettings::interfaceSettings()->outputPanePops
+                  && m_centralWidget->outputPane()->issuesWidget()->count() > 0))
+                m_centralWidget->outputController()->setPaneVisible(false);
+        } else {
             m_centralWidget->outputController()->setPaneVisible(bottomSideVisible);
+        }
 
         m_leftDockBar->removeDockWidget(m_controlsDockWidget);
         m_leftDockBar->removeDockWidget(m_propertiesDockWidget);
