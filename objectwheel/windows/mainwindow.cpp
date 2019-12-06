@@ -304,8 +304,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         else
             setDockWidgetAreasVisible(Qt::RightDockWidgetArea, checked);
     });
-    connect(m_assetsPane->assetsTree(), &AssetsTree::filesDeleted,
-            m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::onAssetsFileExplorerFilesDeleted);
+    connect(m_assetsPane->assetsTree(), &AssetsTree::filesAboutToBeDeleted,
+            m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::onAssetsFileExplorerFilesAboutToBeDeleted);
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, [=] {
         ModeManager::setMode(ModeManager::Designer);

@@ -78,7 +78,7 @@ private:
 
 signals:
     void fileOpened(const QString& relativePath);
-    void filesDeleted(const QSet<QString>& pathes);
+    void filesAboutToBeDeleted(const QSet<QString>& pathes);
     void currentDirChanged(const QString& currentDir);
 
 private:

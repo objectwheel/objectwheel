@@ -721,4 +721,17 @@ bool isFocusRingSet(QWidget* widget)
     return widget->property(Internal::showFocusRingProperty).toBool();
 }
 
+bool isDirAncestor(const QDir& ancestor, const QString& path)
+{
+    QFileInfo fileInfo(path);
+    QDir dir = fileInfo.isDir() ? QDir(path) : fileInfo.dir();
+    if (dir == ancestor)
+        return true;
+    while (dir.cdUp()) {
+        if (dir == ancestor)
+            return true;
+    }
+    return false;
+}
+
 } // UtilityFunctions

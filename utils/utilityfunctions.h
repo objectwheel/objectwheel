@@ -20,6 +20,7 @@ class QAbstractItemView;
 class QComboBox;
 class QMarginsF;
 class QAction;
+class QDir;
 
 namespace UtilityFunctions {
 
@@ -122,6 +123,7 @@ QFont systemDefaultFont();
 void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>& condition);
 void setFocusRing(QWidget* widget, bool showFocusRing);
 bool isFocusRingSet(QWidget* widget);
+bool isDirAncestor(const QDir& ancestor, const QString& path);
 
 } // UtilityFunctions
 

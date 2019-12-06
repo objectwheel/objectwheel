@@ -353,12 +353,16 @@ void FileExplorer::onDeleteButtonClick()
     if (result == QMessageBox::Yes) {
         QSet<QString> deletedFiles;
         for (const QModelIndex& index : selectedIndexes()) {
-            if (index.isValid()) {
+            if (index.isValid())
                 deletedFiles.insert(m_fileSystemModel->filePath(mt(index)));
-                m_fileSystemModel->remove(mt(index));
-            }
         }
-        emit filesDeleted(deletedFiles);
+
+        emit filesAboutToBeDeleted(deletedFiles);
+
+        for (const QModelIndex& index : selectedIndexes()) {
+            if (index.isValid())
+                m_fileSystemModel->remove(mt(index));
+        }
     }
 }
 
