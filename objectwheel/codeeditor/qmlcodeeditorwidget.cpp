@@ -7,6 +7,7 @@
 #include <control.h>
 #include <utilityfunctions.h>
 #include <filesystemutils.h>
+#include <controlremovingmanager.h>
 
 #include <QTimer>
 #include <QApplication>
@@ -144,7 +145,7 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
     connect(toolBar(), &QmlCodeEditorToolBar::savedAll,
             this, &QmlCodeEditorWidget::saveAll);
     connect(toolBar(), &QmlCodeEditorToolBar::closed,
-            this, &QmlCodeEditorWidget::close);
+            this, qOverload<>(&QmlCodeEditorWidget::close));
     connect(toolBar(), &QmlCodeEditorToolBar::showed,
             this, &QmlCodeEditorWidget::setFileExplorerVisible);
     connect(toolBar(), &QmlCodeEditorToolBar::pinned,
@@ -161,6 +162,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
             this, [=] { onModificationChange(m_openDocument); }, Qt::QueuedConnection);
+    connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
+            this, &QmlCodeEditorWidget::closeDesigns);
 }
 
 int QmlCodeEditorWidget::count() const
@@ -374,17 +377,25 @@ void QmlCodeEditorWidget::close()
         return;
     }
 
+    close(m_openDocument);
+}
+
+void QmlCodeEditorWidget::close(QmlCodeEditorWidget::Document* document)
+{
+    if (document == 0)
+        return;
+
     int indexForRemoval = -1;
     Document* nextDocument = nullptr;
-    QmlCodeEditorToolBar::Scope scope = m_openDocument->scope;
+    QmlCodeEditorToolBar::Scope scope = document->scope;
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
     if (scope == QmlCodeEditorToolBar::Assets) {
         m_lastAssetsDocument = nullptr;
-        m_assetsDocuments.removeOne(assets(m_openDocument));
+        m_assetsDocuments.removeOne(assets(document));
         for (int i = 0; i < leftCombo->count(); ++i) {
-            if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == m_openDocument) {
+            if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == document) {
                 indexForRemoval = i;
                 break;
             }
@@ -396,9 +407,9 @@ void QmlCodeEditorWidget::close()
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Assets, !m_assetsDocuments.isEmpty());
     } else if (scope == QmlCodeEditorToolBar::Designs) {
         m_lastDesignsDocument = nullptr;
-        m_designsDocuments.removeOne(designs(m_openDocument));
+        m_designsDocuments.removeOne(designs(document));
         for (int i = 0; i < rightCombo->count(); ++i) {
-            if (rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>() == m_openDocument) {
+            if (rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>() == document) {
                 indexForRemoval = i;
                 break;
             }
@@ -410,7 +421,7 @@ void QmlCodeEditorWidget::close()
         } else {
             indexForRemoval = -1;
             for (int i = 0; i < leftCombo->count(); ++i) {
-                if (leftCombo->itemData(i, ControlRole).value<Control*>() == designs(m_openDocument)->control) {
+                if (leftCombo->itemData(i, ControlRole).value<Control*>() == designs(document)->control) {
                     indexForRemoval = i;
                     break;
                 }
@@ -425,9 +436,9 @@ void QmlCodeEditorWidget::close()
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Designs, !m_designsDocuments.isEmpty());
     } else {
         m_lastOthersDocument = nullptr;
-        m_othersDocuments.removeOne(others(m_openDocument));
+        m_othersDocuments.removeOne(others(document));
         for (int i = 0; i < leftCombo->count(); ++i) {
-            if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == m_openDocument) {
+            if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == document) {
                 indexForRemoval = i;
                 break;
             }
@@ -439,9 +450,9 @@ void QmlCodeEditorWidget::close()
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Others, !m_othersDocuments.isEmpty());
     }
 
-    Q_ASSERT(m_openDocument != nextDocument);
+    Q_ASSERT(document != nextDocument);
 
-    Document* deletion = m_openDocument;
+    Document* deletion = document;
     showNoDocumentsOpen();
 
     delete deletion->document;
@@ -590,6 +601,14 @@ bool QmlCodeEditorWidget::othersExists(const QString& fullPath) const
             return true;
     }
     return false;
+}
+
+void QmlCodeEditorWidget::closeDesigns(Control* control)
+{
+    for (DesignsDocument* document : m_designsDocuments) {
+        if (control == document->control)
+            return close(document);
+    }
 }
 
 QmlCodeEditorWidget::AssetsDocument* QmlCodeEditorWidget::getAssets(const QString& relativePath) const

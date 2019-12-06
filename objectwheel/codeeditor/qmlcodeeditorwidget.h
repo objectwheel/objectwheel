@@ -50,6 +50,8 @@ public:
     bool designsExists(Control* control, const QString& relativePath) const;
     bool othersExists(const QString& fullPath) const;
 
+    void closeDesigns(Control* control);
+
     AssetsDocument* getAssets(const QString& relativePath) const;
     DesignsDocument* getDesigns(Control* control, const QString& relativePath) const;
     OthersDocument* getOthers(const QString& fullPath) const;
@@ -68,8 +70,9 @@ public slots:
     void discharge();
     void saveAll();
     void saveOpen();
-    void save(Document* document);
     void close();
+    void close(Document* document);
+    void save(Document* document);
     void setFileExplorerVisible(bool visible);
     void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document);
 
