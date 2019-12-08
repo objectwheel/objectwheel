@@ -76,6 +76,7 @@ public slots:
     void setFileExplorerVisible(bool visible);
     void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document);
     void onAssetsFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes);
+    void onAssetsFileExplorerFileRenamed(const QString& path, const QString& oldName, const QString& newName);
 
 private slots:
     void onNewOthersFile();
@@ -86,6 +87,7 @@ private slots:
     void onComboActivation(QmlCodeEditorToolBar::Combo);
     void onFileExplorerFileOpen(const QString& relativePath);
     void onFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes);
+    void onFileExplorerFileRenamed(const QString& path, const QString& oldName, const QString& newName);
 
 protected:
     void dragEnterEvent(QDragEnterEvent* e) override;

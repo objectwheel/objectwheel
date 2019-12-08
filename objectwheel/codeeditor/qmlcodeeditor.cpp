@@ -398,7 +398,9 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
 {
     m_noDocsLabel->setVisible(false);
     m_noDocsLabel->setAlignment(Qt::AlignCenter);
-    m_noDocsLabel->setText(QStringLiteral(R"(<p style="margin-left:28px;font-size:12px;color:#888888">%1</p>)").arg(tr("No documents<br>open")));
+    m_noDocsLabel->setText(
+                QStringLiteral(R"(<p style="margin-left:28px;font-size:12px;color:#888888">%1</p>)")
+                .arg(tr("No documents in<br>current scope to show")));
 
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,

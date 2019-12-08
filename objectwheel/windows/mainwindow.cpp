@@ -306,6 +306,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     });
     connect(m_assetsPane->assetsTree(), &AssetsTree::filesAboutToBeDeleted,
             m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::onAssetsFileExplorerFilesAboutToBeDeleted);
+    connect(m_assetsPane->assetsTree(), &AssetsTree::fileRenamed,
+            m_centralWidget->qmlCodeEditorWidget(), &QmlCodeEditorWidget::onAssetsFileExplorerFileRenamed);
     connect(GeneralSettings::instance(), &GeneralSettings::designerStateReset,
             this, [=] {
         ModeManager::setMode(ModeManager::Designer);

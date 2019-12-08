@@ -199,6 +199,8 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
         m_fileSystemProxyModel->setDynamicSortFilter(false);
         m_fileSystemProxyModel->setDynamicSortFilter(true);
     });
+    connect(m_fileSystemModel, &QFileSystemModel::fileRenamed,
+            this, &FileExplorer::fileRenamed);
     connect(m_pathIndicator, &PathIndicator::pathUpdated,
             this, &FileExplorer::goToRelativeDir);
     connect(this, &FileExplorer::doubleClicked,
@@ -368,8 +370,11 @@ void FileExplorer::onDeleteButtonClick()
 
 void FileExplorer::onRenameButtonClick()
 {
-    scrollTo(currentIndex());
-    edit(currentIndex());
+    if (selectedIndexes().size() == 1) {
+        setCurrentIndex(selectedIndexes().first());
+        scrollTo(currentIndex());
+        edit(currentIndex());
+    }
 }
 
 void FileExplorer::onNewFileButtonClick()
@@ -388,6 +393,7 @@ void FileExplorer::onNewFileButtonClick()
 
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+        setCurrentIndex(index);
         scrollTo(index, PositionAtCenter);
         edit(index);
     } else {
@@ -406,6 +412,7 @@ void FileExplorer::onNewFolderButtonClick()
     const QModelIndex& index = mf(m_fileSystemModel->mkdir(mt(rootIndex()), baseFolderName));
     if (index.isValid()) {
         selectionModel()->select(index, QItemSelectionModel::ClearAndSelect);
+        setCurrentIndex(index);
         scrollTo(index, PositionAtCenter);
         edit(index);
     } else {

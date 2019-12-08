@@ -25,23 +25,16 @@
 
 // FIXME:
 // What happens if a assets open file get renamed
-// DONE What happens if a assets open file get deleted
 // What happens if a assets open file's folder get renamed
-// DONE What happens if a assets open file's folder get deleted
 // What happens if a assets open file get overwritten/content changed outside
 
 // What happens if a others open file get renamed
-// DONE What happens if a others open file get deleted
 // What happens if a others open file's folder get renamed
-// DONE What happens if a others open file's folder get deleted
 // What happens if a others open file get overwritten/content changed outside
 
 // What happens if a designs open file get renamed
-// DONE What happens if a designs open file get deleted
 // What happens if a designs open file's folder get renamed
-// DONE What happens if a designs open file's folder get deleted
 // What happens if a designs open file get overwritten/content changed outside
-// DONE What happens if a control get deleted
 // What happens if a control's dir changes
 // What happens if a control's id changes (within code editor/out of code editor)
 // What happens to the file explorer's root path if a control's dir changes
@@ -168,6 +161,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
             this, &QmlCodeEditorWidget::onFileExplorerFileOpen);
     connect(m_fileExplorer, &FileExplorer::filesAboutToBeDeleted,
             this, &QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted);
+    connect(m_fileExplorer, &FileExplorer::fileRenamed,
+            this, &QmlCodeEditorWidget::onFileExplorerFileRenamed);
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
             this, [=] { onModificationChange(m_openDocument); }, Qt::QueuedConnection);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
@@ -400,61 +395,93 @@ void QmlCodeEditorWidget::close(QmlCodeEditorWidget::Document* document)
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
     if (scope == QmlCodeEditorToolBar::Assets) {
-        m_lastAssetsDocument = nullptr;
+        if (document == m_openDocument)
+            m_lastAssetsDocument = nullptr;
         m_assetsDocuments.removeOne(assets(document));
-        for (int i = 0; i < leftCombo->count(); ++i) {
-            if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == document) {
-                indexForRemoval = i;
-                break;
-            }
-        }
-        if (indexForRemoval >= 0)
-            leftCombo->removeItem(indexForRemoval);
-        if (leftCombo->count() > 0)
-            nextDocument = leftCombo->itemData(0, DocumentRole).value<AssetsDocument*>();
-        toolBar()->setScopeWide(QmlCodeEditorToolBar::Assets, !m_assetsDocuments.isEmpty());
-    } else if (scope == QmlCodeEditorToolBar::Designs) {
-        m_lastDesignsDocument = nullptr;
-        m_designsDocuments.removeOne(designs(document));
-        for (int i = 0; i < rightCombo->count(); ++i) {
-            if (rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>() == document) {
-                indexForRemoval = i;
-                break;
-            }
-        }
-        if (indexForRemoval >= 0)
-            rightCombo->removeItem(indexForRemoval);
-        if (rightCombo->count() > 0) {
-            nextDocument = rightCombo->itemData(0, DocumentRole).value<DesignsDocument*>();
-        } else {
-            indexForRemoval = -1;
+        if (m_openDocument && m_openDocument->scope == scope) {
             for (int i = 0; i < leftCombo->count(); ++i) {
-                if (leftCombo->itemData(i, ControlRole).value<Control*>() == designs(document)->control) {
+                if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == document) {
                     indexForRemoval = i;
                     break;
                 }
             }
+            bool openNextDoc = indexForRemoval >= 0 && leftCombo->currentIndex() == indexForRemoval;
             if (indexForRemoval >= 0)
                 leftCombo->removeItem(indexForRemoval);
-            if (leftCombo->count() > 0) {
-                Q_ASSERT(m_designsDocuments.size() > 0);
-                nextDocument = m_designsDocuments.last();
+            if (leftCombo->count() > 0 && openNextDoc)
+                nextDocument = leftCombo->itemData(0, DocumentRole).value<AssetsDocument*>();
+        }
+        toolBar()->setScopeWide(QmlCodeEditorToolBar::Assets, !m_assetsDocuments.isEmpty());
+    } else if (scope == QmlCodeEditorToolBar::Designs) {
+        if (document == m_openDocument)
+            m_lastDesignsDocument = nullptr;
+        m_designsDocuments.removeOne(designs(document));
+        if (m_openDocument && m_openDocument->scope == scope) {
+            for (int i = 0; i < rightCombo->count(); ++i) {
+                if (rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>() == document) {
+                    indexForRemoval = i;
+                    break;
+                }
+            }
+            bool openNextDoc = indexForRemoval >= 0 && rightCombo->currentIndex() == indexForRemoval;
+            if (indexForRemoval >= 0)
+                rightCombo->removeItem(indexForRemoval);
+            if (openNextDoc) {
+                if (rightCombo->count() > 0) {
+                    nextDocument = rightCombo->itemData(0, DocumentRole).value<DesignsDocument*>();
+                } else {
+                    indexForRemoval = -1;
+                    for (int i = 0; i < leftCombo->count(); ++i) {
+                        if (leftCombo->itemData(i, ControlRole).value<Control*>() == designs(document)->control) {
+                            indexForRemoval = i;
+                            break;
+                        }
+                    }
+                    if (indexForRemoval >= 0)
+                        leftCombo->removeItem(indexForRemoval);
+                    if (leftCombo->count() > 0) {
+                        Q_ASSERT(m_designsDocuments.size() > 0);
+                        nextDocument = m_designsDocuments.last();
+                    }
+                }
+            } else {
+                indexForRemoval = -1;
+                for (int i = 0; i < leftCombo->count(); ++i) {
+                    if (leftCombo->itemData(i, ControlRole).value<Control*>() == designs(document)->control) {
+                        indexForRemoval = i;
+                        break;
+                    }
+                }
+                if (indexForRemoval >= 0) {
+                    for (DesignsDocument* doc : qAsConst(m_designsDocuments)) {
+                        if (doc->control == designs(document)->control) {
+                            indexForRemoval = -1;
+                            break;
+                        }
+                    }
+                }
+                if (indexForRemoval >= 0)
+                    leftCombo->removeItem(indexForRemoval);
             }
         }
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Designs, !m_designsDocuments.isEmpty());
     } else {
-        m_lastOthersDocument = nullptr;
+        if (document == m_openDocument)
+            m_lastOthersDocument = nullptr;
         m_othersDocuments.removeOne(others(document));
-        for (int i = 0; i < leftCombo->count(); ++i) {
-            if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == document) {
-                indexForRemoval = i;
-                break;
+        if (m_openDocument && m_openDocument->scope == scope) {
+            for (int i = 0; i < leftCombo->count(); ++i) {
+                if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == document) {
+                    indexForRemoval = i;
+                    break;
+                }
             }
+            bool openNextDoc = indexForRemoval >= 0 && leftCombo->currentIndex() == indexForRemoval;
+            if (indexForRemoval >= 0)
+                leftCombo->removeItem(indexForRemoval);
+            if (leftCombo->count() > 0 && openNextDoc)
+                nextDocument = leftCombo->itemData(0, DocumentRole).value<OthersDocument*>();
         }
-        if (indexForRemoval >= 0)
-            leftCombo->removeItem(indexForRemoval);
-        if (leftCombo->count() > 0)
-            nextDocument = leftCombo->itemData(0, DocumentRole).value<OthersDocument*>();
         toolBar()->setScopeWide(QmlCodeEditorToolBar::Others, !m_othersDocuments.isEmpty());
     }
 
@@ -576,6 +603,11 @@ void QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted(const QSet<QString
     }
 }
 
+void QmlCodeEditorWidget::onFileExplorerFileRenamed(const QString& path, const QString& oldName, const QString& newName)
+{
+
+}
+
 void QmlCodeEditorWidget::onAssetsFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes)
 {
     for (const QString& path : pathes) {
@@ -591,6 +623,27 @@ void QmlCodeEditorWidget::onAssetsFileExplorerFilesAboutToBeDeleted(const QSet<Q
                 if (doc->relativePath == finalPath)
                     close(doc);
             }
+        }
+    }
+}
+
+void QmlCodeEditorWidget::onAssetsFileExplorerFileRenamed(const QString& path, const QString& oldName, const QString& newName)
+{
+    const QString& oldPath = fullPath(path, oldName);
+    const QString& newPath = fullPath(path, newName);
+
+    if (QFileInfo(newPath).isDir()) {
+        for (AssetsDocument* doc : m_assetsDocuments) {
+            const QString& fp = fullPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir()), doc->relativePath);
+            if (UtilityFunctions::isDirAncestor(QDir(path), fp))
+                close(doc);
+        }
+    } else {
+        const QString& oldRelativePath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(oldPath);
+        const QString& newRelativePath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(newPath);
+        for (AssetsDocument* doc : m_assetsDocuments) {
+            if (doc->relativePath == oldRelativePath)
+                doc->relativePath = newRelativePath;
         }
     }
 }
