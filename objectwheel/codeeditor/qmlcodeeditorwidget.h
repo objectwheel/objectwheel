@@ -73,6 +73,7 @@ public slots:
     void close();
     void close(Document* document);
     void save(Document* document);
+    void rename(Document* document, const QString& newPath);
     void setFileExplorerVisible(bool visible);
     void setupLastOpenedDocs(QmlCodeEditorWidget::Document* document);
     void onAssetsFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes);

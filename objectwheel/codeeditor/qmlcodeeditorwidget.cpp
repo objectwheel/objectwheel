@@ -37,6 +37,7 @@
 // What happens if a designs open file get overwritten/content changed outside
 // What happens if a control's dir changes
 // What happens if a control's id changes (within code editor/out of code editor)
+// What happens if a control's uid changes (within code editor/out of code editor) (needed for tooltip)
 // What happens to the file explorer's root path if a control's dir changes
 
 #define MARK_ASTERISK "*"
@@ -362,6 +363,51 @@ void QmlCodeEditorWidget::save(QmlCodeEditorWidget::Document* document)
         saveFilter->afterSave(document);
 }
 
+void QmlCodeEditorWidget::rename(QmlCodeEditorWidget::Document* document, const QString& newPath)
+{
+    if (document == 0)
+        return;
+
+    QmlCodeEditorToolBar::Scope scope = document->scope;
+    QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+    QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
+
+    if (scope == QmlCodeEditorToolBar::Assets) {
+        assets(document)->relativePath = newPath;
+        if (m_openDocument && m_openDocument->scope == scope) {
+            for (int i = 0; i < leftCombo->count(); ++i) {
+                if (leftCombo->itemData(i, DocumentRole).value<AssetsDocument*>() == document) {
+                    leftCombo->setItemText(i, modified(document->document, newPath));
+                    leftCombo->setItemData(i, newPath, Qt::ToolTipRole);
+                    break;
+                }
+            }
+        }
+    } else if (scope == QmlCodeEditorToolBar::Designs) {
+        designs(document)->relativePath = newPath;
+        if (m_openDocument && m_openDocument->scope == scope) {
+            for (int i = 0; i < rightCombo->count(); ++i) {
+                if (rightCombo->itemData(i, DocumentRole).value<DesignsDocument*>() == document) {
+                    rightCombo->setItemText(i, modified(document->document, newPath));
+                    rightCombo->setItemData(i, newPath, Qt::ToolTipRole);
+                    break;
+                }
+            }
+        }
+    } else {
+        others(document)->fullPath = newPath;
+        if (m_openDocument && m_openDocument->scope == scope) {
+            for (int i = 0; i < leftCombo->count(); ++i) {
+                if (leftCombo->itemData(i, DocumentRole).value<OthersDocument*>() == document) {
+                    leftCombo->setItemText(i, modified(document->document, QFileInfo(newPath).fileName()));
+                    leftCombo->setItemData(i, newPath, Qt::ToolTipRole);
+                    break;
+                }
+            }
+        }
+    }
+}
+
 void QmlCodeEditorWidget::close()
 {
     if (!m_openDocument)
@@ -643,7 +689,7 @@ void QmlCodeEditorWidget::onAssetsFileExplorerFileRenamed(const QString& path, c
         const QString& newRelativePath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(newPath);
         for (AssetsDocument* doc : m_assetsDocuments) {
             if (doc->relativePath == oldRelativePath)
-                doc->relativePath = newRelativePath;
+                rename(doc, newRelativePath);
         }
     }
 }
