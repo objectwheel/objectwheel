@@ -40,9 +40,9 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
   /****/
   , m_behavioralGroup(new QGroupBox(contentWidget()))
   , m_outputPanePopsCheckBox(new QCheckBox(m_behavioralGroup))
+  , m_outputPaneMinimizedStartupCheckBox(new QCheckBox(m_behavioralGroup))
   , m_preserveDesignerStateCheckBox(new QCheckBox(m_behavioralGroup))
   , m_designerStateResetButton(new QPushButton(m_behavioralGroup))
-  , m_outputPaneMinimizedStartupCheckBox(new QCheckBox(m_behavioralGroup))
 {
     contentLayout()->addWidget(m_interfaceGroup);
     contentLayout()->addWidget(m_fontGroup);

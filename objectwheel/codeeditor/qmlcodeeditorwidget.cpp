@@ -402,7 +402,7 @@ void QmlCodeEditorWidget::rename(QmlCodeEditorWidget::Document* document, const 
 
 void QmlCodeEditorWidget::close()
 {
-    if (!m_openDocument)
+    if (m_openDocument == 0)
         return;
 
     switch (warnIfModifiedContent(m_openDocument)) {
@@ -591,6 +591,8 @@ void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
 
 void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
 {
+    if (m_openDocument == 0)
+        return;
     if (m_openDocument->scope == QmlCodeEditorToolBar::Assets)
         return openAssets(relativePath);
     if (m_openDocument->scope == QmlCodeEditorToolBar::Designs)
@@ -601,6 +603,8 @@ void QmlCodeEditorWidget::onFileExplorerFileOpen(const QString& relativePath)
 
 void QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes)
 {
+    if (m_openDocument == 0)
+        return;
     for (const QString& path : pathes) {
         QString finalPath = path;
         if (m_openDocument->scope == QmlCodeEditorToolBar::Assets) {
@@ -620,6 +624,7 @@ void QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted(const QSet<QString
         } else if (m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
             if (QFileInfo(path).isDir()) {
                 for (DesignsDocument* doc : m_designsDocuments) {
+//  BUG                  qDebug() << doc << m_openDocument << designs(m_openDocument) << designs(m_openDocument)->control;
                     const QString& fp = fullPath(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir()), doc->relativePath);
                     if (UtilityFunctions::isDirAncestor(QDir(path), fp))
                         close(doc);
@@ -649,6 +654,9 @@ void QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted(const QSet<QString
 
 void QmlCodeEditorWidget::onFileExplorerFileRenamed(const QString& path, const QString& oldName, const QString& newName)
 {
+    if (m_openDocument == 0)
+        return;
+
     const QString& oldPath = fullPath(path, oldName);
     const QString& newPath = fullPath(path, newName);
 
@@ -670,19 +678,23 @@ void QmlCodeEditorWidget::onFileExplorerFileRenamed(const QString& path, const Q
             }
         }
     } else if (m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
-//        if (QFileInfo(path).isDir()) {
-//            for (DesignsDocument* doc : m_designsDocuments) {
-//                const QString& fp = fullPath(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir()), doc->relativePath);
-//                if (UtilityFunctions::isDirAncestor(QDir(path), fp))
-//                    close(doc);
-//            }
-//        } else {
-//            finalPath = QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(path);
-//            for (DesignsDocument* doc : m_designsDocuments) {
-//                if (doc->relativePath == finalPath)
-//                    close(doc);
-//            }
-//        }
+        if (QFileInfo(newPath).isDir()) {
+            for (DesignsDocument* doc : m_designsDocuments) {
+                QString fp = fullPath(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir()), doc->relativePath);
+                if (fp.contains(oldPath)) {
+                    fp.replace(oldPath, newPath);
+                    rename(doc, QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(fp));
+                }
+            }
+        } else {
+            const QString& td = SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir());
+            const QString& oldRelativePath = QDir(td).relativeFilePath(oldPath);
+            const QString& newRelativePath = QDir(td).relativeFilePath(newPath);
+            for (DesignsDocument* doc : m_designsDocuments) {
+                if (doc->relativePath == oldRelativePath)
+                    rename(doc, newRelativePath);
+            }
+        }
     } else {
         for (OthersDocument* doc : m_othersDocuments) {
             QString fp = doc->fullPath;
@@ -969,7 +981,7 @@ QmlCodeEditorWidget::OthersDocument* QmlCodeEditorWidget::addOthers(const QStrin
 
 void QmlCodeEditorWidget::openDocument(Document* document)
 {
-    if (!document)
+    if (document == 0)
         return;
 
     m_codeEditor->setFocus();
@@ -1061,7 +1073,7 @@ void QmlCodeEditorWidget::setupToolBar(Document* document)
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
-    bool refresh = !m_openDocument
+    bool refresh = m_openDocument == 0
             || m_openDocument->scope != document->scope
             || (m_openDocument->scope == QmlCodeEditorToolBar::Designs
                 && designs(m_openDocument)->control != designs(document)->control);
