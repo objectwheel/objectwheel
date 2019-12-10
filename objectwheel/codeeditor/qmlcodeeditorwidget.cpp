@@ -24,16 +24,10 @@
 #include <QPainter>
 
 // FIXME:
-// What happens if a assets open file get renamed
-// What happens if a assets open file's folder get renamed
 // What happens if a assets open file get overwritten/content changed outside
 
-// What happens if a others open file get renamed
-// What happens if a others open file's folder get renamed
 // What happens if a others open file get overwritten/content changed outside
 
-// What happens if a designs open file get renamed
-// What happens if a designs open file's folder get renamed
 // What happens if a designs open file get overwritten/content changed outside
 // What happens if a control's dir changes
 // What happens if a control's id changes (within code editor/out of code editor)
@@ -605,46 +599,50 @@ void QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted(const QSet<QString
 {
     if (m_openDocument == 0)
         return;
+
     for (const QString& path : pathes) {
-        QString finalPath = path;
         if (m_openDocument->scope == QmlCodeEditorToolBar::Assets) {
+            const auto docs = m_assetsDocuments;
             if (QFileInfo(path).isDir()) {
-                for (AssetsDocument* doc : m_assetsDocuments) {
-                    const QString& fp = fullPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir()), doc->relativePath);
+                const QString& pd = SaveUtils::toProjectAssetsDir(ProjectManager::dir());
+                for (AssetsDocument* doc : docs) {
+                    const QString& fp = fullPath(pd, doc->relativePath);
                     if (UtilityFunctions::isDirAncestor(QDir(path), fp))
                         close(doc);
                 }
             } else {
-                finalPath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(path);
-                for (AssetsDocument* doc : m_assetsDocuments) {
-                    if (doc->relativePath == finalPath)
+                const QString& fp = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(path);
+                for (AssetsDocument* doc : docs) {
+                    if (doc->relativePath == fp)
                         close(doc);
                 }
             }
         } else if (m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
+            const auto docs = m_designsDocuments;
             if (QFileInfo(path).isDir()) {
-                for (DesignsDocument* doc : m_designsDocuments) {
-//  BUG                  qDebug() << doc << m_openDocument << designs(m_openDocument) << designs(m_openDocument)->control;
-                    const QString& fp = fullPath(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir()), doc->relativePath);
+                const QString& td = SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir());
+                for (DesignsDocument* doc : docs) {
+                    const QString& fp = fullPath(td, doc->relativePath);
                     if (UtilityFunctions::isDirAncestor(QDir(path), fp))
                         close(doc);
                 }
             } else {
-                finalPath = QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(path);
-                for (DesignsDocument* doc : m_designsDocuments) {
-                    if (doc->relativePath == finalPath)
+                const QString& fp = QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(path);
+                for (DesignsDocument* doc : docs) {
+                    if (doc->relativePath == fp)
                         close(doc);
                 }
             }
         } else {
+            const auto docs = m_othersDocuments;
             if (QFileInfo(path).isDir()) {
-                for (OthersDocument* doc : m_othersDocuments) {
+                for (OthersDocument* doc : docs) {
                     if (UtilityFunctions::isDirAncestor(QDir(path), doc->fullPath))
                         close(doc);
                 }
             } else {
-                for (OthersDocument* doc : m_othersDocuments) {
-                    if (doc->fullPath == finalPath)
+                for (OthersDocument* doc : docs) {
+                    if (doc->fullPath == path)
                         close(doc);
                 }
             }
@@ -709,15 +707,16 @@ void QmlCodeEditorWidget::onFileExplorerFileRenamed(const QString& path, const Q
 void QmlCodeEditorWidget::onAssetsFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes)
 {
     for (const QString& path : pathes) {
+        const auto docs = m_assetsDocuments;
         if (QFileInfo(path).isDir()) {
-            for (AssetsDocument* doc : m_assetsDocuments) {
+            for (AssetsDocument* doc : docs) {
                 const QString& fp = fullPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir()), doc->relativePath);
                 if (UtilityFunctions::isDirAncestor(QDir(path), fp))
                     close(doc);
             }
         } else {
             const QString& finalPath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(path);
-            for (AssetsDocument* doc : m_assetsDocuments) {
+            for (AssetsDocument* doc : docs) {
                 if (doc->relativePath == finalPath)
                     close(doc);
             }
@@ -833,7 +832,8 @@ bool QmlCodeEditorWidget::othersExists(const QString& fullPath) const
 
 void QmlCodeEditorWidget::closeDesigns(Control* control)
 {
-    for (DesignsDocument* document : m_designsDocuments) {
+    const auto docs = m_designsDocuments;
+    for (DesignsDocument* document : docs) {
         if (control == document->control)
             return close(document);
     }
