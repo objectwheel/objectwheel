@@ -127,7 +127,7 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_redoButton->setToolTip(tr("Redo action"));
     m_closeButton->setToolTip(tr("Close document"));
     m_newFileButton->setToolTip(tr("New external file"));
-    m_addFileButton->setToolTip(tr("Add external file"));
+    m_addFileButton->setToolTip(tr("Open external file"));
     m_saveButton->setToolTip(tr("Save document"));
     m_saveAllButton->setToolTip(tr("Save all open documents"));
     m_cutButton->setToolTip(tr("Cut selection"));

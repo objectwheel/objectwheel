@@ -99,14 +99,6 @@ bool warnIfFileWriteFails(const QString& filePath, const QString& content)
     return false;
 }
 
-QString choppedPath(const QString& path)
-{
-    QString choppedPath(path);
-    if (choppedPath.right(1) == MARK_ASTERISK)
-        choppedPath.chop(1);
-    return choppedPath;
-}
-
 QList<Control*> controls(const QList<QmlCodeEditorWidget::DesignsDocument*>& documents)
 {
     QSet<Control*> controlSet;
@@ -576,14 +568,20 @@ void QmlCodeEditorWidget::onComboActivation(QmlCodeEditorToolBar::Combo combo)
     QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
     QComboBox* rightCombo = toolBar()->combo(QmlCodeEditorToolBar::RightCombo);
 
-    if (toolBar()->scope() == QmlCodeEditorToolBar::Assets)
-        return openAssets(choppedPath(leftCombo->currentText()));
-    if (toolBar()->scope() == QmlCodeEditorToolBar::Others)
-        return openOthers(fullPath(m_fileExplorer->rootPath(), choppedPath(leftCombo->currentText())));
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Assets) {
+        auto doc = leftCombo->currentData(DocumentRole).value<AssetsDocument*>();
+        return openAssets(doc->relativePath);
+    }
+    if (toolBar()->scope() == QmlCodeEditorToolBar::Others) {
+        auto doc = leftCombo->currentData(DocumentRole).value<OthersDocument*>();
+        return openOthers(doc->fullPath);
+    }
     if (toolBar()->scope() == QmlCodeEditorToolBar::Designs) {
         Control* control = leftCombo->itemData(leftCombo->currentIndex(), ControlRole).value<Control*>();
-        if (combo == QmlCodeEditorToolBar::RightCombo)
-            return openDesigns(control, choppedPath(rightCombo->currentText()));
+        if (combo == QmlCodeEditorToolBar::RightCombo) {
+            auto doc = rightCombo->currentData(DocumentRole).value<DesignsDocument*>();
+            return openDesigns(control, doc->relativePath);
+        }
         if (combo == QmlCodeEditorToolBar::LeftCombo) {
             DesignsDocument* lastDoc = control->property("ow_last_document").value<DesignsDocument*>();
             return openDocument(lastDoc);
@@ -651,7 +649,49 @@ void QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted(const QSet<QString
 
 void QmlCodeEditorWidget::onFileExplorerFileRenamed(const QString& path, const QString& oldName, const QString& newName)
 {
+    const QString& oldPath = fullPath(path, oldName);
+    const QString& newPath = fullPath(path, newName);
 
+    if (m_openDocument->scope == QmlCodeEditorToolBar::Assets) {
+        if (QFileInfo(newPath).isDir()) {
+            for (AssetsDocument* doc : m_assetsDocuments) {
+                QString fp = fullPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir()), doc->relativePath);
+                if (fp.contains(oldPath)) {
+                    fp.replace(oldPath, newPath);
+                    rename(doc, QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(fp));
+                }
+            }
+        } else {
+            const QString& oldRelativePath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(oldPath);
+            const QString& newRelativePath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(newPath);
+            for (AssetsDocument* doc : m_assetsDocuments) {
+                if (doc->relativePath == oldRelativePath)
+                    rename(doc, newRelativePath);
+            }
+        }
+    } else if (m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
+//        if (QFileInfo(path).isDir()) {
+//            for (DesignsDocument* doc : m_designsDocuments) {
+//                const QString& fp = fullPath(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir()), doc->relativePath);
+//                if (UtilityFunctions::isDirAncestor(QDir(path), fp))
+//                    close(doc);
+//            }
+//        } else {
+//            finalPath = QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(path);
+//            for (DesignsDocument* doc : m_designsDocuments) {
+//                if (doc->relativePath == finalPath)
+//                    close(doc);
+//            }
+//        }
+    } else {
+        for (OthersDocument* doc : m_othersDocuments) {
+            QString fp = doc->fullPath;
+            if (fp.contains(oldPath)) {
+                fp.replace(oldPath, newPath);
+                rename(doc, fp);
+            }
+        }
+    }
 }
 
 void QmlCodeEditorWidget::onAssetsFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes)
@@ -680,9 +720,11 @@ void QmlCodeEditorWidget::onAssetsFileExplorerFileRenamed(const QString& path, c
 
     if (QFileInfo(newPath).isDir()) {
         for (AssetsDocument* doc : m_assetsDocuments) {
-            const QString& fp = fullPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir()), doc->relativePath);
-            if (UtilityFunctions::isDirAncestor(QDir(path), fp))
-                close(doc);
+            QString fp = fullPath(SaveUtils::toProjectAssetsDir(ProjectManager::dir()), doc->relativePath);
+            if (fp.contains(oldPath)) {
+                fp.replace(oldPath, newPath);
+                rename(doc, QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(fp));
+            }
         }
     } else {
         const QString& oldRelativePath = QDir(SaveUtils::toProjectAssetsDir(ProjectManager::dir())).relativeFilePath(oldPath);
