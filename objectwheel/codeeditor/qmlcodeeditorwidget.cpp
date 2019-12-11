@@ -519,14 +519,22 @@ void QmlCodeEditorWidget::close(QmlCodeEditorWidget::Document* document)
 
     Q_ASSERT(document != nextDocument);
 
-    Document* deletion = document;
-    showNoDocumentsOpen();
+    if (m_openDocument == document)
+        m_openDocument = nullptr;
 
-    delete deletion->document;
-    delete deletion;
+    Q_ASSERT(nextDocument == 0 || m_openDocument == 0);
 
     if (nextDocument)
         openDocument(nextDocument);
+    else if (m_openDocument == 0)
+        showNoDocumentsOpen();
+
+    // We make sure we delete the ducument->document
+    // after setting setCodeDocument() of code editor
+    // in case we might delete active document thus
+    // we might get a crash due to deleting active doc
+    delete document->document;
+    delete document;
 }
 
 void QmlCodeEditorWidget::showNoDocumentsOpen()

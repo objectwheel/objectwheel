@@ -20,8 +20,8 @@ class QmlCodeEditorWidget final : public QSplitter
 public:
     struct Document {
         QTextCursor textCursor;
-        QmlCodeDocument* document;
         QmlCodeEditorToolBar::Scope scope;
+        QmlCodeDocument* document;
     };
     struct AssetsDocument : Document { QString relativePath; };
     struct DesignsDocument : AssetsDocument { Control* control; };
