@@ -8,6 +8,7 @@
 #include <utilityfunctions.h>
 #include <filesystemutils.h>
 #include <controlremovingmanager.h>
+#include <controlpropertymanager.h>
 
 #include <QTimer>
 #include <QApplication>
@@ -25,14 +26,9 @@
 
 // FIXME:
 // What happens if a assets open file get overwritten/content changed outside
-
 // What happens if a others open file get overwritten/content changed outside
-
 // What happens if a designs open file get overwritten/content changed outside
-// What happens if a control's dir changes
 // What happens if a control's id changes (within code editor/out of code editor)
-// What happens if a control's uid changes (within code editor/out of code editor) (needed for tooltip)
-// What happens to the file explorer's root path if a control's dir changes
 
 #define MARK_ASTERISK "*"
 #define assets(x) static_cast<QmlCodeEditorWidget::AssetsDocument*>((x))
@@ -154,6 +150,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
             this, [=] { onModificationChange(m_openDocument); }, Qt::QueuedConnection);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &QmlCodeEditorWidget::closeDesigns);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::parentChanged,
+            this, &QmlCodeEditorWidget::onControlParentChange);
 }
 
 int QmlCodeEditorWidget::count() const
@@ -628,14 +626,14 @@ void QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted(const QSet<QString
         } else if (m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
             const auto docs = m_designsDocuments;
             if (QFileInfo(path).isDir()) {
-                const QString& td = SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir());
+                const QString& td = designsDir(m_openDocument);
                 for (DesignsDocument* doc : docs) {
                     const QString& fp = fullPath(td, doc->relativePath);
                     if (UtilityFunctions::isDirAncestor(QDir(path), fp))
                         close(doc);
                 }
             } else {
-                const QString& fp = QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(path);
+                const QString& fp = QDir(designsDir(m_openDocument)).relativeFilePath(path);
                 for (DesignsDocument* doc : docs) {
                     if (doc->relativePath == fp)
                         close(doc);
@@ -686,14 +684,14 @@ void QmlCodeEditorWidget::onFileExplorerFileRenamed(const QString& path, const Q
     } else if (m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
         if (QFileInfo(newPath).isDir()) {
             for (DesignsDocument* doc : m_designsDocuments) {
-                QString fp = fullPath(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir()), doc->relativePath);
+                QString fp = fullPath(designsDir(m_openDocument), doc->relativePath);
                 if (fp.contains(oldPath)) {
                     fp.replace(oldPath, newPath);
-                    rename(doc, QDir(SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir())).relativeFilePath(fp));
+                    rename(doc, QDir(designsDir(m_openDocument)).relativeFilePath(fp));
                 }
             }
         } else {
-            const QString& td = SaveUtils::toControlThisDir(designs(m_openDocument)->control->dir());
+            const QString& td = designsDir(m_openDocument);
             const QString& oldRelativePath = QDir(td).relativeFilePath(oldPath);
             const QString& newRelativePath = QDir(td).relativeFilePath(newPath);
             for (DesignsDocument* doc : m_designsDocuments) {
@@ -708,6 +706,17 @@ void QmlCodeEditorWidget::onFileExplorerFileRenamed(const QString& path, const Q
                 fp.replace(oldPath, newPath);
                 rename(doc, fp);
             }
+        }
+    }
+}
+
+void QmlCodeEditorWidget::onControlParentChange(Control* control)
+{
+    for (DesignsDocument* doc : qAsConst(m_designsDocuments)) {
+        if (doc->control == control) {
+            doc->document->setFilePath(fullPath(designsDir(doc), doc->relativePath));
+            if(m_openDocument == doc)
+                m_fileExplorer->setRootPath(designsDir(doc));
         }
     }
 }
@@ -910,8 +919,7 @@ QmlCodeEditorWidget::AssetsDocument* QmlCodeEditorWidget::addAssets(const QStrin
     return document;
 }
 
-QmlCodeEditorWidget::DesignsDocument* QmlCodeEditorWidget::addDesigns(Control* control,
-                                                                      const QString& relativePath)
+QmlCodeEditorWidget::DesignsDocument* QmlCodeEditorWidget::addDesigns(Control* control, const QString& relativePath)
 {
     const QString& filePath = fullPath(SaveUtils::toControlThisDir(control->dir()), relativePath);
 

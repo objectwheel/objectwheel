@@ -1002,7 +1002,10 @@ void QmlCodeDocument::setTabSettings(const TextEditor::TabSettings &tabSettings)
 
 void QmlCodeDocument::setFilePath(const QString& filePath)
 {
-    m_filePath = filePath;
+    if (m_filePath != filePath) {
+        m_filePath = filePath;
+        m_updateDocumentTimer->start();
+    }
 }
 
 const QString& QmlCodeDocument::filePath() const
