@@ -24,12 +24,6 @@
 #include <QScreen>
 #include <QPainter>
 
-// FIXME:
-// What happens if a assets open file get overwritten/content changed outside
-// What happens if a others open file get overwritten/content changed outside
-// What happens if a designs open file get overwritten/content changed outside
-// What happens if a control's id changes (within code editor/out of code editor)
-
 #define MARK_ASTERISK "*"
 #define assets(x) static_cast<QmlCodeEditorWidget::AssetsDocument*>((x))
 #define designs(x) static_cast<QmlCodeEditorWidget::DesignsDocument*>((x))
@@ -152,6 +146,8 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
             this, &QmlCodeEditorWidget::closeDesigns);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::parentChanged,
             this, &QmlCodeEditorWidget::onControlParentChange);
+    connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
+            this, &QmlCodeEditorWidget::onControlIdChange);
 }
 
 int QmlCodeEditorWidget::count() const
@@ -717,6 +713,26 @@ void QmlCodeEditorWidget::onControlParentChange(Control* control)
             doc->document->setFilePath(fullPath(designsDir(doc), doc->relativePath));
             if(m_openDocument == doc)
                 m_fileExplorer->setRootPath(designsDir(doc));
+        }
+    }
+}
+
+void QmlCodeEditorWidget::onControlIdChange(Control* control, const QString& previousId)
+{
+    if (previousId.isEmpty())
+        return;
+
+    if (control->id() == previousId)
+        return;
+
+    if (m_openDocument && m_openDocument->scope == QmlCodeEditorToolBar::Designs) {
+        QComboBox* leftCombo = toolBar()->combo(QmlCodeEditorToolBar::LeftCombo);
+        for (int i = 0; i < leftCombo->count(); ++i) {
+            if (control == leftCombo->itemData(i, ControlRole).value<Control*>()) {
+                leftCombo->setItemText(i, modifiedControlId(control));
+                leftCombo->setItemData(i, control->id() + "::" + control->uid(), Qt::ToolTipRole);
+                break;
+            }
         }
     }
 }

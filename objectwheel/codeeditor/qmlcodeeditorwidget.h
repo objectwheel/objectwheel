@@ -90,6 +90,7 @@ private slots:
     void onFileExplorerFilesAboutToBeDeleted(const QSet<QString>& pathes);
     void onFileExplorerFileRenamed(const QString& path, const QString& oldName, const QString& newName);
     void onControlParentChange(Control* control);
+    void onControlIdChange(Control* control, const QString& previousId);
 
 protected:
     void dragEnterEvent(QDragEnterEvent* e) override;
