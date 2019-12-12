@@ -44,13 +44,14 @@ CreatorCodeFormatter::CreatorCodeFormatter(const TabSettings &tabSettings)
 
 void CreatorCodeFormatter::saveBlockData(QTextBlock *block, const BlockData &data) const
 {
-    iBlockData *userData = QmlCodeDocument::userData(*block);
-    QmlJSCodeFormatterData *cppData = static_cast<QmlJSCodeFormatterData *>(userData->codeFormatterData);
-    if (!cppData) {
-        cppData = new QmlJSCodeFormatterData;
-        userData->codeFormatterData = cppData;
+    if (iBlockData* userData = QmlCodeDocument::userData(*block)) {
+        QmlJSCodeFormatterData *cppData = static_cast<QmlJSCodeFormatterData *>(userData->codeFormatterData);
+        if (!cppData) {
+            cppData = new QmlJSCodeFormatterData;
+            userData->codeFormatterData = cppData;
+        }
+        cppData->m_data = data;
     }
-    cppData->m_data = data;
 }
 
 bool CreatorCodeFormatter::loadBlockData(const QTextBlock &block, BlockData *data) const

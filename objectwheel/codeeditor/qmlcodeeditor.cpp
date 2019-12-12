@@ -1461,9 +1461,7 @@ QTextBlock QmlCodeEditor::foldedBlockAt(const QPoint &pos, QRect *box) const
                 QRectF lineRect = line.naturalTextRect().translated(offset.x(), top);
                 lineRect.adjust(0, 0, -1, -1);
 
-                QString replacement = QLatin1String(" {") + foldReplacementText(block)
-                        + QLatin1String("}; ");
-
+                QString replacement = foldReplacementText(block);
                 QRectF collapseRect(lineRect.right() + 12,
                                     lineRect.top(),
                                     fontMetrics().horizontalAdvance(replacement),
@@ -3164,11 +3162,9 @@ void QmlCodeEditor::paintReplacement(PaintEventData &data, QPainter &painter,
         lineRect.adjust(0, 0, -1, -1);
 
         QString replacement = foldReplacementText(data.block);
-        QString rectReplacement = QLatin1String(" {") + replacement + QLatin1String("}; ");
-
         QRectF collapseRect(lineRect.right() + 12,
                             lineRect.top(),
-                            fontMetrics().horizontalAdvance(rectReplacement),
+                            fontMetrics().horizontalAdvance(replacement),
                             lineRect.height());
         painter.setRenderHint(QPainter::Antialiasing, true);
         painter.translate(.5, .5);
@@ -3214,7 +3210,7 @@ QColor QmlCodeEditor::replacementPenColor(int blockNumber) const
 
 QString QmlCodeEditor::foldReplacementText(const QTextBlock &) const
 {
-    return QString("· · ·");
+    return QStringLiteral(" ··· ");
 }
 
 bool QmlCodeEditor::selectionVisible(int blockNumber) const

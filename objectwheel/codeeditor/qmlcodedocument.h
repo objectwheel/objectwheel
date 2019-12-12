@@ -63,15 +63,18 @@ public:
     QTextCursor unindent(const QTextCursor &cursor, bool blockSelection = false, int column = 0,
                          int *offset = nullptr);
 
-    static BlockData *testUserData(const QTextBlock &block) {
-        return static_cast<BlockData*>(block.userData());
+    static BlockData* testUserData(const QTextBlock& block) {
+        return dynamic_cast<BlockData*>(block.userData());
     }
 
     static BlockData* userData(const QTextBlock& block) {
-        BlockData *data = static_cast<BlockData*>(block.userData());
-        if (!data && block.isValid())
-            const_cast<QTextBlock &>(block).setUserData((data = new BlockData));
-        return data;
+        if (block.isValid()) {
+            auto data = dynamic_cast<BlockData*>(block.userData());
+            if (data == 0)
+                const_cast<QTextBlock&>(block).setUserData((data = new BlockData));
+            return data;
+        }
+        return nullptr;
     }
 
     static int braceDepth(const QTextBlock &block);

@@ -35,18 +35,19 @@ bool BracketBand::toggleFold(const QPoint& pos) const
     auto bottom = top + ce->blockBoundingRect(block).height();
 
     while (block.isValid() && top <= rect().bottom()) {
-        auto blockData = QmlCodeDocument::userData(block);
 
         if (pos.y() >= top && pos.y() <= bottom) {
-            if (blockData->state == BlockData::StartOn
-                    || blockData->state == BlockData::StartOff) {
-                if (blockData->state == BlockData::StartOn)
-                    blockData->state = BlockData::StartOff;
-                else
-                    blockData->state = BlockData::StartOn;
+            if (BlockData* blockData = QmlCodeDocument::userData(block)) {
+                if (blockData->state == BlockData::StartOn
+                        || blockData->state == BlockData::StartOff) {
+                    if (blockData->state == BlockData::StartOn)
+                        blockData->state = BlockData::StartOff;
+                    else
+                        blockData->state = BlockData::StartOn;
 
-                startBlock = block;
-                break;
+                    startBlock = block;
+                    break;
+                }
             }
         }
 
@@ -144,7 +145,7 @@ QSize BracketBand::sizeHint() const
 void BracketBand::paintEvent(QPaintEvent* e)
 {
     QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
+//    painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(e->rect(), m_qmlCodeEditor->viewport()->palette().base().color());
 
     auto ce = m_qmlCodeEditor;
@@ -161,7 +162,7 @@ void BracketBand::paintEvent(QPaintEvent* e)
         auto w = qMin(fontMetrics().height() - 4, 12); // Handle width
         auto hr = QRectF(width() - w - 0.5, top + fontMetrics().height() / 2.0 - w / 2.0, w, w);
 
-        painter.setPen("#A5A5A5");
+        painter.setPen(QPen(QColor("#A5A5A5"), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
 
         if (block.isVisible() && bottom >= e->rect().top()) {
             if (m_qmlCodeEditor->textCursor().block() == block)
@@ -169,8 +170,8 @@ void BracketBand::paintEvent(QPaintEvent* e)
 
             if (blockData->state == BlockData::StartOn || blockData->state == BlockData::StartOff) {
                 painter.drawRect(hr);
-                painter.setPen("#555555");
-                painter.drawLine(QPointF(hr.x() + 2.5, hr.center().y()), QPointF(hr.right() - 2.5, hr.center().y()));
+                painter.setPen(QPen(QColor("#555555"), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+                painter.drawLine(QPointF(hr.x() + 2, hr.center().y()), QPointF(hr.right() - 2, hr.center().y()));
 
                 if (blockData->state == BlockData::StartOff) {
                     painter.drawLine(QPointF(hr.center().x(), hr.top() + 2.5),
@@ -182,7 +183,7 @@ void BracketBand::paintEvent(QPaintEvent* e)
                 painter.drawLine(QPointF(hr.center().x(), top), QPointF(hr.center().x(), bottom));
                 painter.drawLine(QPointF(hr.center().x(), hr.center().y()), QPointF(hr.right(), hr.center().y()));
             } else if (blockData->state == BlockData::End) {
-                painter.drawLine(QPointF(hr.center().x(), top), QPointF(hr.center().x(), bottom));
+                painter.drawLine(QPointF(hr.center().x(), top), QPointF(hr.center().x(), bottom + 0.5));
                 painter.drawLine(QPointF(hr.center().x(), bottom), QPointF(hr.right(), bottom));
             }
         }
@@ -250,8 +251,7 @@ void BracketBand::updateData()
         }
 
         if (bracketStack.isEmpty()) {
-            auto previousBlockData = QmlCodeDocument::userData(block.previous());
-            if (previousBlockData) {
+            if (auto previousBlockData = QmlCodeDocument::userData(block.previous())) {
                 if (previousBlockData->state == BlockData::Line)
                     blockData->state = BlockData::End;
                 else if (previousBlockData->state == BlockData::MiddleEnd)

@@ -93,11 +93,10 @@ void MarkBand::paintEvent(QPaintEvent* e)
     auto hg = fontMetrics().height();
 
     while (block.isValid() && top <= e->rect().bottom()) {
-        auto blockData = QmlCodeDocument::userData(block);
-
-        if (blockData->mark.type != Mark::NoMark && block.isVisible() && bottom >= e->rect().top())
-            painter.drawPixmap(width() / 2.0 - hg / 2.0, top, hg, hg, pixmap(blockData->mark.type));
-
+        if (BlockData* blockData = QmlCodeDocument::userData(block)) {
+            if (blockData->mark.type != Mark::NoMark && block.isVisible() && bottom >= e->rect().top())
+                painter.drawPixmap(width() / 2.0 - hg / 2.0, top, hg, hg, pixmap(blockData->mark.type));
+        }
         block = block.next();
         top = bottom;
         bottom = top + ce->blockBoundingRect(block).height();
@@ -113,13 +112,13 @@ void MarkBand::mouseMoveEvent(QMouseEvent* e)
     auto bottom = top + ce->blockBoundingRect(block).height();
 
     while (block.isValid() && top <= rect().bottom()) {
-        auto blockData = QmlCodeDocument::userData(block);
-
         if (pos.y() >= top && pos.y() <= bottom) {
-            if (blockData->mark.type == Mark::NoMark)
-                ToolTip::hide();
-            else
-                ToolTip::show(mapToGlobal(pos), blockData->mark.message, this);
+            if (BlockData* blockData = QmlCodeDocument::userData(block)) {
+                if (blockData->mark.type == Mark::NoMark)
+                    ToolTip::hide();
+                else
+                    ToolTip::show(mapToGlobal(pos), blockData->mark.message, this);
+            }
             break;
         }
 
@@ -141,11 +140,11 @@ void MarkBand::mouseReleaseEvent(QMouseEvent* e)
         auto bottom = top + ce->blockBoundingRect(block).height();
 
         while (block.isValid() && top <= rect().bottom()) {
-            auto blockData = QmlCodeDocument::userData(block);
-
             if (pos.y() >= top && pos.y() <= bottom) {
-                if (blockData->mark.type != Mark::NoMark)
-                    emit markActivated(blockData->mark);
+                if (BlockData* blockData = QmlCodeDocument::userData(block)) {
+                    if (blockData->mark.type != Mark::NoMark)
+                        emit markActivated(blockData->mark);
+                }
                 break;
             }
 

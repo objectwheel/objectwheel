@@ -696,7 +696,8 @@ void QmlCodeDocument::setLexerState(const QTextBlock& block, int state)
         if (BlockData* userData = QmlCodeDocument::testUserData(block))
             userData->lexerState = 0;
     } else {
-        userData(block)->lexerState = qMax(0,state);
+        if (BlockData* data = userData(block))
+            data->lexerState = qMax(0,state);
     }
 }
 
@@ -713,7 +714,8 @@ void QmlCodeDocument::setParentheses(const QTextBlock& block, const Parentheses&
         if (BlockData *userData = testUserData(block))
             userData->parentheses.clear();
     } else {
-        userData(block)->parentheses = parentheses;
+        if (BlockData* data = userData(block))
+            data->parentheses = parentheses;
     }
 }
 
@@ -1233,12 +1235,14 @@ void QmlCodeDocument::createMarks(const QList<DiagnosticMessage> &diagnostics)
                 ptr->m_diagnosticMarks.removeAll(mark);
         };
         auto block = findBlockByLineNumber(diagnostic.loc.startLine - 1);
-        auto blockData = QmlCodeDocument::userData(block);
-        blockData->mark.type = isWarning(diagnostic.kind) ? Mark::CodeModelWarning
-                                                          : Mark::CodeModelError;
-        blockData->mark.message = diagnostic.message;
-        blockData->mark.removalCallback = onMarkRemoved;
-        m_diagnosticMarks.append(&blockData->mark);
+        if (BlockData* blockData = QmlCodeDocument::userData(block)) {
+            blockData->mark.type = isWarning(diagnostic.kind)
+                    ? Mark::CodeModelWarning
+                    : Mark::CodeModelError;
+            blockData->mark.message = diagnostic.message;
+            blockData->mark.removalCallback = onMarkRemoved;
+            m_diagnosticMarks.append(&blockData->mark);
+        }
     }
 }
 
@@ -1252,21 +1256,25 @@ void QmlCodeDocument::createMarks(const SemanticInfo &info)
     };
     for (const DiagnosticMessage &diagnostic : qAsConst(info.semanticMessages)) {
         auto block = findBlockByLineNumber(diagnostic.loc.startLine - 1);
-        auto blockData = QmlCodeDocument::userData(block);
-        blockData->mark.type = isWarning(diagnostic.kind) ? Mark::CodeModelWarning
-                                                          : Mark::CodeModelError;
-        blockData->mark.message = diagnostic.message;
-        blockData->mark.removalCallback = onMarkRemoved;
-        m_semanticMarks.append(&blockData->mark);
+        if (BlockData* blockData = QmlCodeDocument::userData(block)) {
+            blockData->mark.type = isWarning(diagnostic.kind)
+                    ? Mark::CodeModelWarning
+                    : Mark::CodeModelError;
+            blockData->mark.message = diagnostic.message;
+            blockData->mark.removalCallback = onMarkRemoved;
+            m_semanticMarks.append(&blockData->mark);
+        }
     }
     for (const QmlJS::StaticAnalysis::Message &message : qAsConst(info.staticAnalysisMessages)) {
         auto block = findBlockByLineNumber(message.location.startLine - 1);
-        auto blockData = QmlCodeDocument::userData(block);
-        blockData->mark.type = isWarning(message.severity) ? Mark::CodeModelWarning
-                                                           : Mark::CodeModelError;
-        blockData->mark.message = message.message;
-        blockData->mark.removalCallback = onMarkRemoved;
-        m_semanticMarks.append(&blockData->mark);
+        if (BlockData* blockData = QmlCodeDocument::userData(block)) {
+            blockData->mark.type = isWarning(message.severity)
+                    ? Mark::CodeModelWarning
+                    : Mark::CodeModelError;
+            blockData->mark.message = message.message;
+            blockData->mark.removalCallback = onMarkRemoved;
+            m_semanticMarks.append(&blockData->mark);
+        }
     }
 }
 

@@ -31,7 +31,7 @@
 #include <QDateTime>
 #include <QApplication>
 
-#define SIZE_LIST        (QSize(450, 250))
+#define SIZE_LIST        (QSize(450, 262))
 #define BUTTONS_WIDTH    (450)
 #define PATH_NICON       (":/images/welcome/new.png")
 #define PATH_LICON       (":/images/welcome/ok.png")
