@@ -497,6 +497,9 @@ void QmlCodeDocument::reparseDocument()
 
 void QmlCodeDocument::onDocumentUpdated(Document::Ptr doc)
 {
+    if (doc.isNull())
+        return;
+
     if (filePath() != doc->fileName())
         return;
 

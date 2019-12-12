@@ -551,7 +551,7 @@ QList<Control*> Control::siblings() const
     if (type() == Form::Type) {
         // FIXME: Fix scene() usage and test
         Q_ASSERT(scene());
-        if (!scene())
+        if (scene() == 0)
             return siblings;
         if (const DesignerScene* scene = this->scene()) {
             for (Form* form : scene->forms())

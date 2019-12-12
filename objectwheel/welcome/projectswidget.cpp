@@ -158,7 +158,8 @@ public:
                const QModelIndex& index) const override
     {
         auto item = m_listWidget->item(index.row());
-        Q_ASSERT(item);
+        if (item == 0)
+            return;
 
         auto name = item->data(Name).toString();
         auto lastEdit = item->data(LastEdit).toString();

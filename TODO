@@ -5,13 +5,16 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
 
 Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
-qmlcodeeditorwidget'de kodları collapse/expand yapma olayı bozuk kod editörde
+server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
+    server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
+form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin ayrıca uyarı da versin bi kereye
+    mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
+ayrıca yukarıdakinin benzeri olacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin
+    ve eğer açık ise bu assetlerdeki herhangi bir dosya, açık halleri de düzeltilsin
 Quick Extras ve Controls 1 ile ilgili kesinlikle bir sorun var, ne tema değişimi adam gibi çalışıyor
     ne de itemler bırakılınca implicitWidth implicitHeight dolayısıyla boyutları ayarlanıyor, öyle
     malca boyutsuzca sahnede duruyorlar
 dialogbuttonbox Qt Creator'da gayet güzel çizilirken bizde niye mal gibi?
-server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
-    server'dan kopuksak yeniden bağlanılmaya falan çalışılsın
 
 Ow menüsünü düzenle; Help, About, Support vs vs gibi temel şeyleri ekle,
     Logout, ana ekrana dönme, projeler ekranına dönme vs vs alayını ekle işte
@@ -24,24 +27,18 @@ videolar ve tutorialler eklenecek, bunlar için özel "learning page" tasarlanac
   entegre edilecek
 
 bir sub-control, yada form, applicationwindow yapılıp, rectangle a çevrilince patlıyor, neden?
-Çökme-raportu-9.txt, buraporlarla ilgilen
+neden bir formun kodunu ApplicationWindow'dan Page'ye çevirince sikko render engine patlıyor
 form nongui yapılırsa renderer patlamasın
 neden bir kontrol içine başka bir kontrol koyunca dıştaki blank laşıyor?
+FormsPane'de add tuşuna basınca bir drop down menü açılıp
+    Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
+    hangi elemana tıklanırsa yeni form olarak o eleman türünden oluşturulsun
 f1 ile help açma mümkün olsun. Hem kod editörde hemde designer view'de seçili olan kontrol için
-qmlcode editor'e save all butonu ekle ve ayrıca CMD + R = run, CMD + Shift + S = save all vs klavye kısayollarını ekle
 Sağ tık menüsüne "bu obje ile ilgili yardım al" minvalinde "Go to Help" gibi bir seçenek de ekle
     böylece ilgili kontrol ile ilgili kolayca documents sekmesine gidilebilsin
 Bazı componentler üzerine reparent etmek yasaklanacak, bunu Designer tarafında module() kontrolü ile yapacağız,
     örneğin bu komponentler non-gui ler üzerine gui koymak, Loader, Component, vs vs araştırılacak
 plan pricing mevzularının limitlerini "beta" ya uygun düşecek şekilde gözden geçir
-form silme işlemi hem js dosyalarını vs assets deki tüm girdileri de silsin ayrıca uyarı da versin bi kereye
-    mahsus, ve uyarıda "bunu bir daha gösterme" de olsun
-ayrıca yukarıdakinin benzeri olacak şekilde form isimlendirme de assets deki tüm girdileri düzenlesin
-    ve eğer açık ise bu assetlerdeki herhangi bir dosya, açık halleri de düzeltilsin
-tüm dock ayarları kalıcı olsun, diğer ayarlar için de bi beyin fırtınası yapılsın
-    Assets ler için DesignerSettings e bölme ekle ve varsayılan AssetsView/Explorer modu buraya ekle,
-    ayrıca tüm dock widgetler vs ve splitview genişlik oranları vs gibi tüm ayarlar program kapatılınca da hatırlanacak
-    şekilde general settings vs şeklinde kayıt edilsin
 çift tıklama ile kod editörün splitview ile mi yoksa full code editor modda mı açılacağını belirleyebilmek
     için settingslere yeni bir settings ekle
 headlineların item genişliğine eşit olup olmayacağına dair scenesettings ekle, yada en azından nongui
@@ -54,26 +51,19 @@ chartview ile tüm "barseries" tarzı toolları Qt Creator'e baka baka aynen kop
 Menu, MenuBar, ToolBar, TabBar gibi bazı (özellikle Container bazlı) toollar için designer şu özellikleri desteklemeli:
     Eğer babaları kendi özel konteynerleri ise (MenuBar, TabBar gibi), ilgili çocukların x, y, width, height gibi özellikleri set edilememeli, mesela designera x, y uygulanır ama UpdateRenderer ve Save edilmez. Resizerlar bu gibi kontroller için pasif olmalı. Ancak ilgili kontrol headline ile yada doğal olarak sürüklenebilmeli ve reparent edilebilmeli, ancak dediğimiz gibi eğer kendi doğal konteynerları babaları ise x, y, w, h set edilmemeli eski yerlerine geri dönmeliler, ayrıca belki properties pane de x, y, w, h propertilerini babaları uygun olduğunda göstermemeli gizlemeli
 engine crash mesajına "dont ask again" ekle
-designerview'i strong focus yaparsak acaba shortcutların bozulma olayı düzelirmi? yada NoFocus mo yaptık orada?
-    ayrıca aynı adobe premier gibi Designer View'in mi Kod Editörün mü focusa sahip olduğunu belirtmek
-    için ilgili widget'in etrafında bir mavi focus ring çizilmeli
 InspectorPane'e de aynı kontrol sağ tık menüsünden ekle, ayrıca InspectorPane için de settings'e
     çift tıklanınca varsayılan olarak neyin açılacağı sorulsun, kod mu, SignalEditor mü vs
-FormsPane'de add tuşuna basınca bir drop down menü açılıp
-    Page, ApplicationWindow-v1, ApplicationWindow-v2, Dialog, Popup, Item vs gibi sorsun
-    hangi elemana tıklanırsa yeni form olarak o eleman türünden oluşturulsun
 
 set Unset cursorda bi mallık oluyor, bi zoom yaptım, geri çıktım, tüm kontrolleri seçip deletleyince designer da form dışına mouse move yapınca sanki kontrol üzerine gelmiş gibi open hand cursor oluyor
 ayrıca shortcutlar yine saçmalıyor her nedense çalışmıyor, yukarıdaki mevzu olunca shortcutlar da aynı şekilde bozuldu ve örneğin delete çalışmıyor artık, bunu denemek için bir timer kur her saniye application'un global focus objecsini print etsin bakalım focus nereye kayıyorda böyle oluyor
 Her tool ikonu ayrı olsun, bir ikon birden fazla kullanılmasın
 FormsPane sağ tık menüsü olsun ve sağ tık ve drag drop desteklesin
-double click için varsayılan olarak hangisinin olacağı da scene settings içinden ayarlanabilsin
+    double click için varsayılan olarak hangisinin olacağı da scene settings içinden ayarlanabilsin
 Broadcasting ile ilgili bir settings sayfası ekle ayrıca ana ekrandaki "devices" listesinin sonuna "settings" menu elemanı ekle
 SignalEditor'de sinyalleri yukarıdan aşağıya doğru, class hiyerarşisine göre sırala, base class'ın propertileri en altta olacak şekilde
 properties pane url li dosya yolları için bir toolbutton sunup, tıklanınca "Assets" içinden başlamalı ve controllere assets'den yol atama olayını kolaylaştırmalı
-qmlcodeeditor'ün gadgetlerinin layoutları bozuk, nesneler içi içe giriyor, bunu düzelt
+qmlcodeeditor'ün gadgetlerinin/qmleditorcontextwidgetslerin layoutları bozuk, nesneler içi içe giriyor, bunu düzelt
 image gadgetinin smooth şekilde resimleri boyutlandırdığından emin ol
-qmlcodeeditor de saçmalamalar oluyor, dosya değiştirme çalışmıyor
 headline'dan tutulup çekilince marginler ayarlanabilsin
 niye popuplar proje yüklenince saçma bir konumda başlıyor centerın: overlay
 neden amk bir formun kodunu ApplicationWindow'dan Page'ye çevirince sikko render engine patlıyor
