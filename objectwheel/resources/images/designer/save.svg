@@ -1,1 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill="#dcd5f2" d="M1.5 14.5L1.5 1.5 11.793 1.5 14.5 4.207 14.5 14.5z"></path><path fill="#8b75a1" d="M11.586,2L14,4.414V14H2V2H11.586 M12,1H1v14h14V4L12,1L12,1z"></path><path fill="#fff" d="M4 8H12V14H4z"></path><path fill="#c6bae6" d="M11,2H4v3c0,0.552,0.448,1,1,1h6V2z"></path><path fill="#e1ebf2" d="M6,5.5C5.725,5.5,5.5,5.276,5.5,5V2c0-0.276,0.225-0.5,0.5-0.5h5c0.275,0,0.5,0.224,0.5,0.5v3 c0,0.276-0.225,0.5-0.5,0.5H6z"></path><path fill="#66798f" d="M11,2v3H6V2H11 M11,1H6C5.448,1,5,1.448,5,2v3c0,0.552,0.448,1,1,1h5c0.552,0,1-0.448,1-1V2 C12,1.448,11.552,1,11,1L11,1z"></path><path fill="#c2e8ff" d="M5 10H11V11H5zM5 12H11V13H5z"></path><path fill="#788b9c" d="M9 3H10V5H9z"></path></svg>
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 23.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="katman_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#BCDEBF;}
+	.st1{fill:#629A78;}
+	.st2{fill:#FFFFFF;}
+	.st3{fill:#AECCAF;}
+	.st4{fill:#E1EBF2;}
+	.st5{fill:#66798F;}
+	.st6{fill:#C2E8FF;}
+	.st7{fill:#788B9C;}
+</style>
+<path class="st0" d="M1.5,14.5v-13h10.3l2.7,2.7v10.3H1.5z"/>
+<path class="st1" d="M11.6,2L14,4.4V14H2V2H11.6 M12,1H1v14h14V4L12,1L12,1z"/>
+<path class="st2" d="M4,8h8v6H4V8z"/>
+<path class="st3" d="M11,2H4v3c0,0.6,0.4,1,1,1h6V2z"/>
+<path class="st4" d="M6,5.5C5.7,5.5,5.5,5.3,5.5,5V2c0-0.3,0.2-0.5,0.5-0.5h5c0.3,0,0.5,0.2,0.5,0.5v3c0,0.3-0.2,0.5-0.5,0.5H6z"/>
+<path class="st5" d="M11,2v3H6V2H11 M11,1H6C5.4,1,5,1.4,5,2v3c0,0.6,0.4,1,1,1h5c0.6,0,1-0.4,1-1V2C12,1.4,11.6,1,11,1L11,1z"/>
+<path class="st6" d="M5,10h6v1H5V10z M5,12h6v1H5V12z"/>
+<path class="st7" d="M9,3h1v2H9V3z"/>
+</svg>

@@ -48,7 +48,7 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
     s_process->setStandardErrorFile(QProcess::nullDevice());
 #endif
 
-    s_warningMessageTimer->setInterval(1000);
+    s_warningMessageTimer->setInterval(1500);
     s_warningMessageTimer->setSingleShot(true);
 
     connect(s_warningMessageTimer, &QTimer::timeout,

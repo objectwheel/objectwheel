@@ -35,12 +35,14 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
 
     ApplicationStyle::setButtonStyle(m_runButton, ApplicationStyle::TexturedRounded);
     m_runButton->setCursor(Qt::PointingHandCursor);
-    m_runButton->setToolTip(tr("Run"));
+    m_runButton->setShortcut(Qt::CTRL + Qt::Key_R);
+    m_runButton->setToolTip(tr("Run") + UtilityFunctions::shortcutSymbol(m_runButton->shortcut()));
     m_runButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_stopButton, ApplicationStyle::TexturedRounded);
     m_stopButton->setCursor(Qt::PointingHandCursor);
-    m_stopButton->setToolTip(tr("Stop"));
+    m_stopButton->setShortcut(Qt::CTRL + Qt::Key_T);
+    m_stopButton->setToolTip(tr("Stop") + UtilityFunctions::shortcutSymbol(m_stopButton->shortcut()));
     m_stopButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_preferencesButton, ApplicationStyle::TexturedRounded);

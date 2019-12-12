@@ -138,5 +138,8 @@
         <file>images/designer/rename.svg</file>
         <file>images/designer/engine-off.svg</file>
         <file>images/designer/engine-on.svg</file>
+        <file>images/designer/comment.svg</file>
+        <file>images/designer/indent.svg</file>
+        <file>images/designer/beautify.svg</file>
     </qresource>
 </RCC>

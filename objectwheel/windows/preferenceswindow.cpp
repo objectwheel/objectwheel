@@ -14,19 +14,16 @@
 
 enum Roles { SettingsPageRole = Qt::UserRole + 1 };
 
-namespace {
-
-void setPageForItem(QListWidgetItem* item, SettingsPage* page)
+static void setPageForItem(QListWidgetItem* item, SettingsPage* page)
 {
     item->setData(SettingsPageRole, QVariant::fromValue<SettingsPage*>(page));
 }
 
-SettingsPage* pageFromItem(QListWidgetItem* item)
+static SettingsPage* pageFromItem(QListWidgetItem* item)
 {
     if (!item)
         return nullptr;
     return item->data(SettingsPageRole).value<SettingsPage*>();
-}
 }
 
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)

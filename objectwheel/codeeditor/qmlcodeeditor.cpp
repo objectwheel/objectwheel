@@ -9,6 +9,7 @@
 
 #include <qmljs/parser/qmljsast_p.h>
 #include <qmljs/qmljsbind.h>
+#include <qmljs/qmljsreformatter.h>
 #include <qmljs/qmljsscopechain.h>
 #include <qmljs/qmljsevaluate.h>
 #include <qmljstools/qmljssemanticinfo.h>
@@ -22,6 +23,7 @@
 #include <utils/textutils.h>
 #include <utils/tooltip/tooltip.h>
 #include <utils/link.h>
+#include <uncommentselection.h>
 
 #include <texteditor/codeassist/codeassistant.h>
 #include <texteditor/colorpreviewhoverhandler.h>
@@ -39,6 +41,7 @@
 #include <QAction>
 #include <QLabel>
 #include <QComboBox>
+#include <QMenu>
 
 using namespace Utils;
 using namespace TextEditor;
@@ -395,6 +398,21 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_refactorOverlay(new TextEditor::RefactorOverlay(this))
   , m_searchResultOverlay(new TextEditor::Internal::TextEditorOverlay(this))
   , m_autoCompleter(new QmlJSEditor::Internal::AutoCompleter)
+
+  , m_menu(new QMenu(this))
+  , m_undoAction(new QAction(this))
+  , m_redoAction(new QAction(this))
+  , m_cutAction(new QAction(this))
+  , m_copyAction(new QAction(this))
+  , m_pasteAction(new QAction(this))
+  , m_deleteAction(new QAction(this))
+  , m_toggleCommentAction(new QAction(this))
+  , m_autoIndentAction(new QAction(this))
+  , m_selectAllAction(new QAction(this))
+  , m_reformatFileAction(new QAction(this))
+  , m_closeAction(new QAction(this))
+  , m_saveAction(new QAction(this))
+  , m_saveAllAction(new QAction(this))
 {
     m_noDocsLabel->setVisible(false);
     m_noDocsLabel->setAlignment(Qt::AlignCenter);
@@ -473,6 +491,111 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     //    QTimer::singleShot(4000, [=]{
     //        highlightSearchResultsSlot("swipeView", FindFlags(FindCaseSensitively | FindWholeWords));
     //    });
+
+    m_undoAction->setShortcutVisibleInContextMenu(true);
+    m_redoAction->setShortcutVisibleInContextMenu(true);
+    m_cutAction->setShortcutVisibleInContextMenu(true);
+    m_copyAction->setShortcutVisibleInContextMenu(true);
+    m_pasteAction->setShortcutVisibleInContextMenu(true);
+    m_deleteAction->setShortcutVisibleInContextMenu(true);
+    m_toggleCommentAction->setShortcutVisibleInContextMenu(true);
+    m_autoIndentAction->setShortcutVisibleInContextMenu(true);
+    m_selectAllAction->setShortcutVisibleInContextMenu(true);
+    m_reformatFileAction->setShortcutVisibleInContextMenu(true);
+
+    m_undoAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_redoAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_cutAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_copyAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_pasteAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_deleteAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_toggleCommentAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_autoIndentAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_selectAllAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_reformatFileAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_closeAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_saveAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_saveAllAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+
+    // NOTE: If you update those, make sure you update
+    // QmlCodeEditorToolbar's button tool tips too.
+    m_undoAction->setShortcut(QKeySequence::Undo);
+    m_redoAction->setShortcut(QKeySequence::Redo);
+    m_cutAction->setShortcut(QKeySequence::Cut);
+    m_copyAction->setShortcut(QKeySequence::Copy);
+    m_pasteAction->setShortcut(QKeySequence::Paste);
+    m_deleteAction->setShortcut(QKeySequence::Delete);
+    m_toggleCommentAction->setShortcut(Qt::CTRL + Qt::Key_Less);
+    m_autoIndentAction->setShortcut(Qt::Key_Tab);
+    m_selectAllAction->setShortcut(QKeySequence::SelectAll);
+    m_closeAction->setShortcut(QKeySequence::Close);
+    m_saveAction->setShortcut(QKeySequence::Save);
+    m_saveAllAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+
+    m_undoAction->setText(tr("Undo"));
+    m_redoAction->setText(tr("Redo"));
+    m_cutAction->setText(tr("Cut"));
+    m_copyAction->setText(tr("Copy"));
+    m_pasteAction->setText(tr("Paste"));
+    m_deleteAction->setText(tr("Delete"));
+    m_toggleCommentAction->setText(tr("Toggle Comment"));
+    m_autoIndentAction->setText(tr("Auto-indent Selection"));
+    m_selectAllAction->setText(tr("Select All"));
+    m_reformatFileAction->setText(tr("Beautify File"));
+
+    m_undoAction->setIcon(QIcon(QStringLiteral(":/images/designer/undo.svg")));
+    m_redoAction->setIcon(QIcon(QStringLiteral(":/images/designer/redo.svg")));
+    m_cutAction->setIcon(QIcon(QStringLiteral(":/images/designer/cut.svg")));
+    m_copyAction->setIcon(QIcon(QStringLiteral(":/images/designer/copy.svg")));
+    m_pasteAction->setIcon(QIcon(QStringLiteral(":/images/designer/paste.svg")));
+    m_deleteAction->setIcon(QIcon(QStringLiteral(":/images/designer/delete.svg")));
+    m_toggleCommentAction->setIcon(QIcon(QStringLiteral(":/images/designer/comment.svg")));
+    m_autoIndentAction->setIcon(QIcon(QStringLiteral(":/images/designer/indent.svg")));
+    m_selectAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/select-all.svg")));
+    m_reformatFileAction->setIcon(QIcon(QStringLiteral(":/images/designer/beautify.svg")));
+
+    connect(m_undoAction, &QAction::triggered, this, &QmlCodeEditor::undo);
+    connect(m_redoAction, &QAction::triggered, this, &QmlCodeEditor::redo);
+    connect(m_cutAction, &QAction::triggered, this, &QmlCodeEditor::cut);
+    connect(m_copyAction, &QAction::triggered, this, &QmlCodeEditor::copy);
+    connect(m_pasteAction, &QAction::triggered, this, &QmlCodeEditor::paste);
+    connect(m_deleteAction, &QAction::triggered, this, &QmlCodeEditor::deleteSelected);
+    connect(m_toggleCommentAction, &QAction::triggered, this, &QmlCodeEditor::toggleComment);
+    connect(m_autoIndentAction, &QAction::triggered, this, &QmlCodeEditor::autoIndent);
+    connect(m_selectAllAction, &QAction::triggered, this, &QmlCodeEditor::selectAll);
+    connect(m_reformatFileAction, &QAction::triggered, this, &QmlCodeEditor::reformatFile);
+    connect(m_closeAction, &QAction::triggered, this, &QmlCodeEditor::closeDocument);
+    connect(m_saveAction, &QAction::triggered, this, &QmlCodeEditor::saveDocument);
+    connect(m_saveAllAction, &QAction::triggered, this, &QmlCodeEditor::saveAll);
+
+    addAction(m_undoAction);
+    addAction(m_redoAction);
+    addAction(m_cutAction);
+    addAction(m_copyAction);
+    addAction(m_pasteAction);
+    addAction(m_deleteAction);
+    addAction(m_toggleCommentAction);
+    addAction(m_autoIndentAction);
+    addAction(m_selectAllAction);
+    addAction(m_reformatFileAction);
+    addAction(m_closeAction);
+    addAction(m_saveAction);
+    addAction(m_saveAllAction);
+
+    m_menu->addAction(m_undoAction);
+    m_menu->addAction(m_redoAction);
+    m_menu->addAction(m_cutAction);
+    m_menu->addAction(m_copyAction);
+    m_menu->addAction(m_pasteAction);
+    m_menu->addAction(m_deleteAction);
+    m_menu->addAction(m_toggleCommentAction);
+    m_menu->addAction(m_autoIndentAction);
+    m_menu->addAction(m_selectAllAction);
+    m_menu->addAction(m_reformatFileAction);
+
+    m_menu->insertSeparator(m_cutAction);
+    m_menu->insertSeparator(m_toggleCommentAction);
+    m_menu->insertSeparator(m_reformatFileAction);
 }
 
 QmlCodeEditor::~QmlCodeEditor()
@@ -1320,7 +1443,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                                                            && */m_linkPressed
+                                                                                                                                                                                                    && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1441,6 +1564,33 @@ void QmlCodeEditor::timerEvent(QTimerEvent* e)
         viewport()->update();
     }
     QPlainTextEdit::timerEvent(e);
+}
+
+void QmlCodeEditor::contextMenuEvent(QContextMenuEvent* event)
+{
+    if (codeDocument() == 0)
+        return;
+
+    m_undoAction->setEnabled(codeDocument()->isUndoAvailable());
+    m_redoAction->setEnabled(codeDocument()->isRedoAvailable());
+    m_cutAction->setEnabled(textCursor().hasSelection());
+    m_copyAction->setEnabled(textCursor().hasSelection());
+    m_pasteAction->setEnabled(canPaste());
+    m_deleteAction->setEnabled(textCursor().hasSelection());
+    m_toggleCommentAction->setEnabled(!codeDocument()->isEmpty());
+    m_autoIndentAction->setEnabled(!codeDocument()->isEmpty());
+    m_selectAllAction->setEnabled(!codeDocument()->isEmpty());
+    m_reformatFileAction->setEnabled(!codeDocument()->isEmpty()
+                                     && ModelManagerInterface::instance()->ensuredGetDocumentForPath(codeDocument()->filePath())->isQmlDocument());
+
+    m_menu->popup(event->globalPos());
+}
+
+void QmlCodeEditor::deleteSelected()
+{
+    if (!(textInteractionFlags() & Qt::TextEditable) || !textCursor().hasSelection())
+        return;
+    textCursor().removeSelectedText();
 }
 
 QTextBlock QmlCodeEditor::foldedBlockAt(const QPoint &pos, QRect *box) const
@@ -2337,6 +2487,49 @@ void QmlCodeEditor::indent()
 void QmlCodeEditor::unindent()
 {
     doSetTextCursor(codeDocument()->unindent(textCursor()));
+}
+
+void QmlCodeEditor::autoIndent()
+{
+    if (!(textInteractionFlags() & Qt::TextEditable))
+        return;
+    if (codeDocument()) {
+        QTextCursor cursor = textCursor();
+        int newPosition;
+        if (codeDocument()->typingSettings().tabShouldIndent(document(), cursor, &newPosition)) {
+            if (newPosition != cursor.position() && !cursor.hasSelection()) {
+                cursor.setPosition(newPosition);
+                setTextCursor(cursor);
+            }
+            codeDocument()->autoIndent(cursor);
+        }
+    }
+}
+
+void QmlCodeEditor::reformatFile()
+{
+    if (!(textInteractionFlags() & Qt::TextEditable))
+        return;
+    if (codeDocument()) {
+        const QString& beautifiedCode = QmlJS::reformat(ModelManagerInterface::instance()->ensuredGetDocumentForPath(
+                                                            codeDocument()->filePath()),
+                                                        codeDocument()->tabSettings().m_indentSize,
+                                                        codeDocument()->tabSettings().m_tabSize);
+        if (!beautifiedCode.isEmpty()) {
+            QTextCursor cursor(codeDocument());
+            cursor.beginEditBlock();
+            cursor.select(QTextCursor::Document);
+            cursor.insertText(beautifiedCode);
+            cursor.endEditBlock();
+        }
+    }
+}
+
+void QmlCodeEditor::toggleComment()
+{
+    if (!(textInteractionFlags() & Qt::TextEditable))
+        return;
+    unCommentSelection(this, CommentDefinition::CppStyle);
 }
 
 QString QmlCodeEditor::wordUnderCursor() const

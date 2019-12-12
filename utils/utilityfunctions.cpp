@@ -413,15 +413,15 @@ QString deviceName(const QVariantMap& deviceInfo)
 QString deviceInfoToolTip(const QVariantMap& deviceInfo)
 {
     return QString(R"(
-                <html><body><table>
-                <tr style='white-space:pre'><th><img src=":/images/output/info.svg" width="16"/></th><th>%1</th><th></th></tr>
-                <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
-                <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
-                <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>
-                <tr style='white-space:pre'><td></td><td>%8</td><td>: %9</td></tr>
-                <tr style='white-space:pre'><td></td><td>%10</td><td>: %11</td></tr>
-                <tr style='white-space:pre'><td></td><td>%12</td><td>: %13</td></tr>
-                </table></body></html>)")
+                   <html><body><table>
+                   <tr style='white-space:pre'><th><img src=":/images/output/info.svg" width="16"/></th><th>%1</th><th></th></tr>
+                   <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
+                   <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
+                   <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>
+                   <tr style='white-space:pre'><td></td><td>%8</td><td>: %9</td></tr>
+                   <tr style='white-space:pre'><td></td><td>%10</td><td>: %11</td></tr>
+                   <tr style='white-space:pre'><td></td><td>%12</td><td>: %13</td></tr>
+                   </table></body></html>)")
             .arg(QObject::tr("Device Information"))
             .arg(QObject::tr("Name")).arg(deviceName(deviceInfo))
             .arg(QObject::tr("Unique ID")).arg(deviceInfo["deviceUid"].toString())
@@ -732,6 +732,13 @@ bool isDirAncestor(const QDir& ancestor, const QString& path)
             return true;
     }
     return false;
+}
+
+QString shortcutSymbol(const QKeySequence& seq)
+{
+    return QStringLiteral(R"( <span style="font-size:10px;color:#666666;">()")
+            + seq.toString(QKeySequence::NativeText)
+            + QStringLiteral(")</span>");
 }
 
 } // UtilityFunctions

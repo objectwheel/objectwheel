@@ -124,6 +124,7 @@ void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>&
 void setFocusRing(QWidget* widget, bool showFocusRing);
 bool isFocusRingSet(QWidget* widget);
 bool isDirAncestor(const QDir& ancestor, const QString& path);
+QString shortcutSymbol(const QKeySequence& seq);
 
 } // UtilityFunctions
 

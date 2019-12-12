@@ -18,8 +18,9 @@ namespace {
 QAction* g_assetsAction;
 QAction* g_designsAction;
 QAction* g_othersAction;
+}
 
-QString choppedText(const QString& text)
+static QString choppedText(const QString& text)
 {
     QString choppedText(text);
     if (choppedText.right(1) == MARK_BULLET)
@@ -27,12 +28,11 @@ QString choppedText(const QString& text)
     return choppedText;
 }
 
-QString bulletText(const QString& text)
+static QString bulletText(const QString& text)
 {
     QString bulletText(choppedText(text));
     bulletText += MARK_BULLET;
     return bulletText;
-}
 }
 
 QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolBar(m_codeEditor)
@@ -123,16 +123,16 @@ QmlCodeEditorToolBar::QmlCodeEditorToolBar(QmlCodeEditor* m_codeEditor) : QToolB
     m_leftCombo->setCursor(Qt::PointingHandCursor);
     m_rightCombo->setCursor(Qt::PointingHandCursor);
 
-    m_undoButton->setToolTip(tr("Undo action"));
-    m_redoButton->setToolTip(tr("Redo action"));
-    m_closeButton->setToolTip(tr("Close document"));
+    m_undoButton->setToolTip(tr("Undo action") + UtilityFunctions::shortcutSymbol(QKeySequence::Undo));
+    m_redoButton->setToolTip(tr("Redo action") + UtilityFunctions::shortcutSymbol(QKeySequence::Redo));
+    m_closeButton->setToolTip(tr("Close document") + UtilityFunctions::shortcutSymbol(QKeySequence::Close));
     m_newFileButton->setToolTip(tr("New external file"));
     m_addFileButton->setToolTip(tr("Open external file"));
-    m_saveButton->setToolTip(tr("Save document"));
-    m_saveAllButton->setToolTip(tr("Save all open documents"));
-    m_cutButton->setToolTip(tr("Cut selection"));
-    m_copyButton->setToolTip(tr("Copy selection"));
-    m_pasteButton->setToolTip(tr("Paste from clipboard"));
+    m_saveButton->setToolTip(tr("Save document") + UtilityFunctions::shortcutSymbol(QKeySequence::Save));
+    m_saveAllButton->setToolTip(tr("Save all open documents") + UtilityFunctions::shortcutSymbol(Qt::CTRL + Qt::SHIFT + Qt::Key_S));
+    m_cutButton->setToolTip(tr("Cut selection") + UtilityFunctions::shortcutSymbol(QKeySequence::Cut));
+    m_copyButton->setToolTip(tr("Copy selection") + UtilityFunctions::shortcutSymbol(QKeySequence::Copy));
+    m_pasteButton->setToolTip(tr("Paste from clipboard") + UtilityFunctions::shortcutSymbol(QKeySequence::Paste));
     m_scopeButton->setToolTip(tr("Change code editor scope"));
     m_lineColumnLabel->setToolTip(tr("Cursor position"));
 

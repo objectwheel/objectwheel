@@ -162,8 +162,12 @@ public slots:
     void discharge();
     void indent();
     void unindent();
+    void autoIndent();
+    void reformatFile();
+    void toggleComment();
     void updateUses();
     void updateTabStops();
+    void deleteSelected();
     void slotSelectionChanged();
     void updateAutoCompleteHighlight();
     void setNoDocsVisible(bool visible);
@@ -241,6 +245,9 @@ private:
 signals:
     void requestBlockUpdate(const QTextBlock &);
     void documentChanged();
+    void closeDocument();
+    void saveDocument();
+    void saveAll();
 
 private:
     bool event(QEvent* e) override;
@@ -260,6 +267,7 @@ private:
     void focusInEvent(QFocusEvent* e) override;
     void changeEvent(QEvent* e) override;
     void timerEvent(QTimerEvent* e) override;
+    void contextMenuEvent(QContextMenuEvent* event) override;
 
 private:
     QmlCodeDocument* m_initialEmptyDocument;
@@ -310,6 +318,22 @@ private:
     static QmlJSEditor::Internal::QmlJSHoverHandler* m_qmlJsHoverHandler;
     static TextEditor::ColorPreviewHoverHandler* m_colorPreviewHoverHandler;
     static QmlJSEditor::QuickToolBar* m_contextPane;
+
+    QMenu* m_menu;
+    QAction* m_undoAction;
+    QAction* m_redoAction;
+    QAction* m_cutAction;
+    QAction* m_copyAction;
+    QAction* m_pasteAction;
+    QAction* m_deleteAction;
+    QAction* m_toggleCommentAction;
+    QAction* m_autoIndentAction;
+    QAction* m_selectAllAction;
+    QAction* m_reformatFileAction;
+    QAction* m_closeAction;
+    QAction* m_saveAction;
+    QAction* m_saveAllAction;
+
 };
 
 #endif // QMLCODEEDITOR_H

@@ -18,7 +18,6 @@ HEADERS += \
     $$PWD/saveutils.h \
     $$PWD/toolutils.h \
     $$PWD/parserutils.h \
-    $$PWD/qmlformatter.h \
     $$PWD/renderinfo.h \
     $$PWD/hashfactory.h \
     $$PWD/utils_global.h \
@@ -37,7 +36,6 @@ SOURCES += \
     $$PWD/saveutils.cpp \
     $$PWD/toolutils.cpp \
     $$PWD/parserutils.cpp \
-    $$PWD/qmlformatter.cpp \
     $$PWD/hashfactory.cpp \
     $$PWD/quicktheme.cpp \
     $$PWD/paintutils.cpp \

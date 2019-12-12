@@ -140,6 +140,12 @@ QmlCodeEditorWidget::QmlCodeEditorWidget(QWidget* parent) : QSplitter(parent)
             this, &QmlCodeEditorWidget::onFileExplorerFilesAboutToBeDeleted);
     connect(m_fileExplorer, &FileExplorer::fileRenamed,
             this, &QmlCodeEditorWidget::onFileExplorerFileRenamed);
+    connect(m_codeEditor, &QmlCodeEditor::saveDocument,
+            this, &QmlCodeEditorWidget::saveOpen);
+    connect(m_codeEditor, &QmlCodeEditor::saveAll,
+            this, &QmlCodeEditorWidget::saveAll);
+    connect(m_codeEditor, &QmlCodeEditor::closeDocument,
+            this, qOverload<>(&QmlCodeEditorWidget::close));
     connect(m_codeEditor, &QmlCodeEditor::modificationChanged,
             this, [=] { onModificationChange(m_openDocument); }, Qt::QueuedConnection);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
