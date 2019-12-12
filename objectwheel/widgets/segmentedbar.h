@@ -57,6 +57,7 @@ signals:
 private:
     QSize m_iconSize;
     QBasicTimer m_animateTimer;
+    bool m_isActionTriggerDisabled;
 };
 
 #endif // SEGMENTEDBAR_H

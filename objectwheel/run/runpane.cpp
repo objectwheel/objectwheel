@@ -47,12 +47,14 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
 
     ApplicationStyle::setButtonStyle(m_preferencesButton, ApplicationStyle::TexturedRounded);
     m_preferencesButton->setCursor(Qt::PointingHandCursor);
-    m_preferencesButton->setToolTip(tr("Show Preferences"));
+    m_preferencesButton->setShortcut(Qt::CTRL + Qt::Key_Comma);
+    m_preferencesButton->setToolTip(tr("Show Preferences") + UtilityFunctions::shortcutSymbol(m_preferencesButton->shortcut()));
     m_preferencesButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_projectsButton, ApplicationStyle::TexturedRounded);
     m_projectsButton->setCursor(Qt::PointingHandCursor);
-    m_projectsButton->setToolTip(tr("Show Projects"));
+    m_projectsButton->setShortcut(Qt::CTRL + Qt::Key_P);
+    m_projectsButton->setToolTip(tr("Show Projects") + UtilityFunctions::shortcutSymbol(m_projectsButton->shortcut()));
     m_projectsButton->setFixedSize(39, 24);
 
     ApplicationStyle::setButtonStyle(m_segmentedBar, ApplicationStyle::TexturedRounded);
@@ -62,15 +64,18 @@ RunPane::RunPane(QWidget* parent) : QToolBar(parent)
 
     QAction* leftAction = m_segmentedBar->addAction();
     leftAction->setCheckable(true);
-    leftAction->setToolTip(tr("Hide or show left panes"));
+    leftAction->setShortcut(Qt::CTRL + Qt::Key_J);
+    leftAction->setToolTip(tr("Hide or show left panes") + UtilityFunctions::shortcutSymbol(leftAction->shortcut()));
 
     QAction* bottomAction = m_segmentedBar->addAction();
     bottomAction->setCheckable(true);
-    bottomAction->setToolTip(tr("Hide or show bottom panes"));
+    bottomAction->setShortcut(Qt::CTRL + Qt::Key_K);
+    bottomAction->setToolTip(tr("Hide or show bottom panes") + UtilityFunctions::shortcutSymbol(bottomAction->shortcut()));
 
     QAction* rightAction = m_segmentedBar->addAction();
     rightAction->setCheckable(true);
-    rightAction->setToolTip(tr("Hide or show right panes"));
+    rightAction->setShortcut(Qt::CTRL + Qt::Key_L);
+    rightAction->setToolTip(tr("Hide or show right panes") + UtilityFunctions::shortcutSymbol(rightAction->shortcut()));
 
     int baseSize = - 7 - m_segmentedBar->sizeHint().width();
 #if defined(Q_OS_MACOS)

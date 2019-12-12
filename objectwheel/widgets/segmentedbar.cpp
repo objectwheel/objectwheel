@@ -1,5 +1,6 @@
 #include <segmentedbar.h>
 #include <private/qwidget_p.h>
+#include <delayer.h>
 
 #include <QStyleOption>
 #include <QStylePainter>
@@ -16,6 +17,7 @@ static const char animatedActionProperty[] = "_q_SegmentedBar_animatedAction";
 static const char originalCursorShapeProperty[] = "_q_SegmentedBar_originalCursorShape";
 
 SegmentedBar::SegmentedBar(QWidget* parent) : QWidget(parent)
+  , m_isActionTriggerDisabled(false)
 {
     setIconSize(QSize());
     // Used to enable hover events on the widget, which
@@ -58,7 +60,9 @@ void SegmentedBar::click(QAction* action)
             action->setChecked(!action->isChecked());
         action->setProperty(downProperty, false);
         emit actionTriggered(action);
+        m_isActionTriggerDisabled = true;
         emit action->triggered(action->isChecked());
+        m_isActionTriggerDisabled = false;
         update();
     }
 }
@@ -270,10 +274,28 @@ void SegmentedBar::mouseReleaseEvent(QMouseEvent* event)
 
 void SegmentedBar::actionEvent(QActionEvent* event)
 {
+    QAction* action = event->action();
     switch (event->type()) {
     case QEvent::ActionAdded:
-    case QEvent::ActionChanged:
+        connect(action, &QAction::triggered, this, [=] {
+            if (!m_isActionTriggerDisabled) {
+                action->setProperty(downProperty, true);
+                repaint();
+                actionTriggered(action);
+                Delayer::delay(100); // FIXME: Improve this
+                action->setProperty(downProperty, false);
+                update();
+            }
+        });
+        updateGeometry();
+        update();
+        break;
     case QEvent::ActionRemoved:
+        action->disconnect(this);
+        updateGeometry();
+        update();
+        break;
+    case QEvent::ActionChanged:
         updateGeometry();
         update();
         break;
