@@ -311,7 +311,7 @@ void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
     if (entry.readOnly)
         return;
 
-    static QMessageBox* messageBox = [this] () -> QMessageBox* {
+    static QMessageBox* messageBox = [this] {
             auto messageBox = new QMessageBox(QMessageBox::Warning,
                                               tr("Delete Color Scheme"),
                                               tr("Are you sure you want to delete this color scheme permanently?"),
@@ -323,19 +323,18 @@ void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
             messageBox->addButton(deleteButton, QMessageBox::AcceptRole);
             messageBox->setDefaultButton(deleteButton);
 
-            connect(deleteButton, &QAbstractButton::clicked, messageBox, &QDialog::accept);
-            connect(messageBox, &QDialog::accepted, this, [=] {
-        const int index = m_colorSchemeBox->currentIndex();
-        Q_ASSERT(index >= 0);
+            connect(messageBox, &QDialog::accepted, this, [this] {
+                const int index = m_colorSchemeBox->currentIndex();
+                Q_ASSERT(index >= 0);
 
-        const TextEditor::ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-        Q_ASSERT(!entry.readOnly);
+                const TextEditor::ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
+                Q_ASSERT(!entry.readOnly);
 
-        if (QFile::remove(entry.fileName))
-            m_schemeListModel->removeColorScheme(index);
-    });
+                if (QFile::remove(entry.fileName))
+                    m_schemeListModel->removeColorScheme(index);
+            });
             return messageBox;
-}();
+    } ();
 
     messageBox->open();
 }
