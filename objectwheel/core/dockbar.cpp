@@ -1,6 +1,4 @@
 #include <dockbar.h>
-#include <utilityfunctions.h>
-
 #include <QToolButton>
 #include <QDockWidget>
 #include <QLayout>
@@ -24,7 +22,6 @@ bool DockBar::buttonExists(QDockWidget* dockWidget) const
 
 void DockBar::addDockWidget(QDockWidget* dockWidget)
 {
-    using namespace UtilityFunctions;
     auto button = new QToolButton(this);
     button->setCheckable(true);
     button->setFixedWidth(20);
@@ -32,15 +29,15 @@ void DockBar::addDockWidget(QDockWidget* dockWidget)
     button->setText(dockWidget->windowTitle());
     button->setCursor(Qt::PointingHandCursor);
     button->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-    button->setToolTip(toToolTip(tr("Hide <b>%1 Pane</b>").arg(dockWidget->windowTitle())));
+    button->setToolTip(tr("Hide <b>%1 Pane</b>").arg(dockWidget->windowTitle()));
     connect(button, &QToolButton::clicked,
             this, [=] { emit dockWidgetButtonClicked(dockWidget, button->isChecked()); });
     connect(button, &QToolButton::toggled,
             this, [=] {
         if (button->isChecked())
-            button->setToolTip(toToolTip(tr("Show <b>%1 Pane</b>").arg(dockWidget->windowTitle())));
+            button->setToolTip(tr("Show <b>%1 Pane</b>").arg(dockWidget->windowTitle()));
         else
-            button->setToolTip(toToolTip(tr("Hide <b>%1 Pane</b>").arg(dockWidget->windowTitle())));
+            button->setToolTip(tr("Hide <b>%1 Pane</b>").arg(dockWidget->windowTitle()));
     });
     DockData data;
     data.dockWidget = dockWidget;

@@ -30,36 +30,35 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     layout()->setContentsMargins(2, 2, 2, 2);
     layout()->setSpacing(7);
 
-    using namespace UtilityFunctions;
     m_designerButton->setCheckable(true);
     m_designerButton->setText(tr("Designer"));
     m_designerButton->setShortcut(Qt::CTRL + Qt::Key_1);
-    m_designerButton->setToolTip(toToolTip(tr("Switch to <b>Designer</b>")) + shortcutSymbol(m_designerButton->shortcut()));
+    m_designerButton->setToolTip(tr("Switch to <b>Designer</b>") + UtilityFunctions::shortcutSymbol(m_designerButton->shortcut()));
 
     m_editorButton->setCheckable(true);
     m_editorButton->setText(tr("Code Editor"));
     m_editorButton->setShortcut(Qt::CTRL + Qt::Key_2);
-    m_editorButton->setToolTip(toToolTip(tr("Switch to <b>Code Editor</b>")) + shortcutSymbol(m_editorButton->shortcut()));
+    m_editorButton->setToolTip(tr("Switch to <b>Code Editor</b>") + UtilityFunctions::shortcutSymbol(m_editorButton->shortcut()));
 
     m_splitButton->setCheckable(true);
     m_splitButton->setText(tr("Split View"));
     m_splitButton->setShortcut(Qt::CTRL + Qt::Key_3);
-    m_splitButton->setToolTip(toToolTip(tr("Switch to <b>Split View</b>")) + shortcutSymbol(m_splitButton->shortcut()));
+    m_splitButton->setToolTip(tr("Switch to <b>Split View</b>") + UtilityFunctions::shortcutSymbol(m_splitButton->shortcut()));
 
     m_optionsButton->setCheckable(true);
     m_optionsButton->setText(tr("Project Options"));
     m_optionsButton->setShortcut(Qt::CTRL + Qt::Key_4);
-    m_optionsButton->setToolTip(toToolTip(tr("Switch to <b>Project Options</b>")) + shortcutSymbol(m_optionsButton->shortcut()));
+    m_optionsButton->setToolTip(tr("Switch to <b>Project Options</b>") + UtilityFunctions::shortcutSymbol(m_optionsButton->shortcut()));
 
     m_buildsButton->setCheckable(true);
     m_buildsButton->setText(tr("Cloud Builds"));
     m_buildsButton->setShortcut(Qt::CTRL + Qt::Key_5);
-    m_buildsButton->setToolTip(toToolTip(tr("Switch to <b>Cloud Builds</b>")) + shortcutSymbol(m_buildsButton->shortcut()));
+    m_buildsButton->setToolTip(tr("Switch to <b>Cloud Builds</b>") + UtilityFunctions::shortcutSymbol(m_buildsButton->shortcut()));
 
     m_documentsButton->setCheckable(true);
     m_documentsButton->setText(tr("Documents"));
     m_documentsButton->setShortcut(Qt::CTRL + Qt::Key_6);
-    m_documentsButton->setToolTip(toToolTip(tr("Switch to <b>Documents</b>")) + shortcutSymbol(m_documentsButton->shortcut()));
+    m_documentsButton->setToolTip(tr("Switch to <b>Documents</b>") + UtilityFunctions::shortcutSymbol(m_documentsButton->shortcut()));
 
     m_designerButton->setCursor(Qt::PointingHandCursor);
     m_editorButton->setCursor(Qt::PointingHandCursor);

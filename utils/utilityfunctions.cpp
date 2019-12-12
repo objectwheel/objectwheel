@@ -317,11 +317,6 @@ QString toPrettyBytesString(qint64 bytes)
     return ret;
 }
 
-QString toToolTip(const QString& str)
-{
-    return QStringLiteral(R"(<span style="font-size:12px !important;">%1</span>)").arg(str);
-}
-
 QRectF itemGeometry(const QVector<PropertyNode>& properties)
 {
     QRectF geometry;
@@ -414,7 +409,7 @@ QString deviceInfoToolTip(const QVariantMap& deviceInfo)
 {
     return QString(R"(
                    <html><body><table>
-                   <tr style='white-space:pre'><th><img src=":/images/output/info.svg" width="16"/></th><th>%1</th><th></th></tr>
+                   <tr style='white-space:pre'><th><img src=':/images/output/info.svg' width='16'/></th><th style='font-weight:500;'>%1</th><th></th></tr>
                    <tr style='white-space:pre'><td></td><td>%2</td><td>: %3</td></tr>
                    <tr style='white-space:pre'><td></td><td>%4</td><td>: %5</td></tr>
                    <tr style='white-space:pre'><td></td><td>%6</td><td>: %7</td></tr>
@@ -736,9 +731,8 @@ bool isDirAncestor(const QDir& ancestor, const QString& path)
 
 QString shortcutSymbol(const QKeySequence& seq)
 {
-    return QStringLiteral(R"( <span style="font-size:10px;color:#666666;">()")
-            + seq.toString(QKeySequence::NativeText)
-            + QStringLiteral(")</span>");
+    return QStringLiteral(" <span style='font-size:10px;color:#656565;'>(%1)</span>")
+            .arg(seq.toString(QKeySequence::NativeText));
 }
 
 } // UtilityFunctions

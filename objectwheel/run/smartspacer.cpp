@@ -9,6 +9,7 @@ SmartSpacer::SmartSpacer(Qt::Orientation orientation, const QList<QWidget*>& wat
   , m_watchedWidgets(watchedWidgets)
 {
     setSizePolicy(hPolicy, vPolicy);
+    setAttribute(Qt::WA_TransparentForMouseEvents);
 }
 
 QSize SmartSpacer::sizeHint() const

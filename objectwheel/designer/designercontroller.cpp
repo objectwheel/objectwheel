@@ -305,7 +305,8 @@ void DesignerController::onControlDoubleClick(Control*, Qt::MouseButtons buttons
 void DesignerController::onRenderEngineConnectionStatusChange(bool connected)
 {
     const QString& toolTip =
-            QStringLiteral(R"(%1<b>%2</b><br><span style="white-space:nowrap;font-size:10px;"><i>%3</i></span>)")
+            QStringLiteral("<span>%1<b>%2</b></span><br>"
+                           "<span style='white-space:nowrap;font-size:10px;'><i>%3</i></span>")
             .arg(tr("Render Engine status: "))
             .arg(connected ? tr("Active") : tr("Inactive"))
             .arg(tr("Click the button if you want to restart the Render Engine."));
@@ -314,7 +315,7 @@ void DesignerController::onRenderEngineConnectionStatusChange(bool connected)
         rendererStatusButton->setIcon(QIcon(QStringLiteral(":/images/designer/engine-on.svg")));
     else
         rendererStatusButton->setIcon(QIcon(QStringLiteral(":/images/designer/engine-off.svg")));
-    rendererStatusButton->setToolTip(UtilityFunctions::toToolTip(toolTip));
+    rendererStatusButton->setToolTip(toolTip);
 }
 
 void DesignerController::onAnchorClear()

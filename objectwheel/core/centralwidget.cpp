@@ -73,9 +73,13 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     containerLayout->setContentsMargins(0, 0, 0, 0);
     containerLayout->addWidget(m_qmlCodeEditorWidget);
 
+    QFont smallFont = font();
+    smallFont.setPixelSize(smallFont.pixelSize() - 1);
+    m_codeEditorContainer->setFont(smallFont);
     m_codeEditorContainer->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
     m_codeEditorContainer->setAlignment(Qt::AlignCenter);
-    m_codeEditorContainer->setText(QStringLiteral(R"(<p style="font-size: 12px; color:#777777">%1</p>)").arg(tr("Editor window<br>raised")));
+    m_codeEditorContainer->setText(QStringLiteral("<span style='color:#777777'>%1</span>")
+                                   .arg(tr("Editor window<br>raised")));
 
     m_splitterIn->setFrameShape(QFrame::NoFrame);
     m_splitterIn->setOrientation(Qt::Horizontal);

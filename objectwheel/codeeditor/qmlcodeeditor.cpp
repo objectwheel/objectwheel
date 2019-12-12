@@ -409,16 +409,15 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
   , m_toggleCommentAction(new QAction(this))
   , m_autoIndentAction(new QAction(this))
   , m_selectAllAction(new QAction(this))
-  , m_reformatFileAction(new QAction(this))
+  , m_beautifyDocumentAction(new QAction(this))
   , m_closeAction(new QAction(this))
   , m_saveAction(new QAction(this))
   , m_saveAllAction(new QAction(this))
 {
     m_noDocsLabel->setVisible(false);
     m_noDocsLabel->setAlignment(Qt::AlignCenter);
-    m_noDocsLabel->setText(
-                QStringLiteral(R"(<p style="margin-left:28px;font-size:12px;color:#888888">%1</p>)")
-                .arg(tr("No documents in<br>current scope to show")));
+    m_noDocsLabel->setText(QStringLiteral("<span style='margin-left:28px;color:#888888'>%1</span>")
+                           .arg(tr("No documents in<br>current scope")));
 
     auto baseTextFind = new BaseTextFind(this); // BUG
     connect(baseTextFind, &BaseTextFind::highlightAllRequested,
@@ -486,12 +485,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     createToolBar();
     setNoDocsVisible(true);
 
-    // That's how find results will be highlighted
-    // Let's trig search on text editor after 4 seconds BUG
-    //    QTimer::singleShot(4000, [=]{
-    //        highlightSearchResultsSlot("swipeView", FindFlags(FindCaseSensitively | FindWholeWords));
-    //    });
-
     m_undoAction->setShortcutVisibleInContextMenu(true);
     m_redoAction->setShortcutVisibleInContextMenu(true);
     m_cutAction->setShortcutVisibleInContextMenu(true);
@@ -501,7 +494,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_toggleCommentAction->setShortcutVisibleInContextMenu(true);
     m_autoIndentAction->setShortcutVisibleInContextMenu(true);
     m_selectAllAction->setShortcutVisibleInContextMenu(true);
-    m_reformatFileAction->setShortcutVisibleInContextMenu(true);
+    m_beautifyDocumentAction->setShortcutVisibleInContextMenu(true);
 
     m_undoAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     m_redoAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -512,7 +505,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_toggleCommentAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     m_autoIndentAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     m_selectAllAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    m_reformatFileAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    m_beautifyDocumentAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     m_closeAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     m_saveAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     m_saveAllAction->setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -541,7 +534,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_toggleCommentAction->setText(tr("Toggle Comment"));
     m_autoIndentAction->setText(tr("Auto-indent Selection"));
     m_selectAllAction->setText(tr("Select All"));
-    m_reformatFileAction->setText(tr("Beautify File"));
+    m_beautifyDocumentAction->setText(tr("Beautify Document"));
 
     m_undoAction->setIcon(QIcon(QStringLiteral(":/images/designer/undo.svg")));
     m_redoAction->setIcon(QIcon(QStringLiteral(":/images/designer/redo.svg")));
@@ -552,7 +545,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_toggleCommentAction->setIcon(QIcon(QStringLiteral(":/images/designer/comment.svg")));
     m_autoIndentAction->setIcon(QIcon(QStringLiteral(":/images/designer/indent.svg")));
     m_selectAllAction->setIcon(QIcon(QStringLiteral(":/images/designer/select-all.svg")));
-    m_reformatFileAction->setIcon(QIcon(QStringLiteral(":/images/designer/beautify.svg")));
+    m_beautifyDocumentAction->setIcon(QIcon(QStringLiteral(":/images/designer/beautify.svg")));
 
     connect(m_undoAction, &QAction::triggered, this, &QmlCodeEditor::undo);
     connect(m_redoAction, &QAction::triggered, this, &QmlCodeEditor::redo);
@@ -563,7 +556,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     connect(m_toggleCommentAction, &QAction::triggered, this, &QmlCodeEditor::toggleComment);
     connect(m_autoIndentAction, &QAction::triggered, this, &QmlCodeEditor::autoIndent);
     connect(m_selectAllAction, &QAction::triggered, this, &QmlCodeEditor::selectAll);
-    connect(m_reformatFileAction, &QAction::triggered, this, &QmlCodeEditor::reformatFile);
+    connect(m_beautifyDocumentAction, &QAction::triggered, this, &QmlCodeEditor::reformatFile);
     connect(m_closeAction, &QAction::triggered, this, &QmlCodeEditor::closeDocument);
     connect(m_saveAction, &QAction::triggered, this, &QmlCodeEditor::saveDocument);
     connect(m_saveAllAction, &QAction::triggered, this, &QmlCodeEditor::saveAll);
@@ -577,7 +570,7 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     addAction(m_toggleCommentAction);
     addAction(m_autoIndentAction);
     addAction(m_selectAllAction);
-    addAction(m_reformatFileAction);
+    addAction(m_beautifyDocumentAction);
     addAction(m_closeAction);
     addAction(m_saveAction);
     addAction(m_saveAllAction);
@@ -591,11 +584,17 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_menu->addAction(m_toggleCommentAction);
     m_menu->addAction(m_autoIndentAction);
     m_menu->addAction(m_selectAllAction);
-    m_menu->addAction(m_reformatFileAction);
+    m_menu->addAction(m_beautifyDocumentAction);
 
     m_menu->insertSeparator(m_cutAction);
     m_menu->insertSeparator(m_toggleCommentAction);
-    m_menu->insertSeparator(m_reformatFileAction);
+    m_menu->insertSeparator(m_beautifyDocumentAction);
+
+    // That's how find results will be highlighted
+    // Let's trig search on text editor after 4 seconds BUG
+    // QTimer::singleShot(4000, [=]{
+    //     highlightSearchResultsSlot("swipeView", FindFlags(FindCaseSensitively | FindWholeWords));
+    // });
 }
 
 QmlCodeEditor::~QmlCodeEditor()
@@ -1443,7 +1442,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                                                                                    && */m_linkPressed
+                                                                                                                                                                                                            && */m_linkPressed
             && e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
@@ -1580,8 +1579,8 @@ void QmlCodeEditor::contextMenuEvent(QContextMenuEvent* event)
     m_toggleCommentAction->setEnabled(!codeDocument()->isEmpty());
     m_autoIndentAction->setEnabled(!codeDocument()->isEmpty());
     m_selectAllAction->setEnabled(!codeDocument()->isEmpty());
-    m_reformatFileAction->setEnabled(!codeDocument()->isEmpty()
-                                     && ModelManagerInterface::instance()->ensuredGetDocumentForPath(codeDocument()->filePath())->isQmlDocument());
+    m_beautifyDocumentAction->setEnabled(!codeDocument()->isEmpty()
+                                         && ModelManagerInterface::instance()->ensuredGetDocumentForPath(codeDocument()->filePath())->isQmlDocument());
 
     m_menu->popup(event->globalPos());
 }
@@ -1802,8 +1801,10 @@ void QmlCodeEditor::applyFontSettings()
                 lineNumberFormat.background().color() : background);
     m_rowBar->setPalette(ep);
 
-    m_toolBar->setFont(QApplication::font());
-    m_noDocsLabel->setFont(QApplication::font());
+    QFont appFont = QApplication::font();
+    m_toolBar->setFont(appFont);
+    appFont.setPixelSize(appFont.pixelSize() - 1);
+    m_noDocsLabel->setFont(appFont);
 
     updateViewportMargins();   // Adjust to new font width
     updateHighlights();
@@ -3860,8 +3861,8 @@ void QmlCodeEditor::keyPressEvent(QKeyEvent *e)
 
         if (doEditBlock) {
             cursor.endEditBlock();
-            //            if (cursorWithinSnippet)
-            //                d->m_snippetOverlay->updateEquivalentSelections(textCursor());
+            // if (cursorWithinSnippet)
+            //     d->m_snippetOverlay->updateEquivalentSelections(textCursor());
         }
 
         setTextCursor(cursor);

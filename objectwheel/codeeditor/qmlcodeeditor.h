@@ -329,7 +329,7 @@ private:
     QAction* m_toggleCommentAction;
     QAction* m_autoIndentAction;
     QAction* m_selectAllAction;
-    QAction* m_reformatFileAction;
+    QAction* m_beautifyDocumentAction;
     QAction* m_closeAction;
     QAction* m_saveAction;
     QAction* m_saveAllAction;

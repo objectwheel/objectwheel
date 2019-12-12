@@ -82,7 +82,6 @@ QRectF horizontalAlignedRect(const QSizeF& size, const QRectF& rect, qreal top =
 QPoint centerPos(const QSize& size);
 QString increasedNumberedText(const QString& text, bool addSpace, bool trim);
 QString toPrettyBytesString(qint64 bytes);
-QString toToolTip(const QString& str);
 bool comboContainsWord(QComboBox* comboBox, const QString& word);
 QRectF itemGeometry(const QVector<PropertyNode>& properties);
 QVariant itemProperty(const QString& propertyName, const QVector<PropertyNode>& properties);

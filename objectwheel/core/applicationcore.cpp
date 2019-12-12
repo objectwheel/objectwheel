@@ -28,6 +28,7 @@
 #include <servermanager.h>
 #include <modemanager.h>
 
+#include <QToolTip>
 #include <QScreen>
 #include <QStandardPaths>
 #include <QSettings>
@@ -91,9 +92,12 @@ ApplicationCore::ApplicationCore(QApplication* app)
     });
 
     /* Set application ui settings */
-    QApplication::setFont(GeneralSettings::interfaceSettings()->toFont());
+    QFont font = GeneralSettings::interfaceSettings()->toFont();
+    QApplication::setFont(font);
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
     QApplication::setStartDragDistance(8);
+    font.setPixelSize(font.pixelSize() - 1);
+    QToolTip::setFont(font);
 
     /* Show splash screen */
     QPixmap pixmap(":/images/app/splash.png");

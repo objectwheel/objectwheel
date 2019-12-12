@@ -248,7 +248,7 @@ void HelpWidget::discharge()
 
 void HelpWidget::onTitleChange()
 {
-    m_titleLabel->setText("<p = \"font-size:12px;\"><b>" + tr("Topic") + ":</b> " + m_helpViewer->title() + "</p>");
+    m_titleLabel->setText("<span style='font-weight:500;'>" + tr("Topic") + ":</span> " + m_helpViewer->title());
 }
 
 void HelpWidget::onIndexFilterTextEdit(const QString& filterText)
