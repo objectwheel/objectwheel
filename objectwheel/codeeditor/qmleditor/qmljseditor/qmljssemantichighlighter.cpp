@@ -583,9 +583,11 @@ void SemanticHighlighter::finished()
 
 void SemanticHighlighter::run(QFutureInterface<SemanticHighlighter::Use> &futureInterface, const QmlJSTools::SemanticInfo &semanticInfo)
 {
-    CollectionTask task(futureInterface, semanticInfo);
-    reportMessagesInfo(task.diagnosticRanges(), task.extraFormats());
-    task.run();
+    if (semanticInfo.isValid()) {
+        CollectionTask task(futureInterface, semanticInfo);
+        reportMessagesInfo(task.diagnosticRanges(), task.extraFormats());
+        task.run();
+    }
 }
 
 void SemanticHighlighter::updateFontSettings()
