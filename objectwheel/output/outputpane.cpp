@@ -4,6 +4,7 @@
 #include <outputbar.h>
 #include <paintutils.h>
 #include <applicationstyle.h>
+#include <utilityfunctions.h>
 
 #include <QStackedWidget>
 #include <QBoxLayout>
@@ -37,7 +38,8 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_issuesButton->setFixedHeight(22);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setText(tr("Issues") + " [0]");
-    m_issuesButton->setToolTip(tr("Activate issues list"));
+    m_issuesButton->setShortcut(Qt::CTRL + Qt::ALT + Qt::Key_1);
+    m_issuesButton->setToolTip(tr("Activate issues list") + UtilityFunctions::shortcutSymbol(m_issuesButton->shortcut()));
 
     ApplicationStyle::setButtonStyle(m_consoleButton, ApplicationStyle::Disclosure);
     ApplicationStyle::setHighlightingDisabledForCheckedState(m_consoleButton, true);
@@ -45,7 +47,8 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_consoleButton->setFixedHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
     m_consoleButton->setText(tr("Console"));
-    m_consoleButton->setToolTip(tr("Activate console output"));
+    m_consoleButton->setShortcut(Qt::CTRL + Qt::ALT + Qt::Key_2);
+    m_consoleButton->setToolTip(tr("Activate console output") + UtilityFunctions::shortcutSymbol(m_consoleButton->shortcut()));
 
     updateIcons();
 }
