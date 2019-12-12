@@ -33,27 +33,33 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     using namespace UtilityFunctions;
     m_designerButton->setCheckable(true);
     m_designerButton->setText(tr("Designer"));
-    m_designerButton->setToolTip(toToolTip(tr("Switch to <b>Designer</b>")));
+    m_designerButton->setShortcut(Qt::CTRL + Qt::Key_1);
+    m_designerButton->setToolTip(toToolTip(tr("Switch to <b>Designer</b>")) + shortcutSymbol(m_designerButton->shortcut()));
 
     m_editorButton->setCheckable(true);
     m_editorButton->setText(tr("Code Editor"));
-    m_editorButton->setToolTip(toToolTip(tr("Switch to <b>Code Editor</b>")));
+    m_editorButton->setShortcut(Qt::CTRL + Qt::Key_2);
+    m_editorButton->setToolTip(toToolTip(tr("Switch to <b>Code Editor</b>")) + shortcutSymbol(m_editorButton->shortcut()));
 
     m_splitButton->setCheckable(true);
     m_splitButton->setText(tr("Split View"));
-    m_splitButton->setToolTip(toToolTip(tr("Switch to <b>Split View</b>")));
+    m_splitButton->setShortcut(Qt::CTRL + Qt::Key_3);
+    m_splitButton->setToolTip(toToolTip(tr("Switch to <b>Split View</b>")) + shortcutSymbol(m_splitButton->shortcut()));
 
     m_optionsButton->setCheckable(true);
     m_optionsButton->setText(tr("Project Options"));
-    m_optionsButton->setToolTip(toToolTip(tr("Switch to <b>Project Options</b>")));
+    m_optionsButton->setShortcut(Qt::CTRL + Qt::Key_4);
+    m_optionsButton->setToolTip(toToolTip(tr("Switch to <b>Project Options</b>")) + shortcutSymbol(m_optionsButton->shortcut()));
 
     m_buildsButton->setCheckable(true);
     m_buildsButton->setText(tr("Cloud Builds"));
-    m_buildsButton->setToolTip(toToolTip(tr("Switch to <b>Cloud Builds</b>")));
+    m_buildsButton->setShortcut(Qt::CTRL + Qt::Key_5);
+    m_buildsButton->setToolTip(toToolTip(tr("Switch to <b>Cloud Builds</b>")) + shortcutSymbol(m_buildsButton->shortcut()));
 
     m_documentsButton->setCheckable(true);
     m_documentsButton->setText(tr("Documents"));
-    m_documentsButton->setToolTip(toToolTip(tr("Switch to <b>Documents</b>")));
+    m_documentsButton->setShortcut(Qt::CTRL + Qt::Key_6);
+    m_documentsButton->setToolTip(toToolTip(tr("Switch to <b>Documents</b>")) + shortcutSymbol(m_documentsButton->shortcut()));
 
     m_designerButton->setCursor(Qt::PointingHandCursor);
     m_editorButton->setCursor(Qt::PointingHandCursor);
