@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QFile>
 
 #define TERMS_HEIGHT     (35)
 #define TERMS_WIDTH      (350)

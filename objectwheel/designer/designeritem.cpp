@@ -320,7 +320,7 @@ void DesignerItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         m_movableSelectedAncestorItems.remove(myMovableSelectedAncestorItem);
 
         const QList<DesignerItem*>& ancestorSiblings = myMovableSelectedAncestorItem->siblingItems();
-        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems.toList()) {
+        for (DesignerItem* movableSelectedAncestorItem : m_movableSelectedAncestorItems.values()) {
             if (!ancestorSiblings.contains(movableSelectedAncestorItem)) {
                 for (DesignerItem* childItem : movableSelectedAncestorItem->childItems())
                     childItem->setSelected(false);

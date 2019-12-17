@@ -331,7 +331,7 @@ void FileExplorer::onCopyButtonClick()
 
     if (!urls.isEmpty()) {
         auto mimeData = new QMimeData;
-        mimeData->setUrls(urls.toList());
+        mimeData->setUrls(urls.values());
         QApplication::clipboard()->setMimeData(mimeData);
     }
 }

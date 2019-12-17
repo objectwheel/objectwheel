@@ -3,7 +3,9 @@ Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Built with Qt logosu
 - Thanks Icons8 for providing icons for this app (URL) (LICENSE)
 - Thanks Google for providing Inconsolato and Roboto fonts for this app (URL) (LICENSE)
+- Miniz license
 
+Qml code editörü bi son kez kontrol et
 Ow açık ve kayıt edilmemiş dökumanlar için program kapatılırken uyarı versin
 server belli bir süre login olmayınca bizi atıyor, dolayısıyla her server isteği gönderilmek istendiğinde
     server'dan kopuksak yeniden bağlanılmaya falan çalışılsın

@@ -17,6 +17,8 @@
 #include <QSpinBox>
 #include <QMetaEnum>
 #include <QScrollBar>
+#include <QFile>
+#include <QMouseEvent>
 
 // FIXME: Fix all QTimer usages
 

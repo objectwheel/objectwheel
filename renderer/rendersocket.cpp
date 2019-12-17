@@ -1,7 +1,6 @@
 #include <rendersocket.h>
-#include <serializeenum.h>
-
 #include <QTimer>
+#include <QDataStream>
 
 RenderSocket::RenderSocket(QObject* parent) : QObject(parent)
   , m_blockSize(0)

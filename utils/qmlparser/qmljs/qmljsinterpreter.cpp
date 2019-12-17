@@ -245,8 +245,8 @@ CppComponentValue::CppComponentValue(FakeMetaObject::ConstPtr metaObject, const 
 
 CppComponentValue::~CppComponentValue()
 {
-    delete m_metaSignatures.load();
-    delete m_signalScopes.load();
+    delete m_metaSignatures.loadRelaxed();
+    delete m_signalScopes.loadRelaxed();
 }
 
 static QString generatedSlotName(const QString &base)
@@ -284,7 +284,7 @@ void CppComponentValue::processMembers(MemberProcessor *processor) const
     QSet<QString> explicitSignals;
 
     // make MetaFunction instances lazily when first needed
-    QList<const Value *> *signatures = m_metaSignatures.load();
+    QList<const Value *> *signatures = m_metaSignatures.loadRelaxed();
     if (!signatures) {
         signatures = new QList<const Value *>;
         signatures->reserve(m_metaObject->methodCount());
@@ -292,7 +292,7 @@ void CppComponentValue::processMembers(MemberProcessor *processor) const
             signatures->append(new MetaFunction(m_metaObject->method(index), valueOwner()));
         if (!m_metaSignatures.testAndSetOrdered(0, signatures)) {
             delete signatures;
-            signatures = m_metaSignatures.load();
+            signatures = m_metaSignatures.loadRelaxed();
         }
     }
 
@@ -520,7 +520,7 @@ const QmlEnumValue *CppComponentValue::getEnumValue(const QString &typeName, con
 
 const ObjectValue *CppComponentValue::signalScope(const QString &signalName) const
 {
-    QHash<QString, const ObjectValue *> *scopes = m_signalScopes.load();
+    QHash<QString, const ObjectValue *> *scopes = m_signalScopes.loadRelaxed();
     if (!scopes) {
         scopes = new QHash<QString, const ObjectValue *>;
         // usually not all methods are signals
@@ -546,7 +546,7 @@ const ObjectValue *CppComponentValue::signalScope(const QString &signalName) con
         }
         if (!m_signalScopes.testAndSetOrdered(0, scopes)) {
             delete scopes;
-            scopes = m_signalScopes.load();
+            scopes = m_signalScopes.loadRelaxed();
         }
     }
 

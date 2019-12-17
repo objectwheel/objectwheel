@@ -25,9 +25,10 @@ void TransparentStyle::attach(QWidget* widget)
 {
     static auto style = new TransparentStyle(QCoreApplication::instance());
 
+    const QList<QWidget*>& childs = widget->findChildren<QWidget*>();
     QSet<QWidget*> widgetList;
     widgetList.insert(widget);
-    widgetList.unite(QSet<QWidget*>::fromList(widget->findChildren<QWidget*>()));
+    widgetList.unite(QSet<QWidget*>(childs.begin(), childs.end()));
 
     for (QWidget* w : widgetList) {
         w->setStyleSheet(QString());
@@ -152,7 +153,7 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_ToolBarItemMargin:
         return 0;
     case PM_ToolBarIconSize:
-        return int(QStyleHelper::dpiScaled(16.));
+        return 16;
     case PM_ComboBoxFrameWidth:
     case PM_SpinBoxFrameWidth:
         return 0;
@@ -160,9 +161,9 @@ int TransparentStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_LayoutVerticalSpacing:
         return -1;
     case PM_SmallIconSize:
-        return int(QStyleHelper::dpiScaled(16.));
+        return 16;
     case PM_LargeIconSize:
-        return int(QStyleHelper::dpiScaled(32.));
+        return 32;
     case PM_IconViewIconSize:
         return proxy()->pixelMetric(PM_LargeIconSize, option, widget);
     case PM_ScrollBarSliderMin:

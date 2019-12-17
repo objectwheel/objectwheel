@@ -6,7 +6,6 @@ TARGET   = utils
 QT      += core-private widgets-private widgets qml quick websockets multimedia quickcontrols2
 DEFINES += UTILS_LIBRARY
 DEFINES += QT_QML_DEBUG_NO_WARNING
-DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 
 INCLUDEPATH += $$PWD
@@ -26,7 +25,6 @@ HEADERS += \
     $$PWD/paintutils.h \
     $$PWD/utilityfunctions.h \
     $$PWD/filesystemutils.h \
-    $$PWD/serializeenum.h \
     $$PWD/tooltipwidget.h \
     $$PWD/textimagehandler.h \
     $$PWD/qmlerror.h

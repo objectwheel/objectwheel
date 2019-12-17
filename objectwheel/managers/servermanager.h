@@ -13,7 +13,7 @@ class ServerManager final : public QWebSocket
 
     friend class ApplicationCore;
 
-    enum { CONNECTION_TIMEOUT = 2000 };
+    enum { CONNECTION_TIMEOUT = 3000 };
 
 public:
     enum ServerCommands : quint32 {

@@ -52,7 +52,6 @@
 #include <saveutils.h>
 #include <filesystemutils.h>
 #include <hashfactory.h>
-#include <serializeenum.h>
 
 #include <QSaveFile>
 #include <QDir>

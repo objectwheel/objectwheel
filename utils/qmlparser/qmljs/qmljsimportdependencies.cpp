@@ -521,7 +521,7 @@ QByteArray DependencyInfo::calculateFingerprint(const ImportDependencies &deps)
 {
     QCryptographicHash hash(QCryptographicHash::Sha1);
     rootImport.addToHash(hash);
-    QStringList coreImports = allCoreImports.toList();
+    QStringList coreImports = allCoreImports.values();
     coreImports.sort();
     foreach (const QString importId, coreImports) {
         hash.addData(reinterpret_cast<const char*>(importId.constData()), importId.size() * sizeof(QChar));
@@ -529,7 +529,7 @@ QByteArray DependencyInfo::calculateFingerprint(const ImportDependencies &deps)
         hash.addData(coreImportFingerprint);
     }
     hash.addData("/", 1);
-    QList<ImportKey> imports(allImports.toList());
+    QList<ImportKey> imports(allImports.values());
     std::sort(imports.begin(), imports.end());
     foreach (const ImportKey &k, imports)
         k.addToHash(hash);

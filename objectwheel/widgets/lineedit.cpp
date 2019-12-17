@@ -11,18 +11,19 @@ static int effectiveTextMargin(int defaultMargin, const QLineEditPrivate::SideWi
 {
     if (widgets.empty())
         return defaultMargin;
+
     return defaultMargin + (parameters.margin + parameters.widgetWidth) *
-           int(std::count_if(widgets.begin(), widgets.end(),
-                             [](const QLineEditPrivate::SideWidgetEntry &e) {
-                                 return e.widget->isVisibleTo(e.widget->parentWidget()); }));
+            int(std::count_if(widgets.begin(), widgets.end(),
+                              [](const QLineEditPrivate::SideWidgetEntry &e) {
+        return e.widget->isVisibleTo(e.widget->parentWidget()); }));
 }
-int QLineEditPrivate::effectiveLeftTextMargin() const
+
+QMargins QLineEditPrivate::effectiveTextMargins() const
 {
-    return effectiveTextMargin(leftTextMargin, leftSideWidgetList(), sideWidgetParameters());
-}
-int QLineEditPrivate::effectiveRightTextMargin() const
-{
-    return effectiveTextMargin(rightTextMargin, rightSideWidgetList(), sideWidgetParameters());
+    return {effectiveTextMargin(textMargins.left(), leftSideWidgetList(), sideWidgetParameters()),
+                textMargins.top(),
+                effectiveTextMargin(textMargins.right(), rightSideWidgetList(), sideWidgetParameters()),
+                textMargins.bottom()};
 }
 
 QLineEditPrivate::SideWidgetParameters QLineEditPrivate::sideWidgetParameters() const
@@ -78,10 +79,10 @@ void LineEdit::paintEvent(QPaintEvent*)
 
     // Draw text and selection
     QRect r = style()->subElementRect(QStyle::SE_LineEditContents, &option, this);
-    r.setX(r.x() + d->effectiveLeftTextMargin());
-    r.setY(r.y() + d->topTextMargin);
-    r.setRight(r.right() - d->effectiveRightTextMargin());
-    r.setBottom(r.bottom() - d->bottomTextMargin);
+    r.setX(r.x() + d->effectiveTextMargins().left());
+    r.setY(r.y() + d->textMargins.top());
+    r.setRight(r.right() - d->effectiveTextMargins().right());
+    r.setBottom(r.bottom() - d->textMargins.bottom());
     p.setClipRect(r);
     QFontMetrics fm = fontMetrics();
     Qt::Alignment va = QStyle::visualAlignment(d->control->layoutDirection(), QFlag(d->alignment));

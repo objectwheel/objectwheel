@@ -458,7 +458,7 @@ void PluginDumper::loadDependencies(const QStringList &dependencies,
     }
     QStringList newDependencies;
     loadQmlTypeDescription(dependenciesPaths, errors, warnings, objects, 0, &newDependencies);
-    newDependencies = (newDependencies.toSet() - *visitedPtr).toList();
+    newDependencies = (QSet<QString>(newDependencies.begin(), newDependencies.end()) - *visitedPtr).values();
     if (!newDependencies.isEmpty())
         loadDependencies(newDependencies, errors, warnings, objects, visitedPtr.take());
 }

@@ -158,11 +158,11 @@ DesignerController::DesignerController(DesignerPane* designerPane, QObject* pare
             this, &DesignerController::onSceneSettingsButtonClick);
     connect(m_designerPane->themeSettingsButton(), &QToolButton::clicked,
             this, &DesignerController::onThemeSettingsButtonClick);
-    connect(m_designerPane->zoomLevelComboBox(), qOverload<const QString&>(&QComboBox::activated),
+    connect(m_designerPane->zoomLevelComboBox(), qOverload<const QString&>(&QComboBox::textActivated),
             this, &DesignerController::onZoomLevelComboBoxActivation);
-    connect(m_designerPane->themeComboBox(), qOverload<const QString&>(&QComboBox::activated),
+    connect(m_designerPane->themeComboBox(), qOverload<const QString&>(&QComboBox::textActivated),
             this, &DesignerController::projectThemeActivated);
-    connect(m_designerPane->themeComboBox1(), qOverload<const QString&>(&QComboBox::activated),
+    connect(m_designerPane->themeComboBox1(), qOverload<const QString&>(&QComboBox::textActivated),
             this, &DesignerController::projectThemeActivated1);
     connect(m_designerPane->rendererStatusButton(), &QToolButton::clicked,
             this, &DesignerController::onRendererStatusButtonClick);
@@ -904,13 +904,13 @@ QList<Control*> DesignerController::movableSelectedAncestorControls(const QList<
     QSet<Control*> movableSelectedAncestorControls;
 
     if (selectedControls.isEmpty())
-        return movableSelectedAncestorControls.toList();
+        return movableSelectedAncestorControls.values();
 
     const DesignerScene* scene = m_designerPane->designerView()->scene();
 
     if (scene->currentForm() && scene->currentForm()->isSelected()) {
         movableSelectedAncestorControls.insert(scene->currentForm());
-        return movableSelectedAncestorControls.toList();
+        return movableSelectedAncestorControls.values();
     }
 
     Control* ancestor = selectedControls.first();
@@ -932,7 +932,7 @@ QList<Control*> DesignerController::movableSelectedAncestorControls(const QList<
     movableSelectedAncestorControls.remove(myMovableSelectedAncestorControl);
 
     const QList<Control*>& ancestorSiblings = myMovableSelectedAncestorControl->siblings();
-    const QList<Control*>& controls = movableSelectedAncestorControls.toList();
+    const QList<Control*>& controls = movableSelectedAncestorControls.values();
     for (Control* movableSelectedAncestorControl : controls) {
         if (!ancestorSiblings.contains(movableSelectedAncestorControl)) {
             const QList<Control*>& childControls = movableSelectedAncestorControl->childControls();
@@ -944,5 +944,5 @@ QList<Control*> DesignerController::movableSelectedAncestorControls(const QList<
     }
 
     movableSelectedAncestorControls.insert(myMovableSelectedAncestorControl);
-    return movableSelectedAncestorControls.toList();
+    return movableSelectedAncestorControls.values();
 }

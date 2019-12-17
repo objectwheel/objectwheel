@@ -4,8 +4,6 @@
 #include <Qt>
 #include <QFont>
 #include <QMessageBox>
-
-#include <serializeenum.h>
 #include <renderinfo.h>
 
 class QTextDocument;

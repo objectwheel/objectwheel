@@ -88,7 +88,7 @@ QList<Control*> controls(const QList<QmlCodeEditorWidget::DesignsDocument*>& doc
     QSet<Control*> controlSet;
     for (QmlCodeEditorWidget::DesignsDocument* document : documents)
         controlSet.insert(document->control);
-    return controlSet.toList();
+    return controlSet.values();
 }
 }
 

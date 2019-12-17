@@ -210,7 +210,7 @@ DesignerView* DesignerScene::view() const
 
 QList<Form*> DesignerScene::forms() const
 {
-    return m_forms.toList();
+    return m_forms.values();
 }
 
 QList<Control*> DesignerScene::selectedControls() const

@@ -1,8 +1,7 @@
 #include <renderserver.h>
-#include <serializeenum.h>
-
 #include <QTimer>
 #include <QLocalServer>
+#include <QDataStream>
 
 RenderServer::RenderServer(QObject* parent)
     : QObject(parent)
