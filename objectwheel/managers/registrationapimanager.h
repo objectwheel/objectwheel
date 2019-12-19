@@ -24,7 +24,7 @@ public:
                                       const QString& code);
 
 private slots:
-    void onDataArrival(ServerManager::ServerCommands command, const QByteArray& data);
+    void onDataArrival(const QByteArray& data);
 
 signals:
     void loginSuccessful(const QVariantList& userInfo);

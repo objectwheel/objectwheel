@@ -123,7 +123,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
-    QObject::connect(s_serverManager, &ServerManager::dataArrived,
+    QObject::connect(s_serverManager, &ServerManager::binaryMessageReceived,
                      s_accountManager, &RegistrationApiManager::onDataArrival);
     s_serverManager->start();
 

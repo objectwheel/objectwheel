@@ -41,6 +41,7 @@ public:
         RequestUserIcon,
         ResponseUserIcon
     };
+    Q_ENUM(ServerCommands)
 
 public:
     static ServerManager* instance();
@@ -56,7 +57,7 @@ public:
             qWarning() << "ServerManager::send: Unable to send the data, server is not connected.";
             return;
         }
-        instance()->sendBinaryMessage(push(command, push(std::forward<Args>(args)...)));
+        instance()->sendBinaryMessage(pushCbor(command, std::forward<Args>(args)...));
     }
 
 private slots:
@@ -64,13 +65,9 @@ private slots:
     void onDisconnect();
     void onError(QAbstractSocket::SocketError);
     void onSslErrors(const QList<QSslError>&);
-    void onBinaryMessageReceive(const QByteArray& message);
 
 private:
     void timerEvent(QTimerEvent* event) override;
-
-signals:
-    void dataArrived(ServerCommands command, const QByteArray& data);
 
 private:
     static ServerManager* s_instance;

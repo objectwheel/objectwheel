@@ -4,6 +4,7 @@
 #include <Qt>
 #include <QFont>
 #include <QMessageBox>
+#include <QCborArray>
 #include <renderinfo.h>
 
 class QTextDocument;
@@ -24,8 +25,25 @@ namespace UtilityFunctions {
 
 namespace Internal {
 
+void pushCborHelper(QCborArray&);
+void pullCborHelper(QCborArray&);
 void pushHelper(QDataStream&);
 void pullHelper(QDataStream&);
+
+template <typename Arg, typename... Args>
+void pushCborHelper(QCborArray& array, Arg&& arg, Args&&... args)
+{
+    array.append(std::forward<Arg>(arg));
+    pushCborHelper(array, std::forward<Args>(args)...);
+}
+
+template <typename Arg, typename... Args>
+void pullCborHelper(QCborArray& array, Arg&& arg, Args&&... args)
+{
+    if (!array.isEmpty())
+        std::forward<Arg>(arg) = array.takeFirst().toVariant().value<std::remove_reference_t<Arg>>();
+    pullCborHelper(array, std::forward<Args>(args)...);
+}
 
 template <typename Arg, typename... Args>
 void pushHelper(QDataStream& stream, Arg&& arg, Args&&... args)
@@ -42,6 +60,21 @@ void pullHelper(QDataStream& stream, Arg&& arg, Args&&... args)
 }
 
 } // Internal
+
+template <typename... Args>
+QByteArray pushCbor(Args&&... args)
+{
+    QCborArray array;
+    Internal::pushCborHelper(array, std::forward<Args>(args)...);
+    return array.toCborValue().toCbor();
+}
+
+template <typename... Args>
+void pullCbor(const QByteArray& data, Args&&... args)
+{
+    QCborArray array(QCborValue::fromCbor(data).toArray());
+    Internal::pullCborHelper(array, std::forward<Args>(args)...);
+}
 
 template <typename... Args>
 QByteArray push(Args&&... args)

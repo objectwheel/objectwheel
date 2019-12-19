@@ -33,6 +33,9 @@ namespace Internal {
 
 const char showFocusRingProperty[] = "_q_Objectwheel_showFocusRing";
 
+void pushCborHelper(QCborArray&) {}
+void pullCborHelper(QCborArray&) {}
+
 void pushHelper(QDataStream&) {}
 void pullHelper(QDataStream&) {}
 

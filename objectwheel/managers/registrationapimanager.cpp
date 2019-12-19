@@ -51,15 +51,22 @@ void RegistrationApiManager::completePasswordReset(const QString& email, const Q
     ServerManager::send(ServerManager::CompletePasswordReset, email, password, code);
 }
 
-void RegistrationApiManager::onDataArrival(ServerManager::ServerCommands command, const QByteArray& data)
+void RegistrationApiManager::onDataArrival(const QByteArray& data)
 {
+    QCborArray array(QCborValue::fromCbor(data).toArray());
+
+    if (array.isEmpty())
+        return;
+
+    auto command = array.first().toVariant().value<ServerManager::ServerCommands>();
+
     switch (command) {
     case ServerManager::LoginSuccessful: {
         QByteArray icon;
         QDateTime regdate;
         PlanManager::Plans plan;
         QString first, last, country, company, title, phone;
-        UtilityFunctions::pull(data, icon, regdate, plan, first, last, country, company, title, phone);
+        UtilityFunctions::pullCbor(data, command, icon, regdate, plan, first, last, country, company, title, phone);
 
         QVariantList userInfo;
         userInfo.append(icon);

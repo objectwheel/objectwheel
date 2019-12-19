@@ -18,21 +18,11 @@ ServerManager::ServerManager(const QUrl& host, QObject* parent) : QWebSocket(QSt
             this, &ServerManager::onError);
     connect(this, &ServerManager::sslErrors,
             this, &ServerManager::onSslErrors);
-    connect(this, &ServerManager::binaryMessageReceived,
-            this, &ServerManager::onBinaryMessageReceive);
 }
 
 ServerManager::~ServerManager()
 {
     s_instance = nullptr;
-}
-
-void ServerManager::onBinaryMessageReceive(const QByteArray& message)
-{
-    QByteArray data;
-    ServerCommands command;
-    UtilityFunctions::pull(message, command, data);
-    emit dataArrived(command, data);
 }
 
 ServerManager* ServerManager::instance()
