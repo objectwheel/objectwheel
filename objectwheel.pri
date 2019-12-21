@@ -55,7 +55,7 @@ DEFINES += APP_VER='"\\\"$$VERSION\\\""' \
            APP_GITVER='"\\\"$$GIT_VERSION\\\""' \
            APP_GITHASH='"\\\"$$GIT_HASH\\\""' \
            APP_GITDATE='"\\\"$$GIT_DATE\\\""' \
-           APP_WSSSERVER='"\\\"ws://api.objectwheel.com:4443\\\""'
+           APP_WSSSERVER='"\\\"wss://api.objectwheel.com:4443\\\""'
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

@@ -53,12 +53,8 @@ void RegistrationApiManager::completePasswordReset(const QString& email, const Q
 
 void RegistrationApiManager::onDataArrival(const QByteArray& data)
 {
-    QCborArray array(QCborValue::fromCbor(data).toArray());
-
-    if (array.isEmpty())
-        return;
-
-    auto command = array.first().toVariant().value<ServerManager::ServerCommands>();
+    ServerManager::ServerCommands command = ServerManager::Invalid;
+    UtilityFunctions::pullCbor(data, command);
 
     switch (command) {
     case ServerManager::LoginSuccessful: {

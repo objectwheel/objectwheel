@@ -17,6 +17,7 @@ class ServerManager final : public QWebSocket
 
 public:
     enum ServerCommands : quint32 {
+        Invalid,
         Login = 0x2023,
         LoginSuccessful,
         LoginFailure,
