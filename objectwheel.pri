@@ -1,4 +1,5 @@
 VERSION_FILE = $$PWD/VERSION
+!exists($$VERSION_FILE):write_file($$VERSION_FILE)
 
 # Need to discard STDERR so get path to NULL device
 win32 {

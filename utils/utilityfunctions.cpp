@@ -366,7 +366,7 @@ QVariantMap localDeviceInfo()
         {"deviceName", CrossPlatform::deviceName()},
         {"deviceUid", "000000000000"},
         {"isEmulator", false},
-        {"interpreterVersion", "1.2"}
+        {"version", APP_VER}
     };
     return info.toVariantMap();
 }

@@ -134,8 +134,6 @@ void ApplicationCore::prepare()
     qputenv("QML_BAD_GUI_RENDER_LOOP", "true");
     qputenv("QML_PUPPET_MODE", "true");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
-    qputenv("QT_QUICK_CONTROLS_CONF",
-            SaveUtils::toProjectAssetsDir(CommandlineParser::projectDirectory()).toUtf8());
 }
 
 void ApplicationCore::startQuitCountdown(int msec)
