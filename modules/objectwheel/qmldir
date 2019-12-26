@@ -1,4 +1,0 @@
-module Objectwheel
-plugin objectwheelmodule
-classname ObjectwheelModule
-typeinfo plugins.qmltypes

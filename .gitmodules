@@ -1,7 +1,10 @@
-[submodule "interpreter"]
-	path = interpreter
-	url = https://github.com/abigdreamer/interpreter
-	branch = objectwheel
 [submodule "utils/zipasync"]
 	path = utils/zipasync
 	url = https://github.com/omergoktas/zipasync
+[submodule "interpreter"]
+	path = interpreter
+	url = ../interpreter
+	branch = objectwheel
+[submodule "modules"]
+	path = modules
+	url = ../modules
