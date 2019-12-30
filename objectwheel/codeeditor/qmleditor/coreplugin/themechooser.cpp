@@ -96,8 +96,8 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
 {
     QList<ThemeEntry> themes;
 
-    static const QString installThemeDir = ApplicationCore::resourcePath() + QLatin1String("/themes");
-    static const QString userThemeDir = ApplicationCore::appDataLocation() + QLatin1String("/themes");
+    static const QString installThemeDir = ApplicationCore::resourcePath() + QLatin1String("/Themes");
+    static const QString userThemeDir = ApplicationCore::appDataPath() + QLatin1String("/Themes");
     addThemesFromPath(installThemeDir, &themes);
     if (themes.isEmpty())
         qWarning() << "Warning: No themes found in installation: "

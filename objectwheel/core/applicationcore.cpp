@@ -248,7 +248,7 @@ QString ApplicationCore::modulesPath()
 
 QString ApplicationCore::settingsPath()
 {
-    return appDataLocation() + "/Settings.ini";
+    return appDataPath() + "/Settings.ini";
 }
 
 QString ApplicationCore::resourcePath()
@@ -265,7 +265,7 @@ QString ApplicationCore::documentsPath()
 #endif
 }
 
-QString ApplicationCore::appDataLocation()
+QString ApplicationCore::appDataPath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
 }

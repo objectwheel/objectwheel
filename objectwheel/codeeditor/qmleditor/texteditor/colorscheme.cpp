@@ -480,7 +480,7 @@ bool ColorScheme::loadColorSchemeInto(ColorScheme& scheme, const QString& fileNa
 
 QString ColorScheme::createColorSchemeFileName(const QString& pattern)
 {
-    const QString stylesPath = ApplicationCore::appDataLocation() + "/styles/";
+    const QString stylesPath = ApplicationCore::appDataPath() + "/Styles/";
     QString baseFileName = stylesPath;
     baseFileName += pattern;
 

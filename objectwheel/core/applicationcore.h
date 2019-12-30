@@ -37,7 +37,7 @@ public:
     static QString settingsPath();
     static QString resourcePath();
     static QString documentsPath();
-    static QString appDataLocation();
+    static QString appDataPath();
 
 private:
     static void onProjectStop();

@@ -1,14 +1,15 @@
 <RCC>
     <qresource prefix="/">
-        <file>styles/dark.xml</file>
-        <file>styles/default_classic.xml</file>
-        <file>styles/default.xml</file>
-        <file>styles/grayscale.xml</file>
-        <file>styles/inkpot.xml</file>
-        <file>styles/intellij.xml</file>
-        <file>styles/modnokai_night_shift_v2.xml</file>
-        <file>styles/solarized-dark.xml</file>
-        <file>styles/solarized-light.xml</file>
+        <file>Styles/dark.xml</file>
+        <file>Styles/default_classic.xml</file>
+        <file>Styles/default.xml</file>
+        <file>Styles/grayscale.xml</file>
+        <file>Styles/inkpot.xml</file>
+        <file>Styles/intellij.xml</file>
+        <file>Styles/modnokai_night_shift_v2.xml</file>
+        <file>Styles/solarized-dark.xml</file>
+        <file>Styles/solarized-light.xml</file>
+        <file>Styles/qt-dark.xml</file>
         <file>qml-type-descriptions/builtins.qmltypes</file>
         <file>qml-type-descriptions/qbs-base.qmltypes</file>
         <file>qml-type-descriptions/qbs-bundle.json</file>
@@ -34,11 +35,11 @@
         <file>qml-type-descriptions/qtmobility-systeminfo.qmltypes</file>
         <file>qml-type-descriptions/qtmultimediakit.qmltypes</file>
         <file>qml-type-descriptions/qtwebkit.qmltypes</file>
-        <file>themes/dark.creatortheme</file>
-        <file>themes/default.creatortheme</file>
-        <file>themes/flat-dark.creatortheme</file>
-        <file>themes/flat-light.creatortheme</file>
-        <file>themes/flat.creatortheme</file>
+        <file>Themes/dark.creatortheme</file>
+        <file>Themes/default.creatortheme</file>
+        <file>Themes/flat-dark.creatortheme</file>
+        <file>Themes/flat-light.creatortheme</file>
+        <file>Themes/flat.creatortheme</file>
         <file>qmldesigner/images/alignment_bottom.png</file>
         <file>qmldesigner/images/alignment_center.png</file>
         <file>qmldesigner/images/alignment_left.png</file>
@@ -108,6 +109,5 @@
         <file>qmldesigner/images/underline-h-icon.png</file>
         <file>qmldesigner/images/vertical-scale-icon.png</file>
         <file>qmleditorwidgets/ow_logo.png</file>
-        <file>styles/qt-dark.xml</file>
     </qresource>
 </RCC>

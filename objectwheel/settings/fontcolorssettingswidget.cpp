@@ -343,17 +343,17 @@ void FontColorsSettingsWidget::fill()
 {
     QList<TextEditor::ColorSchemeEntry> colorSchemes;
     const QString& resourceStylesPath = ApplicationCore::resourcePath();
-    QDir resourceStyleDir(resourceStylesPath + "/styles");
+    QDir resourceStyleDir(resourceStylesPath + "/Styles");
     resourceStyleDir.setNameFilters(QStringList() << "*.xml");
     resourceStyleDir.setFilter(QDir::Files);
-    const QString& customStylesPath = ApplicationCore::appDataLocation();
-    QDir customStyleDir(customStylesPath + "/styles");
+    const QString& customStylesPath = ApplicationCore::appDataPath();
+    QDir customStyleDir(customStylesPath + "/Styles");
     customStyleDir.setNameFilters(QStringList() << "*.xml");
     customStyleDir.setFilter(QDir::Files);
     for (const QString& fileName : resourceStyleDir.entryList())
-        colorSchemes.append(TextEditor::ColorSchemeEntry(resourceStylesPath + "/styles/" + fileName, true));
+        colorSchemes.append(TextEditor::ColorSchemeEntry(resourceStylesPath + "/Styles/" + fileName, true));
     for (const QString& fileName : customStyleDir.entryList())
-        colorSchemes.append(TextEditor::ColorSchemeEntry(customStylesPath + "/styles/" + fileName, false));
+        colorSchemes.append(TextEditor::ColorSchemeEntry(customStylesPath + "/Styles/" + fileName, false));
     m_schemeListModel->setColorSchemes(colorSchemes);
     m_fontFamilyBox->addItems(QFontDatabase().families());
     m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",

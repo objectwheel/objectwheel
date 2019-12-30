@@ -169,7 +169,7 @@ void ModelManager::setupProjectInfoQmlBundles(ModelManagerInterface::ProjectInfo
 void ModelManager::loadDefaultQmlTypeDescriptions()
 {
     loadQmlTypeDescriptionsInternal(ApplicationCore::resourcePath());
-    loadQmlTypeDescriptionsInternal(ApplicationCore::appDataLocation());
+    loadQmlTypeDescriptionsInternal(ApplicationCore::appDataPath());
 }
 
 void ModelManager::writeMessageInternal(const QString &/*msg*/) const

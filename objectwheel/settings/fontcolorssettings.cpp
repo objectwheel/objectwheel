@@ -490,7 +490,7 @@ void FontColorsSettings::reset()
     fontPreferAntialiasing = true;
     fontPixelSize = 14;
     fontFamily = "Inconsolata";
-    colorSchemeFileName = ":/styles/default.xml";
+    colorSchemeFileName = ":/Styles/default.xml";
     loadColorScheme();
 }
 

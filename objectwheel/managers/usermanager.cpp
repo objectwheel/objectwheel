@@ -33,7 +33,7 @@ UserManager* UserManager::instance()
 
 QString UserManager::baseDirectory()
 {
-    static const QString& userBaseDir = ApplicationCore::appDataLocation() + QStringLiteral("/Users");
+    static const QString& userBaseDir = ApplicationCore::appDataPath() + QStringLiteral("/Users");
     return userBaseDir;
 }
 
