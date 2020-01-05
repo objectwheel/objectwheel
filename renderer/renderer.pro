@@ -7,7 +7,6 @@ CONFIG  -= app_bundle
 CONFIG  -= qtquickcompiler
 CONFIG  += console c++14 strict_c++
 TARGET   = Renderer
-DEFINES += QT_QML_DEBUG_NO_WARNING
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += RENDERER_DEBUG
 

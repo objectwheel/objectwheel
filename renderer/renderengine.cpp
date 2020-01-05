@@ -108,11 +108,20 @@ void RenderEngine::init(const InitInfo& initInfo, const InitInfo& toolboxInitInf
 
     emit initializationProgressChanged(g_progress_2);
 
-    // FIXME: Object completetion order must be parent -> to -> child
-    // according to Qt's internal completion order read here:
-    // stackoverflow.com/questions/46196831
-    for (ControlInstance* instance : qAsConst(instanceTree))
-        RenderUtils::doComplete(instance, this);
+    // Do complete
+    for (const QPair<QString, QString>& formPair : qAsConst(initInfo.forms)) {
+        const QString& formPath = formPair.first;
+        ControlInstance* formInstance = instanceTree.value(formPath);
+        Q_ASSERT(formInstance);
+        RenderUtils::doComplete(formInstance, this);
+
+        for (const QPair<QString, QString>& childPair : initInfo.children.value(formPath)) {
+            const QString& childPath = childPair.first;
+            ControlInstance* childInstance = instanceTree.value(childPath);
+            Q_ASSERT(childInstance);
+            RenderUtils::doComplete(childInstance, this);
+        }
+    }
 
     for (ControlInstance* instance : qAsConst(instanceTree)) {
         if (QQuickItem* item = RenderUtils::guiItem(instance))
