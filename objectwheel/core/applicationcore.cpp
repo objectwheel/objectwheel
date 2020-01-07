@@ -102,7 +102,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /* Show splash screen */
     auto splash = new SplashScreen(PaintUtils::pixmap(QIcon(":/images/splash/splash.png"),
                                                       QSize(485, 300)), Qt::WindowStaysOnTopHint);
-    splash->showMessage(QObject::tr("Initializing core..."));
+    splash->showMessage(QObject::tr("Initializing..."));
     splash->show();
 
     s_modeManager = new ModeManager(app);
@@ -119,8 +119,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
-    splash->showMessage(QObject::tr("Initializing user interface..."));
-
     QObject::connect(s_serverManager, &ServerManager::binaryMessageReceived,
                      s_accountManager, &RegistrationApiManager::onDataArrival);
     s_serverManager->start();
@@ -135,8 +133,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /** Ui initialization **/
     s_windowManager = new WindowManager(app);
     s_menuManager = new MenuManager(app);
-
-    splash->showMessage(QObject::tr("Initializing scene..."));
 
 //  FIXME  QObject::connect(s_userManager, &UserManager::started,
 //                     &ApplicationCore::onUserSessionStart);
@@ -153,8 +149,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlRemovingManager->init(scene);
     s_controlRenderingManager->init(scene);
     s_controlRenderingManager->scheduleDevicePixelRatioUpdate(QApplication::primaryScreen()->devicePixelRatio());
-
-    splash->showMessage(QObject::tr("Launching..."));
 
     auto hideSplashScreen = [=] {
         s_windowManager->welcomeWindow()->show();
@@ -250,7 +244,7 @@ QSettings* ApplicationCore::settings()
 QString ApplicationCore::modulesPath()
 {
     // TODO : Think about unix and windows versions too
-    return QFileInfo(QApplication::applicationDirPath() + "/../Frameworks/Modules").canonicalFilePath();
+    return QFileInfo("../Frameworks/Modules").canonicalFilePath();
 }
 
 QString ApplicationCore::settingsPath()
@@ -266,9 +260,9 @@ QString ApplicationCore::resourcePath()
 QString ApplicationCore::documentsPath()
 {
 #if defined(Q_OS_MACOS)
-    return QFileInfo(QApplication::applicationDirPath() + "/../Resources/Documents").canonicalFilePath();
+    return QFileInfo("../Resources/Documents").canonicalFilePath();
 #else
-    return QFileInfo(QApplication::applicationDirPath() + "/Documents").canonicalFilePath();
+    return QFileInfo("Documents").canonicalFilePath();
 #endif
 }
 

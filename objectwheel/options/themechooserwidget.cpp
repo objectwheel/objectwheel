@@ -582,8 +582,7 @@ void ThemeChooserWidget::run()
     }
 
     process = new QProcess(this);
-    process->start(qApp->applicationDirPath() + "/Themer",
-                   QStringList() << "show" << tmpDir.path());
+    process->start(QStringLiteral("Themer"), {QStringLiteral("show"), tmpDir.path()});
 
     QEventLoop loop;
     connect(process, &QProcess::started, &loop, &QEventLoop::quit);
@@ -638,11 +637,7 @@ void ThemeChooserWidget::refresh()
     SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     QProcess process;
-    process.start(qApp->applicationDirPath() + "/Themer",
-                  QStringList()
-                  << "capture"
-                  << tmpDir.path()
-                  << tmpFile.fileName());
+    process.start(QStringLiteral("Themer"), {QStringLiteral("capture"), tmpDir.path(), tmpFile.fileName()});
 
     QEventLoop loop;
     connect(&process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), &loop, &QEventLoop::quit);

@@ -192,8 +192,8 @@ void RunManager::sendExecute(const QString& uid, const QString& projectDirectory
         s_recentDeviceUid = uid;
         if (isLocalDevice(uid)) {
             s_recentProjectDirectory = projectDirectory;
-            device.process->setArguments(QStringList(projectDirectory));
-            device.process->setProgram(QCoreApplication::applicationDirPath() + "/Interpreter");
+            device.process->setArguments({projectDirectory});
+            device.process->setProgram("Interpreter");
             device.process->start();
         } else {
             s_uploadInfo.deviceUid = uid;
