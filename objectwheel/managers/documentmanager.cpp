@@ -8,6 +8,7 @@
 #include <QFileInfo>
 
 DocumentManager* DocumentManager::s_instance = nullptr;
+bool DocumentManager::s_initialized = false;
 QList<QmlCodeDocument*> DocumentManager::m_documents;
 
 DocumentManager::DocumentManager(QObject* parent) : QObject(parent)
@@ -20,6 +21,7 @@ DocumentManager::DocumentManager(QObject* parent) : QObject(parent)
     *conn = connect(&m_modelManager, &QmlJSTools::Internal::ModelManager::idle, [=] {
         disconnect(*conn);
         delete conn;
+        s_initialized = true;
         emit initialized();
     });
 

@@ -27,6 +27,7 @@
 #include <paintutils.h>
 #include <servermanager.h>
 #include <modemanager.h>
+#include <splashscreen.h>
 
 #include <QToolTip>
 #include <QScreen>
@@ -36,7 +37,6 @@
 #include <QApplication>
 #include <QFontDatabase>
 #include <QSharedMemory>
-#include <QSplashScreen>
 #include <QTimer>
 
 #include <theme/theme_p.h>
@@ -100,14 +100,10 @@ ApplicationCore::ApplicationCore(QApplication* app)
     QToolTip::setFont(font);
 
     /* Show splash screen */
-    QPixmap pixmap(":/images/app/splash.png");
-    pixmap.setDevicePixelRatio(QApplication::primaryScreen()->devicePixelRatio());
-    pixmap = pixmap.scaled(int(512 * QApplication::primaryScreen()->devicePixelRatio()),
-                            int(280 * QApplication::primaryScreen()->devicePixelRatio()),
-                            Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    QSplashScreen* splash(new QSplashScreen(pixmap));
+    auto splash = new SplashScreen(PaintUtils::pixmap(QIcon(":/images/splash/splash.png"),
+                                                      QSize(485, 300)), Qt::WindowStaysOnTopHint);
+    splash->showMessage(QObject::tr("Initializing core..."));
     splash->show();
-    app->processEvents();
 
     s_modeManager = new ModeManager(app);
     s_serverManager = new ServerManager(QUrl(APP_WSSSERVER), app);
@@ -123,6 +119,8 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
+    splash->showMessage(QObject::tr("Initializing user interface..."));
+
     QObject::connect(s_serverManager, &ServerManager::binaryMessageReceived,
                      s_accountManager, &RegistrationApiManager::onDataArrival);
     s_serverManager->start();
@@ -137,6 +135,9 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /** Ui initialization **/
     s_windowManager = new WindowManager(app);
     s_menuManager = new MenuManager(app);
+
+    splash->showMessage(QObject::tr("Initializing scene..."));
+
 //  FIXME  QObject::connect(s_userManager, &UserManager::started,
 //                     &ApplicationCore::onUserSessionStart);
 //    QObject::connect(s_userManager, &UserManager::aboutToStop,
@@ -153,11 +154,17 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_controlRenderingManager->init(scene);
     s_controlRenderingManager->scheduleDevicePixelRatioUpdate(QApplication::primaryScreen()->devicePixelRatio());
 
-    QObject::connect(s_documentManager, &DocumentManager::initialized, [=] {
+    splash->showMessage(QObject::tr("Launching..."));
+
+    auto hideSplashScreen = [=] {
         s_windowManager->welcomeWindow()->show();
         splash->finish(s_windowManager->welcomeWindow());
         QTimer::singleShot(2000, [=] { delete splash; });
-    });
+    };
+    if (s_documentManager->isInitialized())
+        hideSplashScreen();
+    else
+        QObject::connect(s_documentManager, &DocumentManager::initialized, hideSplashScreen);
 }
 
 bool ApplicationCore::locked()

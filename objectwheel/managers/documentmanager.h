@@ -25,6 +25,9 @@ public:
     static void removeProjectInfo();
     static void updateProjectInfo(const QString& projectDir);
 
+    static bool isInitialized()
+    { return s_initialized; }
+
     static QList<QmlCodeDocument*> documents()
     { return m_documents; }
 
@@ -43,6 +46,7 @@ private:
 
 private:
     static DocumentManager* s_instance;
+    static bool s_initialized;
     static QList<QmlCodeDocument*> m_documents;
     QmlJSTools::Internal::ModelManager m_modelManager;
     QmlJSTools::Internal::LocatorData m_locatorData;
