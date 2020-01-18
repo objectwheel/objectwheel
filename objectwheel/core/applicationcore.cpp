@@ -244,7 +244,7 @@ QSettings* ApplicationCore::settings()
 QString ApplicationCore::modulesPath()
 {
     // TODO : Think about unix and windows versions too
-    return QFileInfo("../Resources/Modules").canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/Modules")).canonicalFilePath();
 }
 
 QString ApplicationCore::settingsPath()
@@ -260,7 +260,7 @@ QString ApplicationCore::resourcePath()
 QString ApplicationCore::documentsPath()
 {
 #if defined(Q_OS_MACOS)
-    return QFileInfo("../Resources/Documents").canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/Documents")).canonicalFilePath();
 #else
     return QFileInfo("Documents").canonicalFilePath();
 #endif
