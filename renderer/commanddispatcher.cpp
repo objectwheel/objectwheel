@@ -13,7 +13,8 @@ CommandDispatcher::CommandDispatcher(RenderSocket* socket, QObject *parent) : QO
 
 void CommandDispatcher::send(RenderSocket* socket, RendererCommands command, const QByteArray& data)
 {
-    QMetaObject::invokeMethod(socket, "send", Q_ARG(RendererCommands, command), Q_ARG(QByteArray, data));
+    QMetaObject::invokeMethod(socket, "send", Q_ARG(RendererCommands, command),
+                              Qt::QueuedConnection, Q_ARG(QByteArray, data));
 }
 
 void CommandDispatcher::scheduleInitializationProgress(int progress)

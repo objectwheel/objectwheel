@@ -13,7 +13,8 @@ CommandDispatcher::CommandDispatcher(RenderServer* server, QObject *parent) : QO
 
 void CommandDispatcher::send(RenderServer* server, RendererCommands command, const QByteArray& data)
 {
-    QMetaObject::invokeMethod(server, "send", Q_ARG(RendererCommands, command), Q_ARG(QByteArray, data));
+    QMetaObject::invokeMethod(server, "send", Q_ARG(RendererCommands, command),
+                              Qt::QueuedConnection, Q_ARG(QByteArray, data));
 }
 
 void CommandDispatcher::scheduleInit(const InitInfo& initInfo, const InitInfo& toolboxInitInfo)
