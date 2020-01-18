@@ -40,7 +40,7 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
 
     s_commandDispatcher = new CommandDispatcher(s_renderServer, this);
 
-    s_process->setProgram("Renderer");
+    s_process->setProgram(QCoreApplication::applicationDirPath() + QStringLiteral("/Renderer"));
 #if defined(QT_DEBUG)
     s_process->setProcessChannelMode(QProcess::ForwardedChannels);
 #else
@@ -70,9 +70,11 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
 
 #if defined(RENDERER_DEBUG)
     QLocalServer::removeServer("serverName");
-    QMetaObject::invokeMethod(s_renderServer, "listen", Qt::QueuedConnection, Q_ARG(QString, "serverName"));
+    QMetaObject::invokeMethod(s_renderServer, "listen",
+                              Qt::QueuedConnection, Q_ARG(QString, "serverName"));
 #else
-    QMetaObject::invokeMethod(s_renderServer, "listen", Qt::QueuedConnection, Q_ARG(QString, HashFactory::generate()));
+    QMetaObject::invokeMethod(s_renderServer, "listen",
+                              Qt::QueuedConnection, Q_ARG(QString, HashFactory::generate()));
 #endif
 }
 
