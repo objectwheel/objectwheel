@@ -2,7 +2,6 @@
 <QHelpCollectionProject version="1.0">
     <docFiles>
         <register>
-            <file>qt3d.qch</file>
             <file>qtbluetooth.qch</file>
             <file>qtcharts.qch</file>
             <file>qtcore.qch</file>
@@ -39,6 +38,7 @@
             <file>qtwebview.qch</file>
             <file>qtwinextras.qch</file>
             <file>qtxmlpatterns.qch</file>
+            <file>qtquicktimeline.qch</file>
         </register>
     </docFiles>
 </QHelpCollectionProject>
