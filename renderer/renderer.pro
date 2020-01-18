@@ -3,7 +3,6 @@ include($$PWD/platform/platform.pri)
 
 ### App Settings
 CONFIG  -= app_bundle
-CONFIG  -= qtquickcompiler
 CONFIG  += console c++14 strict_c++
 TARGET   = Renderer
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
@@ -41,6 +40,6 @@ include($$PWD/../objectwheel.pri)
 INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/zipasync
 INCLUDEPATH += $$PWD/../utils/zipasync/async
-LIBS        += -L$$OUT_PWD/../utils -lutils
+LIBS        += -L$$OUT_PWD/../utils -lUtils
 windows:CONFIG(release, debug | release):LIBS += -L$$OUT_PWD/../utils/release
 windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug

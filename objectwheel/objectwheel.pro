@@ -1,6 +1,5 @@
 ### App Settings
 CONFIG  += c++14 strict_c++
-CONFIG  -= qtquickcompiler
 TARGET   = Objectwheel
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += RENDERER_DEBUG

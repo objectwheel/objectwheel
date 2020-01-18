@@ -630,7 +630,8 @@ Check::Check(Document::Ptr doc, const ContextPtr &context)
         _isQtQuick2 = isQtQuick2();
     }
 
-    _enabledMessages = Message::allMessageTypes().toSet();
+    const QList<Type>& allTypes = Message::allMessageTypes();
+    _enabledMessages = QSet<Type>(allTypes.begin(), allTypes.end());
     disableMessage(HintAnonymousFunctionSpacing);
     disableMessage(HintDeclareVarsInOneLine);
     disableMessage(HintDeclarationsShouldBeAtStartOfFunction);
@@ -1511,8 +1512,10 @@ void Check::scanCommentsForAnnotations()
         const QString &comment = _doc->source().mid(commentLoc.begin(), commentLoc.length);
 
         // enable all checks annotation
-        if (comment.contains(QLatin1String("@enable-all-checks")))
-            _enabledMessages = Message::allMessageTypes().toSet();
+        if (comment.contains(QLatin1String("@enable-all-checks"))) {
+            const QList<Type>& allTypes = Message::allMessageTypes();
+            _enabledMessages = QSet<Type>(allTypes.begin(), allTypes.end());
+        }
 
         // find all disable annotations
         int lastOffset = -1;

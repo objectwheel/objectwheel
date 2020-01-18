@@ -99,7 +99,7 @@ ApplicationCore::~ApplicationCore()
 QString ApplicationCore::modulesPath()
 {
     // TODO : Think about unix and windows versions too
-    return QFileInfo("../Frameworks/Modules").canonicalFilePath();
+    return QFileInfo("../Resources/Modules").canonicalFilePath();
 }
 
 void ApplicationCore::run()
