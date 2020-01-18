@@ -358,15 +358,15 @@ QVariant itemProperty(const QString& propertyName, const QVector<PropertyNode>& 
 QVariantMap localDeviceInfo()
 {
     static const QJsonObject info = {
-        {"currentCpuArchitecture", QSysInfo::currentCpuArchitecture()},
-        {"kernelType", QSysInfo::kernelType()},
-        {"kernelVersion", QSysInfo::kernelVersion()},
-        {"prettyProductName", QSysInfo::prettyProductName()},
-        {"productType", QSysInfo::productType()},
-        {"deviceName", CrossPlatform::deviceName()},
-        {"deviceUid", "000000000000"},
-        {"isEmulator", false},
-        {"version", APP_VER}
+        {QStringLiteral("currentCpuArchitecture"), QSysInfo::currentCpuArchitecture()},
+        {QStringLiteral("kernelType"), QSysInfo::kernelType()},
+        {QStringLiteral("kernelVersion"), QSysInfo::kernelVersion()},
+        {QStringLiteral("prettyProductName"), QSysInfo::prettyProductName()},
+        {QStringLiteral("productType"), QSysInfo::productType()},
+        {QStringLiteral("deviceName"), CrossPlatform::deviceName()},
+        {QStringLiteral("deviceUid"), QLatin1String("000000000000")},
+        {QStringLiteral("version"), QLatin1String(APP_VER)},
+        {QStringLiteral("isEmulator"), false}
     };
     return info.toVariantMap();
 }

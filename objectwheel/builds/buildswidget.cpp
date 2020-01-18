@@ -6,7 +6,7 @@
 
 BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
 {
-    setWindowTitle(APP_NAME + QStringLiteral(" (Beta)"));
+    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
 
     _modulesWidget = new ModuleSelectionWidget;
     _androidWidget = new AndroidWidget;

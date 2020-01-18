@@ -67,8 +67,8 @@ MenuManager* ApplicationCore::s_menuManager = nullptr;
 ApplicationCore::ApplicationCore(QApplication* app)
 {
     /** Core initialization **/
-    QApplication::setApplicationDisplayName(APP_NAME + QStringLiteral(" (Beta)"));
-    QApplication::setWindowIcon(QIcon(":/images/icon.png"));
+    QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 
     /* Load default fonts */
     for (const QString& fontName : QDir(QStringLiteral(":/fonts")).entryList(QDir::Files))
@@ -106,7 +106,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
     splash->show();
 
     s_modeManager = new ModeManager(app);
-    s_serverManager = new ServerManager(QUrl(APP_WSSSERVER), app);
+    s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)), app);
     s_accountManager = new RegistrationApiManager(app);
     s_userManager = new UserManager(app);
     s_controlRenderingManager = new ControlRenderingManager(app);
@@ -180,10 +180,10 @@ bool ApplicationCore::locked()
 void ApplicationCore::prepare()
 {
     // Set those here, needed by QStandardPaths
-    QApplication::setApplicationName(APP_NAME);
-    QApplication::setOrganizationName(APP_CORP);
-    QApplication::setApplicationVersion(APP_VER);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
+    QApplication::setApplicationName(QStringLiteral(APP_NAME));
+    QApplication::setOrganizationName(QStringLiteral(APP_CORP));
+    QApplication::setApplicationVersion(QStringLiteral(APP_VER));
+    QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
 
     QSettings settings(settingsPath(), QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {

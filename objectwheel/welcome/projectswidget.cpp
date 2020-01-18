@@ -279,19 +279,20 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_progressBar->hide();
 
     m_iconLabel->setFixedSize(QSize(60, 60));
-    m_iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/hammer.svg", QSize(60, 60), this));
+    m_iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/hammer.svg"), QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
     f.setPixelSize(26);
 
     m_welcomeLabel->setFont(f);
-    m_welcomeLabel->setText(tr("Welcome to ") + APP_NAME + QStringLiteral(" (Beta)"));
+    m_welcomeLabel->setText(tr("Welcome to ") + QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
 
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
     m_versionLabel->setFont(f);
-    m_versionLabel->setText(tr("Version ") + tr(APP_VER) + " (" APP_GITHASH ")");
+    m_versionLabel->setText(tr("Version ") + QStringLiteral(APP_VER) +
+                            QStringLiteral(" (") + QStringLiteral(APP_GITHASH) + QStringLiteral(")"));
 
     m_projectsLabel->setText(tr("Your Projects"));
 
@@ -305,7 +306,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
 
     auto updatePalette = [=] {
         QPalette p(m_listWidget->palette());
-        p.setColor(QPalette::Highlight, "#16000000");
+        p.setColor(QPalette::Highlight, QStringLiteral("#16000000"));
         m_listWidget->setPalette(p);
     };
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);

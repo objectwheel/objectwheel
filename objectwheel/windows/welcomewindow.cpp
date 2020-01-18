@@ -20,7 +20,7 @@
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
-    setWindowTitle(APP_NAME + QStringLiteral(" (Beta)"));
+    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
 
     m_view = new View(this);
     m_loginWidget = new LoginWidget;

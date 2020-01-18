@@ -3,7 +3,6 @@ include($$PWD/platform/platform.pri)
 include($$PWD/resources/resources.pri)
 
 ### App Settings
-TEMPLATE = app
 CONFIG  -= app_bundle
 CONFIG  -= qtquickcompiler
 CONFIG  += console c++14 strict_c++

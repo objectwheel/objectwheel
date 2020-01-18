@@ -1,5 +1,4 @@
 ### App Settings
-TEMPLATE = app
 CONFIG  += c++14 strict_c++
 CONFIG  -= qtquickcompiler
 TARGET   = Objectwheel

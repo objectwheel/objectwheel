@@ -13,7 +13,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
   , m_okButton(new QPushButton(this))
   , m_legalLabel(new QLabel(this))
 {
-    setWindowTitle(APP_NAME + QStringLiteral(" (Beta)"));
+    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
     setAutoFillBackground(true);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint
                    | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
@@ -28,19 +28,19 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_layout->setSpacing(20);
 
     m_logoLabel->setFixedSize(QSize(160, 80));
-    m_logoLabel->setPixmap(PaintUtils::pixmap(":/images/logo.svg", QSize(160, 80), this));
+    m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
 
     m_versionLabel->setAlignment(Qt::AlignCenter);
     m_versionLabel->setText(QStringLiteral("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b>"
                                            "<br>%3<br>support@objectwheel.com</p>")
-                            .arg(APP_VER).arg(APP_GITHASH).arg(APP_GITDATE));
+                            .arg(QStringLiteral(APP_VER)).arg(QStringLiteral(APP_GITHASH)).arg(QStringLiteral(APP_GITDATE)));
 
     m_okButton->setDefault(true);
     m_okButton->setCursor(Qt::PointingHandCursor);
     m_okButton->setText(tr("Close"));
     m_okButton->setFixedWidth(100);
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
-                          .arg(QDate::currentDate().year()).arg(APP_CORP));
+                          .arg(QDate::currentDate().year()).arg(QStringLiteral(APP_CORP)));
 
     resize(sizeHint());
     move(UtilityFunctions::centerPos(size()));

@@ -25,11 +25,11 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 {
     /** Core initialization **/
     QApplication::setQuitOnLastWindowClosed(false);
-    QApplication::setApplicationName(APP_NAME);
-    QApplication::setOrganizationName(APP_CORP);
-    QApplication::setApplicationVersion(APP_VER);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
-    QApplication::setApplicationDisplayName(APP_NAME + QObject::tr(" Renderer"));
+    QApplication::setApplicationName(QStringLiteral(APP_NAME));
+    QApplication::setOrganizationName(QStringLiteral(APP_CORP));
+    QApplication::setApplicationVersion(QStringLiteral(APP_VER));
+    QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
+    QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Renderer"));
 
     /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::systemDefaultFont());

@@ -26,7 +26,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
     s_broadcastSocket = new QUdpSocket(this);
-    s_webSocketServer = new QWebSocketServer(APP_NAME, QWebSocketServer::NonSecureMode, this);
+    s_webSocketServer = new QWebSocketServer(QStringLiteral(APP_NAME), QWebSocketServer::NonSecureMode, this);
 
     connect(s_broadcastSocket, qOverload<QAbstractSocket::SocketError>(&QUdpSocket::error),
             this, [=] (QAbstractSocket::SocketError socketError) {

@@ -69,7 +69,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     m_legalLabel->setAlignment(Qt::AlignHCenter);
     m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
-                          .arg(QDate::currentDate().year()).arg(APP_CORP));
+                          .arg(QDate::currentDate().year()).arg(QStringLiteral(APP_CORP)));
 
     ApplicationStyle::setButtonStyle(m_helpButton, ApplicationStyle::Help);
     m_helpButton->setIcon(QIcon(":/images/question.svg"));

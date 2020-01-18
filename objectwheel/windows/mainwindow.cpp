@@ -94,7 +94,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_toolboxDockWidgetVisible(true)
   , m_controlsDockWidgetVisible(true)
 {
-    setWindowTitle(APP_NAME + QStringLiteral(" (Beta)"));
+    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);

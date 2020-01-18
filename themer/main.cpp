@@ -29,12 +29,12 @@ int main(int argc, char *argv[])
 
     // Initialize application
     QApplication a(argc, argv);
-    QApplication::setApplicationName(APP_NAME);
-    QApplication::setOrganizationName(APP_CORP);
-    QApplication::setApplicationVersion(APP_VER);
-    QApplication::setOrganizationDomain(APP_DOMAIN);
-    QApplication::setApplicationDisplayName(APP_NAME + QObject::tr(" Themer"));
-    QApplication::setWindowIcon(QIcon(":/images/icon.png"));
+    QApplication::setApplicationName(QStringLiteral(APP_NAME));
+    QApplication::setOrganizationName(QStringLiteral(APP_CORP));
+    QApplication::setApplicationVersion(QStringLiteral(APP_VER));
+    QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
+    QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Themer"));
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 
     /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
