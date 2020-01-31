@@ -195,7 +195,7 @@ QHelpEngine* HelpManager::helpEngine()
 
 QString HelpManager::collectionFilePath()
 {
-    return ApplicationCore::documentsPath() + "/docs.qch";
+    return ApplicationCore::documentsPath() + "/docs.qhc";
 }
 
 void HelpManager::registerDocumentation(const QStringList &files)
@@ -574,7 +574,7 @@ const QStringList HelpManagerPrivate::documentationFromInstaller()
 //        if (pathInfo.isFile() && pathInfo.isReadable()) {
 //            documentationFiles << pathInfo.absoluteFilePath();
 //        } else if (pathInfo.isDir()) {
-//            const QFileInfoList files(QDir(path).entryInfoList(QStringList(QLatin1String("*.qch")),
+//            const QFileInfoList files(QDir(path).entryInfoList(QStringList(QLatin1String("*.qhc")),
 //                                                               QDir::Files | QDir::Readable));
 //            for (const QFileInfo &fileInfo : files)
 //                documentationFiles << fileInfo.absoluteFilePath();

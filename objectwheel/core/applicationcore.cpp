@@ -93,8 +93,8 @@ ApplicationCore::ApplicationCore(QApplication* app)
 
     /* Set application ui settings */
     QFont font = GeneralSettings::interfaceSettings()->toFont();
-    QApplication::setFont(font);
     QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
+    QApplication::setFont(font); // Call after style change github.com/qt/qtbase/commit/14071b5
     QApplication::setStartDragDistance(8);
     font.setPixelSize(font.pixelSize() - 1);
     QToolTip::setFont(font);
