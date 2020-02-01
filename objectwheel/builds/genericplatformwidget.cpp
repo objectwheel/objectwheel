@@ -1,11 +1,11 @@
-#include <androidplatformwidget.h>
+#include <genericplatformwidget.h>
 #include <QHBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpinBox>
 
-AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(parent)
+GenericPlatformWidget::GenericPlatformWidget(QWidget* parent) : PlatformWidget(parent)
   , m_labelEdit(new QLineEdit(this))
   , m_organizationEdit(new QLineEdit(this))
   , m_domainEdit(new QLineEdit(this))
@@ -399,15 +399,15 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
 ////    _btnBuild.setIconSize(QSize(14,14));
 ////    _btnBuild.setIcon(QIcon(":/images/welcome/load.png"));
 ////    _btnBuild.setText("Build");
-//    // FIXME   connect(&_btnBuild, &FlarButton::clicked, this, &AndroidPlatformWidget::handleBtnBuildClicked);
+//    // FIXME   connect(&_btnBuild, &FlarButton::clicked, this, &GenericPlatformWidget::handleBtnBuildClicked);
 }
 
-QCborMap AndroidPlatformWidget::toCborMap() const
+QCborMap GenericPlatformWidget::toCborMap() const
 {
 
 }
 
-//bool AndroidPlatformWidget::checkFields()
+//bool GenericPlatformWidget::checkFields()
 //{
 //    QString errorMessage;
 
@@ -449,12 +449,12 @@ QCborMap AndroidPlatformWidget::toCborMap() const
 //    return errorMessage.isEmpty();
 //}
 
-//void AndroidPlatformWidget::setTarget(const QString& target)
+//void GenericPlatformWidget::setTarget(const QString& target)
 //{
 //    _lblTitle.setText("Target: " + target);
 //}
 
-//void AndroidPlatformWidget::handleBtnBuildClicked()
+//void GenericPlatformWidget::handleBtnBuildClicked()
 //{
 //    if (checkFields()) {
 //        Build::set(TAG_APPNAME, _txtAppName.text());

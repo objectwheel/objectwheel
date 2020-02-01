@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+class SegmentedBar;
 class QStackedWidget;
 class AndroidPlatformWidget;
 
@@ -14,13 +15,16 @@ class BuildsPane final : public QWidget
 public:
     explicit BuildsPane(QWidget* parent = nullptr);
 
+    SegmentedBar* segmentedBar() const;
     QStackedWidget* stackedWidget() const;
     AndroidPlatformWidget* androidWidget() const;
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
+
 private:
+    SegmentedBar* m_segmentedBar;
     QStackedWidget* m_stackedWidget;
     AndroidPlatformWidget* m_androidWidget;
 };
