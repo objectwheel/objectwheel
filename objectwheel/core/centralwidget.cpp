@@ -2,7 +2,6 @@
 #include <designerview.h>
 #include <projectoptionswidget.h>
 #include <helpwidget.h>
-#include <buildswidget.h>
 #include <controlrenderingmanager.h>
 #include <delayer.h>
 #include <qmlcodeeditorwidget.h>
@@ -19,6 +18,8 @@
 #include <designercontroller.h>
 #include <outputpane.h>
 #include <outputcontroller.h>
+#include <buildspane.h>
+#include <buildscontroller.h>
 #include <issueswidget.h>
 #include <consolewidget.h>
 #include <form.h>
@@ -56,10 +57,11 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
   , m_outputController(new OutputController(m_outputPane, this))
   , m_designerPane(new DesignerPane)
   , m_designerController(new DesignerController(m_designerPane, this))
+  , m_buildsPane(new BuildsPane)
+  , m_buildsController(new BuildsController(m_buildsPane, this))
   , m_codeEditorContainer(new EditorContainer)
   , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
   , m_projectOptionsWidget(new ProjectOptionsWidget)
-  , m_buildsWidget(new BuildsWidget)
   , m_helpWidget(new HelpWidget)
 {
     setFrameShape(QFrame::NoFrame);
@@ -86,7 +88,7 @@ CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
     m_splitterIn->addWidget(m_designerPane);
     m_splitterIn->addWidget(m_codeEditorContainer);
     m_splitterIn->addWidget(m_projectOptionsWidget);
-    m_splitterIn->addWidget(m_buildsWidget);
+    m_splitterIn->addWidget(m_buildsPane);
     m_splitterIn->addWidget(m_helpWidget);
     m_splitterIn->setChildrenCollapsible(false);
     m_splitterIn->setHandleWidth(1);
@@ -229,6 +231,16 @@ OutputController* CentralWidget::outputController() const
     return m_outputController;
 }
 
+BuildsPane* CentralWidget::buildsPane() const
+{
+    return m_buildsPane;
+}
+
+BuildsController* CentralWidget::buildsController() const
+{
+    return m_buildsController;
+}
+
 DesignerPane* CentralWidget::designerPane() const
 {
     return m_designerPane;
@@ -259,7 +271,7 @@ void CentralWidget::hideWidgets()
     m_designerPane->hide();
     m_codeEditorContainer->hide();
     m_projectOptionsWidget->hide();
-    m_buildsWidget->hide();
+    m_buildsPane->hide();
     m_helpWidget->hide();
 }
 
@@ -289,7 +301,7 @@ void CentralWidget::onModeChange(ModeManager::Mode mode)
         break;
 
     case ModeManager::Builds:
-        m_buildsWidget->show();
+        m_buildsPane->show();
         break;
 
     case ModeManager::Documents:

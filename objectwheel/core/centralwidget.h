@@ -7,9 +7,10 @@
 class QmlCodeEditorWidget;
 class ProjectOptionsWidget;
 class HelpWidget;
-class BuildsWidget;
 class OutputPane;
 class OutputController;
+class BuildsPane;
+class BuildsController;
 class DesignerPane;
 class DesignerController;
 class EditorContainer;
@@ -21,11 +22,14 @@ class CentralWidget final : public QSplitter
 
 public:
     explicit CentralWidget(QWidget* parent = nullptr);
-    QmlCodeEditorWidget* qmlCodeEditorWidget() const;
-    OutputPane* outputPane() const;
-    OutputController* outputController() const;
+
     DesignerPane* designerPane() const;
     DesignerController* designerController() const;
+    OutputPane* outputPane() const;
+    OutputController* outputController() const;
+    BuildsPane* buildsPane() const;
+    BuildsController* buildsController() const;
+    QmlCodeEditorWidget* qmlCodeEditorWidget() const;
 
 public slots:
     void charge();
@@ -41,10 +45,11 @@ private:
     OutputController* m_outputController;
     DesignerPane* m_designerPane;
     DesignerController* m_designerController;
+    BuildsPane* m_buildsPane;
+    BuildsController* m_buildsController;
     EditorContainer* m_codeEditorContainer;
     QmlCodeEditorWidget* m_qmlCodeEditorWidget;
     ProjectOptionsWidget* m_projectOptionsWidget;
-    BuildsWidget* m_buildsWidget;
     HelpWidget* m_helpWidget;
 };
 

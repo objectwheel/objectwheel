@@ -16,15 +16,10 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     auto m_organizationLabel = new QLabel(tr("Organization"), this);
     auto m_domainLabel = new QLabel(tr("Domain"), this);
 
-//    layout->addWidget(appBox);
-//    layout->addWidget(packageBox);
-//    layout->addWidget(permissionsBox);
-//    layout->addWidget(signingBox);
-
     auto generalGroupBox = new QGroupBox(tr("General"), this);
     auto generalLayout = new QGridLayout(generalGroupBox);
-    generalLayout->setContentsMargins(0, 0, 0, 0);
-    generalLayout->setSpacing(8);
+    generalLayout->setContentsMargins(8, 8, 8, 8);
+    generalLayout->setSpacing(6);
     generalLayout->addWidget(m_labelLabel, 0, 0);
     generalLayout->addWidget(m_labelEdit, 0, 1);
     generalLayout->addWidget(m_versionCodeLabel, 1, 0);
