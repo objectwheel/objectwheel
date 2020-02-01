@@ -11,10 +11,10 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
   , m_organizationEdit(new QLineEdit(this))
   , m_domainEdit(new QLineEdit(this))
 {
-    auto m_labelLabel = new QLabel(tr("Label"), this);
-    auto m_versionCodeLabel = new QLabel(tr("Version"), this);
-    auto m_organizationLabel = new QLabel(tr("Organization"), this);
-    auto m_domainLabel = new QLabel(tr("Domain"), this);
+    auto m_labelLabel = new QLabel(tr("Label:"), this);
+    auto m_organizationLabel = new QLabel(tr("Organization:"), this);
+    auto m_domainLabel = new QLabel(tr("Domain:"), this);
+    auto m_versionCodeLabel = new QLabel(tr("Version:"), this);
 
     auto generalGroupBox = new QGroupBox(tr("General"), this);
     auto generalLayout = new QGridLayout(generalGroupBox);
@@ -22,12 +22,12 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     generalLayout->setSpacing(6);
     generalLayout->addWidget(m_labelLabel, 0, 0);
     generalLayout->addWidget(m_labelEdit, 0, 1);
-    generalLayout->addWidget(m_versionCodeLabel, 1, 0);
-    generalLayout->addWidget(m_versionCodeSpin, 1, 1);
-    generalLayout->addWidget(m_organizationLabel, 2, 0);
-    generalLayout->addWidget(m_organizationEdit, 2, 1);
-    generalLayout->addWidget(m_domainLabel, 3, 0);
-    generalLayout->addWidget(m_domainEdit, 3, 1);
+    generalLayout->addWidget(m_organizationLabel, 1, 0);
+    generalLayout->addWidget(m_organizationEdit, 1, 1);
+    generalLayout->addWidget(m_domainLabel, 2, 0);
+    generalLayout->addWidget(m_domainEdit, 2, 1);
+    generalLayout->addWidget(m_versionCodeLabel, 3, 0);
+    generalLayout->addWidget(m_versionCodeSpin, 3, 1);
 
     auto layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);

@@ -3,11 +3,8 @@
 
 #include <QWidget>
 
-class View;
+class QStackedWidget;
 class AndroidPlatformWidget;
-//class DownloadWidget;
-class PlatformsWidget;
-class ModuleSelectionWidget;
 
 class BuildsPane final : public QWidget
 {
@@ -17,16 +14,15 @@ class BuildsPane final : public QWidget
 public:
     explicit BuildsPane(QWidget* parent = nullptr);
 
+    QStackedWidget* stackedWidget() const;
+    AndroidPlatformWidget* androidWidget() const;
+
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
 private:
     QStackedWidget* m_stackedWidget;
-    OTargets::Targets _target;
-    PlatformsWidget* _platformsWidget;
-    ModuleSelectionWidget* _modulesWidget;
-    AndroidPlatformWidget* _androidWidget;
-//    DownloadWidget* _downloadWidget;
+    AndroidPlatformWidget* m_androidWidget;
 };
 
 #endif // BUILDSPANE_H

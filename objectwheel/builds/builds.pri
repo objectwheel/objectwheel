@@ -4,15 +4,13 @@ INCLUDEPATH += $$PWD
 HEADERS += $$PWD/androidcreatekeystorecertificate.h \
            $$PWD/androidplatformwidget.h \
            $$PWD/buildspane.h \
-           $$PWD/moduleselectionwidget.h \
-           $$PWD/platformswidget.h \
+           $$PWD/buildscontroller.h \
            $$PWD/platformwidget.h
 
 SOURCES += $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/androidplatformwidget.cpp \
            $$PWD/buildspane.cpp \
-           $$PWD/moduleselectionwidget.cpp \
-           $$PWD/platformswidget.cpp \
+           $$PWD/buildscontroller.cpp \
            $$PWD/platformwidget.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui

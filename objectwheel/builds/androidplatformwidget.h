@@ -19,9 +19,9 @@ public:
 
 private:
     QLineEdit* m_labelEdit;
-    QSpinBox* m_versionCodeSpin;
     QLineEdit* m_organizationEdit;
     QLineEdit* m_domainEdit;
+    QSpinBox* m_versionCodeSpin;
 };
 
 #endif // ANDROIDPLATFORMWIDGET_H

@@ -1,32 +1,39 @@
 #include <buildspane.h>
-#include <view.h>
-#include <platformswidget.h>
 #include <androidplatformwidget.h>
-#include <moduleselectionwidget.h>
 
-BuildsPane::BuildsPane(QWidget *parent) : QWidget(parent)
+#include <QStackedWidget>
+#include <QScrollArea>
+#include <QGridLayout>
+
+BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
+  , m_stackedWidget(new QStackedWidget(this))
+  , m_androidWidget(new AndroidPlatformWidget(this))
+{    
+    auto scrollArea = new QScrollArea(this);
+    scrollArea->setWidgetResizable(true);
+    scrollArea->setWidget(m_stackedWidget);
+
+    auto layout = new QGridLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->setRowStretch(0, 1);
+    layout->setRowStretch(2, 1);
+    layout->setColumnStretch(0, 1);
+    layout->setColumnStretch(2, 1);
+    layout->addWidget(scrollArea, 1, 1);
+
+    m_stackedWidget->addWidget(m_androidWidget);
+    m_stackedWidget->setCurrentWidget(m_androidWidget);
+}
+
+QStackedWidget* BuildsPane::stackedWidget() const
 {
-    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
+    return m_stackedWidget;
+}
 
-    _modulesWidget = new ModuleSelectionWidget;
-    _androidWidget = new AndroidPlatformWidget;
-    _platformsWidget = new PlatformsWidget;
-//   FIXME _downloadWidget = new DownloadWidget;
-
-    connect(_modulesWidget, &ModuleSelectionWidget::backClicked, this, &BuildsPane::showPlatforms);
-    connect(_modulesWidget, &ModuleSelectionWidget::done, this, &BuildsPane::handleModuleSelection);
-//    connect(_androidWidget, &AndroidPlatformWidget::backClicked, this, &BuildsPane::showModules);
-    connect(_platformsWidget, &PlatformsWidget::platformSelected, this, &BuildsPane::handlePlatformSelection);
-//    connect(_androidWidget, &AndroidPlatformWidget::downloadBuild, this, &BuildsPane::handleDownload);
-//    connect(_downloadWidget, &DownloadWidget::done, this, &BuildsPane::handleModuleSelection);
-
-    _view = new View(this);
-    _view->add(Platforms, _platformsWidget);
-    _view->add(Modules, _modulesWidget);
-    _view->add(Android, _androidWidget);
-//    _view->add(Download, _downloadWidget);
-    _view->show(Android);
-
+AndroidPlatformWidget* BuildsPane::androidWidget() const
+{
+    return m_androidWidget;
 }
 
 QSize BuildsPane::sizeHint() const
