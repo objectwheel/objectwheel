@@ -3,7 +3,6 @@
 #include <genericplatformwidget.h>
 #include <androidplatformwidget.h>
 #include <applicationstyle.h>
-#include <utilityfunctions.h>
 #include <paintutils.h>
 
 #include <QStackedWidget>
@@ -27,18 +26,17 @@ BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
     scrollArea->setFrameShape(QFrame::NoFrame);
 
     auto layout = new QGridLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(8, 8, 8, 8);
     layout->setSpacing(8);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(2, 1);
-    layout->setRowStretch(0, 1);
-    layout->setRowStretch(8, 1);
+    layout->setRowStretch(4, 1);
+    layout->setRowStretch(6, 1);
+    layout->setRowMinimumHeight(0, 20);
     layout->addWidget(iconLabel, 1, 1, Qt::AlignHCenter);
     layout->addWidget(titleLabel, 2, 1, Qt::AlignHCenter);
     layout->addWidget(m_platformLabel, 3, 1, Qt::AlignHCenter);
-    layout->setRowMinimumHeight(4, 8);
     layout->addWidget(scrollArea, 5, 1);
-    layout->setRowMinimumHeight(6, 8);
     layout->addWidget(m_segmentedBar, 7, 1);
 
     iconLabel->setFixedSize(QSize(60, 60));
@@ -62,20 +60,26 @@ BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
     m_segmentedBar->setCursor(Qt::PointingHandCursor);
     m_segmentedBar->setIconSize({18, 18});
 
-    QAction* leftAction = m_segmentedBar->addAction();
-    leftAction->setCheckable(true);
-    leftAction->setShortcut(Qt::CTRL + Qt::Key_J);
-    leftAction->setToolTip(tr("Hide or show left panes") + UtilityFunctions::shortcutSymbol(leftAction->shortcut()));
+    QAction* startAction = m_segmentedBar->addAction(tr("Start"));
+    startAction->setCheckable(true);
+    startAction->setShortcut(Qt::CTRL + Qt::Key_J);
+    startAction->setToolTip(tr("Hide or show left panes"));
 
-    QAction* bottomAction = m_segmentedBar->addAction();
-    bottomAction->setCheckable(true);
-    bottomAction->setShortcut(Qt::CTRL + Qt::Key_K);
-    bottomAction->setToolTip(tr("Hide or show bottom panes") + UtilityFunctions::shortcutSymbol(bottomAction->shortcut()));
+    QAction* generalAction = m_segmentedBar->addAction(tr("General Settings"));
+    generalAction->setCheckable(true);
+    generalAction->setShortcut(Qt::CTRL + Qt::Key_K);
+    generalAction->setToolTip(tr("Hide or show bottom panes"));
 
-    QAction* rightAction = m_segmentedBar->addAction();
-    rightAction->setCheckable(true);
-    rightAction->setShortcut(Qt::CTRL + Qt::Key_L);
-    rightAction->setToolTip(tr("Hide or show right panes") + UtilityFunctions::shortcutSymbol(rightAction->shortcut()));
+    QAction* platformAction = m_segmentedBar->addAction(tr("Platform Settings"));
+    platformAction->setCheckable(true);
+    platformAction->setShortcut(Qt::CTRL + Qt::Key_L);
+    platformAction->setToolTip(tr("Hide or show right panes"));
+
+    QAction* downloadsAction = m_segmentedBar->addAction(tr("Downloads"));
+    downloadsAction->setCheckable(true);
+    downloadsAction->setShortcut(Qt::CTRL + Qt::Key_L);
+    downloadsAction->setToolTip(tr("Hide or show right panes"));
+
 }
 
 QLabel* BuildsPane::platformLabel() const
