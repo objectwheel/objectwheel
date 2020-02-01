@@ -1,7 +1,7 @@
 #include <buildswidget.h>
 #include <view.h>
 #include <platformswidget.h>
-#include <androidwidget.h>
+#include <androidplatformwidget.h>
 #include <moduleselectionwidget.h>
 
 BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
@@ -9,15 +9,15 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
     setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
 
     _modulesWidget = new ModuleSelectionWidget;
-    _androidWidget = new AndroidWidget;
+    _androidWidget = new AndroidPlatformWidget;
     _platformsWidget = new PlatformsWidget;
 //   FIXME _downloadWidget = new DownloadWidget;
 
     connect(_modulesWidget, &ModuleSelectionWidget::backClicked, this, &BuildsWidget::showPlatforms);
     connect(_modulesWidget, &ModuleSelectionWidget::done, this, &BuildsWidget::handleModuleSelection);
-    connect(_androidWidget, &AndroidWidget::backClicked, this, &BuildsWidget::showModules);
+    connect(_androidWidget, &AndroidPlatformWidget::backClicked, this, &BuildsWidget::showModules);
     connect(_platformsWidget, &PlatformsWidget::platformSelected, this, &BuildsWidget::handlePlatformSelection);
-    connect(_androidWidget, &AndroidWidget::downloadBuild, this, &BuildsWidget::handleDownload);
+    connect(_androidWidget, &AndroidPlatformWidget::downloadBuild, this, &BuildsWidget::handleDownload);
 //    connect(_downloadWidget, &DownloadWidget::done, this, &BuildsWidget::handleModuleSelection);
 
     _view = new View(this);
@@ -25,7 +25,8 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
     _view->add(Modules, _modulesWidget);
     _view->add(Android, _androidWidget);
 //    _view->add(Download, _downloadWidget);
-    _view->show(Platforms);
+    _view->show(Android);
+
 }
 
 QSize BuildsWidget::sizeHint() const

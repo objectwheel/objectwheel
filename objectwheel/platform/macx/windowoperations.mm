@@ -9,7 +9,8 @@ namespace WindowOperations {
 void removeTitleBar(QMainWindow* mainWindow)
 {
     mainWindow->setUnifiedTitleAndToolBarOnMac(true);
-    mainWindow->setWindowFlags(mainWindow->windowFlags() & ~Qt::WindowFullscreenButtonHint);
+    mainWindow->setWindowFlags((mainWindow->windowFlags() & ~Qt::WindowFullscreenButtonHint) | Qt::CustomizeWindowHint);
+    // CustomizeWindowHint must be added github.com/qt/qtbase/commit/35da2b8
 
     auto nsView = (NSView*) mainWindow->winId();
     auto window = [nsView window];

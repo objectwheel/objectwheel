@@ -5,7 +5,7 @@
 #include <global.h>
 
 class View;
-class AndroidWidget;
+class AndroidPlatformWidget;
 //class DownloadWidget;
 class PlatformsWidget;
 class ModuleSelectionWidget;
@@ -40,7 +40,7 @@ private:
     OTargets::Targets _target;
     PlatformsWidget* _platformsWidget;
     ModuleSelectionWidget* _modulesWidget;
-    AndroidWidget* _androidWidget;
+    AndroidPlatformWidget* _androidWidget;
 //    DownloadWidget* _downloadWidget;
 };
 

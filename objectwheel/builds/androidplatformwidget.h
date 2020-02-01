@@ -1,14 +1,14 @@
-#ifndef ANDROIDWIDGET_H
-#define ANDROIDWIDGET_H
+#ifndef ANDROIDPLATFORMWIDGET_H
+#define ANDROIDPLATFORMWIDGET_H
 
 #include <QtWidgets>
 
-class AndroidWidget : public QWidget
+class AndroidPlatformWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit AndroidWidget(QWidget *parent = nullptr);
+    explicit AndroidPlatformWidget(QWidget *parent = nullptr);
     bool checkFields();
 
 public slots:
@@ -78,4 +78,4 @@ private:
     QCheckBox _chkSign;
 };
 
-#endif // ANDROIDWIDGET_H
+#endif // ANDROIDPLATFORMWIDGET_H
