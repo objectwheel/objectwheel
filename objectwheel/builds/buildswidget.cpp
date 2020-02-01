@@ -15,9 +15,9 @@ BuildsWidget::BuildsWidget(QWidget *parent) : QWidget(parent)
 
     connect(_modulesWidget, &ModuleSelectionWidget::backClicked, this, &BuildsWidget::showPlatforms);
     connect(_modulesWidget, &ModuleSelectionWidget::done, this, &BuildsWidget::handleModuleSelection);
-    connect(_androidWidget, &AndroidPlatformWidget::backClicked, this, &BuildsWidget::showModules);
+//    connect(_androidWidget, &AndroidPlatformWidget::backClicked, this, &BuildsWidget::showModules);
     connect(_platformsWidget, &PlatformsWidget::platformSelected, this, &BuildsWidget::handlePlatformSelection);
-    connect(_androidWidget, &AndroidPlatformWidget::downloadBuild, this, &BuildsWidget::handleDownload);
+//    connect(_androidWidget, &AndroidPlatformWidget::downloadBuild, this, &BuildsWidget::handleDownload);
 //    connect(_downloadWidget, &DownloadWidget::done, this, &BuildsWidget::handleModuleSelection);
 
     _view = new View(this);
@@ -48,12 +48,12 @@ void BuildsWidget::handleModuleSelection()
 {
     switch (_target) {
         case OTargets::android_armeabi_v7a:
-            _androidWidget->setTarget("Android Armeabi v7a");
+//            _androidWidget->setTarget("Android Armeabi v7a");
             _view->show(Android);
             break;
 
         case OTargets::android_x86:
-            _androidWidget->setTarget("Android x86");
+//            _androidWidget->setTarget("Android x86");
             _view->show(Android);
             break;
         default:

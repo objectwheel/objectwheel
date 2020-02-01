@@ -2,6 +2,7 @@
 #define PLATFORMWIDGET_H
 
 #include <QWidget>
+#include <QCborMap>
 
 class PlatformWidget : public QWidget
 {
