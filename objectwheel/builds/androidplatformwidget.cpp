@@ -1,38 +1,66 @@
 #include <androidplatformwidget.h>
-#include <QHBoxLayout>
+#include <QBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpinBox>
+#include <QComboBox>
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(parent)
   , m_labelEdit(new QLineEdit(this))
+  , m_versionCodeSpin(new QSpinBox(this))
+  , m_versionNameEdit(new QLineEdit(this))
   , m_organizationEdit(new QLineEdit(this))
   , m_domainEdit(new QLineEdit(this))
-  , m_versionCodeSpin(new QSpinBox(this))
+  , m_packageEdit(new QLineEdit(this))
+  , m_screenOrientationCombo(new QComboBox(this))
+  , m_minSdkVersionCombo(new QComboBox(this))
+  , m_targetSdkVersionCombo(new QComboBox(this))
 {
-    auto m_labelLabel = new QLabel(tr("Label:"), this);
-    auto m_organizationLabel = new QLabel(tr("Organization:"), this);
-    auto m_domainLabel = new QLabel(tr("Domain:"), this);
-    auto m_versionCodeLabel = new QLabel(tr("Version:"), this);
+    auto labelLabel = new QLabel(tr("Label:"), this);
+    auto versionCodeLabel = new QLabel(tr("Version code:"), this);
+    auto versionNameLabel = new QLabel(tr("Version name:"), this);
+    auto organizationLabel = new QLabel(tr("Organization:"), this);
+    auto domainLabel = new QLabel(tr("Domain:"), this);
 
     auto generalGroupBox = new QGroupBox(tr("General"), this);
     auto generalLayout = new QGridLayout(generalGroupBox);
     generalLayout->setContentsMargins(8, 8, 8, 8);
     generalLayout->setSpacing(6);
-    generalLayout->addWidget(m_labelLabel, 0, 0);
+    generalLayout->addWidget(labelLabel, 0, 0);
     generalLayout->addWidget(m_labelEdit, 0, 1);
-    generalLayout->addWidget(m_organizationLabel, 1, 0);
-    generalLayout->addWidget(m_organizationEdit, 1, 1);
-    generalLayout->addWidget(m_domainLabel, 2, 0);
-    generalLayout->addWidget(m_domainEdit, 2, 1);
-    generalLayout->addWidget(m_versionCodeLabel, 3, 0);
-    generalLayout->addWidget(m_versionCodeSpin, 3, 1);
+    generalLayout->addWidget(versionCodeLabel, 1, 0);
+    generalLayout->addWidget(m_versionCodeSpin, 1, 1);
+    generalLayout->addWidget(versionNameLabel, 2, 0);
+    generalLayout->addWidget(m_versionNameEdit, 2, 1);
+    generalLayout->addWidget(organizationLabel, 3, 0);
+    generalLayout->addWidget(m_organizationEdit, 3, 1);
+    generalLayout->addWidget(domainLabel, 4, 0);
+    generalLayout->addWidget(m_domainEdit, 4, 1);
 
-    auto layout = new QHBoxLayout(this);
+    auto packagLabel = new QLabel(tr("Package name:"), this);
+    auto screenOrientationLabel = new QLabel(tr("Screen orientation:"), this);
+    auto minSdkVersionLabel = new QLabel(tr("Minimum required SDK:"), this);
+    auto targetSdkVersionLabel = new QLabel(tr("Target SDK:"), this);
+
+    auto androidSpesificGroupBox = new QGroupBox(tr("Android Spesific"), this);
+    auto androidSpesificLayout = new QGridLayout(androidSpesificGroupBox);
+    androidSpesificLayout->setContentsMargins(8, 8, 8, 8);
+    androidSpesificLayout->setSpacing(6);
+    androidSpesificLayout->addWidget(packagLabel, 0, 0);
+    androidSpesificLayout->addWidget(m_packageEdit, 0, 1);
+    androidSpesificLayout->addWidget(screenOrientationLabel, 1, 0);
+    androidSpesificLayout->addWidget(m_screenOrientationCombo, 1, 1);
+    androidSpesificLayout->addWidget(minSdkVersionLabel, 2, 0);
+    androidSpesificLayout->addWidget(m_minSdkVersionCombo, 2, 1);
+    androidSpesificLayout->addWidget(targetSdkVersionLabel, 3, 0);
+    androidSpesificLayout->addWidget(m_targetSdkVersionCombo, 3, 1);
+
+    auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
     layout->addWidget(generalGroupBox);
+    layout->addWidget(androidSpesificGroupBox);
 
 //    "label": "Ömer Göktaş",
 //    "versionCode": "5",

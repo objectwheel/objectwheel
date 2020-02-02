@@ -1,6 +1,5 @@
 #include <buildspane.h>
 #include <segmentedbar.h>
-#include <genericplatformwidget.h>
 #include <androidplatformwidget.h>
 #include <applicationstyle.h>
 #include <paintutils.h>
@@ -15,7 +14,6 @@ BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
   , m_platformLabel(new QLabel(this))
   , m_segmentedBar(new SegmentedBar(this))
   , m_stackedWidget(new QStackedWidget(this))
-  , m_genericWidget(new GenericPlatformWidget(this))
   , m_androidWidget(new AndroidPlatformWidget(this))
 {
     auto iconLabel = new QLabel(this);
@@ -51,9 +49,8 @@ BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
     f.setPixelSize(16);
     m_platformLabel->setFont(f);
 
-    m_stackedWidget->addWidget(m_genericWidget);
     m_stackedWidget->addWidget(m_androidWidget);
-    m_stackedWidget->setCurrentWidget(m_genericWidget);
+    m_stackedWidget->setCurrentWidget(m_androidWidget);
 
     ApplicationStyle::setButtonStyle(m_segmentedBar, ApplicationStyle::TexturedRounded);
     ApplicationStyle::setHighlightingDisabledForCheckedState(m_segmentedBar, true);
@@ -65,15 +62,10 @@ BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
     startAction->setShortcut(Qt::CTRL + Qt::Key_J);
     startAction->setToolTip(tr("Hide or show left panes"));
 
-    QAction* generalAction = m_segmentedBar->addAction(tr("General Settings"));
-    generalAction->setCheckable(true);
-    generalAction->setShortcut(Qt::CTRL + Qt::Key_K);
-    generalAction->setToolTip(tr("Hide or show bottom panes"));
-
-    QAction* platformAction = m_segmentedBar->addAction(tr("Platform Settings"));
-    platformAction->setCheckable(true);
-    platformAction->setShortcut(Qt::CTRL + Qt::Key_L);
-    platformAction->setToolTip(tr("Hide or show right panes"));
+    QAction* settingsAction = m_segmentedBar->addAction(tr("Settings"));
+    settingsAction->setCheckable(true);
+    settingsAction->setShortcut(Qt::CTRL + Qt::Key_L);
+    settingsAction->setToolTip(tr("Hide or show right panes"));
 
     QAction* downloadsAction = m_segmentedBar->addAction(tr("Downloads"));
     downloadsAction->setCheckable(true);
