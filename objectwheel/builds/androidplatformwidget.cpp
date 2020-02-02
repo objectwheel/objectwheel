@@ -5,6 +5,8 @@
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QComboBox>
+#include <QPushButton>
+#include <QListWidget>
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(parent)
   , m_labelEdit(new QLineEdit(this))
@@ -16,6 +18,13 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
   , m_screenOrientationCombo(new QComboBox(this))
   , m_minSdkVersionCombo(new QComboBox(this))
   , m_targetSdkVersionCombo(new QComboBox(this))
+  , m_iconPictureLabel(new QLabel(this))
+  , m_browseIconButton(new QPushButton(this))
+  , m_clearIconButton(new QPushButton(this))
+  , m_permissionCombo(new QComboBox(this))
+  , m_permissionList(new QListWidget(this))
+  , m_addPermissionButton(new QPushButton(this))
+  , m_removePermissionButton(new QPushButton(this))
 {
     auto labelLabel = new QLabel(tr("Label:"), this);
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
@@ -25,42 +34,83 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
 
     auto generalGroupBox = new QGroupBox(tr("General"), this);
     auto generalLayout = new QGridLayout(generalGroupBox);
-    generalLayout->setContentsMargins(8, 8, 8, 8);
     generalLayout->setSpacing(6);
-    generalLayout->addWidget(labelLabel, 0, 0);
-    generalLayout->addWidget(m_labelEdit, 0, 1);
-    generalLayout->addWidget(versionCodeLabel, 1, 0);
+    generalLayout->setContentsMargins(8, 8, 8, 8);
+    generalLayout->addWidget(labelLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    generalLayout->addWidget(m_labelEdit, 0, 1, 1, 2);
+    generalLayout->addWidget(versionCodeLabel, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     generalLayout->addWidget(m_versionCodeSpin, 1, 1);
-    generalLayout->addWidget(versionNameLabel, 2, 0);
-    generalLayout->addWidget(m_versionNameEdit, 2, 1);
-    generalLayout->addWidget(organizationLabel, 3, 0);
-    generalLayout->addWidget(m_organizationEdit, 3, 1);
-    generalLayout->addWidget(domainLabel, 4, 0);
-    generalLayout->addWidget(m_domainEdit, 4, 1);
+    generalLayout->addWidget(versionNameLabel, 2, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    generalLayout->addWidget(m_versionNameEdit, 2, 1, 1, 2);
+    generalLayout->addWidget(organizationLabel, 3, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    generalLayout->addWidget(m_organizationEdit, 3, 1, 1, 2);
+    generalLayout->addWidget(domainLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    generalLayout->addWidget(m_domainEdit, 4, 1, 1, 2);
 
     auto packagLabel = new QLabel(tr("Package name:"), this);
     auto screenOrientationLabel = new QLabel(tr("Screen orientation:"), this);
     auto minSdkVersionLabel = new QLabel(tr("Minimum required SDK:"), this);
     auto targetSdkVersionLabel = new QLabel(tr("Target SDK:"), this);
+    auto iconLabel = new QLabel(tr("Icon:"), this);
+    auto permissionLabel = new QLabel(tr("Permissions:"), this);
+
+    auto iconLayout = new QGridLayout;
+    iconLayout->setSpacing(4);
+    iconLayout->setContentsMargins(0, 0, 0, 0);
+    iconLayout->addWidget(m_iconPictureLabel, 0, 0, 2, 1);
+    iconLayout->addWidget(m_browseIconButton, 0, 1);
+    iconLayout->addWidget(m_clearIconButton, 1, 1);
+
+    auto permissionLayout = new QGridLayout;
+    permissionLayout->setSpacing(iconLayout->spacing());
+    permissionLayout->setContentsMargins(iconLayout->contentsMargins());
+    permissionLayout->addWidget(m_permissionCombo, 0, 0);
+    permissionLayout->addWidget(m_addPermissionButton, 0, 1);
+    permissionLayout->addWidget(m_permissionList, 1, 0, 2, 1);
+    permissionLayout->addWidget(m_removePermissionButton, 2, 1);
 
     auto androidSpesificGroupBox = new QGroupBox(tr("Android Spesific"), this);
     auto androidSpesificLayout = new QGridLayout(androidSpesificGroupBox);
-    androidSpesificLayout->setContentsMargins(8, 8, 8, 8);
-    androidSpesificLayout->setSpacing(6);
-    androidSpesificLayout->addWidget(packagLabel, 0, 0);
-    androidSpesificLayout->addWidget(m_packageEdit, 0, 1);
-    androidSpesificLayout->addWidget(screenOrientationLabel, 1, 0);
+    androidSpesificLayout->setSpacing(generalLayout->spacing());
+    androidSpesificLayout->setContentsMargins(generalLayout->contentsMargins());
+    androidSpesificLayout->addWidget(packagLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    androidSpesificLayout->addWidget(m_packageEdit, 0, 1, 1, 2);
+    androidSpesificLayout->addWidget(screenOrientationLabel, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_screenOrientationCombo, 1, 1);
-    androidSpesificLayout->addWidget(minSdkVersionLabel, 2, 0);
+    androidSpesificLayout->addWidget(minSdkVersionLabel, 2, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_minSdkVersionCombo, 2, 1);
-    androidSpesificLayout->addWidget(targetSdkVersionLabel, 3, 0);
+    androidSpesificLayout->addWidget(targetSdkVersionLabel, 3, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_targetSdkVersionCombo, 3, 1);
+    androidSpesificLayout->addWidget(iconLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    androidSpesificLayout->addLayout(iconLayout, 4, 1);
+    androidSpesificLayout->addWidget(permissionLabel, 5, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    androidSpesificLayout->addLayout(permissionLayout, 5, 1, 1, 2);
 
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
     layout->addWidget(generalGroupBox);
     layout->addWidget(androidSpesificGroupBox);
+
+    m_browseIconButton->setText(tr("Browse"));
+    m_clearIconButton->setText(tr("Clear"));
+    m_addPermissionButton->setText(tr("Add"));
+    m_removePermissionButton->setText(tr("Remove"));
+
+    m_browseIconButton->setIcon(QIcon(":/images/builds/browse.svg"));
+    m_clearIconButton->setIcon(QIcon(":/images/designer/clear.svg"));
+    m_addPermissionButton->setIcon(QIcon(":/images/designer/plus.svg"));
+    m_removePermissionButton->setIcon(QIcon(":/images/designer/minus.svg"));
+
+    int iconPictureSize = m_browseIconButton->sizeHint().height()
+            + iconLayout->spacing()
+            + m_clearIconButton->sizeHint().height();
+    m_iconPictureLabel->setFixedSize(iconPictureSize, iconPictureSize);
+    m_iconPictureLabel->setFrameShape(QFrame::StyledPanel);
+
+    int labelColMinSz = minSdkVersionLabel->sizeHint().width(); // Longest label's width
+    generalLayout->setColumnMinimumWidth(0, labelColMinSz);
+    androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
 
 //    "label": "Ömer Göktaş",
 //    "versionCode": "5",

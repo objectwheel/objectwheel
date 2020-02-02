@@ -28,14 +28,13 @@ BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
     layout->setSpacing(8);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(2, 1);
-    layout->setRowStretch(4, 1);
-    layout->setRowStretch(6, 1);
-    layout->setRowMinimumHeight(0, 20);
-    layout->addWidget(iconLabel, 1, 1, Qt::AlignHCenter);
-    layout->addWidget(titleLabel, 2, 1, Qt::AlignHCenter);
-    layout->addWidget(m_platformLabel, 3, 1, Qt::AlignHCenter);
-    layout->addWidget(scrollArea, 5, 1);
-    layout->addWidget(m_segmentedBar, 7, 1);
+    layout->setRowMinimumHeight(0, 15);
+    layout->addWidget(m_segmentedBar, 1, 1, Qt::AlignHCenter);
+    layout->setRowMinimumHeight(2, 15);
+    layout->addWidget(iconLabel, 3, 1, Qt::AlignHCenter);
+    layout->addWidget(titleLabel, 4, 1, Qt::AlignHCenter);
+    layout->addWidget(m_platformLabel, 5, 1, Qt::AlignHCenter);
+    layout->addWidget(scrollArea, 6, 1);
 
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"), QSize(60, 60), this));
