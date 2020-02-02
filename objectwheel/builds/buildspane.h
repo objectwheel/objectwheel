@@ -1,14 +1,14 @@
 #ifndef BUILDSPANE_H
 #define BUILDSPANE_H
 
-#include <QWidget>
+#include <QScrollArea>
 
 class QLabel;
 class SegmentedBar;
 class QStackedWidget;
 class AndroidPlatformWidget;
 
-class BuildsPane final : public QWidget
+class BuildsPane final : public QScrollArea
 {
     Q_OBJECT
     Q_DISABLE_COPY(BuildsPane)

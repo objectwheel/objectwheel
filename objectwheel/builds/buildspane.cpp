@@ -10,31 +10,29 @@
 #include <QAction>
 #include <QLabel>
 
-BuildsPane::BuildsPane(QWidget* parent) : QWidget(parent)
+BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
   , m_platformLabel(new QLabel(this))
   , m_segmentedBar(new SegmentedBar(this))
   , m_stackedWidget(new QStackedWidget(this))
   , m_androidWidget(new AndroidPlatformWidget(this))
 {
+    setWidgetResizable(true);
+    setWidget(new QWidget(this));
+    setFrameShape(QFrame::NoFrame);
+
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Objectwheel Cloud Builds"), this);
-    auto scrollArea = new QScrollArea(this);
-    scrollArea->setWidgetResizable(true);
-    scrollArea->setWidget(m_stackedWidget);
-    scrollArea->setFrameShape(QFrame::NoFrame);
 
-    auto layout = new QGridLayout(this);
-    layout->setContentsMargins(8, 8, 8, 8);
-    layout->setSpacing(8);
+    auto layout = new QGridLayout(widget());
+    layout->setContentsMargins(12, 12, 12, 12);
+    layout->setSpacing(12);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(2, 1);
-    layout->setRowMinimumHeight(0, 15);
-    layout->addWidget(m_segmentedBar, 1, 1, Qt::AlignHCenter);
-    layout->setRowMinimumHeight(2, 15);
-    layout->addWidget(iconLabel, 3, 1, Qt::AlignHCenter);
-    layout->addWidget(titleLabel, 4, 1, Qt::AlignHCenter);
-    layout->addWidget(m_platformLabel, 5, 1, Qt::AlignHCenter);
-    layout->addWidget(scrollArea, 6, 1);
+    layout->addWidget(m_segmentedBar, 0, 1, Qt::AlignHCenter);
+    layout->addWidget(iconLabel, 1, 1, Qt::AlignHCenter);
+    layout->addWidget(titleLabel, 2, 1, Qt::AlignHCenter);
+    layout->addWidget(m_platformLabel, 3, 1, Qt::AlignHCenter);
+    layout->addWidget(m_stackedWidget, 4, 1);
 
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"), QSize(60, 60), this));

@@ -9,6 +9,7 @@ class QSpinBox;
 class QComboBox;
 class QPushButton;
 class QListWidget;
+class QCheckBox;
 
 class AndroidPlatformWidget final : public PlatformWidget
 {
@@ -33,10 +34,21 @@ private:
     QLabel* m_iconPictureLabel;
     QPushButton* m_browseIconButton;
     QPushButton* m_clearIconButton;
+    QCheckBox* m_includePemissionsCheck;
     QComboBox* m_permissionCombo;
     QListWidget* m_permissionList;
     QPushButton* m_addPermissionButton;
     QPushButton* m_removePermissionButton;
+    QCheckBox* m_aabCheck;
+    QCheckBox* m_abiArmeabiV7aCheck;
+    QCheckBox* m_abiArm64V8aCheck;
+    QCheckBox* m_abiX86Check;
+    QCheckBox* m_abiX8664Check;
+    QCheckBox* m_includeQtModulesCheck;
+    QComboBox* m_qtModuleCombo;
+    QListWidget* m_qtModuleList;
+    QPushButton* m_addQtModuleButton;
+    QPushButton* m_removeQtModuleButton;
 };
 
 #endif // ANDROIDPLATFORMWIDGET_H

@@ -7,6 +7,9 @@
 #include <QComboBox>
 #include <QPushButton>
 #include <QListWidget>
+#include <QCheckBox>
+
+// TODO: Disable wheel events for all the widgets from spin boxes to comboboxes
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(parent)
   , m_labelEdit(new QLineEdit(this))
@@ -21,10 +24,21 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
   , m_iconPictureLabel(new QLabel(this))
   , m_browseIconButton(new QPushButton(this))
   , m_clearIconButton(new QPushButton(this))
+  , m_includePemissionsCheck(new QCheckBox(this))
   , m_permissionCombo(new QComboBox(this))
   , m_permissionList(new QListWidget(this))
   , m_addPermissionButton(new QPushButton(this))
   , m_removePermissionButton(new QPushButton(this))
+  , m_aabCheck(new QCheckBox(this))
+  , m_abiArmeabiV7aCheck(new QCheckBox(this))
+  , m_abiArm64V8aCheck(new QCheckBox(this))
+  , m_abiX86Check(new QCheckBox(this))
+  , m_abiX8664Check(new QCheckBox(this))
+  , m_includeQtModulesCheck(new QCheckBox(this))
+  , m_qtModuleCombo(new QComboBox(this))
+  , m_qtModuleList(new QListWidget(this))
+  , m_addQtModuleButton(new QPushButton(this))
+  , m_removeQtModuleButton(new QPushButton(this))
 {
     auto labelLabel = new QLabel(tr("Label:"), this);
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
@@ -46,13 +60,16 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     generalLayout->addWidget(m_organizationEdit, 3, 1, 1, 2);
     generalLayout->addWidget(domainLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     generalLayout->addWidget(m_domainEdit, 4, 1, 1, 2);
+    generalLayout->setColumnStretch(1, 1);
+    generalLayout->setColumnStretch(2, 1);
 
-    auto packagLabel = new QLabel(tr("Package name:"), this);
+    auto packageNameLabel = new QLabel(tr("Package name:"), this);
     auto screenOrientationLabel = new QLabel(tr("Screen orientation:"), this);
     auto minSdkVersionLabel = new QLabel(tr("Minimum required SDK:"), this);
     auto targetSdkVersionLabel = new QLabel(tr("Target SDK:"), this);
     auto iconLabel = new QLabel(tr("Icon:"), this);
     auto permissionLabel = new QLabel(tr("Permissions:"), this);
+    auto autoDetectPemissionsCheck = new QCheckBox(tr("Automatically detected"), this);
 
     auto iconLayout = new QGridLayout;
     iconLayout->setSpacing(4);
@@ -64,16 +81,18 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     auto permissionLayout = new QGridLayout;
     permissionLayout->setSpacing(iconLayout->spacing());
     permissionLayout->setContentsMargins(iconLayout->contentsMargins());
-    permissionLayout->addWidget(m_permissionCombo, 0, 0);
-    permissionLayout->addWidget(m_addPermissionButton, 0, 1);
-    permissionLayout->addWidget(m_permissionList, 1, 0, 2, 1);
-    permissionLayout->addWidget(m_removePermissionButton, 2, 1);
+    permissionLayout->addWidget(autoDetectPemissionsCheck, 0, 0);
+    permissionLayout->addWidget(m_includePemissionsCheck, 1, 0);
+    permissionLayout->addWidget(m_permissionCombo, 2, 0);
+    permissionLayout->addWidget(m_addPermissionButton, 2, 1);
+    permissionLayout->addWidget(m_permissionList, 3, 0, 2, 1);
+    permissionLayout->addWidget(m_removePermissionButton, 3, 1);
 
     auto androidSpesificGroupBox = new QGroupBox(tr("Android Spesific"), this);
     auto androidSpesificLayout = new QGridLayout(androidSpesificGroupBox);
     androidSpesificLayout->setSpacing(generalLayout->spacing());
     androidSpesificLayout->setContentsMargins(generalLayout->contentsMargins());
-    androidSpesificLayout->addWidget(packagLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    androidSpesificLayout->addWidget(packageNameLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_packageEdit, 0, 1, 1, 2);
     androidSpesificLayout->addWidget(screenOrientationLabel, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_screenOrientationCombo, 1, 1);
@@ -85,22 +104,77 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     androidSpesificLayout->addLayout(iconLayout, 4, 1);
     androidSpesificLayout->addWidget(permissionLabel, 5, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addLayout(permissionLayout, 5, 1, 1, 2);
+    androidSpesificLayout->setColumnStretch(1, 1);
+    androidSpesificLayout->setColumnStretch(2, 1);
+
+    auto aabLabel = new QLabel(tr("Android App Bundle:"), this);
+    auto abisLabel = new QLabel(tr("Build ABIs:"), this);
+    auto qtModulesLabel = new QLabel(tr("Qt modules:"), this);
+    auto autoDetectQtModulesCheck = new QCheckBox(tr("Automatically detected"), this);
+
+    auto abisLayout = new QVBoxLayout;
+    abisLayout->setSpacing(0);
+    abisLayout->setContentsMargins(iconLayout->contentsMargins());
+    abisLayout->addWidget(m_abiArmeabiV7aCheck);
+    abisLayout->addWidget(m_abiArm64V8aCheck);
+    abisLayout->addWidget(m_abiX86Check);
+    abisLayout->addWidget(m_abiX8664Check);
+
+    auto qtModuleLayout = new QGridLayout;
+    qtModuleLayout->setSpacing(iconLayout->spacing());
+    qtModuleLayout->setContentsMargins(iconLayout->contentsMargins());
+    qtModuleLayout->addWidget(autoDetectQtModulesCheck, 0, 0);
+    qtModuleLayout->addWidget(m_includeQtModulesCheck, 1, 0);
+    qtModuleLayout->addWidget(m_qtModuleCombo, 2, 0);
+    qtModuleLayout->addWidget(m_addQtModuleButton, 2, 1);
+    qtModuleLayout->addWidget(m_qtModuleList, 3, 0, 2, 1);
+    qtModuleLayout->addWidget(m_removeQtModuleButton, 3, 1);
+
+    auto buildingGroupBox = new QGroupBox(tr("Building"), this);
+    auto buildingLayout = new QGridLayout(buildingGroupBox);
+    buildingLayout->setSpacing(generalLayout->spacing());
+    buildingLayout->setContentsMargins(generalLayout->contentsMargins());
+    buildingLayout->addWidget(aabLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    buildingLayout->addWidget(m_aabCheck, 0, 1, 1, 2);
+    buildingLayout->addWidget(abisLabel, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    buildingLayout->addLayout(abisLayout, 1, 1, 1, 2);
+    buildingLayout->addWidget(qtModulesLabel, 2, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    buildingLayout->addLayout(qtModuleLayout, 2, 1, 1, 2);
+    buildingLayout->setColumnStretch(1, 1);
+    buildingLayout->setColumnStretch(2, 1);
 
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
     layout->addWidget(generalGroupBox);
     layout->addWidget(androidSpesificGroupBox);
+    layout->addWidget(buildingGroupBox);
+
+    autoDetectPemissionsCheck->setChecked(true);
+    autoDetectQtModulesCheck->setChecked(true);
+    autoDetectPemissionsCheck->setEnabled(false);
+    autoDetectQtModulesCheck->setEnabled(false);
 
     m_browseIconButton->setText(tr("Browse"));
     m_clearIconButton->setText(tr("Clear"));
     m_addPermissionButton->setText(tr("Add"));
     m_removePermissionButton->setText(tr("Remove"));
+    m_addQtModuleButton->setText(tr("Add"));
+    m_removeQtModuleButton->setText(tr("Remove"));
+    m_aabCheck->setText(tr("Build AAB package instead of APK"));
+    m_abiArmeabiV7aCheck->setText(tr("armeabi-v7a"));
+    m_abiArm64V8aCheck->setText(tr("arm64-v8a"));
+    m_abiX86Check->setText(tr("x86"));
+    m_abiX8664Check->setText(tr("x86_64"));
+    m_includeQtModulesCheck->setText(tr("Include manual additions below too:"));
+    m_includePemissionsCheck->setText(tr("Include manual additions below too:"));
 
     m_browseIconButton->setIcon(QIcon(":/images/builds/browse.svg"));
     m_clearIconButton->setIcon(QIcon(":/images/designer/clear.svg"));
     m_addPermissionButton->setIcon(QIcon(":/images/designer/plus.svg"));
     m_removePermissionButton->setIcon(QIcon(":/images/designer/minus.svg"));
+    m_addQtModuleButton->setIcon(QIcon(":/images/designer/plus.svg"));
+    m_removeQtModuleButton->setIcon(QIcon(":/images/designer/minus.svg"));
 
     int iconPictureSize = m_browseIconButton->sizeHint().height()
             + iconLayout->spacing()
@@ -111,6 +185,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     int labelColMinSz = minSdkVersionLabel->sizeHint().width(); // Longest label's width
     generalLayout->setColumnMinimumWidth(0, labelColMinSz);
     androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
+    buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
 
 //    "label": "Ömer Göktaş",
 //    "versionCode": "5",
