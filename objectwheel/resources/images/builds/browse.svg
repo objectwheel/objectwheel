@@ -3,18 +3,20 @@
 <svg version="1.1" id="katman_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#DBB065;}
-	.st1{fill:#967A44;}
-	.st2{fill:#F5CE85;}
-	.st3{fill:#788B9C;}
-	.st4{fill:#D1EDFF;}
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#788B9C;}
+	.st2{fill:#D6E3ED;}
+	.st3{fill:#D1EDFF;}
 </style>
-<path class="st0" d="M0.5,13.5v-12h4.293l2,2H15.5v10H0.5z"/>
-<path class="st1" d="M4.586,2l1.707,1.707L6.586,4H7h8v9H1V2H4.586 M5,1H0v13h16V3H7L5,1L5,1z"/>
-<path class="st2" d="M0.5,14.5v-10h4.618l2-1H15.5v11H0.5z"/>
-<path class="st1" d="M15,4v10H1V5h4h0.236l0.211-0.106L7.236,4H15 M16,3H7L5,4H0v11h16V3L16,3z"/>
-<path class="st3" d="M7.917,7.983l-3.7,3.6c-0.4,0.4-0.4,0.9,0,1.3l0,0c0.4,0.4,0.9,0.4,1.3,0l3.6-3.8L7.917,7.983z"/>
-<path class="st4" d="M8.5,5.5c-1.657,0-3,1.343-3,3s1.343,3,3,3s3-1.343,3-3S10.157,5.5,8.5,5.5z"/>
-<path class="st3" d="M8.5,6C9.9,6,11,7.1,11,8.5S9.9,11,8.5,11S6,9.9,6,8.5S7.1,6,8.5,6 M8.5,5C6.6,5,5,6.6,5,8.5S6.6,12,8.5,12
-	S12,10.4,12,8.5S10.4,5,8.5,5L8.5,5z"/>
+<path class="st0" d="M2.5,14.5v-14h7.4l3.6,3.7v10.3H2.5z"/>
+<path class="st1" d="M9.7,1L13,4.4V14H3V1H9.7 M10.1,0H2v15h12V4L10.1,0L10.1,0z"/>
+<path class="st0" d="M9.5,4.5v-4h0.3l3.7,3.7v0.3H9.5z"/>
+<path class="st1" d="M10,1.4L12.6,4H10V1.4 M10,0H9v5h5V4L10,0L10,0z"/>
+<path class="st2" d="M13.4,7.9L13,7.5V14H7.6l0.2,0.1l0.8,0.4L8.7,15H13h1v-1V7.8L13.4,7.9z"/>
+<g>
+	<path class="st1" d="M10.9,12l3.6,3.7c0.4,0.4,0.9,0.4,1.3,0l0,0c0.4-0.4,0.4-0.9,0-1.3L12,10.8L10.9,12z"/>
+	<path class="st3" d="M8.4,11.4c0,1.7,1.3,3,3,3s3-1.3,3-3s-1.3-3-3-3S8.4,9.8,8.4,11.4z"/>
+	<path class="st1" d="M8.9,11.4c0-1.4,1.1-2.5,2.5-2.5s2.5,1.1,2.5,2.5s-1.1,2.5-2.5,2.5S8.9,12.8,8.9,11.4 M7.9,11.4
+		c0,1.9,1.6,3.5,3.5,3.5s3.5-1.6,3.5-3.5s-1.6-3.5-3.5-3.5S7.9,9.5,7.9,11.4L7.9,11.4z"/>
+</g>
 </svg>

@@ -1,4 +1,6 @@
 #include <androidplatformwidget.h>
+#include <utilityfunctions.h>
+
 #include <QBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
@@ -8,6 +10,8 @@
 #include <QPushButton>
 #include <QListWidget>
 #include <QCheckBox>
+#include <QToolButton>
+#include <QRadioButton>
 
 // TODO: Disable wheel events for all the widgets from spin boxes to comboboxes
 
@@ -39,6 +43,17 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
   , m_qtModuleList(new QListWidget(this))
   , m_addQtModuleButton(new QPushButton(this))
   , m_removeQtModuleButton(new QPushButton(this))
+  , m_signingDisabled(new QRadioButton(this))
+  , m_signingEnabled(new QRadioButton(this))
+  , m_keystorePathEdit(new QLineEdit(this))
+  , m_newKeystoreButton(new QPushButton(this))
+  , m_browseKeystoreButton(new QPushButton(this))
+  , m_clearKeystoreButton(new QPushButton(this))
+  , m_keystorePasswordEdit(new QLineEdit(this))
+  , m_showKeystorePasswordButton(new QToolButton(this))
+  , m_keyAliasCombo(new QComboBox(this))
+  , m_keyPasswordEdit(new QLineEdit(this))
+  , m_showKeyPasswordButton(new QToolButton(this))
 {
     auto labelLabel = new QLabel(tr("Label:"), this);
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
@@ -143,17 +158,72 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     buildingLayout->setColumnStretch(1, 1);
     buildingLayout->setColumnStretch(2, 1);
 
+    auto statusLabel = new QLabel(tr("Status:"), this);
+    auto keystorePathLabel = new QLabel(tr("Key store path:"), this);
+    auto keystorePasswordLabel = new QLabel(tr("Key store password:"), this);
+    auto keyAliasLabel = new QLabel(tr("Key alias:"), this);
+    auto keyPasswordLabel = new QLabel(tr("Key password:"), this);
+
+    auto statusLayout = new QHBoxLayout;
+    statusLayout->setSpacing(iconLayout->spacing());
+    statusLayout->setContentsMargins(iconLayout->contentsMargins());
+    statusLayout->addWidget(m_signingDisabled);
+    statusLayout->addWidget(m_signingEnabled);
+    statusLayout->addStretch();
+
+    auto keystorePathLayout = new QGridLayout;
+    keystorePathLayout->setSpacing(iconLayout->spacing());
+    keystorePathLayout->setContentsMargins(iconLayout->contentsMargins());
+    keystorePathLayout->addWidget(m_keystorePathEdit, 0, 0, 1, 4);
+    keystorePathLayout->addWidget(m_newKeystoreButton, 1, 1);
+    keystorePathLayout->addWidget(m_browseKeystoreButton, 1, 2);
+    keystorePathLayout->addWidget(m_clearKeystoreButton, 1, 3);
+    keystorePathLayout->setColumnStretch(0, 1);
+
+    auto keystorePasswordLayout = new QHBoxLayout;
+    keystorePasswordLayout->setSpacing(iconLayout->spacing());
+    keystorePasswordLayout->setContentsMargins(iconLayout->contentsMargins());
+    keystorePasswordLayout->addWidget(m_keystorePasswordEdit);
+    keystorePasswordLayout->addWidget(m_showKeystorePasswordButton);
+
+    auto keyPasswordLayout = new QHBoxLayout;
+    keyPasswordLayout->setSpacing(iconLayout->spacing());
+    keyPasswordLayout->setContentsMargins(iconLayout->contentsMargins());
+    keyPasswordLayout->addWidget(m_keyPasswordEdit);
+    keyPasswordLayout->addWidget(m_showKeyPasswordButton);
+
+    auto signingGroupBox = new QGroupBox(tr("Signing"), this);
+    auto signingLayout = new QGridLayout(signingGroupBox);
+    signingLayout->setSpacing(generalLayout->spacing());
+    signingLayout->setContentsMargins(generalLayout->contentsMargins());
+    signingLayout->addWidget(statusLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    signingLayout->addLayout(statusLayout, 0, 1, 1, 2);
+    signingLayout->addWidget(keystorePathLabel, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    signingLayout->addLayout(keystorePathLayout, 1, 1, 1, 2);
+    signingLayout->addWidget(keystorePasswordLabel, 2, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    signingLayout->addLayout(keystorePasswordLayout, 2, 1, 1, 2);
+    signingLayout->addWidget(keyAliasLabel, 3, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    signingLayout->addWidget(m_keyAliasCombo, 3, 1, 1, 2);
+    signingLayout->addWidget(keyPasswordLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    signingLayout->addLayout(keyPasswordLayout, 4, 1, 1, 2);
+    signingLayout->setColumnStretch(1, 1);
+    signingLayout->setColumnStretch(2, 1);
+
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
     layout->addWidget(generalGroupBox);
     layout->addWidget(androidSpesificGroupBox);
     layout->addWidget(buildingGroupBox);
+    layout->addWidget(signingGroupBox);
 
     autoDetectPemissionsCheck->setChecked(true);
     autoDetectQtModulesCheck->setChecked(true);
     autoDetectPemissionsCheck->setEnabled(false);
     autoDetectQtModulesCheck->setEnabled(false);
+    m_keystorePathEdit->setEnabled(false);
+    m_showKeystorePasswordButton->setCheckable(true);
+    m_showKeyPasswordButton->setCheckable(true);
 
     m_browseIconButton->setText(tr("Browse"));
     m_clearIconButton->setText(tr("Clear"));
@@ -168,6 +238,11 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     m_abiX8664Check->setText(tr("x86_64"));
     m_includeQtModulesCheck->setText(tr("Include manual additions below too:"));
     m_includePemissionsCheck->setText(tr("Include manual additions below too:"));
+    m_signingDisabled->setText(tr("Disabled"));
+    m_signingEnabled->setText(tr("Enabled"));
+    m_newKeystoreButton->setText(tr("New"));
+    m_browseKeystoreButton->setText(tr("Browse"));
+    m_clearKeystoreButton->setText(tr("Clear"));
 
     m_browseIconButton->setIcon(QIcon(":/images/builds/browse.svg"));
     m_clearIconButton->setIcon(QIcon(":/images/designer/clear.svg"));
@@ -175,6 +250,17 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     m_removePermissionButton->setIcon(QIcon(":/images/designer/minus.svg"));
     m_addQtModuleButton->setIcon(QIcon(":/images/designer/plus.svg"));
     m_removeQtModuleButton->setIcon(QIcon(":/images/designer/minus.svg"));
+    m_newKeystoreButton->setIcon(QIcon(":/images/designer/new-file.svg"));
+    m_browseKeystoreButton->setIcon(QIcon(":/images/builds/browse.svg"));
+    m_clearKeystoreButton->setIcon(QIcon(":/images/designer/clear.svg"));
+    m_showKeystorePasswordButton->setIcon(QIcon(":/images/builds/show.svg"));
+    m_showKeyPasswordButton->setIcon(QIcon(":/images/builds/show.svg"));
+
+    UtilityFunctions::adjustFontWeight(m_keyPasswordEdit, QFont::Black);
+    UtilityFunctions::adjustFontWeight(m_keystorePasswordEdit, QFont::Black);
+
+    m_keyPasswordEdit->setEchoMode(QLineEdit::Password);
+    m_keystorePasswordEdit->setEchoMode(QLineEdit::Password);
 
     int iconPictureSize = m_browseIconButton->sizeHint().height()
             + iconLayout->spacing()
@@ -186,6 +272,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     generalLayout->setColumnMinimumWidth(0, labelColMinSz);
     androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
     buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
+    signingLayout->setColumnMinimumWidth(0, labelColMinSz);
 
 //    "label": "Ömer Göktaş",
 //    "versionCode": "5",

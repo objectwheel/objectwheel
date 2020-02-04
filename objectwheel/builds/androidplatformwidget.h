@@ -10,6 +10,8 @@ class QComboBox;
 class QPushButton;
 class QListWidget;
 class QCheckBox;
+class QRadioButton;
+class QToolButton;
 
 class AndroidPlatformWidget final : public PlatformWidget
 {
@@ -49,6 +51,17 @@ private:
     QListWidget* m_qtModuleList;
     QPushButton* m_addQtModuleButton;
     QPushButton* m_removeQtModuleButton;
+    QRadioButton* m_signingDisabled;
+    QRadioButton* m_signingEnabled;
+    QLineEdit* m_keystorePathEdit;
+    QPushButton* m_newKeystoreButton;
+    QPushButton* m_browseKeystoreButton;
+    QPushButton* m_clearKeystoreButton;
+    QLineEdit* m_keystorePasswordEdit;
+    QToolButton* m_showKeystorePasswordButton;
+    QComboBox* m_keyAliasCombo;
+    QLineEdit* m_keyPasswordEdit;
+    QToolButton* m_showKeyPasswordButton;
 };
 
 #endif // ANDROIDPLATFORMWIDGET_H

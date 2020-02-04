@@ -145,5 +145,6 @@
         <file>images/splash/splash@3x.png</file>
         <file>images/builds/gift.svg</file>
         <file>images/builds/browse.svg</file>
+        <file>images/builds/show.svg</file>
     </qresource>
 </RCC>
