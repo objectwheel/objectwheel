@@ -38,7 +38,6 @@ int main(int argc, char *argv[])
 
     /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
-    QApplication::setStartDragDistance(8);
 
 #ifdef Q_OS_MACOS // Show/hide dock icon
     if (argc > 1 && argv[1] == QString("capture"))

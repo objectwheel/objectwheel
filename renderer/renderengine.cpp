@@ -18,7 +18,6 @@
 #include <QQuickView>
 #include <QPainter>
 #include <QTimer>
-#include <QApplication>
 
 namespace {
 qreal g_progress = 0;
