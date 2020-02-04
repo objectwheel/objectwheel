@@ -54,6 +54,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
   , m_keyAliasCombo(new QComboBox(this))
   , m_keyPasswordEdit(new QLineEdit(this))
   , m_showKeyPasswordButton(new QToolButton(this))
+  , m_sameAsKeystorePasswordCheck(new QCheckBox(this))
 {
     auto labelLabel = new QLabel(tr("Label:"), this);
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
@@ -93,15 +94,20 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     iconLayout->addWidget(m_browseIconButton, 0, 1);
     iconLayout->addWidget(m_clearIconButton, 1, 1);
 
+    auto permDetectionLayout = new QVBoxLayout;
+    permDetectionLayout->setSpacing(0);
+    permDetectionLayout->setContentsMargins(iconLayout->contentsMargins());
+    permDetectionLayout->addWidget(autoDetectPemissionsCheck);
+    permDetectionLayout->addWidget(m_includePemissionsCheck);
+
     auto permissionLayout = new QGridLayout;
     permissionLayout->setSpacing(iconLayout->spacing());
     permissionLayout->setContentsMargins(iconLayout->contentsMargins());
-    permissionLayout->addWidget(autoDetectPemissionsCheck, 0, 0);
-    permissionLayout->addWidget(m_includePemissionsCheck, 1, 0);
-    permissionLayout->addWidget(m_permissionCombo, 2, 0);
-    permissionLayout->addWidget(m_addPermissionButton, 2, 1);
-    permissionLayout->addWidget(m_permissionList, 3, 0, 2, 1);
-    permissionLayout->addWidget(m_removePermissionButton, 3, 1);
+    permissionLayout->addLayout(permDetectionLayout, 0, 0);
+    permissionLayout->addWidget(m_permissionCombo, 1, 0);
+    permissionLayout->addWidget(m_addPermissionButton, 1, 1);
+    permissionLayout->addWidget(m_permissionList, 2, 0, 2, 1);
+    permissionLayout->addWidget(m_removePermissionButton, 2, 1);
 
     auto androidSpesificGroupBox = new QGroupBox(tr("Android Spesific"), this);
     auto androidSpesificLayout = new QGridLayout(androidSpesificGroupBox);
@@ -135,15 +141,20 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     abisLayout->addWidget(m_abiX86Check);
     abisLayout->addWidget(m_abiX8664Check);
 
+    auto qtDetectionLayout = new QVBoxLayout;
+    qtDetectionLayout->setSpacing(0);
+    qtDetectionLayout->setContentsMargins(iconLayout->contentsMargins());
+    qtDetectionLayout->addWidget(autoDetectQtModulesCheck);
+    qtDetectionLayout->addWidget(m_includeQtModulesCheck);
+
     auto qtModuleLayout = new QGridLayout;
     qtModuleLayout->setSpacing(iconLayout->spacing());
     qtModuleLayout->setContentsMargins(iconLayout->contentsMargins());
-    qtModuleLayout->addWidget(autoDetectQtModulesCheck, 0, 0);
-    qtModuleLayout->addWidget(m_includeQtModulesCheck, 1, 0);
-    qtModuleLayout->addWidget(m_qtModuleCombo, 2, 0);
-    qtModuleLayout->addWidget(m_addQtModuleButton, 2, 1);
-    qtModuleLayout->addWidget(m_qtModuleList, 3, 0, 2, 1);
-    qtModuleLayout->addWidget(m_removeQtModuleButton, 3, 1);
+    qtModuleLayout->addLayout(qtDetectionLayout, 0, 0);
+    qtModuleLayout->addWidget(m_qtModuleCombo, 1, 0);
+    qtModuleLayout->addWidget(m_addQtModuleButton, 1, 1);
+    qtModuleLayout->addWidget(m_qtModuleList, 2, 0, 2, 1);
+    qtModuleLayout->addWidget(m_removeQtModuleButton, 2, 1);
 
     auto buildingGroupBox = new QGroupBox(tr("Building"), this);
     auto buildingLayout = new QGridLayout(buildingGroupBox);
@@ -175,10 +186,10 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     keystorePathLayout->setSpacing(iconLayout->spacing());
     keystorePathLayout->setContentsMargins(iconLayout->contentsMargins());
     keystorePathLayout->addWidget(m_keystorePathEdit, 0, 0, 1, 4);
-    keystorePathLayout->addWidget(m_newKeystoreButton, 1, 1);
-    keystorePathLayout->addWidget(m_browseKeystoreButton, 1, 2);
-    keystorePathLayout->addWidget(m_clearKeystoreButton, 1, 3);
-    keystorePathLayout->setColumnStretch(0, 1);
+    keystorePathLayout->addWidget(m_newKeystoreButton, 1, 0);
+    keystorePathLayout->addWidget(m_browseKeystoreButton, 1, 1);
+    keystorePathLayout->addWidget(m_clearKeystoreButton, 1, 2);
+    keystorePathLayout->setColumnStretch(3, 1);
 
     auto keystorePasswordLayout = new QHBoxLayout;
     keystorePasswordLayout->setSpacing(iconLayout->spacing());
@@ -186,11 +197,12 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     keystorePasswordLayout->addWidget(m_keystorePasswordEdit);
     keystorePasswordLayout->addWidget(m_showKeystorePasswordButton);
 
-    auto keyPasswordLayout = new QHBoxLayout;
+    auto keyPasswordLayout = new QGridLayout;
     keyPasswordLayout->setSpacing(iconLayout->spacing());
     keyPasswordLayout->setContentsMargins(iconLayout->contentsMargins());
-    keyPasswordLayout->addWidget(m_keyPasswordEdit);
-    keyPasswordLayout->addWidget(m_showKeyPasswordButton);
+    keyPasswordLayout->addWidget(m_keyPasswordEdit, 0, 0);
+    keyPasswordLayout->addWidget(m_showKeyPasswordButton, 0, 1);
+    keyPasswordLayout->addWidget(m_sameAsKeystorePasswordCheck, 1, 0);
 
     auto signingGroupBox = new QGroupBox(tr("Signing"), this);
     auto signingLayout = new QGridLayout(signingGroupBox);
@@ -216,6 +228,16 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     layout->addWidget(androidSpesificGroupBox);
     layout->addWidget(buildingGroupBox);
     layout->addWidget(signingGroupBox);
+
+    m_signingDisabled->setCursor(Qt::PointingHandCursor);
+    m_signingEnabled->setCursor(Qt::PointingHandCursor);
+    m_newKeystoreButton->setCursor(Qt::PointingHandCursor);
+    m_browseKeystoreButton->setCursor(Qt::PointingHandCursor);
+    m_clearKeystoreButton->setCursor(Qt::PointingHandCursor);
+    m_keyAliasCombo->setCursor(Qt::PointingHandCursor);
+    m_showKeystorePasswordButton->setCursor(Qt::PointingHandCursor);
+    m_showKeyPasswordButton->setCursor(Qt::PointingHandCursor);
+    m_sameAsKeystorePasswordCheck->setCursor(Qt::PointingHandCursor);
 
     autoDetectPemissionsCheck->setChecked(true);
     autoDetectQtModulesCheck->setChecked(true);
@@ -243,6 +265,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     m_newKeystoreButton->setText(tr("New"));
     m_browseKeystoreButton->setText(tr("Browse"));
     m_clearKeystoreButton->setText(tr("Clear"));
+    m_sameAsKeystorePasswordCheck->setText(tr("Same as key store password"));
 
     m_browseIconButton->setIcon(QIcon(":/images/builds/browse.svg"));
     m_clearIconButton->setIcon(QIcon(":/images/designer/clear.svg"));
@@ -259,9 +282,6 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     UtilityFunctions::adjustFontWeight(m_keyPasswordEdit, QFont::Black);
     UtilityFunctions::adjustFontWeight(m_keystorePasswordEdit, QFont::Black);
 
-    m_keyPasswordEdit->setEchoMode(QLineEdit::Password);
-    m_keystorePasswordEdit->setEchoMode(QLineEdit::Password);
-
     int iconPictureSize = m_browseIconButton->sizeHint().height()
             + iconLayout->spacing()
             + m_clearIconButton->sizeHint().height();
@@ -273,6 +293,21 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
     buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
     signingLayout->setColumnMinimumWidth(0, labelColMinSz);
+
+
+    m_signingDisabled->setChecked(true);
+    m_keystorePathEdit->clear();
+    m_keystorePasswordEdit->clear();
+    m_keyAliasCombo->clear();
+    m_keyPasswordEdit->clear();
+    m_keyPasswordEdit->setEchoMode(QLineEdit::Password);
+    m_keystorePasswordEdit->setEchoMode(QLineEdit::Password);
+    m_keyPasswordEdit->setEnabled(false);
+    m_showKeyPasswordButton->setEnabled(false);
+    m_showKeystorePasswordButton->setChecked(false);
+    m_showKeyPasswordButton->setChecked(false);
+    m_sameAsKeystorePasswordCheck->setChecked(true);
+
 
 //    "label": "Ömer Göktaş",
 //    "versionCode": "5",

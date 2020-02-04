@@ -62,6 +62,7 @@ private:
     QComboBox* m_keyAliasCombo;
     QLineEdit* m_keyPasswordEdit;
     QToolButton* m_showKeyPasswordButton;
+    QCheckBox* m_sameAsKeystorePasswordCheck;
 };
 
 #endif // ANDROIDPLATFORMWIDGET_H
