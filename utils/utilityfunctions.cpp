@@ -738,4 +738,12 @@ QString shortcutSymbol(const QKeySequence& seq)
             .arg(seq.toString(QKeySequence::NativeText));
 }
 
+QByteArray resourceData(const QString& path)
+{
+    QFile file(path);
+    if (!file.open(QFile::ReadOnly))
+        return QByteArray();
+    return file.readAll();
+}
+
 } // UtilityFunctions

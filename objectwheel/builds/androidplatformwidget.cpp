@@ -12,8 +12,51 @@
 #include <QCheckBox>
 #include <QToolButton>
 #include <QRadioButton>
+#include <QTextStream>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 // TODO: Disable wheel events for all the widgets from spin boxes to comboboxes
+// TODO: Add a "description" label under icon like "Enter final application details below right
+//       before requesting a cloud build for your project"
+
+static QStringList correctModuleList(QStringList list)
+{
+    QStringList removed;
+    QMutableListIterator<QString> i(list);
+    while (i.hasNext()) {
+        const QString& module = i.next();
+        if (module.startsWith(QLatin1String("Qt 3D"))) {
+            removed.append(module);
+            i.remove();
+        }
+    }
+    list.append(removed);
+    return list;
+}
+
+static QStringList androidPermissionList()
+{
+    static QStringList androidPermissions;
+    if (androidPermissions.isEmpty()) {
+        QTextStream stream(UtilityFunctions::resourceData(QLatin1String(":/other/AndroidPermissionList.txt")));
+        QString line;
+        while (stream.readLineInto(&line))
+            androidPermissions.append(line);
+    }
+    return androidPermissions;
+}
+
+static QJsonObject androidModuleList()
+{
+    static QJsonObject androidModules;
+    if (androidModules.isEmpty()) {
+        const QJsonDocument& document = QJsonDocument::fromJson(
+                    UtilityFunctions::resourceData(QLatin1String(":/other/QtModuleListAndroid.json")));
+        androidModules = document.object();
+    }
+    return androidModules;
+}
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(parent)
   , m_labelEdit(new QLineEdit(this))
@@ -56,7 +99,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
   , m_showKeyPasswordButton(new QToolButton(this))
   , m_sameAsKeystorePasswordCheck(new QCheckBox(this))
 {
-    auto labelLabel = new QLabel(tr("Label:"), this);
+    auto labelLabel = new QLabel(tr("Name:"), this);
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
     auto versionNameLabel = new QLabel(tr("Version name:"), this);
     auto organizationLabel = new QLabel(tr("Organization:"), this);
@@ -131,7 +174,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     auto aabLabel = new QLabel(tr("Android App Bundle:"), this);
     auto abisLabel = new QLabel(tr("Build ABIs:"), this);
     auto qtModulesLabel = new QLabel(tr("Qt modules:"), this);
-    auto autoDetectQtModulesCheck = new QCheckBox(tr("Automatically detected"), this);
+    auto autoDetectQtModulesCheck = new QCheckBox(tr("Automatically detected based on Qml imports"), this);
 
     auto abisLayout = new QVBoxLayout;
     abisLayout->setSpacing(0);
@@ -294,6 +337,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
     signingLayout->setColumnMinimumWidth(0, labelColMinSz);
 
+    m_permissionCombo->addItems(androidPermissionList());
+    m_qtModuleCombo->addItems(correctModuleList(androidModuleList().keys()));
 
     m_signingDisabled->setChecked(true);
     m_keystorePathEdit->clear();
