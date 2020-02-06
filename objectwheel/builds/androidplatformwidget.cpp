@@ -19,6 +19,23 @@
 // TODO: Disable wheel events for all the widgets from spin boxes to comboboxes
 // TODO: Add a "description" label under icon like "Enter final application details below right
 //       before requesting a cloud build for your project"
+// TODO: Make sure each line edit and everything matches safety regular exp
+//       except "password" edits, find a solution for this
+// TODO: Set tooltips
+// TODO: Checkout old version of the codes and see what we are lacking
+// TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"
+
+static QStringList g_androidSdkList {
+    "API 21: Android 5.0",
+    "API 22: Android 5.1",
+    "API 23: Android 6.0",
+    "API 24: Android 7.0",
+    "API 25: Android 7.1",
+    "API 26: Android 8.0",
+    "API 27: Android 8.1",
+    "API 28: Android 9.0",
+    "API 29: Android 10",
+};
 
 static QStringList correctModuleList(QStringList list)
 {
@@ -59,7 +76,7 @@ static QJsonObject androidModuleList()
 }
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(parent)
-  , m_labelEdit(new QLineEdit(this))
+  , m_nameEdit(new QLineEdit(this))
   , m_versionCodeSpin(new QSpinBox(this))
   , m_versionNameEdit(new QLineEdit(this))
   , m_organizationEdit(new QLineEdit(this))
@@ -99,7 +116,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
   , m_showKeyPasswordButton(new QToolButton(this))
   , m_sameAsKeystorePasswordCheck(new QCheckBox(this))
 {
-    auto labelLabel = new QLabel(tr("Name:"), this);
+    auto nameLabel = new QLabel(tr("Name:"), this);
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
     auto versionNameLabel = new QLabel(tr("Version name:"), this);
     auto organizationLabel = new QLabel(tr("Organization:"), this);
@@ -109,8 +126,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     auto generalLayout = new QGridLayout(generalGroupBox);
     generalLayout->setSpacing(6);
     generalLayout->setContentsMargins(8, 8, 8, 8);
-    generalLayout->addWidget(labelLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
-    generalLayout->addWidget(m_labelEdit, 0, 1, 1, 2);
+    generalLayout->addWidget(nameLabel, 0, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    generalLayout->addWidget(m_nameEdit, 0, 1, 1, 2);
     generalLayout->addWidget(versionCodeLabel, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     generalLayout->addWidget(m_versionCodeSpin, 1, 1);
     generalLayout->addWidget(versionNameLabel, 2, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
@@ -339,7 +356,17 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
 
     m_permissionCombo->addItems(androidPermissionList());
     m_qtModuleCombo->addItems(correctModuleList(androidModuleList().keys()));
+    m_minSdkVersionCombo->addItems(g_androidSdkList);
+    m_targetSdkVersionCombo->addItems(g_androidSdkList);
+    m_permissionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_qtModuleCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_minSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_targetSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
+
+    m_includeQtModulesCheck->setChecked(true);
+    m_qtModuleList->clear();
+    m_qtModuleList->addItem(QLatin1String("Qt Svg"));
     m_signingDisabled->setChecked(true);
     m_keystorePathEdit->clear();
     m_keystorePasswordEdit->clear();
@@ -352,12 +379,6 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     m_showKeystorePasswordButton->setChecked(false);
     m_showKeyPasswordButton->setChecked(false);
     m_sameAsKeystorePasswordCheck->setChecked(true);
-
-
-//    "label": "Ömer Göktaş",
-//    "versionCode": "5",
-//    "organization": "Ömer Göktaş, Inc.",
-//    "domain": "https://www.omergoktas.com.tr",
 
 //    auto btnResIcon = new QToolButton;
 ////    btnResIcon->setIcon(QIcon(":/images/refresh.png"));
@@ -514,32 +535,12 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
 
 //    _cmbMinSdk.setFixedWidth(200);
 //    _cmbMinSdk.setToolTip("Sets the minimum required version on which this application can be run.");
-//    _cmbMinSdk.addItem("API 14: Android 4.0, 4.0.1, 4.0.2");
-//    _cmbMinSdk.addItem("API 15: Android 4.0.3, 4.0.4");
-//    _cmbMinSdk.addItem("API 16: Android 4.1, 4.1.1");
-//    _cmbMinSdk.addItem("API 17: Android 4.2, 4.2.2");
-//    _cmbMinSdk.addItem("API 18: Android 4.3");
-//    _cmbMinSdk.addItem("API 19: Android 4.4");
-//    _cmbMinSdk.addItem("API 20: Android 4.4W");
-//    _cmbMinSdk.addItem("API 21: Android 5.0");
-//    _cmbMinSdk.addItem("API 22: Android 5.1");
-//    _cmbMinSdk.addItem("API 23: Android 6.0");
 //    _cmbMinSdk.setCurrentText("API 17: Android 4.2, 4.2.2");
 
 //    _cmbTargetSdk.setFixedWidth(200);
 //    _cmbTargetSdk.setToolTip(
 //    "Sets the target SDK. Set this to the highest tested version. This \n"
 //    "disables compatibility behavior of the system for your application.");
-//    _cmbTargetSdk.addItem("API 14: Android 4.0, 4.0.1, 4.0.2");
-//    _cmbTargetSdk.addItem("API 15: Android 4.0.3, 4.0.4");
-//    _cmbTargetSdk.addItem("API 16: Android 4.1, 4.1.1");
-//    _cmbTargetSdk.addItem("API 17: Android 4.2, 4.2.2");
-//    _cmbTargetSdk.addItem("API 18: Android 4.3");
-//    _cmbTargetSdk.addItem("API 19: Android 4.4");
-//    _cmbTargetSdk.addItem("API 20: Android 4.4W");
-//    _cmbTargetSdk.addItem("API 21: Android 5.0");
-//    _cmbTargetSdk.addItem("API 22: Android 5.1");
-//    _cmbTargetSdk.addItem("API 23: Android 6.0");
 //    _cmbTargetSdk.setCurrentText("API 21: Android 5.0");
 
 //    _permissionsBox.setTitle("Permission Settings");

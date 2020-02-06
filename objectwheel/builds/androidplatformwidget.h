@@ -24,7 +24,7 @@ public:
     virtual QCborMap toCborMap() const override;
 
 private:
-    QLineEdit* m_labelEdit;
+    QLineEdit* m_nameEdit;
     QSpinBox* m_versionCodeSpin;
     QLineEdit* m_versionNameEdit;
     QLineEdit* m_organizationEdit;
