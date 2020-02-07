@@ -25,7 +25,7 @@
 // TODO: Checkout old version of the codes and see what we are lacking
 // TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"
 
-static QStringList g_androidSdkList {
+static QStringList g_apiLevels {
     "API 21: Android 5.0",
     "API 22: Android 5.1",
     "API 23: Android 6.0",
@@ -34,7 +34,26 @@ static QStringList g_androidSdkList {
     "API 26: Android 8.0",
     "API 27: Android 8.1",
     "API 28: Android 9.0",
-    "API 29: Android 10",
+    "API 29: Android 10.0",
+};
+
+static QStringList g_orientations {
+    "Behind",
+    "Full Sensor",
+    "Full User",
+    "Landscape",
+    "Locked",
+    "No Sensor",
+    "Portrait",
+    "Reverse Landscape",
+    "Reverse Portrait",
+    "Sensor",
+    "Sensor Landscape",
+    "Sensor Portrait",
+    "Unspecified",
+    "User",
+    "User Landscape",
+    "User Portrait",
 };
 
 static QStringList correctModuleList(QStringList list)
@@ -75,7 +94,7 @@ static QJsonObject androidModuleList()
     return androidModules;
 }
 
-AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(parent)
+AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_nameEdit(new QLineEdit(this))
   , m_versionCodeSpin(new QSpinBox(this))
   , m_versionNameEdit(new QLineEdit(this))
@@ -289,6 +308,25 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
     layout->addWidget(buildingGroupBox);
     layout->addWidget(signingGroupBox);
 
+    m_versionCodeSpin->setCursor(Qt::PointingHandCursor);
+    m_screenOrientationCombo->setCursor(Qt::PointingHandCursor);
+    m_minSdkVersionCombo->setCursor(Qt::PointingHandCursor);
+    m_targetSdkVersionCombo->setCursor(Qt::PointingHandCursor);
+    m_clearIconButton->setCursor(Qt::PointingHandCursor);
+    m_browseIconButton->setCursor(Qt::PointingHandCursor);
+    m_includePemissionsCheck->setCursor(Qt::PointingHandCursor);
+    m_permissionCombo->setCursor(Qt::PointingHandCursor);
+    m_addPermissionButton->setCursor(Qt::PointingHandCursor);
+    m_removePermissionButton->setCursor(Qt::PointingHandCursor);
+    m_aabCheck->setCursor(Qt::PointingHandCursor);
+    m_abiX8664Check->setCursor(Qt::PointingHandCursor);
+    m_abiX86Check->setCursor(Qt::PointingHandCursor);
+    m_abiArm64V8aCheck->setCursor(Qt::PointingHandCursor);
+    m_abiArmeabiV7aCheck->setCursor(Qt::PointingHandCursor);
+    m_includeQtModulesCheck->setCursor(Qt::PointingHandCursor);
+    m_qtModuleCombo->setCursor(Qt::PointingHandCursor);
+    m_addQtModuleButton->setCursor(Qt::PointingHandCursor);
+    m_removeQtModuleButton->setCursor(Qt::PointingHandCursor);
     m_signingDisabled->setCursor(Qt::PointingHandCursor);
     m_signingEnabled->setCursor(Qt::PointingHandCursor);
     m_newKeystoreButton->setCursor(Qt::PointingHandCursor);
@@ -356,14 +394,22 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
 
     m_permissionCombo->addItems(androidPermissionList());
     m_qtModuleCombo->addItems(correctModuleList(androidModuleList().keys()));
-    m_minSdkVersionCombo->addItems(g_androidSdkList);
-    m_targetSdkVersionCombo->addItems(g_androidSdkList);
+    m_screenOrientationCombo->addItems(g_orientations);
+    m_minSdkVersionCombo->addItems(g_apiLevels);
+    m_targetSdkVersionCombo->addItems(g_apiLevels);
     m_permissionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_qtModuleCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_minSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_targetSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
-
+    m_screenOrientationCombo->setCurrentText(QStringLiteral("Unspecified"));
+    m_minSdkVersionCombo->setCurrentText(QStringLiteral("API 21: Android 5.0"));
+    m_targetSdkVersionCombo->setCurrentText(QStringLiteral("API 23: Android 6.0"));
+    m_aabCheck->setChecked(false);
+    m_abiArmeabiV7aCheck->setChecked(true);
+    m_abiArm64V8aCheck->setChecked(false);
+    m_abiX86Check->setChecked(false);
+    m_abiX8664Check->setChecked(false);
     m_includeQtModulesCheck->setChecked(true);
     m_qtModuleList->clear();
     m_qtModuleList->addItem(QLatin1String("Qt Svg"));
