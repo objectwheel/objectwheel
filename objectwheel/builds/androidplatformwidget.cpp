@@ -723,9 +723,199 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : PlatformWidget(p
 //    // FIXME   connect(&_btnBuild, &FlarButton::clicked, this, &AndroidPlatformWidget::handleBtnBuildClicked);
 }
 
-QCborMap AndroidPlatformWidget::toCborMap() const
+QLineEdit* AndroidPlatformWidget::nameEdit() const
 {
+    return m_nameEdit;
+}
 
+QSpinBox* AndroidPlatformWidget::versionCodeSpin() const
+{
+    return m_versionCodeSpin;
+}
+
+QLineEdit* AndroidPlatformWidget::versionNameEdit() const
+{
+    return m_versionNameEdit;
+}
+
+QLineEdit* AndroidPlatformWidget::organizationEdit() const
+{
+    return m_organizationEdit;
+}
+
+QLineEdit* AndroidPlatformWidget::domainEdit() const
+{
+    return m_domainEdit;
+}
+
+QLineEdit* AndroidPlatformWidget::packageEdit() const
+{
+    return m_packageEdit;
+}
+
+QComboBox* AndroidPlatformWidget::screenOrientationCombo() const
+{
+    return m_screenOrientationCombo;
+}
+
+QComboBox* AndroidPlatformWidget::minSdkVersionCombo() const
+{
+    return m_minSdkVersionCombo;
+}
+
+QComboBox* AndroidPlatformWidget::targetSdkVersionCombo() const
+{
+    return m_targetSdkVersionCombo;
+}
+
+QLabel* AndroidPlatformWidget::iconPictureLabel() const
+{
+    return m_iconPictureLabel;
+}
+
+QPushButton* AndroidPlatformWidget::browseIconButton() const
+{
+    return m_browseIconButton;
+}
+
+QPushButton* AndroidPlatformWidget::clearIconButton() const
+{
+    return m_clearIconButton;
+}
+
+QCheckBox* AndroidPlatformWidget::includePemissionsCheck() const
+{
+    return m_includePemissionsCheck;
+}
+
+QComboBox* AndroidPlatformWidget::permissionCombo() const
+{
+    return m_permissionCombo;
+}
+
+QListWidget* AndroidPlatformWidget::permissionList() const
+{
+    return m_permissionList;
+}
+
+QPushButton* AndroidPlatformWidget::addPermissionButton() const
+{
+    return m_addPermissionButton;
+}
+
+QPushButton* AndroidPlatformWidget::removePermissionButton() const
+{
+    return m_removePermissionButton;
+}
+
+QCheckBox* AndroidPlatformWidget::aabCheck() const
+{
+    return m_aabCheck;
+}
+
+QCheckBox* AndroidPlatformWidget::abiArmeabiV7aCheck() const
+{
+    return m_abiArmeabiV7aCheck;
+}
+
+QCheckBox* AndroidPlatformWidget::abiArm64V8aCheck() const
+{
+    return m_abiArm64V8aCheck;
+}
+
+QCheckBox* AndroidPlatformWidget::abiX86Check() const
+{
+    return m_abiX86Check;
+}
+
+QCheckBox* AndroidPlatformWidget::abiX8664Check() const
+{
+    return m_abiX8664Check;
+}
+
+QCheckBox* AndroidPlatformWidget::includeQtModulesCheck() const
+{
+    return m_includeQtModulesCheck;
+}
+
+QComboBox* AndroidPlatformWidget::qtModuleCombo() const
+{
+    return m_qtModuleCombo;
+}
+
+QListWidget* AndroidPlatformWidget::qtModuleList() const
+{
+    return m_qtModuleList;
+}
+
+QPushButton* AndroidPlatformWidget::addQtModuleButton() const
+{
+    return m_addQtModuleButton;
+}
+
+QPushButton* AndroidPlatformWidget::removeQtModuleButton() const
+{
+    return m_removeQtModuleButton;
+}
+
+QRadioButton* AndroidPlatformWidget::signingDisabled() const
+{
+    return m_signingDisabled;
+}
+
+QRadioButton* AndroidPlatformWidget::signingEnabled() const
+{
+    return m_signingEnabled;
+}
+
+QLineEdit* AndroidPlatformWidget::keystorePathEdit() const
+{
+    return m_keystorePathEdit;
+}
+
+QPushButton* AndroidPlatformWidget::newKeystoreButton() const
+{
+    return m_newKeystoreButton;
+}
+
+QPushButton* AndroidPlatformWidget::browseKeystoreButton() const
+{
+    return m_browseKeystoreButton;
+}
+
+QPushButton* AndroidPlatformWidget::clearKeystoreButton() const
+{
+    return m_clearKeystoreButton;
+}
+
+QLineEdit* AndroidPlatformWidget::keystorePasswordEdit() const
+{
+    return m_keystorePasswordEdit;
+}
+
+QToolButton* AndroidPlatformWidget::showKeystorePasswordButton() const
+{
+    return m_showKeystorePasswordButton;
+}
+
+QComboBox* AndroidPlatformWidget::keyAliasCombo() const
+{
+    return m_keyAliasCombo;
+}
+
+QLineEdit* AndroidPlatformWidget::keyPasswordEdit() const
+{
+    return m_keyPasswordEdit;
+}
+
+QToolButton* AndroidPlatformWidget::showKeyPasswordButton() const
+{
+    return m_showKeyPasswordButton;
+}
+
+QCheckBox* AndroidPlatformWidget::sameAsKeystorePasswordCheck() const
+{
+    return m_sameAsKeystorePasswordCheck;
 }
 
 //bool AndroidPlatformWidget::checkFields()
