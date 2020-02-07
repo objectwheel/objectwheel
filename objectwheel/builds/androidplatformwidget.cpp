@@ -365,8 +365,50 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_clearKeystoreButton->setText(tr("Clear"));
     m_sameAsKeystorePasswordCheck->setText(tr("Same as key store password"));
 
+    m_nameEdit->setToolTip(tr("Application name"));
+    m_versionCodeSpin->setToolTip(tr("Application version (int)"));
+    m_versionNameEdit->setToolTip(tr("Application version (string)"));
+    m_organizationEdit->setToolTip(tr("Your organization name"));
+    m_domainEdit->setToolTip(tr("Your organization domain"));
+    m_packageEdit->setToolTip(tr("<p style='white-space:nowrap'>Android package name. "
+                                 "For more information please refer to:<br><i>"
+                                 "<a href='https://developer.android.com/studio/build/application-id'>"
+                                 "https://developer.android.com/studio/build/application-id</a></i></p>"));
+    m_screenOrientationCombo->setToolTip(tr("<p style='white-space:nowrap'>Application screen orientation. "
+                                            "For more information please refer to:<br><i>"
+                                            "<a href='https://developer.android.com/guide/topics/manifest/activity-element#screen'>"
+                                            "https://developer.android.com/guide/topics/manifest/activity-element#screen</a></i></p>"));
+    m_minSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>Minimum API Level required for your application to run. "
+                                        "For more information please refer to:<br><i>"
+                                        "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#min'>"
+                                        "https://developer.android.com/guide/topics/manifest/uses-sdk-element#min</a></i></p>"));
+    m_targetSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>The API Level that your application targets. "
+                                           "For more information please refer to:<br><i>"
+                                           "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#target'>"
+                                           "https://developer.android.com/guide/topics/manifest/uses-sdk-element#target</a></i></p>"));
+    m_iconPictureLabel->setToolTip(tr("<p style='white-space:nowrap'>"
+                                      "Preview of your application icon <i>(If no icon provided, the<br>"
+                                      "Android OS will assign an default icon for your application)</i></p>"));
+    m_browseIconButton->setToolTip(tr("Select an application icon from your computer"));
+    m_clearIconButton->setToolTip(tr("Clear application icon"));
+    autoDetectPemissionsCheck->setToolTip(tr("<p style='white-space:nowrap'>"
+                                             "Our cloud build system will try to guess your android permissions<br>"
+                                             "based on the QML imports and Qt modules you use in your project</p>"));
+    m_includePemissionsCheck->setToolTip(tr("<p style='white-space:nowrap'>"
+                                            "Enable adding extra android permissions manually in case<br>"
+                                            "our cloud build system might not be able to detect all the<br>"
+                                            "necessary permissions for your application to run</p>"));
+    m_permissionCombo->setToolTip(tr("Permissions list to choose from"));
+    m_permissionList->setToolTip(tr("User defined permissions for the application"));
+    m_addPermissionButton->setToolTip(tr("<p style='white-space:nowrap'>"
+                                         "Adds current permission selected on the<br>"
+                                         "left combo box to the bottom list view</p>"));
+    m_removePermissionButton->setToolTip(tr("<p style='white-space:nowrap'>"
+                                            "Select the permission you want to remove from the<br>"
+                                            "list first and click this button to remove it.</p>"));
+
     m_nameEdit->setPlaceholderText(tr("My Application"));
-    m_versionNameEdit->setPlaceholderText(tr("1.0"));
+    m_versionNameEdit->setPlaceholderText(tr("1.1 Gold Edition"));
     m_organizationEdit->setPlaceholderText(tr("My Example Org, Inc."));
     m_domainEdit->setPlaceholderText(tr("example.com"));
     m_packageEdit->setPlaceholderText(tr("com.example.myapplication"));
@@ -432,6 +474,22 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_showKeystorePasswordButton->setChecked(false);
     m_showKeyPasswordButton->setChecked(false);
     m_sameAsKeystorePasswordCheck->setChecked(true);
+
+    UtilityFunctions::disableWheelEvent(m_versionCodeSpin);
+    m_addPermissionButton->setEnabled(false);
+    m_permissionList->setEnabled(false);
+    m_permissionCombo->setEnabled(false);
+    m_removePermissionButton->setEnabled(false);
+    m_removeQtModuleButton->setEnabled(false);
+    m_sameAsKeystorePasswordCheck->setEnabled(false);
+    m_keyPasswordEdit->setEnabled(false);
+    m_showKeyPasswordButton->setEnabled(false);
+    m_keyAliasCombo->setEnabled(false);
+    m_showKeystorePasswordButton->setEnabled(false);
+    m_keystorePasswordEdit->setEnabled(false);
+    m_newKeystoreButton->setEnabled(false);
+    m_browseKeystoreButton->setEnabled(false);
+    m_clearKeystoreButton->setEnabled(false);
 
 //    auto btnResIcon = new QToolButton;
 ////    btnResIcon->setIcon(QIcon(QStringLiteral(":/images/refresh.png"));
