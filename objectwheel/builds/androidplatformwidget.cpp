@@ -365,20 +365,26 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_clearKeystoreButton->setText(tr("Clear"));
     m_sameAsKeystorePasswordCheck->setText(tr("Same as key store password"));
 
-    m_browseIconButton->setIcon(QIcon(":/images/builds/browse.svg"));
-    m_clearIconButton->setIcon(QIcon(":/images/designer/clear.svg"));
-    m_addPermissionButton->setIcon(QIcon(":/images/designer/plus.svg"));
-    m_removePermissionButton->setIcon(QIcon(":/images/designer/minus.svg"));
-    m_addQtModuleButton->setIcon(QIcon(":/images/designer/plus.svg"));
-    m_removeQtModuleButton->setIcon(QIcon(":/images/designer/minus.svg"));
-    m_newKeystoreButton->setIcon(QIcon(":/images/designer/new-file.svg"));
-    m_browseKeystoreButton->setIcon(QIcon(":/images/builds/browse.svg"));
-    m_clearKeystoreButton->setIcon(QIcon(":/images/designer/clear.svg"));
-    m_showKeystorePasswordButton->setIcon(QIcon(":/images/builds/show.svg"));
-    m_showKeyPasswordButton->setIcon(QIcon(":/images/builds/show.svg"));
+    m_nameEdit->setPlaceholderText(tr("My Application"));
+    m_versionNameEdit->setPlaceholderText(tr("1.0"));
+    m_organizationEdit->setPlaceholderText(tr("My Example Org, Inc."));
+    m_domainEdit->setPlaceholderText(tr("example.com"));
+    m_packageEdit->setPlaceholderText(tr("com.example.myapplication"));
+    m_keystorePathEdit->setPlaceholderText(tr("Use 'Browse' button below to choose your key store file"));
+    m_keystorePasswordEdit->setPlaceholderText(tr("Type your key store password"));
+    m_keyPasswordEdit->setPlaceholderText(tr("Type your key password"));
 
-    UtilityFunctions::adjustFontWeight(m_keyPasswordEdit, QFont::Black);
-    UtilityFunctions::adjustFontWeight(m_keystorePasswordEdit, QFont::Black);
+    m_browseIconButton->setIcon(QIcon(QStringLiteral(":/images/builds/browse.svg")));
+    m_clearIconButton->setIcon(QIcon(QStringLiteral(":/images/designer/clear.svg")));
+    m_addPermissionButton->setIcon(QIcon(QStringLiteral(":/images/designer/plus.svg")));
+    m_removePermissionButton->setIcon(QIcon(QStringLiteral(":/images/designer/minus.svg")));
+    m_addQtModuleButton->setIcon(QIcon(QStringLiteral(":/images/designer/plus.svg")));
+    m_removeQtModuleButton->setIcon(QIcon(QStringLiteral(":/images/designer/minus.svg")));
+    m_newKeystoreButton->setIcon(QIcon(QStringLiteral(":/images/designer/new-file.svg")));
+    m_browseKeystoreButton->setIcon(QIcon(QStringLiteral(":/images/builds/browse.svg")));
+    m_clearKeystoreButton->setIcon(QIcon(QStringLiteral(":/images/designer/clear.svg")));
+    m_showKeystorePasswordButton->setIcon(QIcon(QStringLiteral(":/images/builds/show.svg")));
+    m_showKeyPasswordButton->setIcon(QIcon(QStringLiteral(":/images/builds/show.svg")));
 
     int iconPictureSize = m_browseIconButton->sizeHint().height()
             + iconLayout->spacing()
@@ -402,6 +408,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_minSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_targetSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
+    m_versionCodeSpin->setValue(1);
     m_screenOrientationCombo->setCurrentText(QStringLiteral("Unspecified"));
     m_minSdkVersionCombo->setCurrentText(QStringLiteral("API 21: Android 5.0"));
     m_targetSdkVersionCombo->setCurrentText(QStringLiteral("API 23: Android 6.0"));
@@ -427,7 +434,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_sameAsKeystorePasswordCheck->setChecked(true);
 
 //    auto btnResIcon = new QToolButton;
-////    btnResIcon->setIcon(QIcon(":/images/refresh.png"));
+////    btnResIcon->setIcon(QIcon(QStringLiteral(":/images/refresh.png"));
 //    btnResIcon->setIconSize(QSize(14, 14));
 //    btnResIcon->setToolTip("Reset icon to default.");
 //    connect(btnResIcon, &QToolButton::clicked, [&]{
@@ -535,9 +542,9 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 
 //    _cmbOrientation.setFixedWidth(120);
 //    _cmbOrientation.setIconSize({14, 14});
-//    _cmbOrientation.addItem(QIcon(":/images/free.png"), "Free");
-//    _cmbOrientation.addItem(QIcon(":/images/landscape.png"), "Landscape");
-//    _cmbOrientation.addItem(QIcon(":/images/portrait.png"), "Portrait");
+//    _cmbOrientation.addItem(QIcon(QStringLiteral(":/images/free.png"), "Free");
+//    _cmbOrientation.addItem(QIcon(QStringLiteral(":/images/landscape.png"), "Landscape");
+//    _cmbOrientation.addItem(QIcon(QStringLiteral(":/images/portrait.png"), "Portrait");
 //    _cmbOrientation.setToolTip(
 //    "Application orientation. Use Landscape or Portrait to lock your \n"
 //    "application orientation; or use Free to leave it unspecified.");
@@ -646,9 +653,9 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 //    _btnDelPermission.setPalette(p4);
 //    _permissionList.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 //    _btnDelPermission.setText("Delete");
-////    _btnDelPermission.setIcon(QIcon(":/images/delete.png"));
+////    _btnDelPermission.setIcon(QIcon(QStringLiteral(":/images/delete.png"));
 //    _btnAddPermission.setText("Add");
-//    _btnAddPermission.setIcon(QIcon(":/images/newfile.png"));
+//    _btnAddPermission.setIcon(QIcon(QStringLiteral(":/images/newfile.png"));
 //    _btnAddPermission.setCursor(Qt::PointingHandCursor);
 //    _btnDelPermission.setCursor(Qt::PointingHandCursor);
 //    _btnDelPermission.setToolTip("Delete selected permission from the list.");
@@ -682,7 +689,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 
 //    _lblKsPath.setText("Key store path:");
 //    _btnNewKs.setText("Create new...");
-//    _btnNewKs.setIcon(QIcon(":/images/newfile.png"));
+//    _btnNewKs.setIcon(QIcon(QStringLiteral(":/images/newfile.png"));
 //    _btnExistingKs.setText("...");
 //    _lblKsPw.setText("Key store password:");
 //    _lblKsAlias.setText("Alias:");
@@ -752,7 +759,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 ////    _btnBack.settings().textColor = Qt::white;
 ////    _btnBack.setFixedSize(200,28);
 ////    _btnBack.setIconSize(QSize(14,14));
-////    _btnBack.setIcon(QIcon(":/images/welcome/unload.png"));
+////    _btnBack.setIcon(QIcon(QStringLiteral(":/images/welcome/unload.png"));
 ////    _btnBack.setText("Back");
 ////  FIXME  connect(&_btnBack, &FlarButton::clicked, [&]{
 ////        emit backClicked();
@@ -764,7 +771,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 ////    _btnBuild.settings().textColor = Qt::white;
 ////    _btnBuild.setFixedSize(200,28);
 ////    _btnBuild.setIconSize(QSize(14,14));
-////    _btnBuild.setIcon(QIcon(":/images/welcome/load.png"));
+////    _btnBuild.setIcon(QIcon(QStringLiteral(":/images/welcome/load.png"));
 ////    _btnBuild.setText("Build");
 //    // FIXME   connect(&_btnBuild, &FlarButton::clicked, this, &AndroidPlatformWidget::handleBtnBuildClicked);
 }
