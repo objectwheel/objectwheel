@@ -25,16 +25,16 @@
 // TODO: Checkout old version of the codes and see what we are lacking
 // TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"
 
-static QStringList g_apiLevels {
-    "API 21: Android 5.0",
-    "API 22: Android 5.1",
-    "API 23: Android 6.0",
-    "API 24: Android 7.0",
-    "API 25: Android 7.1",
-    "API 26: Android 8.0",
-    "API 27: Android 8.1",
-    "API 28: Android 9.0",
-    "API 29: Android 10.0",
+static QMap<QString, QString> g_apiLevels {
+    { "API 21: Android 5.0", "21" },
+    { "API 22: Android 5.1", "22" },
+    { "API 23: Android 6.0", "23" },
+    { "API 24: Android 7.0", "24" },
+    { "API 25: Android 7.1", "25" },
+    { "API 26: Android 8.0", "26" },
+    { "API 27: Android 8.1", "27" },
+    { "API 28: Android 9.0", "28" },
+    { "API 29: Android 10.0", "29"},
 };
 
 static QStringList g_orientations {
@@ -249,8 +249,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     buildingLayout->setColumnStretch(2, 1);
 
     auto statusLabel = new QLabel(tr("Status:"), this);
-    auto keystorePathLabel = new QLabel(tr("Key store path:"), this);
-    auto keystorePasswordLabel = new QLabel(tr("Key store password:"), this);
+    auto keystorePathLabel = new QLabel(tr("Keystore path:"), this);
+    auto keystorePasswordLabel = new QLabel(tr("Keystore password:"), this);
     auto keyAliasLabel = new QLabel(tr("Key alias:"), this);
     auto keyPasswordLabel = new QLabel(tr("Key password:"), this);
 
@@ -363,26 +363,49 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_newKeystoreButton->setText(tr("New"));
     m_browseKeystoreButton->setText(tr("Browse"));
     m_clearKeystoreButton->setText(tr("Clear"));
-    m_sameAsKeystorePasswordCheck->setText(tr("Same as key store password"));
+    m_sameAsKeystorePasswordCheck->setText(tr("Same as keystore password"));
 
     m_nameEdit->setToolTip(tr("Application name"));
-    m_versionCodeSpin->setToolTip(tr("Application version (int)"));
-    m_versionNameEdit->setToolTip(tr("Application version (string)"));
+    m_versionCodeSpin->setToolTip(tr("Application version (int)"
+                                     "<p style='white-space:nowrap;font-size:11px'>"
+                                     "An internal version number. This number is used only to<br>"
+                                     "determine whether one version is more recent than another,<br>"
+                                     "with higher numbers indicating more recent versions. This<br>"
+                                     "is not the version number shown to users; that number is<br>"
+                                     "set by the Version name field.</p>"
+                                     "<p style='font-size:11px'>"
+                                     "The value must be set as an integer, such as 100. You can<br>"
+                                     "define it however you want, as long as each successive<br>"
+                                     "version has a higher number. For example, it could be a<br>"
+                                     "build number. Or you could translate a version number in<br>"
+                                     "x.y format to an integer by encoding the x and y separately<br>"
+                                     "in the lower and upper 16 bits. Or you could simply increase<br>"
+                                     "the number by one each time a new version is released.</p>"));
+    m_versionNameEdit->setToolTip(tr("Application version (string)"
+                                     "<p style='white-space:nowrap;font-size:11px'>"
+                                     "The version number shown to users. The string might also be<br>"
+                                     "used by Qt internally when creating e.g. cache locations for<br>"
+                                     "the app as an extension for the cache directory. The Version<br>"
+                                     "code field holds the significant version number used internally.</p>"));
     m_organizationEdit->setToolTip(tr("Your organization name"));
     m_domainEdit->setToolTip(tr("Your organization domain"));
-    m_packageEdit->setToolTip(tr("<p style='white-space:nowrap'>Application package name. "
+    m_packageEdit->setToolTip(tr("<p style='white-space:nowrap'>"
+                                 "Application package name. "
                                  "For more information please refer to:<br><i>"
-                                 "<a href='https://developer.android.com/studio/build/application-id'>"
-                                 "https://developer.android.com/studio/build/application-id</a></i></p>"));
-    m_screenOrientationCombo->setToolTip(tr("<p style='white-space:nowrap'>Application screen orientation. "
+                                 "<a href='https://developer.android.com/guide/topics/manifest/manifest-element#package'>"
+                                 "https://developer.android.com/guide/topics/manifest/manifest-element#package</a></i></p>"));
+    m_screenOrientationCombo->setToolTip(tr("<p style='white-space:nowrap'>"
+                                            "Application screen orientation. "
                                             "For more information please refer to:<br><i>"
                                             "<a href='https://developer.android.com/guide/topics/manifest/activity-element#screen'>"
                                             "https://developer.android.com/guide/topics/manifest/activity-element#screen</a></i></p>"));
-    m_minSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>Minimum API Level required for your application to run. "
+    m_minSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>"
+                                        "Minimum API Level required for your application to run. "
                                         "For more information please refer to:<br><i>"
                                         "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#min'>"
                                         "https://developer.android.com/guide/topics/manifest/uses-sdk-element#min</a></i></p>"));
-    m_targetSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>The API Level that your application targets. "
+    m_targetSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>"
+                                           "The API Level that your application targets. "
                                            "For more information please refer to:<br><i>"
                                            "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#target'>"
                                            "https://developer.android.com/guide/topics/manifest/uses-sdk-element#target</a></i></p>"));
@@ -446,14 +469,78 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_abiX8664Check->setToolTip(tr("<p style='white-space:nowrap'>"
                                    "Bundles your application package with necessary assets and library<br>"
                                    "files to support devices those which have x86_64 processors</p>"));
+    m_signingEnabled->setToolTip(tr("Enable package signing"
+                                    "<p style='white-space:nowrap;font-size:11px'>"
+                                    "Android (hence Google Play and other app stores) requires that all APKs be<br>"
+                                    "digitally signed with a certificate before they are installed on a device or<br>"
+                                    "updated.</p>"
+                                    "<p style='white-space:nowrap;font-size:11px'>"
+                                    "Your private key is required for signing all future versions of your app. Thus<br>"
+                                    "you should sign your app with the same certificate throughout its expected<br>"
+                                    "lifespan. If you lose or misplace your key, you will not be able to publish<br>"
+                                    "updates to your existing app. You cannot regenerate a previously generated<br>"
+                                    "key.</p>"
+                                    "<p style='white-space:nowrap;font-size:11px'>"
+                                    "If you sign the new version of your existing app with a different certificate,<br>"
+                                    "you must assign a different package name to the app—in this case, the user<br>"
+                                    "installs the new version as a completely new app (it's not your existing app<br>"
+                                    "anymore).</p>"
+                                    "<p style='white-space:nowrap;font-size:11px'>"
+                                    "Securing your app signing key is of critical importance, both to you and to the<br>"
+                                    "user. If you allow someone to use your key, or if you leave your keystore and<br>"
+                                    "passwords in an unsecured location such that a third-party could find and use<br>"
+                                    "them, your authoring identity and the trust of the user are compromised.</p>"
+                                    "<p style='white-space:nowrap;font-size:11px'>"
+                                    "If a third party should manage to take your key without your knowledge or<br>"
+                                    "permission, that person could sign and distribute apps that maliciously replace<br>"
+                                    "your authentic apps or corrupt them. Such a person could also sign and<br>"
+                                    "distribute apps under your identity that attack other apps or the system itself,<br>"
+                                    "or corrupt or steal user data.</p>"
+                                    "<p style='white-space:nowrap;font-size:11px'>"
+                                    "Your reputation as a developer entity depends on your securing your app<br>"
+                                    "signing key properly, at all times, until the key is expired. For more information:<br>"
+                                    "<a href='https://developer.android.com/studio/publish/app-signing#considerations'>"
+                                    "https://developer.android.com/studio/publish/app-signing#considerations</a></i></p>"));
+    m_signingDisabled->setToolTip(tr("Disable package signing"
+                                     "<p style='white-space:nowrap;font-size:11px'>"
+                                     "Android (hence Google Play and other app stores) requires that all APKs be<br>"
+                                     "digitally signed with a certificate before they are installed on a device or<br>"
+                                     "updated.</p>"
+                                     "<p style='white-space:nowrap;font-size:11px'>"
+                                     "When package signing disabled, our cloud build system automatically signs<br>"
+                                     "your app with a common debug certificate generated by the Android SDK tools.<br>"
+                                     "Thus, this option should only be used for debugging purposes. Do not use<br>"
+                                     "this option for your production builds.</p>"
+                                     "<p style='white-space:nowrap;font-size:11px'>"
+                                     "Because the debug certificate is created by the build tools and is insecure<br>"
+                                     "by design, most app stores (including the Google Play Store) do not accept<br>"
+                                     "apps signed with a debug certificate for publishing.</p>"
+                                     "<p style='white-space:nowrap;font-size:11px'>"
+                                     "The debug certificate used to sign your app for debugging has an expiration<br>"
+                                     "date of 30 years from its creation date. When the certificate expires, you<br>"
+                                     "get a build error.</p>"));
+    m_keystorePathEdit->setToolTip(tr("Keystore file path"));
+    m_newKeystoreButton->setToolTip(tr("Establish new keystore"));
+    m_browseKeystoreButton->setToolTip(tr("Select keystore file from your computer"));
+    m_clearKeystoreButton->setToolTip(tr("Clear keystore settings"));
+    m_keystorePasswordEdit->setToolTip(tr("<p style='white-space:nowrap'>"
+                                          "Password for your keystore, it gives access to the public<br>"
+                                          "key information within the keystore file (such as public<br>"
+                                          "keys, key aliases and encrypted versions of your private keys)</p>"));
+    m_keyAliasCombo->setToolTip(tr("Select the name of the private key you want to use for signing process"));
+    m_keyPasswordEdit->setToolTip(tr("<p style='white-space:nowrap'>"
+                                     "Password for private key, it gives us </p>"));
+    m_showKeystorePasswordButton->setToolTip(tr("Toggle keystore password visibility"));
+    m_showKeyPasswordButton->setToolTip(tr("Toggle key password visibility"));
+    m_sameAsKeystorePasswordCheck->setToolTip(tr("Enable this if private key password is equal to keystore password"));
 
     m_nameEdit->setPlaceholderText(tr("My Application"));
     m_versionNameEdit->setPlaceholderText(tr("1.1 Gold Edition"));
     m_organizationEdit->setPlaceholderText(tr("My Example Org, Inc."));
     m_domainEdit->setPlaceholderText(tr("example.com"));
     m_packageEdit->setPlaceholderText(tr("com.example.myapplication"));
-    m_keystorePathEdit->setPlaceholderText(tr("Use 'Browse' button below to choose your key store file"));
-    m_keystorePasswordEdit->setPlaceholderText(tr("Type your key store password"));
+    m_keystorePathEdit->setPlaceholderText(tr("Use 'Browse' button below to choose your keystore file"));
+    m_keystorePasswordEdit->setPlaceholderText(tr("Type your keystore password"));
     m_keyPasswordEdit->setPlaceholderText(tr("Type your key password"));
 
     m_browseIconButton->setIcon(QIcon(QStringLiteral(":/images/builds/browse.svg")));
@@ -483,8 +570,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_permissionCombo->addItems(androidPermissionList());
     m_qtModuleCombo->addItems(correctModuleList(androidModuleList().keys()));
     m_screenOrientationCombo->addItems(g_orientations);
-    m_minSdkVersionCombo->addItems(g_apiLevels);
-    m_targetSdkVersionCombo->addItems(g_apiLevels);
+    m_minSdkVersionCombo->addItems(g_apiLevels.keys());
+    m_targetSdkVersionCombo->addItems(g_apiLevels.keys());
     m_permissionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_qtModuleCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_minSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);

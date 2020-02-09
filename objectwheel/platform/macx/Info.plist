@@ -9,13 +9,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.objectwheel.Objectwheel</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>2.9.662.g03f4ddfd</string>
+	<string>2.9.666.g04f74b3c</string>
 	<key>CFBundleName</key>
 	<string>Objectwheel</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.9.662.g03f4ddfd</string>
+	<string>2.9.666.g04f74b3c</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12</string>
 	<key>NSPrincipalClass</key>
