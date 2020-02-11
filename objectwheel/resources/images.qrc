@@ -146,5 +146,11 @@
         <file>images/builds/gift.svg</file>
         <file>images/builds/browse.svg</file>
         <file>images/builds/show.svg</file>
+        <file>images/builds/android.svg</file>
+        <file>images/builds/ios.svg</file>
+        <file>images/builds/linux.svg</file>
+        <file>images/builds/macos.svg</file>
+        <file>images/builds/raspberry.svg</file>
+        <file>images/builds/windows.svg</file>
     </qresource>
 </RCC>
