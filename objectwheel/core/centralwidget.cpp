@@ -255,6 +255,7 @@ void CentralWidget::charge()
 {
     m_designerController->charge();
     m_projectOptionsWidget->charge();
+    m_buildsPane->charge();
 }
 
 void CentralWidget::discharge()
@@ -262,6 +263,7 @@ void CentralWidget::discharge()
     m_outputController->discharge();
     m_designerController->discharge();
     m_qmlCodeEditorWidget->discharge();
+    m_buildsPane->discharge();
     m_helpWidget->discharge();
 }
 

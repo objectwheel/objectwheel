@@ -543,6 +543,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_sameAsKeystorePasswordCheck->setCursor(Qt::PointingHandCursor);
 
     m_versionCodeSpin->setMaximum(std::numeric_limits<int>::max());
+    UtilityFunctions::disableWheelEvent(m_versionCodeSpin);
     autoDetectPemissionsCheck->setChecked(true);
     autoDetectQtModulesCheck->setChecked(true);
     autoDetectPemissionsCheck->setEnabled(false);
@@ -748,6 +749,15 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_showKeystorePasswordButton->setIcon(QIcon(QStringLiteral(":/images/builds/show.svg")));
     m_showKeyPasswordButton->setIcon(QIcon(QStringLiteral(":/images/builds/show.svg")));
 
+    m_screenOrientationCombo->addItems(AndroidPlatformWidget::orientationMap.keys());
+    m_minApiLevelCombo->addItems(AndroidPlatformWidget::apiLevelMap.keys());
+    m_targetApiLevelCombo->addItems(AndroidPlatformWidget::apiLevelMap.keys());
+    m_screenOrientationCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_permissionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_qtModuleCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_targetApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+
     int iconPictureSize = m_browseIconButton->sizeHint().height()
             + iconLayout->spacing()
             + m_clearIconButton->sizeHint().height();
@@ -759,57 +769,6 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
     buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
     signingLayout->setColumnMinimumWidth(0, labelColMinSz);
-
-    m_permissionCombo->addItems(androidPermissionList);
-    m_qtModuleCombo->addItems(qtModuleMap.keys());
-    m_screenOrientationCombo->addItems(orientationMap.keys());
-    m_minApiLevelCombo->addItems(apiLevelMap.keys());
-    m_targetApiLevelCombo->addItems(apiLevelMap.keys());
-    m_permissionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-    m_qtModuleCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-    m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-    m_targetApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-
-    m_versionCodeSpin->setValue(1);
-    m_screenOrientationCombo->setCurrentText(QStringLiteral("Unspecified"));
-    m_minApiLevelCombo->setCurrentText(QStringLiteral("API 21: Android 5.0"));
-    m_targetApiLevelCombo->setCurrentText(QStringLiteral("API 23: Android 6.0"));
-    m_aabCheck->setChecked(false);
-    m_abiArmeabiV7aCheck->setChecked(true);
-    m_abiArm64V8aCheck->setChecked(false);
-    m_abiX86Check->setChecked(false);
-    m_abiX8664Check->setChecked(false);
-    m_includeQtModulesCheck->setChecked(true);
-    m_qtModuleList->clear();
-    m_qtModuleList->addItem(QLatin1String("Qt Svg"));
-    m_signingDisabled->setChecked(true);
-    m_keystorePathEdit->clear();
-    m_keystorePasswordEdit->clear();
-    m_keyAliasCombo->clear();
-    m_keyPasswordEdit->clear();
-    m_keyPasswordEdit->setEchoMode(QLineEdit::Password);
-    m_keystorePasswordEdit->setEchoMode(QLineEdit::Password);
-    m_keyPasswordEdit->setEnabled(false);
-    m_showKeyPasswordButton->setEnabled(false);
-    m_showKeystorePasswordButton->setChecked(false);
-    m_showKeyPasswordButton->setChecked(false);
-    m_sameAsKeystorePasswordCheck->setChecked(true);
-
-    UtilityFunctions::disableWheelEvent(m_versionCodeSpin);
-    m_addPermissionButton->setEnabled(false);
-    m_permissionList->setEnabled(false);
-    m_permissionCombo->setEnabled(false);
-    m_removePermissionButton->setEnabled(false);
-    m_removeQtModuleButton->setEnabled(false);
-    m_sameAsKeystorePasswordCheck->setEnabled(false);
-    m_keyPasswordEdit->setEnabled(false);
-    m_showKeyPasswordButton->setEnabled(false);
-    m_keyAliasCombo->setEnabled(false);
-    m_showKeystorePasswordButton->setEnabled(false);
-    m_keystorePasswordEdit->setEnabled(false);
-    m_newKeystoreButton->setEnabled(false);
-    m_browseKeystoreButton->setEnabled(false);
-    m_clearKeystoreButton->setEnabled(false);
 }
 
 QLineEdit* AndroidPlatformWidget::nameEdit() const

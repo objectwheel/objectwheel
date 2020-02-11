@@ -1,6 +1,7 @@
 #include <buildspane.h>
 #include <segmentedbar.h>
 #include <androidplatformwidget.h>
+#include <androidplatformcontroller.h>
 #include <applicationstyle.h>
 #include <paintutils.h>
 
@@ -14,7 +15,8 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
   , m_platformLabel(new QLabel(this))
   , m_segmentedBar(new SegmentedBar(this))
   , m_stackedWidget(new QStackedWidget(this))
-  , m_androidWidget(new AndroidPlatformWidget(this))
+  , m_androidPlatformWidget(new AndroidPlatformWidget(this))
+  , m_androidPlatformController(new AndroidPlatformController(m_androidPlatformWidget, this))
 {
     setWidgetResizable(true);
     setWidget(new QWidget(this));
@@ -35,7 +37,8 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
     layout->addWidget(m_stackedWidget, 4, 1);
 
     iconLabel->setFixedSize(QSize(60, 60));
-    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"), QSize(60, 60), this));
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"),
+                                            QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::ExtraLight);
@@ -46,8 +49,8 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
     f.setPixelSize(16);
     m_platformLabel->setFont(f);
 
-    m_stackedWidget->addWidget(m_androidWidget);
-    m_stackedWidget->setCurrentWidget(m_androidWidget);
+    m_stackedWidget->addWidget(m_androidPlatformWidget);
+    m_stackedWidget->setCurrentWidget(m_androidPlatformWidget);
 
     ApplicationStyle::setButtonStyle(m_segmentedBar, ApplicationStyle::TexturedRounded);
     ApplicationStyle::setHighlightingDisabledForCheckedState(m_segmentedBar, true);
@@ -86,9 +89,9 @@ QStackedWidget* BuildsPane::stackedWidget() const
     return m_stackedWidget;
 }
 
-AndroidPlatformWidget* BuildsPane::androidWidget() const
+AndroidPlatformWidget* BuildsPane::androidPlatformWidget() const
 {
-    return m_androidWidget;
+    return m_androidPlatformWidget;
 }
 
 QSize BuildsPane::sizeHint() const
@@ -99,4 +102,14 @@ QSize BuildsPane::sizeHint() const
 QSize BuildsPane::minimumSizeHint() const
 {
     return {0, 0};
+}
+
+void BuildsPane::charge() const
+{
+    m_androidPlatformController->charge();
+}
+
+void BuildsPane::discharge() const
+{
+    m_androidPlatformController->discharge();
 }

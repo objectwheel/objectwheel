@@ -7,6 +7,7 @@ class QLabel;
 class SegmentedBar;
 class QStackedWidget;
 class AndroidPlatformWidget;
+class AndroidPlatformController;
 
 class BuildsPane final : public QScrollArea
 {
@@ -19,16 +20,21 @@ public:
     QLabel* platformLabel() const;
     SegmentedBar* segmentedBar() const;
     QStackedWidget* stackedWidget() const;
-    AndroidPlatformWidget* androidWidget() const;
+    AndroidPlatformWidget* androidPlatformWidget() const;
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
+
+public slots:
+    void charge() const;
+    void discharge() const;
 
 private:
     QLabel* m_platformLabel;
     SegmentedBar* m_segmentedBar;
     QStackedWidget* m_stackedWidget;
-    AndroidPlatformWidget* m_androidWidget;
+    AndroidPlatformWidget* m_androidPlatformWidget;
+    AndroidPlatformController* m_androidPlatformController;
 };
 
 #endif // BUILDSPANE_H
