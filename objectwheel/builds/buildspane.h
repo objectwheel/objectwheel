@@ -6,6 +6,7 @@
 class QLabel;
 class SegmentedBar;
 class QStackedWidget;
+class StartWidget;
 class AndroidPlatformWidget;
 class AndroidPlatformController;
 
@@ -20,6 +21,7 @@ public:
     QLabel* platformLabel() const;
     SegmentedBar* segmentedBar() const;
     QStackedWidget* stackedWidget() const;
+    StartWidget* startWidget() const;
     AndroidPlatformWidget* androidPlatformWidget() const;
 
     QSize sizeHint() const override;
@@ -33,6 +35,7 @@ private:
     QLabel* m_platformLabel;
     SegmentedBar* m_segmentedBar;
     QStackedWidget* m_stackedWidget;
+    StartWidget* m_startWidget;
     AndroidPlatformWidget* m_androidPlatformWidget;
     AndroidPlatformController* m_androidPlatformController;
 };
