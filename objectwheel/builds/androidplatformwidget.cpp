@@ -25,6 +25,14 @@
 // TODO: Checkout old version of the codes and see what we are lacking
 // TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"
 
+// OLD TODOs
+//TODO: Add "reset form" and critisize side effects
+//TODO: Generate certificate
+//TODO: Test and check alias and keystore passwords
+//TODO: Show aliases
+//TODO: Critisize removing build.json when build is done,
+// or after closing builds screen
+
 static QMap<QString, QString> g_apiLevels {
     { "API 21: Android 5.0", "21" },
     { "API 22: Android 5.1", "22" },
@@ -102,8 +110,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_domainEdit(new QLineEdit(this))
   , m_packageEdit(new QLineEdit(this))
   , m_screenOrientationCombo(new QComboBox(this))
-  , m_minSdkVersionCombo(new QComboBox(this))
-  , m_targetSdkVersionCombo(new QComboBox(this))
+  , m_minApiLevelCombo(new QComboBox(this))
+  , m_targetApiLevelCombo(new QComboBox(this))
   , m_iconPictureLabel(new QLabel(this))
   , m_browseIconButton(new QPushButton(this))
   , m_clearIconButton(new QPushButton(this))
@@ -160,8 +168,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 
     auto packageNameLabel = new QLabel(tr("Package name:"), this);
     auto screenOrientationLabel = new QLabel(tr("Screen orientation:"), this);
-    auto minSdkVersionLabel = new QLabel(tr("Minimum required SDK:"), this);
-    auto targetSdkVersionLabel = new QLabel(tr("Target SDK:"), this);
+    auto minApiLevelLabel = new QLabel(tr("Minimum API level:"), this);
+    auto targetApiLevelLabel = new QLabel(tr("Target API level:"), this);
     auto iconLabel = new QLabel(tr("Icon:"), this);
     auto permissionLabel = new QLabel(tr("Permissions:"), this);
     auto autoDetectPemissionsCheck = new QCheckBox(tr("Automatically detected"), this);
@@ -196,10 +204,10 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     androidSpesificLayout->addWidget(m_packageEdit, 0, 1, 1, 2);
     androidSpesificLayout->addWidget(screenOrientationLabel, 1, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_screenOrientationCombo, 1, 1);
-    androidSpesificLayout->addWidget(minSdkVersionLabel, 2, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
-    androidSpesificLayout->addWidget(m_minSdkVersionCombo, 2, 1);
-    androidSpesificLayout->addWidget(targetSdkVersionLabel, 3, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
-    androidSpesificLayout->addWidget(m_targetSdkVersionCombo, 3, 1);
+    androidSpesificLayout->addWidget(minApiLevelLabel, 2, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    androidSpesificLayout->addWidget(m_minApiLevelCombo, 2, 1);
+    androidSpesificLayout->addWidget(targetApiLevelLabel, 3, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    androidSpesificLayout->addWidget(m_targetApiLevelCombo, 3, 1);
     androidSpesificLayout->addWidget(iconLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addLayout(iconLayout, 4, 1);
     androidSpesificLayout->addWidget(permissionLabel, 5, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
@@ -210,7 +218,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     auto aabLabel = new QLabel(tr("Android App Bundle:"), this);
     auto abisLabel = new QLabel(tr("Build ABIs:"), this);
     auto qtModulesLabel = new QLabel(tr("Qt modules:"), this);
-    auto autoDetectQtModulesCheck = new QCheckBox(tr("Automatically detected based on Qml imports"), this);
+    auto autoDetectQtModulesCheck = new QCheckBox(tr("Automatically detected"), this);
 
     auto abisLayout = new QVBoxLayout;
     abisLayout->setSpacing(0);
@@ -310,8 +318,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 
     m_versionCodeSpin->setCursor(Qt::PointingHandCursor);
     m_screenOrientationCombo->setCursor(Qt::PointingHandCursor);
-    m_minSdkVersionCombo->setCursor(Qt::PointingHandCursor);
-    m_targetSdkVersionCombo->setCursor(Qt::PointingHandCursor);
+    m_minApiLevelCombo->setCursor(Qt::PointingHandCursor);
+    m_targetApiLevelCombo->setCursor(Qt::PointingHandCursor);
     m_clearIconButton->setCursor(Qt::PointingHandCursor);
     m_browseIconButton->setCursor(Qt::PointingHandCursor);
     m_includePemissionsCheck->setCursor(Qt::PointingHandCursor);
@@ -337,6 +345,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_showKeyPasswordButton->setCursor(Qt::PointingHandCursor);
     m_sameAsKeystorePasswordCheck->setCursor(Qt::PointingHandCursor);
 
+    m_versionCodeSpin->setMaximum(std::numeric_limits<int>::max());
     autoDetectPemissionsCheck->setChecked(true);
     autoDetectQtModulesCheck->setChecked(true);
     autoDetectPemissionsCheck->setEnabled(false);
@@ -368,25 +377,21 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_nameEdit->setToolTip(tr("Application name"));
     m_versionCodeSpin->setToolTip(tr("Application version (int)"
                                      "<p style='white-space:nowrap;font-size:11px'>"
-                                     "An internal version number. This number is used only to<br>"
-                                     "determine whether one version is more recent than another,<br>"
-                                     "with higher numbers indicating more recent versions. This<br>"
-                                     "is not the version number shown to users; that number is<br>"
-                                     "set by the Version name field.</p>"
-                                     "<p style='font-size:11px'>"
-                                     "The value must be set as an integer, such as 100. You can<br>"
-                                     "define it however you want, as long as each successive<br>"
-                                     "version has a higher number. For example, it could be a<br>"
-                                     "build number. Or you could translate a version number in<br>"
-                                     "x.y format to an integer by encoding the x and y separately<br>"
-                                     "in the lower and upper 16 bits. Or you could simply increase<br>"
-                                     "the number by one each time a new version is released.</p>"));
+                                     "An internal version number. This number is used to determine whether one<br>"
+                                     "version is more recent than another, with higher numbers indicating more<br>"
+                                     "recent versions. This is not the version number shown to users; that<br>"
+                                     "number is set by the version name field.</p>"
+                                     "<p style='white-space:nowrap;font-size:11px'>"
+                                     "The value must be set as an integer, such as 100. You can define it<br>"
+                                     "however you want, as long as each successive version has a higher number.<br>"
+                                     "For example, it could be a build number. Or you could translate a version<br>"
+                                     "number in x.y format to an integer by encoding the x and y separately in<br>"
+                                     "the lower and upper 16 bits. Or you could simply increase the number by<br>"
+                                     "one each time a new version is released.</p>"));
     m_versionNameEdit->setToolTip(tr("Application version (string)"
                                      "<p style='white-space:nowrap;font-size:11px'>"
-                                     "The version number shown to users. The string might also be<br>"
-                                     "used by Qt internally when creating e.g. cache locations for<br>"
-                                     "the app as an extension for the cache directory. The Version<br>"
-                                     "code field holds the significant version number used internally.</p>"));
+                                     "The version number shown to users. The version code field holds the<br>"
+                                     "significant version number used internally.</p>"));
     m_organizationEdit->setToolTip(tr("Your organization name"));
     m_domainEdit->setToolTip(tr("Your organization domain"));
     m_packageEdit->setToolTip(tr("<p style='white-space:nowrap'>"
@@ -399,140 +404,131 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
                                             "For more information please refer to:<br><i>"
                                             "<a href='https://developer.android.com/guide/topics/manifest/activity-element#screen'>"
                                             "https://developer.android.com/guide/topics/manifest/activity-element#screen</a></i></p>"));
-    m_minSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>"
-                                        "Minimum API Level required for your application to run. "
-                                        "For more information please refer to:<br><i>"
-                                        "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#min'>"
-                                        "https://developer.android.com/guide/topics/manifest/uses-sdk-element#min</a></i></p>"));
-    m_targetSdkVersionCombo->setToolTip(tr("<p style='white-space:nowrap'>"
-                                           "The API Level that your application targets. "
-                                           "For more information please refer to:<br><i>"
-                                           "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#target'>"
-                                           "https://developer.android.com/guide/topics/manifest/uses-sdk-element#target</a></i></p>"));
+    m_minApiLevelCombo->setToolTip(tr("<p style='white-space:nowrap'>"
+                                      "Minimum API Level required for your application to run. "
+                                      "For more information please refer to:<br><i>"
+                                      "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#min'>"
+                                      "https://developer.android.com/guide/topics/manifest/uses-sdk-element#min</a></i></p>"));
+    m_targetApiLevelCombo->setToolTip(tr("<p style='white-space:nowrap'>"
+                                         "The API Level that your application targets. "
+                                         "For more information please refer to:<br><i>"
+                                         "<a href='https://developer.android.com/guide/topics/manifest/uses-sdk-element#target'>"
+                                         "https://developer.android.com/guide/topics/manifest/uses-sdk-element#target</a></i></p>"));
     m_iconPictureLabel->setToolTip(tr("<p style='white-space:nowrap'>"
-                                      "Preview of your application icon <i>(If no icon provided, the<br>"
-                                      "Android OS will assign an default icon for your application)</i></p>"));
+                                      "Preview of your application icon (<i>If no icon provided, Android will<br>"
+                                      "assign an default icon for your application</i>)</p>"));
     m_browseIconButton->setToolTip(tr("Select an application icon from your computer"));
     m_clearIconButton->setToolTip(tr("Clear application icon"));
-    autoDetectPemissionsCheck->setToolTip(tr("<p style='white-space:nowrap'>"
-                                             "Our cloud build system will try to guess your Android permissions<br>"
-                                             "based on the QML imports and Qt modules you use in your project</p>"));
-    m_includePemissionsCheck->setToolTip(tr("<p style='white-space:nowrap'>"
-                                            "Enable adding extra Android permissions manually in case<br>"
-                                            "our cloud build system might not be able to detect all the<br>"
-                                            "necessary permissions for your application to run</p>"));
+    autoDetectPemissionsCheck->setToolTip(tr("Enable automatic detection of Android permissions"
+                                             "<p style='white-space:nowrap;font-size:11px'>"
+                                             "Our cloud build system will try to guess Android permissions based on<br>"
+                                             "the QML imports and Qt modules you use in your project.</p>"));
+    m_includePemissionsCheck->setToolTip(tr("Enable adding extra Android permissions manually"
+                                            "<p style='white-space:nowrap;font-size:11px'>"
+                                            "It could be useful to add some extra permissions manually in case our<br>"
+                                            "cloud build system might not be able to detect all the necessary<br>"
+                                            "permissions for your application to run.</p>"));
     m_permissionCombo->setToolTip(tr("<p style='white-space:nowrap'>"
-                                     "Permissions list to choose from. For more information about Android permissions please refer to:<br><i>"
+                                     "Permission list to choose from. For more information about Android permissions please refer to:<br><i>"
                                      "<a href='https://developer.android.com/reference/android/Manifest.permission'>"
                                      "https://developer.android.com/reference/android/Manifest.permission</a></i></p>"));
-    m_permissionList->setToolTip(tr("User defined permissions for the application"));
-    m_addPermissionButton->setToolTip(tr("<p style='white-space:nowrap'>"
-                                         "Adds current permission selected on the<br>"
-                                         "left combo box to the bottom list view</p>"));
-    m_removePermissionButton->setToolTip(tr("<p style='white-space:nowrap'>"
-                                            "Select the permission you want to remove from the<br>"
-                                            "list first and click this button to remove it</p>"));
-    autoDetectQtModulesCheck->setToolTip(tr("<p style='white-space:nowrap'>"
-                                            "Our cloud build system will try to guess Qt modules your<br>"
-                                            "application needs to be linked against based on the QML<br>"
-                                            "imports you use in your project</p>"));
-    m_includeQtModulesCheck->setToolTip(tr("<p style='white-space:nowrap'>"
-                                           "Enable adding extra Qt modules to link against manually in case<br>"
-                                           "our cloud build system might not be able to detect all the<br>"
-                                           "Qt modules for your application to run. E.g. if you use svg images<br>"
-                                           "in your project we might not be able to detect it (since our<br>"
-                                           "algorithm only scans for import statements in the qml files)</p>"));
+    m_permissionList->setToolTip(tr("User defined Android permissions for the application"));
+    autoDetectQtModulesCheck->setToolTip(tr("Enable automatic detection of Qt modules"
+                                            "<p style='white-space:nowrap;font-size:11px'>"
+                                            "Our cloud build system will try to guess Qt modules your application needs<br>"
+                                            "to be linked against based on the QML imports you use in your project.</p>"));
+    m_includeQtModulesCheck->setToolTip(tr("Enable adding extra Qt modules manually"
+                                           "<p style='white-space:nowrap;font-size:11px'>"
+                                           "It could be useful to add some extra Qt modules to link against manually<br>"
+                                           "in case our cloud build system might not be able to detect all the<br>"
+                                           "necessary Qt modules for your application to run. E.g. if you use svg<br>"
+                                           "images in your project we might not be able to detect it (since our<br>"
+                                           "algorithm only scans for the import statements in qml files).</p>"));
     m_qtModuleCombo->setToolTip(tr("<p style='white-space:nowrap'>"
-                                   "Qt modules list to choose from. For more information about Qt modules please refer to:<br><i>"
+                                   "Qt module list to choose from. For more information about Qt modules please refer to:<br><i>"
                                    "<a href='https://doc.qt.io/qt-5/qtmodules.html'>"
                                    "https://doc.qt.io/qt-5/qtmodules.html</a></i></p>"));
-    m_qtModuleList->setToolTip(tr("User defined Qt modules for the application to link against in the build process"));
-    m_addQtModuleButton->setToolTip(tr("<p style='white-space:nowrap'>"
-                                       "Adds current Qt module selected on the<br>"
-                                       "left combo box to the bottom list view</p>"));
-    m_removeQtModuleButton->setToolTip(tr("<p style='white-space:nowrap'>"
-                                          "Select the Qt module you want to remove from the<br>"
-                                          "list first and click this button to remove it.</p>"));
+    m_qtModuleList->setToolTip(tr("User defined Qt modules for the application to link against"));
     m_aabCheck->setToolTip(tr("<p style='white-space:nowrap'>"
                               "For more information about Android App Bundles:<br><i>"
                               "<a href='https://developer.android.com/guide/app-bundle'>"
                               "https://developer.android.com/guide/app-bundle</a></i></p>"));
-    m_abiArmeabiV7aCheck->setToolTip(tr("<p style='white-space:nowrap'>"
-                                        "Bundles your application package with necessary assets and library<br>"
-                                        "files to support devices those which have armeabi-v7a processors</p>"));
+    m_abiArmeabiV7aCheck->setToolTip(tr("<p style='white-space:nowrap'>"""
+                                        "Enable bundling the application package with the necessary assets and<br>"
+                                        "libraries to support devices with armeabi-v7a ABI.</p>"));
     m_abiArm64V8aCheck->setToolTip(tr("<p style='white-space:nowrap'>"
-                                      "Bundles your application package with necessary assets and library<br>"
-                                      "files to support devices those which have arm64-v8a processors</p>"));
+                                      "Enable bundling the application package with the necessary assets and<br>"
+                                      "libraries to support devices with arm64-v8a ABI.</p>"));
     m_abiX86Check->setToolTip(tr("<p style='white-space:nowrap'>"
-                                 "Bundles your application package with necessary assets and library<br>"
-                                 "files to support devices those which have x86 processors</p>"));
+                                 "Enable bundling the application package with the necessary assets and<br>"
+                                 "libraries to support devices with x86 ABI.</p>"));
     m_abiX8664Check->setToolTip(tr("<p style='white-space:nowrap'>"
-                                   "Bundles your application package with necessary assets and library<br>"
-                                   "files to support devices those which have x86_64 processors</p>"));
+                                   "Enable bundling the application package with the necessary assets and<br>"
+                                   "libraries to support devices with x86_64 ABI.</p>"));
     m_signingEnabled->setToolTip(tr("Enable package signing"
                                     "<p style='white-space:nowrap;font-size:11px'>"
                                     "Android (hence Google Play and other app stores) requires that all APKs be<br>"
-                                    "digitally signed with a certificate before they are installed on a device or<br>"
-                                    "updated.</p>"
+                                    "digitally signed with a certificate before they are installed on a device<br>"
+                                    "or updated.</p>"
                                     "<p style='white-space:nowrap;font-size:11px'>"
-                                    "Your private key is required for signing all future versions of your app. Thus<br>"
-                                    "you should sign your app with the same certificate throughout its expected<br>"
-                                    "lifespan. If you lose or misplace your key, you will not be able to publish<br>"
-                                    "updates to your existing app. You cannot regenerate a previously generated<br>"
-                                    "key.</p>"
+                                    "Your private key is required for signing all future versions of your app.<br>"
+                                    "Thus you should sign your app with the same certificate throughout its<br>"
+                                    "expected lifespan. If you lose or misplace your key, you will not be able<br>"
+                                    "to publish updates to your existing app. You cannot regenerate a<br>"
+                                    "previously generated key.<p>"
                                     "<p style='white-space:nowrap;font-size:11px'>"
-                                    "If you sign the new version of your existing app with a different certificate,<br>"
-                                    "you must assign a different package name to the app—in this case, the user<br>"
-                                    "installs the new version as a completely new app (it's not your existing app<br>"
-                                    "anymore).</p>"
+                                    "If you sign the new version of your existing app with a different<br>"
+                                    "certificate, you must assign a different package name to the app—in this<br>"
+                                    "case, the user installs the new version as a completely new app (it's not<br>"
+                                    "your existing app anymore).</p>"
                                     "<p style='white-space:nowrap;font-size:11px'>"
-                                    "Securing your app signing key is of critical importance, both to you and to the<br>"
-                                    "user. If you allow someone to use your key, or if you leave your keystore and<br>"
-                                    "passwords in an unsecured location such that a third-party could find and use<br>"
-                                    "them, your authoring identity and the trust of the user are compromised.</p>"
+                                    "Securing your private key is of critical importance, both to you and to<br>"
+                                    "the user. If you allow someone to use your key, or if you leave your<br>"
+                                    "keystore and passwords in an unsecured location such that a third-party<br>"
+                                    "could find and use them, your authoring identity and the trust of the user<br>"
+                                    "are compromised.</p>"
                                     "<p style='white-space:nowrap;font-size:11px'>"
                                     "If a third party should manage to take your key without your knowledge or<br>"
-                                    "permission, that person could sign and distribute apps that maliciously replace<br>"
-                                    "your authentic apps or corrupt them. Such a person could also sign and<br>"
-                                    "distribute apps under your identity that attack other apps or the system itself,<br>"
-                                    "or corrupt or steal user data.</p>"
+                                    "permission, that person could sign and distribute apps that maliciously<br>"
+                                    "replace your authentic apps or corrupt them. Such a person could also sign<br>"
+                                    "and distribute apps under your identity that attack other apps or the<br>"
+                                    "system itself, or corrupt or steal user data.</p>"
                                     "<p style='white-space:nowrap;font-size:11px'>"
                                     "Your reputation as a developer entity depends on your securing your app<br>"
-                                    "signing key properly, at all times, until the key is expired. For more information:<br>"
+                                    "signing key properly, at all times, until the key is expired. For more<br>"
+                                    "information:<br>"
                                     "<a href='https://developer.android.com/studio/publish/app-signing#considerations'>"
                                     "https://developer.android.com/studio/publish/app-signing#considerations</a></i></p>"));
     m_signingDisabled->setToolTip(tr("Disable package signing"
                                      "<p style='white-space:nowrap;font-size:11px'>"
                                      "Android (hence Google Play and other app stores) requires that all APKs be<br>"
-                                     "digitally signed with a certificate before they are installed on a device or<br>"
-                                     "updated.</p>"
+                                     "digitally signed with a certificate before they are installed on a device<br>"
+                                     "or updated.</p>"
                                      "<p style='white-space:nowrap;font-size:11px'>"
                                      "When package signing disabled, our cloud build system automatically signs<br>"
-                                     "your app with a common debug certificate generated by the Android SDK tools.<br>"
-                                     "Thus, this option should only be used for debugging purposes. Do not use<br>"
-                                     "this option for your production builds.</p>"
+                                     "your app with a common debug certificate generated by the Android SDK<br>"
+                                     "tools. Thus, this option should only be used for debugging purposes. Do<br>"
+                                     "not use this option for your production builds.</p>"
                                      "<p style='white-space:nowrap;font-size:11px'>"
-                                     "Because the debug certificate is created by the build tools and is insecure<br>"
-                                     "by design, most app stores (including the Google Play Store) do not accept<br>"
-                                     "apps signed with a debug certificate for publishing.</p>"
+                                     "Because the debug certificate is created by the build tools and is<br>"
+                                     "insecure by design, most app stores (including the Google Play Store) do<br>"
+                                     "not accept apps signed with a debug certificate for publishing.</p>"
                                      "<p style='white-space:nowrap;font-size:11px'>"
-                                     "The debug certificate used to sign your app for debugging has an expiration<br>"
-                                     "date of 30 years from its creation date. When the certificate expires, you<br>"
-                                     "get a build error.</p>"));
-    m_keystorePathEdit->setToolTip(tr("Keystore file path"));
+                                     "The debug certificate used to sign your app for debugging has an<br>"
+                                     "expiration date of 30 years from its creation date. When the certificate<br>"
+                                     "expires, you get a build error.</p>"));
+    m_keystorePathEdit->setToolTip(tr("Path to keystore file"
+                                      "<p style='white-space:nowrap;font-size:11px'>"
+                                      "A keystore file is a binary file that serves as a repository of<br>"
+                                      "certificates and private keys.</p>"));
     m_newKeystoreButton->setToolTip(tr("Establish new keystore"));
     m_browseKeystoreButton->setToolTip(tr("Select keystore file from your computer"));
     m_clearKeystoreButton->setToolTip(tr("Clear keystore settings"));
-    m_keystorePasswordEdit->setToolTip(tr("<p style='white-space:nowrap'>"
-                                          "Password for your keystore, it gives access to the public<br>"
-                                          "key information within the keystore file (such as public<br>"
-                                          "keys, key aliases and encrypted versions of your private keys)</p>"));
-    m_keyAliasCombo->setToolTip(tr("Select the name of the private key you want to use for signing process"));
-    m_keyPasswordEdit->setToolTip(tr("<p style='white-space:nowrap'>"
-                                     "Password for private key, it gives us </p>"));
+    m_keystorePasswordEdit->setToolTip(tr("Password for your keystore"));
+    m_keyAliasCombo->setToolTip(tr("Select the name of the private key you want to use for signing"));
+    m_keyPasswordEdit->setToolTip(tr("Password for private key"));
     m_showKeystorePasswordButton->setToolTip(tr("Toggle keystore password visibility"));
     m_showKeyPasswordButton->setToolTip(tr("Toggle key password visibility"));
-    m_sameAsKeystorePasswordCheck->setToolTip(tr("Enable this if private key password is equal to keystore password"));
 
     m_nameEdit->setPlaceholderText(tr("My Application"));
     m_versionNameEdit->setPlaceholderText(tr("1.1 Gold Edition"));
@@ -561,7 +557,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_iconPictureLabel->setFixedSize(iconPictureSize, iconPictureSize);
     m_iconPictureLabel->setFrameShape(QFrame::StyledPanel);
 
-    int labelColMinSz = minSdkVersionLabel->sizeHint().width(); // Longest label's width
+    int labelColMinSz = aabLabel->sizeHint().width(); // Longest label's width
     generalLayout->setColumnMinimumWidth(0, labelColMinSz);
     androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
     buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
@@ -570,17 +566,17 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_permissionCombo->addItems(androidPermissionList());
     m_qtModuleCombo->addItems(correctModuleList(androidModuleList().keys()));
     m_screenOrientationCombo->addItems(g_orientations);
-    m_minSdkVersionCombo->addItems(g_apiLevels.keys());
-    m_targetSdkVersionCombo->addItems(g_apiLevels.keys());
+    m_minApiLevelCombo->addItems(g_apiLevels.keys());
+    m_targetApiLevelCombo->addItems(g_apiLevels.keys());
     m_permissionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_qtModuleCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-    m_minSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
-    m_targetSdkVersionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    m_targetApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
     m_versionCodeSpin->setValue(1);
     m_screenOrientationCombo->setCurrentText(QStringLiteral("Unspecified"));
-    m_minSdkVersionCombo->setCurrentText(QStringLiteral("API 21: Android 5.0"));
-    m_targetSdkVersionCombo->setCurrentText(QStringLiteral("API 23: Android 6.0"));
+    m_minApiLevelCombo->setCurrentText(QStringLiteral("API 21: Android 5.0"));
+    m_targetApiLevelCombo->setCurrentText(QStringLiteral("API 23: Android 6.0"));
     m_aabCheck->setChecked(false);
     m_abiArmeabiV7aCheck->setChecked(true);
     m_abiArm64V8aCheck->setChecked(false);
@@ -617,348 +613,6 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_newKeystoreButton->setEnabled(false);
     m_browseKeystoreButton->setEnabled(false);
     m_clearKeystoreButton->setEnabled(false);
-
-    //    auto btnResIcon = new QToolButton;
-    ////    btnResIcon->setIcon(QIcon(QStringLiteral(":/images/refresh.png"));
-    //    btnResIcon->setIconSize(QSize(14, 14));
-    //    btnResIcon->setToolTip("Reset icon to default.");
-    //    connect(btnResIcon, &QToolButton::clicked, [&]{
-    //        _txtIconPath.setText("");
-    //        _picIcon.setPixmap(QPixmap(":/images/android-default.png"));
-    //    });
-    //    _appBox.setTitle("Application Settings");
-    //    _appBox.setFixedHeight(280);
-    //    _appBoxLay.addWidget(&_lblAppName, 0, 0);
-    //    _appBoxLay.addWidget(&_txtAppName, 0, 1, 1, 2);
-    //    _appBoxLay.addWidget(&_lblVersionName, 1, 0);
-    //    _appBoxLay.addWidget(&_txtVersionName, 1, 1, 1, 2);
-    //    _appBoxLay.addWidget(&_lblVersionCode, 2, 0);
-    //    _appBoxLay.addWidget(&_spnVersionCode, 2, 1, 1, 2);
-    //    _appBoxLay.addWidget(&_lblOrientation, 3, 0);
-    //    _appBoxLay.addWidget(&_cmbOrientation, 3, 1, 1, 2);
-    //    _appBoxLay.addWidget(&_lblIcon, 4, 0);
-    //    _appBoxLay.addWidget(&_txtIconPath, 4, 1);
-    //    _appBoxLay.addWidget(&_btnIcon, 4, 2);
-    //    _appBoxLay.addWidget(btnResIcon, 4, 2);
-    //    _appBoxLay.addWidget(&_picIcon, 5, 1);
-    //    _appBoxLay.setColumnMinimumWidth(2, 55);
-    //    _appBoxLay.setAlignment(btnResIcon, Qt::AlignRight);
-
-    //    connect(&_btnIcon, &QToolButton::clicked, [&] {
-    //        auto fileName = QFileDialog::getOpenFileName(this, tr("Open Image"),
-    //          QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
-    //          tr("Image Files (*.png *.jpg *.jpeg *.tiff *.bmp)"));
-
-    //        QPixmap icon(fileName);
-    //        if (icon.width() == icon.height() &&
-    //            icon.width() >= 256 && icon.height() >= 256) {
-    //            _picIcon.setPixmap(icon);
-    //            _txtIconPath.setText(fileName);
-    //        } else if (!fileName.isEmpty()){
-    //            UtilityFunctions::showMessage(
-    //                        this, tr("Invalid"),
-    //                        tr("Image file is not valid. It must be atleast "
-    //                           "256 x 256 and width must be equal to height."));
-    //        }
-    //    });
-
-    //    connect(&_txtIconPath, &QLineEdit::textChanged, [&] {
-    //        if (_txtIconPath.text().isEmpty()) {
-    //            _txtIconPath.setToolTip(
-    //            "Select icon for your application. It must be at least 256 x 256 and\n"
-    //            "width must be equal to height. Known image formats such as PNG and\n"
-    //            "JPG are allowed. Your icon may contain alpha channel.");
-    //        } else {
-    //            _txtIconPath.setToolTip(_txtIconPath.text() + "\n" +
-    //            "Select icon for your application. It must be at least 256 x 256 and\n"
-    //            "width must be equal to height. Known image formats such as PNG and\n"
-    //            "JPG are allowed. Your icon may contain alpha channel.");
-    //        }
-    //    });
-
-    //    _lblAppName.setText("Application name:");
-    //    _lblVersionCode.setText("Version code:");
-    //    _lblVersionName.setText("Version name:");
-    //    _lblOrientation.setText("Orientation:");
-    //    _lblIcon.setText("Icon:");
-    //    _btnIcon.setText("...");
-    //    _btnIcon.setToolTip(
-    //    "Select icon for your application. It must be at least 256 x 256 and\n"
-    //    "width must be equal to height. Known image formats such as PNG and\n"
-    //    "JPG are allowed. Your icon may contain alpha channel.");
-
-    //    _txtIconPath.setDisabled(true);
-    //    _txtIconPath.setPlaceholderText("[Android Default]");
-    //    _txtIconPath.setToolTip(_btnIcon.toolTip());
-    //    _txtIconPath.setFixedWidth(130);
-
-    //    _picIcon.setToolTip("Application icon.");
-    //    _picIcon.setFixedSize({64, 64});
-    //    _picIcon.setScaledContents(true);
-    //    _picIcon.setPixmap(QPixmap(":/images/android-default.png"));
-    //    _picIcon.setFrameShape(QFrame::StyledPanel);
-
-    //    _txtAppName.setText("My App");
-    //    _txtAppName.setFixedWidth(200);
-    //    _txtAppName.setToolTip("Your application name.");
-
-    //    _txtVersionName.setText("1.0");
-    //    _txtVersionName.setFixedWidth(120);
-    //    _txtVersionName.setToolTip(
-    //    "The version number shown to users. This value can be set as a raw string. \n"
-    //    "The string has no other purpose than to be displayed to users. \n"
-    //    "The 'Version code' field holds the significant version number used internally.");
-
-    //    _spnVersionCode.setValue(1);
-    //    _spnVersionCode.setMaximum(99999);
-    //    _spnVersionCode.setFixedWidth(70);
-    //    _spnVersionCode.setToolTip(
-    //    "An internal version number. This number is used only to determine \n"
-    //    "whether one version is more recent than another, with higher \n"
-    //    "numbers indicating more recent versions. This is not the version \n"
-    //    "number shown to users; that number is set by the 'Version name' field. \n"
-    //    "\n"
-    //    "The value must be set as an integer, such as '100'. You can define it \n"
-    //    "however you want, as long as each successive version has a higher number. \n"
-    //    "For example, it could be a build number. Or you could translate a version \n"
-    //    "number in 'x.y' format to an integer by encoding the 'x' and 'y' \n"
-    //    "separately in the lower and upper 16 bits. Or you could simply increase \n"
-    //    "the number by one each time a new version is released.");
-
-    //    _cmbOrientation.setFixedWidth(120);
-    //    _cmbOrientation.setIconSize({14, 14});
-    //    _cmbOrientation.addItem(QIcon(QStringLiteral(":/images/free.png"), "Free");
-    //    _cmbOrientation.addItem(QIcon(QStringLiteral(":/images/landscape.png"), "Landscape");
-    //    _cmbOrientation.addItem(QIcon(QStringLiteral(":/images/portrait.png"), "Portrait");
-    //    _cmbOrientation.setToolTip(
-    //    "Application orientation. Use Landscape or Portrait to lock your \n"
-    //    "application orientation; or use Free to leave it unspecified.");
-
-    //    _packageBox.setTitle("Package Settings");
-    //    _packageBox.setFixedHeight(150);
-    //    _packageBoxLay.addWidget(&_lblPackageName, 0, 0);
-    //    _packageBoxLay.addWidget(&_txtPackageName, 0, 1);
-    //    _packageBoxLay.addWidget(&_lblMinSdk, 1, 0);
-    //    _packageBoxLay.addWidget(&_cmbMinSdk, 1, 1);
-    //    _packageBoxLay.addWidget(&_lblTargetSdk, 2, 0);
-    //    _packageBoxLay.addWidget(&_cmbTargetSdk, 2, 1);
-
-    //    _lblPackageName.setText("Package name:");
-    //    _lblMinSdk.setText("Minimum required SDK:");
-    //    _lblTargetSdk.setText("Target SDK:");
-    //    _txtPackageName.setText("com.example.myapp");
-
-    //    auto validator = new QRegExpValidator(
-    //    QRegExp("^([A-Za-z]{1}[A-Za-z\\d_]*\\.)*[A-Za-z][A-Za-z\\d_]*$"));
-    //    _txtPackageName.setValidator(validator);
-    //    _txtPackageName.setFixedWidth(200);
-    //    _txtPackageName.setToolTip(
-    //    "The Android package name, also known as the Google Play ID, the unique \n"
-    //    "identifier of an application. Please choose a valid package name for \n"
-    //    "your application (for example, 'org.example.myapp'). \n"
-    //    "\n"
-    //    "Packages are usually defined using a hierarchical naming pattern, with \n"
-    //    "levels in the hierarchy seperated by periods (.) (pronounced 'dot').\n"
-    //    "\n"
-    //    "In general, a package name begins with the top level domain name of \n"
-    //    "the organization and then the organization's domain and then any \n"
-    //    "subdomains listed in reverse order. The organization can then choose \n"
-    //    "a spesific name for their package. Package names should be all \n"
-    //    "lowercase characters whenever possible.\n"
-    //    "\n"
-    //    "Completed conventions for disambiguating package names and rules for \n"
-    //    "naming packages when the Internet domain name cannot be directly \n"
-    //    "used as a package name are described in section 7.7 of \n"
-    //    "the Java Language Specification.");
-
-    //    _cmbMinSdk.setFixedWidth(200);
-    //    _cmbMinSdk.setToolTip("Sets the minimum required version on which this application can be run.");
-    //    _cmbMinSdk.setCurrentText("API 17: Android 4.2, 4.2.2");
-
-    //    _cmbTargetSdk.setFixedWidth(200);
-    //    _cmbTargetSdk.setToolTip(
-    //    "Sets the target SDK. Set this to the highest tested version. This \n"
-    //    "disables compatibility behavior of the system for your application.");
-    //    _cmbTargetSdk.setCurrentText("API 21: Android 5.0");
-
-    //    _permissionsBox.setTitle("Permission Settings");
-    //    _permissionsBox.setFixedHeight(200);
-    //    _permissionsBoxLay.addWidget(&_permissionList, 0, 0);
-    //    _permissionsBoxLay.addWidget(&_btnDelPermission, 0, 1);
-    //    _permissionsBoxLay.addWidget(&_cmbPermissions, 1, 0);
-    //    _permissionsBoxLay.addWidget(&_btnAddPermission, 1, 1);
-    //    _permissionsBoxLay.setAlignment(&_btnDelPermission, Qt::AlignBottom);
-
-    //    _chkSign.setToolTip("You don't have to sign debugging apps, for debugging purpose\n"
-    //                        "for instance if you wont release it on Google Play Store.");
-    ////  FIXME  QString line;
-    ////    QTextStream stream(rdfile(":/other/android-permissions.txt"));
-    ////    while (stream.readLineInto(&line))
-    ////        _cmbPermissions.addItem(line);
-    //    _cmbPermissions.setFixedWidth(400);
-    //    _cmbPermissions.setMaxVisibleItems(15);
-    //    _cmbPermissions.setEditable(true);
-
-    //    _permissionList.setFocusPolicy(Qt::NoFocus);
-    //    _permissionList.setFixedWidth(400);
-    //    _permissionList.addItem("android.permission.WRITE_EXTERNAL_STORAGE");
-    //    _permissionList.addItem("android.permission.READ_PHONE_STATE");
-    //    _btnDelPermission.setDisabled(true);
-    //    connect(&_permissionList, &QListWidget::itemSelectionChanged, [&] {
-    //        auto ct = _permissionList.currentItem()->text();
-    //        _btnDelPermission.setEnabled(_permissionList.currentItem() && ct !=
-    //                "android.permission.READ_PHONE_STATE" && ct !=
-    //                "android.permission.WRITE_EXTERNAL_STORAGE");
-    //    });
-
-    //    connect(&_cmbPermissions, &QComboBox::currentTextChanged, [&] {
-    //        bool found = false;
-    //        auto ct = _cmbPermissions.currentText();
-    //        for (int i = 0; i < _permissionList.count(); i++) {
-    //            if (ct == _permissionList.item(i)->text()) {
-    //                found = true;
-    //                break;
-    //            }
-    //        }
-    //        _btnAddPermission.setDisabled(found);
-    //    });
-
-    //    connect(&_btnAddPermission, &QPushButton::clicked, [&] {
-    //        _permissionList.addItem(_cmbPermissions.currentText());
-    //        emit _cmbPermissions.currentTextChanged(QString());
-    //    });
-
-    //    connect(&_btnDelPermission, &QPushButton::clicked, [&] {
-    //        delete _permissionList.takeItem(_permissionList.currentRow());
-    //        emit _cmbPermissions.currentTextChanged(QString());
-    //    });
-
-    //    QPalette p4(_btnDelPermission.palette());
-    //    p4.setColor(_btnDelPermission.foregroundRole(), "#991223");
-    //    _btnDelPermission.setPalette(p4);
-    //    _permissionList.setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    //    _btnDelPermission.setText("Delete");
-    ////    _btnDelPermission.setIcon(QIcon(QStringLiteral(":/images/delete.png"));
-    //    _btnAddPermission.setText("Add");
-    //    _btnAddPermission.setIcon(QIcon(QStringLiteral(":/images/newfile.png"));
-    //    _btnAddPermission.setCursor(Qt::PointingHandCursor);
-    //    _btnDelPermission.setCursor(Qt::PointingHandCursor);
-    //    _btnDelPermission.setToolTip("Delete selected permission from the list.");
-    //    _btnAddPermission.setToolTip("Add permission to the list.");
-    //    _permissionList.setToolTip("Permissions list. Some of the permissions are not shown here.\n"
-    //                               "Those permissions are needed by Qt Modules and they will be\n"
-    //                               "included automatically.\n");
-
-    //    _cmbPermissions.setToolTip("Select permission to add.");
-    //    _cmbPermissions.setValidator(validator);
-
-    //    _signingBox.setTitle("Signing Settings");
-    //    _signingBox.setFixedHeight(255);
-    //    _signingBoxLay.addWidget(&_lblSign, 0, 0);
-    //    _signingBoxLay.addWidget(&_chkSign, 0, 1, 1, 2);
-    //    _signingBoxLay.addWidget(&_lblKsPath, 1, 0);
-    //    _signingBoxLay.addWidget(&_txtKsPath, 1, 1);
-    //    _signingBoxLay.addWidget(&_btnExistingKs, 1, 2);
-    //    _signingBoxLay.addWidget(&_btnNewKs, 2, 1, 1, 2);
-    //    _signingBoxLay.addWidget(&_lblKsPw, 3, 0);
-    //    _signingBoxLay.addWidget(&_txtKsPw, 3, 1, 1, 2);
-    //    _signingBoxLay.addWidget(&_lblKsAlias, 4, 0);
-    //    _signingBoxLay.addWidget(&_cmbKsAlias, 4, 1, 1, 2);
-    //    _signingBoxLay.addWidget(&_lblKeyPw, 5, 0);
-    //    _signingBoxLay.addWidget(&_txtAliasPw, 5, 1, 1, 2);
-
-    //    _btnExistingKs.setCursor(Qt::PointingHandCursor);
-    //    _btnNewKs.setCursor(Qt::PointingHandCursor);
-    //    _btnIcon.setCursor(Qt::PointingHandCursor);
-    //    btnResIcon->setCursor(Qt::PointingHandCursor);
-
-    //    _lblKsPath.setText("Key store path:");
-    //    _btnNewKs.setText("Create new...");
-    //    _btnNewKs.setIcon(QIcon(QStringLiteral(":/images/newfile.png"));
-    //    _btnExistingKs.setText("...");
-    //    _lblKsPw.setText("Key store password:");
-    //    _lblKsAlias.setText("Alias:");
-    //    _lblKeyPw.setText("Alias password:");
-    //    _txtKsPath.setPlaceholderText("Select key store file...");
-    //    _txtKsPath.setDisabled(true);
-    //    _btnNewKs.setFixedWidth(200);
-    //    _txtKsPath.setFixedWidth(160);
-    //    _cmbKsAlias.setFixedWidth(200);
-    //    _txtAliasPw.setFixedWidth(200);
-    //    _txtKsPw.setFixedWidth(200);
-    //    _txtAliasPw.setEchoMode(QLineEdit::Password);
-    //    _txtKsPw.setEchoMode(QLineEdit::Password);
-
-    //    _chkSign.setChecked(false);
-    //    _chkSign.setText(_chkSign.isChecked() ? "Yes" : "No");
-    //    _lblKsPath.setEnabled(_chkSign.isChecked());
-    //    _btnExistingKs.setEnabled(_chkSign.isChecked());
-    //    _btnNewKs.setEnabled(_chkSign.isChecked());
-    //    _lblKsPw.setEnabled(_chkSign.isChecked());
-    //    _txtKsPw.setEnabled(_chkSign.isChecked());
-    //    _lblKsAlias.setEnabled(_chkSign.isChecked());
-    //    _cmbKsAlias.setEnabled(_chkSign.isChecked());
-    //    _lblKeyPw.setEnabled(_chkSign.isChecked());
-    //    _txtAliasPw.setEnabled(_chkSign.isChecked());
-    //    connect(&_chkSign, &QCheckBox::stateChanged, [&]{
-    //        _chkSign.setText(_chkSign.isChecked() ? "Yes" : "No");
-    //        _lblKsPath.setEnabled(_chkSign.isChecked());
-    //        _btnExistingKs.setEnabled(_chkSign.isChecked());
-    //        _btnNewKs.setEnabled(_chkSign.isChecked());
-    //        _lblKsPw.setEnabled(_chkSign.isChecked());
-    //        _txtKsPw.setEnabled(_chkSign.isChecked());
-    //        _lblKsAlias.setEnabled(_chkSign.isChecked());
-    //        _cmbKsAlias.setEnabled(_chkSign.isChecked());
-    //        _lblKeyPw.setEnabled(_chkSign.isChecked());
-    //        _txtAliasPw.setEnabled(_chkSign.isChecked());
-    //    });
-
-    //    _lblSign.setText("Sign package:");
-    //    _txtKsPath.setToolTip("Key store path.");
-    //    _btnExistingKs.setToolTip("Select key store file...");
-    //    _btnNewKs.setToolTip("Generate new key store and signing certificate.");
-    //    _txtKsPw.setToolTip("Type key store password.");
-    //    _cmbKsAlias.setToolTip("Choose which alias you want to use. First you have to\n"
-    //                           "enter key store password above, then possible aliases\n"
-    //                           "will be shown here.");
-    //    _txtAliasPw.setToolTip("Type the related alias's password.");
-
-    //    connect(&_btnExistingKs, &QToolButton::clicked, [&] {
-    //        auto fileName = QFileDialog::getOpenFileName(this, tr("Select Keystore File"),
-    //          QStandardPaths::standardLocations(QStandardPaths::DesktopLocation).first(),
-    //          tr("Key store files (*.keystore *.jks)"));
-    //        if (!fileName.isEmpty())
-    //            _txtKsPath.setText(fileName);
-    //    });
-    //    connect(&_txtKsPath, &QLineEdit::textChanged, [&] {
-    //        if (_txtKsPath.text().isEmpty()) {
-    //            _txtKsPath.setToolTip("Key store path.");
-    //        } else {
-    //            _txtKsPath.setToolTip("Key store path:\n" + _txtKsPath.text());
-    //        }
-    //    });
-
-    ////    _btnBack.settings().topColor = "#38A3F6";
-    ////    _btnBack.settings().bottomColor = _btnBack.settings().topColor.darker(120);
-    ////    _btnBack.settings().borderRadius = 7.5;
-    ////    _btnBack.settings().textColor = Qt::white;
-    ////    _btnBack.setFixedSize(200,28);
-    ////    _btnBack.setIconSize(QSize(14,14));
-    ////    _btnBack.setIcon(QIcon(QStringLiteral(":/images/welcome/unload.png"));
-    ////    _btnBack.setText("Back");
-    ////  FIXME  connect(&_btnBack, &FlarButton::clicked, [&]{
-    ////        emit backClicked();
-    ////    });
-
-    ////    _btnBuild.settings().topColor = "#84BF52";
-    ////    _btnBuild.settings().bottomColor = _btnBuild.settings().topColor.darker(120);
-    ////    _btnBuild.settings().borderRadius = 7.5;
-    ////    _btnBuild.settings().textColor = Qt::white;
-    ////    _btnBuild.setFixedSize(200,28);
-    ////    _btnBuild.setIconSize(QSize(14,14));
-    ////    _btnBuild.setIcon(QIcon(QStringLiteral(":/images/welcome/load.png"));
-    ////    _btnBuild.setText("Build");
-    //    // FIXME   connect(&_btnBuild, &FlarButton::clicked, this, &AndroidPlatformWidget::handleBtnBuildClicked);
 }
 
 QLineEdit* AndroidPlatformWidget::nameEdit() const
@@ -996,14 +650,14 @@ QComboBox* AndroidPlatformWidget::screenOrientationCombo() const
     return m_screenOrientationCombo;
 }
 
-QComboBox* AndroidPlatformWidget::minSdkVersionCombo() const
+QComboBox* AndroidPlatformWidget::minApiLevelCombo() const
 {
-    return m_minSdkVersionCombo;
+    return m_minApiLevelCombo;
 }
 
-QComboBox* AndroidPlatformWidget::targetSdkVersionCombo() const
+QComboBox* AndroidPlatformWidget::targetApiLevelCombo() const
 {
-    return m_targetSdkVersionCombo;
+    return m_targetApiLevelCombo;
 }
 
 QLabel* AndroidPlatformWidget::iconPictureLabel() const
@@ -1155,95 +809,3 @@ QCheckBox* AndroidPlatformWidget::sameAsKeystorePasswordCheck() const
 {
     return m_sameAsKeystorePasswordCheck;
 }
-
-//bool AndroidPlatformWidget::checkFields()
-//{
-//    QString errorMessage;
-
-//    if (_txtAppName.text().isEmpty())
-//        errorMessage += "* Application name cannot be empty.\n";
-
-//    if (_txtVersionName.text().isEmpty())
-//        errorMessage += "* Version name cannot be empty.\n";
-
-//    if (_txtPackageName.text().isEmpty())
-//        errorMessage += "* Package name cannot be empty.\n";
-//    else if (!_txtPackageName.text().contains(QRegExp
-//      ("^([A-Za-z]{1}[A-Za-z\\d_]*\\.)*[A-Za-z][A-Za-z\\d_]*$")))
-//        errorMessage += "* Package name is not valid. Example usage: com.example.myapp\n";
-
-//    if (_cmbMinSdk.currentText().split(':').
-//     first().remove("API ").toInt() > _cmbTargetSdk.
-//      currentText().split(':').first().remove("API ").toInt())
-//        errorMessage += "* Target SDK api level cannot be lower than Minimum required SDK api level.\n";
-
-//    if (_chkSign.isChecked()) {
-//        if (_txtKsPath.text().isEmpty())
-//             errorMessage += "* You have to choose a valid key store file when signing is on.\n";
-//        else if (_txtKsPw.text().isEmpty())
-//            errorMessage += "* Key store password cannot be empty.\n";
-//        else if (_txtKsPw.text().size() < 6)
-//            errorMessage += "* Key store password is too short.\n";
-//        else if (_cmbKsAlias.currentText().isEmpty())
-//            errorMessage += "* Alias name cannot be empty, your key store file is not valid.\n";
-//        else if (_txtAliasPw.text().isEmpty())
-//            errorMessage += "* Alias password cannot be empty.\n";
-//        else if (_txtAliasPw.text().size() < 6)
-//            errorMessage += "* Alias password is too short.\n";
-//    }
-
-//    if (!errorMessage.isEmpty())
-//        UtilityFunctions::showMessage(this, tr("Warning"), errorMessage);
-
-//    return errorMessage.isEmpty();
-//}
-
-//void AndroidPlatformWidget::setTarget(const QString& target)
-//{
-//    _lblTitle.setText("Target: " + target);
-//}
-
-//void AndroidPlatformWidget::handleBtnBuildClicked()
-//{
-//    if (checkFields()) {
-//        Build::set(TAG_APPNAME, _txtAppName.text());
-//        Build::set(TAG_VERSIONNAME, _txtVersionName.text());
-//        Build::set(TAG_VERSIONCODE, _spnVersionCode.value());
-//        if (_cmbOrientation.currentText() == "Free")
-//            Build::set(TAG_ORIENTATION, "unspecified");
-//        else {
-//            Build::set(TAG_ORIENTATION,
-//              _cmbOrientation.currentText().toLower());
-//        }
-//        Build::setIcon(_txtIconPath.text());
-
-//        Build::set(TAG_PACKAGENAME, _txtPackageName.text());
-//        Build::set(TAG_MINAPI, _cmbMinSdk.currentText().
-//                   split(':').first().remove("API ").toInt());
-//        Build::set(TAG_TARGETAPI, _cmbTargetSdk.currentText().
-//                   split(':').first().remove("API ").toInt());
-
-//        Build::clearPermissions();
-//        for (int i = 0; i < _permissionList.count(); i++) {
-//            auto permission = _permissionList.item(i)->text();
-//            Build::addPermission(permission);
-//        }
-
-//        Build::set(TAG_SIGNON, _chkSign.isChecked());
-//        if (_chkSign.isChecked()) {
-//            Build::setKeystore(_txtKsPath.text());
-//            Build::set(TAG_KSPW, _txtKsPw.text());
-//            Build::set(TAG_ALIASNAME, _cmbKsAlias.currentText());
-//            Build::set(TAG_ALIASPW, _txtAliasPw.text());
-//        }
-
-//        emit downloadBuild();
-//    }
-//}
-
-//TODO: Add "reset form" and critisize side effects
-//TODO: Generate certificate
-//TODO: Test and check alias and keystore passwords
-//TODO: Show aliases
-//TODO: Critisize removing build.json when build is done,
-// or after closing builds screen

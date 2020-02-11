@@ -28,8 +28,8 @@ public:
     QLineEdit* domainEdit() const;
     QLineEdit* packageEdit() const;
     QComboBox* screenOrientationCombo() const;
-    QComboBox* minSdkVersionCombo() const;
-    QComboBox* targetSdkVersionCombo() const;
+    QComboBox* minApiLevelCombo() const;
+    QComboBox* targetApiLevelCombo() const;
     QLabel* iconPictureLabel() const;
     QPushButton* browseIconButton() const;
     QPushButton* clearIconButton() const;
@@ -69,8 +69,8 @@ private:
     QLineEdit* m_domainEdit;
     QLineEdit* m_packageEdit;
     QComboBox* m_screenOrientationCombo;
-    QComboBox* m_minSdkVersionCombo;
-    QComboBox* m_targetSdkVersionCombo;
+    QComboBox* m_minApiLevelCombo;
+    QComboBox* m_targetApiLevelCombo;
     QLabel* m_iconPictureLabel;
     QPushButton* m_browseIconButton;
     QPushButton* m_clearIconButton;
