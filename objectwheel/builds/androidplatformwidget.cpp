@@ -16,24 +16,18 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-// TODO: Disable wheel events for all the widgets from spin boxes to comboboxes
 // TODO: Add a "description" label under icon like "Enter final application details below right
 //       before requesting a cloud build for your project"
 // TODO: Make sure each line edit and everything matches safety regular exp
 //       except "password" edits, find a solution for this
-// TODO: Set tooltips
-// TODO: Checkout old version of the codes and see what we are lacking
 // TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"
+// TODO: Add "reset form"
+// TODO: Generate certificate
+// TODO: Test and check alias and keystore passwords
+// TODO: Show aliases
+// TODO: Clickable tooltips
 
-// OLD TODOs
-//TODO: Add "reset form" and critisize side effects
-//TODO: Generate certificate
-//TODO: Test and check alias and keystore passwords
-//TODO: Show aliases
-//TODO: Critisize removing build.json when build is done,
-// or after closing builds screen
-
-static QMap<QString, QString> g_apiLevels {
+const QMap<QString, QString> AndroidPlatformWidget::apiLevelMap {
     { "API 21: Android 5.0", "21" },
     { "API 22: Android 5.1", "22" },
     { "API 23: Android 6.0", "23" },
@@ -42,65 +36,268 @@ static QMap<QString, QString> g_apiLevels {
     { "API 26: Android 8.0", "26" },
     { "API 27: Android 8.1", "27" },
     { "API 28: Android 9.0", "28" },
-    { "API 29: Android 10.0", "29"},
+    { "API 29: Android 10.0", "29"}
 };
 
-static QStringList g_orientations {
-    "Behind",
-    "Full Sensor",
-    "Full User",
-    "Landscape",
-    "Locked",
-    "No Sensor",
-    "Portrait",
-    "Reverse Landscape",
-    "Reverse Portrait",
-    "Sensor",
-    "Sensor Landscape",
-    "Sensor Portrait",
-    "Unspecified",
-    "User",
-    "User Landscape",
-    "User Portrait",
+const QMap<QString, QString> AndroidPlatformWidget::orientationMap {
+    { "Behind", "behind" },
+    { "Full Sensor", "fullSensor" },
+    { "Full User", "fullUser" },
+    { "Landscape", "landscape" },
+    { "Locked", "locked" },
+    { "No Sensor", "nosensor" },
+    { "Portrait", "portrait" },
+    { "Reverse Landscape", "reverseLandscape" },
+    { "Reverse Portrait", "reversePortrait" },
+    { "Sensor", "sensor" },
+    { "Sensor Landscape", "sensorLandscape" },
+    { "Sensor Portrait", "sensorPortrait" },
+    { "Unspecified", "unspecified" },
+    { "User", "user" },
+    { "User Landscape", "userLandscape" },
+    { "User Portrait", "userPortrait" }
 };
 
-static QStringList correctModuleList(QStringList list)
-{
-    QStringList removed;
-    QMutableListIterator<QString> i(list);
-    while (i.hasNext()) {
-        const QString& module = i.next();
-        if (module.startsWith(QLatin1String("Qt 3D"))) {
-            removed.append(module);
-            i.remove();
-        }
-    }
-    list.append(removed);
-    return list;
-}
+const QMap<QString, QString> AndroidPlatformWidget::qtModuleMap {
+    { "Qt Bluetooth", "bluetooth" },
+    { "Qt Charts", "charts" },
+    { "Qt Concurrent", "concurrent" },
+    { "Qt Data Visualization", "datavisualization" },
+    { "Qt Gamepad", "gamepad" },
+    { "Qt Location", "location" },
+    { "Qt Multimedia", "multimedia" },
+    { "Qt Network Authorization", "networkauth" },
+    { "Qt Network", "network" },
+    { "Qt Nfc", "nfc" },
+    { "Qt OpenGL Extensions", "openglextensions" },
+    { "Qt OpenGL", "opengl" },
+    { "Qt Positioning Quick", "positioningquick" },
+    { "Qt Positioning", "positioning" },
+    { "Qt Print Support", "printsupport" },
+    { "Qt Purchasing", "purchasing" },
+    { "Qt Qml Models", "qmlmodels" },
+    { "Qt Qml Worker Script", "qmlworkerscript" },
+    { "Qt Quick Templates 2", "quicktemplates2" },
+    { "Qt Quick Test", "qmltest" },
+    { "Qt Remote Objects", "remoteobjects" },
+    { "Qt Script Tools", "scripttools" },
+    { "Qt Script", "script" },
+    { "Qt Scxml", "scxml" },
+    { "Qt Sensors", "sensors" },
+    { "Qt Serial Port", "serialport" },
+    { "Qt Sql", "sql" },
+    { "Qt Svg", "svg" },
+    { "Qt Test", "testlib" },
+    { "Qt Text to Speech", "texttospeech" },
+    { "Qt WebChannel", "webchannel" },
+    { "Qt WebSockets", "websockets" },
+    { "Qt WebView", "webview" },
+    { "Qt Widgets", "widgets" },
+    { "Qt Xml Patterns", "xmlpatterns" },
+    { "Qt Xml", "xml" },
+    { "Qt 3D Animation", "3danimation" },
+    { "Qt 3D Core", "3dcore" },
+    { "Qt 3D Extras", "3dextras" },
+    { "Qt 3D Input", "3dinput" },
+    { "Qt 3D Logic", "3dlogic" },
+    { "Qt 3D Quick Animation", "3dquickanimation" },
+    { "Qt 3D Quick Extras", "3dquickextras" },
+    { "Qt 3D Quick Input", "3dquickinput" },
+    { "Qt 3D Quick Render", "3dquickrender" },
+    { "Qt 3D Quick", "3dquick" },
+    { "Qt 3D QuickScene 2D", "3dquickscene2d" },
+    { "Qt 3D Render", "3drender" }
+};
 
-static QStringList androidPermissionList()
-{
-    static QStringList androidPermissions;
-    if (androidPermissions.isEmpty()) {
-        QTextStream stream(UtilityFunctions::resourceData(QLatin1String(":/other/AndroidPermissionList.txt")));
-        QString line;
-        while (stream.readLineInto(&line))
-            androidPermissions.append(line);
-    }
-    return androidPermissions;
-}
-
-static QJsonObject androidModuleList()
-{
-    static QJsonObject androidModules;
-    if (androidModules.isEmpty()) {
-        const QJsonDocument& document = QJsonDocument::fromJson(
-                    UtilityFunctions::resourceData(QLatin1String(":/other/QtModuleListAndroid.json")));
-        androidModules = document.object();
-    }
-    return androidModules;
-}
+const QStringList AndroidPlatformWidget::androidPermissionList {
+    "android.permission.ACCEPT_HANDOVER",
+    "android.permission.ACCESS_BACKGROUND_LOCATION",
+    "android.permission.ACCESS_CHECKIN_PROPERTIES",
+    "android.permission.ACCESS_COARSE_LOCATION",
+    "android.permission.ACCESS_FINE_LOCATION",
+    "android.permission.ACCESS_LOCATION_EXTRA_COMMANDS",
+    "android.permission.ACCESS_MEDIA_LOCATION",
+    "android.permission.ACCESS_MOCK_LOCATION",
+    "android.permission.ACCESS_NETWORK_STATE",
+    "android.permission.ACCESS_NOTIFICATION_POLICY",
+    "android.permission.ACCESS_SURFACE_FLINGER",
+    "android.permission.ACCESS_WIFI_STATE",
+    "android.permission.ACCOUNT_MANAGER",
+    "android.permission.ACTIVITY_RECOGNITION",
+    "android.permission.ANSWER_PHONE_CALLS",
+    "android.permission.AUTHENTICATE_ACCOUNTS",
+    "android.permission.BATTERY_STATS",
+    "android.permission.BIND_ACCESSIBILITY_SERVICE",
+    "android.permission.BIND_APPWIDGET",
+    "android.permission.BIND_AUTOFILL_SERVICE",
+    "android.permission.BIND_CALL_REDIRECTION_SERVICE",
+    "android.permission.BIND_CARRIER_MESSAGING_CLIENT_SERVICE",
+    "android.permission.BIND_CARRIER_MESSAGING_SERVICE",
+    "android.permission.BIND_CARRIER_SERVICES",
+    "android.permission.BIND_CHOOSER_TARGET_SERVICE",
+    "android.permission.BIND_CONDITION_PROVIDER_SERVICE",
+    "android.permission.BIND_DEVICE_ADMIN",
+    "android.permission.BIND_DREAM_SERVICE",
+    "android.permission.BIND_INCALL_SERVICE",
+    "android.permission.BIND_INPUT_METHOD",
+    "android.permission.BIND_MIDI_DEVICE_SERVICE",
+    "android.permission.BIND_NFC_SERVICE",
+    "android.permission.BIND_NOTIFICATION_LISTENER_SERVICE",
+    "android.permission.BIND_PRINT_SERVICE",
+    "android.permission.BIND_QUICK_SETTINGS_TILE",
+    "android.permission.BIND_REMOTEVIEWS",
+    "android.permission.BIND_SCREENING_SERVICE",
+    "android.permission.BIND_TELECOM_CONNECTION_SERVICE",
+    "android.permission.BIND_TEXT_SERVICE",
+    "android.permission.BIND_TV_INPUT",
+    "android.permission.BIND_VISUAL_VOICEMAIL_SERVICE",
+    "android.permission.BIND_VOICE_INTERACTION",
+    "android.permission.BIND_VPN_SERVICE",
+    "android.permission.BIND_VR_LISTENER_SERVICE",
+    "android.permission.BIND_WALLPAPER",
+    "android.permission.BLUETOOTH",
+    "android.permission.BLUETOOTH_ADMIN",
+    "android.permission.BLUETOOTH_PRIVILEGED",
+    "android.permission.BODY_SENSORS",
+    "android.permission.BRICK",
+    "android.permission.BROADCAST_PACKAGE_REMOVED",
+    "android.permission.BROADCAST_SMS",
+    "android.permission.BROADCAST_STICKY",
+    "android.permission.BROADCAST_WAP_PUSH",
+    "android.permission.CALL_COMPANION_APP",
+    "android.permission.CALL_PHONE",
+    "android.permission.CALL_PRIVILEGED",
+    "android.permission.CAMERA",
+    "android.permission.CAPTURE_AUDIO_OUTPUT",
+    "android.permission.CHANGE_COMPONENT_ENABLED_STATE",
+    "android.permission.CHANGE_CONFIGURATION",
+    "android.permission.CHANGE_NETWORK_STATE",
+    "android.permission.CHANGE_WIFI_MULTICAST_STATE",
+    "android.permission.CHANGE_WIFI_STATE",
+    "android.permission.CLEAR_APP_CACHE",
+    "android.permission.CLEAR_APP_USER_DATA",
+    "android.permission.CONTROL_LOCATION_UPDATES",
+    "android.permission.DELETE_CACHE_FILES",
+    "android.permission.DELETE_PACKAGES",
+    "android.permission.DEVICE_POWER",
+    "android.permission.DIAGNOSTIC",
+    "android.permission.DISABLE_KEYGUARD",
+    "android.permission.DUMP",
+    "android.permission.EXPAND_STATUS_BAR",
+    "android.permission.FACTORY_TEST",
+    "android.permission.FLASHLIGHT",
+    "android.permission.FORCE_BACK",
+    "android.permission.FOREGROUND_SERVICE",
+    "android.permission.GET_ACCOUNTS",
+    "android.permission.GET_ACCOUNTS_PRIVILEGED",
+    "android.permission.GET_PACKAGE_SIZE",
+    "android.permission.GET_TASKS",
+    "android.permission.GLOBAL_SEARCH",
+    "android.permission.HARDWARE_TEST",
+    "android.permission.INJECT_EVENTS",
+    "android.permission.INSTALL_LOCATION_PROVIDER",
+    "android.permission.INSTALL_PACKAGES",
+    "android.permission.INSTANT_APP_FOREGROUND_SERVICE",
+    "android.permission.INTERNAL_SYSTEM_WINDOW",
+    "android.permission.INTERNET",
+    "android.permission.KILL_BACKGROUND_PROCESSES",
+    "android.permission.LOCATION_HARDWARE",
+    "android.permission.MANAGE_ACCOUNTS",
+    "android.permission.MANAGE_APP_TOKENS",
+    "android.permission.MANAGE_DOCUMENTS",
+    "android.permission.MANAGE_OWN_CALLS",
+    "android.permission.MASTER_CLEAR",
+    "android.permission.MEDIA_CONTENT_CONTROL",
+    "android.permission.MODIFY_AUDIO_SETTINGS",
+    "android.permission.MODIFY_PHONE_STATE",
+    "android.permission.MOUNT_FORMAT_FILESYSTEMS",
+    "android.permission.MOUNT_UNMOUNT_FILESYSTEMS",
+    "android.permission.NFC",
+    "android.permission.NFC_TRANSACTION_EVENT",
+    "android.permission.PACKAGE_USAGE_STATS",
+    "android.permission.PERSISTENT_ACTIVITY",
+    "android.permission.PROCESS_OUTGOING_CALLS",
+    "android.permission.READ_CALENDAR",
+    "android.permission.READ_CALL_LOG",
+    "android.permission.READ_CONTACTS",
+    "android.permission.READ_EXTERNAL_STORAGE",
+    "android.permission.READ_FRAME_BUFFER",
+    "android.permission.READ_INPUT_STATE",
+    "android.permission.READ_LOGS",
+    "android.permission.READ_PHONE_NUMBERS",
+    "android.permission.READ_PHONE_STATE",
+    "android.permission.READ_PROFILE",
+    "android.permission.READ_SMS",
+    "android.permission.READ_SOCIAL_STREAM",
+    "android.permission.READ_SYNC_SETTINGS",
+    "android.permission.READ_SYNC_STATS",
+    "android.permission.READ_USER_DICTIONARY",
+    "android.permission.REBOOT",
+    "android.permission.RECEIVE_BOOT_COMPLETED",
+    "android.permission.RECEIVE_MMS",
+    "android.permission.RECEIVE_SMS",
+    "android.permission.RECEIVE_WAP_PUSH",
+    "android.permission.RECORD_AUDIO",
+    "android.permission.REORDER_TASKS",
+    "android.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND",
+    "android.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND",
+    "android.permission.REQUEST_DELETE_PACKAGES",
+    "android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS",
+    "android.permission.REQUEST_INSTALL_PACKAGES",
+    "android.permission.REQUEST_PASSWORD_COMPLEXITY",
+    "android.permission.RESTART_PACKAGES",
+    "android.permission.SEND_RESPOND_VIA_MESSAGE",
+    "android.permission.SEND_SMS",
+    "android.permission.SET_ACTIVITY_WATCHER",
+    "android.permission.SET_ALWAYS_FINISH",
+    "android.permission.SET_ANIMATION_SCALE",
+    "android.permission.SET_DEBUG_APP",
+    "android.permission.SET_ORIENTATION",
+    "android.permission.SET_POINTER_SPEED",
+    "android.permission.SET_PREFERRED_APPLICATIONS",
+    "android.permission.SET_PROCESS_LIMIT",
+    "android.permission.SET_TIME",
+    "android.permission.SET_TIME_ZONE",
+    "android.permission.SET_WALLPAPER",
+    "android.permission.SET_WALLPAPER_HINTS",
+    "android.permission.SIGNAL_PERSISTENT_PROCESSES",
+    "android.permission.SMS_FINANCIAL_TRANSACTIONS",
+    "android.permission.START_VIEW_PERMISSION_USAGE",
+    "android.permission.STATUS_BAR",
+    "android.permission.SUBSCRIBED_FEEDS_READ",
+    "android.permission.SUBSCRIBED_FEEDS_WRITE",
+    "android.permission.SYSTEM_ALERT_WINDOW",
+    "android.permission.TRANSMIT_IR",
+    "android.permission.UPDATE_DEVICE_STATS",
+    "android.permission.USE_BIOMETRIC",
+    "android.permission.USE_CREDENTIALS",
+    "android.permission.USE_FINGERPRINT",
+    "android.permission.USE_FULL_SCREEN_INTENT",
+    "android.permission.USE_SIP",
+    "android.permission.VIBRATE",
+    "android.permission.WAKE_LOCK",
+    "android.permission.WRITE_APN_SETTINGS",
+    "android.permission.WRITE_CALENDAR",
+    "android.permission.WRITE_CALL_LOG",
+    "android.permission.WRITE_CONTACTS",
+    "android.permission.WRITE_EXTERNAL_STORAGE",
+    "android.permission.WRITE_GSERVICES",
+    "android.permission.WRITE_PROFILE",
+    "android.permission.WRITE_SECURE_SETTINGS",
+    "android.permission.WRITE_SETTINGS",
+    "android.permission.WRITE_SMS",
+    "android.permission.WRITE_SOCIAL_STREAM",
+    "android.permission.WRITE_SYNC_SETTINGS",
+    "android.permission.WRITE_USER_DICTIONARY",
+    "com.android.alarm.permission.SET_ALARM",
+    "com.android.browser.permission.READ_HISTORY_BOOKMARKS",
+    "com.android.browser.permission.WRITE_HISTORY_BOOKMARKS",
+    "com.android.launcher.permission.INSTALL_SHORTCUT",
+    "com.android.launcher.permission.UNINSTALL_SHORTCUT",
+    "com.android.voicemail.permission.ADD_VOICEMAIL",
+    "com.android.voicemail.permission.READ_VOICEMAIL",
+    "com.android.voicemail.permission.WRITE_VOICEMAIL"
+};
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_nameEdit(new QLineEdit(this))
@@ -563,11 +760,11 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
     signingLayout->setColumnMinimumWidth(0, labelColMinSz);
 
-    m_permissionCombo->addItems(androidPermissionList());
-    m_qtModuleCombo->addItems(correctModuleList(androidModuleList().keys()));
-    m_screenOrientationCombo->addItems(g_orientations);
-    m_minApiLevelCombo->addItems(g_apiLevels.keys());
-    m_targetApiLevelCombo->addItems(g_apiLevels.keys());
+    m_permissionCombo->addItems(androidPermissionList);
+    m_qtModuleCombo->addItems(qtModuleMap.keys());
+    m_screenOrientationCombo->addItems(orientationMap.keys());
+    m_minApiLevelCombo->addItems(apiLevelMap.keys());
+    m_targetApiLevelCombo->addItems(apiLevelMap.keys());
     m_permissionCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_qtModuleCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);

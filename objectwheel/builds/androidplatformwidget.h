@@ -2,6 +2,7 @@
 #define ANDROIDPLATFORMWIDGET_H
 
 #include <QWidget>
+#include <QMap>
 
 class QLabel;
 class QLineEdit;
@@ -17,6 +18,12 @@ class AndroidPlatformWidget final : public QWidget
 {
     Q_OBJECT
     Q_DISABLE_COPY(AndroidPlatformWidget)
+
+public:
+    static const QMap<QString, QString> apiLevelMap;
+    static const QMap<QString, QString> orientationMap;
+    static const QMap<QString, QString> qtModuleMap;
+    static const QStringList androidPermissionList;
 
 public:
     explicit AndroidPlatformWidget(QWidget* parent = nullptr);
