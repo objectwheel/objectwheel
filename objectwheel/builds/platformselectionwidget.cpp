@@ -1,4 +1,4 @@
-#include <startwidget.h>
+#include <platformselectionwidget.h>
 #include <paintutils.h>
 
 #include <QBoxLayout>
@@ -109,7 +109,7 @@ private:
     const QListWidget* m_platformList;
 };
 
-StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
+PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(parent)
   , m_platformList(new QListWidget(this))
 {
     auto updatePalette = [=] {
@@ -222,7 +222,6 @@ StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
     layout->setRowMinimumHeight(4, 8);
     layout->addWidget(platformsLabel, 5, 1, Qt::AlignHCenter);
     layout->addWidget(m_platformList, 6, 1, Qt::AlignHCenter);
-    layout->setRowStretch(7, 1);
 
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"),
@@ -238,12 +237,12 @@ StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
     descriptionLabel->setFont(f);
 }
 
-QListWidget* StartWidget::platformList() const
+QListWidget* PlatformSelectionWidget::platformList() const
 {
     return m_platformList;
 }
 
-StartWidget::Platform StartWidget::currentPlatform() const
+PlatformSelectionWidget::Platform PlatformSelectionWidget::currentPlatform() const
 {
     const QList<QListWidgetItem*>& selectedItems = m_platformList->selectedItems();
     if (selectedItems.isEmpty())

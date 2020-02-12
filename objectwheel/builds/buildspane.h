@@ -4,9 +4,9 @@
 #include <QScrollArea>
 
 class QLabel;
-class SegmentedBar;
-class QStackedWidget;
-class StartWidget;
+class ButtonSlice;
+class StackedLayout;
+class PlatformSelectionWidget;
 class AndroidPlatformWidget;
 class AndroidPlatformController;
 
@@ -16,12 +16,15 @@ class BuildsPane final : public QScrollArea
     Q_DISABLE_COPY(BuildsPane)
 
 public:
+    enum Buttons { Next, Back };
+
+public:
     explicit BuildsPane(QWidget* parent = nullptr);
 
     QLabel* platformLabel() const;
-    SegmentedBar* segmentedBar() const;
-    QStackedWidget* stackedWidget() const;
-    StartWidget* startWidget() const;
+    ButtonSlice* buttonSlice() const;
+    StackedLayout* stackedLayout() const;
+    PlatformSelectionWidget* platformSelectionWidget() const;
     AndroidPlatformWidget* androidPlatformWidget() const;
 
     QSize sizeHint() const override;
@@ -33,9 +36,9 @@ public slots:
 
 private:
     QLabel* m_platformLabel;
-    SegmentedBar* m_segmentedBar;
-    QStackedWidget* m_stackedWidget;
-    StartWidget* m_startWidget;
+    ButtonSlice* m_buttonSlice;
+    StackedLayout* m_stackedLayout;
+    PlatformSelectionWidget* m_platformSelectionWidget;
     AndroidPlatformWidget* m_androidPlatformWidget;
     AndroidPlatformController* m_androidPlatformController;
 };

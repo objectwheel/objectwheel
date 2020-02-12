@@ -7,7 +7,7 @@ HEADERS += $$PWD/androidcreatekeystorecertificate.h \
            $$PWD/buildspane.h \
            $$PWD/buildscontroller.h \
            $$PWD/platformcontroller.h \
-           $$PWD/startwidget.h
+           $$PWD/platformselectionwidget.h
 
 SOURCES += $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/androidplatformcontroller.cpp \
@@ -15,6 +15,6 @@ SOURCES += $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/buildspane.cpp \
            $$PWD/buildscontroller.cpp \
            $$PWD/platformcontroller.cpp \
-           $$PWD/startwidget.cpp
+           $$PWD/platformselectionwidget.cpp
 
 FORMS += $$PWD/androidcreatekeystorecertificate.ui

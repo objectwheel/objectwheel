@@ -1,13 +1,13 @@
-#ifndef STARTWIDGET_H
-#define STARTWIDGET_H
+#ifndef PLATFORMSELECTIONWIDGET_H
+#define PLATFORMSELECTIONWIDGET_H
 
 #include <QWidget>
 
 class QListWidget;
-class StartWidget final : public QWidget
+class PlatformSelectionWidget final : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(StartWidget)
+    Q_DISABLE_COPY(PlatformSelectionWidget)
 
 public:
     enum Platform {
@@ -22,7 +22,7 @@ public:
     Q_ENUM(Platform)
 
 public:
-    explicit StartWidget(QWidget* parent = nullptr);
+    explicit PlatformSelectionWidget(QWidget* parent = nullptr);
 
     QListWidget* platformList() const;
 
@@ -32,4 +32,4 @@ private:
     QListWidget* m_platformList;
 };
 
-#endif // STARTWIDGET_H
+#endif // PLATFORMSELECTIONWIDGET_H
