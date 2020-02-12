@@ -10,7 +10,23 @@ class StartWidget final : public QWidget
     Q_DISABLE_COPY(StartWidget)
 
 public:
+    enum Platform {
+        Invalid,
+        Android,
+        iOS,
+        macOS,
+        Windows,
+        Linux,
+        RaspberryPi
+    };
+    Q_ENUM(Platform)
+
+public:
     explicit StartWidget(QWidget* parent = nullptr);
+
+    QListWidget* platformList() const;
+
+    Platform currentPlatform() const;
 
 private:
     QListWidget* m_platformList;

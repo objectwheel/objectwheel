@@ -9,10 +9,18 @@
 #include <QApplication>
 #include <QPainter>
 
-enum {
-    Name = Qt::UserRole + 1,
-    Decription,
-    Availability
+enum Availability {
+    InFuture,
+    Soon,
+    Available,
+};
+Q_DECLARE_METATYPE(Availability)
+
+enum ItemRoles {
+    PlatformRole = Qt::UserRole + 1,
+    NameRole,
+    DecriptionRole,
+    AvailabilityRole
 };
 
 class PlatformListDelegate final : public QStyledItemDelegate
@@ -25,60 +33,80 @@ public:
     {
     }
 
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    {
+        return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
+                     m_platformList->iconSize().height() + 16);
+    }
+
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override
     {
-        auto item = m_platformList->item(index.row());
+        const QListWidgetItem* item = m_platformList->item(index.row());
+
         if (item == 0)
             return;
 
-        auto name = item->data(Name).toString();
-        auto lastEdit = item->data(Decription).toString();
+        if (item->listWidget() == 0)
+            return;
 
-        auto rn = QRectF(option.rect).adjusted(option.rect.height(),
-                                               7, 0, - option.rect.height() / 2.0);
-        auto rl = QRectF(option.rect).adjusted(option.rect.height(),
-                                               option.rect.height() / 2.0, 0, - 7);
-        auto ri = QRectF(option.rect).adjusted(7, 7,
-                                               - option.rect.width() + option.rect.height() - 7, - 7);
-        auto ra = ri.adjusted(3, -0.5, 0, 0);
-        ra.setSize(QSize(10, 10));
-        auto icon = PaintUtils::pixmap(item->icon(), ri.size().toSize(), m_platformList,
-                                       m_platformList->isEnabled() ? QIcon::Normal : QIcon::Disabled);
+        const QRectF r = option.rect;
+        const QString& name = item->data(NameRole).toString();
+        const QString& description = item->data(DecriptionRole).toString();
+        const Availability availability = item->data(AvailabilityRole).value<Availability>();
 
-        painter->setRenderHint(QPainter::Antialiasing);
-
+        // Limit drawing region to view's rect (with rounded corners)
         QPainterPath path;
-        path.addRoundedRect(m_platformList->rect(), 8, 8);
+        path.addRoundedRect(item->listWidget()->rect(), 8, 8);
         painter->setClipPath(path);
 
+        // Draw highlighted background if selected
         if (item->isSelected())
-            painter->fillRect(option.rect, option.palette.highlight());
+            painter->fillRect(r, option.palette.highlight());
 
-        painter->drawPixmap(ri, icon, icon.rect());
+        // Draw icon
+        const QSize& iconSize = item->listWidget()->iconSize();
+        const int padding = r.height() / 2.0 - iconSize.height() / 2.0;
+        const QRectF iconRect(QPointF(r.left() + padding, r.top() + padding), iconSize);
+        const QPixmap& icon = PaintUtils::pixmap(item->icon(), iconSize, item->listWidget());
+        painter->drawPixmap(iconRect, icon, icon.rect());
 
-//        if (item->data(Active).toBool()) {
-//            QLinearGradient g(ri.topLeft(), ri.bottomLeft());
-//            g.setColorAt(0, "#6BCB36");
-//            g.setColorAt(0.5, "#4db025");
-//            painter->setBrush(g);
-//            painter->setPen("#6BCB36");
-//            painter->drawRoundedRect(ra, ra.width(), ra.height());
-//        }
-
+        // Draw texts
         QFont f;
         f.setWeight(QFont::Medium);
         painter->setFont(f);
+        const QRectF nameRect(QPointF(iconRect.right() + padding, iconRect.top()),
+                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
         painter->setPen(option.palette.text().color());
-        painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
+        painter->drawText(nameRect, name, Qt::AlignVCenter | Qt::AlignLeft);
 
         f.setWeight(QFont::Normal);
         painter->setFont(f);
-        painter->drawText(rl, lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
+        const QRectF descRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
+                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
+        painter->drawText(descRect, description, Qt::AlignVCenter | Qt::AlignLeft);
+
+        // Draw availability label
+        if (availability != Available) {
+            f.setPixelSize(f.pixelSize() - 2);
+            const QString label = availability == Soon ? tr("SOON") : tr("IN FUTURE");
+            const QFontMetrics fm(f);
+            const int msgHeight = fm.height();
+            const int msgWidth = fm.horizontalAdvance(label) + msgHeight;
+            const QRectF msgRect(QPointF(r.left() + r.width() - msgWidth - padding,
+                                         r.top() + r.height() / 2.0 - msgHeight / 2.0),
+                                 QSizeF(msgWidth, msgHeight));
+            painter->setFont(f);
+            painter->setRenderHint(QPainter::Antialiasing);
+            painter->setPen(availability == Soon ? QColor("#b99a4e") : QColor("#607bb3"));
+            painter->setBrush(availability == Soon ? QColor("#fff9df") : QColor("#f2faff"));
+            painter->drawRoundedRect(msgRect, 2, 2);
+            painter->drawText(msgRect, label, Qt::AlignVCenter | Qt::AlignHCenter);
+        }
     }
 
 private:
-    QListWidget* m_platformList;
+    const QListWidget* m_platformList;
 };
 
 StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
@@ -94,53 +122,62 @@ StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
 
     auto androidItem = new QListWidgetItem;
     androidItem->setIcon(QIcon(":/images/builds/android.svg"));
-    androidItem->setData(Name, QLatin1String("Android 5.0+"));
-    androidItem->setData(Decription, tr("Supported ABIs: armeabi-v7a, arm64-v8a, x86, x86_64"));
-    androidItem->setData(Availability, true);
+    androidItem->setData(PlatformRole, Android);
+    androidItem->setData(NameRole, QLatin1String("Android 5.0+"));
+    androidItem->setData(DecriptionRole, tr("Supported ABIs: armeabi-v7a, arm64-v8a, x86, x86_64"));
+    androidItem->setData(AvailabilityRole, Available);
     m_platformList->addItem(androidItem);
 
     auto iOSItem = new QListWidgetItem;
     iOSItem->setIcon(QIcon(":/images/builds/ios.svg"));
-    iOSItem->setData(Name, QLatin1String("iOS 12+"));
-    iOSItem->setData(Decription, tr("Supported ABIs: arm64-v8a, x86_64 (simulator)"));
-    iOSItem->setData(Availability, false);
+    iOSItem->setData(PlatformRole, iOS);
+    iOSItem->setData(NameRole, QLatin1String("iOS 12+"));
+    iOSItem->setData(DecriptionRole, tr("Supported ABIs: arm64-v8a, x86_64 (simulator)"));
+    iOSItem->setData(AvailabilityRole, Soon);
+    iOSItem->setFlags(iOSItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(iOSItem);
 
     auto macOSItem = new QListWidgetItem();
     macOSItem->setIcon(QIcon(":/images/builds/macos.svg"));
-    macOSItem->setData(Name, QLatin1String("macOS 10.13+"));
-    macOSItem->setData(Decription, tr("Supported ABIs: x86_64"));
-    macOSItem->setData(Availability, false);
+    macOSItem->setData(PlatformRole, macOS);
+    macOSItem->setData(NameRole, QLatin1String("macOS 10.13+"));
+    macOSItem->setData(DecriptionRole, tr("Supported ABIs: x86_64"));
+    macOSItem->setData(AvailabilityRole, Soon);
+    macOSItem->setFlags(macOSItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(macOSItem);
 
     auto windowsItem = new QListWidgetItem;
     windowsItem->setIcon(QIcon(":/images/builds/windows.svg"));
-    windowsItem->setData(Name, QLatin1String("Windows 7+"));
-    windowsItem->setData(Decription, tr("Supported ABIs: x86, x86_64"));
-    windowsItem->setData(Availability, false);
+    windowsItem->setData(PlatformRole, Windows);
+    windowsItem->setData(NameRole, QLatin1String("Windows 7+"));
+    windowsItem->setData(DecriptionRole, tr("Supported ABIs: x86, x86_64"));
+    windowsItem->setData(AvailabilityRole, Soon);
+    windowsItem->setFlags(windowsItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(windowsItem);
 
     auto linuxItem = new QListWidgetItem;
     linuxItem->setIcon(QIcon(":/images/builds/linux.svg"));
-    linuxItem->setData(Name, QLatin1String("Linux (X11)"));
-    linuxItem->setData(Decription, tr("Supported ABIs: x86, x86_64"));
-    linuxItem->setData(Availability, false);
+    linuxItem->setData(PlatformRole, Linux);
+    linuxItem->setData(NameRole, QLatin1String("Linux (X11)"));
+    linuxItem->setData(DecriptionRole, tr("Supported ABIs: x86, x86_64"));
+    linuxItem->setData(AvailabilityRole, Soon);
+    linuxItem->setFlags(linuxItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(linuxItem);
 
     auto raspberryPiItem = new QListWidgetItem;
     raspberryPiItem->setIcon(QIcon(":/images/builds/raspberry.svg"));
-    raspberryPiItem->setData(Name, QLatin1String("Raspberry Pi 2+"));
-    raspberryPiItem->setData(Decription, tr("Supported ABIs: armeabi-v7a, arm64-v8a"));
-    raspberryPiItem->setData(Availability, false);
+    raspberryPiItem->setData(PlatformRole, RaspberryPi);
+    raspberryPiItem->setData(NameRole, QLatin1String("Raspberry Pi 2+"));
+    raspberryPiItem->setData(DecriptionRole, tr("Supported ABIs: armeabi-v7a, arm64-v8a"));
+    raspberryPiItem->setData(AvailabilityRole, InFuture);
+    raspberryPiItem->setFlags(raspberryPiItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(raspberryPiItem);
 
-    m_platformList->viewport()->installEventFilter(this);
-    m_platformList->setIconSize(QSize(48, 48));
-    m_platformList->setMinimumWidth(400);
-    m_platformList->setItemDelegate(new PlatformListDelegate(m_platformList, m_platformList));
-    m_platformList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_platformList->setIconSize(QSize(40, 40));
+    m_platformList->setFixedSize(QSize(450, 338));
     m_platformList->setFocusPolicy(Qt::NoFocus);
-    m_platformList->setFixedSize(QSize(450, 314));
+    m_platformList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_platformList->setItemDelegate(new PlatformListDelegate(m_platformList, m_platformList));
     m_platformList->verticalScrollBar()->setStyleSheet(
                 QString {
                     "QScrollBar:vertical {"
@@ -159,10 +196,7 @@ StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
                     "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
                     "    background: none;"
                     "}"
-                }
-                .arg(15)
-                .arg(6)
-                .arg(2.5));
+                } .arg(15).arg(6).arg(2.5));
     m_platformList->setStyleSheet(
                 QString {
                     "QListWidget {"
@@ -170,12 +204,11 @@ StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
                     "    border: 1px solid #22000000;"
                     "    border-radius: %1px;"
                     "}"
-                }
-                .arg(8));
+                }.arg(8));
 
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Objectwheel Cloud Builds"), this);
-    auto descriptionLabel = new QLabel(tr("Select your target platform to start"), this);
+    auto descriptionLabel = new QLabel(tr("Select your target platform"), this);
     auto platformsLabel = new QLabel(tr("Platforms:"));
 
     auto layout = new QGridLayout(this);
@@ -203,4 +236,17 @@ StartWidget::StartWidget(QWidget* parent) : QWidget(parent)
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
     descriptionLabel->setFont(f);
+}
+
+QListWidget* StartWidget::platformList() const
+{
+    return m_platformList;
+}
+
+StartWidget::Platform StartWidget::currentPlatform() const
+{
+    const QList<QListWidgetItem*>& selectedItems = m_platformList->selectedItems();
+    if (selectedItems.isEmpty())
+        return Invalid;
+    return selectedItems.first()->data(PlatformRole).value<Platform>();
 }
