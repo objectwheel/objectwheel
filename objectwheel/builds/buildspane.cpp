@@ -3,7 +3,6 @@
 #include <stackedlayout.h>
 #include <platformselectionwidget.h>
 #include <androidplatformwidget.h>
-#include <androidplatformcontroller.h>
 #include <applicationstyle.h>
 
 #include <QScrollArea>
@@ -18,7 +17,6 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
   , m_stackedLayout(new StackedLayout)
   , m_platformSelectionWidget(new PlatformSelectionWidget(this))
   , m_androidPlatformWidget(new AndroidPlatformWidget(this))
-  , m_androidPlatformController(new AndroidPlatformController(m_androidPlatformWidget, this))
 {
     setWidgetResizable(true);
     setWidget(new QWidget(this));
@@ -58,7 +56,7 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
     m_buttonSlice->get(Next)->setIcon(QIcon(":/images/welcome/load.png"));
     m_buttonSlice->get(Back)->setCursor(Qt::PointingHandCursor);
     m_buttonSlice->get(Next)->setCursor(Qt::PointingHandCursor);
-    m_buttonSlice->settings().cellWidth = 140;
+    m_buttonSlice->settings().cellWidth = 150;
     m_buttonSlice->triggerSettings();
 }
 
@@ -85,16 +83,6 @@ PlatformSelectionWidget* BuildsPane::platformSelectionWidget() const
 AndroidPlatformWidget* BuildsPane::androidPlatformWidget() const
 {
     return m_androidPlatformWidget;
-}
-
-void BuildsPane::charge() const
-{
-    m_androidPlatformController->charge();
-}
-
-void BuildsPane::discharge() const
-{
-    m_androidPlatformController->discharge();
 }
 
 QSize BuildsPane::sizeHint() const

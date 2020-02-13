@@ -75,4 +75,5 @@ void AndroidPlatformController::charge() const
 
 void AndroidPlatformController::discharge() const
 {
+    // TODO
 }

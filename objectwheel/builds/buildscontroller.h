@@ -4,6 +4,8 @@
 #include <QObject>
 
 class BuildsPane;
+class AndroidPlatformController;
+
 class BuildsController final : public QObject
 {
     Q_OBJECT
@@ -17,9 +19,12 @@ public slots:
     void discharge();
 
 private slots:
+    void onNextButtonClick();
+    void onBackButtonClick();
 
 private:
     BuildsPane* m_buildsPane;
+    AndroidPlatformController* m_androidPlatformController;
 };
 
 #endif // BUILDSCONTROLLER_H

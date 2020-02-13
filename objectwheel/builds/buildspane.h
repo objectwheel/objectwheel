@@ -8,7 +8,6 @@ class ButtonSlice;
 class StackedLayout;
 class PlatformSelectionWidget;
 class AndroidPlatformWidget;
-class AndroidPlatformController;
 
 class BuildsPane final : public QScrollArea
 {
@@ -30,17 +29,12 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
-public slots:
-    void charge() const;
-    void discharge() const;
-
 private:
     QLabel* m_platformLabel;
     ButtonSlice* m_buttonSlice;
     StackedLayout* m_stackedLayout;
     PlatformSelectionWidget* m_platformSelectionWidget;
     AndroidPlatformWidget* m_androidPlatformWidget;
-    AndroidPlatformController* m_androidPlatformController;
 };
 
 #endif // BUILDSPANE_H
