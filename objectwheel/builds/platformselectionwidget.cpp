@@ -19,7 +19,7 @@ Q_DECLARE_METATYPE(Availability)
 enum ItemRoles {
     PlatformRole = Qt::UserRole + 1,
     NameRole,
-    DecriptionRole,
+    DescriptionRole,
     AvailabilityRole
 };
 
@@ -50,9 +50,11 @@ public:
         if (item->listWidget() == 0)
             return;
 
+        painter->save();
+
         const QRectF r = option.rect;
         const QString& name = item->data(NameRole).toString();
-        const QString& description = item->data(DecriptionRole).toString();
+        const QString& description = item->data(DescriptionRole).toString();
         const Availability availability = item->data(AvailabilityRole).value<Availability>();
 
         // Limit drawing region to view's rect (with rounded corners)
@@ -86,6 +88,13 @@ public:
                               QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
         painter->drawText(descRect, description, Qt::AlignVCenter | Qt::AlignLeft);
 
+        // Draw bottom line
+        if (index.row() != item->listWidget()->count() - 1) {
+            painter->setPen(QPen(QColor("#28000000"), 0));
+            painter->drawLine(r.bottomLeft() + QPointF(padding, -0.5),
+                              r.bottomRight() + QPointF(-padding, -0.5));
+        }
+
         // Draw availability label
         if (availability != Available) {
             f.setPixelSize(f.pixelSize() - 2);
@@ -103,6 +112,8 @@ public:
             painter->drawRoundedRect(msgRect, 2, 2);
             painter->drawText(msgRect, label, Qt::AlignVCenter | Qt::AlignHCenter);
         }
+
+        painter->restore();
     }
 
 private:
@@ -124,7 +135,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     androidItem->setIcon(QIcon(":/images/builds/android.svg"));
     androidItem->setData(PlatformRole, Android);
     androidItem->setData(NameRole, QLatin1String("Android 5.0+"));
-    androidItem->setData(DecriptionRole, tr("Supported ABIs: armeabi-v7a, arm64-v8a, x86, x86_64"));
+    androidItem->setData(DescriptionRole, tr("Supported ABIs: armeabi-v7a, arm64-v8a, x86, x86_64"));
     androidItem->setData(AvailabilityRole, Available);
     m_platformList->addItem(androidItem);
 
@@ -132,7 +143,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     iOSItem->setIcon(QIcon(":/images/builds/ios.svg"));
     iOSItem->setData(PlatformRole, iOS);
     iOSItem->setData(NameRole, QLatin1String("iOS 12+"));
-    iOSItem->setData(DecriptionRole, tr("Supported ABIs: arm64-v8a, x86_64 (simulator)"));
+    iOSItem->setData(DescriptionRole, tr("Supported ABIs: arm64-v8a, x86_64 (simulator)"));
     iOSItem->setData(AvailabilityRole, Soon);
     iOSItem->setFlags(iOSItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(iOSItem);
@@ -141,7 +152,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     macOSItem->setIcon(QIcon(":/images/builds/macos.svg"));
     macOSItem->setData(PlatformRole, macOS);
     macOSItem->setData(NameRole, QLatin1String("macOS 10.13+"));
-    macOSItem->setData(DecriptionRole, tr("Supported ABIs: x86_64"));
+    macOSItem->setData(DescriptionRole, tr("Supported ABIs: x86_64"));
     macOSItem->setData(AvailabilityRole, Soon);
     macOSItem->setFlags(macOSItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(macOSItem);
@@ -150,7 +161,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     windowsItem->setIcon(QIcon(":/images/builds/windows.svg"));
     windowsItem->setData(PlatformRole, Windows);
     windowsItem->setData(NameRole, QLatin1String("Windows 7+"));
-    windowsItem->setData(DecriptionRole, tr("Supported ABIs: x86, x86_64"));
+    windowsItem->setData(DescriptionRole, tr("Supported ABIs: x86, x86_64"));
     windowsItem->setData(AvailabilityRole, Soon);
     windowsItem->setFlags(windowsItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(windowsItem);
@@ -159,7 +170,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     linuxItem->setIcon(QIcon(":/images/builds/linux.svg"));
     linuxItem->setData(PlatformRole, Linux);
     linuxItem->setData(NameRole, QLatin1String("Linux (X11)"));
-    linuxItem->setData(DecriptionRole, tr("Supported ABIs: x86, x86_64"));
+    linuxItem->setData(DescriptionRole, tr("Supported ABIs: x86, x86_64"));
     linuxItem->setData(AvailabilityRole, Soon);
     linuxItem->setFlags(linuxItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(linuxItem);
@@ -168,7 +179,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     raspberryPiItem->setIcon(QIcon(":/images/builds/raspberry.svg"));
     raspberryPiItem->setData(PlatformRole, RaspberryPi);
     raspberryPiItem->setData(NameRole, QLatin1String("Raspberry Pi 2+"));
-    raspberryPiItem->setData(DecriptionRole, tr("Supported ABIs: armeabi-v7a, arm64-v8a"));
+    raspberryPiItem->setData(DescriptionRole, tr("Supported ABIs: armeabi-v7a, arm64-v8a"));
     raspberryPiItem->setData(AvailabilityRole, InFuture);
     raspberryPiItem->setFlags(raspberryPiItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(raspberryPiItem);

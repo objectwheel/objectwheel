@@ -31,7 +31,7 @@
 #include <QDateTime>
 #include <QApplication>
 
-#define SIZE_LIST        (QSize(450, 262))
+#define SIZE_LIST        (QSize(450, 282))
 #define BUTTONS_WIDTH    (450)
 #define PATH_NICON       (":/images/welcome/new.png")
 #define PATH_LICON       (":/images/welcome/ok.png")
@@ -40,24 +40,28 @@
 #define WIDTH_PROGRESS   80
 
 enum Buttons { Load, New, Import, Export, Settings };
-enum Roles { Name = Qt::UserRole + 1, LastEdit, Uid, Active };
 
-namespace {
+enum ItemRoles {
+    UidRole = Qt::UserRole + 1,
+    NameRole,
+    DescriptionRole,
+    ActivityRole
+};
 
-QListWidgetItem* itemForUid(const QListWidget* listWidget, const QString& uid)
+static QListWidgetItem* itemForUid(const QListWidget* listWidget, const QString& uid)
 {
     for (int i = 0; i < listWidget->count(); ++i) {
         QListWidgetItem* item = listWidget->item(i);
-        if (item->data(Uid).toString() == uid)
+        if (item->data(UidRole).toString() == uid)
             return item;
     }
     return nullptr;
 }
-}
 
-class SearchWidget : public QWidget
+class SearchWidget final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SearchWidget)
 
 public:
     explicit SearchWidget(QWidget* parent = nullptr) : QWidget(parent)
@@ -144,71 +148,96 @@ private:
     QCheckBox* m_reverseSortCheckBox;
 };
 
-class ProjectsDelegate: public QStyledItemDelegate
+class ProjectListDelegate final : public QStyledItemDelegate
 {
-    Q_OBJECT
+    Q_DISABLE_COPY(ProjectListDelegate)
 
 public:
-    ProjectsDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-      , m_listWidget(listWidget)
+    ProjectListDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
+      , m_platformList(listWidget)
     {
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    {
+        return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
+                     m_platformList->iconSize().height() + 16);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override
     {
-        auto item = m_listWidget->item(index.row());
+        const QListWidgetItem* item = m_platformList->item(index.row());
+
         if (item == 0)
             return;
 
-        auto name = item->data(Name).toString();
-        auto lastEdit = item->data(LastEdit).toString();
+        if (item->listWidget() == 0)
+            return;
 
-        auto rn = QRectF(option.rect).adjusted(option.rect.height(),
-                                               7, 0, - option.rect.height() / 2.0);
-        auto rl = QRectF(option.rect).adjusted(option.rect.height(),
-                                               option.rect.height() / 2.0, 0, - 7);
-        auto ri = QRectF(option.rect).adjusted(7, 7,
-                                               - option.rect.width() + option.rect.height() - 7, - 7);
-        auto ra = ri.adjusted(3, -0.5, 0, 0);
-        ra.setSize(QSize(10, 10));
-        auto icon = PaintUtils::pixmap(item->icon(), ri.size().toSize(), m_listWidget,
-                                       m_listWidget->isEnabled() ? QIcon::Normal : QIcon::Disabled);
+        painter->save();
 
-        painter->setRenderHint(QPainter::Antialiasing);
+        const QRectF r = option.rect;
+        const QString& name = item->data(NameRole).toString();
+        const QString& description = item->data(DescriptionRole).toString();
+        const bool isActive = item->data(ActivityRole).toBool();
 
+        // Limit drawing region to view's rect (with rounded corners)
         QPainterPath path;
-        path.addRoundedRect(m_listWidget->rect(), 8, 8);
+        path.addRoundedRect(item->listWidget()->rect(), 8, 8);
         painter->setClipPath(path);
 
+        // Draw highlighted background if selected
         if (item->isSelected())
-            painter->fillRect(option.rect, option.palette.highlight());
+            painter->fillRect(r, option.palette.highlight());
 
-        painter->drawPixmap(ri, icon, icon.rect());
+        // Draw icon
+        const QSize& iconSize = item->listWidget()->iconSize();
+        const int padding = r.height() / 2.0 - iconSize.height() / 2.0;
+        const QRectF iconRect(QPointF(r.left() + padding, r.top() + padding), iconSize);
+        const QPixmap& icon = PaintUtils::pixmap(item->icon(), iconSize, item->listWidget());
+        painter->drawPixmap(iconRect, icon, icon.rect());
 
-        if (item->data(Active).toBool()) {
-            QLinearGradient g(ri.topLeft(), ri.bottomLeft());
-            g.setColorAt(0, "#6BCB36");
-            g.setColorAt(0.5, "#4db025");
-            painter->setBrush(g);
-            painter->setPen("#6BCB36");
-            painter->drawRoundedRect(ra, ra.width(), ra.height());
-        }
-
+        // Draw texts
         QFont f;
         f.setWeight(QFont::Medium);
         painter->setFont(f);
+        const QRectF nameRect(QPointF(iconRect.right() + padding, iconRect.top()),
+                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
         painter->setPen(option.palette.text().color());
-        painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
+        painter->drawText(nameRect, name, Qt::AlignVCenter | Qt::AlignLeft);
 
         f.setWeight(QFont::Normal);
         painter->setFont(f);
-        painter->drawText(rl, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
+        const QRectF descRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
+                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
+        painter->drawText(descRect, description, Qt::AlignVCenter | Qt::AlignLeft);
+
+        // Draw bottom line
+        if (index.row() != item->listWidget()->count() - 1) {
+            painter->setPen(QPen(QColor("#28000000"), 0));
+            painter->drawLine(r.bottomLeft() + QPointF(padding, -0.5),
+                              r.bottomRight() + QPointF(-padding, -0.5));
+        }
+
+        // Draw activity mark
+        if (isActive) {
+            const QRectF activityRect(iconRect.topLeft(), QSizeF(10, 10));
+            QLinearGradient gradient(0, 0, 0, 1);
+            gradient.setCoordinateMode(QGradient::ObjectMode);
+            gradient.setColorAt(0.0, QColor("#6BCB36"));
+            gradient.setColorAt(0.8, QColor("#4db025"));
+            painter->setBrush(gradient);
+            painter->setPen(QColor("#6BCB36"));
+            painter->setRenderHint(QPainter::Antialiasing);
+            painter->drawRoundedRect(activityRect, activityRect.width(), activityRect.height());
+        }
+
+        painter->restore();
     }
 
-
 private:
-    QListWidget* m_listWidget;
+    const QListWidget* m_platformList;
 };
 
 class ProjectListWidgetItem : public QListWidgetItem
@@ -224,14 +253,14 @@ public:
         bool reverseSort = searchWidget->isReverseSort();
 
         if (criteria == QObject::tr("Name")) {
-            const QString& myName = data(Name).toString();
-            const QString& othersName = other.data(Name).toString();
+            const QString& myName = data(NameRole).toString();
+            const QString& othersName = other.data(NameRole).toString();
             bool result = QString::localeAwareCompare(myName, othersName) < 0;
             return reverseSort ? !result : result;
         }
         if (criteria == QObject::tr("Date")) {
-            const QDateTime& myDate = QDateTime::fromString(data(LastEdit).toString(), Qt::SystemLocaleLongDate);
-            const QDateTime& othersDate = QDateTime::fromString(other.data(LastEdit).toString(), Qt::SystemLocaleLongDate);
+            const QDateTime& myDate = QDateTime::fromString(data(DescriptionRole).toString(), Qt::SystemLocaleLongDate);
+            const QDateTime& othersDate = QDateTime::fromString(other.data(DescriptionRole).toString(), Qt::SystemLocaleLongDate);
             bool result = myDate > othersDate;
             return reverseSort ? !result : result;
         }
@@ -311,10 +340,10 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     };
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
+
     m_listWidget->viewport()->installEventFilter(this);
-    m_listWidget->setIconSize(QSize(48, 48));
-    m_listWidget->setMinimumWidth(400);
-    m_listWidget->setItemDelegate(new ProjectsDelegate(m_listWidget, m_listWidget));
+    m_listWidget->setIconSize(QSize(40, 40));
+    m_listWidget->setItemDelegate(new ProjectListDelegate(m_listWidget, m_listWidget));
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setFixedSize(SIZE_LIST);
@@ -464,10 +493,10 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
     for (auto uid : projects) {
         auto item = new ProjectListWidgetItem(this);
         item->setIcon(QIcon(":/images/welcome/project.svg"));
-        item->setData(Uid, uid);
-        item->setData(Name, ProjectManager::name(uid));
-        item->setData(LastEdit, ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
-        item->setData(Active, uid == ProjectManager::uid());
+        item->setData(UidRole, uid);
+        item->setData(NameRole, ProjectManager::name(uid));
+        item->setData(DescriptionRole, ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
+        item->setData(ActivityRole, uid == ProjectManager::uid());
         m_listWidget->addItem(item);
     }
 
@@ -506,9 +535,9 @@ void ProjectsWidget::onNewButtonClick()
 
     auto item = new ProjectListWidgetItem(this);
     item->setIcon(QIcon(":/images/welcome/project.svg"));
-    item->setData(Name, projectName);
-    item->setData(LastEdit, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
-    item->setData(Active, false);
+    item->setData(NameRole, projectName);
+    item->setData(DescriptionRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
+    item->setData(ActivityRole, false);
     m_listWidget->addItem(item);
     m_listWidget->sortItems();
     m_listWidget->setCurrentItem(item);
@@ -528,7 +557,7 @@ void ProjectsWidget::onLoadButtonClick()
         return;
     }
 
-    auto uid = m_listWidget->currentItem()->data(Uid).toString();
+    auto uid = m_listWidget->currentItem()->data(UidRole).toString();
     auto cuid = ProjectManager::uid();
 
     if (!cuid.isEmpty() && cuid == uid) {
@@ -582,10 +611,10 @@ void ProjectsWidget::onLoadButtonClick()
     }
 
     for (int i = m_listWidget->count(); i--;)
-        m_listWidget->item(i)->setData(Active, false);
+        m_listWidget->item(i)->setData(ActivityRole, false);
 
-    m_listWidget->currentItem()->setData(Active, true);
-    m_listWidget->currentItem()->setData(LastEdit, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
+    m_listWidget->currentItem()->setData(ActivityRole, true);
+    m_listWidget->currentItem()->setData(DescriptionRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
 
     Delayer::delay([=] () -> bool {
         return m_progressBar->value() < m_progressBar->maximum();
@@ -608,8 +637,8 @@ void ProjectsWidget::onExportButtonClick()
         return;
     }
 
-    auto uid = m_listWidget->currentItem()->data(Uid).toString();
-    auto pname = m_listWidget->currentItem()->data(Name).toString();
+    auto uid = m_listWidget->currentItem()->data(UidRole).toString();
+    auto pname = m_listWidget->currentItem()->data(NameRole).toString();
 
     if (uid.isEmpty() || pname.isEmpty())
         return;
@@ -664,7 +693,7 @@ void ProjectsWidget::onImportButtonClick()
 void ProjectsWidget::onSettingsButtonClick()
 {
     if (m_listWidget->currentItem())
-        emit editProject(m_listWidget->currentItem()->data(Uid).toString());
+        emit editProject(m_listWidget->currentItem()->data(UidRole).toString());
 }
 
 void ProjectsWidget::onProgressChange(int progress)
@@ -679,7 +708,7 @@ void ProjectsWidget::onSearchTextChange(const QString& text)
     QListWidgetItem* firstVisibleItem = nullptr;
     for (int i = m_listWidget->count() - 1; i >= 0; --i) {
         QListWidgetItem* item = m_listWidget->item(i);
-        const QString& projectName = item->data(Name).toString();
+        const QString& projectName = item->data(NameRole).toString();
         item->setHidden(!text.isEmpty() && !projectName.contains(text, Qt::CaseInsensitive));
         if (!item->isHidden())
             firstVisibleItem = item;
