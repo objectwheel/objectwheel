@@ -21,6 +21,7 @@ public slots:
 private slots:
     void onNextButtonClick();
     void onBackButtonClick();
+    void onCurrentWidgetChange(int index);
 
 private:
     BuildsPane* m_buildsPane;

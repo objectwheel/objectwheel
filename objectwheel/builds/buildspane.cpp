@@ -38,19 +38,32 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
     layout->setSpacing(12);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(2, 1);
-    layout->addWidget(m_iconLabel, 0, 1, Qt::AlignHCenter);
-    layout->addWidget(m_platformLabel, 0, 1, Qt::AlignHCenter);
-    layout->addWidget(m_descriptionLabel, 0, 1, Qt::AlignHCenter);
-    layout->addLayout(m_stackedLayout, 1, 1);
-    layout->addLayout(buttonLayout, 2, 1);
-    layout->setRowStretch(3, 1);
+    layout->setRowStretch(0, 1);
+    layout->addWidget(m_iconLabel, 1, 1, Qt::AlignHCenter);
+    layout->addWidget(m_platformLabel, 2, 1, Qt::AlignHCenter);
+    layout->addWidget(m_descriptionLabel, 3, 1, Qt::AlignHCenter);
+    layout->addLayout(m_stackedLayout, 4, 1);
+    layout->addLayout(buttonLayout, 5, 1);
+    layout->setRowStretch(6, 1);
 
     m_iconLabel->setFixedSize(QSize(60, 60));
+    m_iconLabel->setAlignment(Qt::AlignCenter);
+    m_platformLabel->setAlignment(Qt::AlignCenter);
+    m_descriptionLabel->setAlignment(Qt::AlignCenter);
 
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
     m_platformLabel->setFont(f);
+
+    m_descriptionLabel->setStyleSheet(
+                QLatin1String("QLabel {"
+                              "  padding: 9px;"
+                              "  color: white;"
+                              "  background: #62000000;"
+                              "  border: none;"
+                              "  border-radius: 3px"
+                              "}"));
 
     m_stackedLayout->addWidget(m_downloadWidget);
     m_stackedLayout->addWidget(m_platformSelectionWidget);
