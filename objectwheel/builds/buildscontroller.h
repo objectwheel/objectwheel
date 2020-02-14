@@ -1,9 +1,10 @@
 #ifndef BUILDSCONTROLLER_H
 #define BUILDSCONTROLLER_H
 
-#include <QObject>
+#include <platformselectionwidget.h>
 
 class BuildsPane;
+class DownloadController;
 class AndroidPlatformController;
 
 class BuildsController final : public QObject
@@ -19,12 +20,17 @@ public slots:
     void discharge();
 
 private slots:
-    void onNextButtonClick();
+    void onNewButtonClick();
     void onBackButtonClick();
-    void onCurrentWidgetChange(int index);
+    void onNextButtonClick();
+    void onBuildButtonClick();
+
+private:
+    QWidget* widgetForPlatform(PlatformSelectionWidget::Platform platform) const;
 
 private:
     BuildsPane* m_buildsPane;
+    DownloadController* m_downloadController;
     AndroidPlatformController* m_androidPlatformController;
 };
 
