@@ -1,6 +1,7 @@
 #include <androidplatformwidget.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
+#include <buttonslice.h>
 
 #include <QBoxLayout>
 #include <QGroupBox>
@@ -299,6 +300,7 @@ const QStringList AndroidPlatformWidget::androidPermissionList {
 };
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
+  , m_buttonSlice(new ButtonSlice(this))
   , m_nameEdit(new QLineEdit(this))
   , m_versionCodeSpin(new QSpinBox(this))
   , m_versionNameEdit(new QLineEdit(this))
@@ -528,6 +530,17 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     signingLayout->setColumnStretch(2, 1);
     signingLayout->setColumnMinimumWidth(0, labelColMinSz);
 
+    m_buttonSlice->add(Back, "#5BC5F8", "#2592F9");
+    m_buttonSlice->add(Build, "#8BBB56", "#6EA045");
+    m_buttonSlice->get(Back)->setText(tr("Back"));
+    m_buttonSlice->get(Build)->setText(tr("Build"));
+    m_buttonSlice->get(Back)->setIcon(QIcon(":/images/welcome/unload.png"));
+    m_buttonSlice->get(Build)->setIcon(QIcon(":/images/welcome/load.png"));
+    m_buttonSlice->get(Back)->setCursor(Qt::PointingHandCursor);
+    m_buttonSlice->get(Build)->setCursor(Qt::PointingHandCursor);
+    m_buttonSlice->settings().cellWidth = 150;
+    m_buttonSlice->triggerSettings();
+
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
@@ -540,6 +553,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(androidSpesificGroupBox);
     layout->addWidget(buildingGroupBox);
     layout->addWidget(signingGroupBox);
+    layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
 
     m_versionCodeSpin->setCursor(Qt::PointingHandCursor);
     m_screenOrientationCombo->setCursor(Qt::PointingHandCursor);
@@ -791,6 +805,11 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
             + m_clearIconButton->sizeHint().height();
     m_iconPictureLabel->setFixedSize(iconPictureSize, iconPictureSize);
     m_iconPictureLabel->setFrameShape(QFrame::StyledPanel);
+}
+
+ButtonSlice* AndroidPlatformWidget::buttonSlice() const
+{
+    return m_buttonSlice;
 }
 
 QLineEdit* AndroidPlatformWidget::nameEdit() const

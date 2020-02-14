@@ -16,17 +16,15 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
   , m_buildsPane(buildsPane)
   , m_androidPlatformController(new AndroidPlatformController(m_buildsPane->androidPlatformWidget(), this))
 {
-    connect(m_buildsPane->buttonSlice()->get(BuildsPane::Next), &QPushButton::clicked,
-            this, &BuildsController::onNextButtonClick);
-    connect(m_buildsPane->buttonSlice()->get(BuildsPane::Back), &QPushButton::clicked,
-            this, &BuildsController::onBackButtonClick);
     connect(m_buildsPane->stackedLayout(), &StackedLayout::currentChanged,
             this, &BuildsController::onCurrentWidgetChange);
+    connect(m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New), &QPushButton::clicked,
+            this, [=] { m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->platformSelectionWidget()); });
 }
 
 void BuildsController::charge()
 {
-    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->androidPlatformWidget());
+    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
     m_androidPlatformController->charge();
 }
 
@@ -71,7 +69,7 @@ void BuildsController::onCurrentWidgetChange(int index)
 {
 //    const QWidget* currentWidget = m_buildsPane->stackedLayout()->widget(index);
 //    if (currentWidget == m_buildsPane->platformSelectionWidget()) {
-//        m_buildsPane->buttonSlice()->get(BuildsPane::Next)->setText(tr("Next"));
+////        m_buildsPane->buttonSlice()->get(BuildsPane::Next)->setText(tr("Next"));
 //        m_buildsPane->platformLabel()->setText(tr("Target platform: Android"));
 //        m_buildsPane->descriptionLabel()->setText(tr("Please make your final adjustments down below before requesting a cloud build.\n"
 //                                                     "All fields are optional and will be assigned to their default values if left as is."));

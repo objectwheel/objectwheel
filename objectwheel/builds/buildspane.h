@@ -3,7 +3,6 @@
 
 #include <QScrollArea>
 
-class ButtonSlice;
 class StackedLayout;
 class DownloadWidget;
 class PlatformSelectionWidget;
@@ -15,12 +14,8 @@ class BuildsPane final : public QScrollArea
     Q_DISABLE_COPY(BuildsPane)
 
 public:
-    enum Buttons { Next, Back };
-
-public:
     explicit BuildsPane(QWidget* parent = nullptr);
 
-    ButtonSlice* buttonSlice() const;
     StackedLayout* stackedLayout() const;
     DownloadWidget* downloadWidget() const;
     PlatformSelectionWidget* platformSelectionWidget() const;
@@ -30,7 +25,6 @@ public:
     QSize minimumSizeHint() const override;
 
 private:
-    ButtonSlice* m_buttonSlice;
     StackedLayout* m_stackedLayout;
     DownloadWidget* m_downloadWidget;
     PlatformSelectionWidget* m_platformSelectionWidget;

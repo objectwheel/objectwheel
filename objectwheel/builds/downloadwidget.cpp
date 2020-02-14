@@ -1,14 +1,17 @@
 #include <downloadwidget.h>
+#include <buttonslice.h>
 #include <paintutils.h>
 
 #include <QLabel>
 #include <QBoxLayout>
 #include <QListWidget>
 #include <QScrollBar>
+#include <QPushButton>
 
 DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
+  , m_platformList(new QListWidget(this))
+  , m_buttonSlice(new ButtonSlice(this))
 {
-    m_platformList = new QListWidget(this);
     m_platformList->setIconSize(QSize(40, 40));
     m_platformList->setFixedSize(QSize(450, 326));
     m_platformList->setFocusPolicy(Qt::NoFocus);
@@ -58,6 +61,13 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     descriptionLabel->setAlignment(Qt::AlignCenter);
     descriptionLabel->setFont(f);
 
+    m_buttonSlice->add(New, "#8BBB56", "#6EA045");
+    m_buttonSlice->get(New)->setText(tr("New"));
+    m_buttonSlice->get(New)->setIcon(QIcon(":/images/welcome/new.png"));
+    m_buttonSlice->get(New)->setCursor(Qt::PointingHandCursor);
+    m_buttonSlice->settings().cellWidth = 250;
+    m_buttonSlice->triggerSettings();
+
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
@@ -67,4 +77,15 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     layout->addSpacing(8);
     layout->addWidget(buildsLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_platformList, 0, Qt::AlignHCenter);
+    layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
+}
+
+QListWidget* DownloadWidget::platformList() const
+{
+    return m_platformList;
+}
+
+ButtonSlice* DownloadWidget::buttonSlice() const
+{
+    return m_buttonSlice;
 }

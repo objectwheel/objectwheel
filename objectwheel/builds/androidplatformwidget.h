@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QMap>
 
+class ButtonSlice;
 class QLabel;
 class QLineEdit;
 class QSpinBox;
@@ -20,6 +21,9 @@ class AndroidPlatformWidget final : public QWidget
     Q_DISABLE_COPY(AndroidPlatformWidget)
 
 public:
+    enum Buttons { Back, Build };
+
+public:
     static const QMap<QString, QString> apiLevelMap;
     static const QMap<QString, QString> orientationMap;
     static const QMap<QString, QString> qtModuleMap;
@@ -28,6 +32,7 @@ public:
 public:
     explicit AndroidPlatformWidget(QWidget* parent = nullptr);
 
+    ButtonSlice* buttonSlice() const;
     QLineEdit* nameEdit() const;
     QSpinBox* versionCodeSpin() const;
     QLineEdit* versionNameEdit() const;
@@ -69,6 +74,7 @@ public:
     QCheckBox* sameAsKeystorePasswordCheck() const;
 
 private:
+    ButtonSlice* m_buttonSlice;
     QLineEdit* m_nameEdit;
     QSpinBox* m_versionCodeSpin;
     QLineEdit* m_versionNameEdit;

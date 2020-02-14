@@ -1,5 +1,6 @@
 #include <platformselectionwidget.h>
 #include <paintutils.h>
+#include <buttonslice.h>
 
 #include <QBoxLayout>
 #include <QListWidget>
@@ -8,6 +9,7 @@
 #include <QScrollBar>
 #include <QApplication>
 #include <QPainter>
+#include <QPushButton>
 
 enum Availability {
     InFuture,
@@ -122,6 +124,7 @@ private:
 
 PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(parent)
   , m_platformList(new QListWidget(this))
+  , m_buttonSlice(new ButtonSlice(this))
 {
     auto updatePalette = [=] {
         QPalette p(m_platformList->palette());
@@ -215,6 +218,17 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
                     "    border-radius: %1px;"
                     "}").arg(8));
 
+    m_buttonSlice->add(Back, "#5BC5F8", "#2592F9");
+    m_buttonSlice->add(Next, "#8BBB56", "#6EA045");
+    m_buttonSlice->get(Back)->setText(tr("Back"));
+    m_buttonSlice->get(Next)->setText(tr("Next"));
+    m_buttonSlice->get(Back)->setIcon(QIcon(":/images/welcome/unload.png"));
+    m_buttonSlice->get(Next)->setIcon(QIcon(":/images/welcome/load.png"));
+    m_buttonSlice->get(Back)->setCursor(Qt::PointingHandCursor);
+    m_buttonSlice->get(Next)->setCursor(Qt::PointingHandCursor);
+    m_buttonSlice->settings().cellWidth = 150;
+    m_buttonSlice->triggerSettings();
+
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Platform Selection"), this);
     auto descriptionLabel = new QLabel(tr("Select your target platform to start"), this);
@@ -241,6 +255,17 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     layout->addSpacing(8);
     layout->addWidget(platformsLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_platformList, 0, Qt::AlignHCenter);
+    layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
+}
+
+QListWidget* PlatformSelectionWidget::platformList() const
+{
+    return m_platformList;
+}
+
+ButtonSlice* PlatformSelectionWidget::buttonSlice() const
+{
+    return m_buttonSlice;
 }
 
 PlatformSelectionWidget::Platform PlatformSelectionWidget::currentPlatform() const
