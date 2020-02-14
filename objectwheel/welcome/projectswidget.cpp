@@ -31,7 +31,7 @@
 #include <QDateTime>
 #include <QApplication>
 
-#define SIZE_LIST        (QSize(450, 282))
+#define SIZE_LIST        (QSize(450, 272))
 #define BUTTONS_WIDTH    (450)
 #define PATH_NICON       (":/images/welcome/new.png")
 #define PATH_LICON       (":/images/welcome/ok.png")
@@ -44,7 +44,7 @@ enum Buttons { Load, New, Import, Export, Settings };
 enum ItemRoles {
     UidRole = Qt::UserRole + 1,
     NameRole,
-    DescriptionRole,
+    LastEditRole,
     ActivityRole
 };
 
@@ -161,7 +161,7 @@ public:
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
-                     m_platformList->iconSize().height() + 16);
+                     m_platformList->iconSize().height() + 14);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
@@ -179,7 +179,7 @@ public:
 
         const QRectF r = option.rect;
         const QString& name = item->data(NameRole).toString();
-        const QString& description = item->data(DescriptionRole).toString();
+        const QString& lastEdit = item->data(LastEditRole).toString();
         const bool isActive = item->data(ActivityRole).toBool();
 
         // Limit drawing region to view's rect (with rounded corners)
@@ -209,9 +209,9 @@ public:
 
         f.setWeight(QFont::Normal);
         painter->setFont(f);
-        const QRectF descRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
+        const QRectF lastEditRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
                               QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
-        painter->drawText(descRect, description, Qt::AlignVCenter | Qt::AlignLeft);
+        painter->drawText(lastEditRect, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
 
         // Draw bottom line
         if (index.row() != item->listWidget()->count() - 1) {
@@ -222,13 +222,13 @@ public:
 
         // Draw activity mark
         if (isActive) {
-            const QRectF activityRect(iconRect.topLeft(), QSizeF(10, 10));
+            const QRectF activityRect(iconRect.topLeft(), QSizeF(11, 11));
             QLinearGradient gradient(0, 0, 0, 1);
             gradient.setCoordinateMode(QGradient::ObjectMode);
-            gradient.setColorAt(0.0, QColor("#6BCB36"));
-            gradient.setColorAt(0.8, QColor("#4db025"));
+            gradient.setColorAt(0, QColor("#95c95d"));
+            gradient.setColorAt(1, QColor("#8BBB56"));
             painter->setBrush(gradient);
-            painter->setPen(QColor("#6BCB36"));
+            painter->setPen(QColor("#97cc5e"));
             painter->setRenderHint(QPainter::Antialiasing);
             painter->drawRoundedRect(activityRect, activityRect.width(), activityRect.height());
         }
@@ -259,8 +259,8 @@ public:
             return reverseSort ? !result : result;
         }
         if (criteria == QObject::tr("Date")) {
-            const QDateTime& myDate = QDateTime::fromString(data(DescriptionRole).toString(), Qt::SystemLocaleLongDate);
-            const QDateTime& othersDate = QDateTime::fromString(other.data(DescriptionRole).toString(), Qt::SystemLocaleLongDate);
+            const QDateTime& myDate = QDateTime::fromString(data(LastEditRole).toString(), Qt::SystemLocaleLongDate);
+            const QDateTime& othersDate = QDateTime::fromString(other.data(LastEditRole).toString(), Qt::SystemLocaleLongDate);
             bool result = myDate > othersDate;
             return reverseSort ? !result : result;
         }
@@ -495,7 +495,7 @@ void ProjectsWidget::refreshProjectList(bool selectionPreserved)
         item->setIcon(QIcon(":/images/welcome/project.svg"));
         item->setData(UidRole, uid);
         item->setData(NameRole, ProjectManager::name(uid));
-        item->setData(DescriptionRole, ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
+        item->setData(LastEditRole, ProjectManager::mfDate(uid).toString(Qt::SystemLocaleLongDate));
         item->setData(ActivityRole, uid == ProjectManager::uid());
         m_listWidget->addItem(item);
     }
@@ -536,7 +536,7 @@ void ProjectsWidget::onNewButtonClick()
     auto item = new ProjectListWidgetItem(this);
     item->setIcon(QIcon(":/images/welcome/project.svg"));
     item->setData(NameRole, projectName);
-    item->setData(DescriptionRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
+    item->setData(LastEditRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
     item->setData(ActivityRole, false);
     m_listWidget->addItem(item);
     m_listWidget->sortItems();
@@ -614,7 +614,7 @@ void ProjectsWidget::onLoadButtonClick()
         m_listWidget->item(i)->setData(ActivityRole, false);
 
     m_listWidget->currentItem()->setData(ActivityRole, true);
-    m_listWidget->currentItem()->setData(DescriptionRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
+    m_listWidget->currentItem()->setData(LastEditRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
 
     Delayer::delay([=] () -> bool {
         return m_progressBar->value() < m_progressBar->maximum();

@@ -4,6 +4,7 @@
 #include <platformselectionwidget.h>
 #include <androidplatformwidget.h>
 #include <applicationstyle.h>
+#include <downloadwidget.h>
 
 #include <QScrollArea>
 #include <QGridLayout>
@@ -12,9 +13,12 @@
 #include <QPushButton>
 
 BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
+  , m_iconLabel(new QLabel(this))
   , m_platformLabel(new QLabel(this))
+  , m_descriptionLabel(new QLabel(this))
   , m_buttonSlice(new ButtonSlice(this))
   , m_stackedLayout(new StackedLayout)
+  , m_downloadWidget(new DownloadWidget(this))
   , m_platformSelectionWidget(new PlatformSelectionWidget(this))
   , m_androidPlatformWidget(new AndroidPlatformWidget(this))
 {
@@ -34,19 +38,23 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
     layout->setSpacing(12);
     layout->setColumnStretch(0, 1);
     layout->setColumnStretch(2, 1);
+    layout->addWidget(m_iconLabel, 0, 1, Qt::AlignHCenter);
     layout->addWidget(m_platformLabel, 0, 1, Qt::AlignHCenter);
+    layout->addWidget(m_descriptionLabel, 0, 1, Qt::AlignHCenter);
     layout->addLayout(m_stackedLayout, 1, 1);
     layout->addLayout(buttonLayout, 2, 1);
     layout->setRowStretch(3, 1);
+
+    m_iconLabel->setFixedSize(QSize(60, 60));
 
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
     m_platformLabel->setFont(f);
 
+    m_stackedLayout->addWidget(m_downloadWidget);
     m_stackedLayout->addWidget(m_platformSelectionWidget);
     m_stackedLayout->addWidget(m_androidPlatformWidget);
-    m_stackedLayout->setCurrentWidget(m_platformSelectionWidget);
 
     m_buttonSlice->add(Back, "#5BC5F8", "#2592F9");
     m_buttonSlice->add(Next, "#8BBB56", "#6EA045");
@@ -75,6 +83,11 @@ StackedLayout* BuildsPane::stackedLayout() const
     return m_stackedLayout;
 }
 
+DownloadWidget* BuildsPane::downloadWidget() const
+{
+    return m_downloadWidget;
+}
+
 PlatformSelectionWidget* BuildsPane::platformSelectionWidget() const
 {
     return m_platformSelectionWidget;
@@ -93,4 +106,14 @@ QSize BuildsPane::sizeHint() const
 QSize BuildsPane::minimumSizeHint() const
 {
     return {0, 0};
+}
+
+QLabel* BuildsPane::iconLabel() const
+{
+    return m_iconLabel;
+}
+
+QLabel* BuildsPane::descriptionLabel() const
+{
+    return m_descriptionLabel;
 }

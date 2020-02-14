@@ -6,8 +6,11 @@
 #include <platformselectionwidget.h>
 #include <androidplatformwidget.h>
 #include <utilityfunctions.h>
+#include <downloadwidget.h>
+#include <paintutils.h>
 
 #include <QPushButton>
+#include <QLabel>
 
 BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QObject(parent)
   , m_buildsPane(buildsPane)
@@ -21,16 +24,25 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
 
 void BuildsController::charge()
 {
+    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->platformSelectionWidget());
     m_androidPlatformController->charge();
 }
 
 void BuildsController::discharge()
 {
+    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
     m_androidPlatformController->discharge();
 }
 
 void BuildsController::onNextButtonClick()
 {
+    m_buildsPane->iconLabel()->hide();
+    m_buildsPane->platformLabel()->hide();
+    m_buildsPane->descriptionLabel()->hide();
+
+    m_buildsPane->iconLabel()->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"),
+                                                            QSize(60, 60), m_buildsPane->iconLabel()));
+
 //    if (m_buildsPane->stackedLayout()->currentWidget() == m_buildsPane->platformSelectionWidget())
 //        return;
 //    if (m_buildsPane->stackedLayout()->currentWidget() == m_buildsPane->platformSelectionWidget()) {

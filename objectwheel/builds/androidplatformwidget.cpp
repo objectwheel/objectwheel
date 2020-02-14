@@ -16,8 +16,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-// TODO: Add a "description" label under icon like "Enter final application details below right
-//       before requesting a cloud build for your project"
 // TODO: Make sure each line edit and everything matches safety regular exp
 //       except "password" edits, find a solution for this
 // TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"

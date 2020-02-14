@@ -36,7 +36,7 @@ public:
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
-                     m_platformList->iconSize().height() + 16);
+                     m_platformList->iconSize().height() + 14);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
@@ -185,7 +185,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     m_platformList->addItem(raspberryPiItem);
 
     m_platformList->setIconSize(QSize(40, 40));
-    m_platformList->setFixedSize(QSize(450, 338));
+    m_platformList->setFixedSize(QSize(450, 326));
     m_platformList->setFocusPolicy(Qt::NoFocus);
     m_platformList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_platformList->setItemDelegate(new PlatformListDelegate(m_platformList, m_platformList));
