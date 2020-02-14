@@ -12,7 +12,7 @@
 
 AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* androidPlatformWidget,
                                                      QObject* parent)
-    : PlatformController(parent)
+    : AbstractPlatformController(parent)
     , m_androidPlatformWidget(androidPlatformWidget)
 {
 }

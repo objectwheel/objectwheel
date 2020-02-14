@@ -152,5 +152,6 @@
         <file>images/builds/macos.svg</file>
         <file>images/builds/raspberry.svg</file>
         <file>images/builds/windows.svg</file>
+        <file>images/builds/oses.svg</file>
     </qresource>
 </RCC>

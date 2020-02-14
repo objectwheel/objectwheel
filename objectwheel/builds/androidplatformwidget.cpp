@@ -1,5 +1,6 @@
 #include <androidplatformwidget.h>
 #include <utilityfunctions.h>
+#include <paintutils.h>
 
 #include <QBoxLayout>
 #include <QGroupBox>
@@ -338,6 +339,26 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_showKeyPasswordButton(new QToolButton(this))
   , m_sameAsKeystorePasswordCheck(new QCheckBox(this))
 {
+    static const int labelColMinSz = 120; // Roughly the longest label's width
+
+    auto iconLabel = new QLabel(this);
+    auto titleLabel = new QLabel(tr("Target: Android"), this);
+    auto descriptionLabel = new QLabel(tr("Adjust your application settings below"), this);
+    auto settingsLabel = new QLabel(tr("Settings"));
+
+    iconLabel->setFixedSize(QSize(60, 60));
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android.svg"),
+                                            QSize(60, 60), this));
+    QFont f;
+    f.setWeight(QFont::ExtraLight);
+    f.setPixelSize(26);
+    titleLabel->setFont(f);
+
+    f.setWeight(QFont::Light);
+    f.setPixelSize(16);
+    descriptionLabel->setAlignment(Qt::AlignCenter);
+    descriptionLabel->setFont(f);
+
     auto nameLabel = new QLabel(tr("Name:"), this);
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
     auto versionNameLabel = new QLabel(tr("Version name:"), this);
@@ -360,12 +381,13 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     generalLayout->addWidget(m_domainEdit, 4, 1, 1, 2);
     generalLayout->setColumnStretch(1, 1);
     generalLayout->setColumnStretch(2, 1);
+    generalLayout->setColumnMinimumWidth(0, labelColMinSz);
 
     auto packageNameLabel = new QLabel(tr("Package name:"), this);
     auto screenOrientationLabel = new QLabel(tr("Screen orientation:"), this);
     auto minApiLevelLabel = new QLabel(tr("Minimum API level:"), this);
     auto targetApiLevelLabel = new QLabel(tr("Target API level:"), this);
-    auto iconLabel = new QLabel(tr("Icon:"), this);
+    auto appIconLabel = new QLabel(tr("Icon:"), this);
     auto permissionLabel = new QLabel(tr("Permissions:"), this);
     auto autoDetectPemissionsCheck = new QCheckBox(tr("Automatically detected"), this);
 
@@ -403,12 +425,13 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     androidSpesificLayout->addWidget(m_minApiLevelCombo, 2, 1);
     androidSpesificLayout->addWidget(targetApiLevelLabel, 3, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_targetApiLevelCombo, 3, 1);
-    androidSpesificLayout->addWidget(iconLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
+    androidSpesificLayout->addWidget(appIconLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addLayout(iconLayout, 4, 1);
     androidSpesificLayout->addWidget(permissionLabel, 5, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addLayout(permissionLayout, 5, 1, 1, 2);
     androidSpesificLayout->setColumnStretch(1, 1);
     androidSpesificLayout->setColumnStretch(2, 1);
+    androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
 
     auto aabLabel = new QLabel(tr("Android App Bundle:"), this);
     auto abisLabel = new QLabel(tr("Build ABIs:"), this);
@@ -450,6 +473,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     buildingLayout->addLayout(qtModuleLayout, 2, 1, 1, 2);
     buildingLayout->setColumnStretch(1, 1);
     buildingLayout->setColumnStretch(2, 1);
+    buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
 
     auto statusLabel = new QLabel(tr("Status:"), this);
     auto keystorePathLabel = new QLabel(tr("Keystore path:"), this);
@@ -502,11 +526,17 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     signingLayout->addLayout(keyPasswordLayout, 4, 1, 1, 2);
     signingLayout->setColumnStretch(1, 1);
     signingLayout->setColumnStretch(2, 1);
+    signingLayout->setColumnMinimumWidth(0, labelColMinSz);
 
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
-    layout->addWidget(generalGroupBox);
+    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(titleLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(descriptionLabel, 0, Qt::AlignHCenter);
+    layout->addSpacing(8);
+    layout->addWidget(settingsLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(generalGroupBox); // Don't need to align the others since they are expanding anyways
     layout->addWidget(androidSpesificGroupBox);
     layout->addWidget(buildingGroupBox);
     layout->addWidget(signingGroupBox);
@@ -539,16 +569,6 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_showKeystorePasswordButton->setCursor(Qt::PointingHandCursor);
     m_showKeyPasswordButton->setCursor(Qt::PointingHandCursor);
     m_sameAsKeystorePasswordCheck->setCursor(Qt::PointingHandCursor);
-
-    m_versionCodeSpin->setMaximum(std::numeric_limits<int>::max());
-    UtilityFunctions::disableWheelEvent(m_versionCodeSpin);
-    autoDetectPemissionsCheck->setChecked(true);
-    autoDetectQtModulesCheck->setChecked(true);
-    autoDetectPemissionsCheck->setEnabled(false);
-    autoDetectQtModulesCheck->setEnabled(false);
-    m_keystorePathEdit->setEnabled(false);
-    m_showKeystorePasswordButton->setCheckable(true);
-    m_showKeyPasswordButton->setCheckable(true);
 
     m_browseIconButton->setText(tr("Browse"));
     m_clearIconButton->setText(tr("Clear"));
@@ -756,17 +776,21 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_targetApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
+    m_versionCodeSpin->setMaximum(std::numeric_limits<int>::max());
+    UtilityFunctions::disableWheelEvent(m_versionCodeSpin);
+    autoDetectPemissionsCheck->setChecked(true);
+    autoDetectQtModulesCheck->setChecked(true);
+    autoDetectPemissionsCheck->setEnabled(false);
+    autoDetectQtModulesCheck->setEnabled(false);
+    m_keystorePathEdit->setEnabled(false);
+    m_showKeystorePasswordButton->setCheckable(true);
+    m_showKeyPasswordButton->setCheckable(true);
+
     int iconPictureSize = m_browseIconButton->sizeHint().height()
             + iconLayout->spacing()
             + m_clearIconButton->sizeHint().height();
     m_iconPictureLabel->setFixedSize(iconPictureSize, iconPictureSize);
     m_iconPictureLabel->setFrameShape(QFrame::StyledPanel);
-
-    int labelColMinSz = aabLabel->sizeHint().width(); // Longest label's width
-    generalLayout->setColumnMinimumWidth(0, labelColMinSz);
-    androidSpesificLayout->setColumnMinimumWidth(0, labelColMinSz);
-    buildingLayout->setColumnMinimumWidth(0, labelColMinSz);
-    signingLayout->setColumnMinimumWidth(0, labelColMinSz);
 }
 
 QLineEdit* AndroidPlatformWidget::nameEdit() const

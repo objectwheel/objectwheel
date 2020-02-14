@@ -24,8 +24,6 @@ public:
 public:
     explicit PlatformSelectionWidget(QWidget* parent = nullptr);
 
-    QListWidget* platformList() const;
-
     Platform currentPlatform() const;
 
 private:

@@ -32,7 +32,6 @@ void BuildsController::charge()
 
 void BuildsController::discharge()
 {
-    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
     m_androidPlatformController->discharge();
 }
 
@@ -70,21 +69,31 @@ void BuildsController::onBackButtonClick()
 
 void BuildsController::onCurrentWidgetChange(int index)
 {
-    const QWidget* currentWidget = m_buildsPane->stackedLayout()->widget(index);
-    if (currentWidget == m_buildsPane->androidPlatformWidget()) {
-        m_buildsPane->buttonSlice()->get(BuildsPane::Next)->setText(tr("Build"));
-        m_buildsPane->platformLabel()->setText(tr("Target platform: Android"));
-        m_buildsPane->descriptionLabel()->setText(tr("Please make your final adjustments down below before requesting a cloud build.\n"
-                                                     "All fields are optional and will be assigned to their default values if left as is."));
-        m_buildsPane->iconLabel()->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android.svg"),
-                                                                QSize(60, 60), m_buildsPane->iconLabel()));
-        m_buildsPane->iconLabel()->show();
-        m_buildsPane->platformLabel()->show();
-        m_buildsPane->descriptionLabel()->show();
-    } else {
-        m_buildsPane->buttonSlice()->get(BuildsPane::Next)->setText(tr("Next"));
-        m_buildsPane->iconLabel()->hide();
-        m_buildsPane->platformLabel()->hide();
-        m_buildsPane->descriptionLabel()->hide();
-    }
+//    const QWidget* currentWidget = m_buildsPane->stackedLayout()->widget(index);
+//    if (currentWidget == m_buildsPane->platformSelectionWidget()) {
+//        m_buildsPane->buttonSlice()->get(BuildsPane::Next)->setText(tr("Next"));
+//        m_buildsPane->platformLabel()->setText(tr("Target platform: Android"));
+//        m_buildsPane->descriptionLabel()->setText(tr("Please make your final adjustments down below before requesting a cloud build.\n"
+//                                                     "All fields are optional and will be assigned to their default values if left as is."));
+//        m_buildsPane->iconLabel()->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android.svg"),
+//                                                                QSize(60, 60), m_buildsPane->iconLabel()));
+//        m_buildsPane->iconLabel()->show();
+//        m_buildsPane->platformLabel()->show();
+//        m_buildsPane->descriptionLabel()->show();
+//    } else if (currentWidget == m_buildsPane->androidPlatformWidget()) {
+//        m_buildsPane->buttonSlice()->get(BuildsPane::Next)->setText(tr("Build"));
+//        m_buildsPane->platformLabel()->setText(tr("Target platform: Android"));
+//        m_buildsPane->descriptionLabel()->setText(tr("Please make your final adjustments down below before requesting a cloud build.\n"
+//                                                     "All fields are optional and will be assigned to their default values if left as is."));
+//        m_buildsPane->iconLabel()->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android.svg"),
+//                                                                QSize(60, 60), m_buildsPane->iconLabel()));
+//        m_buildsPane->iconLabel()->show();
+//        m_buildsPane->platformLabel()->show();
+//        m_buildsPane->descriptionLabel()->show();
+//    } else {
+//        m_buildsPane->buttonSlice()->get(BuildsPane::Next)->setText(tr("Next"));
+//        m_buildsPane->iconLabel()->hide();
+//        m_buildsPane->platformLabel()->hide();
+//        m_buildsPane->descriptionLabel()->hide();
+//    }
 }

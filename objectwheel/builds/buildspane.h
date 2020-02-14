@@ -3,7 +3,6 @@
 
 #include <QScrollArea>
 
-class QLabel;
 class ButtonSlice;
 class StackedLayout;
 class DownloadWidget;
@@ -21,9 +20,6 @@ public:
 public:
     explicit BuildsPane(QWidget* parent = nullptr);
 
-    QLabel* platformLabel() const;
-    QLabel* iconLabel() const;
-    QLabel* descriptionLabel() const;
     ButtonSlice* buttonSlice() const;
     StackedLayout* stackedLayout() const;
     DownloadWidget* downloadWidget() const;
@@ -34,9 +30,6 @@ public:
     QSize minimumSizeHint() const override;
 
 private:
-    QLabel* m_iconLabel;
-    QLabel* m_platformLabel;
-    QLabel* m_descriptionLabel;
     ButtonSlice* m_buttonSlice;
     StackedLayout* m_stackedLayout;
     DownloadWidget* m_downloadWidget;

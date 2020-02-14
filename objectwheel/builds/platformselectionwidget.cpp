@@ -29,20 +29,20 @@ class PlatformListDelegate final : public QStyledItemDelegate
 
 public:
     PlatformListDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-      , m_platformList(listWidget)
+      , m_listWidget(listWidget)
     {
     }
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
-                     m_platformList->iconSize().height() + 14);
+                     m_listWidget->iconSize().height() + 14);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override
     {
-        const QListWidgetItem* item = m_platformList->item(index.row());
+        const QListWidgetItem* item = m_listWidget->item(index.row());
 
         if (item == 0)
             return;
@@ -117,7 +117,7 @@ public:
     }
 
 private:
-    const QListWidget* m_platformList;
+    const QListWidget* m_listWidget;
 };
 
 PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(parent)
@@ -190,7 +190,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     m_platformList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_platformList->setItemDelegate(new PlatformListDelegate(m_platformList, m_platformList));
     m_platformList->verticalScrollBar()->setStyleSheet(
-                QString {
+                QStringLiteral(
                     "QScrollBar:vertical {"
                     "    background: transparent;"
                     "    width: %2px;"
@@ -206,38 +206,23 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
                     "    background: none;"
                     "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
                     "    background: none;"
-                    "}"
-                } .arg(15).arg(6).arg(2.5));
+                    "}").arg(15).arg(6).arg(2.5));
     m_platformList->setStyleSheet(
-                QString {
+                QStringLiteral(
                     "QListWidget {"
                     "    background: #12000000;"
                     "    border: 1px solid #22000000;"
                     "    border-radius: %1px;"
-                    "}"
-                }.arg(8));
+                    "}").arg(8));
 
     auto iconLabel = new QLabel(this);
-    auto titleLabel = new QLabel(tr("Objectwheel Cloud Builds"), this);
-    auto descriptionLabel = new QLabel(tr("Select your target platform"), this);
-    auto platformsLabel = new QLabel(tr("Platforms:"));
-
-    auto layout = new QGridLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
-    layout->setColumnStretch(0, 1);
-    layout->setColumnStretch(2, 1);
-    layout->addWidget(iconLabel, 1, 1, Qt::AlignHCenter);
-    layout->addWidget(titleLabel, 2, 1, Qt::AlignHCenter);
-    layout->addWidget(descriptionLabel, 3, 1, Qt::AlignHCenter);
-    layout->setRowMinimumHeight(4, 8);
-    layout->addWidget(platformsLabel, 5, 1, Qt::AlignHCenter);
-    layout->addWidget(m_platformList, 6, 1, Qt::AlignHCenter);
+    auto titleLabel = new QLabel(tr("Platform Selection"), this);
+    auto descriptionLabel = new QLabel(tr("Select your target platform to start"), this);
+    auto platformsLabel = new QLabel(tr("Platforms"));
 
     iconLabel->setFixedSize(QSize(60, 60));
-    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"),
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/oses.svg"),
                                             QSize(60, 60), this));
-
     QFont f;
     f.setWeight(QFont::ExtraLight);
     f.setPixelSize(26);
@@ -246,11 +231,16 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
     descriptionLabel->setFont(f);
-}
 
-QListWidget* PlatformSelectionWidget::platformList() const
-{
-    return m_platformList;
+    auto layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(8);
+    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(titleLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(descriptionLabel, 0, Qt::AlignHCenter);
+    layout->addSpacing(8);
+    layout->addWidget(platformsLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_platformList, 0, Qt::AlignHCenter);
 }
 
 PlatformSelectionWidget::Platform PlatformSelectionWidget::currentPlatform() const

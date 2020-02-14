@@ -154,20 +154,20 @@ class ProjectListDelegate final : public QStyledItemDelegate
 
 public:
     ProjectListDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-      , m_platformList(listWidget)
+      , m_listWidget(listWidget)
     {
     }
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
-                     m_platformList->iconSize().height() + 14);
+                     m_listWidget->iconSize().height() + 14);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override
     {
-        const QListWidgetItem* item = m_platformList->item(index.row());
+        const QListWidgetItem* item = m_listWidget->item(index.row());
 
         if (item == 0)
             return;
@@ -210,7 +210,7 @@ public:
         f.setWeight(QFont::Normal);
         painter->setFont(f);
         const QRectF lastEditRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
-                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
+                                  QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
         painter->drawText(lastEditRect, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
 
         // Draw bottom line
@@ -237,7 +237,7 @@ public:
     }
 
 private:
-    const QListWidget* m_platformList;
+    const QListWidget* m_listWidget;
 };
 
 class ProjectListWidgetItem : public QListWidgetItem

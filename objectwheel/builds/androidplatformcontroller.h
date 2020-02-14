@@ -1,10 +1,10 @@
 #ifndef ANDROIDPLATFORMCONTROLLER_H
 #define ANDROIDPLATFORMCONTROLLER_H
 
-#include <platformcontroller.h>
+#include <abstractplatformcontroller.h>
 
 class AndroidPlatformWidget;
-class AndroidPlatformController final : public PlatformController
+class AndroidPlatformController final : public AbstractPlatformController
 {
     Q_OBJECT
     Q_DISABLE_COPY(AndroidPlatformController)
@@ -16,8 +16,8 @@ public:
     QCborMap toCborMap() const override;
 
 public slots:
-    void charge() const;
-    void discharge() const;
+    void charge() const override;
+    void discharge() const override;
 
 private:
     AndroidPlatformWidget* m_androidPlatformWidget;
