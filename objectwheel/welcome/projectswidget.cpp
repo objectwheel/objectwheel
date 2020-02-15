@@ -527,25 +527,9 @@ void ProjectsWidget::onNewButtonClick()
         return;
     }
 
-    m_buttons->setDisabled(true);
-    QString projectName = tr("Project") + " - 1";
-
+    QString projectName = tr("Project") + QLatin1String(" - 1");
     while (projects.contains(projectName))
         projectName = UtilityFunctions::increasedNumberedText(projectName, true, true);
-
-    auto item = new ProjectListWidgetItem(this);
-    item->setIcon(QIcon(":/images/welcome/project.svg"));
-    item->setData(NameRole, projectName);
-    item->setData(LastEditRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
-    item->setData(ActivityRole, false);
-    m_listWidget->addItem(item);
-    m_listWidget->sortItems();
-    m_listWidget->setCurrentItem(item);
-    m_listWidget->scrollToItem(item);
-
-    Delayer::delay(250);
-
-    m_buttons->setEnabled(true);
 
     emit newProject(projectName);
 }

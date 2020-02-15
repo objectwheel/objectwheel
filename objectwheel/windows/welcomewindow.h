@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class View;
+class StackedLayout;
 class LoginWidget;
 class ProjectsWidget;
 class ProjectTemplatesWidget;
@@ -14,45 +14,30 @@ class SucceedWidget;
 class ForgetWidget;
 class ResetWidget;
 
-class WelcomeWindow : public QWidget
+class WelcomeWindow final : public QWidget
 {
     Q_OBJECT
-
-    friend class WindowManager;
-
-    enum Screens {
-        Login,
-        Robot,
-        Registration,
-        Verification,
-        Forget,
-        Reset,
-        Projects,
-        ProjectTemplates,
-        ProjectDetails,
-        Succeed
-    };
+    Q_DISABLE_COPY(WelcomeWindow)
 
 public:
     explicit WelcomeWindow(QWidget* parent = nullptr);
 
-protected:
     QSize sizeHint() const override;
 
 signals:
     void done();
 
 private:
-    View* m_view;
+    StackedLayout* m_stackedLayout;
     LoginWidget* m_loginWidget;
-    ProjectsWidget* m_projectsWidget;
-    ProjectTemplatesWidget* m_projectTemplatesWidget;
-    ProjectDetailsWidget* m_projectDetailsWidget;
     RegistrationWidget* m_registrationWidget;
     VerificationWidget* m_verificationWidget;
     SucceedWidget* m_succeedWidget;
     ForgetWidget* m_forgetWidget;
     ResetWidget* m_resetWidget;
+    ProjectsWidget* m_projectsWidget;
+    ProjectTemplatesWidget* m_projectTemplatesWidget;
+    ProjectDetailsWidget* m_projectDetailsWidget;
 };
 
 #endif // WELCOMEWINDOW_H

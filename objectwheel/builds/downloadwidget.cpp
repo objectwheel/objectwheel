@@ -45,7 +45,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
 
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Objectwheel Cloud Builds"), this);
-    auto descriptionLabel = new QLabel(tr("Builds you downloaded in the current session appear here"), this);
+    auto descriptionLabel = new QLabel(tr("Downloaded builds appear here"), this);
     auto buildsLabel = new QLabel(tr("Builds"));
 
     iconLabel->setFixedSize(QSize(60, 60));
@@ -65,7 +65,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     m_buttonSlice->get(New)->setText(tr("New"));
     m_buttonSlice->get(New)->setIcon(QIcon(":/images/welcome/new.png"));
     m_buttonSlice->get(New)->setCursor(Qt::PointingHandCursor);
-    m_buttonSlice->settings().cellWidth = 250;
+    m_buttonSlice->settings().cellWidth = 150;
     m_buttonSlice->triggerSettings();
 
     auto layout = new QVBoxLayout(this);

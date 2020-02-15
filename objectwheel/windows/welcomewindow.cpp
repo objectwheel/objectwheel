@@ -1,6 +1,6 @@
 #include <welcomewindow.h>
 #include <windowmanager.h>
-#include <view.h>
+#include <stackedlayout.h>
 #include <loginwidget.h>
 #include <projectswidget.h>
 #include <projectdetailswidget.h>
@@ -13,81 +13,73 @@
 #include <aboutwindow.h>
 #include <utilityfunctions.h>
 
-#include <QTimer>
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QCloseEvent>
-
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
+  , m_stackedLayout(new StackedLayout(this))
+  , m_loginWidget(new LoginWidget(this))
+  , m_registrationWidget(new RegistrationWidget(this))
+  , m_verificationWidget(new VerificationWidget(this))
+  , m_succeedWidget(new SucceedWidget(this))
+  , m_forgetWidget(new ForgetWidget(this))
+  , m_resetWidget(new ResetWidget(this))
+  , m_projectsWidget(new ProjectsWidget(this))
+  , m_projectTemplatesWidget(new ProjectTemplatesWidget(this))
+  , m_projectDetailsWidget(new ProjectDetailsWidget(this))
 {
     setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
-
-    m_view = new View(this);
-    m_loginWidget = new LoginWidget;
-    m_registrationWidget = new RegistrationWidget;
-    m_projectsWidget = new ProjectsWidget;
-    m_projectTemplatesWidget = new ProjectTemplatesWidget;
-    m_projectDetailsWidget = new ProjectDetailsWidget;
-    m_verificationWidget = new VerificationWidget;
-    m_succeedWidget = new SucceedWidget;
-    m_forgetWidget = new ForgetWidget;
-    m_resetWidget = new ResetWidget;
-
-    m_view->add(Login, m_loginWidget);
-    m_view->add(Registration, m_registrationWidget);
-    m_view->add(Verification, m_verificationWidget);
-    m_view->add(Projects, m_projectsWidget);
-    m_view->add(ProjectTemplates, m_projectTemplatesWidget);
-    m_view->add(ProjectDetails, m_projectDetailsWidget);
-    m_view->add(Succeed, m_succeedWidget);
-    m_view->add(Forget, m_forgetWidget);
-    m_view->add(Reset, m_resetWidget);
-    m_view->show(Login);
-
     resize(sizeHint());
     move(UtilityFunctions::centerPos(size()));
 
+    m_stackedLayout->addWidget(m_loginWidget);
+    m_stackedLayout->addWidget(m_registrationWidget);
+    m_stackedLayout->addWidget(m_verificationWidget);
+    m_stackedLayout->addWidget(m_succeedWidget);
+    m_stackedLayout->addWidget(m_forgetWidget);
+    m_stackedLayout->addWidget(m_resetWidget);
+    m_stackedLayout->addWidget(m_projectsWidget);
+    m_stackedLayout->addWidget(m_projectTemplatesWidget);
+    m_stackedLayout->addWidget(m_projectDetailsWidget);
+    m_stackedLayout->setCurrentWidget(m_loginWidget);
+
     /**** ForgetWidget settings ****/
     connect(m_forgetWidget, &ForgetWidget::done, m_resetWidget, &ResetWidget::setEmail);
-    connect(m_forgetWidget, &ForgetWidget::back, [=]
+    connect(m_forgetWidget, &ForgetWidget::back, this, [=]
     {
-        m_view->show(Login, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
-    connect(m_forgetWidget, &ForgetWidget::done, [=]
+    connect(m_forgetWidget, &ForgetWidget::done, this, [=]
     {
-        m_view->show(Reset, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_resetWidget);
     });
     /**** ResetWidget settings ****/
-    connect(m_resetWidget, &ResetWidget::cancel, [=]
+    connect(m_resetWidget, &ResetWidget::cancel, this, [=]
     {
-        m_view->show(Login, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
-    connect(m_resetWidget, &ResetWidget::done, [=] {
-        m_view->show(Succeed, View::RightToLeft);
+    connect(m_resetWidget, &ResetWidget::done, this, [=] {
+        m_stackedLayout->setCurrentWidget(m_succeedWidget);
         m_succeedWidget->start();
-        m_succeedWidget->update(
-          tr("Succeed."),
-          tr("Your password has been successfully changed.\n"
-          "You can continue by logging into the application with your new password."));
+        m_succeedWidget->update(tr("Succeed."),
+                                tr("Your password has been successfully changed.\n"
+                                   "You can continue by logging into the application with your new password."));
     });
     /**** LoginWidget settings ****/
-    connect(m_loginWidget, &LoginWidget::signup, [=]
+    connect(m_loginWidget, &LoginWidget::signup, this, [=]
     {
-        m_view->show(Registration, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_registrationWidget);
     });
-    connect(m_loginWidget, &LoginWidget::resetPassword, [=]
+    connect(m_loginWidget, &LoginWidget::resetPassword, this, [=]
     {
-        m_view->show(Forget, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_forgetWidget);
     });
-    connect(m_loginWidget, &LoginWidget::about, [=]
+    connect(m_loginWidget, &LoginWidget::about, this, [=]
     {
         WindowManager::aboutWindow()->show();
         WindowManager::aboutWindow()->activateWindow();
     });
-    connect(m_loginWidget, &LoginWidget::done, [=]
+    connect(m_loginWidget, &LoginWidget::done, this, [=]
     {
         m_projectsWidget->refreshProjectList();
-        m_view->show(Projects, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_projectsWidget);
     });
     /**** ProjectsWidget settings ****/
     connect(m_projectsWidget, &ProjectsWidget::done,
@@ -96,65 +88,64 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
             m_projectTemplatesWidget, &ProjectTemplatesWidget::onNewProject);
     connect(m_projectsWidget, &ProjectsWidget::editProject,
             m_projectDetailsWidget, &ProjectDetailsWidget::onEditProject);
-    connect(m_projectsWidget, &ProjectsWidget::newProject, [=]
+    connect(m_projectsWidget, &ProjectsWidget::newProject, this, [=]
     {
-        m_view->show(ProjectTemplates, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_projectTemplatesWidget);
     });
-    connect(m_projectsWidget, &ProjectsWidget::editProject, [=]
+    connect(m_projectsWidget, &ProjectsWidget::editProject, this, [=]
     {
-        m_view->show(ProjectDetails, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_projectDetailsWidget);
     });
     /**** ProjectTemplatesWidget settings ****/
     connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::newProject,
             m_projectDetailsWidget, &ProjectDetailsWidget::onNewProject);
-    connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::back, [=]
+    connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::back, this, [=]
     {
         m_projectsWidget->refreshProjectList();
-        m_view->show(Projects, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_projectsWidget);
     });
     connect(m_projectTemplatesWidget, &ProjectTemplatesWidget::newProject, [=]
     {
-        m_view->show(ProjectDetails, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_projectDetailsWidget);
     });
     /**** ProjectDetailsWidget settings ****/
-    connect(m_projectDetailsWidget, &ProjectDetailsWidget::back, [=]
+    connect(m_projectDetailsWidget, &ProjectDetailsWidget::back, this, [=]
     {
-        m_view->show(ProjectTemplates, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_projectTemplatesWidget);
     });
-    connect(m_projectDetailsWidget, &ProjectDetailsWidget::done, [=]
+    connect(m_projectDetailsWidget, &ProjectDetailsWidget::done, this, [=]
     {
         m_projectsWidget->refreshProjectList(true);
-        m_view->show(Projects, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_projectsWidget);
     });
     /**** RegistrationWidget settings ****/
-    connect(m_registrationWidget, &RegistrationWidget::back, [=]
+    connect(m_registrationWidget, &RegistrationWidget::back, this, [=]
     {
-        m_view->show(Login, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
     connect(m_registrationWidget, &RegistrationWidget::done,
             m_verificationWidget, &VerificationWidget::setEmail);
-    connect(m_registrationWidget, &RegistrationWidget::done, [=]
+    connect(m_registrationWidget, &RegistrationWidget::done, this, [=]
     {
-        m_view->show(Verification, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_verificationWidget);
     });
     /**** VerificationWidget settings ****/
-    connect(m_verificationWidget, &VerificationWidget::cancel, [=]
+    connect(m_verificationWidget, &VerificationWidget::cancel, this, [=]
     {
-        m_view->show(Login, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
-    connect(m_verificationWidget, &VerificationWidget::done, [=]
+    connect(m_verificationWidget, &VerificationWidget::done, this, [=]
     {
-        m_view->show(Succeed, View::RightToLeft);
+        m_stackedLayout->setCurrentWidget(m_succeedWidget);
         m_succeedWidget->start();
-        m_succeedWidget->update(
-          tr("Thank you for registering."),
-          tr("Your registration is completed. Thank you for choosing us.\n"
-          "You can continue by logging into the application."));
+        m_succeedWidget->update(tr("Thank you for registering."),
+                                tr("Your registration is completed. Thank you for choosing us.\n"
+                                   "You can continue by logging into the application."));
     });
     /**** SucceedWidget settings ****/
-    connect(m_succeedWidget, &SucceedWidget::done, [=]
+    connect(m_succeedWidget, &SucceedWidget::done, this, [=]
     {
-        m_view->show(Login, View::LeftToRight);
+        m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
 }
 

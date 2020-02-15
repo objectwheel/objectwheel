@@ -25,7 +25,6 @@
 // TODO: Generate certificate
 // TODO: Test and check alias and keystore passwords
 // TODO: Show aliases
-// TODO: Clickable tooltips
 
 const QMap<QString, QString> AndroidPlatformWidget::apiLevelMap {
     { "API 21: Android 5.0", "21" },
