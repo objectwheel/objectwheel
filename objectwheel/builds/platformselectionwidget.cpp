@@ -1,6 +1,7 @@
 #include <platformselectionwidget.h>
 #include <paintutils.h>
 #include <buttonslice.h>
+#include <platform.h>
 
 #include <QBoxLayout>
 #include <QListWidget>
@@ -268,7 +269,7 @@ ButtonSlice* PlatformSelectionWidget::buttonSlice() const
     return m_buttonSlice;
 }
 
-PlatformSelectionWidget::Platform PlatformSelectionWidget::currentPlatform() const
+Platform PlatformSelectionWidget::currentPlatform() const
 {
     const QList<QListWidgetItem*>& selectedItems = m_platformList->selectedItems();
     if (selectedItems.isEmpty())

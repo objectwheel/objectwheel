@@ -7,8 +7,10 @@ HEADERS += $$PWD/androidcreatekeystorecertificate.h \
            $$PWD/androidplatformwidget.h \
            $$PWD/buildscontroller.h \
            $$PWD/buildspane.h \
+           $$PWD/buildmodel.h \
            $$PWD/downloadcontroller.h \
            $$PWD/downloadwidget.h \
+           $$PWD/platform.h \
            $$PWD/platformselectionwidget.h
 
 SOURCES += $$PWD/androidcreatekeystorecertificate.cpp \
@@ -17,6 +19,7 @@ SOURCES += $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/androidplatformwidget.cpp \
            $$PWD/buildscontroller.cpp \
            $$PWD/buildspane.cpp \
+           $$PWD/buildmodel.cpp \
            $$PWD/downloadcontroller.cpp \
            $$PWD/downloadwidget.cpp \
            $$PWD/platformselectionwidget.cpp

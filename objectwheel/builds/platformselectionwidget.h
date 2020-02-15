@@ -2,6 +2,7 @@
 #define PLATFORMSELECTIONWIDGET_H
 
 #include <QWidget>
+#include <platform.h>
 
 class QListWidget;
 class ButtonSlice;
@@ -13,16 +14,6 @@ class PlatformSelectionWidget final : public QWidget
 
 public:
     enum Buttons { Back, Next };
-    enum Platform {
-        Invalid,
-        Android,
-        iOS,
-        macOS,
-        Windows,
-        Linux,
-        RaspberryPi
-    };
-    Q_ENUM(Platform)
 
 public:
     explicit PlatformSelectionWidget(QWidget* parent = nullptr);

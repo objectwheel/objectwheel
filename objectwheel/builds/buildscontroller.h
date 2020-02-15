@@ -1,6 +1,7 @@
 #ifndef BUILDSCONTROLLER_H
 #define BUILDSCONTROLLER_H
 
+#include <platform.h>
 #include <platformselectionwidget.h>
 
 class BuildsPane;
@@ -26,7 +27,7 @@ private slots:
     void onBuildButtonClick();
 
 private:
-    QWidget* widgetForPlatform(PlatformSelectionWidget::Platform platform) const;
+    QWidget* widgetForPlatform(Platform platform) const;
 
 private:
     BuildsPane* m_buildsPane;

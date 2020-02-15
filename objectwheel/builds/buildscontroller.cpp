@@ -1,5 +1,6 @@
 #include <buildscontroller.h>
 #include <buildspane.h>
+#include <platform.h>
 #include <buttonslice.h>
 #include <stackedlayout.h>
 #include <utilityfunctions.h>
@@ -70,9 +71,9 @@ void BuildsController::onBuildButtonClick()
     m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
 }
 
-QWidget* BuildsController::widgetForPlatform(PlatformSelectionWidget::Platform platform) const
+QWidget* BuildsController::widgetForPlatform(Platform platform) const
 {
-    if (platform == PlatformSelectionWidget::Android)
+    if (platform == Android)
         return m_buildsPane->androidPlatformWidget();
     return nullptr;
 }
