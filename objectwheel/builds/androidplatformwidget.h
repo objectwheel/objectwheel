@@ -24,7 +24,7 @@ public:
     enum Buttons { Back, Build };
 
 public:
-    static const QMap<QString, QString> apiLevelMap;
+    static const QMap<QString, int> apiLevelMap;
     static const QMap<QString, QString> orientationMap;
     static const QMap<QString, QString> qtModuleMap;
     static const QStringList androidPermissionList;
@@ -43,6 +43,7 @@ public:
     QComboBox* minApiLevelCombo() const;
     QComboBox* targetApiLevelCombo() const;
     QLabel* iconPictureLabel() const;
+    QLineEdit* iconPathEdit() const;
     QPushButton* browseIconButton() const;
     QPushButton* clearIconButton() const;
     QCheckBox* includePemissionsCheck() const;
@@ -85,6 +86,7 @@ private:
     QComboBox* m_minApiLevelCombo;
     QComboBox* m_targetApiLevelCombo;
     QLabel* m_iconPictureLabel;
+    QLineEdit* m_iconPathEdit;
     QPushButton* m_browseIconButton;
     QPushButton* m_clearIconButton;
     QCheckBox* m_includePemissionsCheck;

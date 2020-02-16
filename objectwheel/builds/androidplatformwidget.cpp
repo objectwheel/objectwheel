@@ -26,16 +26,16 @@
 // TODO: Test and check alias and keystore passwords
 // TODO: Show aliases
 
-const QMap<QString, QString> AndroidPlatformWidget::apiLevelMap {
-    { "API 21: Android 5.0", "21" },
-    { "API 22: Android 5.1", "22" },
-    { "API 23: Android 6.0", "23" },
-    { "API 24: Android 7.0", "24" },
-    { "API 25: Android 7.1", "25" },
-    { "API 26: Android 8.0", "26" },
-    { "API 27: Android 8.1", "27" },
-    { "API 28: Android 9.0", "28" },
-    { "API 29: Android 10.0", "29"}
+const QMap<QString, int> AndroidPlatformWidget::apiLevelMap {
+    { "API 21: Android 5.0", 21 },
+    { "API 22: Android 5.1", 22 },
+    { "API 23: Android 6.0", 23 },
+    { "API 24: Android 7.0", 24 },
+    { "API 25: Android 7.1", 25 },
+    { "API 26: Android 8.0", 26 },
+    { "API 27: Android 8.1", 27 },
+    { "API 28: Android 9.0", 28 },
+    { "API 29: Android 10.0",29 }
 };
 
 const QMap<QString, QString> AndroidPlatformWidget::orientationMap {
@@ -310,6 +310,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_minApiLevelCombo(new QComboBox(this))
   , m_targetApiLevelCombo(new QComboBox(this))
   , m_iconPictureLabel(new QLabel(this))
+  , m_iconPathEdit(new QLineEdit(this))
   , m_browseIconButton(new QPushButton(this))
   , m_clearIconButton(new QPushButton(this))
   , m_includePemissionsCheck(new QCheckBox(this))
@@ -396,8 +397,10 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     iconLayout->setSpacing(4);
     iconLayout->setContentsMargins(0, 0, 0, 0);
     iconLayout->addWidget(m_iconPictureLabel, 0, 0, 2, 1);
-    iconLayout->addWidget(m_browseIconButton, 0, 1);
-    iconLayout->addWidget(m_clearIconButton, 1, 1);
+    iconLayout->addWidget(m_iconPathEdit, 0, 1, 1, 3);
+    iconLayout->addWidget(m_browseIconButton, 1, 1);
+    iconLayout->addWidget(m_clearIconButton, 1, 2);
+    iconLayout->setColumnStretch(3, 1);
 
     auto permDetectionLayout = new QVBoxLayout;
     permDetectionLayout->setSpacing(0);
@@ -427,7 +430,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     androidSpesificLayout->addWidget(targetApiLevelLabel, 3, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addWidget(m_targetApiLevelCombo, 3, 1);
     androidSpesificLayout->addWidget(appIconLabel, 4, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
-    androidSpesificLayout->addLayout(iconLayout, 4, 1);
+    androidSpesificLayout->addLayout(iconLayout, 4, 1, 1, 2);
     androidSpesificLayout->addWidget(permissionLabel, 5, 0, 1, 1, Qt::AlignTop | Qt::AlignRight);
     androidSpesificLayout->addLayout(permissionLayout, 5, 1, 1, 2);
     androidSpesificLayout->setColumnStretch(1, 1);
@@ -646,6 +649,11 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_iconPictureLabel->setToolTip(tr("<p style='white-space:nowrap'>"
                                       "Preview of your application icon (<i>If no icon provided, Android will<br>"
                                       "assign an default icon for your application</i>)</p>"));
+    m_iconPathEdit->setToolTip(tr("Path to application icon file"
+                                  "<p style='white-space:nowrap;font-size:11px'>"
+                                  "The icon could be a JPG or PNG file. It might also contain alpha<br>"
+                                  "channel. But icon dimensions must be between [256px - 1024px].<br>"
+                                  "We highly recommend using a 256×256px PNG file for best result.</p>"));
     m_browseIconButton->setToolTip(tr("Select an application icon from your computer"));
     m_clearIconButton->setToolTip(tr("Clear application icon"));
     autoDetectPemissionsCheck->setToolTip(tr("Enable automatic detection of Android permissions"
@@ -764,7 +772,8 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_organizationEdit->setPlaceholderText(tr("My Example Org, Inc."));
     m_domainEdit->setPlaceholderText(tr("example.com"));
     m_packageEdit->setPlaceholderText(tr("com.example.myapplication"));
-    m_keystorePathEdit->setPlaceholderText(tr("Use 'Browse' button below to choose your keystore file"));
+    m_iconPathEdit->setPlaceholderText(tr("Use 'Browse' button to choose your icon file"));
+    m_keystorePathEdit->setPlaceholderText(tr("Use 'Browse' button to choose your keystore file"));
     m_keystorePasswordEdit->setPlaceholderText(tr("Type your keystore password"));
     m_keyPasswordEdit->setPlaceholderText(tr("Type your key password"));
 
@@ -795,13 +804,15 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     autoDetectQtModulesCheck->setChecked(true);
     autoDetectPemissionsCheck->setEnabled(false);
     autoDetectQtModulesCheck->setEnabled(false);
+    m_iconPathEdit->setEnabled(false);
     m_keystorePathEdit->setEnabled(false);
     m_showKeystorePasswordButton->setCheckable(true);
     m_showKeyPasswordButton->setCheckable(true);
 
-    int iconPictureSize = m_browseIconButton->sizeHint().height()
+    int iconPictureSize =
+            qMax(m_browseIconButton->sizeHint().height(), m_clearIconButton->sizeHint().height())
             + iconLayout->spacing()
-            + m_clearIconButton->sizeHint().height();
+            + m_iconPathEdit->sizeHint().height();
     m_iconPictureLabel->setFixedSize(iconPictureSize, iconPictureSize);
     m_iconPictureLabel->setFrameShape(QFrame::StyledPanel);
 }
@@ -859,6 +870,11 @@ QComboBox* AndroidPlatformWidget::targetApiLevelCombo() const
 QLabel* AndroidPlatformWidget::iconPictureLabel() const
 {
     return m_iconPictureLabel;
+}
+
+QLineEdit* AndroidPlatformWidget::iconPathEdit() const
+{
+    return m_iconPathEdit;
 }
 
 QPushButton* AndroidPlatformWidget::browseIconButton() const

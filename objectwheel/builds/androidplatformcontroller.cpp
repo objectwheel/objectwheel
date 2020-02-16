@@ -1,6 +1,8 @@
 #include <androidplatformcontroller.h>
 #include <androidplatformwidget.h>
+#include <utilityfunctions.h>
 
+#include <QFile>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QCheckBox>
@@ -9,6 +11,7 @@
 #include <QRadioButton>
 #include <QToolButton>
 #include <QPushButton>
+#include <QCborArray>
 
 AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* androidPlatformWidget,
                                                      QObject* parent)
@@ -19,6 +22,110 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
 
 QCborMap AndroidPlatformController::toCborMap() const
 {
+    QCborMap map;
+    map.insert(QLatin1String("platform"), QLatin1String("android"));
+    map.insert(QLatin1String("name"), m_androidPlatformWidget->nameEdit()->text());
+    map.insert(QLatin1String("versionCode"), m_androidPlatformWidget->versionCodeSpin()->value());
+    map.insert(QLatin1String("versionName"), m_androidPlatformWidget->versionNameEdit()->text());
+    map.insert(QLatin1String("organization"), m_androidPlatformWidget->organizationEdit()->text());
+    map.insert(QLatin1String("domain"), m_androidPlatformWidget->domainEdit()->text());
+    map.insert(QLatin1String("package"), m_androidPlatformWidget->packageEdit()->text());
+
+    if (m_androidPlatformWidget->aabCheck()->isChecked())
+        map.insert(QLatin1String("aab"), true);
+
+    map.insert(QLatin1String("screenOrientation"), AndroidPlatformWidget::orientationMap.value(
+                   m_androidPlatformWidget->screenOrientationCombo()->currentText()));
+    map.insert(QLatin1String("minApiLevel"), AndroidPlatformWidget::apiLevelMap.value(
+                   m_androidPlatformWidget->minApiLevelCombo()->currentText()));
+    map.insert(QLatin1String("targetApiLevel"), AndroidPlatformWidget::apiLevelMap.value(
+                   m_androidPlatformWidget->targetApiLevelCombo()->currentText()));
+
+    QCborArray abis;
+    if (m_androidPlatformWidget->abiArmeabiV7aCheck()->isChecked())
+        abis.append(QLatin1String("armeabi-v7a"));
+    if (m_androidPlatformWidget->abiArm64V8aCheck()->isChecked())
+        abis.append(QLatin1String("arm64-v8a"));
+    if (m_androidPlatformWidget->abiX86Check()->isChecked())
+        abis.append(QLatin1String("x86"));
+    if (m_androidPlatformWidget->abiX8664Check()->isChecked())
+        abis.append(QLatin1String("x86_64"));
+    if (!abis.isEmpty())
+        map.insert(QLatin1String("abis"), abis);
+
+    QCborArray qtModules;
+    for (int i = 0; i < m_androidPlatformWidget->qtModuleList()->count(); ++i)
+        qtModules.append(m_androidPlatformWidget->qtModuleList()->item(i)->text());
+    if (!qtModules.isEmpty())
+        map.insert(QLatin1String("qtModules"), qtModules);
+
+    QCborArray permissions;
+    for (int i = 0; i < m_androidPlatformWidget->permissionList()->count(); ++i)
+        permissions.append(m_androidPlatformWidget->permissionList()->item(i)->text());
+    if (!permissions.isEmpty())
+        map.insert(QLatin1String("permissions"), permissions);
+
+    if (m_androidPlatformWidget->signingEnabled()->isChecked()) {
+        QCborMap signature;
+        signature.insert(QLatin1String("keystorePassword"), m_androidPlatformWidget->keystorePasswordEdit()->text());
+        signature.insert(QLatin1String("keyPassword"), m_androidPlatformWidget->keyPasswordEdit()->text());
+        signature.insert(QLatin1String("keyAlias"), m_androidPlatformWidget->keyAliasCombo()->currentText());
+        if (!m_androidPlatformWidget->keystorePathEdit()->text().isEmpty()) {
+            QFile file(m_androidPlatformWidget->keystorePathEdit()->text());
+            if (!file.open(QFile::ReadOnly)) {
+                UtilityFunctions::showMessage(m_androidPlatformWidget,
+                                              tr("File read error"),
+                                              tr("We are unable to read the keystore file, make sure the "
+                                                 "path is correct and the file is readable."),
+                                              QMessageBox::Critical);
+                return QCborMap();
+            }
+            signature.insert(QLatin1String("keystore"), file.readAll());
+        }
+        map.insert(QLatin1String("signature"), signature);
+    }
+
+    if (!m_androidPlatformWidget->iconPathEdit()->text().isEmpty()) {
+        QFile file(m_androidPlatformWidget->iconPathEdit()->text());
+        if (!file.open(QFile::ReadOnly)) {
+            UtilityFunctions::showMessage(m_androidPlatformWidget,
+                                          tr("File read error"),
+                                          tr("We are unable to read the icon file, make sure the "
+                                             "path is correct and the file is readable."),
+                                          QMessageBox::Critical);
+            return QCborMap();
+        }
+        map.insert(QLatin1String("icon"), file.readAll());
+    }
+
+    //    "platform": "android",
+    //    "name": "Ömer Göktaş",
+    //!   "versionCode": 5,
+    //    "versionName": "5.2 Platinum",
+    //    "organization": "Ömer Göktaş, Inc.",
+    //    "domain": "https://www.omergoktas.com.tr",
+    //    "package": "tr.com.omergoktas.OmerGoktasApp",
+    //    "screenOrientation": "unspecified",
+    //!   "minApiLevel": 21,
+    //!   "targetApiLevel": 23,
+    //!   "icon": "h''",
+    //!   "permissions": [
+    //!       "android.permission.ACCESS_FINE_LOCATION",
+    //!       "android.permission.INSTALL_LOCATION_PROVIDER"
+    //!   ],
+
+    //    "aab": false,
+    //!   "abis": [ "arm64-v8a", "x86" ],
+    //!   "qtModules": [ "core", "gui" ],
+
+    //    "signature": {
+    //        "keystore": "h''",
+    //        "keystorePassword": "123456789",
+    //        "keyPassword": "asdfghjkl",
+    //        "keyAlias": "fffff"
+    //    }
+
+    return map;
 }
 
 void AndroidPlatformController::charge() const

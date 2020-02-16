@@ -1,30 +1,31 @@
 #include <buildmodel.h>
+#include <servermanager.h>
 
-AnimalModel::AnimalModel(QObject* parent) : QAbstractListModel(parent)
+BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
 {
 }
 
-void AnimalModel::addAnimal(const Animal& animal)
+void BuildModel::addBuild(const Build& build)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_animals << animal;
+    m_builds.append(build);
     endInsertRows();
 }
 
-int AnimalModel::rowCount(const QModelIndex& /*parent*/) const
+int BuildModel::rowCount(const QModelIndex&) const
 {
-    return m_animals.count();
+    return m_builds.count();
 }
 
-QVariant AnimalModel::data(const QModelIndex& index, int role) const
+QVariant BuildModel::data(const QModelIndex& index, int role) const
 {
-    if (index.row() < 0 || index.row() >= m_animals.count())
+    if (index.row() < 0 || index.row() >= m_builds.count())
         return QVariant();
 
-    const Animal &animal = m_animals[index.row()];
-    if (role == TypeRole)
-        return animal.type();
-    else if (role == SizeRole)
-        return animal.size();
+    const Build& build = m_builds[index.row()];
+    // if (role == TypeRole)
+    //     return build.type();
+    // else if (role == SizeRole)
+    //     return build.size();
     return QVariant();
 }
