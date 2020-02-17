@@ -349,7 +349,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     auto settingsLabel = new QLabel(tr("Settings"));
 
     iconLabel->setFixedSize(QSize(60, 60));
-    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android.svg"),
+    iconLabel->setPixmap(PaintUtils::pixmap(QLatin1String(":/images/builds/android.svg"),
                                             QSize(60, 60), this));
     QFont f;
     f.setWeight(QFont::ExtraLight);
@@ -777,17 +777,17 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_keystorePasswordEdit->setPlaceholderText(tr("Type your keystore password"));
     m_keyPasswordEdit->setPlaceholderText(tr("Type your key password"));
 
-    m_browseIconButton->setIcon(QIcon(QStringLiteral(":/images/builds/browse.svg")));
-    m_clearIconButton->setIcon(QIcon(QStringLiteral(":/images/designer/clear.svg")));
-    m_addPermissionButton->setIcon(QIcon(QStringLiteral(":/images/designer/plus.svg")));
-    m_removePermissionButton->setIcon(QIcon(QStringLiteral(":/images/designer/minus.svg")));
-    m_addQtModuleButton->setIcon(QIcon(QStringLiteral(":/images/designer/plus.svg")));
-    m_removeQtModuleButton->setIcon(QIcon(QStringLiteral(":/images/designer/minus.svg")));
-    m_newKeystoreButton->setIcon(QIcon(QStringLiteral(":/images/designer/new-file.svg")));
-    m_browseKeystoreButton->setIcon(QIcon(QStringLiteral(":/images/builds/browse.svg")));
-    m_clearKeystoreButton->setIcon(QIcon(QStringLiteral(":/images/designer/clear.svg")));
-    m_showKeystorePasswordButton->setIcon(QIcon(QStringLiteral(":/images/builds/show.svg")));
-    m_showKeyPasswordButton->setIcon(QIcon(QStringLiteral(":/images/builds/show.svg")));
+    m_browseIconButton->setIcon(QIcon(QLatin1String(":/images/builds/browse.svg")));
+    m_clearIconButton->setIcon(QIcon(QLatin1String(":/images/designer/clear.svg")));
+    m_addPermissionButton->setIcon(QIcon(QLatin1String(":/images/designer/plus.svg")));
+    m_removePermissionButton->setIcon(QIcon(QLatin1String(":/images/designer/minus.svg")));
+    m_addQtModuleButton->setIcon(QIcon(QLatin1String(":/images/designer/plus.svg")));
+    m_removeQtModuleButton->setIcon(QIcon(QLatin1String(":/images/designer/minus.svg")));
+    m_newKeystoreButton->setIcon(QIcon(QLatin1String(":/images/designer/new-file.svg")));
+    m_browseKeystoreButton->setIcon(QIcon(QLatin1String(":/images/builds/browse.svg")));
+    m_clearKeystoreButton->setIcon(QIcon(QLatin1String(":/images/designer/clear.svg")));
+    m_showKeystorePasswordButton->setIcon(QIcon(QLatin1String(":/images/builds/show.svg")));
+    m_showKeyPasswordButton->setIcon(QIcon(QLatin1String(":/images/builds/show.svg")));
 
     m_screenOrientationCombo->addItems(AndroidPlatformWidget::orientationMap.keys());
     m_minApiLevelCombo->addItems(AndroidPlatformWidget::apiLevelMap.keys());

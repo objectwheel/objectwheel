@@ -3,7 +3,7 @@
 
 #include <QtGlobal>
 
-enum RendererCommands : quint32 {
+enum RendererCommands {
     ConnectionAlive = 0x1000,
     ControlCodeUpdate,
     ControlCreation,

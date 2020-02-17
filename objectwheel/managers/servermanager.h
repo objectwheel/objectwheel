@@ -16,9 +16,10 @@ class ServerManager final : public QWebSocket
     enum { CONNECTION_TIMEOUT = 3000 };
 
 public:
-    enum ServerCommands : quint32 {
+    enum ServerCommands {
         Invalid,
-        Login = 0x2023,
+        MessageTooLarge = 0x2022,
+        Login,
         LoginSuccessful,
         LoginFailure,
         Signup,
@@ -40,7 +41,11 @@ public:
         UpdateUserIconSuccessful,
         UpdateUserIconFailure,
         RequestUserIcon,
-        ResponseUserIcon
+        ResponseUserIcon,
+        RequestBuild,
+        RequestBuildSuccessful,
+        RequestBuildFailure,
+        ResponseBuild
     };
     Q_ENUM(ServerCommands)
 

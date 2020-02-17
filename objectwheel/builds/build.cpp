@@ -2,6 +2,9 @@
 
 Build::Build(const QCborMap& request, QObject* parent) : QObject(parent)
   , m_request(request)
+  , m_speed(-1)
+  , m_totalDataSize(-1)
+  , m_receivedDataSize(-1)
 {
 }
 

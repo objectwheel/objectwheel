@@ -89,6 +89,8 @@ void BuildModel::onServerResponse(const QByteArray& data)
     default:
         break;
     }
+
+//    emit dataChanged(bottom, top);
 }
 
 QString BuildModel::toPrettyPlatformName(const QString& rawPlatformName) const
@@ -109,7 +111,7 @@ QString BuildModel::toPrettyPlatformName(const QString& rawPlatformName) const
 QString BuildModel::packageSuffixFromRequest(const QCborMap& request) const
 {
     if (request.value(QLatin1String("platform")).toString() == QLatin1String("android")) {
-        if (request.value(QLatin1String("aab")).toBool())
+        if (request.value(QLatin1String("aab")).toBool(false))
             return QLatin1String(".aab");
         else
             return QLatin1String(".apk");

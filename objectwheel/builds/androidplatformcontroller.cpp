@@ -98,33 +98,6 @@ QCborMap AndroidPlatformController::toCborMap() const
         map.insert(QLatin1String("icon"), file.readAll());
     }
 
-    //    "platform": "android",
-    //    "name": "Ömer Göktaş",
-    //!   "versionCode": 5,
-    //    "versionName": "5.2 Platinum",
-    //    "organization": "Ömer Göktaş, Inc.",
-    //    "domain": "https://www.omergoktas.com.tr",
-    //    "package": "tr.com.omergoktas.OmerGoktasApp",
-    //    "screenOrientation": "unspecified",
-    //!   "minApiLevel": 21,
-    //!   "targetApiLevel": 23,
-    //!   "icon": "h''",
-    //!   "permissions": [
-    //!       "android.permission.ACCESS_FINE_LOCATION",
-    //!       "android.permission.INSTALL_LOCATION_PROVIDER"
-    //!   ],
-
-    //    "aab": false,
-    //!   "abis": [ "arm64-v8a", "x86" ],
-    //!   "qtModules": [ "core", "gui" ],
-
-    //    "signature": {
-    //        "keystore": "h''",
-    //        "keystorePassword": "123456789",
-    //        "keyPassword": "asdfghjkl",
-    //        "keyAlias": "fffff"
-    //    }
-
     return map;
 }
 
@@ -141,9 +114,9 @@ void AndroidPlatformController::charge() const
     m_androidPlatformWidget->qtModuleCombo()->removeItem(m_androidPlatformWidget->qtModuleCombo()->findText(QLatin1String("Qt Svg")));
 
     m_androidPlatformWidget->versionCodeSpin()->setValue(1);
-    m_androidPlatformWidget->screenOrientationCombo()->setCurrentText(QStringLiteral("Unspecified"));
-    m_androidPlatformWidget->minApiLevelCombo()->setCurrentText(QStringLiteral("API 21: Android 5.0"));
-    m_androidPlatformWidget->targetApiLevelCombo()->setCurrentText(QStringLiteral("API 23: Android 6.0"));
+    m_androidPlatformWidget->screenOrientationCombo()->setCurrentText(QLatin1String("Unspecified"));
+    m_androidPlatformWidget->minApiLevelCombo()->setCurrentText(QLatin1String("API 21: Android 5.0"));
+    m_androidPlatformWidget->targetApiLevelCombo()->setCurrentText(QLatin1String("API 23: Android 6.0"));
     m_androidPlatformWidget->aabCheck()->setChecked(false);
     m_androidPlatformWidget->abiArmeabiV7aCheck()->setChecked(true);
     m_androidPlatformWidget->abiArm64V8aCheck()->setChecked(false);
