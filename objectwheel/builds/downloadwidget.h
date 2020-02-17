@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class QListWidget;
+class QListView;
 class ButtonSlice;
 
 class DownloadWidget final : public QWidget
@@ -17,11 +17,11 @@ public:
 public:
     explicit DownloadWidget(QWidget* parent = nullptr);
 
-    QListWidget* platformList() const;
+    QListView* platformList() const;
     ButtonSlice* buttonSlice() const;
 
 private:
-    QListWidget* m_platformList;
+    QListView* m_platformList;
     ButtonSlice* m_buttonSlice;
 };
 

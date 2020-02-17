@@ -16,11 +16,11 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
     UtilityFunctions::adjustFontPixelSize(noBuildsIndicatorLabel, -1);
     connect(m_downloadWidget->platformList()->model(), &QAbstractItemModel::rowsInserted,
             noBuildsIndicatorLabel, [=] {
-        noBuildsIndicatorLabel->setVisible(m_downloadWidget->platformList()->count() <= 0);
+        noBuildsIndicatorLabel->setVisible(m_downloadWidget->platformList()->model()->rowCount() <= 0);
     });
     connect(m_downloadWidget->platformList()->model(), &QAbstractItemModel::rowsRemoved,
             noBuildsIndicatorLabel, [=] {
-        noBuildsIndicatorLabel->setVisible(m_downloadWidget->platformList()->count() <= 0);
+        noBuildsIndicatorLabel->setVisible(m_downloadWidget->platformList()->model()->rowCount() <= 0);
     });
     connect(m_downloadWidget->platformList()->model(), &QAbstractItemModel::modelReset,
             noBuildsIndicatorLabel, &QLabel::show);

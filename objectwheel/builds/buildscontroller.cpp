@@ -9,7 +9,9 @@
 #include <androidplatformcontroller.h>
 #include <downloadwidget.h>
 #include <downloadcontroller.h>
+#include <buildmodel.h>
 
+#include <QListView>
 #include <QPushButton>
 #include <QLabel>
 
@@ -27,7 +29,7 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
     connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Back), &QPushButton::clicked,
             this, &BuildsController::onBackButtonClick);
     connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Build), &QPushButton::clicked,
-            this, &BuildsController::onBuildButtonClick);
+            this, &BuildsController::onAndroidBuildButtonClick);
 }
 
 void BuildsController::charge()
@@ -66,9 +68,11 @@ void BuildsController::onNextButtonClick()
     }
 }
 
-void BuildsController::onBuildButtonClick()
+void BuildsController::onAndroidBuildButtonClick()
 {
     m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
+    BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->platformList()->model());
+    model->addBuildRequest(m_androidPlatformController->toCborMap());
 }
 
 QWidget* BuildsController::widgetForPlatform(Platform platform) const

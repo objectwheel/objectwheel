@@ -1,7 +1,27 @@
 #include <buildmodel.h>
 #include <build.h>
 #include <servermanager.h>
+#include <usermanager.h>
+#include <projectmanager.h>
+#include <zipasync.h>
+
 #include <QCborMap>
+#include <QTemporaryFile>
+#include <QTimer>
+
+enum StatusCode {
+    SUCCEED,
+    INTERNAL_ERROR,
+    BAD_REQUEST,
+    INVALID_USER_CREDENTIAL,
+    SIMULTANEOUS_BUILD_LIMIT_EXCEEDED,
+    MAKE_FAILED,
+    QMAKE_FAILED,
+    INVALID_PROJECT_FILE,
+    INVALID_PROJECT_SETTINGS_FILE,
+    CANCELED,
+    TIMEDOUT,
+};
 
 BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
 {
@@ -12,8 +32,11 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
 void BuildModel::addBuildRequest(const QCborMap& request)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_builds.append(new Build(request, this));
+    auto build = new Build(request, this);
+    build->setStatus(tr("Compressing the project..."));
+    m_builds.append(build);
     endInsertRows();
+    scheduleConnection(build);
 }
 
 int BuildModel::rowCount(const QModelIndex&) const
@@ -90,7 +113,58 @@ void BuildModel::onServerResponse(const QByteArray& data)
         break;
     }
 
-//    emit dataChanged(bottom, top);
+    //    emit dataChanged(bottom, top);
+}
+
+void BuildModel::scheduleConnection(Build* build)
+{
+    QTimer::singleShot(100, [=] { establishConnection(build); });
+}
+
+void BuildModel::establishConnection(Build* build)
+{
+    int row = m_builds.indexOf(build);
+    if (row < 0)
+        return;
+
+    const QModelIndex& index = BuildModel::index(row);
+    Q_ASSERT(index.isValid());
+
+    build->setStatus(tr("Establishing connection to the server...."));
+
+    QString tmpFilePath;
+    {
+        QTemporaryFile tempFile;
+        if (!tempFile.open()) {
+            qWarning("WARNING: Cannot open up a temporary file");
+            build->setStatus(tr("An Internal Error Occurred"));
+            emit dataChanged(index, index);
+            return;
+        }
+        tmpFilePath = tempFile.fileName();
+    }
+    if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) == 0) {
+        qWarning("WARNING: Cannot zip user project");
+        build->setStatus(tr("An Internal Error Occurred"));
+        emit dataChanged(index, index);
+        return;
+    }
+    QFile tempFile(tmpFilePath);
+    if (!tempFile.open(QFile::ReadOnly)) {
+        qWarning("WARNING: Cannot open compressed project file");
+        build->setStatus(tr("An Internal Error Occurred"));
+        emit dataChanged(index, index);
+        return;
+    }
+
+    ServerManager::send(ServerManager::RequestBuild,
+                        UserManager::email(),
+                        UserManager::password(),
+                        build->request(), tempFile.readAll());
+    tempFile.close();
+    tempFile.remove();
+
+    emit dataChanged(index, index);
 }
 
 QString BuildModel::toPrettyPlatformName(const QString& rawPlatformName) const

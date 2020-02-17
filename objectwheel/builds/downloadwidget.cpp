@@ -1,22 +1,25 @@
 #include <downloadwidget.h>
 #include <buttonslice.h>
 #include <paintutils.h>
+#include <buildmodel.h>
+#include <builddelegate.h>
 
 #include <QLabel>
 #include <QBoxLayout>
-#include <QListWidget>
+#include <QListView>
 #include <QScrollBar>
 #include <QPushButton>
 
 DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
-  , m_platformList(new QListWidget(this))
+  , m_platformList(new QListView(this))
   , m_buttonSlice(new ButtonSlice(this))
 {
     m_platformList->setIconSize(QSize(40, 40));
     m_platformList->setFixedSize(QSize(450, 326));
     m_platformList->setFocusPolicy(Qt::NoFocus);
     m_platformList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    m_platformList->setItemDelegate(new PlatformListDelegate(m_platformList, m_platformList));
+    m_platformList->setModel(new BuildModel(this));
+    m_platformList->setItemDelegate(new BuildDelegate(m_platformList));
     m_platformList->verticalScrollBar()->setStyleSheet(
                 QStringLiteral(
                     "QScrollBar:vertical {"
@@ -37,7 +40,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
                     "}").arg(15).arg(6).arg(2.5));
     m_platformList->setStyleSheet(
                 QStringLiteral(
-                    "QListWidget {"
+                    "QListView {"
                     "    background: #12000000;"
                     "    border: 1px solid #22000000;"
                     "    border-radius: %1px;"
@@ -80,7 +83,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
 }
 
-QListWidget* DownloadWidget::platformList() const
+QListView* DownloadWidget::platformList() const
 {
     return m_platformList;
 }

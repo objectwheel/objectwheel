@@ -38,6 +38,9 @@ private slots:
     void onServerResponse(const QByteArray& data);
 
 private:
+    void scheduleConnection(Build* build);
+    void establishConnection(Build* build);
+
     QString toPrettyPlatformName(const QString& rawPlatformName) const;
     QString packageSuffixFromRequest(const QCborMap& request) const;
 

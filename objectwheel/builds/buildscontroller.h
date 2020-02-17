@@ -24,7 +24,7 @@ private slots:
     void onNewButtonClick();
     void onBackButtonClick();
     void onNextButtonClick();
-    void onBuildButtonClick();
+    void onAndroidBuildButtonClick();
 
 private:
     QWidget* widgetForPlatform(Platform platform) const;
