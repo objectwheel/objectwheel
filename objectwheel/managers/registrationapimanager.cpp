@@ -1,10 +1,13 @@
 #include <registrationapimanager.h>
 #include <planmanager.h>
+#include <servermanager.h>
 
 RegistrationApiManager* RegistrationApiManager::s_instance = nullptr;
 RegistrationApiManager::RegistrationApiManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
+    connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
+            this, &RegistrationApiManager::onServerResponse);
 }
 
 RegistrationApiManager::~RegistrationApiManager()
@@ -51,7 +54,7 @@ void RegistrationApiManager::completePasswordReset(const QString& email, const Q
     ServerManager::send(ServerManager::CompletePasswordReset, email, password, code);
 }
 
-void RegistrationApiManager::onDataArrival(const QByteArray& data)
+void RegistrationApiManager::onServerResponse(const QByteArray& data)
 {
     ServerManager::ServerCommands command = ServerManager::Invalid;
     UtilityFunctions::pullCbor(data, command);
@@ -110,7 +113,6 @@ void RegistrationApiManager::onDataArrival(const QByteArray& data)
         emit completePasswordResetFailure();
         break;
     default:
-        qWarning("RegistrationApiManager: Unrecognized api response");
         break;
     }
 }

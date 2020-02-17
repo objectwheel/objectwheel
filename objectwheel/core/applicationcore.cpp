@@ -49,7 +49,7 @@ DesignerSettings* ApplicationCore::s_designerSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 ModeManager* ApplicationCore::s_modeManager = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
-RegistrationApiManager* ApplicationCore::s_accountManager = nullptr;
+RegistrationApiManager* ApplicationCore::s_registrationApiManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlRenderingManager* ApplicationCore::s_controlRenderingManager = nullptr;
 SaveManager* ApplicationCore::s_saveManager = nullptr;
@@ -107,7 +107,7 @@ ApplicationCore::ApplicationCore(QApplication* app)
 
     s_modeManager = new ModeManager(app);
     s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)), app);
-    s_accountManager = new RegistrationApiManager(app);
+    s_registrationApiManager = new RegistrationApiManager(app);
     s_userManager = new UserManager(app);
     s_controlRenderingManager = new ControlRenderingManager(app);
     s_saveManager = new SaveManager(app);
@@ -119,8 +119,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
-    QObject::connect(s_serverManager, &ServerManager::binaryMessageReceived,
-                     s_accountManager, &RegistrationApiManager::onDataArrival);
     s_serverManager->start();
 
     s_helpManager->setupHelpManager();

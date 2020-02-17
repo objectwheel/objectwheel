@@ -3,7 +3,10 @@
 #include <saveutils.h>
 #include <registrationapimanager.h>
 #include <hashfactory.h>
+#include <utilityfunctions.h>
+
 #include <QDir>
+#include <QCryptographicHash>
 
 UserManager* UserManager::s_instance = nullptr;
 PlanManager::Plans UserManager::s_plan = PlanManager::Free;

@@ -1,7 +1,7 @@
 #ifndef REGISTRATIONAPIMANAGER_H
 #define REGISTRATIONAPIMANAGER_H
 
-#include <servermanager.h>
+#include <QObject>
 
 class RegistrationApiManager final : public QObject
 {
@@ -24,7 +24,7 @@ public:
                                       const QString& code);
 
 private slots:
-    void onDataArrival(const QByteArray& data);
+    void onServerResponse(const QByteArray& data);
 
 signals:
     void loginSuccessful(const QVariantList& userInfo);

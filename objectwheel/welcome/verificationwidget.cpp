@@ -5,6 +5,7 @@
 #include <registrationapimanager.h>
 #include <countdown.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
 #include <QVBoxLayout>
 #include <QLabel>

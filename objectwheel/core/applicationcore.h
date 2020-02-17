@@ -57,7 +57,7 @@ private:
     static CodeEditorSettings* s_codeEditorSettings;
     static ModeManager* s_modeManager;
     static ServerManager* s_serverManager;
-    static RegistrationApiManager* s_accountManager;
+    static RegistrationApiManager* s_registrationApiManager;
     static UserManager* s_userManager;
     static ControlRenderingManager* s_controlRenderingManager;
     static SaveManager* s_saveManager;
