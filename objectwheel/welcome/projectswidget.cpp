@@ -21,7 +21,6 @@
 #include <QScrollBar>
 #include <QStyledItemDelegate>
 #include <QPainter>
-#include <QDebug>
 #include <QScreen>
 #include <QFileDialog>
 #include <QComboBox>
@@ -153,49 +152,40 @@ class ProjectListDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY(ProjectListDelegate)
 
 public:
-    ProjectListDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-      , m_listWidget(listWidget)
-    {
-    }
+    explicit ProjectListDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent)
+    {}
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
-                     m_listWidget->iconSize().height() + 14);
+                     option.decorationSize.height() + 14);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override
     {
-        const QListWidgetItem* item = m_listWidget->item(index.row());
-
-        if (item == 0)
-            return;
-
-        if (item->listWidget() == 0)
-            return;
-
         painter->save();
 
-        const QRectF r = option.rect;
-        const QString& name = item->data(NameRole).toString();
-        const QString& lastEdit = item->data(LastEditRole).toString();
-        const bool isActive = item->data(ActivityRole).toBool();
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+
+        const QString& name = index.data(NameRole).toString();
+        const QString& lastEdit = index.data(LastEditRole).toString();
+        const bool isActive = index.data(ActivityRole).toBool();
 
         // Limit drawing region to view's rect (with rounded corners)
         QPainterPath path;
-        path.addRoundedRect(item->listWidget()->rect(), 8, 8);
+        path.addRoundedRect(opt.widget->rect(), 8, 8);
         painter->setClipPath(path);
 
         // Draw highlighted background if selected
-        if (item->isSelected())
-            painter->fillRect(r, option.palette.highlight());
+        if (opt.state.testFlag(QStyle::State_Selected))
+            painter->fillRect(opt.rect, opt.palette.highlight());
 
         // Draw icon
-        const QSize& iconSize = item->listWidget()->iconSize();
-        const int padding = r.height() / 2.0 - iconSize.height() / 2.0;
-        const QRectF iconRect(QPointF(r.left() + padding, r.top() + padding), iconSize);
-        const QPixmap& icon = PaintUtils::pixmap(item->icon(), iconSize, item->listWidget());
+        const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
+        const QRectF iconRect(QPointF(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
+        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.widget);
         painter->drawPixmap(iconRect, icon, icon.rect());
 
         // Draw texts
@@ -203,21 +193,22 @@ public:
         f.setWeight(QFont::Medium);
         painter->setFont(f);
         const QRectF nameRect(QPointF(iconRect.right() + padding, iconRect.top()),
-                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
-        painter->setPen(option.palette.text().color());
+                              QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding, iconRect.height() / 2.0));
+        painter->setPen(opt.palette.text().color());
         painter->drawText(nameRect, name, Qt::AlignVCenter | Qt::AlignLeft);
 
         f.setWeight(QFont::Normal);
         painter->setFont(f);
         const QRectF lastEditRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
-                                  QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
+                                  QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding,
+                                         iconRect.height() / 2.0));
         painter->drawText(lastEditRect, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
 
         // Draw bottom line
-        if (index.row() != item->listWidget()->count() - 1) {
+        if (index.row() != index.model()->rowCount() - 1) {
             painter->setPen(QPen(QColor("#28000000"), 0));
-            painter->drawLine(r.bottomLeft() + QPointF(padding, -0.5),
-                              r.bottomRight() + QPointF(-padding, -0.5));
+            painter->drawLine(opt.rect.bottomLeft() + QPointF(padding, 0.5),
+                              opt.rect.bottomRight() + QPointF(-padding, 0.5));
         }
 
         // Draw activity mark
@@ -235,9 +226,6 @@ public:
 
         painter->restore();
     }
-
-private:
-    const QListWidget* m_listWidget;
 };
 
 class ProjectListWidgetItem : public QListWidgetItem
@@ -341,9 +329,10 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 
+    m_listWidget->setUniformItemSizes(true);
     m_listWidget->viewport()->installEventFilter(this);
     m_listWidget->setIconSize(QSize(40, 40));
-    m_listWidget->setItemDelegate(new ProjectListDelegate(m_listWidget, m_listWidget));
+    m_listWidget->setItemDelegate(new ProjectListDelegate(m_listWidget));
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setFixedSize(SIZE_LIST);

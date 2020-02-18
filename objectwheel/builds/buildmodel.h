@@ -13,9 +13,10 @@ class BuildModel final : public QAbstractListModel
 
 public:
     enum BuildRoles {
-        PlatformRole = Qt::UserRole + 1,
+        PaddingRole = Qt::UserRole + 1,
+        PlatformRole,
         NameRole,
-        IconRole,
+        PlatformIconRole,
         VersionRole,
         AbisRole,
         StatusRole,
@@ -41,6 +42,7 @@ private:
     void scheduleConnection(Build* build);
     void establishConnection(Build* build);
 
+    QIcon platformIcon(const QString& rawPlatformName) const;
     QString toPrettyPlatformName(const QString& rawPlatformName) const;
     QString packageSuffixFromRequest(const QCborMap& request) const;
 

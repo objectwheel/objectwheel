@@ -31,49 +31,40 @@ class PlatformListDelegate final : public QStyledItemDelegate
     Q_DISABLE_COPY(PlatformListDelegate)
 
 public:
-    PlatformListDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-      , m_listWidget(listWidget)
-    {
-    }
+    explicit PlatformListDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent)
+    {}
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
         return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
-                     m_listWidget->iconSize().height() + 14);
+                     option.decorationSize.height() + 14);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override
     {
-        const QListWidgetItem* item = m_listWidget->item(index.row());
-
-        if (item == 0)
-            return;
-
-        if (item->listWidget() == 0)
-            return;
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
 
         painter->save();
 
-        const QRectF r = option.rect;
-        const QString& name = item->data(NameRole).toString();
-        const QString& description = item->data(DescriptionRole).toString();
-        const Availability availability = item->data(AvailabilityRole).value<Availability>();
+        const QString& name = index.data(NameRole).toString();
+        const QString& description = index.data(DescriptionRole).toString();
+        const Availability availability = index.data(AvailabilityRole).value<Availability>();
 
         // Limit drawing region to view's rect (with rounded corners)
         QPainterPath path;
-        path.addRoundedRect(item->listWidget()->rect(), 8, 8);
+        path.addRoundedRect(opt.widget->rect(), 8, 8);
         painter->setClipPath(path);
 
         // Draw highlighted background if selected
-        if (item->isSelected())
-            painter->fillRect(r, option.palette.highlight());
+        if (opt.state.testFlag(QStyle::State_Selected))
+            painter->fillRect(opt.rect, opt.palette.highlight());
 
         // Draw icon
-        const QSize& iconSize = item->listWidget()->iconSize();
-        const int padding = r.height() / 2.0 - iconSize.height() / 2.0;
-        const QRectF iconRect(QPointF(r.left() + padding, r.top() + padding), iconSize);
-        const QPixmap& icon = PaintUtils::pixmap(item->icon(), iconSize, item->listWidget());
+        const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
+        const QRectF iconRect(QPointF(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
+        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.widget);
         painter->drawPixmap(iconRect, icon, icon.rect());
 
         // Draw texts
@@ -81,21 +72,23 @@ public:
         f.setWeight(QFont::Medium);
         painter->setFont(f);
         const QRectF nameRect(QPointF(iconRect.right() + padding, iconRect.top()),
-                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
-        painter->setPen(option.palette.text().color());
+                              QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding,
+                                     iconRect.height() / 2.0));
+        painter->setPen(opt.palette.text().color());
         painter->drawText(nameRect, name, Qt::AlignVCenter | Qt::AlignLeft);
 
         f.setWeight(QFont::Normal);
         painter->setFont(f);
         const QRectF descRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
-                              QSizeF(r.width() - iconSize.width() - 3 * padding, iconRect.height() / 2.0));
+                              QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding,
+                                     iconRect.height() / 2.0));
         painter->drawText(descRect, description, Qt::AlignVCenter | Qt::AlignLeft);
 
         // Draw bottom line
-        if (index.row() != item->listWidget()->count() - 1) {
+        if (index.row() != index.model()->rowCount() - 1) {
             painter->setPen(QPen(QColor("#28000000"), 0));
-            painter->drawLine(r.bottomLeft() + QPointF(padding, -0.5),
-                              r.bottomRight() + QPointF(-padding, -0.5));
+            painter->drawLine(opt.rect.bottomLeft() + QPointF(padding, 0.5),
+                              opt.rect.bottomRight() + QPointF(-padding, 0.5));
         }
 
         // Draw availability label
@@ -105,8 +98,8 @@ public:
             const QFontMetrics fm(f);
             const int msgHeight = fm.height();
             const int msgWidth = fm.horizontalAdvance(label) + msgHeight;
-            const QRectF msgRect(QPointF(r.left() + r.width() - msgWidth - padding,
-                                         r.top() + r.height() / 2.0 - msgHeight / 2.0),
+            const QRectF msgRect(QPointF(opt.rect.left() + opt.rect.width() - msgWidth - padding,
+                                         opt.rect.top() + opt.rect.height() / 2.0 - msgHeight / 2.0),
                                  QSizeF(msgWidth, msgHeight));
             painter->setFont(f);
             painter->setRenderHint(QPainter::Antialiasing);
@@ -118,9 +111,6 @@ public:
 
         painter->restore();
     }
-
-private:
-    const QListWidget* m_listWidget;
 };
 
 PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(parent)
@@ -152,7 +142,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     iOSItem->setFlags(iOSItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(iOSItem);
 
-    auto macOSItem = new QListWidgetItem();
+    auto macOSItem = new QListWidgetItem;
     macOSItem->setIcon(QIcon(":/images/builds/macos.svg"));
     macOSItem->setData(PlatformRole, macOS);
     macOSItem->setData(NameRole, QLatin1String("macOS 10.13+"));
@@ -188,11 +178,12 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     raspberryPiItem->setFlags(raspberryPiItem->flags() & ~Qt::ItemIsSelectable);
     m_platformList->addItem(raspberryPiItem);
 
+    m_platformList->setUniformItemSizes(true);
     m_platformList->setIconSize(QSize(40, 40));
     m_platformList->setFixedSize(QSize(450, 326));
     m_platformList->setFocusPolicy(Qt::NoFocus);
     m_platformList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_platformList->setItemDelegate(new PlatformListDelegate(m_platformList, m_platformList));
+    m_platformList->setItemDelegate(new PlatformListDelegate(m_platformList));
     m_platformList->verticalScrollBar()->setStyleSheet(
                 QStringLiteral(
                     "QScrollBar:vertical {"

@@ -8,6 +8,8 @@
 #include <QCborMap>
 #include <QTemporaryFile>
 #include <QTimer>
+#include <QIcon>
+#include <QApplication>
 
 enum StatusCode {
     SUCCEED,
@@ -51,12 +53,30 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
 
     const Build* build = m_builds.value(index.row());
     switch (role) {
+    case Qt::BackgroundRole:
+        return QApplication::palette().window();
+    case Qt::ForegroundRole:
+        return QApplication::palette().text();
+    case Qt::TextAlignmentRole:
+        return QVariant::fromValue(Qt::AlignLeft | Qt::AlignVCenter);
+    case Qt::FontRole: {
+        QFont font(QApplication::font());
+        font.setPixelSize(10);
+        font.setWeight(QFont::Light);
+        return font;
+    }
+    case Qt::SizeHintRole:
+        return QSize(0, 12 * 4 + 2 * 3 + 7 * 2);
+    case Qt::DecorationRole:
+        return QImage::fromData(build->request().value(QLatin1String("icon")).toByteArray());
+    case PaddingRole:
+        return 7;
     case PlatformRole:
         return toPrettyPlatformName(build->request().value(QLatin1String("platform")).toString());
     case NameRole:
         return build->request().value(QLatin1String("name")).toString() + packageSuffixFromRequest(build->request());
-    case IconRole:
-        return QImage::fromData(build->request().value(QLatin1String("icon")).toByteArray());
+    case PlatformIconRole:
+        return platformIcon(build->request().value(QLatin1String("platform")).toString());
     case VersionRole:
         return build->request().value(QLatin1String("versionName")).toString();
     case AbisRole: {
@@ -87,28 +107,28 @@ void BuildModel::onServerResponse(const QByteArray& data)
     UtilityFunctions::pullCbor(data, command);
 
     switch (command) {
-//    case ServerManager::LoginSuccessful: {
-//        QByteArray icon;
-//        QDateTime regdate;
-//        PlanManager::Plans plan;
-//        QString first, last, country, company, title, phone;
-//        UtilityFunctions::pullCbor(data, command, icon, regdate, plan, first, last, country, company, title, phone);
+    //    case ServerManager::LoginSuccessful: {
+    //        QByteArray icon;
+    //        QDateTime regdate;
+    //        PlanManager::Plans plan;
+    //        QString first, last, country, company, title, phone;
+    //        UtilityFunctions::pullCbor(data, command, icon, regdate, plan, first, last, country, company, title, phone);
 
-//        QVariantList userInfo;
-//        userInfo.append(icon);
-//        userInfo.append(regdate);
-//        userInfo.append(plan);
-//        userInfo.append(first);
-//        userInfo.append(last);
-//        userInfo.append(country);
-//        userInfo.append(company);
-//        userInfo.append(title);
-//        userInfo.append(phone);
-//        emit loginSuccessful(userInfo);
-//    } break;
-//    case ServerManager::LoginFailure:
-//        emit loginFailure();
-//        break;
+    //        QVariantList userInfo;
+    //        userInfo.append(icon);
+    //        userInfo.append(regdate);
+    //        userInfo.append(plan);
+    //        userInfo.append(first);
+    //        userInfo.append(last);
+    //        userInfo.append(country);
+    //        userInfo.append(company);
+    //        userInfo.append(title);
+    //        userInfo.append(phone);
+    //        emit loginSuccessful(userInfo);
+    //    } break;
+    //    case ServerManager::LoginFailure:
+    //        emit loginFailure();
+    //        break;
     default:
         break;
     }
@@ -132,39 +152,44 @@ void BuildModel::establishConnection(Build* build)
 
     build->setStatus(tr("Establishing connection to the server...."));
 
-    QString tmpFilePath;
-    {
-        QTemporaryFile tempFile;
-        if (!tempFile.open()) {
-            qWarning("WARNING: Cannot open up a temporary file");
-            build->setStatus(tr("An Internal Error Occurred"));
-            emit dataChanged(index, index);
-            return;
-        }
-        tmpFilePath = tempFile.fileName();
-    }
-    if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) == 0) {
-        qWarning("WARNING: Cannot zip user project");
-        build->setStatus(tr("An Internal Error Occurred"));
-        emit dataChanged(index, index);
-        return;
-    }
-    QFile tempFile(tmpFilePath);
-    if (!tempFile.open(QFile::ReadOnly)) {
-        qWarning("WARNING: Cannot open compressed project file");
-        build->setStatus(tr("An Internal Error Occurred"));
-        emit dataChanged(index, index);
-        return;
-    }
+    //    QString tmpFilePath;
+    //    {
+    //        QTemporaryFile tempFile;
+    //        if (!tempFile.open()) {
+    //            qWarning("WARNING: Cannot open up a temporary file");
+    //            build->setStatus(tr("An Internal Error Occurred"));
+    //            emit dataChanged(index, index);
+    //            return;
+    //        }
+    //        tmpFilePath = tempFile.fileName();
+    //    }
+    //    if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) == 0) {
+    //        qWarning("WARNING: Cannot zip user project");
+    //        build->setStatus(tr("An Internal Error Occurred"));
+    //        emit dataChanged(index, index);
+    //        return;
+    //    }
+    //    QFile tempFile(tmpFilePath);
+    //    if (!tempFile.open(QFile::ReadOnly)) {
+    //        qWarning("WARNING: Cannot open compressed project file");
+    //        build->setStatus(tr("An Internal Error Occurred"));
+    //        emit dataChanged(index, index);
+    //        return;
+    //    }
 
-    ServerManager::send(ServerManager::RequestBuild,
-                        UserManager::email(),
-                        UserManager::password(),
-                        build->request(), tempFile.readAll());
-    tempFile.close();
-    tempFile.remove();
+    //    ServerManager::send(ServerManager::RequestBuild,
+    //                        UserManager::email(),
+    //                        UserManager::password(),
+    //                        build->request(), tempFile.readAll());
+    //    tempFile.close();
+    //    tempFile.remove();
 
     emit dataChanged(index, index);
+}
+
+QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
+{
+    return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
 }
 
 QString BuildModel::toPrettyPlatformName(const QString& rawPlatformName) const
