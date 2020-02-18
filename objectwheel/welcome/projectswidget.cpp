@@ -11,6 +11,7 @@
 #include <transparentstyle.h>
 #include <planmanager.h>
 #include <paintutils.h>
+#include <styleditemdelegate.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -19,7 +20,6 @@
 #include <QTimer>
 #include <QListWidget>
 #include <QScrollBar>
-#include <QStyledItemDelegate>
 #include <QPainter>
 #include <QScreen>
 #include <QFileDialog>
@@ -147,17 +147,17 @@ private:
     QCheckBox* m_reverseSortCheckBox;
 };
 
-class ProjectListDelegate final : public QStyledItemDelegate
+class ProjectListDelegate final : public StyledItemDelegate
 {
     Q_DISABLE_COPY(ProjectListDelegate)
 
 public:
-    explicit ProjectListDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent)
+    explicit ProjectListDelegate(QObject* parent = nullptr) : StyledItemDelegate(parent)
     {}
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
-        return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
+        return QSize(StyledItemDelegate::sizeHint(option, index).width(),
                      option.decorationSize.height() + 14);
     }
 
@@ -166,12 +166,12 @@ public:
     {
         painter->save();
 
-        QStyleOptionViewItem opt = option;
+        StyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
 
         // Limit drawing region to view's rect (with rounded corners)
         QPainterPath path;
-        path.addRoundedRect(static_cast<const QAbstractItemView*>(opt.widget)->viewport()->rect(), 7, 7);
+        path.addRoundedRect(opt.widget->viewport()->rect(), 7, 7);
         painter->setClipPath(path);
 
         // Draw highlighted background if selected

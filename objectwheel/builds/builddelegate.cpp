@@ -1,11 +1,9 @@
 #include <builddelegate.h>
 #include <buildmodel.h>
 #include <paintutils.h>
-
 #include <QPainter>
-#include <QAbstractItemView>
 
-BuildDelegate::BuildDelegate(QObject* parent) : QStyledItemDelegate(parent)
+BuildDelegate::BuildDelegate(QObject* parent) : StyledItemDelegate(parent)
 {
 }
 
@@ -21,16 +19,10 @@ BuildDelegate::BuildDelegate(QObject* parent) : QStyledItemDelegate(parent)
 //}
 //case Qt::SizeHintRole:
 //    return QSize(0, 12 * 4 + 2 * 3 + 7 * 2);
-//case Qt::DecorationRole:
-//    return QImage::fromData(build->request().value(QLatin1String("icon")).toByteArray());
-//case PaddingRole:
-//    return 7;
 //case PlatformRole:
 //    return toPrettyPlatformName(build->request().value(QLatin1String("platform")).toString());
 //case NameRole:
 //    return build->request().value(QLatin1String("name")).toString() + packageSuffixFromRequest(build->request());
-//case PlatformIconRole:
-//    return platformIcon(build->request().value(QLatin1String("platform")).toString());
 //case VersionRole:
 //    return build->request().value(QLatin1String("versionName")).toString();
 //case AbisRole: {
@@ -49,11 +41,11 @@ BuildDelegate::BuildDelegate(QObject* parent) : QStyledItemDelegate(parent)
 //    return build->totalDataSize();
 //case ReceivedDataSizeRole:
 //    return build->receivedDataSize();
-#include <QDebug>
+
 void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
                           const QModelIndex& index) const
 {
-    QStyleOptionViewItem opt = option;
+    StyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
 
     painter->save();
@@ -61,7 +53,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 
     // Limit drawing region to view's rect (with rounded corners)
     QPainterPath path;
-    path.addRoundedRect(static_cast<const QAbstractItemView*>(opt.widget)->viewport()->rect(), 7, 7);
+    path.addRoundedRect(opt.widget->viewport()->rect(), 7, 7);
     painter->setClipPath(path);
 
     // Draw background
@@ -69,11 +61,11 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 
     // Draw app icon
     const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
-    QRectF iconRect(QPointF(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
+    QRect iconRect(QPoint(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
     if (opt.icon.isNull()) {
         painter->setPen(QPen(Qt::gray, 1, Qt::DashLine));
         painter->setBrush(Qt::NoBrush);
-        painter->drawRect(iconRect);
+        painter->drawRoundedRect(iconRect, 4, 4);
         painter->setPen(QPen(Qt::darkGray));
         painter->drawText(iconRect, tr("Empty\nicon"), Qt::AlignVCenter | Qt::AlignHCenter);
     } else {
@@ -83,9 +75,9 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 
     // Draw platform icon
     iconRect.moveTopLeft(iconRect.center());
-    iconRect.setSize(iconRect.size() / 2.0);
+    iconRect.setSize(iconRect.size() / 2);
     const QPixmap& icon = PaintUtils::pixmap(index.data(BuildModel::PlatformIconRole).value<QIcon>(),
-                                             opt.decorationSize / 2, opt.widget);
+                                             iconRect.size(), opt.widget);
     painter->drawPixmap(iconRect, icon, icon.rect());
 
 //    // Draw texts

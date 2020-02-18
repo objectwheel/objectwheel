@@ -2,11 +2,11 @@
 #include <paintutils.h>
 #include <buttonslice.h>
 #include <platform.h>
+#include <styleditemdelegate.h>
 
 #include <QBoxLayout>
 #include <QListWidget>
 #include <QLabel>
-#include <QStyledItemDelegate>
 #include <QScrollBar>
 #include <QApplication>
 #include <QPainter>
@@ -26,31 +26,31 @@ enum ItemRoles {
     AvailabilityRole
 };
 
-class PlatformListDelegate final : public QStyledItemDelegate
+class PlatformListDelegate final : public StyledItemDelegate
 {
     Q_DISABLE_COPY(PlatformListDelegate)
 
 public:
-    explicit PlatformListDelegate(QObject* parent = nullptr) : QStyledItemDelegate(parent)
+    explicit PlatformListDelegate(QObject* parent = nullptr) : StyledItemDelegate(parent)
     {}
 
     QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
     {
-        return QSize(QStyledItemDelegate::sizeHint(option, index).width(),
+        return QSize(StyledItemDelegate::sizeHint(option, index).width(),
                      option.decorationSize.height() + 14);
     }
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override
     {
-        QStyleOptionViewItem opt = option;
+        StyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
 
         painter->save();
 
         // Limit drawing region to view's rect (with rounded corners)
         QPainterPath path;
-        path.addRoundedRect(static_cast<const QAbstractItemView*>(opt.widget)->viewport()->rect(), 7, 7);
+        path.addRoundedRect(opt.widget->viewport()->rect(), 7, 7);
         painter->setClipPath(path);
 
         // Draw highlighted background if selected

@@ -1,9 +1,9 @@
 #ifndef BUILDDELEGATE_H
 #define BUILDDELEGATE_H
 
-#include <QStyledItemDelegate>
+#include <styleditemdelegate.h>
 
-class BuildDelegate final : public QStyledItemDelegate
+class BuildDelegate final : public StyledItemDelegate
 {
     Q_OBJECT
     Q_DISABLE_COPY(BuildDelegate)
