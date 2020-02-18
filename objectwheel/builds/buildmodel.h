@@ -13,8 +13,7 @@ class BuildModel final : public QAbstractListModel
 
 public:
     enum BuildRoles {
-        PaddingRole = Qt::UserRole + 1,
-        PlatformRole,
+        PlatformRole = Qt::UserRole + 1,
         NameRole,
         PlatformIconRole,
         VersionRole,

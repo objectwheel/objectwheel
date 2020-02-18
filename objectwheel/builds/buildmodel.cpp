@@ -69,8 +69,6 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         return QSize(0, 12 * 4 + 2 * 3 + 7 * 2);
     case Qt::DecorationRole:
         return QImage::fromData(build->request().value(QLatin1String("icon")).toByteArray());
-    case PaddingRole:
-        return 7;
     case PlatformRole:
         return toPrettyPlatformName(build->request().value(QLatin1String("platform")).toString());
     case NameRole:

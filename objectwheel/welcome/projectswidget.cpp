@@ -169,13 +169,9 @@ public:
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
 
-        const QString& name = index.data(NameRole).toString();
-        const QString& lastEdit = index.data(LastEditRole).toString();
-        const bool isActive = index.data(ActivityRole).toBool();
-
         // Limit drawing region to view's rect (with rounded corners)
         QPainterPath path;
-        path.addRoundedRect(opt.widget->rect(), 8, 8);
+        path.addRoundedRect(static_cast<const QAbstractItemView*>(opt.widget)->viewport()->rect(), 7, 7);
         painter->setClipPath(path);
 
         // Draw highlighted background if selected
@@ -195,14 +191,15 @@ public:
         const QRectF nameRect(QPointF(iconRect.right() + padding, iconRect.top()),
                               QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding, iconRect.height() / 2.0));
         painter->setPen(opt.palette.text().color());
-        painter->drawText(nameRect, name, Qt::AlignVCenter | Qt::AlignLeft);
+        painter->drawText(nameRect, index.data(NameRole).toString(), Qt::AlignVCenter | Qt::AlignLeft);
 
         f.setWeight(QFont::Normal);
         painter->setFont(f);
         const QRectF lastEditRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
                                   QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding,
                                          iconRect.height() / 2.0));
-        painter->drawText(lastEditRect, tr("Last Edit: ") + lastEdit, Qt::AlignVCenter | Qt::AlignLeft);
+        painter->drawText(lastEditRect, tr("Last Edit: ") + index.data(LastEditRole).toString(),
+                          Qt::AlignVCenter | Qt::AlignLeft);
 
         // Draw bottom line
         if (index.row() != index.model()->rowCount() - 1) {
@@ -212,7 +209,7 @@ public:
         }
 
         // Draw activity mark
-        if (isActive) {
+        if (index.data(ActivityRole).toBool()) {
             const QRectF activityRect(iconRect.topLeft(), QSizeF(11, 11));
             QLinearGradient gradient(0, 0, 0, 1);
             gradient.setCoordinateMode(QGradient::ObjectMode);

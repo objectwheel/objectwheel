@@ -1,11 +1,55 @@
 #include <builddelegate.h>
 #include <buildmodel.h>
+#include <paintutils.h>
+
 #include <QPainter>
+#include <QAbstractItemView>
 
 BuildDelegate::BuildDelegate(QObject* parent) : QStyledItemDelegate(parent)
 {
 }
 
+//case Qt::ForegroundRole:
+//    return QApplication::palette().text();
+//case Qt::TextAlignmentRole:
+//    return QVariant::fromValue(Qt::AlignLeft | Qt::AlignVCenter);
+//case Qt::FontRole: {
+//    QFont font(QApplication::font());
+//    font.setPixelSize(10);
+//    font.setWeight(QFont::Light);
+//    return font;
+//}
+//case Qt::SizeHintRole:
+//    return QSize(0, 12 * 4 + 2 * 3 + 7 * 2);
+//case Qt::DecorationRole:
+//    return QImage::fromData(build->request().value(QLatin1String("icon")).toByteArray());
+//case PaddingRole:
+//    return 7;
+//case PlatformRole:
+//    return toPrettyPlatformName(build->request().value(QLatin1String("platform")).toString());
+//case NameRole:
+//    return build->request().value(QLatin1String("name")).toString() + packageSuffixFromRequest(build->request());
+//case PlatformIconRole:
+//    return platformIcon(build->request().value(QLatin1String("platform")).toString());
+//case VersionRole:
+//    return build->request().value(QLatin1String("versionName")).toString();
+//case AbisRole: {
+//    QStringList abis;
+//    foreach (const QCborValue& abi, build->request().value(QLatin1String("abis")).toArray())
+//        abis.append(abi.toString());
+//    return abis.join(QLatin1String(", "));
+//}
+//case StatusRole:
+//    return build->status();
+//case SpeedRole:
+//    return build->speed();
+//case TimeLeftRole:
+//    return build->timeLeft();
+//case TotalDataSizeRole:
+//    return build->totalDataSize();
+//case ReceivedDataSizeRole:
+//    return build->receivedDataSize();
+#include <QDebug>
 void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
                           const QModelIndex& index) const
 {
@@ -13,25 +57,36 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     initStyleOption(&opt, index);
 
     painter->save();
+    painter->setFont(opt.font);
 
-//    const QString& name = index.data(NameRole).toString();
-//    const QString& description = index.data(DescriptionRole).toString();
-//    const Availability availability = index.data(AvailabilityRole).value<Availability>();
+    // Limit drawing region to view's rect (with rounded corners)
+    QPainterPath path;
+    path.addRoundedRect(static_cast<const QAbstractItemView*>(opt.widget)->viewport()->rect(), 7, 7);
+    painter->setClipPath(path);
 
-//    // Limit drawing region to view's rect (with rounded corners)
-//    QPainterPath path;
-//    path.addRoundedRect(opt.widget->rect(), 8, 8);
-//    painter->setClipPath(path);
+    // Draw background
+    painter->fillRect(opt.rect, opt.backgroundBrush);
 
-//    // Draw highlighted background if selected
-//    if (opt.state.testFlag(QStyle::State_Selected))
-//        painter->fillRect(opt.rect, opt.palette.highlight());
+    // Draw app icon
+    const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
+    QRectF iconRect(QPointF(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
+    if (opt.icon.isNull()) {
+        painter->setPen(QPen(Qt::gray, 1, Qt::DashLine));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRect(iconRect);
+        painter->setPen(QPen(Qt::darkGray));
+        painter->drawText(iconRect, tr("Empty\nicon"), Qt::AlignVCenter | Qt::AlignHCenter);
+    } else {
+        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.widget);
+        painter->drawPixmap(iconRect, icon, icon.rect());
+    }
 
-//    // Draw icon
-//    const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
-//    const QRectF iconRect(QPointF(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
-//    const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.widget);
-//    painter->drawPixmap(iconRect, icon, icon.rect());
+    // Draw platform icon
+    iconRect.moveTopLeft(iconRect.center());
+    iconRect.setSize(iconRect.size() / 2.0);
+    const QPixmap& icon = PaintUtils::pixmap(index.data(BuildModel::PlatformIconRole).value<QIcon>(),
+                                             opt.decorationSize / 2, opt.widget);
+    painter->drawPixmap(iconRect, icon, icon.rect());
 
 //    // Draw texts
 //    QFont f;
