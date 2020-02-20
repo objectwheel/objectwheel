@@ -43,7 +43,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     }
 
     // Draw platform icon
-    iconRect.moveTopLeft(iconRect.center());
+    iconRect.moveTopLeft(iconRect.center() + QPoint(2, 2));
     iconRect.setSize(iconRect.size() / 2);
     const QPixmap& icon = PaintUtils::pixmap(index.data(BuildModel::PlatformIconRole).value<QIcon>(),
                                              iconRect.size(), opt.widget);
