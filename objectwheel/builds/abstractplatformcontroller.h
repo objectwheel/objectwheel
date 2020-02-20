@@ -11,6 +11,8 @@ class AbstractPlatformController : public QObject
 public:
     explicit AbstractPlatformController(QObject* parent = nullptr);
 
+    virtual bool isComplete() const = 0;
+
     virtual QCborMap toCborMap() const = 0;
 
 public slots:

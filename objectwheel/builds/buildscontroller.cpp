@@ -70,9 +70,11 @@ void BuildsController::onNextButtonClick()
 
 void BuildsController::onAndroidBuildButtonClick()
 {
-    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
-    BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->platformList()->model());
-    model->addBuildRequest(m_androidPlatformController->toCborMap());
+    if (m_androidPlatformController->isComplete()) {
+        m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
+        BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->platformList()->model());
+        model->addBuildRequest(m_androidPlatformController->toCborMap());
+    }
 }
 
 QWidget* BuildsController::widgetForPlatform(Platform platform) const

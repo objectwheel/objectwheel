@@ -648,7 +648,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
                                          "https://developer.android.com/guide/topics/manifest/uses-sdk-element#target</a></i></p>"));
     m_iconPictureLabel->setToolTip(tr("<p style='white-space:nowrap'>"
                                       "Preview of your application icon (<i>If no icon provided, Android will<br>"
-                                      "assign an default icon for your application</i>)</p>"));
+                                      "assign a default icon for your application</i>)</p>"));
     m_iconPathEdit->setToolTip(tr("Path to application icon file"
                                   "<p style='white-space:nowrap;font-size:11px'>"
                                   "The icon could be a JPG or PNG file. It might also contain alpha<br>"

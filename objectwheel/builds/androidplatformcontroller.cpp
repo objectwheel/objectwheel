@@ -20,36 +20,44 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
 {
 }
 
+bool AndroidPlatformController::isComplete() const
+{
+    if (m_androidPlatformWidget->signingEnabled()->isChecked()
+            && (m_androidPlatformWidget->keystorePathEdit()->text().isEmpty()
+                || m_androidPlatformWidget->keystorePasswordEdit()->text().isEmpty()
+                || m_androidPlatformWidget->keyPasswordEdit()->text().isEmpty()
+                || m_androidPlatformWidget->keyAliasCombo()->currentText().isEmpty())) {
+        UtilityFunctions::showMessage(m_androidPlatformWidget,
+                                      tr("Signing issue"),
+                                      tr("Signing enabled but not all the necessary information "
+                                         "provided. Please either disable signing or fill in all "
+                                         "the requeired fields."));
+        return false;
+    }
+    return true;
+}
+
 QCborMap AndroidPlatformController::toCborMap() const
 {
     QString name = m_androidPlatformWidget->nameEdit()->text();
-    if (name.isEmpty())
-        name = m_androidPlatformWidget->nameEdit()->placeholderText();
-
     QString versionName = m_androidPlatformWidget->versionNameEdit()->text();
-    if (versionName.isEmpty())
-        versionName = m_androidPlatformWidget->versionNameEdit()->placeholderText();
-
     QString organization = m_androidPlatformWidget->organizationEdit()->text();
-    if (organization.isEmpty())
-        organization = m_androidPlatformWidget->organizationEdit()->placeholderText();
-
     QString domain = m_androidPlatformWidget->domainEdit()->text();
-    if (domain.isEmpty())
-        domain = m_androidPlatformWidget->domainEdit()->placeholderText();
-
     QString package = m_androidPlatformWidget->packageEdit()->text();
-    if (package.isEmpty())
-        package = m_androidPlatformWidget->packageEdit()->placeholderText();
 
     QCborMap map;
     map.insert(QLatin1String("platform"), QLatin1String("android"));
-    map.insert(QLatin1String("name"), name);
     map.insert(QLatin1String("versionCode"), m_androidPlatformWidget->versionCodeSpin()->value());
-    map.insert(QLatin1String("versionName"), versionName);
-    map.insert(QLatin1String("organization"), organization);
-    map.insert(QLatin1String("domain"), domain);
-    map.insert(QLatin1String("package"), package);
+    if (!name.isEmpty())
+        map.insert(QLatin1String("name"), name);
+    if (!versionName.isEmpty())
+        map.insert(QLatin1String("versionName"), versionName);
+    if (!organization.isEmpty())
+        map.insert(QLatin1String("organization"), organization);
+    if (!domain.isEmpty())
+        map.insert(QLatin1String("domain"), domain);
+    if (!package.isEmpty())
+        map.insert(QLatin1String("package"), package);
     map.insert(QLatin1String("screenOrientation"), AndroidPlatformWidget::orientationMap.value(
                    m_androidPlatformWidget->screenOrientationCombo()->currentText()));
     map.insert(QLatin1String("minApiLevel"), AndroidPlatformWidget::apiLevelMap.value(

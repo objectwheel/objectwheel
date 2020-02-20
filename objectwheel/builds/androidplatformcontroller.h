@@ -13,6 +13,8 @@ public:
     explicit AndroidPlatformController(AndroidPlatformWidget* androidPlatformWidget,
                                        QObject* parent = nullptr);
 
+    bool isComplete() const override;
+
     QCborMap toCborMap() const override;
 
 public slots:
