@@ -30,24 +30,56 @@ QCborMap AndroidPlatformController::toCborMap() const
     if (versionName.isEmpty())
         versionName = m_androidPlatformWidget->versionNameEdit()->placeholderText();
 
+    QString organization = m_androidPlatformWidget->organizationEdit()->text();
+    if (organization.isEmpty())
+        organization = m_androidPlatformWidget->organizationEdit()->placeholderText();
+
+    QString domain = m_androidPlatformWidget->domainEdit()->text();
+    if (domain.isEmpty())
+        domain = m_androidPlatformWidget->domainEdit()->placeholderText();
+
+    QString package = m_androidPlatformWidget->packageEdit()->text();
+    if (package.isEmpty())
+        package = m_androidPlatformWidget->packageEdit()->placeholderText();
+
     QCborMap map;
     map.insert(QLatin1String("platform"), QLatin1String("android"));
     map.insert(QLatin1String("name"), name);
     map.insert(QLatin1String("versionCode"), m_androidPlatformWidget->versionCodeSpin()->value());
     map.insert(QLatin1String("versionName"), versionName);
-    map.insert(QLatin1String("organization"), m_androidPlatformWidget->organizationEdit()->text());
-    map.insert(QLatin1String("domain"), m_androidPlatformWidget->domainEdit()->text());
-    map.insert(QLatin1String("package"), m_androidPlatformWidget->packageEdit()->text());
-
-    if (m_androidPlatformWidget->aabCheck()->isChecked())
-        map.insert(QLatin1String("aab"), true);
-
+    map.insert(QLatin1String("organization"), organization);
+    map.insert(QLatin1String("domain"), domain);
+    map.insert(QLatin1String("package"), package);
     map.insert(QLatin1String("screenOrientation"), AndroidPlatformWidget::orientationMap.value(
                    m_androidPlatformWidget->screenOrientationCombo()->currentText()));
     map.insert(QLatin1String("minApiLevel"), AndroidPlatformWidget::apiLevelMap.value(
                    m_androidPlatformWidget->minApiLevelCombo()->currentText()));
     map.insert(QLatin1String("targetApiLevel"), AndroidPlatformWidget::apiLevelMap.value(
                    m_androidPlatformWidget->targetApiLevelCombo()->currentText()));
+
+    if (!m_androidPlatformWidget->iconPathEdit()->text().isEmpty()) {
+        QFile file(m_androidPlatformWidget->iconPathEdit()->text());
+        if (!file.open(QFile::ReadOnly)) {
+            UtilityFunctions::showMessage(m_androidPlatformWidget,
+                                          tr("File read error"),
+                                          tr("We are unable to read the icon file, make sure the "
+                                             "path is correct and the file is readable."),
+                                          QMessageBox::Critical);
+            return QCborMap();
+        }
+        map.insert(QLatin1String("icon"), file.readAll());
+    }
+
+    if (m_androidPlatformWidget->includePemissionsCheck()->isChecked()) {
+        QCborArray permissions;
+        for (int i = 0; i < m_androidPlatformWidget->permissionList()->count(); ++i)
+            permissions.append(m_androidPlatformWidget->permissionList()->item(i)->text());
+        if (!permissions.isEmpty())
+            map.insert(QLatin1String("permissions"), permissions);
+    }
+
+    if (m_androidPlatformWidget->aabCheck()->isChecked())
+        map.insert(QLatin1String("aab"), true);
 
     QCborArray abis;
     if (m_androidPlatformWidget->abiArmeabiV7aCheck()->isChecked())
@@ -61,17 +93,15 @@ QCborMap AndroidPlatformController::toCborMap() const
     if (!abis.isEmpty())
         map.insert(QLatin1String("abis"), abis);
 
-    QCborArray qtModules;
-    for (int i = 0; i < m_androidPlatformWidget->qtModuleList()->count(); ++i)
-        qtModules.append(m_androidPlatformWidget->qtModuleList()->item(i)->text());
-    if (!qtModules.isEmpty())
-        map.insert(QLatin1String("qtModules"), qtModules);
-
-    QCborArray permissions;
-    for (int i = 0; i < m_androidPlatformWidget->permissionList()->count(); ++i)
-        permissions.append(m_androidPlatformWidget->permissionList()->item(i)->text());
-    if (!permissions.isEmpty())
-        map.insert(QLatin1String("permissions"), permissions);
+    if (m_androidPlatformWidget->includeQtModulesCheck()->isChecked()) {
+        QCborArray qtModules;
+        for (int i = 0; i < m_androidPlatformWidget->qtModuleList()->count(); ++i) {
+            qtModules.append(AndroidPlatformWidget::qtModuleMap.value(
+                                 m_androidPlatformWidget->qtModuleList()->item(i)->text()));
+        }
+        if (!qtModules.isEmpty())
+            map.insert(QLatin1String("qtModules"), qtModules);
+    }
 
     if (m_androidPlatformWidget->signingEnabled()->isChecked()) {
         QCborMap signature;
@@ -91,19 +121,6 @@ QCborMap AndroidPlatformController::toCborMap() const
             signature.insert(QLatin1String("keystore"), file.readAll());
         }
         map.insert(QLatin1String("signature"), signature);
-    }
-
-    if (!m_androidPlatformWidget->iconPathEdit()->text().isEmpty()) {
-        QFile file(m_androidPlatformWidget->iconPathEdit()->text());
-        if (!file.open(QFile::ReadOnly)) {
-            UtilityFunctions::showMessage(m_androidPlatformWidget,
-                                          tr("File read error"),
-                                          tr("We are unable to read the icon file, make sure the "
-                                             "path is correct and the file is readable."),
-                                          QMessageBox::Critical);
-            return QCborMap();
-        }
-        map.insert(QLatin1String("icon"), file.readAll());
     }
 
     return map;
