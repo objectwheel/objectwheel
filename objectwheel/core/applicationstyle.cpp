@@ -16,6 +16,7 @@
 #include <QToolBar>
 #include <QToolButton>
 #include <QPushButton>
+#include <QVariantAnimation>
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
@@ -203,6 +204,9 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
     case CT_ComboBox:
         sz.setHeight(22);
         break;
+    case CT_ProgressBar:
+        sz.setHeight(7);
+        break;
     default:
         break;
     }
@@ -323,7 +327,7 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
             if(QStyleHintReturnMask* mask = qstyleoption_cast<QStyleHintReturnMask*>(returnData)) {
                 mask->region = widget->rect();
                 int vmargin = proxy()->pixelMetric(QStyle::PM_FocusFrameVMargin) + 1,
-                    hmargin = proxy()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
+                        hmargin = proxy()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
                 mask->region -= QRect(widget->rect().adjusted(hmargin, vmargin, -hmargin, -vmargin));
             }
         }
@@ -1112,6 +1116,80 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
     } break;
     case CE_FocusFrame:
         painter->fillRect(r.adjusted(1, 1, -1, -1), option->palette.highlight());
+        break;
+    case CE_ProgressBarLabel:
+    case CE_ProgressBarGroove:
+        // Do nothing. All done in CE_ProgressBarContents. Only keep these for proxy style overrides.
+        break;
+    case CE_ProgressBarContents:
+        if (const QStyleOptionProgressBar* opt = qstyleoption_cast<const QStyleOptionProgressBar*>(option)) {
+            static const char animationProperty[] = "_q_ApplicationStyle_animationForProgressBar";
+            static const QColor backgroundColor = "#12000000";
+            static const QColor progressColor = "#419BF9";
+            static const QColor borderColor = "#40000000";
+            static const QColor indeterminateColor = "#45ffffff";
+            const bool isIndeterminate = (opt->minimum == 0 && opt->maximum == 0);
+            const qreal borderRadius = opt->rect.height() / 2.0;
+            auto animation = opt->styleObject ? opt->styleObject->property(animationProperty).value<QVariantAnimation*>() : nullptr;
+
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing);
+
+            // Limit drawing area
+            QPainterPath path;
+            path.addRoundedRect(opt->rect, borderRadius, borderRadius);
+            painter->setClipPath(path);
+
+            // Draw the progress
+            if (isIndeterminate) {
+                if (animation == 0 && qobject_cast<QWidget*>(opt->styleObject)) {
+                    animation = new QVariantAnimation(opt->styleObject);
+                    animation->setStartValue(0.0);
+                    animation->setEndValue(1.0);
+                    animation->setDuration(1400);
+                    animation->setLoopCount(-1);
+                    connect(animation, &QVariantAnimation::valueChanged,
+                            qobject_cast<QWidget*>(opt->styleObject), qOverload<>(&QWidget::update));
+                    opt->styleObject->setProperty(animationProperty, QVariant::fromValue(animation));
+                }
+                do {
+                    if (animation == 0)
+                        break;
+                    animation->start(); // Safe to call, since it does nothing if already running
+                    const qreal mover = opt->rect.width() * animation->currentValue().toReal();
+                    const qreal glareLength = opt->rect.width() * 0.66;
+                    const QRectF glareRect(opt->rect.left() - glareLength + mover, opt->rect.top(), glareLength, opt->rect.height());
+
+                    QLinearGradient glareGrad(0.0, 0.5, 1.0, 0.5);
+                    glareGrad.setCoordinateMode(QGradient::ObjectMode);
+                    glareGrad.setColorAt(0, Qt::transparent);
+                    glareGrad.setColorAt(0.4, indeterminateColor);
+                    glareGrad.setColorAt(0.5, indeterminateColor);
+                    glareGrad.setColorAt(0.6, indeterminateColor);
+                    glareGrad.setColorAt(1, Qt::transparent);
+
+                    painter->fillRect(opt->rect, progressColor);
+                    painter->setPen(Qt::NoPen);
+                    painter->setBrush(glareGrad);
+                    painter->drawRect(glareRect);
+                    painter->drawRect(glareRect.adjusted(opt->rect.width(), 0, opt->rect.width(), 0));
+                } while(false);
+            } else {
+                if (animation)
+                    animation->stop();
+                if (const qreal length = opt->maximum - opt->minimum) {
+                    const qreal progressWidth = opt->rect.width() * opt->progress / length;
+                    painter->fillRect(opt->rect, backgroundColor);
+                    painter->fillRect(opt->rect.adjusted(0, 0, -opt->rect.width() + progressWidth, 0), progressColor);
+                }
+            }
+
+            // Draw the frame
+            painter->setPen(borderColor);
+            painter->setBrush(Qt::NoBrush);
+            painter->drawRoundedRect((QRectF)opt->rect, borderRadius, borderRadius);
+            painter->restore();
+        }
         break;
     default:
         QFusionStyle::drawControl(element, option, painter, widget);

@@ -299,23 +299,22 @@ QString increasedNumberedText(const QString& text, bool addSpace, bool trim)
 
 QString toPrettyBytesString(qint64 bytes)
 {
-#define KB 1024.0
-#define MB 1048576.0
-#define GB 1073741824.0
-
+    #define KB 1024.0
+    #define MB 1048576.0
+    #define GB 1073741824.0
     QString ret;
     if (bytes < KB) {
         ret = QString::number(bytes);
         ret += QStringLiteral(" Bytes");
     } else if (bytes < MB) {
-        ret = QString::number(bytes / KB, 'f', 1);
-        ret += QStringLiteral(" Kb");
+        ret = QString::number(bytes / KB, 'f', 2);
+        ret += QStringLiteral(" KB");
     } else if (bytes < GB) {
-        ret = QString::number(bytes / MB, 'f', 1);
-        ret += QStringLiteral(" Mb");
+        ret = QString::number(bytes / MB, 'f', 2);
+        ret += QStringLiteral(" MB");
     } else {
         ret = QString::number(bytes / GB, 'f', 2);
-        ret += QStringLiteral(" Gb");
+        ret += QStringLiteral(" GB");
     }
     return ret;
 }

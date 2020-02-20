@@ -46,6 +46,14 @@ int BuildModel::rowCount(const QModelIndex&) const
     return m_builds.count();
 }
 
+Qt::ItemFlags BuildModel::flags(const QModelIndex& index) const
+{
+    Qt::ItemFlags f = QAbstractListModel::flags(index);
+    if (index.isValid())
+        f &= ~Qt::ItemIsSelectable;
+    return f;
+}
+
 QVariant BuildModel::data(const QModelIndex& index, int role) const
 {
     if (index.row() < 0 || index.row() >= m_builds.count())
@@ -57,20 +65,17 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         return QApplication::palette().window();
     case Qt::ForegroundRole:
         return QApplication::palette().text();
-    case Qt::TextAlignmentRole:
-        return QVariant::fromValue(Qt::AlignLeft | Qt::AlignVCenter);
     case Qt::FontRole: {
         QFont font(QApplication::font());
         font.setPixelSize(10);
-        font.setWeight(QFont::Light);
         return font;
     }
     case Qt::SizeHintRole:
         return QSize(0, 12 * 4 + 2 * 3 + 7 * 2);
     case Qt::DecorationRole:
         return QImage::fromData(build->request().value(QLatin1String("icon")).toByteArray());
-    case PlatformRole:
-        return toPrettyPlatformName(build->request().value(QLatin1String("platform")).toString());
+    case ButtonSize:
+        return QSize(16, 16);
     case NameRole:
         return build->request().value(QLatin1String("name")).toString() + packageSuffixFromRequest(build->request());
     case PlatformIconRole:
@@ -89,10 +94,10 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         return build->speed();
     case TimeLeftRole:
         return build->timeLeft();
-    case TotalDataSizeRole:
-        return build->totalDataSize();
-    case ReceivedDataSizeRole:
-        return build->receivedDataSize();
+    case TotalBytesRole:
+        return build->totalBytes();
+    case ReceivedBytesRole:
+        return build->receivedBytes();
     default:
         break;
     }
@@ -148,39 +153,39 @@ void BuildModel::establishConnection(Build* build)
     const QModelIndex& index = BuildModel::index(row);
     Q_ASSERT(index.isValid());
 
-    build->setStatus(tr("Establishing connection to the server...."));
+    build->setStatus(tr("Connecting to the server...."));
 
-    //    QString tmpFilePath;
-    //    {
-    //        QTemporaryFile tempFile;
-    //        if (!tempFile.open()) {
-    //            qWarning("WARNING: Cannot open up a temporary file");
-    //            build->setStatus(tr("An Internal Error Occurred"));
-    //            emit dataChanged(index, index);
-    //            return;
-    //        }
-    //        tmpFilePath = tempFile.fileName();
-    //    }
-    //    if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) == 0) {
-    //        qWarning("WARNING: Cannot zip user project");
-    //        build->setStatus(tr("An Internal Error Occurred"));
-    //        emit dataChanged(index, index);
-    //        return;
-    //    }
-    //    QFile tempFile(tmpFilePath);
-    //    if (!tempFile.open(QFile::ReadOnly)) {
-    //        qWarning("WARNING: Cannot open compressed project file");
-    //        build->setStatus(tr("An Internal Error Occurred"));
-    //        emit dataChanged(index, index);
-    //        return;
-    //    }
+    QString tmpFilePath;
+    {
+        QTemporaryFile tempFile;
+        if (!tempFile.open()) {
+            qWarning("WARNING: Cannot open up a temporary file");
+            build->setStatus(tr("An Internal Error Occurred"));
+            emit dataChanged(index, index);
+            return;
+        }
+        tmpFilePath = tempFile.fileName();
+    }
+    if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) == 0) {
+        qWarning("WARNING: Cannot zip user project");
+        build->setStatus(tr("An Internal Error Occurred"));
+        emit dataChanged(index, index);
+        return;
+    }
+    QFile tempFile(tmpFilePath);
+    if (!tempFile.open(QFile::ReadOnly)) {
+        qWarning("WARNING: Cannot open compressed project file");
+        build->setStatus(tr("An Internal Error Occurred"));
+        emit dataChanged(index, index);
+        return;
+    }
 
-    //    ServerManager::send(ServerManager::RequestBuild,
-    //                        UserManager::email(),
-    //                        UserManager::password(),
-    //                        build->request(), tempFile.readAll());
-    //    tempFile.close();
-    //    tempFile.remove();
+    ServerManager::send(ServerManager::RequestBuild,
+                        UserManager::email(),
+                        UserManager::password(),
+                        build->request(), tempFile.readAll());
+    tempFile.close();
+    tempFile.remove();
 
     emit dataChanged(index, index);
 }
@@ -188,21 +193,6 @@ void BuildModel::establishConnection(Build* build)
 QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
 {
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
-}
-
-QString BuildModel::toPrettyPlatformName(const QString& rawPlatformName) const
-{
-    if (rawPlatformName == QLatin1String("android"))
-        return QLatin1String("Android");
-    if (rawPlatformName == QLatin1String("ios"))
-        return QLatin1String("iOS");
-    if (rawPlatformName == QLatin1String("macos"))
-        return QLatin1String("macOS");
-    if (rawPlatformName == QLatin1String("windows"))
-        return QLatin1String("Windows");
-    if (rawPlatformName == QLatin1String("linux"))
-        return QLatin1String("Linux");
-    return QString();
 }
 
 QString BuildModel::packageSuffixFromRequest(const QCborMap& request) const

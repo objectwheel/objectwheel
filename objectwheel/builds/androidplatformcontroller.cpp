@@ -22,11 +22,19 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
 
 QCborMap AndroidPlatformController::toCborMap() const
 {
+    QString name = m_androidPlatformWidget->nameEdit()->text();
+    if (name.isEmpty())
+        name = m_androidPlatformWidget->nameEdit()->placeholderText();
+
+    QString versionName = m_androidPlatformWidget->versionNameEdit()->text();
+    if (versionName.isEmpty())
+        versionName = m_androidPlatformWidget->versionNameEdit()->placeholderText();
+
     QCborMap map;
     map.insert(QLatin1String("platform"), QLatin1String("android"));
-    map.insert(QLatin1String("name"), m_androidPlatformWidget->nameEdit()->text());
+    map.insert(QLatin1String("name"), name);
     map.insert(QLatin1String("versionCode"), m_androidPlatformWidget->versionCodeSpin()->value());
-    map.insert(QLatin1String("versionName"), m_androidPlatformWidget->versionNameEdit()->text());
+    map.insert(QLatin1String("versionName"), versionName);
     map.insert(QLatin1String("organization"), m_androidPlatformWidget->organizationEdit()->text());
     map.insert(QLatin1String("domain"), m_androidPlatformWidget->domainEdit()->text());
     map.insert(QLatin1String("package"), m_androidPlatformWidget->packageEdit()->text());

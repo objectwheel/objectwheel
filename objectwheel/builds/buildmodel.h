@@ -13,7 +13,7 @@ class BuildModel final : public QAbstractListModel
 
 public:
     enum BuildRoles {
-        PlatformRole = Qt::UserRole + 1,
+        ButtonSize = Qt::UserRole + 1,
         NameRole,
         PlatformIconRole,
         VersionRole,
@@ -21,8 +21,8 @@ public:
         StatusRole,
         SpeedRole,
         TimeLeftRole,
-        TotalDataSizeRole,
-        ReceivedDataSizeRole
+        TotalBytesRole,
+        ReceivedBytesRole
     };
 
 public:
@@ -30,9 +30,11 @@ public:
 
     void addBuildRequest(const QCborMap& request);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const;
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
-    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+    QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 
 private slots:
     void onServerResponse(const QByteArray& data);
@@ -40,9 +42,7 @@ private slots:
 private:
     void scheduleConnection(Build* build);
     void establishConnection(Build* build);
-
     QIcon platformIcon(const QString& rawPlatformName) const;
-    QString toPrettyPlatformName(const QString& rawPlatformName) const;
     QString packageSuffixFromRequest(const QCborMap& request) const;
 
 private:

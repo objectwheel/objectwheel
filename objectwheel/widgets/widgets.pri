@@ -6,7 +6,6 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/countdown.h \
            $$PWD/lineedit.h \
            $$PWD/pinbar.h \
-           $$PWD/progressbar.h \
            $$PWD/segmentedbar.h \
            $$PWD/splashscreen.h \
            $$PWD/switch.h \
@@ -19,7 +18,6 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/countdown.cpp \
            $$PWD/lineedit.cpp \
            $$PWD/pinbar.cpp \
-           $$PWD/progressbar.cpp \
            $$PWD/segmentedbar.cpp \
            $$PWD/splashscreen.cpp \
            $$PWD/switch.cpp \

@@ -4,7 +4,6 @@
 #include <projectmanager.h>
 #include <delayer.h>
 #include <controlrenderingmanager.h>
-#include <progressbar.h>
 #include <windowmanager.h>
 #include <mainwindow.h>
 #include <utilityfunctions.h>
@@ -14,6 +13,7 @@
 #include <styleditemdelegate.h>
 
 #include <QMessageBox>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <QLabel>
@@ -36,7 +36,6 @@
 #define PATH_LICON       (":/images/welcome/ok.png")
 #define PATH_IICON       (":/images/welcome/load.png")
 #define PATH_EICON       (":/images/welcome/unload.png")
-#define WIDTH_PROGRESS   80
 
 enum Buttons { Load, New, Import, Export, Settings };
 
@@ -267,7 +266,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
   , m_listWidget(new QListWidget)
   , m_buttons(new ButtonSlice)
   , m_buttons_2(new ButtonSlice(m_listWidget->viewport()))
-  , m_progressBar(new ProgressBar(m_listWidget->viewport()))
+  , m_progressBar(new QProgressBar(m_listWidget->viewport()))
   , m_locked(false)
 {
     setFocusPolicy(Qt::NoFocus);
@@ -364,8 +363,6 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
                     "}"
                 }
                 .arg(8));
-
-    m_progressBar->setFixedWidth(WIDTH_PROGRESS);
 
     m_buttons_2->setFixedSize(20, 20);
     m_buttons_2->add(Settings, "#55A6F6", "#448DDE");
@@ -586,9 +583,7 @@ void ProjectsWidget::onLoadButtonClick()
     m_listWidget->currentItem()->setData(ActivityRole, true);
     m_listWidget->currentItem()->setData(LastEditRole, QDateTime::currentDateTime().toString(Qt::SystemLocaleLongDate));
 
-    Delayer::delay([=] () -> bool {
-        return m_progressBar->value() < m_progressBar->maximum();
-    });
+    Delayer::delay([=] () -> bool { return m_progressBar->value() < 100; });
     Delayer::delay(200);
 
     m_listWidget->sortItems();
@@ -668,8 +663,9 @@ void ProjectsWidget::onSettingsButtonClick()
 
 void ProjectsWidget::onProgressChange(int progress)
 {
-    if (m_progressBar->isIndeterminate())
-        m_progressBar->setIndeterminate(false);
+    const bool isIndeterminate = (m_progressBar->minimum() == 0 && m_progressBar->maximum() == 0);
+    if (isIndeterminate)
+        m_progressBar->setMaximum(100); // Makes it normal
     m_progressBar->setValue(progress);
 }
 
@@ -692,8 +688,10 @@ void ProjectsWidget::onSearchTextChange(const QString& text)
 
 void ProjectsWidget::onRenderEngineConnectionStatusChange(bool connected)
 {
-    if (m_locked && !connected)
-        m_progressBar->setValue(m_progressBar->maximum()); // Quit the Delayer event loop
+    if (m_locked && !connected) {
+        m_progressBar->setMaximum(100);
+        m_progressBar->setValue(100); // Quit the Delayer event loop
+    }
 }
 
 void ProjectsWidget::lock()
@@ -703,10 +701,10 @@ void ProjectsWidget::lock()
     m_listWidget->setDisabled(true);
     m_buttons_2->hide();
 
-    m_progressBar->setIndeterminate(true);
+    m_progressBar->setValue(0);
+    m_progressBar->setMaximum(0); // Makes it intermediate
     m_progressBar->show();
     m_progressBar->raise();
-    m_progressBar->setValue(0);
 }
 
 void ProjectsWidget::unlock()
@@ -726,9 +724,9 @@ void ProjectsWidget::updateGadgetPositions()
     const QRect& rect = m_listWidget->visualItemRect(m_listWidget->currentItem());
     m_buttons_2->move(rect.topRight().x() - m_buttons_2->width() - 5,
                       rect.topRight().y() + (rect.height() - m_buttons_2->height()) / 2.0);
-    m_progressBar->move(m_buttons_2->pos() + QPoint(-WIDTH_PROGRESS + m_buttons_2->width(),
-                                                    m_buttons_2->height() / 2.0 -
-                                                    m_progressBar->height() / 2.0));
+    m_progressBar->move(m_buttons_2->pos()
+                        + QPoint(m_buttons_2->width() - m_progressBar->width(),
+                                 (m_buttons_2->height() - m_progressBar->height()) / 2.0));
 }
 
 #include "projectswidget.moc"

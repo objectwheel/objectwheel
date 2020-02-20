@@ -2,9 +2,9 @@
 
 Build::Build(const QCborMap& request, QObject* parent) : QObject(parent)
   , m_request(request)
-  , m_speed(-1)
-  , m_totalDataSize(-1)
-  , m_receivedDataSize(-1)
+  , m_speed(0)
+  , m_totalBytes(0)
+  , m_receivedBytes(0)
 {
 }
 
@@ -43,22 +43,22 @@ void Build::setSpeed(qreal speed)
     m_speed = speed;
 }
 
-int Build::totalDataSize() const
+int Build::totalBytes() const
 {
-    return m_totalDataSize;
+    return m_totalBytes;
 }
 
-void Build::setTotalDataSize(int totalDataSize)
+void Build::setTotalBytes(int totalBytes)
 {
-    m_totalDataSize = totalDataSize;
+    m_totalBytes = totalBytes;
 }
 
-int Build::receivedDataSize() const
+int Build::receivedBytes() const
 {
-    return m_receivedDataSize;
+    return m_receivedBytes;
 }
 
-void Build::setReceivedDataSize(int receivedDataSize)
+void Build::setReceivedBytes(int receivedBytes)
 {
-    m_receivedDataSize = receivedDataSize;
+    m_receivedBytes = receivedBytes;
 }

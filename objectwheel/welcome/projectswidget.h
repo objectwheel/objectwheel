@@ -7,7 +7,7 @@ class QLabel;
 class ButtonSlice;
 class QVBoxLayout;
 class QListWidget;
-class ProgressBar;
+class QProgressBar;
 class SearchWidget;
 
 class ProjectsWidget : public QWidget
@@ -54,7 +54,7 @@ private:
     QListWidget* m_listWidget;
     ButtonSlice* m_buttons;
     ButtonSlice* m_buttons_2;
-    ProgressBar* m_progressBar;
+    QProgressBar* m_progressBar;
     bool m_locked;
 };
 

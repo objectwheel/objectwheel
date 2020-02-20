@@ -18,23 +18,23 @@ public:
     QString status() const;
     QTime timeLeft() const;
     qreal speed() const;
-    int totalDataSize() const;
-    int receivedDataSize() const;
+    int totalBytes() const;
+    int receivedBytes() const;
 
 private:
     void setStatus(const QString& status);
     void setTimeLeft(const QTime& timeLeft);
     void setSpeed(qreal speed);
-    void setTotalDataSize(int totalDataSize);
-    void setReceivedDataSize(int receivedDataSize);
+    void setTotalBytes(int totalBytes);
+    void setReceivedBytes(int receivedBytes);
 
 private:
     const QCborMap m_request;
     QString m_status;
     QTime m_timeLeft;
     qreal m_speed;
-    int m_totalDataSize;
-    int m_receivedDataSize;
+    int m_totalBytes;
+    int m_receivedBytes;
 };
 
 #endif // BUILD_H
