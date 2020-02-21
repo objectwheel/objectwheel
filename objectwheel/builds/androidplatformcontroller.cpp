@@ -22,6 +22,10 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
             this, &AndroidPlatformController::onNameEdit);
     connect(m_androidPlatformWidget->domainEdit(), &LineEdit::textEdited,
             this, &AndroidPlatformController::onDomainEdit);
+    connect(m_androidPlatformWidget->packageEdit(), &LineEdit::textEdited,
+            this, &AndroidPlatformController::onPackageEdit);
+    connect(m_androidPlatformWidget->versionCodeSpin(), &QSpinBox::valueChanged,
+            this, &AndroidPlatformController::onVersionSpinValueChange);
 }
 
 bool AndroidPlatformController::isComplete() const
@@ -49,19 +53,25 @@ QCborMap AndroidPlatformController::toCborMap() const
     QString domain = m_androidPlatformWidget->domainEdit()->text();
     QString package = m_androidPlatformWidget->packageEdit()->text();
 
+    if (name.isEmpty())
+        name = m_androidPlatformWidget->nameEdit()->placeholderText();
+    if (versionName.isEmpty())
+        versionName = m_androidPlatformWidget->versionNameEdit()->placeholderText();
+    if (organization.isEmpty())
+        organization = m_androidPlatformWidget->organizationEdit()->placeholderText();
+    if (domain.isEmpty())
+        domain = m_androidPlatformWidget->domainEdit()->placeholderText();
+    if (package.isEmpty())
+        package = m_androidPlatformWidget->packageEdit()->placeholderText();
+
     QCborMap map;
     map.insert(QLatin1String("platform"), QLatin1String("android"));
+    map.insert(QLatin1String("name"), name);
+    map.insert(QLatin1String("versionName"), versionName);
     map.insert(QLatin1String("versionCode"), m_androidPlatformWidget->versionCodeSpin()->value());
-    if (!name.isEmpty())
-        map.insert(QLatin1String("name"), name);
-    if (!versionName.isEmpty())
-        map.insert(QLatin1String("versionName"), versionName);
-    if (!organization.isEmpty())
-        map.insert(QLatin1String("organization"), organization);
-    if (!domain.isEmpty())
-        map.insert(QLatin1String("domain"), domain);
-    if (!package.isEmpty())
-        map.insert(QLatin1String("package"), package);
+    map.insert(QLatin1String("organization"), organization);
+    map.insert(QLatin1String("domain"), domain);
+    map.insert(QLatin1String("package"), package);
     map.insert(QLatin1String("screenOrientation"), AndroidPlatformWidget::orientationMap.value(
                    m_androidPlatformWidget->screenOrientationCombo()->currentText()));
     map.insert(QLatin1String("minApiLevel"), AndroidPlatformWidget::apiLevelMap.value(
@@ -150,6 +160,10 @@ void AndroidPlatformController::charge() const
     m_androidPlatformWidget->qtModuleList()->addItem(QLatin1String("Qt Svg"));
     m_androidPlatformWidget->qtModuleCombo()->removeItem(m_androidPlatformWidget->qtModuleCombo()->findText(QLatin1String("Qt Svg")));
 
+    m_androidPlatformWidget->versionNameEdit()->setPlaceholderText(tr("Version 1.0"));
+    m_androidPlatformWidget->domainEdit()->setPlaceholderText(tr("example.com"));
+    m_androidPlatformWidget->packageEdit()->setPlaceholderText(tr("com.example.myapplication"));
+
     m_androidPlatformWidget->versionCodeSpin()->setValue(1);
     m_androidPlatformWidget->screenOrientationCombo()->setCurrentText(QLatin1String("Unspecified"));
     m_androidPlatformWidget->minApiLevelCombo()->setCurrentText(QLatin1String("API 21: Android 5.0"));
@@ -195,27 +209,73 @@ void AndroidPlatformController::discharge() const
     // TODO
 }
 
-void AndroidPlatformController::onNameEdit(const QString& name)
+void AndroidPlatformController::onNameEdit(QString name) const
 {
+    QString domain = m_androidPlatformWidget->domainEdit()->text();
     const QString& oldName = m_androidPlatformWidget->nameEdit()->oldText();
     const QString& package = m_androidPlatformWidget->packageEdit()->text();
-    const QString& domain = m_androidPlatformWidget->domainEdit()->text();
     const bool isRelationPreserved = package == generatePackageName(domain, oldName);
-    if (isRelationPreserved || package.isEmpty())
+    if (name.isEmpty() || domain.isEmpty()) {
+        const QString& oldDomain = m_androidPlatformWidget->domainEdit()->oldText();
+        const QString& testName = name.isEmpty() ? oldName : name;
+        const QString& testDomain = domain.isEmpty() ? oldDomain : domain;
+        const bool isTestRelationPreserved = package == generatePackageName(testDomain, testName);
+        if (isTestRelationPreserved || package.isEmpty()) {
+            if (name.isEmpty())
+                name = tr("myapplication");
+            if (domain.isEmpty())
+                domain = tr("example.com");
+            m_androidPlatformWidget->packageEdit()->clear();
+            m_androidPlatformWidget->packageEdit()->setPlaceholderText(generatePackageName(domain, name));
+        }
+    } else if (isRelationPreserved || package.isEmpty()) {
         m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
+    }
 }
 
-void AndroidPlatformController::onDomainEdit(const QString& domain)
+void AndroidPlatformController::onDomainEdit(QString domain) const
 {
+    QString name = m_androidPlatformWidget->nameEdit()->text();
     const QString& oldDomain = m_androidPlatformWidget->domainEdit()->oldText();
     const QString& package = m_androidPlatformWidget->packageEdit()->text();
-    const QString& name = m_androidPlatformWidget->nameEdit()->text();
     const bool isRelationPreserved = package == generatePackageName(oldDomain, name);
-    if (isRelationPreserved || package.isEmpty())
+    if (name.isEmpty() || domain.isEmpty()) {
+        const QString& oldName = m_androidPlatformWidget->nameEdit()->oldText();
+        const QString& testName = name.isEmpty() ? oldName : name;
+        const QString& testDomain = domain.isEmpty() ? oldDomain : domain;
+        const bool isTestRelationPreserved = package == generatePackageName(testDomain, testName);
+        if (isTestRelationPreserved || package.isEmpty()) {
+            if (name.isEmpty())
+                name = tr("myapplication");
+            if (domain.isEmpty())
+                domain = tr("example.com");
+            m_androidPlatformWidget->packageEdit()->clear();
+            m_androidPlatformWidget->packageEdit()->setPlaceholderText(generatePackageName(domain, name));
+        }
+    } else if (isRelationPreserved || package.isEmpty()) {
         m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
+    }
 }
 
-QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName)
+void AndroidPlatformController::onPackageEdit(const QString& package) const
+{
+    QString name = m_androidPlatformWidget->nameEdit()->text();
+    QString domain = m_androidPlatformWidget->domainEdit()->text();
+    if (package.isEmpty()) {
+        if (name.isEmpty())
+            name = tr("myapplication");
+        if (domain.isEmpty())
+            domain = tr("example.com");
+        m_androidPlatformWidget->packageEdit()->setPlaceholderText(generatePackageName(domain, name));
+    }
+}
+
+void AndroidPlatformController::onVersionSpinValueChange(int value) const
+{
+    m_androidPlatformWidget->versionNameEdit()->setPlaceholderText(tr("Version %1.0").arg(value));
+}
+
+QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName) const
 {
     QStringList pieces(rawDomain.split(QLatin1Char('.')));
     pieces.replaceInStrings(QRegularExpression("\\s"), QString());

@@ -21,11 +21,13 @@ public slots:
     void discharge() const override;
 
 private slots:
-    void onNameEdit(const QString& name);
-    void onDomainEdit(const QString& name);
+    void onNameEdit(QString name) const;
+    void onDomainEdit(QString domain) const;
+    void onPackageEdit(const QString& package) const;
+    void onVersionSpinValueChange(int value) const;
 
 private:
-    QString generatePackageName(const QString& rawDomain, const QString& rawAppName);
+    QString generatePackageName(const QString& rawDomain, const QString& rawAppName) const;
 
 private:
     AndroidPlatformWidget* m_androidPlatformWidget;

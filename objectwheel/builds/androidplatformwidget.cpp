@@ -767,10 +767,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_showKeyPasswordButton->setToolTip(tr("Toggle key password visibility"));
 
     m_nameEdit->setPlaceholderText(tr("My Application"));
-    m_versionNameEdit->setPlaceholderText(tr("1.1 Gold Edition"));
-    m_organizationEdit->setPlaceholderText(tr("My Example Org, Inc."));
-    m_domainEdit->setPlaceholderText(tr("example.com"));
-    m_packageEdit->setPlaceholderText(tr("com.example.myapplication"));
+    m_organizationEdit->setPlaceholderText(tr("Organization, Inc."));
     m_iconPathEdit->setPlaceholderText(tr("Use 'Browse' button to choose your icon file"));
     m_keystorePathEdit->setPlaceholderText(tr("Use 'Browse' button to choose your keystore file"));
     m_keystorePasswordEdit->setPlaceholderText(tr("Type your keystore password"));
@@ -797,7 +794,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_targetApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
-    m_versionCodeSpin->setMaximum(std::numeric_limits<int>::max());
+    m_versionCodeSpin->setRange(1, 2100000000); // Based on Andoid Developer Docs
     UtilityFunctions::disableWheelEvent(m_versionCodeSpin);
     autoDetectPemissionsCheck->setChecked(true);
     autoDetectQtModulesCheck->setChecked(true);
