@@ -9,7 +9,7 @@
 
 FormsPane::FormsPane(QWidget* parent) : QWidget(parent)
   , m_formsTree(new FormsTree(this))
-  , m_searchEdit(new LineEdit(this))
+  , m_searchEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search, this))
   , m_addButton(new QPushButton(this))
   , m_removeButton(new QPushButton(this))
 {

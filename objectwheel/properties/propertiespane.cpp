@@ -11,7 +11,7 @@
 
 PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
   , m_propertiesTree(new PropertiesTree(this))
-  , m_searchEdit(new LineEdit(this))
+  , m_searchEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search, this))
   , m_typeItem(new QTreeWidgetItem)
   , m_uidItem(new QTreeWidgetItem)
   , m_idItem(new QTreeWidgetItem)

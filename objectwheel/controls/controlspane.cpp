@@ -6,7 +6,7 @@
 
 ControlsPane::ControlsPane(QWidget* parent) : QWidget(parent)
   , m_controlsTree(new ControlsTree(this))
-  , m_searchEdit(new LineEdit(this))
+  , m_searchEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search, this))
 {
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

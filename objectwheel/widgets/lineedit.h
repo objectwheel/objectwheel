@@ -10,10 +10,11 @@ class LineEdit final : public QLineEdit
     Q_DECLARE_PRIVATE(QLineEdit)
 
 public:
-    enum VisualStyle { Search, Plain };
+    enum VisualStyle { Plain, Search };
+    enum FocusMode { Focus, NoFocus };
 
 public:
-    explicit LineEdit(VisualStyle visualStyle, QWidget* parent = nullptr);
+    explicit LineEdit(FocusMode focusMode, VisualStyle visualStyle, QWidget* parent = nullptr);
     explicit LineEdit(QWidget* parent = nullptr);
 
     VisualStyle visualStyle() const;
@@ -26,6 +27,7 @@ public:
 
 private slots:
     void onTextChange(const QString& text);
+    void onTextEdit(const QString& text);
 
 private:
     void paintEvent(QPaintEvent* event) override;
@@ -33,6 +35,7 @@ private:
     void mousePressEvent(QMouseEvent* event) override;
 
 private:
+    FocusMode m_focusMode;
     VisualStyle m_visualStyle;
     QString m_oldText;
     QString m_newText;

@@ -300,17 +300,17 @@ const QStringList AndroidPlatformWidget::androidPermissionList {
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_buttonSlice(new ButtonSlice(this))
-  , m_nameEdit(new LineEdit(LineEdit::Plain, this))
+  , m_nameEdit(new LineEdit(this))
   , m_versionCodeSpin(new QSpinBox(this))
-  , m_versionNameEdit(new LineEdit(LineEdit::Plain, this))
-  , m_organizationEdit(new LineEdit(LineEdit::Plain, this))
-  , m_domainEdit(new LineEdit(LineEdit::Plain, this))
-  , m_packageEdit(new LineEdit(LineEdit::Plain, this))
+  , m_versionNameEdit(new LineEdit(this))
+  , m_organizationEdit(new LineEdit(this))
+  , m_domainEdit(new LineEdit(this))
+  , m_packageEdit(new LineEdit(this))
   , m_screenOrientationCombo(new QComboBox(this))
   , m_minApiLevelCombo(new QComboBox(this))
   , m_targetApiLevelCombo(new QComboBox(this))
   , m_iconPictureLabel(new QLabel(this))
-  , m_iconPathEdit(new LineEdit(LineEdit::Plain, this))
+  , m_iconPathEdit(new LineEdit(this))
   , m_browseIconButton(new QPushButton(this))
   , m_clearIconButton(new QPushButton(this))
   , m_includePemissionsCheck(new QCheckBox(this))
@@ -330,18 +330,18 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_removeQtModuleButton(new QPushButton(this))
   , m_signingDisabled(new QRadioButton(this))
   , m_signingEnabled(new QRadioButton(this))
-  , m_keystorePathEdit(new LineEdit(LineEdit::Plain, this))
+  , m_keystorePathEdit(new LineEdit(this))
   , m_newKeystoreButton(new QPushButton(this))
   , m_browseKeystoreButton(new QPushButton(this))
   , m_clearKeystoreButton(new QPushButton(this))
-  , m_keystorePasswordEdit(new LineEdit(LineEdit::Plain, this))
+  , m_keystorePasswordEdit(new LineEdit(this))
   , m_showKeystorePasswordButton(new QToolButton(this))
   , m_keyAliasCombo(new QComboBox(this))
-  , m_keyPasswordEdit(new LineEdit(LineEdit::Plain, this))
+  , m_keyPasswordEdit(new LineEdit(this))
   , m_showKeyPasswordButton(new QToolButton(this))
   , m_sameAsKeystorePasswordCheck(new QCheckBox(this))
 {
-    static const int labelColMinSz = 120; // Roughly the longest label's width
+    static const int labelColMinSz = 125; // Roughly longest_label->sizeHint().width()
 
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Target: Android"), this);
@@ -365,7 +365,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     auto versionCodeLabel = new QLabel(tr("Version code:"), this);
     auto versionNameLabel = new QLabel(tr("Version name:"), this);
     auto organizationLabel = new QLabel(tr("Organization:"), this);
-    auto domainLabel = new QLabel(tr("Domain:"), this);
+    auto domainLabel = new QLabel(tr("Organization domain:"), this);
 
     auto generalGroupBox = new QGroupBox(tr("General"), this);
     auto generalLayout = new QGridLayout(generalGroupBox);
@@ -531,7 +531,6 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     signingLayout->setColumnStretch(1, 1);
     signingLayout->setColumnStretch(2, 1);
     signingLayout->setColumnMinimumWidth(0, labelColMinSz);
-
     m_buttonSlice->add(Back, "#5BC5F8", "#2592F9");
     m_buttonSlice->add(Build, "#8BBB56", "#6EA045");
     m_buttonSlice->get(Back)->setText(tr("Back"));

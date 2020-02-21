@@ -29,7 +29,7 @@ static SettingsPage* pageFromItem(QListWidgetItem* item)
 PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
   , m_layout(new QGridLayout(this))
   , m_listWidget(new QListWidget(this))
-  , m_searchLineEdit(new LineEdit(this))
+  , m_searchLineEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search, this))
   , m_dialogButtonBox(new QDialogButtonBox(this))
 {
     setFocusPolicy(Qt::NoFocus);

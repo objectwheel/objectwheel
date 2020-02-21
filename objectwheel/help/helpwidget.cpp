@@ -24,7 +24,7 @@
 HelpWidget::HelpWidget(QWidget* parent) : QSplitter(parent)
   , m_mode(Invalid)
   , m_helpModeComboBox(new QComboBox)
-  , m_indexListFilterEdit(new LineEdit)
+  , m_indexListFilterEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search))
   , m_titleLabel(new QLabel)
   , m_homeButton(new QToolButton)
   , m_backButton(new QToolButton)

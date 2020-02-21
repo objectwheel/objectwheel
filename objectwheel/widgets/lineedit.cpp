@@ -43,15 +43,18 @@ QLineEditPrivate::SideWidgetParameters QLineEditPrivate::sideWidgetParameters() 
  * policy and focusses explicitly on click only (note that setting Qt::ClickFocus
  * is not sufficient for that as an ActivationFocus will occur). */
 
-LineEdit::LineEdit(VisualStyle visualStyle, QWidget* parent) : QLineEdit(parent)
+LineEdit::LineEdit(FocusMode focusMode, VisualStyle visualStyle, QWidget* parent) : QLineEdit(parent)
+  , m_focusMode(focusMode)
   , m_visualStyle(visualStyle)
 {
-    setFocusPolicy(Qt::NoFocus);
+    if (m_focusMode == NoFocus)
+        setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
     connect(this, &LineEdit::textChanged, this, &LineEdit::onTextChange);
+    connect(this, &LineEdit::textEdited, this, &LineEdit::onTextEdit);
 }
 
-LineEdit::LineEdit(QWidget* parent) : LineEdit(Search, parent)
+LineEdit::LineEdit(QWidget* parent) : LineEdit(Focus, Plain, parent)
 {
 }
 
@@ -74,6 +77,16 @@ QString LineEdit::oldText() const
 }
 
 void LineEdit::onTextChange(const QString& text)
+{
+    // textEdited() emited first, so it might have
+    // already been taken place, let's check it first
+    if (m_newText != text) {
+        m_oldText = m_newText;
+        m_newText = text;
+    }
+}
+
+void LineEdit::onTextEdit(const QString& text)
 {
     m_oldText = m_newText;
     m_newText = text;
@@ -219,16 +232,18 @@ void LineEdit::paintEvent(QPaintEvent*)
 
 void LineEdit::focusInEvent(QFocusEvent* event)
 {
-    // Refuse the focus if the mouse it outside. In addition to the mouse
-    // press logic, this prevents a re-focussing which occurs once
-    // we actually had focus
-    const Qt::FocusReason reason = event->reason();
-    if (reason == Qt::ActiveWindowFocusReason || reason == Qt::PopupFocusReason) {
-        const QPoint mousePos = mapFromGlobal(QCursor::pos());
-        const bool refuse = !geometry().contains(mousePos);
-        if (refuse) {
-            event->ignore();
-            return;
+    if (m_focusMode == NoFocus) {
+        // Refuse the focus if the mouse it outside. In addition to the mouse
+        // press logic, this prevents a re-focussing which occurs once
+        // we actually had focus
+        const Qt::FocusReason reason = event->reason();
+        if (reason == Qt::ActiveWindowFocusReason || reason == Qt::PopupFocusReason) {
+            const QPoint mousePos = mapFromGlobal(QCursor::pos());
+            const bool refuse = !geometry().contains(mousePos);
+            if (refuse) {
+                event->ignore();
+                return;
+            }
         }
     }
     QLineEdit::focusInEvent(event);

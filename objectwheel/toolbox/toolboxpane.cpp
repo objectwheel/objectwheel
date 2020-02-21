@@ -8,7 +8,7 @@
 #include <QMimeData>
 
 ToolboxPane::ToolboxPane(QWidget* parent) : QWidget(parent)
-  , m_searchEdit(new LineEdit(this))
+  , m_searchEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search, this))
   , m_toolboxTree(new ToolboxTree(this))
 {
     setFocusPolicy(Qt::NoFocus);

@@ -200,13 +200,9 @@ void AndroidPlatformController::onNameEdit(const QString& name)
     const QString& oldName = m_androidPlatformWidget->nameEdit()->oldText();
     const QString& package = m_androidPlatformWidget->packageEdit()->text();
     const QString& domain = m_androidPlatformWidget->domainEdit()->text();
-    if (domain.isEmpty())
-        return;
-    if (name.isEmpty())
-        return;
-    if (!package.isEmpty() && package != generatePackageName(domain, oldName))
-        return;
-    m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
+    const bool isRelationPreserved = package == generatePackageName(domain, oldName);
+    if (isRelationPreserved || package.isEmpty())
+        m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
 }
 
 void AndroidPlatformController::onDomainEdit(const QString& domain)
@@ -214,13 +210,9 @@ void AndroidPlatformController::onDomainEdit(const QString& domain)
     const QString& oldDomain = m_androidPlatformWidget->domainEdit()->oldText();
     const QString& package = m_androidPlatformWidget->packageEdit()->text();
     const QString& name = m_androidPlatformWidget->nameEdit()->text();
-    if (name.isEmpty())
-        return;
-    if (domain.isEmpty())
-        return;
-    if (!package.isEmpty() && package != generatePackageName(oldDomain, name))
-        return;
-    m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
+    const bool isRelationPreserved = package == generatePackageName(oldDomain, name);
+    if (isRelationPreserved || package.isEmpty())
+        m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
 }
 
 QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName)

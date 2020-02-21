@@ -4,7 +4,6 @@
 #include <QTreeView>
 #include <QStack>
 
-class LineEdit;
 class QFileSystemModel;
 class QToolBar;
 class QToolButton;

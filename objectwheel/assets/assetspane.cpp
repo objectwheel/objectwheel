@@ -9,7 +9,7 @@
 AssetsPane::AssetsPane(QWidget* parent) : QWidget(parent)
   , m_assetsTree(new AssetsTree(this))
   , m_modeComboBox(new QComboBox(this))
-  , m_searchEdit(new LineEdit(this))
+  , m_searchEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search, this))
 {
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
