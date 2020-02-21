@@ -63,11 +63,9 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     setDropIndicatorShown(false);
     setItemDelegate(new FileExplorerListDelegate(this));
     setFocusPolicy(Qt::NoFocus);
-    setSelectionBehavior(QTreeView::SelectRows);
-    setDragDropMode(QAbstractItemView::NoDragDrop);
-    setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setVerticalScrollMode(QTreeView::ScrollPerPixel);
-    setHorizontalScrollMode(QTreeView::ScrollPerPixel);
+    setSelectionBehavior(SelectRows);
+    setDragDropMode(NoDragDrop);
+    setEditTriggers(NoEditTriggers);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto updatePalette = [=] {

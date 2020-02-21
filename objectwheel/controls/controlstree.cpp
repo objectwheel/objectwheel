@@ -25,11 +25,9 @@ ControlsTree::ControlsTree(QWidget* parent) : QTreeWidget(parent)
     setExpandsOnDoubleClick(false);
     setItemDelegate(m_delegate);
     setFocusPolicy(Qt::NoFocus);
-    setSelectionBehavior(QTreeWidget::SelectRows);
-    setSelectionMode(QTreeWidget::ExtendedSelection);
-    setEditTriggers(QAbstractItemView::NoEditTriggers);
-    setVerticalScrollMode(QTreeWidget::ScrollPerPixel);
-    setHorizontalScrollMode(QTreeWidget::ScrollPerPixel);
+    setSelectionBehavior(SelectRows);
+    setSelectionMode(ExtendedSelection);
+    setEditTriggers(NoEditTriggers);
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto updatePalette = [=] {

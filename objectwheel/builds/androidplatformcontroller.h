@@ -26,6 +26,8 @@ private slots:
     void onPackageEdit(const QString& package) const;
     void onVersionSpinValueChange(int value) const;
     void onBrowseIconButtonClick() const;
+    void onClearIconButtonClick() const;
+    void onIncludePemissionsCheckClick(bool checked) const;
 
 private:
     QString generatePackageName(const QString& rawDomain, const QString& rawAppName) const;

@@ -805,6 +805,11 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_showKeystorePasswordButton->setCheckable(true);
     m_showKeyPasswordButton->setCheckable(true);
 
+    m_permissionList->setUniformItemSizes(true);
+    m_qtModuleList->setUniformItemSizes(true);
+    m_permissionList->setFocusPolicy(Qt::NoFocus);
+    m_qtModuleList->setFocusPolicy(Qt::NoFocus);
+
     int iconPictureSize =
             qMax(m_browseIconButton->sizeHint().height(), m_clearIconButton->sizeHint().height())
             + iconLayout->spacing()

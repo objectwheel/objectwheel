@@ -203,7 +203,6 @@ private:
     void clearLink();
     void updateLink();
     void requestUpdateLink(QMouseEvent* e, bool immediate = false);
-    void createToolBar();
     void updateContextPane();
     void showContextPane();
     bool hideContextPane();

@@ -482,7 +482,6 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     updateViewportMargins();
     setWordWrapMode(QTextOption::NoWrap);
     updateHighlights();
-    createToolBar();
     setNoDocsVisible(true);
 
     m_undoAction->setShortcutVisibleInContextMenu(true);
@@ -2919,44 +2918,6 @@ void QmlCodeEditor::requestUpdateLink(QMouseEvent *e, bool immediate)
     }
 
     clearLink();
-}
-
-void QmlCodeEditor::createToolBar()
-{
-    // BUG
-    //    m_outlineCombo = new QComboBox;
-    //    m_outlineCombo->setMinimumContentsLength(22);
-    //    m_outlineCombo->setModel(m_qmlJsEditorDocument->outlineModel());
-
-    //    QTreeView *treeView = new QTreeView;
-
-    //    Utils::AnnotatedItemDelegate *itemDelegate = new Utils::AnnotatedItemDelegate(this);
-    //    itemDelegate->setDelimiter(QLatin1String(" "));
-    //    itemDelegate->setAnnotationRole(QmlOutlineModel::AnnotationRole);
-    //    treeView->setItemDelegateForColumn(0, itemDelegate);
-
-    //    treeView->header()->hide();
-    //    treeView->setItemsExpandable(false);
-    //    treeView->setRootIsDecorated(false);
-    //    m_outlineCombo->setView(treeView);
-    //    treeView->expandAll();
-
-    //    //m_outlineCombo->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-
-    //    // Make the combo box prefer to expand
-    //    QSizePolicy policy = m_outlineCombo->sizePolicy();
-    //    policy.setHorizontalPolicy(QSizePolicy::Expanding);
-    //    m_outlineCombo->setSizePolicy(policy);
-
-    //    connect(m_outlineCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated),
-    //            this, &QmlCodeEditor::jumpToOutlineElement);
-    //    connect(m_qmlJsEditorDocument->outlineModel(), &QmlOutlineModel::updated,
-    //            static_cast<QTreeView *>(m_outlineCombo->view()), &QTreeView::expandAll);
-
-    //    connect(this, &QmlCodeEditor::cursorPositionChanged,
-    //            &m_updateOutlineIndexTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
-
-    //    insertExtraToolBarWidget(QmlCodeEditor::Left, m_outlineCombo);
 }
 
 void QmlCodeEditor::updateContextPane()

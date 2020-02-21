@@ -51,13 +51,12 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setFixedWidth(150);
     m_listWidget->setDragEnabled(false);
     m_listWidget->setSortingEnabled(true);
+    m_listWidget->setUniformItemSizes(true);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setTextElideMode(Qt::ElideMiddle);
     m_listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
     m_listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_listWidget->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
-    m_listWidget->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
 
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setPlaceholderText(tr("Search"));

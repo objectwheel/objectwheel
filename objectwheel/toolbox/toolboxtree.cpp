@@ -16,8 +16,6 @@ ToolboxTree::ToolboxTree(QWidget* parent) : QTreeWidget(parent)
     setColumnCount(1);
     setRootIsDecorated(false);
     setFocusPolicy(Qt::NoFocus);
-    setVerticalScrollMode(ScrollPerPixel);
-    setHorizontalScrollMode(ScrollPerPixel);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setItemDelegate(new ToolboxDelegate(this));
     connect(this, &QTreeWidget::itemPressed, this, &ToolboxTree::onItemPress);

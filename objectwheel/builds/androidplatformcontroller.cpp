@@ -33,6 +33,10 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
             this, &AndroidPlatformController::onVersionSpinValueChange);
     connect(m_androidPlatformWidget->browseIconButton(), &QPushButton::clicked,
             this, &AndroidPlatformController::onBrowseIconButtonClick);
+    connect(m_androidPlatformWidget->clearIconButton(), &QPushButton::clicked,
+            this, &AndroidPlatformController::onClearIconButtonClick);
+    connect(m_androidPlatformWidget->includePemissionsCheck(), &QCheckBox::clicked,
+            this, &AndroidPlatformController::onIncludePemissionsCheckClick);
 
 }
 
@@ -307,6 +311,22 @@ void AndroidPlatformController::onBrowseIconButtonClick() const
             iconLabel->setPixmap(pixmap);
         }
     }
+}
+
+void AndroidPlatformController::onClearIconButtonClick() const
+{
+    m_androidPlatformWidget->iconPathEdit()->setText(QString());
+    m_androidPlatformWidget->iconPictureLabel()->setPixmap(QPixmap());
+}
+
+void AndroidPlatformController::onIncludePemissionsCheckClick(bool checked) const
+{
+    m_androidPlatformWidget->permissionCombo()->setEnabled(checked);
+    m_androidPlatformWidget->permissionList()->setEnabled(checked);
+    m_androidPlatformWidget->addPermissionButton()->setEnabled(
+                checked && m_androidPlatformWidget->permissionCombo()->count() > 0);
+    m_androidPlatformWidget->removePermissionButton()->setEnabled(
+                checked && !m_androidPlatformWidget->permissionList()->selectedItems().isEmpty());
 }
 
 QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName) const

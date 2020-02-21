@@ -3,7 +3,6 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <controlrenderingmanager.h>
-#include <progressbar.h>
 #include <windowmanager.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
@@ -144,6 +143,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
     m_listWidget->viewport()->installEventFilter(this);
+    m_listWidget->setUniformItemSizes(true);
     m_listWidget->setIconSize(QSize(48, 48));
     m_listWidget->setMinimumWidth(400);
     m_listWidget->setItemDelegate(new ProjectTemplatesDelegate(m_listWidget, m_listWidget));
