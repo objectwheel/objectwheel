@@ -43,10 +43,40 @@ QLineEditPrivate::SideWidgetParameters QLineEditPrivate::sideWidgetParameters() 
  * policy and focusses explicitly on click only (note that setting Qt::ClickFocus
  * is not sufficient for that as an ActivationFocus will occur). */
 
-LineEdit::LineEdit(QWidget* parent) : QLineEdit(parent)
+LineEdit::LineEdit(VisualStyle visualStyle, QWidget* parent) : QLineEdit(parent)
+  , m_visualStyle(visualStyle)
 {
     setFocusPolicy(Qt::NoFocus);
     setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+    connect(this, &LineEdit::textChanged, this, &LineEdit::onTextChange);
+}
+
+LineEdit::LineEdit(QWidget* parent) : LineEdit(Search, parent)
+{
+}
+
+LineEdit::VisualStyle LineEdit::visualStyle() const
+{
+    return m_visualStyle;
+}
+
+void LineEdit::setVisualStyle(const VisualStyle& visualStyle)
+{
+    if (m_visualStyle != visualStyle) {
+        m_visualStyle = visualStyle;
+        update();
+    }
+}
+
+QString LineEdit::oldText() const
+{
+    return m_oldText;
+}
+
+void LineEdit::onTextChange(const QString& text)
+{
+    m_oldText = m_newText;
+    m_newText = text;
 }
 
 void LineEdit::paintEvent(QPaintEvent*)
@@ -62,18 +92,27 @@ void LineEdit::paintEvent(QPaintEvent*)
     initStyleOption(&option);
     // Draw outline
     QPainterPath outlinePath;
-    outlinePath.addRoundedRect(option.rect, 4, 4);
+    if (m_visualStyle == Search)
+        outlinePath.addRoundedRect(option.rect, 4, 4);
+    else
+        outlinePath.addRect(option.rect);
     p.setPen(Qt::NoPen);
     p.setBrush(QColor("#b1b1b1"));
     p.drawPath(outlinePath);
     // Draw inline
     QPainterPath inlinePath;
-    inlinePath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5), 3.5, 3.5);
+    if (m_visualStyle == Search)
+        inlinePath.addRoundedRect(QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5), 3.5, 3.5);
+    else
+        inlinePath.addRect(QRectF(option.rect).adjusted(0.5, 0.5, -0.5, -0.5));
     p.setBrush(QColor("#f0f0f0"));
     p.drawPath(inlinePath);
     // Draw body
     QPainterPath bodyPath;
-    bodyPath.addRoundedRect(QRectF(option.rect).adjusted(1, 1, -1, -1), 3, 3);
+    if (m_visualStyle == Search)
+        bodyPath.addRoundedRect(QRectF(option.rect).adjusted(1, 1, -1, -1), 3, 3);
+    else
+        bodyPath.addRect(QRectF(option.rect).adjusted(1, 1, -1, -1));
     p.setBrush(QColor("#ffffff"));
     p.drawPath(bodyPath);
 
@@ -95,7 +134,7 @@ void LineEdit::paintEvent(QPaintEvent*)
          break;
      default:
          //center
-         d->vscroll = r.y() + (r.height() - fm.height() + 1) / 2;
+         d->vscroll = r.y() + (r.height() - fm.height()) / 2.0;
          break;
     }
     QRect lineRect(r.x() + d->horizontalMargin, d->vscroll, r.width() - 2*d->horizontalMargin, fm.height());
@@ -132,7 +171,7 @@ void LineEdit::paintEvent(QPaintEvent*)
             break;
         default:
             // Left
-            d->hscroll = 0;
+            d->hscroll = 1;
             break;
         }
     } else if (cix - d->hscroll >= lineRect.width()) {

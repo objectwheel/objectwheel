@@ -1,9 +1,9 @@
 #include <androidplatformcontroller.h>
 #include <androidplatformwidget.h>
 #include <utilityfunctions.h>
+#include <lineedit.h>
 
 #include <QFile>
-#include <QLineEdit>
 #include <QComboBox>
 #include <QCheckBox>
 #include <QSpinBox>
@@ -18,6 +18,10 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
     : AbstractPlatformController(parent)
     , m_androidPlatformWidget(androidPlatformWidget)
 {
+    connect(m_androidPlatformWidget->nameEdit(), &LineEdit::textEdited,
+            this, &AndroidPlatformController::onNameEdit);
+    connect(m_androidPlatformWidget->domainEdit(), &LineEdit::textEdited,
+            this, &AndroidPlatformController::onDomainEdit);
 }
 
 bool AndroidPlatformController::isComplete() const
@@ -162,8 +166,8 @@ void AndroidPlatformController::charge() const
     m_androidPlatformWidget->keystorePasswordEdit()->clear();
     m_androidPlatformWidget->keyAliasCombo()->clear();
     m_androidPlatformWidget->keyPasswordEdit()->clear();
-    m_androidPlatformWidget->keyPasswordEdit()->setEchoMode(QLineEdit::Password);
-    m_androidPlatformWidget->keystorePasswordEdit()->setEchoMode(QLineEdit::Password);
+    m_androidPlatformWidget->keyPasswordEdit()->setEchoMode(LineEdit::Password);
+    m_androidPlatformWidget->keystorePasswordEdit()->setEchoMode(LineEdit::Password);
     m_androidPlatformWidget->keyPasswordEdit()->setEnabled(false);
     m_androidPlatformWidget->showKeyPasswordButton()->setEnabled(false);
     m_androidPlatformWidget->showKeystorePasswordButton()->setChecked(false);
@@ -189,4 +193,47 @@ void AndroidPlatformController::charge() const
 void AndroidPlatformController::discharge() const
 {
     // TODO
+}
+
+void AndroidPlatformController::onNameEdit(const QString& name)
+{
+    const QString& oldName = m_androidPlatformWidget->nameEdit()->oldText();
+    const QString& package = m_androidPlatformWidget->packageEdit()->text();
+    const QString& domain = m_androidPlatformWidget->domainEdit()->text();
+    if (domain.isEmpty())
+        return;
+    if (name.isEmpty())
+        return;
+    if (!package.isEmpty() && package != generatePackageName(domain, oldName))
+        return;
+    m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
+}
+
+void AndroidPlatformController::onDomainEdit(const QString& domain)
+{
+    const QString& oldDomain = m_androidPlatformWidget->domainEdit()->oldText();
+    const QString& package = m_androidPlatformWidget->packageEdit()->text();
+    const QString& name = m_androidPlatformWidget->nameEdit()->text();
+    if (name.isEmpty())
+        return;
+    if (domain.isEmpty())
+        return;
+    if (!package.isEmpty() && package != generatePackageName(oldDomain, name))
+        return;
+    m_androidPlatformWidget->packageEdit()->setText(generatePackageName(domain, name));
+}
+
+QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName)
+{
+    QStringList pieces(rawDomain.split(QLatin1Char('.')));
+    pieces.replaceInStrings(QRegularExpression("\\s"), QString());
+    pieces.removeAll(QString()); // Clean from null, empty and blank items
+    std::reverse(pieces.begin(), pieces.end());
+    QString appName(rawAppName);
+    appName.remove(QLatin1Char('.'));
+    appName.remove(QRegularExpression("\\s"));
+    pieces.append(appName);
+    appName = pieces.join('.').toLower().normalized(QString::NormalizationForm_KD);
+    appName.remove(QRegularExpression("[^\\.a-z0-9]"));
+    return appName;
 }

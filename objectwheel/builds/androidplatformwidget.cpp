@@ -2,11 +2,11 @@
 #include <utilityfunctions.h>
 #include <paintutils.h>
 #include <buttonslice.h>
+#include <lineedit.h>
 
 #include <QBoxLayout>
 #include <QGroupBox>
 #include <QLabel>
-#include <QLineEdit>
 #include <QSpinBox>
 #include <QComboBox>
 #include <QPushButton>
@@ -300,17 +300,17 @@ const QStringList AndroidPlatformWidget::androidPermissionList {
 
 AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_buttonSlice(new ButtonSlice(this))
-  , m_nameEdit(new QLineEdit(this))
+  , m_nameEdit(new LineEdit(LineEdit::Plain, this))
   , m_versionCodeSpin(new QSpinBox(this))
-  , m_versionNameEdit(new QLineEdit(this))
-  , m_organizationEdit(new QLineEdit(this))
-  , m_domainEdit(new QLineEdit(this))
-  , m_packageEdit(new QLineEdit(this))
+  , m_versionNameEdit(new LineEdit(LineEdit::Plain, this))
+  , m_organizationEdit(new LineEdit(LineEdit::Plain, this))
+  , m_domainEdit(new LineEdit(LineEdit::Plain, this))
+  , m_packageEdit(new LineEdit(LineEdit::Plain, this))
   , m_screenOrientationCombo(new QComboBox(this))
   , m_minApiLevelCombo(new QComboBox(this))
   , m_targetApiLevelCombo(new QComboBox(this))
   , m_iconPictureLabel(new QLabel(this))
-  , m_iconPathEdit(new QLineEdit(this))
+  , m_iconPathEdit(new LineEdit(LineEdit::Plain, this))
   , m_browseIconButton(new QPushButton(this))
   , m_clearIconButton(new QPushButton(this))
   , m_includePemissionsCheck(new QCheckBox(this))
@@ -330,14 +330,14 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
   , m_removeQtModuleButton(new QPushButton(this))
   , m_signingDisabled(new QRadioButton(this))
   , m_signingEnabled(new QRadioButton(this))
-  , m_keystorePathEdit(new QLineEdit(this))
+  , m_keystorePathEdit(new LineEdit(LineEdit::Plain, this))
   , m_newKeystoreButton(new QPushButton(this))
   , m_browseKeystoreButton(new QPushButton(this))
   , m_clearKeystoreButton(new QPushButton(this))
-  , m_keystorePasswordEdit(new QLineEdit(this))
+  , m_keystorePasswordEdit(new LineEdit(LineEdit::Plain, this))
   , m_showKeystorePasswordButton(new QToolButton(this))
   , m_keyAliasCombo(new QComboBox(this))
-  , m_keyPasswordEdit(new QLineEdit(this))
+  , m_keyPasswordEdit(new LineEdit(LineEdit::Plain, this))
   , m_showKeyPasswordButton(new QToolButton(this))
   , m_sameAsKeystorePasswordCheck(new QCheckBox(this))
 {
@@ -822,7 +822,7 @@ ButtonSlice* AndroidPlatformWidget::buttonSlice() const
     return m_buttonSlice;
 }
 
-QLineEdit* AndroidPlatformWidget::nameEdit() const
+LineEdit* AndroidPlatformWidget::nameEdit() const
 {
     return m_nameEdit;
 }
@@ -832,22 +832,22 @@ QSpinBox* AndroidPlatformWidget::versionCodeSpin() const
     return m_versionCodeSpin;
 }
 
-QLineEdit* AndroidPlatformWidget::versionNameEdit() const
+LineEdit* AndroidPlatformWidget::versionNameEdit() const
 {
     return m_versionNameEdit;
 }
 
-QLineEdit* AndroidPlatformWidget::organizationEdit() const
+LineEdit* AndroidPlatformWidget::organizationEdit() const
 {
     return m_organizationEdit;
 }
 
-QLineEdit* AndroidPlatformWidget::domainEdit() const
+LineEdit* AndroidPlatformWidget::domainEdit() const
 {
     return m_domainEdit;
 }
 
-QLineEdit* AndroidPlatformWidget::packageEdit() const
+LineEdit* AndroidPlatformWidget::packageEdit() const
 {
     return m_packageEdit;
 }
@@ -872,7 +872,7 @@ QLabel* AndroidPlatformWidget::iconPictureLabel() const
     return m_iconPictureLabel;
 }
 
-QLineEdit* AndroidPlatformWidget::iconPathEdit() const
+LineEdit* AndroidPlatformWidget::iconPathEdit() const
 {
     return m_iconPathEdit;
 }
@@ -972,7 +972,7 @@ QRadioButton* AndroidPlatformWidget::signingEnabled() const
     return m_signingEnabled;
 }
 
-QLineEdit* AndroidPlatformWidget::keystorePathEdit() const
+LineEdit* AndroidPlatformWidget::keystorePathEdit() const
 {
     return m_keystorePathEdit;
 }
@@ -992,7 +992,7 @@ QPushButton* AndroidPlatformWidget::clearKeystoreButton() const
     return m_clearKeystoreButton;
 }
 
-QLineEdit* AndroidPlatformWidget::keystorePasswordEdit() const
+LineEdit* AndroidPlatformWidget::keystorePasswordEdit() const
 {
     return m_keystorePasswordEdit;
 }
@@ -1007,7 +1007,7 @@ QComboBox* AndroidPlatformWidget::keyAliasCombo() const
     return m_keyAliasCombo;
 }
 
-QLineEdit* AndroidPlatformWidget::keyPasswordEdit() const
+LineEdit* AndroidPlatformWidget::keyPasswordEdit() const
 {
     return m_keyPasswordEdit;
 }
