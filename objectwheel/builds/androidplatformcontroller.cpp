@@ -2,6 +2,7 @@
 #include <androidplatformwidget.h>
 #include <utilityfunctions.h>
 #include <lineedit.h>
+#include <paintutils.h>
 
 #include <QFile>
 #include <QComboBox>
@@ -12,6 +13,10 @@
 #include <QToolButton>
 #include <QPushButton>
 #include <QCborArray>
+#include <QFileDialog>
+#include <QImageReader>
+#include <QLabel>
+#include <QStandardPaths>
 
 AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* androidPlatformWidget,
                                                      QObject* parent)
@@ -26,6 +31,9 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
             this, &AndroidPlatformController::onPackageEdit);
     connect(m_androidPlatformWidget->versionCodeSpin(), &QSpinBox::valueChanged,
             this, &AndroidPlatformController::onVersionSpinValueChange);
+    connect(m_androidPlatformWidget->browseIconButton(), &QPushButton::clicked,
+            this, &AndroidPlatformController::onBrowseIconButtonClick);
+
 }
 
 bool AndroidPlatformController::isComplete() const
@@ -273,6 +281,32 @@ void AndroidPlatformController::onPackageEdit(const QString& package) const
 void AndroidPlatformController::onVersionSpinValueChange(int value) const
 {
     m_androidPlatformWidget->versionNameEdit()->setPlaceholderText(tr("Version %1.0").arg(value));
+}
+
+void AndroidPlatformController::onBrowseIconButtonClick() const
+{
+    QLabel* iconLabel = m_androidPlatformWidget->iconPictureLabel();
+    QLineEdit* iconEdit = m_androidPlatformWidget->iconPathEdit();
+
+    const QString formats = QImageReader::supportedImageFormats().join(QByteArrayLiteral(" *."));
+    const QString title = tr("Choose Application Icon");
+    const QString filter = tr("Image Files (*.%1)").arg(formats);
+    const QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    const QString& filePath = QFileDialog::getOpenFileName(iconLabel, title, desktopPath, filter);
+
+    if (!filePath.isEmpty()) {
+        const int fw = 2 * iconLabel->frameWidth();
+        const QSize& iconSize = iconLabel->size() - QSize(fw, fw);
+        const QPixmap& pixmap = PaintUtils::pixmap(filePath, iconSize, iconLabel);
+        if (pixmap.isNull()) {
+            UtilityFunctions::showMessage(iconLabel,
+                                          tr("Invalid image"),
+                                          tr("The image you have chosen seems to be invalid."));
+        } else {
+            iconEdit->setText(filePath);
+            iconLabel->setPixmap(pixmap);
+        }
+    }
 }
 
 QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName) const

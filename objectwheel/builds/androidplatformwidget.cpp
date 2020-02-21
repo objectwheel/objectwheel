@@ -811,6 +811,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
             + m_iconPathEdit->sizeHint().height();
     m_iconPictureLabel->setFixedSize(iconPictureSize, iconPictureSize);
     m_iconPictureLabel->setFrameShape(QFrame::StyledPanel);
+    m_iconPictureLabel->setIndent(0);
 }
 
 ButtonSlice* AndroidPlatformWidget::buttonSlice() const
