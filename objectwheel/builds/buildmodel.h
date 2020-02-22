@@ -44,6 +44,7 @@ private:
     void establishConnection(Build* build);
     QIcon platformIcon(const QString& rawPlatformName) const;
     QString packageSuffixFromRequest(const QCborMap& request) const;
+    Build* buildFromUid(const QString& uid);
 
 private:
     QList<Build*> m_builds;

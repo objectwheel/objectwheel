@@ -12,18 +12,27 @@
 #include <QApplication>
 
 enum StatusCode {
-    SUCCEED,
-    INTERNAL_ERROR,
-    BAD_REQUEST,
-    INVALID_USER_CREDENTIAL,
-    SIMULTANEOUS_BUILD_LIMIT_EXCEEDED,
-    MAKE_FAILED,
-    QMAKE_FAILED,
-    INVALID_PROJECT_FILE,
-    INVALID_PROJECT_SETTINGS_FILE,
-    CANCELED,
-    TIMEDOUT,
+    InternalError,
+    //
+    BadRequest,
+    InvalidUserCredential,
+    SimultaneousBuildLimitExceeded,
+    RequestSucceed,
+    //
+    SequenceNumberChanged,
+    BuildProcessStarted,
+    //
+    BuildProgress,
+    MakeFailed,
+    QmakeFailed,
+    InvalidProjectFile,
+    InvalidProjectSettings,
+    Canceled,
+    Timedout,
+    //
+    BuildSucceed
 };
+Q_DECLARE_METATYPE(StatusCode)
 
 BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
 {
@@ -109,34 +118,127 @@ void BuildModel::onServerResponse(const QByteArray& data)
     ServerManager::ServerCommands command = ServerManager::Invalid;
     UtilityFunctions::pullCbor(data, command);
 
-    switch (command) {
-    //    case ServerManager::LoginSuccessful: {
-    //        QByteArray icon;
-    //        QDateTime regdate;
-    //        PlanManager::Plans plan;
-    //        QString first, last, country, company, title, phone;
-    //        UtilityFunctions::pullCbor(data, command, icon, regdate, plan, first, last, country, company, title, phone);
+    if (command == ServerManager::ResponseCloudBuild) {
+        StatusCode status;
+        QString uid;
+        UtilityFunctions::pullCbor(data, command, status, uid);
+        Build* build = buildFromUid(uid);
+        switch (status) {
+        case InternalError:
+            m_builds.last()->setStatus(tr("Internal Error"));
+            break;
+        case BadRequest:
+            m_builds.last()->setStatus(tr("Bad Request"));
+            break;
+        case InvalidUserCredential:
+            m_builds.last()->setStatus(tr("Invalid User Credential"));
+            break;
+        case SimultaneousBuildLimitExceeded:
+            m_builds.last()->setStatus(tr("Simultaneous Build Limit Exceeded"));
+            break;
 
-    //        QVariantList userInfo;
-    //        userInfo.append(icon);
-    //        userInfo.append(regdate);
-    //        userInfo.append(plan);
-    //        userInfo.append(first);
-    //        userInfo.append(last);
-    //        userInfo.append(country);
-    //        userInfo.append(company);
-    //        userInfo.append(title);
-    //        userInfo.append(phone);
-    //        emit loginSuccessful(userInfo);
-    //    } break;
-    //    case ServerManager::LoginFailure:
-    //        emit loginFailure();
-    //        break;
-    default:
-        break;
+        case RequestSucceed:
+            Q_ASSERT(!uid.isEmpty());
+            m_builds.last()->setUid(uid);
+            m_builds.last()->setStatus(tr("Requesting build..."));
+            break;
+
+        case SequenceNumberChanged:
+            if (build) {
+                int sequenceNumber;
+                UtilityFunctions::pullCbor(data, command, status, uid, sequenceNumber);
+                build->setStatus(tr("You are %1th in the queue...").arg(sequenceNumber));
+            } else {
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            } break;
+        case BuildProcessStarted:
+            if (build)
+                build->setStatus(tr("Build process started..."));
+            else
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            break;
+        case BuildProgress:
+            if (build) {
+                QByteArray progress;
+                UtilityFunctions::pullCbor(data, command, status, uid, progress);
+                build->setStatus(progress);
+            } else {
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            } break;
+        case MakeFailed:
+            if (build)
+                build->setStatus(tr("Build process started..."));
+            else
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            break;
+        case QmakeFailed:
+            if (build)
+                build->setStatus(tr("QMAKE Process Failed"));
+            else
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            break;
+        case InvalidProjectFile:
+            if (build)
+                build->setStatus(tr("Invalid Project File"));
+            else
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            break;
+        case InvalidProjectSettings:
+            if (build)
+                build->setStatus(tr("Invalid Project Settings"));
+            else
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            break;
+        case Canceled:
+            if (build)
+                build->setStatus(tr("Operation Cancelled"));
+            else
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            break;
+        case Timedout:
+            if (build)
+                build->setStatus(tr("Operation Timedout"));
+            else
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            break;
+        case BuildSucceed:
+            if (build) {
+                build->setStatus(tr("Downloading..."));
+
+                bool isLastFrame;
+                int totalBytes;
+                QByteArray chunk;
+
+                UtilityFunctions::pullCbor(data, command, status, uid, isLastFrame, totalBytes, chunk);
+
+                if (!build->buffer()->isOpen()) {
+                    build->setTotalBytes(totalBytes);
+                    build->buffer()->buffer().reserve(totalBytes);
+                    build->buffer()->open(QBuffer::WriteOnly);
+                }
+
+                build->buffer()->write(chunk);
+                build->setReceivedBytes(build->buffer()->size());
+
+                if (isLastFrame) {
+                    build->buffer()->close();
+                    build->setStatus(tr("Done"));
+                }
+            } else {
+                qWarning("WARNING: Cannot associate build uid to any existing builds");
+            } break;
+        default:
+            break;
+        }
+        if (build == 0)
+            build = m_builds.last();
+        int row = m_builds.indexOf(build);
+        if (row < 0)
+            return;
+        const QModelIndex& index = BuildModel::index(row);
+        Q_ASSERT(index.isValid());
+        emit dataChanged(index, index);
     }
-
-    //    emit dataChanged(bottom, top);
 }
 
 void BuildModel::scheduleConnection(Build* build)
@@ -180,7 +282,7 @@ void BuildModel::establishConnection(Build* build)
         return;
     }
 
-    ServerManager::send(ServerManager::RequestBuild,
+    ServerManager::send(ServerManager::RequestCloudBuild,
                         UserManager::email(),
                         UserManager::password(),
                         build->request(), tempFile.readAll());
@@ -204,4 +306,15 @@ QString BuildModel::packageSuffixFromRequest(const QCborMap& request) const
             return QLatin1String(".apk");
     }
     return QString();
+}
+
+Build* BuildModel::buildFromUid(const QString& uid)
+{
+    if (uid.isEmpty())
+        return nullptr;
+    for (Build* build : qAsConst(m_builds)) {
+        if (build->uid() == uid)
+            return build;
+    }
+    return nullptr;
 }

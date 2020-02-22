@@ -42,10 +42,8 @@ public:
         UpdateUserIconFailure,
         RequestUserIcon,
         ResponseUserIcon,
-        RequestBuild,
-        RequestBuildSuccessful,
-        RequestBuildFailure,
-        ResponseBuild
+        RequestCloudBuild,
+        ResponseCloudBuild
     };
     Q_ENUM(ServerCommands)
 

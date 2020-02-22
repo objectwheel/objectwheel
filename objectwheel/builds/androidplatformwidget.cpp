@@ -652,7 +652,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
                                   "<p style='white-space:nowrap;font-size:11px'>"
                                   "The icon could be a JPG or PNG file. It might also contain alpha<br>"
                                   "channel. But icon dimensions must be between [256px - 1024px].<br>"
-                                  "We highly recommend using a 256×256px PNG file for best result.</p>"));
+                                  "We recommend using a 256×256px PNG file for best result.</p>"));
     m_browseIconButton->setToolTip(tr("Select an application icon from your computer"));
     m_clearIconButton->setToolTip(tr("Clear application icon"));
     autoDetectPemissionsCheck->setToolTip(tr("Enable automatic detection of Android permissions"

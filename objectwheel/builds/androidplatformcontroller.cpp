@@ -51,7 +51,14 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
             this, &AndroidPlatformController::onRemoveQtModuleButtonClick);
     connect(m_androidPlatformWidget->qtModuleList(), &QListWidget::itemSelectionChanged,
             this, &AndroidPlatformController::onQtModuleListItemSelectionChange);
-
+    connect(m_androidPlatformWidget->abiArmeabiV7aCheck(), &QCheckBox::clicked,
+            this, &AndroidPlatformController::onAbiCheckClick);
+    connect(m_androidPlatformWidget->abiArm64V8aCheck(), &QCheckBox::clicked,
+            this, &AndroidPlatformController::onAbiCheckClick);
+    connect(m_androidPlatformWidget->abiX86Check(), &QCheckBox::clicked,
+            this, &AndroidPlatformController::onAbiCheckClick);
+    connect(m_androidPlatformWidget->abiX8664Check(), &QCheckBox::clicked,
+            this, &AndroidPlatformController::onAbiCheckClick);
 }
 
 bool AndroidPlatformController::isComplete() const
@@ -320,6 +327,14 @@ void AndroidPlatformController::onBrowseIconButtonClick() const
             UtilityFunctions::showMessage(iconLabel,
                                           tr("Invalid image"),
                                           tr("The image you have chosen seems to be invalid."));
+        } else if (pixmap.width() < 256 || pixmap.height() < 256  ||
+                   pixmap.width() > 1024  || pixmap.height() > 1024) {
+            UtilityFunctions::showMessage(iconLabel,
+                                          tr("Invalid image size"),
+                                          tr("Application icon size must fit between [256px - 1024px] "
+                                             "for all the dimensions. Bigger or smaller sizes are not "
+                                             "applicable. We recommend using a 256×256px PNG file for "
+                                             "best result."));
         } else {
             iconEdit->setText(filePath);
             iconLabel->setPixmap(pixmap);
@@ -423,6 +438,15 @@ void AndroidPlatformController::onQtModuleListItemSelectionChange() const
 {
     m_androidPlatformWidget->removeQtModuleButton()->setEnabled(
                 !m_androidPlatformWidget->qtModuleList()->selectedItems().isEmpty());
+}
+
+void AndroidPlatformController::onAbiCheckClick()
+{
+    if (!m_androidPlatformWidget->abiArmeabiV7aCheck()->isChecked()
+            && !m_androidPlatformWidget->abiArm64V8aCheck()->isChecked()
+            && !m_androidPlatformWidget->abiX86Check()->isChecked()
+            && !m_androidPlatformWidget->abiX8664Check()->isChecked())
+        m_androidPlatformWidget->abiArmeabiV7aCheck()->setChecked(true);
 }
 
 QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName) const

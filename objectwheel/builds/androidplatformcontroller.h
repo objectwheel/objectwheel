@@ -35,6 +35,7 @@ private slots:
     void onAddQtModuleButtonClick() const;
     void onRemoveQtModuleButtonClick() const;
     void onQtModuleListItemSelectionChange() const;
+    void onAbiCheckClick();
 
 private:
     QString generatePackageName(const QString& rawDomain, const QString& rawAppName) const;

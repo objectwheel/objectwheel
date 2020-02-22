@@ -13,6 +13,21 @@ const QCborMap& Build::request() const
     return m_request;
 }
 
+QBuffer* Build::buffer()
+{
+    return &m_buffer;
+}
+
+QString Build::uid() const
+{
+    return m_uid;
+}
+
+void Build::setUid(const QString& uid)
+{
+    m_uid = uid;
+}
+
 QString Build::status() const
 {
     return m_status;
