@@ -805,6 +805,11 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_showKeystorePasswordButton->setCheckable(true);
     m_showKeyPasswordButton->setCheckable(true);
 
+    m_permissionList->setMinimumWidth(300);
+    m_qtModuleList->setMinimumWidth(300);
+
+    UtilityFunctions::adjustFontPixelSize(m_permissionList, -2);
+    // UtilityFunctions::adjustFontPixelSize(m_qtModuleList, -3);
     m_permissionList->setUniformItemSizes(true);
     m_qtModuleList->setUniformItemSizes(true);
     m_permissionList->setFocusPolicy(Qt::NoFocus);

@@ -37,6 +37,20 @@ AndroidPlatformController::AndroidPlatformController(AndroidPlatformWidget* andr
             this, &AndroidPlatformController::onClearIconButtonClick);
     connect(m_androidPlatformWidget->includePemissionsCheck(), &QCheckBox::clicked,
             this, &AndroidPlatformController::onIncludePemissionsCheckClick);
+    connect(m_androidPlatformWidget->addPermissionButton(), &QPushButton::clicked,
+            this, &AndroidPlatformController::onAddPermissionButtonClick);
+    connect(m_androidPlatformWidget->removePermissionButton(), &QPushButton::clicked,
+            this, &AndroidPlatformController::onRemovePermissionButtonClick);
+    connect(m_androidPlatformWidget->permissionList(), &QListWidget::itemSelectionChanged,
+            this, &AndroidPlatformController::onPermissionListItemSelectionChange);
+    connect(m_androidPlatformWidget->includeQtModulesCheck(), &QCheckBox::clicked,
+            this, &AndroidPlatformController::onIncludeQtModulesCheckClick);
+    connect(m_androidPlatformWidget->addQtModuleButton(), &QPushButton::clicked,
+            this, &AndroidPlatformController::onAddQtModuleButtonClick);
+    connect(m_androidPlatformWidget->removeQtModuleButton(), &QPushButton::clicked,
+            this, &AndroidPlatformController::onRemoveQtModuleButtonClick);
+    connect(m_androidPlatformWidget->qtModuleList(), &QListWidget::itemSelectionChanged,
+            this, &AndroidPlatformController::onQtModuleListItemSelectionChange);
 
 }
 
@@ -292,15 +306,15 @@ void AndroidPlatformController::onBrowseIconButtonClick() const
     QLabel* iconLabel = m_androidPlatformWidget->iconPictureLabel();
     QLineEdit* iconEdit = m_androidPlatformWidget->iconPathEdit();
 
-    const QString formats = QImageReader::supportedImageFormats().join(QByteArrayLiteral(" *."));
-    const QString title = tr("Choose Application Icon");
-    const QString filter = tr("Image Files (*.%1)").arg(formats);
-    const QString desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
+    const QString& formats = QImageReader::supportedImageFormats().join(QByteArrayLiteral(" *."));
+    const QString& title = tr("Choose Application Icon");
+    const QString& filter = tr("Image Files (*.%1)").arg(formats);
+    const QString& desktopPath = QStandardPaths::writableLocation(QStandardPaths::DesktopLocation);
     const QString& filePath = QFileDialog::getOpenFileName(iconLabel, title, desktopPath, filter);
 
     if (!filePath.isEmpty()) {
-        const int fw = 2 * iconLabel->frameWidth();
-        const QSize& iconSize = iconLabel->size() - QSize(fw, fw);
+        const int f = 2 * iconLabel->frameWidth();
+        const QSize& iconSize = iconLabel->size() - QSize(f, f);
         const QPixmap& pixmap = PaintUtils::pixmap(filePath, iconSize, iconLabel);
         if (pixmap.isNull()) {
             UtilityFunctions::showMessage(iconLabel,
@@ -327,6 +341,88 @@ void AndroidPlatformController::onIncludePemissionsCheckClick(bool checked) cons
                 checked && m_androidPlatformWidget->permissionCombo()->count() > 0);
     m_androidPlatformWidget->removePermissionButton()->setEnabled(
                 checked && !m_androidPlatformWidget->permissionList()->selectedItems().isEmpty());
+}
+
+void AndroidPlatformController::onAddPermissionButtonClick() const
+{
+    QPushButton* addButton = m_androidPlatformWidget->addPermissionButton();
+    QComboBox* combo = m_androidPlatformWidget->permissionCombo();
+    QListWidget* list = m_androidPlatformWidget->permissionList();
+    if (combo->count() > 0) {
+        list->addItem(combo->currentText());
+        list->item(list->count() - 1)->setSelected(true);
+        combo->removeItem(combo->currentIndex());
+    }
+    addButton->setEnabled(combo->count() > 0);
+}
+
+void AndroidPlatformController::onRemovePermissionButtonClick() const
+{
+    QPushButton* addButton = m_androidPlatformWidget->addPermissionButton();
+    QPushButton* removeButton = m_androidPlatformWidget->removePermissionButton();
+    QComboBox* combo = m_androidPlatformWidget->permissionCombo();
+    QListWidget* list = m_androidPlatformWidget->permissionList();
+    if (!list->selectedItems().isEmpty()) {
+        const QListWidgetItem* item = list->selectedItems().first();
+        combo->addItem(item->text());
+        combo->model()->sort(0);
+        if (!addButton->isEnabled())
+            addButton->setEnabled(true);
+        delete list->takeItem(list->row(item));
+    }
+    removeButton->setEnabled(!list->selectedItems().isEmpty());
+}
+
+void AndroidPlatformController::onPermissionListItemSelectionChange() const
+{
+    m_androidPlatformWidget->removePermissionButton()->setEnabled(
+                !m_androidPlatformWidget->permissionList()->selectedItems().isEmpty());
+}
+
+void AndroidPlatformController::onIncludeQtModulesCheckClick(bool checked) const
+{
+    m_androidPlatformWidget->qtModuleCombo()->setEnabled(checked);
+    m_androidPlatformWidget->qtModuleList()->setEnabled(checked);
+    m_androidPlatformWidget->addQtModuleButton()->setEnabled(
+                checked && m_androidPlatformWidget->qtModuleCombo()->count() > 0);
+    m_androidPlatformWidget->removeQtModuleButton()->setEnabled(
+                checked && !m_androidPlatformWidget->qtModuleList()->selectedItems().isEmpty());
+}
+
+void AndroidPlatformController::onAddQtModuleButtonClick() const
+{
+    QPushButton* addButton = m_androidPlatformWidget->addQtModuleButton();
+    QComboBox* combo = m_androidPlatformWidget->qtModuleCombo();
+    QListWidget* list = m_androidPlatformWidget->qtModuleList();
+    if (combo->count() > 0) {
+        list->addItem(combo->currentText());
+        list->item(list->count() - 1)->setSelected(true);
+        combo->removeItem(combo->currentIndex());
+    }
+    addButton->setEnabled(combo->count() > 0);
+}
+
+void AndroidPlatformController::onRemoveQtModuleButtonClick() const
+{
+    QPushButton* addButton = m_androidPlatformWidget->addQtModuleButton();
+    QPushButton* removeButton = m_androidPlatformWidget->removeQtModuleButton();
+    QComboBox* combo = m_androidPlatformWidget->qtModuleCombo();
+    QListWidget* list = m_androidPlatformWidget->qtModuleList();
+    if (!list->selectedItems().isEmpty()) {
+        const QListWidgetItem* item = list->selectedItems().first();
+        combo->addItem(item->text());
+        combo->model()->sort(0);
+        if (!addButton->isEnabled())
+            addButton->setEnabled(true);
+        delete list->takeItem(list->row(item));
+    }
+    removeButton->setEnabled(!list->selectedItems().isEmpty());
+}
+
+void AndroidPlatformController::onQtModuleListItemSelectionChange() const
+{
+    m_androidPlatformWidget->removeQtModuleButton()->setEnabled(
+                !m_androidPlatformWidget->qtModuleList()->selectedItems().isEmpty());
 }
 
 QString AndroidPlatformController::generatePackageName(const QString& rawDomain, const QString& rawAppName) const

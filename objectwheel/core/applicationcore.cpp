@@ -207,6 +207,7 @@ QPalette ApplicationCore::palette()
 {
     //  FIXME  QSettings settings(settingsPath(), QSettings::IniFormat);
     //    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light")
+    const int g = qGray(GeneralSettings::interfaceSettings()->highlightColor.rgb());
     QPalette palette(QApplication::palette());
     palette.setColor(QPalette::Active, QPalette::Text, "#2f2f2f");
     palette.setColor(QPalette::Inactive, QPalette::Text, "#2f2f2f");
@@ -220,11 +221,13 @@ QPalette ApplicationCore::palette()
     palette.setColor(QPalette::Active, QPalette::PlaceholderText, "#bfbfbf");
     palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#bfbfbf");
     palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, "#bfbfbf");
+    palette.setColor(QPalette::Active, QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
+    palette.setColor(QPalette::Inactive, QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
+    palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(g, g, g));
     palette.setColor(QPalette::Base, "#ffffff");
     palette.setColor(QPalette::AlternateBase, "#f5f5f5");
     palette.setColor(QPalette::Button, "#ececec");
     palette.setColor(QPalette::Window, "#ececec");
-    palette.setColor(QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
     palette.setColor(QPalette::BrightText, "#ffffff");
     palette.setColor(QPalette::HighlightedText, "#ffffff");
     palette.setColor(QPalette::ToolTipText, "#2f2f2f");

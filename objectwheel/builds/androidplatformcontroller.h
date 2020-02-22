@@ -28,6 +28,13 @@ private slots:
     void onBrowseIconButtonClick() const;
     void onClearIconButtonClick() const;
     void onIncludePemissionsCheckClick(bool checked) const;
+    void onAddPermissionButtonClick() const;
+    void onRemovePermissionButtonClick() const;
+    void onPermissionListItemSelectionChange() const;
+    void onIncludeQtModulesCheckClick(bool checked) const;
+    void onAddQtModuleButtonClick() const;
+    void onRemoveQtModuleButtonClick() const;
+    void onQtModuleListItemSelectionChange() const;
 
 private:
     QString generatePackageName(const QString& rawDomain, const QString& rawAppName) const;
