@@ -162,6 +162,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
                 QByteArray progress;
                 UtilityFunctions::pullCbor(data, command, status, uid, progress);
                 build->setStatus(progress);
+                qDebug() << progress;
             } else {
                 qWarning("WARNING: Cannot associate build uid to any existing builds");
             } break;
@@ -205,24 +206,47 @@ void BuildModel::onServerResponse(const QByteArray& data)
             if (build) {
                 build->setStatus(tr("Downloading..."));
 
+                // Decode data
                 bool isLastFrame;
                 int totalBytes;
                 QByteArray chunk;
-
                 UtilityFunctions::pullCbor(data, command, status, uid, isLastFrame, totalBytes, chunk);
 
+                // Fetch and buffer data
                 if (!build->buffer()->isOpen()) {
                     build->setTotalBytes(totalBytes);
                     build->buffer()->buffer().reserve(totalBytes);
                     build->buffer()->open(QBuffer::WriteOnly);
                 }
-
                 build->buffer()->write(chunk);
                 build->setReceivedBytes(build->buffer()->size());
-
                 if (isLastFrame) {
                     build->buffer()->close();
                     build->setStatus(tr("Done"));
+                }
+
+                // Gather 'speed' and 'time left' information
+                Build::Block block {
+                    .size = chunk.size(),
+                    .timestamp = QTime::currentTime()
+                };
+                build->recentBlocks().append(block);
+                if (build->recentBlocks().size() > 10)
+                    build->recentBlocks().removeFirst();
+
+                if (build->recentBlocks().size() > 1) {
+                    // Calculate Speed
+                    int receivedBytes = -build->recentBlocks().first().size;
+                    int elapedMs = build->recentBlocks().first().timestamp.msecsTo(build->recentBlocks().last().timestamp);
+                    for (const Build::Block& block : qAsConst(build->recentBlocks()))
+                        receivedBytes += block.size;
+                    qreal bytesPerMs = receivedBytes / qreal(elapedMs);
+                    build->setSpeed(bytesPerMs * 1000);
+
+                    // Calculate Time Left
+                    int bytesLeft = totalBytes - build->buffer()->size();
+                    qreal msLeft = bytesLeft / bytesPerMs;
+                    build->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
                 }
             } else {
                 qWarning("WARNING: Cannot associate build uid to any existing builds");

@@ -11,6 +11,7 @@ DEPENDPATH += $$PWD
 
 ### Sources
 HEADERS += \
+    $$PWD/cleanexit.h \
     $$PWD/delayer.h \
     $$PWD/saveutils.h \
     $$PWD/toolutils.h \

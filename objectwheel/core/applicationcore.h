@@ -2,6 +2,7 @@
 #define APPLICATIONCORE_H
 
 #include <QPalette>
+#include <cleanexit.h>
 
 class QSettings;
 class GeneralSettings;
@@ -51,6 +52,7 @@ private:
     ApplicationCore &operator=(const ApplicationCore&) = delete;
 
 private:
+    CleanExit m_cleanExit;
     static QSettings* s_settings;
     static GeneralSettings* s_generalSettings;
     static DesignerSettings* s_designerSettings;

@@ -18,6 +18,11 @@ QBuffer* Build::buffer()
     return &m_buffer;
 }
 
+QList<Build::Block>& Build::recentBlocks()
+{
+    return m_recentBlocks;
+}
+
 QString Build::uid() const
 {
     return m_uid;
