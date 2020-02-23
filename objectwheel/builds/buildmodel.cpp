@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QIcon>
 #include <QApplication>
+#include <QStandardPaths>
 
 enum StatusCode {
     InternalError,
@@ -70,13 +71,17 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
 
     const Build* build = m_builds.value(index.row());
     switch (role) {
-    case Qt::BackgroundRole:
-        return QApplication::palette().window();
-    case Qt::ForegroundRole:
+    case Qt::BackgroundRole: {
+        QLinearGradient background(0, 0, 0, 1);
+        background.setCoordinateMode(QGradient::ObjectMode);
+        background.setColorAt(0, "#28ffffff");
+        background.setColorAt(1, "#12000000");
+        return QBrush(background);
+    } case Qt::ForegroundRole:
         return QApplication::palette().text();
     case Qt::FontRole: {
         QFont font(QApplication::font());
-        font.setPixelSize(10);
+        font.setPixelSize(11);
         return font;
     }
     case Qt::SizeHintRole:
@@ -161,8 +166,13 @@ void BuildModel::onServerResponse(const QByteArray& data)
             if (build) {
                 QByteArray progress;
                 UtilityFunctions::pullCbor(data, command, status, uid, progress);
-                build->setStatus(progress);
-                qDebug() << progress;
+                QTextStream stream(progress);
+                QString line, final;
+                while (stream.readLineInto(&line)) {
+                    if (!line.isEmpty())
+                        final = line;
+                }
+                build->setStatus(final);
             } else {
                 qWarning("WARNING: Cannot associate build uid to any existing builds");
             } break;
@@ -223,6 +233,18 @@ void BuildModel::onServerResponse(const QByteArray& data)
                 if (isLastFrame) {
                     build->buffer()->close();
                     build->setStatus(tr("Done"));
+                    do {
+                        int row = m_builds.indexOf(build);
+                        if (row < 0)
+                            break;
+                        const QModelIndex& index = BuildModel::index(row);
+                        Q_ASSERT(index.isValid());
+                        const QString& downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+                        QFile file(downloadPath + QLatin1Char('/') + index.data(NameRole).toString());
+                        if (!file.open(QFile::WriteOnly))
+                            break;
+                        file.write(build->buffer()->data());
+                    } while(false);
                 }
 
                 // Gather 'speed' and 'time left' information

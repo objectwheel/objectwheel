@@ -322,7 +322,7 @@ void AndroidPlatformController::onBrowseIconButtonClick() const
     if (!filePath.isEmpty()) {
         const int f = 2 * iconLabel->frameWidth();
         const QSize& iconSize = iconLabel->size() - QSize(f, f);
-        const QPixmap& pixmap = PaintUtils::pixmap(filePath, iconSize, iconLabel);
+        const QPixmap pixmap(filePath);
         if (pixmap.isNull()) {
             UtilityFunctions::showMessage(iconLabel,
                                           tr("Invalid image"),
@@ -336,8 +336,9 @@ void AndroidPlatformController::onBrowseIconButtonClick() const
                                              "applicable. We recommend using a 256×256px PNG file for "
                                              "best result."));
         } else {
+            const QPixmap& picture = PaintUtils::pixmap(filePath, iconSize, iconLabel);
             iconEdit->setText(filePath);
-            iconLabel->setPixmap(pixmap);
+            iconLabel->setPixmap(picture);
         }
     }
 }
