@@ -18,14 +18,6 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-// TODO: Make sure each line edit and everything matches safety regular exp
-//       except "password" edits, find a solution for this
-// TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"
-// TODO: Add "reset form"
-// TODO: Generate certificate
-// TODO: Test and check alias and keystore passwords
-// TODO: Show aliases
-
 const QMap<QString, int> AndroidPlatformWidget::apiLevelMap {
     { "API 21: Android 5.0", 21 },
     { "API 22: Android 5.1", 22 },
@@ -345,7 +337,10 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Target: Android"), this);
-    auto descriptionLabel = new QLabel(tr("Adjust your application settings below"), this);
+    auto descriptionLabel = new QLabel(tr("Adjust your application settings below"
+                                          "<p style='white-space:nowrap;font-size:12px'>"
+                                          "All fields are optional and will be set to their "
+                                          "default values if left as is"), this);
     auto settingsLabel = new QLabel(tr("Settings"));
 
     iconLabel->setFixedSize(QSize(60, 60));
@@ -794,6 +789,12 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_targetApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
+    m_nameEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[^@<&\\?\\\"]{1,50}$"), this));
+    m_versionNameEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[^@<&\\?\\\"]{1,255}$"), this));
+    m_organizationEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^.{1,255}$"), this));
+    m_domainEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9_\\.-]{1,255}$"), this));
+    m_packageEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9_\\.]{1,255}$"), this));
+
     m_versionCodeSpin->setRange(1, 2100000000); // Based on Andoid Developer Docs
     UtilityFunctions::disableWheelEvent(m_versionCodeSpin);
     autoDetectPemissionsCheck->setChecked(true);
@@ -809,7 +810,6 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_qtModuleList->setMinimumWidth(300);
 
     UtilityFunctions::adjustFontPixelSize(m_permissionList, -2);
-    // UtilityFunctions::adjustFontPixelSize(m_qtModuleList, -3);
     m_permissionList->setUniformItemSizes(true);
     m_qtModuleList->setUniformItemSizes(true);
     m_permissionList->setFocusPolicy(Qt::NoFocus);
