@@ -183,30 +183,42 @@ QCborMap AndroidPlatformController::toCborMap() const
 
 void AndroidPlatformController::charge() const
 {
-    m_androidPlatformWidget->permissionCombo()->clear();
-    m_androidPlatformWidget->qtModuleCombo()->clear();
-
-    m_androidPlatformWidget->permissionCombo()->addItems(AndroidPlatformWidget::androidPermissionList);
-    m_androidPlatformWidget->qtModuleCombo()->addItems(AndroidPlatformWidget::qtModuleMap.keys());
-
-    m_androidPlatformWidget->qtModuleList()->clear();
-    m_androidPlatformWidget->qtModuleList()->addItem(QLatin1String("Qt Svg"));
-    m_androidPlatformWidget->qtModuleCombo()->removeItem(m_androidPlatformWidget->qtModuleCombo()->findText(QLatin1String("Qt Svg")));
-
-    m_androidPlatformWidget->versionNameEdit()->setPlaceholderText(tr("Version 1.0"));
-    m_androidPlatformWidget->domainEdit()->setPlaceholderText(tr("example.com"));
-    m_androidPlatformWidget->packageEdit()->setPlaceholderText(tr("com.example.myapplication"));
-
+    m_androidPlatformWidget->nameEdit()->clear();
     m_androidPlatformWidget->versionCodeSpin()->setValue(1);
+    m_androidPlatformWidget->versionNameEdit()->clear();
+    m_androidPlatformWidget->versionNameEdit()->setPlaceholderText(tr("Version 1.0"));
+    m_androidPlatformWidget->organizationEdit()->clear();
+    m_androidPlatformWidget->domainEdit()->clear();
+    m_androidPlatformWidget->packageEdit()->clear();
+    m_androidPlatformWidget->packageEdit()->setPlaceholderText(tr("com.example.myapplication"));
     m_androidPlatformWidget->screenOrientationCombo()->setCurrentText(QLatin1String("Unspecified"));
     m_androidPlatformWidget->minApiLevelCombo()->setCurrentText(QLatin1String("API 21: Android 5.0"));
     m_androidPlatformWidget->targetApiLevelCombo()->setCurrentText(QLatin1String("API 23: Android 6.0"));
+    m_androidPlatformWidget->iconPathEdit()->setText(QString());
+    m_androidPlatformWidget->iconPictureLabel()->setPixmap(QPixmap());
+    m_androidPlatformWidget->includePemissionsCheck()->setChecked(false);
+    m_androidPlatformWidget->permissionCombo()->setEnabled(false);
+    m_androidPlatformWidget->permissionList()->setEnabled(false);
+    m_androidPlatformWidget->addPermissionButton()->setEnabled(false);
+    m_androidPlatformWidget->removePermissionButton()->setEnabled(false);
+    m_androidPlatformWidget->permissionCombo()->clear();
+    m_androidPlatformWidget->permissionList()->clear();
+    m_androidPlatformWidget->permissionCombo()->addItems(AndroidPlatformWidget::androidPermissionList);
     m_androidPlatformWidget->aabCheck()->setChecked(false);
     m_androidPlatformWidget->abiArmeabiV7aCheck()->setChecked(true);
     m_androidPlatformWidget->abiArm64V8aCheck()->setChecked(false);
     m_androidPlatformWidget->abiX86Check()->setChecked(false);
     m_androidPlatformWidget->abiX8664Check()->setChecked(false);
     m_androidPlatformWidget->includeQtModulesCheck()->setChecked(true);
+    m_androidPlatformWidget->qtModuleCombo()->setEnabled(true);
+    m_androidPlatformWidget->qtModuleList()->setEnabled(true);
+    m_androidPlatformWidget->addQtModuleButton()->setEnabled(true);
+    m_androidPlatformWidget->removeQtModuleButton()->setEnabled(false);
+    m_androidPlatformWidget->qtModuleCombo()->clear();
+    m_androidPlatformWidget->qtModuleList()->clear();
+    m_androidPlatformWidget->qtModuleCombo()->addItems(AndroidPlatformWidget::qtModuleMap.keys());
+    m_androidPlatformWidget->qtModuleList()->addItem(QLatin1String("Qt Svg"));
+    m_androidPlatformWidget->qtModuleCombo()->removeItem(m_androidPlatformWidget->qtModuleCombo()->findText(QLatin1String("Qt Svg")));
 
     m_androidPlatformWidget->signingDisabled()->setChecked(true);
     m_androidPlatformWidget->keystorePathEdit()->clear();
@@ -220,12 +232,6 @@ void AndroidPlatformController::charge() const
     m_androidPlatformWidget->showKeystorePasswordButton()->setChecked(false);
     m_androidPlatformWidget->showKeyPasswordButton()->setChecked(false);
     m_androidPlatformWidget->sameAsKeystorePasswordCheck()->setChecked(true);
-
-    m_androidPlatformWidget->addPermissionButton()->setEnabled(false);
-    m_androidPlatformWidget->permissionList()->setEnabled(false);
-    m_androidPlatformWidget->permissionCombo()->setEnabled(false);
-    m_androidPlatformWidget->removePermissionButton()->setEnabled(false);
-    m_androidPlatformWidget->removeQtModuleButton()->setEnabled(false);
     m_androidPlatformWidget->sameAsKeystorePasswordCheck()->setEnabled(false);
     m_androidPlatformWidget->keyPasswordEdit()->setEnabled(false);
     m_androidPlatformWidget->showKeyPasswordButton()->setEnabled(false);
@@ -235,11 +241,6 @@ void AndroidPlatformController::charge() const
     m_androidPlatformWidget->newKeystoreButton()->setEnabled(false);
     m_androidPlatformWidget->browseKeystoreButton()->setEnabled(false);
     m_androidPlatformWidget->clearKeystoreButton()->setEnabled(false);
-}
-
-void AndroidPlatformController::discharge() const
-{
-    // TODO
 }
 
 void AndroidPlatformController::onNameEdit(QString name) const

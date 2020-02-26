@@ -18,13 +18,13 @@ public:
 
 public slots:
     void charge();
-    void discharge();
 
 private slots:
     void onNewButtonClick();
     void onBackButtonClick();
     void onNextButtonClick();
     void onAndroidBuildButtonClick();
+    void onAndroidResetButtonClick();
 
 private:
     QWidget* widgetForPlatform(Platform platform) const;

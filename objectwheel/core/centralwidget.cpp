@@ -262,7 +262,6 @@ void CentralWidget::discharge()
 {
     m_outputController->discharge();
     m_designerController->discharge();
-    m_buildsController->discharge();
     m_qmlCodeEditorWidget->discharge();
     m_helpWidget->discharge();
 }

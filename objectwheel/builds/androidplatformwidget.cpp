@@ -527,23 +527,27 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     signingLayout->setColumnStretch(2, 1);
     signingLayout->setColumnMinimumWidth(0, labelColMinSz);
     m_buttonSlice->add(Back, "#5BC5F8", "#2592F9");
+    m_buttonSlice->add(Reset, "#AA815A", "#8C6B4A");
     m_buttonSlice->add(Build, "#8BBB56", "#6EA045");
     m_buttonSlice->get(Back)->setText(tr("Back"));
+    m_buttonSlice->get(Reset)->setText(tr("Reset"));
     m_buttonSlice->get(Build)->setText(tr("Build"));
     m_buttonSlice->get(Back)->setIcon(QIcon(":/images/welcome/unload.png"));
+    m_buttonSlice->get(Reset)->setIcon(QIcon(":/images/welcome/reset.png"));
     m_buttonSlice->get(Build)->setIcon(QIcon(":/images/welcome/load.png"));
     m_buttonSlice->get(Back)->setCursor(Qt::PointingHandCursor);
+    m_buttonSlice->get(Reset)->setCursor(Qt::PointingHandCursor);
     m_buttonSlice->get(Build)->setCursor(Qt::PointingHandCursor);
-    m_buttonSlice->settings().cellWidth = 150;
+    m_buttonSlice->settings().cellWidth = 100;
     m_buttonSlice->triggerSettings();
 
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(8);
+    layout->setSpacing(12);
     layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
     layout->addWidget(titleLabel, 0, Qt::AlignHCenter);
     layout->addWidget(descriptionLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(8);
+    layout->addSpacing(12);
     layout->addWidget(settingsLabel, 0, Qt::AlignHCenter);
     layout->addWidget(generalGroupBox); // Don't need to align the others since they are expanding anyways
     layout->addWidget(androidSpesificGroupBox);
@@ -763,6 +767,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 
     m_nameEdit->setPlaceholderText(tr("My Application"));
     m_organizationEdit->setPlaceholderText(tr("Organization, Inc."));
+    m_domainEdit->setPlaceholderText(tr("example.com"));
     m_iconPathEdit->setPlaceholderText(tr("Use 'Browse' button to choose your icon file"));
     m_keystorePathEdit->setPlaceholderText(tr("Use 'Browse' button to choose your keystore file"));
     m_keystorePasswordEdit->setPlaceholderText(tr("Type your keystore password"));

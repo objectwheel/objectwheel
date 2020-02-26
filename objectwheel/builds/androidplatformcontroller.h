@@ -17,8 +17,7 @@ public:
     QCborMap toCborMap() const override;
 
 public slots:
-    void charge() const override;
-    void discharge() const override;
+    void charge() const;
 
 private slots:
     void onNameEdit(QString name) const;

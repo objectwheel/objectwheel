@@ -30,17 +30,14 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
             this, &BuildsController::onBackButtonClick);
     connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Build), &QPushButton::clicked,
             this, &BuildsController::onAndroidBuildButtonClick);
+    connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Reset), &QPushButton::clicked,
+            this, &BuildsController::onAndroidResetButtonClick);
 }
 
 void BuildsController::charge()
 {
     m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
     m_androidPlatformController->charge();
-}
-
-void BuildsController::discharge()
-{
-    m_androidPlatformController->discharge();
 }
 
 void BuildsController::onNewButtonClick()
@@ -74,7 +71,18 @@ void BuildsController::onAndroidBuildButtonClick()
         m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
         BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->platformList()->model());
         model->addBuildRequest(m_androidPlatformController->toCborMap());
+        m_androidPlatformController->charge();
     }
+}
+
+void BuildsController::onAndroidResetButtonClick()
+{
+    QMessageBox::StandardButton ret = UtilityFunctions::showMessage(m_buildsPane, tr("Do you want to reset the form?"),
+                                                                    tr("This will reset all the fields to their initial values."),
+                                                                    QMessageBox::Question,
+                                                                    QMessageBox::Yes | QMessageBox::No);
+    if (ret == QMessageBox::Yes)
+        m_androidPlatformController->charge();
 }
 
 QWidget* BuildsController::widgetForPlatform(Platform platform) const

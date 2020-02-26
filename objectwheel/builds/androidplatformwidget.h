@@ -21,7 +21,7 @@ class AndroidPlatformWidget final : public QWidget
     Q_DISABLE_COPY(AndroidPlatformWidget)
 
 public:
-    enum Buttons { Back, Build };
+    enum Buttons { Back, Reset, Build };
 
 public:
     static const QMap<QString, int> apiLevelMap;
