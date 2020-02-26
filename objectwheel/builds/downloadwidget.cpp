@@ -11,17 +11,17 @@
 #include <QPushButton>
 
 DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
-  , m_platformList(new QListView(this))
+  , m_downloadList(new QListView(this))
   , m_buttonSlice(new ButtonSlice(this))
 {
-    m_platformList->setUniformItemSizes(true);
-    m_platformList->setIconSize(QSize(54, 54));
-    m_platformList->setFixedSize(QSize(600, 400));
-    m_platformList->setFocusPolicy(Qt::NoFocus);
-    m_platformList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_platformList->setModel(new BuildModel(this));
-    m_platformList->setItemDelegate(new BuildDelegate(m_platformList));
-    m_platformList->verticalScrollBar()->setStyleSheet(
+    m_downloadList->setUniformItemSizes(true);
+    m_downloadList->setIconSize(QSize(54, 54));
+    m_downloadList->setFixedSize(QSize(600, 400));
+    m_downloadList->setFocusPolicy(Qt::NoFocus);
+    m_downloadList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_downloadList->setModel(new BuildModel(this));
+    m_downloadList->setItemDelegate(new BuildDelegate(m_downloadList));
+    m_downloadList->verticalScrollBar()->setStyleSheet(
                 QStringLiteral(
                     "QScrollBar:vertical {"
                     "    background: transparent;"
@@ -39,7 +39,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
                     "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
                     "    background: none;"
                     "}").arg(15).arg(6).arg(2.5));
-    m_platformList->setStyleSheet(
+    m_downloadList->setStyleSheet(
                 QStringLiteral(
                     "QListView {"
                     "    background: #12000000;"
@@ -80,13 +80,13 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(descriptionLabel, 0, Qt::AlignHCenter);
     layout->addSpacing(8);
     layout->addWidget(buildsLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(m_platformList, 0, Qt::AlignHCenter);
+    layout->addWidget(m_downloadList, 0, Qt::AlignHCenter);
     layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
 }
 
-QListView* DownloadWidget::platformList() const
+QListView* DownloadWidget::downloadList() const
 {
-    return m_platformList;
+    return m_downloadList;
 }
 
 ButtonSlice* DownloadWidget::buttonSlice() const

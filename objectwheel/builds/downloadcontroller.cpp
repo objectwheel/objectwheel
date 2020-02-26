@@ -9,19 +9,19 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
     : QObject(parent)
     , m_downloadWidget(downloadWidget)
 {
-    auto noBuildsIndicatorLabel = new QLabel(tr("No builds"), m_downloadWidget->platformList());
-    noBuildsIndicatorLabel->setFixedSize(m_downloadWidget->platformList()->size());
+    auto noBuildsIndicatorLabel = new QLabel(tr("No builds"), m_downloadWidget->downloadList());
+    noBuildsIndicatorLabel->setFixedSize(m_downloadWidget->downloadList()->size());
     noBuildsIndicatorLabel->setAlignment(Qt::AlignCenter);
     noBuildsIndicatorLabel->setStyleSheet("color: #777777");
     UtilityFunctions::adjustFontPixelSize(noBuildsIndicatorLabel, -1);
-    connect(m_downloadWidget->platformList()->model(), &QAbstractItemModel::rowsInserted,
+    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::rowsInserted,
             noBuildsIndicatorLabel, [=] {
-        noBuildsIndicatorLabel->setVisible(m_downloadWidget->platformList()->model()->rowCount() <= 0);
+        noBuildsIndicatorLabel->setVisible(m_downloadWidget->downloadList()->model()->rowCount() <= 0);
     });
-    connect(m_downloadWidget->platformList()->model(), &QAbstractItemModel::rowsRemoved,
+    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::rowsRemoved,
             noBuildsIndicatorLabel, [=] {
-        noBuildsIndicatorLabel->setVisible(m_downloadWidget->platformList()->model()->rowCount() <= 0);
+        noBuildsIndicatorLabel->setVisible(m_downloadWidget->downloadList()->model()->rowCount() <= 0);
     });
-    connect(m_downloadWidget->platformList()->model(), &QAbstractItemModel::modelReset,
+    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::modelReset,
             noBuildsIndicatorLabel, &QLabel::show);
 }

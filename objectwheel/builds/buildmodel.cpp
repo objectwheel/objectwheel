@@ -118,6 +118,17 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+void BuildModel::clear()
+{
+    beginResetModel();
+    qDeleteAll(m_builds.begin(), m_builds.end());
+    m_builds.clear();
+    // FIXME: We also have to send "cancel" to the server,
+    // and no matter what, server might still send data us
+    // back so we have to ignore those too
+    endResetModel();
+}
+
 void BuildModel::onServerResponse(const QByteArray& data)
 {
     ServerManager::ServerCommands command = ServerManager::Invalid;

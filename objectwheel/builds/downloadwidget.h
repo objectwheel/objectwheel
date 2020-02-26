@@ -17,11 +17,11 @@ public:
 public:
     explicit DownloadWidget(QWidget* parent = nullptr);
 
-    QListView* platformList() const;
+    QListView* downloadList() const;
     ButtonSlice* buttonSlice() const;
 
 private:
-    QListView* m_platformList;
+    QListView* m_downloadList;
     ButtonSlice* m_buttonSlice;
 };
 

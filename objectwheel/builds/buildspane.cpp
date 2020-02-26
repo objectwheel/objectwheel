@@ -33,8 +33,8 @@ BuildsPane::BuildsPane(QWidget* parent) : QScrollArea(parent)
     m_stackedLayout->addWidget(m_platformSelectionWidget);
     m_stackedLayout->addWidget(m_androidPlatformWidget);
 
-    // To enable clickable links in tool tips, we use our
-    // own ToolTip class
+    // To enable clickable links in tool
+    // tips we use our own ToolTip class
     QCoreApplication::instance()->installEventFilter(this);
 }
 
@@ -63,10 +63,12 @@ bool BuildsPane::eventFilter(QObject* watched, QEvent* event)
     if (event->type() == QEvent::ToolTip) {
         if (auto widget = qobject_cast<QWidget*>(watched)) {
             if (isAncestorOf(widget)) {
-                if (widget->toolTip().isEmpty())
+                if (widget->toolTip().isEmpty()) {
                     event->ignore();
-                else
-                    Utils::ToolTip::show(static_cast<QHelpEvent*>(event)->globalPos(), widget->toolTip(), widget);
+                } else {
+                    Utils::ToolTip::show(static_cast<QHelpEvent*>(event)->globalPos(),
+                                         widget->toolTip(), widget);
+                }
                 return true;
             }
         }

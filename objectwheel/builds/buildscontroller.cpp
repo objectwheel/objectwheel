@@ -11,9 +11,9 @@
 #include <downloadcontroller.h>
 #include <buildmodel.h>
 
-#include <QListView>
 #include <QPushButton>
 #include <QLabel>
+#include <QListWidget>
 
 BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QObject(parent)
   , m_buildsPane(buildsPane)
@@ -26,6 +26,8 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
             this, &BuildsController::onBackButtonClick);
     connect(m_buildsPane->platformSelectionWidget()->buttonSlice()->get(PlatformSelectionWidget::Next), &QPushButton::clicked,
             this, &BuildsController::onNextButtonClick);
+    connect(m_buildsPane->platformSelectionWidget()->platformList(), &QListWidget::itemDoubleClicked,
+            this, &BuildsController::onNextButtonClick);
     connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Back), &QPushButton::clicked,
             this, &BuildsController::onBackButtonClick);
     connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Build), &QPushButton::clicked,
@@ -36,8 +38,10 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
 
 void BuildsController::charge()
 {
-    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
     m_androidPlatformController->charge();
+    m_buildsPane->platformSelectionWidget()->platformList()->setCurrentRow(0);
+    m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
+    static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model())->clear();
 }
 
 void BuildsController::onNewButtonClick()
@@ -69,7 +73,7 @@ void BuildsController::onAndroidBuildButtonClick()
 {
     if (m_androidPlatformController->isComplete()) {
         m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
-        BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->platformList()->model());
+        BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
         model->addBuildRequest(m_androidPlatformController->toCborMap());
         m_androidPlatformController->charge();
     }
