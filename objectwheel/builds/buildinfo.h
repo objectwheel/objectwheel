@@ -1,14 +1,14 @@
-#ifndef BUILD_H
-#define BUILD_H
+#ifndef BUILDINFO_H
+#define BUILDINFO_H
 
 #include <QCborMap>
 #include <QTime>
 #include <QBuffer>
 
-class Build final : public QObject
+class BuildInfo final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(Build)
+    Q_DISABLE_COPY(BuildInfo)
 
     friend class BuildModel;
 
@@ -18,13 +18,13 @@ class Build final : public QObject
     };
 
 public:
-    explicit Build(const QCborMap& request, QObject* parent = nullptr);
+    explicit BuildInfo(const QCborMap& request, QObject* parent = nullptr);
 
     const QCborMap& request() const;
-
     QBuffer* buffer();
     QList<Block>& recentBlocks();
 
+public:
     QString uid() const;
     void setUid(const QString& uid);
 
@@ -45,14 +45,16 @@ public:
 
 private:
     const QCborMap m_request;
+    QBuffer m_buffer;
+    QList<Block> m_recentBlocks;
+
+private:
     QString m_uid;
     QString m_status;
     QTime m_timeLeft;
     qreal m_speed;
     int m_totalBytes;
     int m_receivedBytes;
-    QBuffer m_buffer;
-    QList<Block> m_recentBlocks;
 };
 
-#endif // BUILD_H
+#endif // BUILDINFO_H

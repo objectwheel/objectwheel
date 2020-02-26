@@ -5,8 +5,8 @@ HEADERS += $$PWD/androidcreatekeystorecertificate.h \
            $$PWD/abstractplatformcontroller.h \
            $$PWD/androidplatformcontroller.h \
            $$PWD/androidplatformwidget.h \
-           $$PWD/build.h \
            $$PWD/builddelegate.h \
+           $$PWD/buildinfo.h \
            $$PWD/buildmodel.h \
            $$PWD/buildscontroller.h \
            $$PWD/buildspane.h \
@@ -19,8 +19,8 @@ SOURCES += $$PWD/androidcreatekeystorecertificate.cpp \
            $$PWD/abstractplatformcontroller.cpp \
            $$PWD/androidplatformcontroller.cpp \
            $$PWD/androidplatformwidget.cpp \
-           $$PWD/build.cpp \
            $$PWD/builddelegate.cpp \
+           $$PWD/buildinfo.cpp \
            $$PWD/buildmodel.cpp \
            $$PWD/buildscontroller.cpp \
            $$PWD/buildspane.cpp \

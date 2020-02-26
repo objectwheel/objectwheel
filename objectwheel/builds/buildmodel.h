@@ -3,7 +3,7 @@
 
 #include <QAbstractListModel>
 
-class Build;
+class BuildInfo;
 class QCborMap;
 
 class BuildModel final : public QAbstractListModel
@@ -43,14 +43,14 @@ private slots:
     void onServerResponse(const QByteArray& data);
 
 private:
-    void scheduleConnection(Build* build);
-    void establishConnection(Build* build);
+    void scheduleConnection(BuildInfo* buildInfo);
+    void establishConnection(BuildInfo* buildInfo);
     QIcon platformIcon(const QString& rawPlatformName) const;
     QString packageSuffixFromRequest(const QCborMap& request) const;
-    Build* buildFromUid(const QString& uid);
+    BuildInfo* buildInfoFromUid(const QString& uid);
 
 private:
-    QList<Build*> m_builds;
+    QList<BuildInfo*> m_buildInfos;
 };
 
 #endif // BUILDMODEL_H
