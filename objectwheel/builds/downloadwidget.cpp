@@ -16,7 +16,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
 {
     m_downloadList->setUniformItemSizes(true);
     m_downloadList->setIconSize(QSize(54, 54));
-    m_downloadList->setFixedSize(QSize(600, 400));
+    m_downloadList->setFixedSize(QSize(550, 360));
     m_downloadList->setFocusPolicy(Qt::NoFocus);
     m_downloadList->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_downloadList->setModel(new BuildModel(this));

@@ -106,6 +106,9 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
             abis.append(abi.toString());
         return abis.join(QLatin1String(", "));
     }
+    case Qt::ToolTipRole:
+    case Qt::StatusTipRole:
+    case Qt::WhatsThisRole:
     case StatusRole:
         return buildInfo->status();
     case SpeedRole:
@@ -318,37 +321,32 @@ void BuildModel::establishConnection(BuildInfo* buildInfo)
 
     buildInfo->setStatus(tr("Connecting to the server...."));
 
-    QString tmpFilePath;
-    {
-        QTemporaryFile tempFile;
-        if (!tempFile.open()) {
-            qWarning("WARNING: Cannot open up a temporary file");
-            buildInfo->setStatus(tr("An Internal Error Occurred"));
-            emit dataChanged(index, index);
-            return;
+    do {
+        QString tmpFilePath;
+        {
+            QTemporaryFile tempFile;
+            if (!tempFile.open()) {
+                buildInfo->setStatus(tr("Failed to establish temporary file"));
+                break;
+            }
+            tmpFilePath = tempFile.fileName();
         }
-        tmpFilePath = tempFile.fileName();
-    }
-    if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) == 0) {
-        qWarning("WARNING: Cannot zip user project");
-        buildInfo->setStatus(tr("An Internal Error Occurred"));
-        emit dataChanged(index, index);
-        return;
-    }
-    QFile tempFile(tmpFilePath);
-    if (!tempFile.open(QFile::ReadOnly)) {
-        qWarning("WARNING: Cannot open compressed project file");
-        buildInfo->setStatus(tr("An Internal Error Occurred"));
-        emit dataChanged(index, index);
-        return;
-    }
-
-    ServerManager::send(ServerManager::RequestCloudBuild,
-                        UserManager::email(),
-                        UserManager::password(),
-                        buildInfo->request(), tempFile.readAll());
-    tempFile.close();
-    tempFile.remove();
+        if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) <= 0) {
+            buildInfo->setStatus(tr("Failed to compress the project"));
+            break;
+        }
+        QFile tempFile(tmpFilePath);
+        if (!tempFile.open(QFile::ReadOnly)) {
+            buildInfo->setStatus(tr("Failed to open temporary file"));
+            break;
+        }
+        ServerManager::send(ServerManager::RequestCloudBuild,
+                            UserManager::email(),
+                            UserManager::password(),
+                            buildInfo->request(), tempFile.readAll());
+        tempFile.close();
+        tempFile.remove();
+    } while(false);
 
     emit dataChanged(index, index);
 }

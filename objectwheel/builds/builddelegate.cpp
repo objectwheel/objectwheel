@@ -33,24 +33,6 @@ void BuildDelegate::updateEditorGeometry(QWidget* widget, const QStyleOptionView
                         widget->width(), opt.rect.height() - 2 * padding);
 }
 
-void BuildDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
-{
-//    if (index.column() == 0)
-//        return editor->deleteLater();
-
-//    // Using typeProperty because the item is invalidated and
-//    // index.data(TypeRole) is invalid already at this point
-//    auto type = editor->property(typeProperty).value<Type>();
-//    if (type == Invalid)
-//        return QStyledItemDelegate::destroyEditor(editor, index);
-
-//    disconnect(editor, 0, 0, 0);
-//    clearWidget(editor, type);
-//    editor->setParent(nullptr);
-//    editor->setVisible(false);
-//    m_cache->push(type, editor);
-}
-
 QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/,
                                      const QModelIndex& index) const
 {
@@ -63,18 +45,22 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     infoButton->setFlat(true);
     infoButton->setIcon(QIcon(":/images/output/info.svg"));
     infoButton->setFixedSize(buttonSize);
+    infoButton->setToolTip(tr("Show details"));
     auto deleteButton = new QPushButton;
     deleteButton->setFocusPolicy(Qt::StrongFocus);
     deleteButton->setCursor(Qt::PointingHandCursor);
     deleteButton->setFlat(true);
     deleteButton->setIcon(QIcon(":/images/builds/trash.svg"));
     deleteButton->setFixedSize(buttonSize);
+    deleteButton->setToolTip(tr("Delete"));
     auto openFolderButton = new QPushButton;
     openFolderButton->setFocusPolicy(Qt::StrongFocus);
     openFolderButton->setCursor(Qt::PointingHandCursor);
     openFolderButton->setFlat(true);
     openFolderButton->setIcon(QIcon(":/images/builds/open.svg"));
     openFolderButton->setFixedSize(buttonSize);
+    openFolderButton->setEnabled(false);
+    openFolderButton->setToolTip(tr("Show in folder"));
     auto widget = new QWidget(parent);
     auto layout = new QVBoxLayout(widget);
     layout->setContentsMargins(0, 0, 0, 0);

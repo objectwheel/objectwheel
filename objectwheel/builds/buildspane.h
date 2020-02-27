@@ -25,9 +25,6 @@ public:
     QSize minimumSizeHint() const override;
 
 private:
-    bool eventFilter(QObject* watched, QEvent* event) override;
-
-private:
     StackedLayout* m_stackedLayout;
     DownloadWidget* m_downloadWidget;
     PlatformSelectionWidget* m_platformSelectionWidget;

@@ -75,6 +75,9 @@ public:
     QCheckBox* sameAsKeystorePasswordCheck() const;
 
 private:
+    bool eventFilter(QObject* watched, QEvent* event) override;
+
+private:
     ButtonSlice* m_buttonSlice;
     LineEdit* m_nameEdit;
     QSpinBox* m_versionCodeSpin;

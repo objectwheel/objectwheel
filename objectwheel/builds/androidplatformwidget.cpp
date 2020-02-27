@@ -3,6 +3,7 @@
 #include <paintutils.h>
 #include <buttonslice.h>
 #include <lineedit.h>
+#include <tooltip/tooltip.h>
 
 #include <QBoxLayout>
 #include <QGroupBox>
@@ -17,6 +18,8 @@
 #include <QTextStream>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QHelpEvent>
+#include <QCoreApplication>
 
 const QMap<QString, int> AndroidPlatformWidget::apiLevelMap {
     { "API 21: Android 5.0", 21 },
@@ -827,6 +830,13 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_iconPictureLabel->setFixedSize(iconPictureSize, iconPictureSize);
     m_iconPictureLabel->setFrameShape(QFrame::StyledPanel);
     m_iconPictureLabel->setIndent(0);
+
+    m_signingEnabled->setEnabled(false);
+    m_signingEnabled->setToolTip(tr("Not available at the moment<br><br>") + m_signingEnabled->toolTip());
+
+    // To enable clickable links in tool
+    // tips we use our own ToolTip class
+    QCoreApplication::instance()->installEventFilter(this);
 }
 
 ButtonSlice* AndroidPlatformWidget::buttonSlice() const
@@ -1032,4 +1042,22 @@ QToolButton* AndroidPlatformWidget::showKeyPasswordButton() const
 QCheckBox* AndroidPlatformWidget::sameAsKeystorePasswordCheck() const
 {
     return m_sameAsKeystorePasswordCheck;
+}
+
+bool AndroidPlatformWidget::eventFilter(QObject* watched, QEvent* event)
+{
+    if (event->type() == QEvent::ToolTip) {
+        if (auto widget = qobject_cast<QWidget*>(watched)) {
+            if (isAncestorOf(widget)) {
+                if (widget->toolTip().isEmpty()) {
+                    event->ignore();
+                } else {
+                    Utils::ToolTip::show(static_cast<QHelpEvent*>(event)->globalPos(),
+                                         widget->toolTip(), widget);
+                }
+                return true;
+            }
+        }
+    }
+    return QWidget::eventFilter(watched, event);
 }
