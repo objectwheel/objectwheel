@@ -16,16 +16,12 @@ struct CleanExit
         std::signal(SIGFPE, exit);
     }
 
-    ~CleanExit()
-    {
-        qWarning("Exited properly");
-    }
-
     static void exit(int)
     {
         static bool isExited = false;
         if (!isExited) {
             isExited = true;
+            qWarning("CleanExit: Exited properly!");
             QCoreApplication::exit(EXIT_FAILURE);
         }
     }

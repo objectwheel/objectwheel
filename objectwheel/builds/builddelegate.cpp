@@ -182,16 +182,14 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     const QTime& timeLeft = index.data(BuildModel::TimeLeftRole).toTime();
     const int receivedBytes = index.data(BuildModel::ReceivedBytesRole).toInt();
     const int totalBytes = index.data(BuildModel::TotalBytesRole).toInt();
-    const qreal progress = 100.0 * receivedBytes / totalBytes;
+    const qreal progress = totalBytes > 0 ? 100.0 * receivedBytes / totalBytes : 0;
     const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QLatin1String("/sec");
     const QString& timeLeftStr = timeLeft.isValid() ? timeLeft.toString(QLatin1String("hh:mm:ss"))
-                                                    : QLatin1String("-");
-    const QString& sizeStr = totalBytes > 0
-            ? UtilityFunctions::toPrettyBytesString(receivedBytes)
-              + QLatin1String(" / ")
-              + UtilityFunctions::toPrettyBytesString(totalBytes)
-              + QLatin1String(" ( % %1 )").arg(QString::number(progress, 'f', 2))
-            : QLatin1String("-");
+                                                    : QLatin1String("00:00:00");
+    const QString& sizeStr = UtilityFunctions::toPrettyBytesString(receivedBytes)
+            + QLatin1String(" / ")
+            + UtilityFunctions::toPrettyBytesString(totalBytes)
+            + QLatin1String(" ( % %1 )").arg(QString::number(progress, 'f', 2));
 
     labelRect = QRectF(labelRect.left() + leftLength + 2 * spacing, opt.rect.top() + padding,
                        rightLabelLength, textHeight);
@@ -221,18 +219,14 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Progress:"), Qt::AlignRight | Qt::AlignBottom);
     painter->setFont(opt.font);
-    if (totalBytes > 0) {
-        QRectF progressRect(textRect.left(), 0, textRect.width(), 7);
-        progressRect.moveBottom(textRect.bottom() - 2);
-        QStyleOptionProgressBar bar;
-        bar.initFrom(opt.widget);
-        bar.rect = progressRect.toRect();
-        bar.maximum = 100;
-        bar.progress = progress; // Due to stylesheet on QListView, we don't use opt->widget->style()
-        QApplication::style()->drawControl(QStyle::CE_ProgressBar, &bar, painter, opt.widget);
-    } else {
-        painter->drawText(textRect, QLatin1String("-"), Qt::AlignLeft | Qt::AlignBottom);
-    }
+    QRectF progressRect(textRect.left(), 0, textRect.width(), 7);
+    progressRect.moveBottom(textRect.bottom() - 2);
+    QStyleOptionProgressBar bar;
+    bar.initFrom(opt.widget);
+    bar.rect = progressRect.toRect();
+    bar.maximum = 100;
+    bar.progress = progress; // Due to stylesheet on QListView, we don't use opt->widget->style()
+    QApplication::style()->drawControl(QStyle::CE_ProgressBar, &bar, painter, opt.widget);
 
     // Draw bottom line
     if (index.row() != index.model()->rowCount() - 1) {
