@@ -51,20 +51,23 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 
     // Draw texts
     QFont labelFont(opt.font);
-    labelFont.setWeight(QFont::Medium);
+    labelFont.setWeight(QFont::Normal);
     const int spacing = 2;
     const QFontMetrics fmLabel(labelFont);
     const QSize& buttonSize = index.data(BuildModel::ButtonSize).toSize();
+    const qreal textHeight = (opt.rect.height() - 2 * padding) / 4.0; // Divided by row count
     const int leftLabelLength = fmLabel.horizontalAdvance(tr("Version:"));
     const int rightLabelLength = fmLabel.horizontalAdvance(tr("Time left:"));
-    const qreal textHeight = (opt.rect.height() - 2 * padding) / 4.0; // Divided by row count
-    const qreal textWidth = (opt.rect.width() - iconRect.right() - 3 * padding - buttonSize.width() - 2 * spacing) / 2.0;
+    const int rightLength = rightLabelLength + spacing
+            + opt.fontMetrics.horizontalAdvance("999.99 MB / 999.99 MB ( % 100.00 )") + 1;
+    const int leftLength = opt.rect.width() - iconRect.right() - 3 * padding - buttonSize.width()
+            - 2 * spacing - rightLength;
     painter->setPen(opt.palette.text().color());
 
     QRectF labelRect(iconRect.right() + padding, opt.rect.top() + padding, leftLabelLength, textHeight);
-    QRectF textRect(labelRect.right() + spacing, labelRect.top(), textWidth - leftLabelLength - spacing, textHeight);
+    QRectF textRect(labelRect.right() + spacing, labelRect.top(), leftLength - leftLabelLength - spacing, textHeight);
     const QString& nameStr = opt.fontMetrics.elidedText(index.data(BuildModel::NameRole).toString(),
-                                                        Qt::ElideMiddle, textRect.width());
+                                                        Qt::ElideRight, textRect.width());
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Name:"), Qt::AlignRight | Qt::AlignTop);
     painter->setFont(opt.font);
@@ -73,7 +76,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     labelRect.moveTop(labelRect.top() + textHeight);
     textRect.moveTop(textRect.top() + textHeight);
     const QString& versionStr = opt.fontMetrics.elidedText(index.data(BuildModel::VersionRole).toString(),
-                                                           Qt::ElideMiddle, textRect.width());
+                                                           Qt::ElideRight, textRect.width());
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Version:"), Qt::AlignRight | Qt::AlignVCenter);
     painter->setFont(opt.font);
@@ -82,7 +85,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     labelRect.moveTop(labelRect.top() + textHeight);
     textRect.moveTop(textRect.top() + textHeight);
     const QString& abisStr = opt.fontMetrics.elidedText(index.data(BuildModel::AbisRole).toString(),
-                                                        Qt::ElideMiddle, textRect.width());
+                                                        Qt::ElideRight, textRect.width());
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("ABIs:"), Qt::AlignRight | Qt::AlignVCenter);
     painter->setFont(opt.font);
@@ -91,7 +94,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     labelRect.moveTop(labelRect.top() + textHeight);
     textRect.moveTop(textRect.top() + textHeight);
     const QString& statusStr = opt.fontMetrics.elidedText(index.data(BuildModel::StatusRole).toString(),
-                                                          Qt::ElideMiddle, textRect.width());
+                                                          Qt::ElideRight, textRect.width());
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Status:"), Qt::AlignRight | Qt::AlignBottom);
     painter->setFont(opt.font);
@@ -111,29 +114,26 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
               + QLatin1String(" ( % %1 )").arg(QString::number(progress, 'f', 2))
             : QLatin1String("-");
 
-    labelRect = QRectF(labelRect.left() + textWidth + 2 * spacing, opt.rect.top() + padding, rightLabelLength, textHeight);
-    textRect = QRectF(labelRect.right() + spacing, labelRect.top(), textWidth - rightLabelLength - spacing, textHeight);
+    labelRect = QRectF(labelRect.left() + leftLength + 2 * spacing, opt.rect.top() + padding, rightLabelLength, textHeight);
+    textRect = QRectF(labelRect.right() + spacing, labelRect.top(), rightLength - rightLabelLength - spacing, textHeight);
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Speed:"), Qt::AlignRight | Qt::AlignTop);
     painter->setFont(opt.font);
-    painter->drawText(textRect, opt.fontMetrics.elidedText(speedStr, Qt::ElideMiddle, textRect.width()),
-                      Qt::AlignLeft | Qt::AlignTop);
+    painter->drawText(textRect, speedStr, Qt::AlignLeft | Qt::AlignTop);
 
     labelRect.moveTop(labelRect.top() + textHeight);
     textRect.moveTop(textRect.top() + textHeight);
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Time left:"), Qt::AlignRight | Qt::AlignVCenter);
     painter->setFont(opt.font);
-    painter->drawText(textRect, opt.fontMetrics.elidedText(timeLeftStr, Qt::ElideMiddle, textRect.width()),
-                      Qt::AlignLeft | Qt::AlignVCenter);
+    painter->drawText(textRect, timeLeftStr, Qt::AlignLeft | Qt::AlignVCenter);
 
     labelRect.moveTop(labelRect.top() + textHeight);
     textRect.moveTop(textRect.top() + textHeight);
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Size:"), Qt::AlignRight | Qt::AlignVCenter);
     painter->setFont(opt.font);
-    painter->drawText(textRect, opt.fontMetrics.elidedText(sizeStr, Qt::ElideMiddle, textRect.width()),
-                      Qt::AlignLeft | Qt::AlignVCenter);
+    painter->drawText(textRect, sizeStr, Qt::AlignLeft | Qt::AlignVCenter);
 
     labelRect.moveTop(labelRect.top() + textHeight);
     textRect.moveTop(textRect.top() + textHeight);

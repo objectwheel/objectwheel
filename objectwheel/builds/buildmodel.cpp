@@ -74,13 +74,15 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
     case Qt::BackgroundRole: {
         QLinearGradient background(0, 0, 0, 1);
         background.setCoordinateMode(QGradient::ObjectMode);
-        background.setColorAt(0, "#28ffffff");
-        background.setColorAt(1, "#12000000");
+        background.setColorAt(0, "#15ffffff");
+        background.setColorAt(1, "#10000000");
         return QBrush(background);
-    } case Qt::ForegroundRole:
+    }
+    case Qt::ForegroundRole:
         return QApplication::palette().text();
     case Qt::FontRole: {
         QFont font(QApplication::font());
+        font.setWeight(QFont::Light);
         font.setPixelSize(11);
         return font;
     }
