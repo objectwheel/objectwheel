@@ -512,7 +512,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
 
-        if (!isFlat || isDown) {
+        if (!isFlat /*|| isDown*/) {
             switch (style) {
             case Push: {
                 rect.adjust(0.5, 0.5, -0.5, 0);

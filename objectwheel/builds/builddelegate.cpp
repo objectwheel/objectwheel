@@ -6,9 +6,86 @@
 #include <QPainter>
 #include <QTime>
 #include <QApplication>
+#include <QPushButton>
+#include <QVBoxLayout>
 
 BuildDelegate::BuildDelegate(QObject* parent) : StyledItemDelegate(parent)
 {
+}
+
+void BuildDelegate::setEditorData(QWidget*, const QModelIndex&) const
+{
+    // do nothing
+}
+
+void BuildDelegate::setModelData(QWidget*, QAbstractItemModel*, const QModelIndex&) const
+{
+    // do nothing
+}
+
+void BuildDelegate::updateEditorGeometry(QWidget* widget, const QStyleOptionViewItem& option,
+                                         const QModelIndex& index) const
+{
+    StyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+    const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
+    widget->setGeometry(opt.rect.width() - padding - widget->width(), padding,
+                        widget->width(), opt.rect.height() - 2 * padding);
+}
+
+void BuildDelegate::destroyEditor(QWidget* editor, const QModelIndex& index) const
+{
+//    if (index.column() == 0)
+//        return editor->deleteLater();
+
+//    // Using typeProperty because the item is invalidated and
+//    // index.data(TypeRole) is invalid already at this point
+//    auto type = editor->property(typeProperty).value<Type>();
+//    if (type == Invalid)
+//        return QStyledItemDelegate::destroyEditor(editor, index);
+
+//    disconnect(editor, 0, 0, 0);
+//    clearWidget(editor, type);
+//    editor->setParent(nullptr);
+//    editor->setVisible(false);
+//    m_cache->push(type, editor);
+}
+
+QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/,
+                                     const QModelIndex& index) const
+{
+    if (!index.isValid())
+        return nullptr;
+    const QSize& buttonSize = index.data(BuildModel::ButtonSize).toSize();
+    auto infoButton = new QPushButton;
+    infoButton->setFocusPolicy(Qt::StrongFocus);
+    infoButton->setCursor(Qt::PointingHandCursor);
+    infoButton->setFlat(true);
+    infoButton->setIcon(QIcon(":/images/output/info.svg"));
+    infoButton->setFixedSize(buttonSize);
+    auto deleteButton = new QPushButton;
+    deleteButton->setFocusPolicy(Qt::StrongFocus);
+    deleteButton->setCursor(Qt::PointingHandCursor);
+    deleteButton->setFlat(true);
+    deleteButton->setIcon(QIcon(":/images/builds/trash.svg"));
+    deleteButton->setFixedSize(buttonSize);
+    auto openFolderButton = new QPushButton;
+    openFolderButton->setFocusPolicy(Qt::StrongFocus);
+    openFolderButton->setCursor(Qt::PointingHandCursor);
+    openFolderButton->setFlat(true);
+    openFolderButton->setIcon(QIcon(":/images/builds/open.svg"));
+    openFolderButton->setFixedSize(buttonSize);
+    auto widget = new QWidget(parent);
+    auto layout = new QVBoxLayout(widget);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(infoButton);
+    layout->addStretch();
+    layout->addWidget(deleteButton);
+    layout->addStretch();
+    layout->addWidget(openFolderButton);
+    widget->setFixedWidth(buttonSize.width());
+    return widget;
 }
 
 void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
@@ -65,7 +142,8 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     painter->setPen(opt.palette.text().color());
 
     QRectF labelRect(iconRect.right() + padding, opt.rect.top() + padding, leftLabelLength, textHeight);
-    QRectF textRect(labelRect.right() + spacing, labelRect.top(), leftLength - leftLabelLength - spacing, textHeight);
+    QRectF textRect(labelRect.right() + spacing, labelRect.top(), leftLength - leftLabelLength
+                    - spacing, textHeight);
     const QString& nameStr = opt.fontMetrics.elidedText(index.data(BuildModel::NameRole).toString(),
                                                         Qt::ElideRight, textRect.width());
     painter->setFont(labelFont);
@@ -106,7 +184,8 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     const int totalBytes = index.data(BuildModel::TotalBytesRole).toInt();
     const qreal progress = 100.0 * receivedBytes / totalBytes;
     const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QLatin1String("/sec");
-    const QString& timeLeftStr = timeLeft.isValid() ? timeLeft.toString(QLatin1String("hh:mm:ss")) : QLatin1String("-");
+    const QString& timeLeftStr = timeLeft.isValid() ? timeLeft.toString(QLatin1String("hh:mm:ss"))
+                                                    : QLatin1String("-");
     const QString& sizeStr = totalBytes > 0
             ? UtilityFunctions::toPrettyBytesString(receivedBytes)
               + QLatin1String(" / ")
@@ -114,8 +193,10 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
               + QLatin1String(" ( % %1 )").arg(QString::number(progress, 'f', 2))
             : QLatin1String("-");
 
-    labelRect = QRectF(labelRect.left() + leftLength + 2 * spacing, opt.rect.top() + padding, rightLabelLength, textHeight);
-    textRect = QRectF(labelRect.right() + spacing, labelRect.top(), rightLength - rightLabelLength - spacing, textHeight);
+    labelRect = QRectF(labelRect.left() + leftLength + 2 * spacing, opt.rect.top() + padding,
+                       rightLabelLength, textHeight);
+    textRect = QRectF(labelRect.right() + spacing, labelRect.top(), rightLength - rightLabelLength
+                      - spacing, textHeight);
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Speed:"), Qt::AlignRight | Qt::AlignTop);
     painter->setFont(opt.font);

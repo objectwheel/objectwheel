@@ -15,8 +15,10 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
     noBuildsIndicatorLabel->setStyleSheet("color: #777777");
     UtilityFunctions::adjustFontPixelSize(noBuildsIndicatorLabel, -1);
     connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::rowsInserted,
-            noBuildsIndicatorLabel, [=] {
-        noBuildsIndicatorLabel->setVisible(m_downloadWidget->downloadList()->model()->rowCount() <= 0);
+            noBuildsIndicatorLabel, [=] (const QModelIndex& index, int first, int /*last*/) {
+        QAbstractItemModel* model = m_downloadWidget->downloadList()->model();
+        noBuildsIndicatorLabel->setVisible(model->rowCount() <= 0);
+        m_downloadWidget->downloadList()->openPersistentEditor(model->index(first, 0, index));
     });
     connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::rowsRemoved,
             noBuildsIndicatorLabel, [=] {
