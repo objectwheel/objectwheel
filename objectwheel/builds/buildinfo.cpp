@@ -1,7 +1,8 @@
 #include <buildinfo.h>
 
-BuildInfo::BuildInfo(const QCborMap& request, QObject* parent) : QObject(parent)
+BuildInfo::BuildInfo(const QCborMap& request, const QString& status, QObject* parent) : QObject(parent)
   , m_request(request)
+  , m_status(status)
   , m_speed(0)
   , m_totalBytes(0)
   , m_receivedBytes(0)

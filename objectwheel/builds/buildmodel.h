@@ -40,11 +40,11 @@ public slots:
     void clear();
 
 private slots:
+    void start();
     void onServerResponse(const QByteArray& data);
+    void onServerBytesWritten(qint64 bytes);
 
 private:
-    void scheduleConnection(BuildInfo* buildInfo);
-    void establishConnection(BuildInfo* buildInfo);
     QIcon platformIcon(const QString& rawPlatformName) const;
     QString packageSuffixFromRequest(const QCborMap& request) const;
     BuildInfo* buildInfoFromUid(const QString& uid);

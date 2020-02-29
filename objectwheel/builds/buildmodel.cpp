@@ -44,11 +44,9 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
 void BuildModel::addBuildRequest(const QCborMap& request)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    auto buildInfo = new BuildInfo(request, this);
-    buildInfo->setStatus(tr("Compressing the project..."));
-    m_buildInfos.append(buildInfo);
+    m_buildInfos.append(new BuildInfo(request, tr("Compressing the project..."), this));
     endInsertRows();
-    scheduleConnection(buildInfo);
+    QTimer::singleShot(100, this, &BuildModel::start);
 }
 
 int BuildModel::rowCount(const QModelIndex&) const
@@ -134,6 +132,50 @@ void BuildModel::clear()
     // and no matter what, server might still send data us
     // back so we have to ignore those too
     endResetModel();
+}
+
+void BuildModel::start()
+{
+    Q_ASSERT(!m_buildInfos.isEmpty());
+    BuildInfo* buildInfo = m_buildInfos.last();
+    const QModelIndex& index = BuildModel::index(m_buildInfos.size() - 1);
+    Q_ASSERT(index.isValid());
+
+    QByteArray data;
+    {
+        QString tmpFilePath;
+        {
+            QTemporaryFile tempFile;
+            if (!tempFile.open()) {
+                buildInfo->setStatus(tr("Failed to establish temporary file"));
+                emit dataChanged(index, index);
+                return;
+            }
+            tmpFilePath = tempFile.fileName();
+        }
+        if (tmpFilePath.isEmpty() || ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) <= 0) {
+            buildInfo->setStatus(tr("Failed to compress the project"));
+            emit dataChanged(index, index);
+            return;
+        }
+        QFile tempFile(tmpFilePath);
+        if (!tempFile.open(QFile::ReadOnly)) {
+            buildInfo->setStatus(tr("Failed to open temporary file"));
+            emit dataChanged(index, index);
+            return;
+        }
+        data = tempFile.readAll();
+        tempFile.close();
+        tempFile.remove();
+    }
+
+    buildInfo->setStatus(tr("Uploading the project..."));
+    emit dataChanged(index, index);
+
+    ServerManager::send(ServerManager::RequestCloudBuild,
+                        UserManager::email(),
+                        UserManager::password(),
+                        buildInfo->request(), data);
 }
 
 void BuildModel::onServerResponse(const QByteArray& data)
@@ -305,50 +347,9 @@ void BuildModel::onServerResponse(const QByteArray& data)
     }
 }
 
-void BuildModel::scheduleConnection(BuildInfo* buildInfo)
+void BuildModel::onServerBytesWritten(qint64 bytes)
 {
-    QTimer::singleShot(100, [=] { establishConnection(buildInfo); });
-}
 
-void BuildModel::establishConnection(BuildInfo* buildInfo)
-{
-    int row = m_buildInfos.indexOf(buildInfo);
-    if (row < 0)
-        return;
-
-    const QModelIndex& index = BuildModel::index(row);
-    Q_ASSERT(index.isValid());
-
-    buildInfo->setStatus(tr("Connecting to the server...."));
-
-    do {
-        QString tmpFilePath;
-        {
-            QTemporaryFile tempFile;
-            if (!tempFile.open()) {
-                buildInfo->setStatus(tr("Failed to establish temporary file"));
-                break;
-            }
-            tmpFilePath = tempFile.fileName();
-        }
-        if (ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) <= 0) {
-            buildInfo->setStatus(tr("Failed to compress the project"));
-            break;
-        }
-        QFile tempFile(tmpFilePath);
-        if (!tempFile.open(QFile::ReadOnly)) {
-            buildInfo->setStatus(tr("Failed to open temporary file"));
-            break;
-        }
-        ServerManager::send(ServerManager::RequestCloudBuild,
-                            UserManager::email(),
-                            UserManager::password(),
-                            buildInfo->request(), tempFile.readAll());
-        tempFile.close();
-        tempFile.remove();
-    } while(false);
-
-    emit dataChanged(index, index);
 }
 
 QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
