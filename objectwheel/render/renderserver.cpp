@@ -10,9 +10,7 @@ RenderServer::RenderServer(QObject* parent)
     , m_checkAliveTimer(new QTimer(this))
 {
     m_checkAliveTimer->setInterval(4000);
-
     connect(m_checkAliveTimer, &QTimer::timeout, this, &RenderServer::connectionTimeout);
-
     connect(m_server, &QLocalServer::newConnection, this, &RenderServer::onNewConnection);
 }
 
@@ -90,6 +88,7 @@ void RenderServer::onNewConnection()
         emit connected();
     } else {
         pendingConnection->abort();
+        pendingConnection->deleteLater();
     }
 }
 

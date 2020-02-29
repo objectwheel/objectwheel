@@ -18,6 +18,9 @@ class BuildInfo final : public QObject
     };
 
 public:
+    enum State { Uploading, Downloading, Finished };
+
+public:
     explicit BuildInfo(const QCborMap& request, const QString& status = QString(), QObject* parent = nullptr);
 
     const QCborMap& request() const;
@@ -40,8 +43,11 @@ public:
     int totalBytes() const;
     void setTotalBytes(int totalBytes);
 
-    int receivedBytes() const;
-    void setReceivedBytes(int receivedBytes);
+    int transferredBytes() const;
+    void setTransferredBytes(int transferredBytes);
+
+    State state() const;
+    void setState(State state);
 
 private:
     const QCborMap m_request;
@@ -54,7 +60,8 @@ private:
     QTime m_timeLeft;
     qreal m_speed;
     int m_totalBytes;
-    int m_receivedBytes;
+    int m_transferredBytes;
+    State m_state;
 };
 
 #endif // BUILDINFO_H

@@ -54,14 +54,14 @@ public:
     static bool isConnected();
 
     template<typename... Args>
-    static void send(ServerCommands command, Args&&... args)
+    static qint64 send(ServerCommands command, Args&&... args)
     {
         using namespace UtilityFunctions;
         if (instance()->state() != QAbstractSocket::ConnectedState) {
             qWarning() << "ServerManager::send: Unable to send the data, server is not connected.";
-            return;
+            return -1;
         }
-        instance()->sendBinaryMessage(pushCbor(command, std::forward<Args>(args)...));
+        return instance()->sendBinaryMessage(pushCbor(command, std::forward<Args>(args)...));
     }
 
 private slots:

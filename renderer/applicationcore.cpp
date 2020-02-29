@@ -7,6 +7,7 @@
 #include <quicktheme.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
+#include <signalwatcher.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -22,6 +23,10 @@
 #endif
 
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
+  , m_renderSocket(new RenderSocket)
+  , m_socketThread(new QThread(this))
+  , m_commandDispatcher(new CommandDispatcher(m_renderSocket, this))
+  , m_renderEngine(nullptr) // Must be initialized after some settings below
 {
     /** Core initialization **/
     QApplication::setQuitOnLastWindowClosed(false);
@@ -30,22 +35,17 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setApplicationVersion(QStringLiteral(APP_VER));
     QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Renderer"));
-
-    /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
+
+    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
+                     QCoreApplication::instance(), [] (int signal) {
+        fputs(qPrintable(QStringLiteral("Quit the application by signal(%1)\n").arg(QString::number(signal))), stderr);
+        QCoreApplication::exit(EXIT_FAILURE);
+    });
 
     DesignerSupport::activateDesignerWindowManager();
     DesignerSupport::activateDesignerMode();
     RenderUtils::stopUnifiedTimer();
-    qRegisterMetaType<RendererCommands>("RendererCommands");
-
-    m_renderSocket = new RenderSocket;
-    m_socketThread = new QThread(this);
-
-    m_renderSocket->moveToThread(m_socketThread);
-    m_socketThread->start();
-
-    m_commandDispatcher = new CommandDispatcher(m_renderSocket, this);
     m_renderEngine = new RenderEngine(this);
 
     connect(m_renderSocket, &RenderSocket::disconnected,
@@ -86,6 +86,9 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
             m_commandDispatcher, &CommandDispatcher::scheduleRenderDone);
     connect(m_renderEngine, &RenderEngine::previewDone,
             m_commandDispatcher, &CommandDispatcher::schedulePreviewDone);
+
+    m_renderSocket->moveToThread(m_socketThread);
+    m_socketThread->start();
 }
 
 ApplicationCore::~ApplicationCore()

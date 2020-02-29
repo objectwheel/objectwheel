@@ -22,7 +22,7 @@ public:
         SpeedRole,
         TimeLeftRole,
         TotalBytesRole,
-        ReceivedBytesRole
+        TransferredBytesRole
     };
 
 public:

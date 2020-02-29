@@ -7,6 +7,7 @@
 #include <paintutils.h>
 #include <parserutils.h>
 #include <applicationcore.h>
+#include <renderercommands.h>
 
 #include <private/qquickdesignersupportmetainfo_p.h>
 #include <private/qquickdesignersupportproperties_p.h>
@@ -40,6 +41,8 @@ RenderEngine::RenderEngine(QObject* parent) : QObject(parent)
   , m_renderTimer(new QTimer(this))
   , m_reRenderTimer(new QTimer(this))
 {
+    qRegisterMetaType<RendererCommands>();
+
     DesignerSupport::createOpenGLContext(m_view);
     DesignerSupport::setRootItem(m_view, RenderUtils::createDummyItem(m_view->engine()));
 

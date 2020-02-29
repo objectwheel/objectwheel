@@ -27,7 +27,7 @@ bool ControlRenderingManager::s_connected = false;
 
 ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(parent)
 {
-    qRegisterMetaType<RendererCommands>("RendererCommands");
+    qRegisterMetaType<RendererCommands>();
 
     s_instance = this;
     s_renderServer = new RenderServer;

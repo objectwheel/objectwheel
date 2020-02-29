@@ -1,7 +1,7 @@
 #ifndef RENDERERCOMMANDS_H
 #define RENDERERCOMMANDS_H
 
-#include <QtGlobal>
+#include <QMetaType>
 
 enum RendererCommands {
     ConnectionAlive = 0x1000,
@@ -24,5 +24,6 @@ enum RendererCommands {
     DevicePixelRatioUpdate,
     Refresh
 };
+Q_DECLARE_METATYPE(RendererCommands)
 
 #endif // RENDERERCOMMANDS_H

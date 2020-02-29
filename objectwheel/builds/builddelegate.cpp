@@ -166,13 +166,13 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 
     const qreal speed = index.data(BuildModel::SpeedRole).toReal();
     const QTime& timeLeft = index.data(BuildModel::TimeLeftRole).toTime();
-    const int receivedBytes = index.data(BuildModel::ReceivedBytesRole).toInt();
+    const int transferredBytes = index.data(BuildModel::TransferredBytesRole).toInt();
     const int totalBytes = index.data(BuildModel::TotalBytesRole).toInt();
-    const qreal progress = totalBytes > 0 ? 100.0 * receivedBytes / totalBytes : 0;
+    const qreal progress = totalBytes > 0 ? 100.0 * transferredBytes / totalBytes : 0;
     const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QLatin1String("/sec");
     const QString& timeLeftStr = timeLeft.isValid() ? timeLeft.toString(QLatin1String("hh:mm:ss"))
                                                     : QLatin1String("00:00:00");
-    const QString& sizeStr = UtilityFunctions::toPrettyBytesString(receivedBytes)
+    const QString& sizeStr = UtilityFunctions::toPrettyBytesString(transferredBytes)
             + QLatin1String(" / ")
             + UtilityFunctions::toPrettyBytesString(totalBytes)
             + QLatin1String(" ( % %1 )").arg(QString::number(progress, 'f', 2));

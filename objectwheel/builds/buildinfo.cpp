@@ -5,7 +5,8 @@ BuildInfo::BuildInfo(const QCborMap& request, const QString& status, QObject* pa
   , m_status(status)
   , m_speed(0)
   , m_totalBytes(0)
-  , m_receivedBytes(0)
+  , m_transferredBytes(0)
+  , m_state(Uploading)
 {
 }
 
@@ -74,12 +75,22 @@ void BuildInfo::setTotalBytes(int totalBytes)
     m_totalBytes = totalBytes;
 }
 
-int BuildInfo::receivedBytes() const
+int BuildInfo::transferredBytes() const
 {
-    return m_receivedBytes;
+    return m_transferredBytes;
 }
 
-void BuildInfo::setReceivedBytes(int receivedBytes)
+void BuildInfo::setTransferredBytes(int transferredBytes)
 {
-    m_receivedBytes = receivedBytes;
+    m_transferredBytes = transferredBytes;
+}
+
+BuildInfo::State BuildInfo::state() const
+{
+    return m_state;
+}
+
+void BuildInfo::setState(State state)
+{
+    m_state = state;
 }

@@ -341,7 +341,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Target: Android"), this);
     auto descriptionLabel = new QLabel(tr("Adjust your application settings below"
-                                          "<p style='white-space:nowrap;font-size:12px'>"
+                                          "<p style='white-space:nowrap;font-weight:normal;font-size:12px'>"
                                           "All fields are optional and will be set to their "
                                           "default values if left as is"), this);
     auto settingsLabel = new QLabel(tr("Settings"));

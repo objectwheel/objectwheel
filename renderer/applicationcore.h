@@ -2,7 +2,6 @@
 #define APPLICATIONCORE_H
 
 #include <QObject>
-#include <cleanexit.h>
 
 class RenderSocket;
 class RenderEngine;
@@ -28,7 +27,6 @@ private slots:
     void quitIfDisconnected();
 
 private:
-    CleanExit m_cleanExit;
     RenderSocket* m_renderSocket;
     QThread* m_socketThread;
     CommandDispatcher* m_commandDispatcher;

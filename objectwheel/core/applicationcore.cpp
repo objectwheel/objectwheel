@@ -28,6 +28,7 @@
 #include <servermanager.h>
 #include <modemanager.h>
 #include <splashscreen.h>
+#include <signalwatcher.h>
 
 #include <QToolTip>
 #include <QScreen>
@@ -69,6 +70,12 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /** Core initialization **/
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
+
+    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
+                     QCoreApplication::instance(), [] (int signal) {
+        fputs(qPrintable(QStringLiteral("Quit the application by signal(%1)\n").arg(QString::number(signal))), stderr);
+        QCoreApplication::exit(EXIT_FAILURE);
+    });
 
     /* Load default fonts */
     for (const QString& fontName : QDir(QStringLiteral(":/fonts")).entryList(QDir::Files))
