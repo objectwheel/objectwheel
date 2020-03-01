@@ -7,7 +7,6 @@
 #include <quicktheme.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
-#include <signalwatcher.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -36,12 +35,6 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Renderer"));
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
-
-    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
-                     QCoreApplication::instance(), [] (int signal) {
-        fputs(qPrintable(QStringLiteral("Quit the application by signal(%1)\n").arg(QString::number(signal))), stderr);
-        QCoreApplication::exit(EXIT_FAILURE);
-    });
 
     DesignerSupport::activateDesignerWindowManager();
     DesignerSupport::activateDesignerMode();

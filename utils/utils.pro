@@ -11,7 +11,7 @@ DEPENDPATH += $$PWD
 
 ### Sources
 HEADERS += \
-    $$PWD/signalwatcher.h \
+    $$PWD/cleanexit.h \
     $$PWD/delayer.h \
     $$PWD/saveutils.h \
     $$PWD/toolutils.h \
@@ -29,7 +29,7 @@ HEADERS += \
     $$PWD/qmlerror.h
 
 SOURCES += \
-    $$PWD/signalwatcher.cpp \
+    $$PWD/cleanexit.cpp \
     $$PWD/delayer.cpp \
     $$PWD/saveutils.cpp \
     $$PWD/toolutils.cpp \

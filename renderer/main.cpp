@@ -1,5 +1,6 @@
 #include <applicationcore.h>
 #include <commandlineparser.h>
+#include <cleanexit.h>
 #include <QApplication>
 
 int main(int argc, char* argv[])
@@ -18,5 +19,5 @@ int main(int argc, char* argv[])
     core.run();
 
     // Start main event loop
-    return app.exec();
+    return CleanExit::exec(app);
 }

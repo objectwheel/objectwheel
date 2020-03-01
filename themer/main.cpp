@@ -2,7 +2,7 @@
 #include <saveutils.h>
 #include <quicktheme.h>
 #include <utilityfunctions.h>
-#include <signalwatcher.h>
+#include <cleanexit.h>
 
 #ifdef Q_OS_MACOS
 #include <windowoperations.h>
@@ -36,12 +36,6 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Themer"));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
-
-    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
-                     QCoreApplication::instance(), [] (int signal) {
-        fputs(qPrintable(QStringLiteral("Quit the application by signal(%1)\n").arg(QString::number(signal))), stderr);
-        QCoreApplication::exit(EXIT_FAILURE);
-    });
 
     /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
@@ -84,7 +78,7 @@ int main(int argc, char *argv[])
                 Qt::WindowStaysOnTopHint
             );
             window->show();
-            return a.exec();
+            return CleanExit::exec(a);
         }
     }
 
