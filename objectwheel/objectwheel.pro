@@ -2,6 +2,7 @@
 CONFIG  += c++14 strict_c++
 TARGET   = Objectwheel
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
+unix:QMAKE_CXXFLAGS += -pedantic-errors
 #DEFINES += RENDERER_DEBUG
 
 QT += network websockets help widgets widgets-private

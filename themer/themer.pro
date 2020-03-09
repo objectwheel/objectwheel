@@ -7,6 +7,7 @@ CONFIG  -= app_bundle
 CONFIG  += console c++14 strict_c++
 TARGET   = Themer
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
+unix:QMAKE_CXXFLAGS += -pedantic-errors
 
 QT += gui widgets qml quick
 

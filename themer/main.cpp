@@ -2,7 +2,7 @@
 #include <saveutils.h>
 #include <quicktheme.h>
 #include <utilityfunctions.h>
-#include <cleanexit.h>
+#include <signalwatcher.h>
 
 #ifdef Q_OS_MACOS
 #include <windowoperations.h>
@@ -36,9 +36,12 @@ int main(int argc, char *argv[])
     QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Themer"));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
-
-    /* Set application ui settings */
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
+
+    // Handle signals
+    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
+                     SignalWatcher::instance(), &SignalWatcher::defaultInterruptAction,
+                     Qt::QueuedConnection);
 
 #ifdef Q_OS_MACOS // Show/hide dock icon
     if (argc > 1 && argv[1] == QString("capture"))
@@ -78,7 +81,7 @@ int main(int argc, char *argv[])
                 Qt::WindowStaysOnTopHint
             );
             window->show();
-            return CleanExit::exec(a);
+            return a.exec();
         }
     }
 

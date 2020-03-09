@@ -28,6 +28,7 @@
 #include <servermanager.h>
 #include <modemanager.h>
 #include <splashscreen.h>
+#include <signalwatcher.h>
 
 #include <QToolTip>
 #include <QScreen>
@@ -69,6 +70,11 @@ ApplicationCore::ApplicationCore(QApplication* app)
     /** Core initialization **/
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
+
+    // Handle signals
+    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
+                     SignalWatcher::instance(), &SignalWatcher::defaultInterruptAction,
+                     Qt::QueuedConnection);
 
     /* Load default fonts */
     for (const QString& fontName : QDir(QStringLiteral(":/fonts")).entryList(QDir::Files))

@@ -295,10 +295,9 @@ void BuildModel::onServerResponse(const QByteArray& data)
             }
 
             // Gather 'speed' and 'time left' information
-            BuildInfo::Block block {
-                .size = chunk.size(),
-                        .timestamp = QTime::currentTime()
-            };
+            BuildInfo::Block block;
+            block.size = chunk.size();
+            block.timestamp = QTime::currentTime();
             buildInfo->recentBlocks().append(block);
             if (buildInfo->recentBlocks().size() > 10)
                 buildInfo->recentBlocks().removeFirst();
@@ -341,10 +340,9 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
             buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
 
             // Gather 'speed' and 'time left' information
-            BuildInfo::Block block {
-                .size = int(bytes),
-                .timestamp = QTime::currentTime()
-            };
+            BuildInfo::Block block;
+            block.size = int(bytes);
+            block.timestamp = QTime::currentTime();
             buildInfo->recentBlocks().append(block);
             if (buildInfo->recentBlocks().size() > 10)
                 buildInfo->recentBlocks().removeFirst();

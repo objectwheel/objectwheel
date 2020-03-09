@@ -7,6 +7,7 @@
 #include <quicktheme.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
+#include <signalwatcher.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -16,9 +17,9 @@
 #include <QThread>
 
 #if defined(Q_OS_UNIX)
-#include <unistd.h>
+#  include <unistd.h>
 #elif defined(Q_OS_WIN)
-#include <windows.h>
+#  include <windows.h>
 #endif
 
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
@@ -35,6 +36,11 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Renderer"));
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
+
+    // Handle signals
+    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
+                     SignalWatcher::instance(), &SignalWatcher::defaultInterruptAction,
+                     Qt::QueuedConnection);
 
     DesignerSupport::activateDesignerWindowManager();
     DesignerSupport::activateDesignerMode();
