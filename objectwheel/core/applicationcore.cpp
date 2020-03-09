@@ -125,8 +125,6 @@ ApplicationCore::ApplicationCore(QApplication* app)
     s_runManager = new RunManager(app);
     s_helpManager = new HelpManager(app);
 
-    s_serverManager->start();
-
     s_helpManager->setupHelpManager();
     Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
     QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,

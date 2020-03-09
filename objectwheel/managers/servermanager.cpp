@@ -5,19 +5,17 @@ ServerManager* ServerManager::s_instance = nullptr;
 QUrl ServerManager::s_host;
 QBasicTimer ServerManager::s_connectionTimer;
 
-ServerManager::ServerManager(const QUrl& host, QObject* parent) : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, parent)
+ServerManager::ServerManager(const QUrl& host, QObject* parent)
+    : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, parent)
 {
     s_instance = this;
     s_host = host;
-
-    connect(this, &ServerManager::connected,
-            this, &ServerManager::onConnect);
-    connect(this, &ServerManager::disconnected,
-            this, &ServerManager::onDisconnect);
     connect(this, qOverload<QAbstractSocket::SocketError>(&ServerManager::error),
             this, &ServerManager::onError);
     connect(this, &ServerManager::sslErrors,
             this, &ServerManager::onSslErrors);
+    s_connectionTimer.start(CONNECTION_TIMEOUT, Qt::VeryCoarseTimer, instance());
+    QMetaObject::invokeMethod(this, "open", Qt::QueuedConnection, Q_ARG(QUrl, s_host));
 }
 
 ServerManager::~ServerManager()
@@ -30,30 +28,9 @@ ServerManager* ServerManager::instance()
     return s_instance;
 }
 
-void ServerManager::start()
-{
-    s_connectionTimer.start(CONNECTION_TIMEOUT, Qt::VeryCoarseTimer, instance());
-}
-
-void ServerManager::stop()
-{
-    instance()->close();
-    s_connectionTimer.stop();
-}
-
 bool ServerManager::isConnected()
 {
     return instance()->state() == QAbstractSocket::ConnectedState;
-}
-
-void ServerManager::onConnect()
-{
-    s_connectionTimer.stop();
-}
-
-void ServerManager::onDisconnect()
-{
-    start();
 }
 
 void ServerManager::onError(QAbstractSocket::SocketError error)
@@ -70,9 +47,11 @@ void ServerManager::onSslErrors(const QList<QSslError>& errors)
 
 void ServerManager::timerEvent(QTimerEvent* event)
 {
-    if (event->timerId() == s_connectionTimer.timerId()
-            && state() == QAbstractSocket::UnconnectedState) {
-        open(s_host);
+    if (event->timerId() == s_connectionTimer.timerId()) {
+        if (state() == QAbstractSocket::UnconnectedState)
+            open(s_host);
+        else if (state() == QAbstractSocket::ConnectedState)
+            ping();
     } else {
         QWebSocket::timerEvent(event);
     }

@@ -128,7 +128,7 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
 void BuildModel::clear()
 {
     beginResetModel();
-    qDeleteAll(m_buildInfos.begin(), m_buildInfos.end());
+    qDeleteAll(m_buildInfos.cbegin(), m_buildInfos.cend());
     m_buildInfos.clear();
     // FIXME: We also have to send "cancel" to the server,
     // and no matter what, server might still send data us

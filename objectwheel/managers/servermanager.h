@@ -13,7 +13,7 @@ class ServerManager final : public QWebSocket
 
     friend class ApplicationCore;
 
-    enum { CONNECTION_TIMEOUT = 3000 };
+    enum { CONNECTION_TIMEOUT = 5000 };
 
 public:
     enum ServerCommands {
@@ -49,24 +49,19 @@ public:
 
 public:
     static ServerManager* instance();
-    static void start();
-    static void stop();
     static bool isConnected();
 
     template<typename... Args>
-    static qint64 send(ServerCommands command, Args&&... args)
-    {
-        using namespace UtilityFunctions;
-        if (instance()->state() != QAbstractSocket::ConnectedState) {
+    static qint64 send(ServerCommands command, Args&&... args) {
+        if (isConnected()) {
+            return instance()->sendBinaryMessage(UtilityFunctions::pushCbor(command, std::forward<Args>(args)...));
+        } else {
             qWarning() << "ServerManager::send: Unable to send the data, server is not connected.";
             return -1;
         }
-        return instance()->sendBinaryMessage(pushCbor(command, std::forward<Args>(args)...));
     }
 
 private slots:
-    void onConnect();
-    void onDisconnect();
     void onError(QAbstractSocket::SocketError);
     void onSslErrors(const QList<QSslError>&);
 
