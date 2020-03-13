@@ -13,7 +13,10 @@ class ServerManager final : public QWebSocket
 
     friend class ApplicationCore;
 
-    enum { CONNECTION_TIMEOUT = 5000 };
+    enum {
+        CONNECTION_RETRY_TIMEOUT = 4000,
+        CONNECTION_DROP_TIMEOUT = 9000
+    };
 
 public:
     enum ServerCommands {
@@ -63,6 +66,7 @@ public:
     }
 
 private slots:
+    void resetConnectionDropTimer();
     void onError(QAbstractSocket::SocketError);
     void onSslErrors(const QList<QSslError>&);
 
@@ -70,13 +74,14 @@ private:
     void timerEvent(QTimerEvent* event) override;
 
 private:
-    static ServerManager* s_instance;
-    static QUrl s_host;
-    static QBasicTimer s_connectionTimer;
-
-private:
     explicit ServerManager(const QUrl& host, QObject* parent = nullptr);
     ~ServerManager() override;
+
+private:
+    static ServerManager* s_instance;
+    static QUrl s_host;
+    static QBasicTimer s_connectionRetryTimer;
+    static QBasicTimer s_connectionDropTimer;
 };
 
 #endif // SERVERMANAGER_H

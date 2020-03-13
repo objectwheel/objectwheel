@@ -10,6 +10,7 @@
 #include <downloadwidget.h>
 #include <downloadcontroller.h>
 #include <buildmodel.h>
+#include <servermanager.h>
 
 #include <QPushButton>
 #include <QLabel>
@@ -34,6 +35,10 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
             this, &BuildsController::onAndroidBuildButtonClick);
     connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Reset), &QPushButton::clicked,
             this, &BuildsController::onAndroidResetButtonClick);
+    connect(static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model()), &BuildModel::uploadFinished,
+            this, [=] { m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New)->setEnabled(true); });
+    connect(ServerManager::instance(), &ServerManager::disconnected,
+            this, &BuildsController::onServerDisconnect);
 }
 
 void BuildsController::charge()
@@ -72,21 +77,49 @@ void BuildsController::onNextButtonClick()
 void BuildsController::onAndroidBuildButtonClick()
 {
     if (m_androidPlatformController->isComplete()) {
-        m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
-        BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
-        model->addBuildRequest(m_androidPlatformController->toCborMap());
-        m_androidPlatformController->charge();
+        if (ServerManager::isConnected()) {
+            m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New)->setEnabled(false);
+            m_buildsPane->stackedLayout()->setCurrentWidget(m_buildsPane->downloadWidget());
+            BuildModel* model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
+            model->addBuildRequest(m_androidPlatformController->toCborMap());
+            m_androidPlatformController->charge();
+        } else {
+            UtilityFunctions::showMessage(
+                        m_buildsPane,
+                        tr("Unable to connect to the server"),
+                        tr("Please make sure you have a working internet connection."),
+                        QMessageBox::Warning);
+        }
     }
 }
 
 void BuildsController::onAndroidResetButtonClick()
 {
-    QMessageBox::StandardButton ret = UtilityFunctions::showMessage(m_buildsPane, tr("Do you want to reset the form?"),
-                                                                    tr("This will reset all the fields to their initial values."),
-                                                                    QMessageBox::Question,
-                                                                    QMessageBox::Yes | QMessageBox::No);
+    QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
+                m_buildsPane,
+                tr("Do you want to reset the form?"),
+                tr("This will reset all the fields to their initial values."),
+                QMessageBox::Question,
+                QMessageBox::Yes | QMessageBox::No);
     if (ret == QMessageBox::Yes)
         m_androidPlatformController->charge();
+}
+
+void BuildsController::onServerDisconnect()
+{
+    auto model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
+    for (int row = 0; row < model->rowCount(); ++row) {
+        const QModelIndex& index = model->index(row);
+        const QVariant& state = model->data(index, BuildModel::StateRole);
+        if (state.isValid()) {
+            if (state.toInt() != BuildModel::Finished) {
+                model->setData(index, tr("Connection lost"), Qt::StatusTipRole);
+                model->setData(index, true, BuildModel::ErrorRole);
+                model->setData(index, BuildModel::Finished, BuildModel::StateRole);
+            }
+        }
+    }
+    m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New)->setEnabled(true);
 }
 
 QWidget* BuildsController::widgetForPlatform(Platform platform) const

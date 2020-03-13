@@ -1125,7 +1125,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         if (const QStyleOptionProgressBar* opt = qstyleoption_cast<const QStyleOptionProgressBar*>(option)) {
             static const char animationProperty[] = "_q_ApplicationStyle_animationForProgressBar";
             static const QColor backgroundColor = "#12000000";
-            static const QColor progressColor = "#419BF9";
+            static const QColor progressColor = opt->invertedAppearance ? opt->palette.button().color() : QColor("#419BF9");
             static const QColor borderColor = "#40000000";
             static const QColor indeterminateColor = "#45ffffff";
             const bool isIndeterminate = (opt->minimum == 0 && opt->maximum == 0);

@@ -25,6 +25,7 @@ private slots:
     void onNextButtonClick();
     void onAndroidBuildButtonClick();
     void onAndroidResetButtonClick();
+    void onServerDisconnect();
 
 private:
     QWidget* widgetForPlatform(Platform platform) const;

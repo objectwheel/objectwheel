@@ -18,19 +18,20 @@ class BuildInfo final : public QObject
     };
 
 public:
-    enum State { Uploading, Downloading, Finished };
-
-public:
     explicit BuildInfo(const QCborMap& request, const QString& status = QString(), QObject* parent = nullptr);
 
     const QCborMap& request() const;
     const QString& details() const;
+
     QBuffer* buffer();
     QList<Block>& recentBlocks();
 
-public:
     QString uid() const;
     void setUid(const QString& uid);
+
+public:
+    bool hasError() const;
+    void setErrorFlag(bool errorFlag);
 
     QString status() const;
     void setStatus(const QString& status);
@@ -47,23 +48,24 @@ public:
     int transferredBytes() const;
     void setTransferredBytes(int transferredBytes);
 
-    State state() const;
-    void setState(State state);
+    int state() const;
+    void setState(int state);
 
 private:
     const QCborMap m_request;
+    QString m_uid;
     QString m_details;
     QBuffer m_buffer;
     QList<Block> m_recentBlocks;
 
 private:
-    QString m_uid;
+    bool m_errorFlag;
     QString m_status;
     QTime m_timeLeft;
     qreal m_speed;
     int m_totalBytes;
     int m_transferredBytes;
-    State m_state;
+    int m_state;
 };
 
 #endif // BUILDINFO_H

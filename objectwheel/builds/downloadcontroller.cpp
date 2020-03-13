@@ -3,7 +3,6 @@
 #include <utilityfunctions.h>
 #include <builddelegate.h>
 #include <buildmodel.h>
-#include <buildinfo.h>
 
 #include <QLabel>
 #include <QListWidget>
@@ -36,9 +35,10 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
 void DownloadController::onDeleteButtonClick(const QModelIndex& index) const
 {
     auto model = static_cast<BuildModel*>(m_downloadWidget->downloadList()->model());
-    if (BuildInfo* buildInfo = model->buildInfo(index.row())) {
+    const QVariant& state = model->data(index, BuildModel::StateRole);
+    if (state.isValid()) {
         QMessageBox::StandardButton ret = QMessageBox::Yes;
-        if (buildInfo->state() != BuildInfo::Finished) {
+        if (state.toInt() != BuildModel::Finished) {
             ret = UtilityFunctions::showMessage(m_downloadWidget,
                                                 tr("Are you sure?"),
                                                 tr("This will cancel the build process."),

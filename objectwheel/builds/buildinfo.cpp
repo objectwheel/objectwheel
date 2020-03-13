@@ -1,13 +1,25 @@
 #include <buildinfo.h>
+#include <buildmodel.h>
 
 BuildInfo::BuildInfo(const QCborMap& request, const QString& status, QObject* parent) : QObject(parent)
   , m_request(request)
+  , m_errorFlag(false)
   , m_status(status)
   , m_speed(0)
   , m_totalBytes(0)
   , m_transferredBytes(0)
-  , m_state(Uploading)
+  , m_state(BuildModel::Uploading)
 {
+}
+
+QString BuildInfo::uid() const
+{
+    return m_uid;
+}
+
+void BuildInfo::setUid(const QString& uid)
+{
+    m_uid = uid;
 }
 
 const QCborMap& BuildInfo::request() const
@@ -30,14 +42,14 @@ QList<BuildInfo::Block>& BuildInfo::recentBlocks()
     return m_recentBlocks;
 }
 
-QString BuildInfo::uid() const
+bool BuildInfo::hasError() const
 {
-    return m_uid;
+    return m_errorFlag;
 }
 
-void BuildInfo::setUid(const QString& uid)
+void BuildInfo::setErrorFlag(bool errorFlag)
 {
-    m_uid = uid;
+    m_errorFlag = errorFlag;
 }
 
 QString BuildInfo::status() const
@@ -101,12 +113,12 @@ void BuildInfo::setTransferredBytes(int transferredBytes)
     m_transferredBytes = transferredBytes;
 }
 
-BuildInfo::State BuildInfo::state() const
+int BuildInfo::state() const
 {
     return m_state;
 }
 
-void BuildInfo::setState(State state)
+void BuildInfo::setState(int state)
 {
     m_state = state;
 }

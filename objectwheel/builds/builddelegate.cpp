@@ -168,13 +168,15 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 
     labelRect.moveTop(labelRect.top() + textHeight);
     textRect.moveTop(textRect.top() + textHeight);
-    const QString& statusStr = opt.fontMetrics.elidedText(index.data(BuildModel::StatusRole).toString(),
+    const QString& statusStr = opt.fontMetrics.elidedText(index.data(Qt::StatusTipRole).toString(),
                                                           Qt::ElideRight, textRect.width());
     painter->setFont(labelFont);
     painter->drawText(labelRect, tr("Status:"), Qt::AlignRight | Qt::AlignBottom);
     painter->setFont(opt.font);
     painter->drawText(textRect, statusStr, Qt::AlignLeft | Qt::AlignBottom);
 
+    const bool hasError = index.data(BuildModel::ErrorRole).toBool();
+    const bool isFinished = index.data(BuildModel::StateRole).toInt() == BuildModel::Finished;
     const qreal speed = index.data(BuildModel::SpeedRole).toReal();
     const QTime& timeLeft = index.data(BuildModel::TimeLeftRole).toTime();
     const int transferredBytes = index.data(BuildModel::TransferredBytesRole).toInt();
@@ -221,8 +223,10 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     QStyleOptionProgressBar bar;
     bar.initFrom(opt.widget);
     bar.rect = progressRect.toRect();
+    bar.invertedAppearance = isFinished ? true : false;
     bar.maximum = 100;
-    bar.progress = progress; // Due to stylesheet on QListView, we don't use opt->widget->style()
+    bar.progress = isFinished ? 100 : progress; // Due to stylesheet on QListView, we don't use opt->widget->style()
+    bar.palette.setColor(QPalette::Button, hasError ? QColor("#fc545b") : (isFinished ? QColor("#65b84b") : QColor()));
     QApplication::style()->drawControl(QStyle::CE_ProgressBar, &bar, painter, opt.widget);
 
     // Draw bottom line

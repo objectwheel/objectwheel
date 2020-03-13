@@ -14,15 +14,22 @@ class BuildModel final : public QAbstractListModel
 public:
     enum BuildRoles {
         ButtonSize = Qt::UserRole + 1,
+        StateRole,
+        ErrorRole,
         NameRole,
         PlatformIconRole,
         VersionRole,
         AbisRole,
-        StatusRole,
         SpeedRole,
         TimeLeftRole,
         TotalBytesRole,
         TransferredBytesRole
+    };
+
+    enum State {
+        Uploading,
+        Downloading,
+        Finished
     };
 
 public:
@@ -36,10 +43,9 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
-
-    BuildInfo* buildInfo(int row) const;
 
 public slots:
     void clear();
@@ -48,6 +54,9 @@ private slots:
     void start();
     void onServerResponse(const QByteArray& data);
     void onServerBytesWritten(qint64 bytes);
+
+signals:
+    void uploadFinished();
 
 private:
     QIcon platformIcon(const QString& rawPlatformName) const;

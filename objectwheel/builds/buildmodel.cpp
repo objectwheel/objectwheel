@@ -112,10 +112,13 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         return abis.join(QLatin1String(", "));
     }
     case Qt::ToolTipRole:
-    case Qt::StatusTipRole:
     case Qt::WhatsThisRole:
-    case StatusRole:
+    case Qt::StatusTipRole:
         return buildInfo->status();
+    case StateRole:
+        return buildInfo->state();
+    case ErrorRole:
+        return buildInfo->hasError();
     case SpeedRole:
         return buildInfo->speed();
     case TimeLeftRole:
@@ -130,6 +133,43 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+bool BuildModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    if (index.row() < 0 || index.row() >= m_buildInfos.count())
+        return false;
+
+    BuildInfo* buildInfo = m_buildInfos.value(index.row());
+    switch (role) {
+    case Qt::ToolTipRole:
+    case Qt::WhatsThisRole:
+    case Qt::StatusTipRole:
+        buildInfo->setStatus(qvariant_cast<QString>(value));
+        break;
+    case StateRole:
+        buildInfo->setState(qvariant_cast<int>(value));
+        break;
+    case ErrorRole:
+        buildInfo->setErrorFlag(qvariant_cast<bool>(value));
+        break;
+    case SpeedRole:
+        buildInfo->setSpeed(qvariant_cast<qreal>(value));
+        break;
+    case TimeLeftRole:
+        buildInfo->setTimeLeft(qvariant_cast<QTime>(value));
+        break;
+    case TotalBytesRole:
+        buildInfo->setTotalBytes(qvariant_cast<int>(value));
+        break;
+    case TransferredBytesRole:
+        buildInfo->setTransferredBytes(qvariant_cast<int>(value));
+        break;
+    default:
+        return false;
+    }
+    emit dataChanged(index, index, { role });
+    return true;
+}
+
 bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
 {
     if (count <= 0 || row < 0 || (row + count) > rowCount(parent))
@@ -138,7 +178,7 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
         BuildInfo* buildInfo = m_buildInfos.takeAt(row + i);
-        if (buildInfo->state() != BuildInfo::Finished)
+        if (buildInfo->state() != Finished)
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
@@ -147,19 +187,12 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-BuildInfo* BuildModel::buildInfo(int row) const
-{
-    if (row >= 0 && row < m_buildInfos.size())
-        return m_buildInfos.at(row);
-    return nullptr;
-}
-
 void BuildModel::clear()
 {
     beginResetModel();
     for (int i = 0; i < m_buildInfos.size(); ++i) {
         BuildInfo* buildInfo = m_buildInfos.at(i);
-        if (buildInfo->state() != BuildInfo::Finished)
+        if (buildInfo->state() != Finished)
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
@@ -231,34 +264,39 @@ void BuildModel::onServerResponse(const QByteArray& data)
     if (buildInfo == 0)
         return;
 
-    if (buildInfo->state() == BuildInfo::Finished)
+    if (buildInfo->state() == Finished)
         return;
 
-    if (buildInfo->state() == BuildInfo::Uploading) {
+    if (buildInfo->state() == Uploading) {
         buildInfo->setSpeed(0);
         buildInfo->setTotalBytes(0);
         buildInfo->setTransferredBytes(0);
         buildInfo->setTimeLeft(QTime());
         buildInfo->recentBlocks().clear();
-        buildInfo->setState(BuildInfo::Downloading);
+        buildInfo->setState(Downloading);
+        emit uploadFinished();
     }
 
     switch (status) {
     case InternalError:
         buildInfo->setStatus(tr("Server failed"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case BadRequest:
         buildInfo->setStatus(tr("Invalid request"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case InvalidUserCredential:
         buildInfo->setStatus(tr("Invalid user credential"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case SimultaneousBuildLimitExceeded:
         buildInfo->setStatus(tr("Simultaneous build limit exceeded"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case RequestSucceed:
         Q_ASSERT(!uid.isEmpty());
@@ -280,27 +318,33 @@ void BuildModel::onServerResponse(const QByteArray& data)
     } break;
     case MakeFailed:
         buildInfo->setStatus(tr("MAKE process failed"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case QmakeFailed:
         buildInfo->setStatus(tr("QMAKE process failed"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case InvalidProjectFile:
         buildInfo->setStatus(tr("Invalid project file"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case InvalidProjectSettings:
         buildInfo->setStatus(tr("Invalid build configuration"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case Canceled:
         buildInfo->setStatus(tr("Operation cancelled"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case Timedout:
         buildInfo->setStatus(tr("Operation timedout"));
-        buildInfo->setState(BuildInfo::Finished);
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         break;
     case BuildData: {
         buildInfo->setStatus(tr("Downloading..."));
@@ -322,7 +366,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         if (isLastFrame) {
             buildInfo->buffer()->close();
             buildInfo->setStatus(tr("Done"));
-            buildInfo->setState(BuildInfo::Finished);
+            buildInfo->setState(Finished);
             do {
                 int row = m_buildInfos.indexOf(buildInfo);
                 if (row < 0)
@@ -376,7 +420,7 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
 {
     if (!m_buildInfos.isEmpty()) {
         BuildInfo* buildInfo = m_buildInfos.last();
-        if (buildInfo->state() == BuildInfo::Uploading) {
+        if (buildInfo->state() == Uploading) {
             const QModelIndex& index = BuildModel::index(m_buildInfos.size() - 1);
             Q_ASSERT(index.isValid());
             buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
@@ -439,7 +483,7 @@ BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
 BuildInfo* BuildModel::uploadingBuildInfo() const
 {
     for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
-        if (buildInfo->state() == BuildInfo::Uploading)
+        if (buildInfo->state() == Uploading)
             return buildInfo;
     }
     return nullptr;
