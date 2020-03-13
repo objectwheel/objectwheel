@@ -27,6 +27,7 @@ public:
 
 public:
     explicit BuildModel(QObject* parent = nullptr);
+    ~BuildModel() override;
 
     void addBuildRequest(const QCborMap& request);
 
@@ -35,6 +36,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+
+    bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
 public slots:
     void clear();

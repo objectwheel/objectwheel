@@ -43,6 +43,11 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
             this, &BuildModel::onServerBytesWritten);
 }
 
+BuildModel::~BuildModel()
+{
+    qDeleteAll(m_buildInfos.cbegin(), m_buildInfos.cend());
+}
+
 void BuildModel::addBuildRequest(const QCborMap& request)
 {
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
@@ -125,14 +130,31 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
+{
+    if (count <= 0 || row < 0 || (row + count) > rowCount(parent))
+        return false;
+
+    beginRemoveRows(parent, row, row + count - 1);
+    for (int i = 0; i < count; ++i) {
+        BuildInfo* buildInfo = m_buildInfos.takeAt(row + i);
+        ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
+        delete buildInfo;
+    }
+    endRemoveRows();
+
+    return true;
+}
+
 void BuildModel::clear()
 {
     beginResetModel();
-    qDeleteAll(m_buildInfos.cbegin(), m_buildInfos.cend());
+    for (int i = 0; i < m_buildInfos.size(); ++i) {
+        BuildInfo* buildInfo = m_buildInfos.at(i);
+        ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
+        delete buildInfo;
+    }
     m_buildInfos.clear();
-    // FIXME: We also have to send "cancel" to the server,
-    // and no matter what, server might still send data us
-    // back so we have to ignore those too
     endResetModel();
 }
 

@@ -46,6 +46,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     infoButton->setIcon(QIcon(":/images/output/info.svg"));
     infoButton->setFixedSize(buttonSize);
     infoButton->setToolTip(tr("Show details"));
+    connect(infoButton, &QPushButton::clicked, this, [=] { emit infoButtonClicked(index); });
     auto deleteButton = new QPushButton;
     deleteButton->setFocusPolicy(Qt::StrongFocus);
     deleteButton->setCursor(Qt::PointingHandCursor);
@@ -53,6 +54,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     deleteButton->setIcon(QIcon(":/images/builds/trash.svg"));
     deleteButton->setFixedSize(buttonSize);
     deleteButton->setToolTip(tr("Delete"));
+    connect(deleteButton, &QPushButton::clicked, this, [=] { emit deleteButtonClicked(index); });
     auto openFolderButton = new QPushButton;
     openFolderButton->setFocusPolicy(Qt::StrongFocus);
     openFolderButton->setCursor(Qt::PointingHandCursor);
@@ -61,6 +63,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     openFolderButton->setFixedSize(buttonSize);
     openFolderButton->setEnabled(false);
     openFolderButton->setToolTip(tr("Show in folder"));
+    connect(openFolderButton, &QPushButton::clicked, this, [=] { emit openFolderButtonClicked(index); });
     auto widget = new QWidget(parent);
     auto layout = new QVBoxLayout(widget);
     layout->setContentsMargins(0, 0, 0, 0);

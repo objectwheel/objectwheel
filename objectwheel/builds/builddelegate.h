@@ -20,6 +20,11 @@ public:
                           const QModelIndex& index) const override;
     void paint(QPainter* painter, const QStyleOptionViewItem& option,
                const QModelIndex& index) const override;
+
+signals:
+    void infoButtonClicked(const QModelIndex& index) const;
+    void deleteButtonClicked(const QModelIndex& index) const;
+    void openFolderButtonClicked(const QModelIndex& index) const;
 };
 
 #endif // BUILDDELEGATE_H
