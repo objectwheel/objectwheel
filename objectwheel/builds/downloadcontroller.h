@@ -12,6 +12,9 @@ class DownloadController final : public QObject
 public:
     explicit DownloadController(DownloadWidget* downloadWidget, QObject* parent = nullptr);
 
+private slots:
+    void onDeleteButtonClick(const QModelIndex& index) const;
+
 private:
     DownloadWidget* m_downloadWidget;
 };

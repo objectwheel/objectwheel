@@ -39,6 +39,8 @@ public:
 
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
+    BuildInfo* buildInfo(int row) const;
+
 public slots:
     void clear();
 
@@ -51,6 +53,7 @@ private:
     QIcon platformIcon(const QString& rawPlatformName) const;
     QString packageSuffixFromRequest(const QCborMap& request) const;
     BuildInfo* buildInfoFromUid(const QString& uid);
+    BuildInfo* uploadingBuildInfo() const;
 
 private:
     QList<BuildInfo*> m_buildInfos;

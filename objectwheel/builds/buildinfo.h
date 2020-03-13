@@ -24,6 +24,7 @@ public:
     explicit BuildInfo(const QCborMap& request, const QString& status = QString(), QObject* parent = nullptr);
 
     const QCborMap& request() const;
+    const QString& details() const;
     QBuffer* buffer();
     QList<Block>& recentBlocks();
 
@@ -51,6 +52,7 @@ public:
 
 private:
     const QCborMap m_request;
+    QString m_details;
     QBuffer m_buffer;
     QList<Block> m_recentBlocks;
 

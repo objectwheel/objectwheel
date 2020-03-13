@@ -1,6 +1,9 @@
 #include <downloadcontroller.h>
 #include <downloadwidget.h>
 #include <utilityfunctions.h>
+#include <builddelegate.h>
+#include <buildmodel.h>
+#include <buildinfo.h>
 
 #include <QLabel>
 #include <QListWidget>
@@ -26,4 +29,23 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
     });
     connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::modelReset,
             noBuildsIndicatorLabel, &QLabel::show);
+    connect(static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate()), &BuildDelegate::deleteButtonClicked,
+            this, &DownloadController::onDeleteButtonClick);
+}
+
+void DownloadController::onDeleteButtonClick(const QModelIndex& index) const
+{
+    auto model = static_cast<BuildModel*>(m_downloadWidget->downloadList()->model());
+    if (BuildInfo* buildInfo = model->buildInfo(index.row())) {
+        QMessageBox::StandardButton ret = QMessageBox::Yes;
+        if (buildInfo->state() != BuildInfo::Finished) {
+            ret = UtilityFunctions::showMessage(m_downloadWidget,
+                                                tr("Are you sure?"),
+                                                tr("This will cancel the build process."),
+                                                QMessageBox::Question,
+                                                QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        }
+        if (ret == QMessageBox::Yes)
+            model->removeRow(index.row(), index.parent());
+    }
 }

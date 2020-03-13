@@ -23,7 +23,7 @@ enum StatusCode {
     SequenceNumberChanged,
     BuildProcessStarted,
     //
-    BuildProgress,
+    BuildStatus,
     MakeFailed,
     QmakeFailed,
     InvalidProjectFile,
@@ -31,7 +31,7 @@ enum StatusCode {
     Canceled,
     Timedout,
     //
-    BuildSucceed
+    BuildData
 };
 Q_DECLARE_METATYPE(StatusCode)
 
@@ -138,7 +138,8 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
         BuildInfo* buildInfo = m_buildInfos.takeAt(row + i);
-        ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
+        if (buildInfo->state() != BuildInfo::Finished)
+            ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
     endRemoveRows();
@@ -146,12 +147,20 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
+BuildInfo* BuildModel::buildInfo(int row) const
+{
+    if (row >= 0 && row < m_buildInfos.size())
+        return m_buildInfos.at(row);
+    return nullptr;
+}
+
 void BuildModel::clear()
 {
     beginResetModel();
     for (int i = 0; i < m_buildInfos.size(); ++i) {
         BuildInfo* buildInfo = m_buildInfos.at(i);
-        ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
+        if (buildInfo->state() != BuildInfo::Finished)
+            ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
     m_buildInfos.clear();
@@ -208,148 +217,159 @@ void BuildModel::onServerResponse(const QByteArray& data)
     ServerManager::ServerCommands command = ServerManager::Invalid;
     UtilityFunctions::pullCbor(data, command);
 
-    if (command == ServerManager::ResponseCloudBuild) {
-        Q_ASSERT(!m_buildInfos.isEmpty());
+    if (command != ServerManager::ResponseCloudBuild)
+        return;
 
-        StatusCode status;
-        QString uid;
-        UtilityFunctions::pullCbor(data, command, status, uid);
+    StatusCode status;
+    QString uid;
+    UtilityFunctions::pullCbor(data, command, status, uid);
+    BuildInfo* buildInfo = buildInfoFromUid(uid);
 
-        BuildInfo* buildInfo = buildInfoFromUid(uid);
-        if (buildInfo == 0) {
-            buildInfo = m_buildInfos.last();
-            Q_ASSERT(buildInfo->state() == BuildInfo::Uploading);
-            buildInfo->setSpeed(0);
-            buildInfo->setTotalBytes(0);
-            buildInfo->setTransferredBytes(0);
-            buildInfo->setTimeLeft(QTime());
-            buildInfo->recentBlocks().clear();
-            buildInfo->setState(BuildInfo::Downloading);
-        }
+    if (buildInfo == 0)
+        buildInfo = uploadingBuildInfo();
 
-        switch (status) {
-        case InternalError:
-            buildInfo->setStatus(tr("Internal Error"));
-            break;
-        case BadRequest:
-            buildInfo->setStatus(tr("Bad Request"));
-            break;
-        case InvalidUserCredential:
-            buildInfo->setStatus(tr("Invalid User Credential"));
-            break;
-        case SimultaneousBuildLimitExceeded:
-            buildInfo->setStatus(tr("Simultaneous Build Limit Exceeded"));
-            break;
-        case RequestSucceed:
-            Q_ASSERT(!uid.isEmpty());
-            buildInfo->setUid(uid);
-            buildInfo->setStatus(tr("Requesting build..."));
-            break;
-        case SequenceNumberChanged: {
-            int sequenceNumber;
-            UtilityFunctions::pullCbor(data, command, status, uid, sequenceNumber);
-            buildInfo->setStatus(tr("You are %1th in the queue...").arg(sequenceNumber));
-        } break;
-        case BuildProcessStarted:
-            buildInfo->setStatus(tr("Build process started..."));
-            break;
-        case BuildProgress: {
-            QByteArray progress;
-            UtilityFunctions::pullCbor(data, command, status, uid, progress);
-            QTextStream stream(progress);
-            QString line, final;
-            while (stream.readLineInto(&line)) {
-                if (!line.isEmpty())
-                    final = line;
-            }
-            buildInfo->setStatus(final);
-        } break;
-        case MakeFailed:
-            buildInfo->setStatus(tr("Build process started..."));
-            break;
-        case QmakeFailed:
-            buildInfo->setStatus(tr("QMAKE Process Failed"));
-            break;
-        case InvalidProjectFile:
-            buildInfo->setStatus(tr("Invalid Project File"));
-            break;
-        case InvalidProjectSettings:
-            buildInfo->setStatus(tr("Invalid Project Settings"));
-            break;
-        case Canceled:
-            buildInfo->setStatus(tr("Operation Cancelled"));
-            break;
-        case Timedout:
-            buildInfo->setStatus(tr("Operation Timedout"));
-            break;
-        case BuildSucceed: {
-            buildInfo->setStatus(tr("Downloading..."));
+    if (buildInfo == 0)
+        return;
 
-            // Decode data
-            bool isLastFrame;
-            int totalBytes;
-            QByteArray chunk;
-            UtilityFunctions::pullCbor(data, command, status, uid, isLastFrame, totalBytes, chunk);
+    if (buildInfo->state() == BuildInfo::Finished)
+        return;
 
-            // Fetch and buffer data
-            if (!buildInfo->buffer()->isOpen()) {
-                buildInfo->setTotalBytes(totalBytes);
-                buildInfo->buffer()->buffer().reserve(totalBytes);
-                buildInfo->buffer()->open(QBuffer::WriteOnly);
-            }
-            buildInfo->buffer()->write(chunk);
-            buildInfo->setTransferredBytes(buildInfo->buffer()->size());
-            if (isLastFrame) {
-                buildInfo->buffer()->close();
-                buildInfo->setStatus(tr("Done"));
-                do {
-                    int row = m_buildInfos.indexOf(buildInfo);
-                    if (row < 0)
-                        break;
-                    const QModelIndex& index = BuildModel::index(row);
-                    Q_ASSERT(index.isValid());
-                    const QString& downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-                    QFile file(downloadPath + QLatin1Char('/') + index.data(NameRole).toString());
-                    if (!file.open(QFile::WriteOnly))
-                        break;
-                    file.write(buildInfo->buffer()->data());
-                } while(false);
-            }
-
-            // Gather 'speed' and 'time left' information
-            BuildInfo::Block block;
-            block.size = chunk.size();
-            block.timestamp = QTime::currentTime();
-            buildInfo->recentBlocks().append(block);
-            if (buildInfo->recentBlocks().size() > 10)
-                buildInfo->recentBlocks().removeFirst();
-
-            if (buildInfo->recentBlocks().size() > 1) {
-                // Calculate Speed
-                int transferredBytes = -buildInfo->recentBlocks().first().size;
-                int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
-                for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
-                    transferredBytes += block.size;
-                qreal bytesPerMs = transferredBytes / qreal(elapedMs);
-                buildInfo->setSpeed(bytesPerMs * 1000);
-
-                // Calculate Time Left
-                int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
-                qreal msLeft = bytesLeft / bytesPerMs;
-                buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
-            }
-        } break;
-        default:
-            break;
-        }
-
-        int row = m_buildInfos.indexOf(buildInfo);
-        if (row < 0)
-            return;
-        const QModelIndex& index = BuildModel::index(row);
-        Q_ASSERT(index.isValid());
-        emit dataChanged(index, index);
+    if (buildInfo->state() == BuildInfo::Uploading) {
+        buildInfo->setSpeed(0);
+        buildInfo->setTotalBytes(0);
+        buildInfo->setTransferredBytes(0);
+        buildInfo->setTimeLeft(QTime());
+        buildInfo->recentBlocks().clear();
+        buildInfo->setState(BuildInfo::Downloading);
     }
+
+    switch (status) {
+    case InternalError:
+        buildInfo->setStatus(tr("Server failed"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case BadRequest:
+        buildInfo->setStatus(tr("Invalid request"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case InvalidUserCredential:
+        buildInfo->setStatus(tr("Invalid user credential"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case SimultaneousBuildLimitExceeded:
+        buildInfo->setStatus(tr("Simultaneous build limit exceeded"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case RequestSucceed:
+        Q_ASSERT(!uid.isEmpty());
+        buildInfo->setUid(uid);
+        buildInfo->setStatus(tr("Processing the request..."));
+        break;
+    case SequenceNumberChanged: {
+        int sequenceNumber;
+        UtilityFunctions::pullCbor(data, command, status, uid, sequenceNumber);
+        buildInfo->setStatus(tr("You are %1th in the queue...").arg(sequenceNumber));
+    } break;
+    case BuildProcessStarted:
+        buildInfo->setStatus(tr("Build process started..."));
+        break;
+    case BuildStatus: {
+        QByteArray progress;
+        UtilityFunctions::pullCbor(data, command, status, uid, progress);
+        buildInfo->setStatus(progress);
+    } break;
+    case MakeFailed:
+        buildInfo->setStatus(tr("MAKE process failed"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case QmakeFailed:
+        buildInfo->setStatus(tr("QMAKE process failed"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case InvalidProjectFile:
+        buildInfo->setStatus(tr("Invalid project file"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case InvalidProjectSettings:
+        buildInfo->setStatus(tr("Invalid build configuration"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case Canceled:
+        buildInfo->setStatus(tr("Operation cancelled"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case Timedout:
+        buildInfo->setStatus(tr("Operation timedout"));
+        buildInfo->setState(BuildInfo::Finished);
+        break;
+    case BuildData: {
+        buildInfo->setStatus(tr("Downloading..."));
+
+        // Decode data
+        bool isLastFrame;
+        int totalBytes;
+        QByteArray chunk;
+        UtilityFunctions::pullCbor(data, command, status, uid, isLastFrame, totalBytes, chunk);
+
+        // Fetch and buffer data
+        if (!buildInfo->buffer()->isOpen()) {
+            buildInfo->setTotalBytes(totalBytes);
+            buildInfo->buffer()->buffer().reserve(totalBytes);
+            buildInfo->buffer()->open(QBuffer::WriteOnly);
+        }
+        buildInfo->buffer()->write(chunk);
+        buildInfo->setTransferredBytes(buildInfo->buffer()->size());
+        if (isLastFrame) {
+            buildInfo->buffer()->close();
+            buildInfo->setStatus(tr("Done"));
+            buildInfo->setState(BuildInfo::Finished);
+            do {
+                int row = m_buildInfos.indexOf(buildInfo);
+                if (row < 0)
+                    break;
+                const QModelIndex& index = BuildModel::index(row);
+                Q_ASSERT(index.isValid());
+                const QString& downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+                QFile file(downloadPath + QLatin1Char('/') + index.data(NameRole).toString());
+                if (!file.open(QFile::WriteOnly))
+                    break;
+                file.write(buildInfo->buffer()->data());
+            } while(false);
+        }
+
+        // Gather 'speed' and 'time left' information
+        BuildInfo::Block block;
+        block.size = chunk.size();
+        block.timestamp = QTime::currentTime();
+        buildInfo->recentBlocks().append(block);
+        if (buildInfo->recentBlocks().size() > 10)
+            buildInfo->recentBlocks().removeFirst();
+
+        if (buildInfo->recentBlocks().size() > 1) {
+            // Calculate Speed
+            int transferredBytes = -buildInfo->recentBlocks().first().size;
+            int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
+            for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
+                transferredBytes += block.size;
+            qreal bytesPerMs = transferredBytes / qreal(elapedMs);
+            buildInfo->setSpeed(bytesPerMs * 1000);
+
+            // Calculate Time Left
+            int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
+            qreal msLeft = bytesLeft / bytesPerMs;
+            buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
+        }
+    } break;
+    default:
+        break;
+    }
+
+    int row = m_buildInfos.indexOf(buildInfo);
+    if (row < 0)
+        return;
+    const QModelIndex& index = BuildModel::index(row);
+    Q_ASSERT(index.isValid());
+    emit dataChanged(index, index);
 }
 
 void BuildModel::onServerBytesWritten(qint64 bytes)
@@ -411,6 +431,15 @@ BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
         return nullptr;
     for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
         if (buildInfo->uid() == uid)
+            return buildInfo;
+    }
+    return nullptr;
+}
+
+BuildInfo* BuildModel::uploadingBuildInfo() const
+{
+    for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
+        if (buildInfo->state() == BuildInfo::Uploading)
             return buildInfo;
     }
     return nullptr;

@@ -23,9 +23,9 @@ template <typename... Args>
 static void qWrite(Args&&... args)
 {
 #if defined(Q_OS_WINDOWS)
-    ::_write(std::forward<Args>(args)...);
+    (void) ::_write(std::forward<Args>(args)...);
 #else
-    ::write(std::forward<Args>(args)...);
+    (void) ::write(std::forward<Args>(args)...);
 #endif
 }
 

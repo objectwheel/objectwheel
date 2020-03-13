@@ -15,6 +15,11 @@ const QCborMap& BuildInfo::request() const
     return m_request;
 }
 
+const QString& BuildInfo::details() const
+{
+    return m_details;
+}
+
 QBuffer* BuildInfo::buffer()
 {
     return &m_buffer;
@@ -42,7 +47,18 @@ QString BuildInfo::status() const
 
 void BuildInfo::setStatus(const QString& status)
 {
-    m_status = status;
+    if (status.contains(QLatin1Char('\n'))) {
+        QTextStream stream(status.toUtf8());
+        QString line;
+        while (stream.readLineInto(&line)) {
+            if (!line.isEmpty())
+                m_status = line;
+        }
+        m_details.append(status);
+    } else {
+        m_status = status;
+        m_details.append(status + QLatin1Char('\n'));
+    }
 }
 
 QTime BuildInfo::timeLeft() const

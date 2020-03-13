@@ -49,7 +49,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
 
     auto iconLabel = new QLabel(this);
     auto titleLabel = new QLabel(tr("Objectwheel Cloud Builds"), this);
-    auto descriptionLabel = new QLabel(tr("Downloaded builds appear here"), this);
+    auto descriptionLabel = new QLabel(tr("Recent builds appear here"), this);
     auto buildsLabel = new QLabel(tr("Builds"));
 
     iconLabel->setFixedSize(QSize(60, 60));

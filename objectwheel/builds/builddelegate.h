@@ -22,9 +22,9 @@ public:
                const QModelIndex& index) const override;
 
 signals:
-    void infoButtonClicked(const QModelIndex& index) const;
-    void deleteButtonClicked(const QModelIndex& index) const;
-    void openFolderButtonClicked(const QModelIndex& index) const;
+    void infoButtonClicked(const QModelIndex& parent) const;
+    void deleteButtonClicked(const QModelIndex& parent) const;
+    void openFolderButtonClicked(const QModelIndex& parent) const;
 };
 
 #endif // BUILDDELEGATE_H
