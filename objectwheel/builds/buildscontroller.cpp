@@ -21,6 +21,7 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
   , m_downloadController(new DownloadController(m_buildsPane->downloadWidget(), this))
   , m_androidPlatformController(new AndroidPlatformController(m_buildsPane->androidPlatformWidget(), this))
 {
+    auto model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
     connect(m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New), &QPushButton::clicked,
             this, &BuildsController::onNewButtonClick);
     connect(m_buildsPane->platformSelectionWidget()->buttonSlice()->get(PlatformSelectionWidget::Back), &QPushButton::clicked,
@@ -35,10 +36,14 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
             this, &BuildsController::onAndroidBuildButtonClick);
     connect(m_buildsPane->androidPlatformWidget()->buttonSlice()->get(AndroidPlatformWidget::Reset), &QPushButton::clicked,
             this, &BuildsController::onAndroidResetButtonClick);
-    connect(static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model()), &BuildModel::uploadFinished,
+    connect(model, &BuildModel::uploadFinished,
             this, [=] { m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New)->setEnabled(true); });
     connect(ServerManager::instance(), &ServerManager::disconnected,
             this, &BuildsController::onServerDisconnect);
+    connect(model, &QAbstractItemModel::rowsRemoved,
+            this, &BuildsController::onRowRemoval);
+    connect(model, &QAbstractItemModel::modelReset,
+            this, &BuildsController::onRowRemoval);
 }
 
 void BuildsController::charge()
@@ -120,6 +125,21 @@ void BuildsController::onServerDisconnect()
         }
     }
     m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New)->setEnabled(true);
+}
+
+void BuildsController::onRowRemoval()
+{
+    bool enableNewButton = true;
+    auto model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
+    for (int row = 0; row < model->rowCount(); ++row) {
+        const QModelIndex& index = model->index(row);
+        const QVariant& state = model->data(index, BuildModel::StateRole);
+        if (state.isValid() && state.toInt() == BuildModel::Uploading) {
+            enableNewButton = false;
+            break;
+        }
+    }
+    m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New)->setEnabled(enableNewButton);
 }
 
 QWidget* BuildsController::widgetForPlatform(Platform platform) const

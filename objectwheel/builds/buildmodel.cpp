@@ -178,7 +178,7 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
         BuildInfo* buildInfo = m_buildInfos.takeAt(row + i);
-        if (buildInfo->state() != Finished)
+        if (buildInfo->state() != Finished && ServerManager::instance() && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
@@ -192,7 +192,7 @@ void BuildModel::clear()
     beginResetModel();
     for (int i = 0; i < m_buildInfos.size(); ++i) {
         BuildInfo* buildInfo = m_buildInfos.at(i);
-        if (buildInfo->state() != Finished)
+        if (buildInfo->state() != Finished && ServerManager::instance() && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
@@ -202,6 +202,7 @@ void BuildModel::clear()
 
 void BuildModel::start()
 {
+    Q_ASSERT(ServerManager::instance() && ServerManager::isConnected());
     Q_ASSERT(!m_buildInfos.isEmpty());
     BuildInfo* buildInfo = m_buildInfos.last();
     const QModelIndex& index = BuildModel::index(m_buildInfos.size() - 1);

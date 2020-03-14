@@ -156,6 +156,8 @@ bool isFocusRingSet(QWidget* widget);
 bool isDirAncestor(const QDir& ancestor, const QString& path);
 QString shortcutSymbol(const QKeySequence& seq);
 QByteArray resourceData(const QString& path);
+void updateToolTip(QWidget* widget, const QString& toolTip);
+void updateToolTip(QWidget* widget, const QString& toolTip, const QRect& region);
 
 } // UtilityFunctions
 

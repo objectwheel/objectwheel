@@ -26,6 +26,7 @@
 #include <QOperatingSystemVersion>
 #include <qpassworddigestor.h>
 #include <QKeyEvent>
+#include <QToolTip>
 
 namespace UtilityFunctions {
 
@@ -65,6 +66,7 @@ void trimCommentsAndStrings(QTextDocument* document)
 QWidget* createSpacingWidget(const QSize& size)
 {
     auto spacing = new QWidget;
+    spacing->setAttribute(Qt::WA_TransparentForMouseEvents);
     spacing->setFixedSize(size);
     return spacing;
 }
@@ -72,6 +74,7 @@ QWidget* createSpacingWidget(const QSize& size)
 QWidget* createSpacerWidget(Qt::Orientation orientation)
 {
     auto spacer = new QWidget;
+    spacer->setAttribute(Qt::WA_TransparentForMouseEvents);
     spacer->setSizePolicy((orientation & Qt::Horizontal)
                           ? QSizePolicy::Expanding : QSizePolicy::Preferred,
                           (orientation & Qt::Vertical)
@@ -82,6 +85,7 @@ QWidget* createSpacerWidget(Qt::Orientation orientation)
 QWidget* createSeparatorWidget(Qt::Orientation orientation)
 {
     auto separator = new QWidget;
+    separator->setAttribute(Qt::WA_TransparentForMouseEvents);
     separator->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     if (orientation & Qt::Horizontal)
         separator->setFixedHeight(1);
@@ -745,4 +749,26 @@ QByteArray resourceData(const QString& path)
     return file.readAll();
 }
 
+void updateToolTip(QWidget* widget, const QString& toolTip)
+{
+    widget->setToolTip(toolTip);
+    if (QToolTip::isVisible()) {
+        const QPoint& globalPos = QCursor::pos();
+        const QPoint& pos = widget->mapFromGlobal(globalPos);
+        if (pos.x() >= 0 && pos.y() >= 0 && pos.x() < widget->width() && pos.y() < widget->height())
+            QToolTip::showText(globalPos, toolTip);
+    }
+}
+
+void updateToolTip(QWidget* widget, const QString& toolTip, const QRect& region)
+{
+    if (QToolTip::isVisible()) {
+        const QPoint& globalPos = QCursor::pos();
+        const QPoint& pos = widget->mapFromGlobal(globalPos);
+        if (pos.x() >= region.left() && pos.y() >= region.top()
+                && pos.x() < region.right() && pos.y() < region.bottom()) {
+            QToolTip::showText(globalPos, toolTip);
+        }
+    }
+}
 } // UtilityFunctions

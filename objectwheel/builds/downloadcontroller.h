@@ -14,6 +14,8 @@ public:
 
 private slots:
     void onDeleteButtonClick(const QModelIndex& index) const;
+    void onModelDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight,
+                           const QVector<int>& roles) const;
 
 private:
     DownloadWidget* m_downloadWidget;

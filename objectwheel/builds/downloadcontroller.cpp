@@ -30,6 +30,8 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
             noBuildsIndicatorLabel, &QLabel::show);
     connect(static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate()), &BuildDelegate::deleteButtonClicked,
             this, &DownloadController::onDeleteButtonClick);
+    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::dataChanged,
+            this, &DownloadController::onModelDataChange);
 }
 
 void DownloadController::onDeleteButtonClick(const QModelIndex& index) const
@@ -47,5 +49,20 @@ void DownloadController::onDeleteButtonClick(const QModelIndex& index) const
         }
         if (ret == QMessageBox::Yes)
             model->removeRow(index.row(), index.parent());
+    }
+}
+
+void DownloadController::onModelDataChange(const QModelIndex& topLeft,
+                                           const QModelIndex& bottomRight,
+                                           const QVector<int>& roles) const
+{
+    if (roles.isEmpty()
+            || roles.contains(Qt::ToolTipRole)
+            || roles.contains(Qt::WhatsThisRole)
+            || roles.contains(Qt::StatusTipRole)) {
+        Q_ASSERT(topLeft == bottomRight);
+        const QString& toolTip = topLeft.data(Qt::ToolTipRole).toString();
+        QListView* listView = m_downloadWidget->downloadList();
+        UtilityFunctions::updateToolTip(listView, toolTip, listView->visualRect(topLeft));
     }
 }

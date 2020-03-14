@@ -26,6 +26,7 @@ private slots:
     void onAndroidBuildButtonClick();
     void onAndroidResetButtonClick();
     void onServerDisconnect();
+    void onRowRemoval();
 
 private:
     QWidget* widgetForPlatform(Platform platform) const;

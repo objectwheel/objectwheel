@@ -90,7 +90,6 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     buttonGroup->addButton(m_buildsButton);
     buttonGroup->addButton(m_documentsButton);
 
-    addWidget(UtilityFunctions::createSpacingWidget({0, 0}));
     addWidget(m_designerButton);
     addWidget(m_editorButton);
     addWidget(m_splitButton);

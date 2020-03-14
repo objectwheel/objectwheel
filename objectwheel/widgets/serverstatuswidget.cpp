@@ -1,5 +1,6 @@
 #include <serverstatuswidget.h>
 #include <servermanager.h>
+#include <utilityfunctions.h>
 #include <QPainter>
 
 ServerStatusWidget::ServerStatusWidget(QWidget* parent) : QWidget(parent)
@@ -28,11 +29,11 @@ void ServerStatusWidget::updateToolTip()
     if (ServerManager::instance())
         state = ServerManager::instance()->state();
     if (state == QAbstractSocket::ConnectedState)
-        setToolTip(toolTipTemplate.arg(tr("Connected")));
+        UtilityFunctions::updateToolTip(this, toolTipTemplate.arg(tr("Connected")));
     else if (state == QAbstractSocket::UnconnectedState)
-        setToolTip(toolTipTemplate.arg(tr("Disconnected")));
+        UtilityFunctions::updateToolTip(this, toolTipTemplate.arg(tr("Disconnected")));
     else
-        setToolTip(toolTipTemplate.arg(tr("Connecting...")));
+        UtilityFunctions::updateToolTip(this, toolTipTemplate.arg(tr("Connecting...")));
 }
 
 void ServerStatusWidget::paintEvent(QPaintEvent*)

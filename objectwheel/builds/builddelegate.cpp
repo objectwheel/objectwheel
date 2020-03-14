@@ -226,7 +226,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     bar.invertedAppearance = isFinished ? true : false;
     bar.maximum = 100;
     bar.progress = isFinished ? 100 : progress; // Due to stylesheet on QListView, we don't use opt->widget->style()
-    bar.palette.setColor(QPalette::Button, hasError ? QColor("#fc545b") : (isFinished ? QColor("#65b84b") : QColor()));
+    bar.palette.setColor(QPalette::Button, hasError ? QColor("#dd5959") : (isFinished ? QColor("#65b84b") : QColor()));
     QApplication::style()->drawControl(QStyle::CE_ProgressBar, &bar, painter, opt.widget);
 
     // Draw bottom line
