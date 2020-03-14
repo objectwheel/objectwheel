@@ -66,7 +66,8 @@ public:
     }
 
 private slots:
-    void resetConnectionDropTimer();
+    void onPong();
+    void startOrRestartConnectionDropTimer();
     void onError(QAbstractSocket::SocketError);
     void onSslErrors(const QList<QSslError>&);
 
@@ -79,6 +80,7 @@ private:
 
 private:
     static ServerManager* s_instance;
+    static bool s_pong;
     static QUrl s_host;
     static QBasicTimer s_connectionRetryTimer;
     static QBasicTimer s_connectionDropTimer;

@@ -98,11 +98,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
-#if defined(Q_OS_MACOS)
-    setUnifiedTitleAndToolBarOnMac(true); // CustomizeWindowHint required github.com/qt/qtbase/commit/35da2b8
-    setWindowFlags((windowFlags() & ~Qt::WindowFullscreenButtonHint) | Qt::CustomizeWindowHint);
-    WindowOperations::removeTitleBar(this);
-#endif
+    removeTitleBar();
 
     /** Setup Tool Bars **/
     /* Add Run Pane */
@@ -317,8 +313,10 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
         QTimer::singleShot(1000, this, [=] {
             resetWidget();
             writeSettings();
+            removeTitleBar();
         });
     });
+    winId(); // Make sure window resources are established before calling windowHandle()
     connect(windowHandle(), &QWindow::screenChanged,
             this, &MainWindow::onScreenChange);
     connect(m_removeSizeRestrictionsOnDockWidgetsTimer, &QTimer::timeout,
@@ -494,9 +492,7 @@ void MainWindow::showEvent(QShowEvent* event)
 {
     QMainWindow::showEvent(event);
 
-#if defined(Q_OS_MACOS)
-    WindowOperations::removeTitleBar(this);
-#endif
+    removeTitleBar();
 
     if (m_shownForTheFirstTime != true) {
         const_cast<bool&>(m_shownForTheFirstTime) = true;
@@ -583,6 +579,17 @@ void MainWindow::closeEvent(QCloseEvent* event)
     }
 
     QMainWindow::closeEvent(event);
+}
+
+void MainWindow::removeTitleBar()
+{
+#if defined(Q_OS_MACOS)
+    setUnifiedTitleAndToolBarOnMac(true); // CustomizeWindowHint required github.com/qt/qtbase/commit/35da2b8
+    setWindowFlags((windowFlags() & ~Qt::WindowFullscreenButtonHint) | Qt::CustomizeWindowHint);
+    WindowOperations::removeTitleBar(this);
+#else
+    // TODO
+#endif
 }
 
 void MainWindow::resetWidget()
@@ -672,5 +679,5 @@ void MainWindow::writeSettings() const
 
 QSize MainWindow::sizeHint() const
 {
-    return {1200, 700};
+    return QSize(1200, 700);
 }

@@ -56,6 +56,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
+    void removeTitleBar();
     void resetWidget();
     void readSettings();
     void writeSettings() const;

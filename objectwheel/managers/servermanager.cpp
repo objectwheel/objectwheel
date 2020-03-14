@@ -2,6 +2,7 @@
 #include <QTimerEvent>
 
 ServerManager* ServerManager::s_instance = nullptr;
+bool ServerManager::s_pong = true;
 QUrl ServerManager::s_host;
 QBasicTimer ServerManager::s_connectionRetryTimer;
 QBasicTimer ServerManager::s_connectionDropTimer;
@@ -16,19 +17,13 @@ ServerManager::ServerManager(const QUrl& host, QObject* parent)
     connect(this, &ServerManager::sslErrors,
             this, &ServerManager::onSslErrors);
     connect(this, &ServerManager::pong,
-            this, &ServerManager::resetConnectionDropTimer);
+            this, &ServerManager::onPong);
     connect(this, &ServerManager::bytesWritten,
-            this, &ServerManager::resetConnectionDropTimer, Qt::QueuedConnection);
+            this, &ServerManager::startOrRestartConnectionDropTimer, Qt::QueuedConnection);
     connect(this, &ServerManager::binaryMessageReceived,
-            this, &ServerManager::resetConnectionDropTimer, Qt::QueuedConnection);
-    connect(this, &ServerManager::stateChanged,
-            this, [=] (QAbstractSocket::SocketState state) {
-        if (state == QAbstractSocket::UnconnectedState)
-            s_connectionDropTimer.stop();
-        else
-            resetConnectionDropTimer();
-    });
+            this, &ServerManager::startOrRestartConnectionDropTimer, Qt::QueuedConnection);
     s_connectionRetryTimer.start(CONNECTION_RETRY_TIMEOUT, Qt::VeryCoarseTimer, instance());
+    startOrRestartConnectionDropTimer();
     QMetaObject::invokeMethod(this, "open", Qt::QueuedConnection, Q_ARG(QUrl, s_host));
 }
 
@@ -47,7 +42,12 @@ bool ServerManager::isConnected()
     return instance()->state() == QAbstractSocket::ConnectedState;
 }
 
-void ServerManager::resetConnectionDropTimer()
+void ServerManager::onPong()
+{
+    s_pong = true;
+}
+
+void ServerManager::startOrRestartConnectionDropTimer()
 {
     s_connectionDropTimer.start(CONNECTION_DROP_TIMEOUT, Qt::VeryCoarseTimer, instance());
 }
@@ -67,13 +67,16 @@ void ServerManager::onSslErrors(const QList<QSslError>& errors)
 void ServerManager::timerEvent(QTimerEvent* event)
 {
     if (event->timerId() == s_connectionRetryTimer.timerId()) {
-        if (state() == QAbstractSocket::UnconnectedState)
+        if (state() == QAbstractSocket::UnconnectedState) {
+            s_pong = true;
             open(s_host);
-        else if (state() == QAbstractSocket::ConnectedState)
+        } else if (state() == QAbstractSocket::ConnectedState && s_pong) {
+            s_pong = false;
             ping();
+        }
     } else if (event->timerId() == s_connectionDropTimer.timerId()) {
         if (state() != QAbstractSocket::UnconnectedState)
-            close();
+            abort();
     } else {
         QWebSocket::timerEvent(event);
     }

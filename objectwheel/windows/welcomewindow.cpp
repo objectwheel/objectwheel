@@ -25,10 +25,17 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_projectsWidget(new ProjectsWidget(this))
   , m_projectTemplatesWidget(new ProjectTemplatesWidget(this))
   , m_projectDetailsWidget(new ProjectDetailsWidget(this))
+  , m_serverStatusWidget(new ServerStatusWidget(this))
 {
     setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
     resize(sizeHint());
     move(UtilityFunctions::centerPos(size()));
+
+    m_serverStatusWidget->adjustSize();
+    m_serverStatusWidget->move(width() - m_serverStatusWidget->width() - 8, 8);
+    m_serverStatusWidget->raise();
+    connect(m_stackedLayout, &StackedLayout::currentChanged,
+            m_serverStatusWidget, &ServerStatusWidget::raise);
 
     m_stackedLayout->addWidget(m_loginWidget);
     m_stackedLayout->addWidget(m_registrationWidget);
@@ -40,13 +47,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     m_stackedLayout->addWidget(m_projectTemplatesWidget);
     m_stackedLayout->addWidget(m_projectDetailsWidget);
     m_stackedLayout->setCurrentWidget(m_loginWidget);
-
-    auto statusWidget = new ServerStatusWidget(this);
-    statusWidget->move(8, 8);
-    statusWidget->adjustSize();
-    statusWidget->raise();
-    connect(m_stackedLayout, &StackedLayout::currentChanged,
-            statusWidget, &ServerStatusWidget::raise);
 
     /**** ForgetWidget settings ****/
     connect(m_forgetWidget, &ForgetWidget::done, m_resetWidget, &ResetWidget::setEmail);
@@ -159,5 +159,11 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 
 QSize WelcomeWindow::sizeHint() const
 {
-    return {980, 560};
+    return QSize(980, 560);
+}
+
+void WelcomeWindow::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    m_serverStatusWidget->move(width() - m_serverStatusWidget->width() - 8, 8);
 }

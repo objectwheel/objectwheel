@@ -13,6 +13,7 @@ class VerificationWidget;
 class SucceedWidget;
 class ForgetWidget;
 class ResetWidget;
+class ServerStatusWidget;
 
 class WelcomeWindow final : public QWidget
 {
@@ -23,6 +24,9 @@ public:
     explicit WelcomeWindow(QWidget* parent = nullptr);
 
     QSize sizeHint() const override;
+
+private:
+    void resizeEvent(QResizeEvent* event) override;
 
 signals:
     void done();
@@ -38,6 +42,7 @@ private:
     ProjectsWidget* m_projectsWidget;
     ProjectTemplatesWidget* m_projectTemplatesWidget;
     ProjectDetailsWidget* m_projectDetailsWidget;
+    ServerStatusWidget* m_serverStatusWidget;
 };
 
 #endif // WELCOMEWINDOW_H
