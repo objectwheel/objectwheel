@@ -1,6 +1,7 @@
 #include <modeselectorpane.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
+#include <serverstatuswidget.h>
 
 #include <QPainter>
 #include <QLayout>
@@ -89,12 +90,16 @@ ModeSelectorPane::ModeSelectorPane(QWidget* parent) : QToolBar(parent)
     buttonGroup->addButton(m_buildsButton);
     buttonGroup->addButton(m_documentsButton);
 
+    addWidget(UtilityFunctions::createSpacingWidget({0, 0}));
     addWidget(m_designerButton);
     addWidget(m_editorButton);
     addWidget(m_splitButton);
     addWidget(m_optionsButton);
     addWidget(m_buildsButton);
     addWidget(m_documentsButton);
+    addWidget(UtilityFunctions::createSpacerWidget(orientation()));
+    addWidget(new ServerStatusWidget(this));
+    addWidget(UtilityFunctions::createSpacingWidget({0, 0}));
 
     updateIcons();
 }

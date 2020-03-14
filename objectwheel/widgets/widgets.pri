@@ -7,6 +7,7 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/lineedit.h \
            $$PWD/pinbar.h \
            $$PWD/segmentedbar.h \
+           $$PWD/serverstatuswidget.h \
            $$PWD/splashscreen.h \
            $$PWD/switch.h \
            $$PWD/waitingspinnerwidget.h \
@@ -19,6 +20,7 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/lineedit.cpp \
            $$PWD/pinbar.cpp \
            $$PWD/segmentedbar.cpp \
+           $$PWD/serverstatuswidget.cpp \
            $$PWD/splashscreen.cpp \
            $$PWD/switch.cpp \
            $$PWD/waitingspinnerwidget.cpp \

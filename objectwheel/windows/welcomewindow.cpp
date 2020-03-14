@@ -12,6 +12,7 @@
 #include <projecttemplateswidget.h>
 #include <aboutwindow.h>
 #include <utilityfunctions.h>
+#include <serverstatuswidget.h>
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_stackedLayout(new StackedLayout(this))
@@ -39,6 +40,13 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     m_stackedLayout->addWidget(m_projectTemplatesWidget);
     m_stackedLayout->addWidget(m_projectDetailsWidget);
     m_stackedLayout->setCurrentWidget(m_loginWidget);
+
+    auto statusWidget = new ServerStatusWidget(this);
+    statusWidget->move(8, 8);
+    statusWidget->adjustSize();
+    statusWidget->raise();
+    connect(m_stackedLayout, &StackedLayout::currentChanged,
+            statusWidget, &ServerStatusWidget::raise);
 
     /**** ForgetWidget settings ****/
     connect(m_forgetWidget, &ForgetWidget::done, m_resetWidget, &ResetWidget::setEmail);
