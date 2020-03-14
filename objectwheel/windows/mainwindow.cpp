@@ -99,6 +99,8 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
 #if defined(Q_OS_MACOS)
+    setUnifiedTitleAndToolBarOnMac(true); // CustomizeWindowHint required github.com/qt/qtbase/commit/35da2b8
+    setWindowFlags((windowFlags() & ~Qt::WindowFullscreenButtonHint) | Qt::CustomizeWindowHint);
     WindowOperations::removeTitleBar(this);
 #endif
 
@@ -491,6 +493,10 @@ void MainWindow::onRemoveSizeRestrictionsOnDockWidgetsTimerTimeout()
 void MainWindow::showEvent(QShowEvent* event)
 {
     QMainWindow::showEvent(event);
+
+#if defined(Q_OS_MACOS)
+    WindowOperations::removeTitleBar(this);
+#endif
 
     if (m_shownForTheFirstTime != true) {
         const_cast<bool&>(m_shownForTheFirstTime) = true;
