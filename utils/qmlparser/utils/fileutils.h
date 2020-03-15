@@ -116,6 +116,7 @@ public:
     static bool copyRecursively(const FileName &srcFilePath, const FileName &tgtFilePath,
                                 QString *error = 0, const std::function<bool (QFileInfo, QFileInfo, QString *)> &copyHelper = std::function<bool (QFileInfo, QFileInfo, QString *)>());
     static bool isFileNewerThan(const FileName &filePath, const QDateTime &timeStamp);
+    static void showInFolder(QWidget* parent, const QString& pathIn);
     static FileName resolveSymlinks(const FileName &path);
     static FileName canonicalPath(const FileName &path);
     static QString shortNativePath(const FileName &path);

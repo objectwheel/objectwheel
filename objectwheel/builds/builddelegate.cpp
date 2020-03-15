@@ -39,6 +39,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     if (!index.isValid())
         return nullptr;
     const QSize& buttonSize = index.data(BuildModel::ButtonSize).toSize();
+    auto model = static_cast<const BuildModel*>(index.model());
 
     auto infoButton = new QPushButton;
     infoButton->setFocusPolicy(Qt::StrongFocus);
@@ -70,6 +71,11 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     openFolderButton->setToolTip(tr("Show in folder"));
     connect(openFolderButton, &QPushButton::clicked, this,
             [=] { emit openFolderButtonClicked(index); });
+    connect(model, &BuildModel::downloadFinished,
+            openFolderButton, [=] (const QModelIndex& i) {
+        if (i == index)
+            openFolderButton->setEnabled(true);
+    });
 
     auto widget = new QWidget(parent);
     auto layout = new QVBoxLayout(widget);

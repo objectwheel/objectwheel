@@ -21,7 +21,7 @@ BuildsController::BuildsController(BuildsPane* buildsPane, QObject* parent) : QO
   , m_downloadController(new DownloadController(m_buildsPane->downloadWidget(), this))
   , m_androidPlatformController(new AndroidPlatformController(m_buildsPane->androidPlatformWidget(), this))
 {
-    auto model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
+    auto model = static_cast<const BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
     connect(m_buildsPane->downloadWidget()->buttonSlice()->get(DownloadWidget::New), &QPushButton::clicked,
             this, &BuildsController::onNewButtonClick);
     connect(m_buildsPane->platformSelectionWidget()->buttonSlice()->get(PlatformSelectionWidget::Back), &QPushButton::clicked,
@@ -129,7 +129,7 @@ void BuildsController::onServerDisconnect()
 void BuildsController::onRowRemoval()
 {
     bool enableNewButton = true;
-    auto model = static_cast<BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
+    auto model = static_cast<const BuildModel*>(m_buildsPane->downloadWidget()->downloadList()->model());
     for (int row = 0; row < model->rowCount(); ++row) {
         const QModelIndex& index = model->index(row);
         const QVariant& state = model->data(index, BuildModel::StateRole);

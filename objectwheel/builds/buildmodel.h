@@ -17,6 +17,7 @@ public:
         StateRole,
         ErrorRole,
         NameRole,
+        PathRole,
         PlatformIconRole,
         VersionRole,
         AbisRole,
@@ -56,11 +57,11 @@ private slots:
     void onServerBytesWritten(qint64 bytes);
 
 signals:
-    void uploadFinished();
+    void uploadFinished(const QModelIndex& index);
+    void downloadFinished(const QModelIndex& index);
 
 private:
     QIcon platformIcon(const QString& rawPlatformName) const;
-    QString packageSuffixFromRequest(const QCborMap& request) const;
     BuildInfo* buildInfoFromUid(const QString& uid);
     BuildInfo* uploadingBuildInfo() const;
 

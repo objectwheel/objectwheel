@@ -10,7 +10,6 @@
 #include <QTimer>
 #include <QIcon>
 #include <QApplication>
-#include <QStandardPaths>
 
 enum StatusCode {
     InternalError,
@@ -97,10 +96,10 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         return QImage::fromData(buildInfo->request().value(QLatin1String("icon")).toByteArray());
     case ButtonSize:
         return QSize(16, 16);
-    case NameRole: {
-        return buildInfo->request().value(QLatin1String("name")).toString()
-                + packageSuffixFromRequest(buildInfo->request());
-    }
+    case NameRole:
+        return QFileInfo(buildInfo->path()).fileName();
+    case PathRole:
+        return buildInfo->path();
     case PlatformIconRole:
         return platformIcon(buildInfo->request().value(QLatin1String("platform")).toString());
     case VersionRole:
@@ -268,6 +267,12 @@ void BuildModel::onServerResponse(const QByteArray& data)
     if (buildInfo->state() == Finished)
         return;
 
+    int row = m_buildInfos.indexOf(buildInfo);
+    if (row < 0)
+        return;
+    const QModelIndex& index = BuildModel::index(row);
+    Q_ASSERT(index.isValid());
+
     if (buildInfo->state() == Uploading) {
         buildInfo->setSpeed(0);
         buildInfo->setTotalBytes(0);
@@ -275,7 +280,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->setTimeLeft(QTime());
         buildInfo->recentBlocks().clear();
         buildInfo->setState(Downloading);
-        emit uploadFinished();
+        emit uploadFinished(index);
     }
 
     switch (status) {
@@ -369,17 +374,12 @@ void BuildModel::onServerResponse(const QByteArray& data)
             buildInfo->setStatus(tr("Done"));
             buildInfo->setState(Finished);
             do {
-                int row = m_buildInfos.indexOf(buildInfo);
-                if (row < 0)
-                    break;
-                const QModelIndex& index = BuildModel::index(row);
-                Q_ASSERT(index.isValid());
-                const QString& downloadPath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
-                QFile file(downloadPath + QLatin1Char('/') + index.data(NameRole).toString());
+                QFile file(index.data(PathRole).toString());
                 if (!file.open(QFile::WriteOnly))
                     break;
                 file.write(buildInfo->buffer()->data());
-            } while(false);
+            } while (false);
+            emit downloadFinished(index);
         }
 
         // Gather 'speed' and 'time left' information
@@ -409,11 +409,6 @@ void BuildModel::onServerResponse(const QByteArray& data)
         break;
     }
 
-    int row = m_buildInfos.indexOf(buildInfo);
-    if (row < 0)
-        return;
-    const QModelIndex& index = BuildModel::index(row);
-    Q_ASSERT(index.isValid());
     emit dataChanged(index, index);
 }
 
@@ -457,17 +452,6 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
 QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
 {
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
-}
-
-QString BuildModel::packageSuffixFromRequest(const QCborMap& request) const
-{
-    if (request.value(QLatin1String("platform")).toString() == QLatin1String("android")) {
-        if (request.value(QLatin1String("aab")).toBool(false))
-            return QLatin1String(".aab");
-        else
-            return QLatin1String(".apk");
-    }
-    return QString();
 }
 
 BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)

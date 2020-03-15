@@ -36,6 +36,7 @@
 #include <QRegExp>
 #include <QTimer>
 #include <QUrl>
+#include <QProcess>
 
 #ifdef QT_GUI_LIB
 #include <QMessageBox>
@@ -57,6 +58,49 @@ QDebug operator<<(QDebug dbg, const Utils::FileName &c)
 }
 
 QT_END_NAMESPACE
+
+static QString substituteFileBrowserParameters(const QString &pre, const QString &file)
+{
+    QString cmd;
+    for (int i = 0; i < pre.size(); ++i) {
+        QChar c = pre.at(i);
+        if (c == QLatin1Char('%') && i < pre.size()-1) {
+            c = pre.at(++i);
+            QString s;
+            if (c == QLatin1Char('d')) {
+                s = QLatin1Char('"') + QFileInfo(file).path() + QLatin1Char('"');
+            } else if (c == QLatin1Char('f')) {
+                s = QLatin1Char('"') + file + QLatin1Char('"');
+            } else if (c == QLatin1Char('n')) {
+                s = QLatin1Char('"') + file.mid(file.lastIndexOf(QLatin1Char('/')) + 1) + QLatin1Char('"');
+            } else if (c == QLatin1Char('%')) {
+                s = c;
+            } else {
+                s = QLatin1Char('%');
+                s += c;
+            }
+            cmd += s;
+            continue;
+
+        }
+        cmd += c;
+    }
+
+    return cmd;
+}
+
+static void showGraphicalShellError(QWidget *parent, const QString &app, const QString &error)
+{
+    const QString title = QObject::tr("Core::Internal",
+                                      "Launching a file browser failed");
+    const QString msg = QObject::tr("Core::Internal",
+                                    "Unable to start the file manager:\n\n%1\n\n").arg(app);
+    QMessageBox mbox(QMessageBox::Warning, title, msg, QMessageBox::Close, parent);
+    if (!error.isEmpty())
+        mbox.setDetailedText(QObject::tr("Core::Internal",
+                                         "\"%1\" returned the following error:\n\n%2").arg(app, error));
+    mbox.exec();
+}
 
 namespace Utils {
 
@@ -206,6 +250,40 @@ bool FileUtils::isFileNewerThan(const FileName &filePath, const QDateTime &timeS
         }
     }
     return false;
+}
+
+void FileUtils::showInFolder(QWidget* parent, const QString& pathIn)
+{
+    const QFileInfo fileInfo(pathIn);
+    // Mac, Windows support folder or file.
+    if (HostOsInfo::isWindowsHost()) {
+        QStringList param;
+        if (!fileInfo.isDir())
+            param += QLatin1String("/select,");
+        param += QDir::toNativeSeparators(fileInfo.canonicalFilePath());
+        QProcess::startDetached(QLatin1String("explorer.exe"), param);
+    } else if (HostOsInfo::isMacHost()) {
+        QStringList scriptArgs;
+        scriptArgs << QLatin1String("-e")
+                   << QString::fromLatin1("tell application \"Finder\" to reveal POSIX file \"%1\"")
+                                         .arg(fileInfo.canonicalFilePath());
+        QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+        scriptArgs.clear();
+        scriptArgs << QLatin1String("-e")
+                   << QLatin1String("tell application \"Finder\" to activate");
+        QProcess::execute(QLatin1String("/usr/bin/osascript"), scriptArgs);
+    } else {
+        // we cannot select a file here, because no file browser really supports it...
+        const QString folder = fileInfo.isDir() ? fileInfo.absoluteFilePath() : fileInfo.filePath();
+        const QString app = QLatin1String("xdg-open %d");
+        QProcess browserProc;
+        const QString browserArgs = substituteFileBrowserParameters(app, folder);
+        bool success = browserProc.startDetached(browserArgs);
+        const QString error = QString::fromLocal8Bit(browserProc.readAllStandardError());
+        success = success && error.isEmpty();
+        if (!success)
+            showGraphicalShellError(parent, app, error);
+    }
 }
 
 /*!

@@ -19,8 +19,10 @@ class BuildInfo final : public QObject
 
 public:
     explicit BuildInfo(const QCborMap& request, const QString& status = QString(), QObject* parent = nullptr);
+    ~BuildInfo() override;
 
     const QCborMap& request() const;
+    const QString& path() const;
     const QString& details() const;
 
     QBuffer* buffer();
@@ -52,8 +54,10 @@ public:
     void setState(int state);
 
 private:
+    static QStringList s_paths;
     const QCborMap m_request;
     QString m_uid;
+    QString m_path;
     QString m_details;
     QBuffer m_buffer;
     QList<Block> m_recentBlocks;

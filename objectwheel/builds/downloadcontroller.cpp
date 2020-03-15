@@ -3,6 +3,7 @@
 #include <utilityfunctions.h>
 #include <builddelegate.h>
 #include <buildmodel.h>
+#include <fileutils.h>
 
 #include <QLabel>
 #include <QListWidget>
@@ -11,26 +12,29 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
     : QObject(parent)
     , m_downloadWidget(downloadWidget)
 {
+    auto model = static_cast<const BuildModel*>(m_downloadWidget->downloadList()->model());
+    auto delegate = static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate());
     auto noBuildsIndicatorLabel = new QLabel(tr("No builds"), m_downloadWidget->downloadList());
     noBuildsIndicatorLabel->setFixedSize(m_downloadWidget->downloadList()->size());
     noBuildsIndicatorLabel->setAlignment(Qt::AlignCenter);
     noBuildsIndicatorLabel->setStyleSheet("color: #777777");
     UtilityFunctions::adjustFontPixelSize(noBuildsIndicatorLabel, -1);
-    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::rowsInserted,
+    connect(model, &BuildModel::rowsInserted,
             noBuildsIndicatorLabel, [=] (const QModelIndex& index, int first, int /*last*/) {
-        QAbstractItemModel* model = m_downloadWidget->downloadList()->model();
         noBuildsIndicatorLabel->setVisible(model->rowCount() <= 0);
         m_downloadWidget->downloadList()->openPersistentEditor(model->index(first, 0, index));
     });
-    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::rowsRemoved,
+    connect(model, &BuildModel::rowsRemoved,
             noBuildsIndicatorLabel, [=] {
-        noBuildsIndicatorLabel->setVisible(m_downloadWidget->downloadList()->model()->rowCount() <= 0);
+        noBuildsIndicatorLabel->setVisible(model->rowCount() <= 0);
     });
-    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::modelReset,
+    connect(model, &BuildModel::modelReset,
             noBuildsIndicatorLabel, &QLabel::show);
-    connect(static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate()), &BuildDelegate::deleteButtonClicked,
+    connect(delegate, &BuildDelegate::deleteButtonClicked,
             this, &DownloadController::onDeleteButtonClick);
-    connect(m_downloadWidget->downloadList()->model(), &QAbstractItemModel::dataChanged,
+    connect(delegate, &BuildDelegate::openFolderButtonClicked,
+            this, &DownloadController::onOpenFolderButtonClick);
+    connect(model, &BuildModel::dataChanged,
             this, &DownloadController::onModelDataChange);
 }
 
@@ -50,6 +54,14 @@ void DownloadController::onDeleteButtonClick(const QModelIndex& index) const
         if (ret == QMessageBox::Yes)
             model->removeRow(index.row(), index.parent());
     }
+}
+
+void DownloadController::onOpenFolderButtonClick(const QModelIndex& index) const
+{
+    auto model = static_cast<const BuildModel*>(m_downloadWidget->downloadList()->model());
+    const QVariant& state = model->data(index, BuildModel::PathRole);
+    if (state.isValid())
+        Utils::FileUtils::showInFolder(m_downloadWidget, state.toString());
 }
 
 void DownloadController::onModelDataChange(const QModelIndex& topLeft,

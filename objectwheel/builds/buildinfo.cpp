@@ -1,6 +1,22 @@
 #include <buildinfo.h>
 #include <buildmodel.h>
 
+#include <QFile>
+#include <QStandardPaths>
+
+static QString packageSuffixFromRequest(const QCborMap& request)
+{
+    if (request.value(QLatin1String("platform")).toString() == QLatin1String("android")) {
+        if (request.value(QLatin1String("aab")).toBool(false))
+            return QLatin1String(".aab");
+        else
+            return QLatin1String(".apk");
+    }
+    return QString();
+}
+
+QStringList BuildInfo::s_paths;
+
 BuildInfo::BuildInfo(const QCborMap& request, const QString& status, QObject* parent) : QObject(parent)
   , m_request(request)
   , m_errorFlag(false)
@@ -10,6 +26,31 @@ BuildInfo::BuildInfo(const QCborMap& request, const QString& status, QObject* pa
   , m_transferredBytes(0)
   , m_state(BuildModel::Uploading)
 {
+    const QString& suffix = packageSuffixFromRequest(request);
+    const QString& baseName = request.value(QLatin1String("name")).toString();
+    const QString& basePath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
+    if (!suffix.isEmpty() && !baseName.isEmpty() && !basePath.isEmpty()) {
+        QString fullPath = basePath + QLatin1Char('/') + baseName + suffix;
+        if (!QFile::exists(fullPath)) {
+            m_path = fullPath;
+            s_paths.append(m_path.toLower());
+        } else {
+            int i = 1;
+            forever {
+                fullPath = basePath + QLatin1Char('/') + baseName + QString::number(i++) + suffix;
+                if (!QFile::exists(fullPath) && !s_paths.contains(fullPath.toLower())) {
+                    m_path = fullPath;
+                    s_paths.append(m_path.toLower());
+                    break;
+                }
+            }
+        }
+    }
+}
+
+BuildInfo::~BuildInfo()
+{
+    s_paths.removeOne(m_path.toLower());
 }
 
 QString BuildInfo::uid() const
@@ -25,6 +66,11 @@ void BuildInfo::setUid(const QString& uid)
 const QCborMap& BuildInfo::request() const
 {
     return m_request;
+}
+
+const QString& BuildInfo::path() const
+{
+    return m_path;
 }
 
 const QString& BuildInfo::details() const
