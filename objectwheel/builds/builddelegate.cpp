@@ -28,7 +28,7 @@ void BuildDelegate::updateEditorGeometry(QWidget* widget, const QStyleOptionView
 {
     StyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
-    const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
+    const int padding = (opt.rect.height() - opt.decorationSize.height()) / 2.0;
     widget->setGeometry(opt.rect.width() - padding - widget->width(), padding,
                         widget->width(), opt.rect.height() - 2 * padding);
 }
@@ -91,6 +91,11 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     return widget;
 }
 
+QSize BuildDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
+{
+    return QSize(550, option.decorationSize.height() + 2 * 7);
+}
+
 void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
                           const QModelIndex& index) const
 {
@@ -101,24 +106,28 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     painter->setFont(opt.font);
 
     // Limit drawing region to view's rect (with rounded corners)
-    QPainterPath path;
-    path.addRoundedRect(opt.widget->viewport()->rect(), 7, 7);
-    painter->setClipPath(path);
+    if (opt.view) {
+        QPainterPath path;
+        path.addRoundedRect(opt.view->viewport()->rect(), 7, 7);
+        painter->setClipPath(path);
+    }
 
     // Draw background
     painter->fillRect(opt.rect, opt.backgroundBrush);
 
     // Draw app icon
-    const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
+    const int padding = (opt.rect.height() - opt.decorationSize.height()) / 2.0;
     QRect iconRect(QPoint(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
     if (opt.icon.isNull()) {
         painter->setPen(QPen(Qt::gray, 1, Qt::DashLine));
         painter->setBrush(Qt::NoBrush);
+        painter->setRenderHint(QPainter::Antialiasing, true);
         painter->drawRoundedRect(iconRect, 4, 4);
+        painter->setRenderHint(QPainter::Antialiasing, false);
         painter->setPen(QPen(Qt::darkGray));
         painter->drawText(iconRect, tr("Empty\nicon"), Qt::AlignVCenter | Qt::AlignHCenter);
     } else {
-        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.widget);
+        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.view);
         painter->drawPixmap(iconRect, icon, icon.rect());
     }
 
@@ -126,7 +135,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     iconRect.moveTopLeft(iconRect.center() + QPoint(2, 2));
     iconRect.setSize(iconRect.size() / 2);
     const QPixmap& icon = PaintUtils::pixmap(index.data(BuildModel::PlatformIconRole).value<QIcon>(),
-                                             iconRect.size(), opt.widget);
+                                             iconRect.size(), opt.view);
     painter->drawPixmap(iconRect, icon, icon.rect());
 
     // Draw texts
@@ -227,7 +236,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     QRectF progressRect(textRect.left(), 0, textRect.width(), 7);
     progressRect.moveBottom(textRect.bottom() - 2);
     QStyleOptionProgressBar bar;
-    bar.initFrom(opt.widget);
+    bar.initFrom(opt.view);
     bar.rect = progressRect.toRect();
     bar.invertedAppearance = isFinished ? true : false;
     bar.maximum = 100;

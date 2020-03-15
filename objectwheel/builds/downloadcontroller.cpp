@@ -30,12 +30,24 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
     });
     connect(model, &BuildModel::modelReset,
             noBuildsIndicatorLabel, &QLabel::show);
+    connect(delegate, &BuildDelegate::infoButtonClicked,
+            this, &DownloadController::onInfoButtonClick);
     connect(delegate, &BuildDelegate::deleteButtonClicked,
             this, &DownloadController::onDeleteButtonClick);
     connect(delegate, &BuildDelegate::openFolderButtonClicked,
             this, &DownloadController::onOpenFolderButtonClick);
     connect(model, &BuildModel::dataChanged,
             this, &DownloadController::onModelDataChange);
+}
+#include <downloaddetailswidget.h>
+void DownloadController::onInfoButtonClick(const QModelIndex& index) const
+{
+    auto model = static_cast<BuildModel*>(m_downloadWidget->downloadList()->model());
+    auto delegate = static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate());
+    auto w = new DownloadDetailsWidget(m_downloadWidget->downloadList(), 0);
+    w->setIndex(index);
+    w->adjustSize();
+    w->show();
 }
 
 void DownloadController::onDeleteButtonClick(const QModelIndex& index) const

@@ -90,8 +90,6 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         font.setPixelSize(11);
         return font;
     }
-    case Qt::SizeHintRole:
-        return QSize(0, 12 * 4 + 2 * 3 + 7 * 2);
     case Qt::DecorationRole:
         return QImage::fromData(buildInfo->request().value(QLatin1String("icon")).toByteArray());
     case ButtonSize:

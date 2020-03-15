@@ -1,5 +1,17 @@
 #include <styleditemdelegate.h>
 
+StyleOptionViewItem::StyleOptionViewItem(const QStyleOptionViewItem& other) : QStyleOptionViewItem(other)
+{
+    view = qobject_cast<const QAbstractItemView*>(other.widget);
+}
+
+StyleOptionViewItem& StyleOptionViewItem::operator=(const QStyleOptionViewItem& other)
+{
+    QStyleOptionViewItem::operator=(other);
+    view = qobject_cast<const QAbstractItemView*>(other.widget);
+    return *this;
+}
+
 StyledItemDelegate::StyledItemDelegate(QObject* parent) : QStyledItemDelegate(parent)
 {
 }

@@ -7,17 +7,9 @@
 class StyleOptionViewItem final : public QStyleOptionViewItem
 {
 public:
-    StyleOptionViewItem(const QStyleOptionViewItem& other) : QStyleOptionViewItem(other)
-    {
-        widget = static_cast<const QAbstractItemView*>(other.widget);
-    }
-    StyleOptionViewItem& operator=(const QStyleOptionViewItem& other)
-    {
-        QStyleOptionViewItem::operator=(other);
-        widget = static_cast<const QAbstractItemView*>(other.widget);
-        return *this;
-    }
-    const QAbstractItemView* widget = nullptr;
+    StyleOptionViewItem(const QStyleOptionViewItem& other);
+    StyleOptionViewItem& operator=(const QStyleOptionViewItem& other);
+    const QAbstractItemView* view = nullptr;
 };
 
 class StyledItemDelegate : public QStyledItemDelegate

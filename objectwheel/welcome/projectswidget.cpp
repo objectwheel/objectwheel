@@ -169,9 +169,11 @@ public:
         initStyleOption(&opt, index);
 
         // Limit drawing region to view's rect (with rounded corners)
-        QPainterPath path;
-        path.addRoundedRect(opt.widget->viewport()->rect(), 7, 7);
-        painter->setClipPath(path);
+        if (opt.view) {
+            QPainterPath path;
+            path.addRoundedRect(opt.view->viewport()->rect(), 7, 7);
+            painter->setClipPath(path);
+        }
 
         // Draw highlighted background if selected
         if (opt.state.testFlag(QStyle::State_Selected))
@@ -180,7 +182,7 @@ public:
         // Draw icon
         const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
         const QRectF iconRect(QPointF(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
-        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.widget);
+        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.view);
         painter->drawPixmap(iconRect, icon, icon.rect());
 
         // Draw texts

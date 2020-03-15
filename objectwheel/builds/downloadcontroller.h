@@ -13,6 +13,7 @@ public:
     explicit DownloadController(DownloadWidget* downloadWidget, QObject* parent = nullptr);
 
 private slots:
+    void onInfoButtonClick(const QModelIndex& index) const;
     void onDeleteButtonClick(const QModelIndex& index) const;
     void onOpenFolderButtonClick(const QModelIndex& index) const;
     void onModelDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight,
