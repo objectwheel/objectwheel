@@ -228,9 +228,18 @@ static QPainterPath highlightPath(const Control* control, bool source)
     return parentPath - chilrenPath;
 }
 
+static void drawArrow(QPainter* painter)
+{
+    static const QPointF points[3] = {
+        QPointF(-3.5, -6.0),
+        QPointF( 3.5, -6.0),
+        QPointF( 0.0,  0.0)
+    };
+    painter->drawPolygon(points, 3);
+}
+
 PaintLayer::PaintLayer(DesignerItem* parent) : DesignerItem(parent)
   , m_geometryUpdateScheduled(false)
-  , m_anchorPixmap(PaintUtils::renderOverlaidPixmap(":/images/designer/anchor.svg", Qt::white, QSize(11, 11), 0))
 {
 }
 
@@ -308,12 +317,10 @@ void PaintLayer::paintAnchor(QPainter* painter, const PaintLayer::AnchorData& da
     painter->drawChord(bumpRectangle, sourceAngle(data), 180 * AngleDegree);
 
     bumpRectangle.moveTo(data.endPoint.x() - m/2/z, data.endPoint.y() - m/2/z);
-    painter->setPen(DesignerScene::pen(settings->anchorColor, 2));
-    painter->drawRoundedRect(bumpRectangle, m/2/z, m/2/z);
     painter->translate(bumpRectangle.center());
     painter->rotate(targetAngle(data));
     painter->scale(1/z, 1/z);
-    painter->drawPixmap(QRectF(-m/2, -m/2, m, m), m_anchorPixmap, m_anchorPixmap.rect());
+    drawArrow(painter);
     painter->restore();
 }
 
@@ -389,13 +396,10 @@ void PaintLayer::paintCenterAnchor(QPainter* painter, Control* control)
     bumpRectangle.moveTo(data.endPoint.x() - bumpRectangle.width() / 2, data.endPoint.y() - bumpRectangle.height() / 2);
     painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     bumpRectangle.adjust(1/z, 1/z, -1/z, -1/z);
-    painter->setPen(DesignerScene::pen(Qt::white, 1.5));
-    painter->setBrush(Qt::NoBrush);
-    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
     painter->translate(bumpRectangle.center());
     painter->rotate(targetAngle(data));
     painter->scale(1/z, 1/z);
-    painter->drawPixmap(QRectF(-m/2, -m/2, m, m), m_anchorPixmap, m_anchorPixmap.rect());
+    drawArrow(painter);
     painter->restore();
 
     painter->save();
@@ -526,14 +530,18 @@ void PaintLayer::paintAnchorConnection(QPainter* painter)
     bumpRectangle.adjust(-2/z, -2/z, 2/z, 2/z);
 
     bumpRectangle.moveTo(line.p2().x() - m/2/z, line.p2().y() - m/2/z);
-    painter->setBrush(painter->pen().color());
-    painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
-    painter->translate(bumpRectangle.center());
-    painter->rotate(angle);
     if (targetControl) {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(DesignerSettings::sceneSettings()->anchorColor);
+        painter->translate(bumpRectangle.center());
+        painter->rotate(angle);
         painter->scale(1/z, 1/z);
-        painter->drawPixmap(QRectF(-m/2, -m/2, m, m), m_anchorPixmap, m_anchorPixmap.rect());
+        drawArrow(painter);
     } else {
+        painter->setBrush(painter->pen().color());
+        painter->drawRoundedRect(bumpRectangle, bumpRectangle.width() / 2, bumpRectangle.height() / 2);
+        painter->translate(bumpRectangle.center());
+        painter->rotate(angle);
         painter->setBrush(Qt::white);
         painter->setPen(DesignerScene::pen("#c00000", 3));
         painter->drawRoundedRect(QRect(-m/2/z, -m/2/z, m/z, m/z), m/2/z, m/2/z);

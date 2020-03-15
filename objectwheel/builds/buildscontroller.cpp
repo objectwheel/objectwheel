@@ -91,9 +91,8 @@ void BuildsController::onAndroidBuildButtonClick()
         } else {
             UtilityFunctions::showMessage(
                         m_buildsPane,
-                        tr("Unable to connect to the server"),
-                        tr("Please make sure you have a working internet connection."),
-                        QMessageBox::Warning);
+                        tr("Unable to connect to the Server"),
+                        tr("Please make sure you have a working internet connection."));
         }
     }
 }

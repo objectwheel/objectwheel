@@ -117,8 +117,9 @@ void ForgetWidget::onNextClicked()
 
     if (!ServerManager::isConnected()) {
         UtilityFunctions::showMessage(
-                    this, tr("No connection"),
-                    tr("Unable to connect to the server, please checkout your internet connection."));
+                    this,
+                    tr("Unable to connect to the Server"),
+                    tr("Please make sure you have a working internet connection."));
         return;
     }
 
