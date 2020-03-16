@@ -57,12 +57,8 @@ public:
 
     template<typename... Args>
     static qint64 send(ServerCommands command, Args&&... args) {
-        if (isConnected()) {
-            return instance()->sendBinaryMessage(UtilityFunctions::pushCbor(command, std::forward<Args>(args)...));
-        } else {
-            qWarning() << "ServerManager::send: Unable to send the data, server is not connected.";
-            return -1;
-        }
+        Q_ASSERT(isConnected());
+        return instance()->sendBinaryMessage(UtilityFunctions::pushCbor(command, std::forward<Args>(args)...));
     }
 
 private slots:

@@ -63,8 +63,9 @@ signals:
 
 private:
     QIcon platformIcon(const QString& rawPlatformName) const;
-    BuildInfo* buildInfoFromUid(const QString& uid);
     BuildInfo* uploadingBuildInfo() const;
+    BuildInfo* buildInfoFromUid(const QString& uid);
+    QModelIndex indexFromBuildInfo(const BuildInfo* buildInfo) const;
 
 private:
     QList<BuildInfo*> m_buildInfos;

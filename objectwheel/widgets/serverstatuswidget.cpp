@@ -25,9 +25,7 @@ QSize ServerStatusWidget::minimumSizeHint() const
 void ServerStatusWidget::updateToolTip()
 {
     static const QString toolTipTemplate(tr("<p style='white-space:nowrap'>Server connection status: <b>%1</b></p>"));
-    QAbstractSocket::SocketState state = QAbstractSocket::UnconnectedState;
-    if (ServerManager::instance())
-        state = ServerManager::instance()->state();
+    const QAbstractSocket::SocketState state = ServerManager::instance()->state();
     if (state == QAbstractSocket::ConnectedState)
         UtilityFunctions::updateToolTip(this, toolTipTemplate.arg(tr("Connected")));
     else if (state == QAbstractSocket::UnconnectedState)
@@ -38,9 +36,7 @@ void ServerStatusWidget::updateToolTip()
 
 void ServerStatusWidget::paintEvent(QPaintEvent*)
 {
-    QAbstractSocket::SocketState state = QAbstractSocket::UnconnectedState;
-    if (ServerManager::instance())
-        state = ServerManager::instance()->state();
+    const QAbstractSocket::SocketState state = ServerManager::instance()->state();
     const QColor color(state != QAbstractSocket::ConnectedState
             ? state == QAbstractSocket::UnconnectedState ? "#f78f8f" : "#f6e69d" : "#b9debc");
     const QColor outline(state != QAbstractSocket::ConnectedState

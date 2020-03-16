@@ -30,7 +30,8 @@ void BuildDelegate::updateEditorGeometry(QWidget* widget, const QStyleOptionView
 {
     StyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
-    widget->setGeometry(opt.rect.width() - PADDING - widget->width(), PADDING,
+    widget->setGeometry(opt.rect.left() + opt.rect.width() - PADDING - widget->width(),
+                        opt.rect.top() + PADDING,
                         widget->width(), opt.rect.height() - 2 * PADDING);
 }
 

@@ -2,6 +2,7 @@
 #include <downloaddetailswidget.h>
 #include <buildmodel.h>
 #include <utilityfunctions.h>
+#include <fontcolorssettings.h>
 
 #include <QPlainTextEdit>
 #include <QBoxLayout>
@@ -26,8 +27,9 @@ BuildDetailsDialog::BuildDetailsDialog(const QAbstractItemView* view, QWidget* p
     layout->addWidget(m_detailsTextEdit);
     layout->addWidget(box);
 
-    UtilityFunctions::adjustFontPixelSize(m_detailsTextEdit, -1);
     m_detailsTextEdit->setReadOnly(true);
+    m_detailsTextEdit->setFont(FontColorsSettings().toFont());
+    UtilityFunctions::adjustFontPixelSize(m_detailsTextEdit, -2);
 
     connect(box, &QDialogButtonBox::rejected, this, &BuildDetailsDialog::reject);
     connect(m_view->model(), &QAbstractItemModel::rowsAboutToBeRemoved,

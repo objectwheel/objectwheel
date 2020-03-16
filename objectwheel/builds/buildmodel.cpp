@@ -49,6 +49,7 @@ BuildModel::~BuildModel()
 
 void BuildModel::addBuildRequest(const QCborMap& request)
 {
+    Q_ASSERT(uploadingBuildInfo() == nullptr);
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_buildInfos.append(new BuildInfo(request, tr("Compressing the project..."), this));
     endInsertRows();
@@ -177,7 +178,7 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
         BuildInfo* buildInfo = m_buildInfos.takeAt(row + i);
-        if (buildInfo->state() != Finished && ServerManager::instance() && ServerManager::isConnected())
+        if (buildInfo->state() != Finished && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
@@ -191,7 +192,7 @@ void BuildModel::clear()
     beginResetModel();
     for (int i = 0; i < m_buildInfos.size(); ++i) {
         BuildInfo* buildInfo = m_buildInfos.at(i);
-        if (buildInfo->state() != Finished && ServerManager::instance() && ServerManager::isConnected())
+        if (buildInfo->state() != Finished && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
     }
@@ -201,11 +202,11 @@ void BuildModel::clear()
 
 void BuildModel::start()
 {
-    Q_ASSERT(ServerManager::instance() && ServerManager::isConnected());
-    Q_ASSERT(!m_buildInfos.isEmpty());
-    BuildInfo* buildInfo = m_buildInfos.last();
-    const QModelIndex& index = BuildModel::index(m_buildInfos.size() - 1);
+    BuildInfo* buildInfo = uploadingBuildInfo();
+    const QModelIndex& index = indexFromBuildInfo(buildInfo);
+
     Q_ASSERT(index.isValid());
+    Q_ASSERT(ServerManager::isConnected());
 
     QByteArray data;
     {
@@ -267,25 +268,22 @@ void BuildModel::onServerResponse(const QByteArray& data)
     if (buildInfo->state() == Finished)
         return;
 
-    int row = m_buildInfos.indexOf(buildInfo);
-    if (row < 0)
-        return;
-    const QModelIndex& index = BuildModel::index(row);
+    const QModelIndex& index = indexFromBuildInfo(buildInfo);
     Q_ASSERT(index.isValid());
 
     if (buildInfo->state() == Uploading) {
+        buildInfo->recentBlocks().clear();
         buildInfo->setSpeed(0);
         buildInfo->setTotalBytes(0);
         buildInfo->setTransferredBytes(0);
         buildInfo->setTimeLeft(QTime());
-        buildInfo->recentBlocks().clear();
         buildInfo->setState(Downloading);
         emit uploadFinished(index);
     }
 
     switch (status) {
     case InternalError:
-        buildInfo->setStatus(tr("Server failed"));
+        buildInfo->setStatus(tr("Server failure"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
         break;
@@ -413,44 +411,51 @@ void BuildModel::onServerResponse(const QByteArray& data)
 
 void BuildModel::onServerBytesWritten(qint64 bytes)
 {
-    if (!m_buildInfos.isEmpty()) {
-        BuildInfo* buildInfo = m_buildInfos.last();
-        if (buildInfo->state() == Uploading) {
-            const QModelIndex& index = BuildModel::index(m_buildInfos.size() - 1);
-            Q_ASSERT(index.isValid());
-            buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
+    if (BuildInfo* buildInfo = uploadingBuildInfo()) {
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
 
-            // Gather 'speed' and 'time left' information
-            BuildInfo::Block block;
-            block.size = int(bytes);
-            block.timestamp = QTime::currentTime();
-            buildInfo->recentBlocks().append(block);
-            if (buildInfo->recentBlocks().size() > 10)
-                buildInfo->recentBlocks().removeFirst();
+        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
 
-            if (buildInfo->recentBlocks().size() > 1) {
-                // Calculate Speed
-                int transferredBytes = -buildInfo->recentBlocks().first().size;
-                int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
-                for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
-                    transferredBytes += block.size;
-                qreal bytesPerMs = transferredBytes / qreal(elapedMs);
-                buildInfo->setSpeed(bytesPerMs * 1000);
+        // Gather 'speed' and 'time left' information
+        BuildInfo::Block block;
+        block.size = int(bytes);
+        block.timestamp = QTime::currentTime();
+        buildInfo->recentBlocks().append(block);
+        if (buildInfo->recentBlocks().size() > 10)
+            buildInfo->recentBlocks().removeFirst();
 
-                // Calculate Time Left
-                int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
-                qreal msLeft = bytesLeft / bytesPerMs;
-                buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
-            }
+        if (buildInfo->recentBlocks().size() > 1) {
+            // Calculate Speed
+            int transferredBytes = -buildInfo->recentBlocks().first().size;
+            int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
+            for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
+                transferredBytes += block.size;
+            qreal bytesPerMs = transferredBytes / qreal(elapedMs);
+            buildInfo->setSpeed(bytesPerMs * 1000);
 
-            emit dataChanged(index, index);
+            // Calculate Time Left
+            int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
+            qreal msLeft = bytesLeft / bytesPerMs;
+            buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
         }
+
+        emit dataChanged(index, index);
     }
 }
 
 QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
 {
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
+}
+
+BuildInfo* BuildModel::uploadingBuildInfo() const
+{
+    for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
+        if (buildInfo->state() == Uploading)
+            return buildInfo;
+    }
+    return nullptr;
 }
 
 BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
@@ -464,11 +469,10 @@ BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
     return nullptr;
 }
 
-BuildInfo* BuildModel::uploadingBuildInfo() const
+QModelIndex BuildModel::indexFromBuildInfo(const BuildInfo* buildInfo) const
 {
-    for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
-        if (buildInfo->state() == Uploading)
-            return buildInfo;
-    }
-    return nullptr;
+    int row = m_buildInfos.indexOf(const_cast<BuildInfo*>(buildInfo));
+    if (row < 0)
+        return QModelIndex();
+    return index(row);
 }
