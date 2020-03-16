@@ -78,11 +78,15 @@ void DownloadDetailsWidget::resizeEvent(QResizeEvent* event)
 void DownloadDetailsWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    painter.setPen(QColor(0, 0, 0, 130));
-    if (m_index.isValid())
+    if (m_index.isValid()) {
         m_view->itemDelegate()->paint(&painter, viewOptions(), m_index);
-    else
+    } else {
+        painter.setPen(QColor(0, 0, 0, 130));
         painter.drawText(rect(), tr("No builds"), Qt::AlignVCenter | Qt::AlignHCenter);
+    }
+    painter.setPen(QPen(QColor("#c4c4c4"), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+    painter.setBrush(Qt::NoBrush);
+    painter.drawRect(QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5));
 }
 
 QStyleOptionViewItem DownloadDetailsWidget::viewOptions() const
