@@ -4,6 +4,7 @@
 #include <builddelegate.h>
 #include <buildmodel.h>
 #include <fileutils.h>
+#include <builddetailsdialog.h>
 
 #include <QLabel>
 #include <QListWidget>
@@ -39,13 +40,12 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
     connect(model, &BuildModel::dataChanged,
             this, &DownloadController::onModelDataChange);
 }
-#include <downloaddetailswidget.h>
+
 void DownloadController::onInfoButtonClick(const QModelIndex& index) const
 {
-    auto w = new DownloadDetailsWidget(m_downloadWidget->downloadList(), 0);
+    auto w = new BuildDetailsDialog(m_downloadWidget->downloadList(), m_downloadWidget);
     w->setIndex(index);
-    w->adjustSize();
-    w->show();
+    w->exec();
 }
 
 void DownloadController::onDeleteButtonClick(const QModelIndex& index) const

@@ -1,11 +1,10 @@
 #include <downloaddetailswidget.h>
 #include <QPainter>
-#include <QAbstractItemView>
-#include <QDebug>
 
 DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWidget* parent) : QWidget(parent)
   , m_view(view)
 {
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     connect(m_view->model(), &QAbstractItemModel::rowsAboutToBeRemoved,
             this, [=] (const QModelIndex& parent, int first, int last) {
         for (; first <= last; ++first) {
@@ -35,6 +34,29 @@ DownloadDetailsWidget::~DownloadDetailsWidget()
     setIndex(QModelIndex());
 }
 
+const QModelIndex& DownloadDetailsWidget::index() const
+{
+    return m_index;
+}
+
+void DownloadDetailsWidget::setIndex(const QModelIndex& index)
+{
+    if (m_index != index) {
+        if (m_index.isValid())
+            m_view->itemDelegate()->destroyEditor(m_editor, m_index);
+
+        m_index = index;
+
+        if (m_index.isValid()) {
+            m_editor = m_view->itemDelegate()->createEditor(this, viewOptions(), m_index);
+            m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
+        }
+
+        updateGeometry();
+        update();
+    }
+}
+
 QSize DownloadDetailsWidget::sizeHint() const
 {
     return minimumSizeHint();
@@ -43,27 +65,6 @@ QSize DownloadDetailsWidget::sizeHint() const
 QSize DownloadDetailsWidget::minimumSizeHint() const
 {
     return m_view->itemDelegate()->sizeHint(viewOptions(), m_index);
-}
-
-const QModelIndex& DownloadDetailsWidget::index() const
-{
-    return m_index;
-}
-
-void DownloadDetailsWidget::setIndex(const QModelIndex& index)
-{
-    if (m_index.isValid())
-        m_view->itemDelegate()->destroyEditor(m_editor, m_index);
-
-    m_index = index;
-
-    if (m_index.isValid()) {
-        m_editor = m_view->itemDelegate()->createEditor(this, viewOptions(), m_index);
-        m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
-    }
-
-    updateGeometry();
-    update();
 }
 
 void DownloadDetailsWidget::resizeEvent(QResizeEvent* event)

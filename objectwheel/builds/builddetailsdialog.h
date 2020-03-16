@@ -2,21 +2,29 @@
 #define BUILDDETAILSDIALOG_H
 
 #include <QDialog>
+#include <QModelIndex>
 
+class QAbstractItemView;
+class DownloadDetailsWidget;
 class QPlainTextEdit;
+
 class BuildDetailsDialog final : public QDialog
 {
     Q_OBJECT
     Q_DISABLE_COPY(BuildDetailsDialog)
 
 public:
-    explicit BuildDetailsDialog(QWidget* parent = nullptr);
+    explicit BuildDetailsDialog(const QAbstractItemView* view, QWidget* parent = nullptr);
+    ~BuildDetailsDialog() override;
 
-    QSize sizeHint() const override;
-    QSize minimumSizeHint() const override;
+    const QModelIndex& index() const;
+    void setIndex(const QModelIndex& index);
 
 private:
-    QPlainTextEdit* m_textEdit;
+    const QAbstractItemView* m_view;
+    DownloadDetailsWidget* m_downloadDetailsWidget;
+    QPlainTextEdit* m_detailsTextEdit;
+    QModelIndex m_index;
 };
 
 #endif // BUILDDETAILSDIALOG_H

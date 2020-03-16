@@ -16,6 +16,7 @@ public:
         ButtonSize = Qt::UserRole + 1,
         StateRole,
         ErrorRole,
+        DetailsRole,
         NameRole,
         PathRole,
         PlatformIconRole,

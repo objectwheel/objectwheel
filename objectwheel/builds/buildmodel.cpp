@@ -116,6 +116,8 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         return buildInfo->state();
     case ErrorRole:
         return buildInfo->hasError();
+    case DetailsRole:
+        return buildInfo->details();
     case SpeedRole:
         return buildInfo->speed();
     case TimeLeftRole:
@@ -351,8 +353,6 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->setState(Finished);
         break;
     case BuildData: {
-        buildInfo->setStatus(tr("Downloading..."));
-
         // Decode data
         bool isLastFrame;
         int totalBytes;
@@ -361,6 +361,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
 
         // Fetch and buffer data
         if (!buildInfo->buffer()->isOpen()) {
+            buildInfo->setStatus(tr("Downloading..."));
             buildInfo->setTotalBytes(totalBytes);
             buildInfo->buffer()->buffer().reserve(totalBytes);
             buildInfo->buffer()->open(QBuffer::WriteOnly);
