@@ -9,6 +9,8 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
+enum { PADDING = 7 };
+
 BuildDelegate::BuildDelegate(QObject* parent) : StyledItemDelegate(parent)
 {
 }
@@ -28,28 +30,34 @@ void BuildDelegate::updateEditorGeometry(QWidget* widget, const QStyleOptionView
 {
     StyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
-    const int padding = (opt.rect.height() - opt.decorationSize.height()) / 2.0;
-    widget->setGeometry(opt.rect.width() - padding - widget->width(), padding,
-                        widget->width(), opt.rect.height() - 2 * padding);
+    widget->setGeometry(opt.rect.width() - PADDING - widget->width(), PADDING,
+                        widget->width(), opt.rect.height() - 2 * PADDING);
 }
 
-QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/,
+QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option,
                                      const QModelIndex& index) const
 {
     if (!index.isValid())
         return nullptr;
+
+    StyleOptionViewItem opt = option;
+    initStyleOption(&opt, index);
+
     const QSize& buttonSize = index.data(BuildModel::ButtonSize).toSize();
     auto model = static_cast<const BuildModel*>(index.model());
 
-    auto infoButton = new QPushButton;
-    infoButton->setFocusPolicy(Qt::StrongFocus);
-    infoButton->setCursor(Qt::PointingHandCursor);
-    infoButton->setFlat(true);
-    infoButton->setIcon(QIcon(":/images/output/info.svg"));
-    infoButton->setFixedSize(buttonSize);
-    infoButton->setToolTip(tr("Show details"));
-    connect(infoButton, &QPushButton::clicked,
-            this, [=] { emit infoButtonClicked(index); });
+    QPushButton* infoButton = nullptr;
+    if (opt.widget == opt.view) {
+        infoButton = new QPushButton;
+        infoButton->setFocusPolicy(Qt::StrongFocus);
+        infoButton->setCursor(Qt::PointingHandCursor);
+        infoButton->setFlat(true);
+        infoButton->setIcon(QIcon(":/images/output/info.svg"));
+        infoButton->setFixedSize(buttonSize);
+        infoButton->setToolTip(tr("Show details"));
+        connect(infoButton, &QPushButton::clicked,
+                this, [=] { emit infoButtonClicked(index); });
+    }
 
     auto deleteButton = new QPushButton;
     deleteButton->setFocusPolicy(Qt::StrongFocus);
@@ -81,8 +89,10 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     auto layout = new QVBoxLayout(widget);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
-    layout->addWidget(infoButton);
-    layout->addStretch();
+    if (infoButton) {
+        layout->addWidget(infoButton);
+        layout->addStretch();
+    }
     layout->addWidget(deleteButton);
     layout->addStretch();
     layout->addWidget(openFolderButton);
@@ -93,7 +103,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
 
 QSize BuildDelegate::sizeHint(const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const
 {
-    return QSize(550, option.decorationSize.height() + 2 * 7);
+    return QSize(550, option.decorationSize.height() + 2 * PADDING);
 }
 
 void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
@@ -108,7 +118,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     // Limit drawing region to view's rect (with rounded corners)
     if (opt.view) {
         QPainterPath path;
-        path.addRoundedRect(opt.view->viewport()->rect(), 7, 7);
+        path.addRoundedRect(opt.view->viewport()->rect(), PADDING, PADDING);
         painter->setClipPath(path);
     }
 
@@ -116,8 +126,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     painter->fillRect(opt.rect, opt.backgroundBrush);
 
     // Draw app icon
-    const int padding = (opt.rect.height() - opt.decorationSize.height()) / 2.0;
-    QRect iconRect(QPoint(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
+    QRect iconRect(QPoint(opt.rect.left() + PADDING, opt.rect.top() + PADDING), opt.decorationSize);
     if (opt.icon.isNull()) {
         painter->setPen(QPen(Qt::gray, 1, Qt::DashLine));
         painter->setBrush(Qt::NoBrush);
@@ -127,7 +136,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
         painter->setPen(QPen(Qt::darkGray));
         painter->drawText(iconRect, tr("Empty\nicon"), Qt::AlignVCenter | Qt::AlignHCenter);
     } else {
-        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.view);
+        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.widget);
         painter->drawPixmap(iconRect, icon, icon.rect());
     }
 
@@ -135,7 +144,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     iconRect.moveTopLeft(iconRect.center() + QPoint(2, 2));
     iconRect.setSize(iconRect.size() / 2);
     const QPixmap& icon = PaintUtils::pixmap(index.data(BuildModel::PlatformIconRole).value<QIcon>(),
-                                             iconRect.size(), opt.view);
+                                             iconRect.size(), opt.widget);
     painter->drawPixmap(iconRect, icon, icon.rect());
 
     // Draw texts
@@ -144,16 +153,16 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     const int spacing = 2;
     const QFontMetrics fmLabel(labelFont);
     const QSize& buttonSize = index.data(BuildModel::ButtonSize).toSize();
-    const qreal textHeight = (opt.rect.height() - 2 * padding) / 4.0; // Divided by row count
+    const qreal textHeight = (opt.rect.height() - 2 * PADDING) / 4.0; // Divided by row count
     const int leftLabelLength = fmLabel.horizontalAdvance(tr("Version:"));
     const int rightLabelLength = fmLabel.horizontalAdvance(tr("Time left:"));
     const int rightLength = rightLabelLength + spacing
             + opt.fontMetrics.horizontalAdvance("999.99 MB / 999.99 MB ( % 100.00 )") + 1;
-    const int leftLength = opt.rect.width() - iconRect.right() - 3 * padding - buttonSize.width()
+    const int leftLength = opt.rect.width() - iconRect.right() - 3 * PADDING - buttonSize.width()
             - 2 * spacing - rightLength;
     painter->setPen(opt.palette.text().color());
 
-    QRectF labelRect(iconRect.right() + padding, opt.rect.top() + padding, leftLabelLength, textHeight);
+    QRectF labelRect(iconRect.right() + PADDING, opt.rect.top() + PADDING, leftLabelLength, textHeight);
     QRectF textRect(labelRect.right() + spacing, labelRect.top(), leftLength - leftLabelLength
                     - spacing, textHeight);
     const QString& nameStr = opt.fontMetrics.elidedText(index.data(BuildModel::NameRole).toString(),
@@ -205,7 +214,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
             + UtilityFunctions::toPrettyBytesString(totalBytes)
             + QLatin1String(" ( % %1 )").arg(QString::number(progress, 'f', 2));
 
-    labelRect = QRectF(labelRect.left() + leftLength + 2 * spacing, opt.rect.top() + padding,
+    labelRect = QRectF(labelRect.left() + leftLength + 2 * spacing, opt.rect.top() + PADDING,
                        rightLabelLength, textHeight);
     textRect = QRectF(labelRect.right() + spacing, labelRect.top(), rightLength - rightLabelLength
                       - spacing, textHeight);
@@ -236,7 +245,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     QRectF progressRect(textRect.left(), 0, textRect.width(), 7);
     progressRect.moveBottom(textRect.bottom() - 2);
     QStyleOptionProgressBar bar;
-    bar.initFrom(opt.view);
+    bar.initFrom(opt.widget);
     bar.rect = progressRect.toRect();
     bar.invertedAppearance = isFinished ? true : false;
     bar.maximum = 100;
@@ -247,8 +256,8 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     // Draw bottom line
     if (index.row() != index.model()->rowCount() - 1) {
         painter->setPen(QPen(QColor("#28000000"), 0));
-        painter->drawLine(opt.rect.bottomLeft() + QPointF(padding, 0.5),
-                          opt.rect.bottomRight() + QPointF(-padding, 0.5));
+        painter->drawLine(opt.rect.bottomLeft() + QPointF(PADDING, 0.5),
+                          opt.rect.bottomRight() + QPointF(-PADDING, 0.5));
     }
 
     painter->restore();

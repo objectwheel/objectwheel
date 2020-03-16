@@ -42,8 +42,6 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
 #include <downloaddetailswidget.h>
 void DownloadController::onInfoButtonClick(const QModelIndex& index) const
 {
-    auto model = static_cast<BuildModel*>(m_downloadWidget->downloadList()->model());
-    auto delegate = static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate());
     auto w = new DownloadDetailsWidget(m_downloadWidget->downloadList(), 0);
     w->setIndex(index);
     w->adjustSize();

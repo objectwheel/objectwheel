@@ -6,26 +6,23 @@
 DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWidget* parent) : QWidget(parent)
   , m_view(view)
 {
-    connect(m_view->model(), &QAbstractItemModel::rowsRemoved,
+    connect(m_view->model(), &QAbstractItemModel::rowsAboutToBeRemoved,
             this, [=] (const QModelIndex& parent, int first, int last) {
-        if (m_index.isValid()) {
-            for (; first <= last; ++first) {
-                const QModelIndex& removed = m_view->model()->index(first, 0, parent);
-                if (m_index == removed) {
-                    m_view->itemDelegate()->destroyEditor(m_editor, m_index);
-                    break;
-                }
+        for (; first <= last; ++first) {
+            if (m_index == m_view->model()->index(first, 0, parent)) {
+                setIndex(QModelIndex());
+                break;
             }
         }
     });
     connect(m_view->model(), &QAbstractItemModel::modelReset,
             this, [=] {
-        if (m_index.isValid())
-            m_view->itemDelegate()->destroyEditor(m_editor, m_index);
+        setIndex(QModelIndex());
     });
     connect(m_view->model(), &QAbstractItemModel::dataChanged,
-            this, [=] {
-        if (m_index.isValid()) {
+            this, [=] (const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>&) {
+        Q_ASSERT(topLeft == bottomRight);
+        if (m_index == topLeft) {
             m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
             updateGeometry();
             update();
@@ -35,8 +32,7 @@ DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWid
 
 DownloadDetailsWidget::~DownloadDetailsWidget()
 {
-    if (m_index.isValid())
-        m_view->itemDelegate()->destroyEditor(m_editor, m_index);
+    setIndex(QModelIndex());
 }
 
 QSize DownloadDetailsWidget::sizeHint() const
@@ -64,32 +60,36 @@ void DownloadDetailsWidget::setIndex(const QModelIndex& index)
     if (m_index.isValid()) {
         m_editor = m_view->itemDelegate()->createEditor(this, viewOptions(), m_index);
         m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
-        updateGeometry();
-        update();
     }
+
+    updateGeometry();
+    update();
 }
 
 void DownloadDetailsWidget::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
+
     if (m_index.isValid())
         m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
 }
 
 void DownloadDetailsWidget::paintEvent(QPaintEvent*)
 {
-    if (m_index.isValid()) {
-        QPainter painter(this);
+    QPainter painter(this);
+    painter.setPen(QColor(0, 0, 0, 130));
+    if (m_index.isValid())
         m_view->itemDelegate()->paint(&painter, viewOptions(), m_index);
-    }
+    else
+        painter.drawText(rect(), tr("No builds"), Qt::AlignVCenter | Qt::AlignHCenter);
 }
 
 QStyleOptionViewItem DownloadDetailsWidget::viewOptions() const
 {
     QStyleOptionViewItem option;
-    option.initFrom(m_view);
-    option.widget = m_view;
-    option.decorationSize = m_view->iconSize();
+    option.initFrom(this);
+    option.widget = this;
     option.rect = rect();
+    option.decorationSize = m_view->iconSize();
     return option;
 }
