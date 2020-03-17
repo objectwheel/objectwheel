@@ -2,7 +2,7 @@
 #define BUILDINFO_H
 
 #include <QCborMap>
-#include <QTime>
+#include <QDateTime>
 #include <QBuffer>
 
 class BuildInfo final : public QObject
@@ -14,7 +14,7 @@ class BuildInfo final : public QObject
 
     struct Block {
         int size;
-        QTime timestamp;
+        QDateTime timestamp;
     };
 
 public:

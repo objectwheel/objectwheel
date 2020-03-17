@@ -424,7 +424,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         // Calculate speed and timeLeft
         BuildInfo::Block block;
         block.size = chunk.size();
-        block.timestamp = QTime::currentTime();
+        block.timestamp = QDateTime::currentDateTime();
         buildInfo->recentBlocks().append(block);
         if (buildInfo->recentBlocks().size() > 20)
             buildInfo->recentBlocks().removeFirst();
@@ -434,7 +434,9 @@ void BuildModel::onServerResponse(const QByteArray& data)
             int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
             for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
                 transferredBytes += block.size;
-            qreal bytesPerMs = transferredBytes / qreal(elapedMs);
+            if (elapedMs == 0)
+                elapedMs = 100;
+            qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
             buildInfo->setSpeed(bytesPerMs * 1000);
             changedRoles.unite({ SpeedRole });
             //
@@ -465,7 +467,7 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
         // Calculate speed and timeLeft
         BuildInfo::Block block;
         block.size = int(bytes);
-        block.timestamp = QTime::currentTime();
+        block.timestamp = QDateTime::currentDateTime();
         buildInfo->recentBlocks().append(block);
         if (buildInfo->recentBlocks().size() > 35)
             buildInfo->recentBlocks().removeFirst();
@@ -475,7 +477,9 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
             int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
             for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
                 transferredBytes += block.size;
-            qreal bytesPerMs = transferredBytes / qreal(elapedMs);
+            if (elapedMs == 0)
+                elapedMs = 100;
+            qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
             buildInfo->setSpeed(bytesPerMs * 1000);
             changedRoles.unite({ SpeedRole });
             //
@@ -512,7 +516,7 @@ void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<
     if (index.isValid()) {
         m_changedRows[index.row()].unite(QSet<int>(roles.cbegin(), roles.cend()));
         if (!m_changeSignalTimer.isActive())
-            m_changeSignalTimer.start(80, this);
+            m_changeSignalTimer.start(80, this); // ~12 fps
     }
 }
 
