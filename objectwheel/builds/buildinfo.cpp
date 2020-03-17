@@ -3,6 +3,13 @@
 
 #include <QFile>
 #include <QStandardPaths>
+#include <QCborMap>
+#include <QCborArray>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
+
+static QJsonObject handleMap(const QCborMap& map);
 
 static QString packageSuffixFromRequest(const QCborMap& request)
 {
@@ -13,6 +20,39 @@ static QString packageSuffixFromRequest(const QCborMap& request)
             return QLatin1String(".apk");
     }
     return QString();
+}
+
+static QJsonArray handleArray(const QCborArray& array)
+{
+    QJsonArray jarray;
+    for (const QCborValue& value : array) {
+        if (value.isMap())
+            jarray.append(handleMap(value.toMap()));
+        else if (value.isArray())
+            jarray.append(handleArray(value.toArray()));
+        else if (value.isByteArray())
+            jarray.append(QLatin1String("<raw_data>"));
+        else
+            jarray.append(value.toJsonValue());
+    }
+    return jarray;
+}
+
+static QJsonObject handleMap(const QCborMap& map)
+{
+    QJsonObject object;
+    for (const QCborValue& key : map.keys()) {
+        const QCborValue& value = map.value(key);
+        if (value.isMap())
+            object.insert(key.toString(), handleMap(value.toMap()));
+        else if (value.isArray())
+            object.insert(key.toString(), handleArray(value.toArray()));
+        else if (value.isByteArray())
+            object.insert(key.toString(), QLatin1String("<raw_data>"));
+        else
+            object.insert(key.toString(), value.toJsonValue());
+    }
+    return object;
 }
 
 QStringList BuildInfo::s_paths;
@@ -45,6 +85,8 @@ BuildInfo::BuildInfo(const QCborMap& request, QObject* parent) : QObject(parent)
             }
         }
     }
+    addStatus(tr("Request Details:"));
+    addStatus(QJsonDocument(handleMap(request)).toJson());
 }
 
 BuildInfo::~BuildInfo()
