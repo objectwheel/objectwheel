@@ -1,6 +1,9 @@
 #ifndef BUILDMODEL_H
 #define BUILDMODEL_H
 
+#include <QSet>
+#include <QHash>
+#include <QBasicTimer>
 #include <QAbstractListModel>
 
 class BuildInfo;
@@ -56,6 +59,10 @@ private slots:
     void start();
     void onServerResponse(const QByteArray& data);
     void onServerBytesWritten(qint64 bytes);
+    void emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles);
+
+private:
+    void timerEvent(QTimerEvent* event) override;
 
 signals:
     void uploadFinished(const QModelIndex& index);
@@ -69,6 +76,8 @@ private:
 
 private:
     QList<BuildInfo*> m_buildInfos;
+    QBasicTimer m_changeSignalTimer;
+    QHash<int, QSet<int>> m_changedRows;
 };
 
 #endif // BUILDMODEL_H

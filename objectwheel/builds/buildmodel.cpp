@@ -426,7 +426,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         block.size = chunk.size();
         block.timestamp = QTime::currentTime();
         buildInfo->recentBlocks().append(block);
-        if (buildInfo->recentBlocks().size() > 10)
+        if (buildInfo->recentBlocks().size() > 20)
             buildInfo->recentBlocks().removeFirst();
         //
         if (buildInfo->recentBlocks().size() > 1) {
@@ -449,7 +449,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         break;
     }
 
-    emit dataChanged(index, index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+    emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
 }
 
 void BuildModel::onServerBytesWritten(qint64 bytes)
@@ -467,7 +467,7 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
         block.size = int(bytes);
         block.timestamp = QTime::currentTime();
         buildInfo->recentBlocks().append(block);
-        if (buildInfo->recentBlocks().size() > 10)
+        if (buildInfo->recentBlocks().size() > 35)
             buildInfo->recentBlocks().removeFirst();
         //
         if (buildInfo->recentBlocks().size() > 1) {
@@ -485,7 +485,34 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
             changedRoles.unite({ TimeLeftRole });
         }
 
-        emit dataChanged(index, index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+        emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+    }
+}
+
+void BuildModel::timerEvent(QTimerEvent* event)
+{
+    if (m_changeSignalTimer.timerId() == event->timerId()) {
+        m_changeSignalTimer.stop();
+        foreach (int row, m_changedRows.keys()) {
+            if (row >= 0 && row < m_buildInfos.size()) {
+                const QModelIndex& index = BuildModel::index(row);
+                const QSet<int>& roles = m_changedRows[row];
+                Q_ASSERT(index.isValid());
+                emit dataChanged(index, index, QVector<int>(roles.cbegin(), roles.cend()));
+            }
+        }
+        m_changedRows.clear();
+    } else {
+        QAbstractListModel::timerEvent(event);
+    }
+}
+
+void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles)
+{
+    if (index.isValid()) {
+        m_changedRows[index.row()].unite(QSet<int>(roles.cbegin(), roles.cend()));
+        if (!m_changeSignalTimer.isActive())
+            m_changeSignalTimer.start(80, this);
     }
 }
 
