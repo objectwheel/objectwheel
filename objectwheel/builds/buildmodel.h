@@ -14,9 +14,9 @@ class BuildModel final : public QAbstractListModel
 public:
     enum BuildRoles {
         ButtonSize = Qt::UserRole + 1,
-        StateRole,
         ErrorRole,
-        DetailsRole,
+        StateRole,
+        StatusRole,
         NameRole,
         PathRole,
         PlatformIconRole,
@@ -40,9 +40,9 @@ public:
 
     void addBuildRequest(const QCborMap& request);
 
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-
     Qt::ItemFlags flags(const QModelIndex& index) const override;
+
+    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;

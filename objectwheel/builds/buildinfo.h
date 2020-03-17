@@ -23,7 +23,6 @@ public:
 
     const QCborMap& request() const;
     const QString& path() const;
-    const QString& details() const;
 
     QBuffer* buffer();
     QList<Block>& recentBlocks();
@@ -35,8 +34,9 @@ public:
     bool hasError() const;
     void setErrorFlag(bool errorFlag);
 
+    QString statusTip() const;
     QString status() const;
-    void setStatus(const QString& status);
+    void addStatus(const QString& status);
 
     QTime timeLeft() const;
     void setTimeLeft(const QTime& timeLeft);
@@ -58,13 +58,13 @@ private:
     const QCborMap m_request;
     QString m_uid;
     QString m_path;
-    QString m_details;
     QBuffer m_buffer;
     QList<Block> m_recentBlocks;
 
 private:
     bool m_errorFlag;
     QString m_status;
+    QString m_statusTip;
     QTime m_timeLeft;
     qreal m_speed;
     int m_totalBytes;

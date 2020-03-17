@@ -53,13 +53,8 @@ void BuildModel::addBuildRequest(const QCborMap& request)
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
     m_buildInfos.append(new BuildInfo(request, this));
     endInsertRows();
-    setData(indexFromBuildInfo(uploadingBuildInfo()), tr("Compressing the project..."), Qt::StatusTipRole);
+    setData(indexFromBuildInfo(uploadingBuildInfo()), tr("Compressing the project..."), StatusRole);
     QTimer::singleShot(100, this, &BuildModel::start);
-}
-
-int BuildModel::rowCount(const QModelIndex&) const
-{
-    return m_buildInfos.count();
 }
 
 Qt::ItemFlags BuildModel::flags(const QModelIndex& index) const
@@ -68,6 +63,11 @@ Qt::ItemFlags BuildModel::flags(const QModelIndex& index) const
     if (index.isValid())
         f &= ~Qt::ItemIsSelectable;
     return f;
+}
+
+int BuildModel::rowCount(const QModelIndex&) const
+{
+    return m_buildInfos.count();
 }
 
 QVariant BuildModel::data(const QModelIndex& index, int role) const
@@ -111,16 +111,14 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
             abis.append(abi.toString());
         return abis.join(QLatin1String(", "));
     }
-    case Qt::ToolTipRole:
-    case Qt::WhatsThisRole:
-    case Qt::StatusTipRole:
-        return buildInfo->status();
-    case StateRole:
-        return buildInfo->state();
     case ErrorRole:
         return buildInfo->hasError();
-    case DetailsRole:
-        return buildInfo->details();
+    case StateRole:
+        return buildInfo->state();
+    case StatusRole:
+        return buildInfo->status();
+    case Qt::StatusTipRole:
+        return buildInfo->statusTip();
     case SpeedRole:
         return buildInfo->speed();
     case TimeLeftRole:
@@ -144,10 +142,8 @@ bool BuildModel::setData(const QModelIndex& index, const QVariant& value, int ro
     BuildInfo* buildInfo = m_buildInfos.value(index.row());
 
     switch (role) {
-    case Qt::ToolTipRole:
-    case Qt::WhatsThisRole:
-    case Qt::StatusTipRole:
-        buildInfo->setStatus(qvariant_cast<QString>(value));
+    case StatusRole:
+        buildInfo->addStatus(qvariant_cast<QString>(value));
         break;
     case StateRole:
         buildInfo->setState(qvariant_cast<int>(value));
@@ -171,7 +167,11 @@ bool BuildModel::setData(const QModelIndex& index, const QVariant& value, int ro
         return false;
     }
 
-    emit dataChanged(index, index, { role });
+    QVector<int> changedRoles { role };
+    if (role == StatusRole)
+        changedRoles.append(Qt::StatusTipRole);
+
+    emit dataChanged(index, index, changedRoles);
 
     return true;
 }
@@ -219,18 +219,18 @@ void BuildModel::start()
     {
         QTemporaryFile tempFile;
         if (!tempFile.open()) {
-            setData(index, tr("Failed to establish a temporary file"), Qt::StatusTipRole);
+            setData(index, tr("Failed to establish a temporary file"), StatusRole);
             return;
         }
         tmpFilePath = tempFile.fileName();
     }
     if (tmpFilePath.isEmpty() || ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) <= 0) {
-        setData(index, tr("Failed to compress the project"), Qt::StatusTipRole);
+        setData(index, tr("Failed to compress the project"), StatusRole);
         return;
     }
     QFile tempFile(tmpFilePath);
     if (!tempFile.open(QFile::ReadOnly)) {
-        setData(index, tr("Failed to open a temporary file"), Qt::StatusTipRole);
+        setData(index, tr("Failed to open a temporary file"), StatusRole);
         return;
     }
     data = tempFile.readAll();
@@ -242,9 +242,9 @@ void BuildModel::start()
                                                UserManager::password(),
                                                buildInfo->request(), data);
 
-    buildInfo->setStatus(tr("Uploading the project..."));
+    buildInfo->addStatus(tr("Uploading the project..."));
     buildInfo->setTotalBytes(uploadSize);
-    emit dataChanged(index, index, { Qt::StatusTipRole, TotalBytesRole });
+    emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, TotalBytesRole });
 }
 
 void BuildModel::onServerResponse(const QByteArray& data)
@@ -259,11 +259,6 @@ void BuildModel::onServerResponse(const QByteArray& data)
     QString uid;
     UtilityFunctions::pullCbor(data, command, status, uid);
     BuildInfo* buildInfo = buildInfoFromUid(uid);
-
-    if (buildInfo == 0 && !uid.isEmpty()) {
-        qWarning("WARNING: Data arrived for an unknown build");
-        return;
-    }
 
     if (buildInfo == 0)
         buildInfo = uploadingBuildInfo();
@@ -295,99 +290,99 @@ void BuildModel::onServerResponse(const QByteArray& data)
 
     switch (status) {
     case InternalError:
-        buildInfo->setStatus(tr("Server failure"));
+        buildInfo->addStatus(tr("Server failure"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case BadRequest:
-        buildInfo->setStatus(tr("Invalid request"));
+        buildInfo->addStatus(tr("Invalid request"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case InvalidUserCredential:
-        buildInfo->setStatus(tr("Invalid user credential"));
+        buildInfo->addStatus(tr("Invalid user credential"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case SimultaneousBuildLimitExceeded:
-        buildInfo->setStatus(tr("Simultaneous build limit exceeded"));
+        buildInfo->addStatus(tr("Simultaneous build limit exceeded"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case RequestSucceed:
         Q_ASSERT(!uid.isEmpty());
         buildInfo->setUid(uid);
-        buildInfo->setStatus(tr("Processing the request..."));
-        changedRoles.unite({ Qt::StatusTipRole });
+        buildInfo->addStatus(tr("Processing the request..."));
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole });
         break;
 
     case SequenceNumberChanged: {
         int sequenceNumber;
         UtilityFunctions::pullCbor(data, command, status, uid, sequenceNumber);
-        buildInfo->setStatus(tr("You are %1th in the queue...").arg(sequenceNumber));
-        changedRoles.unite({ Qt::StatusTipRole });
+        buildInfo->addStatus(tr("You are %1th in the queue...").arg(sequenceNumber));
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole });
     } break;
 
     case BuildProcessStarted:
-        buildInfo->setStatus(tr("Build process started..."));
-        changedRoles.unite({ Qt::StatusTipRole });
+        buildInfo->addStatus(tr("Build process started..."));
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole });
         break;
 
     case BuildStatus: {
         QByteArray buildStatus;
         UtilityFunctions::pullCbor(data, command, status, uid, buildStatus);
-        buildInfo->setStatus(buildStatus);
-        changedRoles.unite({ Qt::StatusTipRole });
+        buildInfo->addStatus(buildStatus);
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole });
     } break;
 
     case MakeFailed:
-        buildInfo->setStatus(tr("MAKE process failed"));
+        buildInfo->addStatus(tr("MAKE process failed"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case QmakeFailed:
-        buildInfo->setStatus(tr("QMAKE process failed"));
+        buildInfo->addStatus(tr("QMAKE process failed"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case InvalidProjectFile:
-        buildInfo->setStatus(tr("Invalid project file"));
+        buildInfo->addStatus(tr("Invalid project file"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case InvalidProjectSettings:
-        buildInfo->setStatus(tr("Invalid build configuration"));
+        buildInfo->addStatus(tr("Invalid build configuration"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case Canceled:
-        buildInfo->setStatus(tr("Operation cancelled"));
+        buildInfo->addStatus(tr("Operation cancelled"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case Timedout:
-        buildInfo->setStatus(tr("Operation timedout"));
+        buildInfo->addStatus(tr("Operation timedout"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case BuildData: {
@@ -399,11 +394,11 @@ void BuildModel::onServerResponse(const QByteArray& data)
 
         // First frame
         if (!buildInfo->buffer()->isOpen()) {
-            buildInfo->setStatus(tr("Downloading..."));
+            buildInfo->addStatus(tr("Downloading..."));
             buildInfo->setTotalBytes(totalBytes);
             buildInfo->buffer()->buffer().reserve(totalBytes);
             buildInfo->buffer()->open(QBuffer::WriteOnly);
-            changedRoles.unite({ Qt::StatusTipRole, TotalBytesRole });
+            changedRoles.unite({ StatusRole, Qt::StatusTipRole, TotalBytesRole });
         }
 
         // Write data into the buffer
@@ -414,9 +409,9 @@ void BuildModel::onServerResponse(const QByteArray& data)
         // Last frame
         if (isLastFrame) {
             buildInfo->buffer()->close();
-            buildInfo->setStatus(tr("Done"));
+            buildInfo->addStatus(tr("Done"));
             buildInfo->setState(Finished);
-            changedRoles.unite({ Qt::StatusTipRole, StateRole });
+            changedRoles.unite({ StatusRole, Qt::StatusTipRole, StateRole });
             do {
                 QFile file(index.data(PathRole).toString());
                 if (!file.open(QFile::WriteOnly))

@@ -4,6 +4,8 @@
 #include <QObject>
 
 class DownloadWidget;
+class BuildDetailsDialog;
+
 class DownloadController final : public QObject
 {
     Q_OBJECT
@@ -16,11 +18,10 @@ private slots:
     void onInfoButtonClick(const QModelIndex& index) const;
     void onDeleteButtonClick(const QModelIndex& index) const;
     void onOpenFolderButtonClick(const QModelIndex& index) const;
-    void onModelDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight,
-                           const QVector<int>& roles) const;
 
 private:
     DownloadWidget* m_downloadWidget;
+    BuildDetailsDialog* m_buildDetailsDialog;
 };
 
 #endif // DOWNLOADCONTROLLER_H

@@ -72,11 +72,6 @@ const QString& BuildInfo::path() const
     return m_path;
 }
 
-const QString& BuildInfo::details() const
-{
-    return m_details;
-}
-
 QBuffer* BuildInfo::buffer()
 {
     return &m_buffer;
@@ -97,25 +92,33 @@ void BuildInfo::setErrorFlag(bool errorFlag)
     m_errorFlag = errorFlag;
 }
 
+QString BuildInfo::statusTip() const
+{
+    return m_statusTip;
+}
+
 QString BuildInfo::status() const
 {
     return m_status;
 }
 
-void BuildInfo::setStatus(const QString& status)
+void BuildInfo::addStatus(const QString& status)
 {
-    if (status.contains(QLatin1Char('\n'))) {
-        QTextStream stream(status.toUtf8());
-        QString line;
-        while (stream.readLineInto(&line)) {
-            if (!line.isEmpty())
-                m_status = line;
-        }
-        m_details.append(status);
-    } else {
-        m_status = status;
-        m_details.append(status + QLatin1Char('\n'));
+    const QString& timestamp = QTime::currentTime().toString("hh:mm:ss");
+    QTextStream stream(status.toUtf8());
+    QString line;
+    while (stream.readLineInto(&line)) {
+        if (line.contains(QRegularExpression("[^\\r\\n\\t\\f\\v ]")))
+            m_status.append(timestamp + QLatin1Char(' ') + line + QLatin1Char('\n'));
+        else
+            m_status.append(line);
     }
+    line = m_status.trimmed();
+    int begin = line.lastIndexOf(QLatin1Char('\n')) + 1;
+    int end = line.lastIndexOf(QRegularExpression("[^\\r\\n\\t\\f\\v ]")) + 1;
+    if (begin > 0 && end > begin)
+        line = line.mid(begin, end - begin);
+    m_statusTip = line.mid(9);
 }
 
 QTime BuildInfo::timeLeft() const

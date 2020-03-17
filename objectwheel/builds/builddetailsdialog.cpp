@@ -9,6 +9,7 @@
 #include <QScrollBar>
 #include <QDialogButtonBox>
 #include <QPushButton>
+#include <QTimer>
 
 BuildDetailsDialog::BuildDetailsDialog(const QAbstractItemView* view, QWidget* parent) : QDialog(parent)
   , m_view(view)
@@ -37,6 +38,7 @@ BuildDetailsDialog::BuildDetailsDialog(const QAbstractItemView* view, QWidget* p
         for (; first <= last; ++first) {
             if (m_index == m_view->model()->index(first, 0, parent)) {
                 setIndex(QModelIndex());
+                reject();
                 break;
             }
         }
@@ -44,14 +46,19 @@ BuildDetailsDialog::BuildDetailsDialog(const QAbstractItemView* view, QWidget* p
     connect(m_view->model(), &QAbstractItemModel::modelReset,
             this, [=] {
         setIndex(QModelIndex());
+        reject();
     });
     connect(m_view->model(), &QAbstractItemModel::dataChanged,
-            this, [=] (const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>&) {
+            this, [=] (const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles) {
         Q_ASSERT(topLeft == bottomRight);
-        if (m_index == topLeft) {
+        if (m_index == topLeft && (roles.isEmpty() || roles.contains(BuildModel::StatusRole))) {
             QScrollBar* bar = m_detailsTextEdit->verticalScrollBar();
-            const bool scrollDown = bar->value() == bar->maximum();
-            m_detailsTextEdit->setPlainText(m_index.data(BuildModel::DetailsRole).toString());
+            bool scrollDown = bar->value() == bar->maximum();
+            QTextCursor cursor(m_detailsTextEdit->textCursor());
+            cursor.movePosition(QTextCursor::End);
+            int begin = cursor.position();
+            cursor.insertText(m_index.data(BuildModel::StatusRole).toString().mid(begin));
+            highlight(begin);
             if (scrollDown)
                 bar->setValue(bar->maximum());
         }
@@ -74,12 +81,32 @@ void BuildDetailsDialog::setIndex(const QModelIndex& index)
         m_index = index;
         m_detailsTextEdit->clear();
         m_downloadDetailsWidget->setIndex(index);
-        if (m_index.isValid()) {
-            QScrollBar* bar = m_detailsTextEdit->verticalScrollBar();
-            const bool scrollDown = bar->value() == bar->maximum();
-            m_detailsTextEdit->setPlainText(m_index.data(BuildModel::DetailsRole).toString());
-            if (scrollDown)
+        if (index.isValid()) {
+            m_detailsTextEdit->setPlainText(index.data(BuildModel::StatusRole).toString());
+            highlight(0);
+            QTimer::singleShot(100, this, [=] {
+                QScrollBar* bar = m_detailsTextEdit->verticalScrollBar();
                 bar->setValue(bar->maximum());
+            });
         }
+    }
+}
+
+void BuildDetailsDialog::highlight(int begin)
+{
+    // Highlight (thicken) hh:mm:ss at the start of each line
+    QTextCursor cursor(m_detailsTextEdit->textCursor());
+    cursor.setPosition(begin);
+    QTextCharFormat format(cursor.charFormat());
+    format.setFontWeight(QFont::Bold);
+
+    if (!cursor.atBlockStart())
+        cursor.movePosition(QTextCursor::NextBlock);
+
+    while (!cursor.atEnd()) {
+        cursor.setPosition(cursor.position() + 8, QTextCursor::KeepAnchor);
+        cursor.mergeCharFormat(format);
+        if (!cursor.atBlockStart())
+            cursor.movePosition(QTextCursor::NextBlock);
     }
 }

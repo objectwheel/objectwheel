@@ -9,9 +9,9 @@
 #include <QLabel>
 #include <QListWidget>
 
-DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* parent)
-    : QObject(parent)
-    , m_downloadWidget(downloadWidget)
+DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* parent) : QObject(parent)
+  , m_downloadWidget(downloadWidget)
+  , m_buildDetailsDialog(new BuildDetailsDialog(m_downloadWidget->downloadList(), m_downloadWidget))
 {
     auto model = static_cast<const BuildModel*>(m_downloadWidget->downloadList()->model());
     auto delegate = static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate());
@@ -37,15 +37,12 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
             this, &DownloadController::onDeleteButtonClick);
     connect(delegate, &BuildDelegate::openFolderButtonClicked,
             this, &DownloadController::onOpenFolderButtonClick);
-    connect(model, &BuildModel::dataChanged,
-            this, &DownloadController::onModelDataChange);
 }
 
 void DownloadController::onInfoButtonClick(const QModelIndex& index) const
 {
-    auto w = new BuildDetailsDialog(m_downloadWidget->downloadList(), m_downloadWidget);
-    w->setIndex(index);
-    w->exec();
+    m_buildDetailsDialog->setIndex(index);
+    m_buildDetailsDialog->exec();
 }
 
 void DownloadController::onDeleteButtonClick(const QModelIndex& index) const
@@ -72,19 +69,4 @@ void DownloadController::onOpenFolderButtonClick(const QModelIndex& index) const
     const QVariant& state = model->data(index, BuildModel::PathRole);
     if (state.isValid())
         Utils::FileUtils::showInFolder(m_downloadWidget, state.toString());
-}
-
-void DownloadController::onModelDataChange(const QModelIndex& topLeft,
-                                           const QModelIndex& bottomRight,
-                                           const QVector<int>& roles) const
-{
-    if (roles.isEmpty()
-            || roles.contains(Qt::ToolTipRole)
-            || roles.contains(Qt::WhatsThisRole)
-            || roles.contains(Qt::StatusTipRole)) {
-        Q_ASSERT(topLeft == bottomRight);
-        const QString& toolTip = topLeft.data(Qt::ToolTipRole).toString();
-        QListView* listView = m_downloadWidget->downloadList();
-        UtilityFunctions::updateToolTip(listView, toolTip, listView->visualRect(topLeft));
-    }
 }

@@ -117,7 +117,7 @@ void BuildsController::onServerDisconnect()
         const QVariant& state = model->data(index, BuildModel::StateRole);
         if (state.isValid()) {
             if (state.toInt() != BuildModel::Finished) {
-                model->setData(index, tr("Connection lost"), Qt::StatusTipRole);
+                model->setData(index, tr("Connection lost"), BuildModel::StatusRole);
                 model->setData(index, true, BuildModel::ErrorRole);
                 model->setData(index, BuildModel::Finished, BuildModel::StateRole);
             }

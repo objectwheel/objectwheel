@@ -4,9 +4,9 @@
 #include <QDialog>
 #include <QModelIndex>
 
+class QPlainTextEdit;
 class QAbstractItemView;
 class DownloadDetailsWidget;
-class QPlainTextEdit;
 
 class BuildDetailsDialog final : public QDialog
 {
@@ -19,6 +19,9 @@ public:
 
     const QModelIndex& index() const;
     void setIndex(const QModelIndex& index);
+
+private:
+    void highlight(int begin);
 
 private:
     const QAbstractItemView* m_view;
