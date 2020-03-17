@@ -17,10 +17,9 @@ static QString packageSuffixFromRequest(const QCborMap& request)
 
 QStringList BuildInfo::s_paths;
 
-BuildInfo::BuildInfo(const QCborMap& request, const QString& status, QObject* parent) : QObject(parent)
+BuildInfo::BuildInfo(const QCborMap& request, QObject* parent) : QObject(parent)
   , m_request(request)
   , m_errorFlag(false)
-  , m_status(status)
   , m_speed(0)
   , m_totalBytes(0)
   , m_transferredBytes(0)

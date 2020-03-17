@@ -18,7 +18,7 @@ class BuildInfo final : public QObject
     };
 
 public:
-    explicit BuildInfo(const QCborMap& request, const QString& status = QString(), QObject* parent = nullptr);
+    explicit BuildInfo(const QCborMap& request, QObject* parent = nullptr);
     ~BuildInfo() override;
 
     const QCborMap& request() const;

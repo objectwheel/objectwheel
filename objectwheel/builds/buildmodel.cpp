@@ -51,8 +51,9 @@ void BuildModel::addBuildRequest(const QCborMap& request)
 {
     Q_ASSERT(uploadingBuildInfo() == nullptr);
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_buildInfos.append(new BuildInfo(request, tr("Compressing the project..."), this));
+    m_buildInfos.append(new BuildInfo(request, this));
     endInsertRows();
+    setData(indexFromBuildInfo(uploadingBuildInfo()), tr("Compressing the project..."), Qt::StatusTipRole);
     QTimer::singleShot(100, this, &BuildModel::start);
 }
 
@@ -75,6 +76,7 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         return QVariant();
 
     const BuildInfo* buildInfo = m_buildInfos.value(index.row());
+
     switch (role) {
     case Qt::BackgroundRole: {
         QLinearGradient background(0, 0, 0, 1);
@@ -130,6 +132,7 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
     default:
         break;
     }
+
     return QVariant();
 }
 
@@ -139,6 +142,7 @@ bool BuildModel::setData(const QModelIndex& index, const QVariant& value, int ro
         return false;
 
     BuildInfo* buildInfo = m_buildInfos.value(index.row());
+
     switch (role) {
     case Qt::ToolTipRole:
     case Qt::WhatsThisRole:
@@ -166,7 +170,9 @@ bool BuildModel::setData(const QModelIndex& index, const QVariant& value, int ro
     default:
         return false;
     }
+
     emit dataChanged(index, index, { role });
+
     return true;
 }
 
@@ -209,32 +215,27 @@ void BuildModel::start()
     Q_ASSERT(ServerManager::isConnected());
 
     QByteArray data;
+    QString tmpFilePath;
     {
-        QString tmpFilePath;
-        {
-            QTemporaryFile tempFile;
-            if (!tempFile.open()) {
-                buildInfo->setStatus(tr("Failed to establish temporary file"));
-                emit dataChanged(index, index);
-                return;
-            }
-            tmpFilePath = tempFile.fileName();
-        }
-        if (tmpFilePath.isEmpty() || ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) <= 0) {
-            buildInfo->setStatus(tr("Failed to compress the project"));
-            emit dataChanged(index, index);
+        QTemporaryFile tempFile;
+        if (!tempFile.open()) {
+            setData(index, tr("Failed to establish a temporary file"), Qt::StatusTipRole);
             return;
         }
-        QFile tempFile(tmpFilePath);
-        if (!tempFile.open(QFile::ReadOnly)) {
-            buildInfo->setStatus(tr("Failed to open temporary file"));
-            emit dataChanged(index, index);
-            return;
-        }
-        data = tempFile.readAll();
-        tempFile.close();
-        tempFile.remove();
+        tmpFilePath = tempFile.fileName();
     }
+    if (tmpFilePath.isEmpty() || ZipAsync::zipSync(ProjectManager::dir(), tmpFilePath) <= 0) {
+        setData(index, tr("Failed to compress the project"), Qt::StatusTipRole);
+        return;
+    }
+    QFile tempFile(tmpFilePath);
+    if (!tempFile.open(QFile::ReadOnly)) {
+        setData(index, tr("Failed to open a temporary file"), Qt::StatusTipRole);
+        return;
+    }
+    data = tempFile.readAll();
+    tempFile.close();
+    tempFile.remove();
 
     int uploadSize = (int) ServerManager::send(ServerManager::RequestCloudBuild,
                                                UserManager::email(),
@@ -243,7 +244,7 @@ void BuildModel::start()
 
     buildInfo->setStatus(tr("Uploading the project..."));
     buildInfo->setTotalBytes(uploadSize);
-    emit dataChanged(index, index);
+    emit dataChanged(index, index, { Qt::StatusTipRole, TotalBytesRole });
 }
 
 void BuildModel::onServerResponse(const QByteArray& data)
@@ -259,15 +260,25 @@ void BuildModel::onServerResponse(const QByteArray& data)
     UtilityFunctions::pullCbor(data, command, status, uid);
     BuildInfo* buildInfo = buildInfoFromUid(uid);
 
+    if (buildInfo == 0 && !uid.isEmpty()) {
+        qWarning("WARNING: Data arrived for an unknown build");
+        return;
+    }
+
     if (buildInfo == 0)
         buildInfo = uploadingBuildInfo();
 
-    if (buildInfo == 0)
+    if (buildInfo == 0) {
+        qWarning("WARNING: Cannot find build information corresponding to incoming data");
         return;
+    }
 
-    if (buildInfo->state() == Finished)
+    if (buildInfo->state() == Finished) {
+        qWarning("WARNING: Data arrived for an already finished build");
         return;
+    }
 
+    QSet<int> changedRoles;
     const QModelIndex& index = indexFromBuildInfo(buildInfo);
     Q_ASSERT(index.isValid());
 
@@ -278,6 +289,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->setTransferredBytes(0);
         buildInfo->setTimeLeft(QTime());
         buildInfo->setState(Downloading);
+        changedRoles.unite({ SpeedRole, TotalBytesRole, TransferredBytesRole, TimeLeftRole, StateRole });
         emit uploadFinished(index);
     }
 
@@ -286,70 +298,98 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->setStatus(tr("Server failure"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case BadRequest:
         buildInfo->setStatus(tr("Invalid request"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case InvalidUserCredential:
         buildInfo->setStatus(tr("Invalid user credential"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case SimultaneousBuildLimitExceeded:
         buildInfo->setStatus(tr("Simultaneous build limit exceeded"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case RequestSucceed:
         Q_ASSERT(!uid.isEmpty());
         buildInfo->setUid(uid);
         buildInfo->setStatus(tr("Processing the request..."));
+        changedRoles.unite({ Qt::StatusTipRole });
         break;
+
     case SequenceNumberChanged: {
         int sequenceNumber;
         UtilityFunctions::pullCbor(data, command, status, uid, sequenceNumber);
         buildInfo->setStatus(tr("You are %1th in the queue...").arg(sequenceNumber));
+        changedRoles.unite({ Qt::StatusTipRole });
     } break;
+
     case BuildProcessStarted:
         buildInfo->setStatus(tr("Build process started..."));
+        changedRoles.unite({ Qt::StatusTipRole });
         break;
+
     case BuildStatus: {
-        QByteArray progress;
-        UtilityFunctions::pullCbor(data, command, status, uid, progress);
-        buildInfo->setStatus(progress);
+        QByteArray buildStatus;
+        UtilityFunctions::pullCbor(data, command, status, uid, buildStatus);
+        buildInfo->setStatus(buildStatus);
+        changedRoles.unite({ Qt::StatusTipRole });
     } break;
+
     case MakeFailed:
         buildInfo->setStatus(tr("MAKE process failed"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case QmakeFailed:
         buildInfo->setStatus(tr("QMAKE process failed"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case InvalidProjectFile:
         buildInfo->setStatus(tr("Invalid project file"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case InvalidProjectSettings:
         buildInfo->setStatus(tr("Invalid build configuration"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case Canceled:
         buildInfo->setStatus(tr("Operation cancelled"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case Timedout:
         buildInfo->setStatus(tr("Operation timedout"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        changedRoles.unite({ Qt::StatusTipRole, ErrorRole, StateRole });
         break;
+
     case BuildData: {
         // Decode data
         bool isLastFrame;
@@ -357,19 +397,26 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QByteArray chunk;
         UtilityFunctions::pullCbor(data, command, status, uid, isLastFrame, totalBytes, chunk);
 
-        // Fetch and buffer data
+        // First frame
         if (!buildInfo->buffer()->isOpen()) {
             buildInfo->setStatus(tr("Downloading..."));
             buildInfo->setTotalBytes(totalBytes);
             buildInfo->buffer()->buffer().reserve(totalBytes);
             buildInfo->buffer()->open(QBuffer::WriteOnly);
+            changedRoles.unite({ Qt::StatusTipRole, TotalBytesRole });
         }
+
+        // Write data into the buffer
         buildInfo->buffer()->write(chunk);
         buildInfo->setTransferredBytes(buildInfo->buffer()->size());
+        changedRoles.unite({ TransferredBytesRole });
+
+        // Last frame
         if (isLastFrame) {
             buildInfo->buffer()->close();
             buildInfo->setStatus(tr("Done"));
             buildInfo->setState(Finished);
+            changedRoles.unite({ Qt::StatusTipRole, StateRole });
             do {
                 QFile file(index.data(PathRole).toString());
                 if (!file.open(QFile::WriteOnly))
@@ -379,68 +426,71 @@ void BuildModel::onServerResponse(const QByteArray& data)
             emit downloadFinished(index);
         }
 
-        // Gather 'speed' and 'time left' information
+        // Calculate speed and timeLeft
         BuildInfo::Block block;
         block.size = chunk.size();
         block.timestamp = QTime::currentTime();
         buildInfo->recentBlocks().append(block);
         if (buildInfo->recentBlocks().size() > 10)
             buildInfo->recentBlocks().removeFirst();
-
+        //
         if (buildInfo->recentBlocks().size() > 1) {
-            // Calculate Speed
             int transferredBytes = -buildInfo->recentBlocks().first().size;
             int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
             for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
                 transferredBytes += block.size;
             qreal bytesPerMs = transferredBytes / qreal(elapedMs);
             buildInfo->setSpeed(bytesPerMs * 1000);
-
-            // Calculate Time Left
+            changedRoles.unite({ SpeedRole });
+            //
             int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
             qreal msLeft = bytesLeft / bytesPerMs;
             buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
+            changedRoles.unite({ TimeLeftRole });
         }
     } break;
+
     default:
         break;
     }
 
-    emit dataChanged(index, index);
+    emit dataChanged(index, index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
 }
 
 void BuildModel::onServerBytesWritten(qint64 bytes)
 {
     if (BuildInfo* buildInfo = uploadingBuildInfo()) {
+        QSet<int> changedRoles;
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
 
         buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
+        changedRoles.unite({ TransferredBytesRole });
 
-        // Gather 'speed' and 'time left' information
+        // Calculate speed and timeLeft
         BuildInfo::Block block;
         block.size = int(bytes);
         block.timestamp = QTime::currentTime();
         buildInfo->recentBlocks().append(block);
         if (buildInfo->recentBlocks().size() > 10)
             buildInfo->recentBlocks().removeFirst();
-
+        //
         if (buildInfo->recentBlocks().size() > 1) {
-            // Calculate Speed
             int transferredBytes = -buildInfo->recentBlocks().first().size;
             int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
             for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
                 transferredBytes += block.size;
             qreal bytesPerMs = transferredBytes / qreal(elapedMs);
             buildInfo->setSpeed(bytesPerMs * 1000);
-
-            // Calculate Time Left
+            changedRoles.unite({ SpeedRole });
+            //
             int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
             qreal msLeft = bytesLeft / bytesPerMs;
             buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
+            changedRoles.unite({ TimeLeftRole });
         }
 
-        emit dataChanged(index, index);
+        emit dataChanged(index, index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
     }
 }
 
