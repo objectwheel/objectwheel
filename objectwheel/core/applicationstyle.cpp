@@ -124,7 +124,12 @@ ApplicationStyle::ApplicationStyle() : QFusionStyle()
 
 ApplicationStyle::~ApplicationStyle()
 {
-    delete m_focusFrame;
+    // It might be deleted already because QFocusFrame
+    // reparents itself into parent widget of its target
+    // widget; so it might be deleted if the parent
+    // widget deleted already.
+    if (m_focusFrame)
+        delete m_focusFrame;
 }
 
 QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption* option, const QSize& contentsSize, const QWidget* widget) const

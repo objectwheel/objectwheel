@@ -2,6 +2,7 @@
 #define APPLICATIONSTYLE_H
 
 #include <private/qfusionstyle_p.h>
+#include <QPointer>
 
 class QFocusFrame;
 class ApplicationStyle : public QFusionStyle
@@ -28,7 +29,7 @@ public:
                              const QPointF& logicalPos);
 public:
     ApplicationStyle();
-    ~ApplicationStyle() override;
+   ~ApplicationStyle() override;
 
     QSize sizeFromContents(QStyle::ContentsType type, const QStyleOption* option,
                            const QSize& contentsSize, const QWidget* widget) const override;
@@ -59,7 +60,7 @@ protected:
     bool event(QEvent* event) override;
 
 private:
-    QFocusFrame* m_focusFrame;
+    QPointer<QFocusFrame> m_focusFrame;
 };
 
 #endif // APPLICATIONSTYLE_H
