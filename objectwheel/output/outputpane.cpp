@@ -11,7 +11,7 @@
 #include <QAbstractButton>
 
 OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
-  , m_stackedWidget(new QStackedWidget)
+  , m_stackedWidget(new QStackedWidget(this))
   , m_outputBar(new OutputBar(this))
   , m_issuesButton(m_outputBar->addButton())
   , m_consoleButton(m_outputBar->addButton())

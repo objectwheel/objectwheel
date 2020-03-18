@@ -153,7 +153,7 @@ void ConsoleWidget::onLinkClick(const PathFinder::Result& result)
         emit assetsFileOpened(result.relativePath, result.line, 0);
     } else {
         emit designsFileOpened(static_cast<const PathFinder::DesignsResult&>(result).control,
-                                result.relativePath, result.line, 0);
+                               result.relativePath, result.line, 0);
     }
 }
 
@@ -205,7 +205,7 @@ bool ConsoleWidget::eventFilter(QObject* w, QEvent* e)
             bottom = top + blockBoundingRect(block).height();
         }
     }
-    return false;
+    return QPlainTextEdit::eventFilter(w, e);
 }
 
 void ConsoleWidget::resizeEvent(QResizeEvent* e)

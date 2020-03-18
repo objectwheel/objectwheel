@@ -22,12 +22,12 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
     s_mainWindow = new MainWindow;
     s_welcomeWindow = new WelcomeWindow;
 
-    QObject::connect(s_aboutWindow, &AboutWindow::done, s_aboutWindow, &AboutWindow::hide);
-    QObject::connect(s_preferencesWindow, &PreferencesWindow::done,
-                     s_preferencesWindow, &PreferencesWindow::hide);
-    QObject::connect(s_mainWindow, &MainWindow::done, s_mainWindow, &MainWindow::hide);
-    QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_welcomeWindow, &WelcomeWindow::hide);
-    QObject::connect(s_welcomeWindow, &WelcomeWindow::done, s_mainWindow, &MainWindow::show);
+    connect(s_aboutWindow, &AboutWindow::done, s_aboutWindow, &AboutWindow::hide);
+    connect(s_preferencesWindow, &PreferencesWindow::done,
+            s_preferencesWindow, &PreferencesWindow::hide);
+    connect(s_mainWindow, &MainWindow::done, s_mainWindow, &MainWindow::hide);
+    connect(s_welcomeWindow, &WelcomeWindow::done, s_welcomeWindow, &WelcomeWindow::hide);
+    connect(s_welcomeWindow, &WelcomeWindow::done, s_mainWindow, &MainWindow::show);
 
     s_aboutWindow->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
                                                    s_aboutWindow->sizeHint(),
@@ -36,11 +36,14 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
 
 WindowManager::~WindowManager()
 {
-    // FIXME: Use delete instead
-    s_welcomeWindow->deleteLater();
-    s_mainWindow->deleteLater();
-    s_preferencesWindow->deleteLater();
-    s_aboutWindow->deleteLater();
+    delete s_welcomeWindow;
+    s_welcomeWindow = nullptr;
+    delete s_mainWindow;
+    s_mainWindow = nullptr;
+    delete s_preferencesWindow;
+    s_preferencesWindow = nullptr;
+    delete s_aboutWindow;
+    s_aboutWindow = nullptr;
 }
 
 WelcomeWindow* WindowManager::welcomeWindow()

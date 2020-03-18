@@ -27,9 +27,13 @@ class ServerManager;
 class ApplicationCore final
 {
 public:
+    ApplicationCore();
+   ~ApplicationCore();
+    ApplicationCore(const ApplicationCore&) = delete;
+    ApplicationCore &operator=(const ApplicationCore&) = delete;
+
     static bool locked();
     static void prepare();
-    static void run(QApplication* app);
 
     static QPalette palette();
     static QSettings* settings();
@@ -44,11 +48,6 @@ private:
     static void onProjectStart();
     static void onUserSessionStop();
     static void onUserSessionStart();
-
-private:
-    ApplicationCore(QApplication* app);
-    ApplicationCore(const ApplicationCore&) = delete;
-    ApplicationCore &operator=(const ApplicationCore&) = delete;
 
 private:
     static QSettings* s_settings;

@@ -65,7 +65,7 @@ DocumentManager* ApplicationCore::s_documentManager = nullptr;
 WindowManager* ApplicationCore::s_windowManager = nullptr;
 MenuManager* ApplicationCore::s_menuManager = nullptr;
 
-ApplicationCore::ApplicationCore(QApplication* app)
+ApplicationCore::ApplicationCore()
 {
     /** Core initialization **/
     QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
@@ -81,10 +81,10 @@ ApplicationCore::ApplicationCore(QApplication* app)
         QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/") + fontName);
 
     /* Prepare setting instances */
-    s_settings = new QSettings(settingsPath(), QSettings::IniFormat, app);
-    s_generalSettings = new GeneralSettings(app);
-    s_designerSettings = new DesignerSettings(app);
-    s_codeEditorSettings = new CodeEditorSettings(app);
+    s_settings = new QSettings(settingsPath(), QSettings::IniFormat);
+    s_generalSettings = new GeneralSettings;
+    s_designerSettings = new DesignerSettings;
+    s_codeEditorSettings = new CodeEditorSettings;
 
     /* Read settings */
     GeneralSettings::read();
@@ -111,30 +111,30 @@ ApplicationCore::ApplicationCore(QApplication* app)
     splash->showMessage(QObject::tr("Initializing..."));
     splash->show();
 
-    s_modeManager = new ModeManager(app);
-    s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)), app);
-    s_registrationApiManager = new RegistrationApiManager(app);
-    s_userManager = new UserManager(app);
-    s_controlRenderingManager = new ControlRenderingManager(app);
-    s_saveManager = new SaveManager(app);
-    s_projectManager = new ProjectManager(app);
-    s_projectExposingManager = new ProjectExposingManager(app);
-    s_controlCreationManager = new ControlCreationManager(app);
-    s_controlRemovingManager = new ControlRemovingManager(app);
-    s_controlPropertyManager = new ControlPropertyManager(app);
-    s_runManager = new RunManager(app);
-    s_helpManager = new HelpManager(app);
+    s_modeManager = new ModeManager;
+    s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)));
+    s_registrationApiManager = new RegistrationApiManager;
+    s_userManager = new UserManager;
+    s_controlRenderingManager = new ControlRenderingManager;
+    s_saveManager = new SaveManager;
+    s_projectManager = new ProjectManager;
+    s_projectExposingManager = new ProjectExposingManager;
+    s_controlCreationManager = new ControlCreationManager;
+    s_controlRemovingManager = new ControlRemovingManager;
+    s_controlPropertyManager = new ControlPropertyManager;
+    s_runManager = new RunManager;
+    s_helpManager = new HelpManager;
 
     s_helpManager->setupHelpManager();
     Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
     QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
                      s_helpManager, &HelpManager::aboutToShutdown);
 
-    s_documentManager = new DocumentManager(app);
+    s_documentManager = new DocumentManager;
 
     /** Ui initialization **/
-    s_windowManager = new WindowManager(app);
-    s_menuManager = new MenuManager(app);
+    s_windowManager = new WindowManager;
+    s_menuManager = new MenuManager;
 
 //  FIXME  QObject::connect(s_userManager, &UserManager::started,
 //                     &ApplicationCore::onUserSessionStart);
@@ -161,6 +161,50 @@ ApplicationCore::ApplicationCore(QApplication* app)
         hideSplashScreen();
     else
         QObject::connect(s_documentManager, &DocumentManager::initialized, hideSplashScreen);
+}
+
+ApplicationCore::~ApplicationCore()
+{
+    delete s_menuManager;
+    s_menuManager = nullptr;
+    delete s_windowManager;
+    s_windowManager = nullptr;
+    delete s_documentManager;
+    s_documentManager = nullptr;
+    delete s_helpManager;
+    s_helpManager = nullptr;
+    delete s_runManager;
+    s_runManager = nullptr;
+    delete s_controlPropertyManager;
+    s_controlPropertyManager = nullptr;
+    delete s_controlRemovingManager;
+    s_controlRemovingManager = nullptr;
+    delete s_controlCreationManager;
+    s_controlCreationManager = nullptr;
+    delete s_projectExposingManager;
+    s_projectExposingManager = nullptr;
+    delete s_projectManager;
+    s_projectManager = nullptr;
+    delete s_saveManager;
+    s_saveManager = nullptr;
+    delete s_controlRenderingManager;
+    s_controlRenderingManager = nullptr;
+    delete s_userManager;
+    s_userManager = nullptr;
+    delete s_registrationApiManager;
+    s_registrationApiManager = nullptr;
+    delete s_serverManager;
+    s_serverManager = nullptr;
+    delete s_modeManager;
+    s_modeManager = nullptr;
+    delete s_codeEditorSettings;
+    s_codeEditorSettings = nullptr;
+    delete s_designerSettings;
+    s_designerSettings = nullptr;
+    delete s_generalSettings;
+    s_generalSettings = nullptr;
+    delete s_settings;
+    s_settings = nullptr;
 }
 
 bool ApplicationCore::locked()
@@ -199,12 +243,6 @@ void ApplicationCore::prepare()
                                      "qtc*.warning=false\n"
                                      "qtc*.critical=false\n"
                                      "qtc*=false");
-}
-
-void ApplicationCore::run(QApplication* app)
-{
-    static ApplicationCore instance(app);
-    Q_UNUSED(instance)
 }
 
 QPalette ApplicationCore::palette()

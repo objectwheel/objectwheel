@@ -13,7 +13,8 @@ int main(int argc, char* argv[])
         return EXIT_FAILURE;
 
     // Initialize application core
-    ApplicationCore::run(&app);
+    ApplicationCore core;
+    Q_UNUSED(core);
 
     // Start main event loop
     return app.exec();

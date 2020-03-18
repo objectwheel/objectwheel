@@ -52,17 +52,17 @@ public:
 };
 
 CentralWidget::CentralWidget(QWidget* parent) : QSplitter(parent)
-  , m_splitterIn(new QSplitter)
-  , m_outputPane(new OutputPane)
+  , m_splitterIn(new QSplitter(this))
+  , m_outputPane(new OutputPane(this))
   , m_outputController(new OutputController(m_outputPane, this))
-  , m_designerPane(new DesignerPane)
+  , m_designerPane(new DesignerPane(this))
   , m_designerController(new DesignerController(m_designerPane, this))
-  , m_buildsPane(new BuildsPane)
+  , m_buildsPane(new BuildsPane(this))
   , m_buildsController(new BuildsController(m_buildsPane, this))
-  , m_codeEditorContainer(new EditorContainer)
-  , m_qmlCodeEditorWidget(new QmlCodeEditorWidget)
-  , m_projectOptionsWidget(new ProjectOptionsWidget)
-  , m_helpWidget(new HelpWidget)
+  , m_codeEditorContainer(new EditorContainer(this))
+  , m_qmlCodeEditorWidget(new QmlCodeEditorWidget(this))
+  , m_projectOptionsWidget(new ProjectOptionsWidget(this))
+  , m_helpWidget(new HelpWidget(this))
 {
     setFrameShape(QFrame::NoFrame);
     setOrientation(Qt::Vertical);
