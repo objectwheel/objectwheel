@@ -18,6 +18,11 @@ public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
+private slots:
+    void onModelReset();
+    void onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last);
+    void onDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
+
 private:
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;

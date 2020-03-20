@@ -20,6 +20,11 @@ public:
     const QModelIndex& index() const;
     void setIndex(const QModelIndex& index);
 
+private slots:
+    void onModelReset();
+    void onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last);
+    void onDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
+
 private:
     void highlight(int begin);
 

@@ -6,27 +6,11 @@ DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWid
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     connect(m_view->model(), &QAbstractItemModel::rowsAboutToBeRemoved,
-            this, [=] (const QModelIndex& parent, int first, int last) {
-        for (; first <= last; ++first) {
-            if (m_index == m_view->model()->index(first, 0, parent)) {
-                setIndex(QModelIndex());
-                break;
-            }
-        }
-    });
+            this, &DownloadDetailsWidget::onRowsAboutToBeRemoved);
     connect(m_view->model(), &QAbstractItemModel::modelReset,
-            this, [=] {
-        setIndex(QModelIndex());
-    });
+            this, &DownloadDetailsWidget::onModelReset);
     connect(m_view->model(), &QAbstractItemModel::dataChanged,
-            this, [=] (const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>&) {
-        Q_ASSERT(topLeft == bottomRight);
-        if (m_index == topLeft) {
-            m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
-            updateGeometry();
-            update();
-        }
-    });
+            this, &DownloadDetailsWidget::onDataChange);
 }
 
 DownloadDetailsWidget::~DownloadDetailsWidget()
@@ -65,6 +49,32 @@ QSize DownloadDetailsWidget::sizeHint() const
 QSize DownloadDetailsWidget::minimumSizeHint() const
 {
     return m_view->itemDelegate()->sizeHint(viewOptions(), m_index);
+}
+
+void DownloadDetailsWidget::onModelReset()
+{
+    setIndex(QModelIndex());
+}
+
+void DownloadDetailsWidget::onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last)
+{
+    for (; first <= last; ++first) {
+        if (m_index == m_view->model()->index(first, 0, parent)) {
+            setIndex(QModelIndex());
+            break;
+        }
+    }
+}
+
+void DownloadDetailsWidget::onDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight,
+                                         const QVector<int>& /*roles*/)
+{
+    Q_ASSERT(topLeft == bottomRight);
+    if (m_index == topLeft) {
+        m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
+        updateGeometry();
+        update();
+    }
 }
 
 void DownloadDetailsWidget::resizeEvent(QResizeEvent* event)
