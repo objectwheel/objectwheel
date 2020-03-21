@@ -41,6 +41,10 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
             this, &BuildModel::onServerResponse);
     connect(ServerManager::instance(), &ServerManager::bytesWritten,
             this, &BuildModel::onServerBytesWritten);
+    connect(m_payloadRelay, &PayloadRelay::bytesDownloaded,
+            this, &BuildModel::onPayloadBytesDownload);
+    connect(m_payloadRelay, &PayloadRelay::downloadFinished,
+            this, &BuildModel::onPayloadDownloadFinish);
 }
 
 BuildModel::~BuildModel()
@@ -387,72 +391,17 @@ void BuildModel::onServerResponse(const QByteArray& data)
         break;
 
     case BuildSucceed: {
-        // Decode data
-        bool isLastFrame;
-        int totalBytes;
-        QByteArray chunk;
-        UtilityFunctions::pullCbor(data, command, status, uid, isLastFrame, totalBytes, chunk);
-
-        // First frame
-        if (!buildInfo->buffer()->isOpen()) {
-            buildInfo->addStatus(tr("Downloading..."));
-            buildInfo->setTotalBytes(totalBytes);
-            buildInfo->buffer()->buffer().reserve(totalBytes);
-            buildInfo->buffer()->open(QBuffer::WriteOnly);
-            changedRoles.unite({ StatusRole, Qt::StatusTipRole, TotalBytesRole });
-        }
-
-        // Write data into the buffer
-        buildInfo->buffer()->write(chunk);
-        buildInfo->setTransferredBytes(buildInfo->buffer()->size());
-        changedRoles.unite({ TransferredBytesRole });
-
-        // Last frame
-        if (isLastFrame) {
-            buildInfo->buffer()->close();
-            buildInfo->addStatus(tr("Done"));
-            buildInfo->setState(Finished);
-            changedRoles.unite({ StatusRole, Qt::StatusTipRole, StateRole });
-            do {
-                QFile file(index.data(PathRole).toString());
-                if (!file.open(QFile::WriteOnly))
-                    break;
-                file.write(buildInfo->buffer()->data());
-            } while (false);
-            emit downloadFinished(index);
-        }
-
-        // Calculate speed and timeLeft
-        BuildInfo::Block block;
-        block.size = chunk.size();
-        block.timestamp = QDateTime::currentDateTime();
-        buildInfo->recentBlocks().append(block);
-        if (buildInfo->recentBlocks().size() > 20)
-            buildInfo->recentBlocks().removeFirst();
-        //
-        if (buildInfo->recentBlocks().size() > 1) {
-            int transferredBytes = -buildInfo->recentBlocks().first().size;
-            int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
-            for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
-                transferredBytes += block.size;
-            if (elapedMs == 0)
-                elapedMs = 100;
-            qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
-            buildInfo->setSpeed(bytesPerMs * 1000);
-            changedRoles.unite({ SpeedRole });
-            //
-            int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
-            qreal msLeft = bytesLeft / bytesPerMs;
-            buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
-            changedRoles.unite({ TimeLeftRole });
-        }
+        QString payloadUid;
+        UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
+        buildInfo->setPayloadUid(payloadUid);
+        m_payloadRelay->download(ServerManager::instance(), payloadUid);
     } break;
 
     default:
         break;
     }
 
-    emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+    emit dataChanged(index, index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
 }
 
 void BuildModel::onServerBytesWritten(qint64 bytes)
@@ -521,6 +470,69 @@ void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<
     }
 }
 
+void BuildModel::onPayloadBytesDownload(const QString& payloadUid, const QByteArray& chunk, int totalBytes)
+{
+    if (auto buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+        QSet<int> changedRoles;
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+
+        if (buildInfo->totalBytes() == 0) {
+            buildInfo->addStatus(tr("Downloading..."));
+            buildInfo->setTotalBytes(totalBytes);
+            changedRoles.unite({ StatusRole, Qt::StatusTipRole, TotalBytesRole });
+        }
+
+        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + chunk.size());
+        changedRoles.unite({ TransferredBytesRole });
+
+        // Calculate speed and timeLeft
+        BuildInfo::Block block;
+        block.size = chunk.size();
+        block.timestamp = QDateTime::currentDateTime();
+        buildInfo->recentBlocks().append(block);
+        if (buildInfo->recentBlocks().size() > 20)
+            buildInfo->recentBlocks().removeFirst();
+        //
+        if (buildInfo->recentBlocks().size() > 1) {
+            int transferredBytes = -buildInfo->recentBlocks().first().size;
+            int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
+            for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
+                transferredBytes += block.size;
+            if (elapedMs == 0)
+                elapedMs = 100;
+            qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
+            buildInfo->setSpeed(bytesPerMs * 1000);
+            changedRoles.unite({ SpeedRole });
+            //
+            int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
+            qreal msLeft = bytesLeft / bytesPerMs;
+            buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
+            changedRoles.unite({ TimeLeftRole });
+        }
+
+        emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+    }
+}
+
+void BuildModel::onPayloadDownloadFinish(const QString& payloadUid, const QByteArray& data)
+{
+    if (auto buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+        buildInfo->addStatus(tr("Done"));
+        buildInfo->setState(Finished);
+        do {
+            QFile file(index.data(PathRole).toString());
+            if (!file.open(QFile::WriteOnly))
+                break;
+            file.write(data);
+        } while (false);
+        emit downloadFinished(index);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
+    }
+}
+
 QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
 {
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
@@ -537,11 +549,22 @@ BuildInfo* BuildModel::uploadingBuildInfo() const
 
 BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
 {
-    if (uid.isEmpty())
-        return nullptr;
-    for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
-        if (buildInfo->uid() == uid)
-            return buildInfo;
+    if (!uid.isEmpty()) {
+        for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
+            if (buildInfo->uid() == uid)
+                return buildInfo;
+        }
+    }
+    return nullptr;
+}
+
+BuildInfo* BuildModel::buildInfoFromPayloadUid(const QString& payloadUid)
+{
+    if (!payloadUid.isEmpty()) {
+        for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
+            if (buildInfo->payloadUid() == payloadUid)
+                return buildInfo;
+        }
     }
     return nullptr;
 }

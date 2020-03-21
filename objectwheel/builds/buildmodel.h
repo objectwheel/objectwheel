@@ -61,6 +61,8 @@ private slots:
     void onServerResponse(const QByteArray& data);
     void onServerBytesWritten(qint64 bytes);
     void emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles);
+    void onPayloadBytesDownload(const QString& payloadUid, const QByteArray& chunk, int totalBytes);
+    void onPayloadDownloadFinish(const QString& payloadUid, const QByteArray& data);
 
 private:
     void timerEvent(QTimerEvent* event) override;
@@ -73,6 +75,7 @@ private:
     QIcon platformIcon(const QString& rawPlatformName) const;
     BuildInfo* uploadingBuildInfo() const;
     BuildInfo* buildInfoFromUid(const QString& uid);
+    BuildInfo* buildInfoFromPayloadUid(const QString& payloadUid);
     QModelIndex indexFromBuildInfo(const BuildInfo* buildInfo) const;
 
 private:

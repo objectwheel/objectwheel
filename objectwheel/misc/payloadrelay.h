@@ -3,22 +3,20 @@
 
 #include <QTimer>
 #include <QBuffer>
-#include <QWebSocket>
 
-class QTimer;
 class QWebSocket;
-
 class PayloadRelay final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(PayloadRelay)
 
     enum {
-        TIMEOUT = 8000,
-        CHUNK_SIZE = 102400 /* 100K */
+        DEFAULT_TIMEOUT = 8000,     /* msec */
+        DEFAULT_CHUNK_SIZE = 102400 /* 100K */
     };
 
     struct Payload {
+        int receivedBytes;
         QString uid;
         QBuffer buffer;
         QWebSocket* socket;
@@ -29,6 +27,15 @@ public:
     explicit PayloadRelay(int payloadSymbol, int payloadAckSymbol, QObject* parent = nullptr);
     ~PayloadRelay() override;
 
+    int timeout() const;
+    void setTimeout(int timeout);
+
+    int uploadChunkSize() const;
+    void setUploadChunkSize(int uploadChunkSize);
+
+    bool downloadBuffered() const;
+    void setDownloadBuffered(bool downloadBuffered);
+
     void download(QWebSocket* socket, const QString& uid);
     QString upload(QWebSocket* socket, const QByteArray& data);
 
@@ -38,15 +45,15 @@ public slots:
 
 private slots:
     void uploadNextAvailableChunk(Payload* payload);
-    void downloadNextAvailableChunk(Payload* payload);
+    void downloadNextAvailableChunk(Payload* payload) const;
     void onBinaryMessageReceived(const QByteArray& message);
 
 private:
     void cleanUpload(Payload* payload);
     void cleanDownload(Payload* payload);
 
-    Payload* uploadPayloadFromUid(const QString& uid);
-    Payload* downloadPayloadFromUid(const QString& uid);
+    Payload* uploadPayloadFromUid(const QString& uid) const;
+    Payload* downloadPayloadFromUid(const QString& uid) const;
 
 signals:
     void uploadFinished(const QString& uid);
@@ -57,9 +64,11 @@ signals:
 private:
     const int m_payloadSymbol;
     const int m_payloadAckSymbol;
+    int m_timeout;
+    int m_uploadChunkSize;
+    bool m_downloadBuffered;
     QVector<Payload*> m_uploads;
     QVector<Payload*> m_downloads;
-
 };
 
 #endif // PAYLOADRELAY_H

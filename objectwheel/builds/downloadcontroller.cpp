@@ -11,7 +11,7 @@
 
 DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* parent) : QObject(parent)
   , m_downloadWidget(downloadWidget)
-  , m_buildDetailsDialog(new BuildDetailsDialog(m_downloadWidget->downloadList(), m_downloadWidget))
+  , m_buildDetailsDialog(new BuildDetailsDialog(m_downloadWidget->downloadList(), m_downloadWidget->downloadList()))
 {
     auto model = static_cast<const BuildModel*>(m_downloadWidget->downloadList()->model());
     auto delegate = static_cast<BuildDelegate*>(m_downloadWidget->downloadList()->itemDelegate());

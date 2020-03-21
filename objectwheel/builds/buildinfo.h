@@ -3,7 +3,6 @@
 
 #include <QCborMap>
 #include <QDateTime>
-#include <QBuffer>
 
 class BuildInfo final : public QObject
 {
@@ -23,8 +22,6 @@ public:
 
     const QCborMap& request() const;
     const QString& path() const;
-
-    QBuffer* buffer();
     QList<Block>& recentBlocks();
 
     QString uid() const;
@@ -37,6 +34,9 @@ public:
     QString statusTip() const;
     QString status() const;
     void addStatus(const QString& status);
+
+    QString payloadUid() const;
+    void setPayloadUid(const QString& payloadUid);
 
     QTime timeLeft() const;
     void setTimeLeft(const QTime& timeLeft);
@@ -58,13 +58,13 @@ private:
     const QCborMap m_request;
     QString m_uid;
     QString m_path;
-    QBuffer m_buffer;
     QList<Block> m_recentBlocks;
 
 private:
     bool m_errorFlag;
     QString m_status;
     QString m_statusTip;
+    QString m_payloadUid;
     QTime m_timeLeft;
     qreal m_speed;
     int m_totalBytes;

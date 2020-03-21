@@ -114,11 +114,6 @@ const QString& BuildInfo::path() const
     return m_path;
 }
 
-QBuffer* BuildInfo::buffer()
-{
-    return &m_buffer;
-}
-
 QList<BuildInfo::Block>& BuildInfo::recentBlocks()
 {
     return m_recentBlocks;
@@ -161,6 +156,16 @@ void BuildInfo::addStatus(const QString& status)
     if (begin > 0 && end > begin)
         line = line.mid(begin, end - begin);
     m_statusTip = line.mid(9);
+}
+
+QString BuildInfo::payloadUid() const
+{
+    return m_payloadUid;
+}
+
+void BuildInfo::setPayloadUid(const QString& payloadUid)
+{
+    m_payloadUid = payloadUid;
 }
 
 QTime BuildInfo::timeLeft() const
