@@ -8,6 +8,7 @@
 
 class BuildInfo;
 class QCborMap;
+class PayloadRelay;
 
 class BuildModel final : public QAbstractListModel
 {
@@ -75,6 +76,7 @@ private:
     QModelIndex indexFromBuildInfo(const BuildInfo* buildInfo) const;
 
 private:
+    PayloadRelay* m_payloadRelay;
     QList<BuildInfo*> m_buildInfos;
     QBasicTimer m_changeSignalTimer;
     QHash<int, QSet<int>> m_changedRows;

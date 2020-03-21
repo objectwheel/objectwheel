@@ -4,6 +4,7 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <zipasync.h>
+#include <payloadrelay.h>
 
 #include <QCborMap>
 #include <QTemporaryFile>
@@ -29,12 +30,12 @@ enum StatusCode {
     InvalidProjectSettings,
     Canceled,
     Timedout,
-    //
-    BuildData
+    BuildSucceed
 };
 Q_DECLARE_METATYPE(StatusCode)
 
 BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
+  , m_payloadRelay(new PayloadRelay(ServerManager::Payload, ServerManager::ResponsePayload, this))
 {
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
             this, &BuildModel::onServerResponse);
@@ -385,7 +386,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
-    case BuildData: {
+    case BuildSucceed: {
         // Decode data
         bool isLastFrame;
         int totalBytes;
