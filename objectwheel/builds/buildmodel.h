@@ -77,6 +77,7 @@ private:
     BuildInfo* buildInfoFromUid(const QString& uid);
     BuildInfo* buildInfoFromPayloadUid(const QString& payloadUid);
     QModelIndex indexFromBuildInfo(const BuildInfo* buildInfo) const;
+    void calculateTransferRate(BuildInfo* buildInfo, int chunkCount, int chunkSize, QSet<int>& changedRoles) const;
 
 private:
     PayloadRelay* m_payloadRelay;

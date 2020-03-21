@@ -150,24 +150,31 @@ bool BuildModel::setData(const QModelIndex& index, const QVariant& value, int ro
     case StatusRole:
         buildInfo->addStatus(qvariant_cast<QString>(value));
         break;
+
     case StateRole:
         buildInfo->setState(qvariant_cast<int>(value));
         break;
+
     case ErrorRole:
         buildInfo->setErrorFlag(qvariant_cast<bool>(value));
         break;
+
     case SpeedRole:
         buildInfo->setSpeed(qvariant_cast<qreal>(value));
         break;
+
     case TimeLeftRole:
         buildInfo->setTimeLeft(qvariant_cast<QTime>(value));
         break;
+
     case TotalBytesRole:
         buildInfo->setTotalBytes(qvariant_cast<int>(value));
         break;
+
     case TransferredBytesRole:
         buildInfo->setTransferredBytes(qvariant_cast<int>(value));
         break;
+
     default:
         return false;
     }
@@ -414,31 +421,7 @@ void BuildModel::onServerBytesWritten(qint64 bytes)
         buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
         changedRoles.unite({ TransferredBytesRole });
 
-        // Calculate speed and timeLeft
-        BuildInfo::Block block;
-        block.size = int(bytes);
-        block.timestamp = QDateTime::currentDateTime();
-        buildInfo->recentBlocks().append(block);
-        if (buildInfo->recentBlocks().size() > 35)
-            buildInfo->recentBlocks().removeFirst();
-        //
-        if (buildInfo->recentBlocks().size() > 1) {
-            int transferredBytes = -buildInfo->recentBlocks().first().size;
-            int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
-            for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
-                transferredBytes += block.size;
-            if (elapedMs == 0)
-                elapedMs = 100;
-            qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
-            buildInfo->setSpeed(bytesPerMs * 1000);
-            changedRoles.unite({ SpeedRole });
-            //
-            int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
-            qreal msLeft = bytesLeft / bytesPerMs;
-            buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
-            changedRoles.unite({ TimeLeftRole });
-        }
-
+        calculateTransferRate(buildInfo, 35, bytes, changedRoles);
         emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
     }
 }
@@ -472,7 +455,7 @@ void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<
 
 void BuildModel::onPayloadBytesDownload(const QString& payloadUid, const QByteArray& chunk, int totalBytes)
 {
-    if (auto buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         QSet<int> changedRoles;
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
@@ -486,31 +469,7 @@ void BuildModel::onPayloadBytesDownload(const QString& payloadUid, const QByteAr
         buildInfo->setTransferredBytes(buildInfo->transferredBytes() + chunk.size());
         changedRoles.unite({ TransferredBytesRole });
 
-        // Calculate speed and timeLeft
-        BuildInfo::Block block;
-        block.size = chunk.size();
-        block.timestamp = QDateTime::currentDateTime();
-        buildInfo->recentBlocks().append(block);
-        if (buildInfo->recentBlocks().size() > 20)
-            buildInfo->recentBlocks().removeFirst();
-        //
-        if (buildInfo->recentBlocks().size() > 1) {
-            int transferredBytes = -buildInfo->recentBlocks().first().size;
-            int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
-            for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
-                transferredBytes += block.size;
-            if (elapedMs == 0)
-                elapedMs = 100;
-            qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
-            buildInfo->setSpeed(bytesPerMs * 1000);
-            changedRoles.unite({ SpeedRole });
-            //
-            int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
-            qreal msLeft = bytesLeft / bytesPerMs;
-            buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
-            changedRoles.unite({ TimeLeftRole });
-        }
-
+        calculateTransferRate(buildInfo, 20, chunk.size(), changedRoles);
         emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
     }
 }
@@ -523,9 +482,16 @@ void BuildModel::onPayloadDownloadFinish(const QString& payloadUid, const QByteA
         buildInfo->addStatus(tr("Done"));
         buildInfo->setState(Finished);
         do {
-            QFile file(index.data(PathRole).toString());
-            if (!file.open(QFile::WriteOnly))
+            const QString& filePath = index.data(PathRole).toString();
+            if (QFile::exists(filePath)) {
+                qWarning("BuildModel: Executable file already exists");
                 break;
+            }
+            QFile file(filePath);
+            if (!file.open(QFile::WriteOnly)) {
+                qWarning("BuildModel: Cannot open executable file");
+                break;
+            }
             file.write(data);
         } while (false);
         emit downloadFinished(index);
@@ -575,4 +541,31 @@ QModelIndex BuildModel::indexFromBuildInfo(const BuildInfo* buildInfo) const
     if (row < 0)
         return QModelIndex();
     return index(row);
+}
+
+void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkCount, int chunkSize, QSet<int>& changedRoles) const
+{
+    BuildInfo::Block block;
+    block.size = chunkSize;
+    block.timestamp = QDateTime::currentDateTime();
+    buildInfo->recentBlocks().append(block);
+    if (buildInfo->recentBlocks().size() > chunkCount)
+        buildInfo->recentBlocks().removeFirst();
+
+    if (buildInfo->recentBlocks().size() > 1) {
+        int transferredBytes = -buildInfo->recentBlocks().first().size;
+        int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
+        for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
+            transferredBytes += block.size;
+        if (elapedMs == 0)
+            elapedMs = 100;
+        qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
+        buildInfo->setSpeed(bytesPerMs * 1000);
+        changedRoles.unite({ SpeedRole });
+
+        int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
+        qreal msLeft = bytesLeft / bytesPerMs;
+        buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
+        changedRoles.unite({ TimeLeftRole });
+    }
 }
