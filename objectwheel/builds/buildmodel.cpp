@@ -38,13 +38,13 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
   , m_payloadRelay(new PayloadRelay(ServerManager::Payload, ServerManager::ResponsePayload, this))
 {
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
-            this, &BuildModel::onServerResponse);
-    connect(ServerManager::instance(), &ServerManager::bytesWritten,
-            this, &BuildModel::onServerBytesWritten);
+            this, &BuildModel::onServerResponse, Qt::QueuedConnection);
+    connect(m_payloadRelay, &PayloadRelay::bytesUploaded,
+            this, &BuildModel::onPayloadBytesUploaded);
     connect(m_payloadRelay, &PayloadRelay::bytesDownloaded,
-            this, &BuildModel::onPayloadBytesDownload);
+            this, &BuildModel::onPayloadBytesDownloaded);
     connect(m_payloadRelay, &PayloadRelay::downloadFinished,
-            this, &BuildModel::onPayloadDownloadFinish);
+            this, &BuildModel::onPayloadDownloadFinished);
 }
 
 BuildModel::~BuildModel()
@@ -54,12 +54,17 @@ BuildModel::~BuildModel()
 
 void BuildModel::addBuildRequest(const QCborMap& request)
 {
-    Q_ASSERT(uploadingBuildInfo() == nullptr);
     beginInsertRows(QModelIndex(), rowCount(), rowCount());
-    m_buildInfos.append(new BuildInfo(request, this));
+    auto buildInfo = new BuildInfo(request, this);
+    m_buildInfos.append(buildInfo);
     endInsertRows();
-    setData(indexFromBuildInfo(uploadingBuildInfo()), tr("Compressing the project..."), StatusRole);
-    QTimer::singleShot(100, this, &BuildModel::start);
+    setData(indexFromBuildInfo(buildInfo), tr("Compressing the project..."), StatusRole);
+    QTimer::singleShot(100, this, [=] {
+        if (m_buildInfos.contains(buildInfo)
+                && buildInfo->state() == BuildModel::Uploading) {
+            start(buildInfo);
+        }
+    });
 }
 
 Qt::ItemFlags BuildModel::flags(const QModelIndex& index) const
@@ -90,48 +95,66 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
         background.setColorAt(1, "#10000000");
         return QBrush(background);
     }
+
     case Qt::ForegroundRole:
         return QApplication::palette().text();
+
     case Qt::FontRole: {
         QFont font(QApplication::font());
         font.setWeight(QFont::Light);
         font.setPixelSize(11);
         return font;
     }
+
     case Qt::DecorationRole:
         return QImage::fromData(buildInfo->request().value(QLatin1String("icon")).toByteArray());
+
     case ButtonSize:
         return QSize(16, 16);
+
     case NameRole:
         return QFileInfo(buildInfo->path()).fileName();
+
     case PathRole:
         return buildInfo->path();
+
     case PlatformIconRole:
         return platformIcon(buildInfo->request().value(QLatin1String("platform")).toString());
+
     case VersionRole:
         return buildInfo->request().value(QLatin1String("versionName")).toString();
+
     case AbisRole: {
         QStringList abis;
         foreach (const QCborValue& abi, buildInfo->request().value(QLatin1String("abis")).toArray())
             abis.append(abi.toString());
         return abis.join(QLatin1String(", "));
     }
+
     case ErrorRole:
         return buildInfo->hasError();
+
     case StateRole:
         return buildInfo->state();
+
     case StatusRole:
         return buildInfo->status();
+
     case Qt::StatusTipRole:
         return buildInfo->statusTip();
+
     case SpeedRole:
         return buildInfo->speed();
+
     case TimeLeftRole:
         return buildInfo->timeLeft();
+
     case TotalBytesRole:
         return buildInfo->totalBytes();
+
     case TransferredBytesRole:
         return buildInfo->transferredBytes();
+
     default:
         break;
     }
@@ -218,11 +241,9 @@ void BuildModel::clear()
     endResetModel();
 }
 
-void BuildModel::start()
+void BuildModel::start(BuildInfo* buildInfo)
 {
-    BuildInfo* buildInfo = uploadingBuildInfo();
     const QModelIndex& index = indexFromBuildInfo(buildInfo);
-
     Q_ASSERT(index.isValid());
     Q_ASSERT(ServerManager::isConnected());
 
@@ -249,13 +270,18 @@ void BuildModel::start()
     tempFile.close();
     tempFile.remove();
 
-    int uploadSize = (int) ServerManager::send(ServerManager::RequestCloudBuild,
-                                               UserManager::email(),
-                                               UserManager::password(),
-                                               buildInfo->request(), data);
+    const QByteArray& payload = UtilityFunctions::pushCbor(buildInfo->request(), data);
+    const QString& payloadUid = m_payloadRelay->scheduleUpload(ServerManager::instance(), payload);
 
+    ServerManager::send(ServerManager::RequestCloudBuild,
+                        UserManager::email(),
+                        UserManager::password(),
+                        payloadUid);
+
+    buildInfo->setPayloadUid(payloadUid);
+    buildInfo->setTotalBytes(payload.size());
     buildInfo->addStatus(tr("Uploading the project..."));
-    buildInfo->setTotalBytes(uploadSize);
+
     emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, TotalBytesRole });
 }
 
@@ -273,7 +299,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
     BuildInfo* buildInfo = buildInfoFromUid(uid);
 
     if (buildInfo == 0)
-        buildInfo = uploadingBuildInfo();
+        buildInfo = buildInfoFromPayloadUid(uid);
 
     if (buildInfo == 0) {
         qWarning("WARNING: Cannot find build information corresponding to incoming data");
@@ -401,7 +427,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QString payloadUid;
         UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
         buildInfo->setPayloadUid(payloadUid);
-        m_payloadRelay->download(ServerManager::instance(), payloadUid);
+        m_payloadRelay->registerDownload(ServerManager::instance(), payloadUid);
     } break;
 
     default:
@@ -409,21 +435,6 @@ void BuildModel::onServerResponse(const QByteArray& data)
     }
 
     emit dataChanged(index, index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
-}
-
-void BuildModel::onServerBytesWritten(qint64 bytes)
-{
-    if (BuildInfo* buildInfo = uploadingBuildInfo()) {
-        QSet<int> changedRoles;
-        const QModelIndex& index = indexFromBuildInfo(buildInfo);
-        Q_ASSERT(index.isValid());
-
-        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
-        changedRoles.unite({ TransferredBytesRole });
-
-        calculateTransferRate(buildInfo, 35, bytes, changedRoles);
-        emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
-    }
 }
 
 void BuildModel::timerEvent(QTimerEvent* event)
@@ -453,7 +464,22 @@ void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<
     }
 }
 
-void BuildModel::onPayloadBytesDownload(const QString& payloadUid, const QByteArray& chunk, int totalBytes)
+void BuildModel::onPayloadBytesUploaded(const QString& uid, int bytes)
+{
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(uid)) {
+        QSet<int> changedRoles;
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+
+        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
+        changedRoles.unite({ TransferredBytesRole });
+
+        calculateTransferRate(buildInfo, bytes, changedRoles);
+        emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+    }
+}
+
+void BuildModel::onPayloadBytesDownloaded(const QString& payloadUid, const QByteArray& chunk, int totalBytes)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         QSet<int> changedRoles;
@@ -469,12 +495,12 @@ void BuildModel::onPayloadBytesDownload(const QString& payloadUid, const QByteAr
         buildInfo->setTransferredBytes(buildInfo->transferredBytes() + chunk.size());
         changedRoles.unite({ TransferredBytesRole });
 
-        calculateTransferRate(buildInfo, 20, chunk.size(), changedRoles);
+        calculateTransferRate(buildInfo, chunk.size(), changedRoles);
         emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
     }
 }
 
-void BuildModel::onPayloadDownloadFinish(const QString& payloadUid, const QByteArray& data)
+void BuildModel::onPayloadDownloadFinished(const QString& payloadUid, const QByteArray& data)
 {
     if (auto buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
@@ -502,15 +528,6 @@ void BuildModel::onPayloadDownloadFinish(const QString& payloadUid, const QByteA
 QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
 {
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
-}
-
-BuildInfo* BuildModel::uploadingBuildInfo() const
-{
-    for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
-        if (buildInfo->state() == Uploading)
-            return buildInfo;
-    }
-    return nullptr;
 }
 
 BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
@@ -543,13 +560,13 @@ QModelIndex BuildModel::indexFromBuildInfo(const BuildInfo* buildInfo) const
     return index(row);
 }
 
-void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkCount, int chunkSize, QSet<int>& changedRoles) const
+void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const
 {
     BuildInfo::Block block;
     block.size = chunkSize;
     block.timestamp = QDateTime::currentDateTime();
     buildInfo->recentBlocks().append(block);
-    if (buildInfo->recentBlocks().size() > chunkCount)
+    if (buildInfo->recentBlocks().size() > 6)
         buildInfo->recentBlocks().removeFirst();
 
     if (buildInfo->recentBlocks().size() > 1) {

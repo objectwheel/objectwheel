@@ -20,7 +20,7 @@ class ServerManager final : public QWebSocket
 
 public:
     enum ServerCommands {
-        Invalid = 0x2019,
+        Invalid = 0x201f,
         MessageTooLarge,
         Payload,
         ResponsePayload,

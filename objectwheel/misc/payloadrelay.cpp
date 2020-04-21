@@ -51,30 +51,15 @@ bool PayloadRelay::downloadBuffered() const
 
 void PayloadRelay::setDownloadBuffered(bool downloadBuffered)
 {
-    if (m_downloads.isEmpty())
-        m_downloadBuffered = downloadBuffered;
-    else
-        qWarning("PayloadRelay: Cannot set downloadBuffered while download in progress");
-}
-
-void PayloadRelay::download(QWebSocket* socket, const QString& uid)
-{
-    if (!uid.isEmpty()) {
-        auto payload = new Payload;
-        payload->receivedBytes = 0;
-        payload->uid = uid;
-        payload->socket = socket;
-        payload->timeoutTimer.start(m_timeout);
-        m_downloads.append(payload);
-
-        connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { cancelDownload(payload->uid); });
-        connect(socket, &QWebSocket::destroyed, this, [=] { cancelDownload(payload->uid); });
-        connect(socket, &QWebSocket::disconnected, this, [=] { cancelDownload(payload->uid); });
-        connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived);
+    if (m_downloadBuffered != downloadBuffered) {
+        if (m_downloads.isEmpty())
+            m_downloadBuffered = downloadBuffered;
+        else
+            qWarning("PayloadRelay: Cannot set downloadBuffered while download in progress");
     }
 }
 
-QString PayloadRelay::upload(QWebSocket* socket, const QByteArray& data)
+QString PayloadRelay::scheduleUpload(QWebSocket* socket, const QByteArray& data)
 {
     if (data.isEmpty())
         return QString();
@@ -96,9 +81,34 @@ QString PayloadRelay::upload(QWebSocket* socket, const QByteArray& data)
     connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { cancelUpload(payload->uid); });
     connect(socket, &QWebSocket::destroyed, this, [=] { cancelUpload(payload->uid); });
     connect(socket, &QWebSocket::disconnected, this, [=] { cancelUpload(payload->uid); });
-    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived);
+    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived, Qt::QueuedConnection);
     QTimer::singleShot(100, this, [=] { if (m_uploads.contains(payload)) uploadNextAvailableChunk(payload); });
+
     return payload->uid;
+}
+
+void PayloadRelay::registerDownload(QWebSocket* socket, const QString& uid)
+{
+    if (uid.isEmpty())
+        return;
+
+    if (socket == 0)
+        return;
+
+    if (socket->state() != QAbstractSocket::ConnectedState)
+        return;
+
+    auto payload = new Payload;
+    payload->receivedBytes = 0;
+    payload->uid = uid;
+    payload->socket = socket;
+    payload->timeoutTimer.start(m_timeout);
+    m_downloads.append(payload);
+
+    connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { cancelDownload(payload->uid); });
+    connect(socket, &QWebSocket::destroyed, this, [=] { cancelDownload(payload->uid); });
+    connect(socket, &QWebSocket::disconnected, this, [=] { cancelDownload(payload->uid); });
+    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived, Qt::QueuedConnection);
 }
 
 void PayloadRelay::cancelUpload(const QString& uid)
@@ -132,8 +142,9 @@ void PayloadRelay::uploadNextAvailableChunk(Payload* payload)
     emit bytesUploaded(payload->uid, payload->buffer.pos());
 
     if (payload->buffer.atEnd()) {
-        emit uploadFinished(payload->uid);
+        const QString uid = payload->uid;
         cleanUpload(payload);
+        emit uploadFinished(uid);
     }
 }
 
@@ -183,8 +194,9 @@ void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)
             if (payload->receivedBytes >= totalBytes) {
                 if (m_downloadBuffered)
                     payload->buffer.close();
-                emit downloadFinished(uid, payload->buffer.data());
+                const QByteArray& data = payload->buffer.data();
                 cleanDownload(payload);
+                emit downloadFinished(uid, data);
             } else {
                 downloadNextAvailableChunk(payload);
             }

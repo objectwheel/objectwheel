@@ -17,7 +17,7 @@ ServerManager::ServerManager(const QUrl& host, QObject* parent)
     connect(this, &ServerManager::sslErrors,
             this, &ServerManager::onSslErrors);
     connect(this, &ServerManager::pong,
-            this, &ServerManager::onPong);
+            this, &ServerManager::onPong, Qt::QueuedConnection);
     connect(this, &ServerManager::bytesWritten,
             this, &ServerManager::startOrRestartConnectionDropTimer, Qt::QueuedConnection);
     connect(this, &ServerManager::binaryMessageReceived,

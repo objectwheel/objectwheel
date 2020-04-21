@@ -7,7 +7,7 @@ RegistrationApiManager::RegistrationApiManager(QObject* parent) : QObject(parent
 {
     s_instance = this;
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
-            this, &RegistrationApiManager::onServerResponse);
+            this, &RegistrationApiManager::onServerResponse, Qt::QueuedConnection);
 }
 
 RegistrationApiManager::~RegistrationApiManager()

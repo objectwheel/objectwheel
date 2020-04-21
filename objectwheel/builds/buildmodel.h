@@ -57,12 +57,12 @@ public slots:
     void clear();
 
 private slots:
-    void start();
+    void start(BuildInfo* buildInfo);
     void onServerResponse(const QByteArray& data);
-    void onServerBytesWritten(qint64 bytes);
     void emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles);
-    void onPayloadBytesDownload(const QString& payloadUid, const QByteArray& chunk, int totalBytes);
-    void onPayloadDownloadFinish(const QString& payloadUid, const QByteArray& data);
+    void onPayloadBytesUploaded(const QString& uid, int bytes);
+    void onPayloadBytesDownloaded(const QString& payloadUid, const QByteArray& chunk, int totalBytes);
+    void onPayloadDownloadFinished(const QString& payloadUid, const QByteArray& data);
 
 private:
     void timerEvent(QTimerEvent* event) override;
@@ -73,11 +73,10 @@ signals:
 
 private:
     QIcon platformIcon(const QString& rawPlatformName) const;
-    BuildInfo* uploadingBuildInfo() const;
     BuildInfo* buildInfoFromUid(const QString& uid);
     BuildInfo* buildInfoFromPayloadUid(const QString& payloadUid);
     QModelIndex indexFromBuildInfo(const BuildInfo* buildInfo) const;
-    void calculateTransferRate(BuildInfo* buildInfo, int chunkCount, int chunkSize, QSet<int>& changedRoles) const;
+    void calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const;
 
 private:
     PayloadRelay* m_payloadRelay;

@@ -36,8 +36,8 @@ public:
     bool downloadBuffered() const;
     void setDownloadBuffered(bool downloadBuffered);
 
-    void download(QWebSocket* socket, const QString& uid);
-    QString upload(QWebSocket* socket, const QByteArray& data);
+    void registerDownload(QWebSocket* socket, const QString& uid);
+    QString scheduleUpload(QWebSocket* socket, const QByteArray& data);
 
 public slots:
     void cancelUpload(const QString& uid);
