@@ -214,6 +214,7 @@ bool ApplicationCore::locked()
         sharedMemory->attach();
         sharedMemory->detach();
         if(!sharedMemory->create(1)) {
+            QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
             UtilityFunctions::showMessage(nullptr,
                                           QObject::tr("Quitting"),
                                           QObject::tr("Another instance is already running."));

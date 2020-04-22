@@ -355,12 +355,14 @@ void BuildModel::onServerResponse(const QByteArray& data)
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
-    case RequestSucceed:
+    case RequestSucceed: {
         Q_ASSERT(!uid.isEmpty());
+        QString payloadUid;
+        UtilityFunctions::pullCbor(data, command, status, payloadUid, uid);
         buildInfo->setUid(uid);
         buildInfo->addStatus(tr("Processing the request..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
-        break;
+    } break;
 
     case SequenceNumberChanged: {
         int sequenceNumber;
