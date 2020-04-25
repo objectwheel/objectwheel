@@ -62,7 +62,10 @@ private slots:
     void emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles);
     void onPayloadBytesUploaded(const QString& uid, int bytes);
     void onPayloadBytesDownloaded(const QString& payloadUid, const QByteArray& chunk, int totalBytes);
+    void onPayloadUploadFinished(const QString& payloadUid);
     void onPayloadDownloadFinished(const QString& payloadUid, const QByteArray& data);
+    void onPayloadUploadTimedout(const QString& payloadUid);
+    void onPayloadDownloadTimedout(const QString& payloadUid);
 
 private:
     void timerEvent(QTimerEvent* event) override;

@@ -49,6 +49,8 @@ private slots:
     void onBinaryMessageReceived(const QByteArray& message);
 
 private:
+    void timeoutUpload(Payload* payload);
+    void timeoutDownload(Payload* payload);
     void cleanUpload(Payload* payload);
     void cleanDownload(Payload* payload);
 
@@ -56,6 +58,8 @@ private:
     Payload* downloadPayloadFromUid(const QString& uid) const;
 
 signals:
+    void uploadTimedout(const QString& uid);
+    void downloadTimedout(const QString& uid);
     void uploadFinished(const QString& uid);
     void bytesUploaded(const QString& uid, int bytes);
     void downloadFinished(const QString& uid, const QByteArray& data);

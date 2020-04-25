@@ -39,12 +39,20 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
 {
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
             this, &BuildModel::onServerResponse, Qt::QueuedConnection);
+    //
     connect(m_payloadRelay, &PayloadRelay::bytesUploaded,
             this, &BuildModel::onPayloadBytesUploaded);
+    connect(m_payloadRelay, &PayloadRelay::uploadFinished,
+            this, &BuildModel::onPayloadUploadFinished);
+    connect(m_payloadRelay, &PayloadRelay::uploadTimedout,
+            this, &BuildModel::onPayloadUploadTimedout);
+    //
     connect(m_payloadRelay, &PayloadRelay::bytesDownloaded,
             this, &BuildModel::onPayloadBytesDownloaded);
     connect(m_payloadRelay, &PayloadRelay::downloadFinished,
             this, &BuildModel::onPayloadDownloadFinished);
+    connect(m_payloadRelay, &PayloadRelay::downloadTimedout,
+            this, &BuildModel::onPayloadDownloadTimedout);
 }
 
 BuildModel::~BuildModel()
@@ -293,6 +301,10 @@ void BuildModel::onServerResponse(const QByteArray& data)
     if (command != ServerManager::ResponseCloudBuild)
         return;
 
+    // NOTE: Beware uid represents the payloadUid until we get a RequestSucceed
+    // response from the server; Other commands which occurs before that should
+    // take it into consideration.
+
     StatusCode status;
     QString uid;
     UtilityFunctions::pullCbor(data, command, status, uid);
@@ -314,17 +326,6 @@ void BuildModel::onServerResponse(const QByteArray& data)
     QSet<int> changedRoles;
     const QModelIndex& index = indexFromBuildInfo(buildInfo);
     Q_ASSERT(index.isValid());
-
-    if (buildInfo->state() == Uploading) {
-        buildInfo->recentBlocks().clear();
-        buildInfo->setSpeed(0);
-        buildInfo->setTotalBytes(0);
-        buildInfo->setTransferredBytes(0);
-        buildInfo->setTimeLeft(QTime());
-        buildInfo->setState(Downloading);
-        changedRoles.unite({ SpeedRole, TotalBytesRole, TransferredBytesRole, TimeLeftRole, StateRole });
-        emit uploadFinished(index);
-    }
 
     switch (status) {
     case InternalError:
@@ -502,9 +503,29 @@ void BuildModel::onPayloadBytesDownloaded(const QString& payloadUid, const QByte
     }
 }
 
+void BuildModel::onPayloadUploadFinished(const QString& payloadUid)
+{
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+        Q_ASSERT(buildInfo->state() == Uploading);
+
+        buildInfo->addStatus(tr("Waiting the server to start..."));
+        buildInfo->recentBlocks().clear();
+        buildInfo->setSpeed(0);
+        buildInfo->setTotalBytes(0);
+        buildInfo->setTransferredBytes(0);
+        buildInfo->setTimeLeft(QTime());
+        buildInfo->setState(Downloading);
+
+        emit uploadFinished(index);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, SpeedRole, TotalBytesRole, TransferredBytesRole, TimeLeftRole, StateRole });
+    }
+}
+
 void BuildModel::onPayloadDownloadFinished(const QString& payloadUid, const QByteArray& data)
 {
-    if (auto buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
         buildInfo->addStatus(tr("Done"));
@@ -524,6 +545,30 @@ void BuildModel::onPayloadDownloadFinished(const QString& payloadUid, const QByt
         } while (false);
         emit downloadFinished(index);
         emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
+    }
+}
+
+void BuildModel::onPayloadUploadTimedout(const QString& payloadUid)
+{
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+        buildInfo->addStatus(tr("Upload timedout"));
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
+    }
+}
+
+void BuildModel::onPayloadDownloadTimedout(const QString& payloadUid)
+{
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+        buildInfo->addStatus(tr("Download timedout"));
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
     }
 }
 

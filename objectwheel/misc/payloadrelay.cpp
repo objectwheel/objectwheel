@@ -78,7 +78,7 @@ QString PayloadRelay::scheduleUpload(QWebSocket* socket, const QByteArray& data)
     payload->timeoutTimer.start(m_timeout);
     m_uploads.append(payload);
 
-    connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { cancelUpload(payload->uid); });
+    connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutUpload(payload); });
     connect(socket, &QWebSocket::destroyed, this, [=] { cancelUpload(payload->uid); });
     connect(socket, &QWebSocket::disconnected, this, [=] { cancelUpload(payload->uid); });
     connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived, Qt::QueuedConnection);
@@ -105,7 +105,7 @@ void PayloadRelay::registerDownload(QWebSocket* socket, const QString& uid)
     payload->timeoutTimer.start(m_timeout);
     m_downloads.append(payload);
 
-    connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { cancelDownload(payload->uid); });
+    connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutDownload(payload); });
     connect(socket, &QWebSocket::destroyed, this, [=] { cancelDownload(payload->uid); });
     connect(socket, &QWebSocket::disconnected, this, [=] { cancelDownload(payload->uid); });
     connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived, Qt::QueuedConnection);
@@ -194,7 +194,7 @@ void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)
             if (payload->receivedBytes >= totalBytes) {
                 if (m_downloadBuffered)
                     payload->buffer.close();
-                const QByteArray& data = payload->buffer.data();
+                const QByteArray data = payload->buffer.data();
                 cleanDownload(payload);
                 emit downloadFinished(uid, data);
             } else {
@@ -216,6 +216,20 @@ void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)
             cancelUpload(uid);
         }
     }
+}
+
+void PayloadRelay::timeoutUpload(Payload* payload)
+{
+    const QString payloadUid = payload->uid;
+    cancelUpload(payloadUid);
+    emit uploadTimedout(payloadUid);
+}
+
+void PayloadRelay::timeoutDownload(Payload* payload)
+{
+    const QString payloadUid = payload->uid;
+    cancelDownload(payloadUid);
+    emit downloadTimedout(payloadUid);
 }
 
 void PayloadRelay::cleanUpload(Payload* payload)
