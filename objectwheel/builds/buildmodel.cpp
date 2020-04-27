@@ -285,6 +285,7 @@ void BuildModel::start(BuildInfo* buildInfo)
                         UserManager::email(),
                         UserManager::password(),
                         payloadUid);
+    ServerManager::instance()->flush();
 
     buildInfo->setPayloadUid(payloadUid);
     buildInfo->setTotalBytes(payload.size());
