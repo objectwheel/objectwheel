@@ -227,6 +227,8 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
         BuildInfo* buildInfo = m_buildInfos.takeAt(row + i);
+        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        m_payloadRelay->cancelDownload(buildInfo->payloadUid());
         if (buildInfo->state() != Finished && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
@@ -241,6 +243,8 @@ void BuildModel::clear()
     beginResetModel();
     for (int i = 0; i < m_buildInfos.size(); ++i) {
         BuildInfo* buildInfo = m_buildInfos.at(i);
+        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        m_payloadRelay->cancelDownload(buildInfo->payloadUid());
         if (buildInfo->state() != Finished && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
@@ -333,6 +337,10 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Server failure"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        if (buildInfo->state() == Uploading)
+            m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        else
+            m_payloadRelay->cancelDownload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -340,6 +348,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Invalid request"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -347,6 +356,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Invalid user credential"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -354,6 +364,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Simultaneous build limit exceeded"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -417,6 +428,10 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Operation cancelled"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        if (buildInfo->state() == Uploading)
+            m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        else
+            m_payloadRelay->cancelDownload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -424,6 +439,10 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Operation timedout"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
+        if (buildInfo->state() == Uploading)
+            m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        else
+            m_payloadRelay->cancelDownload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
