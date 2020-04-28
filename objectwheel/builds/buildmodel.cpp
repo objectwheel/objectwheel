@@ -117,6 +117,9 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
     case Qt::DecorationRole:
         return QImage::fromData(buildInfo->request().value(QLatin1String("icon")).toByteArray());
 
+    case Identifier:
+        return buildInfo->identifier();
+
     case ButtonSize:
         return QSize(16, 16);
 
@@ -236,6 +239,16 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     endRemoveRows();
 
     return true;
+}
+
+QModelIndex BuildModel::indexFromIdentifier(const QString& identifier) const
+{
+    for (int i = 0; i < rowCount(); ++i) {
+        const QModelIndex& index = BuildModel::index(i, 0);
+        if (identifier == index.data(BuildModel::Identifier).toString())
+            return index;
+    }
+    return QModelIndex();
 }
 
 void BuildModel::clear()

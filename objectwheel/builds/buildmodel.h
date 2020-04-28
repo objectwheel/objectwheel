@@ -17,7 +17,8 @@ class BuildModel final : public QAbstractListModel
 
 public:
     enum BuildRoles {
-        ButtonSize = Qt::UserRole + 1,
+        Identifier = Qt::UserRole + 1,
+        ButtonSize,
         ErrorRole,
         StateRole,
         StatusRole,
@@ -52,6 +53,8 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
+
+    QModelIndex indexFromIdentifier(const QString& identifier) const;
 
 public slots:
     void clear();

@@ -46,6 +46,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
 
     const QSize& buttonSize = index.data(BuildModel::ButtonSize).toSize();
     auto model = static_cast<const BuildModel*>(index.model());
+    const QString& identifier = index.data(BuildModel::Identifier).toString();
 
     QPushButton* infoButton = nullptr;
     if (opt.widget == opt.view) {
@@ -57,7 +58,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
         infoButton->setFixedSize(buttonSize);
         infoButton->setToolTip(tr("Show details"));
         connect(infoButton, &QPushButton::clicked,
-                this, [=] { emit infoButtonClicked(index); });
+                this, [=] { emit infoButtonClicked(model->indexFromIdentifier(identifier)); });
     }
 
     auto deleteButton = new QPushButton;
@@ -68,7 +69,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     deleteButton->setFixedSize(buttonSize);
     deleteButton->setToolTip(tr("Delete"));
     connect(deleteButton, &QPushButton::clicked, this,
-            [=] { emit deleteButtonClicked(index); });
+            [=] { emit deleteButtonClicked(model->indexFromIdentifier(identifier)); });
 
     auto openFolderButton = new QPushButton;
     openFolderButton->setFocusPolicy(Qt::StrongFocus);
@@ -79,10 +80,10 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     openFolderButton->setEnabled(false);
     openFolderButton->setToolTip(tr("Show in folder"));
     connect(openFolderButton, &QPushButton::clicked, this,
-            [=] { emit openFolderButtonClicked(index); });
+            [=] { emit openFolderButtonClicked(model->indexFromIdentifier(identifier)); });
     connect(model, &BuildModel::downloadFinished,
             openFolderButton, [=] (const QModelIndex& i) {
-        if (i == index)
+        if (i.data(BuildModel::Identifier).toString() == identifier)
             openFolderButton->setEnabled(true);
     });
 

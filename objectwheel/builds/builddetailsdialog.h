@@ -17,22 +17,23 @@ public:
     explicit BuildDetailsDialog(const QAbstractItemView* view, QWidget* parent = nullptr);
     ~BuildDetailsDialog() override;
 
-    const QModelIndex& index() const;
-    void setIndex(const QModelIndex& index);
+    QString identifier() const;
+    void setIdentifier(const QString& identifier);
 
 private slots:
+    void highlight(int begin);
     void onModelReset();
     void onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last);
     void onDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
 
 private:
-    void highlight(int begin);
+    QModelIndex index() const;
 
 private:
     const QAbstractItemView* m_view;
     DownloadDetailsWidget* m_downloadDetailsWidget;
     QPlainTextEdit* m_detailsTextEdit;
-    QModelIndex m_index;
+    QString m_identifier;
 };
 
 #endif // BUILDDETAILSDIALOG_H

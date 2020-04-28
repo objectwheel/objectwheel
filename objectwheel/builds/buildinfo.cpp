@@ -1,5 +1,6 @@
 #include <buildinfo.h>
 #include <buildmodel.h>
+#include <hashfactory.h>
 
 #include <QFile>
 #include <QStandardPaths>
@@ -58,6 +59,7 @@ static QJsonObject handleMap(const QCborMap& map)
 QStringList BuildInfo::s_paths;
 
 BuildInfo::BuildInfo(const QCborMap& request, QObject* parent) : QObject(parent)
+  , m_identifier(HashFactory::generate())
   , m_request(request)
   , m_errorFlag(false)
   , m_speed(0)
@@ -94,14 +96,9 @@ BuildInfo::~BuildInfo()
     s_paths.removeOne(m_path.toLower());
 }
 
-QString BuildInfo::uid() const
+QString BuildInfo::identifier() const
 {
-    return m_uid;
-}
-
-void BuildInfo::setUid(const QString& uid)
-{
-    m_uid = uid;
+    return m_identifier;
 }
 
 const QCborMap& BuildInfo::request() const
@@ -117,6 +114,16 @@ const QString& BuildInfo::path() const
 QList<BuildInfo::Block>& BuildInfo::recentBlocks()
 {
     return m_recentBlocks;
+}
+
+QString BuildInfo::uid() const
+{
+    return m_uid;
+}
+
+void BuildInfo::setUid(const QString& uid)
+{
+    m_uid = uid;
 }
 
 bool BuildInfo::hasError() const

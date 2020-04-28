@@ -20,6 +20,7 @@ public:
     explicit BuildInfo(const QCborMap& request, QObject* parent = nullptr);
     ~BuildInfo() override;
 
+    QString identifier() const;
     const QCborMap& request() const;
     const QString& path() const;
     QList<Block>& recentBlocks();
@@ -55,6 +56,7 @@ public:
 
 private:
     static QStringList s_paths;
+    const QString m_identifier;
     const QCborMap m_request;
     QString m_uid;
     QString m_path;

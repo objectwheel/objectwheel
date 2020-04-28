@@ -41,7 +41,7 @@ DownloadController::DownloadController(DownloadWidget* downloadWidget, QObject* 
 
 void DownloadController::onInfoButtonClick(const QModelIndex& index) const
 {
-    m_buildDetailsDialog->setIndex(index);
+    m_buildDetailsDialog->setIdentifier(index.data(BuildModel::Identifier).toString());
     m_buildDetailsDialog->exec();
 }
 

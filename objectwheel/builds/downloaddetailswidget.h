@@ -12,8 +12,8 @@ public:
     explicit DownloadDetailsWidget(const QAbstractItemView* view, QWidget* parent = nullptr);
     ~DownloadDetailsWidget() override;
 
-    const QModelIndex& index() const;
-    void setIndex(const QModelIndex& index);
+    QString identifier() const;
+    void setIdentifier(const QString& identifier);
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
@@ -24,6 +24,9 @@ private slots:
     void onDataChange(const QModelIndex& topLeft, const QModelIndex& bottomRight, const QVector<int>& roles);
 
 private:
+    QModelIndex index() const;
+
+private:
     void resizeEvent(QResizeEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
 
@@ -32,7 +35,7 @@ private:
 
 private:
     const QAbstractItemView* m_view;
-    QModelIndex m_index;
+    QString m_identifier;
     QWidget* m_editor;
 };
 

@@ -1,4 +1,5 @@
 #include <downloaddetailswidget.h>
+#include <buildmodel.h>
 #include <QPainter>
 
 DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWidget* parent) : QWidget(parent)
@@ -15,25 +16,25 @@ DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWid
 
 DownloadDetailsWidget::~DownloadDetailsWidget()
 {
-    setIndex(QModelIndex());
+    setIdentifier(QString());
 }
 
-const QModelIndex& DownloadDetailsWidget::index() const
+QString DownloadDetailsWidget::identifier() const
 {
-    return m_index;
+    return m_identifier;
 }
 
-void DownloadDetailsWidget::setIndex(const QModelIndex& index)
+void DownloadDetailsWidget::setIdentifier(const QString& identifier)
 {
-    if (m_index != index) {
-        if (m_index.isValid())
-            m_view->itemDelegate()->destroyEditor(m_editor, m_index);
+    if (m_identifier != identifier) {
+        if (index().isValid())
+            m_view->itemDelegate()->destroyEditor(m_editor, index());
 
-        m_index = index;
+        m_identifier = identifier;
 
-        if (m_index.isValid()) {
-            m_editor = m_view->itemDelegate()->createEditor(this, viewOptions(), m_index);
-            m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
+        if (index().isValid()) {
+            m_editor = m_view->itemDelegate()->createEditor(this, viewOptions(), index());
+            m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), index());
         }
 
         updateGeometry();
@@ -48,19 +49,19 @@ QSize DownloadDetailsWidget::sizeHint() const
 
 QSize DownloadDetailsWidget::minimumSizeHint() const
 {
-    return m_view->itemDelegate()->sizeHint(viewOptions(), m_index);
+    return m_view->itemDelegate()->sizeHint(viewOptions(), index());
 }
 
 void DownloadDetailsWidget::onModelReset()
 {
-    setIndex(QModelIndex());
+    setIdentifier(QString());
 }
 
-void DownloadDetailsWidget::onRowsAboutToBeRemoved(const QModelIndex& parent, int first, int last)
+void DownloadDetailsWidget::onRowsAboutToBeRemoved(const QModelIndex&, int first, int last)
 {
     for (; first <= last; ++first) {
-        if (m_index == m_view->model()->index(first, 0, parent)) {
-            setIndex(QModelIndex());
+        if (first == index().row()) {
+            setIdentifier(QString());
             break;
         }
     }
@@ -70,26 +71,31 @@ void DownloadDetailsWidget::onDataChange(const QModelIndex& topLeft, const QMode
                                          const QVector<int>& /*roles*/)
 {
     Q_ASSERT(topLeft == bottomRight);
-    if (m_index == topLeft) {
-        m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
+    if (index() == topLeft) {
+        m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), index());
         updateGeometry();
         update();
     }
+}
+
+QModelIndex DownloadDetailsWidget::index() const
+{
+    return static_cast<BuildModel*>(m_view->model())->indexFromIdentifier(m_identifier);
 }
 
 void DownloadDetailsWidget::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
 
-    if (m_index.isValid())
-        m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), m_index);
+    if (index().isValid())
+        m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), index());
 }
 
 void DownloadDetailsWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    if (m_index.isValid()) {
-        m_view->itemDelegate()->paint(&painter, viewOptions(), m_index);
+    if (index().isValid()) {
+        m_view->itemDelegate()->paint(&painter, viewOptions(), index());
     } else {
         painter.setPen(QColor(0, 0, 0, 130));
         painter.drawText(rect(), tr("No builds"), Qt::AlignVCenter | Qt::AlignHCenter);
