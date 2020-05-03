@@ -27,6 +27,9 @@ public:
     explicit PayloadRelay(int payloadSymbol, int payloadAckSymbol, QObject* parent = nullptr);
     ~PayloadRelay() override;
 
+    bool hasUpload(const QString& uid) const;
+    bool hasDownload(const QString& uid) const;
+
     int timeout() const;
     void setTimeout(int timeout);
 

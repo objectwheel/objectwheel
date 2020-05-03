@@ -18,6 +18,24 @@ PayloadRelay::~PayloadRelay()
     qDeleteAll(m_downloads.cbegin(), m_downloads.cend());
 }
 
+bool PayloadRelay::hasUpload(const QString& uid) const
+{
+    for (const Payload* payload : qAsConst(m_uploads)) {
+        if (payload->uid == uid)
+            return true;
+    }
+    return false;
+}
+
+bool PayloadRelay::hasDownload(const QString& uid) const
+{
+    for (const Payload* payload : qAsConst(m_downloads)) {
+        if (payload->uid == uid)
+            return true;
+    }
+    return false;
+}
+
 int PayloadRelay::timeout() const
 {
     return m_timeout;
