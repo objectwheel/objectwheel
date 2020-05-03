@@ -72,7 +72,7 @@ BuildInfo::BuildInfo(const QCborMap& request, QObject* parent) : QObject(parent)
     const QString& basePath = QStandardPaths::writableLocation(QStandardPaths::DownloadLocation);
     if (!suffix.isEmpty() && !baseName.isEmpty() && !basePath.isEmpty()) {
         QString fullPath = basePath + QLatin1Char('/') + baseName + suffix;
-        if (!QFile::exists(fullPath)) {
+        if (!QFile::exists(fullPath) && !s_paths.contains(fullPath.toLower())) {
             m_path = fullPath;
             s_paths.append(m_path.toLower());
         } else {

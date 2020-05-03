@@ -99,7 +99,7 @@ QString PayloadRelay::scheduleUpload(QWebSocket* socket, const QByteArray& data)
     connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutUpload(payload); });
     connect(socket, &QWebSocket::destroyed, this, [=] { cancelUpload(payload->uid); });
     connect(socket, &QWebSocket::disconnected, this, [=] { cancelUpload(payload->uid); });
-    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived, Qt::QueuedConnection);
+    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived);
     QTimer::singleShot(100, this, [=] { if (m_uploads.contains(payload)) uploadNextAvailableChunk(payload); });
 
     return payload->uid;
@@ -126,7 +126,7 @@ void PayloadRelay::registerDownload(QWebSocket* socket, const QString& uid)
     connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutDownload(payload); });
     connect(socket, &QWebSocket::destroyed, this, [=] { cancelDownload(payload->uid); });
     connect(socket, &QWebSocket::disconnected, this, [=] { cancelDownload(payload->uid); });
-    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived, Qt::QueuedConnection);
+    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived);
 }
 
 void PayloadRelay::cancelUpload(const QString& uid)
@@ -156,6 +156,7 @@ void PayloadRelay::uploadNextAvailableChunk(Payload* payload)
                                            payload->uid,
                                            payload->buffer.size(),
                                            payload->buffer.read(m_uploadChunkSize)));
+    payload->socket->flush();
 
     emit bytesUploaded(payload->uid, payload->buffer.pos());
 
@@ -181,6 +182,7 @@ void PayloadRelay::downloadNextAvailableChunk(Payload* payload) const
                                            m_payloadAckSymbol,
                                            payload->uid,
                                            true));
+    payload->socket->flush();
 }
 
 void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)

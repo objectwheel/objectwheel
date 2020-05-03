@@ -12,7 +12,7 @@ class PayloadRelay final : public QObject
 
     enum {
         DEFAULT_TIMEOUT = 8000,     /* msec */
-        DEFAULT_CHUNK_SIZE = 102400 /* 100K */
+        DEFAULT_CHUNK_SIZE = 256000 /* 250K */
     };
 
     struct Payload {
