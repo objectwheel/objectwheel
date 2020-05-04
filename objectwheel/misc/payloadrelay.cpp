@@ -150,6 +150,7 @@ void PayloadRelay::uploadNextAvailableChunk(Payload* payload)
     if (payload->buffer.atEnd())
         return;
 
+    const int oldPos = payload->buffer.pos();
     payload->timeoutTimer.start();
     payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
                                            m_payloadSymbol,
@@ -158,7 +159,7 @@ void PayloadRelay::uploadNextAvailableChunk(Payload* payload)
                                            payload->buffer.read(m_uploadChunkSize)));
     payload->socket->flush();
 
-    emit bytesUploaded(payload->uid, payload->buffer.pos());
+    emit bytesUploaded(payload->uid, payload->buffer.pos() - oldPos);
 
     if (payload->buffer.atEnd()) {
         const QString uid = payload->uid;

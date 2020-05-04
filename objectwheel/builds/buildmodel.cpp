@@ -306,7 +306,7 @@ void BuildModel::start(BuildInfo* buildInfo)
 
     buildInfo->setPayloadUid(payloadUid);
     buildInfo->setTotalBytes(payload.size());
-    buildInfo->addStatus(tr("Uploading the project..."));
+    buildInfo->addStatus(tr("Sending the request..."));
 
     emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, TotalBytesRole });
 }
@@ -386,7 +386,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QString payloadUid;
         UtilityFunctions::pullCbor(data, command, status, payloadUid, uid);
         buildInfo->setUid(uid);
-        buildInfo->addStatus(tr("Processing the request..."));
+        buildInfo->addStatus(tr("Request succeed..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
     } break;
 
@@ -507,7 +507,13 @@ void BuildModel::onPayloadBytesUploaded(const QString& uid, int bytes)
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
 
-        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + int(bytes));
+        if (buildInfo->transferredBytes() > 0
+                && buildInfo->transferredBytes() <= m_payloadRelay->uploadChunkSize()) {
+            buildInfo->addStatus(tr("Uploading the project..."));
+            changedRoles.unite({ StatusRole, Qt::StatusTipRole });
+        }
+
+        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + bytes);
         changedRoles.unite({ TransferredBytesRole });
 
         calculateTransferRate(buildInfo, bytes, changedRoles);
@@ -522,8 +528,9 @@ void BuildModel::onPayloadBytesDownloaded(const QString& payloadUid, const QByte
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
 
-        if (buildInfo->totalBytes() == 0) {
+        if (buildInfo->recentBlocks().isEmpty()) {
             buildInfo->addStatus(tr("Downloading..."));
+            buildInfo->setTransferredBytes(0);
             buildInfo->setTotalBytes(totalBytes);
             changedRoles.unite({ StatusRole, Qt::StatusTipRole, TotalBytesRole });
         }
@@ -545,14 +552,10 @@ void BuildModel::onPayloadUploadFinished(const QString& payloadUid)
 
         buildInfo->addStatus(tr("Waiting the server to start..."));
         buildInfo->recentBlocks().clear();
-        buildInfo->setSpeed(0);
-        buildInfo->setTotalBytes(0);
-        buildInfo->setTransferredBytes(0);
-        buildInfo->setTimeLeft(QTime());
         buildInfo->setState(Downloading);
 
         emit uploadFinished(index);
-        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, SpeedRole, TotalBytesRole, TransferredBytesRole, TimeLeftRole, StateRole });
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
     }
 }
 
