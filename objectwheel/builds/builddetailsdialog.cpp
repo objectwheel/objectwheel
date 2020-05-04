@@ -125,3 +125,14 @@ QModelIndex BuildDetailsDialog::index() const
 {
     return static_cast<BuildModel*>(m_view->model())->indexFromIdentifier(m_identifier);
 }
+
+void BuildDetailsDialog::showEvent(QShowEvent* event)
+{
+    QDialog::showEvent(event);
+    // For some reason (probably a Qt bug) the text edit
+    // sometimes stops updating its geometry and a blank
+    // space shows up at the bottom, so we force a new
+    // re-evaluation for the geometry of the text edit
+    m_detailsTextEdit->resize(200, 200);
+    layout()->invalidate();
+}

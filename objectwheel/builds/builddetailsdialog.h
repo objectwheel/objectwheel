@@ -28,6 +28,7 @@ private slots:
 
 private:
     QModelIndex index() const;
+    void showEvent(QShowEvent*) override;
 
 private:
     const QAbstractItemView* m_view;
