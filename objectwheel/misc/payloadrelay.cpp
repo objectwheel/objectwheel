@@ -4,11 +4,10 @@
 #include <QWebSocket>
 
 PayloadRelay::PayloadRelay(int payloadSymbol, int payloadAckSymbol, QObject* parent) : QObject(parent)
-  , m_payloadSymbol(payloadSymbol)
-  , m_payloadAckSymbol(payloadAckSymbol)
+  , PAYLOAD_SYMBOL(payloadSymbol)
+  , PAYLOAD_ACK_SYMBOL(payloadAckSymbol)
   , m_timeout(DEFAULT_TIMEOUT)
   , m_uploadChunkSize(DEFAULT_CHUNK_SIZE)
-  , m_downloadBuffered(true)
 {
 }
 
@@ -62,21 +61,6 @@ void PayloadRelay::setUploadChunkSize(int uploadChunkSize)
     m_uploadChunkSize = uploadChunkSize;
 }
 
-bool PayloadRelay::downloadBuffered() const
-{
-    return m_downloadBuffered;
-}
-
-void PayloadRelay::setDownloadBuffered(bool downloadBuffered)
-{
-    if (m_downloadBuffered != downloadBuffered) {
-        if (m_downloads.isEmpty())
-            m_downloadBuffered = downloadBuffered;
-        else
-            qWarning("PayloadRelay: Cannot set downloadBuffered while download in progress");
-    }
-}
-
 QString PayloadRelay::scheduleUpload(QWebSocket* socket, const QByteArray& data)
 {
     if (data.isEmpty())
@@ -117,7 +101,6 @@ void PayloadRelay::registerDownload(QWebSocket* socket, const QString& uid)
         return;
 
     auto payload = new Payload;
-    payload->receivedBytes = 0;
     payload->uid = uid;
     payload->socket = socket;
     payload->timeoutTimer.start(m_timeout);
@@ -153,9 +136,9 @@ void PayloadRelay::uploadNextAvailableChunk(Payload* payload)
     const int oldPos = payload->buffer.pos();
     payload->timeoutTimer.start();
     payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
-                                           m_payloadSymbol,
+                                           PAYLOAD_SYMBOL,
                                            payload->uid,
-                                           payload->buffer.size(),
+                                           payload->buffer.data().size(),
                                            payload->buffer.read(m_uploadChunkSize)));
     payload->socket->flush();
 
@@ -176,11 +159,11 @@ void PayloadRelay::downloadNextAvailableChunk(Payload* payload) const
     if (payload->socket->state() != QAbstractSocket::ConnectedState)
         return;
 
-    Q_ASSERT(!m_downloadBuffered || (payload->buffer.buffer().capacity() > payload->buffer.pos()));
+    Q_ASSERT(payload->buffer.buffer().capacity() > payload->buffer.pos());
 
     payload->timeoutTimer.start();
     payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
-                                           m_payloadAckSymbol,
+                                           PAYLOAD_ACK_SYMBOL,
                                            payload->uid,
                                            true));
     payload->socket->flush();
@@ -191,30 +174,26 @@ void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)
     int symbol = 0;
     UtilityFunctions::pullCbor(message, symbol);
 
-    if (symbol == m_payloadSymbol) {
+    if (symbol == PAYLOAD_SYMBOL) {
         QString uid;
         int totalBytes;
         QByteArray chunk;
         UtilityFunctions::pullCbor(message, symbol, uid, totalBytes, chunk);
 
-        if (auto payload = downloadPayloadFromUid(uid)) {
-            if (m_downloadBuffered) {
-                // First chunk
-                if (!payload->buffer.isOpen()) {
-                    payload->buffer.buffer().reserve(totalBytes);
-                    payload->buffer.open(QBuffer::WriteOnly);
-                }
-
-                // Write data into the buffer
-                payload->buffer.write(chunk);
+        if (Payload* payload = downloadPayloadFromUid(uid)) {
+            // First chunk
+            if (!payload->buffer.isOpen()) {
+                payload->buffer.buffer().reserve(totalBytes);
+                payload->buffer.open(QBuffer::WriteOnly);
             }
-            payload->receivedBytes += chunk.size();
+
+            // Write data into the buffer
+            payload->buffer.write(chunk);
             emit bytesDownloaded(uid, chunk, totalBytes);
 
             // Last chunk
-            if (payload->receivedBytes >= totalBytes) {
-                if (m_downloadBuffered)
-                    payload->buffer.close();
+            if (payload->buffer.pos() >= totalBytes) {
+                payload->buffer.close();
                 const QByteArray data = payload->buffer.data();
                 cleanDownload(payload);
                 emit downloadFinished(uid, data);
@@ -224,7 +203,7 @@ void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)
         } else {
             qWarning("PayloadRelay: Unknown payload arrived");
         }
-    } else if (symbol == m_payloadAckSymbol) {
+    } else if (symbol == PAYLOAD_ACK_SYMBOL) {
         QString uid;
         bool accepted = false;
         UtilityFunctions::pullCbor(message, symbol, uid, accepted);
@@ -232,7 +211,7 @@ void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)
             if (Payload* payload = uploadPayloadFromUid(uid))
                 uploadNextAvailableChunk(payload);
             else
-                qWarning("PayloadRelay: Upload requested for unknown payload uid");
+                qWarning("PayloadRelay: Upload requested for unknown payload uid: %s", uid.toUtf8().constData());
         } else {
             cancelUpload(uid);
         }

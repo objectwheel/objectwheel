@@ -16,7 +16,6 @@ class PayloadRelay final : public QObject
     };
 
     struct Payload {
-        int receivedBytes;
         QString uid;
         QBuffer buffer;
         QWebSocket* socket;
@@ -36,9 +35,6 @@ public:
 
     int uploadChunkSize() const;
     void setUploadChunkSize(int uploadChunkSize);
-
-    bool downloadBuffered() const;
-    void setDownloadBuffered(bool downloadBuffered);
 
     void registerDownload(QWebSocket* socket, const QString& uid);
     QString scheduleUpload(QWebSocket* socket, const QByteArray& data);
@@ -70,11 +66,11 @@ signals:
     void bytesDownloaded(const QString& uid, const QByteArray& chunk, int totalBytes);
 
 private:
-    const int m_payloadSymbol;
-    const int m_payloadAckSymbol;
+    const int PAYLOAD_SYMBOL;
+    const int PAYLOAD_ACK_SYMBOL;
+
     int m_timeout;
     int m_uploadChunkSize;
-    bool m_downloadBuffered;
     QVector<Payload*> m_uploads;
     QVector<Payload*> m_downloads;
 };
