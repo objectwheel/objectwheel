@@ -49,6 +49,7 @@ private slots:
     void onBinaryMessageReceived(const QByteArray& message);
 
 private:
+    int socketCount(QWebSocket* socket) const;
     void timeoutUpload(Payload* payload);
     void timeoutDownload(Payload* payload);
     void cleanUpload(Payload* payload);
