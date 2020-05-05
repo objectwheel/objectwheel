@@ -21,6 +21,7 @@ class PayloadRelay final : public QObject
         QBuffer buffer;
         QWebSocket* socket;
         QTimer timeoutTimer;
+        QVector<QMetaObject::Connection> connections;
     };
 
 public:

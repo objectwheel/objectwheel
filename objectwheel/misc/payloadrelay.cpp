@@ -96,10 +96,10 @@ QString PayloadRelay::scheduleUpload(QWebSocket* socket, const QByteArray& data)
     payload->timeoutTimer.start(m_timeout);
     m_uploads.append(payload);
 
-    connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutUpload(payload); });
-    connect(socket, &QWebSocket::destroyed, this, [=] { cancelUpload(payload->uid); });
-    connect(socket, &QWebSocket::disconnected, this, [=] { cancelUpload(payload->uid); });
-    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived);
+    payload->connections.append(connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutUpload(payload); }));
+    payload->connections.append(connect(socket, &QWebSocket::destroyed, this, [=] { cancelUpload(payload->uid); }));
+    payload->connections.append(connect(socket, &QWebSocket::disconnected, this, [=] { cancelUpload(payload->uid); }));
+    payload->connections.append(connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived));
     QTimer::singleShot(100, this, [=] { if (m_uploads.contains(payload)) uploadNextAvailableChunk(payload); });
 
     return payload->uid;
@@ -123,10 +123,10 @@ void PayloadRelay::registerDownload(QWebSocket* socket, const QString& uid)
     payload->timeoutTimer.start(m_timeout);
     m_downloads.append(payload);
 
-    connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutDownload(payload); });
-    connect(socket, &QWebSocket::destroyed, this, [=] { cancelDownload(payload->uid); });
-    connect(socket, &QWebSocket::disconnected, this, [=] { cancelDownload(payload->uid); });
-    connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived);
+    payload->connections.append(connect(&payload->timeoutTimer, &QTimer::timeout, this, [=] { timeoutDownload(payload); }));
+    payload->connections.append(connect(socket, &QWebSocket::destroyed, this, [=] { cancelDownload(payload->uid); }));
+    payload->connections.append(connect(socket, &QWebSocket::disconnected, this, [=] { cancelDownload(payload->uid); }));
+    payload->connections.append(connect(socket, &QWebSocket::binaryMessageReceived, this, &PayloadRelay::onBinaryMessageReceived));
 }
 
 void PayloadRelay::cancelUpload(const QString& uid)
@@ -256,7 +256,8 @@ void PayloadRelay::timeoutDownload(Payload* payload)
 void PayloadRelay::cleanUpload(Payload* payload)
 {
     if (payload) {
-        payload->socket->disconnect(this);
+        for (const QMetaObject::Connection& connection : qAsConst(payload->connections))
+            QObject::disconnect(connection);
         m_uploads.removeOne(payload);
         delete payload;
     }
@@ -265,7 +266,8 @@ void PayloadRelay::cleanUpload(Payload* payload)
 void PayloadRelay::cleanDownload(Payload* payload)
 {
     if (payload) {
-        payload->socket->disconnect(this);
+        for (const QMetaObject::Connection& connection : qAsConst(payload->connections))
+            QObject::disconnect(connection);
         m_downloads.removeOne(payload);
         delete payload;
     }
