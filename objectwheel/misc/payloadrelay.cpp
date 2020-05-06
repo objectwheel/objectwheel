@@ -143,6 +143,7 @@ void PayloadRelay::uploadNextAvailableChunk(Payload* payload)
     payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
                                            PAYLOAD_SYMBOL,
                                            payload->uid,
+                                           false,
                                            payload->buffer.data().size(),
                                            payload->buffer.read(m_uploadChunkSize)));
     payload->socket->flush();
@@ -170,7 +171,7 @@ void PayloadRelay::downloadNextAvailableChunk(Payload* payload) const
     payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
                                            PAYLOAD_ACK_SYMBOL,
                                            payload->uid,
-                                           true));
+                                           false));
     payload->socket->flush();
 }
 
@@ -181,44 +182,49 @@ void PayloadRelay::onBinaryMessageReceived(const QByteArray& message)
 
     if (symbol == PAYLOAD_SYMBOL) {
         QString uid;
+        bool cancel = false;
         int totalBytes;
         QByteArray chunk;
-        UtilityFunctions::pullCbor(message, symbol, uid, totalBytes, chunk);
+        UtilityFunctions::pullCbor(message, symbol, uid, cancel, totalBytes, chunk);
 
-        if (Payload* payload = downloadPayloadFromUid(uid)) {
-            // First chunk
-            if (!payload->buffer.isOpen()) {
-                payload->buffer.buffer().reserve(totalBytes);
-                payload->buffer.open(QBuffer::WriteOnly);
-            }
-
-            // Write data into the buffer
-            payload->buffer.write(chunk);
-            emit bytesDownloaded(uid, chunk, totalBytes);
-
-            // Last chunk
-            if (payload->buffer.pos() >= totalBytes) {
-                payload->buffer.close();
-                const QByteArray data = payload->buffer.data();
-                cleanDownload(payload);
-                emit downloadFinished(uid, data);
-            } else {
-                downloadNextAvailableChunk(payload);
-            }
+        if (cancel) {
+            cancelDownload(uid);
         } else {
-            qWarning("PayloadRelay: Unknown payload arrived");
+            if (Payload* payload = downloadPayloadFromUid(uid)) {
+                // First chunk
+                if (!payload->buffer.isOpen()) {
+                    payload->buffer.buffer().reserve(totalBytes);
+                    payload->buffer.open(QBuffer::WriteOnly);
+                }
+
+                // Write data into the buffer
+                payload->buffer.write(chunk);
+                emit bytesDownloaded(uid, chunk, totalBytes);
+
+                // Last chunk
+                if (payload->buffer.pos() >= totalBytes) {
+                    payload->buffer.close();
+                    const QByteArray data = payload->buffer.data();
+                    cleanDownload(payload);
+                    emit downloadFinished(uid, data);
+                } else {
+                    downloadNextAvailableChunk(payload);
+                }
+            } else {
+                qWarning("PayloadRelay: Unknown payload arrived");
+            }
         }
     } else if (symbol == PAYLOAD_ACK_SYMBOL) {
         QString uid;
-        bool accepted = false;
-        UtilityFunctions::pullCbor(message, symbol, uid, accepted);
-        if (accepted) {
+        bool cancel = false;
+        UtilityFunctions::pullCbor(message, symbol, uid, cancel);
+        if (cancel) {
+            cancelUpload(uid);
+        } else {
             if (Payload* payload = uploadPayloadFromUid(uid))
                 uploadNextAvailableChunk(payload);
             else
                 qWarning("PayloadRelay: Upload requested for unknown payload uid: %s", uid.toUtf8().constData());
-        } else {
-            cancelUpload(uid);
         }
     }
 }
@@ -258,6 +264,13 @@ void PayloadRelay::cleanUpload(Payload* payload)
             QObject::disconnect(connection);
         if (socketCount(payload->socket) == 1)
             payload->socket->disconnect(this);
+        if (payload->socket->state() == QAbstractSocket::ConnectedState) {
+            payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
+                                                   PAYLOAD_SYMBOL,
+                                                   payload->uid,
+                                                   true));
+            payload->socket->flush();
+        }
         m_uploads.removeOne(payload);
         delete payload;
     }
@@ -275,7 +288,7 @@ void PayloadRelay::cleanDownload(Payload* payload)
             payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
                                                    PAYLOAD_ACK_SYMBOL,
                                                    payload->uid,
-                                                   false));
+                                                   true));
             payload->socket->flush();
         }
         delete payload;
