@@ -271,6 +271,13 @@ void PayloadRelay::cleanDownload(Payload* payload)
         if (socketCount(payload->socket) == 1)
             payload->socket->disconnect(this);
         m_downloads.removeOne(payload);
+        if (payload->socket->state() == QAbstractSocket::ConnectedState) {
+            payload->socket->sendBinaryMessage(UtilityFunctions::pushCbor(
+                                                   PAYLOAD_ACK_SYMBOL,
+                                                   payload->uid,
+                                                   false));
+            payload->socket->flush();
+        }
         delete payload;
     }
 }
