@@ -386,7 +386,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QString payloadUid;
         UtilityFunctions::pullCbor(data, command, status, payloadUid, uid);
         buildInfo->setUid(uid);
-        buildInfo->addStatus(tr("Request succeed..."));
+        buildInfo->addStatus(tr("Uploading the project..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
     } break;
 
@@ -506,12 +506,6 @@ void BuildModel::onPayloadBytesUploaded(const QString& uid, int bytes)
         QSet<int> changedRoles;
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
-
-        if (buildInfo->transferredBytes() > 0
-                && buildInfo->transferredBytes() <= m_payloadRelay->uploadChunkSize()) {
-            buildInfo->addStatus(tr("Uploading the project..."));
-            changedRoles.unite({ StatusRole, Qt::StatusTipRole });
-        }
 
         buildInfo->setTransferredBytes(buildInfo->transferredBytes() + bytes);
         changedRoles.unite({ TransferredBytesRole });
