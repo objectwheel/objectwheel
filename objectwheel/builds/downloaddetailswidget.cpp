@@ -5,6 +5,8 @@
 DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWidget* parent) : QWidget(parent)
   , m_view(view)
 {
+    Q_ASSERT(m_view);
+    Q_ASSERT(m_view->model());
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
     connect(m_view->model(), &QAbstractItemModel::rowsAboutToBeRemoved,
             this, &DownloadDetailsWidget::onRowsAboutToBeRemoved);
@@ -27,12 +29,12 @@ QString DownloadDetailsWidget::identifier() const
 void DownloadDetailsWidget::setIdentifier(const QString& identifier)
 {
     if (m_identifier != identifier) {
-        if (index().isValid())
+        if (index().isValid() && m_view->itemDelegate())
             m_view->itemDelegate()->destroyEditor(m_editor, index());
 
         m_identifier = identifier;
 
-        if (index().isValid()) {
+        if (index().isValid() && m_view->itemDelegate()) {
             m_editor = m_view->itemDelegate()->createEditor(this, viewOptions(), index());
             m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), index());
         }
@@ -49,7 +51,7 @@ QSize DownloadDetailsWidget::sizeHint() const
 
 QSize DownloadDetailsWidget::minimumSizeHint() const
 {
-    return m_view->itemDelegate()->sizeHint(viewOptions(), index());
+    return m_view->itemDelegate() ? m_view->itemDelegate()->sizeHint(viewOptions(), index()) : QSize();
 }
 
 void DownloadDetailsWidget::onModelReset()
@@ -71,7 +73,7 @@ void DownloadDetailsWidget::onDataChange(const QModelIndex& topLeft, const QMode
                                          const QVector<int>& /*roles*/)
 {
     Q_ASSERT(topLeft == bottomRight);
-    if (index() == topLeft) {
+    if (index() == topLeft && m_view->itemDelegate()) {
         m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), index());
         updateGeometry();
         update();
@@ -80,21 +82,21 @@ void DownloadDetailsWidget::onDataChange(const QModelIndex& topLeft, const QMode
 
 QModelIndex DownloadDetailsWidget::index() const
 {
-    return static_cast<BuildModel*>(m_view->model())->indexFromIdentifier(m_identifier);
+    return m_view->model() ? static_cast<BuildModel*>(m_view->model())->indexFromIdentifier(m_identifier) : QModelIndex();
 }
 
 void DownloadDetailsWidget::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
 
-    if (index().isValid())
+    if (index().isValid() && m_view->itemDelegate())
         m_view->itemDelegate()->updateEditorGeometry(m_editor, viewOptions(), index());
 }
 
 void DownloadDetailsWidget::paintEvent(QPaintEvent*)
 {
     QPainter painter(this);
-    if (index().isValid()) {
+    if (index().isValid() && m_view->itemDelegate()) {
         m_view->itemDelegate()->paint(&painter, viewOptions(), index());
     } else {
         painter.setPen(QColor(0, 0, 0, 130));

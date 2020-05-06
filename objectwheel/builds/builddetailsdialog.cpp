@@ -32,6 +32,8 @@ BuildDetailsDialog::BuildDetailsDialog(const QAbstractItemView* view, QWidget* p
     m_detailsTextEdit->setFont(FontColorsSettings().toFont());
     UtilityFunctions::adjustFontPixelSize(m_detailsTextEdit, -2);
 
+    Q_ASSERT(m_view);
+    Q_ASSERT(m_view->model());
     connect(box, &QDialogButtonBox::rejected, this, &BuildDetailsDialog::reject);
     connect(m_view->model(), &QAbstractItemModel::rowsAboutToBeRemoved,
             this, &BuildDetailsDialog::onRowsAboutToBeRemoved);
@@ -123,7 +125,7 @@ void BuildDetailsDialog::onDataChange(const QModelIndex& topLeft, const QModelIn
 
 QModelIndex BuildDetailsDialog::index() const
 {
-    return static_cast<BuildModel*>(m_view->model())->indexFromIdentifier(m_identifier);
+    return m_view->model() ? static_cast<BuildModel*>(m_view->model())->indexFromIdentifier(m_identifier) : QModelIndex();
 }
 
 void BuildDetailsDialog::showEvent(QShowEvent* event)
