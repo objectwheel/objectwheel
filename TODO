@@ -1,3 +1,17 @@
+// Cloud Android Keystore Establishing
+// TODO: Make sure we warn user before selecting a keystore "warning uploading it to our servers"
+// TODO: Add "reset form" for signing too
+// TODO: Generate certificate
+// TODO: Test and check alias and keystore passwords
+// TODO: Show aliases
+// TODO: Set regexps too
+
+QRegularExpression("[^\\r\\n\\t\\f\\v ]") whitespace olayını tektipleştir UtilityFunctions aracılığıyla
+RegistrationApi tamamlanacak
+ProjectsWidget'de ki loading ve diğer tüm waitingspinner kullananlarda yukarı aşağı kayma problemleri giderilecek
+QStyle::SH_ItemView_PaintAlternatingRowColorsForEmptyArea bunu propertiespane için bi düşün dene
+APK'yı proje dosyasının bir hamlede değiştirilip, cracklenmesine karşı koru, executable kısım ile Project.rcc arasında organik bir bağ olsun
+
 Designer Core TODOs
 Attribitions Bölümü ekle ve şunlar için atıf ekle:
 - Built with Qt logosu
