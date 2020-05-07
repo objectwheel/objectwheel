@@ -5,7 +5,7 @@
 #include <signalwatcher.h>
 
 #ifdef Q_OS_MACOS
-#include <windowoperations.h>
+#  include <macoperations.h>
 #endif
 
 #include <QApplication>
@@ -45,9 +45,9 @@ int main(int argc, char *argv[])
 
 #ifdef Q_OS_MACOS // Show/hide dock icon
     if (argc > 1 && argv[1] == QString("capture"))
-        WindowOperations::setDockIconVisible(false);
+        MacOperations::setDockIconVisible(false);
     else
-        WindowOperations::setDockIconVisible(true);
+        MacOperations::setDockIconVisible(true);
 #endif
 
     QQmlApplicationEngine engine;

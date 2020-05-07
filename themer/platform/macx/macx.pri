@@ -7,5 +7,5 @@ OTHER_FILES += $$PWD/icon.icns
 QMAKE_INFO_PLIST = $$PWD/Info.plist
 QMAKE_LFLAGS += -Wl,-sectcreate,__TEXT,__info_plist,$$system_quote($$PWD/Info.plist)
 
-HEADERS += $$PWD/windowoperations.h
-SOURCES += $$PWD/windowoperations.mm
+HEADERS += $$PWD/macoperations.h
+SOURCES += $$PWD/macoperations.mm

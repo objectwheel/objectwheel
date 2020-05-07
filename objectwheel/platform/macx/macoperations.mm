@@ -1,10 +1,18 @@
-#include <windowoperations.h>
+#include <macoperations.h>
 
 #include <QMainWindow>
 
 #import <AppKit/AppKit.h>
 
-namespace WindowOperations {
+namespace MacOperations {
+
+void disableAppNap(const QString& reason)
+{
+    auto processInfo = [NSProcessInfo processInfo];
+    if ([processInfo respondsToSelector: @selector(beginActivityWithOptions:reason:)]) {
+        [processInfo beginActivityWithOptions: NSActivityBackground reason: reason.toNSString()];
+    }
+}
 
 void removeTitleBar(QMainWindow* mainWindow)
 {

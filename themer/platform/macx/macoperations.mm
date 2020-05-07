@@ -1,7 +1,7 @@
-#include <windowoperations.h>
+#include <macoperations.h>
 #import <AppKit/AppKit.h>
 
-namespace WindowOperations {
+namespace MacOperations {
 
 void setDockIconVisible(bool visible)
 {

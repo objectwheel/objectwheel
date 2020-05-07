@@ -60,7 +60,7 @@
 #include <QTimer>
 
 #if defined(Q_OS_MACOS)
-#include <windowoperations.h>
+#  include <macoperations.h>
 #endif
 
 MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
@@ -586,7 +586,7 @@ void MainWindow::removeTitleBar()
 #if defined(Q_OS_MACOS)
     setUnifiedTitleAndToolBarOnMac(true); // CustomizeWindowHint required github.com/qt/qtbase/commit/35da2b8
     setWindowFlags((windowFlags() & ~Qt::WindowFullscreenButtonHint) | Qt::CustomizeWindowHint);
-    WindowOperations::removeTitleBar(this);
+    MacOperations::removeTitleBar(this);
 #else
     // TODO
 #endif

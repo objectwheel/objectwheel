@@ -1,9 +1,9 @@
 #ifndef SERVERMANAGER_H
 #define SERVERMANAGER_H
 
-#include <QWebSocket>
 #include <QBasicTimer>
-#include <QDataStream>
+#include <QElapsedTimer>
+#include <QWebSocket>
 #include <utilityfunctions.h>
 
 class ServerManager final : public QWebSocket
@@ -14,8 +14,8 @@ class ServerManager final : public QWebSocket
     friend class ApplicationCore;
 
     enum {
-        CONNECTION_RETRY_TIMEOUT = 4000,
-        CONNECTION_DROP_TIMEOUT = 9000
+        PING_INTERVAL = 3000,
+        ACTIVITY_THRESHOLD = 7000
     };
 
 public:
@@ -64,8 +64,6 @@ public:
     }
 
 private slots:
-    void onPong();
-    void startOrRestartConnectionDropTimer();
     void onError(QAbstractSocket::SocketError);
     void onSslErrors(const QList<QSslError>&);
 
@@ -78,10 +76,9 @@ private:
 
 private:
     static ServerManager* s_instance;
-    static bool s_pong;
     static QUrl s_host;
-    static QBasicTimer s_connectionRetryTimer;
-    static QBasicTimer s_connectionDropTimer;
+    static QBasicTimer s_pingTimer;
+    static QElapsedTimer s_activityTimer;
 };
 
 #endif // SERVERMANAGER_H

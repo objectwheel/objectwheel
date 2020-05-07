@@ -9,13 +9,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.objectwheel.Themer</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>2.9.742.gebcbc05d</string>
+	<string>2.9.759.g27ee1fbf</string>
 	<key>CFBundleName</key>
 	<string>Themer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.9.742.gebcbc05d</string>
+	<string>2.9.759.g27ee1fbf</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12</string>
 	<key>LSUIElement</key>

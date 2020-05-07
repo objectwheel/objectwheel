@@ -44,6 +44,10 @@
 #include <coreplugin/coreconstants.h>
 #include <coreplugin/themechooser.h>
 
+#if defined(Q_OS_MACOS)
+#  include <macoperations.h>
+#endif
+
 QSettings* ApplicationCore::s_settings = nullptr;
 GeneralSettings* ApplicationCore::s_generalSettings = nullptr;
 DesignerSettings* ApplicationCore::s_designerSettings = nullptr;
@@ -111,6 +115,13 @@ ApplicationCore::ApplicationCore()
     splash->showMessage(QObject::tr("Initializing..."));
     splash->show();
 
+    // App Nap feature of macOS prevents timers to accurately emit signals at the right time
+    // when the application minimized or working in the background. That especially affects
+    // the disconnection detection of the ServerManager
+#if defined(Q_OS_MACOS)
+    MacOperations::disableAppNap(QLatin1String("Listening to server"));
+#endif
+
     s_modeManager = new ModeManager;
     s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)));
     s_registrationApiManager = new RegistrationApiManager;
@@ -136,10 +147,10 @@ ApplicationCore::ApplicationCore()
     s_windowManager = new WindowManager;
     s_menuManager = new MenuManager;
 
-//  FIXME  QObject::connect(s_userManager, &UserManager::started,
-//                     &ApplicationCore::onUserSessionStart);
-//    QObject::connect(s_userManager, &UserManager::aboutToStop,
-//                     &ApplicationCore::onUserSessionStop);
+    //  FIXME  QObject::connect(s_userManager, &UserManager::started,
+    //                     &ApplicationCore::onUserSessionStart);
+    //    QObject::connect(s_userManager, &UserManager::aboutToStop,
+    //                     &ApplicationCore::onUserSessionStop);
     QObject::connect(s_projectManager, &ProjectManager::started,
                      &ApplicationCore::onProjectStart);
     QObject::connect(s_projectManager, &ProjectManager::stopped,
