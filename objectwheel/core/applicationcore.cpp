@@ -29,6 +29,7 @@
 #include <modemanager.h>
 #include <splashscreen.h>
 #include <signalwatcher.h>
+#include <updatemanager.h>
 
 #include <QToolTip>
 #include <QScreen>
@@ -54,6 +55,7 @@ DesignerSettings* ApplicationCore::s_designerSettings = nullptr;
 CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 ModeManager* ApplicationCore::s_modeManager = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
+UpdateManager* ApplicationCore::s_updateManager = nullptr;
 RegistrationApiManager* ApplicationCore::s_registrationApiManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlRenderingManager* ApplicationCore::s_controlRenderingManager = nullptr;
@@ -124,6 +126,7 @@ ApplicationCore::ApplicationCore()
 
     s_modeManager = new ModeManager;
     s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)));
+    s_updateManager = new UpdateManager;
     s_registrationApiManager = new RegistrationApiManager;
     s_userManager = new UserManager;
     s_controlRenderingManager = new ControlRenderingManager;
@@ -135,6 +138,12 @@ ApplicationCore::ApplicationCore()
     s_controlPropertyManager = new ControlPropertyManager;
     s_runManager = new RunManager;
     s_helpManager = new HelpManager;
+
+    QObject::connect(s_serverManager, &ServerManager::connected,
+                     s_updateManager, [] {
+        if (s_updateManager->updateMetaInfo().isEmpty())
+            s_updateManager->scheduleUpdateCheck();
+    }, Qt::QueuedConnection);
 
     s_helpManager->setupHelpManager();
     Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));

@@ -19,6 +19,7 @@ class ControlRemovingManager;
 class ControlPropertyManager;
 class RunManager;
 class SaveManager;
+class UpdateManager;
 class WindowManager;
 class MenuManager;
 class HelpManager;
@@ -56,6 +57,7 @@ private:
     static CodeEditorSettings* s_codeEditorSettings;
     static ModeManager* s_modeManager;
     static ServerManager* s_serverManager;
+    static UpdateManager* s_updateManager;
     static RegistrationApiManager* s_registrationApiManager;
     static UserManager* s_userManager;
     static ControlRenderingManager* s_controlRenderingManager;
