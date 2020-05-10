@@ -79,8 +79,8 @@ signals:
 
 private:
     QIcon platformIcon(const QString& rawPlatformName) const;
-    BuildInfo* buildInfoFromUid(const QString& uid);
-    BuildInfo* buildInfoFromPayloadUid(const QString& payloadUid);
+    BuildInfo* buildInfoFromUid(const QString& uid) const;
+    BuildInfo* buildInfoFromPayloadUid(const QString& payloadUid) const;
     QModelIndex indexFromBuildInfo(const BuildInfo* buildInfo) const;
     void calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const;
 

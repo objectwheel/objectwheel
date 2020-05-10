@@ -607,7 +607,7 @@ QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
 }
 
-BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
+BuildInfo* BuildModel::buildInfoFromUid(const QString& uid) const
 {
     if (!uid.isEmpty()) {
         for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
@@ -618,7 +618,7 @@ BuildInfo* BuildModel::buildInfoFromUid(const QString& uid)
     return nullptr;
 }
 
-BuildInfo* BuildModel::buildInfoFromPayloadUid(const QString& payloadUid)
+BuildInfo* BuildModel::buildInfoFromPayloadUid(const QString& payloadUid) const
 {
     if (!payloadUid.isEmpty()) {
         for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {

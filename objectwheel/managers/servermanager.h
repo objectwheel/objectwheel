@@ -50,8 +50,8 @@ public:
         RequestCloudBuild,
         ResponseCloudBuild,
         CancelCloudBuild,
-        RequestUpdateMeta,
-        ResponseUpdateMeta
+        RequestUpdateMetaInfo,
+        ResponseUpdateMetaInfo
     };
     Q_ENUM(ServerCommands)
 
