@@ -141,8 +141,12 @@ ApplicationCore::ApplicationCore()
 
     QObject::connect(s_serverManager, &ServerManager::connected,
                      s_updateManager, [] {
-        if (s_updateManager->updateMetaInfo().isEmpty())
+        if (s_updateManager->remoteMetaInfo().isEmpty())
             s_updateManager->scheduleUpdateCheck();
+    }, Qt::QueuedConnection);
+    QObject::connect(s_updateManager, &UpdateManager::updateCheckFinished,
+                     s_updateManager, [] {
+        // TODO
     }, Qt::QueuedConnection);
 
     s_helpManager->setupHelpManager();

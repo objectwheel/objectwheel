@@ -16,7 +16,7 @@ Q_DECLARE_METATYPE(StatusCode)
 UpdateManager* UpdateManager::s_instance = nullptr;
 bool UpdateManager::s_updateCheckInProgress = false;
 QCborMap UpdateManager::s_localMetaInfo;
-QCborMap UpdateManager::s_updateMetaInfo;
+QCborMap UpdateManager::s_remoteMetaInfo;
 QFutureWatcher<QCborMap> UpdateManager::s_localMetaInfoWatcher;
 
 UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
@@ -33,6 +33,11 @@ UpdateManager::~UpdateManager()
     s_instance = nullptr;
 }
 
+QCborMap UpdateManager::localMetaInfo()
+{
+    return s_localMetaInfo;
+}
+
 UpdateManager* UpdateManager::instance()
 {
     return s_instance;
@@ -43,9 +48,9 @@ bool UpdateManager::isUpdateCheckInProgress()
     return s_updateCheckInProgress;
 }
 
-QCborMap UpdateManager::updateMetaInfo()
+QCborMap UpdateManager::remoteMetaInfo()
 {
-    return s_updateMetaInfo;
+    return s_remoteMetaInfo;
 }
 
 void UpdateManager::scheduleUpdateCheck()
@@ -99,7 +104,7 @@ void UpdateManager::onServerResponse(const QByteArray& data)
         return;
 
     StatusCode status;
-    UtilityFunctions::pullCbor(data, command, status, s_updateMetaInfo);
+    UtilityFunctions::pullCbor(data, command, status, s_remoteMetaInfo);
 
     if (status == RequestSucceed) {
         s_localMetaInfoWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
@@ -127,8 +132,9 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
                 qWarning() << "WARNING: Cannot open the file for reading, path:"<< info.absoluteFilePath();
                 return QCborMap({{QCborValue::Undefined, QCborValue::Undefined}});
             }
-            cache.insert(topDir().relativeFilePath(info.absoluteFilePath()),
-                         QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha1).toHex());
+            cache.insert(topDir.relativeFilePath(info.absoluteFilePath()), QString::number(info.size())
+                         + QLatin1Char('/')
+                         + QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha1).toHex());
         }
     }
     return cache;
