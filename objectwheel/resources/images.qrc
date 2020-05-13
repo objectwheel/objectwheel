@@ -154,5 +154,6 @@
         <file>images/builds/oses.svg</file>
         <file>images/builds/trash.svg</file>
         <file>images/builds/open.svg</file>
+        <file>images/settings/update.svg</file>
     </qresource>
 </RCC>

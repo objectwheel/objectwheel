@@ -18,13 +18,17 @@ public:
     virtual QString title() const = 0;
     virtual bool containsWord(const QString& word) const = 0;
 
-    void activate(bool activate = true);
+    void mark(bool marked = true);
+    bool isMarked() const;
+
+    void activate(bool activated = true);
     bool isActivated() const;
 
     QWidget* contentWidget() const;
     QBoxLayout* contentLayout() const;
 
 private:
+    bool m_marked;
     bool m_activated;
 };
 

@@ -2,6 +2,7 @@
 #include <QBoxLayout>
 
 SettingsWidget::SettingsWidget(QWidget* parent) : QScrollArea(parent)
+  , m_marked(false)
   , m_activated(false)
 {
     setWidgetResizable(true);
@@ -15,9 +16,19 @@ SettingsWidget::SettingsWidget(QWidget* parent) : QScrollArea(parent)
     contentLayout->setContentsMargins(4, 4, 4, 4);
 }
 
-void SettingsWidget::activate(bool activate)
+void SettingsWidget::mark(bool marked)
 {
-    m_activated = activate;
+    m_marked = marked;
+}
+
+bool SettingsWidget::isMarked() const
+{
+    return m_marked;
+}
+
+void SettingsWidget::activate(bool activated)
+{
+    m_activated = activated;
 }
 
 bool SettingsWidget::isActivated() const

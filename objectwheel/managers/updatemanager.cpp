@@ -132,7 +132,7 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
                 qWarning() << "WARNING: Cannot open the file for reading, path:"<< info.absoluteFilePath();
                 return QCborMap({{QCborValue::Undefined, QCborValue::Undefined}});
             }
-            cache.insert(topDir.relativeFilePath(info.absoluteFilePath()), QString::number(info.size())
+            cache.insert(topDir().relativeFilePath(info.absoluteFilePath()), QString::number(info.size())
                          + QLatin1Char('/')
                          + QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha1).toHex());
         }
