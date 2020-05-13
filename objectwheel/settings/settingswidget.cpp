@@ -18,7 +18,10 @@ SettingsWidget::SettingsWidget(QWidget* parent) : QScrollArea(parent)
 
 void SettingsWidget::mark(bool marked)
 {
-    m_marked = marked;
+    if (m_marked != marked) {
+        m_marked = marked;
+        emit markChanged(m_marked);
+    }
 }
 
 bool SettingsWidget::isMarked() const

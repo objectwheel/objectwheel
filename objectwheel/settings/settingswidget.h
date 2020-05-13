@@ -27,6 +27,9 @@ public:
     QWidget* contentWidget() const;
     QBoxLayout* contentLayout() const;
 
+signals:
+    void markChanged(bool marked);
+
 private:
     bool m_marked;
     bool m_activated;

@@ -19,6 +19,7 @@ public:
     void activateCurrent();
     void setTitle(const QString& title);
     QString title() const;
+    int markCount() const;
 
     virtual QIcon icon() const = 0;
     virtual bool containsWord(const QString& word) const;
@@ -26,6 +27,9 @@ public:
     void addWidget(SettingsWidget* widget);
     void setWidgetVisible(SettingsWidget* widget);
     QList<SettingsWidget*> widgets() const;
+
+signals:
+    void markCountChanged(int markCount);
 
 private:
     QTabWidget* m_tabWidget;

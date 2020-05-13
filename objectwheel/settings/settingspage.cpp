@@ -67,6 +67,16 @@ QString SettingsPage::title() const
     return m_titleLabel->text();
 }
 
+int SettingsPage::markCount() const
+{
+    int total = 0;
+    for (SettingsWidget* widget : widgets()) {
+        if (widget->isMarked())
+            total++;
+    }
+    return total;
+}
+
 bool SettingsPage::containsWord(const QString& word) const
 {
     if (title().contains(word, Qt::CaseInsensitive))
@@ -81,6 +91,7 @@ bool SettingsPage::containsWord(const QString& word) const
 void SettingsPage::addWidget(SettingsWidget* widget)
 {
     m_tabWidget->addTab(widget, widget->icon(), widget->title());
+    connect(widget, &SettingsWidget::markChanged, this, [this] { emit markCountChanged(markCount()); });
 }
 
 void SettingsPage::setWidgetVisible(SettingsWidget* widget)
