@@ -28,36 +28,14 @@ private:
     void fill();
 
 private:
-    bool m_themeMessageShowed;
-    bool m_hdpiMessageShowed;
-    bool m_fontMessageShowed;
-    bool m_languageMessageShowed;
+    QGroupBox* m_currentStatusGroup;
+    QLabel* m_logoLabel;
+    QLabel* m_brandLabel;
+    QLabel* m_versionLabel;
+    QLabel* m_revisionLabel;
+    QLabel* m_buildDateLabel;
     /****/
     QGroupBox* m_updateGroup;
-    QLabel* m_themeLabel;
-    QLabel* m_languageLabel;
-    QLabel* m_hdpiLabel;
-    QLabel* m_highlightColorLabel;
-    QComboBox* m_themeBox;
-    QComboBox* m_languageBox;
-    QCheckBox* m_hdpiCheckBox;
-    Utils::QtColorButton* m_highlightColorButton;
-    QPushButton* m_highlightColorResetButton;
-    /****/
-    QGroupBox* m_fontGroup;
-    QLabel* m_fontFamilyLabel;
-    QLabel* m_fontSizeLabel;
-    QComboBox* m_fontFamilyBox;
-    QComboBox* m_fontSizeBox;
-    QCheckBox* m_fontAntialiasingBox;
-    QCheckBox* m_fontThickBox;
-    QPushButton* m_fontResetButton;
-    /****/
-    QGroupBox* m_behavioralGroup;
-    QCheckBox* m_outputPanePopsCheckBox;
-    QCheckBox* m_outputPaneMinimizedStartupCheckBox;
-    QCheckBox* m_preserveDesignerStateCheckBox;
-    QPushButton* m_designerStateResetButton;
 };
 
 #endif // UPDATESETTINGSWIDGET_H
