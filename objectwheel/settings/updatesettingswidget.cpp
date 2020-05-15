@@ -3,6 +3,9 @@
 #include <generalsettings.h>
 #include <utilityfunctions.h>
 #include <qtcolorbutton.h>
+#include <paintutils.h>
+#include <servermanager.h>
+#include <updatemanager.h>
 
 #include <QLabel>
 #include <QGroupBox>
@@ -44,12 +47,58 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_preserveDesignerStateCheckBox(new QCheckBox(m_behavioralGroup))
   , m_designerStateResetButton(new QPushButton(m_behavioralGroup))
 {
+    auto leftLayout = new QVBoxLayout;
+    leftLayout->setContentsMargins(6, 6, 6, 6);
+    leftLayout->setSpacing(6);
+
+    auto rightLayout = new QGridLayout;
+    rightLayout->setContentsMargins(6, 6, 6, 6);
+    rightLayout->setSpacing(6);
+
+    contentLayout()->setDirection(QBoxLayout::LeftToRight);
+    contentLayout()->addLayout(leftLayout);
+    contentLayout()->addLayout(rightLayout);
     contentLayout()->addWidget(m_updateGroup);
     contentLayout()->addWidget(m_fontGroup);
     contentLayout()->addWidget(m_behavioralGroup);
     contentLayout()->addStretch();
 
     /****/
+
+    auto logoLabel = new QLabel;
+    logoLabel->setFixedSize(QSize(112, 112));
+    logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/icon.png"), QSize(112, 112), this));
+
+    auto versionLabel = new QLabel;
+    versionLabel->setAlignment(Qt::AlignCenter);
+    versionLabel->setText(QStringLiteral("<p style=\"font-weight:300;font-size:18px;\">Objectwheel (Beta)</p>"
+                                         "<p><b>Version:</b> v%1"
+                                         "<br><b>Revision:</b> %2"
+                                         "<br><b>Date:</b> %3</p>")
+                          .arg(QStringLiteral(APP_VER)).arg(QStringLiteral(APP_GITHASH)).arg(QStringLiteral(APP_GITDATE)));
+
+    leftLayout->addStretch();
+    leftLayout->addWidget(logoLabel, 0, Qt::AlignHCenter);
+    leftLayout->addWidget(versionLabel, 0, Qt::AlignHCenter);
+    leftLayout->addStretch();
+
+    /****/
+
+    QObject::connect(ServerManager::instance(), &ServerManager::connected,
+                     this, [] {
+        // TODO: May we check for updates every 24 hours or something
+        if (GeneralSettings::updateSettings()->checkForUpdatesAutomatically
+                && UpdateManager::remoteMetaInfo().isEmpty()) {
+            UpdateManager::scheduleUpdateCheck();
+        }
+    }, Qt::QueuedConnection);
+    QObject::connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
+                     this, [] {
+        // TODO
+    }, Qt::QueuedConnection);
+
+    /****/
+
 
     auto updateLayout = new QGridLayout(m_updateGroup);
     updateLayout->setSpacing(6);

@@ -28,6 +28,9 @@ struct UpdateSettings final : public Settings
     bool outputPanePops;
     bool preserveDesignerState;
     bool outputPaneMinimizedStartupEnabled;
+
+    /****/
+    bool checkForUpdatesAutomatically;
 };
 
 #endif // UPDATESETTINGS_H
