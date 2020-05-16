@@ -27,7 +27,7 @@ private:
     void fill();
 
 private:
-    QGroupBox* m_currentVersionGroup;
+    QGroupBox* m_installedVersionGroup;
     QLabel* m_logoLabel;
     QLabel* m_brandIconLabel;
     QLabel* m_versionLabel;

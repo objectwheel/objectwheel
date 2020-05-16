@@ -13,12 +13,12 @@
 #include <QStackedLayout>
 
 UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(parent)
-  , m_currentVersionGroup(new QGroupBox(contentWidget()))
-  , m_logoLabel(new QLabel(m_currentVersionGroup))
-  , m_brandIconLabel(new QLabel(m_currentVersionGroup))
-  , m_versionLabel(new QLabel(m_currentVersionGroup))
-  , m_revisionLabel(new QLabel(m_currentVersionGroup))
-  , m_buildDateLabel(new QLabel(m_currentVersionGroup))
+  , m_installedVersionGroup(new QGroupBox(contentWidget()))
+  , m_logoLabel(new QLabel(m_installedVersionGroup))
+  , m_brandIconLabel(new QLabel(m_installedVersionGroup))
+  , m_versionLabel(new QLabel(m_installedVersionGroup))
+  , m_revisionLabel(new QLabel(m_installedVersionGroup))
+  , m_buildDateLabel(new QLabel(m_installedVersionGroup))
   /****/
   , m_updateGroup(new QGroupBox(contentWidget()))
   , m_checkForUpdatesAutomaticallyCheckBox(new QCheckBox(m_updateGroup))
@@ -31,27 +31,27 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_lastCheckedDateLabel(new QLabel(m_upToDateWidget))
   , m_upToDateIcon(new QLabel(m_upToDateWidget))
 {
-    contentLayout()->addWidget(m_currentVersionGroup);
+    contentLayout()->addWidget(m_installedVersionGroup);
     contentLayout()->addWidget(m_updateGroup);
     contentLayout()->addStretch();
 
     /****/
 
-    auto currentVersionLayout = new QGridLayout(m_currentVersionGroup);
-    currentVersionLayout->setSpacing(6);
-    currentVersionLayout->setContentsMargins(4, 4, 4, 4);
-    currentVersionLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    currentVersionLayout->addWidget(m_logoLabel, 0, 0, 6 , 1, Qt::AlignLeft | Qt::AlignVCenter);
-    currentVersionLayout->addWidget(m_brandIconLabel, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    currentVersionLayout->addWidget(m_versionLabel, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    currentVersionLayout->addWidget(m_revisionLabel, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    currentVersionLayout->addWidget(m_buildDateLabel, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
-    currentVersionLayout->setRowStretch(0, 1);
-    currentVersionLayout->setRowStretch(5, 1);
-    currentVersionLayout->setColumnStretch(3, 1);
-    currentVersionLayout->setColumnMinimumWidth(1, currentVersionLayout->contentsMargins().left());
+    auto installedVersionLayout = new QGridLayout(m_installedVersionGroup);
+    installedVersionLayout->setSpacing(6);
+    installedVersionLayout->setContentsMargins(4, 4, 4, 4);
+    installedVersionLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    installedVersionLayout->addWidget(m_logoLabel, 0, 0, 6 , 1, Qt::AlignLeft | Qt::AlignVCenter);
+    installedVersionLayout->addWidget(m_brandIconLabel, 1, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    installedVersionLayout->addWidget(m_versionLabel, 2, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    installedVersionLayout->addWidget(m_revisionLabel, 3, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    installedVersionLayout->addWidget(m_buildDateLabel, 4, 2, Qt::AlignLeft | Qt::AlignVCenter);
+    installedVersionLayout->setRowStretch(0, 1);
+    installedVersionLayout->setRowStretch(5, 1);
+    installedVersionLayout->setColumnStretch(3, 1);
+    installedVersionLayout->setColumnMinimumWidth(1, installedVersionLayout->contentsMargins().left());
 
-    m_currentVersionGroup->setTitle(tr("Current Version"));
+    m_installedVersionGroup->setTitle(tr("Installed Version"));
     m_brandIconLabel->setText(QLatin1String("<span style=\"font-weight:500;\">Objectwheel (Beta)</span>"));
     m_versionLabel->setText(tr("Version: ") + QStringLiteral(APP_VER));
     m_revisionLabel->setText(tr("Revision: ") + QStringLiteral(APP_GITHASH));
