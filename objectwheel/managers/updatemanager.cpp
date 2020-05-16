@@ -17,6 +17,7 @@ UpdateManager* UpdateManager::s_instance = nullptr;
 bool UpdateManager::s_updateCheckInProgress = false;
 QCborMap UpdateManager::s_localMetaInfo;
 QCborMap UpdateManager::s_remoteMetaInfo;
+QString UpdateManager::s_changelog;
 QFutureWatcher<QCborMap> UpdateManager::s_localMetaInfoWatcher;
 
 UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
@@ -25,7 +26,7 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
             this, &UpdateManager::onServerResponse, Qt::QueuedConnection);
     connect(&s_localMetaInfoWatcher, &QFutureWatcher<QCborMap>::resultsReadyAt,
-            this, &UpdateManager::onLocalScanFinished);
+            this, &UpdateManager::onLocalScanFinish);
 }
 
 UpdateManager::~UpdateManager()
@@ -33,24 +34,29 @@ UpdateManager::~UpdateManager()
     s_instance = nullptr;
 }
 
-QCborMap UpdateManager::localMetaInfo()
-{
-    return s_localMetaInfo;
-}
-
 UpdateManager* UpdateManager::instance()
 {
     return s_instance;
 }
 
-bool UpdateManager::isUpdateCheckInProgress()
+QString UpdateManager::changelog()
 {
-    return s_updateCheckInProgress;
+    return s_changelog;
 }
 
 QCborMap UpdateManager::remoteMetaInfo()
 {
     return s_remoteMetaInfo;
+}
+
+QCborMap UpdateManager::localMetaInfo()
+{
+    return s_localMetaInfo;
+}
+
+bool UpdateManager::isUpdateCheckInProgress()
+{
+    return s_updateCheckInProgress;
 }
 
 void UpdateManager::scheduleUpdateCheck()
@@ -88,34 +94,6 @@ QDir UpdateManager::topDir()
     return QString();
 }
 
-void UpdateManager::onLocalScanFinished()
-{
-    s_localMetaInfo = s_localMetaInfoWatcher.future().result();
-    s_updateCheckInProgress = false;
-    emit updateCheckFinished();
-}
-
-void UpdateManager::onServerResponse(const QByteArray& data)
-{
-    ServerManager::ServerCommands command = ServerManager::Invalid;
-    UtilityFunctions::pullCbor(data, command);
-
-    if (command != ServerManager::ResponseUpdateMetaInfo)
-        return;
-
-    StatusCode status;
-    UtilityFunctions::pullCbor(data, command, status, s_remoteMetaInfo);
-
-    if (status == RequestSucceed) {
-        s_localMetaInfoWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
-                                                    &UpdateManager::generateCacheForDir, topDir()));
-    } else {
-        qWarning("WARNING: Requesting update meta info failed.");
-        s_updateCheckInProgress = false;
-        emit updateCheckFinished();
-    }
-}
-
 QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
 {
     QCborMap cache;
@@ -138,4 +116,37 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
         }
     }
     return cache;
+}
+
+void UpdateManager::onLocalScanFinish()
+{
+    s_localMetaInfo = s_localMetaInfoWatcher.future().result();
+    s_updateCheckInProgress = false;
+    emit updateCheckFinished();
+}
+
+void UpdateManager::onServerResponse(const QByteArray& data)
+{
+    ServerManager::ServerCommands command = ServerManager::Invalid;
+    UtilityFunctions::pullCbor(data, command);
+
+    if (command != ServerManager::ResponseUpdateMetaInfo)
+        return;
+
+    QCborArray array;
+    StatusCode status;
+    UtilityFunctions::pullCbor(data, command, status, array);
+
+    if (status == RequestSucceed) {
+        if (array.size() == 2) {
+            s_remoteMetaInfo = array.first().toMap();
+            s_changelog = array.last().toString();
+        }
+        s_localMetaInfoWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
+                                                    &UpdateManager::generateCacheForDir, topDir()));
+    } else {
+        qWarning("WARNING: Requesting update meta info failed.");
+        s_updateCheckInProgress = false;
+        emit updateCheckFinished();
+    }
 }
