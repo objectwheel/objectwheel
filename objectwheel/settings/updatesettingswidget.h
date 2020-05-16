@@ -5,10 +5,9 @@
 
 class QLabel;
 class QGroupBox;
-class QComboBox;
 class QCheckBox;
 class QPushButton;
-namespace Utils { class QtColorButton; }
+class QStackedLayout;
 
 class UpdateSettingsWidget final : public SettingsWidget
 {
@@ -28,7 +27,7 @@ private:
     void fill();
 
 private:
-    QGroupBox* m_currentStatusGroup;
+    QGroupBox* m_currentVersionGroup;
     QLabel* m_logoLabel;
     QLabel* m_brandLabel;
     QLabel* m_versionLabel;
@@ -36,6 +35,9 @@ private:
     QLabel* m_buildDateLabel;
     /****/
     QGroupBox* m_updateGroup;
+    QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
+    QPushButton* m_checkUpdatesButton;
+    QStackedLayout* m_updateStatusStackedLayout;
 };
 
 #endif // UPDATESETTINGSWIDGET_H

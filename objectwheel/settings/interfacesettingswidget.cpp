@@ -152,7 +152,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
     m_behavioralGroup->setTitle(tr("Behavioral"));
     m_outputPanePopsCheckBox->setText(tr("Pop up output pane when it flashes"));
     m_preserveDesignerStateCheckBox->setText(tr("Enable interface state saving"));
-    m_designerStateResetButton->setText(tr("Reset interface state"));
+    m_designerStateResetButton->setText(tr("Reset Interface State"));
     m_outputPaneMinimizedStartupCheckBox->setText(tr("Enable minimized output pane startup"));
 
     m_outputPanePopsCheckBox->setToolTip(tr("Pop up output pane when it flashes (ie. when a "
