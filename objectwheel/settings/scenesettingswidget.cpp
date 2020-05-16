@@ -139,7 +139,7 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     gridViewLayout->setColumnStretch(3, 1);
     gridViewLayout->setColumnMinimumWidth(1, 20);
 
-    m_gridViewGroup->setTitle(tr("Grid View") + ":");
+    m_gridViewGroup->setTitle(tr("Grid View"));
     m_showGridViewDotsLabel->setText(tr("Grid view dots") + ":");
     m_snappingEnabledLabel->setText(tr("Snapping") + ":");
     m_gridSizeLabel->setText(tr("Grid size") + ":");
@@ -180,7 +180,7 @@ SceneSettingsWidget::SceneSettingsWidget(QWidget* parent) : SettingsWidget(paren
     controlsLayout->setColumnStretch(3, 1);
     controlsLayout->setColumnMinimumWidth(1, 20);
 
-    m_controlsGroup->setTitle(tr("Controls") + ":");
+    m_controlsGroup->setTitle(tr("Controls"));
     m_showMouseoverOutlineLabel->setText(tr("Mouseover outline") + ":");
     m_showClippedControlsLabel->setText(tr("Control clipping") + ":");
     m_blankControlDecorationLabel->setText(tr("Blank control decoration") + ":");

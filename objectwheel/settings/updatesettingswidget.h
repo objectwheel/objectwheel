@@ -29,7 +29,7 @@ private:
 private:
     QGroupBox* m_currentVersionGroup;
     QLabel* m_logoLabel;
-    QLabel* m_brandLabel;
+    QLabel* m_brandIconLabel;
     QLabel* m_versionLabel;
     QLabel* m_revisionLabel;
     QLabel* m_buildDateLabel;
@@ -38,6 +38,12 @@ private:
     QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
     QPushButton* m_checkUpdatesButton;
     QStackedLayout* m_updateStatusStackedLayout;
+    /*__*/
+    QWidget* m_upToDateWidget;
+    QLabel* m_upToDateLabel;
+    QLabel* m_lastCheckedLabel;
+    QLabel* m_lastCheckedDateLabel;
+    QLabel* m_upToDateIcon;
 };
 
 #endif // UPDATESETTINGSWIDGET_H
