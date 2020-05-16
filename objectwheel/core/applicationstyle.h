@@ -35,6 +35,8 @@ public:
                            const QSize& contentsSize, const QWidget* widget) const override;
     QRect subControlRect(QStyle::ComplexControl control, const QStyleOptionComplex* option,
                          QStyle::SubControl subControl, const QWidget* widget) const override;
+    QRect subElementRect(SubElement subElement, const QStyleOption* option,
+                         const QWidget* widget) const override;
     QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt,
                            const QWidget* widget) const override;
     QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption* option,

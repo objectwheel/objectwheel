@@ -22,12 +22,15 @@
 #include <private/qcombobox_p.h>
 #include <private/qfusionstyle_p_p.h>
 
+Q_DECLARE_METATYPE(QMargins)
+
 namespace {
 
 const int macItemFrame          = 2;    // menu item frame width
 const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
 const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
+const char layoutMarginsProperty[] = "_q_ApplicationStyle_layoutMarginsProperty";
 const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
 
 void drawArrow(Qt::ArrowType arrowType, const QStyle *style, const QStyleOption *option,
@@ -244,6 +247,37 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
     }
 
     return ret;
+}
+
+QRect ApplicationStyle::subElementRect(QStyle::SubElement subElement, const QStyleOption* option,
+                                       const QWidget* widget) const
+{
+    switch (subElement) {
+    case SE_PushButtonLayoutItem:
+    case SE_CheckBoxLayoutItem:
+    case SE_DateTimeEditLayoutItem:
+    case SE_RadioButtonLayoutItem:
+    case SE_SliderLayoutItem:
+    case SE_SpinBoxLayoutItem:
+    case SE_ProgressBarLayoutItem:
+    case SE_FrameLayoutItem:
+    case SE_LabelLayoutItem:
+    case SE_TabWidgetLayoutItem:
+    case SE_ToolButtonLayoutItem:
+    case SE_DialogButtonBoxLayoutItem:
+    case SE_GroupBoxLayoutItem:
+    case SE_ComboBoxLayoutItem:
+        if (widget && option) {
+            const QVariant& value = widget->property(layoutMarginsProperty);
+            if (value.isValid()) {
+                QMargins m(value.value<QMargins>());
+                return option->rect.adjusted(-m.left(), -m.top(), m.right(), m.bottom());
+            }
+        } break;
+    default:
+        break;
+    }
+    return QFusionStyle::subElementRect(subElement, option, widget);
 }
 
 QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,

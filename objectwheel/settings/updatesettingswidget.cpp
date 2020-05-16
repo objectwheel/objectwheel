@@ -5,12 +5,17 @@
 #include <servermanager.h>
 #include <updatemanager.h>
 
+#include <QCoreApplication>
 #include <QLabel>
 #include <QGroupBox>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QBoxLayout>
 #include <QStackedLayout>
+
+Q_DECLARE_METATYPE(QMargins)
+
+const char layoutMarginsProperty[] = "_q_ApplicationStyle_layoutMarginsProperty";
 
 UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(parent)
   , m_installedVersionGroup(new QGroupBox(contentWidget()))
@@ -97,8 +102,10 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                              .arg(tr("Objectwheel is up to date")));
     m_lastCheckedLabel->setText(tr("Last checked:"));
 
+    m_upToDateIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -5, 0, 0)));
     m_upToDateIcon->setFixedSize(QSize(96, 96));
     m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/run/computer.svg"), QSize(96, 96), this));
+    QCoreApplication::postEvent(m_upToDateIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
 
     /****/
 
