@@ -8,6 +8,7 @@ class QGroupBox;
 class QCheckBox;
 class QPushButton;
 class QStackedLayout;
+class QPlainTextEdit;
 
 class UpdateSettingsWidget final : public SettingsWidget
 {
@@ -44,6 +45,12 @@ private:
     QLabel* m_lastCheckedLabel;
     QLabel* m_lastCheckedDateLabel;
     QLabel* m_upToDateIcon;
+    /*__*/
+    QWidget* m_updatesAvailableWidget;
+    QLabel* m_updatesAvailableLabel;
+    QLabel* m_updatesAvailableIcon;
+    QPlainTextEdit* m_changelogEdit;
+    QPushButton* m_updateButton;
 };
 
 #endif // UPDATESETTINGSWIDGET_H

@@ -155,5 +155,7 @@
         <file>images/builds/trash.svg</file>
         <file>images/builds/open.svg</file>
         <file>images/settings/update.svg</file>
+        <file>images/settings/up-to-date.svg</file>
+        <file>images/settings/updates-available.svg</file>
     </qresource>
 </RCC>
