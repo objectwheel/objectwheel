@@ -4,6 +4,7 @@
 #include <paintutils.h>
 #include <servermanager.h>
 #include <updatemanager.h>
+#include <stackedlayout.h>
 
 #include <QCoreApplication>
 #include <QLabel>
@@ -11,26 +12,15 @@
 #include <QPushButton>
 #include <QCheckBox>
 #include <QBoxLayout>
-#include <QStackedLayout>
-#include <QPlainTextEdit>
+#include <QTextEdit>
 
 Q_DECLARE_METATYPE(QMargins)
 
 const char layoutMarginsProperty[] = "_q_ApplicationStyle_layoutMarginsProperty";
 
 UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(parent)
-  , m_settingsGroup(new QGroupBox(contentWidget()))
-  , m_checkForUpdatesAutomaticallyCheckBox(new QCheckBox(m_settingsGroup))
-  /****/
-  , m_installedVersionGroup(new QGroupBox(contentWidget()))
-  , m_logoLabel(new QLabel(m_installedVersionGroup))
-  , m_brandIconLabel(new QLabel(m_installedVersionGroup))
-  , m_versionLabel(new QLabel(m_installedVersionGroup))
-  , m_revisionLabel(new QLabel(m_installedVersionGroup))
-  , m_buildDateLabel(new QLabel(m_installedVersionGroup))
-  /****/
   , m_updateGroup(new QGroupBox(contentWidget()))
-  , m_updateStatusStackedLayout(new QStackedLayout(m_updateGroup))
+  , m_updateStatusStackedLayout(new StackedLayout(m_updateGroup))
   /*__*/
   , m_upToDateWidget(new QWidget(m_updateGroup))
   , m_upToDateLabel(new QLabel(m_upToDateWidget))
@@ -42,47 +32,23 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_updatesAvailableWidget(new QWidget(m_updateGroup))
   , m_updatesAvailableLabel(new QLabel(m_updatesAvailableWidget))
   , m_updatesAvailableIcon(new QLabel(m_updatesAvailableWidget))
-  , m_changelogEdit(new QPlainTextEdit(m_updatesAvailableWidget))
+  , m_changelogEdit(new QTextEdit(m_updatesAvailableWidget))
   , m_updateButton(new QPushButton(m_updatesAvailableWidget))
+  /****/
+  , m_statusGroup(new QGroupBox(contentWidget()))
+  , m_logoLabel(new QLabel(m_statusGroup))
+  , m_brandIconLabel(new QLabel(m_statusGroup))
+  , m_versionLabel(new QLabel(m_statusGroup))
+  , m_revisionLabel(new QLabel(m_statusGroup))
+  , m_buildDateLabel(new QLabel(m_statusGroup))
+  /****/
+  , m_settingsGroup(new QGroupBox(contentWidget()))
+  , m_checkForUpdatesAutomaticallyCheckBox(new QCheckBox(m_settingsGroup))
 {
-    contentLayout()->addWidget(m_settingsGroup);
-    contentLayout()->addWidget(m_installedVersionGroup);
     contentLayout()->addWidget(m_updateGroup);
+    contentLayout()->addWidget(m_statusGroup);
+    contentLayout()->addWidget(m_settingsGroup);
     contentLayout()->addStretch();
-
-    /****/
-
-    auto settingsLayout = new QVBoxLayout(m_settingsGroup);
-    settingsLayout->setSpacing(6);
-    settingsLayout->setContentsMargins(6, 6, 6, 6);
-    settingsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    settingsLayout->addWidget(m_checkForUpdatesAutomaticallyCheckBox, 0, 0);
-
-    m_settingsGroup->setTitle(tr("Settings"));
-    m_checkForUpdatesAutomaticallyCheckBox->setText(tr("Check for updates automatically"));
-
-    m_checkForUpdatesAutomaticallyCheckBox->setCursor(Qt::PointingHandCursor);
-
-    /****/
-
-    auto installedVersionLayout = new QGridLayout(m_installedVersionGroup);
-    installedVersionLayout->setSpacing(6);
-    installedVersionLayout->setContentsMargins(6, 6, 6, 6);
-    installedVersionLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    installedVersionLayout->addWidget(m_logoLabel, 0, 0, 4, 1, Qt::AlignVCenter);
-    installedVersionLayout->addWidget(m_brandIconLabel, 0, 1);
-    installedVersionLayout->addWidget(m_versionLabel, 1, 1);
-    installedVersionLayout->addWidget(m_revisionLabel, 2, 1);
-    installedVersionLayout->addWidget(m_buildDateLabel, 3, 1);
-
-    m_installedVersionGroup->setTitle(tr("Installed Version"));
-    m_brandIconLabel->setText(QLatin1String("Objectwheel (Beta)"));
-    m_versionLabel->setText(tr("Version: ") + QStringLiteral(APP_VER));
-    m_revisionLabel->setText(tr("Revision: ") + QStringLiteral(APP_GITHASH));
-    m_buildDateLabel->setText(tr("Build Date: ") + QStringLiteral(APP_GITDATE));
-
-    m_logoLabel->setFixedSize(QSize(80, 80));
-    m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/icon.png"), QSize(80, 80), this));
 
     /****/
 
@@ -108,8 +74,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     upToDateLayout->setRowStretch(3, 1);
 
     m_checkUpdatesButton->setText(tr("Check Now"));
-    m_upToDateLabel->setText(QLatin1String("<span style=\"font-weight:500;\">%1</span>")
-                             .arg(tr("Objectwheel is up to date")));
+    m_upToDateLabel->setText(tr("Objectwheel is up to date"));
     m_lastCheckedLabel->setText(tr("Last checked:"));
 
     m_upToDateIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -4, 0, 0)));
@@ -118,7 +83,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     QCoreApplication::postEvent(m_upToDateIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
 
     m_checkUpdatesButton->setCursor(Qt::PointingHandCursor);
-    m_checkUpdatesButton->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    m_checkUpdatesButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
     // FIXME: remove this
     m_lastCheckedDateLabel->setText(APP_GITDATE);
@@ -129,22 +94,62 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     updatesAvailableLayout->setSpacing(6);
     updatesAvailableLayout->setContentsMargins(6, 6, 6, 6);
     updatesAvailableLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    updatesAvailableLayout->addWidget(m_updatesAvailableLabel, 0, 0, 1, 3);
-    updatesAvailableLayout->addWidget(m_updatesAvailableIcon, 1, 0);
-    updatesAvailableLayout->addWidget(m_changelogEdit, 1, 2, 3, 1);
-    updatesAvailableLayout->addWidget(m_updateButton, 3, 0, 1, 1);
+    updatesAvailableLayout->addWidget(m_updateButton, 0, 0);
+    updatesAvailableLayout->addWidget(m_updatesAvailableLabel, 0, 1);
+    updatesAvailableLayout->addWidget(m_updatesAvailableIcon, 1, 0, Qt::AlignTop);
+    updatesAvailableLayout->addWidget(m_changelogEdit, 1, 1);
 
     m_updateButton->setText(tr("Update"));
-    m_updatesAvailableLabel->setText(QLatin1String("<span style=\"font-weight:500;\">%1</span>")
-                                     .arg(tr("Updates are available for Objectwheel")));
+    m_updatesAvailableLabel->setText(tr("A new version of Objectwheel is available:"));
 
     m_updatesAvailableIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -5, 0, 0)));
     m_updatesAvailableIcon->setFixedSize(QSize(80, 80));
     m_updatesAvailableIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-available.svg"), QSize(80, 80), this));
     QCoreApplication::postEvent(m_updatesAvailableIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
 
+    m_changelogEdit->setReadOnly(true);
+    UtilityFunctions::adjustFontPixelSize(m_changelogEdit, -1);
+    m_changelogEdit->setText("<p style=\"line-height:0.5;\">\r\n  <b>Objectwheel v3.12 Changelog</b>\r\n</p>\r\n<p>\r\n  Objectwheel version 3.12 contains bug fixes and improvements.\r\n  You can find The most important changes here in this document.\r\n</p>\r\n\r\n<p style=\"line-height:0.3;\">\r\n  <b>General</b>\r\n  <ul style=\"margin-left:24px; -qt-list-indent: 0;\">\r\n    <li>Fixed crash when changing font settings (QTCREATORBUG-14385)</li>\r\n    <li>Fixed that run button could stay disabled after parsing</li>\r\n    <li>Fixed issue with JOM (QTCREATORBUG-22645)</li>\r\n    <li>Fixed issues with symbolic links (QTCREATORBUG-23511)</li>\r\n    <li>Fixed pretty printing of `std::unique_ptr` with custom deleter (QTCREATORBUG-23885)</li>\r\n  </ul>\r\n</p>\r\n\r\n<p style=\"line-height:0.3;\">\r\n  <b>Editor</b>\r\n  <ul style=\"margin-left:24px; -qt-list-indent: 0;\">\r\n    <li>Fixed crash when loading settings from Qt Creator < 4.11 (QTCREATORBUG-23916)</li>\r\n    <li>Fixed semantic highlighting (QTCREATORBUG-23729, QTCREATORBUG-23777)</li>\r\n    <li>Fixed wrong symbol highlighting (QTCREATORBUG-23830)</li>\r\n    <li>Fixed warning for `palette` property (QTCREATORBUG-23830)</li>\r\n  </ul>\r\n</p>\r\n\r\n<p style=\"line-height:0.3;\">\r\n  <b>Designer</b>\r\n  <ul style=\"margin-left:24px; -qt-list-indent: 0;\">\r\n    <li>Fixed crash after building emulation layer (QTCREATORBUG-20364)</li>\r\n    <li>Fixed crash when opening `.qml` file instead of `.qml.ui` file (QDS-2011)</li>\r\n    <li>Fixed handling of test output (QTCREATORBUG-23939)</li>\r\n    <li>Fixed crash at startup when Qt is missing in Kit (QTCREATORBUG-23963)</li>\r\n    <li>Fixed `Always use this device for this project` (QTCREATORBUG-23918)</li>\r\n    <li>Fixed Qt ABI detection (QTCREATORBUG-23818)</li>\r\n  </ul>\r\n</p>");
+    m_changelogEdit->setMinimumHeight(170);
+
+    m_updateButton->setCursor(Qt::PointingHandCursor);
+    m_updateButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
     /****/
 
+    auto statusLayout = new QGridLayout(m_statusGroup);
+    statusLayout->setSpacing(6);
+    statusLayout->setContentsMargins(6, 6, 6, 6);
+    statusLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    statusLayout->addWidget(m_logoLabel, 0, 0, 4, 1, Qt::AlignVCenter);
+    statusLayout->addWidget(m_brandIconLabel, 0, 1);
+    statusLayout->addWidget(m_versionLabel, 1, 1);
+    statusLayout->addWidget(m_revisionLabel, 2, 1);
+    statusLayout->addWidget(m_buildDateLabel, 3, 1);
+
+    m_statusGroup->setTitle(tr("Status"));
+    m_brandIconLabel->setText(QLatin1String("Objectwheel (Beta)"));
+    m_versionLabel->setText(tr("Version: ") + QStringLiteral(APP_VER));
+    m_revisionLabel->setText(tr("Revision: ") + QStringLiteral(APP_GITHASH));
+    m_buildDateLabel->setText(tr("Build date: ") + QStringLiteral(APP_GITDATE));
+
+    m_logoLabel->setFixedSize(QSize(80, 80));
+    m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/icon.png"), QSize(80, 80), this));
+
+    /****/
+
+    auto settingsLayout = new QVBoxLayout(m_settingsGroup);
+    settingsLayout->setSpacing(6);
+    settingsLayout->setContentsMargins(6, 6, 6, 6);
+    settingsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    settingsLayout->addWidget(m_checkForUpdatesAutomaticallyCheckBox, 0, 0);
+
+    m_settingsGroup->setTitle(tr("Settings"));
+    m_checkForUpdatesAutomaticallyCheckBox->setText(tr("Check for updates automatically"));
+
+    m_checkForUpdatesAutomaticallyCheckBox->setCursor(Qt::PointingHandCursor);
+
+    /****/
 
     QObject::connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
                      this, [] {

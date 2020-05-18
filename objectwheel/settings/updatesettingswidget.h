@@ -8,7 +8,7 @@ class QGroupBox;
 class QCheckBox;
 class QPushButton;
 class QStackedLayout;
-class QPlainTextEdit;
+class QTextEdit;
 
 class UpdateSettingsWidget final : public SettingsWidget
 {
@@ -28,16 +28,6 @@ private:
     void fill();
 
 private:
-    QGroupBox* m_settingsGroup;
-    QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
-    /****/
-    QGroupBox* m_installedVersionGroup;
-    QLabel* m_logoLabel;
-    QLabel* m_brandIconLabel;
-    QLabel* m_versionLabel;
-    QLabel* m_revisionLabel;
-    QLabel* m_buildDateLabel;
-    /****/
     QGroupBox* m_updateGroup;
     QStackedLayout* m_updateStatusStackedLayout;
     /*__*/
@@ -51,8 +41,18 @@ private:
     QWidget* m_updatesAvailableWidget;
     QLabel* m_updatesAvailableLabel;
     QLabel* m_updatesAvailableIcon;
-    QPlainTextEdit* m_changelogEdit;
+    QTextEdit* m_changelogEdit;
     QPushButton* m_updateButton;
+    /****/
+    QGroupBox* m_statusGroup;
+    QLabel* m_logoLabel;
+    QLabel* m_brandIconLabel;
+    QLabel* m_versionLabel;
+    QLabel* m_revisionLabel;
+    QLabel* m_buildDateLabel;
+    /****/
+    QGroupBox* m_settingsGroup;
+    QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
 };
 
 #endif // UPDATESETTINGSWIDGET_H
