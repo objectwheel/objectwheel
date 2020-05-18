@@ -33,7 +33,7 @@ equals(SZVER, 1) {
 VERSION = $$section(CONF_VERSION, ., 0, 1)$$ZEROS$$COMMIT_VER
 GIT_HASH = $$section(CONF_VERSION, ., 3, 4)
 GIT_HASH ~= s/g/""
-GIT_DATE = $$system($$BASE_GIT_COMMAND log -1 --format=%cd)
+GIT_DATE = $$system($$BASE_GIT_COMMAND log -1 --date=iso-strict --format=%cd)
 
 equals(GIT_HASH, ) {
     GIT_HASH = master

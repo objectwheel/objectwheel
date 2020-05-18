@@ -82,11 +82,10 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
     QCoreApplication::postEvent(m_upToDateIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
 
+    m_checkUpdatesButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(-1, 0, 0, 0)));
     m_checkUpdatesButton->setCursor(Qt::PointingHandCursor);
     m_checkUpdatesButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
-
-    // FIXME: remove this
-    m_lastCheckedDateLabel->setText(APP_GITDATE);
+    QCoreApplication::postEvent(m_checkUpdatesButton, new QEvent(QEvent::StyleChange)); // Apply margin change
 
     /*__*/
 
@@ -131,7 +130,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_brandIconLabel->setText(QLatin1String("Objectwheel (Beta)"));
     m_versionLabel->setText(tr("Version: ") + QStringLiteral(APP_VER));
     m_revisionLabel->setText(tr("Revision: ") + QStringLiteral(APP_GITHASH));
-    m_buildDateLabel->setText(tr("Build date: ") + QStringLiteral(APP_GITDATE));
+    m_buildDateLabel->setText(tr("Build date: ") + QDateTime::fromString(APP_GITDATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate));
 
     m_logoLabel->setFixedSize(QSize(80, 80));
     m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/icon.png"), QSize(80, 80), this));
@@ -151,12 +150,25 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     /****/
 
+    fill();
+
     QObject::connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
                      this, [] {
         // TODO
     }, Qt::QueuedConnection);
 
-    /****/
+    activate();
+    revert();
+
+    const QDateTime& lastChecked = GeneralSettings::updateSettings()->lastUpdateCheckDate;
+    qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
+    if (lastChecked.isNull() || days > 2) {
+        if (lastChecked.isNull())
+            m_upToDateLabel->setText(tr("Updates has never been checked"));
+        else
+            m_upToDateLabel->setText(tr("Updates has not been checked for % days").arg(days));
+        m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
+    }
 }
 
 void UpdateSettingsWidget::apply()
@@ -184,7 +196,10 @@ void UpdateSettingsWidget::revert()
     const UpdateSettings* settings = GeneralSettings::updateSettings();
     /****/
     m_checkForUpdatesAutomaticallyCheckBox->setChecked(settings->checkForUpdatesAutomatically);
-    m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+    if (settings->lastUpdateCheckDate.isNull())
+        m_lastCheckedDateLabel->setText(tr("Never"));
+    else
+        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
 }
 
 void UpdateSettingsWidget::reset()

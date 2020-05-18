@@ -33,7 +33,8 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_versionLabel->setAlignment(Qt::AlignCenter);
     m_versionLabel->setText(QStringLiteral("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b>"
                                            "<br>%3<br>support@objectwheel.com</p>")
-                            .arg(QStringLiteral(APP_VER)).arg(QStringLiteral(APP_GITHASH)).arg(QStringLiteral(APP_GITDATE)));
+                            .arg(QStringLiteral(APP_VER)).arg(QStringLiteral(APP_GITHASH))
+                            .arg(QDateTime::fromString(APP_GITDATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate)));
 
     m_okButton->setDefault(true);
     m_okButton->setCursor(Qt::PointingHandCursor);
