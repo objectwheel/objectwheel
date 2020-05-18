@@ -157,7 +157,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     }, Qt::QueuedConnection);
 
     /****/
-
 }
 
 void UpdateSettingsWidget::apply()
@@ -166,6 +165,13 @@ void UpdateSettingsWidget::apply()
         return;
 
     activate(false);
+
+    UpdateSettings* settings = GeneralSettings::updateSettings();
+    /****/
+    settings->checkForUpdatesAutomatically = m_checkForUpdatesAutomaticallyCheckBox->isChecked();
+    // settings->lastUpdateCheckDate = QDateTime::fromString(m_lastCheckedDateLabel->text(), Qt::SystemLocaleLongDate);
+    /****/
+    settings->write();
 }
 
 void UpdateSettingsWidget::revert()
@@ -174,6 +180,11 @@ void UpdateSettingsWidget::revert()
         return;
 
     activate(false);
+
+    const UpdateSettings* settings = GeneralSettings::updateSettings();
+    /****/
+    m_checkForUpdatesAutomaticallyCheckBox->setChecked(settings->checkForUpdatesAutomatically);
+    m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
 }
 
 void UpdateSettingsWidget::reset()

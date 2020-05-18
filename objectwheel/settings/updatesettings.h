@@ -2,8 +2,7 @@
 #define UPDATESETTINGS_H
 
 #include <settings.h>
-#include <QFont>
-#include <QColor>
+#include <QDateTime>
 
 class GeneralSettings;
 struct UpdateSettings final : public Settings
@@ -13,24 +12,9 @@ struct UpdateSettings final : public Settings
     void write() override;
     void reset() override;
     const char* category() const override;
-    QFont toFont() const;
 
-    bool hdpiEnabled;
-    int theme;
-    int language;
-    QColor highlightColor;
-    /****/
-    bool fontPreferThick;
-    bool fontPreferAntialiasing;
-    int fontPixelSize;
-    QString fontFamily;
-    /****/
-    bool outputPanePops;
-    bool preserveDesignerState;
-    bool outputPaneMinimizedStartupEnabled;
-
-    /****/
     bool checkForUpdatesAutomatically;
+    QDateTime lastUpdateCheckDate;
 };
 
 #endif // UPDATESETTINGS_H
