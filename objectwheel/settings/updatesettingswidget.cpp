@@ -102,8 +102,8 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_updateStatusStackedLayout->setSpacing(0);
     m_updateStatusStackedLayout->setContentsMargins(0, 0, 0, 0);
-    m_updateStatusStackedLayout->addWidget(m_upToDateWidget);
     m_updateStatusStackedLayout->addWidget(m_updatesAvailableWidget);
+    m_updateStatusStackedLayout->addWidget(m_upToDateWidget);
 
     /*__*/
 
@@ -150,14 +150,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     /****/
 
-    QObject::connect(ServerManager::instance(), &ServerManager::connected,
-                     this, [] {
-        // TODO: May we check for updates every 24 hours or something
-        if (GeneralSettings::updateSettings()->checkForUpdatesAutomatically
-                && UpdateManager::remoteMetaInfo().isEmpty()) {
-            UpdateManager::scheduleUpdateCheck();
-        }
-    }, Qt::QueuedConnection);
+
     QObject::connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
                      this, [] {
         // TODO

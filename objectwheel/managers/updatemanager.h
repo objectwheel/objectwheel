@@ -16,9 +16,6 @@ class UpdateManager final : public QObject
 public:
     static UpdateManager* instance();
     static QString changelog();
-    static QCborMap remoteMetaInfo();
-    static QCborMap localMetaInfo();
-    static bool isUpdateCheckInProgress();
     static void scheduleUpdateCheck();
 
 private:
@@ -27,6 +24,8 @@ private:
     static QCborMap generateCacheForDir(const QDir& dir);
 
 private slots:
+    void onConnect();
+    void onDisconnect();
     void onLocalScanFinish();
     void onServerResponse(const QByteArray& data);
 
@@ -39,7 +38,6 @@ private:
 
 private:
     static UpdateManager* s_instance;
-    static bool s_updateCheckInProgress;
     static QCborMap s_localMetaInfo;
     static QCborMap s_remoteMetaInfo;
     static QString s_changelog;
