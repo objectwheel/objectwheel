@@ -28,7 +28,7 @@ private:
     void fill();
 
 private:
-    QGroupBox* m_updateSettingsGroup;
+    QGroupBox* m_settingsGroup;
     QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
     /****/
     QGroupBox* m_installedVersionGroup;
