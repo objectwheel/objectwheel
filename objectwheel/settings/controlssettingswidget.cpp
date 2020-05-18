@@ -20,7 +20,7 @@ ControlsSettingsWidget::ControlsSettingsWidget(QWidget* parent) : SettingsWidget
 
     auto functionLayout = new QGridLayout(m_functionGroup);
     functionLayout->setSpacing(6);
-    functionLayout->setContentsMargins(4, 4, 4, 4);
+    functionLayout->setContentsMargins(6, 6, 6, 6);
     functionLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     functionLayout->addWidget(m_itemDoubleClickActionLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     functionLayout->addWidget(m_itemDoubleClickActionBox, 0, 2, Qt::AlignLeft | Qt::AlignVCenter);

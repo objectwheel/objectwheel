@@ -28,6 +28,9 @@ private:
     void fill();
 
 private:
+    QGroupBox* m_updateSettingsGroup;
+    QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
+    /****/
     QGroupBox* m_installedVersionGroup;
     QLabel* m_logoLabel;
     QLabel* m_brandIconLabel;
@@ -36,8 +39,6 @@ private:
     QLabel* m_buildDateLabel;
     /****/
     QGroupBox* m_updateGroup;
-    QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
-    QPushButton* m_checkUpdatesButton;
     QStackedLayout* m_updateStatusStackedLayout;
     /*__*/
     QWidget* m_upToDateWidget;
@@ -45,6 +46,7 @@ private:
     QLabel* m_lastCheckedLabel;
     QLabel* m_lastCheckedDateLabel;
     QLabel* m_upToDateIcon;
+    QPushButton* m_checkUpdatesButton;
     /*__*/
     QWidget* m_updatesAvailableWidget;
     QLabel* m_updatesAvailableLabel;

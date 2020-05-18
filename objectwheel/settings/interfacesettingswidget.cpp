@@ -53,7 +53,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
 
     auto interfaceLayout = new QGridLayout(m_interfaceGroup);
     interfaceLayout->setSpacing(6);
-    interfaceLayout->setContentsMargins(4, 4, 4, 4);
+    interfaceLayout->setContentsMargins(6, 6, 6, 6);
     interfaceLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     interfaceLayout->addWidget(m_themeLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     interfaceLayout->addWidget(m_languageLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);
@@ -112,7 +112,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
 
     auto fontLayout = new QVBoxLayout(m_fontGroup);
     fontLayout->setSpacing(6);
-    fontLayout->setContentsMargins(4, 4, 4, 4);
+    fontLayout->setContentsMargins(6, 6, 6, 6);
     fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     fontLayout->addLayout(hb1);
     fontLayout->addLayout(hb2);
@@ -140,7 +140,7 @@ InterfaceSettingsWidget::InterfaceSettingsWidget(QWidget* parent) : SettingsWidg
 
     auto behavioralLayout = new QGridLayout(m_behavioralGroup);
     behavioralLayout->setSpacing(6);
-    behavioralLayout->setContentsMargins(4, 4, 4, 4);
+    behavioralLayout->setContentsMargins(6, 6, 6, 6);
     behavioralLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     behavioralLayout->addWidget(m_outputPanePopsCheckBox, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     behavioralLayout->addWidget(m_outputPaneMinimizedStartupCheckBox, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);

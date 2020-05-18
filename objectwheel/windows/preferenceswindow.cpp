@@ -41,7 +41,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     addPage(new DesignerSettingsPage(this));
     addPage(new CodeEditorSettingsPage(this));
 
-    m_layout->setSpacing(6);
+    m_layout->setSpacing(8);
     m_layout->setContentsMargins(10, 10, 10, 10);
     m_layout->addWidget(m_searchLineEdit, 0, 0, 1, 1);
     m_layout->addWidget(m_listWidget, 1, 0, 1, 1);
@@ -270,5 +270,5 @@ void PreferencesWindow::closeEvent(QCloseEvent* event)
 
 QSize PreferencesWindow::sizeHint() const
 {
-    return {780, 460};
+    return {780, 480};
 }

@@ -25,7 +25,7 @@ ToolboxSettingsWidget::ToolboxSettingsWidget(QWidget* parent) : SettingsWidget(p
 
     auto appearanceLayout = new QGridLayout(m_appearanceGroup);
     appearanceLayout->setSpacing(6);
-    appearanceLayout->setContentsMargins(4, 4, 4, 4);
+    appearanceLayout->setContentsMargins(6, 6, 6, 6);
     appearanceLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     appearanceLayout->addWidget(m_alternatingRowColorsLabel, 0, 0, Qt::AlignLeft | Qt::AlignVCenter);
     appearanceLayout->addWidget(m_textElideModeLabel, 1, 0, Qt::AlignLeft | Qt::AlignVCenter);

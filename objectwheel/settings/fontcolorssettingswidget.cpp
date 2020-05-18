@@ -61,7 +61,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
 
     auto fontLayout = new QVBoxLayout(m_fontGroup);
     fontLayout->setSpacing(6);
-    fontLayout->setContentsMargins(4, 4, 4, 4);
+    fontLayout->setContentsMargins(6, 6, 6, 6);
     fontLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     fontLayout->addLayout(hb1);
     fontLayout->addLayout(hb2);
@@ -97,7 +97,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
 
     auto colorSchemeLayout = new QVBoxLayout(m_colorSchemeGroup);
     colorSchemeLayout->setSpacing(6);
-    colorSchemeLayout->setContentsMargins(4, 4, 4, 4);
+    colorSchemeLayout->setContentsMargins(6, 6, 6, 6);
     colorSchemeLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     colorSchemeLayout->addLayout(hb3);
     colorSchemeLayout->addWidget(m_colorSchemeEdit);
