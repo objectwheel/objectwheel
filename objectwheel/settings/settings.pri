@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/settingspage.h \
            $$PWD/generalsettingspage.h \
+           $$PWD/systemsettingspage.h \
            $$PWD/designersettingspage.h \
            $$PWD/interfacesettingswidget.h \
            $$PWD/updatesettingswidget.h \
@@ -13,6 +14,7 @@ HEADERS += $$PWD/settingspage.h \
            $$PWD/scenesettings.h \
            $$PWD/settings.h \
            $$PWD/generalsettings.h \
+           $$PWD/systemsettings.h \
            $$PWD/designersettings.h \
            $$PWD/codeeditorsettings.h \
            $$PWD/codeeditorsettingspage.h \
@@ -28,6 +30,7 @@ HEADERS += $$PWD/settingspage.h \
 
 SOURCES += $$PWD/settingspage.cpp \
            $$PWD/generalsettingspage.cpp \
+           $$PWD/systemsettingspage.cpp \
            $$PWD/designersettingspage.cpp \
            $$PWD/interfacesettingswidget.cpp \
            $$PWD/updatesettingswidget.cpp \
@@ -38,6 +41,7 @@ SOURCES += $$PWD/settingspage.cpp \
            $$PWD/scenesettings.cpp \
            $$PWD/settings.cpp \
            $$PWD/generalsettings.cpp \
+           $$PWD/systemsettings.cpp \
            $$PWD/designersettings.cpp \
            $$PWD/codeeditorsettingspage.cpp \
            $$PWD/codeeditorsettings.cpp \

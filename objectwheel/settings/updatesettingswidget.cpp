@@ -1,6 +1,6 @@
 #include <updatesettingswidget.h>
 #include <updatesettings.h>
-#include <generalsettings.h>
+#include <systemsettings.h>
 #include <paintutils.h>
 #include <servermanager.h>
 #include <updatemanager.h>
@@ -160,7 +160,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     activate();
     revert();
 
-    const QDateTime& lastChecked = GeneralSettings::updateSettings()->lastUpdateCheckDate;
+    const QDateTime& lastChecked = SystemSettings::updateSettings()->lastUpdateCheckDate;
     qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
     if (lastChecked.isNull() || days > 2) {
         if (lastChecked.isNull())
@@ -178,7 +178,7 @@ void UpdateSettingsWidget::apply()
 
     activate(false);
 
-    UpdateSettings* settings = GeneralSettings::updateSettings();
+    UpdateSettings* settings = SystemSettings::updateSettings();
     /****/
     settings->checkForUpdatesAutomatically = m_checkForUpdatesAutomaticallyCheckBox->isChecked();
     // settings->lastUpdateCheckDate = QDateTime::fromString(m_lastCheckedDateLabel->text(), Qt::SystemLocaleLongDate);
@@ -193,7 +193,7 @@ void UpdateSettingsWidget::revert()
 
     activate(false);
 
-    const UpdateSettings* settings = GeneralSettings::updateSettings();
+    const UpdateSettings* settings = SystemSettings::updateSettings();
     /****/
     m_checkForUpdatesAutomaticallyCheckBox->setChecked(settings->checkForUpdatesAutomatically);
     if (settings->lastUpdateCheckDate.isNull())
@@ -204,11 +204,11 @@ void UpdateSettingsWidget::revert()
 
 void UpdateSettingsWidget::reset()
 {
-    GeneralSettings::updateSettings()->reset();
-    GeneralSettings::updateSettings()->write();
+    SystemSettings::updateSettings()->reset();
+    SystemSettings::updateSettings()->write();
     activate();
     revert();
-    emit GeneralSettings::instance()->designerStateReset();
+    emit SystemSettings::instance()->designerStateReset();
 }
 
 QIcon UpdateSettingsWidget::icon() const

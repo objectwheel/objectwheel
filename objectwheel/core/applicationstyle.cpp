@@ -31,6 +31,7 @@ const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
 const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
 const char layoutMarginsProperty[] = "_q_ApplicationStyle_layoutMarginsProperty";
+const char itemViewItemMarginsProperty[] = "_q_ApplicationStyle_itemViewItemMarginsProperty";
 const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
 
 void drawArrow(Qt::ArrowType arrowType, const QStyle *style, const QStyleOption *option,
@@ -274,9 +275,24 @@ QRect ApplicationStyle::subElementRect(QStyle::SubElement subElement, const QSty
                 return option->rect.adjusted(-m.left(), -m.top(), m.right(), m.bottom());
             }
         } break;
+
+    case SE_ItemViewItemDecoration:
+    case SE_ItemViewItemText:
+    case SE_ItemViewItemFocusRect:
+        if (widget && qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
+            const QVariant& value = widget->property(itemViewItemMarginsProperty);
+            if (value.isValid()) {
+                QStyleOptionViewItem copy(*qstyleoption_cast<const QStyleOptionViewItem*>(option));
+                QMargins m(value.value<QMargins>());
+                copy.rect.adjust(-m.left(), -m.top(), m.right(), m.bottom());
+                return QFusionStyle::subElementRect(subElement, &copy, widget);
+            }
+        } break;
+
     default:
         break;
     }
+
     return QFusionStyle::subElementRect(subElement, option, widget);
 }
 

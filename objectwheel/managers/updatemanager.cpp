@@ -1,7 +1,7 @@
 #include <updatemanager.h>
 #include <servermanager.h>
 #include <async.h>
-#include <generalsettings.h>
+#include <systemsettings.h>
 #include <updatesettings.h>
 
 #include <QCoreApplication>
@@ -108,7 +108,7 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
 
 void UpdateManager::onConnect()
 {
-    if (GeneralSettings::updateSettings()->checkForUpdatesAutomatically
+    if (SystemSettings::updateSettings()->checkForUpdatesAutomatically
             && s_remoteMetaInfo.isEmpty()) {
         UpdateManager::scheduleUpdateCheck();
     }

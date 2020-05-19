@@ -7,6 +7,7 @@ class QSettings;
 class GeneralSettings;
 class DesignerSettings;
 class CodeEditorSettings;
+class SystemSettings;
 class ModeManager;
 class RegistrationApiManager;
 class UserManager;
@@ -55,6 +56,7 @@ private:
     static GeneralSettings* s_generalSettings;
     static DesignerSettings* s_designerSettings;
     static CodeEditorSettings* s_codeEditorSettings;
+    static SystemSettings* s_systemSettings;
     static ModeManager* s_modeManager;
     static ServerManager* s_serverManager;
     static UpdateManager* s_updateManager;

@@ -4,10 +4,10 @@
 #include <settings.h>
 #include <QDateTime>
 
-class GeneralSettings;
+class SystemSettings;
 struct UpdateSettings final : public Settings
 {
-    explicit UpdateSettings(GeneralSettings* generalSettings);
+    explicit UpdateSettings(SystemSettings* systemSettings);
     void read() override;
     void write() override;
     void reset() override;

@@ -3,6 +3,7 @@
 #include <generalsettingspage.h>
 #include <codeeditorsettingspage.h>
 #include <designersettingspage.h>
+#include <systemsettingspage.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
 
@@ -12,7 +13,11 @@
 #include <QDialogButtonBox>
 #include <QShowEvent>
 
+Q_DECLARE_METATYPE(QMargins)
+
 enum Roles { SettingsPageRole = Qt::UserRole + 1 };
+
+const char itemViewItemMarginsProperty[] = "_q_ApplicationStyle_itemViewItemMarginsProperty";
 
 static void setPageForItem(QListWidgetItem* item, SettingsPage* page)
 {
@@ -40,6 +45,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     addPage(new GeneralSettingsPage(this));
     addPage(new DesignerSettingsPage(this));
     addPage(new CodeEditorSettingsPage(this));
+    addPage(new SystemSettingsPage(this));
 
     m_layout->setSpacing(8);
     m_layout->setContentsMargins(10, 10, 10, 10);
@@ -57,6 +63,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
     m_listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_listWidget->setProperty(itemViewItemMarginsProperty, QVariant::fromValue(QMargins(-5, 0, 0, 0)));
 
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setPlaceholderText(tr("Search"));

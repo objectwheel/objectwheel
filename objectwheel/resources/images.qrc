@@ -158,5 +158,6 @@
         <file>images/settings/up-to-date.svg</file>
         <file>images/settings/updates-available.svg</file>
         <file>images/settings/update-warning.svg</file>
+        <file>images/settings/system.svg</file>
     </qresource>
 </RCC>

@@ -4,7 +4,6 @@
 #include <groupsettings.h>
 
 struct InterfaceSettings;
-struct UpdateSettings;
 
 class GeneralSettings final : public GroupSettings
 {
@@ -19,12 +18,10 @@ public:
     static void write();
     static void reset();
     static InterfaceSettings* interfaceSettings();
-    static UpdateSettings* updateSettings();
     const char* group() const override;
 
 signals:
     void interfaceSettingsChanged();
-    void updateSettingsChanged();
     void designerStateReset();
 
 private:
@@ -34,7 +31,6 @@ private:
 private:
     static GeneralSettings* s_instance;
     static InterfaceSettings* s_interfaceSettings;
-    static UpdateSettings* s_updateSettings;
 };
 
 #endif // GENERALSETTINGS_H

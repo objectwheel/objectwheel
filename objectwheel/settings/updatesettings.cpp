@@ -1,10 +1,10 @@
 #include <updatesettings.h>
-#include <generalsettings.h>
+#include <systemsettings.h>
 
 static const char g_checkForUpdatesAutomatically[] = "CheckForUpdatesAutomatically";
 static const char g_lastUpdateCheckDate[] = "LastUpdateCheckDate";
 
-UpdateSettings::UpdateSettings(GeneralSettings* generalSettings) : Settings(generalSettings)
+UpdateSettings::UpdateSettings(SystemSettings* systemSettings) : Settings(systemSettings)
 {
     reset();
 }
@@ -26,7 +26,7 @@ void UpdateSettings::write()
     setValue(g_lastUpdateCheckDate, lastUpdateCheckDate);
     end();
 
-    emit static_cast<GeneralSettings*>(groupSettings())->updateSettingsChanged();
+    emit static_cast<SystemSettings*>(groupSettings())->updateSettingsChanged();
 }
 
 void UpdateSettings::reset()
