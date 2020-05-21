@@ -30,9 +30,28 @@ const int macItemFrame          = 2;    // menu item frame width
 const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
 const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
+const char notificationsProperty[] = "_q_ApplicationStyle_notificationsProperty";
 const char layoutMarginsProperty[] = "_q_ApplicationStyle_layoutMarginsProperty";
 const char itemViewItemMarginsProperty[] = "_q_ApplicationStyle_itemViewItemMarginsProperty";
 const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
+
+void drawNotifications(QPainter* painter, const QRectF& r, const QString& text)
+{
+    painter->save();
+    QFont f; f.setPixelSize(10);
+    QLinearGradient grad(0, 0, 0, 1);
+    grad.setCoordinateMode(QGradient::ObjectMode);
+    grad.setColorAt(0.0, QColor("#fa4747"));
+    grad.setColorAt(1.0, QColor("#d13e3e"));
+    painter->setRenderHint(QPainter::Antialiasing);
+    painter->setPen(QPen(QColor("#a81d24"), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+    painter->setBrush(grad);
+    painter->drawRoundedRect(r, r.height() / 2.0, r.width() / 2.0);
+    painter->setFont(f);
+    painter->setPen(Qt::white);
+    painter->drawText(r, text, {Qt::AlignCenter});
+    painter->restore();
+}
 
 void drawArrow(Qt::ArrowType arrowType, const QStyle *style, const QStyleOption *option,
                const QRect &rect, QPainter *painter, const QWidget *widget = 0)
@@ -136,7 +155,8 @@ ApplicationStyle::~ApplicationStyle()
         delete m_focusFrame;
 }
 
-QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption* option, const QSize& contentsSize, const QWidget* widget) const
+QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption* option,
+                                         const QSize& contentsSize, const QWidget* widget) const
 {
     QSize sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
 
@@ -392,7 +412,8 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
     }
 }
 
-int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option, const QWidget* widget) const
+int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption* option,
+                                  const QWidget* widget) const
 {
     switch (metric) {
     case PM_SmallIconSize:
@@ -552,8 +573,10 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         bool isDefault = false;
         bool hasHover = option->state & QStyle::State_MouseOver;
         bool isEnabled = option->state & QStyle::State_Enabled;
-        bool isDown = (option->state & QStyle::State_Sunken) || (!highlightingDisabledForCheckedState(widget) && option->state & QStyle::State_On);
-        bool hasFocus = (option->state & QStyle::State_HasFocus) && (option->state & QStyle::State_KeyboardFocusChange);
+        bool isDown = (option->state & QStyle::State_Sunken)
+                || (!highlightingDisabledForCheckedState(widget) && option->state & QStyle::State_On);
+        bool hasFocus = (option->state & QStyle::State_HasFocus)
+                && (option->state & QStyle::State_KeyboardFocusChange);
 
         if (const QStyleOptionButton* button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
             hasMenu = button->features & QStyleOptionButton::HasMenu;
@@ -816,7 +839,8 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
     }
 }
 
-void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
+void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleOption* option,
+                                   QPainter* painter, const QWidget* widget) const
 {
     Q_D (const QFusionStyle);
     const QRectF r(option->rect);
@@ -827,7 +851,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
     case CE_MenuVMargin:
     case CE_MenuTearoff:
     case CE_MenuScroller:
-        if (const QStyleOptionMenuItem *m
+        if (const QStyleOptionMenuItem* m
                 = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
             QStyleOptionMenuItem mi(*m);
@@ -998,7 +1022,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 w = pixmap.width() / pixmap.devicePixelRatioF();
                 if (button->direction == Qt::RightToLeft)
                     point.rx() += w;
-                painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap, pixmap.rect());
+                painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap,
+                                    pixmap.rect());
                 if (button->direction == Qt::RightToLeft)
                     ir.translate(ir.x() - point.x() - 2, 0);
                 else
@@ -1018,8 +1043,10 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 bool isFlat = false;
                 bool isDefault = false;
                 bool isEnabled = option->state & QStyle::State_Enabled;
-                bool isDown = (option->state & QStyle::State_Sunken) || (!highlightingDisabledForCheckedState(widget) && option->state & QStyle::State_On);
-                bool hasFocus = (option->state & QStyle::State_HasFocus) && (option->state & QStyle::State_KeyboardFocusChange);
+                bool isDown = (option->state & QStyle::State_Sunken)
+                        || (!highlightingDisabledForCheckedState(widget) && option->state & QStyle::State_On);
+                bool hasFocus = (option->state & QStyle::State_HasFocus)
+                        && (option->state & QStyle::State_KeyboardFocusChange);
 
                 if (const QStyleOptionButton* button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
                     isFlat = button->features & QStyleOptionButton::Flat;
@@ -1035,6 +1062,16 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             }
             drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
                          copy.text, QPalette::ButtonText);
+
+            if (widget) {
+                const QVariant& value = widget->property(notificationsProperty);
+                if (value.isValid()) {
+                    QRectF r = option->rect;
+                    r = QRectF(QPointF(r.right() - 14, r.center().y() - 2 - option->fontMetrics.height() / 2.0),
+                               QSizeF(12, 12));
+                    drawNotifications(painter, r, value.toString());
+                }
+            }
         } break;
     case CE_ToolButtonLabel:
         if (const QStyleOptionToolButton* opt
@@ -1086,7 +1123,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                         mode = QIcon::Active;
                     else
                         mode = QIcon::Normal;
-                    pm = PaintUtils::pixmap(toolbutton->icon, toolbutton->rect.size().boundedTo(toolbutton->iconSize),
+                    pm = PaintUtils::pixmap(toolbutton->icon,
+                                            toolbutton->rect.size().boundedTo(toolbutton->iconSize),
                                             widget, mode, state);
                     pmSize = pm.size() / pm.devicePixelRatioF();
                 }
@@ -1114,7 +1152,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                         tr.adjust(pr.width(), 0, 0, 0);
                         pr.translate(shiftX, shiftY);
                         if (!hasArrow) {
-                            proxy()->drawItemPixmap(painter, QStyle::visualRect(option->direction, rect, pr), Qt::AlignCenter, pm);
+                            proxy()->drawItemPixmap(painter, QStyle::visualRect(option->direction, rect,
+                                                                                pr), Qt::AlignCenter, pm);
                         } else {
                             drawArrow(proxy(), toolbutton, pr, painter, widget);
                         }
@@ -1122,7 +1161,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     }
                     tr.translate(shiftX, shiftY);
                     const QString text = d->toolButtonElideText(toolbutton, tr, alignment);
-                    proxy()->drawItemText(painter, QStyle::visualRect(option->direction, rect, tr), alignment, toolbutton->palette,
+                    proxy()->drawItemText(painter, QStyle::visualRect(option->direction, rect, tr),
+                                          alignment, toolbutton->palette,
                                           toolbutton->state & State_Enabled, text,
                                           QPalette::ButtonText);
                 } else {
@@ -1145,7 +1185,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             gradient.setColorAt(0, QStringLiteral("#ffffff"));
             gradient.setColorAt(1, QStringLiteral("#e3e3e3"));
             painter->setBrush(gradient);
-            painter->setPen(QPen(QColor(QStringLiteral("#b6b6b6")), 1, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+            painter->setPen(QPen(QColor(QStringLiteral("#b6b6b6")), 1, Qt::SolidLine, Qt::FlatCap,
+                                 Qt::MiterJoin));
             painter->drawRect(cb->rect);
             painter->restore();
         } break;
@@ -1182,10 +1223,12 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             static const QColor backgroundColor = "#12000000";
             static const QColor borderColor = "#40000000";
             static const QColor indeterminateColor = "#45ffffff";
-            const QColor progressColor = opt->invertedAppearance ? opt->palette.button().color() : QColor("#419BF9");
+            const QColor progressColor = opt->invertedAppearance ? opt->palette.button().color()
+                                                                 : QColor("#419BF9");
             const bool isIndeterminate = (opt->minimum == 0 && opt->maximum == 0);
             const qreal borderRadius = opt->rect.height() / 2.0;
-            auto animation = opt->styleObject ? opt->styleObject->property(animationProperty).value<QVariantAnimation*>() : nullptr;
+            auto animation = opt->styleObject
+                    ? opt->styleObject->property(animationProperty).value<QVariantAnimation*>() : nullptr;
 
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing);
@@ -1213,7 +1256,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     animation->start(); // Safe to call, since it does nothing if already running
                     const qreal mover = opt->rect.width() * animation->currentValue().toReal();
                     const qreal glareLength = opt->rect.width() * 0.66;
-                    const QRectF glareRect(opt->rect.left() - glareLength + mover, opt->rect.top(), glareLength, opt->rect.height());
+                    const QRectF glareRect(opt->rect.left() - glareLength + mover, opt->rect.top(),
+                                           glareLength, opt->rect.height());
 
                     QLinearGradient glareGrad(0.0, 0.5, 1.0, 0.5);
                     glareGrad.setCoordinateMode(QGradient::ObjectMode);
@@ -1235,7 +1279,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 if (const qreal length = opt->maximum - opt->minimum) {
                     const qreal progressWidth = opt->rect.width() * opt->progress / length;
                     painter->fillRect(opt->rect, backgroundColor);
-                    painter->fillRect(opt->rect.adjusted(0, 0, -opt->rect.width() + progressWidth, 0), progressColor);
+                    painter->fillRect(opt->rect.adjusted(0, 0, -opt->rect.width() + progressWidth, 0),
+                                      progressColor);
                 }
             }
 
@@ -1246,6 +1291,19 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             painter->restore();
         }
         break;
+    case CE_TabBarTabLabel:
+        painter->save();
+        QFusionStyle::drawControl(element, option, painter, widget);
+        painter->restore();
+        if (widget && option) {
+            const QVariant& value = widget->property(notificationsProperty);
+            if (value.isValid()) {
+                QRectF r = proxy()->subElementRect(SE_TabBarTabText, option, widget);
+                r = QRectF(QPointF(r.right() - 3, r.center().y() - 3 - option->fontMetrics.height() / 2.0),
+                           QSizeF(12, 12));
+                drawNotifications(painter, r, value.toString());
+            }
+        } break;
     default:
         QFusionStyle::drawControl(element, option, painter, widget);
         break;
