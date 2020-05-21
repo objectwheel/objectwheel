@@ -3,6 +3,7 @@
 #include <async.h>
 #include <systemsettings.h>
 #include <updatesettings.h>
+#include <applicationcore.h>
 
 #include <QCoreApplication>
 #include <QFileInfo>
@@ -33,6 +34,12 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onServerResponse, Qt::QueuedConnection);
     connect(&s_localMetaInfoWatcher, &QFutureWatcher<QCborMap>::resultsReadyAt,
             this, &UpdateManager::onLocalScanFinish);
+    do {
+        QFile file(ApplicationCore::updatesPath() + QLatin1String("/Updates.meta"));
+        if (!file.open(QFile::ReadOnly))
+            break;
+        s_localMetaInfo = QCborValue::fromCbor(file.readAll()).toMap();
+    } while(false);
 }
 
 UpdateManager::~UpdateManager()
@@ -54,6 +61,7 @@ void UpdateManager::scheduleUpdateCheck(bool force)
 {
     Q_ASSERT(ServerManager::isConnected());
     if (s_remoteMetaInfo.isEmpty() || force) {
+        s_localMetaInfo.clear();
         ServerManager::send(ServerManager::RequestUpdateMetaInfo, hostOS());
         s_isUpdateCheckRunning = true;
         emit instance()->updateCheckStarted();
@@ -117,8 +125,9 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
 
 void UpdateManager::onConnect()
 {
-    if (SystemSettings::updateSettings()->checkForUpdatesAutomatically)
-        UpdateManager::scheduleUpdateCheck(false);
+    const UpdateSettings* settings = SystemSettings::updateSettings();
+    if (settings->checkForUpdatesAutomatically)
+        UpdateManager::scheduleUpdateCheck(settings->lastUpdateCheckDate.daysTo(QDateTime::currentDateTime()) > 5);
 }
 
 void UpdateManager::onDisconnect()
@@ -135,6 +144,19 @@ void UpdateManager::onLocalScanFinish()
 {
     s_localMetaInfo = s_localMetaInfoWatcher.future().result();
     s_isUpdateCheckRunning = false;
+
+    if (!QDir(ApplicationCore::updatesPath()).mkpath(".")) {
+        qWarning("Cannot establish a new updates directory");
+        return;
+    }
+    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Updates.meta"));
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning("Cannot open updates meta file to save");
+        return;
+    }
+    file.write(s_localMetaInfo.toCborValue().toCbor());
+    file.close();
+
     emit updateCheckFinished(!s_remoteMetaInfo.isEmpty());
 }
 

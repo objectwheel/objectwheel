@@ -315,7 +315,7 @@ QString ApplicationCore::modulesPath()
 
 QString ApplicationCore::settingsPath()
 {
-    return appDataPath() + "/Settings.ini";
+    return appDataPath() + QLatin1String("/Settings.ini");
 }
 
 QString ApplicationCore::resourcePath()
@@ -330,6 +330,11 @@ QString ApplicationCore::documentsPath()
 #else
     return QFileInfo("Documents").canonicalFilePath();
 #endif
+}
+
+QString ApplicationCore::updatesPath()
+{
+    return appDataPath() + QLatin1String("/Updates");
 }
 
 QString ApplicationCore::appDataPath()
