@@ -16,7 +16,7 @@
 Q_DECLARE_METATYPE(QMargins)
 
 enum Roles { SettingsPageRole = Qt::UserRole + 1 };
-enum { NotificationsProperty = Qt::UserRole + 29934373 };
+enum { NotificationsProperty = Qt::UserRole + 293373 };
 
 const char itemViewItemMarginsProperty[] = "_q_ApplicationStyle_itemViewItemMarginsProperty";
 
@@ -57,7 +57,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setIconSize(QSize(20, 20));
     m_listWidget->setFixedWidth(150);
     m_listWidget->setDragEnabled(false);
-    m_listWidget->setSortingEnabled(true);
+    m_listWidget->setSortingEnabled(false);
     m_listWidget->setUniformItemSizes(true);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setTextElideMode(Qt::ElideMiddle);

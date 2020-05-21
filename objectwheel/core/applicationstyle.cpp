@@ -26,7 +26,7 @@ Q_DECLARE_METATYPE(QMargins)
 
 namespace {
 
-enum { NotificationsProperty = Qt::UserRole + 29934373 };
+enum { NotificationsProperty = Qt::UserRole + 293373 };
 
 const int macItemFrame          = 2;    // menu item frame width
 const int macItemHMargin        = 3;    // menu item hor text margin

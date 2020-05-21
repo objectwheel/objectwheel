@@ -28,8 +28,10 @@ SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
         const QWindow* window = UtilityFunctions::window(this);
         if (window == 0 || !window->isVisible())
             return;
-        if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->widget(index)))
+        if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->widget(index))) {
             widget->activate();
+            widget->mark(false);
+        }
     });
 }
 
@@ -53,8 +55,10 @@ void SettingsPage::apply()
 
 void SettingsPage::activateCurrent()
 {
-    if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->currentWidget()))
+    if (SettingsWidget* widget = qobject_cast<SettingsWidget*>(m_tabWidget->currentWidget())) {
         widget->activate();
+        widget->mark(false);
+    }
 }
 
 void SettingsPage::setTitle(const QString& title)
