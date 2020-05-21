@@ -16,6 +16,7 @@
 Q_DECLARE_METATYPE(QMargins)
 
 enum Roles { SettingsPageRole = Qt::UserRole + 1 };
+enum { NotificationsProperty = Qt::UserRole + 29934373 };
 
 const char itemViewItemMarginsProperty[] = "_q_ApplicationStyle_itemViewItemMarginsProperty";
 
@@ -176,6 +177,16 @@ SettingsWidget* PreferencesWindow::widget(PreferencesWindow::Widget w) const
     return nullptr;
 }
 
+int PreferencesWindow::markCount() const
+{
+    int total = 0;
+    for (int i = 0; i < m_listWidget->count(); ++i) {
+        if (SettingsPage* page = pageFromItem(m_listWidget->item(i)))
+            total += page->markCount();
+    }
+    return total;
+}
+
 void PreferencesWindow::apply()
 {
     for (int i = 0; i < m_listWidget->count(); ++i) {
@@ -239,6 +250,12 @@ void PreferencesWindow::addPage(SettingsPage* page)
 
     auto item = new QListWidgetItem(page->icon(), page->title());
     setPageForItem(item, page);
+
+    item->setData(NotificationsProperty, page->markCount() > 0 ? page->markCount() : QVariant());
+    connect(page, &SettingsPage::markCountChanged, this, [=] (int markCount) {
+        item->setData(NotificationsProperty, markCount > 0 ? markCount : QVariant());
+        emit markCountChanged(this->markCount());
+    });
 
     m_listWidget->addItem(item);
 }

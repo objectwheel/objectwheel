@@ -26,6 +26,8 @@ Q_DECLARE_METATYPE(QMargins)
 
 namespace {
 
+enum { NotificationsProperty = Qt::UserRole + 29934373 };
+
 const int macItemFrame          = 2;    // menu item frame width
 const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
@@ -38,7 +40,9 @@ const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_
 void drawNotifications(QPainter* painter, const QRectF& r, const QString& text)
 {
     painter->save();
-    QFont f; f.setPixelSize(10);
+    QFont f;
+    f.setPixelSize(10);
+    f.setWeight(QFont::DemiBold);
     QLinearGradient grad(0, 0, 0, 1);
     grad.setCoordinateMode(QGradient::ObjectMode);
     grad.setColorAt(0.0, QColor("#fa4747"));
@@ -1295,13 +1299,29 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         painter->save();
         QFusionStyle::drawControl(element, option, painter, widget);
         painter->restore();
-        if (widget && option) {
-            const QVariant& value = widget->property(notificationsProperty);
-            if (value.isValid()) {
-                QRectF r = proxy()->subElementRect(SE_TabBarTabText, option, widget);
-                r = QRectF(QPointF(r.right() - 3, r.center().y() - 3 - option->fontMetrics.height() / 2.0),
-                           QSizeF(12, 12));
-                drawNotifications(painter, r, value.toString());
+        if (auto bar = qobject_cast<const QTabBar*>(widget)) {
+            if (auto opt = qstyleoption_cast<const QStyleOptionTab*>(option)) {
+                const QVariant& value = bar->tabData(bar->tabAt(opt->rect.center()));
+                if (value.isValid()) {
+                    QRectF r = proxy()->subElementRect(SE_TabBarTabText, option, widget);
+                    r = QRectF(QPointF(r.right() - 3, r.center().y() - 3 - option->fontMetrics.height() / 2.0),
+                               QSizeF(12, 12));
+                    drawNotifications(painter, r, value.toString());
+                }
+            }
+        } break;
+    case CE_ItemViewItem:
+        painter->save();
+        QFusionStyle::drawControl(element, option, painter, widget);
+        painter->restore();
+        if (widget) {
+            if (auto opt = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
+                const QVariant& value = opt->index.data(NotificationsProperty);
+                if (value.isValid()) {
+                    QRectF r = proxy()->subElementRect(SE_ItemViewItemFocusRect, option, widget);
+                    r = QRectF(QPointF(r.right() - 15, r.center().y() - 6), QSizeF(12, 12));
+                    drawNotifications(painter, r, value.toString());
+                }
             }
         } break;
     default:

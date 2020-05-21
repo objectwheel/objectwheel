@@ -35,6 +35,8 @@ public:
     SettingsPage* page(Widget widget) const;
     SettingsWidget* widget(Widget widget) const;
 
+    int markCount() const;
+
 private slots:
     void apply();
     void revert();
@@ -53,6 +55,7 @@ private:
 
 signals:
     void done();
+    void markCountChanged(int markCount);
 
 private:
     QGridLayout* m_layout;

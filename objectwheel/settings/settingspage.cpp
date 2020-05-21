@@ -91,7 +91,13 @@ bool SettingsPage::containsWord(const QString& word) const
 void SettingsPage::addWidget(SettingsWidget* widget)
 {
     m_tabWidget->addTab(widget, widget->icon(), widget->title());
-    connect(widget, &SettingsWidget::markChanged, this, [this] { emit markCountChanged(markCount()); });
+    m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
+                                      ? QVariant("﹡") : QVariant());
+    connect(widget, &SettingsWidget::markChanged, this, [=] {
+        m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
+                                          ? QVariant("﹡") : QVariant());
+        emit markCountChanged(markCount());
+    });
 }
 
 void SettingsPage::setWidgetVisible(SettingsWidget* widget)

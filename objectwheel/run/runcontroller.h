@@ -44,6 +44,8 @@ private slots:
     void onDeviceConnect(const QString& uid);
     void onDeviceDisconnect(const QVariantMap& deviceInfo);
 
+    void onPreferencesWindowMarkCountChange(int markCount);
+
 private:
     static QString progressBarMessageFor(MessageKind kind, const QString& arg = QString());
 

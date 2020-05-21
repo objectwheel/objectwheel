@@ -13,11 +13,16 @@
 #include <QTime>
 #include <QPushButton>
 
+const char notificationsProperty[] = "_q_ApplicationStyle_notificationsProperty";
+
 RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent)
   , m_runScheduled(false)
   , m_appManuallyTerminated(false)
   , m_runPane(runPane)
 {
+    int markCount = WindowManager::preferencesWindow()->markCount();
+    m_runPane->preferencesButton()->setProperty(notificationsProperty, markCount > 0 ? markCount : QVariant());
+
     connect(m_runPane->projectsButton(), &QPushButton::clicked,
             this, &RunController::onProjectsButtonClick);
     connect(m_runPane->preferencesButton(), &QPushButton::clicked,
@@ -42,6 +47,9 @@ RunController::RunController(RunPane* runPane, QObject* parent) : QObject(parent
             this, &RunController::onDeviceConnect);
     connect(RunManager::instance(), &RunManager::deviceDisconnected,
             this, &RunController::onDeviceDisconnect);
+
+    connect(WindowManager::preferencesWindow(), &PreferencesWindow::markCountChanged,
+            this, &RunController::onPreferencesWindowMarkCountChange);
 
     m_runPane->stopButton()->setDisabled(true);
 }
@@ -183,6 +191,11 @@ void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
                         progressBarMessageFor(Disconnected, UtilityFunctions::deviceName(deviceInfo)));
         }
     }
+}
+
+void RunController::onPreferencesWindowMarkCountChange(int markCount)
+{
+    m_runPane->preferencesButton()->setProperty(notificationsProperty, markCount > 0 ? markCount : QVariant());
 }
 
 QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
