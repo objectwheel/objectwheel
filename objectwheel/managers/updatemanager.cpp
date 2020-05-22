@@ -20,8 +20,26 @@ UpdateManager* UpdateManager::s_instance = nullptr;
 bool UpdateManager::s_isUpdateCheckRunning = false;
 QCborMap UpdateManager::s_localMetaInfo;
 QCborMap UpdateManager::s_remoteMetaInfo;
+QCborMap UpdateManager::s_differences;
 QString UpdateManager::s_changelog;
+qint64 UpdateManager::s_downloadSize = 0;
 QFutureWatcher<QCborMap> UpdateManager::s_localMetaInfoWatcher;
+
+static qint64 sizeFromValue(const QCborValue& value)
+{
+    const QStringList& list = value.toString().split(QLatin1Char('/'));
+    if (list.size() == 2)
+        return list.first().toLongLong();
+    return 0;
+}
+
+static QString hashFromValue(const QCborValue& value)
+{
+    const QStringList& list = value.toString().split(QLatin1Char('/'));
+    if (list.size() == 2)
+        return list.last();
+    return QString();
+}
 
 UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
 {
@@ -34,6 +52,8 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onServerResponse, Qt::QueuedConnection);
     connect(&s_localMetaInfoWatcher, &QFutureWatcher<QCborMap>::resultsReadyAt,
             this, &UpdateManager::onLocalScanFinish);
+    connect(this, &UpdateManager::updateCheckFinished,
+            this, &UpdateManager::onUpdateCheckFinish);
     do {
         QFile file(ApplicationCore::updatesPath() + QLatin1String("/Updates.meta"));
         if (!file.open(QFile::ReadOnly))
@@ -71,6 +91,11 @@ void UpdateManager::scheduleUpdateCheck(bool force)
 bool UpdateManager::isUpdateCheckRunning()
 {
     return s_isUpdateCheckRunning;
+}
+
+qint64 UpdateManager::downloadSize()
+{
+    return s_downloadSize;
 }
 
 QString UpdateManager::hostOS()
@@ -192,5 +217,31 @@ void UpdateManager::onServerResponse(const QByteArray& data)
         qWarning("WARNING: Requesting update meta info failed.");
         s_isUpdateCheckRunning = false;
         emit updateCheckFinished(false);
+    }
+}
+
+void UpdateManager::onUpdateCheckFinish(bool succeed)
+{
+    if (succeed) {
+        s_downloadSize = 0;
+        s_differences.clear();
+        foreach (const QCborValue& key, s_localMetaInfo.keys()) {
+            const QCborValue& localVal = s_localMetaInfo.value(key);
+            const QCborValue& remoteVal = s_remoteMetaInfo.value(key);
+            const QString& localHash = hashFromValue(localVal);
+            const QString& remoteHash = hashFromValue(remoteVal);
+            if (QString::compare(localHash, remoteHash, Qt::CaseInsensitive) != 0)
+                s_differences[key] = true; // Mark for removal
+        }
+        foreach (const QCborValue& key, s_remoteMetaInfo.keys()) {
+            const QCborValue& localVal = s_localMetaInfo.value(key);
+            const QCborValue& remoteVal = s_remoteMetaInfo.value(key);
+            const QString& localHash = hashFromValue(localVal);
+            const QString& remoteHash = hashFromValue(remoteVal);
+            if (QString::compare(localHash, remoteHash, Qt::CaseInsensitive) != 0) {
+                s_differences[key] = false; // Mark for replacement or new
+                s_downloadSize += sizeFromValue(remoteVal);
+            }
+        }
     }
 }

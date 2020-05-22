@@ -107,7 +107,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_changelogEdit->setReadOnly(true);
     UtilityFunctions::adjustFontPixelSize(m_changelogEdit, -1);
-    m_changelogEdit->setText("<p style=\"line-height:0.5;\">\r\n  <b>Objectwheel v3.12 Changelog</b>\r\n</p>\r\n<p>\r\n  Objectwheel version 3.12 contains bug fixes and improvements.\r\n  You can find The most important changes here in this document.\r\n</p>\r\n\r\n<p style=\"line-height:0.3;\">\r\n  <b>General</b>\r\n  <ul style=\"margin-left:24px; -qt-list-indent: 0;\">\r\n    <li>Fixed crash when changing font settings (QTCREATORBUG-14385)</li>\r\n    <li>Fixed that run button could stay disabled after parsing</li>\r\n    <li>Fixed issue with JOM (QTCREATORBUG-22645)</li>\r\n    <li>Fixed issues with symbolic links (QTCREATORBUG-23511)</li>\r\n    <li>Fixed pretty printing of `std::unique_ptr` with custom deleter (QTCREATORBUG-23885)</li>\r\n  </ul>\r\n</p>\r\n\r\n<p style=\"line-height:0.3;\">\r\n  <b>Editor</b>\r\n  <ul style=\"margin-left:24px; -qt-list-indent: 0;\">\r\n    <li>Fixed crash when loading settings from Qt Creator < 4.11 (QTCREATORBUG-23916)</li>\r\n    <li>Fixed semantic highlighting (QTCREATORBUG-23729, QTCREATORBUG-23777)</li>\r\n    <li>Fixed wrong symbol highlighting (QTCREATORBUG-23830)</li>\r\n    <li>Fixed warning for `palette` property (QTCREATORBUG-23830)</li>\r\n  </ul>\r\n</p>\r\n\r\n<p style=\"line-height:0.3;\">\r\n  <b>Designer</b>\r\n  <ul style=\"margin-left:24px; -qt-list-indent: 0;\">\r\n    <li>Fixed crash after building emulation layer (QTCREATORBUG-20364)</li>\r\n    <li>Fixed crash when opening `.qml` file instead of `.qml.ui` file (QDS-2011)</li>\r\n    <li>Fixed handling of test output (QTCREATORBUG-23939)</li>\r\n    <li>Fixed crash at startup when Qt is missing in Kit (QTCREATORBUG-23963)</li>\r\n    <li>Fixed `Always use this device for this project` (QTCREATORBUG-23918)</li>\r\n    <li>Fixed Qt ABI detection (QTCREATORBUG-23818)</li>\r\n  </ul>\r\n</p>");
     m_changelogEdit->setMinimumHeight(170);
 
     m_updateButton->setCursor(Qt::PointingHandCursor);
@@ -168,6 +167,14 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             m_upToDateLabel->setText(tr("Objectwheel is up to date"));
             m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
             m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+            const qint64 downloadSize = UpdateManager::downloadSize();
+            if (downloadSize > 0) {
+                m_updatesAvailableLabel->setText(tr("A new version of Objectwheel is available (%1):")
+                                                 .arg(UtilityFunctions::toPrettyBytesString(downloadSize)));
+                m_changelogEdit->setHtml(UpdateManager::changelog());
+                m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
+                mark();
+            }
         }
     });
 
