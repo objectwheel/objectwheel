@@ -127,7 +127,7 @@ QDir UpdateManager::topDir()
 QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
 {
     QCborMap cache;
-    foreach (const QFileInfo& info, dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot)) {
+    foreach (const QFileInfo& info, dir.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::Dirs | QDir::NoDotAndDotDot)) {
         if (info.isDir()) {
             const QCborMap& map = generateCacheForDir(info.absoluteFilePath());
             if (!map.isEmpty() && map.contains(QCborValue::Undefined))

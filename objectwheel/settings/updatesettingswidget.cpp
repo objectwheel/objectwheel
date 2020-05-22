@@ -98,7 +98,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     updatesAvailableLayout->addWidget(m_changelogEdit, 1, 1);
 
     m_updateButton->setText(tr("Update"));
-    m_updatesAvailableLabel->setText(tr("A new version of Objectwheel is available:"));
 
     m_updatesAvailableIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -7, 0, 0)));
     m_updatesAvailableIcon->setFixedSize(QSize(80, 80));
@@ -169,7 +168,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
             const qint64 downloadSize = UpdateManager::downloadSize();
             if (downloadSize > 0) {
-                m_updatesAvailableLabel->setText(tr("A new version of Objectwheel is available (%1):")
+                m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1):")
                                                  .arg(UtilityFunctions::toPrettyBytesString(downloadSize)));
                 m_changelogEdit->setHtml(UpdateManager::changelog());
                 m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
