@@ -74,7 +74,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     upToDateLayout->setRowStretch(3, 1);
 
     m_checkUpdatesButton->setText(tr("Check Now"));
-    m_upToDateLabel->setText(tr("Objectwheel is up to date"));
     m_lastCheckedLabel->setText(tr("Last checked:"));
 
     m_upToDateIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -4, 0, 0)));
@@ -152,23 +151,28 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     fill();
 
-    QObject::connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
-                     this, [] {
-        // TODO
-    }, Qt::QueuedConnection);
+    connect(m_checkUpdatesButton, &QPushButton::clicked,
+            this, [=] { UpdateManager::scheduleUpdateCheck(); });
+    connect(ServerManager::instance(), &ServerManager::stateChanged,
+            this, &UpdateSettingsWidget::updateCheckButton);
+    connect(UpdateManager::instance(), &UpdateManager::updateCheckStarted,
+            this, &UpdateSettingsWidget::updateCheckButton);
+    connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
+            this, &UpdateSettingsWidget::updateCheckButton);
+    connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
+            this, [this] (bool succeed) {
+        if (succeed) {
+            UpdateSettings* settings = SystemSettings::updateSettings();
+            settings->lastUpdateCheckDate = QDateTime::currentDateTime();
+            settings->write();
+            m_upToDateLabel->setText(tr("Objectwheel is up to date"));
+            m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
+            m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+        }
+    });
 
     activate();
     revert();
-
-    const QDateTime& lastChecked = SystemSettings::updateSettings()->lastUpdateCheckDate;
-    qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
-    if (lastChecked.isNull() || days > 2) {
-        if (lastChecked.isNull())
-            m_upToDateLabel->setText(tr("Updates has never been checked"));
-        else
-            m_upToDateLabel->setText(tr("Updates has not been checked for % days").arg(days));
-        m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
-    }
 }
 
 void UpdateSettingsWidget::apply()
@@ -196,10 +200,22 @@ void UpdateSettingsWidget::revert()
     const UpdateSettings* settings = SystemSettings::updateSettings();
     /****/
     m_checkForUpdatesAutomaticallyCheckBox->setChecked(settings->checkForUpdatesAutomatically);
-    if (settings->lastUpdateCheckDate.isNull())
-        m_lastCheckedDateLabel->setText(tr("Never"));
-    else
+
+    const QDateTime& lastChecked = SystemSettings::updateSettings()->lastUpdateCheckDate;
+    const qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
+    if (!lastChecked.isValid() || days > 2) {
+        if (lastChecked.isValid())
+            m_upToDateLabel->setText(tr("Updates has not been checked for %1 days").arg(days));
+        else
+            m_upToDateLabel->setText(tr("Updates has never been checked"));
+        m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
+    } else {
+        m_upToDateLabel->setText(tr("Objectwheel is up to date"));
+    }
+    if (lastChecked.isValid())
         m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+    else
+        m_lastCheckedDateLabel->setText(tr("Never"));
 }
 
 void UpdateSettingsWidget::reset()
@@ -224,6 +240,11 @@ QString UpdateSettingsWidget::title() const
 bool UpdateSettingsWidget::containsWord(const QString& word) const
 {
     return title().contains(word, Qt::CaseInsensitive);
+}
+
+void UpdateSettingsWidget::updateCheckButton()
+{
+    m_checkUpdatesButton->setEnabled(ServerManager::isConnected() && !UpdateManager::isUpdateCheckRunning());
 }
 
 void UpdateSettingsWidget::fill()

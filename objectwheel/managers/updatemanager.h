@@ -16,7 +16,8 @@ class UpdateManager final : public QObject
 public:
     static UpdateManager* instance();
     static QString changelog();
-    static void scheduleUpdateCheck();
+    static void scheduleUpdateCheck(bool force = true);
+    static bool isUpdateCheckRunning();
 
 private:
     static QString hostOS();
@@ -30,7 +31,8 @@ private slots:
     void onServerResponse(const QByteArray& data);
 
 signals:
-    void updateCheckFinished();
+    void updateCheckStarted();
+    void updateCheckFinished(bool succeed);
 
 private:
     explicit UpdateManager(QObject* parent = nullptr);
@@ -38,6 +40,7 @@ private:
 
 private:
     static UpdateManager* s_instance;
+    static bool s_isUpdateCheckRunning;
     static QCborMap s_localMetaInfo;
     static QCborMap s_remoteMetaInfo;
     static QString s_changelog;

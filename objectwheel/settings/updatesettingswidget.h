@@ -2,6 +2,7 @@
 #define UPDATESETTINGSWIDGET_H
 
 #include <settingswidget.h>
+#include <QAbstractSocket>
 
 class QLabel;
 class QGroupBox;
@@ -23,6 +24,9 @@ public:
     QIcon icon() const override;
     QString title() const override;
     bool containsWord(const QString& word) const override;
+
+private slots:
+    void updateCheckButton();
 
 private:
     void fill();
