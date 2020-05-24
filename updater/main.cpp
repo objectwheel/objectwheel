@@ -1,21 +1,23 @@
-#include <QCoreApplication>
+#include <QApplication>
+#include <QIcon>
+
+#ifdef Q_OS_MACOS
+#  include <macoperations.h>
+#endif
 
 int main(int argc, char *argv[])
 {
-#ifdef Q_OS_MACOS // Disable focus stealing on macOS
-    if (argc > 1 && argv[1] == QString("capture"))
-        qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "true");
-#endif
-
-    QCoreApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 
     // Initialize application
-    QCoreApplication a(argc, argv);
-    QCoreApplication::setApplicationName(QStringLiteral(APP_NAME));
-    QCoreApplication::setOrganizationName(QStringLiteral(APP_CORP));
-    QCoreApplication::setApplicationVersion(QStringLiteral(APP_VER));
-    QCoreApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
+    QApplication a(argc, argv);
+    QApplication::setApplicationName(QStringLiteral(APP_NAME));
+    QApplication::setOrganizationName(QStringLiteral(APP_CORP));
+    QApplication::setApplicationVersion(QStringLiteral(APP_VER));
+    QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
+    QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Updater"));
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 
-    return EXIT_FAILURE;
+    return a.exec();
 }

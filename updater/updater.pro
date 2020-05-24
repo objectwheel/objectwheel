@@ -9,7 +9,7 @@ TARGET   = Updater
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 unix:QMAKE_CXXFLAGS += -pedantic-errors
 
-QT += widgets qml quick
+QT += widgets
 
 ### Sources
 INCLUDEPATH += $$PWD
