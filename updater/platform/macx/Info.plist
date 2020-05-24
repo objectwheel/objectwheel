@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleExecutable</key>
+	<string>Themer</string>
+	<key>CFBundleIconFile</key>
+	<string>icon.icns</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.objectwheel.Themer</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>2.9.784.g56ff1867</string>
+	<key>CFBundleName</key>
+	<string>Themer</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2.9.784.g56ff1867</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>10.12</string>
+	<key>LSUIElement</key>
+	<string>True</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSRequiresAquaSystemAppearance</key>
+	<string>True</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<string>True</string>
+</dict>
+</plist>

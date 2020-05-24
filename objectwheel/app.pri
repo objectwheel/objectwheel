@@ -17,6 +17,8 @@ macx {
     renderer.path = Contents/MacOS
     themer.files = $$OUT_PWD/../themer/Themer
     themer.path = Contents/MacOS
+    updater.files = $$OUT_PWD/../updater/Updater
+    updater.path = Contents/MacOS
     utils.files = $$OUT_PWD/../utils/libUtils.dylib
     utils.path = Contents/Frameworks
     QMAKE_POST_LINK += install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change \
@@ -31,7 +33,7 @@ macx {
     docs.path = Contents/Resources
     modules.files = $$OUT_PWD/../modules/Modules
     modules.path = Contents/Resources
-    QMAKE_BUNDLE_DATA += interpreter renderer themer utils docs modules
+    QMAKE_BUNDLE_DATA += interpreter renderer themer updater utils docs modules
 } else:unix {
     interpreter.files = $$OUT_PWD/../interpreter/Interpreter
     interpreter.path = $$OUT_PWD/
@@ -39,12 +41,14 @@ macx {
     renderer.path = $$OUT_PWD/
     themer.files = $$OUT_PWD/../themer/Themer
     themer.path = $$OUT_PWD/
+    updater.files = $$OUT_PWD/../updater/Updater
+    updater.path = $$OUT_PWD/
     utils.files = $$OUT_PWD/../utils/libUtils.so
     utils.path = $$OUT_PWD/
     docs.files = $$PWD/resources/Documents/*
     docs.path = $$OUT_PWD/Documents
     # TODO : Copy modules too
-    INSTALLS += interpreter renderer themer utils docs
+    INSTALLS += interpreter renderer updater themer utils docs
 } else:windows {
     CONFIG(debug, debug | release):COMPILING_MODE = debug
     CONFIG(release, debug | release):COMPILING_MODE = release
@@ -52,6 +56,7 @@ macx {
     FILES_TO_COPY = $$OUT_PWD/../interpreter/$$COMPILING_MODE/Interpreter.exe
     FILES_TO_COPY += $$OUT_PWD/../renderer/$$COMPILING_MODE/Renderer.exe
     FILES_TO_COPY += $$OUT_PWD/../themer/$$COMPILING_MODE/Themer.exe
+    FILES_TO_COPY += $$OUT_PWD/../updater/$$COMPILING_MODE/Updater.exe
     FILES_TO_COPY += $$OUT_PWD/../utils/$$COMPILING_MODE/Utils.dll
     DESTINATION_DIR = $$shell_quote($$shell_path($$OUT_PWD/$$COMPILING_MODE))
 

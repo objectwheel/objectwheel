@@ -67,6 +67,7 @@ CONFIG(release, debug | release) {
         touch($$PWD/objectwheel/windows/aboutwindow.cpp, $$VERSION_FILE)
         touch($$PWD/objectwheel/welcome/projectswidget.cpp, $$VERSION_FILE)
         touch($$PWD/themer/main.cpp, $$VERSION_FILE)
+        touch($$PWD/updater/main.cpp, $$VERSION_FILE)
         touch($$PWD/renderer/applicationcore.cpp, $$VERSION_FILE)
         touch($$PWD/interpreter/applicationcore.cpp, $$VERSION_FILE)
     }
