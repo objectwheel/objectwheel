@@ -8,6 +8,7 @@
 #include <QProcess>
 #include <csignal>
 
+static QFileInfo g_myInfo;
 static QDir g_updateCacheDir;
 static QDir g_installationDir;
 static QString g_diffFilePath;
@@ -17,7 +18,7 @@ static QProgressDialog* g_progressDialog;
 static QString detectInstallationDir();
 
 static void load();
-static void unload();
+static void unload(int exitCode);
 static void readDiffFile();
 static void updateFiles();
 static void removeOldFiles();
@@ -47,6 +48,7 @@ int main(int argc, char *argv[])
     }
 
     g_diffFilePath = argv[1];
+    g_myInfo = QCoreApplication::applicationFilePath();
     g_updateCacheDir = QFileInfo(g_diffFilePath).dir().absoluteFilePath(QLatin1String("Files"));
     g_installationDir = detectInstallationDir();
 
@@ -108,10 +110,10 @@ static void load()
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 }
 
-static void unload()
+static void unload(int exitCode)
 {
     delete g_progressDialog;
-    QCoreApplication::exit(EXIT_FAILURE);
+    QCoreApplication::exit(exitCode);
 }
 
 static void readDiffFile()
@@ -119,7 +121,7 @@ static void readDiffFile()
     QFile file(g_diffFilePath);
     if (!file.open(QFile::ReadOnly)) {
         qWarning("Cannot open the diff file. Exiting...");
-        return unload();
+        return unload(EXIT_FAILURE);
     }
 
     g_differences = QCborValue::fromCbor(file.readAll()).toMap();
@@ -127,19 +129,17 @@ static void readDiffFile()
 
     if (g_differences.isEmpty()) {
         qWarning("The diff file is empty. Exiting...");
-        return unload();
+        return unload(EXIT_FAILURE);
     }
 }
 
 static void updateFiles()
 {
-    static const QFileInfo myInfo(QCoreApplication::applicationFilePath());
-
     g_progressDialog->setLabelText(QObject::tr("Updating files..."));
 
     foreach (const QCborValue& key, g_differences.keys()) {
         const QString& relativePath = QDir::cleanPath(key.toString());
-        const bool remove = g_differences.value(key).toBool(false);
+        const bool remove = g_differences.value(key).toBool(true);
 
         if (remove)
             continue;
@@ -160,7 +160,7 @@ static void updateFiles()
         }
 
         if (!canonicalFilePathTo.isEmpty()) {
-            if (infoTo == myInfo) {
+            if (infoTo == g_myInfo) {
                 if (!QFile::rename(canonicalFilePathTo, QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"))) {
                     qWarning("Unable to rename myself. Skipping...");
                     continue;
@@ -190,8 +190,6 @@ static void updateFiles()
 
 static void removeOldFiles()
 {
-    static const QFileInfo myInfo(QCoreApplication::applicationFilePath());
-
     g_progressDialog->setLabelText(QObject::tr("Removing old and redundant files..."));
 
     foreach (const QCborValue& key, g_differences.keys()) {
@@ -214,7 +212,7 @@ static void removeOldFiles()
             continue;
         }
 
-        if (info == myInfo) {
+        if (info == g_myInfo) {
             if (!QFile::rename(canonicalFilePath, QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak")))
                 qWarning("Unable to rename myself. Skipping...");
         } else {
@@ -239,6 +237,6 @@ static void launchObjectwheelAndExit()
     QCoreApplication::processEvents();
     QTimer::singleShot(2000, [] {
         QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
-        unload();
+        unload(EXIT_SUCCESS);
     });
 }
