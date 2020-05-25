@@ -5,6 +5,7 @@
 #include <updatesettings.h>
 #include <applicationcore.h>
 
+#include <QProcess>
 #include <QCoreApplication>
 #include <QFileInfo>
 #include <QDir>
@@ -55,7 +56,7 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
     connect(this, &UpdateManager::updateCheckFinished,
             this, &UpdateManager::onUpdateCheckFinish);
     do {
-        QFile file(ApplicationCore::updatesPath() + QLatin1String("/Updates.meta"));
+        QFile file(ApplicationCore::updatesPath() + QLatin1String("/Local.meta"));
         if (!file.open(QFile::ReadOnly))
             break;
         s_localMetaInfo = QCborValue::fromCbor(file.readAll()).toMap();
@@ -96,6 +97,13 @@ bool UpdateManager::isUpdateCheckRunning()
 qint64 UpdateManager::downloadSize()
 {
     return s_downloadSize;
+}
+
+void UpdateManager::update()
+{
+    QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Updater"),
+                            QStringList(ApplicationCore::updatesPath() + QLatin1String("/Diff.meta")));
+    QCoreApplication::quit();
 }
 
 QString UpdateManager::hostOS()
@@ -174,7 +182,7 @@ void UpdateManager::onLocalScanFinish()
         qWarning("Cannot establish a new updates directory");
         return;
     }
-    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Updates.meta"));
+    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Local.meta"));
     if (!file.open(QFile::WriteOnly)) {
         qWarning("Cannot open updates meta file to save");
         return;
@@ -222,26 +230,37 @@ void UpdateManager::onServerResponse(const QByteArray& data)
 
 void UpdateManager::onUpdateCheckFinish(bool succeed)
 {
-    if (succeed) {
-        s_downloadSize = 0;
-        s_differences.clear();
-        foreach (const QCborValue& key, s_localMetaInfo.keys()) {
-            const QCborValue& localVal = s_localMetaInfo.value(key);
-            const QCborValue& remoteVal = s_remoteMetaInfo.value(key);
-            const QString& localHash = hashFromValue(localVal);
-            const QString& remoteHash = hashFromValue(remoteVal);
-            if (QString::compare(localHash, remoteHash, Qt::CaseInsensitive) != 0)
-                s_differences[key] = true; // Mark for removal
-        }
-        foreach (const QCborValue& key, s_remoteMetaInfo.keys()) {
-            const QCborValue& localVal = s_localMetaInfo.value(key);
-            const QCborValue& remoteVal = s_remoteMetaInfo.value(key);
-            const QString& localHash = hashFromValue(localVal);
-            const QString& remoteHash = hashFromValue(remoteVal);
-            if (QString::compare(localHash, remoteHash, Qt::CaseInsensitive) != 0) {
-                s_differences[key] = false; // Mark for replacement or new
-                s_downloadSize += sizeFromValue(remoteVal);
-            }
+    if (!succeed)
+        return;
+
+    s_downloadSize = 0;
+    s_differences.clear();
+
+    foreach (const QCborValue& key, s_localMetaInfo.keys()) {
+        const QCborValue& localVal = s_localMetaInfo.value(key);
+        const QCborValue& remoteVal = s_remoteMetaInfo.value(key);
+        const QString& localHash = hashFromValue(localVal);
+        const QString& remoteHash = hashFromValue(remoteVal);
+        if (QString::compare(localHash, remoteHash, Qt::CaseInsensitive) != 0)
+            s_differences[key] = true; // Mark for removal
+    }
+
+    foreach (const QCborValue& key, s_remoteMetaInfo.keys()) {
+        const QCborValue& localVal = s_localMetaInfo.value(key);
+        const QCborValue& remoteVal = s_remoteMetaInfo.value(key);
+        const QString& localHash = hashFromValue(localVal);
+        const QString& remoteHash = hashFromValue(remoteVal);
+        if (QString::compare(localHash, remoteHash, Qt::CaseInsensitive) != 0) {
+            s_differences[key] = false; // Mark for replacement or new
+            s_downloadSize += sizeFromValue(remoteVal);
         }
     }
+
+    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Diff.meta"));
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning("Cannot open diff meta file to save");
+        return;
+    }
+    file.write(s_differences.toCborValue().toCbor());
+    file.close();
 }

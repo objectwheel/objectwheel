@@ -151,6 +151,8 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     connect(m_checkUpdatesButton, &QPushButton::clicked,
             this, [=] { UpdateManager::scheduleUpdateCheck(); });
+    connect(m_updateButton, &QPushButton::clicked,
+            this, [=] { UpdateManager::update(); });
     connect(ServerManager::instance(), &ServerManager::stateChanged,
             this, &UpdateSettingsWidget::updateCheckButton);
     connect(UpdateManager::instance(), &UpdateManager::updateCheckStarted,

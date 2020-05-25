@@ -19,6 +19,7 @@ public:
     static void scheduleUpdateCheck(bool force = true);
     static bool isUpdateCheckRunning();
     static qint64 downloadSize();
+    static void update();
 
 private:
     static QString hostOS();
