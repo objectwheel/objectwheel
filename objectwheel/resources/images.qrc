@@ -159,5 +159,6 @@
         <file>images/settings/updates-available.svg</file>
         <file>images/settings/update-warning.svg</file>
         <file>images/settings/system.svg</file>
+        <file>images/settings/updates-disabled.svg</file>
     </qresource>
 </RCC>

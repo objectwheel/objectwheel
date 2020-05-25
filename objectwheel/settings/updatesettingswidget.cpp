@@ -5,6 +5,7 @@
 #include <servermanager.h>
 #include <updatemanager.h>
 #include <stackedlayout.h>
+#include <waitingspinnerwidget.h>
 
 #include <QCoreApplication>
 #include <QLabel>
@@ -28,6 +29,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_lastCheckedDateLabel(new QLabel(m_upToDateWidget))
   , m_upToDateIcon(new QLabel(m_upToDateWidget))
   , m_checkUpdatesButton(new QPushButton(m_upToDateWidget))
+  , m_updateCheckSpinner(new WaitingSpinnerWidget(m_upToDateWidget, false, false))
   /*__*/
   , m_updatesAvailableWidget(new QWidget(m_updateGroup))
   , m_updatesAvailableLabel(new QLabel(m_updatesAvailableWidget))
@@ -71,6 +73,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     upToDateLayout->addWidget(m_lastCheckedLabel, 1, 1);
     upToDateLayout->addWidget(m_lastCheckedDateLabel, 1, 2);
     upToDateLayout->addWidget(m_checkUpdatesButton, 2, 1);
+    upToDateLayout->addWidget(m_updateCheckSpinner, 2, 2);
     upToDateLayout->setRowStretch(3, 1);
 
     m_checkUpdatesButton->setText(tr("Check Now"));
@@ -84,6 +87,17 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_checkUpdatesButton->setCursor(Qt::PointingHandCursor);
     m_checkUpdatesButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     QCoreApplication::postEvent(m_checkUpdatesButton, new QEvent(QEvent::StyleChange)); // Apply margin change
+
+    m_updateCheckSpinner->setLineWidth(2);
+    m_updateCheckSpinner->setRoundness(50);
+    m_updateCheckSpinner->setLineLength(5);
+    m_updateCheckSpinner->setInnerRadius(4);
+    m_updateCheckSpinner->setNumberOfLines(12);
+    m_updateCheckSpinner->setMinimumTrailOpacity(5);
+    m_updateCheckSpinner->setRevolutionsPerSecond(2);
+    m_updateCheckSpinner->setTrailFadePercentage(100);
+    m_updateCheckSpinner->setStyleSheet("background: transparent;");
+    m_updateCheckSpinner->setColor(palette().text().color());
 
     /*__*/
 
@@ -211,20 +225,23 @@ void UpdateSettingsWidget::revert()
 
     const QDateTime& lastChecked = SystemSettings::updateSettings()->lastUpdateCheckDate;
     const qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
-    if (!lastChecked.isValid() || days > 2) {
-        if (lastChecked.isValid())
-            m_upToDateLabel->setText(tr("Updates have not been checked for %1 days").arg(days));
-        else
-            m_upToDateLabel->setText(tr("Updates have never been checked"));
+    if (!lastChecked.isValid()) {
+        m_upToDateLabel->setText(tr("Updates have never been checked"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
+        m_lastCheckedDateLabel->setText(tr("Never"));
+    } else if (days > 2) {
+        m_upToDateLabel->setText(tr("Updates have not been checked for %1 days").arg(days));
+        m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
+        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+    } else if (!settings->checkForUpdatesAutomatically) {
+        m_upToDateLabel->setText(tr("Automatic update checking is disabled"));
+        m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-disabled.svg"), QSize(80, 80), this));
+        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else {
         m_upToDateLabel->setText(tr("Objectwheel is up to date"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
-    }
-    if (lastChecked.isValid())
         m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
-    else
-        m_lastCheckedDateLabel->setText(tr("Never"));
+    }
 }
 
 void UpdateSettingsWidget::reset()
@@ -254,6 +271,10 @@ bool UpdateSettingsWidget::containsWord(const QString& word) const
 void UpdateSettingsWidget::updateCheckButton()
 {
     m_checkUpdatesButton->setEnabled(ServerManager::isConnected() && !UpdateManager::isUpdateCheckRunning());
+    if (m_checkUpdatesButton->isEnabled())
+        m_updateCheckSpinner->stop();
+    else
+        m_updateCheckSpinner->start();
 }
 
 void UpdateSettingsWidget::fill()
