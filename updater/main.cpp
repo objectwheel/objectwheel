@@ -159,17 +159,17 @@ static void updateFiles()
             continue;
         }
 
-        if (infoTo == myInfo) {
-            if (!QFile::rename(canonicalFilePathTo, QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"))) {
-                qWarning("Unable to rename myself. Skipping...");
-                continue;
-            }
-        }
-
         if (!canonicalFilePathTo.isEmpty()) {
-            if (!QFile::remove(canonicalFilePathTo)) {
-                qWarning("Can't update an existing file %s. Skipping...", canonicalFilePathTo.toUtf8().constData());
-                continue;
+            if (infoTo == myInfo) {
+                if (!QFile::rename(canonicalFilePathTo, QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"))) {
+                    qWarning("Unable to rename myself. Skipping...");
+                    continue;
+                }
+            } else {
+                if (!QFile::remove(canonicalFilePathTo)) {
+                    qWarning("Can't update an existing file %s. Skipping...", canonicalFilePathTo.toUtf8().constData());
+                    continue;
+                }
             }
         }
 
