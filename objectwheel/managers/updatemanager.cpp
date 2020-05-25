@@ -105,7 +105,7 @@ qint64 UpdateManager::downloadSize()
 
 void UpdateManager::update()
 {
-    QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Updater"),
+    QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
                             QStringList(ApplicationCore::updatesPath() + QLatin1String("/Diff.meta")));
     QCoreApplication::quit();
 }

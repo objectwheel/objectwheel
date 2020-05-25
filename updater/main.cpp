@@ -25,7 +25,7 @@ static void updateFiles();
 static void removeOldFiles();
 static void launchObjectwheelAndExit();
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     load();
 

@@ -78,7 +78,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_upToDateIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -4, 0, 0)));
     m_upToDateIcon->setFixedSize(QSize(80, 80));
-    m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
     QCoreApplication::postEvent(m_upToDateIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
 
     m_checkUpdatesButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(-1, 0, 0, 0)));
@@ -165,9 +164,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             UpdateSettings* settings = SystemSettings::updateSettings();
             settings->lastUpdateCheckDate = QDateTime::currentDateTime();
             settings->write();
-            m_upToDateLabel->setText(tr("Objectwheel is up to date"));
-            m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
-            m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
             const qint64 downloadSize = UpdateManager::downloadSize();
             if (downloadSize > 0) {
                 m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1):")
@@ -175,6 +171,10 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 m_changelogEdit->setHtml(UpdateManager::changelog());
                 m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
                 mark();
+            } else {
+                m_upToDateLabel->setText(tr("Objectwheel is up to date"));
+                m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
+                m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
             }
         }
     });
@@ -213,12 +213,13 @@ void UpdateSettingsWidget::revert()
     const qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
     if (!lastChecked.isValid() || days > 2) {
         if (lastChecked.isValid())
-            m_upToDateLabel->setText(tr("Updates has not been checked for %1 days").arg(days));
+            m_upToDateLabel->setText(tr("Updates have not been checked for %1 days").arg(days));
         else
-            m_upToDateLabel->setText(tr("Updates has never been checked"));
+            m_upToDateLabel->setText(tr("Updates have never been checked"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
     } else {
         m_upToDateLabel->setText(tr("Objectwheel is up to date"));
+        m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
     }
     if (lastChecked.isValid())
         m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
