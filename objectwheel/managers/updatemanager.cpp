@@ -55,6 +55,10 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onLocalScanFinish);
     connect(this, &UpdateManager::updateCheckFinished,
             this, &UpdateManager::onUpdateCheckFinish);
+
+    // WARNING: Remove an update artifact if any
+    QFile::remove(QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"));
+
     do {
         QFile file(ApplicationCore::updatesPath() + QLatin1String("/Local.meta"));
         if (!file.open(QFile::ReadOnly))
