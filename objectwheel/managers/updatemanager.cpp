@@ -86,7 +86,8 @@ void UpdateManager::scheduleUpdateCheck(bool force)
 {
     Q_ASSERT(ServerManager::isConnected());
     if (s_remoteMetaInfo.isEmpty() || force) {
-        s_localMetaInfo.clear();
+        if (force)
+            s_localMetaInfo.clear();
         ServerManager::send(ServerManager::RequestUpdateMetaInfo, hostOS());
         s_isUpdateCheckRunning = true;
         emit instance()->updateCheckStarted();
@@ -163,8 +164,10 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
 void UpdateManager::onConnect()
 {
     const UpdateSettings* settings = SystemSettings::updateSettings();
-    if (settings->checkForUpdatesAutomatically)
-        UpdateManager::scheduleUpdateCheck(settings->lastUpdateCheckDate.daysTo(QDateTime::currentDateTime()) > 5);
+    if (settings->checkForUpdatesAutomatically) {
+        const QFileInfo localInfo(ApplicationCore::updatesPath() + QLatin1String("/Local.meta"));
+        UpdateManager::scheduleUpdateCheck(localInfo.lastModified().daysTo(QDateTime::currentDateTime()) > 4);
+    }
 }
 
 void UpdateManager::onDisconnect()
