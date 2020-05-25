@@ -1,20 +1,14 @@
 #include <QApplication>
 #include <QIcon>
-#include <QFileInfo>
 #include <QCborMap>
 #include <QCborValue>
 #include <QProgressDialog>
 #include <QTimer>
 #include <QDir>
 #include <QProcess>
-
 #include <csignal>
 
-#ifdef Q_OS_MACOS
-#  include <macoperations.h>
-#endif
-
-static QDir g_filesDir;
+static QDir g_updateCacheDir;
 static QDir g_installationDir;
 static QString g_diffFilePath;
 static QCborMap g_differences;
@@ -22,23 +16,16 @@ static QProgressDialog* g_progressDialog;
 
 static QString detectInstallationDir();
 
+static void load();
 static void unload();
 static void readDiffFile();
 static void updateFiles();
 static void removeOldFiles();
-static void launchObjectwheel();
+static void launchObjectwheelAndExit();
 
 int main(int argc, char *argv[])
 {
-    std::signal(SIGFPE, SIG_IGN);
-    std::signal(SIGILL, SIG_IGN);
-    std::signal(SIGSEGV, SIG_IGN);
-    std::signal(SIGABRT, SIG_IGN);
-    std::signal(SIGINT, SIG_IGN);
-    std::signal(SIGTERM, SIG_IGN);
-
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    load();
 
     // Initialize application
     QApplication a(argc, argv);
@@ -60,11 +47,11 @@ int main(int argc, char *argv[])
     }
 
     g_diffFilePath = argv[1];
-    g_filesDir = QFileInfo(g_diffFilePath).dir().absoluteFilePath(QLatin1String("Files"));
+    g_updateCacheDir = QFileInfo(g_diffFilePath).dir().absoluteFilePath(QLatin1String("Files"));
     g_installationDir = detectInstallationDir();
 
-    if (!g_filesDir.exists()) {
-        qWarning("No Files dir. Exiting...");
+    if (!g_updateCacheDir.exists()) {
+        qWarning("No update cache dir. Exiting...");
         return EXIT_FAILURE;
     }
 
@@ -82,11 +69,12 @@ int main(int argc, char *argv[])
     g_progressDialog->setWindowTitle(QObject::tr("Objectwheel Updater"));
     g_progressDialog->show();
 
+    // Give Objectwheel some time to quit
     QTimer::singleShot(2000, [] {
         readDiffFile();
         updateFiles();
         removeOldFiles();
-        launchObjectwheel();
+        launchObjectwheelAndExit();
     });
 
     return a.exec();
@@ -105,6 +93,21 @@ static QString detectInstallationDir()
     return QString();
 }
 
+static void load()
+{
+    // The update shouldn't be blocked
+    std::signal(SIGFPE, SIG_IGN);
+    std::signal(SIGILL, SIG_IGN);
+    std::signal(SIGSEGV, SIG_IGN);
+    std::signal(SIGABRT, SIG_IGN);
+    std::signal(SIGINT, SIG_IGN);
+    std::signal(SIGTERM, SIG_IGN);
+
+    // Enable high dpi
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+}
+
 static void unload()
 {
     delete g_progressDialog;
@@ -120,7 +123,7 @@ static void readDiffFile()
     }
 
     g_differences = QCborValue::fromCbor(file.readAll()).toMap();
-    g_progressDialog->setMaximum(g_differences.size() + 1); // +1 for Files dir removal
+    g_progressDialog->setMaximum(g_differences.size() + 1); // +1 for update caches removal
 
     if (g_differences.isEmpty()) {
         qWarning("The diff file is empty. Exiting...");
@@ -143,28 +146,22 @@ static void updateFiles()
 
         if (relativePath.isEmpty()) {
             qWarning("Empty relative path to update. Skipping...");
-            g_progressDialog->setValue(g_progressDialog->value() + 1);
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
             continue;
         }
 
         const QFileInfo infoTo(g_installationDir.filePath(relativePath));
         const QString& canonicalFilePathTo = infoTo.canonicalFilePath();
-        const QFileInfo infoFrom(g_filesDir.filePath(relativePath));
+        const QFileInfo infoFrom(g_updateCacheDir.filePath(relativePath));
         const QString& canonicalFilePathFrom = infoFrom.canonicalFilePath();
 
         if (canonicalFilePathFrom.isEmpty()) {
             qWarning("Empty file path to update from %s. Skipping...", canonicalFilePathFrom.toUtf8().constData());
-            g_progressDialog->setValue(g_progressDialog->value() + 1);
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
             continue;
         }
 
         if (infoTo == myInfo) {
             if (!QFile::rename(canonicalFilePathTo, QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"))) {
                 qWarning("Unable to rename myself. Skipping...");
-                g_progressDialog->setValue(g_progressDialog->value() + 1);
-                QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
                 continue;
             }
         }
@@ -172,23 +169,17 @@ static void updateFiles()
         if (!canonicalFilePathTo.isEmpty()) {
             if (!QFile::remove(canonicalFilePathTo)) {
                 qWarning("Can't update an existing file %s. Skipping...", canonicalFilePathTo.toUtf8().constData());
-                g_progressDialog->setValue(g_progressDialog->value() + 1);
-                QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
                 continue;
             }
         }
 
         if (!infoTo.dir().mkpath(QLatin1String("."))) {
             qWarning("Can't establish a new folder for a file %s. Skipping...", infoTo.dir().path().toUtf8().constData());
-            g_progressDialog->setValue(g_progressDialog->value() + 1);
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
             continue;
         }
 
         if (!QFile::rename(canonicalFilePathFrom, infoTo.filePath())) {
             qWarning("Can't update a file %s. Skipping...", infoTo.filePath().toUtf8().constData());
-            g_progressDialog->setValue(g_progressDialog->value() + 1);
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
             continue;
         }
 
@@ -212,8 +203,6 @@ static void removeOldFiles()
 
         if (relativePath.isEmpty()) {
             qWarning("Empty relative path to remove. Skipping...");
-            g_progressDialog->setValue(g_progressDialog->value() + 1);
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
             continue;
         }
 
@@ -222,8 +211,6 @@ static void removeOldFiles()
 
         if (canonicalFilePath.isEmpty()) {
             qWarning("Empty file path to remove %s. Skipping...", canonicalFilePath.toUtf8().constData());
-            g_progressDialog->setValue(g_progressDialog->value() + 1);
-            QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
             continue;
         }
 
@@ -239,16 +226,13 @@ static void removeOldFiles()
         QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
     }
 
-    g_filesDir.cdUp(); // Cd into updates dir (removing Local.meta etc since it contains old info anymore)
+    g_updateCacheDir.cdUp(); // Cd up into updates dir (removing Local.meta etc since it contains old info anymore)
 
-    if (!g_filesDir.removeRecursively())
-        qWarning("Encountered a problem while removing cache files. Skipping...");
-
-    g_progressDialog->setValue(g_progressDialog->value() + 1);
-    QCoreApplication::processEvents();
+    if (!g_updateCacheDir.removeRecursively())
+        qWarning("Encountered a problem while removing update cache. Skipping...");
 }
 
-static void launchObjectwheel()
+static void launchObjectwheelAndExit()
 {
     g_progressDialog->setLabelText(QObject::tr("Succeed"));
     g_progressDialog->setValue(g_progressDialog->maximum());
