@@ -79,6 +79,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_checkUpdatesButton->setText(tr("Check Now"));
     m_lastCheckedLabel->setText(tr("Last checked:"));
 
+    m_checkUpdatesButton->setToolTip(tr("Make a fresh update check"));
+    m_lastCheckedDateLabel->setToolTip(tr("Shows last successful update check date"));
+
     m_upToDateIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -4, 0, 0)));
     m_upToDateIcon->setFixedSize(QSize(80, 80));
     QCoreApplication::postEvent(m_upToDateIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
@@ -155,7 +158,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_settingsGroup->setTitle(tr("Settings"));
     m_checkForUpdatesAutomaticallyCheckBox->setText(tr("Check for updates automatically"));
-
+    m_checkForUpdatesAutomaticallyCheckBox->setToolTip(tr("It does not download or install updates automatically"));
     m_checkForUpdatesAutomaticallyCheckBox->setCursor(Qt::PointingHandCursor);
 
     /****/
@@ -189,6 +192,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 m_upToDateLabel->setText(tr("Objectwheel is up to date"));
                 m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
                 m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+                m_updateStatusStackedLayout->setCurrentWidget(m_upToDateWidget);
             }
         }
     });
@@ -271,10 +275,10 @@ bool UpdateSettingsWidget::containsWord(const QString& word) const
 void UpdateSettingsWidget::updateCheckButton()
 {
     m_checkUpdatesButton->setEnabled(ServerManager::isConnected() && !UpdateManager::isUpdateCheckRunning());
-    if (m_checkUpdatesButton->isEnabled())
-        m_updateCheckSpinner->stop();
-    else
+    if (UpdateManager::isUpdateCheckRunning())
         m_updateCheckSpinner->start();
+    else
+        m_updateCheckSpinner->stop();
 }
 
 void UpdateSettingsWidget::fill()

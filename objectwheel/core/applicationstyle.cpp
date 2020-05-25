@@ -45,10 +45,10 @@ void drawNotifications(QPainter* painter, const QRectF& r, const QString& text)
     f.setWeight(QFont::DemiBold);
     QLinearGradient grad(0, 0, 0, 1);
     grad.setCoordinateMode(QGradient::ObjectMode);
-    grad.setColorAt(0.0, QColor("#fa4747"));
-    grad.setColorAt(1.0, QColor("#d13e3e"));
+    grad.setColorAt(0.0, QColor("#f24949"));
+    grad.setColorAt(1.0, QColor("#d94141"));
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(QColor("#a81d24"), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+    painter->setPen(QPen(QColor("#bf3939"), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
     painter->setBrush(grad);
     painter->drawRoundedRect(r, r.height() / 2.0, r.width() / 2.0);
     painter->setFont(f);
