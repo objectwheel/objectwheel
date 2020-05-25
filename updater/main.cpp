@@ -8,6 +8,7 @@
 #include <QProcess>
 #include <csignal>
 
+static bool g_errorFlag = false;
 static QFileInfo g_myInfo;
 static QDir g_updateCacheDir;
 static QDir g_installationDir;
@@ -155,6 +156,7 @@ static void updateFiles()
         const QString& canonicalFilePathFrom = infoFrom.canonicalFilePath();
 
         if (canonicalFilePathFrom.isEmpty()) {
+            g_errorFlag = true;
             qWarning("Empty file path to update from %s. Skipping...", canonicalFilePathFrom.toUtf8().constData());
             continue;
         }
@@ -162,11 +164,13 @@ static void updateFiles()
         if (!canonicalFilePathTo.isEmpty()) {
             if (infoTo == g_myInfo) {
                 if (!QFile::rename(canonicalFilePathTo, QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"))) {
+                    g_errorFlag = true;
                     qWarning("Unable to rename myself. Skipping...");
                     continue;
                 }
             } else {
                 if (!QFile::remove(canonicalFilePathTo)) {
+                    g_errorFlag = true;
                     qWarning("Can't update an existing file %s. Skipping...", canonicalFilePathTo.toUtf8().constData());
                     continue;
                 }
@@ -174,13 +178,14 @@ static void updateFiles()
         }
 
         if (!infoTo.dir().mkpath(QLatin1String("."))) {
+            g_errorFlag = true;
             qWarning("Can't establish a new folder for a file %s. Skipping...", infoTo.dir().path().toUtf8().constData());
             continue;
         }
 
         if (!QFile::rename(canonicalFilePathFrom, infoTo.filePath())) {
+            g_errorFlag = true;
             qWarning("Can't update a file %s. Skipping...", infoTo.filePath().toUtf8().constData());
-            continue;
         }
 
         g_progressDialog->setValue(g_progressDialog->value() + 1);
@@ -226,17 +231,29 @@ static void removeOldFiles()
 
     g_updateCacheDir.cdUp(); // Cd up into updates dir (removing Local.meta etc since it contains old info anymore)
 
-    if (!g_updateCacheDir.removeRecursively())
+    if (!g_updateCacheDir.removeRecursively()) {
+        g_errorFlag = true;
         qWarning("Encountered a problem while removing update cache. Skipping...");
+    }
 }
 
 static void launchObjectwheelAndExit()
 {
-    g_progressDialog->setLabelText(QObject::tr("Succeed"));
     g_progressDialog->setValue(g_progressDialog->maximum());
+    if (g_errorFlag) {
+        g_progressDialog->setLabelText(QObject::tr("Update was completed with warnings. If you encounter<br>"
+                                                   "some odd behavior, please re-install Objectwheel."));
+        g_progressDialog->setCancelButtonText(QObject::tr("Close"));
+        QObject::connect(g_progressDialog, &QProgressDialog::canceled, [] {
+            QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
+            unload(EXIT_SUCCESS);
+        });
+    } else {
+        g_progressDialog->setLabelText(QObject::tr("Succeed"));
+        QTimer::singleShot(2000, [] {
+            QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
+            unload(EXIT_SUCCESS);
+        });
+    }
     QCoreApplication::processEvents();
-    QTimer::singleShot(2000, [] {
-        QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
-        unload(EXIT_SUCCESS);
-    });
 }
