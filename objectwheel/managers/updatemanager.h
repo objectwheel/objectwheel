@@ -20,11 +20,13 @@ public:
     static bool isUpdateCheckRunning();
     static qint64 downloadSize();
     static void update();
+    static void cancelUpdate();
 
 private:
     static QString hostOS();
     static QDir topDir();
     static QCborMap generateCacheForDir(const QDir& dir);
+    static int download(QFutureInterfaceBase* futureInterface);
 
 private slots:
     void onConnect();
@@ -34,6 +36,9 @@ private slots:
     void onUpdateCheckFinish(bool succeed);
 
 signals:
+    void downloadStarted();
+    void downloadProgress(int progress);
+    void downloadFinished(bool succeed);
     void updateCheckStarted();
     void updateCheckFinished(bool succeed);
 
@@ -49,6 +54,7 @@ private:
     static QCborMap s_differences;
     static QString s_changelog;
     static qint64 s_downloadSize;
+    static QFutureWatcher<int> s_downloadWatcher;
     static QFutureWatcher<QCborMap> s_localMetaInfoWatcher;
 };
 

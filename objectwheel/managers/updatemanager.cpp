@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QFuture>
+#include <QTcpSocket>
 
 enum StatusCode {
     BadRequest,
@@ -24,6 +25,7 @@ QCborMap UpdateManager::s_remoteMetaInfo;
 QCborMap UpdateManager::s_differences;
 QString UpdateManager::s_changelog;
 qint64 UpdateManager::s_downloadSize = 0;
+QFutureWatcher<int> UpdateManager::s_downloadWatcher;
 QFutureWatcher<QCborMap> UpdateManager::s_localMetaInfoWatcher;
 
 static qint64 sizeFromValue(const QCborValue& value)
@@ -106,9 +108,17 @@ qint64 UpdateManager::downloadSize()
 
 void UpdateManager::update()
 {
+    // TODO
+    s_downloadWatcher.setFuture(Async::run(QThreadPool::globalInstance(), &UpdateManager::download));
+
     QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
                             QStringList(ApplicationCore::updatesPath() + QLatin1String("/Diff.meta")));
     QCoreApplication::quit();
+}
+
+void UpdateManager::cancelUpdate()
+{
+    // TODO
 }
 
 QString UpdateManager::hostOS()
@@ -159,6 +169,42 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
         }
     }
     return cache;
+}
+
+int UpdateManager::download(QFutureInterfaceBase* futureInterface)
+{
+    auto future = static_cast<QFutureInterface<int>*>(futureInterface);
+    future->setProgressRange(0, 100);
+    future->setProgressValue(0);
+
+    qint64 downloadedSize = 0;
+    const qint64 totalSize = s_downloadSize;
+
+    QTcpSocket socket;
+    socket.connectToHost(ServerManager::instance()->peerAddress(), 54544, QTcpSocket::ReadOnly);
+
+    foreach (const QCborValue& key, s_differences.keys()) {
+        if (future->isPaused())
+            future->waitForResume();
+        if (future->isCanceled())
+            return 100;
+
+        const QString& filePath = QDir::cleanPath(key.toString());
+        const bool remove = s_differences.value(key).toBool(true);
+
+        if (remove)
+            continue;
+
+        const QCborValue& value = s_remoteMetaInfo.value(key);
+        const QString& fileHash = hashFromValue(value);
+        const qint64 fileSize = sizeFromValue(value);
+
+        downloadedSize += fileSize;
+        future->setProgressValue(100 * qreal(downloadedSize) / totalSize);
+    }
+
+    future->reportResult(100);
+    return 100;
 }
 
 void UpdateManager::onConnect()
