@@ -13,6 +13,7 @@ HEADERS += $$PWD/controlcreationmanager.h \
            $$PWD/projectmanager.h \
            $$PWD/savemanager.h \
            $$PWD/servermanager.h \
+           $$PWD/payloadmanager.h \
            $$PWD/registrationapimanager.h \
            $$PWD/updatemanager.h \
            $$PWD/usermanager.h \
@@ -32,6 +33,7 @@ SOURCES += $$PWD/controlcreationmanager.cpp \
            $$PWD/projectmanager.cpp \
            $$PWD/savemanager.cpp \
            $$PWD/servermanager.cpp \
+           $$PWD/payloadmanager.cpp \
            $$PWD/registrationapimanager.cpp \
            $$PWD/updatemanager.cpp \
            $$PWD/usermanager.cpp \
