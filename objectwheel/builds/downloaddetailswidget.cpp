@@ -18,15 +18,15 @@ DownloadDetailsWidget::DownloadDetailsWidget(const QAbstractItemView* view, QWid
 
 DownloadDetailsWidget::~DownloadDetailsWidget()
 {
-    setIdentifier(QString());
+    setIdentifier(QByteArray());
 }
 
-QString DownloadDetailsWidget::identifier() const
+QByteArray DownloadDetailsWidget::identifier() const
 {
     return m_identifier;
 }
 
-void DownloadDetailsWidget::setIdentifier(const QString& identifier)
+void DownloadDetailsWidget::setIdentifier(const QByteArray& identifier)
 {
     if (m_identifier != identifier) {
         if (index().isValid() && m_view->itemDelegate())
@@ -56,14 +56,14 @@ QSize DownloadDetailsWidget::minimumSizeHint() const
 
 void DownloadDetailsWidget::onModelReset()
 {
-    setIdentifier(QString());
+    setIdentifier(QByteArray());
 }
 
 void DownloadDetailsWidget::onRowsAboutToBeRemoved(const QModelIndex&, int first, int last)
 {
     for (; first <= last; ++first) {
         if (first == index().row()) {
-            setIdentifier(QString());
+            setIdentifier(QByteArray());
             break;
         }
     }

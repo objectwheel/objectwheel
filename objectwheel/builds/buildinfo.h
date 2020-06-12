@@ -20,13 +20,13 @@ public:
     explicit BuildInfo(const QCborMap& request, QObject* parent = nullptr);
     ~BuildInfo() override;
 
-    QString identifier() const;
+    QByteArray identifier() const;
     const QCborMap& request() const;
     const QString& path() const;
     QList<Block>& recentBlocks();
 
-    QString uid() const;
-    void setUid(const QString& uid);
+    QByteArray uid() const;
+    void setUid(const QByteArray& uid);
 
 public:
     bool hasError() const;
@@ -36,8 +36,8 @@ public:
     QString status() const;
     void addStatus(const QString& status);
 
-    QString payloadUid() const;
-    void setPayloadUid(const QString& payloadUid);
+    QByteArray payloadUid() const;
+    void setPayloadUid(const QByteArray& payloadUid);
 
     QTime timeLeft() const;
     void setTimeLeft(const QTime& timeLeft);
@@ -56,9 +56,9 @@ public:
 
 private:
     static QStringList s_paths;
-    const QString m_identifier;
+    const QByteArray m_identifier;
     const QCborMap m_request;
-    QString m_uid;
+    QByteArray m_uid;
     QString m_path;
     QList<Block> m_recentBlocks;
 
@@ -66,7 +66,7 @@ private:
     bool m_errorFlag;
     QString m_status;
     QString m_statusTip;
-    QString m_payloadUid;
+    QByteArray m_payloadUid;
     QTime m_timeLeft;
     qreal m_speed;
     int m_totalBytes;

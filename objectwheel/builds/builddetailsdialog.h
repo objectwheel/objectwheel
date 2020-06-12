@@ -17,8 +17,8 @@ public:
     explicit BuildDetailsDialog(const QAbstractItemView* view, QWidget* parent = nullptr);
     ~BuildDetailsDialog() override;
 
-    QString identifier() const;
-    void setIdentifier(const QString& identifier);
+    QByteArray identifier() const;
+    void setIdentifier(const QByteArray& identifier);
 
 private slots:
     void highlight(int begin);
@@ -34,7 +34,7 @@ private:
     const QAbstractItemView* m_view;
     DownloadDetailsWidget* m_downloadDetailsWidget;
     QPlainTextEdit* m_detailsTextEdit;
-    QString m_identifier;
+    QByteArray m_identifier;
 };
 
 #endif // BUILDDETAILSDIALOG_H

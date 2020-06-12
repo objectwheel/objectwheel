@@ -45,15 +45,15 @@ BuildDetailsDialog::BuildDetailsDialog(const QAbstractItemView* view, QWidget* p
 
 BuildDetailsDialog::~BuildDetailsDialog()
 {
-    setIdentifier(QString());
+    setIdentifier(QByteArray());
 }
 
-QString BuildDetailsDialog::identifier() const
+QByteArray BuildDetailsDialog::identifier() const
 {
     return m_identifier;
 }
 
-void BuildDetailsDialog::setIdentifier(const QString& identifier)
+void BuildDetailsDialog::setIdentifier(const QByteArray& identifier)
 {
     if (m_identifier != identifier) {
         m_identifier = identifier;
@@ -91,7 +91,7 @@ void BuildDetailsDialog::highlight(int begin)
 
 void BuildDetailsDialog::onModelReset()
 {
-    setIdentifier(QString());
+    setIdentifier(QByteArray());
     reject();
 }
 
@@ -99,7 +99,7 @@ void BuildDetailsDialog::onRowsAboutToBeRemoved(const QModelIndex&, int first, i
 {
     for (; first <= last; ++first) {
         if (first == index().row()) {
-            setIdentifier(QString());
+            setIdentifier(QByteArray());
             reject();
             break;
         }

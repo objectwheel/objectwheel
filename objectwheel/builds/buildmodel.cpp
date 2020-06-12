@@ -4,7 +4,6 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <zipasync.h>
-#include <payloadrelay.h>
 
 #include <QCborMap>
 #include <QTemporaryFile>
@@ -35,23 +34,22 @@ enum StatusCode {
 Q_DECLARE_METATYPE(StatusCode)
 
 BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
-  , m_payloadRelay(new PayloadRelay(ServerManager::Payload, ServerManager::ResponsePayload, this))
 {
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
             this, &BuildModel::onServerResponse, Qt::QueuedConnection);
     //
-    connect(m_payloadRelay, &PayloadRelay::bytesUploaded,
+    connect(PayloadManager::instance(), &PayloadManager::bytesUploaded,
             this, &BuildModel::onPayloadBytesUploaded);
-    connect(m_payloadRelay, &PayloadRelay::uploadFinished,
+    connect(PayloadManager::instance(), &PayloadManager::uploadFinished,
             this, &BuildModel::onPayloadUploadFinished);
-    connect(m_payloadRelay, &PayloadRelay::uploadTimedout,
+    connect(PayloadManager::instance(), &PayloadManager::uploadTimedout,
             this, &BuildModel::onPayloadUploadTimedout);
     //
-    connect(m_payloadRelay, &PayloadRelay::bytesDownloaded,
+    connect(PayloadManager::instance(), &PayloadManager::bytesDownloaded,
             this, &BuildModel::onPayloadBytesDownloaded);
-    connect(m_payloadRelay, &PayloadRelay::downloadFinished,
+    connect(PayloadManager::instance(), &PayloadManager::downloadFinished,
             this, &BuildModel::onPayloadDownloadFinished);
-    connect(m_payloadRelay, &PayloadRelay::downloadTimedout,
+    connect(PayloadManager::instance(), &PayloadManager::downloadTimedout,
             this, &BuildModel::onPayloadDownloadTimedout);
 }
 
@@ -230,8 +228,8 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     beginRemoveRows(parent, row, row + count - 1);
     for (int i = 0; i < count; ++i) {
         BuildInfo* buildInfo = m_buildInfos.takeAt(row + i);
-        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
-        m_payloadRelay->cancelDownload(buildInfo->payloadUid());
+        PayloadManager::cancelUpload(buildInfo->payloadUid());
+        PayloadManager::cancelDownload(buildInfo->payloadUid());
         if (buildInfo->state() != Finished && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
@@ -241,11 +239,11 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-QModelIndex BuildModel::indexFromIdentifier(const QString& identifier) const
+QModelIndex BuildModel::indexFromIdentifier(const QByteArray& identifier) const
 {
     for (int i = 0; i < rowCount(); ++i) {
         const QModelIndex& index = BuildModel::index(i, 0);
-        if (identifier == index.data(BuildModel::Identifier).toString())
+        if (identifier == index.data(BuildModel::Identifier).toByteArray())
             return index;
     }
     return QModelIndex();
@@ -256,8 +254,8 @@ void BuildModel::clear()
     beginResetModel();
     for (int i = 0; i < m_buildInfos.size(); ++i) {
         BuildInfo* buildInfo = m_buildInfos.at(i);
-        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
-        m_payloadRelay->cancelDownload(buildInfo->payloadUid());
+        PayloadManager::cancelUpload(buildInfo->payloadUid());
+        PayloadManager::cancelDownload(buildInfo->payloadUid());
         if (buildInfo->state() != Finished && ServerManager::isConnected())
             ServerManager::send(ServerManager::CancelCloudBuild, buildInfo->uid());
         delete buildInfo;
@@ -296,7 +294,7 @@ void BuildModel::start(BuildInfo* buildInfo)
     tempFile.remove();
 
     const QByteArray& payload = UtilityFunctions::pushCbor(buildInfo->request(), data);
-    const QString& payloadUid = m_payloadRelay->scheduleUpload(ServerManager::instance(), payload);
+    const QByteArray& payloadUid = PayloadManager::scheduleUpload(ServerManager::instance(), payload);
 
     ServerManager::send(ServerManager::RequestCloudBuild,
                         UserManager::email(),
@@ -324,7 +322,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
     // take it into consideration.
 
     StatusCode status;
-    QString uid;
+    QByteArray uid;
     UtilityFunctions::pullCbor(data, command, status, uid);
     BuildInfo* buildInfo = buildInfoFromUid(uid);
 
@@ -351,9 +349,9 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
         if (buildInfo->state() == Uploading)
-            m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+            PayloadManager::cancelUpload(buildInfo->payloadUid());
         else
-            m_payloadRelay->cancelDownload(buildInfo->payloadUid());
+            PayloadManager::cancelDownload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -361,7 +359,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Invalid request"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        PayloadManager::cancelUpload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -369,7 +367,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Invalid user credential"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        PayloadManager::cancelUpload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -377,13 +375,13 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->addStatus(tr("Simultaneous build limit exceeded"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
-        m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+        PayloadManager::cancelUpload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case RequestSucceed: {
         Q_ASSERT(!uid.isEmpty());
-        QString payloadUid;
+        QByteArray payloadUid;
         UtilityFunctions::pullCbor(data, command, status, payloadUid, uid);
         buildInfo->setUid(uid);
         buildInfo->addStatus(tr("Uploading the project..."));
@@ -442,9 +440,9 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
         if (buildInfo->state() == Uploading)
-            m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+            PayloadManager::cancelUpload(buildInfo->payloadUid());
         else
-            m_payloadRelay->cancelDownload(buildInfo->payloadUid());
+            PayloadManager::cancelDownload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
@@ -453,17 +451,17 @@ void BuildModel::onServerResponse(const QByteArray& data)
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
         if (buildInfo->state() == Uploading)
-            m_payloadRelay->cancelUpload(buildInfo->payloadUid());
+            PayloadManager::cancelUpload(buildInfo->payloadUid());
         else
-            m_payloadRelay->cancelDownload(buildInfo->payloadUid());
+            PayloadManager::cancelDownload(buildInfo->payloadUid());
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
     case BuildSucceed: {
-        QString payloadUid;
+        QByteArray payloadUid;
         UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
         buildInfo->setPayloadUid(payloadUid);
-        m_payloadRelay->registerDownload(ServerManager::instance(), payloadUid);
+        PayloadManager::registerDownload(ServerManager::instance(), payloadUid);
     } break;
 
     default:
@@ -500,7 +498,7 @@ void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<
     }
 }
 
-void BuildModel::onPayloadBytesUploaded(const QString& uid, int bytes)
+void BuildModel::onPayloadBytesUploaded(const QByteArray& uid, int bytes)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(uid)) {
         QSet<int> changedRoles;
@@ -515,7 +513,7 @@ void BuildModel::onPayloadBytesUploaded(const QString& uid, int bytes)
     }
 }
 
-void BuildModel::onPayloadBytesDownloaded(const QString& payloadUid, const QByteArray& chunk, int totalBytes)
+void BuildModel::onPayloadBytesDownloaded(const QByteArray& payloadUid, const QByteArray& chunk, int totalBytes)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         QSet<int> changedRoles;
@@ -537,7 +535,7 @@ void BuildModel::onPayloadBytesDownloaded(const QString& payloadUid, const QByte
     }
 }
 
-void BuildModel::onPayloadUploadFinished(const QString& payloadUid)
+void BuildModel::onPayloadUploadFinished(const QByteArray& payloadUid)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
@@ -553,7 +551,7 @@ void BuildModel::onPayloadUploadFinished(const QString& payloadUid)
     }
 }
 
-void BuildModel::onPayloadDownloadFinished(const QString& payloadUid, const QByteArray& data)
+void BuildModel::onPayloadDownloadFinished(const QByteArray& payloadUid, const QByteArray& data)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
@@ -578,7 +576,7 @@ void BuildModel::onPayloadDownloadFinished(const QString& payloadUid, const QByt
     }
 }
 
-void BuildModel::onPayloadUploadTimedout(const QString& payloadUid)
+void BuildModel::onPayloadUploadTimedout(const QByteArray& payloadUid)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
@@ -590,7 +588,7 @@ void BuildModel::onPayloadUploadTimedout(const QString& payloadUid)
     }
 }
 
-void BuildModel::onPayloadDownloadTimedout(const QString& payloadUid)
+void BuildModel::onPayloadDownloadTimedout(const QByteArray& payloadUid)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
@@ -607,7 +605,7 @@ QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
 }
 
-BuildInfo* BuildModel::buildInfoFromUid(const QString& uid) const
+BuildInfo* BuildModel::buildInfoFromUid(const QByteArray& uid) const
 {
     if (!uid.isEmpty()) {
         for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
@@ -618,7 +616,7 @@ BuildInfo* BuildModel::buildInfoFromUid(const QString& uid) const
     return nullptr;
 }
 
-BuildInfo* BuildModel::buildInfoFromPayloadUid(const QString& payloadUid) const
+BuildInfo* BuildModel::buildInfoFromPayloadUid(const QByteArray& payloadUid) const
 {
     if (!payloadUid.isEmpty()) {
         for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {

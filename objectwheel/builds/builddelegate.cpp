@@ -46,7 +46,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
 
     const QSize& buttonSize = index.data(BuildModel::ButtonSize).toSize();
     auto model = static_cast<const BuildModel*>(index.model());
-    const QString& identifier = index.data(BuildModel::Identifier).toString();
+    const QByteArray& identifier = index.data(BuildModel::Identifier).toByteArray();
 
     QPushButton* infoButton = nullptr;
     if (opt.widget == opt.view) {
@@ -83,7 +83,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             [=] { emit openFolderButtonClicked(model->indexFromIdentifier(identifier)); });
     connect(model, &BuildModel::downloadFinished,
             openFolderButton, [=] (const QModelIndex& i) {
-        if (i.data(BuildModel::Identifier).toString() == identifier)
+        if (i.data(BuildModel::Identifier).toByteArray() == identifier)
             openFolderButton->setEnabled(true);
     });
 

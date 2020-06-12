@@ -22,8 +22,6 @@ public:
     enum ServerCommands {
         Invalid = 0x201f,
         MessageTooLarge,
-        Payload,
-        ResponsePayload,
         Login,
         LoginSuccessful,
         LoginFailure,

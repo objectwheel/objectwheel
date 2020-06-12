@@ -96,7 +96,7 @@ BuildInfo::~BuildInfo()
     s_paths.removeOne(m_path.toLower());
 }
 
-QString BuildInfo::identifier() const
+QByteArray BuildInfo::identifier() const
 {
     return m_identifier;
 }
@@ -116,12 +116,12 @@ QList<BuildInfo::Block>& BuildInfo::recentBlocks()
     return m_recentBlocks;
 }
 
-QString BuildInfo::uid() const
+QByteArray BuildInfo::uid() const
 {
     return m_uid;
 }
 
-void BuildInfo::setUid(const QString& uid)
+void BuildInfo::setUid(const QByteArray& uid)
 {
     m_uid = uid;
 }
@@ -165,12 +165,12 @@ void BuildInfo::addStatus(const QString& status)
     m_statusTip = line.mid(9);
 }
 
-QString BuildInfo::payloadUid() const
+QByteArray BuildInfo::payloadUid() const
 {
     return m_payloadUid;
 }
 
-void BuildInfo::setPayloadUid(const QString& payloadUid)
+void BuildInfo::setPayloadUid(const QByteArray& payloadUid)
 {
     m_payloadUid = payloadUid;
 }

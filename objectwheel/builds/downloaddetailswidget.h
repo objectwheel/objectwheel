@@ -12,8 +12,8 @@ public:
     explicit DownloadDetailsWidget(const QAbstractItemView* view, QWidget* parent = nullptr);
     ~DownloadDetailsWidget() override;
 
-    QString identifier() const;
-    void setIdentifier(const QString& identifier);
+    QByteArray identifier() const;
+    void setIdentifier(const QByteArray& identifier);
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
@@ -35,7 +35,7 @@ private:
 
 private:
     const QAbstractItemView* m_view;
-    QString m_identifier;
+    QByteArray m_identifier;
     QWidget* m_editor;
 };
 

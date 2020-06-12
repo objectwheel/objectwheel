@@ -8,7 +8,6 @@
 
 class BuildInfo;
 class QCborMap;
-class PayloadRelay;
 
 class BuildModel final : public QAbstractListModel
 {
@@ -54,7 +53,7 @@ public:
 
     bool removeRows(int row, int count, const QModelIndex& parent = QModelIndex()) override;
 
-    QModelIndex indexFromIdentifier(const QString& identifier) const;
+    QModelIndex indexFromIdentifier(const QByteArray& identifier) const;
 
 public slots:
     void clear();
@@ -63,12 +62,12 @@ private slots:
     void start(BuildInfo* buildInfo);
     void onServerResponse(const QByteArray& data);
     void emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles);
-    void onPayloadBytesUploaded(const QString& uid, int bytes);
-    void onPayloadBytesDownloaded(const QString& payloadUid, const QByteArray& chunk, int totalBytes);
-    void onPayloadUploadFinished(const QString& payloadUid);
-    void onPayloadDownloadFinished(const QString& payloadUid, const QByteArray& data);
-    void onPayloadUploadTimedout(const QString& payloadUid);
-    void onPayloadDownloadTimedout(const QString& payloadUid);
+    void onPayloadBytesUploaded(const QByteArray& uid, int bytes);
+    void onPayloadBytesDownloaded(const QByteArray& payloadUid, const QByteArray& chunk, int totalBytes);
+    void onPayloadUploadFinished(const QByteArray& payloadUid);
+    void onPayloadDownloadFinished(const QByteArray& payloadUid, const QByteArray& data);
+    void onPayloadUploadTimedout(const QByteArray& payloadUid);
+    void onPayloadDownloadTimedout(const QByteArray& payloadUid);
 
 private:
     void timerEvent(QTimerEvent* event) override;
@@ -79,13 +78,12 @@ signals:
 
 private:
     QIcon platformIcon(const QString& rawPlatformName) const;
-    BuildInfo* buildInfoFromUid(const QString& uid) const;
-    BuildInfo* buildInfoFromPayloadUid(const QString& payloadUid) const;
+    BuildInfo* buildInfoFromUid(const QByteArray& uid) const;
+    BuildInfo* buildInfoFromPayloadUid(const QByteArray& payloadUid) const;
     QModelIndex indexFromBuildInfo(const BuildInfo* buildInfo) const;
     void calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const;
 
 private:
-    PayloadRelay* m_payloadRelay;
     QList<BuildInfo*> m_buildInfos;
     QBasicTimer m_changeSignalTimer;
     QHash<int, QSet<int>> m_changedRows;
