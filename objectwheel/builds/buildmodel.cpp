@@ -39,10 +39,8 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
             this, &BuildModel::onServerResponse, Qt::QueuedConnection);
     //
-    connect(PayloadManager::instance(), &PayloadManager::bytesUploaded,
-            this, &BuildModel::onPayloadBytesUploaded);
-    connect(PayloadManager::instance(), &PayloadManager::uploadFinished,
-            this, &BuildModel::onPayloadUploadFinished);
+    connect(PayloadManager::instance(), &PayloadManager::bytesWritten,
+            this, &BuildModel::onPayloadManagerBytesWritten);
     connect(PayloadManager::instance(), &PayloadManager::uploadTimedout,
             this, &BuildModel::onPayloadUploadTimedout);
     //
@@ -459,7 +457,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QByteArray payloadUid;
         UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
         buildInfo->setPayloadUid(payloadUid);
-        PayloadManager::registerDownload(ServerManager::instance(), payloadUid);
+        PayloadManager::registerDownload(payloadUid);
     } break;
 
     default:
@@ -496,22 +494,35 @@ void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<
     }
 }
 
-void BuildModel::onPayloadBytesUploaded(const QByteArray& uid, int bytes)
+void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 bytes)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(uid)) {
         QSet<int> changedRoles;
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
+        Q_ASSERT(buildInfo->state() == Uploading);
 
         buildInfo->setTransferredBytes(buildInfo->transferredBytes() + bytes);
         changedRoles.unite({ TransferredBytesRole });
 
         calculateTransferRate(buildInfo, bytes, changedRoles);
         emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+
+        if (buildInfo->transferredBytes() < buildInfo->totalBytes())
+            return;
+
+        PayloadManager::cancelUpload(uid);
+
+        buildInfo->addStatus(tr("Waiting the server to start..."));
+        buildInfo->recentBlocks().clear();
+        buildInfo->setState(Downloading);
+
+        emit uploadFinished(index);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
     }
 }
 
-void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device, int totalBytes)
+void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device, qint64 totalBytes)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         QSet<int> changedRoles;
@@ -555,22 +566,6 @@ void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevi
             file.write(*buildInfo->buffer());
         } while (false);
         emit downloadFinished(index);
-        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
-    }
-}
-
-void BuildModel::onPayloadUploadFinished(const QByteArray& payloadUid)
-{
-    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
-        const QModelIndex& index = indexFromBuildInfo(buildInfo);
-        Q_ASSERT(index.isValid());
-        Q_ASSERT(buildInfo->state() == Uploading);
-
-        buildInfo->addStatus(tr("Waiting the server to start..."));
-        buildInfo->recentBlocks().clear();
-        buildInfo->setState(Downloading);
-
-        emit uploadFinished(index);
         emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
     }
 }
