@@ -24,6 +24,7 @@ public:
     const QCborMap& request() const;
     const QString& path() const;
     QList<Block>& recentBlocks();
+    QByteArray* buffer();
 
     QByteArray uid() const;
     void setUid(const QByteArray& uid);
@@ -61,6 +62,7 @@ private:
     QByteArray m_uid;
     QString m_path;
     QList<Block> m_recentBlocks;
+    QByteArray m_buffer;
 
 private:
     bool m_errorFlag;

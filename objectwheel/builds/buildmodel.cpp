@@ -46,10 +46,8 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
     connect(PayloadManager::instance(), &PayloadManager::uploadTimedout,
             this, &BuildModel::onPayloadUploadTimedout);
     //
-    connect(PayloadManager::instance(), &PayloadManager::bytesDownloaded,
-            this, &BuildModel::onPayloadBytesDownloaded);
-    connect(PayloadManager::instance(), &PayloadManager::downloadFinished,
-            this, &BuildModel::onPayloadDownloadFinished);
+    connect(PayloadManager::instance(), &PayloadManager::readyRead,
+            this, &BuildModel::onPayloadManagerReadyRead);
     connect(PayloadManager::instance(), &PayloadManager::downloadTimedout,
             this, &BuildModel::onPayloadDownloadTimedout);
 }
@@ -513,7 +511,7 @@ void BuildModel::onPayloadBytesUploaded(const QByteArray& uid, int bytes)
     }
 }
 
-void BuildModel::onPayloadBytesDownloaded(const QByteArray& payloadUid, const QByteArray& chunk, int totalBytes)
+void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device, int totalBytes)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         QSet<int> changedRoles;
@@ -527,11 +525,37 @@ void BuildModel::onPayloadBytesDownloaded(const QByteArray& payloadUid, const QB
             changedRoles.unite({ StatusRole, Qt::StatusTipRole, TotalBytesRole });
         }
 
-        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + chunk.size());
+        buildInfo->setTransferredBytes(buildInfo->transferredBytes() + device->bytesAvailable());
         changedRoles.unite({ TransferredBytesRole });
 
-        calculateTransferRate(buildInfo, chunk.size(), changedRoles);
+        calculateTransferRate(buildInfo, device->bytesAvailable(), changedRoles);
         emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
+
+        if (buildInfo->buffer()->isEmpty())
+            buildInfo->buffer()->reserve(totalBytes);
+        buildInfo->buffer()->append(device->readAll());
+        if (buildInfo->buffer()->size() < totalBytes)
+            return;
+
+        PayloadManager::cancelDownload(payloadUid);
+
+        buildInfo->addStatus(tr("Done"));
+        buildInfo->setState(Finished);
+        do {
+            const QString& filePath = index.data(PathRole).toString();
+            if (QFile::exists(filePath)) {
+                qWarning("BuildModel: Executable file already exists");
+                break;
+            }
+            QFile file(filePath);
+            if (!file.open(QFile::WriteOnly)) {
+                qWarning("BuildModel: Cannot open executable file");
+                break;
+            }
+            file.write(*buildInfo->buffer());
+        } while (false);
+        emit downloadFinished(index);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
     }
 }
 
@@ -547,31 +571,6 @@ void BuildModel::onPayloadUploadFinished(const QByteArray& payloadUid)
         buildInfo->setState(Downloading);
 
         emit uploadFinished(index);
-        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
-    }
-}
-
-void BuildModel::onPayloadDownloadFinished(const QByteArray& payloadUid, const QByteArray& data)
-{
-    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
-        const QModelIndex& index = indexFromBuildInfo(buildInfo);
-        Q_ASSERT(index.isValid());
-        buildInfo->addStatus(tr("Done"));
-        buildInfo->setState(Finished);
-        do {
-            const QString& filePath = index.data(PathRole).toString();
-            if (QFile::exists(filePath)) {
-                qWarning("BuildModel: Executable file already exists");
-                break;
-            }
-            QFile file(filePath);
-            if (!file.open(QFile::WriteOnly)) {
-                qWarning("BuildModel: Cannot open executable file");
-                break;
-            }
-            file.write(data);
-        } while (false);
-        emit downloadFinished(index);
         emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
     }
 }

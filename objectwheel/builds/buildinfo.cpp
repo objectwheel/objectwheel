@@ -116,6 +116,11 @@ QList<BuildInfo::Block>& BuildInfo::recentBlocks()
     return m_recentBlocks;
 }
 
+QByteArray* BuildInfo::buffer()
+{
+    return &m_buffer;
+}
+
 QByteArray BuildInfo::uid() const
 {
     return m_uid;
