@@ -44,10 +44,11 @@ public:
     static void cancelUpload(const QByteArray& uid);
 
 private slots:
-    static void processData(QSslSocket* socket);
+    static void processConnected(QSslSocket* socket);
+    static void startUploading(Upload* upload);
 
 private:
-    static void handleBytesWritten(const QByteArray& uid, qint64 bytes);
+    static void handleBytesWritten(Upload* upload, qint64 bytes);
     static void timeoutDownload(const Download* download);
     static void timeoutUpload(const Upload* upload);
 

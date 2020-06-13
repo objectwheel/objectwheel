@@ -55,6 +55,7 @@ void PayloadManager::registerDownload(const QByteArray& uid)
     download->timer.setSingleShot(true);
     download->timer.start(DataTransferTimeout);
     connect(&download->timer, &QTimer::timeout, s_instance, [=] { timeoutDownload(download); });
+    connect(download->socket, &QSslSocket::disconnected, s_instance, [=] { cancelDownload(download->uid); });
     s_downloads.append(download);
 #if defined(QT_DEBUG)
     QMetaObject::invokeMethod(download->socket, "connectToHost",
@@ -78,13 +79,20 @@ QByteArray PayloadManager::registerUpload(const QByteArray& data)
     upload->timer.setSingleShot(true);
     upload->timer.start(DataTransferTimeout);
     connect(&upload->timer, &QTimer::timeout, s_instance, [=] { timeoutUpload(upload); });
+    connect(upload->socket, &QSslSocket::disconnected, s_instance, [=] { cancelUpload(upload->uid); });
+    connect(upload->socket, &QSslSocket::readyRead, s_instance, [=] { cancelUpload(upload->uid); }, Qt::QueuedConnection);
     s_uploads.append(upload);
-
 #if defined(QT_DEBUG)
+    connect(upload->socket, &QSslSocket::connected, s_instance, [=] { startUploading(upload); });
+    connect(upload->socket, &QSslSocket::bytesWritten,
+            s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
     QMetaObject::invokeMethod(upload->socket, "connectToHost",
                               Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
                               Q_ARG(quint16, 5455));
 #else
+    connect(upload->socket, &QSslSocket::encrypted, s_instance, [=] { startUploading(upload); });
+    connect(upload->socket, &QSslSocket::encryptedBytesWritten,
+            s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
     QMetaObject::invokeMethod(upload->socket, "connectToHostEncrypted",
                               Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
                               Q_ARG(quint16, 5455));
@@ -93,7 +101,7 @@ QByteArray PayloadManager::registerUpload(const QByteArray& data)
     return upload->uid;
 }
 
-void PayloadManager::processData(QSslSocket* socket)
+void PayloadManager::processConnected(QSslSocket* socket)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(socket);
@@ -158,46 +166,47 @@ void PayloadManager::processData(QSslSocket* socket)
             emit s_instance->readyRead(download->uid, socket, download->totalBytes);
         }
     } else {
-        if (socket->bytesAvailable() > 0 || upload->data.isEmpty()) {
-            WARNING(QLatin1String("Socket aborted, absurd data received, address: ") +
-                    socket->peerAddress().toString() + QLatin1String(", uid: ") + upload->uid);
-            socket->abort();
-            return;
-        }
-        upload->timer.start(upload->timer.interval());
-        // Write the header
-        const qint64 totalBytes = qToBigEndian<qint64>(upload->data.size());
-        socket->write(upload->uid);
-        socket->write(reinterpret_cast<const char*>(&totalBytes), 8);
-        // Write the body
-        qint64 currentPosition = 0;
-        qint64 bytesLeft = upload->data.size();
-        qint64 numFrames = bytesLeft / FrameSizeInBytes;
-        if (bytesLeft % FrameSizeInBytes > 0)
-            numFrames++;
-        for (qint64 i = 0; i < numFrames; ++i) {
-            const qint64 size = qMin(bytesLeft, qint64(FrameSizeInBytes));
-            if (socket->write(upload->data.constData() + currentPosition, size) != size) {
-                CRITICAL(QLatin1String("Socket aborted, failed to write data, address: ") +
-                         socket->peerAddress().toString() + QLatin1String(", uid: ") + upload->uid +
-                         QLatin1String(", error: ") + socket->errorString());
-                socket->abort();
-                return;
-            }
-            currentPosition += size;
-            bytesLeft -= size;
-        }
-        upload->data.clear();
+
     }
 }
 
-void PayloadManager::handleBytesWritten(const QByteArray& uid, qint64 bytes)
+void PayloadManager::startUploading(Upload* upload)
+{
+    Q_ASSERT(upload);
+    Q_ASSERT(!upload->data.isEmpty());
+
+    upload->timer.start(upload->timer.interval());
+    // Write the header
+    const qint64 totalBytes = qToBigEndian<qint64>(upload->data.size());
+    upload->socket->write(upload->uid);
+    upload->socket->write(reinterpret_cast<const char*>(&totalBytes), 8);
+    // Write the body
+    qint64 currentPosition = 0;
+    qint64 bytesLeft = upload->data.size();
+    qint64 numFrames = bytesLeft / FrameSizeInBytes;
+    if (bytesLeft % FrameSizeInBytes > 0)
+        numFrames++;
+    for (qint64 i = 0; i < numFrames; ++i) {
+        const qint64 size = qMin(bytesLeft, qint64(FrameSizeInBytes));
+        if (upload->socket->write(upload->data.constData() + currentPosition, size) != size) {
+            CRITICAL(QLatin1String("Socket aborted, failed to write data, address: ") +
+                     upload->socket->peerAddress().toString() + QLatin1String(", uid: ") + upload->uid +
+                     QLatin1String(", error: ") + upload->socket->errorString());
+            upload->socket->abort();
+            return;
+        }
+        currentPosition += size;
+        bytesLeft -= size;
+    }
+    upload->data.clear();
+}
+
+void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
 {
     Q_ASSERT(s_instance);
-    if (Upload* upload = uploadFromUid(uid)) {
-        upload->timer.start(upload->timer.interval());
-        emit s_instance->bytesWritten(uid, bytes);
-    }
+    Q_ASSERT(upload);
+    upload->timer.start(upload->timer.interval());
+    emit s_instance->bytesWritten(upload->uid, bytes);
 }
 
 void PayloadManager::cancelDownload(const QByteArray& uid)
