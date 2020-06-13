@@ -4,6 +4,7 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <zipasync.h>
+#include <payloadmanager.h>
 
 #include <QCborMap>
 #include <QTemporaryFile>
@@ -300,7 +301,6 @@ void BuildModel::start(BuildInfo* buildInfo)
                         UserManager::email(),
                         UserManager::password(),
                         payloadUid);
-    ServerManager::instance()->flush();
 
     buildInfo->setPayloadUid(payloadUid);
     buildInfo->setTotalBytes(payload.size());
