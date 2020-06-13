@@ -50,12 +50,21 @@ void PayloadManager::registerDownload(const QByteArray& uid)
     Q_ASSERT(!hasDownload(uid) && !hasUpload(uid));
     auto download = new Download;
     download->uid = uid;
-    download->socket = nullptr;
+    download->socket = new QSslSocket(s_instance);
     download->totalBytes = 0;
     download->timer.setSingleShot(true);
     download->timer.start(DataTransferTimeout);
     connect(&download->timer, &QTimer::timeout, s_instance, [=] { timeoutDownload(download); });
     s_downloads.append(download);
+#if defined(QT_DEBUG)
+    QMetaObject::invokeMethod(download->socket, "connectToHost",
+                              Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
+                              Q_ARG(quint16, 5455));
+#else
+    QMetaObject::invokeMethod(download->socket, "connectToHostEncrypted",
+                              Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
+                              Q_ARG(quint16, 5455));
+#endif
 }
 
 QByteArray PayloadManager::registerUpload(const QByteArray& data)
@@ -65,28 +74,23 @@ QByteArray PayloadManager::registerUpload(const QByteArray& data)
     auto upload = new Upload;
     upload->uid = HashFactory::generate();
     upload->data = data;
-    upload->socket = nullptr;
+    upload->socket = new QSslSocket(s_instance);
     upload->timer.setSingleShot(true);
     upload->timer.start(DataTransferTimeout);
     connect(&upload->timer, &QTimer::timeout, s_instance, [=] { timeoutUpload(upload); });
     s_uploads.append(upload);
+
+#if defined(QT_DEBUG)
+    QMetaObject::invokeMethod(upload->socket, "connectToHost",
+                              Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
+                              Q_ARG(quint16, 5455));
+#else
+    QMetaObject::invokeMethod(upload->socket, "connectToHostEncrypted",
+                              Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
+                              Q_ARG(quint16, 5455));
+#endif
+
     return upload->uid;
-}
-
-void PayloadManager::processNewConnection(QSslSocket* socket)
-{
-    Q_ASSERT(socket);
-    Q_ASSERT(socket->state() == QAbstractSocket::ConnectedState);
-    Q_ASSERT(!hasDownload(socket) && !hasUpload(socket));
-
-//    if (simultaneousConnectionCount(socket) > MaxSimultaneousConnections) {
-//        WARNING(QLatin1String("Max simultaneous connections exceeded, address: ") +
-//                socket->peerAddress().toString());
-//        socket->abort();
-//        return;
-//    }
-
-    UtilityFunctions::startSocketTimeout(socket, g_authKey, AuthenticationTimeout);
 }
 
 void PayloadManager::processData(QSslSocket* socket)

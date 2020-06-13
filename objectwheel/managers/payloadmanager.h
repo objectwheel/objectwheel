@@ -3,7 +3,6 @@
 
 #include <QSslSocket>
 #include <QTimer>
-#include <QPointer>
 
 class PayloadManager final : public QObject
 {
@@ -21,14 +20,14 @@ class PayloadManager final : public QObject
     struct Download {
         QByteArray uid;
         QTimer timer;
-        QPointer<QSslSocket> socket;
+        QSslSocket* socket;
         qint64 totalBytes;
     };
 
     struct Upload {
         QByteArray uid;
         QTimer timer;
-        QPointer<QSslSocket> socket;
+        QSslSocket* socket;
         QByteArray data;
     };
 
@@ -45,7 +44,6 @@ public:
     static void cancelUpload(const QByteArray& uid);
 
 private slots:
-    static void processNewConnection(QSslSocket* socket);
     static void processData(QSslSocket* socket);
 
 private:

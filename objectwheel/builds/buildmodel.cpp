@@ -291,7 +291,7 @@ void BuildModel::start(BuildInfo* buildInfo)
     tempFile.remove();
 
     const QByteArray& payload = UtilityFunctions::pushCbor(buildInfo->request(), data);
-    const QByteArray& payloadUid = PayloadManager::scheduleUpload(ServerManager::instance(), payload);
+    const QByteArray& payloadUid = PayloadManager::registerUpload(payload);
 
     ServerManager::send(ServerManager::RequestCloudBuild,
                         UserManager::email(),
@@ -565,6 +565,7 @@ void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevi
             }
             file.write(*buildInfo->buffer());
         } while (false);
+        buildInfo->buffer()->clear();
         emit downloadFinished(index);
         emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
     }
