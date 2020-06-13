@@ -44,22 +44,17 @@ public:
     static void cancelUpload(const QByteArray& uid);
 
 private slots:
-    static void processConnected(QSslSocket* socket);
-    static void startUploading(Upload* upload);
+    static void handleConnected(Upload* upload);
+    static void handleReadyRead(Download* download);
+    static void handleBytesWritten(Upload* upload, qint64 bytes);
 
 private:
-    static void handleBytesWritten(Upload* upload, qint64 bytes);
     static void timeoutDownload(const Download* download);
     static void timeoutUpload(const Upload* upload);
 
 private:
-    static int simultaneousConnectionCount(const QSslSocket* socket);
-    static bool hasDownload(const QSslSocket* socket);
-    static bool hasUpload(const QSslSocket* socket);
     static Download* downloadFromUid(const QByteArray& uid);
-    static Download* downloadFromSocket(const QSslSocket* socket);
     static Upload* uploadFromUid(const QByteArray& uid);
-    static Upload* uploadFromSocket(const QSslSocket* socket);
 
 signals:
     void downloadTimedout(const QByteArray& uid);
