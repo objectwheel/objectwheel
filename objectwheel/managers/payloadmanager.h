@@ -35,8 +35,11 @@ public:
     static void scheduleDownload(const QByteArray& uid);
     static QByteArray scheduleUpload(const QByteArray& data);
 
-    static void cancelDownload(const QByteArray& uid);
-    static void cancelUpload(const QByteArray& uid);
+    static void cancelDownload(const QByteArray& uid, bool abort = true);
+    static void cancelUpload(const QByteArray& uid, bool abort = true);
+
+    static void closeDownload(const QByteArray& uid);
+    static void closeUpload(const QByteArray& uid);
 
 private slots:
     static void handleEncrypted(Download* download);

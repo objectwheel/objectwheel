@@ -512,7 +512,7 @@ void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 byte
         if (buildInfo->transferredBytes() < buildInfo->totalBytes())
             return;
 
-        PayloadManager::cancelUpload(uid);
+        PayloadManager::closeUpload(uid);
 
         buildInfo->addStatus(tr("Waiting the server to start..."));
         buildInfo->recentBlocks().clear();
@@ -549,7 +549,7 @@ void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevi
         if (buildInfo->buffer()->size() < totalBytes)
             return;
 
-        PayloadManager::cancelDownload(payloadUid);
+        PayloadManager::closeDownload(payloadUid);
 
         buildInfo->addStatus(tr("Done"));
         buildInfo->setState(Finished);

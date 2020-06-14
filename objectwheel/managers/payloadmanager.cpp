@@ -170,30 +170,50 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
     emit s_instance->bytesWritten(upload->uid, bytes);
 }
 
-void PayloadManager::cancelDownload(const QByteArray& uid)
+void PayloadManager::cancelDownload(const QByteArray& uid, bool abort)
 {
     Q_ASSERT(s_instance);
     if (Download* download = downloadFromUid(uid)) {
         s_downloads.removeOne(download);
         download->socket->disconnect(s_instance);
-        if (download->socket->state() != QAbstractSocket::UnconnectedState)
-            download->socket->abort();
+        if (download->socket->state() != QAbstractSocket::UnconnectedState) {
+            if (abort)
+                download->socket->abort();
+            else
+                download->socket->close();
+        }
         download->socket->deleteLater();
         delete download;
     }
 }
 
-void PayloadManager::cancelUpload(const QByteArray& uid)
+void PayloadManager::cancelUpload(const QByteArray& uid, bool abort)
 {
     Q_ASSERT(s_instance);
     if (Upload* upload = uploadFromUid(uid)) {
         s_uploads.removeOne(upload);
         upload->socket->disconnect(s_instance);
-        if (upload->socket->state() != QAbstractSocket::UnconnectedState)
-            upload->socket->abort();
+        if (upload->socket->state() != QAbstractSocket::UnconnectedState) {
+            if (abort)
+                upload->socket->abort();
+            else
+                upload->socket->close();
+        }
         upload->socket->deleteLater();
         delete upload;
     }
+}
+
+void PayloadManager::closeDownload(const QByteArray& uid)
+{
+    Q_ASSERT(s_instance);
+    QTimer::singleShot(150, s_instance, [=] { cancelDownload(uid, false); });
+}
+
+void PayloadManager::closeUpload(const QByteArray& uid)
+{
+    Q_ASSERT(s_instance);
+    QTimer::singleShot(150, s_instance, [=] { cancelUpload(uid, false); });
 }
 
 void PayloadManager::handleEncrypted(Download* download)
