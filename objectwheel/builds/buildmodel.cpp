@@ -635,11 +635,13 @@ QModelIndex BuildModel::indexFromBuildInfo(const BuildInfo* buildInfo) const
 
 void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const
 {
+    const int IDEAL_BLOCK_SIZE = buildInfo->totalBytes() / chunkSize / 80;
     BuildInfo::Block block;
     block.size = chunkSize;
     block.timestamp = QDateTime::currentDateTime();
     buildInfo->recentBlocks().append(block);
-    if (buildInfo->recentBlocks().size() > 6)
+
+    if (buildInfo->recentBlocks().size() > qBound(2, IDEAL_BLOCK_SIZE, 100))
         buildInfo->recentBlocks().removeFirst();
 
     if (buildInfo->recentBlocks().size() > 1) {

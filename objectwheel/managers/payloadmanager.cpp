@@ -79,6 +79,7 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
     upload->uid = HashFactory::generate();
     upload->data = data;
     upload->bytesLeft = data.size();
+    upload->isSizeCorrected = false;
     upload->socket = new QSslSocket(s_instance);
     upload->timer.setSingleShot(true);
     upload->timer.start(DataTransferTimeout);
@@ -175,6 +176,10 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
     Q_ASSERT(s_instance);
     Q_ASSERT(upload);
     Q_ASSERT(s_uploads.contains(upload));
+    if (!upload->isSizeCorrected) {
+        upload->isSizeCorrected = true;
+        bytes -= 20; // Correct sent bytes size (12 uid + 8 size = 20 bytes)
+    }
     upload->timer.start(upload->timer.interval());
     upload->bytesLeft -= bytes;
     emit s_instance->bytesWritten(upload->uid, bytes, upload->bytesLeft <= 0);
