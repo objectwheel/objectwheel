@@ -20,11 +20,12 @@ class ControlRemovingManager;
 class ControlPropertyManager;
 class RunManager;
 class SaveManager;
-class UpdateManager;
 class WindowManager;
 class MenuManager;
 class HelpManager;
 class ServerManager;
+class PayloadManager;
+class UpdateManager;
 
 class ApplicationCore final
 {
@@ -60,6 +61,7 @@ private:
     static SystemSettings* s_systemSettings;
     static ModeManager* s_modeManager;
     static ServerManager* s_serverManager;
+    static PayloadManager* s_payloadManager;
     static UpdateManager* s_updateManager;
     static RegistrationApiManager* s_registrationApiManager;
     static UserManager* s_userManager;

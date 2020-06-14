@@ -27,10 +27,11 @@
 #include <helpmanager.h>
 #include <paintutils.h>
 #include <servermanager.h>
+#include <payloadmanager.h>
+#include <updatemanager.h>
 #include <modemanager.h>
 #include <splashscreen.h>
 #include <signalwatcher.h>
-#include <updatemanager.h>
 
 #include <QToolTip>
 #include <QScreen>
@@ -57,6 +58,7 @@ CodeEditorSettings* ApplicationCore::s_codeEditorSettings = nullptr;
 SystemSettings* ApplicationCore::s_systemSettings = nullptr;
 ModeManager* ApplicationCore::s_modeManager = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
+PayloadManager* ApplicationCore::s_payloadManager = nullptr;
 UpdateManager* ApplicationCore::s_updateManager = nullptr;
 RegistrationApiManager* ApplicationCore::s_registrationApiManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
@@ -130,6 +132,7 @@ ApplicationCore::ApplicationCore()
 
     s_modeManager = new ModeManager;
     s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)));
+    s_payloadManager = new PayloadManager;
     s_updateManager = new UpdateManager;
     s_registrationApiManager = new RegistrationApiManager;
     s_userManager = new UserManager;
@@ -213,6 +216,8 @@ ApplicationCore::~ApplicationCore()
     s_registrationApiManager = nullptr;
     delete s_updateManager;
     s_updateManager = nullptr;
+    delete s_payloadManager;
+    s_payloadManager = nullptr;
     delete s_serverManager;
     s_serverManager = nullptr;
     delete s_modeManager;

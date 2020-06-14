@@ -291,12 +291,13 @@ void BuildModel::start(BuildInfo* buildInfo)
     tempFile.remove();
 
     const QByteArray& payload = UtilityFunctions::pushCbor(buildInfo->request(), data);
-    const QByteArray& payloadUid = PayloadManager::registerUpload(payload);
+    const QByteArray& payloadUid = PayloadManager::scheduleUpload(payload);
 
     ServerManager::send(ServerManager::RequestCloudBuild,
                         UserManager::email(),
                         UserManager::password(),
                         payloadUid);
+    ServerManager::instance()->flush();
 
     buildInfo->setPayloadUid(payloadUid);
     buildInfo->setTotalBytes(payload.size());
@@ -457,7 +458,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QByteArray payloadUid;
         UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
         buildInfo->setPayloadUid(payloadUid);
-        PayloadManager::registerDownload(payloadUid);
+        PayloadManager::scheduleDownload(payloadUid);
     } break;
 
     default:

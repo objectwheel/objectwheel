@@ -58,6 +58,7 @@ DEFINES += APP_VER='"\\\"$$VERSION\\\""' \
            APP_GITHASH='"\\\"$$GIT_HASH\\\""' \
            APP_GITDATE='"\\\"$$GIT_DATE\\\""' \
            APP_WSSSERVER='"\\\"wss://objectwheel.com:5454\\\""'
+#           PAYLOADMANAGER_DEBUG
 
 CONFIG(release, debug | release) {
     !infile($$VERSION_FILE, PREVIOUS_VERSION, $$GIT_VERSION) {

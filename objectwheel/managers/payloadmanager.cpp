@@ -18,14 +18,14 @@ PayloadManager::~PayloadManager()
         download->socket->disconnect(this);
         if (download->socket->state() != QAbstractSocket::UnconnectedState)
             download->socket->abort();
-        delete download->socket;
+        download->socket->deleteLater();
         delete download;
     }
     for (const Upload* upload : qAsConst(s_uploads)) {
         upload->socket->disconnect(this);
         if (upload->socket->state() != QAbstractSocket::UnconnectedState)
             upload->socket->abort();
-        delete upload->socket;
+        upload->socket->deleteLater();
         delete upload;
     }
     s_downloads.clear();
@@ -38,68 +38,75 @@ PayloadManager* PayloadManager::instance()
     return s_instance;
 }
 
-void PayloadManager::registerDownload(const QByteArray& uid)
+void PayloadManager::scheduleDownload(const QByteArray& uid)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(uid.size() == 12);
+
     auto download = new Download;
     download->uid = uid;
     download->socket = new QSslSocket(s_instance);
     download->totalBytes = -1;
     download->timer.setSingleShot(true);
     download->timer.start(DataTransferTimeout);
+    s_downloads.append(download);
+
     connect(&download->timer, &QTimer::timeout,
             s_instance, [=] { timeoutDownload(download); });
     connect(download->socket, &QSslSocket::disconnected,
             s_instance, [=] { cancelDownload(download->uid); });
     connect(download->socket, &QSslSocket::readyRead,
             s_instance, [=] { handleReadyRead(download); }, Qt::QueuedConnection);
-    s_downloads.append(download);
-#if defined(QT_DEBUG)
-    QMetaObject::invokeMethod(download->socket, "connectToHost",
-                              Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
-                              Q_ARG(quint16, 5455));
+
+#if defined(PAYLOADMANAGER_DEBUG)
+    connect(download->socket, &QSslSocket::connected,
+            s_instance, [=] { handleEncrypted(download); });
+    download->socket->connectToHost(QStringLiteral("localhost"), 5455);
 #else
-    QMetaObject::invokeMethod(download->socket, "connectToHostEncrypted",
-                              Qt::QueuedConnection, Q_ARG(QString, "objectwheel.com"),
-                              Q_ARG(quint16, 5455));
+    connect(download->socket, &QSslSocket::encrypted,
+            s_instance, [=] { handleEncrypted(download); });
+    download->socket->connectToHostEncrypted(QStringLiteral("objectwheel.com"), 5455);
 #endif
 }
 
-QByteArray PayloadManager::registerUpload(const QByteArray& data)
+QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(!data.isEmpty());
+
     auto upload = new Upload;
     upload->uid = HashFactory::generate();
     upload->data = data;
     upload->socket = new QSslSocket(s_instance);
     upload->timer.setSingleShot(true);
     upload->timer.start(DataTransferTimeout);
+    s_uploads.append(upload);
+
     connect(&upload->timer, &QTimer::timeout,
             s_instance, [=] { timeoutUpload(upload); });
     connect(upload->socket, &QSslSocket::disconnected,
             s_instance, [=] { cancelUpload(upload->uid); });
     connect(upload->socket, &QSslSocket::readyRead,
             s_instance, [=] { cancelUpload(upload->uid); }, Qt::QueuedConnection);
-    s_uploads.append(upload);
-#if defined(QT_DEBUG)
+
+#if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::connected,
-            s_instance, [=] { handleConnected(upload); });
+            s_instance, [=] { handleEncrypted(upload); });
     connect(upload->socket, &QSslSocket::bytesWritten,
             s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
-    QMetaObject::invokeMethod(upload->socket, "connectToHost",
-                              Qt::QueuedConnection, Q_ARG(QString, QStringLiteral("objectwheel.com")),
-                              Q_ARG(quint16, 5455));
+    QTimer::singleShot(250, upload->socket, [=] {
+        upload->socket->connectToHost(QStringLiteral("localhost"), 5455);
+    });
 #else
     connect(upload->socket, &QSslSocket::encrypted,
-            s_instance, [=] { handleConnected(upload); });
+            s_instance, [=] { handleEncrypted(upload); });
     connect(upload->socket, &QSslSocket::encryptedBytesWritten,
             s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
-    QMetaObject::invokeMethod(upload->socket, "connectToHostEncrypted",
-                              Qt::QueuedConnection, Q_ARG(QString, QStringLiteral("objectwheel.com")),
-                              Q_ARG(quint16, 5455));
+    QTimer::singleShot(250, upload->socket, [=] {
+        upload->socket->connectToHostEncrypted(QStringLiteral("objectwheel.com"), 5455);
+    });
 #endif
+
     return upload->uid;
 }
 
@@ -126,12 +133,12 @@ void PayloadManager::handleReadyRead(Download* download)
     }
 }
 
-void PayloadManager::handleConnected(Upload* upload)
+void PayloadManager::handleEncrypted(Upload* upload)
 {
     Q_ASSERT(upload);
     Q_ASSERT(!upload->data.isEmpty());
 
-    // Write the header
+    // Write the header (uid + size)
     const qint64 totalBytes = qToBigEndian<qint64>(upload->data.size());
     upload->socket->write(upload->uid);
     upload->socket->write(reinterpret_cast<const char*>(&totalBytes), 8);
@@ -171,7 +178,7 @@ void PayloadManager::cancelDownload(const QByteArray& uid)
         download->socket->disconnect(s_instance);
         if (download->socket->state() != QAbstractSocket::UnconnectedState)
             download->socket->abort();
-        delete download->socket;
+        download->socket->deleteLater();
         delete download;
     }
 }
@@ -184,9 +191,17 @@ void PayloadManager::cancelUpload(const QByteArray& uid)
         upload->socket->disconnect(s_instance);
         if (upload->socket->state() != QAbstractSocket::UnconnectedState)
             upload->socket->abort();
-        delete upload->socket;
+        upload->socket->deleteLater();
         delete upload;
     }
+}
+
+void PayloadManager::handleEncrypted(Download* download)
+{
+    Q_ASSERT(download);
+    Q_ASSERT(download->uid.size() == 12);
+    // Write the header (uid)
+    download->socket->write(download->uid);
 }
 
 void PayloadManager::timeoutDownload(const Download* download)

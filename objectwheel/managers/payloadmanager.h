@@ -32,15 +32,16 @@ class PayloadManager final : public QObject
 public:
     static PayloadManager* instance();
 
-    static void registerDownload(const QByteArray& uid);
-    static QByteArray registerUpload(const QByteArray& data);
+    static void scheduleDownload(const QByteArray& uid);
+    static QByteArray scheduleUpload(const QByteArray& data);
 
     static void cancelDownload(const QByteArray& uid);
     static void cancelUpload(const QByteArray& uid);
 
 private slots:
+    static void handleEncrypted(Download* download);
     static void handleReadyRead(Download* download);
-    static void handleConnected(Upload* upload);
+    static void handleEncrypted(Upload* upload);
     static void handleBytesWritten(Upload* upload, qint64 bytes);
 
 private:
