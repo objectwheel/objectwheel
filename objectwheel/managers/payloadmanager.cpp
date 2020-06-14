@@ -47,6 +47,7 @@ void PayloadManager::scheduleDownload(const QByteArray& uid)
     download->uid = uid;
     download->socket = new QSslSocket(s_instance);
     download->totalBytes = -1;
+    download->bytesWritten = 0;
     download->timer.setSingleShot(true);
     download->timer.start(DataTransferTimeout);
     s_downloads.append(download);
@@ -56,7 +57,7 @@ void PayloadManager::scheduleDownload(const QByteArray& uid)
     connect(download->socket, &QSslSocket::disconnected,
             s_instance, [=] { cancelDownload(download->uid); });
     connect(download->socket, &QSslSocket::readyRead,
-            s_instance, [=] { handleReadyRead(download); }, Qt::QueuedConnection);
+            s_instance, [=] { handleReadyRead(download); });
 
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(download->socket, &QSslSocket::connected,
@@ -77,6 +78,7 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
     auto upload = new Upload;
     upload->uid = HashFactory::generate();
     upload->data = data;
+    upload->bytesLeft = data.size();
     upload->socket = new QSslSocket(s_instance);
     upload->timer.setSingleShot(true);
     upload->timer.start(DataTransferTimeout);
@@ -87,7 +89,7 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
     connect(upload->socket, &QSslSocket::disconnected,
             s_instance, [=] { cancelUpload(upload->uid); });
     connect(upload->socket, &QSslSocket::readyRead,
-            s_instance, [=] { cancelUpload(upload->uid); }, Qt::QueuedConnection);
+            s_instance, [=] { cancelUpload(upload->uid); });
 
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::connected,
@@ -114,6 +116,7 @@ void PayloadManager::handleReadyRead(Download* download)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(download);
+    Q_ASSERT(s_downloads.contains(download));
 
     // Header
     if (download->totalBytes < 0) {
@@ -128,8 +131,12 @@ void PayloadManager::handleReadyRead(Download* download)
 
     // Body
     if (download->socket->bytesAvailable() > 0) {
-        download->timer.start(download->timer.interval());
-        emit s_instance->readyRead(download->uid, download->socket, download->totalBytes);
+        download->timer.start(download->timer.interval());        
+        const qint64 available = download->socket->bytesAvailable();
+        emit s_instance->readyRead(download->uid, download->socket, download->totalBytes,
+                                   download->bytesWritten + available >= download->totalBytes);
+        if (s_downloads.contains(download))
+            download->bytesWritten += available - download->socket->bytesAvailable();
     }
 }
 
@@ -137,6 +144,7 @@ void PayloadManager::handleEncrypted(Upload* upload)
 {
     Q_ASSERT(upload);
     Q_ASSERT(!upload->data.isEmpty());
+    Q_ASSERT(s_uploads.contains(upload));
 
     // Write the header (uid + size)
     const qint64 totalBytes = qToBigEndian<qint64>(upload->data.size());
@@ -166,8 +174,10 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(upload);
+    Q_ASSERT(s_uploads.contains(upload));
     upload->timer.start(upload->timer.interval());
-    emit s_instance->bytesWritten(upload->uid, bytes);
+    upload->bytesLeft -= bytes;
+    emit s_instance->bytesWritten(upload->uid, bytes, upload->bytesLeft <= 0);
 }
 
 void PayloadManager::cancelDownload(const QByteArray& uid, bool abort)
@@ -204,22 +214,11 @@ void PayloadManager::cancelUpload(const QByteArray& uid, bool abort)
     }
 }
 
-void PayloadManager::closeDownload(const QByteArray& uid)
-{
-    Q_ASSERT(s_instance);
-    QTimer::singleShot(150, s_instance, [=] { cancelDownload(uid, false); });
-}
-
-void PayloadManager::closeUpload(const QByteArray& uid)
-{
-    Q_ASSERT(s_instance);
-    QTimer::singleShot(150, s_instance, [=] { cancelUpload(uid, false); });
-}
-
 void PayloadManager::handleEncrypted(Download* download)
 {
     Q_ASSERT(download);
     Q_ASSERT(download->uid.size() == 12);
+    Q_ASSERT(s_downloads.contains(download));
     // Write the header (uid)
     download->socket->write(download->uid);
 }

@@ -63,8 +63,9 @@ private slots:
     void start(BuildInfo* buildInfo);
     void onServerResponse(const QByteArray& data);
     void emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles);
-    void onPayloadManagerBytesWritten(const QByteArray& uid, qint64 bytes);
-    void onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device, qint64 totalBytes);
+    void onPayloadManagerBytesWritten(const QByteArray& uid, qint64 bytes, bool isLastFrame);
+    void onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device,
+                                   qint64 totalBytes, bool isLastFrame);
     void onPayloadUploadTimedout(const QByteArray& payloadUid);
     void onPayloadDownloadTimedout(const QByteArray& payloadUid);
 

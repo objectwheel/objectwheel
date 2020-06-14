@@ -20,6 +20,7 @@ class PayloadManager final : public QObject
         QTimer timer;
         QSslSocket* socket;
         qint64 totalBytes;
+        qint64 bytesWritten;
     };
 
     struct Upload {
@@ -27,6 +28,7 @@ class PayloadManager final : public QObject
         QTimer timer;
         QSslSocket* socket;
         QByteArray data;
+        qint64 bytesLeft;
     };
 
 public:
@@ -37,9 +39,6 @@ public:
 
     static void cancelDownload(const QByteArray& uid, bool abort = true);
     static void cancelUpload(const QByteArray& uid, bool abort = true);
-
-    static void closeDownload(const QByteArray& uid);
-    static void closeUpload(const QByteArray& uid);
 
 private slots:
     static void handleEncrypted(Download* download);
@@ -58,8 +57,8 @@ private:
 signals:
     void downloadTimedout(const QByteArray& uid);
     void uploadTimedout(const QByteArray& uid);
-    void bytesWritten(const QByteArray& uid, qint64 bytes);
-    void readyRead(const QByteArray& uid, QIODevice* device, qint64 totalBytes);
+    void bytesWritten(const QByteArray& uid, qint64 bytes, bool isLastFrame);
+    void readyRead(const QByteArray& uid, QIODevice* device, qint64 totalBytes, bool isLastFrame);
 
 private:
     static PayloadManager* s_instance;

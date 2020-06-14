@@ -495,7 +495,7 @@ void BuildModel::emitDelayedDataChanged(const QModelIndex& index, const QVector<
     }
 }
 
-void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 bytes)
+void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 bytes, bool isLastFrame)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(uid)) {
         QSet<int> changedRoles;
@@ -509,10 +509,10 @@ void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 byte
         calculateTransferRate(buildInfo, bytes, changedRoles);
         emitDelayedDataChanged(index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
 
-        if (buildInfo->transferredBytes() < buildInfo->totalBytes())
+        if (!isLastFrame)
             return;
 
-        PayloadManager::closeUpload(uid);
+        PayloadManager::cancelUpload(uid, false);
 
         buildInfo->addStatus(tr("Waiting the server to start..."));
         buildInfo->recentBlocks().clear();
@@ -523,7 +523,8 @@ void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 byte
     }
 }
 
-void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device, qint64 totalBytes)
+void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device,
+                                           qint64 totalBytes, bool isLastFrame)
 {
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         QSet<int> changedRoles;
@@ -546,10 +547,11 @@ void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevi
         if (buildInfo->buffer()->isEmpty())
             buildInfo->buffer()->reserve(totalBytes);
         buildInfo->buffer()->append(device->readAll());
-        if (buildInfo->buffer()->size() < totalBytes)
+
+        if (!isLastFrame)
             return;
 
-        PayloadManager::closeDownload(payloadUid);
+        PayloadManager::cancelDownload(payloadUid, false);
 
         buildInfo->addStatus(tr("Done"));
         buildInfo->setState(Finished);
