@@ -15,14 +15,16 @@ PayloadManager::PayloadManager(QObject* parent) : QObject(parent)
 PayloadManager::~PayloadManager()
 {
     for (const Download* download : qAsConst(s_downloads)) {
-        download->socket->disconnect(s_instance);
-        download->socket->abort();
+        download->socket->disconnect(this);
+        if (download->socket->state() != QAbstractSocket::UnconnectedState)
+            download->socket->abort();
         delete download->socket;
         delete download;
     }
     for (const Upload* upload : qAsConst(s_uploads)) {
-        upload->socket->disconnect(s_instance);
-        upload->socket->abort();
+        upload->socket->disconnect(this);
+        if (upload->socket->state() != QAbstractSocket::UnconnectedState)
+            upload->socket->abort();
         delete upload->socket;
         delete upload;
     }
@@ -106,6 +108,7 @@ void PayloadManager::handleReadyRead(Download* download)
     Q_ASSERT(s_instance);
     Q_ASSERT(download);
 
+    // Header
     if (download->totalBytes < 0) {
         // 8 Bytes for Size
         if (download->socket->bytesAvailable() < 8)
@@ -116,8 +119,11 @@ void PayloadManager::handleReadyRead(Download* download)
         Q_ASSERT(download->totalBytes > 0);
     }
 
-    download->timer.start(download->timer.interval());
-    emit s_instance->readyRead(download->uid, download->socket, download->totalBytes);
+    // Body
+    if (download->socket->bytesAvailable() > 0) {
+        download->timer.start(download->timer.interval());
+        emit s_instance->readyRead(download->uid, download->socket, download->totalBytes);
+    }
 }
 
 void PayloadManager::handleConnected(Upload* upload)
@@ -125,7 +131,6 @@ void PayloadManager::handleConnected(Upload* upload)
     Q_ASSERT(upload);
     Q_ASSERT(!upload->data.isEmpty());
 
-    upload->timer.start(upload->timer.interval());
     // Write the header
     const qint64 totalBytes = qToBigEndian<qint64>(upload->data.size());
     upload->socket->write(upload->uid);
@@ -164,7 +169,8 @@ void PayloadManager::cancelDownload(const QByteArray& uid)
     if (Download* download = downloadFromUid(uid)) {
         s_downloads.removeOne(download);
         download->socket->disconnect(s_instance);
-        download->socket->abort();
+        if (download->socket->state() != QAbstractSocket::UnconnectedState)
+            download->socket->abort();
         delete download->socket;
         delete download;
     }
@@ -176,7 +182,8 @@ void PayloadManager::cancelUpload(const QByteArray& uid)
     if (Upload* upload = uploadFromUid(uid)) {
         s_uploads.removeOne(upload);
         upload->socket->disconnect(s_instance);
-        upload->socket->abort();
+        if (upload->socket->state() != QAbstractSocket::UnconnectedState)
+            upload->socket->abort();
         delete upload->socket;
         delete upload;
     }

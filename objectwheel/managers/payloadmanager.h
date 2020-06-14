@@ -11,8 +11,6 @@ class PayloadManager final : public QObject
     friend class ApplicationCore;
 
     enum {
-        MaxSimultaneousConnections = 5,
-        AuthenticationTimeout = 5000,
         DataTransferTimeout = 8000,
         FrameSizeInBytes = 524288,
     };
