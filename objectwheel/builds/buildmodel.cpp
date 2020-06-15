@@ -512,7 +512,9 @@ void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 byte
         if (!isLastFrame)
             return;
 
-        PayloadManager::cancelUpload(uid, false);
+        QTimer::singleShot(1000, PayloadManager::instance(), [uid] {
+            PayloadManager::cancelUpload(uid, false);
+        });
 
         buildInfo->addStatus(tr("Waiting the server to start..."));
         buildInfo->recentBlocks().clear();
@@ -551,7 +553,9 @@ void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevi
         if (!isLastFrame)
             return;
 
-        PayloadManager::cancelDownload(payloadUid, false);
+        QTimer::singleShot(1000, PayloadManager::instance(), [payloadUid] {
+            PayloadManager::cancelDownload(payloadUid, false);
+        });
 
         buildInfo->addStatus(tr("Done"));
         buildInfo->setState(Finished);

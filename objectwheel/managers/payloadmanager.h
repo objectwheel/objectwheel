@@ -42,9 +42,9 @@ public:
     static void cancelUpload(const QByteArray& uid, bool abort = true);
 
 private slots:
-    static void handleEncrypted(Download* download);
+    static void handleConnected(Download* download);
     static void handleReadyRead(Download* download);
-    static void handleEncrypted(Upload* upload);
+    static void handleConnected(Upload* upload);
     static void handleBytesWritten(Upload* upload, qint64 bytes);
 
 private:
