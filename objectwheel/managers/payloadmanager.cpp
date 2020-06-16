@@ -56,8 +56,6 @@ void PayloadManager::scheduleDownload(const QByteArray& uid)
             s_instance, [=] { timeoutDownload(download); });
     connect(download->socket, &QSslSocket::disconnected,
             s_instance, [=] { cancelDownload(download->uid); });
-    connect(download->socket, &QSslSocket::readyRead,
-            s_instance, [=] { handleReadyRead(download); });
 
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(download->socket, &QSslSocket::connected,
@@ -79,7 +77,6 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
     upload->uid = HashFactory::generate();
     upload->data = data;
     upload->bytesLeft = data.size();
-    upload->isSizeCorrected = false;
     upload->socket = new QSslSocket(s_instance);
     upload->timer.setSingleShot(true);
     upload->timer.start(DataTransferTimeout);
@@ -89,22 +86,16 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
             s_instance, [=] { timeoutUpload(upload); });
     connect(upload->socket, &QSslSocket::disconnected,
             s_instance, [=] { cancelUpload(upload->uid); });
-    connect(upload->socket, &QSslSocket::readyRead,
-            s_instance, [=] { cancelUpload(upload->uid); });
 
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::connected,
             s_instance, [=] { handleConnected(upload); });
-    connect(upload->socket, &QSslSocket::bytesWritten,
-            s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
     QTimer::singleShot(250, upload->socket, [=] {
         upload->socket->connectToHost(QStringLiteral("localhost"), 5455);
     });
 #else
     connect(upload->socket, &QSslSocket::encrypted,
             s_instance, [=] { handleConnected(upload); });
-    connect(upload->socket, &QSslSocket::encryptedBytesWritten,
-            s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
     QTimer::singleShot(250, upload->socket, [=] {
         upload->socket->connectToHostEncrypted(QStringLiteral("objectwheel.com"), 5455);
     });
@@ -116,6 +107,7 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
 void PayloadManager::cancelDownload(const QByteArray& uid, bool abort)
 {
     Q_ASSERT(s_instance);
+
     if (Download* download = downloadFromUid(uid)) {
         s_downloads.removeOne(download);
         download->socket->disconnect(s_instance);
@@ -133,6 +125,7 @@ void PayloadManager::cancelDownload(const QByteArray& uid, bool abort)
 void PayloadManager::cancelUpload(const QByteArray& uid, bool abort)
 {
     Q_ASSERT(s_instance);
+
     if (Upload* upload = uploadFromUid(uid)) {
         s_uploads.removeOne(upload);
         upload->socket->disconnect(s_instance);
@@ -152,6 +145,12 @@ void PayloadManager::handleConnected(Download* download)
     Q_ASSERT(download);
     Q_ASSERT(download->uid.size() == 12);
     Q_ASSERT(s_downloads.contains(download));
+    Q_ASSERT(download->socket->state() == QAbstractSocket::ConnectedState);
+    Q_ASSERT(download->socket->bytesAvailable() <= 0);
+
+    connect(download->socket, &QSslSocket::readyRead,
+            s_instance, [=] { handleReadyRead(download); });
+
     // Write the header (uid)
     download->socket->write(download->uid);
 }
@@ -161,6 +160,7 @@ void PayloadManager::handleReadyRead(Download* download)
     Q_ASSERT(s_instance);
     Q_ASSERT(download);
     Q_ASSERT(s_downloads.contains(download));
+    Q_ASSERT(download->socket->state() == QAbstractSocket::ConnectedState);
 
     // Header
     if (download->totalBytes < 0) {
@@ -189,6 +189,17 @@ void PayloadManager::handleConnected(Upload* upload)
     Q_ASSERT(upload);
     Q_ASSERT(!upload->data.isEmpty());
     Q_ASSERT(s_uploads.contains(upload));
+    Q_ASSERT(upload->socket->state() == QAbstractSocket::ConnectedState);
+
+    connect(upload->socket, &QSslSocket::readyRead,
+            s_instance, [=] { cancelUpload(upload->uid); });
+#if defined(PAYLOADMANAGER_DEBUG)
+    connect(upload->socket, &QSslSocket::bytesWritten,
+            s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
+#else
+    connect(upload->socket, &QSslSocket::encryptedBytesWritten,
+            s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
+#endif
 
     // Write the header (uid + size)
     const qint64 totalBytes = qToBigEndian<qint64>(upload->data.size());
@@ -220,14 +231,22 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
     Q_ASSERT(s_instance);
     Q_ASSERT(upload);
     Q_ASSERT(s_uploads.contains(upload));
-    if (!upload->isSizeCorrected) {
-        upload->isSizeCorrected = true;
-        bytes -= 20; // Correct sent bytes size (12 uid + 8 size = 20 bytes)
-    }
+    Q_ASSERT(upload->socket->state() == QAbstractSocket::ConnectedState);
+
     upload->timer.start(upload->timer.interval());
-    if (bytes > 0) {
+
+#if defined(PAYLOADMANAGER_DEBUG)
+    const bool isLastFrame = upload->socket->bytesToWrite() <= 0;
+#else
+    const bool isLastFrame = upload->socket->encryptedBytesToWrite() <= 0;
+#endif
+    const bool isArtificialLastFrame = upload->bytesLeft - bytes <= 0;
+
+    if (isLastFrame) {
+        emit s_instance->bytesWritten(upload->uid, upload->bytesLeft, true);
+    } else if (!isArtificialLastFrame) {
         upload->bytesLeft -= bytes;
-        emit s_instance->bytesWritten(upload->uid, bytes, upload->bytesLeft <= 0);
+        emit s_instance->bytesWritten(upload->uid, bytes, false);
     }
 }
 
@@ -235,6 +254,7 @@ void PayloadManager::timeoutDownload(const Download* download)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(download);
+
     const QByteArray uid = download->uid;
     cancelDownload(uid);
     emit s_instance->downloadTimedout(uid);
@@ -244,6 +264,7 @@ void PayloadManager::timeoutUpload(const Upload* upload)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(upload);
+
     const QByteArray uid = upload->uid;
     cancelUpload(uid);
     emit s_instance->uploadTimedout(uid);

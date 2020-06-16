@@ -29,7 +29,6 @@ class PayloadManager final : public QObject
         QSslSocket* socket;
         QByteArray data;
         qint64 bytesLeft;
-        bool isSizeCorrected;
     };
 
 public:
