@@ -21,6 +21,7 @@ class PayloadManager final : public QObject
         QSslSocket* socket;
         qint64 totalBytes;
         qint64 bytesWritten;
+        bool isFinished;
     };
 
     struct Upload {
@@ -29,6 +30,7 @@ class PayloadManager final : public QObject
         QSslSocket* socket;
         QByteArray data;
         qint64 bytesLeft;
+        bool isFinished;
     };
 
 public:
@@ -47,8 +49,8 @@ private slots:
     static void handleBytesWritten(Upload* upload, qint64 bytes);
 
 private:
-    static void timeoutDownload(const Download* download);
-    static void timeoutUpload(const Upload* upload);
+    static void timeoutDownload(Download* download);
+    static void timeoutUpload(Upload* upload);
 
 private:
     static Download* downloadFromUid(const QByteArray& uid);
@@ -57,6 +59,8 @@ private:
 signals:
     void downloadTimedout(const QByteArray& uid);
     void uploadTimedout(const QByteArray& uid);
+    void downloadAborted(const QByteArray& uid);
+    void uploadAborted(const QByteArray& uid);
     void bytesWritten(const QByteArray& uid, qint64 bytes, bool isLastFrame);
     void readyRead(const QByteArray& uid, QIODevice* device, qint64 totalBytes, bool isLastFrame);
 

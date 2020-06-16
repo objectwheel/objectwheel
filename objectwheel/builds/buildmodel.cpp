@@ -43,11 +43,15 @@ BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
             this, &BuildModel::onPayloadManagerBytesWritten);
     connect(PayloadManager::instance(), &PayloadManager::uploadTimedout,
             this, &BuildModel::onPayloadUploadTimedout);
+    connect(PayloadManager::instance(), &PayloadManager::uploadAborted,
+            this, &BuildModel::onPayloadUploadAborted);
     //
     connect(PayloadManager::instance(), &PayloadManager::readyRead,
             this, &BuildModel::onPayloadManagerReadyRead);
     connect(PayloadManager::instance(), &PayloadManager::downloadTimedout,
             this, &BuildModel::onPayloadDownloadTimedout);
+    connect(PayloadManager::instance(), &PayloadManager::downloadAborted,
+            this, &BuildModel::onPayloadDownloadAborted);
 }
 
 BuildModel::~BuildModel()
@@ -512,10 +516,6 @@ void BuildModel::onPayloadManagerBytesWritten(const QByteArray& uid, qint64 byte
         if (!isLastFrame)
             return;
 
-        QTimer::singleShot(1000, PayloadManager::instance(), [uid] {
-            PayloadManager::cancelUpload(uid, false);
-        });
-
         buildInfo->addStatus(tr("Waiting the server to start..."));
         buildInfo->recentBlocks().clear();
         buildInfo->setState(Downloading);
@@ -552,10 +552,6 @@ void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevi
 
         if (!isLastFrame)
             return;
-
-        QTimer::singleShot(1000, PayloadManager::instance(), [payloadUid] {
-            PayloadManager::cancelDownload(payloadUid, false);
-        });
 
         buildInfo->addStatus(tr("Done"));
         buildInfo->setState(Finished);
@@ -602,6 +598,30 @@ void BuildModel::onPayloadDownloadTimedout(const QByteArray& payloadUid)
     }
 }
 
+void BuildModel::onPayloadUploadAborted(const QByteArray& payloadUid)
+{
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+        buildInfo->addStatus(tr("Connection lost"));
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
+    }
+}
+
+void BuildModel::onPayloadDownloadAborted(const QByteArray& payloadUid)
+{
+    if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
+        const QModelIndex& index = indexFromBuildInfo(buildInfo);
+        Q_ASSERT(index.isValid());
+        buildInfo->addStatus(tr("Connection lost"));
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
+        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
+    }
+}
+
 QIcon BuildModel::platformIcon(const QString& rawPlatformName) const
 {
     return QIcon(QLatin1String(":/images/builds/%1.svg").arg(rawPlatformName));
@@ -639,13 +659,13 @@ QModelIndex BuildModel::indexFromBuildInfo(const BuildInfo* buildInfo) const
 
 void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const
 {
-    const int IDEAL_BLOCK_SIZE = buildInfo->totalBytes() / chunkSize / 80;
+    const int IDEAL_BLOCK_SIZE = buildInfo->totalBytes() / qMax(1, chunkSize) / 80;
     BuildInfo::Block block;
     block.size = chunkSize;
     block.timestamp = QDateTime::currentDateTime();
     buildInfo->recentBlocks().append(block);
 
-    if (buildInfo->recentBlocks().size() > qBound(2, IDEAL_BLOCK_SIZE, 100))
+    if (buildInfo->recentBlocks().size() > qBound(3, IDEAL_BLOCK_SIZE, 100))
         buildInfo->recentBlocks().removeFirst();
 
     if (buildInfo->recentBlocks().size() > 1) {

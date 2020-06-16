@@ -14,22 +14,32 @@ PayloadManager::PayloadManager(QObject* parent) : QObject(parent)
 
 PayloadManager::~PayloadManager()
 {
-    for (const Download* download : qAsConst(s_downloads)) {
+    const QVector<Download*> downloads = s_downloads;
+    const QVector<Upload*> uploads = s_uploads;
+    s_downloads.clear();
+    s_uploads.clear();
+    for (const Download* download : downloads) {
+        const QByteArray uid = download->uid;
+        const bool isFinished = download->isFinished;
         download->socket->disconnect(this);
         if (download->socket->state() != QAbstractSocket::UnconnectedState)
             download->socket->abort();
         download->socket->deleteLater();
         delete download;
+        if (!isFinished)
+            emit downloadAborted(uid);
     }
-    for (const Upload* upload : qAsConst(s_uploads)) {
+    for (const Upload* upload : uploads) {
+        const QByteArray uid = upload->uid;
+        const bool isFinished = upload->isFinished;
         upload->socket->disconnect(this);
         if (upload->socket->state() != QAbstractSocket::UnconnectedState)
             upload->socket->abort();
         upload->socket->deleteLater();
         delete upload;
+        if (!isFinished)
+            emit uploadAborted(uid);
     }
-    s_downloads.clear();
-    s_uploads.clear();
     s_instance = nullptr;
 }
 
@@ -44,6 +54,7 @@ void PayloadManager::scheduleDownload(const QByteArray& uid)
     Q_ASSERT(uid.size() == 12);
 
     auto download = new Download;
+    download->isFinished = false;
     download->uid = uid;
     download->socket = new QSslSocket(s_instance);
     download->totalBytes = -1;
@@ -74,6 +85,7 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
     Q_ASSERT(!data.isEmpty());
 
     auto upload = new Upload;
+    upload->isFinished = false;
     upload->uid = HashFactory::generate();
     upload->data = data;
     upload->bytesLeft = data.size();
@@ -90,13 +102,13 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::connected,
             s_instance, [=] { handleConnected(upload); });
-    QTimer::singleShot(1000, upload->socket, [=] {
+    QTimer::singleShot(500, upload->socket, [=] {
         upload->socket->connectToHost(QStringLiteral("localhost"), 5455);
     });
 #else
     connect(upload->socket, &QSslSocket::encrypted,
             s_instance, [=] { handleConnected(upload); });
-    QTimer::singleShot(1000, upload->socket, [=] {
+    QTimer::singleShot(500, upload->socket, [=] {
         upload->socket->connectToHostEncrypted(QStringLiteral("objectwheel.com"), 5455);
     });
 #endif
@@ -119,6 +131,8 @@ void PayloadManager::cancelDownload(const QByteArray& uid, bool abort)
         }
         download->socket->deleteLater();
         delete download;
+        if (abort && !download->isFinished)
+            emit s_instance->downloadAborted(uid);
     }
 }
 
@@ -137,6 +151,8 @@ void PayloadManager::cancelUpload(const QByteArray& uid, bool abort)
         }
         upload->socket->deleteLater();
         delete upload;
+        if (abort && !upload->isFinished)
+            emit s_instance->uploadAborted(uid);
     }
 }
 
@@ -177,10 +193,16 @@ void PayloadManager::handleReadyRead(Download* download)
     if (download->socket->bytesAvailable() > 0) {
         download->timer.start(download->timer.interval());
         const qint64 available = download->socket->bytesAvailable();
-        emit s_instance->readyRead(download->uid, download->socket, download->totalBytes,
-                                   download->bytesWritten + available >= download->totalBytes);
-        if (s_downloads.contains(download))
-            download->bytesWritten += available - download->socket->bytesAvailable();
+        const bool isLastFrame = download->bytesWritten + available >= download->totalBytes;
+        if (isLastFrame)
+            download->isFinished = true;
+        emit s_instance->readyRead(download->uid, download->socket, download->totalBytes, isLastFrame);
+        if (s_downloads.contains(download)) {
+            if (isLastFrame)
+                cancelDownload(download->uid, false);
+            else
+                download->bytesWritten += available - download->socket->bytesAvailable();
+        }
     }
 }
 
@@ -243,29 +265,34 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
     const bool isArtificialLastFrame = upload->bytesLeft - bytes <= 0;
 
     if (isLastFrame) {
+        upload->isFinished = true;
         emit s_instance->bytesWritten(upload->uid, upload->bytesLeft, true);
+        if (s_uploads.contains(upload))
+            cancelDownload(upload->uid, false);
     } else if (!isArtificialLastFrame) {
         upload->bytesLeft -= bytes;
         emit s_instance->bytesWritten(upload->uid, bytes, false);
     }
 }
 
-void PayloadManager::timeoutDownload(const Download* download)
+void PayloadManager::timeoutDownload(Download* download)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(download);
 
     const QByteArray uid = download->uid;
+    download->isFinished = true;
     cancelDownload(uid);
     emit s_instance->downloadTimedout(uid);
 }
 
-void PayloadManager::timeoutUpload(const Upload* upload)
+void PayloadManager::timeoutUpload(Upload* upload)
 {
     Q_ASSERT(s_instance);
     Q_ASSERT(upload);
 
     const QByteArray uid = upload->uid;
+    upload->isFinished = true;
     cancelUpload(uid);
     emit s_instance->uploadTimedout(uid);
 }

@@ -68,6 +68,8 @@ private slots:
                                    qint64 totalBytes, bool isLastFrame);
     void onPayloadUploadTimedout(const QByteArray& payloadUid);
     void onPayloadDownloadTimedout(const QByteArray& payloadUid);
+    void onPayloadUploadAborted(const QByteArray& payloadUid);
+    void onPayloadDownloadAborted(const QByteArray& payloadUid);
 
 private:
     void timerEvent(QTimerEvent* event) override;
