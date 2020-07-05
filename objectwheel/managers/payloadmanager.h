@@ -37,7 +37,7 @@ public:
     static PayloadManager* instance();
 
     static void scheduleDownload(const QByteArray& uid);
-    static QByteArray scheduleUpload(const QByteArray& data);
+    static void scheduleUpload(const QByteArray& uid, const QByteArray& data);
 
     static void cancelDownload(const QByteArray& uid, bool abort = true);
     static void cancelUpload(const QByteArray& uid, bool abort = true);

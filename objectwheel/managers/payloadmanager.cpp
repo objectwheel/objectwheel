@@ -79,14 +79,15 @@ void PayloadManager::scheduleDownload(const QByteArray& uid)
 #endif
 }
 
-QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
+void PayloadManager::scheduleUpload(const QByteArray& uid, const QByteArray& data)
 {
     Q_ASSERT(s_instance);
+    Q_ASSERT(uid.size() == 12);
     Q_ASSERT(!data.isEmpty());
 
     auto upload = new Upload;
     upload->isFinished = false;
-    upload->uid = HashFactory::generate();
+    upload->uid = uid;
     upload->data = data;
     upload->bytesLeft = data.size();
     upload->socket = new QSslSocket(s_instance);
@@ -108,8 +109,6 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
             s_instance, [=] { handleConnected(upload); });
     upload->socket->connectToHostEncrypted(QStringLiteral("objectwheel.com"), 5455);
 #endif
-
-    return upload->uid;
 }
 
 void PayloadManager::cancelDownload(const QByteArray& uid, bool abort)

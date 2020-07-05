@@ -5,6 +5,7 @@
 #include <projectmanager.h>
 #include <zipasync.h>
 #include <payloadmanager.h>
+#include <hashfactory.h>
 
 #include <QCborMap>
 #include <QTemporaryFile>
@@ -298,14 +299,14 @@ void BuildModel::start(BuildInfo* buildInfo)
     tempFile.remove();
 
     const QByteArray& payload = UtilityFunctions::pushCbor(buildInfo->request(), data);
-    const QByteArray& payloadUid = PayloadManager::scheduleUpload(payload);
+    const QByteArray& payloadUid = HashFactory::generate();
 
     ServerManager::send(ServerManager::RequestCloudBuild,
                         UserManager::email(),
                         UserManager::password(),
                         payloadUid);
-    ServerManager::instance()->flush();
 
+    buildInfo->buffer()->append(payload);
     buildInfo->setPayloadUid(payloadUid);
     buildInfo->setTotalBytes(payload.size());
     buildInfo->addStatus(tr("Sending the request..."));
@@ -388,16 +389,31 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QByteArray payloadUid;
         UtilityFunctions::pullCbor(data, command, status, payloadUid, uid);
         buildInfo->setUid(uid);
-        buildInfo->addStatus(tr("Uploading the project..."));
+        buildInfo->addStatus(tr("Request succeed..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
     } break;
+
+    case PayloadTransferPermitted:
+        PayloadManager::scheduleUpload(buildInfo->payloadUid(), *buildInfo->buffer());
+        buildInfo->buffer()->clear();
+        buildInfo->addStatus(tr("Uploading the project..."));
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole });
+        break;
 
     case SequenceNumberChanged: {
         int sequenceNumber;
         UtilityFunctions::pullCbor(data, command, status, uid, sequenceNumber);
-        buildInfo->addStatus(tr("You are %1th in the queue...").arg(sequenceNumber));
+        if (buildInfo->state() == Uploading)
+            buildInfo->addStatus(tr("You are %1th in the upload queue...").arg(sequenceNumber));
+        else
+            buildInfo->addStatus(tr("You are %1th in the build queue...").arg(sequenceNumber));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
     } break;
+
+    case BuildProcessStarting:
+        buildInfo->addStatus(tr("Build process starting..."));
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole });
+        break;
 
     case BuildProcessStarted:
         buildInfo->addStatus(tr("Build process started..."));
@@ -458,6 +474,13 @@ void BuildModel::onServerResponse(const QByteArray& data)
             PayloadManager::cancelUpload(buildInfo->payloadUid());
         else
             PayloadManager::cancelDownload(buildInfo->payloadUid());
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
+        break;
+
+    case ConnectionLost:
+        buildInfo->addStatus(tr("Connection lost"));
+        buildInfo->setErrorFlag(true);
+        buildInfo->setState(Finished);
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
