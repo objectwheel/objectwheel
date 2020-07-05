@@ -68,7 +68,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_rememberMeLabel->setText(tr("Remember me"));
 
     m_legalLabel->setAlignment(Qt::AlignHCenter);
-    m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
+    m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2, Inc. All Rights Reserved.</b></p>")
                           .arg(QDate::currentDate().year()).arg(QStringLiteral(APP_CORP)));
 
     ApplicationStyle::setButtonStyle(m_helpButton, ApplicationStyle::Help);

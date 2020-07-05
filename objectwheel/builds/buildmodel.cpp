@@ -20,7 +20,9 @@ enum StatusCode {
     SimultaneousBuildLimitExceeded,
     RequestSucceed,
     //
+    PayloadTransferPermitted,
     SequenceNumberChanged,
+    BuildProcessStarting,
     BuildProcessStarted,
     //
     BuildStatus,
@@ -30,6 +32,7 @@ enum StatusCode {
     InvalidProjectSettings,
     Canceled,
     Timedout,
+    ConnectionLost,
     BuildSucceed
 };
 Q_DECLARE_METATYPE(StatusCode)

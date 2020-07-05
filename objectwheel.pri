@@ -52,7 +52,7 @@ macx {
 ### Defines
 DEFINES += APP_VER='"\\\"$$VERSION\\\""' \
            APP_NAME='"\\\"$$TARGET\\\""' \
-           APP_CORP='"\\\"Objectwheel, Inc.\\\""' \
+           APP_CORP='"\\\"Objectwheel\\\""' \
            APP_DOMAIN='"\\\"objectwheel.com\\\""' \
            APP_GITVER='"\\\"$$GIT_VERSION\\\""' \
            APP_GITHASH='"\\\"$$GIT_HASH\\\""' \

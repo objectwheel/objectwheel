@@ -102,15 +102,11 @@ QByteArray PayloadManager::scheduleUpload(const QByteArray& data)
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::connected,
             s_instance, [=] { handleConnected(upload); });
-    QTimer::singleShot(500, upload->socket, [=] {
-        upload->socket->connectToHost(QStringLiteral("localhost"), 5455);
-    });
+    upload->socket->connectToHost(QStringLiteral("localhost"), 5455);
 #else
     connect(upload->socket, &QSslSocket::encrypted,
             s_instance, [=] { handleConnected(upload); });
-    QTimer::singleShot(500, upload->socket, [=] {
-        upload->socket->connectToHostEncrypted(QStringLiteral("objectwheel.com"), 5455);
-    });
+    upload->socket->connectToHostEncrypted(QStringLiteral("objectwheel.com"), 5455);
 #endif
 
     return upload->uid;
