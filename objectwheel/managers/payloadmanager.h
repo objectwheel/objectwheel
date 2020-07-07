@@ -11,7 +11,7 @@ class PayloadManager final : public QObject
     friend class ApplicationCore;
 
     enum {
-        DataTransferTimeout = 8000,
+        DataTransferTimeout = 30000,
         FrameSizeInBytes = 524288,
     };
 

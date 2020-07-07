@@ -33,7 +33,7 @@ enum StatusCode {
     InvalidProjectSettings,
     Canceled,
     Timedout,
-    ConnectionLost,
+    ConnectionDropped,
     BuildSucceed
 };
 Q_DECLARE_METATYPE(StatusCode)
@@ -477,8 +477,8 @@ void BuildModel::onServerResponse(const QByteArray& data)
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
         break;
 
-    case ConnectionLost:
-        buildInfo->addStatus(tr("Connection lost"));
+    case ConnectionDropped:
+        buildInfo->addStatus(tr("Connection dropped"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
         changedRoles.unite({ StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
@@ -629,7 +629,7 @@ void BuildModel::onPayloadUploadAborted(const QByteArray& payloadUid)
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
-        buildInfo->addStatus(tr("Connection lost"));
+        buildInfo->addStatus(tr("Upload aborted"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
         emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
@@ -641,7 +641,7 @@ void BuildModel::onPayloadDownloadAborted(const QByteArray& payloadUid)
     if (BuildInfo* buildInfo = buildInfoFromPayloadUid(payloadUid)) {
         const QModelIndex& index = indexFromBuildInfo(buildInfo);
         Q_ASSERT(index.isValid());
-        buildInfo->addStatus(tr("Connection lost"));
+        buildInfo->addStatus(tr("Download aborted"));
         buildInfo->setErrorFlag(true);
         buildInfo->setState(Finished);
         emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, ErrorRole, StateRole });
