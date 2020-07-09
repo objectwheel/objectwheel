@@ -394,7 +394,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
     } break;
 
     case PayloadTransferPermitted:
-        PayloadManager::scheduleUpload(buildInfo->payloadUid(), *buildInfo->buffer());
+        PayloadManager::startUpload(buildInfo->payloadUid(), *buildInfo->buffer());
         buildInfo->buffer()->clear();
         buildInfo->addStatus(tr("Uploading the project..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
@@ -488,7 +488,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QByteArray payloadUid;
         UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
         buildInfo->setPayloadUid(payloadUid);
-        PayloadManager::scheduleDownload(payloadUid);
+        PayloadManager::startDownload(payloadUid);
     } break;
 
     default:

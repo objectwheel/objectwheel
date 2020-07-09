@@ -8,7 +8,6 @@ QVector<PayloadManager::Upload*> PayloadManager::s_uploads;
 
 PayloadManager::PayloadManager(QObject* parent) : QObject(parent)
 {
-    Q_ASSERT(s_instance == 0);
     s_instance = this;
 }
 
@@ -48,9 +47,8 @@ PayloadManager* PayloadManager::instance()
     return s_instance;
 }
 
-void PayloadManager::scheduleDownload(const QByteArray& uid)
+void PayloadManager::startDownload(const QByteArray& uid)
 {
-    Q_ASSERT(s_instance);
     Q_ASSERT(uid.size() == 12);
 
     auto download = new Download;
@@ -79,9 +77,8 @@ void PayloadManager::scheduleDownload(const QByteArray& uid)
 #endif
 }
 
-void PayloadManager::scheduleUpload(const QByteArray& uid, const QByteArray& data)
+void PayloadManager::startUpload(const QByteArray& uid, const QByteArray& data)
 {
-    Q_ASSERT(s_instance);
     Q_ASSERT(uid.size() == 12);
     Q_ASSERT(!data.isEmpty());
 
@@ -113,42 +110,12 @@ void PayloadManager::scheduleUpload(const QByteArray& uid, const QByteArray& dat
 
 void PayloadManager::cancelDownload(const QByteArray& uid, bool abort)
 {
-    Q_ASSERT(s_instance);
-
-    if (Download* download = downloadFromUid(uid)) {
-        s_downloads.removeOne(download);
-        download->socket->disconnect(s_instance);
-        if (download->socket->state() != QAbstractSocket::UnconnectedState) {
-            if (abort)
-                download->socket->abort();
-            else
-                download->socket->close();
-        }
-        download->socket->deleteLater();
-        delete download;
-        if (abort && !download->isFinished)
-            emit s_instance->downloadAborted(uid);
-    }
+    cleanDownload(downloadFromUid(uid), abort);
 }
 
 void PayloadManager::cancelUpload(const QByteArray& uid, bool abort)
 {
-    Q_ASSERT(s_instance);
-
-    if (Upload* upload = uploadFromUid(uid)) {
-        s_uploads.removeOne(upload);
-        upload->socket->disconnect(s_instance);
-        if (upload->socket->state() != QAbstractSocket::UnconnectedState) {
-            if (abort)
-                upload->socket->abort();
-            else
-                upload->socket->close();
-        }
-        upload->socket->deleteLater();
-        delete upload;
-        if (abort && !upload->isFinished)
-            emit s_instance->uploadAborted(uid);
-    }
+    cleanUpload(uploadFromUid(uid), abort);
 }
 
 void PayloadManager::handleConnected(Download* download)
@@ -168,7 +135,6 @@ void PayloadManager::handleConnected(Download* download)
 
 void PayloadManager::handleReadyRead(Download* download)
 {
-    Q_ASSERT(s_instance);
     Q_ASSERT(download);
     Q_ASSERT(s_downloads.contains(download));
     Q_ASSERT(download->socket->state() == QAbstractSocket::ConnectedState);
@@ -245,7 +211,6 @@ void PayloadManager::handleConnected(Upload* upload)
 
 void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
 {
-    Q_ASSERT(s_instance);
     Q_ASSERT(upload);
     Q_ASSERT(s_uploads.contains(upload));
     Q_ASSERT(upload->socket->state() == QAbstractSocket::ConnectedState);
@@ -270,26 +235,94 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
     }
 }
 
+void PayloadManager::abortDownload(Download* download)
+{
+    Q_ASSERT(download && s_downloads.contains(download));
+    const QByteArray uid = download->uid;
+    cleanDownload(download, true);
+    emit s_instance->downloadAborted(uid);
+}
+
+void PayloadManager::abortUpload(Upload* upload)
+{
+    Q_ASSERT(upload && s_uploads.contains(upload));
+    const QByteArray uid = upload->uid;
+    cleanUpload(upload, true);
+    emit s_instance->uploadAborted(uid);
+}
+
 void PayloadManager::timeoutDownload(Download* download)
 {
-    Q_ASSERT(s_instance);
-    Q_ASSERT(download);
-
+    Q_ASSERT(download && s_downloads.contains(download));
     const QByteArray uid = download->uid;
-    download->isFinished = true;
-    cancelDownload(uid);
+    cleanDownload(download, true);
     emit s_instance->downloadTimedout(uid);
 }
 
 void PayloadManager::timeoutUpload(Upload* upload)
 {
-    Q_ASSERT(s_instance);
-    Q_ASSERT(upload);
-
+    Q_ASSERT(upload && s_uploads.contains(upload));
     const QByteArray uid = upload->uid;
-    upload->isFinished = true;
-    cancelUpload(uid);
+    cleanUpload(upload, true);
     emit s_instance->uploadTimedout(uid);
+}
+
+void PayloadManager::cleanDownload(Download* download, bool abort)
+{
+//    if (Download* download = downloadFromUid(uid)) {
+//        s_downloads.removeOne(download);
+//        download->socket->disconnect(s_instance);
+//        if (download->socket->state() != QAbstractSocket::UnconnectedState) {
+//            if (abort)
+//                download->socket->abort();
+//            else
+//                download->socket->close();
+//        }
+//        download->socket->deleteLater();
+//        delete download;
+//        if (abort && !download->isFinished)
+//            emit s_instance->downloadAborted(uid);
+//    }
+
+    Q_ASSERT(download && s_downloads.contains(download));
+    s_downloads.removeOne(download);
+    if (download->socket) {
+        download->socket->disconnect(s_instance);
+        if (abort)
+            download->socket->abort();
+        else
+            download->socket->close();
+    }
+    delete download;
+}
+
+void PayloadManager::cleanUpload(Upload* upload, bool abort)
+{
+//    if (Upload* upload = uploadFromUid(uid)) {
+//        s_uploads.removeOne(upload);
+//        upload->socket->disconnect(s_instance);
+//        if (upload->socket->state() != QAbstractSocket::UnconnectedState) {
+//            if (abort)
+//                upload->socket->abort();
+//            else
+//                upload->socket->close();
+//        }
+//        upload->socket->deleteLater();
+//        delete upload;
+//        if (abort && !upload->isFinished)
+//            emit s_instance->uploadAborted(uid);
+//    }
+
+    Q_ASSERT(upload && s_uploads.contains(upload));
+    s_uploads.removeOne(upload);
+    if (upload->socket) {
+        upload->socket->disconnect(s_instance);
+        if (abort)
+            upload->socket->abort();
+        else
+            upload->socket->close();
+    }
+    delete upload;
 }
 
 PayloadManager::Download* PayloadManager::downloadFromUid(const QByteArray& uid)
