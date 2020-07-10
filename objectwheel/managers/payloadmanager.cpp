@@ -271,7 +271,7 @@ void PayloadManager::abortDownload(Download* download)
 {
     Q_ASSERT(download && s_downloads.contains(download));
     const QByteArray uid = download->uid;
-    cleanDownload(download, true);
+    cleanDownload(download);
     emit s_instance->downloadAborted(uid);
 }
 
@@ -279,7 +279,7 @@ void PayloadManager::abortUpload(Upload* upload)
 {
     Q_ASSERT(upload && s_uploads.contains(upload));
     const QByteArray uid = upload->uid;
-    cleanUpload(upload, true);
+    cleanUpload(upload);
     emit s_instance->uploadAborted(uid);
 }
 
@@ -287,7 +287,7 @@ void PayloadManager::timeoutDownload(Download* download)
 {
     Q_ASSERT(download && s_downloads.contains(download));
     const QByteArray uid = download->uid;
-    cleanDownload(download, true);
+    cleanDownload(download);
     emit s_instance->downloadTimedout(uid);
 }
 
@@ -295,7 +295,7 @@ void PayloadManager::timeoutUpload(Upload* upload)
 {
     Q_ASSERT(upload && s_uploads.contains(upload));
     const QByteArray uid = upload->uid;
-    cleanUpload(upload, true);
+    cleanUpload(upload);
     emit s_instance->uploadTimedout(uid);
 }
 

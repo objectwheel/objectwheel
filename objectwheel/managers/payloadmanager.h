@@ -38,8 +38,8 @@ public:
     static void startDownload(const QByteArray& uid);
     static void startUpload(const QByteArray& uid, const QByteArray& data);
 
-    static void cancelDownload(const QByteArray& uid, bool abort);
-    static void cancelUpload(const QByteArray& uid, bool abort);
+    static void cancelDownload(const QByteArray& uid, bool abort = true);
+    static void cancelUpload(const QByteArray& uid, bool abort = true);
 
 private slots:
     static void handleConnected(Download* download);
@@ -52,8 +52,8 @@ private:
     static void abortUpload(Upload* upload);
     static void timeoutDownload(Download* download);
     static void timeoutUpload(Upload* upload);
-    static void cleanDownload(Download* download, bool abort);
-    static void cleanUpload(Upload* upload, bool abort);
+    static void cleanDownload(Download* download, bool abort = true);
+    static void cleanUpload(Upload* upload, bool abort = true);
 
 private:
     static Download* downloadFromUid(const QByteArray& uid);
