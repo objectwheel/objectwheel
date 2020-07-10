@@ -147,7 +147,6 @@ void PayloadManager::handleConnected(Download* download)
 
 void PayloadManager::handleReadyRead(Download* download)
 {
-    Q_ASSERT(s_downloads.contains(download));
     Q_ASSERT(download->socket->state() == QAbstractSocket::ConnectedState);
 
     // Header
@@ -234,8 +233,6 @@ void PayloadManager::handleConnected(Upload* upload)
 
 void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
 {
-    Q_ASSERT(upload);
-    Q_ASSERT(s_uploads.contains(upload));
     Q_ASSERT(upload->socket->state() == QAbstractSocket::ConnectedState);
 
     upload->timer.start(DataTransferTimeout);
