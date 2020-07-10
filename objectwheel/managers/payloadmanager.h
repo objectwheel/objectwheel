@@ -12,7 +12,8 @@ class PayloadManager final : public QObject
 
     enum {
         DataTransferTimeout = 30000,
-        FrameSizeInBytes = 524288
+        FrameSizeInBytes = 524288,
+        ReadBufferSize = 2097152
     };
 
     struct Download {

@@ -1,6 +1,14 @@
 #include <payloadmanager.h>
 #include <hashfactory.h>
+
 #include <QtEndian>
+#include <QBuffer>
+
+#if defined(Q_OS_WINDOWS) // For linger, setsockopt()
+#  include <Winsock.h>
+#else
+#  include <sys/socket.h>
+#endif
 
 PayloadManager* PayloadManager::s_instance = nullptr;
 QVector<PayloadManager::Download*> PayloadManager::s_downloads;
@@ -13,32 +21,33 @@ PayloadManager::PayloadManager(QObject* parent) : QObject(parent)
 
 PayloadManager::~PayloadManager()
 {
-    const QVector<Download*> downloads = s_downloads;
-    const QVector<Upload*> uploads = s_uploads;
-    s_downloads.clear();
-    s_uploads.clear();
-    for (const Download* download : downloads) {
-        const QByteArray uid = download->uid;
-        const bool isFinished = download->isFinished;
+    QVector<QByteArray> downloadUids(s_downloads.size());
+    for (int i = 0; i < s_downloads.size(); ++i) {
+        Download* download = s_downloads[i];
+        downloadUids[i] = download->uid;
         download->socket->disconnect(this);
-        if (download->socket->state() != QAbstractSocket::UnconnectedState)
-            download->socket->abort();
-        download->socket->deleteLater();
+        download->socket->abort();
+        delete download->socket;
         delete download;
-        if (!isFinished)
-            emit downloadAborted(uid);
     }
-    for (const Upload* upload : uploads) {
-        const QByteArray uid = upload->uid;
-        const bool isFinished = upload->isFinished;
+    s_downloads.clear();
+
+    QVector<QByteArray> uploadUids(s_uploads.size());
+    for (int i = 0; i < s_uploads.size(); ++i) {
+        Upload* upload = s_uploads[i];
+        uploadUids[i] = upload->uid;
         upload->socket->disconnect(this);
-        if (upload->socket->state() != QAbstractSocket::UnconnectedState)
-            upload->socket->abort();
-        upload->socket->deleteLater();
+        upload->socket->abort();
+        delete upload->socket;
         delete upload;
-        if (!isFinished)
-            emit uploadAborted(uid);
     }
+    s_uploads.clear();
+
+    for (const QByteArray& uid : qAsConst(downloadUids))
+        emit downloadAborted(uid);
+    for (const QByteArray& uid : qAsConst(uploadUids))
+        emit uploadAborted(uid);
+
     s_instance = nullptr;
 }
 
@@ -52,19 +61,19 @@ void PayloadManager::startDownload(const QByteArray& uid)
     Q_ASSERT(uid.size() == 12);
 
     auto download = new Download;
-    download->isFinished = false;
     download->uid = uid;
     download->socket = new QSslSocket(s_instance);
+    download->bytesRead = 0;
     download->totalBytes = -1;
-    download->bytesWritten = 0;
     download->timer.setSingleShot(true);
     download->timer.start(DataTransferTimeout);
+    download->socket->setReadBufferSize(ReadBufferSize);
     s_downloads.append(download);
 
     connect(&download->timer, &QTimer::timeout,
             s_instance, [=] { timeoutDownload(download); });
     connect(download->socket, &QSslSocket::disconnected,
-            s_instance, [=] { cancelDownload(download->uid); });
+            s_instance, [=] { abortDownload(download); });
 
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(download->socket, &QSslSocket::connected,
@@ -83,19 +92,19 @@ void PayloadManager::startUpload(const QByteArray& uid, const QByteArray& data)
     Q_ASSERT(!data.isEmpty());
 
     auto upload = new Upload;
-    upload->isFinished = false;
     upload->uid = uid;
     upload->data = data;
     upload->bytesLeft = data.size();
     upload->socket = new QSslSocket(s_instance);
     upload->timer.setSingleShot(true);
     upload->timer.start(DataTransferTimeout);
+    upload->socket->setReadBufferSize(ReadBufferSize);
     s_uploads.append(upload);
 
     connect(&upload->timer, &QTimer::timeout,
             s_instance, [=] { timeoutUpload(upload); });
     connect(upload->socket, &QSslSocket::disconnected,
-            s_instance, [=] { cancelUpload(upload->uid); });
+            s_instance, [=] { abortUpload(upload); });
 
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::connected,
@@ -120,11 +129,14 @@ void PayloadManager::cancelUpload(const QByteArray& uid, bool abort)
 
 void PayloadManager::handleConnected(Download* download)
 {
-    Q_ASSERT(download);
-    Q_ASSERT(download->uid.size() == 12);
-    Q_ASSERT(s_downloads.contains(download));
     Q_ASSERT(download->socket->state() == QAbstractSocket::ConnectedState);
     Q_ASSERT(download->socket->bytesAvailable() <= 0);
+
+    const qintptr socketDescriptor = download->socket->socketDescriptor();
+    if (socketDescriptor > 0) {
+        linger l = {0, 0};
+        ::setsockopt(socketDescriptor, SOL_SOCKET, SO_LINGER, (char*) &l, sizeof(l));
+    }
 
     connect(download->socket, &QSslSocket::readyRead,
             s_instance, [=] { handleReadyRead(download); });
@@ -135,7 +147,6 @@ void PayloadManager::handleConnected(Download* download)
 
 void PayloadManager::handleReadyRead(Download* download)
 {
-    Q_ASSERT(download);
     Q_ASSERT(s_downloads.contains(download));
     Q_ASSERT(download->socket->state() == QAbstractSocket::ConnectedState);
 
@@ -152,30 +163,43 @@ void PayloadManager::handleReadyRead(Download* download)
 
     // Body
     if (download->socket->bytesAvailable() > 0) {
-        download->timer.start(download->timer.interval());
+        download->timer.start(DataTransferTimeout);
         const qint64 available = download->socket->bytesAvailable();
-        const bool isLastFrame = download->bytesWritten + available >= download->totalBytes;
-        if (isLastFrame)
-            download->isFinished = true;
-        emit s_instance->readyRead(download->uid, download->socket, download->totalBytes, isLastFrame);
-        if (s_downloads.contains(download)) {
-            if (isLastFrame)
-                cancelDownload(download->uid, false);
-            else
-                download->bytesWritten += available - download->socket->bytesAvailable();
+        const bool isLastFrame = download->bytesRead + available >= download->totalBytes;
+        if (isLastFrame) {
+            QBuffer buffer;
+            buffer.setData(download->socket->readAll());
+            buffer.open(QIODevice::ReadOnly);
+            const qint64 totalBytes = download->totalBytes;
+            const QByteArray uid = download->uid;
+            cleanDownload(download, false);
+            emit s_instance->readyRead(uid, &buffer, totalBytes, true);
+        } else {
+            emit s_instance->readyRead(download->uid, download->socket, download->totalBytes, false);
+            if (s_downloads.contains(download))
+                download->bytesRead += available - download->socket->bytesAvailable();
         }
     }
 }
 
 void PayloadManager::handleConnected(Upload* upload)
 {
-    Q_ASSERT(upload);
-    Q_ASSERT(!upload->data.isEmpty());
-    Q_ASSERT(s_uploads.contains(upload));
     Q_ASSERT(upload->socket->state() == QAbstractSocket::ConnectedState);
 
+    if (upload->socket->bytesAvailable() > 0 || upload->data.isEmpty()) {
+        qWarning("PayloadManager: Upload aborted, absurd data received.");
+        abortUpload(upload);
+        return;
+    }
+
+    const qintptr socketDescriptor = upload->socket->socketDescriptor();
+    if (socketDescriptor > 0) {
+        linger l = {0, 0};
+        ::setsockopt(socketDescriptor, SOL_SOCKET, SO_LINGER, (char*) &l, sizeof(l));
+    }
+
     connect(upload->socket, &QSslSocket::readyRead,
-            s_instance, [=] { cancelUpload(upload->uid); });
+            s_instance, [=] { abortUpload(upload); });
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::bytesWritten,
             s_instance, [=] (qint64 bytes) { handleBytesWritten(upload, bytes); });
@@ -197,10 +221,9 @@ void PayloadManager::handleConnected(Upload* upload)
     for (qint64 i = 0; i < numFrames; ++i) {
         const qint64 size = qMin(bytesLeft, qint64(FrameSizeInBytes));
         if (upload->socket->write(upload->data.constData() + currentPosition, size) != size) {
-            qWarning() << QLatin1String("Socket aborted, failed to write data, reason:")
+            qWarning() << QLatin1String("PayloadManager: Upload aborted, failed to write data, reason:")
                        << upload->socket->errorString();
-            upload->data.clear();
-            upload->socket->abort();
+            abortUpload(upload);
             return;
         }
         currentPosition += size;
@@ -215,21 +238,30 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
     Q_ASSERT(s_uploads.contains(upload));
     Q_ASSERT(upload->socket->state() == QAbstractSocket::ConnectedState);
 
-    upload->timer.start(upload->timer.interval());
+    upload->timer.start(DataTransferTimeout);
+
+    // We don't know the total size of the encrypted data written
+    // and Qt doesn't help us figuring that information out. Plus
+    // there is no way of knowing the size of the plain data that
+    // is written in each encryptedBytesWritten() signal cycle. So
+    // we count written data size until it reaches out the plain
+    // data size that was originally written and stop emitting the
+    // bytesWritten() signal before the last frame. Even if we did
+    // not encrypt the data, the written data size is going to be
+    // bigger anyway (due to header information we are writing).
 
 #if defined(PAYLOADMANAGER_DEBUG)
     const bool isLastFrame = upload->socket->bytesToWrite() <= 0;
 #else
     const bool isLastFrame = upload->socket->encryptedBytesToWrite() <= 0;
 #endif
-    const bool isArtificialLastFrame = upload->bytesLeft - bytes <= 0;
-
+    const bool isPseudoLastFrame = upload->bytesLeft - bytes <= 0;
     if (isLastFrame) {
-        upload->isFinished = true;
-        emit s_instance->bytesWritten(upload->uid, upload->bytesLeft, true);
-        if (s_uploads.contains(upload))
-            cancelDownload(upload->uid, false);
-    } else if (!isArtificialLastFrame) {
+        const qint64 bytesLeft = upload->bytesLeft;
+        const QByteArray uid = upload->uid;
+        cleanUpload(upload, false);
+        emit s_instance->bytesWritten(uid, bytesLeft, true);
+    } else if (!isPseudoLastFrame) {
         upload->bytesLeft -= bytes;
         emit s_instance->bytesWritten(upload->uid, bytes, false);
     }
@@ -269,59 +301,27 @@ void PayloadManager::timeoutUpload(Upload* upload)
 
 void PayloadManager::cleanDownload(Download* download, bool abort)
 {
-//    if (Download* download = downloadFromUid(uid)) {
-//        s_downloads.removeOne(download);
-//        download->socket->disconnect(s_instance);
-//        if (download->socket->state() != QAbstractSocket::UnconnectedState) {
-//            if (abort)
-//                download->socket->abort();
-//            else
-//                download->socket->close();
-//        }
-//        download->socket->deleteLater();
-//        delete download;
-//        if (abort && !download->isFinished)
-//            emit s_instance->downloadAborted(uid);
-//    }
-
     Q_ASSERT(download && s_downloads.contains(download));
     s_downloads.removeOne(download);
-    if (download->socket) {
-        download->socket->disconnect(s_instance);
-        if (abort)
-            download->socket->abort();
-        else
-            download->socket->close();
-    }
+    download->socket->disconnect(s_instance);
+    if (abort)
+        download->socket->abort();
+    else
+        download->socket->close();
+    download->socket->deleteLater();
     delete download;
 }
 
 void PayloadManager::cleanUpload(Upload* upload, bool abort)
 {
-//    if (Upload* upload = uploadFromUid(uid)) {
-//        s_uploads.removeOne(upload);
-//        upload->socket->disconnect(s_instance);
-//        if (upload->socket->state() != QAbstractSocket::UnconnectedState) {
-//            if (abort)
-//                upload->socket->abort();
-//            else
-//                upload->socket->close();
-//        }
-//        upload->socket->deleteLater();
-//        delete upload;
-//        if (abort && !upload->isFinished)
-//            emit s_instance->uploadAborted(uid);
-//    }
-
     Q_ASSERT(upload && s_uploads.contains(upload));
     s_uploads.removeOne(upload);
-    if (upload->socket) {
-        upload->socket->disconnect(s_instance);
-        if (abort)
-            upload->socket->abort();
-        else
-            upload->socket->close();
-    }
+    upload->socket->disconnect(s_instance);
+    if (abort)
+        upload->socket->abort();
+    else
+        upload->socket->close();
+    upload->socket->deleteLater();
     delete upload;
 }
 
