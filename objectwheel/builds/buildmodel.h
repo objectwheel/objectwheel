@@ -2,7 +2,6 @@
 #define BUILDMODEL_H
 
 #include <QSet>
-#include <QHash>
 #include <QBasicTimer>
 #include <QAbstractListModel>
 
