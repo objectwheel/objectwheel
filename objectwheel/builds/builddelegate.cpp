@@ -67,7 +67,7 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
     deleteButton->setFlat(true);
     deleteButton->setIcon(QIcon(":/images/builds/trash.svg"));
     deleteButton->setFixedSize(buttonSize);
-    deleteButton->setToolTip(tr("Delete"));
+    deleteButton->setToolTip(tr("Abort"));
     connect(deleteButton, &QPushButton::clicked, this,
             [=] { emit deleteButtonClicked(model->indexFromIdentifier(identifier)); });
 
@@ -214,7 +214,7 @@ void BuildDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     const QString& sizeStr = UtilityFunctions::toPrettyBytesString(transferredBytes)
             + QLatin1String(" / ")
             + UtilityFunctions::toPrettyBytesString(totalBytes)
-            + QLatin1String(" ( % %1 )").arg(QString::number(progress, 'f', 2));
+            + QStringLiteral(" ( % %1 )").arg(QString::number(progress, 'f', 2));
 
     labelRect = QRectF(labelRect.left() + leftLength + 2 * spacing, opt.rect.top() + PADDING,
                        rightLabelLength, textHeight);

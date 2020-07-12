@@ -266,60 +266,78 @@ void PayloadManager::handleBytesWritten(Upload* upload, qint64 bytes)
 
 void PayloadManager::abortDownload(Download* download)
 {
-    Q_ASSERT(download && s_downloads.contains(download));
-    const QByteArray uid = download->uid;
-    cleanDownload(download);
-    emit s_instance->downloadAborted(uid);
+    if (download && s_downloads.contains(download)) {
+        const QByteArray uid = download->uid;
+        cleanDownload(download);
+        emit s_instance->downloadAborted(uid);
+    } else {
+        qWarning("Cannot abort unknown download");
+    }
 }
 
 void PayloadManager::abortUpload(Upload* upload)
 {
-    Q_ASSERT(upload && s_uploads.contains(upload));
-    const QByteArray uid = upload->uid;
-    cleanUpload(upload);
-    emit s_instance->uploadAborted(uid);
+    if (upload && s_uploads.contains(upload)) {
+        const QByteArray uid = upload->uid;
+        cleanUpload(upload);
+        emit s_instance->uploadAborted(uid);
+    } else {
+        qWarning("Cannot abort unknown upload");
+    }
 }
 
 void PayloadManager::timeoutDownload(Download* download)
 {
-    Q_ASSERT(download && s_downloads.contains(download));
-    const QByteArray uid = download->uid;
-    cleanDownload(download);
-    emit s_instance->downloadTimedout(uid);
+    if (download && s_downloads.contains(download)) {
+        const QByteArray uid = download->uid;
+        cleanDownload(download);
+        emit s_instance->downloadTimedout(uid);
+    } else {
+        qWarning("Cannot timeout unknown download");
+    }
 }
 
 void PayloadManager::timeoutUpload(Upload* upload)
 {
-    Q_ASSERT(upload && s_uploads.contains(upload));
-    const QByteArray uid = upload->uid;
-    cleanUpload(upload);
-    emit s_instance->uploadTimedout(uid);
+    if (upload && s_uploads.contains(upload)) {
+        const QByteArray uid = upload->uid;
+        cleanUpload(upload);
+        emit s_instance->uploadTimedout(uid);
+    } else {
+        qWarning("Cannot timeout unknown upload");
+    }
 }
 
 void PayloadManager::cleanDownload(Download* download, bool abort)
 {
-    Q_ASSERT(download && s_downloads.contains(download));
-    s_downloads.removeOne(download);
-    download->socket->disconnect(s_instance);
-    if (abort)
-        download->socket->abort();
-    else
-        download->socket->close();
-    download->socket->deleteLater();
-    delete download;
+    if (download && s_downloads.contains(download)) {
+        s_downloads.removeOne(download);
+        download->socket->disconnect(s_instance);
+        if (abort)
+            download->socket->abort();
+        else
+            download->socket->close();
+        download->socket->deleteLater();
+        delete download;
+    } else {
+        qWarning("Cannot clean unknown download");
+    }
 }
 
 void PayloadManager::cleanUpload(Upload* upload, bool abort)
 {
-    Q_ASSERT(upload && s_uploads.contains(upload));
-    s_uploads.removeOne(upload);
-    upload->socket->disconnect(s_instance);
-    if (abort)
-        upload->socket->abort();
-    else
-        upload->socket->close();
-    upload->socket->deleteLater();
-    delete upload;
+    if (upload && s_uploads.contains(upload)) {
+        s_uploads.removeOne(upload);
+        upload->socket->disconnect(s_instance);
+        if (abort)
+            upload->socket->abort();
+        else
+            upload->socket->close();
+        upload->socket->deleteLater();
+        delete upload;
+    } else {
+        qWarning("Cannot clean unknown upload");
+    }
 }
 
 PayloadManager::Download* PayloadManager::downloadFromUid(const QByteArray& uid)

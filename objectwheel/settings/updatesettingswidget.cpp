@@ -158,7 +158,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_settingsGroup->setTitle(tr("Settings"));
     m_checkForUpdatesAutomaticallyCheckBox->setText(tr("Check for updates automatically"));
-    m_checkForUpdatesAutomaticallyCheckBox->setToolTip(tr("It does not download or install updates automatically"));
+    m_checkForUpdatesAutomaticallyCheckBox->setToolTip(tr("It does not download or install updates automatically in any case"));
     m_checkForUpdatesAutomaticallyCheckBox->setCursor(Qt::PointingHandCursor);
 
     /****/

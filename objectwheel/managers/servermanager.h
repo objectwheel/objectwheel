@@ -47,7 +47,7 @@ public:
         ResponseUserIcon,
         RequestCloudBuild,
         ResponseCloudBuild,
-        CancelCloudBuild,
+        AbortCloudBuild,
         RequestUpdateMetaInfo,
         ResponseUpdateMetaInfo
     };

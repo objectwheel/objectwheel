@@ -54,7 +54,7 @@ void DownloadController::onDeleteButtonClick(const QModelIndex& index) const
         if (state.toInt() != BuildModel::Finished) {
             ret = UtilityFunctions::showMessage(m_downloadWidget,
                                                 tr("Are you sure?"),
-                                                tr("This will cancel the build process."),
+                                                tr("This will abort the build process."),
                                                 QMessageBox::Question,
                                                 QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
         }
