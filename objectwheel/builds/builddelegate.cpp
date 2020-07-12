@@ -83,8 +83,10 @@ QWidget* BuildDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
             [=] { emit openFolderButtonClicked(model->indexFromIdentifier(identifier)); });
     connect(model, &BuildModel::downloadFinished,
             openFolderButton, [=] (const QModelIndex& i) {
-        if (i.data(BuildModel::Identifier).toByteArray() == identifier)
+        if (i.data(BuildModel::Identifier).toByteArray() == identifier
+                && !i.data(BuildModel::ErrorRole).toBool()) {
             openFolderButton->setEnabled(true);
+        }
     });
 
     auto widget = new QWidget(parent);

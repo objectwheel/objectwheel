@@ -12,6 +12,7 @@
 #include <QTimer>
 #include <QIcon>
 #include <QApplication>
+#include <QRandomGenerator>
 
 enum StatusCode {
     InternalError,
@@ -487,7 +488,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
         QByteArray payloadUid;
         UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
         buildInfo->setPayloadUid(payloadUid);
-        buildInfo->addStatus(tr("Build succeed, downloading..."));
+        buildInfo->addStatus(tr("Build succeed, awaiting download..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
         PayloadManager::startDownload(payloadUid);
     } break;
@@ -611,22 +612,33 @@ void BuildModel::onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevi
 
         buildInfo->addStatus(tr("Done"));
         buildInfo->setState(Finished);
+        changedRoles.clear();
+        changedRoles.unite({ StatusRole, Qt::StatusTipRole, StateRole });
         do {
             const QString& filePath = index.data(PathRole).toString();
             if (QFile::exists(filePath)) {
-                qWarning("BuildModel: Executable file already exists");
+                buildInfo->addStatus(tr("Failed to save, file already exists"));
+                buildInfo->setErrorFlag(true);
+                changedRoles.unite({ ErrorRole });
                 break;
             }
             QFile file(filePath);
             if (!file.open(QFile::WriteOnly)) {
-                qWarning("BuildModel: Cannot open executable file");
+                buildInfo->addStatus(tr("Failed to save, permission denied"));
+                buildInfo->setErrorFlag(true);
+                changedRoles.unite({ ErrorRole });
                 break;
             }
-            file.write(*buildInfo->buffer());
+            if (file.write(*buildInfo->buffer()) != buildInfo->buffer()->size()) {
+                buildInfo->addStatus(tr("Failed to save, not enough space"));
+                buildInfo->setErrorFlag(true);
+                changedRoles.unite({ ErrorRole });
+                break;
+            }
         } while (false);
         buildInfo->buffer()->clear();
         emit downloadFinished(index);
-        emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, StateRole });
+        emit dataChanged(index, index, QVector<int>(changedRoles.cbegin(), changedRoles.cend()));
     }
 }
 
@@ -715,11 +727,19 @@ QModelIndex BuildModel::indexFromBuildInfo(const BuildInfo* buildInfo) const
 
 void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const
 {
+    const bool isFirstChunk = buildInfo->recentBlocks().isEmpty();
     const int IDEAL_BLOCK_SIZE = buildInfo->totalBytes() / qMax(1, chunkSize) / 80;
     BuildInfo::Block block;
     block.size = chunkSize;
     block.timestamp = QDateTime::currentDateTime();
     buildInfo->recentBlocks().append(block);
+
+    if (isFirstChunk) {
+        BuildInfo::Block block;
+        block.size = chunkSize;
+        block.timestamp = QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(10, 200));
+        buildInfo->recentBlocks().append(block);
+    }
 
     if (buildInfo->recentBlocks().size() > qBound(3, IDEAL_BLOCK_SIZE, 100))
         buildInfo->recentBlocks().removeFirst();
@@ -730,7 +750,7 @@ void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet
         for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
             transferredBytes += block.size;
         if (elapedMs == 0)
-            elapedMs = 100;
+            elapedMs = QRandomGenerator::global()->bounded(10, 200);
         qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
         buildInfo->setSpeed(bytesPerMs * 1000);
         changedRoles.unite({ SpeedRole });
