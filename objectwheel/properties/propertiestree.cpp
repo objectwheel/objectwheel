@@ -33,11 +33,12 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto updatePalette = [=] {
-        QPalette p(palette());
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Light, "#ab8157");
         p.setColor(QPalette::Dark, "#9c7650");
         p.setColor(QPalette::AlternateBase, "#f7efe6");
         p.setColor(QPalette::Link, "#489c3b");
+        setStyleSheet(QString());
         setPalette(p);
         setStyleSheet(QString { R"qss(
                         QTreeView {

@@ -4,7 +4,7 @@
 AssetsTree::AssetsTree(QWidget* parent) : FileExplorer(parent)
 {
     auto updatePalette = [=] {
-        QPalette p(palette());
+        QPalette p(/*QApplication::*/palette()); // Base class updates class-platte already
         p.setColor(QPalette::Light, "#a671bd");
         p.setColor(QPalette::Dark, "#9968ad");
         p.setColor(QPalette::AlternateBase, "#f6f2f7");

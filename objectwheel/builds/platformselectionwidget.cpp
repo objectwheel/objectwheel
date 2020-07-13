@@ -117,7 +117,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
   , m_buttonSlice(new ButtonSlice(this))
 {
     auto updatePalette = [=] {
-        QPalette p(m_platformList->palette());
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Highlight, QStringLiteral("#16000000"));
         m_platformList->setPalette(p);
     };

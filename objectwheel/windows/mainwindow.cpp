@@ -196,7 +196,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
     m_removeSizeRestrictionsOnDockWidgetsTimer->setInterval(1000);
 
     auto updatePalette = [=] {
-        QPalette p(palette());
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Active, QPalette::Text, "#505050");
         p.setColor(QPalette::Inactive, QPalette::Text, "#505050");
         p.setColor(QPalette::Disabled, QPalette::Text, "#9c9c9c");

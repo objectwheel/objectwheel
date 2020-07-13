@@ -319,7 +319,7 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     });
 
     auto updatePalette = [=] {
-        QPalette p(m_listWidget->palette());
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Highlight, QStringLiteral("#16000000"));
         m_listWidget->setPalette(p);
     };

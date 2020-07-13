@@ -61,7 +61,7 @@ TextBrowserHelpViewer::TextBrowserHelpViewer(QWidget *parent)
     setFocusProxy(m_textBrowser);
 
     auto updatePalette = [=] {
-        QPalette p = palette();
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Inactive, QPalette::Highlight,
             p.color(QPalette::Active, QPalette::Highlight));
         p.setColor(QPalette::Inactive, QPalette::HighlightedText,

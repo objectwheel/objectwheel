@@ -42,6 +42,7 @@
 #include <QFontDatabase>
 #include <QSharedMemory>
 #include <QTimer>
+#include <QPixmapCache>
 
 #include <theme/theme_p.h>
 #include <coreplugin/coreconstants.h>
@@ -107,6 +108,7 @@ ApplicationCore::ApplicationCore()
     QApplication::setPalette(palette());
     QObject::connect(GeneralSettings::instance(), &GeneralSettings::interfaceSettingsChanged, [=]{
         QApplication::setPalette(palette());
+        QPixmapCache::clear(); // Cached QIcon pixmaps makes use of old palette, so we have to update
     });
 
     /* Set application ui settings */

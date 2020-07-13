@@ -32,10 +32,11 @@ FormsTree::FormsTree(QWidget* parent) : QTreeWidget(parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto updatePalette = [=] {
-        QPalette p(palette());
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Light, "#bf5861");
         p.setColor(QPalette::Dark, "#b05159");
         p.setColor(QPalette::AlternateBase, "#f7e6e8");
+        setStyleSheet(QString());
         setPalette(p);
         setStyleSheet(QString { R"qss(
                         QTreeView {

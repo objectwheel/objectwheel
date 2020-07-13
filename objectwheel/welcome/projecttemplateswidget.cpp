@@ -143,7 +143,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_templatesLabel->setText(tr("Templates"));
 
     auto updatePalette = [=] {
-        QPalette p(m_listWidget->palette());
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Highlight, "#16000000");
         m_listWidget->setPalette(p);
     };

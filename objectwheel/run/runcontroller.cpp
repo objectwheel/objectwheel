@@ -116,7 +116,7 @@ void RunController::onApplicationStart()
 {
     m_runPane->runProgressBar()->setBusy(false);
     m_runPane->runProgressBar()->setProgress(100);
-    m_runPane->runProgressBar()->setProgressColor("#247dd6");
+    m_runPane->runProgressBar()->setProgressColor(m_runPane->palette().highlight().color());
     m_runPane->runProgressBar()->setText(progressBarMessageFor(Running));
 }
 

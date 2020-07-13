@@ -69,7 +69,7 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     auto updatePalette = [=] {
-        QPalette p(palette());
+        QPalette p(QApplication::palette());
         p.setColor(QPalette::Light, "#ffffff");
         p.setColor(QPalette::Dark, "#f0f0f0");
         p.setColor(QPalette::AlternateBase, "#f7f7f7");
@@ -436,6 +436,8 @@ void FileExplorer::onItemDoubleClick(const QModelIndex& index)
 
 void FileExplorer::setPalette(const QPalette& pal)
 {    
+    setStyleSheet(QString());
+
     QWidget::setPalette(pal);
     m_pathIndicator->setPalette(pal);
 
