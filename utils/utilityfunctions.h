@@ -150,6 +150,7 @@ QStringList anchorPropertyNames();
 void disableWheelEvent(QWidget* widget);
 QFont defaultFont();
 QFont systemDefaultFont();
+QFont systemTitleFont();
 void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>& condition);
 void setFocusRing(QWidget* widget, bool showFocusRing);
 bool isFocusRingSet(QWidget* widget);

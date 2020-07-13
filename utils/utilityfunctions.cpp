@@ -684,6 +684,16 @@ QFont systemDefaultFont()
     return font;
 }
 
+QFont systemTitleFont()
+{
+    QFont font;
+#if defined(Q_OS_MACOS)
+    if (QOperatingSystemVersion::current() >= QOperatingSystemVersion::MacOSCatalina)
+        font.setFamily("SF UI Display");
+#endif
+    return font;
+}
+
 // Shortcut events are sent based on the shortcut context that's set on the action/shortcut.
 // If shortcut context allows the shortcut to get triggered even if its window has the focus,
 // then there might be an ambiguity among all the other widgets who has shortcuts in the same
@@ -771,4 +781,5 @@ void updateToolTip(QWidget* widget, const QString& toolTip, const QRect& region)
         }
     }
 }
+
 } // UtilityFunctions

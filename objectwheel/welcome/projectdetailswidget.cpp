@@ -46,7 +46,6 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
-
     m_settingsLabel->setFont(f);
     m_settingsLabel->setText(tr("Project Settings"));
 

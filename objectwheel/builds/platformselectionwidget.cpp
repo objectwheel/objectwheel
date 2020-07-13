@@ -3,6 +3,7 @@
 #include <buttonslice.h>
 #include <platform.h>
 #include <styleditemdelegate.h>
+#include <utilityfunctions.h>
 
 #include <QBoxLayout>
 #include <QListWidget>
@@ -66,17 +67,16 @@ public:
         painter->drawPixmap(iconRect, icon, icon.rect());
 
         // Draw texts
-        QFont f;
-        f.setWeight(QFont::Medium);
-        painter->setFont(f);
         const QRectF nameRect(QPointF(iconRect.right() + padding, iconRect.top()),
                               QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding,
                                      iconRect.height() / 2.0));
         painter->setPen(opt.palette.text().color());
         painter->drawText(nameRect, index.data(NameRole).toString(), Qt::AlignVCenter | Qt::AlignLeft);
 
-        f.setWeight(QFont::Normal);
+        QFont f;
+        f.setPixelSize(f.pixelSize() - 1);
         painter->setFont(f);
+        painter->setPen(QColor(0, 0, 0, opt.state.testFlag(QStyle::State_Enabled) ? 160 : 100));
         const QRectF descRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
                               QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding,
                                      iconRect.height() / 2.0));
@@ -228,9 +228,9 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/oses.svg"),
                                             QSize(60, 60), this));
-    QFont f;
-    f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(26);
+    QFont f = UtilityFunctions::systemTitleFont();
+    f.setWeight(QFont::Light);
+    f.setPixelSize(24);
     titleLabel->setFont(f);
 
     f.setWeight(QFont::Light);

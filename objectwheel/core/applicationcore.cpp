@@ -279,15 +279,15 @@ QPalette ApplicationCore::palette()
     //    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light")
     const int g = qGray(GeneralSettings::interfaceSettings()->highlightColor.rgb());
     QPalette palette(QApplication::palette());
-    palette.setColor(QPalette::Active, QPalette::Text, "#2f2f2f");
-    palette.setColor(QPalette::Inactive, QPalette::Text, "#2f2f2f");
-    palette.setColor(QPalette::Disabled, QPalette::Text, "#6f7e8c");
-    palette.setColor(QPalette::Active, QPalette::WindowText, "#2f2f2f");
-    palette.setColor(QPalette::Inactive, QPalette::WindowText, "#2f2f2f");
-    palette.setColor(QPalette::Disabled, QPalette::WindowText, "#6f7e8c");
-    palette.setColor(QPalette::Active, QPalette::ButtonText, "#2f2f2f");
-    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#2f2f2f");
-    palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#6f7e8c");
+    palette.setColor(QPalette::Active, QPalette::Text, "#303030");
+    palette.setColor(QPalette::Inactive, QPalette::Text, "#303030");
+    palette.setColor(QPalette::Disabled, QPalette::Text, "#656565");
+    palette.setColor(QPalette::Active, QPalette::WindowText, "#303030");
+    palette.setColor(QPalette::Inactive, QPalette::WindowText, "#303030");
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, "#656565");
+    palette.setColor(QPalette::Active, QPalette::ButtonText, "#303030");
+    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#303030");
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#656565");
     palette.setColor(QPalette::Active, QPalette::PlaceholderText, "#bfbfbf");
     palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#bfbfbf");
     palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, "#bfbfbf");
@@ -300,7 +300,7 @@ QPalette ApplicationCore::palette()
     palette.setColor(QPalette::Window, "#ececec");
     palette.setColor(QPalette::BrightText, "#ffffff");
     palette.setColor(QPalette::HighlightedText, "#ffffff");
-    palette.setColor(QPalette::ToolTipText, "#2f2f2f");
+    palette.setColor(QPalette::ToolTipText, "#303030");
     palette.setColor(QPalette::ToolTipBase, "#ececec");
     palette.setColor(QPalette::Link, "#025dbf");
     palette.setColor(QPalette::LinkVisited, "#B44B46");

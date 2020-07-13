@@ -3,6 +3,7 @@
 #include <paintutils.h>
 #include <buildmodel.h>
 #include <builddelegate.h>
+#include <utilityfunctions.h>
 
 #include <QLabel>
 #include <QBoxLayout>
@@ -55,9 +56,9 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/gift.svg"),
                                             QSize(60, 60), this));
-    QFont f;
-    f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(26);
+    QFont f = UtilityFunctions::systemTitleFont();
+    f.setWeight(QFont::Light);
+    f.setPixelSize(24);
     titleLabel->setFont(f);
 
     f.setWeight(QFont::Light);

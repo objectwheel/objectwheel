@@ -6,6 +6,7 @@
 #include <windowmanager.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
+#include <styleditemdelegate.h>
 
 #include <QMessageBox>
 #include <QPushButton>
@@ -29,70 +30,76 @@
 
 namespace {
 enum Buttons { Back, Next };
-enum Roles { Name = Qt::UserRole + 1, Description };
+enum Roles { NameRole = Qt::UserRole + 1, DescriptionRole };
 extern const QStringList NAMES;
 extern const QStringList DESCRIPTIONS;
 } // Anonymous Namespace
 
-class ProjectTemplatesDelegate: public QStyledItemDelegate
+class ProjectTemplatesListDelegate final : public StyledItemDelegate
 {
-        Q_OBJECT
+    Q_DISABLE_COPY(ProjectTemplatesListDelegate)
 
-    public:
-        ProjectTemplatesDelegate(QListWidget* listWidget, QWidget* parent);
+public:
+    explicit ProjectTemplatesListDelegate(QObject* parent = nullptr) : StyledItemDelegate(parent)
+    {}
 
-        void paint(QPainter* painter, const QStyleOptionViewItem& option,
-          const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    {
+        return QSize(StyledItemDelegate::sizeHint(option, index).width(),
+                     option.decorationSize.height() + 14);
+    }
 
-    private:
-        QListWidget* m_listWidget;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+               const QModelIndex& index) const override
+    {
+        painter->save();
+
+        StyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+
+        // Limit drawing region to view's rect (with rounded corners)
+        if (opt.view) {
+            QPainterPath path;
+            path.addRoundedRect(opt.view->viewport()->rect(), 7, 7);
+            painter->setClipPath(path);
+        }
+
+        // Draw highlighted background if selected
+        if (opt.state.testFlag(QStyle::State_Selected))
+            painter->fillRect(opt.rect, opt.palette.highlight());
+
+        // Draw icon
+        const int padding = opt.rect.height() / 2.0 - opt.decorationSize.height() / 2.0;
+        const QRectF iconRect(QPointF(opt.rect.left() + padding, opt.rect.top() + padding), opt.decorationSize);
+        const QPixmap& icon = PaintUtils::pixmap(opt.icon, opt.decorationSize, opt.view);
+        painter->drawPixmap(iconRect, icon, icon.rect());
+
+        // Draw texts
+        const QRectF nameRect(QPointF(iconRect.right() + padding, iconRect.top()),
+                              QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding, iconRect.height() / 2.0));
+        painter->setPen(opt.palette.text().color());
+        painter->drawText(nameRect, index.data(NameRole).toString(), Qt::AlignVCenter | Qt::AlignLeft);
+
+        QFont f;
+        f.setPixelSize(f.pixelSize() - 2);
+        painter->setFont(f);
+        painter->setPen(QColor(0, 0, 0, opt.state.testFlag(QStyle::State_Enabled) ? 160 : 100));
+        const QRectF descriptionRect(QPointF(iconRect.right() + padding, iconRect.center().y()),
+                                     QSizeF(opt.rect.width() - opt.decorationSize.width() - 3 * padding,
+                                            iconRect.height() / 2.0));
+        painter->drawText(descriptionRect, index.data(DescriptionRole).toString(), Qt::AlignVCenter | Qt::AlignLeft);
+
+        // Draw bottom line
+        if (index.row() != index.model()->rowCount() - 1) {
+            painter->setPen(QPen(QColor("#28000000"), 0));
+            painter->drawLine(opt.rect.bottomLeft() + QPointF(padding, 0.5),
+                              opt.rect.bottomRight() + QPointF(-padding, 0.5));
+        }
+
+        painter->restore();
+    }
 };
 
-ProjectTemplatesDelegate::ProjectTemplatesDelegate(QListWidget* listWidget, QWidget* parent) : QStyledItemDelegate(parent)
-  , m_listWidget(listWidget)
-{
-}
-
-void ProjectTemplatesDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
-{
-   auto item = m_listWidget->item(index.row());
-   Q_ASSERT(item);
-
-   auto name = item->data(Name).toString();
-   auto description = item->data(Description).toString();
-
-   auto rn = QRectF(option.rect).adjusted(option.rect.height(),
-     7, 0, - option.rect.height() / 2.0);
-   auto rl = QRectF(option.rect).adjusted(option.rect.height(),
-     option.rect.height() / 2.0, 0, - 7);
-   auto ri = QRectF(option.rect).adjusted(7, 7,
-     - option.rect.width() + option.rect.height() - 7, - 7);
-   auto ra = ri.adjusted(3, -0.5, 0, 0);
-   ra.setSize(QSize(10, 10));
-   auto icon = PaintUtils::pixmap(item->icon(), ri.size().toSize(), m_listWidget);
-
-   painter->setRenderHint(QPainter::Antialiasing);
-
-   QPainterPath path;
-   path.addRoundedRect(m_listWidget->rect(), 8, 8);
-   painter->setClipPath(path);
-
-    if (item->isSelected())
-        painter->fillRect(option.rect, option.palette.highlight());
-
-    painter->drawPixmap(ri, icon, icon.rect());
-
-    QFont f;
-    f.setWeight(QFont::DemiBold);
-    painter->setFont(f);
-    painter->setPen(option.palette.text().color());
-    painter->drawText(rn, name, Qt::AlignVCenter | Qt::AlignLeft);
-
-    f.setPixelSize(f.pixelSize() - 2);
-    f.setWeight(QFont::Normal);
-    painter->setFont(f);
-    painter->drawText(rl, description, Qt::AlignVCenter | Qt::AlignLeft);
-}
 
 ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
@@ -120,15 +127,15 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_iconLabel->setFixedSize(QSize(60, 60));
     m_iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/templates.svg", QSize(60, 60), this));
 
-    QFont f;
-    f.setWeight(QFont::ExtraLight);
-    f.setPixelSize(26);
+    QFont f = UtilityFunctions::systemTitleFont();
+    f.setWeight(QFont::Light);
+    f.setPixelSize(24);
 
     m_titleLabel->setFont(f);
     m_titleLabel->setText(tr("Project Templates"));
 
     f.setWeight(QFont::Light);
-    f.setPixelSize(15);
+    f.setPixelSize(16);
     m_informativeLabel->setFont(f);
     m_informativeLabel->setText(tr("Choose appropriate template for your project"));
     m_informativeLabel->setAlignment(Qt::AlignCenter);
@@ -142,53 +149,51 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     };
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
-    m_listWidget->viewport()->installEventFilter(this);
     m_listWidget->setUniformItemSizes(true);
-    m_listWidget->setIconSize(QSize(48, 48));
-    m_listWidget->setMinimumWidth(400);
-    m_listWidget->setItemDelegate(new ProjectTemplatesDelegate(m_listWidget, m_listWidget));
+    m_listWidget->viewport()->installEventFilter(this);
+    m_listWidget->setIconSize(QSize(40, 40));
+    m_listWidget->setItemDelegate(new ProjectTemplatesListDelegate(m_listWidget));
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_listWidget->setFocusPolicy(Qt::NoFocus);
     m_listWidget->setFixedSize(SIZE_LIST);
     m_listWidget->verticalScrollBar()->setStyleSheet(
-        tr(
-            "QScrollBar:vertical {"
-            "    background: transparent;"
-            "    width: %2px;"
-            "} QScrollBar::handle:vertical {"
-            "    background: #909497;"
-            "    min-height: %1px;"
-            "    border-radius: %3px;"
-            "} QScrollBar::add-line:vertical {"
-            "    background: none;"
-            "} QScrollBar::sub-line:vertical {"
-            "    background: none;"
-            "} QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
-            "    background: none;"
-            "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
-            "    background: none;"
-            "}"
-        ).
-        arg(15).
-        arg(6).
-        arg(2.5)
-    );
+                QString {
+                    "QScrollBar:vertical {"
+                    "    background: transparent;"
+                    "    width: %2px;"
+                    "} QScrollBar::handle:vertical {"
+                    "    background: #909497;"
+                    "    min-height: %1px;"
+                    "    border-radius: %3px;"
+                    "} QScrollBar::add-line:vertical {"
+                    "    background: none;"
+                    "} QScrollBar::sub-line:vertical {"
+                    "    background: none;"
+                    "} QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {"
+                    "    background: none;"
+                    "} QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {"
+                    "    background: none;"
+                    "}"
+                }
+                .arg(15)
+                .arg(6)
+                .arg(2.5));
     m_listWidget->setStyleSheet(
-        tr(
-            "QListWidget {"
-            "    background: #12000000;"
-            "    border: 1px solid #22000000;"
-            "    border-radius: %1px;"
-            "}"
-        )
-        .arg(8)
-    );
+                QString {
+                    "QListWidget {"
+                    "    background: #12000000;"
+                    "    border: 1px solid #22000000;"
+                    "    border-radius: %1px;"
+                    "}"
+                }
+                .arg(8));
+
 
     for (int i = 0; i < NAMES.size(); i++) {
         auto item = new QListWidgetItem("Test");
         item->setIcon(QIcon(QStringLiteral(":/images/welcome/template%1.svg").arg(i)));
-        item->setData(Name, NAMES[i]);
-        item->setData(Description, DESCRIPTIONS[i]);
+        item->setData(NameRole, NAMES[i]);
+        item->setData(DescriptionRole, DESCRIPTIONS[i]);
         m_listWidget->addItem(item);
     }
 
@@ -205,6 +210,8 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     m_buttons->triggerSettings();
 
+    connect(m_listWidget, &QListWidget::itemDoubleClicked,
+            this, &ProjectTemplatesWidget::onNextButtonClick);
     connect(m_buttons->get(Back), &QPushButton::clicked,
             this, &ProjectTemplatesWidget::back);
     connect(m_buttons->get(Next), &QPushButton::clicked,
@@ -247,16 +254,16 @@ const QStringList NAMES = {
     QObject::tr("Blank Project"),
     QObject::tr("Application Project v2"),
     QObject::tr("Application Project v1")/*,
-    QObject::tr("Full-featured Application Project v2"),
-    QObject::tr("Full-featured Application Project v1")*/
+        QObject::tr("Full-featured Application Project v2"),
+        QObject::tr("Full-featured Application Project v1")*/
 };
 
 const QStringList DESCRIPTIONS = {
     QObject::tr("A blank project with an empty Window"),
     QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 2"),
     QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 1")/*,
-    QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 2"),
-    QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 1")*/
+        QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 2"),
+        QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 1")*/
 };
 } // Anonymous Namespace
 
