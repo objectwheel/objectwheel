@@ -1,7 +1,7 @@
 #ifndef UPDATEMANAGER_H
 #define UPDATEMANAGER_H
 
-#include <QObject>
+#include <QBuffer>
 #include <QCborMap>
 #include <QFutureWatcher>
 
@@ -49,6 +49,7 @@ private:
 private:
     static UpdateManager* s_instance;
     static bool s_isUpdateCheckRunning;
+    static QBuffer s_downloadBuffer;
     static QCborMap s_localMetaInfo;
     static QCborMap s_remoteMetaInfo;
     static QCborMap s_differences;

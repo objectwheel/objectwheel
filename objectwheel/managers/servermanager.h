@@ -47,9 +47,7 @@ public:
         ResponseUserIcon,
         RequestCloudBuild,
         ResponseCloudBuild,
-        AbortCloudBuild,
-        RequestUpdateMetaInfo,
-        ResponseUpdateMetaInfo
+        AbortCloudBuild
     };
     Q_ENUM(ServerCommands)
 

@@ -8,3 +8,6 @@
 [submodule "modules"]
 	path = modules
 	url = ../modules
+[submodule "utils/fastdownloader"]
+	path = utils/fastdownloader
+	url = https://github.com/omergoktas/fastdownloader

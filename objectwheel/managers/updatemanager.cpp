@@ -1,9 +1,10 @@
 #include <updatemanager.h>
-#include <servermanager.h>
 #include <async.h>
 #include <systemsettings.h>
 #include <updatesettings.h>
 #include <applicationcore.h>
+#include <servermanager.h>
+#include <fastdownloader.h>
 
 #include <QProcess>
 #include <QCoreApplication>
@@ -14,7 +15,7 @@
 
 enum StatusCode {
     BadRequest,
-    RequestSucceed,
+    RequestSucceed
 };
 Q_DECLARE_METATYPE(StatusCode)
 
@@ -51,12 +52,49 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onConnect, Qt::QueuedConnection);
     connect(ServerManager::instance(), &ServerManager::disconnected,
             this, &UpdateManager::onDisconnect, Qt::QueuedConnection);
-    connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
-            this, &UpdateManager::onServerResponse, Qt::QueuedConnection);
     connect(&s_localMetaInfoWatcher, &QFutureWatcher<QCborMap>::resultsReadyAt,
             this, &UpdateManager::onLocalScanFinish);
     connect(this, &UpdateManager::updateCheckFinished,
             this, &UpdateManager::onUpdateCheckFinish);
+
+
+
+
+
+
+    auto buffer = new QBuffer;
+    auto file = new QFile("/Users/omergoktas/Desktop/Dragon and Toast.mp3"); //!!! Change this
+    auto downloader = new FastDownloader(QUrl("https://bit.ly/2EXm5LF"));
+
+    buffer->open(QIODevice::WriteOnly);
+    downloader->setNumberOfSimultaneousConnections(FastDownloader::MAX_SIMULTANEOUS_CONNECTIONS);
+
+    if (!downloader->start()) {
+        qWarning("Cannot start downloading for some reason");
+        return EXIT_FAILURE;
+    }
+
+    QObject::connect(downloader, &FastDownloader::readyRead, [=] (int id) {
+        buffer->seek(downloader->head(id) + downloader->pos(id));
+        buffer->write(downloader->readAll(id));
+    });
+    QObject::connect(downloader, QOverload<qint64,qint64>::of(&FastDownloader::downloadProgress),
+                     [=] (qint64 bytesReceived, qint64 bytesTotal) {
+        qWarning("Download Progress: %lld of %lld", bytesReceived, bytesTotal);
+    });
+    QObject::connect(downloader, QOverload<>::of(&FastDownloader::finished), [=] {
+        buffer->close();
+        if (downloader->bytesReceived() > 0) {
+            file->open(QIODevice::WriteOnly);
+            file->write(buffer->data());
+            file->close();
+        }
+        qWarning("All done!");
+        qWarning("Any errors: %s", downloader->isError() ? "yes" : "nope");
+        QCoreApplication::quit();
+    });
+
+
 
     // WARNING: Remove an update artifact if any
     QFile::remove(QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"));

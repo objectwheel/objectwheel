@@ -1,5 +1,6 @@
 ### Utils Settings
 INCLUDEPATH += $$PWD/../utils
+INCLUDEPATH += $$PWD/../utils/fastdownloader
 INCLUDEPATH += $$PWD/../utils/zipasync
 INCLUDEPATH += $$PWD/../utils/zipasync/async
 INCLUDEPATH += $$PWD/../utils/qmlparser
