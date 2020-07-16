@@ -4,6 +4,7 @@
 #include <QBuffer>
 #include <QCborMap>
 #include <QFutureWatcher>
+#include <fastdownloader.h>
 
 class QDir;
 class UpdateManager final : public QObject
@@ -23,8 +24,8 @@ public:
     static void cancelUpdate();
 
 private:
-    static QString hostOS();
-    static QDir topDir();
+    static QDir topUpdateDir();
+    static QString topUpdateRemotePath();
     static QCborMap generateCacheForDir(const QDir& dir);
     static int download(QFutureInterfaceBase* futureInterface);
 
@@ -32,7 +33,12 @@ private slots:
     void onConnect();
     void onDisconnect();
     void onLocalScanFinish();
-    void onServerResponse(const QByteArray& data);
+    void onMetaDownloaderResolved();
+    void onChangelogDownloaderResolved();
+    void onMetaDownloaderFinished();
+    void onChangelogDownloaderFinished();
+    void onMetaDownloaderReadyRead(int id);
+    void onChangelogDownloaderReadyRead(int id);
     void onUpdateCheckFinish(bool succeed);
 
 signals:
@@ -49,7 +55,10 @@ private:
 private:
     static UpdateManager* s_instance;
     static bool s_isUpdateCheckRunning;
-    static QBuffer s_downloadBuffer;
+    static QBuffer s_metaBuffer;
+    static QBuffer s_changelogBuffer;
+    static FastDownloader s_metaDownloader;
+    static FastDownloader s_changelogDownloader;
     static QCborMap s_localMetaInfo;
     static QCborMap s_remoteMetaInfo;
     static QCborMap s_differences;

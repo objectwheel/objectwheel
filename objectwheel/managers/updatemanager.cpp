@@ -13,14 +13,12 @@
 #include <QFuture>
 #include <QTcpSocket>
 
-enum StatusCode {
-    BadRequest,
-    RequestSucceed
-};
-Q_DECLARE_METATYPE(StatusCode)
-
 UpdateManager* UpdateManager::s_instance = nullptr;
 bool UpdateManager::s_isUpdateCheckRunning = false;
+QBuffer UpdateManager::s_metaBuffer;
+QBuffer UpdateManager::s_changelogBuffer;
+FastDownloader UpdateManager::s_metaDownloader;
+FastDownloader UpdateManager::s_changelogDownloader;
 QCborMap UpdateManager::s_localMetaInfo;
 QCborMap UpdateManager::s_remoteMetaInfo;
 QCborMap UpdateManager::s_differences;
@@ -56,45 +54,23 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onLocalScanFinish);
     connect(this, &UpdateManager::updateCheckFinished,
             this, &UpdateManager::onUpdateCheckFinish);
+    connect(&s_metaDownloader, &FastDownloader::resolved,
+            this, &UpdateManager::onMetaDownloaderResolved);
+    connect(&s_metaDownloader, &FastDownloader::readyRead,
+            this, &UpdateManager::onMetaDownloaderReadyRead);
+    connect(&s_metaDownloader, qOverload<>(&FastDownloader::finished),
+            this, &UpdateManager::onMetaDownloaderFinished);
+    connect(&s_changelogDownloader, &FastDownloader::resolved,
+            this, &UpdateManager::onChangelogDownloaderResolved);
+    connect(&s_changelogDownloader, &FastDownloader::readyRead,
+            this, &UpdateManager::onChangelogDownloaderReadyRead);
+    connect(&s_changelogDownloader, qOverload<>(&FastDownloader::finished),
+            this, &UpdateManager::onChangelogDownloaderFinished);
 
-
-
-
-
-
-    auto buffer = new QBuffer;
-    auto file = new QFile("/Users/omergoktas/Desktop/Dragon and Toast.mp3"); //!!! Change this
-    auto downloader = new FastDownloader(QUrl("https://bit.ly/2EXm5LF"));
-
-    buffer->open(QIODevice::WriteOnly);
-    downloader->setNumberOfSimultaneousConnections(FastDownloader::MAX_SIMULTANEOUS_CONNECTIONS);
-
-    if (!downloader->start()) {
-        qWarning("Cannot start downloading for some reason");
-        return EXIT_FAILURE;
-    }
-
-    QObject::connect(downloader, &FastDownloader::readyRead, [=] (int id) {
-        buffer->seek(downloader->head(id) + downloader->pos(id));
-        buffer->write(downloader->readAll(id));
-    });
-    QObject::connect(downloader, QOverload<qint64,qint64>::of(&FastDownloader::downloadProgress),
-                     [=] (qint64 bytesReceived, qint64 bytesTotal) {
-        qWarning("Download Progress: %lld of %lld", bytesReceived, bytesTotal);
-    });
-    QObject::connect(downloader, QOverload<>::of(&FastDownloader::finished), [=] {
-        buffer->close();
-        if (downloader->bytesReceived() > 0) {
-            file->open(QIODevice::WriteOnly);
-            file->write(buffer->data());
-            file->close();
-        }
-        qWarning("All done!");
-        qWarning("Any errors: %s", downloader->isError() ? "yes" : "nope");
-        QCoreApplication::quit();
-    });
-
-
+    s_metaDownloader.setUrl(QUrl(topUpdateRemotePath() + QStringLiteral("/update.meta")));
+    s_metaDownloader.setNumberOfSimultaneousConnections(2);
+    s_changelogDownloader.setUrl(QUrl(topUpdateRemotePath() + QStringLiteral("/changelog.html")));
+    s_changelogDownloader.setNumberOfSimultaneousConnections(1);
 
     // WARNING: Remove an update artifact if any
     QFile::remove(QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"));
@@ -126,9 +102,17 @@ void UpdateManager::scheduleUpdateCheck(bool force)
 {
     Q_ASSERT(ServerManager::isConnected());
     if (s_remoteMetaInfo.isEmpty() || force) {
+        if (!s_metaDownloader.start()) {
+            qWarning("Cannot start downloading for some reason");
+            return;
+        }
+        if (!s_changelogDownloader.start()) {
+            s_metaDownloader.abort();
+            qWarning("Cannot start downloading for some reason");
+            return;
+        }
         if (force)
             s_localMetaInfo.clear();
-        ServerManager::send(ServerManager::RequestUpdateMetaInfo, hostOS());
         s_isUpdateCheckRunning = true;
         emit instance()->updateCheckStarted();
     }
@@ -159,20 +143,7 @@ void UpdateManager::cancelUpdate()
     // TODO
 }
 
-QString UpdateManager::hostOS()
-{
-    // TODO: Make sure to handle different architectures
-#if defined(Q_OS_MACOS)
-    return QStringLiteral("macos");
-#elif defined(Q_OS_WINDOWS)
-    return QStringLiteral("windows");
-#elif defined(Q_OS_LINUX)
-    return QStringLiteral("linux");
-#endif
-    return QString();
-}
-
-QDir UpdateManager::topDir()
+QDir UpdateManager::topUpdateDir()
 {
     // TODO: Handle other OSes
 #if defined(Q_OS_MACOS)
@@ -181,6 +152,20 @@ QDir UpdateManager::topDir()
     return QCoreApplication::applicationDirPath();
 #elif defined(Q_OS_LINUX)
     return QCoreApplication::applicationDirPath();
+#endif
+    return QString();
+}
+
+QString UpdateManager::topUpdateRemotePath()
+{
+    // TODO: Handle other OSes
+    static const QString root("https://update.objectwheel.com");
+#if defined(Q_OS_MACOS)
+    return root + QStringLiteral("/macos-x64");
+#elif defined(Q_OS_WINDOWS)
+    return root + QStringLiteral("/windows-x64");
+#elif defined(Q_OS_LINUX)
+    return root + QStringLiteral("/linux-x64");
 #endif
     return QString();
 }
@@ -201,7 +186,7 @@ QCborMap UpdateManager::generateCacheForDir(const QDir& dir)
                 qWarning() << "WARNING: Cannot open the file for reading, path:"<< info.absoluteFilePath();
                 return QCborMap({{QCborValue::Undefined, QCborValue::Undefined}});
             }
-            cache.insert(topDir().relativeFilePath(info.absoluteFilePath()), QString::number(info.size())
+            cache.insert(topUpdateDir().relativeFilePath(info.absoluteFilePath()), QString::number(info.size())
                          + QLatin1Char('/')
                          + QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha1).toHex());
         }
@@ -284,38 +269,83 @@ void UpdateManager::onLocalScanFinish()
     emit updateCheckFinished(!s_remoteMetaInfo.isEmpty());
 }
 
-void UpdateManager::onServerResponse(const QByteArray& data)
+void UpdateManager::onMetaDownloaderResolved()
 {
-    ServerManager::ServerCommands command = ServerManager::Invalid;
-    UtilityFunctions::pullCbor(data, command);
+    if (s_metaDownloader.contentLength() > 0)
+        s_metaBuffer.buffer().reserve(s_metaDownloader.contentLength());
+    if (!s_metaBuffer.isOpen())
+        s_metaBuffer.open(QIODevice::WriteOnly);
+}
 
-    if (command != ServerManager::ResponseUpdateMetaInfo)
-        return;
+void UpdateManager::onChangelogDownloaderResolved()
+{
+    if (s_changelogDownloader.contentLength() > 0)
+        s_changelogBuffer.buffer().reserve(s_changelogDownloader.contentLength());
+    if (!s_changelogBuffer.isOpen())
+        s_changelogBuffer.open(QIODevice::WriteOnly);
+}
 
-    QCborArray array;
-    StatusCode status;
-    UtilityFunctions::pullCbor(data, command, status, array);
+void UpdateManager::onMetaDownloaderReadyRead(int id)
+{
+    s_metaBuffer.seek(s_metaDownloader.head(id) + s_metaDownloader.pos(id));
+    s_metaBuffer.write(s_metaDownloader.readAll(id));
+}
 
-    if (status == RequestSucceed) {
-        s_remoteMetaInfo.clear();
-        s_changelog.clear();
-        if (array.size() == 2) {
-            s_remoteMetaInfo = array.first().toMap();
-            s_changelog = array.last().toString();
-        }
-        if (s_localMetaInfo.isEmpty()) {
-            if (s_localMetaInfoWatcher.isFinished()) {
-                s_localMetaInfoWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
-                                                            &UpdateManager::generateCacheForDir, topDir()));
-            }
-        } else {
-            s_isUpdateCheckRunning = false;
-            emit updateCheckFinished(!s_remoteMetaInfo.isEmpty());
-        }
-    } else {
+void UpdateManager::onChangelogDownloaderReadyRead(int id)
+{
+    s_changelogBuffer.seek(s_changelogDownloader.head(id) + s_changelogDownloader.pos(id));
+    s_changelogBuffer.write(s_changelogDownloader.readAll(id));
+}
+
+void UpdateManager::onMetaDownloaderFinished()
+{
+    if (s_metaBuffer.isOpen())
+        s_metaBuffer.close();
+
+    if (s_metaDownloader.isError() || s_metaDownloader.bytesReceived() <= 0) {
         qWarning("WARNING: Requesting update meta info failed.");
+        s_metaBuffer.buffer().clear();
         s_isUpdateCheckRunning = false;
         emit updateCheckFinished(false);
+    }
+
+    s_remoteMetaInfo = QCborValue::fromCbor(s_metaBuffer.data()).toMap();
+    s_metaBuffer.buffer().clear();
+
+    if (s_localMetaInfo.isEmpty()) {
+        if (s_localMetaInfoWatcher.isFinished()) {
+            s_localMetaInfoWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
+                                                        &UpdateManager::generateCacheForDir, topUpdateDir()));
+        }
+    } else {
+        s_isUpdateCheckRunning = false;
+        emit updateCheckFinished(!s_remoteMetaInfo.isEmpty());
+    }
+}
+
+void UpdateManager::onChangelogDownloaderFinished()
+{
+    if (s_changelogBuffer.isOpen())
+        s_changelogBuffer.close();
+
+    if (s_changelogDownloader.isError() || s_changelogDownloader.bytesReceived() <= 0) {
+        qWarning("WARNING: Requesting update meta info failed.");
+        s_changelogBuffer.buffer().clear();
+        s_isUpdateCheckRunning = false;
+        emit updateCheckFinished(false);
+    }
+
+    s_changelog = QCborValue::fromCbor(s_changelogBuffer.data()).toString();
+    s_changelogBuffer.buffer().clear();
+
+    if (s_localMetaInfo.isEmpty()) {
+        if (s_localMetaInfoWatcher.isFinished()) {
+            s_localMetaInfoWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
+                                                        &UpdateManager::generateCacheForDir, topUpdateDir()));
+        }
+    } else {
+        s_isUpdateCheckRunning = false;
+        emit updateCheckFinished(!s_remoteMetaInfo.isEmpty());
     }
 }
 
