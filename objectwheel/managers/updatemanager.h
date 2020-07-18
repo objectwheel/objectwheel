@@ -26,20 +26,21 @@ public:
 private:
     static QDir topUpdateDir();
     static QString topUpdateRemotePath();
-    static QCborMap generateCacheForDir(const QDir& dir);
+    static QCborMap generateUpdateChecksums(const QDir& topDir, const QDir& dir);
     static int download(QFutureInterfaceBase* futureInterface);
 
 private slots:
     void onConnect();
     void onDisconnect();
     void onLocalScanFinish();
-    void onMetaDownloaderResolved();
+    void onChecksumsDownloaderResolved();
     void onChangelogDownloaderResolved();
-    void onMetaDownloaderFinished();
+    void onChecksumsDownloaderFinished();
     void onChangelogDownloaderFinished();
-    void onMetaDownloaderReadyRead(int id);
+    void onChecksumsDownloaderReadyRead(int id);
     void onChangelogDownloaderReadyRead(int id);
     void onUpdateCheckFinish(bool succeed);
+    void handleDownloaderError();
 
 signals:
     void downloadStarted();
@@ -55,17 +56,17 @@ private:
 private:
     static UpdateManager* s_instance;
     static bool s_isUpdateCheckRunning;
-    static QBuffer s_metaBuffer;
+    static QBuffer s_checksumsBuffer;
     static QBuffer s_changelogBuffer;
-    static FastDownloader s_metaDownloader;
+    static FastDownloader s_checksumsDownloader;
     static FastDownloader s_changelogDownloader;
-    static QCborMap s_localMetaInfo;
-    static QCborMap s_remoteMetaInfo;
-    static QCborMap s_differences;
+    static QCborMap s_localChecksums;
+    static QCborMap s_remoteChecksums;
+    static QCborMap s_checksumsDiff;
     static QString s_changelog;
     static qint64 s_downloadSize;
     static QFutureWatcher<int> s_downloadWatcher;
-    static QFutureWatcher<QCborMap> s_localMetaInfoWatcher;
+    static QFutureWatcher<QCborMap> s_localChecksumsWatcher;
 };
 
 #endif // UPDATEMANAGER_H
