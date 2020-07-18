@@ -69,12 +69,11 @@ private:
     void timerEvent(QTimerEvent* event) override;
 
 private:
-    explicit ServerManager(const QUrl& host, QObject* parent = nullptr);
+    explicit ServerManager(QObject* parent = nullptr);
     ~ServerManager() override;
 
 private:
     static ServerManager* s_instance;
-    static QUrl s_host;
     static QBasicTimer s_pingTimer;
     static QElapsedTimer s_activityTimer;
 };

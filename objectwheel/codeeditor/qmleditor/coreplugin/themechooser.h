@@ -45,7 +45,6 @@ public:
     QString displayName() const;
     QString filePath() const;
     static QList<ThemeEntry> availableThemes();
-    static Id themeSetting();
     static Utils::Theme *createTheme(Id id);
 
 private:

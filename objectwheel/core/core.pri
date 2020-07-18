@@ -4,6 +4,7 @@ INCLUDEPATH += $$PWD
 HEADERS += $$PWD/applicationcore.h \
            $$PWD/applicationstyle.h \
            $$PWD/centralwidget.h \
+           $$PWD/coreconstants.h \
            $$PWD/dockbar.h
 
 SOURCES += $$PWD/main.cpp \

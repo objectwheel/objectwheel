@@ -103,27 +103,13 @@ QList<ThemeEntry> ThemeEntry::availableThemes()
         qWarning() << "Warning: No themes found in installation: "
                    << QDir::toNativeSeparators(installThemeDir);
     // move default theme to front
-    int defaultIndex = Utils::indexOf(themes, Utils::equal(&ThemeEntry::id, Id(Constants::DEFAULT_THEME)));
+    int defaultIndex = Utils::indexOf(themes, Utils::equal(&ThemeEntry::id, Id("flat-light")));
     if (defaultIndex > 0) { // == exists and not at front
         ThemeEntry defaultEntry = themes.takeAt(defaultIndex);
         themes.prepend(defaultEntry);
     }
     addThemesFromPath(userThemeDir, &themes);
     return themes;
-}
-
-Id ThemeEntry::themeSetting()
-{
-    const Id setting =
-            Id::fromSetting(ApplicationCore::settings()->value(QLatin1String(Constants::SETTINGS_THEME),
-                                                     QLatin1String(Constants::DEFAULT_THEME)));
-
-    const QList<ThemeEntry> themes = availableThemes();
-    if (themes.empty())
-        return Id();
-    const bool settingValid = Utils::contains(themes, Utils::equal(&ThemeEntry::id, setting));
-
-    return settingValid ? setting : themes.first().id();
 }
 
 Theme *ThemeEntry::createTheme(Id id)

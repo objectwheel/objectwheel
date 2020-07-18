@@ -45,7 +45,6 @@
 #include <QPixmapCache>
 
 #include <theme/theme_p.h>
-#include <coreplugin/coreconstants.h>
 #include <coreplugin/themechooser.h>
 
 #if defined(Q_OS_MACOS)
@@ -133,7 +132,7 @@ ApplicationCore::ApplicationCore()
 #endif
 
     s_modeManager = new ModeManager;
-    s_serverManager = new ServerManager(QUrl(QStringLiteral(APP_WSSSERVER)));
+    s_serverManager = new ServerManager;
     s_payloadManager = new PayloadManager;
     s_updateManager = new UpdateManager;
     s_registrationApiManager = new RegistrationApiManager;
@@ -149,7 +148,7 @@ ApplicationCore::ApplicationCore()
     s_helpManager = new HelpManager;
 
     s_helpManager->setupHelpManager();
-    Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme(Core::Constants::DEFAULT_THEME));
+    Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme("flat-light"));
     QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
                      s_helpManager, &HelpManager::aboutToShutdown);
 

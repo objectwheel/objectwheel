@@ -56,8 +56,7 @@ DEFINES += APP_VER='"\\\"$$VERSION\\\""' \
            APP_DOMAIN='"\\\"objectwheel.com\\\""' \
            APP_GITVER='"\\\"$$GIT_VERSION\\\""' \
            APP_GITHASH='"\\\"$$GIT_HASH\\\""' \
-           APP_GITDATE='"\\\"$$GIT_DATE\\\""' \
-           APP_WSSSERVER='"\\\"wss://objectwheel.com:5454\\\""'
+           APP_GITDATE='"\\\"$$GIT_DATE\\\""'
 #           PAYLOADMANAGER_DEBUG
 
 CONFIG(release, debug | release) {

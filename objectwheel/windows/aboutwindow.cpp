@@ -1,4 +1,5 @@
 #include <aboutwindow.h>
+#include <coreconstants.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
 
@@ -32,9 +33,10 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
 
     m_versionLabel->setAlignment(Qt::AlignCenter);
     m_versionLabel->setText(QStringLiteral("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b>"
-                                           "<br>%3<br>support@objectwheel.com</p>")
+                                           "<br>%3<br>%4</p>")
                             .arg(QStringLiteral(APP_VER)).arg(QStringLiteral(APP_GITHASH))
-                            .arg(QDateTime::fromString(APP_GITDATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate)));
+                            .arg(QDateTime::fromString(APP_GITDATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate))
+                            .arg(CoreConstants::EMAIL_ADDRESS));
 
     m_okButton->setDefault(true);
     m_okButton->setCursor(Qt::PointingHandCursor);

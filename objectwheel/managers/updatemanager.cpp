@@ -1,4 +1,5 @@
 #include <updatemanager.h>
+#include <coreconstants.h>
 #include <async.h>
 #include <systemsettings.h>
 #include <updatesettings.h>
@@ -159,13 +160,12 @@ QDir UpdateManager::topUpdateDir()
 QString UpdateManager::topUpdateRemotePath()
 {
     // TODO: Handle other OSes
-    static const QString root("https://update.objectwheel.com");
 #if defined(Q_OS_MACOS)
-    return root + QStringLiteral("/macos-x64");
+    return CoreConstants::UPDATE_ADDRESS + QStringLiteral("/macos-x64");
 #elif defined(Q_OS_WINDOWS)
-    return root + QStringLiteral("/windows-x64");
+    return CoreConstants::UPDATE_ADDRESS + QStringLiteral("/windows-x64");
 #elif defined(Q_OS_LINUX)
-    return root + QStringLiteral("/linux-x64");
+    return CoreConstants::UPDATE_ADDRESS + QStringLiteral("/linux-x64");
 #endif
     return QString();
 }
