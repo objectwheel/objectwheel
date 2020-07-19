@@ -35,7 +35,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_updatesAvailableLabel(new QLabel(m_updatesAvailableWidget))
   , m_updatesAvailableIcon(new QLabel(m_updatesAvailableWidget))
   , m_changelogEdit(new QTextEdit(m_updatesAvailableWidget))
-  , m_updateButton(new QPushButton(m_updatesAvailableWidget))
+  , m_downloadButton(new QPushButton(m_updatesAvailableWidget))
   /****/
   , m_statusGroup(new QGroupBox(contentWidget()))
   , m_logoLabel(new QLabel(m_statusGroup))
@@ -108,12 +108,12 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     updatesAvailableLayout->setSpacing(6);
     updatesAvailableLayout->setContentsMargins(6, 6, 6, 6);
     updatesAvailableLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    updatesAvailableLayout->addWidget(m_updateButton, 0, 0);
+    updatesAvailableLayout->addWidget(m_downloadButton, 0, 0);
     updatesAvailableLayout->addWidget(m_updatesAvailableLabel, 0, 1);
     updatesAvailableLayout->addWidget(m_updatesAvailableIcon, 1, 0, Qt::AlignTop);
     updatesAvailableLayout->addWidget(m_changelogEdit, 1, 1);
 
-    m_updateButton->setText(tr("Update"));
+    m_downloadButton->setText(tr("Download"));
 
     m_updatesAvailableIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -7, 0, 0)));
     m_updatesAvailableIcon->setFixedSize(QSize(80, 80));
@@ -124,8 +124,8 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     UtilityFunctions::adjustFontPixelSize(m_changelogEdit, -1);
     m_changelogEdit->setMinimumHeight(170);
 
-    m_updateButton->setCursor(Qt::PointingHandCursor);
-    m_updateButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+    m_downloadButton->setCursor(Qt::PointingHandCursor);
+    m_downloadButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
 
     /****/
 
@@ -167,8 +167,8 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     connect(m_checkUpdatesButton, &QPushButton::clicked,
             this, [=] { UpdateManager::startUpdateCheck(); });
-    connect(m_updateButton, &QPushButton::clicked,
-            this, [=] { UpdateManager::update(); });
+    connect(m_downloadButton, &QPushButton::clicked,
+            this, [=] { UpdateManager::download(); });
     connect(ServerManager::instance(), &ServerManager::stateChanged,
             this, &UpdateSettingsWidget::updateCheckButton);
     connect(UpdateManager::instance(), &UpdateManager::updateCheckStarted,

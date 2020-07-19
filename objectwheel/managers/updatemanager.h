@@ -17,17 +17,18 @@ class UpdateManager final : public QObject
 public:
     static UpdateManager* instance();
     static QString changelog();
-    static void startUpdateCheck(bool force = true);
-    static bool isUpdateCheckRunning();
     static qint64 downloadSize();
-    static void update();
-    static void cancelUpdate();
+    static bool isUpdateCheckRunning();
+    static void startUpdateCheck(bool force = true);
+    static void download();
+    static void cancelDownload();
+    static void install();
 
 private:
     static QDir topUpdateDir();
     static QString topUpdateRemotePath();
     static QCborMap generateUpdateChecksums(const QDir& topDir, const QDir& dir);
-    static int download(QFutureInterfaceBase* futureInterface);
+    static int startDownload(QFutureInterfaceBase* futureInterface);
 
 private slots:
     void onConnect();

@@ -48,7 +48,7 @@ private:
     QLabel* m_updatesAvailableLabel;
     QLabel* m_updatesAvailableIcon;
     QTextEdit* m_changelogEdit;
-    QPushButton* m_updateButton;
+    QPushButton* m_downloadButton;
     /****/
     QGroupBox* m_statusGroup;
     QLabel* m_logoLabel;
