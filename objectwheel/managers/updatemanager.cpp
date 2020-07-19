@@ -193,12 +193,12 @@ int UpdateManager::download(QFutureInterfaceBase* futureInterface)
     future->setProgressRange(0, 100);
     future->setProgressValue(0);
 
+    bool errorSet = false;
     qint64 downloadedSize = 0;
-    const qint64 totalSize = s_downloadSize;
-
     foreach (const QCborValue& key, s_checksumsDiff.keys()) {
-        if (future->isCanceled())
-            return 100;
+        if (future->isCanceled() || errorSet)
+            return 0;
+
         if (s_checksumsDiff.value(key).toBool(true))
             continue;
 
@@ -211,13 +211,12 @@ int UpdateManager::download(QFutureInterfaceBase* futureInterface)
         if (QFileInfo::exists(localPath)) {
             QFile file(localPath);
             if (!file.open(QFile::ReadOnly)) {
-                qWarning("WARNING: Cannot read update file");
-                return 100;
+                future->setProgressValueAndText(0, tr("Cannot read update file"));
+                return 0;
             }
             if (fileHash == QCH::hash(file.readAll(), QCH::Sha1)) {
-                file.close();
                 downloadedSize += fileSize;
-                future->setProgressValue(100 * downloadedSize / qreal(totalSize));
+                future->setProgressValue(100 * downloadedSize / qreal(s_downloadSize));
                 continue;
             }
         }
@@ -230,46 +229,61 @@ int UpdateManager::download(QFutureInterfaceBase* futureInterface)
         connect(&downloader, &FastDownloader::readyRead, [&] (int id) {
             if (future->isCanceled())
                 return loop.quit();
+            const qint64 pos = downloader.head(id) + downloader.pos(id);
             const QByteArray& chunk = downloader.readAll(id);
-            buffer.seek(downloader.head(id) + downloader.pos(id));
-            buffer.write(chunk);
+            if (!buffer.seek(pos)) {
+                errorSet = true;
+                future->setProgressValueAndText(0, tr("Cannot seek further in the buffer"));
+                return loop.quit();
+            }
+            if (buffer.write(chunk) != chunk.size()) {
+                errorSet = true;
+                future->setProgressValueAndText(0, tr("Cannot write more data into the buffer"));
+                return loop.quit();
+            }
             downloadedSize += chunk.size();
-            future->setProgressValue(100 * downloadedSize / qreal(totalSize));
+            future->setProgressValue(100 * downloadedSize / qreal(s_downloadSize));
         });
         connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
             buffer.close();
             if (downloader.bytesReceived() > 0 && !downloader.isError()) {
-                if (fileHash != QCH::hash(buffer.data(), QCH::Sha1)) {
-                    qWarning("WARNING: Hashes do not match");
+                if (fileHash != QCH::hash(buffer.data(), QCH::Sha1)) {                    
+                    errorSet = true;
+                    future->setProgressValueAndText(0, tr("Hashes do not match"));
                     return loop.quit();
                 }
                 if (!QFileInfo(localPath).dir().mkpath(".")) {
-                    qWarning("WARNING: Cannot make path file");
+                    errorSet = true;
+                    future->setProgressValueAndText(0, tr("Cannot establish an update path"));
                     return loop.quit();
                 }
                 QSaveFile file(localPath);
                 if (!file.open(QFile::WriteOnly)) {
-                    qWarning("WARNING: Cannot open update file");
+                    errorSet = true;
+                    future->setProgressValueAndText(0, tr("Cannot open an update file"));
                     return loop.quit();
                 }
                 if (file.write(buffer.data()) != buffer.size()) {
-                    qWarning("WARNING: Cannot write update file");
+                    errorSet = true;
+                    future->setProgressValueAndText(0, tr("Cannot write an update file"));
                     return loop.quit();
                 }
                 if (!file.commit()) {
-                    qWarning("WARNING: Cannot commit update file");
-                    return loop.quit();
+                    errorSet = true;
+                    future->setProgressValueAndText(0, tr("Cannot commit an update file"));
                 }
-                buffer.buffer().clear();
             } else {
-                qWarning("WARNING: Error while download");
-                return loop.quit();
+                errorSet = true;
+                future->setProgressValueAndText(0, tr("Download failed"));
             }
             loop.quit();
         });
         downloader.start();
         loop.exec();
     }
+
+    if (future->isCanceled() || errorSet)
+        return 0;
 
     future->reportResult(100);
     return 100;
