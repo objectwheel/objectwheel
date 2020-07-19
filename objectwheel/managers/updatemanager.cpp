@@ -9,10 +9,11 @@
 
 #include <QProcess>
 #include <QCoreApplication>
-#include <QFileInfo>
 #include <QDir>
 #include <QFuture>
-#include <QTcpSocket>
+#include <QSaveFile>
+
+using QCH = QCryptographicHash;
 
 UpdateManager* UpdateManager::s_instance = nullptr;
 bool UpdateManager::s_isUpdateCheckRunning = false;
@@ -91,7 +92,7 @@ qint64 UpdateManager::downloadSize()
     return s_downloadSize;
 }
 
-void UpdateManager::scheduleUpdateCheck(bool force)
+void UpdateManager::startUpdateCheck(bool force)
 {
     Q_ASSERT(ServerManager::isConnected() && !s_isUpdateCheckRunning);
 
@@ -114,20 +115,20 @@ void UpdateManager::scheduleUpdateCheck(bool force)
 
 void UpdateManager::update()
 {
-    // TODO
-    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor"));
-    if (!file.open(QFile::WriteOnly)) {
-        qWarning("Cannot open checksums diff file to save");
-        return;
-    }
-    file.write(s_checksumsDiff.toCborValue().toCbor());
-    file.close();
+//    // TODO
+//    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor"));
+//    if (!file.open(QFile::WriteOnly)) {
+//        qWarning("Cannot open checksums diff file to save");
+//        return;
+//    }
+//    file.write(s_checksumsDiff.toCborValue().toCbor());
+//    file.close();
 
     s_downloadWatcher.setFuture(Async::run(QThreadPool::globalInstance(), &UpdateManager::download));
 
-    QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
-                            QStringList(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor")));
-    QCoreApplication::quit();
+//    QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
+//                            QStringList(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor")));
+//    QCoreApplication::quit();
 }
 
 void UpdateManager::cancelUpdate()
@@ -177,7 +178,6 @@ QCborMap UpdateManager::generateUpdateChecksums(const QDir& topDir, const QDir& 
                 qWarning() << "WARNING: Cannot open the file for reading, path:"<< info.absoluteFilePath();
                 return QCborMap({{QCborValue::Undefined, QCborValue::Undefined}});
             }
-            using QCH = QCryptographicHash;
             QCborMap map;
             map.insert(QStringLiteral("size"), info.size());
             map.insert(QStringLiteral("sha1"), QCH::hash(file.readAll(), QCH::Sha1));
@@ -196,27 +196,78 @@ int UpdateManager::download(QFutureInterfaceBase* futureInterface)
     qint64 downloadedSize = 0;
     const qint64 totalSize = s_downloadSize;
 
-    QTcpSocket socket;
-    socket.connectToHost(ServerManager::instance()->peerAddress(), 54544, QTcpSocket::ReadOnly);
-
     foreach (const QCborValue& key, s_checksumsDiff.keys()) {
-        if (future->isPaused())
-            future->waitForResume();
         if (future->isCanceled())
             return 100;
-
-        const QString& filePath = QDir::cleanPath(key.toString());
-        const bool remove = s_checksumsDiff.value(key).toBool(true);
-
-        if (remove)
+        if (s_checksumsDiff.value(key).toBool(true))
             continue;
 
-        const QCborMap& value = s_remoteChecksums.value(key).toMap();
-        const QByteArray& fileHash = value.value(QStringLiteral("sha1")).toByteArray();
-        const qint64 fileSize = value.value(QStringLiteral("size")).toInteger();
+        const QString& localPath = ApplicationCore::updatesPath() + QStringLiteral("/Download/") + key.toString();
+        const QString& remotePath = topUpdateRemotePath() + QStringLiteral("/content/") + key.toString();
+        const QCborMap& remote = s_remoteChecksums.value(key).toMap();
+        const QByteArray& fileHash = remote.value(QStringLiteral("sha1")).toByteArray();
+        const qint64 fileSize = remote.value(QStringLiteral("size")).toInteger();
 
-        downloadedSize += fileSize;
-        future->setProgressValue(100 * qreal(downloadedSize) / totalSize);
+        if (QFileInfo::exists(localPath)) {
+            QFile file(localPath);
+            if (!file.open(QFile::ReadOnly)) {
+                qWarning("WARNING: Cannot read update file");
+                return 100;
+            }
+            if (fileHash == QCH::hash(file.readAll(), QCH::Sha1)) {
+                file.close();
+                downloadedSize += fileSize;
+                future->setProgressValue(100 * downloadedSize / qreal(totalSize));
+                continue;
+            } else {
+                file.close();
+                file.remove();
+            }
+        }
+
+        QEventLoop loop;
+        QBuffer buffer;
+        buffer.open(QIODevice::WriteOnly);
+        FastDownloader downloader({remotePath});
+
+        connect(&downloader, &FastDownloader::readyRead, [&] (int id) {
+            if (future->isCanceled())
+                return loop.quit();
+            const QByteArray& chunk = downloader.readAll(id);
+            buffer.seek(downloader.head(id) + downloader.pos(id));
+            buffer.write(chunk);
+            downloadedSize += chunk.size();
+            future->setProgressValue(100 * downloadedSize / qreal(totalSize));
+        });
+        connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
+            buffer.close();
+            if (downloader.bytesReceived() > 0 && !downloader.isError()) {
+                if (!QFileInfo(localPath).dir().mkpath(".")) {
+                    qWarning("WARNING: Cannot make path file");
+                    return loop.quit();
+                }
+                QSaveFile file(localPath);
+                if (!file.open(QFile::WriteOnly)) {
+                    qWarning("WARNING: Cannot open update file");
+                    return loop.quit();
+                }
+                if (file.write(buffer.data()) != buffer.size()) {
+                    qWarning("WARNING: Cannot write update file");
+                    return loop.quit();
+                }
+                if (!file.commit()) {
+                    qWarning("WARNING: Cannot commit update file");
+                    return loop.quit();
+                }
+                buffer.buffer().clear();
+            } else {
+                qWarning("WARNING: Error while download");
+                return loop.quit();
+            }
+            loop.quit();
+        });
+        downloader.start();
+        loop.exec();
     }
 
     future->reportResult(100);
@@ -227,9 +278,10 @@ void UpdateManager::onConnect()
 {
     const UpdateSettings* settings = SystemSettings::updateSettings();
     if (settings->checkForUpdatesAutomatically && !s_isUpdateCheckRunning) {
-        const QFileInfo localInfo(ApplicationCore::updatesPath() + QLatin1String("/Local.cbor"));
-        UpdateManager::scheduleUpdateCheck(!localInfo.exists() ||
-                                           localInfo.lastModified().daysTo(QDateTime::currentDateTime()) > 5);
+        const QFileInfo localChecksums(ApplicationCore::updatesPath() + QLatin1String("/Local.cbor"));
+        UpdateManager::startUpdateCheck(s_localChecksums.isEmpty()
+                                        || !localChecksums.exists()
+                                        || localChecksums.lastModified().daysTo(QDateTime::currentDateTime()) > 5);
     }
 }
 

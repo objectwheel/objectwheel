@@ -100,6 +100,7 @@ void SettingsPage::addWidget(SettingsWidget* widget)
     connect(widget, &SettingsWidget::markChanged, this, [=] {
         m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
                                           ? QVariant("﹡") : QVariant());
+        m_tabWidget->tabBar()->update();
         emit markCountChanged(markCount());
     });
 }

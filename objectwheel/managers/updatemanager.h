@@ -17,7 +17,7 @@ class UpdateManager final : public QObject
 public:
     static UpdateManager* instance();
     static QString changelog();
-    static void scheduleUpdateCheck(bool force = true);
+    static void startUpdateCheck(bool force = true);
     static bool isUpdateCheckRunning();
     static qint64 downloadSize();
     static void update();

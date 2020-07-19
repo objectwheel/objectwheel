@@ -196,6 +196,7 @@ void RunController::onDeviceDisconnect(const QVariantMap& deviceInfo)
 void RunController::onPreferencesWindowMarkCountChange(int markCount)
 {
     m_runPane->preferencesButton()->setProperty(notificationsProperty, markCount > 0 ? markCount : QVariant());
+    m_runPane->preferencesButton()->update();
 }
 
 QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
