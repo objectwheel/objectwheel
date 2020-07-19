@@ -115,6 +115,14 @@ void UpdateManager::scheduleUpdateCheck(bool force)
 void UpdateManager::update()
 {
     // TODO
+    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor"));
+    if (!file.open(QFile::WriteOnly)) {
+        qWarning("Cannot open checksums diff file to save");
+        return;
+    }
+    file.write(s_checksumsDiff.toCborValue().toCbor());
+    file.close();
+
     s_downloadWatcher.setFuture(Async::run(QThreadPool::globalInstance(), &UpdateManager::download));
 
     QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
@@ -328,7 +336,7 @@ void UpdateManager::onChangelogDownloaderFinished()
     if (s_changelogBuffer.isOpen())
         s_changelogBuffer.close();
 
-    s_changelog = QCborValue::fromCbor(s_changelogBuffer.data()).toString();
+    s_changelog = QString::fromUtf8(s_changelogBuffer.data());
     s_changelogBuffer.buffer().clear();
 
     if (s_checksumsDownloader.isFinished()) {
@@ -345,6 +353,39 @@ void UpdateManager::onChangelogDownloaderFinished()
     }
 }
 
+void UpdateManager::onUpdateCheckFinish(bool succeed)
+{
+    if (!succeed)
+        return;
+
+    s_downloadSize = 0;
+    s_checksumsDiff.clear();
+
+    foreach (const QCborValue& key, s_localChecksums.keys()) {
+        if (!key.isUndefined() && !key.toString().isEmpty()) {
+            const QCborMap& localVal = s_localChecksums.value(key).toMap();
+            const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
+            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
+            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
+            if (localHash != remoteHash)
+                s_checksumsDiff[key] = true; // Mark for removal
+        }
+    }
+
+    foreach (const QCborValue& key, s_remoteChecksums.keys()) {
+        if (!key.isUndefined() && !key.toString().isEmpty()) {
+            const QCborMap& localVal = s_localChecksums.value(key).toMap();
+            const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
+            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
+            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
+            if (localHash != remoteHash) {
+                s_checksumsDiff[key] = false; // Mark for replacement or new
+                s_downloadSize += remoteVal.value(QStringLiteral("size")).toInteger();
+            }
+        }
+    }
+}
+
 void UpdateManager::handleDownloaderError()
 {
     s_checksumsDownloader.abort();
@@ -357,41 +398,4 @@ void UpdateManager::handleDownloaderError()
     s_changelogBuffer.buffer().clear();
     s_isUpdateCheckRunning = false;
     emit updateCheckFinished(false);
-}
-
-void UpdateManager::onUpdateCheckFinish(bool succeed)
-{
-    if (!succeed)
-        return;
-
-    s_downloadSize = 0;
-    s_checksumsDiff.clear();
-
-    foreach (const QCborValue& key, s_localChecksums.keys()) {
-        const QCborMap& localVal = s_localChecksums.value(key).toMap();
-        const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
-        const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
-        const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
-        if (localHash != remoteHash)
-            s_checksumsDiff[key] = true; // Mark for removal
-    }
-
-    foreach (const QCborValue& key, s_remoteChecksums.keys()) {
-        const QCborMap& localVal = s_localChecksums.value(key).toMap();
-        const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
-        const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
-        const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
-        if (localHash != remoteHash) {
-            s_checksumsDiff[key] = false; // Mark for replacement or new
-            s_downloadSize += remoteVal.value(QStringLiteral("size")).toInteger();
-        }
-    }
-
-    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor"));
-    if (!file.open(QFile::WriteOnly)) {
-        qWarning("Cannot open checksums diff file to save");
-        return;
-    }
-    file.write(s_checksumsDiff.toCborValue().toCbor());
-    file.close();
 }
