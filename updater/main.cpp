@@ -229,7 +229,7 @@ static void removeOldFiles()
         QCoreApplication::processEvents(QEventLoop::AllEvents, 20);
     }
 
-    g_updateCacheDir.cdUp(); // Cd up into updates dir (removing Local.cbor etc since it contains old info anymore)
+    g_updateCacheDir.cdUp(); // Cd up into updates dir (removing Checksums.cbor etc since it contains old info anymore)
 
     if (!g_updateCacheDir.removeRecursively()) {
         g_errorFlag = true;

@@ -62,7 +62,7 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
     s_checksumsDownloader.setUrl(QUrl(topUpdateRemotePath() + QStringLiteral("/checksums.cbor")));
     s_changelogDownloader.setUrl(QUrl(topUpdateRemotePath() + QStringLiteral("/changelog.html")));
 
-    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Local.cbor"));
+    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
     if (file.open(QFile::ReadOnly))
         s_localChecksums = QCborValue::fromCbor(file.readAll()).toMap();
 }
@@ -116,7 +116,7 @@ void UpdateManager::startUpdateCheck(bool force)
 void UpdateManager::update()
 {
 //    // TODO
-//    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor"));
+//    QFile file(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor"));
 //    if (!file.open(QFile::WriteOnly)) {
 //        qWarning("Cannot open checksums diff file to save");
 //        return;
@@ -127,7 +127,7 @@ void UpdateManager::update()
     s_downloadWatcher.setFuture(Async::run(QThreadPool::globalInstance(), &UpdateManager::download));
 
 //    QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
-//                            QStringList(ApplicationCore::updatesPath() + QLatin1String("/Diff.cbor")));
+//                            QStringList(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")));
 //    QCoreApplication::quit();
 }
 
@@ -202,7 +202,7 @@ int UpdateManager::download(QFutureInterfaceBase* futureInterface)
         if (s_checksumsDiff.value(key).toBool(true))
             continue;
 
-        const QString& localPath = ApplicationCore::updatesPath() + QStringLiteral("/Download/") + key.toString();
+        const QString& localPath = ApplicationCore::updatesPath() + QStringLiteral("/Downloads/") + key.toString();
         const QString& remotePath = topUpdateRemotePath() + QStringLiteral("/content/") + key.toString();
         const QCborMap& remote = s_remoteChecksums.value(key).toMap();
         const QByteArray& fileHash = remote.value(QStringLiteral("sha1")).toByteArray();
@@ -219,16 +219,13 @@ int UpdateManager::download(QFutureInterfaceBase* futureInterface)
                 downloadedSize += fileSize;
                 future->setProgressValue(100 * downloadedSize / qreal(totalSize));
                 continue;
-            } else {
-                file.close();
-                file.remove();
             }
         }
 
         QEventLoop loop;
         QBuffer buffer;
         buffer.open(QIODevice::WriteOnly);
-        FastDownloader downloader({remotePath});
+        FastDownloader downloader(QUrl{remotePath});
 
         connect(&downloader, &FastDownloader::readyRead, [&] (int id) {
             if (future->isCanceled())
@@ -242,6 +239,10 @@ int UpdateManager::download(QFutureInterfaceBase* futureInterface)
         connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
             buffer.close();
             if (downloader.bytesReceived() > 0 && !downloader.isError()) {
+                if (fileHash != QCH::hash(buffer.data(), QCH::Sha1)) {
+                    qWarning("WARNING: Hashes do not match");
+                    return loop.quit();
+                }
                 if (!QFileInfo(localPath).dir().mkpath(".")) {
                     qWarning("WARNING: Cannot make path file");
                     return loop.quit();
@@ -278,7 +279,7 @@ void UpdateManager::onConnect()
 {
     const UpdateSettings* settings = SystemSettings::updateSettings();
     if (settings->checkForUpdatesAutomatically && !s_isUpdateCheckRunning) {
-        const QFileInfo localChecksums(ApplicationCore::updatesPath() + QLatin1String("/Local.cbor"));
+        const QFileInfo localChecksums(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
         UpdateManager::startUpdateCheck(s_localChecksums.isEmpty()
                                         || !localChecksums.exists()
                                         || localChecksums.lastModified().daysTo(QDateTime::currentDateTime()) > 5);
@@ -305,7 +306,7 @@ void UpdateManager::onLocalScanFinish()
         emit updateCheckFinished(false);
         return;
     }
-    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Local.cbor"));
+    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
     if (!file.open(QFile::WriteOnly)) {
         qWarning("WARNING: Cannot open local checksums file to save");
         emit updateCheckFinished(false);
