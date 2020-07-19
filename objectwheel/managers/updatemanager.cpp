@@ -52,8 +52,12 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onChangelogDownloaderReadyRead);
     connect(&s_changelogDownloader, qOverload<>(&FastDownloader::finished),
             this, &UpdateManager::onChangelogDownloaderFinished);
+    connect(&s_downloadWatcher, &QFutureWatcher<int>::finished,
+            this, &UpdateManager::onDownloadWatcherFinish);
+    connect(&s_downloadWatcher, &QFutureWatcher<int>::progressValueChanged,
+            this, &UpdateManager::onDownloadWatcherProgressValueChange);
 
-    // WARNING: Remove an update artifact if any
+    // WARNING: Clean up update artifacts from previous install if there is any
     QFile::remove(QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"));
 
     s_checksumsDownloader.setNumberOfSimultaneousConnections(2);
@@ -135,29 +139,27 @@ void UpdateManager::startUpdateCheck(bool force)
 
 void UpdateManager::download()
 {
-    if (s_downloadWatcher.isRunning()) {
-        s_downloadWatcher.cancel();
-        s_downloadWatcher.waitForFinished();
-    }
-
-    s_downloadWatcher.setFuture(Async::run(QThreadPool::globalInstance(), &UpdateManager::startDownload));
+    Q_ASSERT(s_downloadWatcher.isFinished());
+    s_downloadWatcher.setFuture(Async::run(QThreadPool::globalInstance(), &UpdateManager::handleDownload));
 }
 
 void UpdateManager::cancelDownload()
 {
-    if (s_downloadWatcher.isRunning())
-        s_downloadWatcher.cancel();
+    Q_ASSERT(s_downloadWatcher.isRunning());
+    s_downloadWatcher.cancel();
 }
 
 void UpdateManager::install()
 {
-    QFile file(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor"));
+    Q_ASSERT(s_downloadWatcher.isFinished() && !s_checksumsDiff.isEmpty());
+
+    QSaveFile file(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor"));
     if (!file.open(QFile::WriteOnly)) {
         qWarning("Cannot open checksums diff file to save");
         return;
     }
     file.write(s_checksumsDiff.toCborValue().toCbor());
-    file.close();
+    file.commit();
 
     QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
                             QStringList(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")));
@@ -215,7 +217,7 @@ QCborMap UpdateManager::generateUpdateChecksums(const QDir& topDir, const QDir& 
     return checksums;
 }
 
-int UpdateManager::startDownload(QFutureInterfaceBase* futureInterface)
+int UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
 {
     auto future = static_cast<QFutureInterface<int>*>(futureInterface);
     future->setProgressRange(0, 100);
@@ -250,7 +252,7 @@ int UpdateManager::startDownload(QFutureInterfaceBase* futureInterface)
 
         QEventLoop loop;
         QBuffer buffer;
-        buffer.open(QIODevice::WriteOnly);
+        buffer.open(QBuffer::WriteOnly);
         FastDownloader downloader(QUrl{remotePath});
 
         connect(&watcher, &QFutureWatcher<int>::canceled, &loop, &QEventLoop::quit);
@@ -346,14 +348,14 @@ void UpdateManager::onLocalScanFinish()
         emit updateCheckFinished(false);
         return;
     }
-    QFile file(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
+    QSaveFile file(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
     if (!file.open(QFile::WriteOnly)) {
         qWarning("WARNING: Cannot open local checksums file to save");
         emit updateCheckFinished(false);
         return;
     }
     file.write(s_localChecksums.toCborValue().toCbor());
-    file.close();
+    file.commit();
 
     emit updateCheckFinished(!s_remoteChecksums.isEmpty() && !s_changelog.isEmpty() && !s_localChecksums.isEmpty());
 }
@@ -479,6 +481,16 @@ void UpdateManager::onUpdateCheckFinish(bool succeed)
     }
 }
 
+void UpdateManager::onDownloadWatcherProgressValueChange(int progressValue)
+{
+    emit downloadProgress(progressValue);
+}
+
+void UpdateManager::onDownloadWatcherFinish()
+{
+    emit downloadFinished(s_downloadWatcher.isCanceled(), s_downloadWatcher.progressText());
+}
+
 void UpdateManager::handleDownloaderError()
 {
     if (s_checksumsDownloader.isRunning())
@@ -492,5 +504,5 @@ void UpdateManager::handleDownloaderError()
     s_checksumsBuffer.buffer().clear();
     s_changelogBuffer.buffer().clear();
     s_isUpdateCheckRunning = false;
-    emit updateCheckFinished(false);
+    emit s_instance->updateCheckFinished(false);
 }
