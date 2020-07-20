@@ -226,11 +226,22 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
     QFutureWatcher<QCborMap> watcher;
     watcher.setFuture(future->future());
 
-    bool errorSet = false;
-    qint64 downloadedSize = 0;
-    foreach (const QCborValue& key, s_checksumsDiff.keys()) {
+    int fileCount = 0;
+    const QVector<QCborValue>& keys = s_checksumsDiff.keys();
+    for (const QCborValue& key : keys) {
         if (s_checksumsDiff.value(key).toBool(true))
             continue;
+        fileCount++;
+    }
+
+    bool errorSet = false;
+    qint64 downloadedSize = 0;
+    int fileIndex = 0;
+    for (const QCborValue& key : keys) {
+        if (s_checksumsDiff.value(key).toBool(true))
+            continue;
+
+        fileIndex++;
 
         const QString& localPath = ApplicationCore::updatesPath() + QStringLiteral("/Downloads/") + key.toString();
         const QString& remotePath = topUpdateRemotePath() + QStringLiteral("/content/") + key.toString();
@@ -246,7 +257,14 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
             }
             if (fileHash == QCH::hash(file.readAll(), QCH::Sha1)) {
                 downloadedSize += fileSize;
-                future->setProgressValue(100 * downloadedSize / qreal(s_downloadSize));
+                if (future->isProgressUpdateNeeded()) {
+                    QCborMap result;
+                    result.insert(QStringLiteral("downloadedSize"), downloadedSize);
+                    result.insert(QStringLiteral("fileCount"), fileCount);
+                    result.insert(QStringLiteral("fileIndex"), fileIndex);
+                    result.insert(QStringLiteral("fileName"), key.toString());
+                    future->reportResult(result);
+                }
                 continue;
             }
         }
@@ -262,7 +280,7 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
         {
             QCborMap result;
             const bool isFirstChunk = recentBlocks.isEmpty();
-            const int IDEAL_BLOCK_SIZE = s_downloadSize / qMax(1, chunkSize) / 80;
+            const int IDEAL_BLOCK_SIZE = fileSize / qMax(1, chunkSize) / 80;
             Block block;
             block.size = chunkSize;
             block.timestamp = QDateTime::currentDateTime();
@@ -271,11 +289,11 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
             if (isFirstChunk) {
                 Block block;
                 block.size = chunkSize;
-                block.timestamp = QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(10, 200));
+                block.timestamp = QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(3, 50));
                 recentBlocks.append(block);
             }
 
-            if (recentBlocks.size() > qBound(3, IDEAL_BLOCK_SIZE, 100))
+            if (recentBlocks.size() > qBound(3, IDEAL_BLOCK_SIZE, 200))
                 recentBlocks.removeFirst();
 
             if (recentBlocks.size() > 1) {
@@ -284,14 +302,12 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
                 for (const Block& block : qAsConst(recentBlocks))
                     transferredBytes += block.size;
                 if (elapedMs == 0)
-                    elapedMs = QRandomGenerator::global()->bounded(10, 200);
+                    elapedMs = QRandomGenerator::global()->bounded(3, 50);
                 qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
                 result.insert(QStringLiteral("bytesPerSec"), bytesPerMs * 1000);
-
-                int bytesLeft = s_downloadSize - downloadedSize;
-                qreal msLeft = bytesLeft / bytesPerMs;
-                result.insert(QStringLiteral("msLeft"), msLeft);
                 result.insert(QStringLiteral("downloadedSize"), downloadedSize);
+                result.insert(QStringLiteral("fileCount"), fileCount);
+                result.insert(QStringLiteral("fileIndex"), fileIndex);
                 result.insert(QStringLiteral("fileName"), key.toString());
             }
             return result;
@@ -312,11 +328,12 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
                 return loop.quit();
             }
             downloadedSize += chunk.size();
-            future->reportResult(calculateTransferRate(chunk.size()));
+            if (future->isProgressUpdateNeeded())
+                future->reportResult(calculateTransferRate(chunk.size()));
         });
         connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
             buffer.close();
-            if (downloader.bytesReceived() > 0 && !downloader.isError()) {
+            if (!downloader.isError()) {
                 if (fileHash != QCH::hash(buffer.data(), QCH::Sha1)) {
                     errorSet = true;
                     future->setProgressValueAndText(0, tr("Hashes do not match"));
@@ -529,7 +546,8 @@ void UpdateManager::onDownloadWatcherResultReadyAt(int resultIndex)
     emit downloadProgress(s_downloadSize,
                           result.value(QStringLiteral("downloadedSize")).toDouble(),
                           result.value(QStringLiteral("bytesPerSec")).toDouble(),
-                          QTime(0, 0).addMSecs(result.value(QStringLiteral("msLeft")).toDouble()),
+                          result.value(QStringLiteral("fileCount")).toDouble(),
+                          result.value(QStringLiteral("fileIndex")).toDouble(),
                           result.value(QStringLiteral("fileName")).toString());
 }
 

@@ -46,7 +46,8 @@ private slots:
     void onDownloadWatcherFinish();
 
 signals:
-    void downloadProgress(qint64 totalBytes, qint64 receivedBytes, qreal speed, const QTime& timeLeft, const QString& fileName);
+    void downloadProgress(qint64 totalBytes, qint64 receivedBytes, qreal speed,
+                          int fileCount, int fileIndex, const QString& fileName);
     void downloadFinished(bool canceled, const QString& errorString);
     void updateCheckStarted();
     void updateCheckFinished(bool succeed);

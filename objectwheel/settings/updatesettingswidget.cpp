@@ -153,14 +153,15 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_abortDownloadButton->setText(tr("Abort"));
     m_downloadingLabel->setText(tr("Downloading..."));
-    m_downloadSizeLabel->setText("000.00 MB of 000.00 MB  •  00:00:00");
-    m_downloadSpeedLabel->setText("000.00 kB/sec");
+    m_downloadSizeLabel->setText("000.00 MB / 000.00 MB");
+    m_downloadSpeedLabel->setText("0000.00 Bytes/sec ↓");
 
     // NOTE: QProgressBar::minimumSizeHint() returns fontMetrics().height() + 2 for the height
     m_downloadProgressBar->setFixedHeight(m_downloadProgressBar->sizeHint().height());
     m_downloadSizeLabel->setFixedHeight(m_abortDownloadButton->sizeHint().height());
     m_downloadSpeedLabel->setFixedHeight(m_abortDownloadButton->sizeHint().height());
-    m_downloadSpeedLabel->setFixedWidth(90);
+    m_downloadSpeedLabel->setFixedWidth(m_downloadSpeedLabel->fontMetrics().
+                                        horizontalAdvance(m_downloadSpeedLabel->text()) + 2);
 
     m_downloadSpeedLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
     m_downloadSizeLabel->setAlignment(Qt::AlignVCenter);
@@ -248,21 +249,20 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         }
     });
     connect(UpdateManager::instance(), &UpdateManager::downloadProgress, this, [this]
-            (qint64 totalBytes, qint64 receivedBytes, qreal speed, const QTime& timeLeft, const QString& fileName) {
+            (qint64 totalBytes, qint64 receivedBytes, qreal speed, int fileCount, int fileIndex, const QString& fileName) {
         const qreal progress = totalBytes > 0 ? 100.0 * receivedBytes / totalBytes : 0;
-        const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QLatin1String("/sec");
-        const QString& timeLeftStr = timeLeft.isValid() ? timeLeft.toString(QLatin1String("hh:mm:ss"))
-                                                        : QLatin1String("00:00:00");
+        const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QStringLiteral("/sec ↓");
         const QString& sizeStr = UtilityFunctions::toPrettyBytesString(receivedBytes)
                 + QLatin1String(" / ")
                 + UtilityFunctions::toPrettyBytesString(totalBytes)
                 + QStringLiteral(" ( % %1 )").arg(QString::number(progress, 'f', 2));
+        const QString& downloadingStr = tr("Downloading (%1/%2): ").arg(fileIndex).arg(fileCount);
         m_downloadProgressBar->setValue(progress);
-        m_downloadSizeLabel->setText(sizeStr + QStringLiteral("  •  ") + timeLeftStr);
+        m_downloadSizeLabel->setText(sizeStr);
         m_downloadSpeedLabel->setText(speedStr);
         const int w = m_downloadingLabel->width() -
-                m_downloadingLabel->fontMetrics().horizontalAdvance(tr("Downloading: ")) - 1;
-        m_downloadingLabel->setText(tr("Downloading: ") +
+                m_downloadingLabel->fontMetrics().horizontalAdvance(downloadingStr) - 1;
+        m_downloadingLabel->setText(downloadingStr +
                                     m_downloadingLabel->fontMetrics().elidedText(fileName, Qt::ElideLeft, w));
     });
 

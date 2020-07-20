@@ -737,7 +737,7 @@ void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet
     if (isFirstChunk) {
         BuildInfo::Block block;
         block.size = chunkSize;
-        block.timestamp = QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(10, 200));
+        block.timestamp = QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(3, 50));
         buildInfo->recentBlocks().append(block);
     }
 
@@ -750,7 +750,7 @@ void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet
         for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
             transferredBytes += block.size;
         if (elapedMs == 0)
-            elapedMs = QRandomGenerator::global()->bounded(10, 200);
+            elapedMs = QRandomGenerator::global()->bounded(3, 50);
         qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
         buildInfo->setSpeed(bytesPerMs * 1000);
         changedRoles.unite({ SpeedRole });
