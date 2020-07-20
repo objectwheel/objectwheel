@@ -111,7 +111,7 @@ const QString& BuildInfo::path() const
     return m_path;
 }
 
-QList<BuildInfo::Block>& BuildInfo::recentBlocks()
+QVector<BuildInfo::Block>& BuildInfo::recentBlocks()
 {
     return m_recentBlocks;
 }

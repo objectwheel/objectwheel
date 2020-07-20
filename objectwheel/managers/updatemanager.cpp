@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QFuture>
 #include <QSaveFile>
+#include <QRandomGenerator>
 
 using QCH = QCryptographicHash;
 
@@ -26,7 +27,7 @@ QCborMap UpdateManager::s_remoteChecksums;
 QCborMap UpdateManager::s_checksumsDiff;
 QString UpdateManager::s_changelog;
 qint64 UpdateManager::s_downloadSize = 0;
-QFutureWatcher<int> UpdateManager::s_downloadWatcher;
+QFutureWatcher<QCborMap> UpdateManager::s_downloadWatcher;
 QFutureWatcher<QCborMap> UpdateManager::s_localChecksumsWatcher;
 
 UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
@@ -52,10 +53,10 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onChangelogDownloaderReadyRead);
     connect(&s_changelogDownloader, qOverload<>(&FastDownloader::finished),
             this, &UpdateManager::onChangelogDownloaderFinished);
-    connect(&s_downloadWatcher, &QFutureWatcher<int>::finished,
+    connect(&s_downloadWatcher, &QFutureWatcher<QCborMap>::finished,
             this, &UpdateManager::onDownloadWatcherFinish);
-    connect(&s_downloadWatcher, &QFutureWatcher<int>::progressValueChanged,
-            this, &UpdateManager::onDownloadWatcherProgressValueChange);
+    connect(&s_downloadWatcher, &QFutureWatcher<QCborMap>::resultReadyAt,
+            this, &UpdateManager::onDownloadWatcherResultReadyAt);
 
     // WARNING: Clean up update artifacts from previous install if there is any
     QFile::remove(QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"));
@@ -217,12 +218,12 @@ QCborMap UpdateManager::generateUpdateChecksums(const QDir& topDir, const QDir& 
     return checksums;
 }
 
-int UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
+QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
 {
-    auto future = static_cast<QFutureInterface<int>*>(futureInterface);
+    auto future = static_cast<QFutureInterface<QCborMap>*>(futureInterface);
     future->setProgressRange(0, 100);
     future->setProgressValue(0);
-    QFutureWatcher<int> watcher;
+    QFutureWatcher<QCborMap> watcher;
     watcher.setFuture(future->future());
 
     bool errorSet = false;
@@ -241,7 +242,7 @@ int UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
             QFile file(localPath);
             if (!file.open(QFile::ReadOnly)) {
                 future->setProgressValueAndText(0, tr("Cannot read update file"));
-                return 0;
+                return QCborMap();
             }
             if (fileHash == QCH::hash(file.readAll(), QCH::Sha1)) {
                 downloadedSize += fileSize;
@@ -255,7 +256,48 @@ int UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
         buffer.open(QBuffer::WriteOnly);
         FastDownloader downloader(QUrl{remotePath});
 
-        connect(&watcher, &QFutureWatcher<int>::canceled, &loop, &QEventLoop::quit);
+        struct Block { int size; QDateTime timestamp; };
+        QVector<Block> recentBlocks;
+        auto calculateTransferRate = [&] (int chunkSize) -> QCborMap
+        {
+            QCborMap result;
+            const bool isFirstChunk = recentBlocks.isEmpty();
+            const int IDEAL_BLOCK_SIZE = s_downloadSize / qMax(1, chunkSize) / 80;
+            Block block;
+            block.size = chunkSize;
+            block.timestamp = QDateTime::currentDateTime();
+            recentBlocks.append(block);
+
+            if (isFirstChunk) {
+                Block block;
+                block.size = chunkSize;
+                block.timestamp = QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(10, 200));
+                recentBlocks.append(block);
+            }
+
+            if (recentBlocks.size() > qBound(3, IDEAL_BLOCK_SIZE, 100))
+                recentBlocks.removeFirst();
+
+            if (recentBlocks.size() > 1) {
+                int transferredBytes = -recentBlocks.first().size;
+                int elapedMs = recentBlocks.first().timestamp.msecsTo(recentBlocks.last().timestamp);
+                for (const Block& block : qAsConst(recentBlocks))
+                    transferredBytes += block.size;
+                if (elapedMs == 0)
+                    elapedMs = QRandomGenerator::global()->bounded(10, 200);
+                qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
+                result.insert(QStringLiteral("bytesPerSec"), bytesPerMs * 1000);
+
+                int bytesLeft = s_downloadSize - downloadedSize;
+                qreal msLeft = bytesLeft / bytesPerMs;
+                result.insert(QStringLiteral("msLeft"), msLeft);
+                result.insert(QStringLiteral("downloadedSize"), downloadedSize);
+                result.insert(QStringLiteral("fileName"), key.toString());
+            }
+            return result;
+        };
+
+        connect(&watcher, &QFutureWatcher<QCborMap>::canceled, &loop, &QEventLoop::quit);
         connect(&downloader, &FastDownloader::readyRead, [&] (int id) {
             const qint64 pos = downloader.head(id) + downloader.pos(id);
             const QByteArray& chunk = downloader.readAll(id);
@@ -270,7 +312,7 @@ int UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
                 return loop.quit();
             }
             downloadedSize += chunk.size();
-            future->setProgressValue(100 * downloadedSize / qreal(s_downloadSize));
+            future->reportResult(calculateTransferRate(chunk.size()));
         });
         connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
             buffer.close();
@@ -310,11 +352,11 @@ int UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
         loop.exec();
 
         if (future->isCanceled() || errorSet)
-            return 0;
+            return QCborMap();
     }
 
-    future->reportResult(100);
-    return 100;
+    future->reportResult(QCborMap());
+    return QCborMap();
 }
 
 void UpdateManager::onConnect()
@@ -481,9 +523,14 @@ void UpdateManager::onUpdateCheckFinish(bool succeed)
     }
 }
 
-void UpdateManager::onDownloadWatcherProgressValueChange(int progressValue)
+void UpdateManager::onDownloadWatcherResultReadyAt(int resultIndex)
 {
-    emit downloadProgress(progressValue);
+    const QCborMap& result = s_downloadWatcher.resultAt(resultIndex);
+    emit downloadProgress(s_downloadSize,
+                          result.value(QStringLiteral("downloadedSize")).toDouble(),
+                          result.value(QStringLiteral("bytesPerSec")).toDouble(),
+                          QTime(0, 0).addMSecs(result.value(QStringLiteral("msLeft")).toDouble()),
+                          result.value(QStringLiteral("fileName")).toString());
 }
 
 void UpdateManager::onDownloadWatcherFinish()

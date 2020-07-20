@@ -23,7 +23,7 @@ public:
     QByteArray identifier() const;
     const QCborMap& request() const;
     const QString& path() const;
-    QList<Block>& recentBlocks();
+    QVector<Block>& recentBlocks();
     QByteArray* buffer();
 
     QByteArray uid() const;
@@ -61,7 +61,7 @@ private:
     const QCborMap m_request;
     QByteArray m_uid;
     QString m_path;
-    QList<Block> m_recentBlocks;
+    QVector<Block> m_recentBlocks;
     QByteArray m_buffer;
 
 private:
