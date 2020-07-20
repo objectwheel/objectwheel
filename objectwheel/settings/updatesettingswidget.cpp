@@ -218,6 +218,20 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             this, [=] { UpdateManager::startUpdateCheck(); });
     connect(m_downloadButton, &QPushButton::clicked,
             this, [=] {
+        if (UpdateManager::fileCount() > 200) {
+            QMessageBox::StandardButton ret =
+                    UtilityFunctions::showMessage(this, tr("This looks like to be a big update"),
+                                                  tr("<p>Fragmented updates with more than 200 files may take "
+                                                     "longer to download than what you may expect. We "
+                                                     "suggest you to download an offline installer instead from: "
+                                                     "<a href='https://objectwheel.com/download'>"
+                                                     "https://objectwheel.com/download</a></p>"
+                                                     "<p>Do you still want to proceed with the update?</p>"),
+                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::No);
+            if (ret == QMessageBox::No)
+                return;
+        }
         UpdateManager::download();
         m_updateStatusStackedLayout->setCurrentWidget(m_downloadWidget);
     });
@@ -233,10 +247,11 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             UpdateSettings* settings = SystemSettings::updateSettings();
             settings->lastUpdateCheckDate = QDateTime::currentDateTime();
             settings->write();
-            const qint64 downloadSize = UpdateManager::downloadSize();
-            if (downloadSize > 0) {
-                m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1):")
-                                                 .arg(UtilityFunctions::toPrettyBytesString(downloadSize)));
+            const int fileCount = UpdateManager::fileCount();
+            if (fileCount > 0) {
+                m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1 files of %2 size):")
+                                                 .arg(fileCount)
+                                                 .arg(UtilityFunctions::toPrettyBytesString(UpdateManager::downloadSize())));
                 m_changelogEdit->setHtml(UpdateManager::changelog());
                 m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
                 mark();
@@ -256,7 +271,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 + QLatin1String(" / ")
                 + UtilityFunctions::toPrettyBytesString(totalBytes)
                 + QStringLiteral(" ( % %1 )").arg(QString::number(progress, 'f', 2));
-        const QString& downloadingStr = tr("Downloading (%1/%2): ").arg(fileIndex).arg(fileCount);
+        const QString& downloadingStr = tr("Downloading (%1 / %2): ").arg(fileIndex).arg(fileCount);
         m_downloadProgressBar->setValue(progress);
         m_downloadSizeLabel->setText(sizeStr);
         m_downloadSpeedLabel->setText(speedStr);
@@ -264,6 +279,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 m_downloadingLabel->fontMetrics().horizontalAdvance(downloadingStr) - 1;
         m_downloadingLabel->setText(downloadingStr +
                                     m_downloadingLabel->fontMetrics().elidedText(fileName, Qt::ElideLeft, w));
+        UtilityFunctions::updateToolTip(m_downloadingLabel, downloadingStr + fileName);
     });
 
     activate();

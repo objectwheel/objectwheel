@@ -26,6 +26,7 @@ QCborMap UpdateManager::s_localChecksums;
 QCborMap UpdateManager::s_remoteChecksums;
 QCborMap UpdateManager::s_checksumsDiff;
 QString UpdateManager::s_changelog;
+int UpdateManager::s_fileCount = 0;
 qint64 UpdateManager::s_downloadSize = 0;
 QFutureWatcher<QCborMap> UpdateManager::s_downloadWatcher;
 QFutureWatcher<QCborMap> UpdateManager::s_localChecksumsWatcher;
@@ -39,8 +40,6 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
             this, &UpdateManager::onDisconnect, Qt::QueuedConnection);
     connect(&s_localChecksumsWatcher, &QFutureWatcher<QCborMap>::resultsReadyAt,
             this, &UpdateManager::onLocalScanFinish);
-    connect(this, &UpdateManager::updateCheckFinished,
-            this, &UpdateManager::onUpdateCheckFinish);
     connect(&s_checksumsDownloader, &FastDownloader::resolved,
             this, &UpdateManager::onChecksumsDownloaderResolved);
     connect(&s_checksumsDownloader, &FastDownloader::readyRead,
@@ -93,6 +92,7 @@ UpdateManager::~UpdateManager()
     s_remoteChecksums.clear();
     s_localChecksums.clear();
     s_downloadSize = 0;
+    s_fileCount = 0;
     s_isUpdateCheckRunning = false;
     s_instance = nullptr;
 }
@@ -115,6 +115,11 @@ bool UpdateManager::isUpdateCheckRunning()
 qint64 UpdateManager::downloadSize()
 {
     return s_downloadSize;
+}
+
+int UpdateManager::fileCount()
+{
+    return s_fileCount;
 }
 
 void UpdateManager::startUpdateCheck(bool force)
@@ -416,7 +421,9 @@ void UpdateManager::onLocalScanFinish()
     file.write(s_localChecksums.toCborValue().toCbor());
     file.commit();
 
-    emit updateCheckFinished(!s_remoteChecksums.isEmpty() && !s_changelog.isEmpty() && !s_localChecksums.isEmpty());
+    const bool succeed = !s_remoteChecksums.isEmpty() && !s_changelog.isEmpty() && !s_localChecksums.isEmpty();
+    handleUpdateCheckFinish(succeed);
+    emit updateCheckFinished(succeed);
 }
 
 void UpdateManager::onChecksumsDownloaderResolved()
@@ -472,7 +479,9 @@ void UpdateManager::onChecksumsDownloaderFinished()
             }
         } else {
             s_isUpdateCheckRunning = false;
-            emit updateCheckFinished(!s_remoteChecksums.isEmpty() && !s_changelog.isEmpty());
+            const bool succeed = !s_remoteChecksums.isEmpty() && !s_changelog.isEmpty();
+            handleUpdateCheckFinish(succeed);
+            emit updateCheckFinished(succeed);
         }
     }
 }
@@ -502,40 +511,9 @@ void UpdateManager::onChangelogDownloaderFinished()
             }
         } else {
             s_isUpdateCheckRunning = false;
-            emit updateCheckFinished(!s_remoteChecksums.isEmpty() && !s_changelog.isEmpty());
-        }
-    }
-}
-
-void UpdateManager::onUpdateCheckFinish(bool succeed)
-{
-    if (!succeed)
-        return;
-
-    s_downloadSize = 0;
-    s_checksumsDiff.clear();
-
-    foreach (const QCborValue& key, s_localChecksums.keys()) {
-        if (!key.isUndefined() && !key.toString().isEmpty()) {
-            const QCborMap& localVal = s_localChecksums.value(key).toMap();
-            const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
-            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
-            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
-            if (localHash != remoteHash)
-                s_checksumsDiff[key] = true; // Mark for removal
-        }
-    }
-
-    foreach (const QCborValue& key, s_remoteChecksums.keys()) {
-        if (!key.isUndefined() && !key.toString().isEmpty()) {
-            const QCborMap& localVal = s_localChecksums.value(key).toMap();
-            const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
-            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
-            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
-            if (localHash != remoteHash) {
-                s_checksumsDiff[key] = false; // Mark for replacement or new
-                s_downloadSize += remoteVal.value(QStringLiteral("size")).toInteger();
-            }
+            const bool succeed = !s_remoteChecksums.isEmpty() && !s_changelog.isEmpty();
+            handleUpdateCheckFinish(succeed);
+            emit updateCheckFinished(succeed);
         }
     }
 }
@@ -570,4 +548,39 @@ void UpdateManager::handleDownloaderError()
     s_changelogBuffer.buffer().clear();
     s_isUpdateCheckRunning = false;
     emit s_instance->updateCheckFinished(false);
+}
+
+void UpdateManager::handleUpdateCheckFinish(bool succeed)
+{
+    if (!succeed)
+        return;
+
+    s_fileCount = 0;
+    s_downloadSize = 0;
+    s_checksumsDiff.clear();
+
+    foreach (const QCborValue& key, s_localChecksums.keys()) {
+        if (!key.isUndefined() && !key.toString().isEmpty()) {
+            const QCborMap& localVal = s_localChecksums.value(key).toMap();
+            const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
+            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
+            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
+            if (localHash != remoteHash)
+                s_checksumsDiff[key] = true; // Mark for removal
+        }
+    }
+
+    foreach (const QCborValue& key, s_remoteChecksums.keys()) {
+        if (!key.isUndefined() && !key.toString().isEmpty()) {
+            const QCborMap& localVal = s_localChecksums.value(key).toMap();
+            const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
+            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
+            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
+            if (localHash != remoteHash) {
+                s_checksumsDiff[key] = false; // Mark for replacement or new
+                s_downloadSize += remoteVal.value(QStringLiteral("size")).toInteger();
+                s_fileCount++;
+            }
+        }
+    }
 }

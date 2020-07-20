@@ -18,6 +18,7 @@ public:
     static UpdateManager* instance();
     static QString changelog();
     static qint64 downloadSize();
+    static int fileCount();
     static bool isUpdateCheckRunning();
     static void startUpdateCheck(bool force = true);
     static void download();
@@ -30,6 +31,7 @@ private:
     static QCborMap generateUpdateChecksums(const QDir& topDir, const QDir& dir);
     static QCborMap handleDownload(QFutureInterfaceBase* futureInterface);
     static void handleDownloaderError();
+    static void handleUpdateCheckFinish(bool succeed);
 
 private slots:
     void onConnect();
@@ -41,7 +43,6 @@ private slots:
     void onChangelogDownloaderFinished();
     void onChecksumsDownloaderReadyRead(int id);
     void onChangelogDownloaderReadyRead(int id);
-    void onUpdateCheckFinish(bool succeed);
     void onDownloadWatcherResultReadyAt(int resultIndex);
     void onDownloadWatcherFinish();
 
@@ -67,6 +68,7 @@ private:
     static QCborMap s_remoteChecksums;
     static QCborMap s_checksumsDiff;
     static QString s_changelog;
+    static int s_fileCount;
     static qint64 s_downloadSize;
     static QFutureWatcher<QCborMap> s_downloadWatcher;
     static QFutureWatcher<QCborMap> s_localChecksumsWatcher;
