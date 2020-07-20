@@ -6,6 +6,7 @@
 #include <updatemanager.h>
 #include <stackedlayout.h>
 #include <waitingspinnerwidget.h>
+#include <QProgressBar>
 
 #include <QCoreApplication>
 #include <QLabel>
@@ -36,6 +37,14 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_updatesAvailableIcon(new QLabel(m_updatesAvailableWidget))
   , m_changelogEdit(new QTextEdit(m_updatesAvailableWidget))
   , m_downloadButton(new QPushButton(m_updatesAvailableWidget))
+  /*__*/
+  , m_downloadWidget(new QWidget(m_updateGroup))
+  , m_downloadingIcon(new QLabel(m_downloadWidget))
+  , m_downloadingLabel(new QLabel(m_downloadWidget))
+  , m_abortDownloadButton(new QPushButton(m_downloadWidget))
+  , m_downloadProgressBar(new QProgressBar(m_downloadWidget))
+  , m_downloadSizeLabel(new QLabel(m_downloadWidget))
+  , m_downloadSpeedLabel(new QLabel(m_downloadWidget))
   /****/
   , m_statusGroup(new QGroupBox(contentWidget()))
   , m_logoLabel(new QLabel(m_statusGroup))
@@ -59,6 +68,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_updateStatusStackedLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_updateStatusStackedLayout->addWidget(m_upToDateWidget);
     m_updateStatusStackedLayout->addWidget(m_updatesAvailableWidget);
+    m_updateStatusStackedLayout->addWidget(m_downloadWidget);
 
     m_updateGroup->setTitle(tr("Update"));
 
@@ -126,6 +136,45 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_downloadButton->setCursor(Qt::PointingHandCursor);
     m_downloadButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
+
+    /*__*/
+
+    auto downloadLayout = new QGridLayout(m_downloadWidget);
+    downloadLayout->setSpacing(6);
+    downloadLayout->setContentsMargins(6, 6, 6, 6);
+    downloadLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
+    downloadLayout->addWidget(m_downloadingIcon, 0, 0, 4, 1, Qt::AlignTop);
+    downloadLayout->addWidget(m_downloadingLabel, 0, 1);
+    downloadLayout->addWidget(m_abortDownloadButton, 0, 2);
+    downloadLayout->addWidget(m_downloadProgressBar, 1, 1, 1, 2);
+    downloadLayout->addWidget(m_downloadSizeLabel, 2, 1);
+    downloadLayout->addWidget(m_downloadSpeedLabel, 2, 2);
+    downloadLayout->setRowStretch(3, 1);
+
+    m_abortDownloadButton->setText(tr("Abort"));
+    m_downloadingLabel->setText(tr("Downloading..."));
+    m_downloadSizeLabel->setText("000.00 MB of 000.00 MB  •  00:00:00");
+    m_downloadSpeedLabel->setText("000.00 kB/sec");
+
+    // NOTE: QProgressBar::minimumSizeHint() returns fontMetrics().height() + 2 for the height
+    m_downloadProgressBar->setFixedHeight(m_downloadProgressBar->sizeHint().height());
+    m_downloadSizeLabel->setFixedHeight(m_abortDownloadButton->sizeHint().height());
+    m_downloadSpeedLabel->setFixedHeight(m_abortDownloadButton->sizeHint().height());
+    m_downloadSpeedLabel->setFixedWidth(90);
+
+    m_downloadSpeedLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
+    m_downloadSizeLabel->setAlignment(Qt::AlignVCenter);
+    m_downloadingLabel->setAlignment(Qt::AlignVCenter);
+
+    m_downloadProgressBar->setValue(60);
+    m_downloadingIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -4, 0, 0)));
+    m_downloadingIcon->setFixedSize(QSize(80, 80));
+    m_downloadingIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/downloading.svg"), QSize(80, 80), this));
+    QCoreApplication::postEvent(m_downloadingIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
+
+    m_abortDownloadButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, 0, -1, 0)));
+    m_abortDownloadButton->setCursor(Qt::PointingHandCursor);
+    QCoreApplication::postEvent(m_abortDownloadButton, new QEvent(QEvent::StyleChange)); // Apply margin change
 
     /****/
 

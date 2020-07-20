@@ -11,6 +11,7 @@ class QPushButton;
 class QStackedLayout;
 class QTextEdit;
 class WaitingSpinnerWidget;
+class QProgressBar;
 
 class UpdateSettingsWidget final : public SettingsWidget
 {
@@ -49,6 +50,14 @@ private:
     QLabel* m_updatesAvailableIcon;
     QTextEdit* m_changelogEdit;
     QPushButton* m_downloadButton;
+    /*__*/
+    QWidget* m_downloadWidget;
+    QLabel* m_downloadingIcon;
+    QLabel* m_downloadingLabel;
+    QPushButton* m_abortDownloadButton;
+    QProgressBar* m_downloadProgressBar;
+    QLabel* m_downloadSizeLabel;
+    QLabel* m_downloadSpeedLabel;
     /****/
     QGroupBox* m_statusGroup;
     QLabel* m_logoLabel;
