@@ -309,7 +309,7 @@ QString toPrettyBytesString(qint64 bytes)
     QString ret;
     if (bytes < KB) {
         ret = QString::number(bytes);
-        ret += QStringLiteral(" bytes");
+        ret += QStringLiteral(" B");
     } else if (bytes < MB) {
         ret = QString::number(bytes / KB, 'f', 2);
         ret += QStringLiteral(" kB");

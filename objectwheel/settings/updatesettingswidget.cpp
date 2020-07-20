@@ -153,8 +153,8 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_abortDownloadButton->setText(tr("Abort"));
     m_downloadingLabel->setText(tr("Downloading..."));
-    m_downloadSizeLabel->setText("000.00 MB / 000.00 MB");
-    m_downloadSpeedLabel->setText("0000.00 Bytes/sec ↓");
+    m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
+    m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
 
     // NOTE: QProgressBar::minimumSizeHint() returns fontMetrics().height() + 2 for the height
     m_downloadProgressBar->setFixedHeight(m_downloadProgressBar->sizeHint().height());
@@ -251,7 +251,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     connect(UpdateManager::instance(), &UpdateManager::downloadProgress, this, [this]
             (qint64 totalBytes, qint64 receivedBytes, qreal speed, int fileCount, int fileIndex, const QString& fileName) {
         const qreal progress = totalBytes > 0 ? 100.0 * receivedBytes / totalBytes : 0;
-        const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QStringLiteral("/sec ↓");
+        const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QStringLiteral("/s ↓");
         const QString& sizeStr = UtilityFunctions::toPrettyBytesString(receivedBytes)
                 + QLatin1String(" / ")
                 + UtilityFunctions::toPrettyBytesString(totalBytes)
