@@ -112,6 +112,11 @@ bool UpdateManager::isUpdateCheckRunning()
     return s_isUpdateCheckRunning;
 }
 
+bool UpdateManager::isDownloadRunning()
+{
+    return s_downloadWatcher.isRunning();
+}
+
 qint64 UpdateManager::downloadSize()
 {
     return s_downloadSize;
@@ -226,8 +231,6 @@ QCborMap UpdateManager::generateUpdateChecksums(const QDir& topDir, const QDir& 
 QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
 {
     auto future = static_cast<QFutureInterface<QCborMap>*>(futureInterface);
-    future->setProgressRange(0, 100);
-    future->setProgressValue(0);
     QFutureWatcher<QCborMap> watcher;
     watcher.setFuture(future->future());
 
@@ -239,10 +242,15 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
         fileCount++;
     }
 
-    bool errorSet = false;
+    QString errorString;
     qint64 downloadedSize = 0;
     int fileIndex = 0;
     for (const QCborValue& key : keys) {
+        if (future->isCanceled() || !errorString.isEmpty()) {
+            future->reportResult({{ "errorString", errorString }});
+            return QCborMap();
+        }
+
         if (s_checksumsDiff.value(key).toBool(true))
             continue;
 
@@ -257,7 +265,7 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
         if (QFileInfo::exists(localPath)) {
             QFile file(localPath);
             if (!file.open(QFile::ReadOnly)) {
-                future->setProgressValueAndText(0, tr("Cannot read update file"));
+                future->reportResult({{ "errorString", tr("Cannot read update file") }});
                 return QCborMap();
             }
             if (fileHash == QCH::hash(file.readAll(), QCH::Sha1)) {
@@ -323,61 +331,54 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
             const qint64 pos = downloader.head(id) + downloader.pos(id);
             const QByteArray& chunk = downloader.readAll(id);
             if (!buffer.seek(pos)) {
-                errorSet = true;
-                future->setProgressValueAndText(0, tr("Cannot seek further in the buffer"));
+                errorString = tr("Cannot seek further in the buffer");
                 return loop.quit();
             }
             if (buffer.write(chunk) != chunk.size()) {
-                errorSet = true;
-                future->setProgressValueAndText(0, tr("Cannot write more data into the buffer"));
+                errorString = tr("Cannot write more data into the buffer");
                 return loop.quit();
             }
             downloadedSize += chunk.size();
             if (future->isProgressUpdateNeeded())
                 future->reportResult(calculateTransferRate(chunk.size()));
         });
-        connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
+        connect(&downloader, qOverload<int>(&FastDownloader::finished), [&] (int id) {
             buffer.close();
             if (!downloader.isError()) {
                 if (fileHash != QCH::hash(buffer.data(), QCH::Sha1)) {
-                    errorSet = true;
-                    future->setProgressValueAndText(0, tr("Hashes do not match"));
+                    errorString = tr("Hashes do not match");
                     return loop.quit();
                 }
                 if (!QFileInfo(localPath).dir().mkpath(".")) {
-                    errorSet = true;
-                    future->setProgressValueAndText(0, tr("Cannot establish an update path"));
+                    errorString = tr("Cannot establish an update path");
                     return loop.quit();
                 }
                 QSaveFile file(localPath);
                 if (!file.open(QFile::WriteOnly)) {
-                    errorSet = true;
-                    future->setProgressValueAndText(0, tr("Cannot open an update file"));
+                    errorString = tr("Cannot open an update file");
                     return loop.quit();
                 }
                 if (file.write(buffer.data()) != buffer.size()) {
-                    errorSet = true;
-                    future->setProgressValueAndText(0, tr("Cannot write an update file"));
+                    errorString = tr("Cannot write an update file");
                     return loop.quit();
                 }
                 if (!file.commit()) {
-                    errorSet = true;
-                    future->setProgressValueAndText(0, tr("Cannot commit an update file"));
+                    errorString = tr("Cannot commit an update file");
                 }
             } else {
-                errorSet = true;
-                future->setProgressValueAndText(0, tr("Download failed"));
+                errorString = tr("Network error occurred, reason: ") + downloader.errorString(id);
             }
             loop.quit();
         });
         downloader.start();
         loop.exec();
-
-        if (future->isCanceled() || errorSet)
-            return QCborMap();
     }
 
-    future->reportResult(QCborMap());
+    if (future->isCanceled() || !errorString.isEmpty()) {
+        future->reportResult({{ "errorString", errorString }});
+        return QCborMap();
+    }
+
     return QCborMap();
 }
 
@@ -521,17 +522,24 @@ void UpdateManager::onChangelogDownloaderFinished()
 void UpdateManager::onDownloadWatcherResultReadyAt(int resultIndex)
 {
     const QCborMap& result = s_downloadWatcher.resultAt(resultIndex);
-    emit downloadProgress(s_downloadSize,
-                          result.value(QStringLiteral("downloadedSize")).toDouble(),
-                          result.value(QStringLiteral("bytesPerSec")).toDouble(),
-                          result.value(QStringLiteral("fileCount")).toDouble(),
-                          result.value(QStringLiteral("fileIndex")).toDouble(),
-                          result.value(QStringLiteral("fileName")).toString());
+    const QString& errorString = result.value(QStringLiteral("errorString")).toString();
+    if (errorString.isEmpty()) {
+        emit downloadProgress(s_downloadSize,
+                              result.value(QStringLiteral("downloadedSize")).toDouble(),
+                              result.value(QStringLiteral("bytesPerSec")).toDouble(),
+                              result.value(QStringLiteral("fileCount")).toDouble(),
+                              result.value(QStringLiteral("fileIndex")).toDouble(),
+                              result.value(QStringLiteral("fileName")).toString());
+    }
 }
 
 void UpdateManager::onDownloadWatcherFinish()
 {
-    emit downloadFinished(s_downloadWatcher.isCanceled(), s_downloadWatcher.progressText());
+    QCborMap result;
+    int resultCount = s_downloadWatcher.future().resultCount();
+    if (resultCount > 0)
+        result = s_downloadWatcher.resultAt(resultCount - 1);
+    emit downloadFinished(s_downloadWatcher.isCanceled(), result.value("errorString").toString());
 }
 
 void UpdateManager::handleDownloaderError()

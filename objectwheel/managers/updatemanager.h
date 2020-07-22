@@ -20,6 +20,7 @@ public:
     static qint64 downloadSize();
     static int fileCount();
     static bool isUpdateCheckRunning();
+    static bool isDownloadRunning();
     static void startUpdateCheck(bool force = true);
     static void download();
     static void cancelDownload();

@@ -263,6 +263,12 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             }
         }
     });
+    connect(m_abortDownloadButton, &QPushButton::clicked, this, [=] {
+        if (UpdateManager::isDownloadRunning()) {
+            m_abortDownloadButton->setEnabled(false);
+            UpdateManager::cancelDownload();
+        }
+    });
     connect(UpdateManager::instance(), &UpdateManager::downloadProgress, this, [this]
             (qint64 totalBytes, qint64 receivedBytes, qreal speed, int fileCount, int fileIndex, const QString& fileName) {
         const qreal progress = totalBytes > 0 ? 100.0 * receivedBytes / totalBytes : 0;
@@ -280,6 +286,30 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         m_downloadingLabel->setText(downloadingStr +
                                     m_downloadingLabel->fontMetrics().elidedText(fileName, Qt::ElideLeft, w));
         UtilityFunctions::updateToolTip(m_downloadingLabel, downloadingStr + fileName);
+    });
+    connect(UpdateManager::instance(), &UpdateManager::downloadFinished, this, [this]
+            (bool canceled, const QString& errorString) {
+        if (canceled) {
+            m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
+            m_abortDownloadButton->setEnabled(true);
+            m_downloadProgressBar->setValue(0);
+            m_abortDownloadButton->setText(tr("Abort"));
+            m_downloadingLabel->setText(tr("Downloading..."));
+            m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
+            m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
+        } else {
+            if (!errorString.isEmpty()) {
+                UtilityFunctions::showMessage(this, tr("Something went wrong"), errorString, QMessageBox::Critical);
+                m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
+                m_downloadProgressBar->setValue(0);
+                m_abortDownloadButton->setText(tr("Abort"));
+                m_downloadingLabel->setText(tr("Downloading..."));
+                m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
+                m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
+            } else {
+
+            }
+        }
     });
 
     activate();
