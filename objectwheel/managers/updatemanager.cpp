@@ -13,6 +13,7 @@
 #include <QFuture>
 #include <QSaveFile>
 #include <QRandomGenerator>
+#include <QTimer>
 
 using QCH = QCryptographicHash;
 
@@ -174,7 +175,7 @@ void UpdateManager::install()
 
     QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
                             QStringList(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")));
-    QCoreApplication::quit();
+    QTimer::singleShot(200, [] { QCoreApplication::quit(); });
 }
 
 QDir UpdateManager::topUpdateDir()
@@ -343,9 +344,11 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
                 future->reportResult(calculateTransferRate(chunk.size()));
         });
         connect(&downloader, qOverload<int>(&FastDownloader::finished), [&] (int id) {
-            const QString& reason = downloader.errorString(id);
-            if (downloader.isError() && !reason.isEmpty())
-                errorString = tr("Network error occurred, reason: ") + reason;
+            if (downloader.isError()) {
+                const QString& reason = downloader.errorString(id);
+                if (!reason.isEmpty())
+                    errorString = tr("Network error occurred, reason: ") + reason;
+            }
         });
         connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
             buffer.close();
@@ -367,6 +370,11 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
                     errorString = tr("Cannot write an update file");
                     return loop.quit();
                 }
+                file.setPermissions(file.permissions()
+                                    | QSaveFile::ExeUser
+                                    | QSaveFile::ExeOwner
+                                    | QSaveFile::ExeGroup
+                                    | QSaveFile::ExeOther);
                 if (!file.commit()) {
                     errorString = tr("Cannot commit an update file");
                 }

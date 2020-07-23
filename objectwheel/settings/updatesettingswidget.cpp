@@ -265,9 +265,22 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         }
     });
     connect(m_abortAndInstallButton, &QPushButton::clicked, this, [=] {
-        if (UpdateManager::isDownloadRunning()) {
+        if (m_downloadProgressBar->invertedAppearance()) {
             m_abortAndInstallButton->setEnabled(false);
-            UpdateManager::cancelDownload();
+            UpdateManager::install();
+        } else {
+            QMessageBox::StandardButton ret =
+                    UtilityFunctions::showMessage(this, tr("Are you sure?"),
+                                                  tr("This will abort the download, though files "
+                                                     "are cached you can continue later."),
+                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::No);
+            if (ret == QMessageBox::No)
+                return;
+            if (UpdateManager::isDownloadRunning()) {
+                m_abortAndInstallButton->setEnabled(false);
+                UpdateManager::cancelDownload();
+            }
         }
     });
     connect(UpdateManager::instance(), &UpdateManager::downloadProgress, this, [this]

@@ -23,7 +23,7 @@ static void unload(int exitCode);
 static void readDiffFile();
 static void updateFiles();
 static void removeOldFiles();
-static void launchObjectwheelAndExit();
+static void launchAndExit();
 
 int main(int argc, char* argv[])
 {
@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
 
     g_diffFilePath = argv[1];
     g_myInfo = QCoreApplication::applicationFilePath();
-    g_updateCacheDir = QFileInfo(g_diffFilePath).dir().absoluteFilePath(QLatin1String("Files"));
+    g_updateCacheDir = QFileInfo(g_diffFilePath).dir().absoluteFilePath(QLatin1String("Downloads"));
     g_installationDir = detectInstallationDir();
 
     if (!g_updateCacheDir.exists()) {
@@ -73,11 +73,11 @@ int main(int argc, char* argv[])
     g_progressDialog->show();
 
     // Give Objectwheel some time to quit
-    QTimer::singleShot(2000, [] {
+    QTimer::singleShot(3500, [] {
         readDiffFile();
         updateFiles();
         removeOldFiles();
-        launchObjectwheelAndExit();
+        launchAndExit();
     });
 
     return a.exec();
@@ -237,7 +237,7 @@ static void removeOldFiles()
     }
 }
 
-static void launchObjectwheelAndExit()
+static void launchAndExit()
 {
     g_progressDialog->setValue(g_progressDialog->maximum());
     if (g_errorFlag) {
@@ -246,13 +246,13 @@ static void launchObjectwheelAndExit()
         g_progressDialog->setCancelButtonText(QObject::tr("Close"));
         QObject::connect(g_progressDialog, &QProgressDialog::canceled, [] {
             QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
-            unload(EXIT_SUCCESS);
+            QTimer::singleShot(200, [] { unload(EXIT_SUCCESS); });
         });
     } else {
         g_progressDialog->setLabelText(QObject::tr("Succeed"));
         QTimer::singleShot(2000, [] {
             QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
-            unload(EXIT_SUCCESS);
+            QTimer::singleShot(200, [] { unload(EXIT_SUCCESS); });
         });
     }
     QCoreApplication::processEvents();
