@@ -41,7 +41,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_downloadWidget(new QWidget(m_updateGroup))
   , m_downloadingIcon(new QLabel(m_downloadWidget))
   , m_downloadingLabel(new QLabel(m_downloadWidget))
-  , m_abortDownloadButton(new QPushButton(m_downloadWidget))
+  , m_abortAndInstallButton(new QPushButton(m_downloadWidget))
   , m_downloadProgressBar(new QProgressBar(m_downloadWidget))
   , m_downloadSizeLabel(new QLabel(m_downloadWidget))
   , m_downloadSpeedLabel(new QLabel(m_downloadWidget))
@@ -145,21 +145,22 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     downloadLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     downloadLayout->addWidget(m_downloadingIcon, 0, 0, 4, 1, Qt::AlignTop);
     downloadLayout->addWidget(m_downloadingLabel, 0, 1);
-    downloadLayout->addWidget(m_abortDownloadButton, 0, 2);
+    downloadLayout->addWidget(m_abortAndInstallButton, 0, 2);
     downloadLayout->addWidget(m_downloadProgressBar, 1, 1, 1, 2);
     downloadLayout->addWidget(m_downloadSizeLabel, 2, 1);
     downloadLayout->addWidget(m_downloadSpeedLabel, 2, 2);
     downloadLayout->setRowStretch(3, 1);
 
-    m_abortDownloadButton->setText(tr("Abort"));
+    m_abortAndInstallButton->setText(tr("Abort"));
     m_downloadingLabel->setText(tr("Downloading..."));
     m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
     m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
+    m_downloadProgressBar->setPalette(QColor("#65b84b"));
 
     // NOTE: QProgressBar::minimumSizeHint() returns fontMetrics().height() + 2 for the height
     m_downloadProgressBar->setFixedHeight(m_downloadProgressBar->sizeHint().height());
-    m_downloadSizeLabel->setFixedHeight(m_abortDownloadButton->sizeHint().height());
-    m_downloadSpeedLabel->setFixedHeight(m_abortDownloadButton->sizeHint().height());
+    m_downloadSizeLabel->setFixedHeight(m_abortAndInstallButton->sizeHint().height());
+    m_downloadSpeedLabel->setFixedHeight(m_abortAndInstallButton->sizeHint().height());
     m_downloadSpeedLabel->setFixedWidth(m_downloadSpeedLabel->fontMetrics().
                                         horizontalAdvance(m_downloadSpeedLabel->text()) + 2);
 
@@ -172,9 +173,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_downloadingIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/downloading.svg"), QSize(80, 80), this));
     QCoreApplication::postEvent(m_downloadingIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
 
-    m_abortDownloadButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, 0, -1, 0)));
-    m_abortDownloadButton->setCursor(Qt::PointingHandCursor);
-    QCoreApplication::postEvent(m_abortDownloadButton, new QEvent(QEvent::StyleChange)); // Apply margin change
+    m_abortAndInstallButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, 0, -1, 0)));
+    m_abortAndInstallButton->setCursor(Qt::PointingHandCursor);
+    QCoreApplication::postEvent(m_abortAndInstallButton, new QEvent(QEvent::StyleChange)); // Apply margin change
 
     /****/
 
@@ -263,9 +264,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             }
         }
     });
-    connect(m_abortDownloadButton, &QPushButton::clicked, this, [=] {
+    connect(m_abortAndInstallButton, &QPushButton::clicked, this, [=] {
         if (UpdateManager::isDownloadRunning()) {
-            m_abortDownloadButton->setEnabled(false);
+            m_abortAndInstallButton->setEnabled(false);
             UpdateManager::cancelDownload();
         }
     });
@@ -291,9 +292,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             (bool canceled, const QString& errorString) {
         if (canceled) {
             m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
-            m_abortDownloadButton->setEnabled(true);
+            m_abortAndInstallButton->setEnabled(true);
             m_downloadProgressBar->setValue(0);
-            m_abortDownloadButton->setText(tr("Abort"));
+            m_abortAndInstallButton->setText(tr("Abort"));
             m_downloadingLabel->setText(tr("Downloading..."));
             m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
             m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
@@ -302,12 +303,16 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 UtilityFunctions::showMessage(this, tr("Something went wrong"), errorString, QMessageBox::Critical);
                 m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
                 m_downloadProgressBar->setValue(0);
-                m_abortDownloadButton->setText(tr("Abort"));
+                m_abortAndInstallButton->setText(tr("Abort"));
                 m_downloadingLabel->setText(tr("Downloading..."));
                 m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
                 m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
             } else {
-
+                m_downloadProgressBar->setInvertedAppearance(true);
+                m_abortAndInstallButton->setText(tr("Install"));
+                QString text = m_downloadingLabel->text();
+                text.replace(tr("Downloading"), tr("Ready to install"));
+                m_downloadingLabel->setText(text);
             }
         }
     });

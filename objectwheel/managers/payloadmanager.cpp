@@ -83,7 +83,7 @@ void PayloadManager::startDownload(const QByteArray& uid)
 #else
     connect(download->socket, &QSslSocket::encrypted,
             s_instance, [=] { handleConnected(download); });
-    download->socket->connectToHostEncrypted(CoreConstants::API_ADDRESS, CoreConstants::PAYLAOD_PORT);
+    download->socket->connectToHostEncrypted(CoreConstants::API_HOST, CoreConstants::PAYLAOD_PORT);
 #endif
 }
 
@@ -114,7 +114,7 @@ void PayloadManager::startUpload(const QByteArray& uid, const QByteArray& data)
 #else
     connect(upload->socket, &QSslSocket::encrypted,
             s_instance, [=] { handleConnected(upload); });
-    upload->socket->connectToHostEncrypted(CoreConstants::API_ADDRESS, CoreConstants::PAYLAOD_PORT);
+    upload->socket->connectToHostEncrypted(CoreConstants::API_HOST, CoreConstants::PAYLAOD_PORT);
 #endif
 }
 

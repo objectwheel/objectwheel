@@ -194,11 +194,11 @@ QString UpdateManager::topUpdateRemotePath()
 {
     // TODO: Handle other OSes
 #if defined(Q_OS_MACOS)
-    return CoreConstants::UPDATE_ADDRESS + QStringLiteral("/macos-x64");
+    return CoreConstants::UPDATE_URL + QStringLiteral("/macos-x64");
 #elif defined(Q_OS_WINDOWS)
-    return CoreConstants::UPDATE_ADDRESS + QStringLiteral("/windows-x64");
+    return CoreConstants::UPDATE_URL + QStringLiteral("/windows-x64");
 #elif defined(Q_OS_LINUX)
-    return CoreConstants::UPDATE_ADDRESS + QStringLiteral("/linux-x64");
+    return CoreConstants::UPDATE_URL + QStringLiteral("/linux-x64");
 #endif
     return QString();
 }
@@ -270,7 +270,7 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
             }
             if (fileHash == QCH::hash(file.readAll(), QCH::Sha1)) {
                 downloadedSize += fileSize;
-                if (future->isProgressUpdateNeeded()) {
+                if (future->isProgressUpdateNeeded() || (downloadedSize >= s_downloadSize && fileIndex >= fileCount)) {
                     QCborMap result;
                     result.insert(QStringLiteral("downloadedSize"), downloadedSize);
                     result.insert(QStringLiteral("fileCount"), fileCount);
@@ -339,10 +339,15 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
                 return loop.quit();
             }
             downloadedSize += chunk.size();
-            if (future->isProgressUpdateNeeded())
+            if (future->isProgressUpdateNeeded() || (downloadedSize >= s_downloadSize && fileIndex >= fileCount))
                 future->reportResult(calculateTransferRate(chunk.size()));
         });
         connect(&downloader, qOverload<int>(&FastDownloader::finished), [&] (int id) {
+            const QString& reason = downloader.errorString(id);
+            if (downloader.isError() && !reason.isEmpty())
+                errorString = tr("Network error occurred, reason: ") + reason;
+        });
+        connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
             buffer.close();
             if (!downloader.isError()) {
                 if (fileHash != QCH::hash(buffer.data(), QCH::Sha1)) {
@@ -365,8 +370,8 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
                 if (!file.commit()) {
                     errorString = tr("Cannot commit an update file");
                 }
-            } else {
-                errorString = tr("Network error occurred, reason: ") + downloader.errorString(id);
+            } else if (errorString.isEmpty()) {
+                errorString = tr("Unknown network error occurred.");
             }
             loop.quit();
         });

@@ -54,7 +54,7 @@ private:
     QWidget* m_downloadWidget;
     QLabel* m_downloadingIcon;
     QLabel* m_downloadingLabel;
-    QPushButton* m_abortDownloadButton;
+    QPushButton* m_abortAndInstallButton;
     QProgressBar* m_downloadProgressBar;
     QLabel* m_downloadSizeLabel;
     QLabel* m_downloadSpeedLabel;

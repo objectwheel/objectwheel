@@ -155,7 +155,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setTextFormat(Qt::RichText);
     _termsLabel->setText(tr(
         "I accept <a href=\"%1\">the terms and conditions</a>"
-    ).arg(CoreConstants::TAC_ADDRESS));
+    ).arg(CoreConstants::TAC_URL));
 
     _termsLabel->setOpenExternalLinks(true);
     _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);

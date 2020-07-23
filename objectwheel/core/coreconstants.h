@@ -5,12 +5,19 @@
 
 namespace CoreConstants {
 
-const quint16 PAYLAOD_PORT  = 5455;
-const char EMAIL_ADDRESS[]  = "support@objectwheel.com";
-const char API_ADDRESS[]    = "api.objectwheel.com";
-const char WSS_ADDRESS[]    = "wss://api.objectwheel.com:5454";
-const char UPDATE_ADDRESS[] = "https://update.objectwheel.com";
-const char TAC_ADDRESS[]    = "https://objectwheel.com/terms-and-conditions";
+#if 0 // LOCAL DEBUG ENVIRONMENT
+const char API_HOST[]      = "localhost";
+const char WSS_URL[]       = "ws://localhost:5454";
+const char UPDATE_URL[]    = "http://localhost:3000";
+#else
+const char API_HOST[]      = "api.objectwheel.com";
+const char WSS_URL[]       = "wss://api.objectwheel.com:5454";
+const char UPDATE_URL[]    = "https://update.objectwheel.com";
+#endif
+
+const char TAC_URL[]       = "https://objectwheel.com/terms-and-conditions";
+const char EMAIL_ADDRESS[] = "support@objectwheel.com";
+const short PAYLAOD_PORT   = 5455;
 
 }
 
