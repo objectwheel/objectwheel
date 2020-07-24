@@ -173,8 +173,11 @@ void UpdateManager::install()
     file.write(s_checksumsDiff.toCborValue().toCbor());
     file.commit();
 
-    QProcess::startDetached(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"),
-                            QStringList(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")));
+    QProcess process;
+    process.setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+    process.setProgram(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"));
+    process.setArguments(QStringList(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")));
+    process.startDetached();
     QTimer::singleShot(200, [] { QCoreApplication::quit(); });
 }
 

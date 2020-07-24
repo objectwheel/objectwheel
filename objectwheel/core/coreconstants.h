@@ -8,7 +8,7 @@ namespace CoreConstants {
 #if 0 // LOCAL DEBUG ENVIRONMENT
 const char API_HOST[]      = "localhost";
 const char WSS_URL[]       = "ws://localhost:5454";
-const char UPDATE_URL[]    = "http://localhost:3000";
+const char UPDATE_URL[]    = "http://localhost:4443";
 #else
 const char API_HOST[]      = "api.objectwheel.com";
 const char WSS_URL[]       = "wss://api.objectwheel.com:5454";

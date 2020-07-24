@@ -87,7 +87,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     upToDateLayout->setRowStretch(3, 1);
 
     m_checkUpdatesButton->setText(tr("Check Now"));
-    m_lastCheckedLabel->setText(tr("Last checked:"));
+    m_lastCheckedLabel->setText(tr("Last successful check:"));
 
     m_checkUpdatesButton->setToolTip(tr("Make a fresh update check"));
     m_lastCheckedDateLabel->setToolTip(tr("Shows last successful update check date"));
@@ -250,7 +250,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             settings->write();
             const int fileCount = UpdateManager::fileCount();
             if (fileCount > 0) {
-                m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1 files of %2 size):")
+                m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1 files, %2 in size):")
                                                  .arg(fileCount)
                                                  .arg(UtilityFunctions::toPrettyBytesString(UpdateManager::downloadSize())));
                 m_changelogEdit->setHtml(UpdateManager::changelog());
@@ -262,6 +262,10 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
                 m_updateStatusStackedLayout->setCurrentWidget(m_upToDateWidget);
             }
+        } else {
+            m_upToDateLabel->setText(tr("Unable to connect to the update server"));
+            m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
+            m_updateStatusStackedLayout->setCurrentWidget(m_upToDateWidget);
         }
     });
     connect(m_abortAndInstallButton, &QPushButton::clicked, this, [=] {
@@ -272,7 +276,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             QMessageBox::StandardButton ret =
                     UtilityFunctions::showMessage(this, tr("Are you sure?"),
                                                   tr("This will abort the download, though files "
-                                                     "are cached you can continue later."),
+                                                     "are cached, so you can continue later."),
                                                   QMessageBox::Question, QMessageBox::Yes | QMessageBox::No,
                                                   QMessageBox::No);
             if (ret == QMessageBox::No)

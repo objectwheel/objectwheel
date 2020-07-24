@@ -245,13 +245,19 @@ static void launchAndExit()
                                                    "some odd behavior, please re-install Objectwheel."));
         g_progressDialog->setCancelButtonText(QObject::tr("Close"));
         QObject::connect(g_progressDialog, &QProgressDialog::canceled, [] {
-            QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
+            QProcess process;
+            process.setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+            process.setProgram(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
+            process.startDetached();
             QTimer::singleShot(200, [] { unload(EXIT_SUCCESS); });
         });
     } else {
         g_progressDialog->setLabelText(QObject::tr("Succeed"));
         QTimer::singleShot(2000, [] {
-            QProcess::startDetached(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
+            QProcess process;
+            process.setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+            process.setProgram(QCoreApplication::applicationDirPath() + QStringLiteral("/Objectwheel"));
+            process.startDetached();
             QTimer::singleShot(200, [] { unload(EXIT_SUCCESS); });
         });
     }
