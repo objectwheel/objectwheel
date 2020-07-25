@@ -6,8 +6,9 @@
 #include <updatemanager.h>
 #include <stackedlayout.h>
 #include <waitingspinnerwidget.h>
-#include <QProgressBar>
+#include <coreconstants.h>
 
+#include <QProgressBar>
 #include <QCoreApplication>
 #include <QLabel>
 #include <QGroupBox>
@@ -86,6 +87,12 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     upToDateLayout->addWidget(m_updateCheckSpinner, 2, 2);
     upToDateLayout->setRowStretch(3, 1);
 
+    m_upToDateLabel->setSizePolicy(QSizePolicy::Expanding, m_upToDateLabel->sizePolicy().verticalPolicy());
+    m_lastCheckedLabel->setSizePolicy(QSizePolicy::Maximum, m_lastCheckedLabel->sizePolicy().verticalPolicy());
+    m_lastCheckedDateLabel->setSizePolicy(QSizePolicy::Expanding, m_lastCheckedDateLabel->sizePolicy().verticalPolicy());
+    m_checkUpdatesButton->setSizePolicy(QSizePolicy::Maximum, m_checkUpdatesButton->sizePolicy().verticalPolicy());
+    m_updateCheckSpinner->setSizePolicy(QSizePolicy::Expanding, m_updateCheckSpinner->sizePolicy().verticalPolicy());
+
     m_checkUpdatesButton->setText(tr("Check Now"));
     m_lastCheckedLabel->setText(tr("Last successful check:"));
 
@@ -98,7 +105,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_checkUpdatesButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(-1, 0, 0, 0)));
     m_checkUpdatesButton->setCursor(Qt::PointingHandCursor);
-    m_checkUpdatesButton->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred);
     QCoreApplication::postEvent(m_checkUpdatesButton, new QEvent(QEvent::StyleChange)); // Apply margin change
 
     m_updateCheckSpinner->setLineWidth(2);
@@ -225,9 +231,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                                                   tr("<p>Fragmented updates with more than 200 files may take "
                                                      "longer to download than what you may expect. We "
                                                      "suggest you to download an offline installer instead from: "
-                                                     "<a href='https://objectwheel.com/download'>"
-                                                     "https://objectwheel.com/download</a></p>"
-                                                     "<p>Do you still want to proceed with the update?</p>"),
+                                                     "<a href='%1'>%1</a></p>"
+                                                     "<p>Do you still want to proceed with the update?</p>")
+                                                  .arg(CoreConstants::DOWNLOAD_URL),
                                                   QMessageBox::Question, QMessageBox::Yes | QMessageBox::No,
                                                   QMessageBox::No);
             if (ret == QMessageBox::No)

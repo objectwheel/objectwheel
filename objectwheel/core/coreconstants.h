@@ -15,6 +15,7 @@ const char WSS_URL[]       = "wss://api.objectwheel.com:5454";
 const char UPDATE_URL[]    = "https://update.objectwheel.com";
 #endif
 
+const char DOWNLOAD_URL[]  = "https://objectwheel.com/download";
 const char TAC_URL[]       = "https://objectwheel.com/terms-and-conditions";
 const char EMAIL_ADDRESS[] = "support@objectwheel.com";
 const short PAYLAOD_PORT   = 5455;
