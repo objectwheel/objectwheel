@@ -442,6 +442,16 @@ void setDeviceInfo(QAction* action, const QVariantMap& deviceInfo)
     action->setProperty("__OW_DEVICE_INFO__", deviceInfo);
 }
 
+QString buildCpuArchitecture()
+{
+    QString abi(QSysInfo::buildCpuArchitecture());
+    if (abi == QLatin1String("x86_64"))
+        abi = QStringLiteral("x64");
+    else if (abi == QLatin1String("i386"))
+        abi = QStringLiteral("x86");
+    return abi;
+}
+
 QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, const QString& text,
                                         QMessageBox::Icon icon, QMessageBox::StandardButtons buttons,
                                         QMessageBox::StandardButton defaultButton, bool modal)

@@ -6,7 +6,6 @@
 #include <QFutureWatcher>
 #include <fastdownloader.h>
 
-class QDir;
 class UpdateManager final : public QObject
 {
     Q_OBJECT
@@ -16,42 +15,44 @@ class UpdateManager final : public QObject
 
 public:
     static UpdateManager* instance();
-    static QString changelog();
-    static qint64 downloadSize();
     static int fileCount();
+    static qint64 downloadSize();
+    static QString changelog();
     static bool isUpdateCheckRunning();
     static bool isDownloadRunning();
+
+public:
     static void startUpdateCheck(bool forceLocalScan = true);
     static void download();
     static void cancelDownload();
     static void install();
 
-private:
-    static QDir topUpdateDir();
-    static QString topUpdateRemotePath();
-    static QCborMap handleLocalScan(QFutureInterfaceBase* futureInterface, const QDir& topDir, const QDir& dir);
-    static QCborMap handleDownload(QFutureInterfaceBase* futureInterface);
-    static void handleDownloaderError();
-    static void updateDownloadInfo();
-
 private slots:
     void onServerManagerConnected();
-    void onLocalScanFinish();
-    void onChecksumsDownloaderResolved();
     void onChangelogDownloaderResolved();
-    void onChecksumsDownloaderFinished();
-    void onChangelogDownloaderFinished();
-    void onChecksumsDownloaderReadyRead(int id);
+    void onChecksumsDownloaderResolved();
     void onChangelogDownloaderReadyRead(int id);
+    void onChecksumsDownloaderReadyRead(int id);
+    void onChangelogDownloaderFinished();
+    void onChecksumsDownloaderFinished();
+    void onLocalScanFinished();
     void onDownloadWatcherResultReadyAt(int resultIndex);
-    void onDownloadWatcherFinish();
+    void onDownloadWatcherFinished();
+
+private:
+    static QString localUpdateRootPath();
+    static QString remoteUpdateRootPath();
+    static void handleDownloaderError();
+    static void handleDownloadInfoUpdate();
+    static void doLocalScan(QFutureInterfaceBase* futureInterface);
+    static void doDownload(QFutureInterfaceBase* futureInterface);
 
 signals:
+    void updateCheckStarted();
+    void updateCheckFinished(bool succeed);
     void downloadProgress(qint64 totalBytes, qint64 receivedBytes, qreal speed,
                           int fileCount, int fileIndex, const QString& fileName);
     void downloadFinished(bool canceled, const QString& errorString);
-    void updateCheckStarted();
-    void updateCheckFinished(bool succeed);
 
 private:
     explicit UpdateManager(QObject* parent = nullptr);
@@ -60,19 +61,19 @@ private:
 private:
     static UpdateManager* s_instance;
     static bool s_isUpdateCheckRunning;
-    static QBuffer s_checksumsBuffer;
-    static QBuffer s_changelogBuffer;
-    static FastDownloader s_checksumsDownloader;
-    static FastDownloader s_changelogDownloader;
+    static int s_fileCount;
+    static qint64 s_downloadSize;
+    static QDateTime s_lastSuccessfulCheckup;
+    static QString s_changelog;
     static QCborMap s_localChecksums;
     static QCborMap s_remoteChecksums;
     static QCborMap s_checksumsDiff;
-    static QString s_changelog;
-    static QDateTime s_lastSuccessfulCheckup;
-    static int s_fileCount;
-    static qint64 s_downloadSize;
-    static QFutureWatcher<QCborMap> s_downloadWatcher;
+    static QBuffer s_changelogBuffer;
+    static QBuffer s_checksumsBuffer;
+    static FastDownloader s_changelogDownloader;
+    static FastDownloader s_checksumsDownloader;
     static QFutureWatcher<QCborMap> s_localScanWatcher;
+    static QFutureWatcher<QVariantMap> s_downloadWatcher;
 };
 
 #endif // UPDATEMANAGER_H

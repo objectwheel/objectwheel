@@ -123,6 +123,7 @@ QString deviceUid(const QVariantMap& deviceInfo);
 QString deviceName(const QVariantMap& deviceInfo);
 QString deviceInfoToolTip(const QVariantMap& deviceInfo);
 QString deviceUid(const QAction* action);
+QString buildCpuArchitecture();
 void setDeviceInfo(QAction* action, const QVariantMap& deviceInfo);
 QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, const QString& text,
                                         QMessageBox::Icon icon = QMessageBox::Warning,
