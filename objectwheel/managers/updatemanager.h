@@ -21,7 +21,7 @@ public:
     static int fileCount();
     static bool isUpdateCheckRunning();
     static bool isDownloadRunning();
-    static void startUpdateCheck(bool force = true);
+    static void startUpdateCheck(bool forceLocalScan = true);
     static void download();
     static void cancelDownload();
     static void install();
@@ -29,14 +29,13 @@ public:
 private:
     static QDir topUpdateDir();
     static QString topUpdateRemotePath();
-    static QCborMap generateUpdateChecksums(const QDir& topDir, const QDir& dir);
+    static QCborMap handleLocalScan(QFutureInterfaceBase* futureInterface, const QDir& topDir, const QDir& dir);
     static QCborMap handleDownload(QFutureInterfaceBase* futureInterface);
     static void handleDownloaderError();
-    static void handleUpdateCheckFinish(bool succeed);
+    static void updateDownloadInfo();
 
 private slots:
-    void onConnect();
-    void onDisconnect();
+    void onServerManagerConnected();
     void onLocalScanFinish();
     void onChecksumsDownloaderResolved();
     void onChangelogDownloaderResolved();
@@ -69,10 +68,11 @@ private:
     static QCborMap s_remoteChecksums;
     static QCborMap s_checksumsDiff;
     static QString s_changelog;
+    static QDateTime s_lastSuccessfulCheckup;
     static int s_fileCount;
     static qint64 s_downloadSize;
     static QFutureWatcher<QCborMap> s_downloadWatcher;
-    static QFutureWatcher<QCborMap> s_localChecksumsWatcher;
+    static QFutureWatcher<QCborMap> s_localScanWatcher;
 };
 
 #endif // UPDATEMANAGER_H

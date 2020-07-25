@@ -27,19 +27,18 @@ QCborMap UpdateManager::s_localChecksums;
 QCborMap UpdateManager::s_remoteChecksums;
 QCborMap UpdateManager::s_checksumsDiff;
 QString UpdateManager::s_changelog;
+QDateTime UpdateManager::s_lastSuccessfulCheckup;
 int UpdateManager::s_fileCount = 0;
 qint64 UpdateManager::s_downloadSize = 0;
 QFutureWatcher<QCborMap> UpdateManager::s_downloadWatcher;
-QFutureWatcher<QCborMap> UpdateManager::s_localChecksumsWatcher;
+QFutureWatcher<QCborMap> UpdateManager::s_localScanWatcher;
 
 UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
     connect(ServerManager::instance(), &ServerManager::connected,
-            this, &UpdateManager::onConnect, Qt::QueuedConnection);
-    connect(ServerManager::instance(), &ServerManager::disconnected,
-            this, &UpdateManager::onDisconnect, Qt::QueuedConnection);
-    connect(&s_localChecksumsWatcher, &QFutureWatcher<QCborMap>::resultsReadyAt,
+            this, &UpdateManager::onServerManagerConnected, Qt::QueuedConnection);
+    connect(&s_localScanWatcher, &QFutureWatcher<QCborMap>::resultsReadyAt,
             this, &UpdateManager::onLocalScanFinish);
     connect(&s_checksumsDownloader, &FastDownloader::resolved,
             this, &UpdateManager::onChecksumsDownloaderResolved);
@@ -74,27 +73,41 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
 
 UpdateManager::~UpdateManager()
 {
+    if (s_isUpdateCheckRunning) {
+        s_isUpdateCheckRunning = false;
+        emit s_instance->updateCheckFinished(false);
+    }
+
+    if (s_checksumsBuffer.isOpen())
+        s_checksumsBuffer.close();
+
+    if (s_changelogBuffer.isOpen())
+        s_changelogBuffer.close();
+
     if (s_checksumsDownloader.isRunning())
         s_checksumsDownloader.abort();
+
     if (s_changelogDownloader.isRunning())
         s_changelogDownloader.abort();
-    if (s_localChecksumsWatcher.isRunning()) {
-        s_localChecksumsWatcher.cancel();
-        s_localChecksumsWatcher.waitForFinished();
+
+    if (s_localScanWatcher.isRunning()) {
+        s_localScanWatcher.cancel();
+        s_localScanWatcher.waitForFinished();
     }
+
     if (s_downloadWatcher.isRunning()) {
         s_downloadWatcher.cancel();
         s_downloadWatcher.waitForFinished();
     }
-    s_checksumsBuffer.buffer().clear();
-    s_changelogBuffer.buffer().clear();
+
+    s_fileCount = 0;
+    s_downloadSize = 0;
     s_changelog.clear();
     s_checksumsDiff.clear();
-    s_remoteChecksums.clear();
     s_localChecksums.clear();
-    s_downloadSize = 0;
-    s_fileCount = 0;
-    s_isUpdateCheckRunning = false;
+    s_remoteChecksums.clear();
+    s_checksumsBuffer.buffer().clear();
+    s_changelogBuffer.buffer().clear();
     s_instance = nullptr;
 }
 
@@ -128,25 +141,51 @@ int UpdateManager::fileCount()
     return s_fileCount;
 }
 
-void UpdateManager::startUpdateCheck(bool force)
+void UpdateManager::startUpdateCheck(bool forceLocalScan)
 {
-    Q_ASSERT(ServerManager::isConnected() && !s_isUpdateCheckRunning);
-
-    if (s_changelog.isEmpty() || s_remoteChecksums.isEmpty() || force) {
-        if (!s_checksumsDownloader.start()) {
-            qWarning("Cannot start downloading update checksums");
-            return;
-        }
-        if (!s_changelogDownloader.start()) {
-            s_checksumsDownloader.abort();
-            qWarning("Cannot start downloading changelog data");
-            return;
-        }
-        if (force)
-            s_localChecksums.clear();
-        s_isUpdateCheckRunning = true;
-        emit instance()->updateCheckStarted();
+    if (s_isUpdateCheckRunning) {
+        s_isUpdateCheckRunning = false;
+        emit s_instance->updateCheckFinished(false);
     }
+
+    if (s_checksumsBuffer.isOpen())
+        s_checksumsBuffer.close();
+
+    if (s_changelogBuffer.isOpen())
+        s_changelogBuffer.close();
+
+    if (s_checksumsDownloader.isRunning())
+        s_checksumsDownloader.abort();
+
+    if (s_changelogDownloader.isRunning())
+        s_changelogDownloader.abort();
+
+    if (s_localScanWatcher.isRunning()) {
+        s_localScanWatcher.cancel();
+        s_localScanWatcher.waitForFinished();
+    }
+
+    if (s_downloadWatcher.isRunning()) {
+        s_downloadWatcher.cancel();
+        s_downloadWatcher.waitForFinished();
+    }
+
+    if (forceLocalScan)
+        s_localChecksums.clear();
+
+    s_fileCount = 0;
+    s_downloadSize = 0;
+    s_changelog.clear();
+    s_checksumsDiff.clear();
+    s_remoteChecksums.clear();
+    s_checksumsBuffer.buffer().clear();
+    s_changelogBuffer.buffer().clear();
+    s_isUpdateCheckRunning = true;
+
+    s_checksumsDownloader.start();
+    s_changelogDownloader.start();
+
+    emit instance()->updateCheckStarted();
 }
 
 void UpdateManager::download()
@@ -207,12 +246,16 @@ QString UpdateManager::topUpdateRemotePath()
     return QString();
 }
 
-QCborMap UpdateManager::generateUpdateChecksums(const QDir& topDir, const QDir& dir)
+QCborMap UpdateManager::handleLocalScan(QFutureInterfaceBase* futureInterface, const QDir& topDir, const QDir& dir)
 {
+    auto future = static_cast<QFutureInterface<QCborMap>*>(futureInterface);
+
     QCborMap checksums;
     foreach (const QFileInfo& info, dir.entryInfoList(QDir::Files | QDir::NoSymLinks | QDir::Dirs | QDir::NoDotAndDotDot)) {
+        if (future->isCanceled())
+            return QCborMap();
         if (info.isDir()) {
-            const QCborMap& map = generateUpdateChecksums(topDir, info.absoluteFilePath());
+            const QCborMap& map = handleLocalScan(futureInterface, topDir, info.absoluteFilePath());
             if (!map.isEmpty() && map.contains(QCborValue::Undefined))
                 return map;
             foreach (const QCborValue& key, map.keys())
@@ -354,7 +397,8 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
             }
         });
         connect(&downloader, qOverload<>(&FastDownloader::finished), [&] {
-            buffer.close();
+            if (buffer.isOpen())
+                buffer.close();
             if (!downloader.isError()) {
                 if (fileHash != QCH::hash(buffer.data(), QCH::Sha1)) {
                     errorString = tr("Hashes do not match");
@@ -398,31 +442,33 @@ QCborMap UpdateManager::handleDownload(QFutureInterfaceBase* futureInterface)
     return QCborMap();
 }
 
-void UpdateManager::onConnect()
+void UpdateManager::onServerManagerConnected()
 {
-    const UpdateSettings* settings = SystemSettings::updateSettings();
-    if (settings->checkForUpdatesAutomatically && !s_isUpdateCheckRunning) {
-        const QFileInfo localChecksums(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
-        UpdateManager::startUpdateCheck(s_localChecksums.isEmpty()
-                                        || !localChecksums.exists()
-                                        || localChecksums.lastModified().daysTo(QDateTime::currentDateTime()) > 5);
-    }
-}
+    if (!SystemSettings::updateSettings()->checkForUpdatesAutomatically)
+        return;
 
-void UpdateManager::onDisconnect()
-{
-    s_remoteChecksums.clear();
-    s_changelog.clear();
-    if (s_isUpdateCheckRunning && s_localChecksumsWatcher.isFinished()) {
-        s_isUpdateCheckRunning = false;
-        emit updateCheckFinished(false);
-    }
+    if (s_isUpdateCheckRunning)
+        return;
+
+    if (s_downloadWatcher.isRunning())
+        return;
+
+    int checkupSecs = s_lastSuccessfulCheckup.secsTo(QDateTime::currentDateTime());
+    if (s_lastSuccessfulCheckup.isValid() && checkupSecs > 0 && checkupSecs < 7200)
+        return;
+
+    // If s_localChecksums is empty, we are going to scan anyway
+    const QFileInfo checksumsInfo(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
+    int modificationDays = checksumsInfo.lastModified().daysTo(QDateTime::currentDateTime());
+    UpdateManager::startUpdateCheck(checksumsInfo.exists() && (modificationDays < 0 || modificationDays > 7));
 }
 
 void UpdateManager::onLocalScanFinish()
 {
-    s_localChecksums = s_localChecksumsWatcher.future().result();
-    s_isUpdateCheckRunning = false;
+    if (s_localScanWatcher.isCanceled())
+        return;
+
+    s_localChecksums = s_localScanWatcher.future().result();
 
     if (!QDir(ApplicationCore::updatesPath()).mkpath(".")) {
         qWarning("WARNING: Cannot establish a new updates directory");
@@ -438,8 +484,10 @@ void UpdateManager::onLocalScanFinish()
     file.write(s_localChecksums.toCborValue().toCbor());
     file.commit();
 
-    const bool succeed = !s_remoteChecksums.isEmpty() && !s_changelog.isEmpty() && !s_localChecksums.isEmpty();
-    handleUpdateCheckFinish(succeed);
+    s_isUpdateCheckRunning = false;
+    const bool succeed = !s_changelog.isEmpty() && !s_remoteChecksums.isEmpty() && !s_localChecksums.isEmpty();
+    if (succeed)
+        updateDownloadInfo();
     emit updateCheckFinished(succeed);
 }
 
@@ -461,18 +509,25 @@ void UpdateManager::onChangelogDownloaderResolved()
 
 void UpdateManager::onChecksumsDownloaderReadyRead(int id)
 {
-    s_checksumsBuffer.seek(s_checksumsDownloader.head(id) + s_checksumsDownloader.pos(id));
-    s_checksumsBuffer.write(s_checksumsDownloader.readAll(id));
+    if (s_checksumsBuffer.isOpen()) {
+        s_checksumsBuffer.seek(s_checksumsDownloader.head(id) + s_checksumsDownloader.pos(id));
+        s_checksumsBuffer.write(s_checksumsDownloader.readAll(id));
+    }
 }
 
 void UpdateManager::onChangelogDownloaderReadyRead(int id)
 {
-    s_changelogBuffer.seek(s_changelogDownloader.head(id) + s_changelogDownloader.pos(id));
-    s_changelogBuffer.write(s_changelogDownloader.readAll(id));
+    if (s_changelogBuffer.isOpen()) {
+        s_changelogBuffer.seek(s_changelogDownloader.head(id) + s_changelogDownloader.pos(id));
+        s_changelogBuffer.write(s_changelogDownloader.readAll(id));
+    }
 }
 
 void UpdateManager::onChecksumsDownloaderFinished()
 {
+    if (s_checksumsDownloader.error() == QNetworkReply::OperationCanceledError)
+        return;
+
     if (s_changelogDownloader.isFinished() && s_changelogDownloader.isError())
         return;
 
@@ -489,15 +544,16 @@ void UpdateManager::onChecksumsDownloaderFinished()
 
     if (s_changelogDownloader.isFinished()) {
         if (s_localChecksums.isEmpty()) {
-            if (s_localChecksumsWatcher.isFinished()) {
-                s_localChecksumsWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
-                                                             &UpdateManager::generateUpdateChecksums,
-                                                             topUpdateDir(), topUpdateDir()));
+            if (s_localScanWatcher.isFinished()) {
+                s_localScanWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
+                                                        &UpdateManager::handleLocalScan,
+                                                        topUpdateDir(), topUpdateDir()));
             }
         } else {
             s_isUpdateCheckRunning = false;
-            const bool succeed = !s_remoteChecksums.isEmpty() && !s_changelog.isEmpty();
-            handleUpdateCheckFinish(succeed);
+            const bool succeed = !s_changelog.isEmpty() && !s_remoteChecksums.isEmpty() && !s_localChecksums.isEmpty();
+            if (succeed)
+                updateDownloadInfo();
             emit updateCheckFinished(succeed);
         }
     }
@@ -505,6 +561,9 @@ void UpdateManager::onChecksumsDownloaderFinished()
 
 void UpdateManager::onChangelogDownloaderFinished()
 {
+    if (s_changelogDownloader.error() == QNetworkReply::OperationCanceledError)
+        return;
+
     if (s_checksumsDownloader.isFinished() && s_checksumsDownloader.isError())
         return;
 
@@ -521,15 +580,16 @@ void UpdateManager::onChangelogDownloaderFinished()
 
     if (s_checksumsDownloader.isFinished()) {
         if (s_localChecksums.isEmpty()) {
-            if (s_localChecksumsWatcher.isFinished()) {
-                s_localChecksumsWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
-                                                             &UpdateManager::generateUpdateChecksums,
-                                                             topUpdateDir(), topUpdateDir()));
+            if (s_localScanWatcher.isFinished()) {
+                s_localScanWatcher.setFuture(Async::run(QThreadPool::globalInstance(),
+                                                        &UpdateManager::handleLocalScan,
+                                                        topUpdateDir(), topUpdateDir()));
             }
         } else {
             s_isUpdateCheckRunning = false;
-            const bool succeed = !s_remoteChecksums.isEmpty() && !s_changelog.isEmpty();
-            handleUpdateCheckFinish(succeed);
+            const bool succeed = !s_changelog.isEmpty() && !s_remoteChecksums.isEmpty() && !s_localChecksums.isEmpty();
+            if (succeed)
+                updateDownloadInfo();
             emit updateCheckFinished(succeed);
         }
     }
@@ -574,14 +634,12 @@ void UpdateManager::handleDownloaderError()
     emit s_instance->updateCheckFinished(false);
 }
 
-void UpdateManager::handleUpdateCheckFinish(bool succeed)
+void UpdateManager::updateDownloadInfo()
 {
-    if (!succeed)
-        return;
-
     s_fileCount = 0;
     s_downloadSize = 0;
     s_checksumsDiff.clear();
+    s_lastSuccessfulCheckup = QDateTime::currentDateTime();
 
     foreach (const QCborValue& key, s_localChecksums.keys()) {
         if (!key.isUndefined() && !key.toString().isEmpty()) {
