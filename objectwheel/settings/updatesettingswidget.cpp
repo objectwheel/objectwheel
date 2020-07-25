@@ -80,18 +80,18 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     upToDateLayout->setContentsMargins(6, 6, 6, 6);
     upToDateLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     upToDateLayout->addWidget(m_upToDateIcon, 0, 0, 4, 1, Qt::AlignTop);
-    upToDateLayout->addWidget(m_upToDateLabel, 0, 1, 1, 2);
-    upToDateLayout->addWidget(m_lastCheckedLabel, 1, 1);
-    upToDateLayout->addWidget(m_lastCheckedDateLabel, 1, 2);
+    upToDateLayout->addWidget(m_upToDateLabel, 0, 1, 1, 4);
+    upToDateLayout->addWidget(m_lastCheckedLabel, 1, 1, 1, 3);
+    upToDateLayout->addWidget(m_lastCheckedDateLabel, 1, 4);
     upToDateLayout->addWidget(m_checkUpdatesButton, 2, 1);
     upToDateLayout->addWidget(m_updateCheckSpinner, 2, 2);
+    upToDateLayout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 2, 3);
     upToDateLayout->setRowStretch(3, 1);
+    upToDateLayout->setColumnStretch(4, 1);
 
-    m_upToDateLabel->setSizePolicy(QSizePolicy::Expanding, m_upToDateLabel->sizePolicy().verticalPolicy());
     m_lastCheckedLabel->setSizePolicy(QSizePolicy::Maximum, m_lastCheckedLabel->sizePolicy().verticalPolicy());
-    m_lastCheckedDateLabel->setSizePolicy(QSizePolicy::Expanding, m_lastCheckedDateLabel->sizePolicy().verticalPolicy());
     m_checkUpdatesButton->setSizePolicy(QSizePolicy::Maximum, m_checkUpdatesButton->sizePolicy().verticalPolicy());
-    m_updateCheckSpinner->setSizePolicy(QSizePolicy::Expanding, m_updateCheckSpinner->sizePolicy().verticalPolicy());
+    m_updateCheckSpinner->setSizePolicy(QSizePolicy::Maximum, m_updateCheckSpinner->sizePolicy().verticalPolicy());
 
     m_checkUpdatesButton->setText(tr("Check Now"));
     m_lastCheckedLabel->setText(tr("Last successful check:"));
