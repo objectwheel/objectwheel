@@ -294,22 +294,20 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         }
     });
     connect(UpdateManager::instance(), &UpdateManager::downloadProgress, this, [this]
-            (qint64 totalBytes, qint64 receivedBytes, qreal speed, int fileCount, int fileIndex, const QString& fileName) {
-        const qreal progress = totalBytes > 0 ? 100.0 * receivedBytes / totalBytes : 0;
-        const QString& speedStr = UtilityFunctions::toPrettyBytesString(speed) + QStringLiteral("/s ↓");
-        const QString& sizeStr = UtilityFunctions::toPrettyBytesString(receivedBytes)
-                + QLatin1String(" / ")
+            (qreal bytesPerSec, qint64 bytesReceived, qint64 fileIndex, const QString& fileName) {
+        const qint64 totalBytes = UpdateManager::downloadSize();
+        const qreal progress = totalBytes > 0 ? 100.0 * bytesReceived / totalBytes : 0;
+        const QString& speedStr = UtilityFunctions::toPrettyBytesString(bytesPerSec) + QStringLiteral("/s ↓");
+        const QString& szStr = UtilityFunctions::toPrettyBytesString(bytesReceived) + QLatin1String(" / ")
                 + UtilityFunctions::toPrettyBytesString(totalBytes)
                 + QStringLiteral(" ( % %1 )").arg(QString::number(progress, 'f', 2));
-        const QString& downloadingStr = tr("Downloading (%1 / %2): ").arg(fileIndex).arg(fileCount);
+        const QString& dlStr = tr("Downloading (%1 / %2): ").arg(fileIndex).arg(UpdateManager::fileCount());
         m_downloadProgressBar->setValue(progress);
-        m_downloadSizeLabel->setText(sizeStr);
+        m_downloadSizeLabel->setText(szStr);
         m_downloadSpeedLabel->setText(speedStr);
-        const int w = m_downloadingLabel->width() -
-                m_downloadingLabel->fontMetrics().horizontalAdvance(downloadingStr) - 1;
-        m_downloadingLabel->setText(downloadingStr +
-                                    m_downloadingLabel->fontMetrics().elidedText(fileName, Qt::ElideLeft, w));
-        UtilityFunctions::updateToolTip(m_downloadingLabel, downloadingStr + fileName);
+        const int w = m_downloadingLabel->width() - m_downloadingLabel->fontMetrics().horizontalAdvance(dlStr) - 1;
+        m_downloadingLabel->setText(dlStr + m_downloadingLabel->fontMetrics().elidedText(fileName, Qt::ElideLeft, w));
+        UtilityFunctions::updateToolTip(m_downloadingLabel, dlStr + fileName);
     });
     connect(UpdateManager::instance(), &UpdateManager::downloadFinished, this, [this]
             (bool canceled, const QString& errorString) {

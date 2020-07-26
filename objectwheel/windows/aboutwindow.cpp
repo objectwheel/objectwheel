@@ -32,11 +32,13 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
 
     m_versionLabel->setAlignment(Qt::AlignCenter);
-    m_versionLabel->setText(QStringLiteral("<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b>"
-                                           "<br>%3<br>%4</p>")
+    m_versionLabel->setText(QStringLiteral("<p>Contact<br><a href='mailto:%4'>%4</a></p>"
+                                           "<p>Objectwheel Forum<br><a href='%5'>%5</a></p>"
+                                           "<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b><br>%3</p>")
                             .arg(QStringLiteral(APP_VER)).arg(QStringLiteral(APP_GITHASH))
                             .arg(QDateTime::fromString(APP_GITDATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate))
-                            .arg(CoreConstants::EMAIL_ADDRESS));
+                            .arg(CoreConstants::EMAIL_ADDRESS)
+                            .arg(CoreConstants::FORUM_URL));
 
     m_okButton->setDefault(true);
     m_okButton->setCursor(Qt::PointingHandCursor);

@@ -1,4 +1,4 @@
-#ifndef UPDATEMANAGER_H
+﻿#ifndef UPDATEMANAGER_H
 #define UPDATEMANAGER_H
 
 #include <QBuffer>
@@ -15,7 +15,7 @@ class UpdateManager final : public QObject
 
 public:
     static UpdateManager* instance();
-    static int fileCount();
+    static qint64 fileCount();
     static qint64 downloadSize();
     static QString changelog();
     static bool isUpdateCheckRunning();
@@ -42,7 +42,7 @@ private slots:
 private:
     static QString localUpdateRootPath();
     static QString remoteUpdateRootPath();
-    static void handleDownloaderError();
+    static void handleInfoDownloaderError();
     static void handleDownloadInfoUpdate();
     static void doLocalScan(QFutureInterfaceBase* futureInterface);
     static void doDownload(QFutureInterfaceBase* futureInterface);
@@ -50,8 +50,7 @@ private:
 signals:
     void updateCheckStarted();
     void updateCheckFinished(bool succeed);
-    void downloadProgress(qint64 totalBytes, qint64 receivedBytes, qreal speed,
-                          int fileCount, int fileIndex, const QString& fileName);
+    void downloadProgress(qreal bytesPerSec, qint64 bytesReceived, qint64 fileIndex, const QString& fileName);
     void downloadFinished(bool canceled, const QString& errorString);
 
 private:
@@ -61,7 +60,7 @@ private:
 private:
     static UpdateManager* s_instance;
     static bool s_isUpdateCheckRunning;
-    static int s_fileCount;
+    static qint64 s_fileCount;
     static qint64 s_downloadSize;
     static QDateTime s_lastSuccessfulCheckup;
     static QString s_changelog;

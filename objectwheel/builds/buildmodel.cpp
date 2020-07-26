@@ -727,37 +727,27 @@ QModelIndex BuildModel::indexFromBuildInfo(const BuildInfo* buildInfo) const
 
 void BuildModel::calculateTransferRate(BuildInfo* buildInfo, int chunkSize, QSet<int>& changedRoles) const
 {
-    const bool isFirstChunk = buildInfo->recentBlocks().isEmpty();
     const int IDEAL_BLOCK_SIZE = buildInfo->totalBytes() / qMax(1, chunkSize) / 80;
-    BuildInfo::Block block;
-    block.size = chunkSize;
-    block.timestamp = QDateTime::currentDateTime();
-    buildInfo->recentBlocks().append(block);
+    buildInfo->recentBlocks().append({chunkSize, QDateTime::currentDateTime()});
 
-    if (isFirstChunk) {
-        BuildInfo::Block block;
-        block.size = chunkSize;
-        block.timestamp = QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(3, 50));
-        buildInfo->recentBlocks().append(block);
-    }
+    if (buildInfo->recentBlocks().size() == 1)
+        buildInfo->recentBlocks().append({chunkSize, QDateTime::currentDateTime().addMSecs(QRandomGenerator::global()->bounded(3, 50))});
 
     if (buildInfo->recentBlocks().size() > qBound(3, IDEAL_BLOCK_SIZE, 100))
         buildInfo->recentBlocks().removeFirst();
 
-    if (buildInfo->recentBlocks().size() > 1) {
-        int transferredBytes = -buildInfo->recentBlocks().first().size;
-        int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
-        for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
-            transferredBytes += block.size;
-        if (elapedMs == 0)
-            elapedMs = QRandomGenerator::global()->bounded(3, 50);
-        qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
-        buildInfo->setSpeed(bytesPerMs * 1000);
-        changedRoles.unite({ SpeedRole });
+    int transferredBytes = -buildInfo->recentBlocks().first().size;
+    int elapedMs = buildInfo->recentBlocks().first().timestamp.msecsTo(buildInfo->recentBlocks().last().timestamp);
+    for (const BuildInfo::Block& block : qAsConst(buildInfo->recentBlocks()))
+        transferredBytes += block.size;
+    if (elapedMs == 0)
+        elapedMs = QRandomGenerator::global()->bounded(3, 50);
+    qreal bytesPerMs = qMax(1., transferredBytes / qreal(elapedMs));
+    buildInfo->setSpeed(bytesPerMs * 1000);
+    changedRoles.unite({ SpeedRole });
 
-        int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
-        qreal msLeft = bytesLeft / bytesPerMs;
-        buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
-        changedRoles.unite({ TimeLeftRole });
-    }
+    int bytesLeft = buildInfo->totalBytes() - buildInfo->transferredBytes();
+    qreal msLeft = bytesLeft / bytesPerMs;
+    buildInfo->setTimeLeft(QTime(0, 0).addMSecs(msLeft));
+    changedRoles.unite({ TimeLeftRole });
 }
