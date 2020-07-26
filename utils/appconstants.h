@@ -5,6 +5,10 @@
 
 namespace AppConstants {
 
+const short SMTP_PORT      = 465;
+const short WSS_PORT       = 5454;
+const short PAYLOAD_PORT   = 5455;
+
 const char NAME[]          = APP_NAME;
 const char LABEL[]         = APP_LABEL;
 const char VERSION[]       = APP_VER;
@@ -29,10 +33,6 @@ const char API_DOMAIN[]    = "api.objectwheel.com";
 const char WSS_URL[]       = "wss://api.objectwheel.com:5454";
 const char UPDATE_URL[]    = "https://update.objectwheel.com";
 #endif
-
-const short SMTP_PORT      = 465;
-const short WSS_PORT       = 5454;
-const short PAYLOAD_PORT   = 5455;
 
 } // AppConstants
 
