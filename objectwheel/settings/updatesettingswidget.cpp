@@ -341,6 +341,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 QString text = m_downloadingLabel->text();
                 text.replace(tr("Downloading"), tr("Ready to install"));
                 m_downloadingLabel->setText(text);
+                text = m_downloadingLabel->toolTip();
+                text.replace(tr("Downloading"), tr("Ready to install"));
+                UtilityFunctions::updateToolTip(m_downloadingLabel, text);
             }
         }
     });
