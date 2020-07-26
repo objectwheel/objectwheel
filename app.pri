@@ -52,7 +52,7 @@ macx {
 ### Defines
 DEFINES += APP_VER='"\\\"$$VERSION\\\""' \
            APP_NAME='"\\\"$$TARGET\\\""' \
-           APP_LABEL='"\\\"$$TARGET (Beta)\\\""' \
+           APP_LABEL='"\\\"Objectwheel $$TARGET\\\""' \
            APP_REVISION='"\\\"$$GIT_HASH\\\""' \
            APP_BUILD_DATE='"\\\"$$GIT_DATE\\\""'
 #           PAYLOADMANAGER_DEBUG

@@ -33,7 +33,7 @@ HEADERS += $$PWD/rendersocket.h \
 
 
 ### Includes
-include($$PWD/../objectwheel.pri)
+include($$PWD/../app.pri)
 include($$PWD/platform/platform.pri)
 
 ### Utils Settings

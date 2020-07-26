@@ -45,7 +45,6 @@ SOURCES += \
 RESOURCES += $$PWD/resources/resources.qrc
 
 ###Includes
-include($$PWD/../objectwheel.pri)
 include($$PWD/zipasync/zipasync.pri)
 include($$PWD/fastdownloader/fastdownloader.pri)
 include($$PWD/platform/platform.pri)

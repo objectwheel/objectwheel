@@ -5,7 +5,6 @@
 #include <async.h>
 #include <filesystemutils.h>
 #include <hashfactory.h>
-#include <appconstants.h>
 
 #include <QFileInfo>
 #include <QQmlEngine>
@@ -368,7 +367,7 @@ QVariantMap localDeviceInfo()
         {QStringLiteral("productType"), QSysInfo::productType()},
         {QStringLiteral("deviceName"), CrossPlatform::deviceName()},
         {QStringLiteral("deviceUid"), QLatin1String("000000000000")},
-        {QStringLiteral("version"), AppConstants::VERSION},
+        // {QStringLiteral("version"), AppConstants::VERSION},
         {QStringLiteral("isEmulator"), false}
     };
     return info.toVariantMap();
