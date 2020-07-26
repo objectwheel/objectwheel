@@ -45,6 +45,7 @@
 #include <pinbar.h>
 #include <dockbar.h>
 #include <issueswidget.h>
+#include <appconstants.h>
 
 #include <QStackedWidget>
 #include <QComboBox>
@@ -94,7 +95,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_toolboxDockWidgetVisible(true)
   , m_controlsDockWidgetVisible(true)
 {
-    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
+    setWindowTitle(AppConstants::LABEL);
     setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);

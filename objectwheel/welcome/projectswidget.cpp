@@ -11,6 +11,7 @@
 #include <planmanager.h>
 #include <paintutils.h>
 #include <styleditemdelegate.h>
+#include <appconstants.h>
 
 #include <QMessageBox>
 #include <QProgressBar>
@@ -300,13 +301,13 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     f.setPixelSize(24);
 
     m_welcomeLabel->setFont(f);
-    m_welcomeLabel->setText(tr("Welcome to ") + QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
+    m_welcomeLabel->setText(tr("Welcome to ") + AppConstants::LABEL);
 
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
     m_versionLabel->setFont(f);
-    m_versionLabel->setText(tr("Version ") + QStringLiteral(APP_VER) +
-                            QStringLiteral(" (") + QStringLiteral(APP_GITHASH) + QStringLiteral(")"));
+    m_versionLabel->setText(tr("Version ") + AppConstants::VERSION + QStringLiteral(" (") +
+                            AppConstants::REVISION + QLatin1Char(')'));
 
     m_projectsLabel->setText(tr("Your Projects"));
 
@@ -630,7 +631,7 @@ void ProjectsWidget::onImportButtonClick()
 {
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFiles);
-    dialog.setNameFilter(tr("Objectwheel Projects (*.opf)"));
+    dialog.setNameFilter(tr("%1 Project Files (*.opf)").arg(AppConstants::NAME));
     dialog.setViewMode(QFileDialog::Detail);
 
     if (dialog.exec()) {

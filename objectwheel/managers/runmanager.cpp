@@ -2,6 +2,7 @@
 #include <zipasync.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
+#include <appconstants.h>
 
 #include <QUdpSocket>
 #include <QWebSocketServer>
@@ -26,7 +27,7 @@ RunManager::RunManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
     s_broadcastSocket = new QUdpSocket(this);
-    s_webSocketServer = new QWebSocketServer(QStringLiteral(APP_NAME), QWebSocketServer::NonSecureMode, this);
+    s_webSocketServer = new QWebSocketServer(AppConstants::NAME, QWebSocketServer::NonSecureMode, this);
 
     connect(s_broadcastSocket, qOverload<QAbstractSocket::SocketError>(&QUdpSocket::error),
             this, [=] (QAbstractSocket::SocketError socketError) {

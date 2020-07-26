@@ -33,8 +33,6 @@
 #include <qmlcodeeditor.h>
 #include "circularclipboard.h"
 
-//#include <coreplugin/coreconstants.h>
-
 #include <utils/utilsicons.h>
 
 #include <QApplication>

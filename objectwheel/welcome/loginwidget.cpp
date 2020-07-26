@@ -10,6 +10,7 @@
 #include <applicationcore.h>
 #include <paintutils.h>
 #include <applicationstyle.h>
+#include <appconstants.h>
 
 #include <QPushButton>
 #include <QSettings>
@@ -68,8 +69,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_rememberMeLabel->setText(tr("Remember me"));
 
     m_legalLabel->setAlignment(Qt::AlignHCenter);
-    m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2, Inc. All Rights Reserved.</b></p>")
-                          .arg(QDate::currentDate().year()).arg(QStringLiteral(APP_CORP)));
+    m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
+                          .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL));
 
     ApplicationStyle::setButtonStyle(m_helpButton, ApplicationStyle::Help);
     m_helpButton->setIcon(QIcon(":/images/question.svg"));
@@ -237,7 +238,7 @@ void LoginWidget::onLoginButtonClick()
                 UtilityFunctions::showMessage(this,
                                               tr("You have reached the offline usage limit"),
                                               tr("Please connect to the Internet in order to "
-                                                 "continue using Objectwheel in offline mode."));
+                                                 "continue using %1 in offline mode.").arg(AppConstants::NAME));
             } else if (!PlanManager::isEligibleForOfflineLogging(plan)) {
                 UtilityFunctions::showMessage(this,
                                               tr("You are not eligible for offline mode"),

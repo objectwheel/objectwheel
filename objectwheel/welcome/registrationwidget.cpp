@@ -1,5 +1,5 @@
 #include <registrationwidget.h>
-#include <coreconstants.h>
+#include <appconstants.h>
 #include <switch.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
@@ -155,7 +155,7 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
     _termsLabel->setTextFormat(Qt::RichText);
     _termsLabel->setText(tr(
         "I accept <a href=\"%1\">the terms and conditions</a>"
-    ).arg(CoreConstants::TAC_URL));
+    ).arg(AppConstants::TAC_URL));
 
     _termsLabel->setOpenExternalLinks(true);
     _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);

@@ -100,7 +100,6 @@ public:
     }
 };
 
-
 ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent)
   , m_layout(new QVBoxLayout(this))
   , m_iconLabel(new QLabel)
@@ -266,5 +265,3 @@ const QStringList DESCRIPTIONS = {
         QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 1")*/
 };
 } // Anonymous Namespace
-
-#include "projecttemplateswidget.moc"

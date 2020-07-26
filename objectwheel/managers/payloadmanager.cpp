@@ -1,6 +1,6 @@
 #include <payloadmanager.h>
 #include <hashfactory.h>
-#include <coreconstants.h>
+#include <appconstants.h>
 
 #include <QtEndian>
 #include <QBuffer>
@@ -79,11 +79,11 @@ void PayloadManager::startDownload(const QByteArray& uid)
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(download->socket, &QSslSocket::connected,
             s_instance, [=] { handleConnected(download); });
-    download->socket->connectToHost(QStringLiteral("localhost"), CoreConstants::PAYLAOD_PORT);
+    download->socket->connectToHost(QStringLiteral("localhost"), AppConstants::PAYLOAD_PORT);
 #else
     connect(download->socket, &QSslSocket::encrypted,
             s_instance, [=] { handleConnected(download); });
-    download->socket->connectToHostEncrypted(CoreConstants::API_HOST, CoreConstants::PAYLAOD_PORT);
+    download->socket->connectToHostEncrypted(AppConstants::API_DOMAIN, AppConstants::PAYLOAD_PORT);
 #endif
 }
 
@@ -110,11 +110,11 @@ void PayloadManager::startUpload(const QByteArray& uid, const QByteArray& data)
 #if defined(PAYLOADMANAGER_DEBUG)
     connect(upload->socket, &QSslSocket::connected,
             s_instance, [=] { handleConnected(upload); });
-    upload->socket->connectToHost(QStringLiteral("localhost"), CoreConstants::PAYLAOD_PORT);
+    upload->socket->connectToHost(QStringLiteral("localhost"), AppConstants::PAYLOAD_PORT);
 #else
     connect(upload->socket, &QSslSocket::encrypted,
             s_instance, [=] { handleConnected(upload); });
-    upload->socket->connectToHostEncrypted(CoreConstants::API_HOST, CoreConstants::PAYLAOD_PORT);
+    upload->socket->connectToHostEncrypted(AppConstants::API_DOMAIN, AppConstants::PAYLOAD_PORT);
 #endif
 }
 

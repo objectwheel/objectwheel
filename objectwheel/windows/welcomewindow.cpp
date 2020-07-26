@@ -13,6 +13,7 @@
 #include <aboutwindow.h>
 #include <utilityfunctions.h>
 #include <serverstatuswidget.h>
+#include <appconstants.h>
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_stackedLayout(new StackedLayout(this))
@@ -27,7 +28,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_projectDetailsWidget(new ProjectDetailsWidget(this))
   , m_serverStatusWidget(new ServerStatusWidget(this))
 {
-    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
+    setWindowTitle(AppConstants::LABEL);
     resize(sizeHint());
     move(UtilityFunctions::centerPos(size()));
 

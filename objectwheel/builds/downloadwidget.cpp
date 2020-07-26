@@ -4,6 +4,7 @@
 #include <buildmodel.h>
 #include <builddelegate.h>
 #include <utilityfunctions.h>
+#include <appconstants.h>
 
 #include <QLabel>
 #include <QBoxLayout>
@@ -49,7 +50,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
                     "}").arg(8));
 
     auto iconLabel = new QLabel(this);
-    auto titleLabel = new QLabel(tr("Objectwheel Cloud Builds"), this);
+    auto titleLabel = new QLabel(tr("%1 Cloud Builds").arg(AppConstants::NAME), this);
     auto descriptionLabel = new QLabel(tr("Recent builds appear here"), this);
     auto buildsLabel = new QLabel(tr("Builds"));
 

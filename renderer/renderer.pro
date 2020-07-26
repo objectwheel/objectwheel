@@ -1,6 +1,3 @@
-### Includes
-include($$PWD/platform/platform.pri)
-
 ### App Settings
 CONFIG  -= app_bundle
 CONFIG  += console c++14 strict_c++
@@ -35,8 +32,11 @@ HEADERS += $$PWD/rendersocket.h \
            $$PWD/knownenums.h
 
 
-### Utils Settings
+### Includes
 include($$PWD/../objectwheel.pri)
+include($$PWD/platform/platform.pri)
+
+### Utils Settings
 INCLUDEPATH += $$PWD/../utils
 INCLUDEPATH += $$PWD/../utils/zipasync
 INCLUDEPATH += $$PWD/../utils/zipasync/async

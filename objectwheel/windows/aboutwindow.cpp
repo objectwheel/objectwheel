@@ -1,5 +1,5 @@
 #include <aboutwindow.h>
-#include <coreconstants.h>
+#include <appconstants.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
 
@@ -14,7 +14,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
   , m_okButton(new QPushButton(this))
   , m_legalLabel(new QLabel(this))
 {
-    setWindowTitle(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
+    setWindowTitle(AppConstants::LABEL);
     setAutoFillBackground(true);
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint
                    | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint);
@@ -32,20 +32,22 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
 
     m_versionLabel->setAlignment(Qt::AlignCenter);
-    m_versionLabel->setText(QStringLiteral("<p>Contact<br><a href='mailto:%4'>%4</a></p>"
-                                           "<p>Objectwheel Forum<br><a href='%5'>%5</a></p>"
-                                           "<p><b>version</b> v%1 <b>revision</b> %2 <b>date</b><br>%3</p>")
-                            .arg(QStringLiteral(APP_VER)).arg(QStringLiteral(APP_GITHASH))
-                            .arg(QDateTime::fromString(APP_GITDATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate))
-                            .arg(CoreConstants::EMAIL_ADDRESS)
-                            .arg(CoreConstants::FORUM_URL));
+    m_versionLabel->setText(QStringLiteral("<p>Contact<br><a href='mailto:%1'>%1</a></p>"
+                                           "<p>%2 Forum<br><a href='%3'>%3</a></p>"
+                                           "<p><b>version</b> v%4 <b>revision</b> %5 <b>date</b><br>%6</p>")
+                            .arg(AppConstants::SUPPORT_EMAIL)
+                            .arg(AppConstants::NAME)
+                            .arg(AppConstants::FORUM_URL)
+                            .arg(AppConstants::VERSION)
+                            .arg(AppConstants::REVISION)
+                            .arg(QDateTime::fromString(AppConstants::BUILD_DATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate)));
 
     m_okButton->setDefault(true);
     m_okButton->setCursor(Qt::PointingHandCursor);
     m_okButton->setText(tr("Close"));
     m_okButton->setFixedWidth(100);
-    m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2, Inc. All Rights Reserved.</b></p>")
-                          .arg(QDate::currentDate().year()).arg(QStringLiteral(APP_CORP)));
+    m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
+                          .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL));
 
     resize(sizeHint());
     move(UtilityFunctions::centerPos(size()));

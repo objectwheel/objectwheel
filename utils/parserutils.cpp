@@ -656,7 +656,7 @@ QString moduleBodyPlusMajorVersion(const QString& module)
 
 QByteArray mockSource(const QString& url, const QString& module)
 {
-    static const QString& mockSign = QStringLiteral("Objectwheel_MOCK_FILES_54");
+    static const QString& mockSign = QStringLiteral("ParserUtils_MOCK_FILES_54");
     static const QString& mockBase = QStringLiteral(":/mockfiles");
     static const QStringList& mockFiles = QDir(mockBase).entryList(QDir::Files);
     static const QString& importStatement = QStringLiteral(";import \"qrc%1\" as %2;");

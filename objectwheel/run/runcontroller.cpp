@@ -9,6 +9,7 @@
 #include <preferenceswindow.h>
 #include <utilityfunctions.h>
 #include <segmentedbar.h>
+#include <appconstants.h>
 
 #include <QTime>
 #include <QPushButton>
@@ -202,7 +203,7 @@ void RunController::onPreferencesWindowMarkCountChange(int markCount)
 QString RunController::progressBarMessageFor(MessageKind kind, const QString& arg)
 {
     using namespace UtilityFunctions;
-    static const char* msgWelcome  = QT_TR_NOOP("<b>Ready</b>  |  Welcome to Objectwheel (Beta)");
+    static const char* msgWelcome  = QT_TR_NOOP("<b>Ready</b>  |  Welcome to ");
     static const char* msgStarting = QT_TR_NOOP("<b>Starting</b> the application....");
     static const char* msgFailure  = QT_TR_NOOP("<b>System Failure</b>  |  %1 at %2");
     static const char* msgDisconnected = QT_TR_NOOP("<b>Disconnected</b>  |  Connection lost to <i>%1</i> at %2");
@@ -218,7 +219,7 @@ QString RunController::progressBarMessageFor(MessageKind kind, const QString& ar
 
     switch (kind) {
     case Welcome:
-        message += tr(msgWelcome);
+        message += tr(msgWelcome) + AppConstants::LABEL;
         break;
     case Starting:
         message += tr(msgStarting);

@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QProcess>
 #include <csignal>
+#include <appconstants.h>
 
 static bool g_errorFlag = false;
 static QFileInfo g_myInfo;
@@ -31,11 +32,11 @@ int main(int argc, char* argv[])
 
     // Initialize application
     QApplication a(argc, argv);
-    QApplication::setApplicationName(QStringLiteral(APP_NAME));
-    QApplication::setOrganizationName(QStringLiteral(APP_CORP));
-    QApplication::setApplicationVersion(QStringLiteral(APP_VER));
-    QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
-    QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Updater"));
+    QApplication::setApplicationName(AppConstants::NAME);
+    QApplication::setOrganizationName(AppConstants::COMPANY);
+    QApplication::setApplicationVersion(AppConstants::VERSION);
+    QApplication::setOrganizationDomain(AppConstants::DOMAIN);
+    QApplication::setApplicationDisplayName(AppConstants::LABEL);
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 
     if (argc != 2) {
@@ -69,10 +70,10 @@ int main(int argc, char* argv[])
                 Qt::CustomizeWindowHint | Qt::WindowTitleHint);
     g_progressDialog->setAutoReset(false);
     g_progressDialog->setAutoClose(false);
-    g_progressDialog->setWindowTitle(QObject::tr("Objectwheel Updater"));
+    g_progressDialog->setWindowTitle(AppConstants::LABEL);
     g_progressDialog->show();
 
-    // Give Objectwheel some time to quit
+    // Give the subject app some time to quit
     QTimer::singleShot(3500, [] {
         readDiffFile();
         updateFiles();
@@ -242,7 +243,7 @@ static void launchAndExit()
     g_progressDialog->setValue(g_progressDialog->maximum());
     if (g_errorFlag) {
         g_progressDialog->setLabelText(QObject::tr("Update was completed with warnings. If you encounter<br>"
-                                                   "some odd behavior, please re-install Objectwheel."));
+                                                   "some odd behavior, please re-install the application."));
         g_progressDialog->setCancelButtonText(QObject::tr("Close"));
         QObject::connect(g_progressDialog, &QProgressDialog::canceled, [] {
             QProcess process;

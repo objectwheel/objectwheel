@@ -11,6 +11,7 @@ DEPENDPATH += $$PWD
 
 ### Sources
 HEADERS += \
+    $$PWD/appconstants.h \
     $$PWD/signalwatcher.h \
     $$PWD/delayer.h \
     $$PWD/saveutils.h \

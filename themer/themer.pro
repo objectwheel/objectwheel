@@ -1,7 +1,3 @@
-### Includes
-include($$PWD/platform/platform.pri)
-include($$PWD/resources/resources.pri)
-
 ### App Settings
 CONFIG  -= app_bundle
 CONFIG  += console c++14 strict_c++
@@ -17,8 +13,12 @@ DEPENDPATH  += $$PWD
 
 SOURCES += $$PWD/main.cpp
 
-### Utils Settings
+### Includes
 include($$PWD/../objectwheel.pri)
+include($$PWD/platform/platform.pri)
+include($$PWD/resources/resources.pri)
+
+### Utils Settings
 INCLUDEPATH += $$PWD/../utils
 LIBS        += -L$$OUT_PWD/../utils -lUtils
 windows:CONFIG(release, debug | release):LIBS += -L$$OUT_PWD/../utils/release

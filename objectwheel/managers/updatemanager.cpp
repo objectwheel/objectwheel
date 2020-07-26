@@ -1,5 +1,5 @@
 #include <updatemanager.h>
-#include <coreconstants.h>
+#include <appconstants.h>
 #include <async.h>
 #include <systemsettings.h>
 #include <updatesettings.h>
@@ -450,11 +450,11 @@ QString UpdateManager::localUpdateRootPath()
 QString UpdateManager::remoteUpdateRootPath()
 {
 #if defined(Q_OS_MACOS)
-    return CoreConstants::UPDATE_URL + QStringLiteral("/macos-") + UtilityFunctions::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/macos-") + UtilityFunctions::buildCpuArchitecture();
 #elif defined(Q_OS_WINDOWS)
-    return CoreConstants::UPDATE_URL + QStringLiteral("/windows-") + UtilityFunctions::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/windows-") + UtilityFunctions::buildCpuArchitecture();
 #elif defined(Q_OS_LINUX)
-    return CoreConstants::UPDATE_URL + QStringLiteral("/linux-") + UtilityFunctions::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/linux-") + UtilityFunctions::buildCpuArchitecture();
 #else
     return QString();
 #endif

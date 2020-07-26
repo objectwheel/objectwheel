@@ -25,7 +25,6 @@
 
 #include "ilocatorfilter.h"
 
-//#include <coreplugin/coreconstants.h>
 #include <utils/fuzzymatcher.h>
 
 #include <QBoxLayout>

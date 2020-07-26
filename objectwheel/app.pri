@@ -22,13 +22,13 @@ macx {
     updater.path = Contents/MacOS
     utils.files = $$OUT_PWD/../utils/libUtils.dylib
     utils.path = Contents/Frameworks
-    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Objectwheel -change \
+    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/$${TARGET}.app/Contents/MacOS/$$TARGET -change \
                        libUtils.dylib @loader_path/../Frameworks/libUtils.dylib $$escape_expand(\n\t)
-    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Interpreter -change \
+    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/$${TARGET}.app/Contents/MacOS/Interpreter -change \
                        libUtils.dylib @loader_path/../Frameworks/libUtils.dylib $$escape_expand(\n\t)
-    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Renderer -change \
+    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/$${TARGET}.app/Contents/MacOS/Renderer -change \
                        libUtils.dylib @loader_path/../Frameworks/libUtils.dylib $$escape_expand(\n\t)
-    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/Objectwheel.app/Contents/MacOS/Themer -change \
+    QMAKE_POST_LINK += install_name_tool $$OUT_PWD/$${TARGET}.app/Contents/MacOS/Themer -change \
                        libUtils.dylib @loader_path/../Frameworks/libUtils.dylib $$escape_expand(\n\t)
     docs.files = $$PWD/resources/Documents
     docs.path = Contents/Resources

@@ -5,7 +5,7 @@
 #include <async.h>
 #include <filesystemutils.h>
 #include <hashfactory.h>
-#include <cmath>
+#include <appconstants.h>
 
 #include <QFileInfo>
 #include <QQmlEngine>
@@ -32,7 +32,7 @@ namespace UtilityFunctions {
 
 namespace Internal {
 
-const char showFocusRingProperty[] = "_q_Objectwheel_showFocusRing";
+const char showFocusRingProperty[] = "_q_UtilityFunctions_Internal_showFocusRing";
 
 void pushCborHelper(QCborArray&) {}
 void pullCborHelper(QCborArray&) {}
@@ -368,7 +368,7 @@ QVariantMap localDeviceInfo()
         {QStringLiteral("productType"), QSysInfo::productType()},
         {QStringLiteral("deviceName"), CrossPlatform::deviceName()},
         {QStringLiteral("deviceUid"), QLatin1String("000000000000")},
-        {QStringLiteral("version"), QLatin1String(APP_VER)},
+        {QStringLiteral("version"), AppConstants::VERSION},
         {QStringLiteral("isEmulator"), false}
     };
     return info.toVariantMap();

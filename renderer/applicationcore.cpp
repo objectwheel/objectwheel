@@ -8,6 +8,7 @@
 #include <saveutils.h>
 #include <utilityfunctions.h>
 #include <signalwatcher.h>
+#include <appconstants.h>
 
 #include <private/qquickdesignersupport_p.h>
 
@@ -30,11 +31,11 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 {
     /** Core initialization **/
     QApplication::setQuitOnLastWindowClosed(false);
-    QApplication::setApplicationName(QStringLiteral(APP_NAME));
-    QApplication::setOrganizationName(QStringLiteral(APP_CORP));
-    QApplication::setApplicationVersion(QStringLiteral(APP_VER));
-    QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
-    QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QObject::tr(" Renderer"));
+    QApplication::setApplicationName(AppConstants::NAME);
+    QApplication::setOrganizationName(AppConstants::COMPANY);
+    QApplication::setApplicationVersion(AppConstants::VERSION);
+    QApplication::setOrganizationDomain(AppConstants::DOMAIN);
+    QApplication::setApplicationDisplayName(AppConstants::LABEL);
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
 
     // Handle signals

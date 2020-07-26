@@ -23,7 +23,6 @@
 **
 ****************************************************************************/
 
-#include "coreconstants.h"
 //#include "icore.h"
 //#include "manhattanstyle.h"
 #include "themechooser.h"

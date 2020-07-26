@@ -1,5 +1,5 @@
 #include <servermanager.h>
-#include <coreconstants.h>
+#include <appconstants.h>
 #include <QTimerEvent>
 
 ServerManager* ServerManager::s_instance = nullptr;
@@ -24,7 +24,7 @@ ServerManager::ServerManager(QObject* parent)
             this, [this] { ping(); s_activityTimer.restart(); });
     s_activityTimer.start();
     s_pingTimer.start(PING_INTERVAL, Qt::VeryCoarseTimer, this);
-    QMetaObject::invokeMethod(this, "open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(CoreConstants::WSS_URL)));
+    QMetaObject::invokeMethod(this, "open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(AppConstants::WSS_URL)));
 }
 
 ServerManager::~ServerManager()
@@ -61,10 +61,10 @@ void ServerManager::timerEvent(QTimerEvent* event)
             ping();
         if (s_activityTimer.hasExpired(ACTIVITY_THRESHOLD)) {
             if (state() == QAbstractSocket::UnconnectedState) {
-                open(QUrl(CoreConstants::WSS_URL));
+                open(QUrl(AppConstants::WSS_URL));
             } else { // You have 3 secs to establish a successful connection
                 abort();
-                open(QUrl(CoreConstants::WSS_URL));
+                open(QUrl(AppConstants::WSS_URL));
             }
         }
     } else {

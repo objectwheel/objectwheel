@@ -5,7 +5,7 @@
 #include <updatemanager.h>
 #include <stackedlayout.h>
 #include <waitingspinnerwidget.h>
-#include <coreconstants.h>
+#include <appconstants.h>
 #include <utilityfunctions.h>
 
 #include <QProgressBar>
@@ -14,7 +14,6 @@
 #include <QGroupBox>
 #include <QPushButton>
 #include <QCheckBox>
-#include <QBoxLayout>
 #include <QTextEdit>
 
 Q_DECLARE_METATYPE(QMargins)
@@ -196,10 +195,10 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     statusLayout->addWidget(m_buildDateLabel, 3, 1);
 
     m_statusGroup->setTitle(tr("Status"));
-    m_brandIconLabel->setText(QLatin1String("Objectwheel (Beta)"));
-    m_versionLabel->setText(tr("Version: ") + QStringLiteral(APP_VER));
-    m_revisionLabel->setText(tr("Revision: ") + QStringLiteral(APP_GITHASH));
-    m_buildDateLabel->setText(tr("Build date: ") + QDateTime::fromString(APP_GITDATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate));
+    m_brandIconLabel->setText(AppConstants::LABEL);
+    m_versionLabel->setText(tr("Version: ") + AppConstants::VERSION);
+    m_revisionLabel->setText(tr("Revision: ") + AppConstants::REVISION);
+    m_buildDateLabel->setText(tr("Build date: ") + QDateTime::fromString(AppConstants::BUILD_DATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate));
 
     m_logoLabel->setFixedSize(QSize(80, 80));
     m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/icon.png"), QSize(80, 80), this));
@@ -219,8 +218,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     /****/
 
-    fill();
-
     connect(m_checkUpdatesButton, &QPushButton::clicked,
             this, [=] { UpdateManager::startUpdateCheck(); });
     connect(m_downloadButton, &QPushButton::clicked, this, [this] {
@@ -232,7 +229,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                                                      "suggest you to download an offline installer instead from: "
                                                      "<a href='%1'>%1</a></p>"
                                                      "<p>Do you still want to proceed with the update?</p>")
-                                                  .arg(CoreConstants::DOWNLOAD_URL),
+                                                  .arg(AppConstants::DOWNLOAD_URL),
                                                   QMessageBox::Question, QMessageBox::Yes | QMessageBox::No,
                                                   QMessageBox::No);
             if (ret == QMessageBox::No)
@@ -253,14 +250,15 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             settings->wereUpdatesAvailableLastTime = fileCount > 0;
             settings->write();
             if (fileCount > 0) {
-                m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1 files, %2 in size):")
+                m_updatesAvailableLabel->setText(tr("Updates are available for %1 (%2 files, %3 in size):")
+                                                 .arg(AppConstants::NAME)
                                                  .arg(fileCount)
                                                  .arg(UtilityFunctions::toPrettyBytesString(UpdateManager::downloadSize())));
                 m_changelogEdit->setHtml(UpdateManager::changelog());
                 m_updateStatusStackedLayout->setCurrentWidget(m_updatesAvailableWidget);
                 mark();
             } else {
-                m_upToDateLabel->setText(tr("Objectwheel is up to date"));
+                m_upToDateLabel->setText(tr("%1 is up to date").arg(AppConstants::NAME));
                 m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
                 m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
                 m_updateStatusStackedLayout->setCurrentWidget(m_upToDateWidget);
@@ -391,11 +389,11 @@ void UpdateSettingsWidget::revert()
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-disabled.svg"), QSize(80, 80), this));
         m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else if (settings->wereUpdatesAvailableLastTime) {
-        m_upToDateLabel->setText(tr("Updates are available for Objectwheel"));
+        m_upToDateLabel->setText(tr("Updates are available for %1").arg(AppConstants::NAME));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-disabled.svg"), QSize(80, 80), this));
         m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else {
-        m_upToDateLabel->setText(tr("Objectwheel is up to date"));
+        m_upToDateLabel->setText(tr("%1 is up to date").arg(AppConstants::NAME));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
         m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     }
@@ -422,7 +420,24 @@ QString UpdateSettingsWidget::title() const
 
 bool UpdateSettingsWidget::containsWord(const QString& word) const
 {
-    return title().contains(word, Qt::CaseInsensitive);
+    return title().contains(word, Qt::CaseInsensitive)
+            || m_updateGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_statusGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_settingsGroup->title().contains(word, Qt::CaseInsensitive)
+            || m_upToDateLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_lastCheckedLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_lastCheckedDateLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_checkUpdatesButton->text().contains(word, Qt::CaseInsensitive)
+            || m_updatesAvailableLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_downloadButton->text().contains(word, Qt::CaseInsensitive)
+            || m_downloadingLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_abortAndInstallButton->text().contains(word, Qt::CaseInsensitive)
+            || m_downloadSizeLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_brandIconLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_versionLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_revisionLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_buildDateLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_checkForUpdatesAutomaticallyCheckBox->text().contains(word, Qt::CaseInsensitive);
 }
 
 void UpdateSettingsWidget::updateCheckButton()
@@ -433,8 +448,4 @@ void UpdateSettingsWidget::updateCheckButton()
         m_updateCheckSpinner->stop();
     m_downloadButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
     m_checkUpdatesButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
-}
-
-void UpdateSettingsWidget::fill()
-{
 }

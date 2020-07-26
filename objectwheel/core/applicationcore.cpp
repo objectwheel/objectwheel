@@ -32,6 +32,7 @@
 #include <modemanager.h>
 #include <splashscreen.h>
 #include <signalwatcher.h>
+#include <appconstants.h>
 
 #include <QToolTip>
 #include <QScreen>
@@ -78,7 +79,7 @@ MenuManager* ApplicationCore::s_menuManager = nullptr;
 ApplicationCore::ApplicationCore()
 {
     /** Core initialization **/
-    QApplication::setApplicationDisplayName(QStringLiteral(APP_NAME) + QStringLiteral(" (Beta)"));
+    QApplication::setApplicationDisplayName(AppConstants::LABEL);
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 
     // Handle signals
@@ -255,10 +256,10 @@ bool ApplicationCore::locked()
 void ApplicationCore::prepare()
 {
     // Set those here, needed by QStandardPaths
-    QApplication::setApplicationName(QStringLiteral(APP_NAME));
-    QApplication::setOrganizationName(QStringLiteral(APP_CORP));
-    QApplication::setApplicationVersion(QStringLiteral(APP_VER));
-    QApplication::setOrganizationDomain(QStringLiteral(APP_DOMAIN));
+    QApplication::setApplicationName(AppConstants::NAME);
+    QApplication::setOrganizationName(AppConstants::COMPANY);
+    QApplication::setApplicationVersion(AppConstants::VERSION);
+    QApplication::setOrganizationDomain(AppConstants::DOMAIN);
 
     QSettings settings(settingsPath(), QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {

@@ -2,7 +2,6 @@
 #define UPDATESETTINGSWIDGET_H
 
 #include <settingswidget.h>
-#include <QAbstractSocket>
 
 class QLabel;
 class QGroupBox;
@@ -29,9 +28,6 @@ public:
 
 private slots:
     void updateCheckButton();
-
-private:
-    void fill();
 
 private:
     QGroupBox* m_updateGroup;

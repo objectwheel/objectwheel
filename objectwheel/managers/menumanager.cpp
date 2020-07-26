@@ -3,6 +3,7 @@
 #include <mainwindow.h>
 #include <preferenceswindow.h>
 #include <aboutwindow.h>
+#include <appconstants.h>
 
 #include <QMenuBar>
 #include <QApplication>
@@ -139,7 +140,7 @@ void MenuManager::createActions(QObject* parent)
     connect(s_aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
 
     s_preferencesAct = new QAction(tr("&Preferences"), parent);
-    s_preferencesAct->setStatusTip(tr("Show Objectwheel Preferences"));
+    s_preferencesAct->setStatusTip(tr("Show %1 Preferences").arg(AppConstants::NAME));
     connect(s_preferencesAct, &QAction::triggered, &MenuManager::onPreferences);
 
     s_leftAlignAct = new QAction(tr("&Left Align"), parent);
