@@ -2,7 +2,6 @@
 #include <utilityfunctions.h>
 #include <utilsicons.h>
 #include <paintutils.h>
-#include <qmlcodeeditor.h>
 
 #include <QStyleFactory>
 #include <QApplication>
