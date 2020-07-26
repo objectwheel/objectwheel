@@ -14,6 +14,7 @@ struct UpdateSettings final : public Settings
     const char* category() const override;
 
     bool checkForUpdatesAutomatically;
+    bool wereUpdatesAvailableLastTime;
     QDateTime lastUpdateCheckDate;
 };
 

@@ -161,7 +161,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_downloadingLabel->setText(tr("Downloading..."));
     m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
     m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
-    m_downloadProgressBar->setPalette(QColor("#65b84b"));
+    m_downloadProgressBar->setPalette(QColor("#65b84b")); // Button
 
     // NOTE: QProgressBar::minimumSizeHint() returns fontMetrics().height() + 2 for the height
     m_downloadProgressBar->setFixedHeight(m_downloadProgressBar->sizeHint().height());
@@ -251,10 +251,11 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
             this, [this] (bool succeed) {
         if (succeed) {
+            int fileCount = UpdateManager::fileCount();
             UpdateSettings* settings = SystemSettings::updateSettings();
             settings->lastUpdateCheckDate = QDateTime::currentDateTime();
+            settings->wereUpdatesAvailableLastTime = fileCount > 0;
             settings->write();
-            const int fileCount = UpdateManager::fileCount();
             if (fileCount > 0) {
                 m_updatesAvailableLabel->setText(tr("Updates are available for Objectwheel (%1 files, %2 in size):")
                                                  .arg(fileCount)
@@ -277,6 +278,10 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     connect(m_abortAndInstallButton, &QPushButton::clicked, this, [=] {
         if (m_downloadProgressBar->invertedAppearance()) {
             m_abortAndInstallButton->setEnabled(false);
+            UpdateSettings* settings = SystemSettings::updateSettings();
+            settings->lastUpdateCheckDate = QDateTime::currentDateTime();
+            settings->wereUpdatesAvailableLastTime = false;
+            settings->write();
             UpdateManager::install();
         } else {
             QMessageBox::StandardButton ret =
@@ -371,15 +376,19 @@ void UpdateSettingsWidget::revert()
     const QDateTime& lastChecked = SystemSettings::updateSettings()->lastUpdateCheckDate;
     const qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
     if (!lastChecked.isValid()) {
-        m_upToDateLabel->setText(tr("Updates have never been checked"));
+        m_upToDateLabel->setText(tr("Updates has never been checked"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
         m_lastCheckedDateLabel->setText(tr("Never"));
     } else if (days > 2) {
-        m_upToDateLabel->setText(tr("Updates have not been checked for %1 days").arg(days));
+        m_upToDateLabel->setText(tr("Updates has not been checked for %1 days").arg(days));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
         m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else if (!settings->checkForUpdatesAutomatically) {
-        m_upToDateLabel->setText(tr("Automatic update checking is disabled"));
+        m_upToDateLabel->setText(tr("Automatic update check disabled"));
+        m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-disabled.svg"), QSize(80, 80), this));
+        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+    } else if (settings->wereUpdatesAvailableLastTime) {
+        m_upToDateLabel->setText(tr("Updates are available for Objectwheel"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-disabled.svg"), QSize(80, 80), this));
         m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else {
@@ -415,7 +424,7 @@ bool UpdateSettingsWidget::containsWord(const QString& word) const
 
 void UpdateSettingsWidget::updateCheckButton()
 {
-    m_checkUpdatesButton->setEnabled(ServerManager::isConnected() && !UpdateManager::isUpdateCheckRunning());
+    m_checkUpdatesButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
     if (UpdateManager::isUpdateCheckRunning())
         m_updateCheckSpinner->start();
     else

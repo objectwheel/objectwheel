@@ -2,6 +2,7 @@
 #include <systemsettings.h>
 
 static const char g_checkForUpdatesAutomatically[] = "CheckForUpdatesAutomatically";
+static const char g_wereUpdatesAvailableLastTime[] = "WereUpdatesAvailableLastTime";
 static const char g_lastUpdateCheckDate[] = "LastUpdateCheckDate";
 
 UpdateSettings::UpdateSettings(SystemSettings* systemSettings) : Settings(systemSettings)
@@ -15,7 +16,8 @@ void UpdateSettings::read()
 
     begin();
     checkForUpdatesAutomatically = value<bool>(g_checkForUpdatesAutomatically, checkForUpdatesAutomatically);
-    lastUpdateCheckDate = value<QDateTime>(g_lastUpdateCheckDate, lastUpdateCheckDate);
+    wereUpdatesAvailableLastTime = value<bool>(g_wereUpdatesAvailableLastTime, false);
+    lastUpdateCheckDate = value<QDateTime>(g_lastUpdateCheckDate, QDateTime());
     end();
 }
 
@@ -23,6 +25,7 @@ void UpdateSettings::write()
 {
     begin();
     setValue(g_checkForUpdatesAutomatically, checkForUpdatesAutomatically);
+    setValue(g_wereUpdatesAvailableLastTime, wereUpdatesAvailableLastTime);
     setValue(g_lastUpdateCheckDate, lastUpdateCheckDate);
     end();
 
@@ -32,6 +35,7 @@ void UpdateSettings::write()
 void UpdateSettings::reset()
 {
     checkForUpdatesAutomatically = true;
+    // wereUpdatesAvailableLastTime = false;
     // lastUpdateCheckDate = QDateTime();
 }
 
