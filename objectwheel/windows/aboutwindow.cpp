@@ -32,6 +32,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
 
     m_versionLabel->setAlignment(Qt::AlignCenter);
+    m_versionLabel->setOpenExternalLinks(true);
     m_versionLabel->setText(QStringLiteral("<p>Contact<br><a href='mailto:%1'>%1</a></p>"
                                            "<p>%2 Forum<br><a href='%3'>%3</a></p>"
                                            "<p><b>version</b> v%4 <b>revision</b> %5 <b>date</b><br>%6</p>")
