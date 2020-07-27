@@ -552,7 +552,6 @@ bool FileSaverBase::setResult(QXmlStreamWriter *stream)
     return setResult(!stream->hasError());
 }
 
-
 FileSaver::FileSaver(const QString &filename, QIODevice::OpenMode mode)
 {
     m_fileName = filename;
