@@ -254,7 +254,7 @@ void PreferencesWindow::addPage(SettingsPage* page)
 
     item->setData(NotificationsProperty, page->markCount() > 0 ? page->markCount() : QVariant());
     connect(page, &SettingsPage::markCountChanged, this, [=] (int markCount) {
-        QTimer::singleShot(800, [=] {
+        QTimer::singleShot(600, [=] {
             item->setData(NotificationsProperty, markCount > 0 ? markCount : QVariant());
             m_listWidget->update();
         });

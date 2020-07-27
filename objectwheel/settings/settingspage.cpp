@@ -99,7 +99,7 @@ void SettingsPage::addWidget(SettingsWidget* widget)
     m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
                                       ? QVariant("﹡") : QVariant());
     connect(widget, &SettingsWidget::markChanged, this, [=] {
-        QTimer::singleShot(800, [=] {
+        QTimer::singleShot(600, [=] {
             m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
                                               ? QVariant("﹡") : QVariant());
             m_tabWidget->tabBar()->update();
