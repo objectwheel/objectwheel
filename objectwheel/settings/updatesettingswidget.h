@@ -27,7 +27,7 @@ public:
     bool containsWord(const QString& word) const override;
 
 private slots:
-    void updateCheckButton();
+    void onUpdateCheckStatusChange();
 
 private:
     QGroupBox* m_updateGroup;
@@ -64,6 +64,9 @@ private:
     /****/
     QGroupBox* m_settingsGroup;
     QCheckBox* m_checkForUpdatesAutomaticallyCheckBox;
+    QPushButton* m_showCacheFolderButton;
+    QPushButton* m_showCacheSizeButton;
+    QPushButton* m_cleanCacheButton;
 };
 
 #endif // UPDATESETTINGSWIDGET_H

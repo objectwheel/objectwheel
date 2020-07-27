@@ -7,7 +7,10 @@
 #include <waitingspinnerwidget.h>
 #include <appconstants.h>
 #include <utilityfunctions.h>
+#include <applicationcore.h>
+#include <fileutils.h>
 
+#include <QFileInfo>
 #include <QProgressBar>
 #include <QCoreApplication>
 #include <QLabel>
@@ -55,6 +58,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   /****/
   , m_settingsGroup(new QGroupBox(contentWidget()))
   , m_checkForUpdatesAutomaticallyCheckBox(new QCheckBox(m_settingsGroup))
+  , m_showCacheFolderButton(new QPushButton(m_settingsGroup))
+  , m_showCacheSizeButton(new QPushButton(m_settingsGroup))
+  , m_cleanCacheButton(new QPushButton(m_settingsGroup))
 {
     contentLayout()->addWidget(m_updateGroup);
     contentLayout()->addWidget(m_statusGroup);
@@ -205,19 +211,74 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     /****/
 
-    auto settingsLayout = new QVBoxLayout(m_settingsGroup);
+    auto settingsLayout = new QGridLayout(m_settingsGroup);
     settingsLayout->setSpacing(6);
     settingsLayout->setContentsMargins(6, 6, 6, 6);
     settingsLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
-    settingsLayout->addWidget(m_checkForUpdatesAutomaticallyCheckBox, 0, 0);
+    settingsLayout->addWidget(m_checkForUpdatesAutomaticallyCheckBox, 0, 0, 1, 3);
+    settingsLayout->addWidget(m_showCacheFolderButton, 1, 0);
+    settingsLayout->addWidget(m_showCacheSizeButton, 1, 1);
+    settingsLayout->addWidget(m_cleanCacheButton, 1, 2);
+    settingsLayout->setColumnStretch(3, 1);
 
     m_settingsGroup->setTitle(tr("Settings"));
     m_checkForUpdatesAutomaticallyCheckBox->setText(tr("Check for updates automatically"));
     m_checkForUpdatesAutomaticallyCheckBox->setToolTip(tr("It does not download or install updates automatically in any case"));
     m_checkForUpdatesAutomaticallyCheckBox->setCursor(Qt::PointingHandCursor);
 
+    m_showCacheFolderButton->setText(tr("Show Cache Folder"));
+    m_showCacheFolderButton->setToolTip(tr("Shows update cache folder"));
+    m_showCacheFolderButton->setCursor(Qt::PointingHandCursor);
+
+    m_showCacheSizeButton->setText(tr("Calculate Cache Size"));
+    m_showCacheSizeButton->setToolTip(tr("Calculates update cache size (this may freeze the app)."));
+    m_showCacheSizeButton->setCursor(Qt::PointingHandCursor);
+
+    m_cleanCacheButton->setText(tr("Clean Update Cache"));
+    m_cleanCacheButton->setToolTip(tr("Deletes existing download files and cleans up the update cache"));
+    m_cleanCacheButton->setCursor(Qt::PointingHandCursor);
+
     /****/
 
+    connect(m_showCacheFolderButton, &QPushButton::clicked, this, [=] {
+        if (QFileInfo::exists(ApplicationCore::updatesPath())) {
+            Utils::FileUtils::showInFolder(this, ApplicationCore::updatesPath());
+        } else {
+            UtilityFunctions::showMessage(this, tr("No cache found"),
+                                          tr("There is nothing to worry about!"),
+                                          QMessageBox::Information);
+        }
+    });
+    connect(m_showCacheSizeButton, &QPushButton::clicked, this, [=] {
+        m_showCacheSizeButton->setEnabled(false);
+        UtilityFunctions::showMessage(this, tr("Calculation is done"), tr("Update cache size: ") +
+                                      UtilityFunctions::toPrettyBytesString(UpdateManager::cacheSize()),
+                                      QMessageBox::Information);
+        m_showCacheSizeButton->setEnabled(true);
+    });
+    connect(m_cleanCacheButton, &QPushButton::clicked, this, [=] {
+        if (UpdateManager::isDownloadRunning()) {
+            UtilityFunctions::showMessage(this, tr("Operation is not permitted"),
+                                          tr("The update cache cannot be cleaned while an update"
+                                             "is already in progress, please abort it first."),
+                                          QMessageBox::Warning);
+        } else {
+            QMessageBox::StandardButton ret =
+                    UtilityFunctions::showMessage(this, tr("Are you sure?"),
+                                                  tr("This will clean up the update cache, interrupted "
+                                                     "updates will start downloading over again."),
+                                                  QMessageBox::Question, QMessageBox::Yes | QMessageBox::No,
+                                                  QMessageBox::No);
+            if (ret == QMessageBox::No)
+                return;
+            UpdateManager::cleanCache();
+            if (m_downloadProgressBar->invertedAppearance()) {
+                revert();
+                m_updateStatusStackedLayout->setCurrentWidget(m_upToDateWidget);
+            }
+            m_showCacheSizeButton->click();
+        }
+    });
     connect(m_checkUpdatesButton, &QPushButton::clicked,
             this, [=] { UpdateManager::startUpdateCheck(); });
     connect(m_downloadButton, &QPushButton::clicked, this, [this] {
@@ -239,9 +300,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         m_updateStatusStackedLayout->setCurrentWidget(m_downloadWidget);
     });
     connect(UpdateManager::instance(), &UpdateManager::updateCheckStarted,
-            this, &UpdateSettingsWidget::updateCheckButton);
+            this, &UpdateSettingsWidget::onUpdateCheckStatusChange);
     connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
-            this, &UpdateSettingsWidget::updateCheckButton);
+            this, &UpdateSettingsWidget::onUpdateCheckStatusChange);
     connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished, this, [this] (bool succeed) {
         if (succeed) {
             int fileCount = UpdateManager::fileCount();
@@ -430,7 +491,9 @@ bool UpdateSettingsWidget::containsWord(const QString& word) const
             || m_upToDateLabel->text().contains(word, Qt::CaseInsensitive)
             || m_lastCheckedLabel->text().contains(word, Qt::CaseInsensitive)
             || m_lastCheckedDateLabel->text().contains(word, Qt::CaseInsensitive)
+            || m_lastCheckedDateLabel->toolTip().contains(word, Qt::CaseInsensitive)
             || m_checkUpdatesButton->text().contains(word, Qt::CaseInsensitive)
+            || m_checkUpdatesButton->toolTip().contains(word, Qt::CaseInsensitive)
             || m_updatesAvailableLabel->text().contains(word, Qt::CaseInsensitive)
             || m_downloadButton->text().contains(word, Qt::CaseInsensitive)
             || m_downloadingLabel->text().contains(word, Qt::CaseInsensitive)
@@ -440,15 +503,23 @@ bool UpdateSettingsWidget::containsWord(const QString& word) const
             || m_versionLabel->text().contains(word, Qt::CaseInsensitive)
             || m_revisionLabel->text().contains(word, Qt::CaseInsensitive)
             || m_buildDateLabel->text().contains(word, Qt::CaseInsensitive)
-            || m_checkForUpdatesAutomaticallyCheckBox->text().contains(word, Qt::CaseInsensitive);
+            || m_checkForUpdatesAutomaticallyCheckBox->text().contains(word, Qt::CaseInsensitive)
+            || m_checkForUpdatesAutomaticallyCheckBox->toolTip().contains(word, Qt::CaseInsensitive)
+            || m_showCacheFolderButton->text().contains(word, Qt::CaseInsensitive)
+            || m_showCacheFolderButton->toolTip().contains(word, Qt::CaseInsensitive)
+            || m_showCacheSizeButton->text().contains(word, Qt::CaseInsensitive)
+            || m_showCacheSizeButton->toolTip().contains(word, Qt::CaseInsensitive)
+            || m_cleanCacheButton->text().contains(word, Qt::CaseInsensitive)
+            || m_cleanCacheButton->toolTip().contains(word, Qt::CaseInsensitive);
 }
 
-void UpdateSettingsWidget::updateCheckButton()
+void UpdateSettingsWidget::onUpdateCheckStatusChange()
 {
     if (UpdateManager::isUpdateCheckRunning())
         m_updateCheckSpinner->start();
     else
         m_updateCheckSpinner->stop();
     m_downloadButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
+    m_cleanCacheButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
     m_checkUpdatesButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
 }

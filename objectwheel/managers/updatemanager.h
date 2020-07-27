@@ -15,6 +15,7 @@ class UpdateManager final : public QObject
 
 public:
     static UpdateManager* instance();
+    static qint64 cacheSize();
     static qint64 fileCount();
     static qint64 downloadSize();
     static QString changelog();
@@ -26,6 +27,7 @@ public:
     static void download();
     static void cancelDownload();
     static void install();
+    static void cleanCache();
 
 private slots:
     void onServerManagerConnected();

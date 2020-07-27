@@ -5,6 +5,7 @@
 #include <updatesettings.h>
 #include <applicationcore.h>
 #include <servermanager.h>
+#include <filesystemutils.h>
 
 #include <QProcess>
 #include <QDir>
@@ -103,12 +104,18 @@ UpdateManager::~UpdateManager()
     s_remoteChecksums.clear();
     s_checksumsBuffer.buffer().clear();
     s_changelogBuffer.buffer().clear();
+    s_lastSuccessfulCheckup = QDateTime();
     s_instance = nullptr;
 }
 
 UpdateManager* UpdateManager::instance()
 {
     return s_instance;
+}
+
+qint64 UpdateManager::cacheSize()
+{
+    return FileSystemUtils::directorySize(ApplicationCore::updatesPath());
 }
 
 qint64 UpdateManager::fileCount()
@@ -175,6 +182,7 @@ void UpdateManager::startUpdateCheck(bool forceLocalScan)
     s_remoteChecksums.clear();
     s_checksumsBuffer.buffer().clear();
     s_changelogBuffer.buffer().clear();
+    s_lastSuccessfulCheckup = QDateTime();
     s_isUpdateCheckRunning = true;
 
     s_checksumsDownloader.start();
@@ -256,6 +264,21 @@ void UpdateManager::install()
     process.setArguments(QStringList(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")));
     process.startDetached();
     QTimer::singleShot(200, [] { QCoreApplication::quit(); });
+}
+
+void UpdateManager::cleanCache()
+{
+    if (s_isUpdateCheckRunning) {
+        qWarning("WARNING: Wait until info download is finished");
+        return;
+    }
+
+    if (s_downloadWatcher.isRunning()) {
+        qWarning("WARNING: Wait until active download is finished");
+        return;
+    }
+
+    QDir(ApplicationCore::updatesPath()).removeRecursively();
 }
 
 void UpdateManager::onServerManagerConnected()
