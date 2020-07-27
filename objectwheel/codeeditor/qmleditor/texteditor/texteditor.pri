@@ -41,8 +41,6 @@ HEADERS += \
         $$PWD/colorpreviewhoverhandler.h \
         $$PWD/autocompleter.h \
         $$PWD/basehoverhandler.h \
-        $$PWD/circularclipboard.h \
-        $$PWD/circularclipboardassist.h \
         $$PWD/simplecodestylepreferences.h \
         $$PWD/icodestylepreferences.h \
         $$PWD/refactoroverlay.h
@@ -85,8 +83,6 @@ SOURCES += \
         $$PWD/texteditoroverlay.cpp \
         $$PWD/texteditorsettings.cpp \
         $$PWD/typingsettings.cpp \
-        $$PWD/circularclipboard.cpp \
-        $$PWD/circularclipboardassist.cpp \
         $$PWD/simplecodestylepreferences.cpp \
         $$PWD/icodestylepreferences.cpp \
         $$PWD/refactoroverlay.cpp
