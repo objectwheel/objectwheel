@@ -473,11 +473,11 @@ QString UpdateManager::localUpdateRootPath()
 QString UpdateManager::remoteUpdateRootPath()
 {
 #if defined(Q_OS_MACOS)
-    return AppConstants::UPDATE_URL + QStringLiteral("/macos-") + UtilityFunctions::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/macos-") + QSysInfo::buildCpuArchitecture();
 #elif defined(Q_OS_WINDOWS)
-    return AppConstants::UPDATE_URL + QStringLiteral("/windows-") + UtilityFunctions::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/windows-") + QSysInfo::buildCpuArchitecture();
 #elif defined(Q_OS_LINUX)
-    return AppConstants::UPDATE_URL + QStringLiteral("/linux-") + UtilityFunctions::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/linux-") + QSysInfo::buildCpuArchitecture();
 #else
     return QString();
 #endif
