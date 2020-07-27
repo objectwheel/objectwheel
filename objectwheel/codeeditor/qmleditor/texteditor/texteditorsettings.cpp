@@ -27,22 +27,16 @@
 
 #include <qmlcodeeditor.h>
 //#include "behaviorsettings.h"
-//#include "behaviorsettingspage.h"
 #include "completionsettings.h"
 #include "simplecodestylepreferences.h"
 //#include "marginsettings.h"
 //#include "displaysettings.h"
-//#include "displaysettingspage.h"
 #include "typingsettings.h"
 #include "storagesettings.h"
 #include "tabsettings.h"
 //#include "extraencodingsettings.h"
 #include "icodestylepreferences.h"
 //#include "icodestylepreferencesfactory.h"
-#include "completionsettingspage.h"
-//#include <texteditor/generichighlighter/highlightersettingspage.h>
-//#include <texteditor/snippets/snippetssettingspage.h>
-
 //#include <extensionsystem/pluginmanager.h>
 //#include <coreplugin/icore.h>
 #include <utils/qtcassert.h>
@@ -59,12 +53,6 @@ namespace Internal {
 class TextEditorSettingsPrivate
 {
 public:
-//    BehaviorSettingsPage *m_behaviorSettingsPage;
-//    DisplaySettingsPage *m_displaySettingsPage;
-//    HighlighterSettingsPage *m_highlighterSettingsPage;
-//    SnippetsSettingsPage *m_snippetsSettingsPage;
-    CompletionSettingsPage *m_completionSettingsPage;
-
 //    QMap<Core::Id, ICodeStylePreferencesFactory *> m_languageToFactory;
 
     QMap<Core::Id, ICodeStylePreferences *> m_languageToCodeStyle;
@@ -84,42 +72,6 @@ TextEditorSettings::TextEditorSettings()
     QTC_ASSERT(!m_instance, return);
     m_instance = this;
     d = new Internal::TextEditorSettingsPrivate;
-
-    // Add the GUI used to configure the tab, storage and interaction settings
-//    BehaviorSettingsPageParameters behaviorSettingsPageParameters;
-//    behaviorSettingsPageParameters.id = Constants::TEXT_EDITOR_BEHAVIOR_SETTINGS;
-//    behaviorSettingsPageParameters.displayName = tr("Behavior");
-//    behaviorSettingsPageParameters.settingsPrefix = QLatin1String("text");
-//    d->m_behaviorSettingsPage = new BehaviorSettingsPage(behaviorSettingsPageParameters, this);
-
-//    DisplaySettingsPageParameters displaySettingsPageParameters;
-//    displaySettingsPageParameters.id = Constants::TEXT_EDITOR_DISPLAY_SETTINGS;
-//    displaySettingsPageParameters.displayName = tr("Display");
-//    displaySettingsPageParameters.settingsPrefix = QLatin1String("text");
-//    d->m_displaySettingsPage = new DisplaySettingsPage(displaySettingsPageParameters, this);
-
-//    d->m_highlighterSettingsPage =
-//        new HighlighterSettingsPage(Constants::TEXT_EDITOR_HIGHLIGHTER_SETTINGS, this);
-//    d->m_snippetsSettingsPage =
-//        new SnippetsSettingsPage(Constants::TEXT_EDITOR_SNIPPETS_SETTINGS, this);
-    d->m_completionSettingsPage = new CompletionSettingsPage(this);
-
-//    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::typingSettingsChanged,
-//            this, &TextEditorSettings::typingSettingsChanged);
-//    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::storageSettingsChanged,
-//            this, &TextEditorSettings::storageSettingsChanged);
-//    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::behaviorSettingsChanged,
-//            this, &TextEditorSettings::behaviorSettingsChanged);
-//    connect(d->m_behaviorSettingsPage, &BehaviorSettingsPage::extraEncodingSettingsChanged,
-//            this, &TextEditorSettings::extraEncodingSettingsChanged);
-//    connect(d->m_displaySettingsPage, &DisplaySettingsPage::marginSettingsChanged,
-//            this, &TextEditorSettings::marginSettingsChanged);
-//    connect(d->m_displaySettingsPage, &DisplaySettingsPage::displaySettingsChanged,
-//            this, &TextEditorSettings::displaySettingsChanged);
-    connect(d->m_completionSettingsPage, &CompletionSettingsPage::completionSettingsChanged,
-            this, &TextEditorSettings::completionSettingsChanged);
-//    connect(d->m_completionSettingsPage, &CompletionSettingsPage::commentsSettingsChanged,
-//            this, &TextEditorSettings::commentsSettingsChanged);
 }
 
 TextEditorSettings::~TextEditorSettings()
@@ -134,60 +86,10 @@ TextEditorSettings *TextEditorSettings::instance()
     return m_instance;
 }
 
-//const BehaviorSettings &TextEditorSettings::behaviorSettings()
-//{
-//    return d->m_behaviorSettingsPage->behaviorSettings();
-//}
-
-//const MarginSettings &TextEditorSettings::marginSettings()
-//{
-//    return d->m_displaySettingsPage->marginSettings();
-//}
-
-//const DisplaySettings &TextEditorSettings::displaySettings()
-//{
-//    return d->m_displaySettingsPage->displaySettings();
-//}
-
-const CompletionSettings &TextEditorSettings::completionSettings()
+const CompletionSettings TextEditorSettings::completionSettings()
 {
-    return d->m_completionSettingsPage->completionSettings();
+    return CompletionSettings();
 }
-
-//const HighlighterSettings &TextEditorSettings::highlighterSettings()
-//{
-//    return d->m_highlighterSettingsPage->highlighterSettings();
-//}
-
-//const ExtraEncodingSettings &TextEditorSettings::extraEncodingSettings()
-//{
-//    return d->m_behaviorSettingsPage->extraEncodingSettings();
-//}
-
-//const CommentsSettings &TextEditorSettings::commentsSettings()
-//{
-//    return d->m_completionSettingsPage->commentsSettings();
-//}
-
-//void TextEditorSettings::registerCodeStyleFactory(ICodeStylePreferencesFactory *factory)
-//{
-//    d->m_languageToFactory.insert(factory->languageId(), factory);
-//}
-
-//void TextEditorSettings::unregisterCodeStyleFactory(Core::Id languageId)
-//{
-//    d->m_languageToFactory.remove(languageId);
-//}
-
-//QMap<Core::Id, ICodeStylePreferencesFactory *> TextEditorSettings::codeStyleFactories()
-//{
-//    return d->m_languageToFactory;
-//}
-
-//ICodeStylePreferencesFactory *TextEditorSettings::codeStyleFactory(Core::Id languageId)
-//{
-//    return d->m_languageToFactory.value(languageId);
-//}
 
 ICodeStylePreferences *TextEditorSettings::codeStyle()
 {
@@ -216,26 +118,6 @@ void TextEditorSettings::unregisterCodeStyle(Core::Id languageId)
 {
     d->m_languageToCodeStyle.remove(languageId);
 }
-
-//CodeStylePool *TextEditorSettings::codeStylePool()
-//{
-//    return d->m_behaviorSettingsPage->codeStylePool();
-//}
-
-//CodeStylePool *TextEditorSettings::codeStylePool(Core::Id languageId)
-//{
-//    return d->m_languageToCodeStylePool.value(languageId);
-//}
-
-//void TextEditorSettings::registerCodeStylePool(Core::Id languageId, CodeStylePool *pool)
-//{
-//    d->m_languageToCodeStylePool.insert(languageId, pool);
-//}
-
-//void TextEditorSettings::unregisterCodeStylePool(Core::Id languageId)
-//{
-//    d->m_languageToCodeStylePool.remove(languageId);
-//}
 
 void TextEditorSettings::registerMimeTypeForLanguageId(const char *mimeType, Core::Id languageId)
 {

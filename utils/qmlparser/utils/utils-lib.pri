@@ -23,9 +23,6 @@ SOURCES += \
     $$PWD/savefile.cpp \
     $$PWD/changeset.cpp \
     $$PWD/fuzzymatcher.cpp \
-    $$PWD/templateengine.cpp \
-    $$PWD/macroexpander.cpp \
-    $$PWD/stringutils.cpp \
     $$PWD/textutils.cpp \
     $$PWD/faketooltip.cpp \
     $$PWD/environment.cpp \
@@ -55,9 +52,6 @@ HEADERS += \
     $$PWD/changeset.h \
     $$PWD/declarationmacros.h \
     $$PWD/fuzzymatcher.h \
-    $$PWD/templateengine.h \
-    $$PWD/macroexpander.h \
-    $$PWD/stringutils.h \
     $$PWD/textutils.h \
     $$PWD/faketooltip.h \
     $$PWD/environment.h \

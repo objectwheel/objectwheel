@@ -84,7 +84,7 @@ private:
 };
 
 /*!
-  A widget for editing a color scheme. Used in the FontSettingsPage.
+  A widget for editing a color scheme. Used in the Font Settings Page.
   */
 class ColorSchemeEdit : public QWidget
 {

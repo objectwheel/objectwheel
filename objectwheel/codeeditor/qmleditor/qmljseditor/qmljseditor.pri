@@ -1,8 +1,8 @@
 SOURCES += \
+        $$PWD/qmljseditingsettings.cpp \
         $$PWD/qmlexpressionundercursor.cpp \
         $$PWD/qmljsautocompleter.cpp \
         $$PWD/qmljscompletionassist.cpp \
-        $$PWD/qmljseditingsettingspage.cpp \
         $$PWD/qmljshighlighter.cpp \
         $$PWD/qmljshoverhandler.cpp \
         $$PWD/qmljsreuse.cpp \
@@ -12,6 +12,7 @@ SOURCES += \
 
 HEADERS += \
         $$PWD/quicktoolbar.h \
+        $$PWD/qmljseditingsettings.h \
         $$PWD/qmljssemanticinfoupdater.h \
         $$PWD/qmljssemantichighlighter.h \
         $$PWD/qmljsreuse.h \
@@ -19,10 +20,6 @@ HEADERS += \
         $$PWD/qmljshighlighter.h \
         $$PWD/qmljseditorconstants.h \
         $$PWD/qmljseditor_global.h \
-        $$PWD/qmljseditingsettingspage.h \
         $$PWD/qmljscompletionassist.h \
         $$PWD/qmlexpressionundercursor.h \
         $$PWD/qmljsautocompleter.h
-
-FORMS += \
-        $$PWD/qmljseditingsettingspage.ui

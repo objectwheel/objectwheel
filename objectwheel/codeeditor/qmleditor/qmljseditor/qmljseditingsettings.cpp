@@ -1,41 +1,12 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
-
-#include "qmljseditingsettingspage.h"
+#include "qmljseditingsettings.h"
 #include "qmljseditorconstants.h"
 
 #include <applicationcore.h>
 #include <qmljstools/qmljstoolsconstants.h>
-//#include <coreplugin/icore.h>
 
-#include <QTextStream>
-#include <QCheckBox>
 #include <QSettings>
 
 using namespace QmlJSEditor;
-using namespace QmlJSEditor::Internal;
 
 QmlJsEditingSettings::QmlJsEditingSettings()
     : m_enableContextPane(false),
@@ -130,62 +101,9 @@ void QmlJsEditingSettings::setAutoFormatOnlyCurrentProject(const bool autoFormat
     m_autoFormatOnlyCurrentProject = autoFormatOnlyCurrentProject;
 }
 
-QmlJsEditingSettingsPageWidget::QmlJsEditingSettingsPageWidget(QWidget *parent) :
-    QWidget(parent)
-{
-    m_ui.setupUi(this);
-}
-
-QmlJsEditingSettings QmlJsEditingSettingsPageWidget::settings() const
-{
-    QmlJsEditingSettings s;
-    s.setEnableContextPane(m_ui.textEditHelperCheckBox->isChecked());
-    s.setPinContextPane(m_ui.textEditHelperCheckBoxPin->isChecked());
-    s.setAutoFormatOnSave(m_ui.autoFormatOnSave->isChecked());
-    s.setAutoFormatOnlyCurrentProject(m_ui.autoFormatOnlyCurrentProject->isChecked());
-    return s;
-}
-
-void QmlJsEditingSettingsPageWidget::setSettings(const QmlJsEditingSettings &s)
-{
-    m_ui.textEditHelperCheckBox->setChecked(s.enableContextPane());
-    m_ui.textEditHelperCheckBoxPin->setChecked(s.pinContextPane());
-    m_ui.autoFormatOnSave->setChecked(s.autoFormatOnSave());
-    m_ui.autoFormatOnlyCurrentProject->setChecked(s.autoFormatOnlyCurrentProject());
-}
-
 QmlJsEditingSettings QmlJsEditingSettings::get()
 {
     QmlJsEditingSettings settings;
     settings.fromSettings(ApplicationCore::settings());
     return settings;
-}
-
-QmlJsEditingSettingsPage::QmlJsEditingSettingsPage() :
-    m_widget(0)
-{
-    setId("C.QmlJsEditing");
-    setDisplayName(tr("QML/JS Editing"));
-    setCategory(Constants::SETTINGS_CATEGORY_QML);
-}
-
-QWidget *QmlJsEditingSettingsPage::widget()
-{
-    if (!m_widget) {
-        m_widget = new QmlJsEditingSettingsPageWidget;
-        m_widget->setSettings(QmlJsEditingSettings::get());
-    }
-    return m_widget;
-}
-
-void QmlJsEditingSettingsPage::apply()
-{
-    if (!m_widget) // page was never shown
-        return;
-    m_widget->settings().set();
-}
-
-void QmlJsEditingSettingsPage::finish()
-{
-    delete m_widget;
 }

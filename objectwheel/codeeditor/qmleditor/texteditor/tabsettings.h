@@ -35,7 +35,7 @@ QT_END_NAMESPACE
 
 namespace TextEditor {
 
-// Tab settings: Data type the GeneralSettingsPage acts on
+// Tab settings: Data type the General Settings Page acts on
 // with some convenience functions for formatting.
 class TEXTEDITOR_EXPORT TabSettings
 {

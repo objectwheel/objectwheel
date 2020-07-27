@@ -25,7 +25,6 @@
 
 #include "Icons.h"
 
-#include <utils/templateengine.h>
 #include <utils/icon.h>
 
 using namespace CPlusPlus;

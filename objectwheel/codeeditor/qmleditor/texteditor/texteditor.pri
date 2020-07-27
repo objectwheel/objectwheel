@@ -26,10 +26,8 @@ HEADERS += \
         $$PWD/textstyles.h \
         $$PWD/texteditorsettings.h \
         $$PWD/texteditoroverlay.h \
-        $$PWD/texteditoroptionspage.h \
         $$PWD/texteditorconstants.h \
         $$PWD/texteditor_global.h \
-        $$PWD/tabsettingswidget.h \
         $$PWD/tabsettings.h \
         $$PWD/syntaxhighlighter.h \
         $$PWD/storagesettings.h \
@@ -37,7 +35,6 @@ HEADERS += \
         $$PWD/quickfix.h \
         $$PWD/indenter.h \
         $$PWD/helpitem.h \
-        $$PWD/completionsettingspage.h \
         $$PWD/completionsettings.h \
         $$PWD/colorschemeedit.h \
         $$PWD/colorscheme.h \
@@ -48,7 +45,6 @@ HEADERS += \
         $$PWD/circularclipboardassist.h \
         $$PWD/simplecodestylepreferences.h \
         $$PWD/icodestylepreferences.h \
-        $$PWD/simplecodestylepreferenceswidget.h \
         $$PWD/refactoroverlay.h
 
 SOURCES += \
@@ -78,7 +74,6 @@ SOURCES += \
         $$PWD/colorscheme.cpp \
         $$PWD/colorschemeedit.cpp \
         $$PWD/completionsettings.cpp \
-        $$PWD/completionsettingspage.cpp \
         $$PWD/helpitem.cpp \
         $$PWD/indenter.cpp \
         $$PWD/quickfix.cpp \
@@ -86,9 +81,7 @@ SOURCES += \
         $$PWD/storagesettings.cpp \
         $$PWD/syntaxhighlighter.cpp \
         $$PWD/tabsettings.cpp \
-        $$PWD/tabsettingswidget.cpp \
         $$PWD/texteditorconstants.cpp \
-        $$PWD/texteditoroptionspage.cpp \
         $$PWD/texteditoroverlay.cpp \
         $$PWD/texteditorsettings.cpp \
         $$PWD/typingsettings.cpp \
@@ -96,10 +89,7 @@ SOURCES += \
         $$PWD/circularclipboardassist.cpp \
         $$PWD/simplecodestylepreferences.cpp \
         $$PWD/icodestylepreferences.cpp \
-        $$PWD/simplecodestylepreferenceswidget.cpp \
         $$PWD/refactoroverlay.cpp
 
 FORMS += \
-        $$PWD/colorschemeedit.ui \
-        $$PWD/completionsettingspage.ui \
-        $$PWD/tabsettingswidget.ui
+        $$PWD/colorschemeedit.ui
