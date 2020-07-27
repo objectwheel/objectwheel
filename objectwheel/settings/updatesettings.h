@@ -15,7 +15,7 @@ struct UpdateSettings final : public Settings
 
     bool checkForUpdatesAutomatically;
     bool wereUpdatesAvailableLastTime;
-    QDateTime lastUpdateCheckDate;
+    QDateTime lastSuccessfulUpdateCheckDate;
 };
 
 #endif // UPDATESETTINGS_H

@@ -2,11 +2,11 @@
 #include <updatesettings.h>
 #include <systemsettings.h>
 #include <paintutils.h>
-#include <servermanager.h>
 #include <updatemanager.h>
 #include <stackedlayout.h>
 #include <waitingspinnerwidget.h>
 #include <coreconstants.h>
+#include <utilityfunctions.h>
 
 #include <QProgressBar>
 #include <QCoreApplication>
@@ -223,8 +223,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     connect(m_checkUpdatesButton, &QPushButton::clicked,
             this, [=] { UpdateManager::startUpdateCheck(); });
-    connect(m_downloadButton, &QPushButton::clicked,
-            this, [=] {
+    connect(m_downloadButton, &QPushButton::clicked, this, [this] {
         if (UpdateManager::fileCount() > 200) {
             QMessageBox::StandardButton ret =
                     UtilityFunctions::showMessage(this, tr("This looks like to be a big update"),
@@ -242,18 +241,15 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         UpdateManager::download();
         m_updateStatusStackedLayout->setCurrentWidget(m_downloadWidget);
     });
-    connect(ServerManager::instance(), &ServerManager::stateChanged,
-            this, &UpdateSettingsWidget::updateCheckButton);
     connect(UpdateManager::instance(), &UpdateManager::updateCheckStarted,
             this, &UpdateSettingsWidget::updateCheckButton);
     connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
             this, &UpdateSettingsWidget::updateCheckButton);
-    connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished,
-            this, [this] (bool succeed) {
+    connect(UpdateManager::instance(), &UpdateManager::updateCheckFinished, this, [this] (bool succeed) {
         if (succeed) {
             int fileCount = UpdateManager::fileCount();
             UpdateSettings* settings = SystemSettings::updateSettings();
-            settings->lastUpdateCheckDate = QDateTime::currentDateTime();
+            settings->lastSuccessfulUpdateCheckDate = QDateTime::currentDateTime();
             settings->wereUpdatesAvailableLastTime = fileCount > 0;
             settings->write();
             if (fileCount > 0) {
@@ -266,7 +262,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             } else {
                 m_upToDateLabel->setText(tr("Objectwheel is up to date"));
                 m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
-                m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+                m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
                 m_updateStatusStackedLayout->setCurrentWidget(m_upToDateWidget);
             }
         } else {
@@ -274,12 +270,20 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
             m_updateStatusStackedLayout->setCurrentWidget(m_upToDateWidget);
         }
+        m_downloadProgressBar->setInvertedAppearance(false);
+        m_downloadProgressBar->setValue(0);
+        m_downloadingLabel->setText(tr("Downloading..."));
+        m_abortAndInstallButton->setText(tr("Abort"));
+        m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
+        m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
     });
-    connect(m_abortAndInstallButton, &QPushButton::clicked, this, [=] {
+    connect(m_abortAndInstallButton, &QPushButton::clicked, this, [this] {
+        if (UpdateManager::isUpdateCheckRunning())
+            return;
         if (m_downloadProgressBar->invertedAppearance()) {
             m_abortAndInstallButton->setEnabled(false);
             UpdateSettings* settings = SystemSettings::updateSettings();
-            settings->lastUpdateCheckDate = QDateTime::currentDateTime();
+            settings->lastSuccessfulUpdateCheckDate = QDateTime::currentDateTime();
             settings->wereUpdatesAvailableLastTime = false;
             settings->write();
             UpdateManager::install();
@@ -357,7 +361,6 @@ void UpdateSettingsWidget::apply()
     UpdateSettings* settings = SystemSettings::updateSettings();
     /****/
     settings->checkForUpdatesAutomatically = m_checkForUpdatesAutomaticallyCheckBox->isChecked();
-    // settings->lastUpdateCheckDate = QDateTime::fromString(m_lastCheckedDateLabel->text(), Qt::SystemLocaleLongDate);
     /****/
     settings->write();
 }
@@ -373,7 +376,7 @@ void UpdateSettingsWidget::revert()
     /****/
     m_checkForUpdatesAutomaticallyCheckBox->setChecked(settings->checkForUpdatesAutomatically);
 
-    const QDateTime& lastChecked = SystemSettings::updateSettings()->lastUpdateCheckDate;
+    const QDateTime& lastChecked = SystemSettings::updateSettings()->lastSuccessfulUpdateCheckDate;
     const qint64 days = lastChecked.daysTo(QDateTime::currentDateTime());
     if (!lastChecked.isValid()) {
         m_upToDateLabel->setText(tr("Updates has never been checked"));
@@ -382,19 +385,19 @@ void UpdateSettingsWidget::revert()
     } else if (days > 2) {
         m_upToDateLabel->setText(tr("Updates has not been checked for %1 days").arg(days));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/update-warning.svg"), QSize(80, 80), this));
-        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+        m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else if (!settings->checkForUpdatesAutomatically) {
         m_upToDateLabel->setText(tr("Automatic update check disabled"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-disabled.svg"), QSize(80, 80), this));
-        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+        m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else if (settings->wereUpdatesAvailableLastTime) {
         m_upToDateLabel->setText(tr("Updates are available for Objectwheel"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-disabled.svg"), QSize(80, 80), this));
-        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+        m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     } else {
         m_upToDateLabel->setText(tr("Objectwheel is up to date"));
         m_upToDateIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/up-to-date.svg"), QSize(80, 80), this));
-        m_lastCheckedDateLabel->setText(settings->lastUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
+        m_lastCheckedDateLabel->setText(settings->lastSuccessfulUpdateCheckDate.toString(Qt::SystemLocaleLongDate));
     }
 }
 
@@ -424,11 +427,12 @@ bool UpdateSettingsWidget::containsWord(const QString& word) const
 
 void UpdateSettingsWidget::updateCheckButton()
 {
-    m_checkUpdatesButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
     if (UpdateManager::isUpdateCheckRunning())
         m_updateCheckSpinner->start();
     else
         m_updateCheckSpinner->stop();
+    m_downloadButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
+    m_checkUpdatesButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
 }
 
 void UpdateSettingsWidget::fill()
