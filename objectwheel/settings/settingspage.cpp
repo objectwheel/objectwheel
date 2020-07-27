@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QWindow>
 #include <QTabBar>
+#include <QTimer>
 
 SettingsPage::SettingsPage(QWidget* parent) : QWidget(parent)
   , m_tabWidget(new QTabWidget(this))
@@ -98,9 +99,11 @@ void SettingsPage::addWidget(SettingsWidget* widget)
     m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
                                       ? QVariant("﹡") : QVariant());
     connect(widget, &SettingsWidget::markChanged, this, [=] {
-        m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
-                                          ? QVariant("﹡") : QVariant());
-        m_tabWidget->tabBar()->update();
+        QTimer::singleShot(800, [=] {
+            m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
+                                              ? QVariant("﹡") : QVariant());
+            m_tabWidget->tabBar()->update();
+        });
         emit markCountChanged(markCount());
     });
 }

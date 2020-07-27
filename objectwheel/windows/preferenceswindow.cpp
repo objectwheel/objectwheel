@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QDialogButtonBox>
 #include <QShowEvent>
+#include <QTimer>
 
 Q_DECLARE_METATYPE(QMargins)
 
@@ -253,8 +254,10 @@ void PreferencesWindow::addPage(SettingsPage* page)
 
     item->setData(NotificationsProperty, page->markCount() > 0 ? page->markCount() : QVariant());
     connect(page, &SettingsPage::markCountChanged, this, [=] (int markCount) {
-        item->setData(NotificationsProperty, markCount > 0 ? markCount : QVariant());
-        m_listWidget->update();
+        QTimer::singleShot(800, [=] {
+            item->setData(NotificationsProperty, markCount > 0 ? markCount : QVariant());
+            m_listWidget->update();
+        });
         emit markCountChanged(this->markCount());
     });
 
