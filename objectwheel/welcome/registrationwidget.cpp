@@ -7,123 +7,125 @@
 #include <registrationapimanager.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
-#include <QVBoxLayout>
-#include <QHBoxLayout>
+#include <QBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QComboBox>
-#include <QTextStream>
-#include <QMessageBox>
-#include <QFile>
-
-#define TERMS_HEIGHT     (35)
-#define TERMS_WIDTH      (350)
-#define PATH_COUNTRIES   (":/other/countries.txt")
-#define PATH_OICON       (":/images/welcome/load.png")
-#define PATH_BICON       (":/images/welcome/unload.png")
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
 enum Buttons { Next, Back };
 
-static const QStringList& countries()
+RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
+  , m_bulkEdit(new BulkEdit(this))
+  , m_termsSwitch(new Switch(this))
+  , m_buttons(new ButtonSlice(this))
+  , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
 {
-    static QStringList countries;
-
-    if (countries.isEmpty()) {
-        QFile file(PATH_COUNTRIES);
-        if (!file.open(QFile::ReadOnly)) {
-            qWarning("countries: Cannot read file");
-            return countries;
-        }
-
-        QString country;
-        QTextStream in(&file);
-        while (in.readLineInto(&country))
-            countries << country.split("   ").first();
-    }
-
-    return countries;
-}
-
-RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
-{
-    _layout = new QVBoxLayout(this);
-    _iconLabel = new QLabel;
-    _signupLabel = new QLabel;
-    _bulkEdit = new BulkEdit;
-    _termsWidget = new QWidget;
-    _termsLayout = new QHBoxLayout(_termsWidget);
-    _termsSwitch = new Switch;
-    _termsLabel = new QLabel;
-    _buttons = new ButtonSlice;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false);
-
-    _layout->setSpacing(6);
-
-    _layout->addStretch();
-    _layout->addWidget(_iconLabel,0 , Qt::AlignCenter);
-    _layout->addWidget(_signupLabel,0 , Qt::AlignCenter);
-    _layout->addWidget(_bulkEdit, 0, Qt::AlignCenter);
-    _layout->addWidget(_termsWidget, 0, Qt::AlignCenter);
-    _layout->addWidget(_buttons, 0, Qt::AlignCenter);
-    _layout->addStretch();
-    _layout->addWidget(_loadingIndicator, 0, Qt::AlignCenter);
-    _layout->addStretch();
-
-    _termsLayout->setSpacing(5);
-    _termsLayout->setContentsMargins(2, 0, 0, 0);
-    _termsLayout->addWidget(_termsSwitch);
-    _termsLayout->addWidget(_termsLabel);
-    _termsLayout->setAlignment(_termsLabel, Qt::AlignVCenter);
-    _termsLayout->setAlignment(_termsSwitch, Qt::AlignVCenter);
-    _termsLayout->addStretch();
-
-    _iconLabel->setFixedSize(QSize(60, 60));
-    _iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/register.svg", QSize(60, 60), this));
+    auto iconLabel = new QLabel(this);
+    iconLabel->setFixedSize(QSize(60, 60));
+    iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/register.svg", QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
 
-    _signupLabel->setFont(f);
-    _signupLabel->setText(tr("Sign Up"));
+    auto signupLabel = new QLabel(this);
+    signupLabel->setFont(f);
+    signupLabel->setText(tr("Sign Up"));
 
-    _bulkEdit->add(First, tr("First Name *"));
-    _bulkEdit->add(Last, tr("Last Name *"));
-    _bulkEdit->add(Email, tr("Email Address *"));
-    _bulkEdit->add(ConfirmEmail, tr("Confirm Email *"));
-    _bulkEdit->add(Password, tr("Password *"));
-    _bulkEdit->add(ConfirmPassword, tr("Confirm Password *"));
-    _bulkEdit->add(Country, tr("Country"), new QComboBox);
-    _bulkEdit->add(Company, tr("Company"));
-    _bulkEdit->add(Title, tr("Title"));
-    _bulkEdit->add(Phone, tr("Phone"));
-    _bulkEdit->setFixedWidth(TERMS_WIDTH);
+    m_bulkEdit->add(First, tr("First Name *"));
+    m_bulkEdit->add(Last, tr("Last Name *"));
+    m_bulkEdit->add(Email, tr("Email Address *"));
+    m_bulkEdit->add(ConfirmEmail, tr("Confirm Email *"));
+    m_bulkEdit->add(Password, tr("Password *"));
+    m_bulkEdit->add(ConfirmPassword, tr("Confirm Password *"));
+    m_bulkEdit->add(Country, tr("Country"), new QComboBox(this));
+    m_bulkEdit->add(Company, tr("Company"));
+    m_bulkEdit->add(Title, tr("Title"));
+    m_bulkEdit->add(Phone, tr("Phone"));
+    m_bulkEdit->setFixedWidth(350);
 
-    _bulkEdit->get<QLineEdit*>(First)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Last)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Email)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(ConfirmEmail)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Company)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Title)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Phone)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
-    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setEchoMode(QLineEdit::Password);
+    m_bulkEdit->get<QLineEdit*>(First)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Last)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Email)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Company)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Title)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Phone)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setEchoMode(QLineEdit::Password);
 
-    auto cbox = _bulkEdit->get<QComboBox*>(Country);
+    auto termsWidget = new QWidget(this);
+    termsWidget->setFixedSize(m_bulkEdit->width(), 35);
+    termsWidget->setObjectName("termsWidget");
+    termsWidget->setStyleSheet(tr("#termsWidget {"
+                                  "    border-radius: %1;"
+                                  "    Background: #12000000;"
+                                  "    border: 1px solid #18000000;"
+                                  "}").arg(int(termsWidget->height() / 2.0)));
+
+    auto termsLabel = new QLabel(termsWidget);
+    termsLabel->setFocusPolicy(Qt::NoFocus);
+    termsLabel->setTextFormat(Qt::RichText);
+    termsLabel->setOpenExternalLinks(true);
+    termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
+    termsLabel->setText(tr("I accept <a href=\"%1\">the terms and conditions</a>").arg(AppConstants::TAC_URL));
+
+    auto termsLayout = new QHBoxLayout(termsWidget);
+    termsLayout->setSpacing(5);
+    termsLayout->setContentsMargins(2, 0, 0, 0);
+    termsLayout->addWidget(m_termsSwitch, 0, Qt::AlignVCenter);
+    termsLayout->addWidget(termsLabel, 0, Qt::AlignVCenter);
+    termsLayout->addStretch();
+
+    m_buttons->add(Back, "#5BC5F8", "#2592F9");
+    m_buttons->add(Next, "#8BBB56", "#6EA045");
+    m_buttons->get(Next)->setText(tr("Next"));
+    m_buttons->get(Back)->setText(tr("Back"));
+    m_buttons->get(Next)->setIcon(QIcon(":/images/welcome/load.png"));
+    m_buttons->get(Back)->setIcon(QIcon(":/images/welcome/unload.png"));
+    m_buttons->get(Next)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
+    m_buttons->settings().cellWidth = m_bulkEdit->width() / 2.0;
+    m_buttons->triggerSettings();
+
+    m_loadingIndicator->setStyleSheet("background: transparent;");
+    m_loadingIndicator->setColor(palette().text().color());
+    m_loadingIndicator->setRoundness(50);
+    m_loadingIndicator->setMinimumTrailOpacity(5);
+    m_loadingIndicator->setTrailFadePercentage(100);
+    m_loadingIndicator->setRevolutionsPerSecond(2);
+    m_loadingIndicator->setNumberOfLines(12);
+    m_loadingIndicator->setLineLength(5);
+    m_loadingIndicator->setInnerRadius(4);
+    m_loadingIndicator->setLineWidth(2);
+
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(6);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addStretch();
+    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(signupLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
+    layout->addWidget(termsWidget, 0, Qt::AlignHCenter);
+    layout->addWidget(m_buttons, 0, Qt::AlignHCenter);
+    layout->addStretch();
+    layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
+    layout->addStretch();
+
+    auto cbox = m_bulkEdit->get<QComboBox*>(Country);
     cbox->setEditable(true);
     cbox->lineEdit()->setReadOnly(true);
     cbox->lineEdit()->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     cbox->setMaxVisibleItems(15);
 
     cbox->addItem(tr("Please select..."));
-    for (int i = 0; i < countries().size(); i++)
-        cbox->addItem(countries().at(i));
-
+    cbox->addItems(UtilityFunctions::countryList());
     cbox->setStyleSheet(
     "QComboBox {\
         border: none;\
@@ -138,108 +140,54 @@ RegistrationWidget::RegistrationWidget(QWidget *parent) : QWidget(parent)
         image: url(:/images/welcome/downarrow.png);\
     }");
 
-    _termsWidget->setObjectName("termsWidget");
-    _termsWidget->setFixedSize(TERMS_WIDTH, TERMS_HEIGHT);
-    _termsWidget->setStyleSheet(
-        tr(
-            "#termsWidget {"
-            "    border-radius: %1;"
-            "    Background: #12000000;"
-            "    border: 1px solid #18000000;"
-            "}"
-        )
-        .arg(int(TERMS_HEIGHT / 2.0))
-    );
-
-    _termsLabel->setFocusPolicy(Qt::NoFocus);
-    _termsLabel->setTextFormat(Qt::RichText);
-    _termsLabel->setText(tr(
-        "I accept <a href=\"%1\">the terms and conditions</a>"
-    ).arg(AppConstants::TAC_URL));
-
-    _termsLabel->setOpenExternalLinks(true);
-    _termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
-
-    _buttons->add(Back, "#5BC5F8", "#2592F9");
-    _buttons->add(Next, "#8BBB56", "#6EA045");
-    _buttons->get(Next)->setText(tr("Next"));
-    _buttons->get(Back)->setText(tr("Back"));
-    _buttons->get(Next)->setIcon(QIcon(PATH_OICON));
-    _buttons->get(Back)->setIcon(QIcon(PATH_BICON));
-    _buttons->get(Next)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Back)->setCursor(Qt::PointingHandCursor);
-    _buttons->settings().cellWidth = TERMS_WIDTH / 2.0;
-    _buttons->triggerSettings();
-
-    connect(_buttons->get(Next), &QPushButton::clicked, this, &RegistrationWidget::onNextClicked);
-    connect(_buttons->get(Back), &QPushButton::clicked, this, &RegistrationWidget::back);
-
-    _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor(palette().text().color());
-    _loadingIndicator->setRoundness(50);
-    _loadingIndicator->setMinimumTrailOpacity(5);
-    _loadingIndicator->setTrailFadePercentage(100);
-    _loadingIndicator->setRevolutionsPerSecond(2);
-    _loadingIndicator->setNumberOfLines(12);
-    _loadingIndicator->setLineLength(5);
-    _loadingIndicator->setInnerRadius(4);
-    _loadingIndicator->setLineWidth(2);
+    connect(m_buttons->get(Next), &QPushButton::clicked,
+            this, &RegistrationWidget::onNextClicked);
+    connect(m_buttons->get(Back), &QPushButton::clicked,
+            this, &RegistrationWidget::back);
 }
 
 void RegistrationWidget::clear()
 {
-    _bulkEdit->get<QLineEdit*>(First)->setText("");
-    _bulkEdit->get<QLineEdit*>(Last)->setText("");
-    _bulkEdit->get<QLineEdit*>(Email)->setText("");
-    _bulkEdit->get<QLineEdit*>(ConfirmEmail)->setText("");
-    _bulkEdit->get<QLineEdit*>(Password)->setText("");
-    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setText("");
-    _bulkEdit->get<QLineEdit*>(Company)->setText("");
-    _bulkEdit->get<QLineEdit*>(Title)->setText("");
-    _bulkEdit->get<QLineEdit*>(Phone)->setText("");
-    _bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
-    _termsSwitch->setChecked(false);
-    _buttons->setFocus();
+    m_bulkEdit->get<QLineEdit*>(First)->setText("");
+    m_bulkEdit->get<QLineEdit*>(Last)->setText("");
+    m_bulkEdit->get<QLineEdit*>(Email)->setText("");
+    m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->setText("");
+    m_bulkEdit->get<QLineEdit*>(Password)->setText("");
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setText("");
+    m_bulkEdit->get<QLineEdit*>(Company)->setText("");
+    m_bulkEdit->get<QLineEdit*>(Title)->setText("");
+    m_bulkEdit->get<QLineEdit*>(Phone)->setText("");
+    m_bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
+    m_termsSwitch->setChecked(false);
+    m_buttons->setFocus();
 }
 
 void RegistrationWidget::lock()
 {
-    _bulkEdit->setDisabled(true);
-    _termsLabel->setDisabled(true);
-    _termsSwitch->setDisabled(true);
-    _buttons->setDisabled(true);
-    _loadingIndicator->start();
-    _buttons->setFocus();
+    m_loadingIndicator->start();
+    m_buttons->setFocus();
 }
 
 void RegistrationWidget::unlock()
 {
-    _bulkEdit->setEnabled(true);
-    _termsLabel->setEnabled(true);
-    _termsSwitch->setEnabled(true);
-    _buttons->setEnabled(true);
-    _loadingIndicator->stop();
-
-    if (_termsSwitch->isChecked())
-        _buttons->get(Next)->setEnabled(true);
-
-    _buttons->setFocus();
+    m_loadingIndicator->stop();
+    m_buttons->setFocus();
 }
 
 void RegistrationWidget::onNextClicked()
 {
-    const auto& first = _bulkEdit->get<QLineEdit*>(First)->text();
-    const auto& last = _bulkEdit->get<QLineEdit*>(Last)->text();
-    const auto& email = _bulkEdit->get<QLineEdit*>(Email)->text();
-    const auto& cemail = _bulkEdit->get<QLineEdit*>(ConfirmEmail)->text();
-    const auto& password = _bulkEdit->get<QLineEdit*>(Password)->text();
-    const auto& cpassword = _bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
-    const auto& company = _bulkEdit->get<QLineEdit*>(Company)->text();
-    const auto& title = _bulkEdit->get<QLineEdit*>(Title)->text();
-    const auto& phone = _bulkEdit->get<QLineEdit*>(Phone)->text();
-    const auto& country = _bulkEdit->get<QComboBox*>(Country)->currentText();
+    const auto& first = m_bulkEdit->get<QLineEdit*>(First)->text();
+    const auto& last = m_bulkEdit->get<QLineEdit*>(Last)->text();
+    const auto& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
+    const auto& cemail = m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->text();
+    const auto& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
+    const auto& cpassword = m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
+    const auto& company = m_bulkEdit->get<QLineEdit*>(Company)->text();
+    const auto& title = m_bulkEdit->get<QLineEdit*>(Title)->text();
+    const auto& phone = m_bulkEdit->get<QLineEdit*>(Phone)->text();
+    const auto& country = m_bulkEdit->get<QComboBox*>(Country)->currentText();
 
-    if (!_termsSwitch->isChecked()) {
+    if (!m_termsSwitch->isChecked()) {
         UtilityFunctions::showMessage(
                     this, tr("Oops"),
                     tr("Please accept the terms and conditions first in "
@@ -296,15 +244,15 @@ void RegistrationWidget::onNextClicked()
 
 //    bool succeed =
 //    RegistrationApiManager::signup(
-//        _bulkEdit->get<QLineEdit*>(First)->text(),
-//        _bulkEdit->get<QLineEdit*>(Last)->text(),
-//        _bulkEdit->get<QLineEdit*>(Email)->text(),
-//        _bulkEdit->get<QLineEdit*>(Password)->text(),
-//        static_cast<QComboBox*>(_bulkEdit->get(Country)->currentText() != "Please select..." ?
-//        static_cast<QComboBox*>(_bulkEdit->get(Country)->currentText() : "",
-//        _bulkEdit->get<QLineEdit*>(Company)->text(),
-//        _bulkEdit->get<QLineEdit*>(Title)->text(),
-//        _bulkEdit->get<QLineEdit*>(Phone)->text()
+//        m_bulkEdit->get<QLineEdit*>(First)->text(),
+//        m_bulkEdit->get<QLineEdit*>(Last)->text(),
+//        m_bulkEdit->get<QLineEdit*>(Email)->text(),
+//        m_bulkEdit->get<QLineEdit*>(Password)->text(),
+//        static_cast<QComboBox*>(m_bulkEdit->get(Country)->currentText() != "Please select..." ?
+//        static_cast<QComboBox*>(m_bulkEdit->get(Country)->currentText() : "",
+//        m_bulkEdit->get<QLineEdit*>(Company)->text(),
+//        m_bulkEdit->get<QLineEdit*>(Title)->text(),
+//        m_bulkEdit->get<QLineEdit*>(Phone)->text()
 //    );
 
 //    if (succeed)

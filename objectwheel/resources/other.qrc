@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>other/countries.txt</file>
         <file>other/form.js</file>
         <file>other/form.qml</file>
     </qresource>

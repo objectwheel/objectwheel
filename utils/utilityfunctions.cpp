@@ -645,6 +645,20 @@ QStringList anchorPropertyNames()
     return anchorPropertyNames;
 }
 
+QStringList countryList()
+{
+    static QStringList countries;
+    if (countries.isEmpty()) {
+        QFile file(":/other/countries.txt");
+        file.open(QFile::ReadOnly);
+        QString country;
+        QTextStream in(&file);
+        while (in.readLineInto(&country))
+            countries.append(country.split(QStringLiteral("   ")).first());
+    }
+    return countries;
+}
+
 void disableWheelEvent(QWidget* widget)
 {
     class WheelDisabler final : public QObject {

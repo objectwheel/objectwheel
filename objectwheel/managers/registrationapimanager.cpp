@@ -26,8 +26,8 @@ void RegistrationApiManager::login(const QString& email, const QString& password
 }
 
 void RegistrationApiManager::signup(const QString& first, const QString& last, const QString& email,
-                            const QString& password, const QString& country, const QString& company,
-                            const QString& title, const QString& phone)
+                                    const QString& password, const QString& country, const QString& company,
+                                    const QString& title, const QString& phone)
 {
     ServerManager::send(ServerManager::Signup, first, last, email,
                         password, country, company, title, phone);
@@ -49,7 +49,7 @@ void RegistrationApiManager::resetPassword(const QString& email)
 }
 
 void RegistrationApiManager::completePasswordReset(const QString& email, const QString& password,
-                                           const QString& code)
+                                                   const QString& code)
 {
     ServerManager::send(ServerManager::CompletePasswordReset, email, password, code);
 }

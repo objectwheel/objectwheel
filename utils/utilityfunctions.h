@@ -147,6 +147,7 @@ QPointF bottomCenter(const QRectF& rect);
 QPixmap imageToPixmap(const QImage& image);
 QStringList anchorLineNames();
 QStringList anchorPropertyNames();
+QStringList countryList();
 void disableWheelEvent(QWidget* widget);
 QFont defaultFont();
 QFont systemDefaultFont();
