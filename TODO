@@ -10,7 +10,6 @@ QRegularExpression("[^\\r\\n\\t\\f\\v ]") whitespace olayını tektipleştir Uti
 RegistrationApi tamamlanacak
 ProjectsWidget'de ki loading ve diğer tüm waitingspinner kullananlarda yukarı aşağı kayma problemleri giderilecek
 QStyle::SH_ItemView_PaintAlternatingRowColorsForEmptyArea bunu propertiespane için bi düşün dene
-APK'yı proje dosyasının bir hamlede değiştirilip, cracklenmesine karşı koru, executable kısım ile Project.rcc arasında organik bir bağ olsun
 
 Designer Core TODOs
 Attribitions Bölümü ekle ve şunlar için atıf ekle:

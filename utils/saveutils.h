@@ -38,15 +38,7 @@ enum UserProperties : quint32 { // ### Designer related properties
     UserVersion,
     UserEmail,
     UserPassword,
-    UserFirst,
-    UserLast,
-    UserCountry,
-    UserCompany,
-    UserTitle,
-    UserPhone,
-    UserIcon,
     UserPlan,
-    UserRegistrationDate,
     UserLastOnlineDate
 };
 
@@ -83,16 +75,8 @@ QByteArray projectTheme(const QString& projectDir);
 
 quint32 userPlan(const QString& userDir);
 QString userEmail(const QString& userDir);
-QString userFirst(const QString& userDir);
-QString userLast(const QString& userDir);
-QString userCountry(const QString& userDir);
-QString userCompany(const QString& userDir);
-QString userTitle(const QString& userDir);
-QString userPhone(const QString& userDir);
 QDateTime userLastOnlineDate(const QString& userDir);
-QDateTime userRegistrationDate(const QString& userDir);
 QByteArray userPassword(const QString& userDir);
-QByteArray userIcon(const QString& userDir);
 
 bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
 bool setProperty(const QString& controlDir, DesignProperties property, const QVariant& value);

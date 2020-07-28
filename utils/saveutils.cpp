@@ -45,7 +45,6 @@
 **                                                control.meta
 **            meta
 **                user.meta
-**                user.icon
 **
 ****************************************************************************/
 
@@ -69,34 +68,6 @@ using ProjectMetaHash = QHash<ProjectProperties, QVariant>;
 using UserMetaHash = QHash<UserProperties, QVariant>;
 
 namespace Internal {
-
-QByteArray readFile(const QString& filePath)
-{
-    QByteArray data;
-    QFile file(filePath);
-    if (!file.open(QFile::ReadOnly)) {
-        qWarning("SaveUtils: Failed to read file, %s", filePath.toUtf8().constData());
-        return data;
-    }
-    data = file.readAll();
-    file.close();
-    return data;
-}
-
-bool writeFile(const QString& filePath, const QByteArray& data)
-{
-    QFile file(filePath);
-    if (!file.open(QFile::WriteOnly)) {
-        qWarning("SaveUtils: Failed to open file, %s", filePath.toUtf8().constData());
-        return false;
-    }
-    if (file.write(data) != data.size()) {
-        qWarning("SaveUtils: Failed to write file, %s", filePath.toUtf8().constData());
-        return false;
-    }
-    file.close();
-    return true;
-}
 
 template <typename MetaHash>
 MetaHash readMetaHash(const QString& metaFilePath)
@@ -174,11 +145,6 @@ QString projectMetaFileName()
     return QStringLiteral("project.meta");
 }
 
-QString userIconFileName()
-{
-    return QStringLiteral("user.icon");
-}
-
 QString userMetaFileName()
 {
     return QStringLiteral("user.meta");
@@ -212,11 +178,6 @@ QString toDesignMetaFile(const QString& controlDir)
 QString toProjectMetaFile(const QString& projectDir)
 {
     return toProjectMetaDir(projectDir) + '/' + projectMetaFileName();
-}
-
-QString toUserIconFile(const QString& userDir)
-{
-    return toUserMetaDir(userDir) + '/' + userIconFileName();
 }
 
 QString toUserMetaFile(const QString& userDir)
@@ -261,10 +222,7 @@ QVariant property(const QString& projectDir, ProjectProperties property)
 
 QVariant property(const QString& userDir, UserProperties property)
 {
-    if (property == UserIcon)
-        return readFile(toUserIconFile(userDir));
-    else
-        return userMetaHash(userDir).value(property);
+    return userMetaHash(userDir).value(property);
 }
 
 } // Internal
@@ -421,54 +379,14 @@ QString userEmail(const QString& userDir)
     return Internal::property(userDir, UserEmail).value<QString>();
 }
 
-QString userFirst(const QString& userDir)
-{
-    return Internal::property(userDir, UserFirst).value<QString>();
-}
-
-QString userLast(const QString& userDir)
-{
-    return Internal::property(userDir, UserLast).value<QString>();
-}
-
-QString userCountry(const QString& userDir)
-{
-    return Internal::property(userDir, UserCountry).value<QString>();
-}
-
-QString userCompany(const QString& userDir)
-{
-    return Internal::property(userDir, UserCompany).value<QString>();
-}
-
-QString userTitle(const QString& userDir)
-{
-    return Internal::property(userDir, UserTitle).value<QString>();
-}
-
-QString userPhone(const QString& userDir)
-{
-    return Internal::property(userDir, UserPhone).value<QString>();
-}
-
 QDateTime userLastOnlineDate(const QString& userDir)
 {
     return Internal::property(userDir, UserLastOnlineDate).value<QDateTime>();
 }
 
-QDateTime userRegistrationDate(const QString& userDir)
-{
-    return Internal::property(userDir, UserRegistrationDate).value<QDateTime>();
-}
-
 QByteArray userPassword(const QString& userDir)
 {
     return Internal::property(userDir, UserPassword).value<QByteArray>();
-}
-
-QByteArray userIcon(const QString& userDir)
-{
-    return Internal::property(userDir, UserIcon).value<QByteArray>();
 }
 
 bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value)
@@ -495,16 +413,9 @@ bool setProperty(const QString& projectDir, ProjectProperties property, const QV
 
 bool setProperty(const QString& userDir, UserProperties property, const QVariant& value)
 {
-    if (property == UserIcon) {
-        if (value.toByteArray().isEmpty())
-            return true;
-        else
-            return Internal::writeFile(Internal::toUserIconFile(userDir), value.toByteArray());
-    } else {
-        UserMetaHash hash(Internal::userMetaHash(userDir));
-        hash.insert(property, value);
-        return Internal::saveMetaHash(hash, Internal::toUserMetaFile(userDir));
-    }
+    UserMetaHash hash(Internal::userMetaHash(userDir));
+    hash.insert(property, value);
+    return Internal::saveMetaHash(hash, Internal::toUserMetaFile(userDir));
 }
 
 bool initControlMeta(const QString& controlDir)

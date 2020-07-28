@@ -61,23 +61,9 @@ void RegistrationApiManager::onServerResponse(const QByteArray& data)
 
     switch (command) {
     case ServerManager::LoginSuccessful: {
-        QByteArray icon;
-        QDateTime regdate;
         PlanManager::Plans plan;
-        QString first, last, country, company, title, phone;
-        UtilityFunctions::pullCbor(data, command, icon, regdate, plan, first, last, country, company, title, phone);
-
-        QVariantList userInfo;
-        userInfo.append(icon);
-        userInfo.append(regdate);
-        userInfo.append(plan);
-        userInfo.append(first);
-        userInfo.append(last);
-        userInfo.append(country);
-        userInfo.append(company);
-        userInfo.append(title);
-        userInfo.append(phone);
-        emit loginSuccessful(userInfo);
+        UtilityFunctions::pullCbor(data, command, plan);
+        emit loginSuccessful({plan});
     } break;
     case ServerManager::LoginFailure:
         emit loginFailure();

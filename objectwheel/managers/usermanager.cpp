@@ -201,21 +201,12 @@ void UserManager::onLoginSuccessful(const QVariantList& userInfo)
     UtilityFunctions::cleanSensitiveInformation(s_emailCache);
     UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
 
-    // userRecord: icon, timestamp, plan, first, last, country, company, title, phone
     if (!userInfo.isEmpty()) {
-        SaveUtils::setProperty(userDir, SaveUtils::UserRegistrationDate, userInfo.at(1));
-        SaveUtils::setProperty(userDir, SaveUtils::UserPlan, userInfo.at(2));
-        SaveUtils::setProperty(userDir, SaveUtils::UserFirst, userInfo.at(3));
-        SaveUtils::setProperty(userDir, SaveUtils::UserLast, userInfo.at(4));
-        SaveUtils::setProperty(userDir, SaveUtils::UserCountry, userInfo.at(5));
-        SaveUtils::setProperty(userDir, SaveUtils::UserCompany, userInfo.at(6));
-        SaveUtils::setProperty(userDir, SaveUtils::UserTitle, userInfo.at(7));
-        SaveUtils::setProperty(userDir, SaveUtils::UserPhone, userInfo.at(8));
+        s_plan = userInfo.at(0).value<PlanManager::Plans>();
+        SaveUtils::setProperty(userDir, SaveUtils::UserPlan, quint32(s_plan));
         SaveUtils::setProperty(userDir, SaveUtils::UserLastOnlineDate, QDateTime::currentDateTime());
         SaveUtils::setProperty(userDir, SaveUtils::UserEmail, s_email);
-        SaveUtils::setProperty(userDir, SaveUtils::UserIcon, userInfo.at(0));
         SaveUtils::setProperty(userDir, SaveUtils::UserPassword, UtilityFunctions::generatePasswordHash(s_password.toUtf8()));
-        s_plan = userInfo.at(2).value<PlanManager::Plans>();
     } else {
         s_plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(userDir));
     }

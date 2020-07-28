@@ -7,7 +7,7 @@ namespace PlanManager {
 
 Q_NAMESPACE
 
-enum Plans {
+enum Plans : quint32 {
     Free,
     Pro = 0x23b,
     Enterprise = 0x5ad

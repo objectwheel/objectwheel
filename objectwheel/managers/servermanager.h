@@ -40,11 +40,6 @@ public:
         CompletePasswordReset,
         CompletePasswordResetSuccessful,
         CompletePasswordResetFailure,
-        UpdateUserIcon,
-        UpdateUserIconSuccessful,
-        UpdateUserIconFailure,
-        RequestUserIcon,
-        ResponseUserIcon,
         RequestCloudBuild,
         ResponseCloudBuild,
         AbortCloudBuild
