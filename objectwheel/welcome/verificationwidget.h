@@ -30,6 +30,8 @@ private slots:
     void onVerifyFailure();
     void onResendSuccessful();
     void onResendFailure();
+    void onDisconnected();
+    void onCountdownFinished();
 
 signals:
     void done();

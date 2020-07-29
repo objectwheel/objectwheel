@@ -12,7 +12,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QMessageBox>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
 // TODO: Check out if the given email address is valid before sending request to the server
 
@@ -46,10 +46,11 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     m_emailLabel->setAlignment(Qt::AlignHCenter);
     m_emailLabel->setStyleSheet(QStringLiteral("color: #70000000"));
 
-    m_bulkEdit->add(Code, tr("Enter Verification Code"));
     m_bulkEdit->setFixedWidth(300);
+    m_bulkEdit->add(Code, tr("Enter Verification Code"));
     m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    m_bulkEdit->get<QLineEdit*>(Code)->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
+    m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
+                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));
 
     m_buttons->add(Cancel, QLatin1String("#CC5D67"), QLatin1String("#B2525A"));
     m_buttons->add(Resend, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
@@ -100,16 +101,13 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
             this, &VerificationWidget::onResendClicked);
     connect(m_buttons->get(Cancel), &QPushButton::clicked,
             this, &VerificationWidget::onCancelClicked);
-    connect(m_countdown, &Countdown::finished, [=] {
-        UtilityFunctions::showMessage(this,
-                                      tr("Expired"),
-                                      tr("Your verification code has been expired, please try again later."));
-    });
+    connect(m_countdown, &Countdown::finished,
+            this, &VerificationWidget::onCountdownFinished);
 }
 
 void VerificationWidget::setEmail(const QString& email)
 {
-    resent = false;
+//    resent = false;
     unlock();
     m_countdown->start(300); // 5 mins
     m_emailLabel->setText(tr("Please use the verification code\n"
@@ -135,7 +133,7 @@ void VerificationWidget::unlock()
 {
     m_bulkEdit->setEnabled(true);
     m_buttons->get(Verify)->setEnabled(true);
-    if (!resent)
+//    if (!resent)
         m_buttons->get(Resend)->setEnabled(true);
     m_buttons->get(Cancel)->setEnabled(true);
     m_loadingIndicator->stop();
@@ -207,4 +205,36 @@ void VerificationWidget::onVerifyClicked()
 
     //    if (succeed)
     //        emit done();
+}
+
+void VerificationWidget::onVerifySuccessful()
+{
+
+}
+
+void VerificationWidget::onVerifyFailure()
+{
+
+}
+
+void VerificationWidget::onResendSuccessful()
+{
+
+}
+
+void VerificationWidget::onResendFailure()
+{
+
+}
+
+void VerificationWidget::onDisconnected()
+{
+
+}
+
+void VerificationWidget::onCountdownFinished()
+{
+    UtilityFunctions::showMessage(this,
+                                  tr("Expired"),
+                                  tr("Your verification code has been expired, please try again later."));
 }
