@@ -52,8 +52,10 @@ WaitingSpinnerWidget::WaitingSpinnerWidget(Qt::WindowModality modality,
     // We need to set the window modality AFTER we've hidden the
     // widget for the first time since changing this property while
     // the widget is visible has no effect.
+    bool v = isVisible(); hide();
     setWindowModality(modality);
     setAttribute(Qt::WA_TranslucentBackground);
+    setVisible(v);
 }
 
 void WaitingSpinnerWidget::initialize() {
@@ -73,10 +75,12 @@ void WaitingSpinnerWidget::initialize() {
     connect(_timer, &QTimer::timeout, this, &WaitingSpinnerWidget::rotate);
     updateSize();
     updateTimer();
-    hide();
+    // hide();
 }
 
 void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
+    if (!_isSpinning)
+        return;
     updatePosition();
     QPainter painter(this);
     painter.fillRect(this->rect(), Qt::transparent);
@@ -112,7 +116,7 @@ void WaitingSpinnerWidget::paintEvent(QPaintEvent *) {
 void WaitingSpinnerWidget::start() {
     updatePosition();
     _isSpinning = true;
-    show();
+    // show();
 
     if(parentWidget() && _disableParentWhenSpinning) {
         parentWidget()->setEnabled(false);
@@ -126,7 +130,7 @@ void WaitingSpinnerWidget::start() {
 
 void WaitingSpinnerWidget::stop() {
     _isSpinning = false;
-    hide();
+    // hide();
 
     if(parentWidget() && _disableParentWhenSpinning) {
         parentWidget()->setEnabled(true);

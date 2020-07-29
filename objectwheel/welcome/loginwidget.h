@@ -20,8 +20,6 @@ public:
 
 private slots:
     void clear();
-    void lock();
-    void unlock();
     void onLoginFailure();
     void onLoginSuccessful();
     void onLoginButtonClick();

@@ -140,29 +140,11 @@ void LoginWidget::clear()
     m_bulkEdit->get<QLineEdit*>(Password)->clear();
 }
 
-void LoginWidget::lock()
-{
-    m_bulkEdit->setDisabled(true);
-    m_buttons->setDisabled(true);
-    m_rememberMeSwitch->setDisabled(true);
-    m_helpButton->setDisabled(true);
-    m_loadingIndicator->start();
-}
-
-void LoginWidget::unlock()
-{
-    m_bulkEdit->setEnabled(true);
-    m_buttons->setEnabled(true);
-    m_rememberMeSwitch->setEnabled(true);
-    m_helpButton->setEnabled(true);
-    m_loadingIndicator->stop();
-}
-
 void LoginWidget::onLoginFailure()
 {
     clearRememberMe();
 
-    unlock();
+    m_loadingIndicator->stop();
 
     UtilityFunctions::showMessage(this,
                                   tr("Unable to log in"),
@@ -177,7 +159,7 @@ void LoginWidget::onLoginSuccessful()
     else
         clearRememberMe();
 
-    unlock();
+    m_loadingIndicator->stop();
 
     QTimer::singleShot(200, this, &LoginWidget::clear);
 
@@ -245,7 +227,7 @@ void LoginWidget::onLoginButtonClick()
                                               tr("Please upgrade your plan in order to enable offline "
                                                  "mode or checkout your internet connection."));
             } else {
-                lock();
+                m_loadingIndicator->start();
                 UserManager::loginOffline(email, hash);
             }
         } else {
@@ -257,7 +239,7 @@ void LoginWidget::onLoginButtonClick()
                                           QMessageBox::Information);
         }
     } else {
-        lock();
+        m_loadingIndicator->start();
         UserManager::login(email, hash);
     }
 }

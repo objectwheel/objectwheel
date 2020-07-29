@@ -128,6 +128,10 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
 
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupSuccessful,
+            this, &RegistrationWidget::onSignupSuccessful);
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupFailure,
+            this, &RegistrationWidget::onSignupFailure);
     connect(m_buttons->get(Next), &QPushButton::clicked,
             this, &RegistrationWidget::onNextClicked);
     connect(m_buttons->get(Back), &QPushButton::clicked,
@@ -256,5 +260,130 @@ void RegistrationWidget::onNextClicked()
 //    unlock();
 
 //    if (succeed)
-//        emit done(email);
+    //        emit done(email);
 }
+
+void RegistrationWidget::onSignupSuccessful()
+{
+
+}
+
+void RegistrationWidget::onSignupFailure()
+{
+
+}
+
+
+
+
+
+
+//void LoginWidget::clear()
+//{
+//    m_bulkEdit->get<QLineEdit*>(Email)->clear();
+//    m_bulkEdit->get<QLineEdit*>(Password)->clear();
+//}
+
+//void LoginWidget::onLoginFailure()
+//{
+//    clearRememberMe();
+
+//    m_loadingIndicator->stop();
+
+//    UtilityFunctions::showMessage(this,
+//                                  tr("Unable to log in"),
+//                                  tr("Incorrect email address or password, "
+//                                     "please checkout the information you entered."));
+//}
+
+//void LoginWidget::onLoginSuccessful()
+//{
+//    if (m_rememberMeSwitch->isChecked())
+//        saveRememberMe();
+//    else
+//        clearRememberMe();
+
+//    m_loadingIndicator->stop();
+
+//    QTimer::singleShot(200, this, &LoginWidget::clear);
+
+//    emit done();
+//}
+
+//void LoginWidget::onLoginButtonClick()
+//{
+//    const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
+//    const QString& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
+//    const QString& hash = UtilityFunctions::isPasswordHashFormatCorrect(password)
+//            ? password : UserManager::hashPassword(password);
+
+//    if (email.isEmpty() || password.isEmpty()) {
+//        UtilityFunctions::showMessage(this,
+//                                      tr("Fields cannot be left blank"),
+//                                      tr("Please fill in the required fields first."),
+//                                      QMessageBox::Information);
+//        return;
+//    }
+
+//    if (email.size() > 255 || password.size() > 255) {
+//        UtilityFunctions::showMessage(this,
+//                                      tr("Entry too long"),
+//                                      tr("Length of any fields cannot exceed 255 characters."),
+//                                      QMessageBox::Information);
+//        return;
+//    }
+
+//    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
+//        UtilityFunctions::showMessage(this,
+//                                      tr("Corrupt email address"),
+//                                      tr("Your email address doesn't comply with "
+//                                         "the standard email address format."),
+//                                      QMessageBox::Information);
+//        return;
+//    }
+
+//    if (!UtilityFunctions::isPasswordFormatCorrect(password) && password != hash) {
+//        UtilityFunctions::showMessage(this,
+//                                      tr("Corrupt password"),
+//                                      tr("Your password must comply with following standards:\n"
+//                                         "•  Length must be between 6 and 35 characters\n"
+//                                         "•  Only Latin-1 characters are allowed\n"
+//                                         "•  Whitespace characters are not allowed\n"
+//                                         "•  It can contain a-z, A-Z, 0-9\n"
+//                                         "•  It can also contain following special characters:\n"
+//                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"),
+//                                      QMessageBox::Information);
+//        return;
+//    }
+
+//    if (!ServerManager::isConnected()) {
+//        if (UserManager::hasLocalData(email)) {
+//            const QDateTime& lastOnline = SaveUtils::userLastOnlineDate(UserManager::dir(email));
+//            PlanManager::Plans plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(UserManager::dir(email)));
+//            if (lastOnline.daysTo(QDateTime::currentDateTime()) > 30) {
+//                UtilityFunctions::showMessage(this,
+//                                              tr("You have reached the offline usage limit"),
+//                                              tr("Please connect to the Internet in order to "
+//                                                 "continue using %1 in offline mode.").arg(AppConstants::NAME));
+//            } else if (!PlanManager::isEligibleForOfflineLogging(plan)) {
+//                UtilityFunctions::showMessage(this,
+//                                              tr("You are not eligible for offline mode"),
+//                                              tr("Please upgrade your plan in order to enable offline "
+//                                                 "mode or checkout your internet connection."));
+//            } else {
+//                m_loadingIndicator->start();
+//                UserManager::loginOffline(email, hash);
+//            }
+//        } else {
+//            UtilityFunctions::showMessage(this,
+//                                          tr("Unable to connect to the Internet"),
+//                                          tr("We could not find any local data to enable offline "
+//                                             "login for the issued email address, please connect "
+//                                             "to the internet."),
+//                                          QMessageBox::Information);
+//        }
+//    } else {
+//        m_loadingIndicator->start();
+//        UserManager::login(email, hash);
+//    }
+//}
