@@ -14,145 +14,131 @@
 #include <QMessageBox>
 #include <QRegExpValidator>
 
-#define COUNTDOWN        300
-#define BUTTONS_WIDTH    (300)
-#define PATH_VICON       (":/images/welcome/ok.png")
-#define PATH_RICON       (":/images/welcome/reset.png")
-#define PATH_CICON       (":/images/welcome/cancel.png")
+// TODO: Check out if the given email address is valid before sending request to the server
 
 enum Fields { Code };
 enum Buttons { Verify, Resend, Cancel };
 
-static bool resent = false;
-
 VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
+  , m_countdown(new Countdown(this))
+  , m_emailLabel(new QLabel(this))
+  , m_bulkEdit(new BulkEdit(this))
+  , m_buttons(new ButtonSlice(this))
+  , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
 {
-    _layout = new QVBoxLayout(this);
-    _iconLabel = new QLabel;
-    _countdownLabel = new QLabel;
-    _countdown = new Countdown;
-    _verificationLabel = new QLabel;
-    _bulkEdit = new BulkEdit;
-    _emailLabel = new QLabel;
-    _buttons = new ButtonSlice;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false);
-    // TODO: Check out if the given email address is valid before sending request to the server
-    _layout->setSpacing(6);
-    _layout->addStretch();
-    _layout->addWidget(_iconLabel);
-    _layout->addWidget(_verificationLabel);
-    _layout->addSpacing(40);
-    _layout->addWidget(_countdownLabel);
-    _layout->addWidget(_countdown);
-    _layout->addSpacing(40);
-    _layout->addWidget(_emailLabel);
-    _layout->addWidget(_bulkEdit);
-    _layout->addWidget(_buttons);
-    _layout->addStretch();
-    _layout->addWidget(_loadingIndicator);
-    _layout->addStretch();
-
-    _layout->setAlignment(_iconLabel, Qt::AlignCenter);
-    _layout->setAlignment(_countdownLabel, Qt::AlignCenter);
-    _layout->setAlignment(_countdown, Qt::AlignCenter);
-    _layout->setAlignment(_verificationLabel, Qt::AlignCenter);
-    _layout->setAlignment(_emailLabel, Qt::AlignCenter);
-    _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
-    _layout->setAlignment(_buttons, Qt::AlignCenter);
-    _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
-
-    _iconLabel->setFixedSize(QSize(60, 60));
-    _iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/verification.svg", QSize(60, 60), this));
+    auto iconLabel = new QLabel;
+    iconLabel->setFixedSize(QSize(60, 60));
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/verification.svg"), QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
 
-    _verificationLabel->setFont(f);
-    _verificationLabel->setText(tr("Email Verification"));
+    auto verificationLabel = new QLabel;
+    verificationLabel->setFont(f);
+    verificationLabel->setText(tr("Email Verification"));
 
-    _countdownLabel->setAlignment(Qt::AlignHCenter);
-    _countdownLabel->setText(tr("You have left:"));
-    _countdownLabel->setStyleSheet("color: #70000000");
+    auto countdownLabel = new QLabel;
+    countdownLabel->setAlignment(Qt::AlignHCenter);
+    countdownLabel->setText(tr("You have left:"));
+    countdownLabel->setStyleSheet(QStringLiteral("color: #70000000"));
 
-    _emailLabel->setAlignment(Qt::AlignHCenter);
-    _emailLabel->setStyleSheet("color: #70000000");
+    m_emailLabel->setAlignment(Qt::AlignHCenter);
+    m_emailLabel->setStyleSheet(QStringLiteral("color: #70000000"));
 
-    _bulkEdit->add(Code, tr("Enter Verification Code"));
-    _bulkEdit->setFixedWidth(BUTTONS_WIDTH);
+    m_bulkEdit->add(Code, tr("Enter Verification Code"));
+    m_bulkEdit->setFixedWidth(300);
+    m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Code)->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
 
-    _bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Code)->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
+    m_buttons->add(Cancel, QLatin1String("#CC5D67"), QLatin1String("#B2525A"));
+    m_buttons->add(Resend, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
+    m_buttons->add(Verify, QLatin1String("#86CC63"), QLatin1String("#75B257"));
+    m_buttons->get(Cancel)->setText(tr("Cancel"));
+    m_buttons->get(Resend)->setText(tr("Resend"));
+    m_buttons->get(Verify)->setText(tr("Verify"));
+    m_buttons->get(Cancel)->setIcon(QIcon(QStringLiteral(":/images/welcome/cancel.png")));
+    m_buttons->get(Resend)->setIcon(QIcon(QStringLiteral(":/images/welcome/reset.png")));
+    m_buttons->get(Verify)->setIcon(QIcon(QStringLiteral(":/images/welcome/ok.png")));
+    m_buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(Resend)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(Verify)->setCursor(Qt::PointingHandCursor);
+    m_buttons->settings().cellWidth = m_bulkEdit->width() / 3.0;
+    m_buttons->triggerSettings();
 
-    _buttons->add(Cancel, "#CC5D67", "#B2525A");
-    _buttons->add(Resend, "#5BC5F8", "#2592F9");
-    _buttons->add(Verify, "#86CC63", "#75B257");
-    _buttons->get(Cancel)->setText(tr("Cancel"));
-    _buttons->get(Resend)->setText(tr("Resend"));
-    _buttons->get(Verify)->setText(tr("Verify"));
-    _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
-    _buttons->get(Resend)->setIcon(QIcon(PATH_RICON));
-    _buttons->get(Verify)->setIcon(QIcon(PATH_VICON));
-    _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Resend)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Verify)->setCursor(Qt::PointingHandCursor);
-    _buttons->settings().cellWidth = BUTTONS_WIDTH / 3.0;
-    _buttons->triggerSettings();
+    m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
+    m_loadingIndicator->setColor(palette().text().color());
+    m_loadingIndicator->setRoundness(50);
+    m_loadingIndicator->setMinimumTrailOpacity(5);
+    m_loadingIndicator->setTrailFadePercentage(100);
+    m_loadingIndicator->setRevolutionsPerSecond(2);
+    m_loadingIndicator->setNumberOfLines(12);
+    m_loadingIndicator->setLineLength(5);
+    m_loadingIndicator->setInnerRadius(4);
+    m_loadingIndicator->setLineWidth(2);
 
-    connect(_buttons->get(Verify), &QPushButton::clicked, this, &VerificationWidget::onVerifyClicked);
-    connect(_buttons->get(Resend), &QPushButton::clicked, this, &VerificationWidget::onResendClicked);
-    connect(_buttons->get(Cancel), &QPushButton::clicked, this, &VerificationWidget::onCancelClicked);
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(6);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addStretch();
+    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(verificationLabel, 0, Qt::AlignHCenter);
+    layout->addSpacing(40);
+    layout->addWidget(countdownLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_countdown, 0, Qt::AlignHCenter);
+    layout->addSpacing(40);
+    layout->addWidget(m_emailLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
+    layout->addWidget(m_buttons, 0, Qt::AlignHCenter);
+    layout->addStretch();
+    layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
+    layout->addStretch();
 
-    connect(_countdown, &Countdown::finished, [=]{
-        UtilityFunctions::showMessage(
-                    this, tr("Expired"),
-                    tr("Your verification code has been expired, please try again later."));
+    connect(m_buttons->get(Verify), &QPushButton::clicked,
+            this, &VerificationWidget::onVerifyClicked);
+    connect(m_buttons->get(Resend), &QPushButton::clicked,
+            this, &VerificationWidget::onResendClicked);
+    connect(m_buttons->get(Cancel), &QPushButton::clicked,
+            this, &VerificationWidget::onCancelClicked);
+    connect(m_countdown, &Countdown::finished, [=] {
+        UtilityFunctions::showMessage(this,
+                                      tr("Expired"),
+                                      tr("Your verification code has been expired, please try again later."));
     });
-
-    _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor(palette().text().color());
-    _loadingIndicator->setRoundness(50);
-    _loadingIndicator->setMinimumTrailOpacity(5);
-    _loadingIndicator->setTrailFadePercentage(100);
-    _loadingIndicator->setRevolutionsPerSecond(2);
-    _loadingIndicator->setNumberOfLines(12);
-    _loadingIndicator->setLineLength(5);
-    _loadingIndicator->setInnerRadius(4);
-    _loadingIndicator->setLineWidth(2);
 }
 
 void VerificationWidget::setEmail(const QString& email)
 {
     resent = false;
     unlock();
-    _countdown->start(COUNTDOWN);
-    _emailLabel->setText(tr("Please use the verification code\n"
-        "we have sent to the following email address.\n") + email);
+    m_countdown->start(300); // 5 mins
+    m_emailLabel->setText(tr("Please use the verification code\n"
+                             "we have sent to the following email address.\n") + email);
 }
 
 void VerificationWidget::clear()
 {
-    _countdown->stop();
-    _bulkEdit->get<QLineEdit*>(Code)->clear();
+    m_countdown->stop();
+    m_bulkEdit->get<QLineEdit*>(Code)->clear();
 }
 
 void VerificationWidget::lock()
 {
-    _bulkEdit->setDisabled(true);
-    _buttons->get(Verify)->setDisabled(true);
-    _buttons->get(Resend)->setDisabled(true);
-    _buttons->get(Cancel)->setDisabled(true);
-    _loadingIndicator->start();
+    m_bulkEdit->setDisabled(true);
+    m_buttons->get(Verify)->setDisabled(true);
+    m_buttons->get(Resend)->setDisabled(true);
+    m_buttons->get(Cancel)->setDisabled(true);
+    m_loadingIndicator->start();
 }
 
 void VerificationWidget::unlock()
 {
-    _bulkEdit->setEnabled(true);
-    _buttons->get(Verify)->setEnabled(true);
+    m_bulkEdit->setEnabled(true);
+    m_buttons->get(Verify)->setEnabled(true);
     if (!resent)
-        _buttons->get(Resend)->setEnabled(true);
-    _buttons->get(Cancel)->setEnabled(true);
-    _loadingIndicator->stop();
+        m_buttons->get(Resend)->setEnabled(true);
+    m_buttons->get(Cancel)->setEnabled(true);
+    m_loadingIndicator->stop();
 }
 
 void VerificationWidget::onCancelClicked()
@@ -163,38 +149,38 @@ void VerificationWidget::onCancelClicked()
 
 void VerificationWidget::onResendClicked()
 {
-    auto email = _emailLabel->text().split("\n").at(2);
+    auto email = m_emailLabel->text().split("\n").at(2);
 
     lock();
 
-//    bool succeed = RegistrationApiManager::resend(email);
+    //    bool succeed = RegistrationApiManager::resend(email);
 
-//    if (succeed) {
-//        clear();
-//        _countdown->start();
+    //    if (succeed) {
+    //        clear();
+    //        m_countdown->start();
 
-//        QMessageBox::information(
-//            this,
-//            tr("Resend succeed"),
-//            tr("New verification code has been sent.")
-//        );
-//    } else {
-//        QMessageBox::warning(
-//            this,
-//            tr("Oops"),
-//            tr("Server rejected your request. You might exceed "
-//               "the verification trial limit. Try again later.")
-//        );
-//    }
+    //        QMessageBox::information(
+    //            this,
+    //            tr("Resend succeed"),
+    //            tr("New verification code has been sent.")
+    //        );
+    //    } else {
+    //        QMessageBox::warning(
+    //            this,
+    //            tr("Oops"),
+    //            tr("Server rejected your request. You might exceed "
+    //               "the verification trial limit. Try again later.")
+    //        );
+    //    }
 
-//    resent = true;
-//    unlock();
+    //    resent = true;
+    //    unlock();
 }
 
 void VerificationWidget::onVerifyClicked()
 {
-    auto email = _emailLabel->text().split("\n").at(2);
-    auto code = _bulkEdit->get<QLineEdit*>(Code)->text();
+    auto email = m_emailLabel->text().split("\n").at(2);
+    auto code = m_bulkEdit->get<QLineEdit*>(Code)->text();
 
     if (code.isEmpty() || code.size() != 6) {
         UtilityFunctions::showMessage(this, tr("Incorrect information"),
@@ -204,21 +190,21 @@ void VerificationWidget::onVerifyClicked()
 
     lock();
 
-//    bool succeed = RegistrationApiManager::verify(email, code);
+    //    bool succeed = RegistrationApiManager::verify(email, code);
 
-//    if (succeed)
-//        clear();
-//    else {
-//        QMessageBox::warning(
-//            this,
-//            tr("Oops"),
-//            tr("Server rejected your code. Or, you might exceed "
-//               "the verification trial limit. Try again later.")
-//        );
-//    }
+    //    if (succeed)
+    //        clear();
+    //    else {
+    //        QMessageBox::warning(
+    //            this,
+    //            tr("Oops"),
+    //            tr("Server rejected your code. Or, you might exceed "
+    //               "the verification trial limit. Try again later.")
+    //        );
+    //    }
 
-//    unlock();
+    //    unlock();
 
-//    if (succeed)
-//        emit done();
+    //    if (succeed)
+    //        emit done();
 }

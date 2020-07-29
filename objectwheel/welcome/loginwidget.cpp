@@ -59,7 +59,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     rememberMeLayout->setAlignment(m_rememberMeSwitch, Qt::AlignVCenter);
     rememberMeLayout->addStretch();
     rememberMeWidget->setFixedSize(300, 35);
-    rememberMeWidget->setObjectName("rememberMeWidget");
+    rememberMeWidget->setObjectName(QStringLiteral("rememberMeWidget"));
     rememberMeWidget->setStyleSheet(QStringLiteral("#rememberMeWidget {"
                                                    "    border-radius: 17;"
                                                    "    background: #12000000;"
@@ -73,12 +73,12 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
                           .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL));
 
     ApplicationStyle::setButtonStyle(m_helpButton, ApplicationStyle::Help);
-    m_helpButton->setIcon(QIcon(":/images/question.svg"));
+    m_helpButton->setIcon(QIcon(QStringLiteral(":/images/question.svg")));
     m_helpButton->setFixedSize(22, 22);
     m_helpButton->setCursor(Qt::PointingHandCursor);
 
     m_logoLabel->setFixedSize(QSize(160, 80));
-    m_logoLabel->setPixmap(PaintUtils::pixmap(":/images/logo.svg", QSize(160, 80), this));
+    m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
 
     QFont f;
     f.setWeight(QFont::Light);
@@ -92,12 +92,12 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_bulkEdit->get<QLineEdit*>(Email)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    m_buttons->add(Register, "#5BC5F8", "#2592F9");
-    m_buttons->add(Login, "#8BBB56", "#6EA045");
+    m_buttons->add(Register, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
+    m_buttons->add(Login, QLatin1String("#8BBB56"), QLatin1String("#6EA045"));
     m_buttons->get(Register)->setText(tr("Sign Up"));
     m_buttons->get(Login)->setText(tr("Log In"));
-    m_buttons->get(Register)->setIcon(QIcon(":/images/welcome/new.png"));
-    m_buttons->get(Login)->setIcon(QIcon(":/images/welcome/load.png"));
+    m_buttons->get(Register)->setIcon(QIcon(QStringLiteral(":/images/welcome/new.png")));
+    m_buttons->get(Login)->setIcon(QIcon(QStringLiteral(":/images/welcome/load.png")));
     m_buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Login)->setCursor(Qt::PointingHandCursor);
 
@@ -109,7 +109,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_loadingIndicator->setMinimumTrailOpacity(5);
     m_loadingIndicator->setRevolutionsPerSecond(2);
     m_loadingIndicator->setTrailFadePercentage(100);
-    m_loadingIndicator->setStyleSheet("background: transparent;");
+    m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
     m_loadingIndicator->setColor(palette().text().color());
 
     connect(ServerManager::instance(), &ServerManager::disconnected,

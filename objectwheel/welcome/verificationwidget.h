@@ -1,18 +1,17 @@
 #ifndef VERIFICATIONWIDGET_H
 #define VERIFICATIONWIDGET_H
 
-#include <QWidget>
+#include <QLabel>
 
-class QVBoxLayout;
-class QLabel;
 class BulkEdit;
 class ButtonSlice;
 class WaitingSpinnerWidget;
 class Countdown;
 
-class VerificationWidget : public QWidget
+class VerificationWidget final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(VerificationWidget)
 
 public:
     explicit VerificationWidget(QWidget* parent = nullptr);
@@ -27,21 +26,21 @@ private slots:
     void onCancelClicked();
     void onResendClicked();
     void onVerifyClicked();
+    void onVerifySuccessful();
+    void onVerifyFailure();
+    void onResendSuccessful();
+    void onResendFailure();
 
 signals:
     void done();
     void cancel();
 
 private:
-    QVBoxLayout* _layout;
-    QLabel* _iconLabel;
-    QLabel* _countdownLabel;
-    Countdown* _countdown;
-    QLabel* _verificationLabel;
-    QLabel* _emailLabel;
-    BulkEdit* _bulkEdit;
-    ButtonSlice* _buttons;
-    WaitingSpinnerWidget* _loadingIndicator;
+    Countdown* m_countdown;
+    QLabel* m_emailLabel;
+    BulkEdit* m_bulkEdit;
+    ButtonSlice* m_buttons;
+    WaitingSpinnerWidget* m_loadingIndicator;
 };
 
 #endif // VERIFICATIONWIDGET_H
