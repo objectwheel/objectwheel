@@ -130,7 +130,7 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     layout->addStretch();
 
     connect(ServerManager::instance(), &ServerManager::disconnected,
-            this, &RegistrationWidget::onDisconnected);
+            this, &RegistrationWidget::onServerDisconnected);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupSuccessful,
             this, &RegistrationWidget::onSignupSuccessful);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupFailure,
@@ -278,7 +278,7 @@ void RegistrationWidget::onSignupFailure()
                                      "and make sure you are not trying to sign up more than once."));
 }
 
-void RegistrationWidget::onDisconnected()
+void RegistrationWidget::onServerDisconnected()
 {
     if (m_loadingIndicator->isSpinning()) {
         m_loadingIndicator->stop();

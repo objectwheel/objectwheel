@@ -23,7 +23,7 @@ private slots:
     void onLoginButtonClick();
     void onLoginSuccessful();
     void onLoginFailure();
-    void onDisconnected();
+    void onServerDisconnected();
 
 private:
     void saveRememberMe();

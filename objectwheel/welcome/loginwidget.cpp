@@ -113,7 +113,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_loadingIndicator->setColor(palette().text().color());
 
     connect(ServerManager::instance(), &ServerManager::disconnected,
-            this, &LoginWidget::onDisconnected);
+            this, &LoginWidget::onServerDisconnected);
     connect(UserManager::instance(), &UserManager::loggedIn,
             this, &LoginWidget::onLoginSuccessful);
     connect(UserManager::instance(), &UserManager::loginFailed,
@@ -246,7 +246,7 @@ void LoginWidget::onLoginFailure()
                                      "please checkout the information you entered."));
 }
 
-void LoginWidget::onDisconnected()
+void LoginWidget::onServerDisconnected()
 {
     if (m_loadingIndicator->isSpinning()) {
         m_loadingIndicator->stop();

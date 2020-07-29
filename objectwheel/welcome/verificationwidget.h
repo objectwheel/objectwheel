@@ -22,14 +22,14 @@ public slots:
 private slots:
     void clear();
     void onCancelClicked();
-    void onResendClicked();
-    void onVerifyClicked();
-    void onVerifySuccessful();
-    void onVerifyFailure();
-    void onResendSuccessful();
-    void onResendFailure();
-    void onDisconnected();
+    void onCompleteSignupClicked();
+    void onResendSignupCodeClicked();
+    void onCompleteSignupSuccessful();
+    void onCompleteSignupFailure();
+    void onResendSignupCodeSuccessful();
+    void onResendSignupCodeFailure();
     void onCountdownFinished();
+    void onServerDisconnected();
 
 signals:
     void done();
