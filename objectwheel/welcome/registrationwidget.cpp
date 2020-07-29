@@ -60,6 +60,16 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     m_bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
     m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setEchoMode(QLineEdit::Password);
 
+    auto countryCombo = m_bulkEdit->get<QComboBox*>(Country);
+    countryCombo->setFrame(false);
+    countryCombo->setEditable(true);
+    countryCombo->addItem(tr("Please select..."));
+    countryCombo->addItems(UtilityFunctions::countryList());
+    countryCombo->lineEdit()->setFrame(false);
+    countryCombo->lineEdit()->setReadOnly(true);
+    countryCombo->lineEdit()->setAttribute(Qt::WA_TransparentForMouseEvents);
+    countryCombo->lineEdit()->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
     auto termsWidget = new QWidget(this);
     termsWidget->setFixedSize(m_bulkEdit->width(), 35);
     termsWidget->setObjectName("termsWidget");
@@ -94,7 +104,7 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     m_buttons->settings().cellWidth = m_bulkEdit->width() / 2.0;
     m_buttons->triggerSettings();
 
-    m_loadingIndicator->setStyleSheet("background: transparent;");
+    m_loadingIndicator->setStyleSheet("background: transparent");
     m_loadingIndicator->setColor(palette().text().color());
     m_loadingIndicator->setRoundness(50);
     m_loadingIndicator->setMinimumTrailOpacity(5);
@@ -117,28 +127,6 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     layout->addStretch();
     layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
-
-    auto cbox = m_bulkEdit->get<QComboBox*>(Country);
-    cbox->setEditable(true);
-    cbox->lineEdit()->setReadOnly(true);
-    cbox->lineEdit()->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    cbox->setMaxVisibleItems(15);
-
-    cbox->addItem(tr("Please select..."));
-    cbox->addItems(UtilityFunctions::countryList());
-    cbox->setStyleSheet(
-    "QComboBox {\
-        border: none;\
-        background: transparent;\
-    }\
-    QComboBox::drop-down {\
-        subcontrol-origin: padding;\
-        subcontrol-position: top right;\
-        border: none;\
-    }\
-    QComboBox::down-arrow {\
-        image: url(:/images/welcome/downarrow.png);\
-    }");
 
     connect(m_buttons->get(Next), &QPushButton::clicked,
             this, &RegistrationWidget::onNextClicked);

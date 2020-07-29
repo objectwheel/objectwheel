@@ -473,9 +473,15 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->drawRect(QRectF(option->rect).adjusted(0, 0, -0.5, -0.5));
         painter->restore();
     } break;
-    case PE_PanelTipLabel: {
-        painter->fillRect(option->rect, option->palette.brush(QPalette::ToolTipBase));
+    case PE_PanelLineEdit: {
+        if (auto lineEdit = qobject_cast<const QLineEdit*>(widget)) {
+            if (lineEdit->hasFrame())
+                QFusionStyle::drawPrimitive(element, option, painter, widget);
+        }
     } break;
+    case PE_PanelTipLabel:
+        painter->fillRect(option->rect, option->palette.brush(QPalette::ToolTipBase));
+        break;
     case PE_PanelMenu: {
         painter->save();
         painter->setPen("#b0b0b0");
@@ -569,6 +575,10 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             break;
         }
     case PE_PanelButtonCommand: {
+        if (auto combo = qobject_cast<const QComboBox*>(widget)) {
+            if (!combo->hasFrame())
+                break;
+        }
         QRectF rect(option->rect);
         ButtonStyle style = buttonStyle(widget);
         bool hasMenu = false;
@@ -1336,15 +1346,16 @@ void ApplicationStyle::drawComplexControl(QStyle::ComplexControl control,
     switch (control) {
     case CC_ComboBox:
         if (auto combo = qstyleoption_cast<const QStyleOptionComboBox*>(option)) {
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing);
+            QStyleOptionComboBox copy = *combo;
+            copy.subControls &= ~SC_ComboBoxArrow;
+            copy.editable = false;
+            QFusionStyle::drawComplexControl(control, &copy, painter, widget);
             if (combo->subControls & SC_ComboBoxArrow) {
-                painter->save();
-                painter->setRenderHint(QPainter::Antialiasing);
-                QStyleOptionComboBox copy = *combo;
-                copy.subControls &= ~SC_ComboBoxArrow;
-                QFusionStyle::drawComplexControl(control, &copy, painter, widget);
                 QColor arrowColor = option->palette.buttonText().color();
                 arrowColor.setAlpha(230);
-                if (buttonStyle(widget) == Combo)
+                if (buttonStyle(widget) == Combo && combo->frame)
                     arrowColor = Qt::white;
                 QRectF dr = proxy()->subControlRect(CC_ComboBox, combo, SC_ComboBoxArrow, widget);
                 QPainterPath pathDown;
@@ -1361,8 +1372,8 @@ void ApplicationStyle::drawComplexControl(QStyle::ComplexControl control,
                 painter->drawPath(pathUp);
                 painter->translate(QPointF(0, 7.5));
                 painter->drawPath(pathDown);
-                painter->restore();
             }
+            painter->restore();
         } break;
     default:
         QFusionStyle::drawComplexControl(control, option, painter, widget);
