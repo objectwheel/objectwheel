@@ -170,10 +170,10 @@ void RegistrationWidget::onNextClicked()
     const QString& hash = UtilityFunctions::hashPassword(password);
 
     if (!m_termsSwitch->isChecked()) {
-        UtilityFunctions::showMessage(
-                    this, tr("Please accept the terms and conditions"),
-                    tr("You have to agree with the terms and conditions "
-                       "in order to use Objectwheel apps and services."));
+        UtilityFunctions::showMessage(this,
+                                      tr("Please accept the terms and conditions"),
+                                      tr("You have to agree with the terms and conditions "
+                                         "in order to use Objectwheel apps and services."));
         return;
     }
 
@@ -208,16 +208,18 @@ void RegistrationWidget::onNextClicked()
     }
 
     if (email != cemail) {
-        UtilityFunctions::showMessage(
-                    this, tr("Incorrect email addresses"),
-                    tr("Email addresses you entered do not match."));
+        UtilityFunctions::showMessage(this,
+                                      tr("Incorrect email addresses"),
+                                      tr("Email addresses you entered do not match."),
+                                      QMessageBox::Information);
         return;
     }
 
     if (password != cpassword) {
-        UtilityFunctions::showMessage(
-                    this, tr("Incorrect passwords"),
-                    tr("Passwords you entered do not match."));
+        UtilityFunctions::showMessage(this,
+                                      tr("Incorrect passwords"),
+                                      tr("Passwords you entered do not match."),
+                                      QMessageBox::Information);
         return;
     }
 
@@ -247,7 +249,6 @@ void RegistrationWidget::onNextClicked()
     if (ServerManager::isConnected()) {
         m_loadingIndicator->start();
         RegistrationApiManager::signup(first, last, email, hash, country, company, title, phone);
-
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
