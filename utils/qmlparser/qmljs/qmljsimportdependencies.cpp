@@ -197,7 +197,7 @@ QString ImportKey::libraryQualifiedPath() const
 {
     QString res = splitPath.join(QLatin1Char('.'));
     if (res.isEmpty() && !splitPath.isEmpty())
-        return QLatin1String("");
+        return QString();
     return res;
 }
 

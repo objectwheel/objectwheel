@@ -136,7 +136,7 @@ QVariantList EnvironmentItem::toVariantList(const QList<EnvironmentItem> &list)
 
 EnvironmentItem EnvironmentItem::itemFromVariantList(const QVariantList &list)
 {
-    QTC_ASSERT(list.size() == 3, return EnvironmentItem("", ""));
+    QTC_ASSERT(list.size() == 3, return EnvironmentItem(QString(), QString()));
     QString name = list.value(0).toString();
     Operation operation = Operation(list.value(1).toInt());
     QString value = list.value(2).toString();

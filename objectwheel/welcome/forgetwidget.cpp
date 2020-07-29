@@ -86,7 +86,7 @@ ForgetWidget::ForgetWidget(QWidget* parent) : QWidget(parent)
 
 void ForgetWidget::clear()
 {
-    m_bulkEdit->get<QLineEdit*>(Email)->setText("");
+    m_bulkEdit->get<QLineEdit*>(Email)->setText(QString());
 }
 
 void ForgetWidget::lock()

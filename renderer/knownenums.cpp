@@ -28,11 +28,11 @@ public:
 QString cleanScopeName(QString scope)
 {
     scope.replace("QQuickWindowQmlImpl", "Window");
-    scope.replace("QQuick", "");
-    scope.replace("QDeclarative", "");
-    scope.replace("QQml", "");
+    scope.replace("QQuick", QString());
+    scope.replace("QDeclarative", QString());
+    scope.replace("QQml", QString());
     scope.replace("QWindow", "Window");
-    scope.replace("KnownEnums::Internal::", "");
+    scope.replace("KnownEnums::Internal::", QString());
     return scope;
 }
 } // Internal

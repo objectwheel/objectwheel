@@ -4,9 +4,7 @@
 #include <registrationapimanager.h>
 #include <hashfactory.h>
 #include <utilityfunctions.h>
-
 #include <QDir>
-#include <QCryptographicHash>
 
 UserManager* UserManager::s_instance = nullptr;
 PlanManager::Plans UserManager::s_plan = PlanManager::Free;
@@ -88,11 +86,6 @@ QString UserManager::email()
 QString UserManager::password()
 {
     return s_password;
-}
-
-QString UserManager::hashPassword(const QString& password)
-{
-    return QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha3_512).toHex();
 }
 
 bool UserManager::isLoggedIn()

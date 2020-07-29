@@ -104,6 +104,7 @@ bool hasHover(const QWidget* widget);
 bool isEmailFormatCorrect(const QString& email);
 bool isPasswordFormatCorrect(const QString& password);
 bool isPasswordHashFormatCorrect(const QString& hash); // SHA3-512
+QString hashPassword(const QString& password); // SHA3-512
 QWidget* createSpacingWidget(const QSize& size);
 QWidget* createSpacerWidget(Qt::Orientation orientation);
 QWidget* createSeparatorWidget(Qt::Orientation orientation);

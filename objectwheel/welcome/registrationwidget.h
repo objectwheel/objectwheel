@@ -18,8 +18,6 @@ public:
 
 private slots:
     void clear();
-    void lock();
-    void unlock();
     void onNextClicked();
     void onSignupSuccessful();
     void onSignupFailure();

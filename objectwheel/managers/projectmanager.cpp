@@ -132,12 +132,12 @@ QString ProjectManager::dir(const QString& uid)
 {
     if (uid.isEmpty()) {
         qWarning("ProjectManager: Caution, empty uid.");
-        return QStringLiteral("");
+        return QString();
     }
 
     if (!UserManager::isLoggedIn()) {
         qWarning("ProjectManager: Caution, user is not logged in yet.");
-        return QStringLiteral("");
+        return QString();
     }
 
     const QString& projectsDirectory = SaveUtils::toUserProjectsDir(UserManager::dir());
@@ -149,7 +149,7 @@ QString ProjectManager::dir(const QString& uid)
             return projectDir;
     }
 
-    return QStringLiteral("");
+    return QString();
 }
 
 QString ProjectManager::name(const QString& uid)
@@ -253,7 +253,7 @@ void ProjectManager::stop()
     ProjectExposingManager::removeProject();
     DocumentManager::removeProjectInfo();
     updateSize(s_uid);
-    s_uid = "";
+    s_uid = QString();
     emit instance()->stopped();
 }
 

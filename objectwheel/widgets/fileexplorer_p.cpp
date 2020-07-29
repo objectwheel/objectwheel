@@ -67,7 +67,7 @@ void PathIndicator::setPath(const QString& path)
 {
     m_path = path;
     if (m_path == ".")
-        m_path = "";
+        m_path = QString();
     m_path.prepend("/");
     m_pathEdit->setText(m_path);
     update();

@@ -15,7 +15,7 @@ QString PathFinder::cleansed(const QString& text, bool withUid)
 {
     QString cleansed(text);
     for (const Control* control : Control::controls()) {
-        const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
+        const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : QString());
         QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toControlThisDir(
                                                                                 withBase(control->dir(), RunManager::recentProjectDirectory())) + '/'));
         if (cleansed.contains(exp))
@@ -34,7 +34,7 @@ QString PathFinder::locallyCleansed(const QString& text, bool withUid)
 {
     QString cleansed(text);
     for (const Control* control : Control::controls()) {
-        const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : "");
+        const QString& clean = control->id() + "::" + (withUid ? control->uid() + "::" : QString());
         QRegularExpression exp("file:\\/{1,3}" + QRegularExpression::escape(SaveUtils::toControlThisDir(control->dir()) + '/'));
         if (cleansed.contains(exp))
             cleansed.replace(exp, clean);

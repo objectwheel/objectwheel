@@ -234,6 +234,11 @@ bool isPasswordHashFormatCorrect(const QString& hash)
     return hash.contains(QRegularExpression(QStringLiteral("^[a-fA-F0-9]{128}$")));
 }
 
+QString hashPassword(const QString& password)
+{
+    return QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha3_512).toHex();
+}
+
 QRectF verticalAlignedRect(const QSizeF& size, const QRectF& rect, qreal left)
 {
     QRectF ret({0, 0}, size);

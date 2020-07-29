@@ -171,7 +171,7 @@ void LoginWidget::onLoginButtonClick()
     const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
     const QString& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
     const QString& hash = UtilityFunctions::isPasswordHashFormatCorrect(password)
-            ? password : UserManager::hashPassword(password);
+            ? password : UtilityFunctions::hashPassword(password);
 
     if (email.isEmpty() || password.isEmpty()) {
         UtilityFunctions::showMessage(this,
@@ -184,7 +184,7 @@ void LoginWidget::onLoginButtonClick()
     if (email.size() > 255 || password.size() > 255) {
         UtilityFunctions::showMessage(this,
                                       tr("Entry too long"),
-                                      tr("Length of any fields cannot exceed 255 characters."),
+                                      tr("No fields can be larger than 255 characters."),
                                       QMessageBox::Information);
         return;
     }

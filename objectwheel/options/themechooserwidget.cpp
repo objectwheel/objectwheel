@@ -667,31 +667,31 @@ QByteArray ThemeChooserWidget::toJson() const
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("theme", text);
         else
-            object.insert("theme", "");
+            object.insert("theme", QString());
 
         text = m_accentColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("accent", exp.match(text).captured(0));
         else
-            object.insert("accent", "");
+            object.insert("accent", QString());
 
         text = m_primaryColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("primary", exp.match(text).captured(0));
         else
-            object.insert("primary", "");
+            object.insert("primary", QString());
 
         text = m_backgroundColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("background", exp.match(text).captured(0));
         else
-            object.insert("background", "");
+            object.insert("background", QString());
 
         text = m_foregroundColorsCombo->currentText();
         if (!text.contains("default") && !text.contains("Unavailable"))
             object.insert("foreground", exp.match(text).captured(0));
         else
-            object.insert("foreground", "");
+            object.insert("foreground", QString());
     }
 
     return QJsonDocument(object).toBinaryData();

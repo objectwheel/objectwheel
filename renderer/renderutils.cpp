@@ -109,8 +109,8 @@ static void stopAnimation(QObject* object)
     QQmlTimer *timer = qobject_cast<QQmlTimer*>(object);
     QObject* animatedImage = object->inherits("QQuickAnimatedImage") ? object : nullptr;
     if (transition) {
-        transition->setFromState("");
-        transition->setToState("");
+        transition->setFromState(QString());
+        transition->setToState(QString());
     } else if (animation) {
         //        QQuickScriptAction *scriptAimation = qobject_cast<QQuickScriptAction*>(animation);
         //        if (scriptAimation) FIXME
@@ -260,12 +260,12 @@ static QString cleanClassName(const QMetaObject* metaObject)
 {
     QString className = metaObject->className();
     className.replace("QQuickWindowQmlImpl", "Window");
-    className.replace("QQuick", "");
-    className.replace("QDeclarative", "");
-    className.replace("QQml", "");
+    className.replace("QQuick", QString());
+    className.replace("QDeclarative", QString());
+    className.replace("QQml", QString());
     className.replace("QWindow", "Window");
-    className.replace(QRegularExpression("_QMLTYPE_\\d+"), "");
-    className.replace(QRegularExpression("_QML_\\d+"), "");
+    className.replace(QRegularExpression("_QMLTYPE_\\d+"), QString());
+    className.replace(QRegularExpression("_QML_\\d+"), QString());
     return className;
 }
 

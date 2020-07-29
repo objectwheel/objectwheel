@@ -20,7 +20,6 @@ public:
     static PlanManager::Plans plan();
     static QString email();
     static QString password();
-    static QString hashPassword(const QString& password);
 
     static bool isLoggedIn();
     static bool hasLocalData(const QString& email);
