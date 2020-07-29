@@ -2,95 +2,56 @@
 #include <buttonslice.h>
 #include <utilityfunctions.h>
 
-#include <QTimer>
 #include <QMovie>
-#include <QVBoxLayout>
-#include <QLabel>
+#include <QBoxLayout>
 #include <QPushButton>
-#include <QPainter>
-
-#define BUTTONS_WIDTH    (150)
-#define SIZE_GIF        (QSize(100, 100))
-#define PATH_GIF         (":/images/welcome/complete.gif")
-#define PATH_OICON       (":/images/welcome/ok.png")
 
 enum Buttons { Ok };
 
 SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
+  , m_movie(new QMovie(this))
+  , m_titleLabel(new QLabel(this))
+  , m_descriptionLabel(new QLabel(this))
 {
-    _layout = new QVBoxLayout(this);
-    _movie = new QMovie(this);
-    _iconLabel = new QLabel;
-    _titleLabel = new QLabel;
-    _descriptionLabel = new QLabel;
-    _buttons = new ButtonSlice;
+    auto iconLabel = new QLabel(this);
+    iconLabel->setFixedSize(QSize(140, 140));
+    iconLabel->setStyleSheet(QStringLiteral("background: transparent"));
+    iconLabel->setMovie(m_movie);
 
-    _layout->setSpacing(12);
-    _layout->addStretch();
-    _layout->addWidget(_iconLabel);
-    _layout->addWidget(_titleLabel);
-    _layout->addWidget(_descriptionLabel);
-    _layout->addWidget(_buttons);
-    _layout->addStretch();
+    auto buttons = new ButtonSlice(this);
+    buttons->add(Ok, QLatin1String("#86CC63"), QLatin1String("#75B257"));
+    buttons->get(Ok)->setText(tr("Ok"));
+    buttons->get(Ok)->setIcon(QIcon(QStringLiteral(":/images/welcome/ok.png")));
+    buttons->get(Ok)->setCursor(Qt::PointingHandCursor);
+    buttons->settings().cellWidth = 150;
+    buttons->triggerSettings();
 
-    _layout->setAlignment(_iconLabel, Qt::AlignCenter);
-    _layout->setAlignment(_titleLabel, Qt::AlignCenter);
-    _layout->setAlignment(_descriptionLabel, Qt::AlignCenter);
-    _layout->setAlignment(_buttons, Qt::AlignCenter);
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(10);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addStretch();
+    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_titleLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_descriptionLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(buttons, 0, Qt::AlignHCenter);
+    layout->addStretch();
 
-    _movie->setFileName(PATH_GIF);
-    _movie->setBackgroundColor(Qt::transparent);
-    _movie->setScaledSize(SIZE_GIF * devicePixelRatioF());
-    connect(_movie, qOverload<int>(&QMovie::frameChanged),
-            this, qOverload<>(&SucceedWidget::update));
+    UtilityFunctions::adjustFontPixelSize(m_titleLabel, 3);
+    m_titleLabel->setStyleSheet(QStringLiteral("color: #65A35C"));
+    m_titleLabel->setAlignment(Qt::AlignHCenter);
+    m_descriptionLabel->setAlignment(Qt::AlignHCenter);
 
-    _iconLabel->setFixedSize(SIZE_GIF);
-    _iconLabel->setStyleSheet("background: transparent;");
+    m_movie->setFileName(QStringLiteral(":/images/welcome/complete.gif"));
+    m_movie->setBackgroundColor(Qt::transparent);
+    m_movie->setScaledSize(iconLabel->size() * iconLabel->devicePixelRatioF());
 
-    UtilityFunctions::adjustFontPixelSize(_titleLabel, 3);
-    _titleLabel->setStyleSheet("color: #65A35C");
-
-    _descriptionLabel->setStyleSheet("color: #304050");
-    _descriptionLabel->setAlignment(Qt::AlignHCenter);
-
-    _buttons->add(Ok, "#86CC63", "#75B257");
-    _buttons->get(Ok)->setText(tr("Ok"));
-    _buttons->get(Ok)->setIcon(QIcon(PATH_OICON));
-    _buttons->get(Ok)->setCursor(Qt::PointingHandCursor);
-    _buttons->settings().cellWidth = BUTTONS_WIDTH;
-    _buttons->triggerSettings();
-    connect(_buttons->get(Ok), &QPushButton::clicked, this, &SucceedWidget::done);
+    connect(buttons->get(Ok), &QPushButton::clicked, this, &SucceedWidget::done);
 }
 
-void SucceedWidget::start()
+void SucceedWidget::play(const QString& title, const QString& description)
 {
-    _movie->jumpToFrame(0);
-    update();
-    QTimer::singleShot(20, _movie, &QMovie::start);
-}
-
-void SucceedWidget::update(const QString& title, const QString& description)
-{
-    _titleLabel->setText(title);
-    _descriptionLabel->setText(description);
-}
-
-void SucceedWidget::paintEvent(QPaintEvent* event)
-{
-    QWidget::paintEvent(event);
-
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    if (_movie->currentFrameNumber() > 48) {
-        auto r = _iconLabel->geometry().adjusted(10, 10, -10, -10);
-        painter.setBrush(Qt::white);
-        painter.drawRoundedRect(r, r.width() / 2.0, r.width() / 2.0);
-    }
-
-    painter.drawPixmap(
-        _iconLabel->geometry(),
-        _movie->currentPixmap(),
-        QRectF(QPoint(), SIZE_GIF * devicePixelRatioF())
-    );
+    m_titleLabel->setText(title);
+    m_descriptionLabel->setText(description);
+    m_movie->jumpToFrame(0);
+    m_movie->start();
 }

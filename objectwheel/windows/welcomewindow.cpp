@@ -66,10 +66,9 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     });
     connect(m_resetWidget, &ResetWidget::done, this, [=] {
         m_stackedLayout->setCurrentWidget(m_succeedWidget);
-        m_succeedWidget->start();
-        m_succeedWidget->update(tr("Succeed"),
-                                tr("Your password has been successfully changed.\n"
-                                   "You can continue by logging into the application with your new password."));
+        m_succeedWidget->play(tr("Succeed"),
+                              tr("Your password has been successfully changed.\n"
+                                 "You can continue by logging into the application with your new password."));
     });
     /**** LoginWidget settings ****/
     connect(m_loginWidget, &LoginWidget::signup, this, [=]
@@ -146,10 +145,9 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     connect(m_verificationWidget, &VerificationWidget::done, this, [=]
     {
         m_stackedLayout->setCurrentWidget(m_succeedWidget);
-        m_succeedWidget->start();
-        m_succeedWidget->update(tr("Thank you for registering"),
-                                tr("Your registration is completed. Thank you for choosing us.\n"
-                                   "You can continue by logging into the application."));
+        m_succeedWidget->play(tr("Thank you for registering"),
+                              tr("Your registration is completed. Thank you for choosing us.\n"
+                                 "You can continue by logging into the application."));
     });
     /**** SucceedWidget settings ****/
     connect(m_succeedWidget, &SucceedWidget::done, this, [=]

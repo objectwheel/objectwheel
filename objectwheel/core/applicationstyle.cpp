@@ -16,6 +16,8 @@
 #include <QToolButton>
 #include <QPushButton>
 #include <QVariantAnimation>
+#include <QLabel>
+#include <QMovie>
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
@@ -1402,6 +1404,18 @@ void ApplicationStyle::drawItemText(QPainter* painter, const QRectF& rect, int a
     }
     painter->drawText(rect, alignment, text);
     painter->setPen(savedPen);
+}
+
+void ApplicationStyle::drawItemPixmap(QPainter* painter, const QRect& rect, int alignment,
+                                      const QPixmap& pixmap) const
+{
+    // Workaround for bad QMovie painting
+    QPixmap copy(pixmap);
+    if (auto label = dynamic_cast<const QLabel*>(painter->device())) {
+        if (label->movie() && label->movie()->isValid() && label->movie()->state() != QMovie::NotRunning)
+            copy.setDevicePixelRatio(label->devicePixelRatioF());
+    }
+    QFusionStyle::drawItemPixmap(painter, rect, alignment, copy);
 }
 
 void ApplicationStyle::polish(QWidget* w)

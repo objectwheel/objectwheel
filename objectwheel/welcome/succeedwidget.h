@@ -1,38 +1,27 @@
 #ifndef SUCCEEDWIDGET_H
 #define SUCCEEDWIDGET_H
 
-#include <QWidget>
+#include <QLabel>
 
-class QVBoxLayout;
-class QLabel;
-class ButtonSlice;
 class QMovie;
-
-class SucceedWidget : public QWidget
+class SucceedWidget final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SucceedWidget)
 
 public:
     explicit SucceedWidget(QWidget* parent = nullptr);
-    using QWidget::update;
 
 public slots:
-    void start();
-    void update(const QString& title, const QString& description);
-
-protected:
-    void paintEvent(QPaintEvent* event) override;
+    void play(const QString& title, const QString& description);
 
 signals:
     void done();
 
 private:
-    QVBoxLayout* _layout;
-    QMovie* _movie;
-    QLabel* _iconLabel;
-    QLabel* _titleLabel;
-    QLabel* _descriptionLabel;
-    ButtonSlice* _buttons;
+    QMovie* m_movie;
+    QLabel* m_titleLabel;
+    QLabel* m_descriptionLabel;
 };
 
 #endif // SUCCEEDWIDGET_H

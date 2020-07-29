@@ -25,7 +25,7 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
   , m_buttons(new ButtonSlice(this))
   , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
 {
-    auto iconLabel = new QLabel;
+    auto iconLabel = new QLabel(this);
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/verification.svg"), QSize(60, 60), this));
 
@@ -33,11 +33,11 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
 
-    auto verificationLabel = new QLabel;
+    auto verificationLabel = new QLabel(this);
     verificationLabel->setFont(f);
     verificationLabel->setText(tr("Email Verification"));
 
-    auto countdownLabel = new QLabel;
+    auto countdownLabel = new QLabel(this);
     countdownLabel->setAlignment(Qt::AlignHCenter);
     countdownLabel->setText(tr("You have left:"));
     countdownLabel->setStyleSheet(QStringLiteral("color: #70000000"));

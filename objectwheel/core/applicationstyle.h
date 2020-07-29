@@ -55,6 +55,8 @@ public:
                       bool enabled, const QString& text, QPalette::ColorRole textRole) const override;
     void drawItemText(QPainter* painter, const QRectF& rect, int alignment, const QPalette& pal,
                       bool enabled, const QString& text, QPalette::ColorRole textRole) const;
+    void drawItemPixmap(QPainter* painter, const QRect& rect, int alignment,
+                        const QPixmap& pixmap) const override;
     void polish(QWidget* w) override;
     void unpolish(QWidget* w) override;
 
