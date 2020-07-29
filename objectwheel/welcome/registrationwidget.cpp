@@ -129,6 +129,8 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
 
+    connect(ServerManager::instance(), &ServerManager::disconnected,
+            this, &RegistrationWidget::onDisconnected);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupSuccessful,
             this, &RegistrationWidget::onSignupSuccessful);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupFailure,
@@ -259,62 +261,29 @@ void RegistrationWidget::onNextClicked()
 
 void RegistrationWidget::onSignupSuccessful()
 {
-    //    if (succeed)
-    //        clear();
-    //    else
-    //        QMessageBox::warning(
-    //            this,
-    //            tr("Incorrect Information"),
-    //            tr("Server rejected your request. Please review the information you entered. "
-    //               "And make sure you are not trying to sign up more than once.")
-    //        );
+    m_loadingIndicator->stop();
 
-    //    m_loadingIndicator->stop();
+    QTimer::singleShot(200, this, &RegistrationWidget::clear);
 
-    //    if (succeed)
-    //        emit done(email);
-
-
-
-
-    //    if (m_rememberMeSwitch->isChecked())
-    //        saveRememberMe();
-    //    else
-    //        clearRememberMe();
-
-    //    m_loadingIndicator->stop();
-
-    //    QTimer::singleShot(200, this, &LoginWidget::clear);
-
-    //    emit done();
+    emit done(m_bulkEdit->get<QLineEdit*>(Email)->text());
 }
 
 void RegistrationWidget::onSignupFailure()
 {
-    //    if (succeed)
-    //        clear();
-    //    else
-    //        QMessageBox::warning(
-    //            this,
-    //            tr("Incorrect Information"),
-    //            tr("Server rejected your request. Please review the information you entered. "
-    //               "And make sure you are not trying to sign up more than once.")
-    //        );
+    m_loadingIndicator->stop();
 
-    //    m_loadingIndicator->stop();
+    UtilityFunctions::showMessage(this,
+                                  tr("Incorrect information"),
+                                  tr("The server rejected your request. Please review the information you entered "
+                                     "and make sure you are not trying to sign up more than once."));
+}
 
-    //    if (succeed)
-    //        emit done(email);
-
-
-
-
-    //    clearRememberMe();
-
-    //    m_loadingIndicator->stop();
-
-    //    UtilityFunctions::showMessage(this,
-    //                                  tr("Unable to log in"),
-    //                                  tr("Incorrect email address or password, "
-    //                                     "please checkout the information you entered."));
+void RegistrationWidget::onDisconnected()
+{
+    if (m_loadingIndicator->isSpinning()) {
+        m_loadingIndicator->stop();
+        UtilityFunctions::showMessage(this,
+                                      tr("Connection lost"),
+                                      tr("We are unable to connect to the server."));
+    }
 }

@@ -20,9 +20,10 @@ public:
 
 private slots:
     void clear();
-    void onLoginFailure();
-    void onLoginSuccessful();
     void onLoginButtonClick();
+    void onLoginSuccessful();
+    void onLoginFailure();
+    void onDisconnected();
 
 private:
     void saveRememberMe();

@@ -21,6 +21,7 @@ private slots:
     void onNextClicked();
     void onSignupSuccessful();
     void onSignupFailure();
+    void onDisconnected();
 
 signals:
     void back();

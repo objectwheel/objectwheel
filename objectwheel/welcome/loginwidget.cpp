@@ -112,6 +112,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_loadingIndicator->setStyleSheet("background: transparent;");
     m_loadingIndicator->setColor(palette().text().color());
 
+    connect(ServerManager::instance(), &ServerManager::disconnected,
+            this, &LoginWidget::onDisconnected);
     connect(UserManager::instance(), &UserManager::loggedIn,
             this, &LoginWidget::onLoginSuccessful);
     connect(UserManager::instance(), &UserManager::loginFailed,
@@ -138,32 +140,6 @@ void LoginWidget::clear()
 {
     m_bulkEdit->get<QLineEdit*>(Email)->clear();
     m_bulkEdit->get<QLineEdit*>(Password)->clear();
-}
-
-void LoginWidget::onLoginFailure()
-{
-    clearRememberMe();
-
-    m_loadingIndicator->stop();
-
-    UtilityFunctions::showMessage(this,
-                                  tr("Unable to log in"),
-                                  tr("Incorrect email address or password, "
-                                     "please checkout the information you entered."));
-}
-
-void LoginWidget::onLoginSuccessful()
-{
-    if (m_rememberMeSwitch->isChecked())
-        saveRememberMe();
-    else
-        clearRememberMe();
-
-    m_loadingIndicator->stop();
-
-    QTimer::singleShot(200, this, &LoginWidget::clear);
-
-    emit done();
 }
 
 void LoginWidget::onLoginButtonClick()
@@ -241,6 +217,42 @@ void LoginWidget::onLoginButtonClick()
     } else {
         m_loadingIndicator->start();
         UserManager::login(email, hash);
+    }
+}
+
+void LoginWidget::onLoginSuccessful()
+{
+    if (m_rememberMeSwitch->isChecked())
+        saveRememberMe();
+    else
+        clearRememberMe();
+
+    m_loadingIndicator->stop();
+
+    QTimer::singleShot(200, this, &LoginWidget::clear);
+
+    emit done();
+}
+
+void LoginWidget::onLoginFailure()
+{
+    clearRememberMe();
+
+    m_loadingIndicator->stop();
+
+    UtilityFunctions::showMessage(this,
+                                  tr("Unable to log in"),
+                                  tr("Incorrect email address or password, "
+                                     "please checkout the information you entered."));
+}
+
+void LoginWidget::onDisconnected()
+{
+    if (m_loadingIndicator->isSpinning()) {
+        m_loadingIndicator->stop();
+        UtilityFunctions::showMessage(this,
+                                      tr("Connection lost"),
+                                      tr("We are unable to connect to the server."));
     }
 }
 
