@@ -6,6 +6,7 @@
 #include <countdown.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
+#include <servermanager.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
@@ -13,8 +14,6 @@
 #include <QPushButton>
 #include <QMessageBox>
 #include <QRegularExpressionValidator>
-
-// TODO: Check out if the given email address is valid before sending request to the server
 
 enum Fields { Code };
 enum Buttons { Verify, Resend, Cancel };
@@ -107,36 +106,18 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 
 void VerificationWidget::setEmail(const QString& email)
 {
-//    resent = false;
-    unlock();
+    m_loadingIndicator->stop();
+    m_buttons->get(Resend)->setEnabled(true);
     m_countdown->start(300); // 5 mins
-    m_emailLabel->setText(tr("Please use the verification code\n"
-                             "we have sent to the following email address.\n") + email);
+    m_emailLabel->setText(tr("Please use the verification code that we have\n"
+                             "sent to the email address below to complete your registration\n") + email);
 }
 
 void VerificationWidget::clear()
 {
     m_countdown->stop();
     m_bulkEdit->get<QLineEdit*>(Code)->clear();
-}
-
-void VerificationWidget::lock()
-{
-    m_bulkEdit->setDisabled(true);
-    m_buttons->get(Verify)->setDisabled(true);
-    m_buttons->get(Resend)->setDisabled(true);
-    m_buttons->get(Cancel)->setDisabled(true);
-    m_loadingIndicator->start();
-}
-
-void VerificationWidget::unlock()
-{
-    m_bulkEdit->setEnabled(true);
-    m_buttons->get(Verify)->setEnabled(true);
-//    if (!resent)
-        m_buttons->get(Resend)->setEnabled(true);
-    m_buttons->get(Cancel)->setEnabled(true);
-    m_loadingIndicator->stop();
+    m_buttons->get(Resend)->setEnabled(true);
 }
 
 void VerificationWidget::onCancelClicked()
@@ -145,11 +126,35 @@ void VerificationWidget::onCancelClicked()
     emit cancel();
 }
 
+void VerificationWidget::onVerifyClicked()
+{
+    const QString& email = m_emailLabel->text().split(QStringLiteral("\n")).at(2);
+    const QString& code = m_bulkEdit->get<QLineEdit*>(Code)->text();
+
+    if (code.isEmpty() || code.size() != 6) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Invalid information entered"),
+                                      tr("Verification code is not in proper format."),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (ServerManager::isConnected()) {
+        m_loadingIndicator->start();
+        RegistrationApiManager::completeSignup(email, code);
+    } else {
+        UtilityFunctions::showMessage(this,
+                                      tr("Unable to connect to the server"),
+                                      tr("Please make sure you are connected to the internet."),
+                                      QMessageBox::Information);
+    }
+}
+
 void VerificationWidget::onResendClicked()
 {
-    auto email = m_emailLabel->text().split("\n").at(2);
+    const QString& email = m_emailLabel->text().split(QStringLiteral("\n")).at(2);
 
-    lock();
+    m_loadingIndicator->start();
 
     //    bool succeed = RegistrationApiManager::resend(email);
 
@@ -175,19 +180,8 @@ void VerificationWidget::onResendClicked()
     //    unlock();
 }
 
-void VerificationWidget::onVerifyClicked()
+void VerificationWidget::onVerifySuccessful()
 {
-    auto email = m_emailLabel->text().split("\n").at(2);
-    auto code = m_bulkEdit->get<QLineEdit*>(Code)->text();
-
-    if (code.isEmpty() || code.size() != 6) {
-        UtilityFunctions::showMessage(this, tr("Incorrect information"),
-                                      tr("Verification code is incorrect."));
-        return;
-    }
-
-    lock();
-
     //    bool succeed = RegistrationApiManager::verify(email, code);
 
     //    if (succeed)
@@ -207,14 +201,25 @@ void VerificationWidget::onVerifyClicked()
     //        emit done();
 }
 
-void VerificationWidget::onVerifySuccessful()
-{
-
-}
-
 void VerificationWidget::onVerifyFailure()
 {
+    //    bool succeed = RegistrationApiManager::verify(email, code);
 
+    //    if (succeed)
+    //        clear();
+    //    else {
+    //        QMessageBox::warning(
+    //            this,
+    //            tr("Oops"),
+    //            tr("Server rejected your code. Or, you might exceed "
+    //               "the verification trial limit. Try again later.")
+    //        );
+    //    }
+
+    //    unlock();
+
+    //    if (succeed)
+    //        emit done();
 }
 
 void VerificationWidget::onResendSuccessful()
@@ -235,6 +240,9 @@ void VerificationWidget::onDisconnected()
 void VerificationWidget::onCountdownFinished()
 {
     UtilityFunctions::showMessage(this,
-                                  tr("Expired"),
-                                  tr("Your verification code has been expired, please try again later."));
+                                  tr("Verification code expired"),
+                                  tr("Please try again later."),
+                                  QMessageBox::Information);
+    clear();
+    emit cancel();
 }

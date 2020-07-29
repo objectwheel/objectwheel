@@ -110,7 +110,7 @@ void ForgetWidget::onNextClicked()
     if (email.isEmpty() || email.size() > 255 ||
         !UtilityFunctions::isEmailFormatCorrect(email)) {
         UtilityFunctions::showMessage(
-                    this, tr("Incorrect information"),
+                    this, tr("Invalid information entered"),
                     tr("Please checkout the email address you entered."));
         return;
     }

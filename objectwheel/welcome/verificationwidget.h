@@ -21,8 +21,6 @@ public slots:
 
 private slots:
     void clear();
-    void lock();
-    void unlock();
     void onCancelClicked();
     void onResendClicked();
     void onVerifyClicked();

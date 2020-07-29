@@ -123,7 +123,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     connect(m_buttons->get(Login), &QPushButton::clicked,
             this, &LoginWidget::onLoginButtonClick);
     connect(m_helpButton, &QPushButton::clicked, this, [=] {
-        auto ret = UtilityFunctions::showMessage(
+        const QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
                     this, tr("Need help?"), tr("Do you want to reset your password?"),
                     QMessageBox::Question, QMessageBox::Reset | QMessageBox::Help |
                     QMessageBox::Close, QMessageBox::Close);
@@ -208,7 +208,7 @@ void LoginWidget::onLoginButtonClick()
             }
         } else {
             UtilityFunctions::showMessage(this,
-                                          tr("Unable to connect to the Internet"),
+                                          tr("Unable to connect to the server"),
                                           tr("We could not find any local data to enable offline "
                                              "login for the issued email address, please connect "
                                              "to the internet."),

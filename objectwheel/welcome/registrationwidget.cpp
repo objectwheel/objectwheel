@@ -158,17 +158,17 @@ void RegistrationWidget::clear()
 
 void RegistrationWidget::onNextClicked()
 {
-    const auto& first = m_bulkEdit->get<QLineEdit*>(First)->text();
-    const auto& last = m_bulkEdit->get<QLineEdit*>(Last)->text();
-    const auto& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
-    const auto& cemail = m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->text();
-    const auto& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
-    const auto& cpassword = m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
-    const auto& country = m_bulkEdit->get<QComboBox*>(Country)->currentIndex() > 0
+    const QString& first = m_bulkEdit->get<QLineEdit*>(First)->text();
+    const QString& last = m_bulkEdit->get<QLineEdit*>(Last)->text();
+    const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
+    const QString& cemail = m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->text();
+    const QString& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
+    const QString& cpassword = m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
+    const QString& country = m_bulkEdit->get<QComboBox*>(Country)->currentIndex() > 0
             ? m_bulkEdit->get<QComboBox*>(Country)->currentText() : QString();
-    const auto& company = m_bulkEdit->get<QLineEdit*>(Company)->text();
-    const auto& title = m_bulkEdit->get<QLineEdit*>(Title)->text();
-    const auto& phone = m_bulkEdit->get<QLineEdit*>(Phone)->text();
+    const QString& company = m_bulkEdit->get<QLineEdit*>(Company)->text();
+    const QString& title = m_bulkEdit->get<QLineEdit*>(Title)->text();
+    const QString& phone = m_bulkEdit->get<QLineEdit*>(Phone)->text();
     const QString& hash = UtilityFunctions::hashPassword(password);
 
     if (!m_termsSwitch->isChecked()) {
@@ -273,7 +273,7 @@ void RegistrationWidget::onSignupFailure()
     m_loadingIndicator->stop();
 
     UtilityFunctions::showMessage(this,
-                                  tr("Incorrect information"),
+                                  tr("Invalid information entered"),
                                   tr("The server rejected your request. Please review the information you entered "
                                      "and make sure you are not trying to sign up more than once."));
 }
