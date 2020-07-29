@@ -39,11 +39,11 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 
     auto countdownLabel = new QLabel(this);
     countdownLabel->setAlignment(Qt::AlignHCenter);
-    countdownLabel->setText(tr("You have left:"));
-    countdownLabel->setStyleSheet(QStringLiteral("color: #70000000"));
+    countdownLabel->setText(tr("You have left"));
+    countdownLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
     m_emailLabel->setAlignment(Qt::AlignHCenter);
-    m_emailLabel->setStyleSheet(QStringLiteral("color: #70000000"));
+    m_emailLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
     m_bulkEdit->setFixedWidth(300);
     m_bulkEdit->add(Code, tr("Enter Verification Code"));

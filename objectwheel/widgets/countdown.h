@@ -4,10 +4,10 @@
 #include <QWidget>
 
 class QTimer;
-
-class Countdown : public QWidget
+class Countdown final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(Countdown)
 
 public:
     struct Settings {
@@ -20,7 +20,6 @@ public:
         QColor dotColor;
         QColor screwColor;
         QColor lineColor;
-
         /* Sizes */
         qreal margins;
         qreal digitRadius;
@@ -28,7 +27,7 @@ public:
     };
 
 public:
-    explicit Countdown(QWidget *parent = nullptr);
+    explicit Countdown(QWidget* parent = nullptr);
     Settings& settings();
 
 public slots:
@@ -36,7 +35,7 @@ public slots:
     void decrease();
     void start(int sec = 0);
 
-protected:
+private:
     QSize sizeHint() const override;
     void paintEvent(QPaintEvent* event) override;
 
@@ -45,9 +44,9 @@ signals:
     void finished();
 
 private:
-    int _second;
-    QTimer* _timer;
-    Settings _settings;
+    int m_second;
+    QTimer* m_timer;
+    Settings m_settings;
 };
 
 #endif // COUNTDOWN_H

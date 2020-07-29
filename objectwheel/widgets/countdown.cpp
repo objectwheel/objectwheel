@@ -2,42 +2,40 @@
 #include <QTimer>
 #include <QPainter>
 
-#define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
-
-Countdown::Countdown(QWidget *parent) : QWidget(parent)
-  , _second(0)
-  , _timer(new QTimer(this))
+Countdown::Countdown(QWidget* parent) : QWidget(parent)
+  , m_second(0)
+  , m_timer(new QTimer(this))
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
 
-    _settings.borderColor = "#22000000";
-    _settings.backgroundColor = "#12000000";
-    _settings.leftDigitColor = "#7EBE5D";
-    _settings.rightDigitColor = "#BE5760";
-    _settings.dotColor = "#50000000";
-    _settings.textColor = Qt::white;
-    _settings.screwColor = "#70000000";
-    _settings.lineColor = "#40000000";
+    m_settings.borderColor = QLatin1String("#28000000");
+    m_settings.backgroundColor = QLatin1String("#18000000");
+    m_settings.leftDigitColor = QLatin1String("#7EBE5D");
+    m_settings.rightDigitColor = QLatin1String("#BE5760");
+    m_settings.dotColor = QLatin1String("#55000000");
+    m_settings.textColor = Qt::white;
+    m_settings.screwColor = QLatin1String("#75000000");
+    m_settings.lineColor = QLatin1String("#45000000");
+    m_settings.borderRadius = 4;
+    m_settings.digitRadius = 4;
+    m_settings.margins = 8;
 
-    _settings.borderRadius = 4;
-    _settings.digitRadius = 4;
-    _settings.margins = 8;
-
-    connect(_timer, &QTimer::timeout, this, &Countdown::decrease);
+    connect(m_timer, &QTimer::timeout, this, &Countdown::decrease);
 }
 
 Countdown::Settings& Countdown::settings()
 {
-    return _settings;
+    return m_settings;
 }
 
 void Countdown::decrease()
 {
-    if (_second <= 0) {
+    if (m_second <= 0) {
         stop();
         emit finished();
-    } else
-        _second--;
+    } else {
+        m_second--;
+    }
     update();
 }
 
@@ -45,18 +43,16 @@ void Countdown::start(int sec)
 {
     if (sec < 0)
         return;
-
     if (sec > 5999)
         sec = 5999;
-
     if (sec > 0)
-        _second = sec;
-    _timer->start(1000);
+        m_second = sec;
+    m_timer->start(1000);
 }
 
 void Countdown::stop()
 {
-    _timer->stop();
+    m_timer->stop();
     emit stopped();
 }
 
@@ -65,100 +61,100 @@ void Countdown::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    qreal m = _settings.margins;                // Margins
-    const auto& r = ADJUST(QRectF(rect()));     // Rectangle
-    const auto& ir = r.adjusted(m, m, -m, -m);  // Inner rectangle
-    qreal dw = ir.width() * 0.189;              // Digit width
-    qreal sh = ir.height() * 0.05681;           // Shadow height
-    qreal dh = ir.height() - sh / 2.0;          // Digit height
-    qreal ds = ir.width() * 0.046;              // Digit space
-    qreal scw = ir.width() * 0.0078;            // Screw width
-    qreal sch = dh * 0.14;                      // Screw height
-    qreal ms = ir.width() * 0.09;               // Middle space
-    qreal dts = dh * 0.106;                     // Dot size
-    qreal pw = ir.width() * 0.0037;             // Lines' pen width
+    qreal m = m_settings.margins;                                    // Margins
+    const QRectF& r = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5); // Rectangle
+    const QRectF& ir = r.adjusted(m, m, -m, -m);                     // Inner rectangle
+    qreal dw  = ir.width() * 0.189;                                  // Digit width
+    qreal sh  = ir.height() * 0.05681;                               // Shadow height
+    qreal dh  = ir.height() - sh / 2.0;                              // Digit height
+    qreal ds  = ir.width() * 0.046;                                  // Digit space
+    qreal scw = ir.width() * 0.0078;                                 // Screw width
+    qreal sch = dh * 0.14;                                           // Screw height
+    qreal ms  = ir.width() * 0.09;                                   // Middle space
+    qreal dts = dh * 0.106;                                          // Dot size
+    qreal pw  = ir.width() * 0.0037;                                 // Lines' pen width
 
-    const auto& bc = _settings.backgroundColor;
-    const auto& bbc = _settings.borderColor;
-    const auto& ldc = _settings.leftDigitColor;
-    const auto& rdc = _settings.rightDigitColor;
-    const auto& dc = _settings.dotColor;
-    const auto& tc = _settings.textColor;
-    const auto& scc = _settings.screwColor;
-    const auto& lc = _settings.lineColor;
+    const QColor& bc  = m_settings.backgroundColor;
+    const QColor& bbc = m_settings.borderColor;
+    const QColor& ldc = m_settings.leftDigitColor;
+    const QColor& rdc = m_settings.rightDigitColor;
+    const QColor& dc  = m_settings.dotColor;
+    const QColor& tc  = m_settings.textColor;
+    const QColor& scc = m_settings.screwColor;
+    const QColor& lc  = m_settings.lineColor;
 
-    const auto& ldr1 = QRectF(ir.x() + 2 * scw, ir.y(), dw, dh);
-    const auto& ldr2 = QRectF(ldr1.right() + ds, ir.y(), dw, dh);
-    const auto& rdr1 = QRectF(ldr2.right() + 4 * scw + ms, ir.y(), dw, dh);
-    const auto& rdr2 = QRectF(rdr1.right() + ds, ir.y(), dw, dh);
+    const QRectF& ldr1 = QRectF(ir.x() + 2 * scw, ir.y(), dw, dh);
+    const QRectF& ldr2 = QRectF(ldr1.right() + ds, ir.y(), dw, dh);
+    const QRectF& rdr1 = QRectF(ldr2.right() + 4 * scw + ms, ir.y(), dw, dh);
+    const QRectF& rdr2 = QRectF(rdr1.right() + ds, ir.y(), dw, dh);
 
-    const auto& ldsr1 = ldr1.adjusted(0, sh, 0, sh);
-    const auto& ldsr2 = ldr2.adjusted(0, sh, 0, sh);
-    const auto& rdsr1 = rdr2.adjusted(0, sh, 0, sh);
-    const auto& rdsr2 = rdr2.adjusted(0, sh, 0, sh);
+    const QRectF& ldsr1 = ldr1.adjusted(0, sh, 0, sh);
+    const QRectF& ldsr2 = ldr2.adjusted(0, sh, 0, sh);
+    const QRectF& rdsr1 = rdr2.adjusted(0, sh, 0, sh);
+    const QRectF& rdsr2 = rdr2.adjusted(0, sh, 0, sh);
 
     /* Draw background */
     painter.setPen(bbc);
     painter.setBrush(bc);
-    painter.drawRoundedRect(r, _settings.borderRadius, _settings.borderRadius);
+    painter.drawRoundedRect(r, m_settings.borderRadius, m_settings.borderRadius);
 
     QLinearGradient sg(ldsr1.topLeft(), ldsr1.bottomLeft());
-    sg.setColorAt(0, "#60000000");
-    sg.setColorAt(1, "#15000000");
+    sg.setColorAt(0, QLatin1String("#60000000"));
+    sg.setColorAt(1, QLatin1String("#15000000"));
 
     /* Draw digit shadows */
     painter.setPen(Qt::NoPen);
     painter.setBrush(sg);
-    painter.drawRoundedRect(ldsr1, _settings.digitRadius, _settings.digitRadius);
+    painter.drawRoundedRect(ldsr1, m_settings.digitRadius, m_settings.digitRadius);
 
     sg.setStart(ldsr2.topLeft());
     sg.setFinalStop(ldsr2.bottomLeft());
     painter.setBrush(sg);
-    painter.drawRoundedRect(ldsr2, _settings.digitRadius, _settings.digitRadius);
+    painter.drawRoundedRect(ldsr2, m_settings.digitRadius, m_settings.digitRadius);
 
     sg.setStart(rdsr1.topLeft());
     sg.setFinalStop(rdsr2.bottomLeft());
     painter.setBrush(sg);
-    painter.drawRoundedRect(rdsr1, _settings.digitRadius, _settings.digitRadius);
+    painter.drawRoundedRect(rdsr1, m_settings.digitRadius, m_settings.digitRadius);
 
     sg.setStart(rdsr2.topLeft());
     sg.setFinalStop(rdsr2.bottomLeft());
     painter.setBrush(sg);
-    painter.drawRoundedRect(rdsr2, _settings.digitRadius, _settings.digitRadius);
+    painter.drawRoundedRect(rdsr2, m_settings.digitRadius, m_settings.digitRadius);
 
     /* Draw left digit first backgrounds */
     painter.setPen(Qt::NoPen);
     painter.setBrush(ldc.darker(125));
     painter.drawRoundedRect(ldr1.adjusted(0, sh / 2.0, 0, sh / 2.0),
-                            _settings.digitRadius, _settings.digitRadius);
+                            m_settings.digitRadius, m_settings.digitRadius);
     painter.drawRoundedRect(ldr2.adjusted(0, sh / 2.0, 0, sh / 2.0)
-                            , _settings.digitRadius, _settings.digitRadius);
+                            , m_settings.digitRadius, m_settings.digitRadius);
 
     /* Draw right digit first backgrounds */
     painter.setBrush(rdc.darker(125));
     painter.drawRoundedRect(rdr1.adjusted(0, sh / 2.0, 0, sh / 2.0),
-                            _settings.digitRadius, _settings.digitRadius);
+                            m_settings.digitRadius, m_settings.digitRadius);
     painter.drawRoundedRect(rdr2.adjusted(0, sh / 2.0, 0, sh / 2.0),
-                            _settings.digitRadius, _settings.digitRadius);
+                            m_settings.digitRadius, m_settings.digitRadius);
 
     /* Draw left digit second backgrounds */
     painter.setBrush(ldc);
-    painter.drawRoundedRect(ldr1, _settings.digitRadius, _settings.digitRadius);
-    painter.drawRoundedRect(ldr2, _settings.digitRadius, _settings.digitRadius);
+    painter.drawRoundedRect(ldr1, m_settings.digitRadius, m_settings.digitRadius);
+    painter.drawRoundedRect(ldr2, m_settings.digitRadius, m_settings.digitRadius);
 
     /* Draw right digit second backgrounds */
     painter.setBrush(rdc);
-    painter.drawRoundedRect(rdr1, _settings.digitRadius, _settings.digitRadius);
-    painter.drawRoundedRect(rdr2, _settings.digitRadius, _settings.digitRadius);
+    painter.drawRoundedRect(rdr1, m_settings.digitRadius, m_settings.digitRadius);
+    painter.drawRoundedRect(rdr2, m_settings.digitRadius, m_settings.digitRadius);
 
-    const auto& lscr1 = QRectF(ir.x(), ir.center().y() - sch / 2.0, scw, sch);
-    const auto& lscr2 = QRectF(lscr1.right() + 2 * scw + dw, lscr1.y(), scw, sch);
-    const auto& lscr3 = QRectF(ldr1.right() + ds - 2 * scw, lscr1.y(), scw, sch);
-    const auto& lscr4 = QRectF(lscr3.right() + 2 * scw + dw, lscr1.y(), scw, sch);
-    const auto& rscr1 = QRectF(rdr1.x() - 2 * scw, lscr1.y(), scw, sch);
-    const auto& rscr2 = QRectF(rscr1.right() + 2 * scw + dw, rscr1.y(), scw, sch);
-    const auto& rscr3 = QRectF(rdr1.right() + ds - 2 * scw, rscr1.y(), scw, sch);
-    const auto& rscr4 = QRectF(rscr3.right() + 2 * scw + dw, rscr1.y(), scw, sch);
+    const QRectF& lscr1 = QRectF(ir.x(), ir.center().y() - sch / 2.0, scw, sch);
+    const QRectF& lscr2 = QRectF(lscr1.right() + 2 * scw + dw, lscr1.y(), scw, sch);
+    const QRectF& lscr3 = QRectF(ldr1.right() + ds - 2 * scw, lscr1.y(), scw, sch);
+    const QRectF& lscr4 = QRectF(lscr3.right() + 2 * scw + dw, lscr1.y(), scw, sch);
+    const QRectF& rscr1 = QRectF(rdr1.x() - 2 * scw, lscr1.y(), scw, sch);
+    const QRectF& rscr2 = QRectF(rscr1.right() + 2 * scw + dw, rscr1.y(), scw, sch);
+    const QRectF& rscr3 = QRectF(rdr1.right() + ds - 2 * scw, rscr1.y(), scw, sch);
+    const QRectF& rscr4 = QRectF(rscr3.right() + 2 * scw + dw, rscr1.y(), scw, sch);
 
     /* Draw screws */
     painter.setBrush(scc);
@@ -181,13 +177,13 @@ void Countdown::paintEvent(QPaintEvent*)
     painter.drawLine(rdr1.left(), rdr1.center().y(), rdr1.right(), rdr1.center().y());
     painter.drawLine(rdr2.left(), rdr2.center().y(), rdr2.right(), rdr2.center().y());
 
-    const auto& dr1 = QRectF(ldr2.right() + 2 * scw + (ms / 2.0 - dts / 2.0),
-                             ldr2.center().y() - 2 * dts, dts, dts);
-    const auto& dr2 = QRectF(ldr2.right() + 2 * scw + (ms / 2.0 - dts / 2.0),
-                             ldr2.center().y() + dts, dts, dts);
+    const QRectF& dr1 = QRectF(ldr2.right() + 2 * scw + (ms / 2.0 - dts / 2.0),
+                               ldr2.center().y() - 2 * dts, dts, dts);
+    const QRectF& dr2 = QRectF(ldr2.right() + 2 * scw + (ms / 2.0 - dts / 2.0),
+                               ldr2.center().y() + dts, dts, dts);
 
     /* Draw dots */
-    if (_second % 2) {
+    if (m_second % 2) {
         painter.setPen(Qt::NoPen);
         painter.setBrush(dc);
         painter.drawRoundedRect(dr1, 1.0, 1.0);
@@ -195,17 +191,17 @@ void Countdown::paintEvent(QPaintEvent*)
     }
 
     QString ld, rd;
-    int min = _second / 60;
-    int sec = _second % 60;
+    int min = m_second / 60;
+    int sec = m_second % 60;
 
     if (min < 10)
-        ld = "0" + QString::number(min);
+        ld = QLatin1Char('0') + QString::number(min);
     else if (min < 100)
         ld = QString::number(min);
 
     rd = QString::number(sec);
     if (sec < 10)
-        rd = "0" + rd;
+        rd = QLatin1Char('0') + rd;
 
     QFont f;
     f.setPixelSize(dh - 4);
@@ -221,6 +217,5 @@ void Countdown::paintEvent(QPaintEvent*)
 
 QSize Countdown::sizeHint() const
 {
-    return {270, 86};
+    return QSize(270, 86);
 }
-

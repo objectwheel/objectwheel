@@ -5,8 +5,8 @@
 
 class BulkEdit;
 class ButtonSlice;
-class WaitingSpinnerWidget;
 class Countdown;
+class WaitingSpinnerWidget;
 
 class VerificationWidget final : public QWidget
 {
