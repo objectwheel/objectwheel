@@ -172,7 +172,7 @@ void SignupWidget::onNextClicked()
             || cpassword.isEmpty()) {
         UtilityFunctions::showMessage(this,
                                       tr("Fields cannot be left blank"),
-                                      tr("Please fill in all the required fields first."),
+                                      tr("Please fill in all the required fields."),
                                       QMessageBox::Information);
         return;
     }
