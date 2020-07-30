@@ -6,200 +6,335 @@
 #include <countdown.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
+#include <servermanager.h>
 
-#include <QVBoxLayout>
+#include <QBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QMessageBox>
-#include <QRegExpValidator>
+#include <QRegularExpressionValidator>
 
-#define COUNTDOWN        300
-#define BUTTONS_WIDTH    (300)
-#define PATH_VICON       (":/images/welcome/ok.png")
-#define PATH_CICON       (":/images/welcome/cancel.png")
-
-enum Fields { Password, ConfirmPassword, Code };
-enum Buttons { Apply, Cancel };
+enum Fields { Code, Password, ConfirmPassword };
+enum Buttons { CompletePasswordReset, ResendPasswordResetCode, Cancel };
 
 ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(parent)
+  , m_countdown(new Countdown(this))
+  , m_emailLabel(new QLabel(this))
+  , m_bulkEdit(new BulkEdit(this))
+  , m_buttons(new ButtonSlice(this))
+  , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
 {
-    _layout = new QVBoxLayout(this);
-    _iconLabel = new QLabel;
-    _countdownLabel = new QLabel;
-    _countdown = new Countdown;
-    _resetLabel = new QLabel;
-    _bulkEdit = new BulkEdit;
-    _emailLabel = new QLabel;
-    _buttons = new ButtonSlice;
-    _loadingIndicator = new WaitingSpinnerWidget(this, false);
-
-    _layout->setSpacing(6);
-    _layout->addStretch();
-    _layout->addWidget(_iconLabel);
-    _layout->addWidget(_resetLabel);
-    _layout->addSpacing(40);
-    _layout->addWidget(_countdownLabel);
-    _layout->addWidget(_countdown);
-    _layout->addSpacing(40);
-    _layout->addWidget(_emailLabel);
-    _layout->addWidget(_bulkEdit);
-    _layout->addWidget(_buttons);
-    _layout->addStretch();
-    _layout->addWidget(_loadingIndicator);
-    _layout->addStretch();
-
-    _layout->setAlignment(_iconLabel, Qt::AlignCenter);
-    _layout->setAlignment(_countdownLabel, Qt::AlignCenter);
-    _layout->setAlignment(_countdown, Qt::AlignCenter);
-    _layout->setAlignment(_resetLabel, Qt::AlignCenter);
-    _layout->setAlignment(_emailLabel, Qt::AlignCenter);
-    _layout->setAlignment(_bulkEdit, Qt::AlignCenter);
-    _layout->setAlignment(_buttons, Qt::AlignCenter);
-    _layout->setAlignment(_loadingIndicator, Qt::AlignCenter);
-
-    _iconLabel->setFixedSize(QSize(60, 60));
-    _iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/password.svg", QSize(60, 60), this));
+    auto iconLabel = new QLabel(this);
+    iconLabel->setFixedSize(QSize(60, 60));
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/password.svg"), QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
 
-    _resetLabel->setFont(f);
-    _resetLabel->setText(tr("Verify Password Reset"));
+    auto resetLabel = new QLabel(this);
+    resetLabel->setFont(f);
+    resetLabel->setText(tr("Password Reset Verification"));
 
-    _countdownLabel->setAlignment(Qt::AlignHCenter);
-    _countdownLabel->setText(tr("You have left:"));
-    _countdownLabel->setStyleSheet("color: #70000000");
+    auto countdownLabel = new QLabel(this);
+    countdownLabel->setAlignment(Qt::AlignHCenter);
+    countdownLabel->setText(tr("You have left"));
+    countdownLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
-    _emailLabel->setAlignment(Qt::AlignHCenter);
-    _emailLabel->setStyleSheet("color: #70000000");
+    m_emailLabel->setAlignment(Qt::AlignHCenter);
+    m_emailLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
-    _bulkEdit->add(Password, tr("New Password"));
-    _bulkEdit->add(ConfirmPassword, tr("Confirm Password"));
-    _bulkEdit->add(Code, tr("Reset Code"));
-    _bulkEdit->setFixedWidth(BUTTONS_WIDTH);
+    m_bulkEdit->setFixedWidth(300);
+    m_bulkEdit->add(Code, tr("Verification Code"));
+    m_bulkEdit->add(Password, tr("New Password"));
+    m_bulkEdit->add(ConfirmPassword, tr("Confirm New Password"));
 
-    _bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Code)->setValidator(new QRegExpValidator(QRegExp("^\\d{1,6}$"), this));
-    _bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    _bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
-    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->setEchoMode(QLineEdit::Password);
+    m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
+                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));
+    m_bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setEchoMode(QLineEdit::Password);
 
-    _buttons->add(Cancel, "#CC5D67", "#B2525A");
-    _buttons->add(Apply, "#86CC63", "#75B257");
-    _buttons->get(Cancel)->setText(tr("Cancel"));
-    _buttons->get(Apply)->setText(tr("Apply"));
-    _buttons->get(Cancel)->setIcon(QIcon(PATH_CICON));
-    _buttons->get(Apply)->setIcon(QIcon(PATH_VICON));
-    _buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
-    _buttons->get(Apply)->setCursor(Qt::PointingHandCursor);
-    _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
-    _buttons->triggerSettings();
+    m_buttons->add(Cancel, QLatin1String("#CC5D67"), QLatin1String("#B2525A"));
+    m_buttons->add(CompletePasswordReset, QLatin1String("#86CC63"), QLatin1String("#75B257"));
+    m_buttons->get(Cancel)->setText(tr("Cancel"));
+    m_buttons->get(CompletePasswordReset)->setText(tr("Apply"));
+    m_buttons->get(Cancel)->setIcon(QIcon(QStringLiteral(":/images/welcome/cancel.png")));
+    m_buttons->get(CompletePasswordReset)->setIcon(QIcon(QStringLiteral(":/images/welcome/ok.png")));
+    m_buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
+    m_buttons->get(CompletePasswordReset)->setCursor(Qt::PointingHandCursor);
+    m_buttons->settings().cellWidth = m_bulkEdit->width() / 2.0;
+    m_buttons->triggerSettings();
 
-    connect(_buttons->get(Apply), &QPushButton::clicked, this, &ResetVerificationWidget::onApplyClicked);
-    connect(_buttons->get(Cancel), &QPushButton::clicked, this, &ResetVerificationWidget::onCancelClicked);
+    m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
+    m_loadingIndicator->setColor(palette().text().color());
+    m_loadingIndicator->setRoundness(50);
+    m_loadingIndicator->setMinimumTrailOpacity(5);
+    m_loadingIndicator->setTrailFadePercentage(100);
+    m_loadingIndicator->setRevolutionsPerSecond(2);
+    m_loadingIndicator->setNumberOfLines(12);
+    m_loadingIndicator->setLineLength(5);
+    m_loadingIndicator->setInnerRadius(4);
+    m_loadingIndicator->setLineWidth(2);
 
-    connect(_countdown, &Countdown::finished, [=]{
-        UtilityFunctions::showMessage(
-                    this, tr("Expired"),
-                    tr("Your reset code has been expired, please try again later."));
-    });
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(6);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addStretch();
+    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(resetLabel, 0, Qt::AlignHCenter);
+    layout->addSpacing(40);
+    layout->addWidget(countdownLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_countdown, 0, Qt::AlignHCenter);
+    layout->addSpacing(40);
+    layout->addWidget(m_emailLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
+    layout->addWidget(m_buttons, 0, Qt::AlignHCenter);
+    layout->addStretch();
+    layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
+    layout->addStretch();
 
-    _loadingIndicator->setStyleSheet("background: transparent;");
-    _loadingIndicator->setColor("#2E3A41");
-    _loadingIndicator->setRoundness(50);
-    _loadingIndicator->setMinimumTrailOpacity(5);
-    _loadingIndicator->setTrailFadePercentage(100);
-    _loadingIndicator->setRevolutionsPerSecond(2);
-    _loadingIndicator->setNumberOfLines(12);
-    _loadingIndicator->setLineLength(5);
-    _loadingIndicator->setInnerRadius(4);
-    _loadingIndicator->setLineWidth(2);
+    connect(m_buttons->get(Cancel), &QPushButton::clicked,
+            this, &ResetVerificationWidget::onCancelClicked);
+    connect(m_buttons->get(CompletePasswordReset), &QPushButton::clicked,
+            this, &ResetVerificationWidget::onCompletePasswordResetClicked);
+    connect(m_buttons->get(ResendPasswordResetCode), &QPushButton::clicked,
+            this, &ResetVerificationWidget::onResendPasswordResetCodeClicked);
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::completePasswordResetSuccessful,
+            this, &ResetVerificationWidget::onCompletePasswordResetSuccessful);
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::completePasswordResetFailure,
+            this, &ResetVerificationWidget::onCompletePasswordResetFailure);
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendPasswordResetCodeSuccessful,
+            this, &ResetVerificationWidget::onResendPasswordResetCodeSuccessful);
+    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendPasswordResetCodeFailure,
+            this, &ResetVerificationWidget::onResendPasswordResetCodeFailure);
+    connect(m_countdown, &Countdown::finished,
+            this, &ResetVerificationWidget::onCountdownFinished);
+    connect(ServerManager::instance(), &ServerManager::disconnected,
+            this, &ResetVerificationWidget::onServerDisconnected);
 }
 
 void ResetVerificationWidget::setEmail(const QString& email)
 {
-    _countdown->start(COUNTDOWN);
-    _emailLabel->setText(tr("Please use the reset code we have sent\n"
-      "to the following email address, to reset your password.\n") + email);
-}
-
-void ResetVerificationWidget::clear()
-{
-    _countdown->stop();
-    _bulkEdit->get<QLineEdit*>(Code)->clear();
-    _bulkEdit->get<QLineEdit*>(Password)->clear();
-    _bulkEdit->get<QLineEdit*>(ConfirmPassword)->clear();
-}
-
-void ResetVerificationWidget::lock()
-{
-    _bulkEdit->setDisabled(true);
-    _buttons->setDisabled(true);
-    _loadingIndicator->start();
-}
-
-void ResetVerificationWidget::unlock()
-{
-    _bulkEdit->setEnabled(true);
-    _buttons->setEnabled(true);
-    _loadingIndicator->stop();
+    Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
+    m_buttons->get(ResendPasswordResetCode)->setEnabled(true);
+    m_bulkEdit->get<QLineEdit*>(Code)->clear();
+    m_bulkEdit->get<QLineEdit*>(Password)->clear();
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->clear();
+    m_emailLabel->setText(tr("Please use the verification code that we have\n"
+                             "sent to the email address below to reset your password\n") + email);
+    m_countdown->start(300); // 5 mins
 }
 
 void ResetVerificationWidget::onCancelClicked()
 {
-    clear();
+    m_countdown->stop();
     emit cancel();
 }
 
-void ResetVerificationWidget::onApplyClicked()
+void ResetVerificationWidget::onCompletePasswordResetClicked()
 {
-    auto email = _emailLabel->text().split("\n").at(2);
-    const auto& code = _bulkEdit->get<QLineEdit*>(Code)->text();
-    const auto& password = _bulkEdit->get<QLineEdit*>(Password)->text();
-    const auto& cpassword = _bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
+    const QString email = m_emailLabel->text().split(QLatin1Char('\n')).at(2);
+    const QString& code = m_bulkEdit->get<QLineEdit*>(Code)->text();
+    const QString& password = m_bulkEdit->get<QLineEdit*>(Password)->text();
+    const QString& cpassword = m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
+    const QString& hash = UtilityFunctions::hashPassword(password);
+    Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
+
+    if (m_countdown->hasExpired()) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Verification code expired"),
+                                      tr("Please try again later."),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (code.isEmpty() || code.size() != 6) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Invalid information entered"),
+                                      tr("Verification code is not appropriate."),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (password.isEmpty() || cpassword.isEmpty()) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Fields cannot be left blank"),
+                                      tr("Please fill in all the required fields first."),
+                                      QMessageBox::Information);
+        return;
+    }
+
+    if (password.size() > 255 || cpassword.size() > 255) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Password too long"),
+                                      tr("No passwords can be larger than 255 characters."),
+                                      QMessageBox::Information);
+        return;
+    }
 
     if (password != cpassword) {
-        UtilityFunctions::showMessage(
-                    this, tr("Incorrect passwords"),
-                    tr("Passwords you entered do not match."));
+        UtilityFunctions::showMessage(this,
+                                      tr("Incorrect passwords"),
+                                      tr("Passwords you entered do not match."),
+                                      QMessageBox::Information);
         return;
     }
 
     if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
-        UtilityFunctions::showMessage(
-                    this, tr("Incorrect password"),
-                    tr("Broken password, your password must be in between "
-                       "6 and 35 characters long. Also please checkout if it contains invalid characters."));
+        UtilityFunctions::showMessage(this,
+                                      tr("Corrupt password"),
+                                      tr("Your password must comply with following standards:\n"
+                                         "•  Length must be between 6 and 35 characters\n"
+                                         "•  Only Latin-1 characters are allowed\n"
+                                         "•  Whitespace characters are not allowed\n"
+                                         "•  It can contain a-z, A-Z, 0-9\n"
+                                         "•  It can also contain following special characters:\n"
+                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"),
+                                      QMessageBox::Information);
         return;
     }
 
-    if (code.isEmpty() || code.size() != 6) {        
-        UtilityFunctions::showMessage(
-                    this, tr("Incorrect code"),
-                    tr("Reset code you entered is incorrect."));
+    if (ServerManager::isConnected()) {
+        m_loadingIndicator->start();
+        RegistrationApiManager::completePasswordReset(email, hash, code);
+    } else {
+        UtilityFunctions::showMessage(this,
+                                      tr("Unable to connect to the server"),
+                                      tr("Please make sure you are connected to the internet."),
+                                      QMessageBox::Information);
+    }
+}
+
+void ResetVerificationWidget::onResendPasswordResetCodeClicked()
+{
+    const QString email = m_emailLabel->text().split(QLatin1Char('\n')).at(2);
+    Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
+
+    if (m_countdown->hasExpired()) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Verification code expired"),
+                                      tr("Please sign up again later."),
+                                      QMessageBox::Information);
         return;
     }
 
-    lock();
+    if (ServerManager::isConnected()) {
+        m_buttons->get(ResendPasswordResetCode)->setEnabled(false);
+        m_loadingIndicator->start();
+        RegistrationApiManager::resendPasswordResetCode(email);
+    } else {
+        UtilityFunctions::showMessage(this,
+                                      tr("Unable to connect to the server"),
+                                      tr("Please make sure you are connected to the internet."),
+                                      QMessageBox::Information);
+    }
+}
 
-//    bool succeed = RegistrationApiManager::reset(email, password, code);
+void ResetVerificationWidget::onCompletePasswordResetSuccessful()
+{
+    m_loadingIndicator->stop();
+    m_countdown->stop();
+    emit done();
+}
 
-//    if (succeed)
-//        clear();
-//    else {
-//        QMessageBox::warning(
-//            this,
-//            tr("Oops"),
-//            tr("Server rejected your code. You might mistyped "
-//               "the reset code. Try again.")
-//        );
+void ResetVerificationWidget::onCompletePasswordResetFailure()
+{
+    m_loadingIndicator->stop();
+    UtilityFunctions::showMessage(this,
+                                  tr("Invalid information entered"),
+                                  tr("Incorrect verification code entered or maybe you have "
+                                     "tried it too much. Please try again some time later."));
+}
+
+void ResetVerificationWidget::onResendPasswordResetCodeSuccessful()
+{
+    m_loadingIndicator->stop();
+    UtilityFunctions::showMessage(this,
+                                  tr("Resend succeed"),
+                                  tr("New verification code has been sent."),
+                                  QMessageBox::Information);
+}
+
+void ResetVerificationWidget::onResendPasswordResetCodeFailure()
+{
+    m_loadingIndicator->stop();
+    UtilityFunctions::showMessage(this,
+                                  tr("The server rejected your request"),
+                                  tr("You might have exceeded the verification "
+                                     "trial limit. Please try again some time later."));
+
+}
+
+void ResetVerificationWidget::onCountdownFinished()
+{
+    UtilityFunctions::showMessage(this,
+                                  tr("Verification code expired"),
+                                  tr("Please sign up again later."),
+                                  QMessageBox::Information);
+}
+
+void ResetVerificationWidget::onServerDisconnected()
+{
+    if (m_loadingIndicator->isSpinning()) {
+        m_loadingIndicator->stop();
+        UtilityFunctions::showMessage(this,
+                                      tr("Connection lost"),
+                                      tr("We are unable to connect to the server."));
+    }
+}
+
+
+
+
+//void ResetVerificationWidget::onCompletePasswordResetClicked()
+//{
+//    auto email = _emailLabel->text().split("\n").at(2);
+//    const auto& code = _bulkEdit->get<QLineEdit*>(Code)->text();
+//    const auto& password = _bulkEdit->get<QLineEdit*>(Password)->text();
+//    const auto& cpassword = _bulkEdit->get<QLineEdit*>(ConfirmPassword)->text();
+
+//    if (password != cpassword) {
+//        UtilityFunctions::showMessage(
+//                    this, tr("Incorrect passwords"),
+//                    tr("Passwords you entered do not match."));
+//        return;
 //    }
 
-//    unlock();
+//    if (!UtilityFunctions::isPasswordFormatCorrect(password)) {
+//        UtilityFunctions::showMessage(
+//                    this, tr("Incorrect password"),
+//                    tr("Broken password, your password must be in between "
+//                       "6 and 35 characters long. Also please checkout if it contains invalid characters."));
+//        return;
+//    }
 
-//    if (succeed)
-//        emit done();
-}
+//    if (code.isEmpty() || code.size() != 6) {
+//        UtilityFunctions::showMessage(
+//                    this, tr("Incorrect code"),
+//                    tr("Reset code you entered is incorrect."));
+//        return;
+//    }
+
+//    lock();
+
+////    bool succeed = RegistrationApiManager::reset(email, password, code);
+
+////    if (succeed)
+////        clear();
+////    else {
+////        QMessageBox::warning(
+////            this,
+////            tr("Oops"),
+////            tr("Server rejected your code. You might mistyped "
+////               "the reset code. Try again.")
+////        );
+////    }
+
+////    unlock();
+
+////    if (succeed)
+////        emit done();
+//}

@@ -146,7 +146,7 @@ void LoginWidget::onLoginButtonClick()
     if (email.isEmpty() || password.isEmpty()) {
         UtilityFunctions::showMessage(this,
                                       tr("Fields cannot be left blank"),
-                                      tr("Please fill in the required fields first."),
+                                      tr("Please fill in all the required fields first."),
                                       QMessageBox::Information);
         return;
     }

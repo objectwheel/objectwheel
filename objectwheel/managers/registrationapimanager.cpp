@@ -48,6 +48,11 @@ void RegistrationApiManager::resetPassword(const QString& email)
     ServerManager::send(ServerManager::ResetPassword, email);
 }
 
+void RegistrationApiManager::resendPasswordResetCode(const QString& email)
+{
+    ServerManager::send(ServerManager::ResendPasswordResetCode, email);
+}
+
 void RegistrationApiManager::completePasswordReset(const QString& email, const QString& password,
                                                    const QString& code)
 {
@@ -91,6 +96,12 @@ void RegistrationApiManager::onServerResponse(const QByteArray& data)
         break;
     case ServerManager::ResetPasswordFailure:
         emit resetPasswordFailure();
+        break;
+    case ServerManager::ResendPasswordResetCodeSuccessful:
+        emit resendPasswordResetCodeSuccessful();
+        break;
+    case ServerManager::ResendPasswordResetCodeFailure:
+        emit resendPasswordResetCodeFailure();
         break;
     case ServerManager::CompletePasswordResetSuccessful:
         emit completePasswordResetSuccessful();

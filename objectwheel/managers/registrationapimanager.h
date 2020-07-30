@@ -20,6 +20,7 @@ public:
     static void resendSignupCode(const QString& email);
     static void completeSignup(const QString& email, const QString& code);
     static void resetPassword(const QString& email);
+    static void resendPasswordResetCode(const QString& email);
     static void completePasswordReset(const QString& email, const QString& password,
                                       const QString& code);
 
@@ -37,6 +38,8 @@ signals:
     void completeSignupFailure();
     void resetPasswordSuccessful();
     void resetPasswordFailure();
+    void resendPasswordResetCodeSuccessful();
+    void resendPasswordResetCodeFailure();
     void completePasswordResetSuccessful();
     void completePasswordResetFailure();
 
