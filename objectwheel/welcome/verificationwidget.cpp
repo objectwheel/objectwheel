@@ -117,22 +117,16 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
 void VerificationWidget::setEmail(const QString& email)
 {
     Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
-    m_loadingIndicator->stop();
     m_buttons->get(ResendSignupCode)->setEnabled(true);
-    m_countdown->start(300); // 5 mins
+    m_bulkEdit->get<QLineEdit*>(Code)->clear();
     m_emailLabel->setText(tr("Please use the verification code that we have\n"
                              "sent to the email address below to complete your registration\n") + email);
-}
-
-void VerificationWidget::clear()
-{
-    m_countdown->stop();
-    m_bulkEdit->get<QLineEdit*>(Code)->clear();
+    m_countdown->start(300); // 5 mins
 }
 
 void VerificationWidget::onCancelClicked()
 {
-    clear();
+    m_countdown->stop();
     emit cancel();
 }
 
@@ -145,7 +139,7 @@ void VerificationWidget::onCompleteSignupClicked()
     if (code.isEmpty() || code.size() != 6) {
         UtilityFunctions::showMessage(this,
                                       tr("Invalid information entered"),
-                                      tr("Verification code is not in proper format."),
+                                      tr("Verification code is not appropriate."),
                                       QMessageBox::Information);
         return;
     }
@@ -181,26 +175,21 @@ void VerificationWidget::onResendSignupCodeClicked()
 void VerificationWidget::onCompleteSignupSuccessful()
 {
     m_loadingIndicator->stop();
-
-    QTimer::singleShot(200, this, &VerificationWidget::clear);
-
+    m_countdown->stop();
     emit done();
 }
 
 void VerificationWidget::onCompleteSignupFailure()
 {
     m_loadingIndicator->stop();
-
     UtilityFunctions::showMessage(this,
                                   tr("Invalid information entered"),
-                                  tr("Server rejected your code. Or, you might have exceeded "
-                                     "the verification trial limit. Please try again some time later."));
+                                  tr("Incorrect verification code entered or maybe you have "
+                                     "tried it too much. Please try again some time later."));
 }
 
 void VerificationWidget::onResendSignupCodeSuccessful()
 {
-    clear();
-    m_countdown->start();
     m_loadingIndicator->stop();
     UtilityFunctions::showMessage(this,
                                   tr("Resend succeed"),
@@ -224,11 +213,16 @@ void VerificationWidget::onCountdownFinished()
                                   tr("Verification code expired"),
                                   tr("Please try again later."),
                                   QMessageBox::Information);
-    clear();
+    m_countdown->stop();
     emit cancel();
 }
 
 void VerificationWidget::onServerDisconnected()
 {
-
+    if (m_loadingIndicator->isSpinning()) {
+        m_loadingIndicator->stop();
+        UtilityFunctions::showMessage(this,
+                                      tr("Connection lost"),
+                                      tr("We are unable to connect to the server."));
+    }
 }

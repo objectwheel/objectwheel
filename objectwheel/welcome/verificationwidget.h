@@ -20,7 +20,6 @@ public slots:
     void setEmail(const QString& email);
 
 private slots:
-    void clear();
     void onCancelClicked();
     void onCompleteSignupClicked();
     void onResendSignupCodeClicked();

@@ -88,7 +88,7 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     termsLabel->setText(tr("I accept <a href=\"%1\">the terms and conditions</a>").arg(AppConstants::TAC_URL));
 
     auto termsLayout = new QHBoxLayout(termsWidget);
-    termsLayout->setSpacing(5);
+    termsLayout->setSpacing(4);
     termsLayout->setContentsMargins(2, 0, 0, 0);
     termsLayout->addWidget(m_termsSwitch, 0, Qt::AlignVCenter);
     termsLayout->addWidget(termsLabel, 0, Qt::AlignVCenter);
@@ -117,7 +117,7 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     m_loadingIndicator->setLineWidth(2);
 
     auto layout = new QVBoxLayout(this);
-    layout->setSpacing(6);
+    layout->setSpacing(4);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addStretch();
     layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
