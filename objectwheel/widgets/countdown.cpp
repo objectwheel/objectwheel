@@ -3,7 +3,7 @@
 #include <QPainter>
 
 Countdown::Countdown(QWidget* parent) : QWidget(parent)
-  , m_second(0)
+  , m_seconds(0)
   , m_timer(new QTimer(this))
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -23,6 +23,11 @@ Countdown::Countdown(QWidget* parent) : QWidget(parent)
     connect(m_timer, &QTimer::timeout, this, &Countdown::decrease);
 }
 
+bool Countdown::hasExpired() const
+{
+    return m_seconds <= 0;
+}
+
 Countdown::Settings& Countdown::settings()
 {
     return m_settings;
@@ -30,11 +35,11 @@ Countdown::Settings& Countdown::settings()
 
 void Countdown::decrease()
 {
-    if (m_second <= 0) {
+    if (m_seconds <= 0) {
         stop();
         emit finished();
     } else {
-        m_second--;
+        m_seconds--;
     }
     update();
 }
@@ -46,7 +51,7 @@ void Countdown::start(int sec)
     if (sec > 5999)
         sec = 5999;
     if (sec > 0)
-        m_second = sec;
+        m_seconds = sec;
     m_timer->start(1000);
 }
 
@@ -183,7 +188,7 @@ void Countdown::paintEvent(QPaintEvent*)
                                ldr2.center().y() + dts, dts, dts);
 
     /* Draw dots */
-    if (m_second % 2) {
+    if (m_seconds % 2) {
         painter.setPen(Qt::NoPen);
         painter.setBrush(dc);
         painter.drawRoundedRect(dr1, 1.0, 1.0);
@@ -191,8 +196,8 @@ void Countdown::paintEvent(QPaintEvent*)
     }
 
     QString ld, rd;
-    int min = m_second / 60;
-    int sec = m_second % 60;
+    int min = m_seconds / 60;
+    int sec = m_seconds % 60;
 
     if (min < 10)
         ld = QLatin1Char('0') + QString::number(min);

@@ -28,6 +28,7 @@ public:
 
 public:
     explicit Countdown(QWidget* parent = nullptr);
+    bool hasExpired() const;
     Settings& settings();
 
 public slots:
@@ -44,7 +45,7 @@ signals:
     void finished();
 
 private:
-    int m_second;
+    int m_seconds;
     QTimer* m_timer;
     Settings m_settings;
 };

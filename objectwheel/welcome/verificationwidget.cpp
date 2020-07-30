@@ -8,11 +8,9 @@
 #include <utilityfunctions.h>
 #include <servermanager.h>
 
-#include <QVBoxLayout>
-#include <QLabel>
+#include <QBoxLayout>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QMessageBox>
 #include <QRegularExpressionValidator>
 
 enum Fields { Code };
@@ -136,6 +134,14 @@ void VerificationWidget::onCompleteSignupClicked()
     const QString& code = m_bulkEdit->get<QLineEdit*>(Code)->text();
     Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
 
+    if (m_countdown->hasExpired()) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Verification code expired"),
+                                      tr("Please sign up again later."),
+                                      QMessageBox::Information);
+        return;
+    }
+
     if (code.isEmpty() || code.size() != 6) {
         UtilityFunctions::showMessage(this,
                                       tr("Invalid information entered"),
@@ -159,6 +165,14 @@ void VerificationWidget::onResendSignupCodeClicked()
 {
     const QString email = m_emailLabel->text().split(QLatin1Char('\n')).at(2);
     Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
+
+    if (m_countdown->hasExpired()) {
+        UtilityFunctions::showMessage(this,
+                                      tr("Verification code expired"),
+                                      tr("Please sign up again later."),
+                                      QMessageBox::Information);
+        return;
+    }
 
     if (ServerManager::isConnected()) {
         m_buttons->get(ResendSignupCode)->setEnabled(false);
@@ -211,10 +225,8 @@ void VerificationWidget::onCountdownFinished()
 {
     UtilityFunctions::showMessage(this,
                                   tr("Verification code expired"),
-                                  tr("Please try again later."),
+                                  tr("Please sign up again later."),
                                   QMessageBox::Information);
-    m_countdown->stop();
-    emit cancel();
 }
 
 void VerificationWidget::onServerDisconnected()
