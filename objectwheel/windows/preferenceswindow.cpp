@@ -80,7 +80,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_dialogButtonBox->button(QDialogButtonBox::Reset)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
 
-    resize(sizeHint());
+    resize(sizeHint()); // Don't use adjustSize() on Windows
     move(UtilityFunctions::centerPos(size()));
 
     connect(m_searchLineEdit, &LineEdit::textEdited,

@@ -4,11 +4,10 @@
 #include <QList>
 #include <QLineEdit>
 
-class QLayout;
-
-class BulkEdit : public QWidget
+class BulkEdit final : public QWidget
 {
     Q_OBJECT
+    Q_DISABLE_COPY(BulkEdit)
 
 private:
     struct LineElement {
@@ -23,7 +22,6 @@ public:
         QColor borderColor;
         QColor backgroundColor;
         QColor labelColor;
-
         /* Sizes */
         qreal cellHeight;
         qreal borderRadius;
@@ -48,9 +46,11 @@ public:
 public slots:
     void triggerSettings();
 
-protected:
+public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
+
+private:
     void paintEvent(QPaintEvent* event) override;
 
 private:

@@ -32,7 +32,6 @@ ResetPasswordWidget::ResetPasswordWidget(QWidget* parent) : QWidget(parent)
     forgotLabel->setFont(f);
     forgotLabel->setText(tr("Password Reset"));
 
-    m_bulkEdit->setFixedWidth(350);
     m_bulkEdit->add(Email, tr("Email Address"));
     m_bulkEdit->get<QLineEdit*>(Email)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
@@ -44,7 +43,7 @@ ResetPasswordWidget::ResetPasswordWidget(QWidget* parent) : QWidget(parent)
     m_buttons->get(Back)->setIcon(QIcon(QStringLiteral(":/images/welcome/unload.png")));
     m_buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
-    m_buttons->settings().cellWidth = m_bulkEdit->width() / 2.0;
+    m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 2.0;
     m_buttons->triggerSettings();
 
     m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
@@ -62,12 +61,10 @@ ResetPasswordWidget::ResetPasswordWidget(QWidget* parent) : QWidget(parent)
     layout->setSpacing(6);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addStretch();
+    layout->addStretch();
     layout->addWidget(iconLabel, 0 , Qt::AlignHCenter);
-    layout->addSpacing(10);
     layout->addWidget(forgotLabel, 0 , Qt::AlignHCenter);
-    layout->addSpacing(50);
     layout->addWidget(m_bulkEdit, 0 , Qt::AlignHCenter);
-    layout->addSpacing(10);
     layout->addWidget(m_buttons, 0 , Qt::AlignHCenter);
     layout->addStretch();
     layout->addWidget(m_loadingIndicator, 0 , Qt::AlignHCenter);

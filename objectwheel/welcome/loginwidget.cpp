@@ -14,77 +14,30 @@
 
 #include <QPushButton>
 #include <QSettings>
-#include <QGridLayout>
+#include <QBoxLayout>
+#include <QLabel>
 
 enum Fields { Email, Password };
 enum Buttons { Login, Register };
 
 LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
-  , m_layout(new QGridLayout(this))
-  , m_logoLabel(new QLabel(this))
-  , m_loginLabel(new QLabel(this))
   , m_bulkEdit(new BulkEdit(this))
   , m_rememberMeSwitch(new Switch(this))
-  , m_rememberMeLabel(new QLabel(this))
   , m_buttons(new ButtonSlice(this))
   , m_helpButton(new QPushButton(this))
   , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
-  , m_legalLabel(new QLabel(this))
 {
-    auto rememberMeWidget = new QWidget(this);
-    auto rememberMeLayout = new QHBoxLayout(rememberMeWidget);
-
-    m_layout->setSpacing(6);
-    m_layout->setRowStretch(0, 1);
-    m_layout->setRowStretch(1, 1);
-    m_layout->setRowStretch(8, 1);
-    m_layout->setRowStretch(10, 1);
-    m_layout->setColumnStretch(0, 1);
-    m_layout->setColumnStretch(2, 1);
-
-    m_layout->addWidget(m_logoLabel, 2, 1, Qt::AlignCenter);
-    m_layout->addWidget(m_loginLabel, 3, 1, Qt::AlignCenter);
-    m_layout->addWidget(m_bulkEdit, 4, 1, Qt::AlignCenter);
-    m_layout->addWidget(rememberMeWidget, 5, 1, Qt::AlignCenter);
-    m_layout->addWidget(m_buttons, 6, 1, Qt::AlignCenter);
-    m_layout->addWidget(m_helpButton, 7, 1, Qt::AlignCenter);
-    m_layout->addWidget(m_loadingIndicator, 9, 1, Qt::AlignCenter);
-    m_layout->addWidget(m_legalLabel, 11, 1, Qt::AlignCenter);
-
-    rememberMeLayout->setSpacing(5);
-    rememberMeLayout->setContentsMargins(2, 0, 0, 0);
-    rememberMeLayout->addWidget(m_rememberMeSwitch);
-    rememberMeLayout->addWidget(m_rememberMeLabel);
-    rememberMeLayout->setAlignment(m_rememberMeLabel, Qt::AlignVCenter);
-    rememberMeLayout->setAlignment(m_rememberMeSwitch, Qt::AlignVCenter);
-    rememberMeLayout->addStretch();
-    rememberMeWidget->setFixedSize(300, 35);
-    rememberMeWidget->setObjectName(QStringLiteral("rememberMeWidget"));
-    rememberMeWidget->setStyleSheet(QStringLiteral("#rememberMeWidget {"
-                                                   "    border-radius: 17;"
-                                                   "    background: #12000000;"
-                                                   "    border: 1px solid #18000000;"
-                                                   "}"));
-
-    m_rememberMeLabel->setText(tr("Remember me"));
-
-    m_legalLabel->setAlignment(Qt::AlignHCenter);
-    m_legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
-                          .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL));
-
-    ApplicationStyle::setButtonStyle(m_helpButton, ApplicationStyle::Help);
-    m_helpButton->setIcon(QIcon(QStringLiteral(":/images/question.svg")));
-    m_helpButton->setFixedSize(22, 22);
-    m_helpButton->setCursor(Qt::PointingHandCursor);
-
-    m_logoLabel->setFixedSize(QSize(160, 80));
-    m_logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
+    auto logoLabel = new QLabel(this);
+    logoLabel->setFixedSize(QSize(160, 80));
+    logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
 
     QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(16);
-    m_loginLabel->setFont(f);
-    m_loginLabel->setText(tr("Log In"));
+
+    auto loginLabel = new QLabel(this);
+    loginLabel->setFont(f);
+    loginLabel->setText(tr("Log In"));
 
     m_bulkEdit->add(Email, tr("Email"));
     m_bulkEdit->add(Password, tr("Password"));
@@ -101,6 +54,11 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_buttons->get(Register)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Login)->setCursor(Qt::PointingHandCursor);
 
+    ApplicationStyle::setButtonStyle(m_helpButton, ApplicationStyle::Help);
+    m_helpButton->setIcon(QIcon(QStringLiteral(":/images/question.svg")));
+    m_helpButton->setFixedSize(22, 22);
+    m_helpButton->setCursor(Qt::PointingHandCursor);
+
     m_loadingIndicator->setLineWidth(2);
     m_loadingIndicator->setRoundness(50);
     m_loadingIndicator->setLineLength(5);
@@ -112,6 +70,44 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
     m_loadingIndicator->setColor(palette().text().color());
 
+    auto rememberMeWidget = new QWidget(this);
+    rememberMeWidget->setFixedSize(m_bulkEdit->sizeHint().width(), 35);
+    rememberMeWidget->setObjectName(QStringLiteral("rememberMeWidget"));
+    rememberMeWidget->setStyleSheet(QStringLiteral("#rememberMeWidget {"
+                                                   "    border-radius: 17;"
+                                                   "    background: #12000000;"
+                                                   "    border: 1px solid #18000000;"
+                                                   "}"));
+
+    auto rememberMeLayout = new QHBoxLayout(rememberMeWidget);
+    rememberMeLayout->setSpacing(5);
+    rememberMeLayout->setContentsMargins(2, 0, 0, 0);
+    rememberMeLayout->addWidget(m_rememberMeSwitch, 0, Qt::AlignVCenter);
+    rememberMeLayout->addWidget(new QLabel(tr("Remember me"), rememberMeWidget), 0, Qt::AlignVCenter);
+    rememberMeLayout->addStretch();
+
+    auto legalLabel = new QLabel(this);
+    legalLabel->setAlignment(Qt::AlignHCenter);
+    legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
+                        .arg(QDate::currentDate().year())
+                        .arg(AppConstants::COMPANY_FULL));
+
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(6);
+    layout->setContentsMargins(0, 4, 0, 4);
+    layout->addStretch();
+    layout->addStretch();
+    layout->addWidget(logoLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(loginLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
+    layout->addWidget(rememberMeWidget, 0, Qt::AlignHCenter);
+    layout->addWidget(m_buttons, 0, Qt::AlignHCenter);
+    layout->addWidget(m_helpButton, 0, Qt::AlignHCenter);
+    layout->addStretch();
+    layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
+    layout->addStretch();
+    layout->addWidget(legalLabel, 0, Qt::AlignHCenter);
+
     connect(ServerManager::instance(), &ServerManager::disconnected,
             this, &LoginWidget::onServerDisconnected);
     connect(UserManager::instance(), &UserManager::loggedIn,
@@ -121,22 +117,26 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     connect(m_buttons->get(Register), &QPushButton::clicked,
             this, &LoginWidget::signup);
     connect(m_buttons->get(Login), &QPushButton::clicked,
-            this, &LoginWidget::onLoginButtonClick);
-    connect(m_helpButton, &QPushButton::clicked, this, [=] {
-        const QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
-                    this, tr("Need help?"), tr("Do you want to reset your password?"),
-                    QMessageBox::Question, QMessageBox::Reset | QMessageBox::Help |
-                    QMessageBox::Close, QMessageBox::Close);
-        if (ret == QMessageBox::Help)
-            return emit about();
-        if (ret == QMessageBox::Reset)
-            return emit resetPassword();
-    });
+            this, &LoginWidget::onLoginButtonClicked);
+    connect(m_helpButton, &QPushButton::clicked,
+            this, &LoginWidget::onHelpButtonClicked);
 
     restoreRememberMe();
 }
 
-void LoginWidget::onLoginButtonClick()
+void LoginWidget::onHelpButtonClicked()
+{
+    const QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
+                this, tr("Need help?"), tr("Do you want to reset your password?"),
+                QMessageBox::Question, QMessageBox::Reset | QMessageBox::Help |
+                QMessageBox::Close, QMessageBox::Close);
+    if (ret == QMessageBox::Help)
+        emit about();
+    else if (ret == QMessageBox::Reset)
+        emit resetPassword();
+}
+
+void LoginWidget::onLoginButtonClicked()
 {
     const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
     const QString& password = m_bulkEdit->get<QLineEdit*>(Password)->text();

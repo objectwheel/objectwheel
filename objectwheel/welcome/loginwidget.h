@@ -1,13 +1,12 @@
 #ifndef LOGINWIDGET_H
 #define LOGINWIDGET_H
 
-#include <QLabel>
+#include <QWidget>
 
 class Switch;
 class BulkEdit;
 class QPushButton;
 class ButtonSlice;
-class QGridLayout;
 class WaitingSpinnerWidget;
 
 class LoginWidget final : public QWidget
@@ -19,7 +18,8 @@ public:
     explicit LoginWidget(QWidget* parent = nullptr);
 
 private slots:
-    void onLoginButtonClick();
+    void onHelpButtonClicked();
+    void onLoginButtonClicked();
     void onLoginSuccessful();
     void onLoginFailure();
     void onServerDisconnected();
@@ -36,16 +36,11 @@ signals:
     void resetPassword();
 
 private:
-    QGridLayout* m_layout;
-    QLabel* m_logoLabel;
-    QLabel* m_loginLabel;
     BulkEdit* m_bulkEdit;
     Switch* m_rememberMeSwitch;
-    QLabel* m_rememberMeLabel;
     ButtonSlice* m_buttons;
     QPushButton* m_helpButton;
     WaitingSpinnerWidget* m_loadingIndicator;
-    QLabel* m_legalLabel;
 };
 
 #endif // LOGINWIDGET_H

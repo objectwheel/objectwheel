@@ -43,7 +43,6 @@ ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(pare
     m_emailLabel->setAlignment(Qt::AlignHCenter);
     m_emailLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
-    m_bulkEdit->setFixedWidth(300);
     m_bulkEdit->add(Code, tr("Verification Code"));
     m_bulkEdit->add(Password, tr("New Password"));
     m_bulkEdit->add(ConfirmPassword, tr("Confirm New Password"));
@@ -68,7 +67,7 @@ ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(pare
     m_buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(ResendPasswordResetCode)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(CompletePasswordReset)->setCursor(Qt::PointingHandCursor);
-    m_buttons->settings().cellWidth = m_bulkEdit->width() / 3.0;
+    m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 3.0;
     m_buttons->triggerSettings();
 
     m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
@@ -86,12 +85,13 @@ ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(pare
     layout->setSpacing(6);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addStretch();
+    layout->addStretch();
     layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
     layout->addWidget(resetLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(40);
+    layout->addSpacing(25);
     layout->addWidget(countdownLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_countdown, 0, Qt::AlignHCenter);
-    layout->addSpacing(40);
+    layout->addSpacing(25);
     layout->addWidget(m_emailLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
     layout->addWidget(m_buttons, 0, Qt::AlignHCenter);

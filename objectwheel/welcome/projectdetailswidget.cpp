@@ -14,11 +14,6 @@
 #include <QDir>
 #include <QDateTime>
 
-#define BUTTONS_WIDTH    (338)
-#define PATH_SICON       (":/images/welcome/load.png")
-#define PATH_CICON       (":/images/welcome/unload.png")
-#define PATH_DICON       (":/images/welcome/cancel.png")
-
 enum Fields { Name, Description, CreationDate, ModificationDate, Size };
 enum Buttons { Back, Save, Delete };
 
@@ -54,7 +49,6 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_bulkEdit->add(CreationDate, tr("Creation"));
     m_bulkEdit->add(ModificationDate, tr("Last Edit"));
     m_bulkEdit->add(Size, tr("Size"));
-    m_bulkEdit->setFixedWidth(BUTTONS_WIDTH);
 
     m_bulkEdit->get<QLineEdit*>(Name)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Description)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -75,17 +69,19 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
     m_buttons->get(Delete)->setText(tr("Delete"));
     m_buttons->get(Back)->setText(tr("Back"));
     m_buttons->get(Save)->setText(tr("Save"));
-    m_buttons->get(Delete)->setIcon(QIcon(PATH_DICON));
-    m_buttons->get(Back)->setIcon(QIcon(PATH_CICON));
-    m_buttons->get(Save)->setIcon(QIcon(PATH_SICON));
+    m_buttons->get(Delete)->setIcon(QIcon(":/images/welcome/cancel.png"));
+    m_buttons->get(Back)->setIcon(QIcon(":/images/welcome/unload.png"));
+    m_buttons->get(Save)->setIcon(QIcon(":/images/welcome/load.png"));
     m_buttons->get(Delete)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Save)->setCursor(Qt::PointingHandCursor);
-    m_buttons->settings().cellWidth = BUTTONS_WIDTH / 3.0;
+    m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 3.0;
     m_buttons->triggerSettings();
 
-    connect(m_buttons->get(Save), &QPushButton::clicked, this, &ProjectDetailsWidget::onSaveClick);
-    connect(m_buttons->get(Delete), &QPushButton::clicked, this, &ProjectDetailsWidget::onDeleteClick);
+    connect(m_buttons->get(Save), &QPushButton::clicked,
+            this, &ProjectDetailsWidget::onSaveClick);
+    connect(m_buttons->get(Delete), &QPushButton::clicked,
+            this, &ProjectDetailsWidget::onDeleteClick);
     connect(m_buttons->get(Back), &QPushButton::clicked, [=] {
         if (m_toTemplates)
             emit back();

@@ -47,7 +47,6 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
     m_bulkEdit->add(Company, tr("Company"));
     m_bulkEdit->add(Title, tr("Title"));
     m_bulkEdit->add(Phone, tr("Phone"));
-    m_bulkEdit->setFixedWidth(350);
 
     m_bulkEdit->get<QLineEdit*>(First)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Last)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
@@ -72,7 +71,7 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
     countryCombo->lineEdit()->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
     auto termsWidget = new QWidget(this);
-    termsWidget->setFixedSize(m_bulkEdit->width(), 35);
+    termsWidget->setFixedSize(m_bulkEdit->sizeHint().width(), 35);
     termsWidget->setObjectName(QStringLiteral("termsWidget"));
     termsWidget->setStyleSheet(QStringLiteral("#termsWidget {"
                                               "    border-radius: %1;"
@@ -102,7 +101,7 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
     m_buttons->get(Back)->setIcon(QIcon(QStringLiteral(":/images/welcome/unload.png")));
     m_buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(Back)->setCursor(Qt::PointingHandCursor);
-    m_buttons->settings().cellWidth = m_bulkEdit->width() / 2.0;
+    m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 2.0;
     m_buttons->triggerSettings();
 
     m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
@@ -119,6 +118,7 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(4);
     layout->setContentsMargins(0, 0, 0, 0);
+    layout->addStretch();
     layout->addStretch();
     layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
     layout->addWidget(signupLabel, 0, Qt::AlignHCenter);

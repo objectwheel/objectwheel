@@ -29,7 +29,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_serverStatusWidget(new ServerStatusWidget(this))
 {
     setWindowTitle(AppConstants::LABEL);
-    resize(sizeHint());
+    resize(sizeHint()); // Don't use adjustSize() on Windows
     move(UtilityFunctions::centerPos(size()));
 
     m_serverStatusWidget->adjustSize();

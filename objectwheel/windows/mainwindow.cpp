@@ -96,7 +96,6 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent)
   , m_controlsDockWidgetVisible(true)
 {
     setWindowTitle(AppConstants::LABEL);
-    setAutoFillBackground(true);
     setCentralWidget(m_centralWidget);
     setContextMenuPolicy(Qt::NoContextMenu);
     removeTitleBar();
@@ -596,7 +595,7 @@ void MainWindow::removeTitleBar()
 void MainWindow::resetWidget()
 {
     const bool wasVisible = isVisible();
-    resize(sizeHint());
+    resize(sizeHint()); // Don't use adjustSize() on Windows
     move(UtilityFunctions::centerPos(size()));
     setWindowState(windowState() & ~Qt::WindowMaximized);
     restoreState(m_initialInterfaceState);

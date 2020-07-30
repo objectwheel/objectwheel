@@ -1,10 +1,7 @@
 #ifndef ABOUTWINDOW_H
 #define ABOUTWINDOW_H
 
-#include <QLabel>
-
-class QVBoxLayout;
-class QPushButton;
+#include <QWidget>
 
 class AboutWindow final : public QWidget
 {
@@ -14,17 +11,11 @@ class AboutWindow final : public QWidget
 public:
     explicit AboutWindow(QWidget* parent = nullptr);
 
+public:
     QSize sizeHint() const override;
 
 signals:
     void done();
-
-private:
-    QVBoxLayout* m_layout;
-    QLabel* m_logoLabel;
-    QLabel* m_versionLabel;
-    QPushButton* m_okButton;
-    QLabel* m_legalLabel;
 };
 
 #endif //  ABOUTWINDOW_H

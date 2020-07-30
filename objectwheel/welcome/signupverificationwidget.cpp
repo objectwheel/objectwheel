@@ -43,7 +43,6 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
     m_emailLabel->setAlignment(Qt::AlignHCenter);
     m_emailLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
-    m_bulkEdit->setFixedWidth(300);
     m_bulkEdit->add(Code, tr("Enter Verification Code"));
     m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
@@ -61,7 +60,7 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
     m_buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(ResendSignupCode)->setCursor(Qt::PointingHandCursor);
     m_buttons->get(CompleteSignup)->setCursor(Qt::PointingHandCursor);
-    m_buttons->settings().cellWidth = m_bulkEdit->width() / 3.0;
+    m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 3.0;
     m_buttons->triggerSettings();
 
     m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
@@ -79,12 +78,13 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
     layout->setSpacing(6);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addStretch();
+    layout->addStretch();
     layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
     layout->addWidget(verificationLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(40);
+    layout->addSpacing(25);
     layout->addWidget(countdownLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_countdown, 0, Qt::AlignHCenter);
-    layout->addSpacing(40);
+    layout->addSpacing(25);
     layout->addWidget(m_emailLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
     layout->addWidget(m_buttons, 0, Qt::AlignHCenter);

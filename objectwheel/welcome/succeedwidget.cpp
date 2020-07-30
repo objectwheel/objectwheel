@@ -27,7 +27,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     buttons->triggerSettings();
 
     auto layout = new QVBoxLayout(this);
-    layout->setSpacing(10);
+    layout->setSpacing(8);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addStretch();
     layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
@@ -44,6 +44,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     m_movie->setFileName(QStringLiteral(":/images/welcome/complete.gif"));
     m_movie->setBackgroundColor(Qt::transparent);
     m_movie->setScaledSize(iconLabel->size() * iconLabel->devicePixelRatioF());
+    m_movie->setSpeed(160);
 
     connect(buttons->get(Ok), &QPushButton::clicked, this, &SucceedWidget::done);
 }
