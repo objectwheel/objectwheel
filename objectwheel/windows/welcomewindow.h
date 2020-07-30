@@ -5,14 +5,14 @@
 
 class StackedLayout;
 class LoginWidget;
+class SignupWidget;
+class SignupVerificationWidget;
+class ResetPasswordWidget;
+class ResetVerificationWidget;
+class SucceedWidget;
 class ProjectsWidget;
 class ProjectTemplatesWidget;
 class ProjectDetailsWidget;
-class RegistrationWidget;
-class VerificationWidget;
-class SucceedWidget;
-class ForgetWidget;
-class ResetWidget;
 class ServerStatusWidget;
 
 class WelcomeWindow final : public QWidget
@@ -34,11 +34,11 @@ signals:
 private:
     StackedLayout* m_stackedLayout;
     LoginWidget* m_loginWidget;
-    RegistrationWidget* m_registrationWidget;
-    VerificationWidget* m_verificationWidget;
+    SignupWidget* m_signupWidget;
+    SignupVerificationWidget* m_signupVerificationWidget;
+    ResetPasswordWidget* m_resetPasswordWidget;
+    ResetVerificationWidget* m_resetVerificationWidget;
     SucceedWidget* m_succeedWidget;
-    ForgetWidget* m_forgetWidget;
-    ResetWidget* m_resetWidget;
     ProjectsWidget* m_projectsWidget;
     ProjectTemplatesWidget* m_projectTemplatesWidget;
     ProjectDetailsWidget* m_projectDetailsWidget;

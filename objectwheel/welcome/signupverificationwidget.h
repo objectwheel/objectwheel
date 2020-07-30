@@ -1,5 +1,5 @@
-#ifndef VERIFICATIONWIDGET_H
-#define VERIFICATIONWIDGET_H
+#ifndef SIGNUPVERIFICATIONWIDGET_H
+#define SIGNUPVERIFICATIONWIDGET_H
 
 #include <QLabel>
 
@@ -8,13 +8,13 @@ class ButtonSlice;
 class Countdown;
 class WaitingSpinnerWidget;
 
-class VerificationWidget final : public QWidget
+class SignupVerificationWidget final : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(VerificationWidget)
+    Q_DISABLE_COPY(SignupVerificationWidget)
 
 public:
-    explicit VerificationWidget(QWidget* parent = nullptr);
+    explicit SignupVerificationWidget(QWidget* parent = nullptr);
 
 public slots:
     void setEmail(const QString& email);
@@ -42,4 +42,4 @@ private:
     WaitingSpinnerWidget* m_loadingIndicator;
 };
 
-#endif // VERIFICATIONWIDGET_H
+#endif // SIGNUPVERIFICATIONWIDGET_H

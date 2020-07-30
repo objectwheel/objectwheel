@@ -1,4 +1,4 @@
-#include <resetwidget.h>
+#include <resetverificationwidget.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
@@ -22,7 +22,7 @@
 enum Fields { Password, ConfirmPassword, Code };
 enum Buttons { Apply, Cancel };
 
-ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
+ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(parent)
 {
     _layout = new QVBoxLayout(this);
     _iconLabel = new QLabel;
@@ -98,8 +98,8 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _buttons->settings().cellWidth = BUTTONS_WIDTH / 2.0;
     _buttons->triggerSettings();
 
-    connect(_buttons->get(Apply), &QPushButton::clicked, this, &ResetWidget::onApplyClicked);
-    connect(_buttons->get(Cancel), &QPushButton::clicked, this, &ResetWidget::onCancelClicked);
+    connect(_buttons->get(Apply), &QPushButton::clicked, this, &ResetVerificationWidget::onApplyClicked);
+    connect(_buttons->get(Cancel), &QPushButton::clicked, this, &ResetVerificationWidget::onCancelClicked);
 
     connect(_countdown, &Countdown::finished, [=]{
         UtilityFunctions::showMessage(
@@ -119,14 +119,14 @@ ResetWidget::ResetWidget(QWidget* parent) : QWidget(parent)
     _loadingIndicator->setLineWidth(2);
 }
 
-void ResetWidget::setEmail(const QString& email)
+void ResetVerificationWidget::setEmail(const QString& email)
 {
     _countdown->start(COUNTDOWN);
     _emailLabel->setText(tr("Please use the reset code we have sent\n"
       "to the following email address, to reset your password.\n") + email);
 }
 
-void ResetWidget::clear()
+void ResetVerificationWidget::clear()
 {
     _countdown->stop();
     _bulkEdit->get<QLineEdit*>(Code)->clear();
@@ -134,27 +134,27 @@ void ResetWidget::clear()
     _bulkEdit->get<QLineEdit*>(ConfirmPassword)->clear();
 }
 
-void ResetWidget::lock()
+void ResetVerificationWidget::lock()
 {
     _bulkEdit->setDisabled(true);
     _buttons->setDisabled(true);
     _loadingIndicator->start();
 }
 
-void ResetWidget::unlock()
+void ResetVerificationWidget::unlock()
 {
     _bulkEdit->setEnabled(true);
     _buttons->setEnabled(true);
     _loadingIndicator->stop();
 }
 
-void ResetWidget::onCancelClicked()
+void ResetVerificationWidget::onCancelClicked()
 {
     clear();
     emit cancel();
 }
 
-void ResetWidget::onApplyClicked()
+void ResetVerificationWidget::onApplyClicked()
 {
     auto email = _emailLabel->text().split("\n").at(2);
     const auto& code = _bulkEdit->get<QLineEdit*>(Code)->text();

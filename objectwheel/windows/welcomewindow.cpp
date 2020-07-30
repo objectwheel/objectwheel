@@ -4,11 +4,11 @@
 #include <loginwidget.h>
 #include <projectswidget.h>
 #include <projectdetailswidget.h>
-#include <registrationwidget.h>
-#include <verificationwidget.h>
+#include <signupwidget.h>
+#include <signupverificationwidget.h>
 #include <succeedwidget.h>
-#include <forgetwidget.h>
-#include <resetwidget.h>
+#include <resetpasswordwidget.h>
+#include <resetverificationwidget.h>
 #include <projecttemplateswidget.h>
 #include <aboutwindow.h>
 #include <utilityfunctions.h>
@@ -18,11 +18,11 @@
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_stackedLayout(new StackedLayout(this))
   , m_loginWidget(new LoginWidget(this))
-  , m_registrationWidget(new RegistrationWidget(this))
-  , m_verificationWidget(new VerificationWidget(this))
+  , m_signupWidget(new SignupWidget(this))
+  , m_signupVerificationWidget(new SignupVerificationWidget(this))
+  , m_resetPasswordWidget(new ResetPasswordWidget(this))
+  , m_resetVerificationWidget(new ResetVerificationWidget(this))
   , m_succeedWidget(new SucceedWidget(this))
-  , m_forgetWidget(new ForgetWidget(this))
-  , m_resetWidget(new ResetWidget(this))
   , m_projectsWidget(new ProjectsWidget(this))
   , m_projectTemplatesWidget(new ProjectTemplatesWidget(this))
   , m_projectDetailsWidget(new ProjectDetailsWidget(this))
@@ -39,32 +39,33 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
             m_serverStatusWidget, &ServerStatusWidget::raise);
 
     m_stackedLayout->addWidget(m_loginWidget);
-    m_stackedLayout->addWidget(m_registrationWidget);
-    m_stackedLayout->addWidget(m_verificationWidget);
+    m_stackedLayout->addWidget(m_signupWidget);
+    m_stackedLayout->addWidget(m_signupVerificationWidget);
+    m_stackedLayout->addWidget(m_resetPasswordWidget);
+    m_stackedLayout->addWidget(m_resetVerificationWidget);
     m_stackedLayout->addWidget(m_succeedWidget);
-    m_stackedLayout->addWidget(m_forgetWidget);
-    m_stackedLayout->addWidget(m_resetWidget);
     m_stackedLayout->addWidget(m_projectsWidget);
     m_stackedLayout->addWidget(m_projectTemplatesWidget);
     m_stackedLayout->addWidget(m_projectDetailsWidget);
     m_stackedLayout->setCurrentWidget(m_loginWidget);
 
-    /**** ForgetWidget settings ****/
-    connect(m_forgetWidget, &ForgetWidget::done, m_resetWidget, &ResetWidget::setEmail);
-    connect(m_forgetWidget, &ForgetWidget::back, this, [=]
+    /**** ResetPasswordWidget settings ****/
+    connect(m_resetPasswordWidget, &ResetPasswordWidget::done,
+            m_resetVerificationWidget, &ResetVerificationWidget::setEmail);
+    connect(m_resetPasswordWidget, &ResetPasswordWidget::back, this, [=]
     {
         m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
-    connect(m_forgetWidget, &ForgetWidget::done, this, [=]
+    connect(m_resetPasswordWidget, &ResetPasswordWidget::done, this, [=]
     {
-        m_stackedLayout->setCurrentWidget(m_resetWidget);
+        m_stackedLayout->setCurrentWidget(m_resetVerificationWidget);
     });
-    /**** ResetWidget settings ****/
-    connect(m_resetWidget, &ResetWidget::cancel, this, [=]
+    /**** ResetVerificationWidget settings ****/
+    connect(m_resetVerificationWidget, &ResetVerificationWidget::cancel, this, [=]
     {
         m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
-    connect(m_resetWidget, &ResetWidget::done, this, [=] {
+    connect(m_resetVerificationWidget, &ResetVerificationWidget::done, this, [=] {
         m_stackedLayout->setCurrentWidget(m_succeedWidget);
         m_succeedWidget->play(tr("Succeed"),
                               tr("Your password has been successfully changed.\n"
@@ -73,11 +74,11 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     /**** LoginWidget settings ****/
     connect(m_loginWidget, &LoginWidget::signup, this, [=]
     {
-        m_stackedLayout->setCurrentWidget(m_registrationWidget);
+        m_stackedLayout->setCurrentWidget(m_signupWidget);
     });
     connect(m_loginWidget, &LoginWidget::resetPassword, this, [=]
     {
-        m_stackedLayout->setCurrentWidget(m_forgetWidget);
+        m_stackedLayout->setCurrentWidget(m_resetPasswordWidget);
     });
     connect(m_loginWidget, &LoginWidget::about, this, [=]
     {
@@ -126,23 +127,23 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
         m_projectsWidget->refreshProjectList(true);
         m_stackedLayout->setCurrentWidget(m_projectsWidget);
     });
-    /**** RegistrationWidget settings ****/
-    connect(m_registrationWidget, &RegistrationWidget::back, this, [=]
+    /**** SignupWidget settings ****/
+    connect(m_signupWidget, &SignupWidget::back, this, [=]
     {
         m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
-    connect(m_registrationWidget, &RegistrationWidget::done,
-            m_verificationWidget, &VerificationWidget::setEmail);
-    connect(m_registrationWidget, &RegistrationWidget::done, this, [=]
+    connect(m_signupWidget, &SignupWidget::done,
+            m_signupVerificationWidget, &SignupVerificationWidget::setEmail);
+    connect(m_signupWidget, &SignupWidget::done, this, [=]
     {
-        m_stackedLayout->setCurrentWidget(m_verificationWidget);
+        m_stackedLayout->setCurrentWidget(m_signupVerificationWidget);
     });
-    /**** VerificationWidget settings ****/
-    connect(m_verificationWidget, &VerificationWidget::cancel, this, [=]
+    /**** SignupVerificationWidget settings ****/
+    connect(m_signupVerificationWidget, &SignupVerificationWidget::cancel, this, [=]
     {
         m_stackedLayout->setCurrentWidget(m_loginWidget);
     });
-    connect(m_verificationWidget, &VerificationWidget::done, this, [=]
+    connect(m_signupVerificationWidget, &SignupVerificationWidget::done, this, [=]
     {
         m_stackedLayout->setCurrentWidget(m_succeedWidget);
         m_succeedWidget->play(tr("Thank you for registering"),

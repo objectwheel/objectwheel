@@ -1,5 +1,5 @@
-#ifndef REGISTRATIONWIDGET_H
-#define REGISTRATIONWIDGET_H
+#ifndef SIGNUPWIDGET_H
+#define SIGNUPWIDGET_H
 
 #include <QWidget>
 
@@ -8,16 +8,15 @@ class BulkEdit;
 class ButtonSlice;
 class WaitingSpinnerWidget;
 
-class RegistrationWidget final : public QWidget
+class SignupWidget final : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(RegistrationWidget)
+    Q_DISABLE_COPY(SignupWidget)
 
 public:
-    explicit RegistrationWidget(QWidget* parent = nullptr);
+    explicit SignupWidget(QWidget* parent = nullptr);
 
 private slots:
-    void clear();
     void onNextClicked();
     void onSignupSuccessful();
     void onSignupFailure();
@@ -34,4 +33,4 @@ private:
     WaitingSpinnerWidget* m_loadingIndicator;
 };
 
-#endif // REGISTRATIONWIDGET_H
+#endif // SIGNUPWIDGET_H

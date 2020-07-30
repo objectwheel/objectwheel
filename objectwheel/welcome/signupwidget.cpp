@@ -1,4 +1,4 @@
-#include <registrationwidget.h>
+#include <signupwidget.h>
 #include <appconstants.h>
 #include <switch.h>
 #include <bulkedit.h>
@@ -19,7 +19,7 @@
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
 enum Buttons { Next, Back };
 
-RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
+SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
   , m_bulkEdit(new BulkEdit(this))
   , m_termsSwitch(new Switch(this))
   , m_buttons(new ButtonSlice(this))
@@ -130,33 +130,18 @@ RegistrationWidget::RegistrationWidget(QWidget* parent) : QWidget(parent)
     layout->addStretch();
 
     connect(ServerManager::instance(), &ServerManager::disconnected,
-            this, &RegistrationWidget::onServerDisconnected);
+            this, &SignupWidget::onServerDisconnected);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupSuccessful,
-            this, &RegistrationWidget::onSignupSuccessful);
+            this, &SignupWidget::onSignupSuccessful);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupFailure,
-            this, &RegistrationWidget::onSignupFailure);
+            this, &SignupWidget::onSignupFailure);
     connect(m_buttons->get(Next), &QPushButton::clicked,
-            this, &RegistrationWidget::onNextClicked);
+            this, &SignupWidget::onNextClicked);
     connect(m_buttons->get(Back), &QPushButton::clicked,
-            this, &RegistrationWidget::back);
+            this, &SignupWidget::back);
 }
 
-void RegistrationWidget::clear()
-{
-    m_bulkEdit->get<QLineEdit*>(First)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Last)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Email)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Password)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Company)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Title)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Phone)->setText(QString());
-    m_bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
-    m_termsSwitch->setChecked(false);
-}
-
-void RegistrationWidget::onNextClicked()
+void SignupWidget::onNextClicked()
 {
     const QString& first = m_bulkEdit->get<QLineEdit*>(First)->text();
     const QString& last = m_bulkEdit->get<QLineEdit*>(Last)->text();
@@ -259,26 +244,34 @@ void RegistrationWidget::onNextClicked()
     }
 }
 
-void RegistrationWidget::onSignupSuccessful()
+void SignupWidget::onSignupSuccessful()
 {
+    const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
     m_loadingIndicator->stop();
-
-    QTimer::singleShot(200, this, &RegistrationWidget::clear);
-
-    emit done(m_bulkEdit->get<QLineEdit*>(Email)->text());
+    m_bulkEdit->get<QLineEdit*>(First)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(Last)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(Email)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(Password)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(Company)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(Title)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(Phone)->setText(QString());
+    m_bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
+    m_termsSwitch->setChecked(false);
+    emit done(email);
 }
 
-void RegistrationWidget::onSignupFailure()
+void SignupWidget::onSignupFailure()
 {
     m_loadingIndicator->stop();
-
     UtilityFunctions::showMessage(this,
                                   tr("Invalid information entered"),
                                   tr("The server rejected your request. Please review the information you entered "
                                      "and make sure you are not trying to sign up more than once."));
 }
 
-void RegistrationWidget::onServerDisconnected()
+void SignupWidget::onServerDisconnected()
 {
     if (m_loadingIndicator->isSpinning()) {
         m_loadingIndicator->stop();

@@ -136,12 +136,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     restoreRememberMe();
 }
 
-void LoginWidget::clear()
-{
-    m_bulkEdit->get<QLineEdit*>(Email)->clear();
-    m_bulkEdit->get<QLineEdit*>(Password)->clear();
-}
-
 void LoginWidget::onLoginButtonClick()
 {
     const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
@@ -226,20 +220,16 @@ void LoginWidget::onLoginSuccessful()
         saveRememberMe();
     else
         clearRememberMe();
-
     m_loadingIndicator->stop();
-
-    QTimer::singleShot(200, this, &LoginWidget::clear);
-
+    m_bulkEdit->get<QLineEdit*>(Email)->clear();
+    m_bulkEdit->get<QLineEdit*>(Password)->clear();
     emit done();
 }
 
 void LoginWidget::onLoginFailure()
 {
     clearRememberMe();
-
     m_loadingIndicator->stop();
-
     UtilityFunctions::showMessage(this,
                                   tr("Unable to log in"),
                                   tr("Incorrect email address or password, "

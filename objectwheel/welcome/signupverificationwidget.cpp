@@ -1,4 +1,4 @@
-#include <verificationwidget.h>
+#include <signupverificationwidget.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <waitingspinnerwidget.h>
@@ -16,7 +16,7 @@
 enum Fields { Code };
 enum Buttons { CompleteSignup, ResendSignupCode, Cancel };
 
-VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
+SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(parent)
   , m_countdown(new Countdown(this))
   , m_emailLabel(new QLabel(this))
   , m_bulkEdit(new BulkEdit(this))
@@ -93,26 +93,26 @@ VerificationWidget::VerificationWidget(QWidget* parent) : QWidget(parent)
     layout->addStretch();
 
     connect(m_buttons->get(Cancel), &QPushButton::clicked,
-            this, &VerificationWidget::onCancelClicked);
+            this, &SignupVerificationWidget::onCancelClicked);
     connect(m_buttons->get(CompleteSignup), &QPushButton::clicked,
-            this, &VerificationWidget::onCompleteSignupClicked);
+            this, &SignupVerificationWidget::onCompleteSignupClicked);
     connect(m_buttons->get(ResendSignupCode), &QPushButton::clicked,
-            this, &VerificationWidget::onResendSignupCodeClicked);
+            this, &SignupVerificationWidget::onResendSignupCodeClicked);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::completeSignupSuccessful,
-            this, &VerificationWidget::onCompleteSignupSuccessful);
+            this, &SignupVerificationWidget::onCompleteSignupSuccessful);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::completeSignupFailure,
-            this, &VerificationWidget::onCompleteSignupFailure);
+            this, &SignupVerificationWidget::onCompleteSignupFailure);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendSignupCodeSuccessful,
-            this, &VerificationWidget::onResendSignupCodeSuccessful);
+            this, &SignupVerificationWidget::onResendSignupCodeSuccessful);
     connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendSignupCodeFailure,
-            this, &VerificationWidget::onResendSignupCodeFailure);
+            this, &SignupVerificationWidget::onResendSignupCodeFailure);
     connect(m_countdown, &Countdown::finished,
-            this, &VerificationWidget::onCountdownFinished);
+            this, &SignupVerificationWidget::onCountdownFinished);
     connect(ServerManager::instance(), &ServerManager::disconnected,
-            this, &VerificationWidget::onServerDisconnected);
+            this, &SignupVerificationWidget::onServerDisconnected);
 }
 
-void VerificationWidget::setEmail(const QString& email)
+void SignupVerificationWidget::setEmail(const QString& email)
 {
     Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
     m_buttons->get(ResendSignupCode)->setEnabled(true);
@@ -122,13 +122,13 @@ void VerificationWidget::setEmail(const QString& email)
     m_countdown->start(300); // 5 mins
 }
 
-void VerificationWidget::onCancelClicked()
+void SignupVerificationWidget::onCancelClicked()
 {
     m_countdown->stop();
     emit cancel();
 }
 
-void VerificationWidget::onCompleteSignupClicked()
+void SignupVerificationWidget::onCompleteSignupClicked()
 {
     const QString email = m_emailLabel->text().split(QLatin1Char('\n')).at(2);
     const QString& code = m_bulkEdit->get<QLineEdit*>(Code)->text();
@@ -161,7 +161,7 @@ void VerificationWidget::onCompleteSignupClicked()
     }
 }
 
-void VerificationWidget::onResendSignupCodeClicked()
+void SignupVerificationWidget::onResendSignupCodeClicked()
 {
     const QString email = m_emailLabel->text().split(QLatin1Char('\n')).at(2);
     Q_ASSERT(UtilityFunctions::isEmailFormatCorrect(email));
@@ -186,14 +186,14 @@ void VerificationWidget::onResendSignupCodeClicked()
     }
 }
 
-void VerificationWidget::onCompleteSignupSuccessful()
+void SignupVerificationWidget::onCompleteSignupSuccessful()
 {
     m_loadingIndicator->stop();
     m_countdown->stop();
     emit done();
 }
 
-void VerificationWidget::onCompleteSignupFailure()
+void SignupVerificationWidget::onCompleteSignupFailure()
 {
     m_loadingIndicator->stop();
     UtilityFunctions::showMessage(this,
@@ -202,7 +202,7 @@ void VerificationWidget::onCompleteSignupFailure()
                                      "tried it too much. Please try again some time later."));
 }
 
-void VerificationWidget::onResendSignupCodeSuccessful()
+void SignupVerificationWidget::onResendSignupCodeSuccessful()
 {
     m_loadingIndicator->stop();
     UtilityFunctions::showMessage(this,
@@ -211,7 +211,7 @@ void VerificationWidget::onResendSignupCodeSuccessful()
                                   QMessageBox::Information);
 }
 
-void VerificationWidget::onResendSignupCodeFailure()
+void SignupVerificationWidget::onResendSignupCodeFailure()
 {
     m_loadingIndicator->stop();
     UtilityFunctions::showMessage(this,
@@ -221,7 +221,7 @@ void VerificationWidget::onResendSignupCodeFailure()
 
 }
 
-void VerificationWidget::onCountdownFinished()
+void SignupVerificationWidget::onCountdownFinished()
 {
     UtilityFunctions::showMessage(this,
                                   tr("Verification code expired"),
@@ -229,7 +229,7 @@ void VerificationWidget::onCountdownFinished()
                                   QMessageBox::Information);
 }
 
-void VerificationWidget::onServerDisconnected()
+void SignupVerificationWidget::onServerDisconnected()
 {
     if (m_loadingIndicator->isSpinning()) {
         m_loadingIndicator->stop();

@@ -1,5 +1,5 @@
-#ifndef RESETWIDGET_H
-#define RESETWIDGET_H
+#ifndef RESETVERIFICATIONWIDGET_H
+#define RESETVERIFICATIONWIDGET_H
 
 #include <QWidget>
 
@@ -10,12 +10,12 @@ class ButtonSlice;
 class WaitingSpinnerWidget;
 class Countdown;
 
-class ResetWidget : public QWidget
+class ResetVerificationWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ResetWidget(QWidget* parent = nullptr);
+    explicit ResetVerificationWidget(QWidget* parent = nullptr);
 
 public slots:
     void setEmail(const QString& email);
@@ -43,5 +43,4 @@ private:
     WaitingSpinnerWidget* _loadingIndicator;
 };
 
-
-#endif // RESETWIDGET_H
+#endif // RESETVERIFICATIONWIDGET_H

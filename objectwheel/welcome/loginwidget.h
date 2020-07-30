@@ -19,7 +19,6 @@ public:
     explicit LoginWidget(QWidget* parent = nullptr);
 
 private slots:
-    void clear();
     void onLoginButtonClick();
     void onLoginSuccessful();
     void onLoginFailure();
