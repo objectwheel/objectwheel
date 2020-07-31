@@ -4,10 +4,9 @@
 
 ServerManager* ServerManager::s_instance = nullptr;
 QBasicTimer ServerManager::s_pingTimer;
-QElapsedTimer ServerManager::s_activityTimer;
+QElapsedTimer ServerManager::s_inactivityTimer;
 
-ServerManager::ServerManager(QObject* parent)
-    : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, parent)
+ServerManager::ServerManager(QObject* parent) : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, parent)
 {
     s_instance = this;
     connect(this, qOverload<QAbstractSocket::SocketError>(&ServerManager::error),
@@ -15,16 +14,14 @@ ServerManager::ServerManager(QObject* parent)
     connect(this, &ServerManager::sslErrors,
             this, &ServerManager::onSslErrors);
     connect(this, &ServerManager::textFrameReceived,
-            this, [] { s_activityTimer.restart(); });
+            this, [] { s_inactivityTimer.restart(); });
     connect(this, &ServerManager::binaryFrameReceived,
-            this, [] { s_activityTimer.restart(); });
+            this, [] { s_inactivityTimer.restart(); });
     connect(this, &ServerManager::pong,
-            this, [] { s_activityTimer.restart(); });
+            this, [] { s_inactivityTimer.restart(); });
     connect(this, &ServerManager::connected,
-            this, [this] { ping(); s_activityTimer.restart(); });
-    s_activityTimer.start();
-    s_pingTimer.start(PING_INTERVAL, Qt::VeryCoarseTimer, this);
-    QMetaObject::invokeMethod(this, "open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(AppConstants::WSS_URL)));
+            this, [this] { ping(); s_inactivityTimer.restart(); });
+    wake();
 }
 
 ServerManager::~ServerManager()
@@ -40,6 +37,21 @@ ServerManager* ServerManager::instance()
 bool ServerManager::isConnected()
 {
     return instance()->state() == QAbstractSocket::ConnectedState;
+}
+
+void ServerManager::sleep()
+{
+    s_pingTimer.stop();
+    s_inactivityTimer.invalidate();
+    if (s_instance->state() != QAbstractSocket::UnconnectedState)
+        s_instance->abort();
+}
+
+void ServerManager::wake()
+{
+    s_inactivityTimer.start();
+    s_pingTimer.start(PingInterval, Qt::VeryCoarseTimer, s_instance);
+    QMetaObject::invokeMethod(s_instance, "open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(AppConstants::WSS_URL)));
 }
 
 void ServerManager::onError(QAbstractSocket::SocketError error)
@@ -59,13 +71,10 @@ void ServerManager::timerEvent(QTimerEvent* event)
     if (event->timerId() == s_pingTimer.timerId()) {
         if (state() == QAbstractSocket::ConnectedState)
             ping();
-        if (s_activityTimer.hasExpired(ACTIVITY_THRESHOLD)) {
-            if (state() == QAbstractSocket::UnconnectedState) {
-                open(QUrl(AppConstants::WSS_URL));
-            } else { // You have 3 secs to establish a successful connection
+        if (s_inactivityTimer.hasExpired(InactivityLimit)) {
+            if (state() != QAbstractSocket::UnconnectedState)
                 abort();
-                open(QUrl(AppConstants::WSS_URL));
-            }
+            open(QUrl(AppConstants::WSS_URL));
         }
     } else {
         QWebSocket::timerEvent(event);

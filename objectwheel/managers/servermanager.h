@@ -14,8 +14,8 @@ class ServerManager final : public QWebSocket
     friend class ApplicationCore;
 
     enum {
-        PING_INTERVAL = 3000,
-        ACTIVITY_THRESHOLD = 7000
+        PingInterval = 3000,
+        InactivityLimit = 8000
     };
 
 public:
@@ -52,6 +52,8 @@ public:
 public:
     static ServerManager* instance();
     static bool isConnected();
+    static void sleep();
+    static void wake();
 
     template<typename... Args>
     static qint64 send(ServerCommands command, Args&&... args) {
@@ -73,7 +75,7 @@ private:
 private:
     static ServerManager* s_instance;
     static QBasicTimer s_pingTimer;
-    static QElapsedTimer s_activityTimer;
+    static QElapsedTimer s_inactivityTimer;
 };
 
 #endif // SERVERMANAGER_H
