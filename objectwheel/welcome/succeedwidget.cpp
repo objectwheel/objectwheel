@@ -44,7 +44,7 @@ SucceedWidget::SucceedWidget(QWidget* parent) : QWidget(parent)
     m_movie->setFileName(QStringLiteral(":/images/welcome/complete.gif"));
     m_movie->setBackgroundColor(Qt::transparent);
     m_movie->setScaledSize(iconLabel->size() * iconLabel->devicePixelRatioF());
-    m_movie->setSpeed(160);
+    m_movie->setSpeed(165);
 
     connect(buttons->get(Ok), &QPushButton::clicked, this, &SucceedWidget::done);
 }

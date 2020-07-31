@@ -190,15 +190,24 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     /****/
 
+    auto infoButton = new QPushButton(m_statusGroup);
+    infoButton->setFixedSize(18, 18);
+    infoButton->setCursor(Qt::PointingHandCursor);
+    infoButton->setToolTip(tr("A quick reminder about updates"));
+    infoButton->setIcon(QIcon(":/images/output/info.svg"));
+    infoButton->setFlat(true);
+
     auto statusLayout = new QGridLayout(m_statusGroup);
     statusLayout->setSpacing(6);
     statusLayout->setContentsMargins(6, 6, 6, 6);
     statusLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     statusLayout->addWidget(m_logoLabel, 0, 0, 4, 1, Qt::AlignVCenter);
     statusLayout->addWidget(m_brandIconLabel, 0, 1);
+    statusLayout->addWidget(infoButton, 0, 2);
     statusLayout->addWidget(m_versionLabel, 1, 1);
     statusLayout->addWidget(m_revisionLabel, 2, 1);
     statusLayout->addWidget(m_buildDateLabel, 3, 1);
+    statusLayout->setColumnStretch(1, 1);
 
     m_statusGroup->setTitle(tr("Status"));
     m_brandIconLabel->setText(AppConstants::LABEL);
@@ -240,6 +249,31 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     /****/
 
+    connect(infoButton, &QPushButton::clicked, this, [=] {
+        UtilityFunctions::showMessage(
+                    this,
+                    tr("A quick reminder about updates"),
+                    tr("Objectwheel needs regular updates to function properly. "
+                       "Opening up new projects or using cloud services with an "
+                       "outdated version of Objectwheel may result in failure."
+                       "\n\n"
+                       "Meanwhile Objectwheel does not download or install any "
+                       "updates automatically in any way."),
+                    QMessageBox::Information);
+    });
+    connect(m_checkForUpdatesAutomaticallyCheckBox, &QCheckBox::clicked, this, [=] {
+        if (!m_checkForUpdatesAutomaticallyCheckBox->isChecked()) {
+            QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
+                        this,
+                        tr("Are you sure?"),
+                        tr("Objectwheel needs regular updates to function properly. "
+                           "Opening up new projects or using cloud services with an "
+                           "outdated version of Objectwheel may result in failure."),
+                        QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No);
+            if (ret == QMessageBox::No)
+                m_checkForUpdatesAutomaticallyCheckBox->setChecked(true);
+        }
+    });
     connect(m_showCacheFolderButton, &QPushButton::clicked, this, [=] {
         if (QFileInfo::exists(ApplicationCore::updatesPath())) {
             Utils::FileUtils::showInFolder(this, ApplicationCore::updatesPath());

@@ -74,6 +74,13 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     m_buttonSlice->settings().cellWidth = 150;
     m_buttonSlice->triggerSettings();
 
+    auto infoButton = new QPushButton(this);
+    infoButton->setFixedSize(18, 18);
+    infoButton->setCursor(Qt::PointingHandCursor);
+    infoButton->setToolTip(tr("A quick reminder about privacy"));
+    infoButton->setIcon(QIcon(":/images/output/info.svg"));
+    infoButton->setFlat(true);
+
     auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
@@ -84,6 +91,22 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(buildsLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_downloadList, 0, Qt::AlignHCenter);
     layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
+    layout->addWidget(infoButton, 0, Qt::AlignHCenter);
+
+    connect(infoButton, &QPushButton::clicked, this, [=] {
+        UtilityFunctions::showMessage(
+                    this,
+                    tr("A quick reminder about privacy"),
+                    tr("Objectwheel does not collect, store or share any of your "
+                       "data regarding to your cloud builds. Your projects are at "
+                       "safe hands with the Objectwheel Cloud Builds. We only store "
+                       "them, within a temporary location under the build system, "
+                       "for the time that your project is being built. Immediately "
+                       "after the build is finished (succeeded, failed or halted; "
+                       "doesn't matter) your data is erased completely. We respect "
+                       "your privacy and hopefully we will always be."),
+                    QMessageBox::Information);
+    });
 }
 
 QListView* DownloadWidget::downloadList() const
