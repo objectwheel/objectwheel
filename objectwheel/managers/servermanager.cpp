@@ -21,7 +21,6 @@ ServerManager::ServerManager(QObject* parent) : QWebSocket(QString(), QWebSocket
             this, [] { s_inactivityTimer.restart(); });
     connect(this, &ServerManager::connected,
             this, [this] { ping(); s_inactivityTimer.restart(); });
-    wake();
 }
 
 ServerManager::~ServerManager()
@@ -49,9 +48,11 @@ void ServerManager::sleep()
 
 void ServerManager::wake()
 {
-    s_inactivityTimer.start();
-    s_pingTimer.start(PingInterval, Qt::VeryCoarseTimer, s_instance);
-    QMetaObject::invokeMethod(s_instance, "open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(AppConstants::WSS_URL)));
+    if (s_instance->state() == QAbstractSocket::UnconnectedState) {
+        s_inactivityTimer.start();
+        s_pingTimer.start(PingInterval, Qt::VeryCoarseTimer, s_instance);
+        QMetaObject::invokeMethod(s_instance, "open", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(AppConstants::WSS_URL)));
+    }
 }
 
 void ServerManager::onError(QAbstractSocket::SocketError error)

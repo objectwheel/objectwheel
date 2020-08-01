@@ -33,6 +33,7 @@
 #include <splashscreen.h>
 #include <signalwatcher.h>
 #include <appconstants.h>
+#include <inactivitywatcher.h>
 
 #include <QToolTip>
 #include <QScreen>
@@ -44,6 +45,7 @@
 #include <QSharedMemory>
 #include <QTimer>
 #include <QPixmapCache>
+#include <QWindow>
 
 #include <theme/theme_p.h>
 #include <coreplugin/themechooser.h>
@@ -75,6 +77,7 @@ HelpManager* ApplicationCore::s_helpManager = nullptr;
 DocumentManager* ApplicationCore::s_documentManager = nullptr;
 WindowManager* ApplicationCore::s_windowManager = nullptr;
 MenuManager* ApplicationCore::s_menuManager = nullptr;
+InactivityWatcher* ApplicationCore::s_inactivityWatcher = nullptr;
 
 ApplicationCore::ApplicationCore()
 {
@@ -125,13 +128,6 @@ ApplicationCore::ApplicationCore()
     splash->showMessage(QObject::tr("Initializing..."));
     splash->show();
 
-    // App Nap feature of macOS prevents timers to accurately emit signals at the right time
-    // when the application minimized or working in the background. That especially affects
-    // the disconnection detection of the ServerManager
-#if defined(Q_OS_MACOS)
-    MacOperations::disableAppNap(QLatin1String("Listening to server"));
-#endif
-
     s_modeManager = new ModeManager;
     s_serverManager = new ServerManager;
     s_payloadManager = new PayloadManager;
@@ -158,15 +154,31 @@ ApplicationCore::ApplicationCore()
     /** Ui initialization **/
     s_windowManager = new WindowManager;
     s_menuManager = new MenuManager;
+    s_inactivityWatcher = new InactivityWatcher(300);
 
-    //  FIXME  QObject::connect(s_userManager, &UserManager::started,
-    //                     &ApplicationCore::onUserSessionStart);
-    //    QObject::connect(s_userManager, &UserManager::aboutToStop,
-    //                     &ApplicationCore::onUserSessionStop);
+    QObject::connect(s_inactivityWatcher, &InactivityWatcher::activated,
+                     &ApplicationCore::onActivated);
+    QObject::connect(s_inactivityWatcher, &InactivityWatcher::deactivated,
+                     &ApplicationCore::onDeactivated);
+    QObject::connect(qApp, &QApplication::focusWindowChanged,
+                     s_inactivityWatcher, &InactivityWatcher::activate);
+    QObject::connect(s_payloadManager, &PayloadManager::bytesWritten,
+                     s_inactivityWatcher, [] { s_inactivityWatcher->activate(); });
+    QObject::connect(s_payloadManager, &PayloadManager::readyRead,
+                     s_inactivityWatcher, [] { s_inactivityWatcher->activate(); });
+    QObject::connect(s_updateManager, &UpdateManager::updateCheckStarted,
+                     s_inactivityWatcher, [] { s_inactivityWatcher->activate(); });
+    QObject::connect(s_updateManager, &UpdateManager::downloadProgress,
+                     s_inactivityWatcher, [] { s_inactivityWatcher->activate(); });
+
     QObject::connect(s_projectManager, &ProjectManager::started,
                      &ApplicationCore::onProjectStart);
     QObject::connect(s_projectManager, &ProjectManager::stopped,
                      &ApplicationCore::onProjectStop);
+    //  FIXME  QObject::connect(s_userManager, &UserManager::started,
+    //                     &ApplicationCore::onUserSessionStart);
+    //    QObject::connect(s_userManager, &UserManager::aboutToStop,
+    //                     &ApplicationCore::onUserSessionStop);
 
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerPane()->designerView()->scene();
     s_projectExposingManager->init(scene);
@@ -188,6 +200,8 @@ ApplicationCore::ApplicationCore()
 
 ApplicationCore::~ApplicationCore()
 {
+    delete s_inactivityWatcher;
+    s_inactivityWatcher = nullptr;
     delete s_menuManager;
     s_menuManager = nullptr;
     delete s_windowManager;
@@ -347,6 +361,22 @@ QString ApplicationCore::updatesPath()
 QString ApplicationCore::appDataPath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+}
+
+void ApplicationCore::onActivated()
+{
+    ServerManager::wake();
+#if defined(Q_OS_MACOS)
+    MacOperations::disableIdleSystemSleep();
+#endif
+}
+
+void ApplicationCore::onDeactivated()
+{
+    ServerManager::sleep();
+#if defined(Q_OS_MACOS)
+    MacOperations::enableIdleSystemSleep();
+#endif
 }
 
 void ApplicationCore::onProjectStop()

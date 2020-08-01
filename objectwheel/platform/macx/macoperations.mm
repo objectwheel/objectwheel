@@ -6,12 +6,29 @@
 
 namespace MacOperations {
 
-void disableAppNap(const QString& reason)
+namespace Internal {
+id activity = nullptr;
+}
+
+// App Nap feature of macOS prevents timers to accurately emit signals at the right time
+// when the application minimized or working in the background. That especially affects
+// the disconnection detection of the ServerManager
+
+void enableIdleSystemSleep()
 {
-    auto processInfo = [NSProcessInfo processInfo];
-    if ([processInfo respondsToSelector: @selector(beginActivityWithOptions:reason:)]) {
-        [processInfo beginActivityWithOptions: NSActivityBackground reason: reason.toNSString()];
+    if (Internal::activity) {
+        [[NSProcessInfo processInfo] endActivity: Internal::activity];
+        [Internal::activity release];
+        Internal::activity = nullptr;
     }
+}
+
+void disableIdleSystemSleep()
+{
+    Q_ASSERT(Internal::activity == 0);
+    Internal::activity = [[NSProcessInfo processInfo] beginActivityWithOptions:
+        NSActivityBackground | NSActivityIdleSystemSleepDisabled reason: @"Busy"];
+    [Internal::activity retain];
 }
 
 void removeTitleBar(QMainWindow* mainWindow)

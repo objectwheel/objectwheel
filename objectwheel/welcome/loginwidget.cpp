@@ -94,7 +94,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(6);
-    layout->setContentsMargins(0, 4, 0, 4);
+    layout->setContentsMargins(0, 6, 0, 6);
     layout->addStretch();
     layout->addStretch();
     layout->addWidget(logoLabel, 0, Qt::AlignHCenter);

@@ -26,6 +26,7 @@ class HelpManager;
 class ServerManager;
 class PayloadManager;
 class UpdateManager;
+class InactivityWatcher;
 
 class ApplicationCore final
 {
@@ -48,6 +49,8 @@ public:
     static QString appDataPath();
 
 private:
+    static void onActivated();
+    static void onDeactivated();
     static void onProjectStop();
     static void onProjectStart();
     static void onUserSessionStop();
@@ -77,6 +80,7 @@ private:
     static DocumentManager* s_documentManager;
     static WindowManager* s_windowManager;
     static MenuManager* s_menuManager;
+    static InactivityWatcher* s_inactivityWatcher;
 };
 
 #endif // APPLICATIONCORE_H

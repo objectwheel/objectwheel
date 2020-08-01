@@ -6,7 +6,8 @@ class QMainWindow;
 
 namespace MacOperations {
 
-void disableAppNap(const QString& reason);
+void enableIdleSystemSleep();
+void disableIdleSystemSleep();
 void removeTitleBar(QMainWindow* mainWindow);
 
 }
