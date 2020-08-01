@@ -154,7 +154,7 @@ ApplicationCore::ApplicationCore()
     /** Ui initialization **/
     s_windowManager = new WindowManager;
     s_menuManager = new MenuManager;
-    s_inactivityWatcher = new InactivityWatcher(300);
+    s_inactivityWatcher = new InactivityWatcher(180);
 
     QObject::connect(s_inactivityWatcher, &InactivityWatcher::activated,
                      &ApplicationCore::onActivated);
