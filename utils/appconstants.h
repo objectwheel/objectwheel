@@ -24,7 +24,7 @@ const char DOWNLOAD_URL[]  = "https://objectwheel.com/download";
 const char TAC_URL[]       = "https://objectwheel.com/terms-and-conditions";
 const char MAIL_DOMAIN[]   = "mail.objectwheel.com";
 
-#if 1 // LOCAL DEBUG ENVIRONMENT
+#if 0 // LOCAL DEBUG ENVIRONMENT
 const char API_DOMAIN[]    = "localhost";
 const char WSS_URL[]       = "ws://localhost:5454";
 const char UPDATE_URL[]    = "http://localhost:4443";

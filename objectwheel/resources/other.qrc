@@ -2,5 +2,6 @@
     <qresource prefix="/">
         <file>other/form.js</file>
         <file>other/form.qml</file>
+        <file>other/plans.csv</file>
     </qresource>
 </RCC>

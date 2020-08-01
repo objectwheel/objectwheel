@@ -27,7 +27,8 @@ HEADERS += \
     $$PWD/filesystemutils.h \
     $$PWD/tooltipwidget.h \
     $$PWD/textimagehandler.h \
-    $$PWD/qmlerror.h
+    $$PWD/qmlerror.h \
+    $$PWD/csvparser.h
 
 SOURCES += \
     $$PWD/signalwatcher.cpp \
@@ -40,7 +41,8 @@ SOURCES += \
     $$PWD/paintutils.cpp \
     $$PWD/utilityfunctions.cpp \
     $$PWD/filesystemutils.cpp \
-    $$PWD/textimagehandler.cpp
+    $$PWD/textimagehandler.cpp \
+    $$PWD/csvparser.cpp
 
 RESOURCES += $$PWD/resources/resources.qrc
 
