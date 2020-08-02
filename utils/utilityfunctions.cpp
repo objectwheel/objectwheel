@@ -704,12 +704,46 @@ QFont systemDefaultFont()
 
 QFont systemTitleFont()
 {
-    QFont font;
+    QFont font(systemDefaultFont());
 #if defined(Q_OS_MACOS)
     if (QOperatingSystemVersion::current() >= QOperatingSystemVersion::MacOSCatalina)
         font.setFamily("SF UI Display");
 #endif
     return font;
+}
+
+QFont thickerFont(const QFont& font)
+{
+    QFont thicker(font);
+    switch (font.weight()) {
+    case QFont::Thin:
+        thicker.setWeight(QFont::ExtraLight);
+        break;
+    case QFont::ExtraLight:
+        thicker.setWeight(QFont::Light);
+        break;
+    case QFont::Light:
+        thicker.setWeight(QFont::Normal);
+        break;
+    case QFont::Normal:
+        thicker.setWeight(QFont::Medium);
+        break;
+    case QFont::Medium:
+        thicker.setWeight(QFont::DemiBold);
+        break;
+    case QFont::DemiBold:
+        thicker.setWeight(QFont::Bold);
+        break;
+    case QFont::Bold:
+        thicker.setWeight(QFont::ExtraBold);
+        break;
+    case QFont::ExtraBold:
+        thicker.setWeight(QFont::Black);
+        break;
+    default:
+        break;
+    }
+    return thicker;
 }
 
 // Shortcut events are sent based on the shortcut context that's set on the action/shortcut.

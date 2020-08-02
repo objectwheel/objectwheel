@@ -9,13 +9,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.objectwheel.Updater</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>2.9.876.g164e5e9d</string>
+	<string>2.9.900.g1d989bee</string>
 	<key>CFBundleName</key>
 	<string>Updater</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.9.876.g164e5e9d</string>
+	<string>2.9.900.g1d989bee</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>10.12</string>
 	<key>LSUIElement</key>

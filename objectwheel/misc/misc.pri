@@ -3,6 +3,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/pathfinder.h \
            $$PWD/buttongroup.h \
+           $$PWD/planwidget.h \
            $$PWD/inactivitywatcher.h \
            $$PWD/stackedlayout.h \
            $$PWD/styleditemdelegate.h \
@@ -11,6 +12,7 @@ HEADERS += $$PWD/pathfinder.h \
 
 SOURCES += $$PWD/pathfinder.cpp \
            $$PWD/buttongroup.cpp \
+           $$PWD/planwidget.cpp \
            $$PWD/inactivitywatcher.cpp \
            $$PWD/stackedlayout.cpp \
            $$PWD/styleditemdelegate.cpp \
