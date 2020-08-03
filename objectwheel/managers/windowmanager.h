@@ -7,6 +7,7 @@ class MainWindow;
 class WelcomeWindow;
 class AboutWindow;
 class PreferencesWindow;
+class SubscriptionWindow;
 
 class WindowManager final : public QObject
 {
@@ -20,6 +21,7 @@ public:
     static PreferencesWindow* preferencesWindow();
     static MainWindow* mainWindow();
     static WelcomeWindow* welcomeWindow();
+    static SubscriptionWindow* subscriptionWindow();
 
 private:
     explicit WindowManager(QObject* parent = nullptr);
@@ -30,6 +32,7 @@ private:
     static PreferencesWindow* s_preferencesWindow;
     static MainWindow* s_mainWindow;
     static WelcomeWindow* s_welcomeWindow;
+    static SubscriptionWindow* s_subscriptionWindow;
 };
 
 #endif // WINDOWMANAGER_H

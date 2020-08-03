@@ -39,6 +39,8 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
   , m_searchLineEdit(new LineEdit(LineEdit::NoFocus, LineEdit::Search, this))
   , m_dialogButtonBox(new QDialogButtonBox(this))
 {
+    resize(sizeHint()); // Don't use adjustSize() on Windows
+    move(UtilityFunctions::centerPos(size()));
     setFocusPolicy(Qt::NoFocus);
     setWindowTitle(tr("Preferences"));
     setWindowModality(Qt::ApplicationModal);
@@ -79,9 +81,6 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_dialogButtonBox->button(QDialogButtonBox::Apply)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Reset)->setCursor(Qt::PointingHandCursor);
     m_dialogButtonBox->button(QDialogButtonBox::Cancel)->setCursor(Qt::PointingHandCursor);
-
-    resize(sizeHint()); // Don't use adjustSize() on Windows
-    move(UtilityFunctions::centerPos(size()));
 
     connect(m_searchLineEdit, &LineEdit::textEdited,
             this, [=] { search(m_searchLineEdit->text()); });

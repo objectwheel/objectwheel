@@ -10,6 +10,10 @@
 
 AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
 {
+    resize(sizeHint()); // Don't use adjustSize() on Windows
+    move(UtilityFunctions::centerPos(size()));
+    setWindowModality(Qt::ApplicationModal);
+    setAttribute(Qt::WA_QuitOnClose, false);
     setWindowTitle(AppConstants::LABEL);
     setWindowFlags(Qt::Dialog
                    | Qt::WindowTitleHint
@@ -52,8 +56,6 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
                                  .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL), this),
                       0, Qt::AlignHCenter);
 
-    resize(sizeHint()); // Don't use adjustSize() on Windows
-    move(UtilityFunctions::centerPos(size()));
     connect(okButton, &QPushButton::clicked, this, &AboutWindow::done);
 }
 

@@ -28,9 +28,11 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_projectDetailsWidget(new ProjectDetailsWidget(this))
   , m_serverStatusWidget(new ServerStatusWidget(this))
 {
-    setWindowTitle(AppConstants::LABEL);
     resize(sizeHint()); // Don't use adjustSize() on Windows
     move(UtilityFunctions::centerPos(size()));
+    // setWindowModality(Qt::ApplicationModal); Breaks proper functioning of the app
+    // setAttribute(Qt::WA_QuitOnClose, false); Since its possible that it may be the last window
+    setWindowTitle(AppConstants::LABEL);
 
     m_serverStatusWidget->adjustSize();
     m_serverStatusWidget->move(width() - m_serverStatusWidget->width() - 8, 8);

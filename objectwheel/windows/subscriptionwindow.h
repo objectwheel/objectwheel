@@ -11,6 +11,11 @@ class SubscriptionWindow final : public QWidget
 public:
     explicit SubscriptionWindow(QWidget* parent = nullptr);
 
+public:
+    QSize sizeHint() const override;
+
+signals:
+    void done();
 };
 
 
