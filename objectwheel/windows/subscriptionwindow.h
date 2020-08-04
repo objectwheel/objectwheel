@@ -3,6 +3,12 @@
 
 #include <QWidget>
 
+class StackedLayout;
+class SubscriptionWidget;
+class CheckoutWidget;
+class SucceedWidget;
+class ServerStatusWidget;
+
 class SubscriptionWindow final : public QWidget
 {
     Q_OBJECT
@@ -11,12 +17,20 @@ class SubscriptionWindow final : public QWidget
 public:
     explicit SubscriptionWindow(QWidget* parent = nullptr);
 
-public:
     QSize sizeHint() const override;
+
+private:
+    void resizeEvent(QResizeEvent* event) override;
 
 signals:
     void done();
-};
 
+private:
+    StackedLayout* m_stackedLayout;
+    SubscriptionWidget* m_subscriptionWidget;
+    CheckoutWidget* m_checkoutWidget;
+    SucceedWidget* m_succeedWidget;
+    ServerStatusWidget* m_serverStatusWidget;
+};
 
 #endif // SUBSCRIPTIONWINDOW_H

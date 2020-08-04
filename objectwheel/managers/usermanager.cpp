@@ -197,7 +197,6 @@ void UserManager::onLoginSuccessful(const QVariantList& userInfo)
     if (!userInfo.isEmpty()) {
         s_plan = userInfo.at(0).value<PlanManager::Plans>();
         SaveUtils::setProperty(userDir, SaveUtils::UserPlan, quint32(s_plan));
-        SaveUtils::setProperty(userDir, SaveUtils::UserLastOnlineDate, QDateTime::currentDateTime());
         SaveUtils::setProperty(userDir, SaveUtils::UserEmail, s_email);
         SaveUtils::setProperty(userDir, SaveUtils::UserPassword, UtilityFunctions::generatePasswordHash(s_password.toUtf8()));
     } else {

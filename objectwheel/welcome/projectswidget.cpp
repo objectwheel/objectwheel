@@ -8,7 +8,6 @@
 #include <mainwindow.h>
 #include <utilityfunctions.h>
 #include <transparentstyle.h>
-#include <planmanager.h>
 #include <paintutils.h>
 #include <styleditemdelegate.h>
 #include <appconstants.h>
@@ -503,15 +502,6 @@ void ProjectsWidget::onNewButtonClick()
         return;
 
     auto projects = ProjectManager::projectNames();
-
-    if (!PlanManager::isEligibleForNewProject(UserManager::plan(), projects.size())) {
-        UtilityFunctions::showMessage(this,
-                                      tr("You are not eligible for this"),
-                                      tr("Please upgrade your plan in order to have "
-                                         "more than 3 projects at the same time."));
-        return;
-    }
-
     QString projectName = tr("Project") + QLatin1String(" - 1");
     while (projects.contains(projectName))
         projectName = UtilityFunctions::increasedNumberedText(projectName, true, true);

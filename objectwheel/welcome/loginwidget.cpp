@@ -5,7 +5,6 @@
 #include <waitingspinnerwidget.h>
 #include <usermanager.h>
 #include <utilityfunctions.h>
-#include <saveutils.h>
 #include <servermanager.h>
 #include <applicationcore.h>
 #include <paintutils.h>
@@ -184,22 +183,8 @@ void LoginWidget::onLoginButtonClicked()
 
     if (!ServerManager::isConnected()) {
         if (UserManager::hasLocalData(email)) {
-            const QDateTime& lastOnline = SaveUtils::userLastOnlineDate(UserManager::dir(email));
-            PlanManager::Plans plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(UserManager::dir(email)));
-            if (lastOnline.daysTo(QDateTime::currentDateTime()) > 30) {
-                UtilityFunctions::showMessage(this,
-                                              tr("You have reached the offline usage limit"),
-                                              tr("Please connect to the Internet in order to "
-                                                 "continue using %1 in offline mode.").arg(AppConstants::NAME));
-            } else if (!PlanManager::isEligibleForOfflineLogging(plan)) {
-                UtilityFunctions::showMessage(this,
-                                              tr("You are not eligible for offline mode"),
-                                              tr("Please upgrade your plan in order to enable offline "
-                                                 "mode or checkout your internet connection."));
-            } else {
-                m_loadingIndicator->start();
-                UserManager::loginOffline(email, hash);
-            }
+            m_loadingIndicator->start();
+            UserManager::loginOffline(email, hash);
         } else {
             UtilityFunctions::showMessage(this,
                                           tr("Unable to connect to the server"),

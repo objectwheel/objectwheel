@@ -38,8 +38,7 @@ enum UserProperties : quint32 { // ### Designer related properties
     UserVersion,
     UserEmail,
     UserPassword,
-    UserPlan,
-    UserLastOnlineDate
+    UserPlan
 };
 
 QString controlMainQmlFileName();
@@ -75,7 +74,6 @@ QByteArray projectTheme(const QString& projectDir);
 
 quint32 userPlan(const QString& userDir);
 QString userEmail(const QString& userDir);
-QDateTime userLastOnlineDate(const QString& userDir);
 QByteArray userPassword(const QString& userDir);
 
 bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);

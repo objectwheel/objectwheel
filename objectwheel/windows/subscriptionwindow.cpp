@@ -1,64 +1,57 @@
 #include <subscriptionwindow.h>
-#include <appconstants.h>
-#include <paintutils.h>
 #include <utilityfunctions.h>
-
-#include <QBoxLayout>
-#include <QPushButton>
-#include <QDateTime>
-#include <QLabel>
+#include <stackedlayout.h>
+#include <serverstatuswidget.h>
+#include <succeedwidget.h>
+#include <appconstants.h>
+#include <subscriptionwidget.h>
+#include <checkoutwidget.h>
 
 SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
+  , m_stackedLayout(new StackedLayout(this))
+  , m_subscriptionWidget(new SubscriptionWidget(this))
+  , m_checkoutWidget(new CheckoutWidget(this))
+  , m_succeedWidget(new SucceedWidget(this))
+  , m_serverStatusWidget(new ServerStatusWidget(this))
 {
     resize(sizeHint()); // Don't use adjustSize() on Windows
     move(UtilityFunctions::centerPos(size()));
     setWindowModality(Qt::ApplicationModal);
     // setAttribute(Qt::WA_QuitOnClose, false); Since its possible that it may be the last window
     setWindowTitle(AppConstants::LABEL);
-    setWindowFlags(Qt::Window
-                   | Qt::WindowTitleHint
-                   | Qt::WindowSystemMenuHint
-                   | Qt::CustomizeWindowHint);
 
-    auto logoLabel = new QLabel(this);
-    logoLabel->setFixedSize(QSize(160, 80));
-    logoLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/logo.svg"), QSize(160, 80), this));
+    m_serverStatusWidget->adjustSize();
+    m_serverStatusWidget->move(width() - m_serverStatusWidget->width() - 8, 8);
+    m_serverStatusWidget->raise();
+    connect(m_stackedLayout, &StackedLayout::currentChanged,
+            m_serverStatusWidget, &ServerStatusWidget::raise);
 
-    auto versionLabel = new QLabel(this);
-    versionLabel->setAlignment(Qt::AlignCenter);
-    versionLabel->setOpenExternalLinks(true);
-    versionLabel->setText(QStringLiteral("<p>Contact<br><a href='mailto:%1'>%1</a></p>"
-                                         "<p>%2 Forum<br><a href='%3'>%3</a></p>"
-                                         "<p><b>version</b> v%4 <b>revision</b> %5 <b>date</b><br>%6</p>")
-                          .arg(AppConstants::SUPPORT_EMAIL)
-                          .arg(AppConstants::NAME)
-                          .arg(AppConstants::FORUM_URL)
-                          .arg(AppConstants::VERSION)
-                          .arg(AppConstants::REVISION)
-                          .arg(QDateTime::fromString(AppConstants::BUILD_DATE, Qt::ISODate).toString(Qt::SystemLocaleLongDate)));
+    m_stackedLayout->addWidget(m_subscriptionWidget);
+    m_stackedLayout->addWidget(m_checkoutWidget);
+    m_stackedLayout->addWidget(m_succeedWidget);
+    m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
 
-    auto okButton = new QPushButton(this);
-    okButton->setDefault(true);
-    okButton->setCursor(Qt::PointingHandCursor);
-    okButton->setText(tr("Close"));
-
-    auto layout = new QVBoxLayout(this);
-    layout->setSpacing(6);
-    layout->setContentsMargins(0, 6, 0, 6);
-    layout->addStretch();
-    layout->addWidget(logoLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(versionLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(30);
-    layout->addWidget(okButton, 0, Qt::AlignHCenter);
-    layout->addStretch();
-    layout->addWidget(new QLabel(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
-                                 .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL), this),
-                      0, Qt::AlignHCenter);
-
-    connect(okButton, &QPushButton::clicked, this, &SubscriptionWindow::done);
+//    connect(m_signupVerificationWidget, &SignupVerificationWidget::done, this, [=]
+//    {
+//        m_stackedLayout->setCurrentWidget(m_succeedWidget);
+//        m_succeedWidget->play(tr("Thank you for registering"),
+//                              tr("Your registration is completed. Thank you for choosing us.\n"
+//                                 "You can continue by logging into the application."));
+//    });
+//    /**** SucceedWidget settings ****/
+//    connect(m_succeedWidget, &SucceedWidget::done, this, [=]
+//    {
+//        m_stackedLayout->setCurrentWidget(m_loginWidget);
+//    });
 }
 
 QSize SubscriptionWindow::sizeHint() const
 {
     return QSize(980, 560);
+}
+
+void SubscriptionWindow::resizeEvent(QResizeEvent* event)
+{
+    QWidget::resizeEvent(event);
+    m_serverStatusWidget->move(width() - m_serverStatusWidget->width() - 8, 8);
 }

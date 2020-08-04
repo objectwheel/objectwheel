@@ -379,11 +379,6 @@ QString userEmail(const QString& userDir)
     return Internal::property(userDir, UserEmail).value<QString>();
 }
 
-QDateTime userLastOnlineDate(const QString& userDir)
-{
-    return Internal::property(userDir, UserLastOnlineDate).value<QDateTime>();
-}
-
 QByteArray userPassword(const QString& userDir)
 {
     return Internal::property(userDir, UserPassword).value<QByteArray>();
