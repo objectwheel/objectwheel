@@ -6,7 +6,7 @@
 class BulkEdit;
 class ButtonSlice;
 class Countdown;
-class WaitingSpinnerWidget;
+class BusyIndicatorWidget;
 
 class ResetVerificationWidget final : public QWidget
 {
@@ -39,7 +39,7 @@ private:
     QLabel* m_emailLabel;
     BulkEdit* m_bulkEdit;
     ButtonSlice* m_buttons;
-    WaitingSpinnerWidget* m_loadingIndicator;
+    BusyIndicatorWidget* m_busyIndicator;
 };
 
 #endif // RESETVERIFICATIONWIDGET_H

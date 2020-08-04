@@ -10,9 +10,12 @@ HEADERS += $$PWD/bulkedit.h \
            $$PWD/serverstatuswidget.h \
            $$PWD/splashscreen.h \
            $$PWD/switch.h \
-           $$PWD/waitingspinnerwidget.h \
+           $$PWD/busyindicatorwidget.h \
            $$PWD/fileexplorer.h \
-           $$PWD/fileexplorer_p.h
+           $$PWD/fileexplorer_p.h \
+           $$PWD/planwidget.h \
+           $$PWD/styleditemdelegate.h \
+           $$PWD/stackedlayout.h
 
 SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/buttonslice.cpp \
@@ -23,6 +26,9 @@ SOURCES += $$PWD/bulkedit.cpp \
            $$PWD/serverstatuswidget.cpp \
            $$PWD/splashscreen.cpp \
            $$PWD/switch.cpp \
-           $$PWD/waitingspinnerwidget.cpp \
+           $$PWD/busyindicatorwidget.cpp \
            $$PWD/fileexplorer.cpp \
-           $$PWD/fileexplorer_p.cpp
+           $$PWD/fileexplorer_p.cpp \
+           $$PWD/planwidget.cpp \
+           $$PWD/stackedlayout.cpp \
+           $$PWD/styleditemdelegate.cpp

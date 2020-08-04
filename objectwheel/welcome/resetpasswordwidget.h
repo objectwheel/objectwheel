@@ -5,7 +5,7 @@
 
 class BulkEdit;
 class ButtonSlice;
-class WaitingSpinnerWidget;
+class BusyIndicatorWidget;
 
 class ResetPasswordWidget final : public QWidget
 {
@@ -28,7 +28,7 @@ signals:
 private:
     BulkEdit* m_bulkEdit;
     ButtonSlice* m_buttons;
-    WaitingSpinnerWidget* m_loadingIndicator;
+    BusyIndicatorWidget* m_busyIndicator;
 };
 
 #endif // RESETPASSWORDWIDGET_H

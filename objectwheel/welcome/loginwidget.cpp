@@ -2,7 +2,7 @@
 #include <switch.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
-#include <waitingspinnerwidget.h>
+#include <busyindicatorwidget.h>
 #include <usermanager.h>
 #include <utilityfunctions.h>
 #include <servermanager.h>
@@ -24,7 +24,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
   , m_rememberMeSwitch(new Switch(this))
   , m_buttons(new ButtonSlice(this))
   , m_helpButton(new QPushButton(this))
-  , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
+  , m_busyIndicator(new BusyIndicatorWidget(this, false))
 {
     auto logoLabel = new QLabel(this);
     logoLabel->setFixedSize(QSize(160, 80));
@@ -58,16 +58,16 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_helpButton->setFixedSize(22, 22);
     m_helpButton->setCursor(Qt::PointingHandCursor);
 
-    m_loadingIndicator->setLineWidth(2);
-    m_loadingIndicator->setRoundness(50);
-    m_loadingIndicator->setLineLength(5);
-    m_loadingIndicator->setInnerRadius(4);
-    m_loadingIndicator->setNumberOfLines(12);
-    m_loadingIndicator->setMinimumTrailOpacity(5);
-    m_loadingIndicator->setRevolutionsPerSecond(2);
-    m_loadingIndicator->setTrailFadePercentage(100);
-    m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
-    m_loadingIndicator->setColor(palette().text().color());
+    m_busyIndicator->setLineWidth(2);
+    m_busyIndicator->setRoundness(50);
+    m_busyIndicator->setLineLength(5);
+    m_busyIndicator->setInnerRadius(4);
+    m_busyIndicator->setNumberOfLines(12);
+    m_busyIndicator->setMinimumTrailOpacity(5);
+    m_busyIndicator->setRevolutionsPerSecond(2);
+    m_busyIndicator->setTrailFadePercentage(100);
+    m_busyIndicator->setStyleSheet(QStringLiteral("background: transparent"));
+    m_busyIndicator->setColor(palette().text().color());
 
     auto rememberMeWidget = new QWidget(this);
     rememberMeWidget->setFixedSize(m_bulkEdit->sizeHint().width(), 35);
@@ -103,7 +103,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     layout->addWidget(m_buttons, 0, Qt::AlignHCenter);
     layout->addWidget(m_helpButton, 0, Qt::AlignHCenter);
     layout->addStretch();
-    layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
+    layout->addWidget(m_busyIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
     layout->addWidget(legalLabel, 0, Qt::AlignHCenter);
 
@@ -183,7 +183,7 @@ void LoginWidget::onLoginButtonClicked()
 
     if (!ServerManager::isConnected()) {
         if (UserManager::hasLocalData(email)) {
-            m_loadingIndicator->start();
+            m_busyIndicator->start();
             UserManager::loginOffline(email, hash);
         } else {
             UtilityFunctions::showMessage(this,
@@ -194,7 +194,7 @@ void LoginWidget::onLoginButtonClicked()
                                           QMessageBox::Information);
         }
     } else {
-        m_loadingIndicator->start();
+        m_busyIndicator->start();
         UserManager::login(email, hash);
     }
 }
@@ -205,7 +205,7 @@ void LoginWidget::onLoginSuccessful()
         saveRememberMe();
     else
         clearRememberMe();
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
     m_bulkEdit->get<QLineEdit*>(Email)->clear();
     m_bulkEdit->get<QLineEdit*>(Password)->clear();
     emit done();
@@ -214,7 +214,7 @@ void LoginWidget::onLoginSuccessful()
 void LoginWidget::onLoginFailure()
 {
     clearRememberMe();
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
     UtilityFunctions::showMessage(this,
                                   tr("Unable to log in"),
                                   tr("Incorrect email address or password, "
@@ -223,8 +223,8 @@ void LoginWidget::onLoginFailure()
 
 void LoginWidget::onServerDisconnected()
 {
-    if (m_loadingIndicator->isSpinning()) {
-        m_loadingIndicator->stop();
+    if (m_busyIndicator->isSpinning()) {
+        m_busyIndicator->stop();
         UtilityFunctions::showMessage(this,
                                       tr("Connection lost"),
                                       tr("We are unable to connect to the server."));

@@ -1,7 +1,7 @@
 #include <signupverificationwidget.h>
 #include <bulkedit.h>
 #include <buttonslice.h>
-#include <waitingspinnerwidget.h>
+#include <busyindicatorwidget.h>
 #include <registrationapimanager.h>
 #include <countdown.h>
 #include <paintutils.h>
@@ -21,7 +21,7 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
   , m_emailLabel(new QLabel(this))
   , m_bulkEdit(new BulkEdit(this))
   , m_buttons(new ButtonSlice(this))
-  , m_loadingIndicator(new WaitingSpinnerWidget(this, false))
+  , m_busyIndicator(new BusyIndicatorWidget(this, false))
 {
     auto iconLabel = new QLabel(this);
     iconLabel->setFixedSize(QSize(60, 60));
@@ -63,16 +63,16 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
     m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 3.0;
     m_buttons->triggerSettings();
 
-    m_loadingIndicator->setStyleSheet(QStringLiteral("background: transparent"));
-    m_loadingIndicator->setColor(palette().text().color());
-    m_loadingIndicator->setRoundness(50);
-    m_loadingIndicator->setMinimumTrailOpacity(5);
-    m_loadingIndicator->setTrailFadePercentage(100);
-    m_loadingIndicator->setRevolutionsPerSecond(2);
-    m_loadingIndicator->setNumberOfLines(12);
-    m_loadingIndicator->setLineLength(5);
-    m_loadingIndicator->setInnerRadius(4);
-    m_loadingIndicator->setLineWidth(2);
+    m_busyIndicator->setStyleSheet(QStringLiteral("background: transparent"));
+    m_busyIndicator->setColor(palette().text().color());
+    m_busyIndicator->setRoundness(50);
+    m_busyIndicator->setMinimumTrailOpacity(5);
+    m_busyIndicator->setTrailFadePercentage(100);
+    m_busyIndicator->setRevolutionsPerSecond(2);
+    m_busyIndicator->setNumberOfLines(12);
+    m_busyIndicator->setLineLength(5);
+    m_busyIndicator->setInnerRadius(4);
+    m_busyIndicator->setLineWidth(2);
 
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(6);
@@ -89,7 +89,7 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
     layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
     layout->addWidget(m_buttons, 0, Qt::AlignHCenter);
     layout->addStretch();
-    layout->addWidget(m_loadingIndicator, 0, Qt::AlignHCenter);
+    layout->addWidget(m_busyIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
 
     connect(m_buttons->get(Cancel), &QPushButton::clicked,
@@ -151,7 +151,7 @@ void SignupVerificationWidget::onCompleteSignupClicked()
     }
 
     if (ServerManager::isConnected()) {
-        m_loadingIndicator->start();
+        m_busyIndicator->start();
         RegistrationApiManager::completeSignup(email, code);
     } else {
         UtilityFunctions::showMessage(this,
@@ -176,7 +176,7 @@ void SignupVerificationWidget::onResendSignupCodeClicked()
 
     if (ServerManager::isConnected()) {
         m_buttons->get(ResendSignupCode)->setEnabled(false);
-        m_loadingIndicator->start();
+        m_busyIndicator->start();
         RegistrationApiManager::resendSignupCode(email);
     } else {
         UtilityFunctions::showMessage(this,
@@ -188,14 +188,14 @@ void SignupVerificationWidget::onResendSignupCodeClicked()
 
 void SignupVerificationWidget::onCompleteSignupSuccessful()
 {
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
     m_countdown->stop();
     emit done();
 }
 
 void SignupVerificationWidget::onCompleteSignupFailure()
 {
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
     UtilityFunctions::showMessage(this,
                                   tr("Invalid information entered"),
                                   tr("Incorrect verification code entered or maybe you have "
@@ -204,7 +204,7 @@ void SignupVerificationWidget::onCompleteSignupFailure()
 
 void SignupVerificationWidget::onResendSignupCodeSuccessful()
 {
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
     UtilityFunctions::showMessage(this,
                                   tr("Resend succeed"),
                                   tr("New verification code has been sent."),
@@ -213,7 +213,7 @@ void SignupVerificationWidget::onResendSignupCodeSuccessful()
 
 void SignupVerificationWidget::onResendSignupCodeFailure()
 {
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
     UtilityFunctions::showMessage(this,
                                   tr("The server rejected your request"),
                                   tr("You might have exceeded the verification "
@@ -231,8 +231,8 @@ void SignupVerificationWidget::onCountdownFinished()
 
 void SignupVerificationWidget::onServerDisconnected()
 {
-    if (m_loadingIndicator->isSpinning()) {
-        m_loadingIndicator->stop();
+    if (m_busyIndicator->isSpinning()) {
+        m_busyIndicator->stop();
         UtilityFunctions::showMessage(this,
                                       tr("Connection lost"),
                                       tr("We are unable to connect to the server."));

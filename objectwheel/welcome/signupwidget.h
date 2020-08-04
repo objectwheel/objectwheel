@@ -6,7 +6,7 @@
 class Switch;
 class BulkEdit;
 class ButtonSlice;
-class WaitingSpinnerWidget;
+class BusyIndicatorWidget;
 
 class SignupWidget final : public QWidget
 {
@@ -30,7 +30,7 @@ private:
     BulkEdit* m_bulkEdit;
     Switch* m_termsSwitch;
     ButtonSlice* m_buttons;
-    WaitingSpinnerWidget* m_loadingIndicator;
+    BusyIndicatorWidget* m_busyIndicator;
 };
 
 #endif // SIGNUPWIDGET_H

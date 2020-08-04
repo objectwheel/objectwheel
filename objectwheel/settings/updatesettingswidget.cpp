@@ -4,7 +4,7 @@
 #include <paintutils.h>
 #include <updatemanager.h>
 #include <stackedlayout.h>
-#include <waitingspinnerwidget.h>
+#include <busyindicatorwidget.h>
 #include <appconstants.h>
 #include <utilityfunctions.h>
 #include <applicationcore.h>
@@ -33,7 +33,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
   , m_lastCheckedDateLabel(new QLabel(m_upToDateWidget))
   , m_upToDateIcon(new QLabel(m_upToDateWidget))
   , m_checkUpdatesButton(new QPushButton(m_upToDateWidget))
-  , m_updateCheckSpinner(new WaitingSpinnerWidget(m_upToDateWidget, false, false))
+  , m_busyIndicator(new BusyIndicatorWidget(m_upToDateWidget, false, false))
   /*__*/
   , m_updatesAvailableWidget(new QWidget(m_updateGroup))
   , m_updatesAvailableLabel(new QLabel(m_updatesAvailableWidget))
@@ -89,14 +89,14 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     upToDateLayout->addWidget(m_lastCheckedLabel, 1, 1, 1, 3);
     upToDateLayout->addWidget(m_lastCheckedDateLabel, 1, 4);
     upToDateLayout->addWidget(m_checkUpdatesButton, 2, 1);
-    upToDateLayout->addWidget(m_updateCheckSpinner, 2, 2);
+    upToDateLayout->addWidget(m_busyIndicator, 2, 2);
     upToDateLayout->addItem(new QSpacerItem(1, 1, QSizePolicy::Expanding, QSizePolicy::Fixed), 2, 3);
     upToDateLayout->setRowStretch(3, 1);
     upToDateLayout->setColumnStretch(4, 1);
 
     m_lastCheckedLabel->setSizePolicy(QSizePolicy::Maximum, m_lastCheckedLabel->sizePolicy().verticalPolicy());
     m_checkUpdatesButton->setSizePolicy(QSizePolicy::Maximum, m_checkUpdatesButton->sizePolicy().verticalPolicy());
-    m_updateCheckSpinner->setSizePolicy(QSizePolicy::Maximum, m_updateCheckSpinner->sizePolicy().verticalPolicy());
+    m_busyIndicator->setSizePolicy(QSizePolicy::Maximum, m_busyIndicator->sizePolicy().verticalPolicy());
 
     m_checkUpdatesButton->setText(tr("Check Now"));
     m_lastCheckedLabel->setText(tr("Last successful check:"));
@@ -112,16 +112,16 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_checkUpdatesButton->setCursor(Qt::PointingHandCursor);
     QCoreApplication::postEvent(m_checkUpdatesButton, new QEvent(QEvent::StyleChange)); // Apply margin change
 
-    m_updateCheckSpinner->setLineWidth(2);
-    m_updateCheckSpinner->setRoundness(50);
-    m_updateCheckSpinner->setLineLength(5);
-    m_updateCheckSpinner->setInnerRadius(4);
-    m_updateCheckSpinner->setNumberOfLines(12);
-    m_updateCheckSpinner->setMinimumTrailOpacity(5);
-    m_updateCheckSpinner->setRevolutionsPerSecond(2);
-    m_updateCheckSpinner->setTrailFadePercentage(100);
-    m_updateCheckSpinner->setStyleSheet("background: transparent;");
-    m_updateCheckSpinner->setColor(palette().text().color());
+    m_busyIndicator->setLineWidth(2);
+    m_busyIndicator->setRoundness(50);
+    m_busyIndicator->setLineLength(5);
+    m_busyIndicator->setInnerRadius(4);
+    m_busyIndicator->setNumberOfLines(12);
+    m_busyIndicator->setMinimumTrailOpacity(5);
+    m_busyIndicator->setRevolutionsPerSecond(2);
+    m_busyIndicator->setTrailFadePercentage(100);
+    m_busyIndicator->setStyleSheet("background: transparent;");
+    m_busyIndicator->setColor(palette().text().color());
 
     /*__*/
 
@@ -550,9 +550,9 @@ bool UpdateSettingsWidget::containsWord(const QString& word) const
 void UpdateSettingsWidget::onUpdateCheckStatusChange()
 {
     if (UpdateManager::isUpdateCheckRunning())
-        m_updateCheckSpinner->start();
+        m_busyIndicator->start();
     else
-        m_updateCheckSpinner->stop();
+        m_busyIndicator->stop();
     m_downloadButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
     m_cleanCacheButton->setEnabled(!UpdateManager::isUpdateCheckRunning());
     m_checkUpdatesButton->setEnabled(!UpdateManager::isUpdateCheckRunning());

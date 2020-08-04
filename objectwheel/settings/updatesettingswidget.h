@@ -9,7 +9,7 @@ class QCheckBox;
 class QPushButton;
 class QStackedLayout;
 class QTextEdit;
-class WaitingSpinnerWidget;
+class BusyIndicatorWidget;
 class QProgressBar;
 
 class UpdateSettingsWidget final : public SettingsWidget
@@ -39,7 +39,7 @@ private:
     QLabel* m_lastCheckedDateLabel;
     QLabel* m_upToDateIcon;
     QPushButton* m_checkUpdatesButton;
-    WaitingSpinnerWidget* m_updateCheckSpinner;
+    BusyIndicatorWidget* m_busyIndicator;
     /*__*/
     QWidget* m_updatesAvailableWidget;
     QLabel* m_updatesAvailableLabel;

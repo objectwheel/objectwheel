@@ -1,6 +1,6 @@
-#include "subscriptionwidget.h"
+#include <subscriptionwidget.h>
 
-SubscriptionWidget::SubscriptionWidget(QWidget *parent) : QWidget(parent)
+SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
 {
 
 }

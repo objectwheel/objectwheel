@@ -6,7 +6,7 @@
 #include <QVariantAnimation>
 
 class QTextDocument;
-class WaitingSpinnerWidget;
+class BusyIndicatorWidget;
 
 class RunProgressBar final : public QWidget
 {
@@ -58,7 +58,7 @@ private:
     QVariantAnimation m_springAnimation;
     QVariantAnimation m_faderAnimation;
     QTextDocument* m_document;
-    WaitingSpinnerWidget* m_busyIndicator;
+    BusyIndicatorWidget* m_busyIndicator;
 };
 
 #endif // RUNPROGRESSBAR_H

@@ -2,7 +2,7 @@
 #include <delayer.h>
 #include <saveutils.h>
 #include <projectmanager.h>
-#include <waitingspinnerwidget.h>
+#include <busyindicatorwidget.h>
 #include <utilityfunctions.h>
 
 #include <QJsonValue>
@@ -49,18 +49,18 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
   , m_previewLabel(new QLabel)
   , m_previewPicture(new QLabel)
   , m_gridLayout(new QGridLayout(this))
-  , m_loadingIndicator(new WaitingSpinnerWidget(m_previewPicture))
+  , m_busyIndicator(new BusyIndicatorWidget(m_previewPicture))
 {
-    m_loadingIndicator->setStyleSheet("background: transparent;");
-    m_loadingIndicator->setColor(palette().text().color());
-    m_loadingIndicator->setRoundness(50);
-    m_loadingIndicator->setMinimumTrailOpacity(5);
-    m_loadingIndicator->setTrailFadePercentage(100);
-    m_loadingIndicator->setRevolutionsPerSecond(2);
-    m_loadingIndicator->setNumberOfLines(12);
-    m_loadingIndicator->setLineLength(7);
-    m_loadingIndicator->setInnerRadius(5);
-    m_loadingIndicator->setLineWidth(2);
+    m_busyIndicator->setStyleSheet("background: transparent;");
+    m_busyIndicator->setColor(palette().text().color());
+    m_busyIndicator->setRoundness(50);
+    m_busyIndicator->setMinimumTrailOpacity(5);
+    m_busyIndicator->setTrailFadePercentage(100);
+    m_busyIndicator->setRevolutionsPerSecond(2);
+    m_busyIndicator->setNumberOfLines(12);
+    m_busyIndicator->setLineLength(7);
+    m_busyIndicator->setInnerRadius(5);
+    m_busyIndicator->setLineWidth(2);
 
     m_stylesLabel->setText(m_version == V2 ? tr("Quick Controls Style:") : tr("Quick Controls 1 Style:"));
     UtilityFunctions::adjustFontWeight(m_stylesLabel, QFont::DemiBold);
@@ -567,7 +567,7 @@ void ThemeChooserWidget::charge()
 void ThemeChooserWidget::run()
 {
     setEnabled(false);
-    m_loadingIndicator->start();
+    m_busyIndicator->start();
 
     QTemporaryDir tmpDir;
     Q_ASSERT(tmpDir.isValid());
@@ -593,7 +593,7 @@ void ThemeChooserWidget::run()
     Delayer::delay(400);
 
     setEnabled(true);
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
 }
 
 void ThemeChooserWidget::save()
@@ -626,7 +626,7 @@ void ThemeChooserWidget::disable()
 void ThemeChooserWidget::refresh()
 {    
     setEnabled(false);
-    m_loadingIndicator->start();
+    m_busyIndicator->start();
 
     QTemporaryFile tmpFile;
     tmpFile.open();
@@ -651,7 +651,7 @@ void ThemeChooserWidget::refresh()
     m_previewPicture->setPixmap(preview);
 
     setEnabled(true);
-    m_loadingIndicator->stop();
+    m_busyIndicator->stop();
 }
 
 QByteArray ThemeChooserWidget::toJson() const

@@ -8,7 +8,7 @@ class QComboBox;
 class QToolButton;
 class QGridLayout;
 class QPushButton;
-class WaitingSpinnerWidget;
+class BusyIndicatorWidget;
 
 class ThemeChooserWidget : public QWidget
 {
@@ -70,7 +70,7 @@ private:
     QLabel* m_previewLabel;
     QLabel* m_previewPicture;
     QGridLayout* m_gridLayout;
-    WaitingSpinnerWidget* m_loadingIndicator;
+    BusyIndicatorWidget* m_busyIndicator;
 };
 
 #endif // THEMECHOOSERWIDGET_H

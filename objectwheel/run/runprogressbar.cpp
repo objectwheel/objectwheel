@@ -1,5 +1,5 @@
 #include <runprogressbar.h>
-#include <waitingspinnerwidget.h>
+#include <busyindicatorwidget.h>
 
 #include <QtMath>
 #include <QPainter>
@@ -13,7 +13,7 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
   , m_progressVisible(true)
   , m_widerLineWidth(0)
   , m_document(new QTextDocument(this))
-  , m_busyIndicator(new WaitingSpinnerWidget(this, false, false))
+  , m_busyIndicator(new BusyIndicatorWidget(this, false, false))
 {
     setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
     setProgressColor(QColor());
