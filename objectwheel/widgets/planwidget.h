@@ -1,6 +1,7 @@
 #ifndef PLANWIDGET_H
 #define PLANWIDGET_H
 
+#include <QHash>
 #include <QWidget>
 #include <csvparser.h>
 
@@ -25,6 +26,9 @@ public:
     void setColumnColors(const QVector<QColor>& columnColors);
 
     QString selectedPlan() const;
+    void setDefaultPlan(const QString& defaultPlan);
+    void setPlanBadge(const QString& plan, const QString& badgeText);
+
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
@@ -45,6 +49,7 @@ private:
     int m_spacing;
     int m_padding;
     QVector<QColor> m_columnColors;
+    QHash<QString, QString> m_planBadges;
 };
 
 #endif // PLANWIDGET_H
