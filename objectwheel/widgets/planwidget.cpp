@@ -10,12 +10,14 @@ PlanWidget::PlanWidget(const QString& filePath, QWidget* parent) : QWidget(paren
   , m_csvParser(filePath)
   , m_radius(4)
   , m_spacing(6)
-  , m_padding(10)
-  , m_columnColors {"#505050", "#bf5861", "#7ebf5e", "#3183e0", "#9c6ab1"}
+  , m_padding(10)  
+  , m_headerColors { "#000000", "#c25d65", "#63a67d", "#4f91e8" }
+  , m_columnColors { "#606060", "#ffe3e5", "#f0fff6", "#e3efff", "#a67acc" }
 {
     m_csvParser.parse();
 
     auto layout = new QGridLayout(this);
+    layout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(m_spacing);
     layout->addWidget(new QWidget(this), 0, 0, 1, m_csvParser.columnCount());
@@ -32,8 +34,9 @@ PlanWidget::PlanWidget(const QString& filePath, QWidget* parent) : QWidget(paren
         radio->setText(m_csvParser.at(0, i + 1));
         layout->addWidget(radio, 1, i + 1, Qt::AlignHCenter);
         layout->setColumnMinimumWidth(i + 1, colWidth);
+        UtilityFunctions::adjustFontPixelSize(radio, 1);
         connect(radio, &QRadioButton::toggled, radio, [=] (bool checked) {
-            UtilityFunctions::adjustFontWeight(radio, checked ? QFont::Bold : QFont::Weight(font().weight()));
+            UtilityFunctions::adjustFontWeight(radio, checked ? QFont::DemiBold : QFont::Weight(font().weight()));
         });
     }
 }
@@ -77,6 +80,17 @@ void PlanWidget::setPadding(int padding)
         m_padding = padding;
         update();
     }
+}
+
+QVector<QColor> PlanWidget::headerColors() const
+{
+    return m_headerColors;
+}
+
+void PlanWidget::setHeaderColors(const QVector<QColor>& headerColors)
+{
+    m_headerColors = headerColors;
+    update();
 }
 
 QVector<QColor> PlanWidget::columnColors() const
@@ -133,7 +147,7 @@ int PlanWidget::rowHeight() const
 
 int PlanWidget::headerHeight() const
 {
-    return rowHeight() + 2;
+    return rowHeight() + 4;
 }
 
 int PlanWidget::blockWidth() const
@@ -208,7 +222,7 @@ void PlanWidget::paintEvent(QPaintEvent*)
     for (int i = 0; i < m_csvParser.rowCount() - 1; i++) {
         // Paint Block Row Lines
         if (i != m_csvParser.rowCount() - 2) {
-            painter.setPen(cosmeticPen(m_columnColors[0].lighter(145)));
+            painter.setPen(cosmeticPen(QColor(255, 255, 255, 45)));
             painter.drawLine(QPointF(cr.left() + m_padding, cr.top() + headerHeight()
                                      + rowHeight() * (i + 1)),
                              QPointF(cr.left() + blkWidth - m_padding, cr.top() + headerHeight()
@@ -224,24 +238,32 @@ void PlanWidget::paintEvent(QPaintEvent*)
 
     for (int i = 0; i < m_csvParser.columnCount() - 1; i++) {
         // Paint Column Backgrounds
-        qreal left = cr.left() + blkWidth + m_spacing * (i + 1) + colWidth * i;
+        const qreal left = cr.left() + blkWidth + m_spacing * (i + 1) + colWidth * i;
+        const QRectF boundingRect(left + 0.5, cr.top() + 0.5, colWidth - 1, rowHeight() * (m_csvParser.rowCount() - 1) + headerHeight());
         painter.setPen(Qt::NoPen);
+        painter.setBrush(m_headerColors[i + 1].darker(120));
+        painter.drawRoundedRect(boundingRect.adjusted(-0.5, -0.5, 0.5, 0.5), m_radius + 0.5, m_radius + 0.5);
         painter.setBrush(m_columnColors[i + 1]);
-        painter.drawRoundedRect(QRectF(left, cr.top(), colWidth,
-                                       rowHeight() * (m_csvParser.rowCount() - 1) + headerHeight() + 1),
-                                m_radius, m_radius);
-        painter.setBrush(m_columnColors[i + 1].lighter(190));
-        painter.drawRoundedRect(QRectF(left + 0.5, cr.top() + headerHeight(), colWidth - 1,
-                                       rowHeight() * (m_csvParser.rowCount() - 1) - 0.5 + 1),
-                                m_radius - 0.5, m_radius - 0.5);
-        painter.drawRect(QRectF(left + 0.5, cr.top() + headerHeight(), colWidth - 1, rowHeight()));
+        painter.drawRoundedRect(boundingRect, m_radius, m_radius);
+        // Paint Header Backgrounds
+        QRectF headerRect(boundingRect);
+        headerRect.setBottom(headerRect.top() + headerHeight());
+        painter.setClipRect(headerRect);
+        QLinearGradient header(0, 0, 0, 1);
+        header.setCoordinateMode(QGradient::ObjectMode);
+        header.setColorAt(0, m_headerColors[i + 1].lighter(108));
+        header.setColorAt(1, m_headerColors[i + 1].darker(105));
+        painter.setBrush(header);
+        painter.drawRoundedRect(headerRect.adjusted(0, 0, 0, m_radius + 1), m_radius, m_radius);
+        painter.setClipRect(headerRect, Qt::NoClip);
 
-        // Paint Column Row Lines
+        // Paint Header Row Lines
         painter.setRenderHint(QPainter::Antialiasing, false);
-        painter.setPen(cosmeticPen(QColor(0, 0, 0, 50)));
-        painter.drawLine(QPointF(left, cr.top() + headerHeight() - 0.5),
-                         QPointF(left + colWidth, cr.top() + headerHeight() - 0.5));
-        painter.setPen(cosmeticPen(m_columnColors[i + 1].lighter(190).darker(130)));
+        painter.setPen(cosmeticPen(m_headerColors[i + 1].darker(120)));
+        painter.drawLine(QPointF(left, cr.top() + headerHeight()),
+                         QPointF(left + colWidth, cr.top() + headerHeight()));
+        // Paint Column Row Lines
+        painter.setPen(cosmeticPen(QColor(0, 0, 0, 45)));
         for (int j = 0; j < m_csvParser.rowCount() - 2; j++) {
             painter.drawLine(QPointF(left + m_padding, cr.top() + headerHeight()
                                      + rowHeight() * (j + 1)),
@@ -276,7 +298,7 @@ void PlanWidget::paintEvent(QPaintEvent*)
             QLinearGradient background(0, 0, 0, 1);
             background.setCoordinateMode(QGradient::ObjectMode);
             background.setColorAt(0, m_columnColors.last());
-            background.setColorAt(1, m_columnColors.last().darker(120));
+            background.setColorAt(1, m_columnColors.last().darker(125));
             QFont f(font());
             f.setPixelSize(f.pixelSize() - 2);
             painter.save();

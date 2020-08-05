@@ -158,7 +158,7 @@ void SignupWidget::onNextClicked()
         UtilityFunctions::showMessage(this,
                                       tr("Please accept the terms and conditions"),
                                       tr("You have to agree with the terms and conditions "
-                                         "in order to use Objectwheel apps and services."));
+                                         "in order to use %1 apps and services.").arg(AppConstants::NAME));
         return;
     }
 

@@ -22,6 +22,9 @@ public:
     int padding() const;
     void setPadding(int padding);
 
+    QVector<QColor> headerColors() const;
+    void setHeaderColors(const QVector<QColor>& headerColors);
+
     QVector<QColor> columnColors() const;
     void setColumnColors(const QVector<QColor>& columnColors);
 
@@ -48,6 +51,7 @@ private:
     int m_radius;
     int m_spacing;
     int m_padding;
+    QVector<QColor> m_headerColors;
     QVector<QColor> m_columnColors;
     QHash<QString, QString> m_planBadges;
 };

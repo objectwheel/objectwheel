@@ -12,16 +12,11 @@
 
 #include <QFileInfo>
 #include <QProgressBar>
-#include <QCoreApplication>
 #include <QLabel>
 #include <QGroupBox>
 #include <QPushButton>
 #include <QCheckBox>
 #include <QTextEdit>
-
-Q_DECLARE_METATYPE(QMargins)
-
-const char layoutMarginsProperty[] = "_q_ApplicationStyle_layoutMarginsProperty";
 
 UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(parent)
   , m_updateGroup(new QGroupBox(contentWidget()))
@@ -104,13 +99,11 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_checkUpdatesButton->setToolTip(tr("Make a fresh update check"));
     m_lastCheckedDateLabel->setToolTip(tr("Shows last successful update check date"));
 
-    m_upToDateIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -4, 0, 0)));
     m_upToDateIcon->setFixedSize(QSize(80, 80));
-    QCoreApplication::postEvent(m_upToDateIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
+    UtilityFunctions::setLayoutItemMargins(m_upToDateIcon, QMargins(0, -4, 0, 0));
 
-    m_checkUpdatesButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(-1, 0, 0, 0)));
     m_checkUpdatesButton->setCursor(Qt::PointingHandCursor);
-    QCoreApplication::postEvent(m_checkUpdatesButton, new QEvent(QEvent::StyleChange)); // Apply margin change
+    UtilityFunctions::setLayoutItemMargins(m_checkUpdatesButton, QMargins(-1, 0, 0, 0));
 
     m_busyIndicator->setLineWidth(2);
     m_busyIndicator->setRoundness(50);
@@ -134,10 +127,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     m_downloadButton->setText(tr("Download"));
 
-    m_updatesAvailableIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -7, 0, 0)));
     m_updatesAvailableIcon->setFixedSize(QSize(80, 80));
     m_updatesAvailableIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-available.svg"), QSize(80, 80), this));
-    QCoreApplication::postEvent(m_updatesAvailableIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
+    UtilityFunctions::setLayoutItemMargins(m_updatesAvailableIcon, QMargins(0, -7, 0, 0));
 
     m_changelogEdit->setReadOnly(true);
     UtilityFunctions::adjustFontPixelSize(m_changelogEdit, -1);
@@ -177,14 +169,12 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_downloadSizeLabel->setAlignment(Qt::AlignVCenter);
     m_downloadingLabel->setAlignment(Qt::AlignVCenter);
 
-    m_downloadingIcon->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, -4, 0, 0)));
     m_downloadingIcon->setFixedSize(QSize(80, 80));
     m_downloadingIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/downloading.svg"), QSize(80, 80), this));
-    QCoreApplication::postEvent(m_downloadingIcon, new QEvent(QEvent::StyleChange)); // Apply margin change
+    UtilityFunctions::setLayoutItemMargins(m_downloadingIcon, QMargins(0, -4, 0, 0));
 
-    m_abortAndInstallButton->setProperty(layoutMarginsProperty, QVariant::fromValue(QMargins(0, 0, -1, 0)));
     m_abortAndInstallButton->setCursor(Qt::PointingHandCursor);
-    QCoreApplication::postEvent(m_abortAndInstallButton, new QEvent(QEvent::StyleChange)); // Apply margin change
+    UtilityFunctions::setLayoutItemMargins(m_abortAndInstallButton, QMargins(0, 0, -1, 0));
 
     /****/
 
@@ -251,12 +241,12 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         UtilityFunctions::showMessage(
                     this,
                     tr("A quick reminder about updates"),
-                    tr("Objectwheel needs regular updates to function properly. "
+                    tr("%1 needs regular updates to function properly. "
                        "Opening up new projects or using cloud services with an "
-                       "outdated version of Objectwheel may result in failure."
+                       "outdated version of %1 may result in failure."
                        "\n\n"
-                       "Meanwhile Objectwheel does not download or install any "
-                       "updates automatically in any way."),
+                       "Meanwhile %1 does not download or install any "
+                       "updates automatically in any way.").arg(AppConstants::NAME),
                     QMessageBox::Information);
     });
     connect(m_checkForUpdatesAutomaticallyCheckBox, &QCheckBox::clicked, this, [=] {
@@ -264,9 +254,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
                         this,
                         tr("Are you sure?"),
-                        tr("Objectwheel needs regular updates to function properly. "
+                        tr("%1 needs regular updates to function properly. "
                            "Opening up new projects or using cloud services with an "
-                           "outdated version of Objectwheel may result in failure."),
+                           "outdated version of %1 may result in failure.").arg(AppConstants::NAME),
                         QMessageBox::Warning, QMessageBox::Yes | QMessageBox::No);
             if (ret == QMessageBox::No)
                 m_checkForUpdatesAutomaticallyCheckBox->setChecked(true);

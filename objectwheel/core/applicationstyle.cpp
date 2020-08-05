@@ -23,8 +23,6 @@
 #include <private/qcombobox_p.h>
 #include <private/qfusionstyle_p_p.h>
 
-Q_DECLARE_METATYPE(QMargins)
-
 namespace {
 
 enum { NotificationsProperty = Qt::UserRole + 293373 };
@@ -34,8 +32,6 @@ const int macItemHMargin        = 3;    // menu item hor text margin
 const int macRightBorder        = 12;   // right border on mac
 const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
 const char notificationsProperty[] = "_q_ApplicationStyle_notificationsProperty";
-const char layoutMarginsProperty[] = "_q_ApplicationStyle_layoutMarginsProperty";
-const char itemViewItemMarginsProperty[] = "_q_ApplicationStyle_itemViewItemMarginsProperty";
 const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
 
 void drawNotifications(QPainter* painter, const QRectF& r, const QString& text)
@@ -273,52 +269,6 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
     }
 
     return ret;
-}
-
-QRect ApplicationStyle::subElementRect(QStyle::SubElement subElement, const QStyleOption* option,
-                                       const QWidget* widget) const
-{
-    switch (subElement) {
-    case SE_PushButtonLayoutItem:
-    case SE_CheckBoxLayoutItem:
-    case SE_DateTimeEditLayoutItem:
-    case SE_RadioButtonLayoutItem:
-    case SE_SliderLayoutItem:
-    case SE_SpinBoxLayoutItem:
-    case SE_ProgressBarLayoutItem:
-    case SE_FrameLayoutItem:
-    case SE_LabelLayoutItem:
-    case SE_TabWidgetLayoutItem:
-    case SE_ToolButtonLayoutItem:
-    case SE_DialogButtonBoxLayoutItem:
-    case SE_GroupBoxLayoutItem:
-    case SE_ComboBoxLayoutItem:
-        if (widget && option) {
-            const QVariant& value = widget->property(layoutMarginsProperty);
-            if (value.isValid()) {
-                QMargins m(value.value<QMargins>());
-                return option->rect.adjusted(-m.left(), -m.top(), m.right(), m.bottom());
-            }
-        } break;
-
-    case SE_ItemViewItemDecoration:
-    case SE_ItemViewItemText:
-    case SE_ItemViewItemFocusRect:
-        if (widget && qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
-            const QVariant& value = widget->property(itemViewItemMarginsProperty);
-            if (value.isValid()) {
-                QStyleOptionViewItem copy(*qstyleoption_cast<const QStyleOptionViewItem*>(option));
-                QMargins m(value.value<QMargins>());
-                copy.rect.adjust(-m.left(), -m.top(), m.right(), m.bottom());
-                return QFusionStyle::subElementRect(subElement, &copy, widget);
-            }
-        } break;
-
-    default:
-        break;
-    }
-
-    return QFusionStyle::subElementRect(subElement, option, widget);
 }
 
 QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,

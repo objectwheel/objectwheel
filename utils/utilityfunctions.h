@@ -1,11 +1,11 @@
 #ifndef UTILITYFUNCTIONS_H
 #define UTILITYFUNCTIONS_H
 
-#include <Qt>
 #include <QFont>
 #include <QMessageBox>
 #include <QCborArray>
 #include <renderinfo.h>
+#include <QStyle>
 
 class QTextDocument;
 class QWidget;
@@ -162,6 +162,9 @@ QString shortcutSymbol(const QKeySequence& seq);
 QByteArray resourceData(const QString& path);
 void updateToolTip(QWidget* widget, const QString& toolTip);
 void updateToolTip(QWidget* widget, const QString& toolTip, const QRect& region);
+QMargins layoutItemMargins(const QWidget* widget);
+void setLayoutItemMargins(QWidget* widget, const QMargins& margins);
+void setLayoutItemMargins(QWidget* widget, QStyle::SubElement element, const QStyleOption* option = nullptr);
 
 } // UtilityFunctions
 

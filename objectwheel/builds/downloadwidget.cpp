@@ -97,14 +97,14 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
         UtilityFunctions::showMessage(
                     this,
                     tr("A quick reminder about privacy"),
-                    tr("Objectwheel does not collect, store or share any of your "
+                    tr("%1 does not collect, store or share any of your "
                        "data regarding to your cloud builds. Your projects are at "
-                       "safe hands with the Objectwheel Cloud Builds. We only store "
+                       "safe hands with the %1 Cloud Builds. We only store "
                        "them, within a temporary location under the build system, "
                        "for the time that your project is being built. Immediately "
                        "after the build is finished (succeeded, failed or halted; "
                        "doesn't matter) your data is erased completely. We respect "
-                       "your privacy and hopefully we will always be."),
+                       "your privacy and hopefully we will always be.").arg(AppConstants::NAME),
                     QMessageBox::Information);
     });
 }

@@ -6,6 +6,8 @@
 #include <filesystemutils.h>
 #include <hashfactory.h>
 
+#include <private/qwidget_p.h>
+
 #include <QFileInfo>
 #include <QQmlEngine>
 #include <QTextDocument>
@@ -26,6 +28,8 @@
 #include <qpassworddigestor.h>
 #include <QKeyEvent>
 #include <QToolTip>
+
+Q_DECLARE_METATYPE(QMargins)
 
 namespace UtilityFunctions {
 
@@ -832,6 +836,25 @@ void updateToolTip(QWidget* widget, const QString& toolTip, const QRect& region)
             QToolTip::showText(globalPos, toolTip);
         }
     }
+}
+
+QMargins layoutItemMargins(const QWidget* widget)
+{
+    int left = 0, top = 0, right = 0, bottom = 0;
+    QWidgetPrivate::get(widget)->getLayoutItemMargins(&left, &top, &right, &bottom);
+    return QMargins(left, top, right, bottom);
+}
+
+void setLayoutItemMargins(QWidget* widget, const QMargins& margins)
+{
+    Q_ASSERT(widget);
+    QWidgetPrivate::get(widget)->setLayoutItemMargins(margins.left(), margins.top(), margins.right(), margins.bottom());
+}
+
+void setLayoutItemMargins(QWidget* widget, QStyle::SubElement element, const QStyleOption* option)
+{
+    Q_ASSERT(widget);
+    QWidgetPrivate::get(widget)->setLayoutItemMargins(element, option);
 }
 
 } // UtilityFunctions
