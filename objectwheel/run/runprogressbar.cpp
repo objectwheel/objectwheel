@@ -30,7 +30,6 @@ RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
     m_document->setDocumentMargin(0);
     m_document->setDefaultTextOption(Qt::AlignTop | Qt::AlignLeft);
 
-    m_busyIndicator->setStyleSheet("background: transparent");
     m_busyIndicator->setColor(palette().buttonText().color());
     m_busyIndicator->setRoundness(50);
     m_busyIndicator->setMinimumTrailOpacity(15);

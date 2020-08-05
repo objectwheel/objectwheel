@@ -83,7 +83,6 @@ void BusyIndicatorWidget::paintEvent(QPaintEvent *) {
         return;
     updatePosition();
     QPainter painter(this);
-    painter.fillRect(this->rect(), Qt::transparent);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     if (_currentCounter >= _numberOfLines) {

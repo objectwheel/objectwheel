@@ -46,8 +46,6 @@ ResetPasswordWidget::ResetPasswordWidget(QWidget* parent) : QWidget(parent)
     m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 2.0;
     m_buttons->triggerSettings();
 
-    m_busyIndicator->setStyleSheet(QStringLiteral("background: transparent"));
-    m_busyIndicator->setColor(palette().text().color());
     m_busyIndicator->setRoundness(50);
     m_busyIndicator->setMinimumTrailOpacity(5);
     m_busyIndicator->setTrailFadePercentage(100);

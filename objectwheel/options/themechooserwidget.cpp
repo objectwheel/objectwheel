@@ -51,8 +51,6 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
   , m_gridLayout(new QGridLayout(this))
   , m_busyIndicator(new BusyIndicatorWidget(m_previewPicture))
 {
-    m_busyIndicator->setStyleSheet("background: transparent;");
-    m_busyIndicator->setColor(palette().text().color());
     m_busyIndicator->setRoundness(50);
     m_busyIndicator->setMinimumTrailOpacity(5);
     m_busyIndicator->setTrailFadePercentage(100);

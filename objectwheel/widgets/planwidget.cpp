@@ -10,7 +10,7 @@ PlanWidget::PlanWidget(const QString& filePath, QWidget* parent) : QWidget(paren
   , m_csvParser(filePath)
   , m_radius(4)
   , m_spacing(6)
-  , m_padding(12)
+  , m_padding(10)
   , m_columnColors {"#505050", "#bf5861", "#7ebf5e", "#3183e0", "#9c6ab1"}
 {
     m_csvParser.parse();
@@ -32,6 +32,9 @@ PlanWidget::PlanWidget(const QString& filePath, QWidget* parent) : QWidget(paren
         radio->setText(m_csvParser.at(0, i + 1));
         layout->addWidget(radio, 1, i + 1, Qt::AlignHCenter);
         layout->setColumnMinimumWidth(i + 1, colWidth);
+        connect(radio, &QRadioButton::toggled, radio, [=] (bool checked) {
+            UtilityFunctions::adjustFontWeight(radio, checked ? QFont::Bold : QFont::Weight(font().weight()));
+        });
     }
 }
 
@@ -125,12 +128,12 @@ QSize PlanWidget::minimumSizeHint() const
 
 int PlanWidget::rowHeight() const
 {
-    return fontMetrics().height() + 10;
+    return fontMetrics().height() + 8;
 }
 
 int PlanWidget::headerHeight() const
 {
-    return rowHeight() + 4;
+    return rowHeight() + 2;
 }
 
 int PlanWidget::blockWidth() const
@@ -264,7 +267,7 @@ void PlanWidget::paintEvent(QPaintEvent*)
         const QString& badge = m_planBadges.value(m_csvParser.at(0, i + 1));
         if (!badge.isEmpty()) {
             static const QVector<QPointF> points = { {-24, 0}, {24, 0}, {0, 30} };
-            const qreal angle = 18;
+            const qreal angle = 20;
             QPainterPath path;
             QTransform transform;
             path.setFillRule(Qt::WindingFill);
@@ -277,11 +280,11 @@ void PlanWidget::paintEvent(QPaintEvent*)
             QFont f(font());
             f.setPixelSize(f.pixelSize() - 2);
             painter.save();
-            painter.setFont(f);
+            painter.setFont(UtilityFunctions::thickerFont(f));
             painter.translate(left + colWidth - path.boundingRect().width() / 2,
                               cr.top() + headerHeight() / 2);
             painter.setBrush(background);
-            painter.setPen(cosmeticPen(m_columnColors.last().darker()));
+            painter.setPen(cosmeticPen(m_columnColors.last().darker(250)));
             painter.drawPath(path.simplified());
             painter.setPen(palette().brightText().color());
             painter.drawText(path.boundingRect(), badge, Qt::AlignVCenter | Qt::AlignHCenter);

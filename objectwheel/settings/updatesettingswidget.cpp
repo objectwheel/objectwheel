@@ -120,8 +120,6 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_busyIndicator->setMinimumTrailOpacity(5);
     m_busyIndicator->setRevolutionsPerSecond(2);
     m_busyIndicator->setTrailFadePercentage(100);
-    m_busyIndicator->setStyleSheet("background: transparent;");
-    m_busyIndicator->setColor(palette().text().color());
 
     /*__*/
 

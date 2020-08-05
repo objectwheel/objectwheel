@@ -66,8 +66,6 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
     m_busyIndicator->setMinimumTrailOpacity(5);
     m_busyIndicator->setRevolutionsPerSecond(2);
     m_busyIndicator->setTrailFadePercentage(100);
-    m_busyIndicator->setStyleSheet(QStringLiteral("background: transparent"));
-    m_busyIndicator->setColor(palette().text().color());
 
     auto rememberMeWidget = new QWidget(this);
     rememberMeWidget->setFixedSize(m_bulkEdit->sizeHint().width(), 35);
