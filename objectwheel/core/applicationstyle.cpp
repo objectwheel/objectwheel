@@ -271,6 +271,29 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
     return ret;
 }
 
+QRect ApplicationStyle::subElementRect(QStyle::SubElement subElement, const QStyleOption* option,
+                                       const QWidget* widget) const
+{
+    switch (subElement) {
+    case SE_ItemViewItemDecoration:
+    case SE_ItemViewItemText:
+    case SE_ItemViewItemFocusRect:
+        if (widget && qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
+            const QMargins& m = UtilityFunctions::itemViewMargins(qobject_cast<const QAbstractItemView*>(widget));
+            if (!m.isNull()) {
+                QStyleOptionViewItem copy(*qstyleoption_cast<const QStyleOptionViewItem*>(option));
+                copy.rect.adjust(-m.left(), -m.top(), m.right(), m.bottom());
+                return QFusionStyle::subElementRect(subElement, &copy, widget);
+            }
+        } break;
+
+    default:
+        break;
+    }
+
+    return QFusionStyle::subElementRect(subElement, option, widget);
+}
+
 QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
                                          const QStyleOption* option, const QWidget* widget) const
 {

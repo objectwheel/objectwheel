@@ -120,7 +120,7 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
                        "plans too much for the moment. They are subject to change and in every "
                        "change we make, we will make sure that the user is the main beneficary. We "
                        "value every user feedback and we believe we will make %1 better "
-                       "together. Please do not hasitate to leave a feedback at our "
+                       "together. Please do not hesitate to leave a feedback at our "
                        "<a href='%2'>forum</a>. Even though we are a very small team of people, we "
                        "will try as hard as possible to stay in touch with our users.</p>"
                        "<p>Thank you for your support :)</p>"

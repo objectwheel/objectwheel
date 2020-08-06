@@ -63,7 +63,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     m_listWidget->setDragDropMode(QAbstractItemView::NoDragDrop);
     m_listWidget->setSelectionBehavior(QAbstractItemView::SelectRows);
     m_listWidget->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    UtilityFunctions::setLayoutItemMargins(m_listWidget, QMargins(-5, 0, 0, 0));
+    UtilityFunctions::setItemViewMargins(m_listWidget, QMargins(-5, 0, 0, 0));
 
     m_searchLineEdit->setFixedWidth(m_listWidget->width());
     m_searchLineEdit->setPlaceholderText(tr("Search"));

@@ -36,6 +36,7 @@ namespace UtilityFunctions {
 namespace Internal {
 
 const char showFocusRingProperty[] = "_q_UtilityFunctions_Internal_showFocusRing";
+const char itemViewMarginsProperty[] = "_q_UtilityFunctions_Internal_itemViewMarginsProperty";
 
 void pushCborHelper(QCborArray&) {}
 void pullCborHelper(QCborArray&) {}
@@ -841,20 +842,33 @@ void updateToolTip(QWidget* widget, const QString& toolTip, const QRect& region)
 QMargins layoutItemMargins(const QWidget* widget)
 {
     int left = 0, top = 0, right = 0, bottom = 0;
-    QWidgetPrivate::get(widget)->getLayoutItemMargins(&left, &top, &right, &bottom);
+    if (widget)
+        QWidgetPrivate::get(widget)->getLayoutItemMargins(&left, &top, &right, &bottom);
     return QMargins(left, top, right, bottom);
 }
 
 void setLayoutItemMargins(QWidget* widget, const QMargins& margins)
 {
-    Q_ASSERT(widget);
-    QWidgetPrivate::get(widget)->setLayoutItemMargins(margins.left(), margins.top(), margins.right(), margins.bottom());
+    if (widget) {
+        QWidgetPrivate::get(widget)->setLayoutItemMargins(margins.left(), margins.top(),
+                                                          margins.right(), margins.bottom());
+    }
 }
 
-void setLayoutItemMargins(QWidget* widget, QStyle::SubElement element, const QStyleOption* option)
+QMargins itemViewMargins(const QAbstractItemView* view)
 {
-    Q_ASSERT(widget);
-    QWidgetPrivate::get(widget)->setLayoutItemMargins(element, option);
+    if (view) {
+        const QVariant& var = view->property(Internal::itemViewMarginsProperty);
+        if (var.isValid())
+            return var.value<QMargins>();
+    }
+    return QMargins();
+}
+
+void setItemViewMargins(QAbstractItemView* view, const QMargins& margins)
+{
+    if (view)
+        view->setProperty(Internal::itemViewMarginsProperty, QVariant::fromValue<QMargins>(margins));
 }
 
 } // UtilityFunctions

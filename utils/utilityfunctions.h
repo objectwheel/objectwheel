@@ -162,9 +162,10 @@ QString shortcutSymbol(const QKeySequence& seq);
 QByteArray resourceData(const QString& path);
 void updateToolTip(QWidget* widget, const QString& toolTip);
 void updateToolTip(QWidget* widget, const QString& toolTip, const QRect& region);
+QMargins itemViewMargins(const QAbstractItemView* view);
 QMargins layoutItemMargins(const QWidget* widget);
+void setItemViewMargins(QAbstractItemView* view, const QMargins& margins);
 void setLayoutItemMargins(QWidget* widget, const QMargins& margins);
-void setLayoutItemMargins(QWidget* widget, QStyle::SubElement element, const QStyleOption* option = nullptr);
 
 } // UtilityFunctions
 
