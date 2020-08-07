@@ -30,6 +30,7 @@ private:
 
 signals:
     void done();
+    void subscriptionNeeded();
 
 private:
     StackedLayout* m_stackedLayout;

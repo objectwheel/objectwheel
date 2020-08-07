@@ -9,7 +9,7 @@ class DesignerSettings;
 class CodeEditorSettings;
 class SystemSettings;
 class ModeManager;
-class RegistrationApiManager;
+class ApiManager;
 class UserManager;
 class DocumentManager;
 class ProjectManager;
@@ -66,7 +66,7 @@ private:
     static ServerManager* s_serverManager;
     static PayloadManager* s_payloadManager;
     static UpdateManager* s_updateManager;
-    static RegistrationApiManager* s_registrationApiManager;
+    static ApiManager* s_apiManager;
     static UserManager* s_userManager;
     static ControlRenderingManager* s_controlRenderingManager;
     static SaveManager* s_saveManager;

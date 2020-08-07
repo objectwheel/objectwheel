@@ -31,18 +31,19 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     m_stackedLayout->addWidget(m_succeedWidget);
     m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
 
-//    connect(m_signupVerificationWidget, &SignupVerificationWidget::done, this, [=]
-//    {
-//        m_stackedLayout->setCurrentWidget(m_succeedWidget);
-//        m_succeedWidget->play(tr("Thank you for registering"),
-//                              tr("Your registration is completed. Thank you for choosing us.\n"
-//                                 "You can continue by logging into the application."));
-//    });
-//    /**** SucceedWidget settings ****/
-//    connect(m_succeedWidget, &SucceedWidget::done, this, [=]
-//    {
-//        m_stackedLayout->setCurrentWidget(m_loginWidget);
-//    });
+    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=]
+    {
+        m_stackedLayout->setCurrentWidget(m_succeedWidget);
+        m_succeedWidget->play(tr("Thank you for purchasing"),
+                              tr("Your purchase is completed. Thank you for choosing us.\n"
+                                 "You can cancel your subscription anytime from the application preferences section."));
+    });
+    /**** SucceedWidget settings ****/
+    connect(m_succeedWidget, &SucceedWidget::done, this, [=]
+    {
+        m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
+        emit done();
+    });
 }
 
 QSize SubscriptionWindow::sizeHint() const

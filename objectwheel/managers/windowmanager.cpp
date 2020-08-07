@@ -25,12 +25,24 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
     s_welcomeWindow = new WelcomeWindow;
     s_subscriptionWindow = new SubscriptionWindow;
 
-    connect(s_aboutWindow, &AboutWindow::done, s_aboutWindow, &AboutWindow::hide);
+    connect(s_aboutWindow, &AboutWindow::done,
+            s_aboutWindow, &AboutWindow::hide);
     connect(s_preferencesWindow, &PreferencesWindow::done,
             s_preferencesWindow, &PreferencesWindow::hide);
-    connect(s_mainWindow, &MainWindow::done, s_mainWindow, &MainWindow::hide);
-    connect(s_welcomeWindow, &WelcomeWindow::done, s_welcomeWindow, &WelcomeWindow::hide);
-    connect(s_welcomeWindow, &WelcomeWindow::done, s_mainWindow, &MainWindow::show);
+    connect(s_mainWindow, &MainWindow::done, s_mainWindow,
+            &MainWindow::hide);
+    connect(s_welcomeWindow, &WelcomeWindow::done,
+            s_welcomeWindow, &WelcomeWindow::hide);
+    connect(s_welcomeWindow, &WelcomeWindow::done,
+            s_mainWindow, &MainWindow::show);
+    connect(s_welcomeWindow, &WelcomeWindow::subscriptionNeeded,
+            s_welcomeWindow, &WelcomeWindow::hide);
+    connect(s_welcomeWindow, &WelcomeWindow::subscriptionNeeded,
+            s_subscriptionWindow, &SubscriptionWindow::show);
+    connect(s_subscriptionWindow, &SubscriptionWindow::done,
+            s_subscriptionWindow, &SubscriptionWindow::hide);
+    connect(s_subscriptionWindow, &SubscriptionWindow::done,
+            s_welcomeWindow, &WelcomeWindow::show);
 }
 
 WindowManager::~WindowManager()

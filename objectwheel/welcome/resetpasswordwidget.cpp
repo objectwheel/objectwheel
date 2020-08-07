@@ -2,7 +2,7 @@
 #include <buttonslice.h>
 #include <bulkedit.h>
 #include <busyindicatorwidget.h>
-#include <registrationapimanager.h>
+#include <apimanager.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
 #include <servermanager.h>
@@ -72,9 +72,9 @@ ResetPasswordWidget::ResetPasswordWidget(QWidget* parent) : QWidget(parent)
             this, &ResetPasswordWidget::back);
     connect(m_buttons->get(Next), &QPushButton::clicked,
             this, &ResetPasswordWidget::onNextClicked);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resetPasswordSuccessful,
+    connect(ApiManager::instance(), &ApiManager::resetPasswordSuccessful,
             this, &ResetPasswordWidget::onResetPasswordSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resetPasswordFailure,
+    connect(ApiManager::instance(), &ApiManager::resetPasswordFailure,
             this, &ResetPasswordWidget::onResetPasswordFailure);
     connect(ServerManager::instance(), &ServerManager::disconnected,
             this, &ResetPasswordWidget::onServerDisconnected);
@@ -95,7 +95,7 @@ void ResetPasswordWidget::onNextClicked()
 
     if (ServerManager::isConnected()) {
         m_busyIndicator->start();
-        RegistrationApiManager::resetPassword(email);
+        ApiManager::resetPassword(email);
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),

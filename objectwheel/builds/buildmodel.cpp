@@ -6,6 +6,7 @@
 #include <zipasync.h>
 #include <payloadmanager.h>
 #include <hashfactory.h>
+#include <apimanager.h>
 
 #include <QCborMap>
 #include <QTemporaryFile>
@@ -43,8 +44,8 @@ Q_DECLARE_METATYPE(StatusCode)
 
 BuildModel::BuildModel(QObject* parent) : QAbstractListModel(parent)
 {
-    connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
-            this, &BuildModel::onServerResponse, Qt::QueuedConnection);
+    connect(ApiManager::instance(), &ApiManager::responseCloudBuild,
+            this, &BuildModel::onResponseCloudBuild);
     //
     connect(PayloadManager::instance(), &PayloadManager::bytesWritten,
             this, &BuildModel::onPayloadManagerBytesWritten);
@@ -237,7 +238,7 @@ bool BuildModel::removeRows(int row, int count, const QModelIndex& parent)
     while (count--) {
         BuildInfo* buildInfo = m_buildInfos.takeAt(row);
         if (buildInfo->state() != Finished && ServerManager::isConnected())
-            ServerManager::send(ServerManager::AbortCloudBuild, buildInfo->uid());
+            ApiManager::abortCloudBuild(buildInfo->uid());
         if (buildInfo->state() == Uploading)
             PayloadManager::cancelUpload(buildInfo->payloadUid());
         else if (buildInfo->state() != Finished)
@@ -264,7 +265,7 @@ void BuildModel::clear()
     beginResetModel();
     for (BuildInfo* buildInfo : qAsConst(m_buildInfos)) {
         if (buildInfo->state() != Finished && ServerManager::isConnected())
-            ServerManager::send(ServerManager::AbortCloudBuild, buildInfo->uid());
+            ApiManager::abortCloudBuild(buildInfo->uid());
         if (buildInfo->state() == Uploading)
             PayloadManager::cancelUpload(buildInfo->payloadUid());
         else if (buildInfo->state() != Finished)
@@ -317,10 +318,7 @@ void BuildModel::start(BuildInfo* buildInfo)
     const QByteArray& payloadUid = HashFactory::generate();
     data.clear();
 
-    ServerManager::send(ServerManager::RequestCloudBuild,
-                        UserManager::email(),
-                        UserManager::password(),
-                        payloadUid);
+    ApiManager::requestCloudBuild(UserManager::email(), UserManager::password(), payloadUid);
 
     buildInfo->buffer()->append(payload);
     buildInfo->setPayloadUid(payloadUid);
@@ -331,21 +329,16 @@ void BuildModel::start(BuildInfo* buildInfo)
     emit dataChanged(index, index, { StatusRole, Qt::StatusTipRole, TotalBytesRole });
 }
 
-void BuildModel::onServerResponse(const QByteArray& data)
+void BuildModel::onResponseCloudBuild(const QByteArray& data)
 {
-    ServerManager::ServerCommands command = ServerManager::Invalid;
-    UtilityFunctions::pullCbor(data, command);
-
-    if (command != ServerManager::ResponseCloudBuild)
-        return;
-
     // NOTE: Beware uid represents the payloadUid until we get a RequestSucceed
     // response from the server; Other commands which occurs before that should
     // take it into consideration.
 
     StatusCode status;
     QByteArray uid;
-    UtilityFunctions::pullCbor(data, command, status, uid);
+    ServerManager::ServerCommands dummy;
+    UtilityFunctions::pullCbor(data, dummy, status, uid);
     BuildInfo* buildInfo = buildInfoFromUid(uid);
 
     if (buildInfo == 0)
@@ -401,7 +394,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
     case RequestSucceed: {
         Q_ASSERT(!uid.isEmpty());
         QByteArray payloadUid;
-        UtilityFunctions::pullCbor(data, command, status, payloadUid, uid);
+        UtilityFunctions::pullCbor(data, dummy, status, payloadUid, uid);
         buildInfo->setUid(uid);
         buildInfo->addStatus(tr("Request succeed..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
@@ -409,7 +402,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
 
     case SequenceNumberChanged: {
         int sequenceNumber;
-        UtilityFunctions::pullCbor(data, command, status, uid, sequenceNumber);
+        UtilityFunctions::pullCbor(data, dummy, status, uid, sequenceNumber);
         if (buildInfo->state() == Uploading)
             buildInfo->addStatus(tr("You are %1th in the upload queue...").arg(sequenceNumber));
         else
@@ -429,7 +422,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
 
     case BuildStatusChanged: {
         QByteArray buildStatus;
-        UtilityFunctions::pullCbor(data, command, status, uid, buildStatus);
+        UtilityFunctions::pullCbor(data, dummy, status, uid, buildStatus);
         buildInfo->addStatus(buildStatus);
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });
     } break;
@@ -486,7 +479,7 @@ void BuildModel::onServerResponse(const QByteArray& data)
 
     case BuildSucceed: {
         QByteArray payloadUid;
-        UtilityFunctions::pullCbor(data, command, status, uid, payloadUid);
+        UtilityFunctions::pullCbor(data, dummy, status, uid, payloadUid);
         buildInfo->setPayloadUid(payloadUid);
         buildInfo->addStatus(tr("Build succeed, awaiting download..."));
         changedRoles.unite({ StatusRole, Qt::StatusTipRole });

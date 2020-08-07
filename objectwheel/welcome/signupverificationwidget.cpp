@@ -2,7 +2,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <busyindicatorwidget.h>
-#include <registrationapimanager.h>
+#include <apimanager.h>
 #include <countdown.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
@@ -96,13 +96,13 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
             this, &SignupVerificationWidget::onCompleteSignupClicked);
     connect(m_buttons->get(ResendSignupCode), &QPushButton::clicked,
             this, &SignupVerificationWidget::onResendSignupCodeClicked);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::completeSignupSuccessful,
+    connect(ApiManager::instance(), &ApiManager::completeSignupSuccessful,
             this, &SignupVerificationWidget::onCompleteSignupSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::completeSignupFailure,
+    connect(ApiManager::instance(), &ApiManager::completeSignupFailure,
             this, &SignupVerificationWidget::onCompleteSignupFailure);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendSignupCodeSuccessful,
+    connect(ApiManager::instance(), &ApiManager::resendSignupCodeSuccessful,
             this, &SignupVerificationWidget::onResendSignupCodeSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendSignupCodeFailure,
+    connect(ApiManager::instance(), &ApiManager::resendSignupCodeFailure,
             this, &SignupVerificationWidget::onResendSignupCodeFailure);
     connect(m_countdown, &Countdown::finished,
             this, &SignupVerificationWidget::onCountdownFinished);
@@ -150,7 +150,7 @@ void SignupVerificationWidget::onCompleteSignupClicked()
 
     if (ServerManager::isConnected()) {
         m_busyIndicator->start();
-        RegistrationApiManager::completeSignup(email, code);
+        ApiManager::completeSignup(email, code);
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
@@ -175,7 +175,7 @@ void SignupVerificationWidget::onResendSignupCodeClicked()
     if (ServerManager::isConnected()) {
         m_buttons->get(ResendSignupCode)->setEnabled(false);
         m_busyIndicator->start();
-        RegistrationApiManager::resendSignupCode(email);
+        ApiManager::resendSignupCode(email);
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),

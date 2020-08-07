@@ -29,7 +29,7 @@ public:
     void setColumnColors(const QVector<QColor>& columnColors);
 
     QString selectedPlan() const;
-    void setDefaultPlan(const QString& defaultPlan);
+    void setSelectedPlan(const QString& defaultPlan);
     void setPlanBadge(const QString& plan, const QString& badgeText);
 
     QSize sizeHint() const override;

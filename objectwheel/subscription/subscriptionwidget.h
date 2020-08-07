@@ -2,9 +2,9 @@
 #define SUBSCRIPTIONWIDGET_H
 
 #include <QWidget>
+#include <planmanager.h>
 
 class PlanWidget;
-class ButtonSlice;
 class BusyIndicatorWidget;
 
 class SubscriptionWidget final : public QWidget
@@ -16,8 +16,19 @@ public:
     explicit SubscriptionWidget(QWidget* parent = nullptr);
 
 private:
+    PlanManager::Plans plan() const;
+
+private slots:
+    void onPurchaseButtonClicked();
+    void onSubscriptionSuccessful();
+    void onSubscriptionFailure();
+    void onServerDisconnected();
+
+signals:
+    void done(PlanManager::Plans plan);
+
+private:
     PlanWidget* m_planWidget;
-    ButtonSlice* m_buttons;
     BusyIndicatorWidget* m_busyIndicator;
 };
 

@@ -45,7 +45,10 @@ public:
         CompletePasswordResetFailure,
         RequestCloudBuild,
         ResponseCloudBuild,
-        AbortCloudBuild
+        AbortCloudBuild,
+        Subscribe,
+        SubscriptionSuccessful,
+        SubscriptionFailure
     };
     Q_ENUM(ServerCommands)
 

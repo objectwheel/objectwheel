@@ -4,7 +4,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <busyindicatorwidget.h>
-#include <registrationapimanager.h>
+#include <apimanager.h>
 #include <utilityfunctions.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
@@ -129,9 +129,9 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
 
     connect(ServerManager::instance(), &ServerManager::disconnected,
             this, &SignupWidget::onServerDisconnected);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupSuccessful,
+    connect(ApiManager::instance(), &ApiManager::signupSuccessful,
             this, &SignupWidget::onSignupSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::signupFailure,
+    connect(ApiManager::instance(), &ApiManager::signupFailure,
             this, &SignupWidget::onSignupFailure);
     connect(m_buttons->get(Next), &QPushButton::clicked,
             this, &SignupWidget::onNextClicked);
@@ -233,7 +233,7 @@ void SignupWidget::onNextClicked()
 
     if (ServerManager::isConnected()) {
         m_busyIndicator->start();
-        RegistrationApiManager::signup(first, last, email, hash, country, company, title, phone);
+        ApiManager::signup(first, last, email, hash, country, company, title, phone);
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),

@@ -113,7 +113,7 @@ QString PlanWidget::selectedPlan() const
     return QString();
 }
 
-void PlanWidget::setDefaultPlan(const QString& defaultPlan)
+void PlanWidget::setSelectedPlan(const QString& defaultPlan)
 {
     for (QRadioButton* button : findChildren<QRadioButton*>()) {
         if (button->text() == defaultPlan)

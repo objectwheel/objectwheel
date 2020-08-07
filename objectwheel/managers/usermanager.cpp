@@ -1,7 +1,7 @@
 #include <usermanager.h>
 #include <applicationcore.h>
 #include <saveutils.h>
-#include <registrationapimanager.h>
+#include <apimanager.h>
 #include <hashfactory.h>
 #include <utilityfunctions.h>
 #include <QDir>
@@ -16,9 +16,9 @@ QString UserManager::s_passwordCache;
 UserManager::UserManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginSuccessful,
+    connect(ApiManager::instance(), &ApiManager::loginSuccessful,
             this, &UserManager::onLoginSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::loginFailure,
+    connect(ApiManager::instance(), &ApiManager::loginFailure,
             this, &UserManager::onLoginFailure);
 }
 
@@ -132,7 +132,7 @@ void UserManager::login(const QString& email, const QString& password)
     s_emailCache = email;
     s_passwordCache = password;
 
-    RegistrationApiManager::login(email, password);
+    ApiManager::login(email, password);
 }
 
 void UserManager::loginOffline(const QString& email, const QString& password)

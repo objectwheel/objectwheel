@@ -14,6 +14,7 @@
 #include <utilityfunctions.h>
 #include <serverstatuswidget.h>
 #include <appconstants.h>
+#include <usermanager.h>
 
 WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
   , m_stackedLayout(new StackedLayout(this))
@@ -91,6 +92,8 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_projectsWidget->refreshProjectList();
         m_stackedLayout->setCurrentWidget(m_projectsWidget);
+        if (UserManager::plan() == PlanManager::None)
+            emit subscriptionNeeded();
     });
     /**** ProjectsWidget settings ****/
     connect(m_projectsWidget, &ProjectsWidget::done,

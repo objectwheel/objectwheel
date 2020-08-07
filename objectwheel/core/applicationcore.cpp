@@ -4,7 +4,7 @@
 #include <projectexposingmanager.h>
 #include <controlcreationmanager.h>
 #include <windowmanager.h>
-#include <registrationapimanager.h>
+#include <apimanager.h>
 #include <controlrenderingmanager.h>
 #include <documentmanager.h>
 #include <mainwindow.h>
@@ -63,7 +63,7 @@ ModeManager* ApplicationCore::s_modeManager = nullptr;
 ServerManager* ApplicationCore::s_serverManager = nullptr;
 PayloadManager* ApplicationCore::s_payloadManager = nullptr;
 UpdateManager* ApplicationCore::s_updateManager = nullptr;
-RegistrationApiManager* ApplicationCore::s_registrationApiManager = nullptr;
+ApiManager* ApplicationCore::s_apiManager = nullptr;
 UserManager* ApplicationCore::s_userManager = nullptr;
 ControlRenderingManager* ApplicationCore::s_controlRenderingManager = nullptr;
 SaveManager* ApplicationCore::s_saveManager = nullptr;
@@ -132,7 +132,7 @@ ApplicationCore::ApplicationCore()
     s_serverManager = new ServerManager;
     s_payloadManager = new PayloadManager;
     s_updateManager = new UpdateManager;
-    s_registrationApiManager = new RegistrationApiManager;
+    s_apiManager = new ApiManager;
     s_userManager = new UserManager;
     s_controlRenderingManager = new ControlRenderingManager;
     s_saveManager = new SaveManager;
@@ -228,8 +228,8 @@ ApplicationCore::~ApplicationCore()
     s_controlRenderingManager = nullptr;
     delete s_userManager;
     s_userManager = nullptr;
-    delete s_registrationApiManager;
-    s_registrationApiManager = nullptr;
+    delete s_apiManager;
+    s_apiManager = nullptr;
     delete s_updateManager;
     s_updateManager = nullptr;
     delete s_payloadManager;

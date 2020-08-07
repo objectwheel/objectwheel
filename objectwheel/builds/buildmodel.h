@@ -60,7 +60,7 @@ public slots:
 
 private slots:
     void start(BuildInfo* buildInfo);
-    void onServerResponse(const QByteArray& data);
+    void onResponseCloudBuild(const QByteArray& data);
     void emitDelayedDataChanged(const QModelIndex& index, const QVector<int>& roles);
     void onPayloadManagerBytesWritten(const QByteArray& uid, qint64 bytes, bool isLastFrame);
     void onPayloadManagerReadyRead(const QByteArray& payloadUid, QIODevice* device,

@@ -1,17 +1,18 @@
-#ifndef REGISTRATIONAPIMANAGER_H
-#define REGISTRATIONAPIMANAGER_H
+#ifndef APIMANAGER_H
+#define APIMANAGER_H
 
 #include <QObject>
+#include <QDateTime>
 
-class RegistrationApiManager final : public QObject
+class ApiManager final : public QObject
 {
     Q_OBJECT
-    Q_DISABLE_COPY(RegistrationApiManager)
+    Q_DISABLE_COPY(ApiManager)
 
     friend class ApplicationCore;
 
 public:
-    static RegistrationApiManager* instance();
+    static ApiManager* instance();
 
     static void login(const QString& email, const QString& password);
     static void signup(const QString& first, const QString& last, const QString& email,
@@ -23,6 +24,11 @@ public:
     static void resendPasswordResetCode(const QString& email);
     static void completePasswordReset(const QString& email, const QString& password,
                                       const QString& code);
+    static void subscribe(const QString& email, const QString& password, int plan, int creditCardCcv = 0,
+                          const QString& creditCardNumber = QString(), const QDate& creditCardDate = QDate());
+    static void requestCloudBuild(const QString& email, const QString& password,
+                                  const QString& payloadUid);
+    static void abortCloudBuild(const QString& buildUid);
 
 private slots:
     void onServerResponse(const QByteArray& data);
@@ -42,13 +48,16 @@ signals:
     void resendPasswordResetCodeFailure();
     void completePasswordResetSuccessful();
     void completePasswordResetFailure();
+    void subscriptionSuccessful();
+    void subscriptionFailure();
+    void responseCloudBuild(const QByteArray& data);
 
 private:
-    explicit RegistrationApiManager(QObject* parent = nullptr);
-    ~RegistrationApiManager() override;
+    explicit ApiManager(QObject* parent = nullptr);
+    ~ApiManager() override;
 
 private:
-    static RegistrationApiManager* s_instance;
+    static ApiManager* s_instance;
 };
 
-#endif // REGISTRATIONAPIMANAGER_H
+#endif // APIMANAGER_H

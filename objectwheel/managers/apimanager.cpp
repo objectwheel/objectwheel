@@ -1,65 +1,82 @@
-#include <registrationapimanager.h>
+#include <apimanager.h>
 #include <planmanager.h>
 #include <servermanager.h>
 
-RegistrationApiManager* RegistrationApiManager::s_instance = nullptr;
-RegistrationApiManager::RegistrationApiManager(QObject* parent) : QObject(parent)
+ApiManager* ApiManager::s_instance = nullptr;
+ApiManager::ApiManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
     connect(ServerManager::instance(), &ServerManager::binaryMessageReceived,
-            this, &RegistrationApiManager::onServerResponse, Qt::QueuedConnection);
+            this, &ApiManager::onServerResponse, Qt::QueuedConnection);
 }
 
-RegistrationApiManager::~RegistrationApiManager()
+ApiManager::~ApiManager()
 {
     s_instance = nullptr;
 }
 
-RegistrationApiManager* RegistrationApiManager::instance()
+ApiManager* ApiManager::instance()
 {
     return s_instance;
 }
 
-void RegistrationApiManager::login(const QString& email, const QString& password)
+void ApiManager::login(const QString& email, const QString& password)
 {
     ServerManager::send(ServerManager::Login, email, password);
 }
 
-void RegistrationApiManager::signup(const QString& first, const QString& last, const QString& email,
-                                    const QString& password, const QString& country, const QString& company,
-                                    const QString& title, const QString& phone)
+void ApiManager::signup(const QString& first, const QString& last, const QString& email,
+                        const QString& password, const QString& country, const QString& company,
+                        const QString& title, const QString& phone)
 {
     ServerManager::send(ServerManager::Signup, first, last, email,
                         password, country, company, title, phone);
 }
 
-void RegistrationApiManager::resendSignupCode(const QString& email)
+void ApiManager::resendSignupCode(const QString& email)
 {
     ServerManager::send(ServerManager::ResendSignupCode, email);
 }
 
-void RegistrationApiManager::completeSignup(const QString& email, const QString& code)
+void ApiManager::completeSignup(const QString& email, const QString& code)
 {
     ServerManager::send(ServerManager::CompleteSignup, email, code);
 }
 
-void RegistrationApiManager::resetPassword(const QString& email)
+void ApiManager::resetPassword(const QString& email)
 {
     ServerManager::send(ServerManager::ResetPassword, email);
 }
 
-void RegistrationApiManager::resendPasswordResetCode(const QString& email)
+void ApiManager::resendPasswordResetCode(const QString& email)
 {
     ServerManager::send(ServerManager::ResendPasswordResetCode, email);
 }
 
-void RegistrationApiManager::completePasswordReset(const QString& email, const QString& password,
-                                                   const QString& code)
+void ApiManager::completePasswordReset(const QString& email, const QString& password,
+                                       const QString& code)
 {
     ServerManager::send(ServerManager::CompletePasswordReset, email, password, code);
 }
 
-void RegistrationApiManager::onServerResponse(const QByteArray& data)
+void ApiManager::subscribe(const QString& email, const QString& password, int plan, int creditCardCcv,
+                           const QString& creditCardNumber, const QDate& creditCardDate)
+{
+    ServerManager::send(ServerManager::Subscribe, email, password, plan, creditCardCcv,
+                        creditCardNumber, QCborValue(QDateTime(creditCardDate)));
+}
+
+void ApiManager::requestCloudBuild(const QString& email, const QString& password, const QString& payloadUid)
+{
+    ServerManager::send(ServerManager::RequestCloudBuild, email, password, payloadUid);
+}
+
+void ApiManager::abortCloudBuild(const QString& buildUid)
+{
+    ServerManager::send(ServerManager::AbortCloudBuild, buildUid);
+}
+
+void ApiManager::onServerResponse(const QByteArray& data)
 {
     ServerManager::ServerCommands command = ServerManager::Invalid;
     UtilityFunctions::pullCbor(data, command);
@@ -108,6 +125,15 @@ void RegistrationApiManager::onServerResponse(const QByteArray& data)
         break;
     case ServerManager::CompletePasswordResetFailure:
         emit completePasswordResetFailure();
+        break;
+    case ServerManager::ResponseCloudBuild:
+        emit responseCloudBuild(data);
+        break;
+    case ServerManager::SubscriptionSuccessful:
+        emit subscriptionSuccessful();
+        break;
+    case ServerManager::SubscriptionFailure:
+        emit subscriptionFailure();
         break;
     default:
         break;

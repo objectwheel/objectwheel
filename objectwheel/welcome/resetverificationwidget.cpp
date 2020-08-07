@@ -2,7 +2,7 @@
 #include <bulkedit.h>
 #include <buttonslice.h>
 #include <busyindicatorwidget.h>
-#include <registrationapimanager.h>
+#include <apimanager.h>
 #include <countdown.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
@@ -103,13 +103,13 @@ ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(pare
             this, &ResetVerificationWidget::onCompletePasswordResetClicked);
     connect(m_buttons->get(ResendPasswordResetCode), &QPushButton::clicked,
             this, &ResetVerificationWidget::onResendPasswordResetCodeClicked);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::completePasswordResetSuccessful,
+    connect(ApiManager::instance(), &ApiManager::completePasswordResetSuccessful,
             this, &ResetVerificationWidget::onCompletePasswordResetSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::completePasswordResetFailure,
+    connect(ApiManager::instance(), &ApiManager::completePasswordResetFailure,
             this, &ResetVerificationWidget::onCompletePasswordResetFailure);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendPasswordResetCodeSuccessful,
+    connect(ApiManager::instance(), &ApiManager::resendPasswordResetCodeSuccessful,
             this, &ResetVerificationWidget::onResendPasswordResetCodeSuccessful);
-    connect(RegistrationApiManager::instance(), &RegistrationApiManager::resendPasswordResetCodeFailure,
+    connect(ApiManager::instance(), &ApiManager::resendPasswordResetCodeFailure,
             this, &ResetVerificationWidget::onResendPasswordResetCodeFailure);
     connect(m_countdown, &Countdown::finished,
             this, &ResetVerificationWidget::onCountdownFinished);
@@ -200,7 +200,7 @@ void ResetVerificationWidget::onCompletePasswordResetClicked()
 
     if (ServerManager::isConnected()) {
         m_busyIndicator->start();
-        RegistrationApiManager::completePasswordReset(email, hash, code);
+        ApiManager::completePasswordReset(email, hash, code);
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
@@ -225,7 +225,7 @@ void ResetVerificationWidget::onResendPasswordResetCodeClicked()
     if (ServerManager::isConnected()) {
         m_buttons->get(ResendPasswordResetCode)->setEnabled(false);
         m_busyIndicator->start();
-        RegistrationApiManager::resendPasswordResetCode(email);
+        ApiManager::resendPasswordResetCode(email);
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
