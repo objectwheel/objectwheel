@@ -98,13 +98,10 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
                     this,
                     tr("A quick reminder about privacy"),
                     tr("%1 does not collect, store or share any of your "
-                       "data regarding to your cloud builds. Your projects are at "
-                       "safe hands with the %1 Cloud Builds. We only store "
-                       "them, within a temporary location under the build system, "
-                       "for the time that your project is being built. Immediately "
-                       "after the build is finished (succeeded, failed or halted; "
-                       "doesn't matter) your data is erased completely. We respect "
-                       "your privacy and hopefully we will always be.").arg(AppConstants::NAME),
+                       "data regarding to your cloud builds. We only store your "
+                       "projects, within a temporary location under the build system, "
+                       "for the time that the project is being built. They are "
+                       "erased completely when the building is over.").arg(AppConstants::NAME),
                     QMessageBox::Information);
     });
 }

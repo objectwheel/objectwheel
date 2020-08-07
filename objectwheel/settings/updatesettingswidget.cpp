@@ -243,10 +243,9 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                     tr("A quick reminder about updates"),
                     tr("%1 needs regular updates to function properly. "
                        "Opening up new projects or using cloud services with an "
-                       "outdated version of %1 may result in failure."
-                       "\n\n"
-                       "Meanwhile %1 does not download or install any "
-                       "updates automatically in any way.").arg(AppConstants::NAME),
+                       "outdated version of %1 may result in failure. "
+                       "Meanwhile %1 does not download or install "
+                       "updates automatically.").arg(AppConstants::NAME),
                     QMessageBox::Information);
     });
     connect(m_checkForUpdatesAutomaticallyCheckBox, &QCheckBox::clicked, this, [=] {

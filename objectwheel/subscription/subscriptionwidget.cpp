@@ -161,7 +161,7 @@ void SubscriptionWidget::onPurchaseButtonClicked()
                         tr("Unable to connect to the server"),
                         tr("<p>We are unable to connect to the server. Please checkout your internet "
                            "connection and try again later.</p>"
-                           "<p>Meinwhile you can use the app if you want as a free user. Would you "
+                           "<p>Meanwhile you can use the app if you want as a free user. Would you "
                            "like to continue as a free user?</p>"),
                         QMessageBox::Question, QMessageBox::Yes | QMessageBox::No);
             if (ret == QMessageBox::Yes)
