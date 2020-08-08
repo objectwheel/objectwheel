@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDateTime>
+#include <planmanager.h>
 
 class ApiManager final : public QObject
 {
@@ -24,8 +25,10 @@ public:
     static void resendPasswordResetCode(const QString& email);
     static void completePasswordReset(const QString& email, const QString& password,
                                       const QString& code);
-    static void subscribe(const QString& email, const QString& password, int plan, int creditCardCcv = 0,
-                          const QString& creditCardNumber = QString(), const QDate& creditCardDate = QDate());
+    static void subscribe(const QString& email, const QString& password, PlanManager::Plans plan,
+                          const QString& creditCardNumber = QString(),
+                          const QString& creditCardCcv = QString(),
+                          const QDate& creditCardDate = QDate());
     static void requestCloudBuild(const QString& email, const QString& password,
                                   const QString& payloadUid);
     static void abortCloudBuild(const QString& buildUid);

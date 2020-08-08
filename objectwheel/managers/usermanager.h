@@ -18,6 +18,8 @@ public:
     static QString dir(const QString& = email());
 
     static PlanManager::Plans plan();
+    static void updatePlan(PlanManager::Plans plan);
+
     static QString email();
     static QString password();
 

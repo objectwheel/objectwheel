@@ -35,14 +35,20 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
             s_welcomeWindow, &WelcomeWindow::hide);
     connect(s_welcomeWindow, &WelcomeWindow::done,
             s_mainWindow, &MainWindow::show);
+    connect(s_welcomeWindow, &WelcomeWindow::done,
+            s_mainWindow, &MainWindow::activateWindow);
     connect(s_welcomeWindow, &WelcomeWindow::subscriptionNeeded,
             s_welcomeWindow, &WelcomeWindow::hide);
     connect(s_welcomeWindow, &WelcomeWindow::subscriptionNeeded,
             s_subscriptionWindow, &SubscriptionWindow::show);
+    connect(s_welcomeWindow, &WelcomeWindow::subscriptionNeeded,
+            s_subscriptionWindow, &SubscriptionWindow::activateWindow);
     connect(s_subscriptionWindow, &SubscriptionWindow::done,
             s_subscriptionWindow, &SubscriptionWindow::hide);
     connect(s_subscriptionWindow, &SubscriptionWindow::done,
             s_welcomeWindow, &WelcomeWindow::show);
+    connect(s_subscriptionWindow, &SubscriptionWindow::done,
+            s_welcomeWindow, &WelcomeWindow::activateWindow);
 }
 
 WindowManager::~WindowManager()

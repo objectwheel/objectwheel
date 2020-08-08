@@ -78,6 +78,14 @@ PlanManager::Plans UserManager::plan()
     return s_plan;
 }
 
+void UserManager::updatePlan(PlanManager::Plans plan)
+{
+    if (isLoggedIn()) {
+        s_plan = plan;
+        SaveUtils::setProperty(dir(), SaveUtils::UserPlan, s_plan);
+    }
+}
+
 QString UserManager::email()
 {
     return s_email;
@@ -196,7 +204,7 @@ void UserManager::onLoginSuccessful(const QVariantList& userInfo)
 
     if (!userInfo.isEmpty()) {
         s_plan = userInfo.at(0).value<PlanManager::Plans>();
-        SaveUtils::setProperty(userDir, SaveUtils::UserPlan, quint32(s_plan));
+        SaveUtils::setProperty(userDir, SaveUtils::UserPlan, s_plan);
         SaveUtils::setProperty(userDir, SaveUtils::UserEmail, s_email);
         SaveUtils::setProperty(userDir, SaveUtils::UserPassword, UtilityFunctions::generatePasswordHash(s_password.toUtf8()));
     } else {

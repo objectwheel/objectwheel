@@ -6,6 +6,7 @@
 #include <appconstants.h>
 #include <subscriptionwidget.h>
 #include <checkoutwidget.h>
+#include <usermanager.h>
 
 SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
   , m_stackedLayout(new StackedLayout(this))
@@ -31,8 +32,9 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     m_stackedLayout->addWidget(m_succeedWidget);
     m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
 
-    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=]
+    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
     {
+        UserManager::updatePlan(plan);
         m_stackedLayout->setCurrentWidget(m_succeedWidget);
         m_succeedWidget->play(tr("Thank you for purchasing"),
                               tr("Your purchase is completed. Thank you for choosing us.\n"
