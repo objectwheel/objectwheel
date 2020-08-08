@@ -66,6 +66,7 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
     UtilityFunctions::adjustFontPixelSize(m_planWidget, -1);
     m_planWidget->setSelectedPlan(tr("Indie"));
     m_planWidget->setPlanBadge(tr("Indie"), tr("30-days\nFree\nTrial"));
+    m_planWidget->setPlanBadge(tr("Pro"), tr("30-days\nFree\nTrial"));
     m_planWidget->setContentsMargins(0, 18, 0, 0);
 
     auto buttons = new ButtonSlice(this);

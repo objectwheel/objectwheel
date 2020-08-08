@@ -5,13 +5,15 @@
 #include <succeedwidget.h>
 #include <appconstants.h>
 #include <subscriptionwidget.h>
-#include <checkoutwidget.h>
+#include <creditcardwidget.h>
+#include <ordersummarywidget.h>
 #include <usermanager.h>
 
 SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
   , m_stackedLayout(new StackedLayout(this))
   , m_subscriptionWidget(new SubscriptionWidget(this))
-  , m_checkoutWidget(new CheckoutWidget(this))
+  , m_creditCardWidget(new CreditCardWidget(this))
+  , m_orderSummaryWidget(new OrderSummaryWidget(this))
   , m_succeedWidget(new SucceedWidget(this))
   , m_serverStatusWidget(new ServerStatusWidget(this))
 {
@@ -28,7 +30,8 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
             m_serverStatusWidget, &ServerStatusWidget::raise);
 
     m_stackedLayout->addWidget(m_subscriptionWidget);
-    m_stackedLayout->addWidget(m_checkoutWidget);
+    m_stackedLayout->addWidget(m_creditCardWidget);
+    m_stackedLayout->addWidget(m_orderSummaryWidget);
     m_stackedLayout->addWidget(m_succeedWidget);
     m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
 

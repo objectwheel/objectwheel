@@ -5,7 +5,8 @@
 
 class StackedLayout;
 class SubscriptionWidget;
-class CheckoutWidget;
+class CreditCardWidget;
+class OrderSummaryWidget;
 class SucceedWidget;
 class ServerStatusWidget;
 
@@ -28,7 +29,8 @@ signals:
 private:
     StackedLayout* m_stackedLayout;
     SubscriptionWidget* m_subscriptionWidget;
-    CheckoutWidget* m_checkoutWidget;
+    CreditCardWidget* m_creditCardWidget;
+    OrderSummaryWidget* m_orderSummaryWidget;
     SucceedWidget* m_succeedWidget;
     ServerStatusWidget* m_serverStatusWidget;
 };
