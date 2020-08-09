@@ -22,6 +22,8 @@ QImage renderErrorControlImage(const QSizeF& size, const QString& id,
                                const QBrush& brush, const QPen& pen, const QWidget* widget);
 QImage renderBlankControlImage(const QRectF& rect, const QString& id, qreal dpr,
                                const QBrush& brush, const QPen& pen);
+QColor disabledColor(const QColor& color);
+
 } // PaintUtils
 
 #endif // PAINTUTILS_H

@@ -8,16 +8,19 @@
 #include <apimanager.h>
 #include <servermanager.h>
 #include <usermanager.h>
+#include <delayer.h>
 
 #include <QLabel>
 #include <QPushButton>
 #include <QBoxLayout>
+#include <QFile>
 
-enum { Purchase };
+enum { Next };
 
 SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
-  , m_planWidget(new PlanWidget(":/other/plans.csv", this))
+  , m_planWidget(new PlanWidget(this))
   , m_busyIndicator(new BusyIndicatorWidget(this, false))
+  , m_isDelayerWorking(false)
 {
     auto iconLabel = new QLabel(this);
     iconLabel->setFixedSize(QSize(60, 60));
@@ -63,17 +66,17 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
     noticeLayout->addStretch();
     noticeLayout->addWidget(noticeButton, Qt::AlignVCenter);
 
+    QFile c(":/other/plans.csv"); c.open(QFile::ReadOnly);
     UtilityFunctions::adjustFontPixelSize(m_planWidget, -1);
-    m_planWidget->setSelectedPlan(tr("Indie"));
-    m_planWidget->setPlanBadge(tr("Indie"), tr("30-days\nFree\nTrial"));
-    m_planWidget->setPlanBadge(tr("Pro"), tr("30-days\nFree\nTrial"));
     m_planWidget->setContentsMargins(0, 18, 0, 0);
+    m_planWidget->setPlanData(c.readAll());
+    m_planWidget->setSelectedPlan(QStringLiteral("-"));
 
     auto buttons = new ButtonSlice(this);
-    buttons->add(Purchase, QLatin1String("#86CC63"), QLatin1String("#75B257"));
-    buttons->get(Purchase)->setText(tr("Purchase"));
-    buttons->get(Purchase)->setIcon(QIcon(QStringLiteral(":/images/welcome/ok.png")));
-    buttons->get(Purchase)->setCursor(Qt::PointingHandCursor);
+    buttons->add(Next, QLatin1String("#86CC63"), QLatin1String("#75B257"));
+    buttons->get(Next)->setText(tr("Next"));
+    buttons->get(Next)->setIcon(QIcon(QStringLiteral(":/images/welcome/ok.png")));
+    buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     buttons->settings().cellWidth = 150;
     buttons->triggerSettings();
 
@@ -132,12 +135,27 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
 
     connect(ServerManager::instance(), &ServerManager::disconnected,
             this, &SubscriptionWidget::onServerDisconnected);
-    connect(ApiManager::instance(), &ApiManager::subscriptionSuccessful,
-            this, &SubscriptionWidget::onSubscriptionSuccessful);
-    connect(ApiManager::instance(), &ApiManager::subscriptionFailure,
-            this, &SubscriptionWidget::onSubscriptionFailure);
-    connect(buttons->get(Purchase), &QPushButton::clicked,
-            this, &SubscriptionWidget::onPurchaseButtonClicked);
+    connect(ApiManager::instance(), &ApiManager::responseSubscriptionPlans,
+            this, &SubscriptionWidget::onResponseSubscriptionPlans);
+    connect(buttons->get(Next), &QPushButton::clicked,
+            this, &SubscriptionWidget::onNextButtonClicked);
+}
+
+void SubscriptionWidget::refresh()
+{
+    if (!ServerManager::isConnected()) {
+        m_isDelayerWorking = true;
+        m_busyIndicator->start();
+        Delayer::delay(&ServerManager::isConnected, true, 12000, 500);
+        m_busyIndicator->stop();
+        m_isDelayerWorking = false;
+    }
+    if (ServerManager::isConnected()) {
+        ApiManager::requestSubscriptionPlans(UserManager::email(), UserManager::password());
+        m_busyIndicator->start();
+    } else {
+        emit done();
+    }
 }
 
 PlanManager::Plans SubscriptionWidget::plan() const
@@ -149,7 +167,7 @@ PlanManager::Plans SubscriptionWidget::plan() const
     return PlanManager::Free;
 }
 
-void SubscriptionWidget::onPurchaseButtonClicked()
+void SubscriptionWidget::onNextButtonClicked()
 {
     if (plan() == PlanManager::Free) {
         if (ServerManager::isConnected()) {
@@ -164,31 +182,23 @@ void SubscriptionWidget::onPurchaseButtonClicked()
                            "<p>Meanwhile you can use the app if you want as a free user. Would you "
                            "like to continue as a free user?</p>"),
                         QMessageBox::Question, QMessageBox::Yes | QMessageBox::No);
-            if (ret == QMessageBox::Yes)
-                emit done(PlanManager::Free);
+//            if (ret == QMessageBox::Yes)
+//                emit done(PlanManager::Free);
         }
     } else {
-        emit done(plan());
+//        emit done(plan());
     }
 }
 
-void SubscriptionWidget::onSubscriptionSuccessful()
+void SubscriptionWidget::onResponseSubscriptionPlans(const QByteArray& planData)
 {
     m_busyIndicator->stop();
-    emit done(PlanManager::Free);
-}
-
-void SubscriptionWidget::onSubscriptionFailure()
-{
-    m_busyIndicator->stop();
-    UtilityFunctions::showMessage(this,
-                                  tr("The server rejected your request."),
-                                  tr("Please try again later."));
+    m_planWidget->setPlanData(planData);
 }
 
 void SubscriptionWidget::onServerDisconnected()
 {
-    if (m_busyIndicator->isSpinning()) {
+    if (m_busyIndicator->isSpinning() && !m_isDelayerWorking) {
         m_busyIndicator->stop();
         UtilityFunctions::showMessage(this,
                                       tr("Connection lost"),

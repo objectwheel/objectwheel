@@ -33,16 +33,15 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     m_stackedLayout->addWidget(m_creditCardWidget);
     m_stackedLayout->addWidget(m_orderSummaryWidget);
     m_stackedLayout->addWidget(m_succeedWidget);
-    m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
 
-    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
-    {
-        UserManager::updatePlan(plan);
-        m_stackedLayout->setCurrentWidget(m_succeedWidget);
-        m_succeedWidget->play(tr("Thank you for purchasing"),
-                              tr("Your purchase is completed. Thank you for choosing us.\n"
-                                 "You can cancel your subscription anytime from the application preferences section."));
-    });
+//    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
+//    {
+//        UserManager::updatePlan(plan);
+//        m_stackedLayout->setCurrentWidget(m_succeedWidget);
+//        m_succeedWidget->play(tr("Thank you for purchasing"),
+//                              tr("Your purchase is completed. Thank you for choosing us.\n"
+//                                 "You can cancel your subscription anytime from the application preferences section."));
+//    });
     /**** SucceedWidget settings ****/
     connect(m_succeedWidget, &SucceedWidget::done, this, [=]
     {
@@ -54,6 +53,12 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
 QSize SubscriptionWindow::sizeHint() const
 {
     return QSize(980, 560);
+}
+
+void SubscriptionWindow::reset()
+{
+    m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
+    m_subscriptionWidget->refresh();
 }
 
 void SubscriptionWindow::resizeEvent(QResizeEvent* event)

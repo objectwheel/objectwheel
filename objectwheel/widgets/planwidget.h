@@ -1,9 +1,8 @@
 #ifndef PLANWIDGET_H
 #define PLANWIDGET_H
 
-#include <QHash>
 #include <QWidget>
-#include <csvparser.h>
+#include <planparser.h>
 
 class PlanWidget final : public QWidget
 {
@@ -11,7 +10,9 @@ class PlanWidget final : public QWidget
     Q_DISABLE_COPY(PlanWidget)
 
 public:
-    explicit PlanWidget(const QString& filePath, QWidget* parent = nullptr);
+    explicit PlanWidget(QWidget* parent = nullptr);
+
+    PlanParser planParser() const;
 
     int radius() const;
     void setRadius(int radius);
@@ -22,18 +23,14 @@ public:
     int padding() const;
     void setPadding(int padding);
 
-    QVector<QColor> headerColors() const;
-    void setHeaderColors(const QVector<QColor>& headerColors);
-
-    QVector<QColor> columnColors() const;
-    void setColumnColors(const QVector<QColor>& columnColors);
-
     QString selectedPlan() const;
     void setSelectedPlan(const QString& defaultPlan);
-    void setPlanBadge(const QString& plan, const QString& badgeText);
 
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
+
+public slots:
+    void setPlanData(const QByteArray& data);
 
 private:
     int rowHeight() const;
@@ -47,13 +44,10 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    CsvParser m_csvParser;
+    PlanParser m_planParser;
     int m_radius;
     int m_spacing;
     int m_padding;
-    QVector<QColor> m_headerColors;
-    QVector<QColor> m_columnColors;
-    QHash<QString, QString> m_planBadges;
 };
 
 #endif // PLANWIDGET_H

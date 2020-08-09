@@ -20,6 +20,9 @@ public:
 
     QSize sizeHint() const override;
 
+public slots:
+    void reset();
+
 private:
     void resizeEvent(QResizeEvent* event) override;
 

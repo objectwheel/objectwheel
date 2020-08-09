@@ -22,120 +22,147 @@ ApiManager* ApiManager::instance()
 
 void ApiManager::login(const QString& email, const QString& password)
 {
-    ServerManager::send(ServerManager::Login, email, password);
+    ServerManager::send(Login, email, password);
 }
 
 void ApiManager::signup(const QString& first, const QString& last, const QString& email,
                         const QString& password, const QString& country, const QString& company,
                         const QString& title, const QString& phone)
 {
-    ServerManager::send(ServerManager::Signup, first, last, email,
-                        password, country, company, title, phone);
+    ServerManager::send(Signup, first, last, email, password, country, company, title, phone);
 }
 
 void ApiManager::resendSignupCode(const QString& email)
 {
-    ServerManager::send(ServerManager::ResendSignupCode, email);
+    ServerManager::send(ResendSignupCode, email);
 }
 
 void ApiManager::completeSignup(const QString& email, const QString& code)
 {
-    ServerManager::send(ServerManager::CompleteSignup, email, code);
+    ServerManager::send(CompleteSignup, email, code);
 }
 
 void ApiManager::resetPassword(const QString& email)
 {
-    ServerManager::send(ServerManager::ResetPassword, email);
+    ServerManager::send(ResetPassword, email);
 }
 
 void ApiManager::resendPasswordResetCode(const QString& email)
 {
-    ServerManager::send(ServerManager::ResendPasswordResetCode, email);
+    ServerManager::send(ResendPasswordResetCode, email);
 }
 
 void ApiManager::completePasswordReset(const QString& email, const QString& password,
                                        const QString& code)
 {
-    ServerManager::send(ServerManager::CompletePasswordReset, email, password, code);
+    ServerManager::send(CompletePasswordReset, email, password, code);
 }
 
 void ApiManager::subscribe(const QString& email, const QString& password, PlanManager::Plans plan,
                            const QString& creditCardNumber, const QString& creditCardCcv,
                            const QDate& creditCardDate)
 {
-    ServerManager::send(ServerManager::Subscribe, email, password, plan, creditCardNumber,
+    ServerManager::send(Subscribe, email, password, plan, creditCardNumber,
                         creditCardCcv, QCborValue(QDateTime(creditCardDate)));
 }
 
 void ApiManager::requestCloudBuild(const QString& email, const QString& password, const QString& payloadUid)
 {
-    ServerManager::send(ServerManager::RequestCloudBuild, email, password, payloadUid);
+    ServerManager::send(RequestCloudBuild, email, password, payloadUid);
 }
 
 void ApiManager::abortCloudBuild(const QString& buildUid)
 {
-    ServerManager::send(ServerManager::AbortCloudBuild, buildUid);
+    ServerManager::send(AbortCloudBuild, buildUid);
+}
+
+void ApiManager::requestSubscriptionPlans(const QString& email, const QString& password)
+{
+    ServerManager::send(RequestSubscriptionPlans, email, password);
 }
 
 void ApiManager::onServerResponse(const QByteArray& data)
 {
-    ServerManager::ServerCommands command = ServerManager::Invalid;
+    Commands command = Invalid;
     UtilityFunctions::pullCbor(data, command);
 
     switch (command) {
-    case ServerManager::LoginSuccessful: {
+    case LoginSuccessful: {
         PlanManager::Plans plan;
         UtilityFunctions::pullCbor(data, command, plan);
         emit loginSuccessful({plan});
     } break;
-    case ServerManager::LoginFailure:
+
+    case LoginFailure:
         emit loginFailure();
         break;
-    case ServerManager::SignupSuccessful:
+
+    case SignupSuccessful:
         emit signupSuccessful();
         break;
-    case ServerManager::SignupFailure:
+
+    case SignupFailure:
         emit signupFailure();
         break;
-    case ServerManager::ResendSignupCodeSuccessful:
+
+    case ResendSignupCodeSuccessful:
         emit resendSignupCodeSuccessful();
         break;
-    case ServerManager::ResendSignupCodeFailure:
+
+    case ResendSignupCodeFailure:
         emit resendSignupCodeFailure();
         break;
-    case ServerManager::CompleteSignupSuccessful:
+
+    case CompleteSignupSuccessful:
         emit completeSignupSuccessful();
         break;
-    case ServerManager::CompleteSignupFailure:
+
+    case CompleteSignupFailure:
         emit completeSignupFailure();
         break;
-    case ServerManager::ResetPasswordSuccessful:
+
+    case ResetPasswordSuccessful:
         emit resetPasswordSuccessful();
         break;
-    case ServerManager::ResetPasswordFailure:
+
+    case ResetPasswordFailure:
         emit resetPasswordFailure();
         break;
-    case ServerManager::ResendPasswordResetCodeSuccessful:
+
+    case ResendPasswordResetCodeSuccessful:
         emit resendPasswordResetCodeSuccessful();
         break;
-    case ServerManager::ResendPasswordResetCodeFailure:
+
+    case ResendPasswordResetCodeFailure:
         emit resendPasswordResetCodeFailure();
         break;
-    case ServerManager::CompletePasswordResetSuccessful:
+
+    case CompletePasswordResetSuccessful:
         emit completePasswordResetSuccessful();
         break;
-    case ServerManager::CompletePasswordResetFailure:
+
+    case CompletePasswordResetFailure:
         emit completePasswordResetFailure();
         break;
-    case ServerManager::ResponseCloudBuild:
+
+    case ResponseCloudBuild:
         emit responseCloudBuild(data);
         break;
-    case ServerManager::SubscriptionSuccessful:
+
+    case ResponseSubscriptionPlans: {
+        QByteArray plans;
+        UtilityFunctions::pullCbor(data, command, plans);
+        emit responseSubscriptionPlans(plans);
+    } break;
+
+    case SubscriptionSuccessful:
         emit subscriptionSuccessful();
         break;
-    case ServerManager::SubscriptionFailure:
+
+    case SubscriptionFailure:
         emit subscriptionFailure();
         break;
+
     default:
         break;
     }

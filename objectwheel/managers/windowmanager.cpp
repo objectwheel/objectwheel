@@ -43,6 +43,8 @@ WindowManager::WindowManager(QObject* parent) : QObject(parent)
             s_subscriptionWindow, &SubscriptionWindow::show);
     connect(s_welcomeWindow, &WelcomeWindow::subscriptionNeeded,
             s_subscriptionWindow, &SubscriptionWindow::activateWindow);
+    connect(s_welcomeWindow, &WelcomeWindow::subscriptionNeeded,
+            s_subscriptionWindow, &SubscriptionWindow::reset);
     connect(s_subscriptionWindow, &SubscriptionWindow::done,
             s_subscriptionWindow, &SubscriptionWindow::hide);
     connect(s_subscriptionWindow, &SubscriptionWindow::done,

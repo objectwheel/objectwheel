@@ -19,49 +19,15 @@ class ServerManager final : public QWebSocket
     };
 
 public:
-    enum ServerCommands {
-        Invalid = 0x201f,
-        MessageTooLarge,
-        Login,
-        LoginSuccessful,
-        LoginFailure,
-        Signup,
-        SignupSuccessful,
-        SignupFailure,
-        ResendSignupCode,
-        ResendSignupCodeSuccessful,
-        ResendSignupCodeFailure,
-        CompleteSignup,
-        CompleteSignupSuccessful,
-        CompleteSignupFailure,
-        ResetPassword,
-        ResetPasswordSuccessful,
-        ResetPasswordFailure,
-        ResendPasswordResetCode,
-        ResendPasswordResetCodeSuccessful,
-        ResendPasswordResetCodeFailure,
-        CompletePasswordReset,
-        CompletePasswordResetSuccessful,
-        CompletePasswordResetFailure,
-        RequestCloudBuild,
-        ResponseCloudBuild,
-        AbortCloudBuild,
-        Subscribe,
-        SubscriptionSuccessful,
-        SubscriptionFailure
-    };
-    Q_ENUM(ServerCommands)
-
-public:
     static ServerManager* instance();
     static bool isConnected();
     static void sleep();
     static void wake();
 
-    template<typename... Args>
-    static qint64 send(ServerCommands command, Args&&... args) {
+    template <typename... Args>
+    static inline qint64 send(Args&&... args) {
         Q_ASSERT(isConnected());
-        return instance()->sendBinaryMessage(UtilityFunctions::pushCbor(command, std::forward<Args>(args)...));
+        return instance()->sendBinaryMessage(UtilityFunctions::pushCbor(std::forward<Args>(args)...));
     }
 
 private slots:

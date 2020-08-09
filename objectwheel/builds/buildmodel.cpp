@@ -337,7 +337,7 @@ void BuildModel::onResponseCloudBuild(const QByteArray& data)
 
     StatusCode status;
     QByteArray uid;
-    ServerManager::ServerCommands dummy;
+    ApiManager::Commands dummy;
     UtilityFunctions::pullCbor(data, dummy, status, uid);
     BuildInfo* buildInfo = buildInfoFromUid(uid);
 

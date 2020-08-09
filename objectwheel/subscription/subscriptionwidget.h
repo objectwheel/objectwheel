@@ -15,21 +15,25 @@ class SubscriptionWidget final : public QWidget
 public:
     explicit SubscriptionWidget(QWidget* parent = nullptr);
 
+public slots:
+    void refresh();
+
 private:
     PlanManager::Plans plan() const;
 
 private slots:
-    void onPurchaseButtonClicked();
-    void onSubscriptionSuccessful();
-    void onSubscriptionFailure();
+    void onNextButtonClicked();
+    void onResponseSubscriptionPlans(const QByteArray& planData);
     void onServerDisconnected();
 
 signals:
-    void done(PlanManager::Plans plan);
+    void cancel();
+    void done();
 
 private:
     PlanWidget* m_planWidget;
     BusyIndicatorWidget* m_busyIndicator;
+    bool m_isDelayerWorking;
 };
 
 #endif // SUBSCRIPTIONWIDGET_H

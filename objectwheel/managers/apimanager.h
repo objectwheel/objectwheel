@@ -13,6 +13,42 @@ class ApiManager final : public QObject
     friend class ApplicationCore;
 
 public:
+    enum Commands {
+        Invalid = 0x201f,
+        MessageTooBig,
+        Login,
+        LoginSuccessful,
+        LoginFailure,
+        Signup,
+        SignupSuccessful,
+        SignupFailure,
+        ResendSignupCode,
+        ResendSignupCodeSuccessful,
+        ResendSignupCodeFailure,
+        CompleteSignup,
+        CompleteSignupSuccessful,
+        CompleteSignupFailure,
+        ResetPassword,
+        ResetPasswordSuccessful,
+        ResetPasswordFailure,
+        ResendPasswordResetCode,
+        ResendPasswordResetCodeSuccessful,
+        ResendPasswordResetCodeFailure,
+        CompletePasswordReset,
+        CompletePasswordResetSuccessful,
+        CompletePasswordResetFailure,
+        RequestCloudBuild,
+        ResponseCloudBuild,
+        AbortCloudBuild,
+        RequestSubscriptionPlans,
+        ResponseSubscriptionPlans,
+        Subscribe,
+        SubscriptionSuccessful,
+        SubscriptionFailure
+    };
+    Q_ENUM(Commands)
+
+public:
     static ApiManager* instance();
 
     static void login(const QString& email, const QString& password);
@@ -25,13 +61,14 @@ public:
     static void resendPasswordResetCode(const QString& email);
     static void completePasswordReset(const QString& email, const QString& password,
                                       const QString& code);
+    static void requestCloudBuild(const QString& email, const QString& password,
+                                  const QString& payloadUid);
+    static void abortCloudBuild(const QString& buildUid);
+    static void requestSubscriptionPlans(const QString& email, const QString& password);
     static void subscribe(const QString& email, const QString& password, PlanManager::Plans plan,
                           const QString& creditCardNumber = QString(),
                           const QString& creditCardCcv = QString(),
                           const QDate& creditCardDate = QDate());
-    static void requestCloudBuild(const QString& email, const QString& password,
-                                  const QString& payloadUid);
-    static void abortCloudBuild(const QString& buildUid);
 
 private slots:
     void onServerResponse(const QByteArray& data);
@@ -51,6 +88,7 @@ signals:
     void resendPasswordResetCodeFailure();
     void completePasswordResetSuccessful();
     void completePasswordResetFailure();
+    void responseSubscriptionPlans(const QByteArray& planData);
     void subscriptionSuccessful();
     void subscriptionFailure();
     void responseCloudBuild(const QByteArray& data);

@@ -1,12 +1,17 @@
-﻿;Free;Indie;Pro
-Price;$0/month;$30/month ($25 if paid annually);$60/month ($55 if paid annually)
-Docs & Tutorials;Yes;Yes;Yes
-Live Device Debugging;Yes;Yes;Yes
-Offline Mode;Yes;Yes;Yes
-Objectwheel Libraries;Some;All;All
-Splash Screen;'Made with Objectwheel';Fully customizable;Fully customizable
-Support;Community forum;9/5 email support;9/5 email support
-Target Platforms;Android only;macOS, Android, Windows, Linux;macOS, iOS, Android, Windows, Linux
-Project Size Limit;2 Mb;20 Mb;No limit
-Cloud Builds;2 cloud builds per month;20 cloud builds per month;No limit
-Revenue/Funding Limit;≤ $50k;≤ $100k;No limit
+﻿;-;-;-
+#header-color;#c25d65;#63a67d;#4f91e8
+#column-color;#ffe3e5;#f0fff6;#e3efff
+#badge-color;;#a67acc;#a67acc
+#badge;;;-
+#price;0;0;0
+#annual-price;0;0;0
+-;-;-;-
+-;-;-;-
+-;-;-;-
+-;-;-;-
+-;-;-;-
+-;-;-;-
+-;-;-;-
+-;-;-;-
+-;-;-;-
+-;-;-;-

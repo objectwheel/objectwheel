@@ -204,3 +204,9 @@ QImage PaintUtils::renderBlankControlImage(const QRectF& rect, const QString& id
 
     return dest;
 }
+
+QColor PaintUtils::disabledColor(const QColor& color)
+{
+    int g = qGray(color.rgb());
+    return QColor(g, g, g, color.alpha());
+}
