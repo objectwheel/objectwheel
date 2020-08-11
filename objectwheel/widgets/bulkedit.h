@@ -36,7 +36,7 @@ public:
 
     template <typename WidgetPtr> WidgetPtr get(int id)
     {
-        for (const LineElement& element : _elements) {
+        for (const LineElement& element : m_elements) {
             if (element.id == id)
                 return static_cast<WidgetPtr>(element.edit);
         }
@@ -54,9 +54,9 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    QLayout* _layout;
-    Settings _settings;
-    QList<LineElement> _elements;
+    QLayout* m_layout;
+    Settings m_settings;
+    QList<LineElement> m_elements;
 };
 
 #endif // BULKEDIT_H

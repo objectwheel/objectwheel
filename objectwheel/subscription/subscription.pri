@@ -1,10 +1,10 @@
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
-HEADERS += $$PWD/creditcardwidget.h \
+HEADERS += $$PWD/paymentdetailswidget.h \
            $$PWD/ordersummarywidget.h \
            $$PWD/subscriptionwidget.h
 
-SOURCES += $$PWD/creditcardwidget.cpp \
+SOURCES += $$PWD/paymentdetailswidget.cpp \
            $$PWD/ordersummarywidget.cpp \
            $$PWD/subscriptionwidget.cpp

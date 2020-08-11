@@ -1,36 +1,37 @@
 #include <bulkedit.h>
 #include <lineedit.h>
 #include <QPainter>
-#include <QLineEdit>
-#include <QVBoxLayout>
-
-#define ADJUST(x) ((x).adjusted(0.5, 0.5, -0.5, -0.5))
+#include <QBoxLayout>
 
 BulkEdit::BulkEdit(QWidget* parent) : QWidget(parent)
+  , m_layout(new QVBoxLayout(this))
 {
     setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
-    /* Set color settings */
-    _settings.borderColor = "#18000000";
-    _settings.backgroundColor = "#12000000";
-    _settings.labelColor = "#40000000";
 
-    /* Set size settings */
-    _settings.cellHeight = 35;
-    _settings.borderRadius = 8;
-    _settings.leftMargin = 10;
-    _settings.rightMargin = 10;
+    m_settings.borderColor = "#18000000";
+    m_settings.backgroundColor = "#15000000";
+    m_settings.labelColor = "#60000000";
+    m_settings.cellHeight = 35;
+    m_settings.borderRadius = 8;
+    m_settings.leftMargin = 10;
+    m_settings.rightMargin = 10;
 
-    _layout = new QVBoxLayout(this);
-    _layout->setSpacing(0);
-    _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
+    m_layout->setSpacing(0);
+    m_layout->setContentsMargins(m_settings.leftMargin, 0, m_settings.rightMargin, 0);
 }
 
 void BulkEdit::add(int id, const QString& label, QWidget* widget)
 {
+    QColor c(m_settings.labelColor);
+    c.setAlpha(c.alpha() * 0.6);
+    QPalette p(widget->palette());
+    p.setColor(QPalette::PlaceholderText, c);
+
     LineElement element;
     element.id = id;
     element.text = label;
     element.edit = widget;
+    element.edit->setPalette(p);
     element.edit->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     element.edit->setStyleSheet(QStringLiteral("QLineEdit {"
                                                "  border: none;"
@@ -38,21 +39,27 @@ void BulkEdit::add(int id, const QString& label, QWidget* widget)
                                                "  margin-left: %1;"
                                                "}").arg(fontMetrics().horizontalAdvance(label) + 15));
 
-    _elements << element;
-
-    _layout->addWidget(element.edit);
+    m_elements.append(element);
+    m_layout->addWidget(element.edit);
     updateGeometry();
     update();
 }
 
 BulkEdit::Settings& BulkEdit::settings()
 {
-    return _settings;
+    return m_settings;
 }
 
 void BulkEdit::triggerSettings()
 {
-    _layout->setContentsMargins(_settings.leftMargin, 0, _settings.rightMargin, 0);
+    for (const LineElement& element : qAsConst(m_elements)) {
+        QColor c(m_settings.labelColor);
+        c.setAlpha(c.alpha() * 0.6);
+        QPalette p(element.edit->palette());
+        p.setColor(QPalette::PlaceholderText, c);
+        element.edit->setPalette(p);
+    }
+    m_layout->setContentsMargins(m_settings.leftMargin, 0, m_settings.rightMargin, 0);
     adjustSize(); // In case we are not in a layout
     updateGeometry();
     update();
@@ -60,12 +67,12 @@ void BulkEdit::triggerSettings()
 
 QSize BulkEdit::sizeHint() const
 {
-    return QSize(300, qMax(qreal(minimumSizeHint().height()), _elements.size() * _settings.cellHeight));
+    return QSize(300, qMax(qreal(minimumSizeHint().height()), m_elements.size() * m_settings.cellHeight));
 }
 
 QSize BulkEdit::minimumSizeHint() const
 {
-    return QSize(300, qMax(_elements.size() * _settings.cellHeight, _settings.cellHeight));
+    return QSize(300, qMax(m_elements.size() * m_settings.cellHeight, m_settings.cellHeight));
 }
 
 void BulkEdit::paintEvent(QPaintEvent*)
@@ -73,38 +80,34 @@ void BulkEdit::paintEvent(QPaintEvent*)
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing);
 
-    const auto& r = ADJUST(QRectF(rect()));
-    auto bc = _settings.backgroundColor;
-    auto bbc = _settings.borderColor;
-    auto lc = _settings.labelColor;
+    const QRectF& r = QRectF(rect()).adjusted(0.5, 0.5, -0.5, -0.5);
 
-    /* Draw background */
-    painter.setPen(bbc);
-    painter.setBrush(bc);
-    painter.drawRoundedRect(r, _settings.borderRadius, _settings.borderRadius);
+    // Draw background
+    painter.setPen(m_settings.borderColor);
+    painter.setBrush(m_settings.backgroundColor);
+    painter.drawRoundedRect(r, m_settings.borderRadius, m_settings.borderRadius);
 
-    /* Draw seperator lines */
-    for (int i = 0; i < _elements.size() - 1; i++) {
+    // Draw seperator lines
+    for (int i = 0; i < m_elements.size() - 1; i++) {
         painter.drawLine(
             r.left(),
-            r.top() + _settings.cellHeight * (i + 1),
+            r.top() + m_settings.cellHeight * (i + 1),
             r.right(),
-            r.top() + _settings.cellHeight * (i + 1)
+            r.top() + m_settings.cellHeight * (i + 1)
         );
     }
 
-    /* Draw labels */
-    painter.setPen(lc);
-    for (int i = 0; i < _elements.size(); i++) {
-        const auto& element = _elements.at(i);
+    // Draw labels
+    painter.setPen(m_settings.labelColor);
+    for (int i = 0; i < m_elements.size(); i++) {
         painter.drawText(
             QRectF(
                 r.left() + 10,
-                r.top() + _settings.cellHeight * i,
+                r.top() + m_settings.cellHeight * i,
                 r.width() - 20,
-                _settings.cellHeight
+                m_settings.cellHeight
             ),
-            element.text,
+            m_elements.at(i).text,
             QTextOption(Qt::AlignVCenter | Qt::AlignLeft)
         );
     }

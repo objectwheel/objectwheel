@@ -49,7 +49,7 @@ ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(pare
 
     m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
-                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));
+                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("\\d{1,6}")), this));
     m_bulkEdit->get<QLineEdit*>(Password)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Password)->setEchoMode(QLineEdit::Password);
     m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);

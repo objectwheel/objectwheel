@@ -65,9 +65,9 @@ public:
     static void abortCloudBuild(const QString& buildUid);
     static void requestSubscriptionPlans(const QString& email, const QString& password);
     static void subscribe(const QString& email, const QString& password, qint64 plan,
-                          const QString& creditCardNumber = QString(),
-                          const QString& creditCardCcv = QString(),
-                          const QDate& creditCardDate = QDate());
+                          const QString& cardNumber = QString(),
+                          const QString& cardCvv = QString(),
+                          const QDate& cardExpDate = QDate());
 
 private slots:
     void onServerResponse(const QByteArray& data);

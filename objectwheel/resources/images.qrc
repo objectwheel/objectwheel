@@ -162,5 +162,6 @@
         <file>images/settings/updates-disabled.svg</file>
         <file>images/settings/downloading.svg</file>
         <file>images/subscription/subscription.svg</file>
+        <file>images/subscription/payment-details.svg</file>
     </qresource>
 </RCC>

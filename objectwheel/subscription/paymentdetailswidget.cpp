@@ -1,4 +1,4 @@
-#include <creditcardwidget.h>
+#include <paymentdetailswidget.h>
 #include <bulkedit.h>
 #include <paintutils.h>
 #include <buttonslice.h>
@@ -6,17 +6,18 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QBoxLayout>
+#include <QRegularExpressionValidator>
 
-enum Fields { CardNumber, CardCcv, CardDate};
+enum Fields { CardNumber, CardCvv, CardExpDate};
 enum Buttons { Next, Back };
 
-CreditCardWidget::CreditCardWidget(QWidget* parent) : QWidget(parent)
+PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
   , m_selectedPlanLabel(new QLabel(this))
   , m_bulkEdit(new BulkEdit(this))
 {
     auto iconLabel = new QLabel(this);
     iconLabel->setFixedSize(QSize(60, 60));
-    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/verification.svg"), QSize(60, 60), this));
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/subscription/payment-details.svg"), QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);
@@ -30,24 +31,29 @@ CreditCardWidget::CreditCardWidget(QWidget* parent) : QWidget(parent)
     m_selectedPlanLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
     m_bulkEdit->add(CardNumber, tr("Card Number"));
-    m_bulkEdit->add(CardDate, tr("Card Date"));
-    m_bulkEdit->add(CardCcv, tr("Security Code"));
+    m_bulkEdit->add(CardExpDate, tr("Card Expiration Date"));
+    m_bulkEdit->add(CardCvv, tr("Card Security Code"));
     m_bulkEdit->setFixedWidth(300);
 
     m_bulkEdit->get<QLineEdit*>(CardNumber)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    m_bulkEdit->get<QLineEdit*>(CardDate)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-    m_bulkEdit->get<QLineEdit*>(CardCcv)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(CardExpDate)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(CardCvv)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    m_bulkEdit->get<QLineEdit*>(CardNumber)->setInputMask(QStringLiteral("9999 9999 9999 9999;_"));
-    m_bulkEdit->get<QLineEdit*>(CardDate)->setInputMask(QStringLiteral("99/99;_"));
-    m_bulkEdit->get<QLineEdit*>(CardCcv)->setInputMask(QStringLiteral("999;_"));
+    m_bulkEdit->get<QLineEdit*>(CardNumber)->setPlaceholderText(tr("dddd dddd dddd dddd"));
+    m_bulkEdit->get<QLineEdit*>(CardExpDate)->setPlaceholderText(tr("mm/yy"));
+    m_bulkEdit->get<QLineEdit*>(CardCvv)->setPlaceholderText(tr("ddd"));
 
     m_bulkEdit->get<QLineEdit*>(CardNumber)->setInputMethodHints(
                 m_bulkEdit->get<QLineEdit*>(CardNumber)->inputMethodHints() | Qt::ImhSensitiveData);
-    m_bulkEdit->get<QLineEdit*>(CardDate)->setInputMethodHints(
-                m_bulkEdit->get<QLineEdit*>(CardDate)->inputMethodHints() | Qt::ImhSensitiveData);
-    m_bulkEdit->get<QLineEdit*>(CardCcv)->setInputMethodHints(
-                m_bulkEdit->get<QLineEdit*>(CardCcv)->inputMethodHints() | Qt::ImhSensitiveData);
+    m_bulkEdit->get<QLineEdit*>(CardExpDate)->setInputMethodHints(
+                m_bulkEdit->get<QLineEdit*>(CardExpDate)->inputMethodHints() | Qt::ImhSensitiveData);
+    m_bulkEdit->get<QLineEdit*>(CardCvv)->setInputMethodHints(
+                m_bulkEdit->get<QLineEdit*>(CardCvv)->inputMethodHints() | Qt::ImhSensitiveData);
+
+    m_bulkEdit->get<QLineEdit*>(CardNumber)->setValidator(
+                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("[\\d ]{1,24}")), this));
+    m_bulkEdit->get<QLineEdit*>(CardCvv)->setValidator(
+                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("\\d{1,6}")), this));
 
     auto buttons = new ButtonSlice(this);
     buttons->add(Back, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
@@ -74,8 +80,52 @@ CreditCardWidget::CreditCardWidget(QWidget* parent) : QWidget(parent)
     layout->addSpacing(16);
     layout->addStretch();
 
+    connect(m_bulkEdit->get<QLineEdit*>(CardNumber), &QLineEdit::editingFinished, this, [this] {
+        QString text = m_bulkEdit->get<QLineEdit*>(CardNumber)->text();
+        text.remove(QRegularExpression(QStringLiteral("[^\\d]")));
+        if (text.size() > 20)
+            text.chop(text.size() - 20);
+        QStringList parts;
+        while(!text.isEmpty()) {
+            parts.append(text.left(4));
+            text.remove(0, 4);
+        }
+        if (!parts.isEmpty())
+            text = parts.join(QLatin1Char(' '));
+        m_bulkEdit->get<QLineEdit*>(CardNumber)->setText(text);
+    });
+    connect(m_bulkEdit->get<QLineEdit*>(CardNumber), &QLineEdit::textEdited, this, [this] {
+        if (m_bulkEdit->get<QLineEdit*>(CardNumber)->cursorPosition() !=
+                m_bulkEdit->get<QLineEdit*>(CardNumber)->text().size())
+            return;
+        QString text = m_bulkEdit->get<QLineEdit*>(CardNumber)->text();
+        text.remove(QRegularExpression(QStringLiteral("[^\\d]")));
+        if (text.size() > 20)
+            text.chop(text.size() - 20);
+        QStringList parts;
+        while(!text.isEmpty()) {
+            parts.append(text.left(4));
+            text.remove(0, 4);
+        }
+        if (!parts.isEmpty())
+            text = parts.join(QLatin1Char(' '));
+        m_bulkEdit->get<QLineEdit*>(CardNumber)->setText(text);
+    });
+    connect(m_bulkEdit->get<QLineEdit*>(CardExpDate), &QLineEdit::textChanged, this, [this] (QString text) {
+        text = text.simplified();
+        text.remove(QLatin1Char('/'));
+        if (m_bulkEdit->get<QLineEdit*>(CardExpDate)->inputMask().isEmpty()) {
+            if (!text.isEmpty()) {
+                m_bulkEdit->get<QLineEdit*>(CardExpDate)->setInputMask(QStringLiteral("99/99;_"));
+                m_bulkEdit->get<QLineEdit*>(CardExpDate)->cursorForward(false);
+            }
+        } else {
+            if (text.isEmpty())
+                m_bulkEdit->get<QLineEdit*>(CardExpDate)->setInputMask(QString());
+        }
+    });
     connect(buttons->get(Back), &QPushButton::clicked,
-            this, &CreditCardWidget::back);
+            this, &PaymentDetailsWidget::back);
     //    connect(m_buttons->get(CompleteSignup), &QPushButton::clicked,
     //            this, &SignupVerificationWidget::onCompleteSignupClicked);
     //    connect(m_buttons->get(ResendSignupCode), &QPushButton::clicked,
@@ -94,7 +144,7 @@ CreditCardWidget::CreditCardWidget(QWidget* parent) : QWidget(parent)
     //            this, &SignupVerificationWidget::onServerDisconnected);
 }
 
-void CreditCardWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan)
+void PaymentDetailsWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan)
 {
     int col = planInfo.columnForIdentifier(selectedPlan);
     qreal price = planInfo.price(col);
@@ -106,7 +156,7 @@ void CreditCardWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan)
     m_selectedPlan = selectedPlan;
     m_selectedPlanLabel->setText(tr("<span style=\"font-weight: 500\">Plan: </span>%1<br>"
                                     "<span style=\"font-weight: 500\">Price: </span>%2<br><br>"
-                                    "Please enter your payment card<br>"
+                                    "Please enter your payment<br>"
                                     "details below to continue purchasing")
                                  .arg(planInfo.at(0, col)).arg(priceText));
 }

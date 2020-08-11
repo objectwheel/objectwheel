@@ -58,11 +58,11 @@ void ApiManager::completePasswordReset(const QString& email, const QString& pass
 }
 
 void ApiManager::subscribe(const QString& email, const QString& password, qint64 plan,
-                           const QString& creditCardNumber, const QString& creditCardCcv,
-                           const QDate& creditCardDate)
+                           const QString& cardNumber, const QString& cardCvv,
+                           const QDate& cardExpDate)
 {
-    ServerManager::send(Subscribe, email, password, plan, creditCardNumber,
-                        creditCardCcv, QCborValue(QDateTime(creditCardDate)));
+    ServerManager::send(Subscribe, email, password, plan, cardNumber,
+                        cardCvv, QCborValue(QDateTime(cardExpDate)));
 }
 
 void ApiManager::requestCloudBuild(const QString& email, const QString& password, const QString& payloadUid)

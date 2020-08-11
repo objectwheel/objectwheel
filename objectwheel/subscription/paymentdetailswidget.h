@@ -1,5 +1,5 @@
-#ifndef CREDITCARDWIDGET_H
-#define CREDITCARDWIDGET_H
+#ifndef PAYMENTDETAILSWIDGET_H
+#define PAYMENTDETAILSWIDGET_H
 
 #include <QWidget>
 #include <planinfo.h>
@@ -7,13 +7,13 @@
 class QLabel;
 class BulkEdit;
 
-class CreditCardWidget final : public QWidget
+class PaymentDetailsWidget final : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(CreditCardWidget)
+    Q_DISABLE_COPY(PaymentDetailsWidget)
 
 public:
-    explicit CreditCardWidget(QWidget* parent = nullptr);
+    explicit PaymentDetailsWidget(QWidget* parent = nullptr);
 
 public slots:
     void refresh(const PlanInfo& planInfo, qint64 selectedPlan);
@@ -29,4 +29,4 @@ private:
     BulkEdit* m_bulkEdit;
 };
 
-#endif // CREDITCARDWIDGET_H
+#endif // PAYMENTDETAILSWIDGET_H

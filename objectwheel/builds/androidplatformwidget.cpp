@@ -798,11 +798,11 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_minApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
     m_targetApiLevelCombo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
 
-    m_nameEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[^@<&\\?\\\"]{1,50}$"), this));
-    m_versionNameEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[^@<&\\?\\\"]{1,255}$"), this));
-    m_organizationEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^.{1,255}$"), this));
-    m_domainEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9_\\.-]{1,255}$"), this));
-    m_packageEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("^[a-zA-Z0-9_\\.]{1,255}$"), this));
+    m_nameEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("[^@<&\\?\\\"]{1,50}"), this));
+    m_versionNameEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("[^@<&\\?\\\"]{1,255}"), this));
+    m_organizationEdit->setValidator(new QRegularExpressionValidator(QRegularExpression(".{1,255}"), this));
+    m_domainEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9_\\.-]{1,255}"), this));
+    m_packageEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("[a-zA-Z0-9_\\.]{1,255}"), this));
 
     m_versionCodeSpin->setRange(1, 2100000000); // Based on Andoid Developer Docs
     UtilityFunctions::disableWheelEvent(m_versionCodeSpin);

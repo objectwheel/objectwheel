@@ -46,7 +46,7 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
     m_bulkEdit->add(Code, tr("Verification Code"));
     m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
-                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));
+                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("\\d{1,6}")), this));
 
     m_buttons->add(Cancel, QLatin1String("#CC5D67"), QLatin1String("#B2525A"));
     m_buttons->add(ResendSignupCode, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
