@@ -22,7 +22,7 @@ private slots:
 
 signals:
     void cancel();
-    void done(const PlanInfo& planInfo, qint64 selectedPlan);
+    void next(const PlanInfo& planInfo, qint64 selectedPlan);
 
 private:
     PlanWidget* m_planWidget;

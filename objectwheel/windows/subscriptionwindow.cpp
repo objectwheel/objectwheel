@@ -36,6 +36,12 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
 
     connect(m_subscriptionWidget, &SubscriptionWidget::cancel,
             this, &SubscriptionWindow::done);
+    connect(m_subscriptionWidget, &SubscriptionWidget::next,
+            m_creditCardWidget, &CreditCardWidget::refresh);
+    connect(m_subscriptionWidget, &SubscriptionWidget::next,
+            this, [this] { m_stackedLayout->setCurrentWidget(m_creditCardWidget); });
+    connect(m_creditCardWidget, &CreditCardWidget::back,
+            this, [this] { m_stackedLayout->setCurrentWidget(m_subscriptionWidget); });
 //    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
 //    {
 //        UserManager::updatePlan(plan);

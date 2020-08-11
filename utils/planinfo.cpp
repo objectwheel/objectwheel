@@ -141,6 +141,15 @@ int PlanInfo::columnCount() const
     return m_columnCount;
 }
 
+int PlanInfo::columnForIdentifier(qint64 identifier) const
+{
+    for (int i = 0; i < m_identifiers.size(); ++i) {
+        if (m_identifiers.at(i) == identifier)
+            return i;
+    }
+    return -1;
+}
+
 qint64 PlanInfo::defaultPlan() const
 {
     return m_defaultPlan;

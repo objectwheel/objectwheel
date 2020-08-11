@@ -1,90 +1,104 @@
 #include <creditcardwidget.h>
+#include <bulkedit.h>
+#include <paintutils.h>
+#include <buttonslice.h>
+
+#include <QLabel>
+#include <QPushButton>
+#include <QBoxLayout>
+
+enum Fields { CardNumber, CardCcv, CardDate};
+enum Buttons { Next, Back };
 
 CreditCardWidget::CreditCardWidget(QWidget* parent) : QWidget(parent)
+  , m_selectedPlanLabel(new QLabel(this))
+  , m_bulkEdit(new BulkEdit(this))
 {
-//    auto iconLabel = new QLabel(this);
-//    iconLabel->setFixedSize(QSize(60, 60));
-//    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/verification.svg"), QSize(60, 60), this));
+    auto iconLabel = new QLabel(this);
+    iconLabel->setFixedSize(QSize(60, 60));
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/verification.svg"), QSize(60, 60), this));
 
-//    QFont f;
-//    f.setWeight(QFont::Light);
-//    f.setPixelSize(16);
+    QFont f;
+    f.setWeight(QFont::Light);
+    f.setPixelSize(16);
 
-//    auto verificationLabel = new QLabel(this);
-//    verificationLabel->setFont(f);
-//    verificationLabel->setText(tr("Email Verification"));
+    auto titleLabel = new QLabel(this);
+    titleLabel->setFont(f);
+    titleLabel->setText(tr("Payment Details"));
 
-//    auto countdownLabel = new QLabel(this);
-//    countdownLabel->setAlignment(Qt::AlignHCenter);
-//    countdownLabel->setText(tr("You have left"));
-//    countdownLabel->setStyleSheet(QStringLiteral("color: #77000000"));
+    m_selectedPlanLabel->setAlignment(Qt::AlignHCenter);
+    m_selectedPlanLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
-//    m_emailLabel->setAlignment(Qt::AlignHCenter);
-//    m_emailLabel->setStyleSheet(QStringLiteral("color: #77000000"));
+    m_bulkEdit->add(CardNumber, tr("Card Number"));
+    m_bulkEdit->add(CardDate, tr("Card Date"));
+    m_bulkEdit->add(CardCcv, tr("Security Code"));
+    m_bulkEdit->setFixedWidth(300);
 
-//    m_bulkEdit->add(Code, tr("Enter Verification Code"));
-//    m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
-//    m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
-//                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));
+    m_bulkEdit->get<QLineEdit*>(CardNumber)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(CardDate)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    m_bulkEdit->get<QLineEdit*>(CardCcv)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-//    m_buttons->add(Cancel, QLatin1String("#CC5D67"), QLatin1String("#B2525A"));
-//    m_buttons->add(ResendSignupCode, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
-//    m_buttons->add(CompleteSignup, QLatin1String("#86CC63"), QLatin1String("#75B257"));
-//    m_buttons->get(Cancel)->setText(tr("Cancel"));
-//    m_buttons->get(ResendSignupCode)->setText(tr("Resend"));
-//    m_buttons->get(CompleteSignup)->setText(tr("Verify"));
-//    m_buttons->get(Cancel)->setIcon(QIcon(QStringLiteral(":/images/welcome/cancel.png")));
-//    m_buttons->get(ResendSignupCode)->setIcon(QIcon(QStringLiteral(":/images/welcome/reset.png")));
-//    m_buttons->get(CompleteSignup)->setIcon(QIcon(QStringLiteral(":/images/welcome/ok.png")));
-//    m_buttons->get(Cancel)->setCursor(Qt::PointingHandCursor);
-//    m_buttons->get(ResendSignupCode)->setCursor(Qt::PointingHandCursor);
-//    m_buttons->get(CompleteSignup)->setCursor(Qt::PointingHandCursor);
-//    m_buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 3.0;
-//    m_buttons->triggerSettings();
+    //    m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
+    //                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));
 
-//    m_busyIndicator->setRoundness(50);
-//    m_busyIndicator->setMinimumTrailOpacity(5);
-//    m_busyIndicator->setTrailFadePercentage(100);
-//    m_busyIndicator->setRevolutionsPerSecond(2);
-//    m_busyIndicator->setNumberOfLines(12);
-//    m_busyIndicator->setLineLength(5);
-//    m_busyIndicator->setInnerRadius(4);
-//    m_busyIndicator->setLineWidth(2);
+    auto buttons = new ButtonSlice(this);
+    buttons->add(Back, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
+    buttons->add(Next, QLatin1String("#86CC63"), QLatin1String("#75B257"));
+    buttons->get(Back)->setText(tr("Back"));
+    buttons->get(Next)->setText(tr("Next"));
+    buttons->get(Back)->setIcon(QIcon(QStringLiteral(":/images/welcome/unload.png")));
+    buttons->get(Next)->setIcon(QIcon(QStringLiteral(":/images/welcome/load.png")));
+    buttons->get(Back)->setCursor(Qt::PointingHandCursor);
+    buttons->get(Next)->setCursor(Qt::PointingHandCursor);
+    buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 2.0;
+    buttons->triggerSettings();
 
-//    auto layout = new QVBoxLayout(this);
-//    layout->setSpacing(6);
-//    layout->setContentsMargins(0, 0, 0, 0);
-//    layout->addStretch();
-//    layout->addStretch();
-//    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
-//    layout->addWidget(verificationLabel, 0, Qt::AlignHCenter);
-//    layout->addSpacing(25);
-//    layout->addWidget(countdownLabel, 0, Qt::AlignHCenter);
-//    layout->addWidget(m_countdown, 0, Qt::AlignHCenter);
-//    layout->addSpacing(25);
-//    layout->addWidget(m_emailLabel, 0, Qt::AlignHCenter);
-//    layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
-//    layout->addWidget(m_buttons, 0, Qt::AlignHCenter);
-//    layout->addStretch();
-//    layout->addWidget(m_busyIndicator, 0, Qt::AlignHCenter);
-//    layout->addStretch();
+    auto layout = new QVBoxLayout(this);
+    layout->setSpacing(6);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->addStretch();
+    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(titleLabel, 0, Qt::AlignHCenter);
+    layout->addSpacing(16);
+    layout->addWidget(m_selectedPlanLabel, 0, Qt::AlignHCenter);
+    layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
+    layout->addWidget(buttons, 0, Qt::AlignHCenter);
+    layout->addSpacing(16);
+    layout->addStretch();
 
-//    connect(m_buttons->get(Cancel), &QPushButton::clicked,
-//            this, &SignupVerificationWidget::onCancelClicked);
-//    connect(m_buttons->get(CompleteSignup), &QPushButton::clicked,
-//            this, &SignupVerificationWidget::onCompleteSignupClicked);
-//    connect(m_buttons->get(ResendSignupCode), &QPushButton::clicked,
-//            this, &SignupVerificationWidget::onResendSignupCodeClicked);
-//    connect(ApiManager::instance(), &ApiManager::completeSignupSuccessful,
-//            this, &SignupVerificationWidget::onCompleteSignupSuccessful);
-//    connect(ApiManager::instance(), &ApiManager::completeSignupFailure,
-//            this, &SignupVerificationWidget::onCompleteSignupFailure);
-//    connect(ApiManager::instance(), &ApiManager::resendSignupCodeSuccessful,
-//            this, &SignupVerificationWidget::onResendSignupCodeSuccessful);
-//    connect(ApiManager::instance(), &ApiManager::resendSignupCodeFailure,
-//            this, &SignupVerificationWidget::onResendSignupCodeFailure);
-//    connect(m_countdown, &Countdown::finished,
-//            this, &SignupVerificationWidget::onCountdownFinished);
-//    connect(ServerManager::instance(), &ServerManager::disconnected,
-//            this, &SignupVerificationWidget::onServerDisconnected);
+    connect(buttons->get(Back), &QPushButton::clicked,
+            this, &CreditCardWidget::back);
+    //    connect(m_buttons->get(CompleteSignup), &QPushButton::clicked,
+    //            this, &SignupVerificationWidget::onCompleteSignupClicked);
+    //    connect(m_buttons->get(ResendSignupCode), &QPushButton::clicked,
+    //            this, &SignupVerificationWidget::onResendSignupCodeClicked);
+    //    connect(ApiManager::instance(), &ApiManager::completeSignupSuccessful,
+    //            this, &SignupVerificationWidget::onCompleteSignupSuccessful);
+    //    connect(ApiManager::instance(), &ApiManager::completeSignupFailure,
+    //            this, &SignupVerificationWidget::onCompleteSignupFailure);
+    //    connect(ApiManager::instance(), &ApiManager::resendSignupCodeSuccessful,
+    //            this, &SignupVerificationWidget::onResendSignupCodeSuccessful);
+    //    connect(ApiManager::instance(), &ApiManager::resendSignupCodeFailure,
+    //            this, &SignupVerificationWidget::onResendSignupCodeFailure);
+    //    connect(m_countdown, &Countdown::finished,
+    //            this, &SignupVerificationWidget::onCountdownFinished);
+    //    connect(ServerManager::instance(), &ServerManager::disconnected,
+    //            this, &SignupVerificationWidget::onServerDisconnected);
+}
+
+void CreditCardWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan)
+{
+    int col = planInfo.columnForIdentifier(selectedPlan);
+    qreal price = planInfo.price(col);
+    qreal annualPrice = planInfo.annualPrice(col);
+    QString priceText = tr("$%1/month").arg(price);
+    if (annualPrice >= 0)
+        priceText += tr(" ($%2 if paid annually)").arg(annualPrice);
+    m_planInfo = planInfo;
+    m_selectedPlan = selectedPlan;
+    m_selectedPlanLabel->setText(tr("<span style=\"font-weight: 500\">Plan: </span>%1<br>"
+                                    "<span style=\"font-weight: 500\">Price: </span>%2<br><br>"
+                                    "Please enter your payment card<br>"
+                                    "details below to continue purchasing")
+                                 .arg(planInfo.at(0, col)).arg(priceText));
 }

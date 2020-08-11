@@ -43,7 +43,7 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
     m_emailLabel->setAlignment(Qt::AlignHCenter);
     m_emailLabel->setStyleSheet(QStringLiteral("color: #77000000"));
 
-    m_bulkEdit->add(Code, tr("Enter Verification Code"));
+    m_bulkEdit->add(Code, tr("Verification Code"));
     m_bulkEdit->get<QLineEdit*>(Code)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
                 new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));

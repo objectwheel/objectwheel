@@ -85,7 +85,7 @@ void PlanWidget::setPlanInfo(const PlanInfo& planInfo)
             auto radio = new QRadioButton(this);
             radio->setCursor(Qt::PointingHandCursor);
             radio->setAutoExclusive(true);
-            radio->setText(tr("Choose"));
+            radio->setText(planInfo.at(0, i + 1));
             radio->setProperty(g_planIdentifierProperty, planIdentifier);
             if (m_planInfo.defaultPlan() == planIdentifier)
                 radio->setChecked(true);

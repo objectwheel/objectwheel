@@ -14,7 +14,7 @@
 #include <QBoxLayout>
 #include <QFile>
 
-enum { Next };
+enum Buttons { Next };
 
 SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
   , m_planWidget(new PlanWidget(this))
@@ -71,7 +71,7 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
     auto buttons = new ButtonSlice(this);
     buttons->add(Next, QLatin1String("#86CC63"), QLatin1String("#75B257"));
     buttons->get(Next)->setText(tr("Next"));
-    buttons->get(Next)->setIcon(QIcon(QStringLiteral(":/images/welcome/ok.png")));
+    buttons->get(Next)->setIcon(QIcon(QStringLiteral(":/images/welcome/load.png")));
     buttons->get(Next)->setCursor(Qt::PointingHandCursor);
     buttons->settings().cellWidth = 150;
     buttons->triggerSettings();
@@ -125,7 +125,10 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
                        "though we are a very small team of people, we will try to stay in touch "
                        "with our users as much as possible.</p>"
                        "<p>Thank you for your support.</p>"
-                       ).arg(AppConstants::NAME).arg(AppConstants::FORUM_URL),
+                       "<p><b>%3</b></p>")
+                    .arg(AppConstants::NAME)
+                    .arg(AppConstants::FORUM_URL)
+                    .arg(AppConstants::COMPANY_FULL),
                     QMessageBox::Information);
     });
 
@@ -168,7 +171,7 @@ void SubscriptionWidget::refresh()
 
 void SubscriptionWidget::onNextButtonClicked()
 {
-    emit done(m_planWidget->planInfo(), m_planWidget->selectedPlan());
+    emit next(m_planWidget->planInfo(), m_planWidget->selectedPlan());
 }
 
 void SubscriptionWidget::onResponseSubscriptionPlans(const QByteArray& planData)

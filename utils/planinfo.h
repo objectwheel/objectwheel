@@ -19,6 +19,7 @@ public:
 public:
     int rowCount() const;
     int columnCount() const;
+    int columnForIdentifier(qint64 identifier) const;
     qint64 defaultPlan() const;
     QString at(int row, int column) const;
     QString badge(int column) const;
