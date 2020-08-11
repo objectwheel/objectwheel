@@ -34,10 +34,12 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     m_stackedLayout->addWidget(m_orderSummaryWidget);
     m_stackedLayout->addWidget(m_succeedWidget);
 
+    connect(m_subscriptionWidget, &SubscriptionWidget::cancel,
+            this, &SubscriptionWindow::done);
 //    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
 //    {
 //        UserManager::updatePlan(plan);
-//        m_stackedLayout->setCurrentWidget(m_succeedWidget);
+//        m_stackedLayout->setCurrentWidget(m_creditCardWidget);
 //        m_succeedWidget->play(tr("Thank you for purchasing"),
 //                              tr("Your purchase is completed. Thank you for choosing us.\n"
 //                                 "You can cancel your subscription anytime from the application preferences section."));

@@ -92,7 +92,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     {
         m_projectsWidget->refreshProjectList();
         m_stackedLayout->setCurrentWidget(m_projectsWidget);
-        if (UserManager::plan() == PlanManager::None)
+        if (UserManager::plan() <= 0)
             emit subscriptionNeeded();
     });
     /**** ProjectsWidget settings ****/

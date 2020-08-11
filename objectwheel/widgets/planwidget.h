@@ -2,7 +2,7 @@
 #define PLANWIDGET_H
 
 #include <QWidget>
-#include <planparser.h>
+#include <planinfo.h>
 
 class PlanWidget final : public QWidget
 {
@@ -11,8 +11,6 @@ class PlanWidget final : public QWidget
 
 public:
     explicit PlanWidget(QWidget* parent = nullptr);
-
-    PlanParser planParser() const;
 
     int radius() const;
     void setRadius(int radius);
@@ -23,14 +21,12 @@ public:
     int padding() const;
     void setPadding(int padding);
 
-    QString selectedPlan() const;
-    void setSelectedPlan(const QString& defaultPlan);
+    PlanInfo planInfo() const;
+    void setPlanInfo(const PlanInfo& planInfo);
 
+    qint64 selectedPlan() const;
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
-
-public slots:
-    void setPlanData(const QByteArray& data);
 
 private:
     int rowHeight() const;
@@ -44,7 +40,7 @@ private:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    PlanParser m_planParser;
+    PlanInfo m_planInfo;
     int m_radius;
     int m_spacing;
     int m_padding;

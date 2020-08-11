@@ -1,5 +1,4 @@
 #include <apimanager.h>
-#include <planmanager.h>
 #include <servermanager.h>
 
 ApiManager* ApiManager::s_instance = nullptr;
@@ -58,7 +57,7 @@ void ApiManager::completePasswordReset(const QString& email, const QString& pass
     ServerManager::send(CompletePasswordReset, email, password, code);
 }
 
-void ApiManager::subscribe(const QString& email, const QString& password, PlanManager::Plans plan,
+void ApiManager::subscribe(const QString& email, const QString& password, qint64 plan,
                            const QString& creditCardNumber, const QString& creditCardCcv,
                            const QDate& creditCardDate)
 {
@@ -88,9 +87,9 @@ void ApiManager::onServerResponse(const QByteArray& data)
 
     switch (command) {
     case LoginSuccessful: {
-        PlanManager::Plans plan;
+        qint64 plan;
         UtilityFunctions::pullCbor(data, command, plan);
-        emit loginSuccessful({plan});
+        emit loginSuccessful(plan);
     } break;
 
     case LoginFailure:

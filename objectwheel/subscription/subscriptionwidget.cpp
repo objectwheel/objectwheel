@@ -1,5 +1,4 @@
 #include <subscriptionwidget.h>
-#include <planwidget.h>
 #include <buttonslice.h>
 #include <busyindicatorwidget.h>
 #include <utilityfunctions.h>
@@ -20,7 +19,7 @@ enum { Next };
 SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
   , m_planWidget(new PlanWidget(this))
   , m_busyIndicator(new BusyIndicatorWidget(this, false))
-  , m_isDelayerWorking(false)
+  , m_isWaitingForConnection(false)
 {
     auto iconLabel = new QLabel(this);
     iconLabel->setFixedSize(QSize(60, 60));
@@ -66,11 +65,8 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
     noticeLayout->addStretch();
     noticeLayout->addWidget(noticeButton, Qt::AlignVCenter);
 
-    QFile c(":/other/plans.csv"); c.open(QFile::ReadOnly);
     UtilityFunctions::adjustFontPixelSize(m_planWidget, -1);
     m_planWidget->setContentsMargins(0, 18, 0, 0);
-    m_planWidget->setPlanData(c.readAll());
-    m_planWidget->setSelectedPlan(QStringLiteral("-"));
 
     auto buttons = new ButtonSlice(this);
     buttons->add(Next, QLatin1String("#86CC63"), QLatin1String("#75B257"));
@@ -143,66 +139,54 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
 
 void SubscriptionWidget::refresh()
 {
+    QFile dummy(":/other/plans.csv");
+    dummy.open(QFile::ReadOnly);
+    m_planWidget->setPlanInfo(PlanParser::parse(dummy.readAll()));
+
     if (!ServerManager::isConnected()) {
-        m_isDelayerWorking = true;
+        m_isWaitingForConnection = true;
         m_busyIndicator->start();
-        Delayer::delay(&ServerManager::isConnected, true, 12000, 500);
+        Delayer::delay(&ServerManager::isConnected, true, 9000, 500);
         m_busyIndicator->stop();
-        m_isDelayerWorking = false;
+        m_isWaitingForConnection = false;
     }
+
     if (ServerManager::isConnected()) {
         ApiManager::requestSubscriptionPlans(UserManager::email(), UserManager::password());
         m_busyIndicator->start();
     } else {
-        emit done();
+        UtilityFunctions::showMessage(
+                    this,
+                    tr("Unable to connect to the server"),
+                    tr("<p>We are unable to connect to the server in order to fetch the subscription "
+                       "details. Please checkout your internet connection and try again later. "
+                       "Though you can still use the app as a free user in the offline mode.</p>"),
+                    QMessageBox::Information);
+        emit cancel();
     }
-}
-
-PlanManager::Plans SubscriptionWidget::plan() const
-{
-    if (m_planWidget->selectedPlan() == tr("Indie"))
-        return PlanManager::Indie;
-    if (m_planWidget->selectedPlan() == tr("Pro"))
-        return PlanManager::Pro;
-    return PlanManager::Free;
 }
 
 void SubscriptionWidget::onNextButtonClicked()
 {
-    if (plan() == PlanManager::Free) {
-        if (ServerManager::isConnected()) {
-            ApiManager::subscribe(UserManager::email(), UserManager::password(), plan());
-            m_busyIndicator->start();
-        } else {
-            QMessageBox::StandardButton ret = UtilityFunctions::showMessage(
-                        this,
-                        tr("Unable to connect to the server"),
-                        tr("<p>We are unable to connect to the server. Please checkout your internet "
-                           "connection and try again later.</p>"
-                           "<p>Meanwhile you can use the app if you want as a free user. Would you "
-                           "like to continue as a free user?</p>"),
-                        QMessageBox::Question, QMessageBox::Yes | QMessageBox::No);
-//            if (ret == QMessageBox::Yes)
-//                emit done(PlanManager::Free);
-        }
-    } else {
-//        emit done(plan());
-    }
+    emit done(m_planWidget->planInfo(), m_planWidget->selectedPlan());
 }
 
 void SubscriptionWidget::onResponseSubscriptionPlans(const QByteArray& planData)
 {
     m_busyIndicator->stop();
-    m_planWidget->setPlanData(planData);
+    m_planWidget->setPlanInfo(PlanParser::parse(planData));
 }
 
 void SubscriptionWidget::onServerDisconnected()
 {
-    if (m_busyIndicator->isSpinning() && !m_isDelayerWorking) {
+    if (m_busyIndicator->isSpinning() && !m_isWaitingForConnection) {
         m_busyIndicator->stop();
         UtilityFunctions::showMessage(this,
                                       tr("Connection lost"),
-                                      tr("We are unable to connect to the server. "
-                                         "Please try again later."));
+                                      tr("<p>Connection lost while trying to fetch the subscription "
+                                         "details. Please checkout your internet connection and try "
+                                         "again later. Though you can still use the app as a free "
+                                         "user in the offline mode.</p>"));
+        emit cancel();
     }
 }

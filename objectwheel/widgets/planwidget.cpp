@@ -6,6 +6,8 @@
 #include <QRadioButton>
 #include <QEvent>
 
+static const char g_planIdentifierProperty[] = "q_PlanWidget_planIdentifierProperty";
+
 PlanWidget::PlanWidget(QWidget* parent) : QWidget(parent)
   , m_radius(4)
   , m_spacing(6)
@@ -16,11 +18,6 @@ PlanWidget::PlanWidget(QWidget* parent) : QWidget(parent)
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(m_spacing);
     layout->addWidget(new QWidget(this), 0, 0);
-}
-
-PlanParser PlanWidget::planParser() const
-{
-    return m_planParser;
 }
 
 int PlanWidget::radius() const
@@ -64,56 +61,34 @@ void PlanWidget::setPadding(int padding)
     }
 }
 
-QString PlanWidget::selectedPlan() const
+PlanInfo PlanWidget::planInfo() const
 {
-    for (QRadioButton* button : findChildren<QRadioButton*>()) {
-        if (button->isChecked())
-            return button->text();
-    }
-    return QString();
+    return m_planInfo;
 }
 
-void PlanWidget::setSelectedPlan(const QString& defaultPlan)
+void PlanWidget::setPlanInfo(const PlanInfo& planInfo)
 {
-    for (QRadioButton* button : findChildren<QRadioButton*>()) {
-        if (button->text() == defaultPlan)
-            return button->setChecked(true);
-    }
-}
-
-QSize PlanWidget::sizeHint() const
-{
-    return minimumSizeHint();
-}
-
-QSize PlanWidget::minimumSizeHint() const
-{
-    return QSize(blockWidth() + (m_planParser.columnCount() - 1) * (columnWidth() + m_spacing)
-                 + contentsMargins().left() + contentsMargins().right(),
-                 headerHeight() + (m_planParser.rowCount() - 1) * rowHeight() + 1
-                 + contentsMargins().top() + contentsMargins().bottom()
-                 + QRadioButton().sizeHint().height() + m_spacing);
-}
-
-void PlanWidget::setPlanData(const QByteArray& data)
-{
-    m_planParser.parse(data);
+    m_planInfo = planInfo;
 
     if (auto layout = static_cast<QGridLayout*>(this->layout())) {
         for (QRadioButton* button : findChildren<QRadioButton*>())
             delete button;
         layout->addWidget(layout->takeAt(layout->indexOf(layout->itemAtPosition(0, 0)))->widget(),
-                          0, 0, 1, m_planParser.columnCount());
+                          0, 0, 1, m_planInfo.columnCount());
         layout->setColumnMinimumWidth(0, blockWidth());
-        layout->setRowMinimumHeight(0, headerHeight() + rowHeight() * (m_planParser.rowCount() - 1) + 1);
+        layout->setRowMinimumHeight(0, headerHeight() + rowHeight() * (m_planInfo.rowCount() - 1) + 1);
         layout->setRowStretch(2, 1);
         layout->setColumnStretch(4, 1);
         int colWidth = columnWidth();
-        for (int i = 0; i < m_planParser.columnCount() - 1; i++) {
+        for (int i = 0; i < m_planInfo.columnCount() - 1; i++) {
+            qint64 planIdentifier = m_planInfo.identifier(i + 1);
             auto radio = new QRadioButton(this);
             radio->setCursor(Qt::PointingHandCursor);
             radio->setAutoExclusive(true);
-            radio->setText(m_planParser.at(0, i + 1));
+            radio->setText(tr("Choose"));
+            radio->setProperty(g_planIdentifierProperty, planIdentifier);
+            if (m_planInfo.defaultPlan() == planIdentifier)
+                radio->setChecked(true);
             layout->addWidget(radio, 1, i + 1, Qt::AlignHCenter);
             layout->setColumnMinimumWidth(i + 1, colWidth);
             UtilityFunctions::adjustFontPixelSize(radio, 1);
@@ -123,9 +98,31 @@ void PlanWidget::setPlanData(const QByteArray& data)
         }
     }
 
-    setSelectedPlan(m_planParser.defaultPlan());
     updateGeometry();
     update();
+}
+
+qint64 PlanWidget::selectedPlan() const
+{
+    for (QRadioButton* button : findChildren<QRadioButton*>()) {
+        if (button->isChecked())
+            return button->property(g_planIdentifierProperty).toLongLong();
+    }
+    return 0;
+}
+
+QSize PlanWidget::sizeHint() const
+{
+    return minimumSizeHint();
+}
+
+QSize PlanWidget::minimumSizeHint() const
+{
+    return QSize(blockWidth() + (m_planInfo.columnCount() - 1) * (columnWidth() + m_spacing)
+                 + contentsMargins().left() + contentsMargins().right(),
+                 headerHeight() + (m_planInfo.rowCount() - 1) * rowHeight() + 1
+                 + contentsMargins().top() + contentsMargins().bottom()
+                 + QRadioButton().sizeHint().height() + m_spacing);
 }
 
 int PlanWidget::rowHeight() const
@@ -144,8 +141,8 @@ int PlanWidget::blockWidth() const
     f.setWeight(QFont::Medium);
     const QFontMetrics fm(f);
     int max = 0;
-    for (int i = 0; i < m_planParser.rowCount() - 1; ++i) {
-        int val = fm.horizontalAdvance(m_planParser.at(i + 1, 0)) + 2;
+    for (int i = 0; i < m_planInfo.rowCount() - 1; ++i) {
+        int val = fm.horizontalAdvance(m_planInfo.at(i + 1, 0)) + 2;
         if (val > max)
             max = val;
     }
@@ -155,9 +152,9 @@ int PlanWidget::blockWidth() const
 int PlanWidget::columnWidth() const
 {
     int max = 0;
-    for (int i = 0; i < m_planParser.rowCount() - 1; ++i) {
-        for (int j = 0; j < m_planParser.columnCount() - 1; ++j) {
-            int val = fontMetrics().horizontalAdvance(m_planParser.at(i + 1, j + 1)) + 2;
+    for (int i = 0; i < m_planInfo.rowCount() - 1; ++i) {
+        for (int j = 0; j < m_planInfo.columnCount() - 1; ++j) {
+            int val = fontMetrics().horizontalAdvance(m_planInfo.at(i + 1, j + 1)) + 2;
             if (val > max)
                 max = val;
         }
@@ -179,9 +176,9 @@ void PlanWidget::changeEvent(QEvent* event)
             || event->type() == QEvent::PaletteChange) {
         if (auto layout = static_cast<QGridLayout*>(this->layout())) {
             layout->setColumnMinimumWidth(0, blockWidth());
-            layout->setRowMinimumHeight(0, headerHeight() + rowHeight() * (m_planParser.rowCount() - 1) + 1);
+            layout->setRowMinimumHeight(0, headerHeight() + rowHeight() * (m_planInfo.rowCount() - 1) + 1);
             const int colWidth = columnWidth();
-            for (int i = 0; i < m_planParser.columnCount() - 1; i++)
+            for (int i = 0; i < m_planInfo.columnCount() - 1; i++)
                 layout->setColumnMinimumWidth(i + 1, colWidth);
         }
         updateGeometry();
@@ -200,19 +197,19 @@ void PlanWidget::paintEvent(QPaintEvent*)
     const QRectF& cr = contentsRect();
 
     // Paint Block Background
-    if (m_planParser.rowCount() > 1) {
+    if (m_planInfo.rowCount() > 1) {
         painter.setPen(Qt::NoPen);
         painter.setBrush(QColor("#606060"));
         painter.drawRoundedRect(QRectF(cr.left(), cr.top() + headerHeight(), blkWidth,
-                                       rowHeight() * (m_planParser.rowCount() - 1) + 1),
+                                       rowHeight() * (m_planInfo.rowCount() - 1) + 1),
                                 m_radius, m_radius);
     }
 
     painter.setFont(UtilityFunctions::thickerFont(font()));
     painter.setRenderHint(QPainter::Antialiasing, false);
-    for (int i = 0; i < m_planParser.rowCount() - 1; i++) {
+    for (int i = 0; i < m_planInfo.rowCount() - 1; i++) {
         // Paint Block Row Lines
-        if (i != m_planParser.rowCount() - 2) {
+        if (i != m_planInfo.rowCount() - 2) {
             painter.setPen(cosmeticPen(QColor(255, 255, 255, 45)));
             painter.drawLine(QPointF(cr.left() + m_padding, cr.top() + headerHeight()
                                      + rowHeight() * (i + 1)),
@@ -223,18 +220,18 @@ void PlanWidget::paintEvent(QPaintEvent*)
         painter.setPen(palette().brightText().color());
         painter.drawText(QRectF(cr.left(), cr.top() + headerHeight()
                                 + rowHeight() * i, blkWidth - m_padding, rowHeight()),
-                         m_planParser.at(i + 1, 0), Qt::AlignVCenter | Qt::AlignRight);
+                         m_planInfo.at(i + 1, 0), Qt::AlignVCenter | Qt::AlignRight);
     }
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    for (int i = 0; i < m_planParser.columnCount() - 1; i++) {
+    for (int i = 0; i < m_planInfo.columnCount() - 1; i++) {
         // Paint Column Backgrounds
         const qreal left = cr.left() + blkWidth + m_spacing * (i + 1) + colWidth * i;
-        const QRectF boundingRect(left + 0.5, cr.top() + 0.5, colWidth - 1, rowHeight() * (m_planParser.rowCount() - 1) + headerHeight());
+        const QRectF boundingRect(left + 0.5, cr.top() + 0.5, colWidth - 1, rowHeight() * (m_planInfo.rowCount() - 1) + headerHeight());
         painter.setPen(Qt::NoPen);
-        painter.setBrush(m_planParser.headerColor(i + 1, isEnabled()).darker(120));
+        painter.setBrush(m_planInfo.headerColor(i + 1, isEnabled()).darker(120));
         painter.drawRoundedRect(boundingRect.adjusted(-0.5, -0.5, 0.5, 0.5), m_radius + 0.5, m_radius + 0.5);
-        painter.setBrush(m_planParser.columnColor(i + 1, isEnabled()));
+        painter.setBrush(m_planInfo.columnColor(i + 1, isEnabled()));
         painter.drawRoundedRect(boundingRect, m_radius, m_radius);
         // Paint Header Backgrounds
         QRectF headerRect(boundingRect);
@@ -242,20 +239,20 @@ void PlanWidget::paintEvent(QPaintEvent*)
         painter.setClipRect(headerRect);
         QLinearGradient header(0, 0, 0, 1);
         header.setCoordinateMode(QGradient::ObjectMode);
-        header.setColorAt(0, m_planParser.headerColor(i + 1, isEnabled()).lighter(108));
-        header.setColorAt(1, m_planParser.headerColor(i + 1, isEnabled()).darker(105));
+        header.setColorAt(0, m_planInfo.headerColor(i + 1, isEnabled()).lighter(108));
+        header.setColorAt(1, m_planInfo.headerColor(i + 1, isEnabled()).darker(105));
         painter.setBrush(header);
         painter.drawRoundedRect(headerRect.adjusted(0, 0, 0, m_radius + 1), m_radius, m_radius);
         painter.setClipRect(headerRect, Qt::NoClip);
 
         // Paint Header Row Lines
         painter.setRenderHint(QPainter::Antialiasing, false);
-        painter.setPen(cosmeticPen(m_planParser.headerColor(i + 1, isEnabled()).darker(120)));
+        painter.setPen(cosmeticPen(m_planInfo.headerColor(i + 1, isEnabled()).darker(120)));
         painter.drawLine(QPointF(left, cr.top() + headerHeight()),
                          QPointF(left + colWidth, cr.top() + headerHeight()));
         // Paint Column Row Lines
         painter.setPen(cosmeticPen(QColor(0, 0, 0, 45)));
-        for (int j = 0; j < m_planParser.rowCount() - 2; j++) {
+        for (int j = 0; j < m_planInfo.rowCount() - 2; j++) {
             painter.drawLine(QPointF(left + m_padding, cr.top() + headerHeight()
                                      + rowHeight() * (j + 1)),
                              QPointF(left + colWidth - m_padding, cr.top() + headerHeight()
@@ -267,17 +264,17 @@ void PlanWidget::paintEvent(QPaintEvent*)
         painter.setFont(UtilityFunctions::thickerFont(font()));
         painter.setPen(palette().brightText().color());
         painter.drawText(QRectF(left, cr.top(), colWidth, headerHeight()),
-                         m_planParser.at(0, i + 1), Qt::AlignVCenter | Qt::AlignHCenter);
+                         m_planInfo.at(0, i + 1), Qt::AlignVCenter | Qt::AlignHCenter);
 
         // Paint Column Row Texts
         painter.setFont(font());
         painter.setPen(palette().text().color());
-        for (int j = 0; j < m_planParser.rowCount() - 1; j++) {
+        for (int j = 0; j < m_planInfo.rowCount() - 1; j++) {
             painter.drawText(QRectF(left, cr.top() + headerHeight() + rowHeight() * j, colWidth, rowHeight()),
-                             m_planParser.at(j + 1, i + 1), Qt::AlignVCenter | Qt::AlignHCenter);
+                             m_planInfo.at(j + 1, i + 1), Qt::AlignVCenter | Qt::AlignHCenter);
         }
 
-        const QString& badge = m_planParser.badge(i + 1);
+        const QString& badge = m_planInfo.badge(i + 1);
         if (!badge.isEmpty()) {
             static const QVector<QPointF> points = { {-24, 0}, {24, 0}, {0, 30} };
             const qreal angle = 20;
@@ -286,7 +283,7 @@ void PlanWidget::paintEvent(QPaintEvent*)
             path.setFillRule(Qt::WindingFill);
             for (int i = 360; i >= 0; i -= angle)
                 path.addPolygon(transform.rotate(angle).map(points));
-            const QColor badgeColor(m_planParser.badgeColor(i + 1, isEnabled()));
+            const QColor badgeColor(m_planInfo.badgeColor(i + 1, isEnabled()));
             QLinearGradient background(0, 0, 0, 1);
             background.setCoordinateMode(QGradient::ObjectMode);
             background.setColorAt(0, badgeColor);

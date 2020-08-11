@@ -3,7 +3,6 @@
 
 #include <QObject>
 #include <QDateTime>
-#include <planmanager.h>
 
 class ApiManager final : public QObject
 {
@@ -65,7 +64,7 @@ public:
                                   const QString& payloadUid);
     static void abortCloudBuild(const QString& buildUid);
     static void requestSubscriptionPlans(const QString& email, const QString& password);
-    static void subscribe(const QString& email, const QString& password, PlanManager::Plans plan,
+    static void subscribe(const QString& email, const QString& password, qint64 plan,
                           const QString& creditCardNumber = QString(),
                           const QString& creditCardCcv = QString(),
                           const QDate& creditCardDate = QDate());
@@ -74,7 +73,7 @@ private slots:
     void onServerResponse(const QByteArray& data);
 
 signals:
-    void loginSuccessful(const QVariantList& userInfo);
+    void loginSuccessful(qint64 plan);
     void loginFailure();
     void signupSuccessful();
     void signupFailure();

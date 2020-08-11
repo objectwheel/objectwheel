@@ -1,7 +1,7 @@
 #ifndef USERMANAGER_H
 #define USERMANAGER_H
 
-#include <planmanager.h>
+#include <QObject>
 
 class UserManager final : public QObject
 {
@@ -16,23 +16,19 @@ public:
     static QStringList userDirs();
     static QStringList users();
     static QString dir(const QString& = email());
-
-    static PlanManager::Plans plan();
-    static void updatePlan(PlanManager::Plans plan);
-
     static QString email();
     static QString password();
+    static qint64 plan();
 
     static bool isLoggedIn();
     static bool hasLocalData(const QString& email);
-
     static void logout();
     static void login(const QString& email, const QString& password);
     static void loginOffline(const QString& email, const QString& password);
 
 private slots:
     void onLoginFailure();
-    void onLoginSuccessful(const QVariantList& userInfo);
+    void onLoginSuccessful(qint64 plan, bool online);
 
 signals:
     void loginFailed();
@@ -46,7 +42,7 @@ private:
 
 private:
     static UserManager* s_instance;
-    static PlanManager::Plans s_plan;
+    static qint64 s_plan;
     static QString s_email;
     static QString s_password;
     static QString s_emailCache;

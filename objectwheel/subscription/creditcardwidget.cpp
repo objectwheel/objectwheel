@@ -88,8 +88,3 @@ CreditCardWidget::CreditCardWidget(QWidget* parent) : QWidget(parent)
 //    connect(ServerManager::instance(), &ServerManager::disconnected,
 //            this, &SignupVerificationWidget::onServerDisconnected);
 }
-
-void CreditCardWidget::setPlan(PlanManager::Plans plan)
-{
-
-}

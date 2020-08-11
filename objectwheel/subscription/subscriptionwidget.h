@@ -1,12 +1,9 @@
 #ifndef SUBSCRIPTIONWIDGET_H
 #define SUBSCRIPTIONWIDGET_H
 
-#include <QWidget>
-#include <planmanager.h>
+#include <planwidget.h>
 
-class PlanWidget;
 class BusyIndicatorWidget;
-
 class SubscriptionWidget final : public QWidget
 {
     Q_OBJECT
@@ -18,9 +15,6 @@ public:
 public slots:
     void refresh();
 
-private:
-    PlanManager::Plans plan() const;
-
 private slots:
     void onNextButtonClicked();
     void onResponseSubscriptionPlans(const QByteArray& planData);
@@ -28,12 +22,12 @@ private slots:
 
 signals:
     void cancel();
-    void done();
+    void done(const PlanInfo& planInfo, qint64 selectedPlan);
 
 private:
     PlanWidget* m_planWidget;
     BusyIndicatorWidget* m_busyIndicator;
-    bool m_isDelayerWorking;
+    bool m_isWaitingForConnection;
 };
 
 #endif // SUBSCRIPTIONWIDGET_H

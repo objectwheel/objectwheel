@@ -28,7 +28,7 @@ HEADERS += \
     $$PWD/tooltipwidget.h \
     $$PWD/textimagehandler.h \
     $$PWD/qmlerror.h \
-    $$PWD/planparser.h
+    $$PWD/planinfo.h
 
 SOURCES += \
     $$PWD/signalwatcher.cpp \
@@ -42,7 +42,7 @@ SOURCES += \
     $$PWD/utilityfunctions.cpp \
     $$PWD/filesystemutils.cpp \
     $$PWD/textimagehandler.cpp \
-    $$PWD/planparser.cpp
+    $$PWD/planinfo.cpp
 
 RESOURCES += $$PWD/resources/resources.qrc
 

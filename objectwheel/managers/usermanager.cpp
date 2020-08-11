@@ -7,7 +7,7 @@
 #include <QDir>
 
 UserManager* UserManager::s_instance = nullptr;
-PlanManager::Plans UserManager::s_plan = PlanManager::Free;
+qint64 UserManager::s_plan = 0;
 QString UserManager::s_email;
 QString UserManager::s_password;
 QString UserManager::s_emailCache;
@@ -17,7 +17,7 @@ UserManager::UserManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
     connect(ApiManager::instance(), &ApiManager::loginSuccessful,
-            this, &UserManager::onLoginSuccessful);
+            this, [this] (qint64 plan) { onLoginSuccessful(plan, true); });
     connect(ApiManager::instance(), &ApiManager::loginFailure,
             this, &UserManager::onLoginFailure);
 }
@@ -73,19 +73,6 @@ QString UserManager::dir(const QString& email)
     return QString();
 }
 
-PlanManager::Plans UserManager::plan()
-{
-    return s_plan;
-}
-
-void UserManager::updatePlan(PlanManager::Plans plan)
-{
-    if (isLoggedIn()) {
-        s_plan = plan;
-        SaveUtils::setProperty(dir(), SaveUtils::UserPlan, s_plan);
-    }
-}
-
 QString UserManager::email()
 {
     return s_email;
@@ -94,6 +81,11 @@ QString UserManager::email()
 QString UserManager::password()
 {
     return s_password;
+}
+
+qint64 UserManager::plan()
+{
+    return s_plan;
 }
 
 bool UserManager::isLoggedIn()
@@ -113,7 +105,7 @@ void UserManager::logout()
 
     emit s_instance->aboutToLogout();
 
-    s_plan = PlanManager::Free;
+    s_plan = 0;
     UtilityFunctions::cleanSensitiveInformation(s_email);
     UtilityFunctions::cleanSensitiveInformation(s_password);
 
@@ -169,7 +161,7 @@ void UserManager::loginOffline(const QString& email, const QString& password)
     s_passwordCache = password;
 
     if (UtilityFunctions::testPassword(password.toUtf8(), SaveUtils::userPassword(dir(email))))
-        s_instance->onLoginSuccessful(QVariantList());
+        s_instance->onLoginSuccessful(0, false);
     else
         s_instance->onLoginFailure();
 }
@@ -181,7 +173,7 @@ void UserManager::onLoginFailure()
     emit loginFailed();
 }
 
-void UserManager::onLoginSuccessful(const QVariantList& userInfo)
+void UserManager::onLoginSuccessful(qint64 plan, bool online)
 {
     QString userDir = dir(s_emailCache);
 
@@ -202,13 +194,13 @@ void UserManager::onLoginSuccessful(const QVariantList& userInfo)
     UtilityFunctions::cleanSensitiveInformation(s_emailCache);
     UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
 
-    if (!userInfo.isEmpty()) {
-        s_plan = userInfo.at(0).value<PlanManager::Plans>();
+    if (online) {
+        s_plan = plan;
         SaveUtils::setProperty(userDir, SaveUtils::UserPlan, s_plan);
         SaveUtils::setProperty(userDir, SaveUtils::UserEmail, s_email);
         SaveUtils::setProperty(userDir, SaveUtils::UserPassword, UtilityFunctions::generatePasswordHash(s_password.toUtf8()));
     } else {
-        s_plan = static_cast<PlanManager::Plans>(SaveUtils::userPlan(userDir));
+        s_plan = SaveUtils::userPlan(userDir);
     }
 
     emit loggedIn();
