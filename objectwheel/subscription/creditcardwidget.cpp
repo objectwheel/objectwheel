@@ -38,8 +38,16 @@ CreditCardWidget::CreditCardWidget(QWidget* parent) : QWidget(parent)
     m_bulkEdit->get<QLineEdit*>(CardDate)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
     m_bulkEdit->get<QLineEdit*>(CardCcv)->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
 
-    //    m_bulkEdit->get<QLineEdit*>(Code)->setValidator(
-    //                new QRegularExpressionValidator(QRegularExpression(QStringLiteral("^\\d{1,6}$")), this));
+    m_bulkEdit->get<QLineEdit*>(CardNumber)->setInputMask(QStringLiteral("9999 9999 9999 9999;_"));
+    m_bulkEdit->get<QLineEdit*>(CardDate)->setInputMask(QStringLiteral("99/99;_"));
+    m_bulkEdit->get<QLineEdit*>(CardCcv)->setInputMask(QStringLiteral("999;_"));
+
+    m_bulkEdit->get<QLineEdit*>(CardNumber)->setInputMethodHints(
+                m_bulkEdit->get<QLineEdit*>(CardNumber)->inputMethodHints() | Qt::ImhSensitiveData);
+    m_bulkEdit->get<QLineEdit*>(CardDate)->setInputMethodHints(
+                m_bulkEdit->get<QLineEdit*>(CardDate)->inputMethodHints() | Qt::ImhSensitiveData);
+    m_bulkEdit->get<QLineEdit*>(CardCcv)->setInputMethodHints(
+                m_bulkEdit->get<QLineEdit*>(CardCcv)->inputMethodHints() | Qt::ImhSensitiveData);
 
     auto buttons = new ButtonSlice(this);
     buttons->add(Back, QLatin1String("#5BC5F8"), QLatin1String("#2592F9"));
