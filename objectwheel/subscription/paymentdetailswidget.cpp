@@ -73,11 +73,9 @@ PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
     layout->addStretch();
     layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
     layout->addWidget(titleLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(16);
     layout->addWidget(m_selectedPlanLabel, 0, Qt::AlignHCenter);
     layout->addWidget(m_bulkEdit, 0, Qt::AlignHCenter);
     layout->addWidget(buttons, 0, Qt::AlignHCenter);
-    layout->addSpacing(16);
     layout->addStretch();
 
     connect(m_bulkEdit->get<QLineEdit*>(CardNumber), &QLineEdit::editingFinished, this, [this] {
@@ -154,9 +152,9 @@ void PaymentDetailsWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan
         priceText += tr(" ($%2 if paid annually)").arg(annualPrice);
     m_planInfo = planInfo;
     m_selectedPlan = selectedPlan;
-    m_selectedPlanLabel->setText(tr("<span style=\"font-weight: 500\">Plan: </span>%1<br>"
-                                    "<span style=\"font-weight: 500\">Price: </span>%2<br><br>"
-                                    "Please enter your payment<br>"
-                                    "details below to continue purchasing")
+    m_selectedPlanLabel->setText(tr("Please enter your payment card and<br>"
+                                    "billing details below to continue purchasing<br>"
+                                    "<span style=\"font-weight: 500\">Plan: </span>%1"
+                                    "<span style=\"font-weight: 500\">, Price: </span>%2")
                                  .arg(planInfo.at(0, col)).arg(priceText));
 }
