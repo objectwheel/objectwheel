@@ -190,7 +190,7 @@ void FileSystemWatcher::init()
     if (!d->m_staticData->m_watcher) {
         d->m_staticData->m_watcher = new QFileSystemWatcher();
         if (debug)
-            qDebug() << this << "Created watcher for id " << d->m_id;
+            qDebug() << this << "Established watcher for id " << d->m_id;
     }
     ++(d->m_staticData->m_objectCount);
     connect(d->m_staticData->m_watcher, &QFileSystemWatcher::fileChanged,

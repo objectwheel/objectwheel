@@ -113,20 +113,20 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_pasteButton->setToolTip(tr("Paste files/folders from system's clipboard into the current directory"));
     m_deleteButton->setToolTip(tr("Delete selected files/folders"));
     m_renameButton->setToolTip(tr("Rename selected file/folder"));
-    m_newFileButton->setToolTip(tr("Create an empty new file within the current directory"));
-    m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
+    m_newFileButton->setToolTip(tr("Establish an empty new file within the current directory"));
+    m_newFolderButton->setToolTip(tr("Establish an empty new folder within the current directory"));
     m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
 
-//    m_upButton->setIcon(Utils::Icons::ARROW_UP.icon());
-//    m_backButton->setIcon(Utils::Icons::ARROW_BACK.icon());
-//    m_forthButton->setIcon(Utils::Icons::ARROW_FORTH.icon());
-//    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
-//    m_copyButton->setIcon(Utils::Icons::COPY_TOOLBAR.icon());
-//    m_pasteButton->setIcon(Utils::Icons::PASTE_TOOLBAR.icon());
-//    m_deleteButton->setIcon(Utils::Icons::DELETE_TOOLBAR.icon());
-//    m_renameButton->setIcon(Utils::Icons::RENAME.icon());
-//    m_newFileButton->setIcon(Utils::Icons::FILENEW.icon());
-//    m_newFolderButton->setIcon(Utils::Icons::FOLDERNEW.icon());
+    m_upButton->setIcon(QIcon(QStringLiteral(":/images/help/up.svg")));
+    m_backButton->setIcon(QIcon(QStringLiteral(":/images/help/back.svg")));
+    m_forthButton->setIcon(QIcon(QStringLiteral(":/images/help/forth.svg")));
+    m_homeButton->setIcon(QIcon(QStringLiteral(":/images/help/home.svg")));
+    m_copyButton->setIcon(QIcon(QStringLiteral(":/images/designer/copy.svg")));
+    m_pasteButton->setIcon(QIcon(QStringLiteral(":/images/designer/paste.svg")));
+    m_deleteButton->setIcon(QIcon(QStringLiteral(":/images/builds/trash.svg")));
+    m_renameButton->setIcon(QIcon(QStringLiteral(":/images/designer/rename.svg")));
+    m_newFileButton->setIcon(QIcon(QStringLiteral(":/images/designer/new-file.svg")));
+    m_newFolderButton->setIcon(QIcon(QStringLiteral(":/images/designer/new-folder.svg")));
 
     m_upButton->setFixedSize(18, 18);
     m_backButton->setFixedSize(18, 18);
@@ -394,7 +394,7 @@ void FileExplorer::onNewFileButtonClick()
         scrollTo(index, PositionAtCenter);
         edit(index);
     } else {
-        qWarning() << "FileExplorer:" << tr("File creation failed");
+        qWarning() << "FileExplorer:" << tr("New file failed");
     }
 }
 
@@ -413,7 +413,7 @@ void FileExplorer::onNewFolderButtonClick()
         scrollTo(index, PositionAtCenter);
         edit(index);
     } else {
-        qWarning() << "FileExplorer:" << tr("Folder creation failed");
+        qWarning() << "FileExplorer:" << tr("New folder failed");
     }
 }
 

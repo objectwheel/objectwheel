@@ -15,7 +15,7 @@ class DocumentManager;
 class ProjectManager;
 class ProjectExposingManager;
 class ControlRenderingManager;
-class ControlCreationManager;
+class ControlProductionManager;
 class ControlRemovingManager;
 class ControlPropertyManager;
 class RunManager;
@@ -74,7 +74,7 @@ private:
     static SaveManager* s_saveManager;
     static ProjectManager* s_projectManager;
     static ProjectExposingManager* s_projectExposingManager;
-    static ControlCreationManager* s_controlCreationManager;
+    static ControlProductionManager* s_controlProductionManager;
     static ControlRemovingManager* s_controlRemovingManager;
     static ControlPropertyManager* s_controlPropertyManager;
     static RunManager* s_runManager;

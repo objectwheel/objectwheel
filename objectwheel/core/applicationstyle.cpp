@@ -301,10 +301,7 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
     case SP_LineEditClearButton: {
         int sz = proxy()->pixelMetric(PM_SmallIconSize, option, widget);
         pixmap = PaintUtils::pixmap(QStringLiteral(":/images/clear.svg"), QSize(sz, sz), widget);
-        if (option)
-            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, option->palette.buttonText().color().lighter());
-        else if (widget)
-            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, widget->palette().buttonText().color().lighter());
+        pixmap = PaintUtils::renderOverlaidPixmap(pixmap, QColor("#505050"));
     } break;
 
     case SP_DockWidgetCloseButton: {
@@ -321,10 +318,7 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
         if (auto btn = qobject_cast<const QAbstractButton*>(widget))
             size = btn->iconSize();
         pixmap = PaintUtils::pixmap(QStringLiteral(":/images/extension.svg"), size, widget);
-        if (option)
-            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, option->palette.buttonText().color().lighter());
-        else if (widget)
-            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, widget->palette().buttonText().color().lighter());
+        pixmap = PaintUtils::renderOverlaidPixmap(pixmap, QColor("#505050"));
     } break;
 
     default:
@@ -348,7 +342,7 @@ QIcon ApplicationStyle::standardIcon(QStyle::StandardPixmap standardIcon, const 
     case SP_LineEditClearButton: {
         const QPixmap& stdPix = proxy()->standardPixmap(standardIcon, option, widget);
         icon.addPixmap(stdPix);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 100)), QIcon::Active);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 150)), QIcon::Active);
     } break;
     case SP_DockWidgetCloseButton:
         icon.addPixmap(proxy()->standardPixmap(standardIcon, option, widget));
@@ -356,7 +350,7 @@ QIcon ApplicationStyle::standardIcon(QStyle::StandardPixmap standardIcon, const 
     case SP_ToolBarHorizontalExtensionButton: {
         const QPixmap& stdPix = proxy()->standardPixmap(standardIcon, option, widget);
         icon.addPixmap(stdPix);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 100)), QIcon::Normal, QIcon::On);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 150)), QIcon::Normal, QIcon::On);
     } break;
     default:
         icon = QFusionStyle::standardIcon(standardIcon, option, widget);

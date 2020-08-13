@@ -92,7 +92,7 @@ bool HostOsInfo::canCreateOpenGLContext(QString *errorMessage)
     static const bool canCreate = QOpenGLContext().create();
     if (!canCreate)
         *errorMessage = QCoreApplication::translate("Utils::HostOsInfo",
-                                                    "Cannot create OpenGL context.");
+                                                    "Cannot establish OpenGL context.");
     return canCreate;
 #endif
 }

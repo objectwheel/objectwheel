@@ -29,7 +29,7 @@ private slots:
     void onAddButtonClick();
     void onRemoveButtonClick();
     void onSearchEditReturnPress();
-    void onControlCreation(Control* control);
+    void onControlProduction(Control* control);
     void onControlRemove(Control* control);
     void onControlIdChange(Control* control, const QString& previousId);
     void onControlIndexChange(Control* control) const;

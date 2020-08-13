@@ -205,7 +205,7 @@ QString SaveManager::addForm(const QString& formRootPath)
     const QString& newFormRootPath = targetDesignsDir + '/' + HashFactory::generate();
 
     if (!QDir(newFormRootPath).mkpath(".")) {
-        qWarning("SaveManager::addForm: Failed. Cannot create the new form root path.");
+        qWarning("SaveManager::addForm: Failed. Cannot establish the new form root path.");
         return {};
     }
 
@@ -240,7 +240,7 @@ QString SaveManager::addControl(const QString& controlRootPath, const QString& t
     const QString& newControlRootPath = targetParentControlChildrenDir + '/' + HashFactory::generate();
 
     if (!QDir(newControlRootPath).mkpath(".")) {
-        qWarning("SaveManager::addControl: Failed. Cannot create the new control root path.");
+        qWarning("SaveManager::addControl: Failed. Cannot establish the new control root path.");
         return {};
     }
 
@@ -281,7 +281,7 @@ bool SaveManager::moveControl(Control* control, const Control* parentControl)
     const QString& newControlRootPath = targetControlChildrenDir + '/' + QDir(control->dir()).dirName();
 
     if (!QDir(newControlRootPath).mkpath(".")) {
-        qWarning("SaveManager::moveControl: Failed. Cannot create the new control root path.");
+        qWarning("SaveManager::moveControl: Failed. Cannot establish the new control root path.");
         return false;
     }
 

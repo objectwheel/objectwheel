@@ -107,7 +107,7 @@ FontColorsSettingsWidget::FontColorsSettingsWidget(QWidget* parent) : SettingsWi
     m_colorSchemeCopyButton->setText(tr("Copy") + "...");
 
     m_colorSchemeBox->setToolTip(tr("Chage code color scheme"));
-    m_colorSchemeCopyButton->setToolTip(tr("Copy and create new color scheme from current scheme"));
+    m_colorSchemeCopyButton->setToolTip(tr("Duplicate existing scheme"));
     m_colorSchemeDeleteButton->setToolTip(tr("Delete current color scheme"));
 
     m_colorSchemeBox->setCursor(Qt::PointingHandCursor);

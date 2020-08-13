@@ -12,8 +12,8 @@
 #include <utilityfunctions.h>
 #include <controlpropertymanager.h>
 #include <projectexposingmanager.h>
-#include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
+#include <controlproductionmanager.h>
 
 #include <QtMath>
 #include <QMimeData>
@@ -58,7 +58,7 @@ DesignerScene::DesignerScene(QObject* parent) : QGraphicsScene(parent)
             m_gadgetLayer, &GadgetLayer::handleSceneSelectionChange);
     connect(this, &DesignerScene::currentFormChanged,
             m_gadgetLayer, &GadgetLayer::handleSceneCurrentFormChange);
-    connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
+    connect(ControlProductionManager::instance(), &ControlProductionManager::controlProduced,
             m_gadgetLayer, &GadgetLayer::addResizers);
     connect(ProjectExposingManager::instance(), &ProjectExposingManager::controlExposed,
             m_gadgetLayer, &GadgetLayer::addResizers);
@@ -672,7 +672,7 @@ void DesignerScene::handleToolDrop(QGraphicsSceneDragDropEvent* event)
     // will move the item by setting a transform on it according to its parent margin
     Control* parentControl = static_cast<Control*>(m_recentHighlightedItem.data());
     const QPointF margins(parentControl->margins().left(), parentControl->margins().top());
-    Control* newControl = ControlCreationManager::createControl(
+    Control* newControl = ControlProductionManager::produceControl(
                 parentControl,
                 dir, module,
                 DesignerScene::snapPosition(parentControl->mapFromScene(event->scenePos() - QPointF(3, 3) - margins)),

@@ -6,9 +6,9 @@
 #include <designerscene.h>
 #include <saveutils.h>
 #include <filesystemutils.h>
-#include <controlcreationmanager.h>
 #include <controlremovingmanager.h>
 #include <controlpropertymanager.h>
+#include <controlproductionmanager.h>
 #include <form.h>
 #include <controlitemcache.h>
 #include <parserutils.h>
@@ -41,8 +41,8 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
             this, &FormsController::onCurrentFormChange);
     connect(tree, &FormsTree::itemSelectionChanged,
             this, &FormsController::onItemSelectionChange);
-    connect(ControlCreationManager::instance(), &ControlCreationManager::controlCreated,
-            this, &FormsController::onControlCreation);
+    connect(ControlProductionManager::instance(), &ControlProductionManager::controlProduced,
+            this, &FormsController::onControlProduction);
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &FormsController::onControlRemove);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
@@ -129,8 +129,8 @@ void FormsController::onAddButtonClick()
     QDir(thisDir).mkpath(".");
     FileSystemUtils::copy(":/other/form.qml", thisDir, true, true);
     QFile::rename(thisDir + "/form.qml", thisDir + '/' + SaveUtils::controlMainQmlFileName());
-    ControlCreationManager::createForm(temp.path(), QStringLiteral("QtQuick.Controls/2/Page"));
-    // onControlCreation(); Not needed, ControlCreationManager::controlCreated will be emitted
+    ControlProductionManager::produceForm(temp.path(), QStringLiteral("QtQuick.Controls/2/Page"));
+    // onControlProduction(); Not needed, ControlProductionManager::controlProduced will be emitted
 }
 
 void FormsController::onRemoveButtonClick()
@@ -161,7 +161,7 @@ void FormsController::onSearchEditReturnPress()
     }
 }
 
-void FormsController::onControlCreation(Control* control)
+void FormsController::onControlProduction(Control* control)
 {
     if (!m_isProjectStarted)
         return;
@@ -175,7 +175,7 @@ void FormsController::onControlCreation(Control* control)
     addCompleterEntry(control->id());
     tree->sortItems(0, Qt::AscendingOrder);
 
-    // We are calling this manually because ControlCreationManager::controlCreated
+    // We are calling this manually because ControlProductionManager::controlProduced
     // is called later and DesignerScene::currentFormChanged is called first
     onCurrentFormChange();
 }

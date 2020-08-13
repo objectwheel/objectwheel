@@ -194,7 +194,7 @@ bool FileUtils::copyRecursively(const FileName &srcFilePath, const FileName &tgt
             targetDir.cdUp();
             if (!targetDir.mkdir(tgtFilePath.fileName())) {
                 if (error) {
-                    *error = QCoreApplication::translate("Utils::FileUtils", "Failed to create directory \"%1\".")
+                    *error = QCoreApplication::translate("Utils::FileUtils", "Failed to establish directory \"%1\".")
                             .arg(tgtFilePath.toUserOutput());
                 }
                 return false;
@@ -580,7 +580,7 @@ FileSaver::FileSaver(const QString &filename, QIODevice::OpenMode mode)
     }
     if (!m_file->open(QIODevice::WriteOnly | mode)) {
         QString err = QFile::exists(filename) ?
-                tr("Cannot overwrite file %1: %2") : tr("Cannot create file %1: %2");
+                tr("Cannot overwrite file %1: %2") : tr("Cannot establish file %1: %2");
         m_errorString = err.arg(QDir::toNativeSeparators(filename), m_file->errorString());
         m_hasError = true;
     }
@@ -611,7 +611,7 @@ TempFileSaver::TempFileSaver(const QString &templ)
         tempFile->setFileTemplate(templ);
     tempFile->setAutoRemove(false);
     if (!tempFile->open()) {
-        m_errorString = tr("Cannot create temporary file in %1: %2").arg(
+        m_errorString = tr("Cannot establish temporary file in %1: %2").arg(
                 QDir::toNativeSeparators(QFileInfo(tempFile->fileTemplate()).absolutePath()),
                 tempFile->errorString());
         m_hasError = true;

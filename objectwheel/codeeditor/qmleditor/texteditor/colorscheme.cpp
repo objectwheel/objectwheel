@@ -493,7 +493,7 @@ QString ColorScheme::createColorSchemeFileName(const QString& pattern)
 
     // Create the base directory when it doesn't exist
     if (!QFile::exists(ApplicationCore::stylesPath()) && !QDir().mkpath(ApplicationCore::stylesPath())) {
-        qWarning() << "Failed to create color scheme directory:" << ApplicationCore::stylesPath();
+        qWarning() << "Failed to establish color scheme directory:" << ApplicationCore::stylesPath();
         return QString();
     }
 

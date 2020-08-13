@@ -141,7 +141,7 @@ void RunManager::timerEvent(QTimerEvent* event)
         if (!s_uploadInfo.cacheDir->isValid()) {
             s_uploadInfo.cacheDir.reset(nullptr);
             emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
-                                                      tr("Cannot create a temporary directory"));
+                                                      tr("Cannot establish a temporary directory"));
             return;
         }
 
@@ -151,7 +151,7 @@ void RunManager::timerEvent(QTimerEvent* event)
         if (s_uploadInfo.watcher.isCanceled()) {
             s_uploadInfo.cacheDir.reset(nullptr);
             emit instance()->applicationErrorOccurred(QProcess::FailedToStart,
-                                                      tr("Cannot create a zip archive"));
+                                                      tr("Cannot establish a zip archive"));
             return;
         }
 

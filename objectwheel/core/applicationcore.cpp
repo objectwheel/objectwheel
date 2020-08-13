@@ -2,14 +2,13 @@
 #include <usermanager.h>
 #include <projectmanager.h>
 #include <projectexposingmanager.h>
-#include <controlcreationmanager.h>
+#include <controlproductionmanager.h>
 #include <windowmanager.h>
 #include <apimanager.h>
 #include <controlrenderingmanager.h>
 #include <documentmanager.h>
 #include <mainwindow.h>
 #include <runmanager.h>
-#include <controlcreationmanager.h>
 #include <savemanager.h>
 #include <menumanager.h>
 #include <centralwidget.h>
@@ -66,7 +65,7 @@ ControlRenderingManager* ApplicationCore::s_controlRenderingManager = nullptr;
 SaveManager* ApplicationCore::s_saveManager = nullptr;
 ProjectManager* ApplicationCore::s_projectManager = nullptr;
 ProjectExposingManager* ApplicationCore::s_projectExposingManager = nullptr;
-ControlCreationManager* ApplicationCore::s_controlCreationManager = nullptr;
+ControlProductionManager* ApplicationCore::s_controlProductionManager = nullptr;
 ControlRemovingManager* ApplicationCore::s_controlRemovingManager = nullptr;
 ControlPropertyManager* ApplicationCore::s_controlPropertyManager = nullptr;
 RunManager* ApplicationCore::s_runManager = nullptr;
@@ -135,7 +134,7 @@ ApplicationCore::ApplicationCore()
     s_saveManager = new SaveManager;
     s_projectManager = new ProjectManager;
     s_projectExposingManager = new ProjectExposingManager;
-    s_controlCreationManager = new ControlCreationManager;
+    s_controlProductionManager = new ControlProductionManager;
     s_controlRemovingManager = new ControlRemovingManager;
     s_controlPropertyManager = new ControlPropertyManager;
     s_runManager = new RunManager;
@@ -178,7 +177,7 @@ ApplicationCore::ApplicationCore()
 
     DesignerScene* scene = s_windowManager->mainWindow()->centralWidget()->designerPane()->designerView()->scene();
     s_projectExposingManager->init(scene);
-    s_controlCreationManager->init(scene);
+    s_controlProductionManager->init(scene);
     s_controlRemovingManager->init(scene);
     s_controlRenderingManager->init(scene);
     s_controlRenderingManager->scheduleDevicePixelRatioUpdate(QApplication::primaryScreen()->devicePixelRatio());
@@ -212,8 +211,8 @@ ApplicationCore::~ApplicationCore()
     s_controlPropertyManager = nullptr;
     delete s_controlRemovingManager;
     s_controlRemovingManager = nullptr;
-    delete s_controlCreationManager;
-    s_controlCreationManager = nullptr;
+    delete s_controlProductionManager;
+    s_controlProductionManager = nullptr;
     delete s_projectExposingManager;
     s_projectExposingManager = nullptr;
     delete s_projectManager;

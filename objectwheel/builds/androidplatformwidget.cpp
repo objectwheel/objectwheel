@@ -749,7 +749,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
                                      "tools. Thus, this option should only be used for debugging purposes. Do<br>"
                                      "not use this option for your production builds.</p>"
                                      "<p style='white-space:nowrap;font-size:11px'>"
-                                     "Because the debug certificate is created by the build tools and is<br>"
+                                     "Because the debug certificate is made by the build tools and is<br>"
                                      "insecure by design, most app stores (including the Google Play Store) do<br>"
                                      "not accept apps signed with a debug certificate for publishing.</p>"
                                      "<p style='white-space:nowrap;font-size:11px'>"

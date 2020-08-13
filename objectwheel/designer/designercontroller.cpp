@@ -16,7 +16,7 @@
 #include <controlpropertymanager.h>
 #include <controlremovingmanager.h>
 #include <controlrenderingmanager.h>
-#include <controlcreationmanager.h>
+#include <controlproductionmanager.h>
 #include <mouselayer.h>
 
 #include <private/qgraphicsitem_p.h>
@@ -789,7 +789,7 @@ void DesignerController::onPasteActionTrigger()
             } else {
                 pos += moveGap - margins;
             }
-            Control* newControl = ControlCreationManager::createControl(
+            Control* newControl = ControlProductionManager::produceControl(
                         parentControl, control->dir(), control->module(), DesignerScene::snapPosition(pos),
                         control->size(), control->pixmap());
             if (newControl) {

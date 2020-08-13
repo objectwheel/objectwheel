@@ -165,5 +165,7 @@
         <file>images/subscription/payment-details.svg</file>
         <file>images/clear.svg</file>
         <file>images/lightbulb.svg</file>
+        <file>images/designer/new-folder.svg</file>
+        <file>images/help/up.svg</file>
     </qresource>
 </RCC>

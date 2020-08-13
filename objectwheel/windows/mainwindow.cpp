@@ -16,7 +16,6 @@
 #include <assetscontroller.h>
 #include <centralwidget.h>
 #include <designerview.h>
-#include <controlcreationmanager.h>
 #include <runmanager.h>
 #include <projectmanager.h>
 #include <consolewidget.h>

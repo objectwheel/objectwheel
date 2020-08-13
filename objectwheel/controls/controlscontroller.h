@@ -40,7 +40,7 @@ private slots:
     void onItemSelectionChange();
     void onSceneSelectionChange();
 
-    void onControlCreation(Control* control);
+    void onControlProduction(Control* control);
     void onControlRemove(Control* control);
     void onCurrentFormChange(Form* currentForm);
     void onControlParentChange(Control* control);

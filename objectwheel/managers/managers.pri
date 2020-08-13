@@ -1,7 +1,7 @@
 DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
-HEADERS += $$PWD/controlcreationmanager.h \
+HEADERS += $$PWD/controlproductionmanager.h \
            $$PWD/controlrenderingmanager.h \
            $$PWD/controlpropertymanager.h \
            $$PWD/controlremovingmanager.h \
@@ -20,7 +20,7 @@ HEADERS += $$PWD/controlcreationmanager.h \
            $$PWD/helpmanager.h \
            $$PWD/runmanager.h
 
-SOURCES += $$PWD/controlcreationmanager.cpp \
+SOURCES += $$PWD/controlproductionmanager.cpp \
            $$PWD/controlrenderingmanager.cpp \
            $$PWD/controlpropertymanager.cpp \
            $$PWD/controlremovingmanager.cpp \

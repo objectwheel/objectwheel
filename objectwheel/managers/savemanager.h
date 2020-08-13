@@ -12,7 +12,7 @@ class SaveManager final : public QObject
 
     friend class ApplicationCore;        // For constructor and destructor
     friend class ControlRemovingManager; // For removeControl()
-    friend class ControlCreationManager; // For addControl()
+    friend class ControlProductionManager; // For addControl()
     friend class ControlPropertyManager; // For setProperty(), setIndex(), moveControl()
     friend class ProjectManager;         // For initProject()
 

@@ -1,4 +1,4 @@
-#include <controlcreationmanager.h>
+#include <controlproductionmanager.h>
 #include <form.h>
 #include <designerscene.h>
 #include <saveutils.h>
@@ -9,34 +9,34 @@
 #include <filesystemutils.h>
 #include <QTemporaryDir>
 
-ControlCreationManager* ControlCreationManager::s_instance = nullptr;
-DesignerScene* ControlCreationManager::s_designerScene = nullptr;
+ControlProductionManager* ControlProductionManager::s_instance = nullptr;
+DesignerScene* ControlProductionManager::s_designerScene = nullptr;
 
-ControlCreationManager::ControlCreationManager(QObject* parent) : QObject(parent)
+ControlProductionManager::ControlProductionManager(QObject* parent) : QObject(parent)
 {
     s_instance = this;
 }
 
-ControlCreationManager::~ControlCreationManager()
+ControlProductionManager::~ControlProductionManager()
 {
     s_instance = nullptr;
 }
 
-ControlCreationManager* ControlCreationManager::instance()
+ControlProductionManager* ControlProductionManager::instance()
 {
     return s_instance;
 }
 
-void ControlCreationManager::init(DesignerScene* designerScene)
+void ControlProductionManager::init(DesignerScene* designerScene)
 {
     s_designerScene = designerScene;
 }
 
-Form* ControlCreationManager::createForm(const QString& formRootPath, const QString& module)
+Form* ControlProductionManager::produceForm(const QString& formRootPath, const QString& module)
 {
     const QString& newFormRootPath = SaveManager::addForm(formRootPath);
     if (newFormRootPath.isEmpty()) {
-        qWarning("ControlCreationManager::createForm: Failed.");
+        qWarning("ControlProductionManager::produceForm: Failed.");
         return nullptr;
     }
 
@@ -74,7 +74,7 @@ Form* ControlCreationManager::createForm(const QString& formRootPath, const QStr
             form, &Control::syncGeometry, Qt::QueuedConnection);
     ControlRenderingManager::scheduleFormCreation(form->dir(), form->module());
 
-    // NOTE: We don't have to worry about possible child controls since createForm is only
+    // NOTE: We don't have to worry about possible child controls since produceForm is only
     // called from FormsPane
 
     auto conn = new QMetaObject::Connection;
@@ -87,12 +87,12 @@ Form* ControlCreationManager::createForm(const QString& formRootPath, const QStr
         }
     }, Qt::QueuedConnection);
 
-    emit instance()->controlCreated(form);
+    emit instance()->controlProduced(form);
 
     return form;
 }
 
-Control* ControlCreationManager::createControl(Control* targetParentControl,
+Control* ControlProductionManager::produceControl(Control* targetParentControl,
                                                const QString& controlRootPath,
                                                const QString& module,
                                                const QPointF& pos,
@@ -114,7 +114,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
     }
 
     if (newControlRootPath.isEmpty()) {
-        qWarning("ControlCreationManager::createControl: Failed.");
+        qWarning("ControlProductionManager::produceControl: Failed.");
         return nullptr;
     }
 
@@ -179,7 +179,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
 
     QMap<QString, Control*> controlTree;
     controlTree.insert(control->dir(), control);
-    emit instance()->controlCreated(control);
+    emit instance()->controlProduced(control);
 
     for (const QString& childPath : SaveUtils::childrenPaths(control->dir())) {
         Control* parentControl = controlTree.value(SaveUtils::toDoubleUp(childPath));
@@ -220,7 +220,7 @@ Control* ControlCreationManager::createControl(Control* targetParentControl,
 
         controlTree.insert(childPath, childControl);
 
-        emit instance()->controlCreated(childControl);
+        emit instance()->controlProduced(childControl);
     }
 
     return control;

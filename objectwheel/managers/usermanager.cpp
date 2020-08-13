@@ -180,7 +180,7 @@ void UserManager::onLoginSuccessful(qint64 plan, bool online)
     if (userDir.isEmpty()) {
         userDir = baseDirectory() + '/' + HashFactory::generate();
         if (!QDir(userDir).mkpath(".")) {
-            qWarning("UserManager: Cannot create a user directory");
+            qWarning("UserManager: Cannot establish a user directory");
             UtilityFunctions::cleanSensitiveInformation(s_emailCache);
             UtilityFunctions::cleanSensitiveInformation(s_passwordCache);
             return;

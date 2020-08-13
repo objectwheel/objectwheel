@@ -183,7 +183,7 @@ void ControlsController::onSceneSelectionChange()
     tree->scrollToItem(firstSelectedItem);
 }
 
-void ControlsController::onControlCreation(Control* control)
+void ControlsController::onControlProduction(Control* control)
 {
     if (!m_isProjectStarted)
         return;
@@ -323,7 +323,7 @@ void ControlsController::onControlParentChange(Control* control)
     // Check if already exists, if not --reparented from
     // another form or a tool dropped-- add it to the list
     if (itemFromControl(control) == 0)
-        return onControlCreation(control);
+        return onControlProduction(control);
 
     if (QTreeWidgetItem* parentItem = itemFromControl(control->parentControl())) {
         if (QTreeWidgetItem* childItem = itemFromControl(control)) {

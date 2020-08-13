@@ -54,7 +54,7 @@ void MenuManager::createActions(QObject* parent)
 {
     s_newAct = new QAction(tr("&New"), parent);
     s_newAct->setShortcuts(QKeySequence::New);
-    s_newAct->setStatusTip(tr("Create a new file"));
+    s_newAct->setStatusTip(tr("Establish a new file"));
     connect(s_newAct, &QAction::triggered, &MenuManager::onNewFile);
 
     s_openAct = new QAction(tr("&Open..."), parent);
