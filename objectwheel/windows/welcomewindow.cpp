@@ -31,7 +31,6 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
 {
     resize(sizeHint()); // Don't use adjustSize() on Windows
     move(UtilityFunctions::centerPos(size()));
-    // setWindowModality(Qt::ApplicationModal); Breaks proper functioning of the app
     // setAttribute(Qt::WA_QuitOnClose, false); Since its possible that it may be the last window
     setWindowTitle(AppConstants::LABEL);
 

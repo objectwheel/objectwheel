@@ -47,9 +47,6 @@
 #include <QPixmapCache>
 #include <QWindow>
 
-#include <theme/theme_p.h>
-#include <coreplugin/themechooser.h>
-
 #if defined(Q_OS_MACOS)
 #  include <macoperations.h>
 #endif
@@ -123,7 +120,7 @@ ApplicationCore::ApplicationCore()
     QToolTip::setFont(font);
 
     /* Show splash screen */
-    auto splash = new SplashScreen(PaintUtils::pixmap(QIcon(":/images/splash/splash.png"),
+    auto splash = new SplashScreen(PaintUtils::pixmap(QStringLiteral(":/images/splash/splash.png"),
                                                       QSize(485, 300)), Qt::WindowStaysOnTopHint);
     splash->showMessage(QObject::tr("Initializing..."));
     splash->show();
@@ -145,7 +142,6 @@ ApplicationCore::ApplicationCore()
     s_helpManager = new HelpManager;
 
     s_helpManager->setupHelpManager();
-    Utils::setCreatorTheme(Core::Internal::ThemeEntry::createTheme("flat-light"));
     QObject::connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit,
                      s_helpManager, &HelpManager::aboutToShutdown);
 
@@ -331,7 +327,7 @@ QSettings* ApplicationCore::settings()
 QString ApplicationCore::modulesPath()
 {
     // TODO : Think about unix and windows versions too
-    return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/Modules")).canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Modules")).canonicalFilePath();
 }
 
 QString ApplicationCore::settingsPath()
@@ -341,13 +337,13 @@ QString ApplicationCore::settingsPath()
 
 QString ApplicationCore::resourcePath()
 {
-    return ":";
+    return QStringLiteral(":");
 }
 
 QString ApplicationCore::documentsPath()
 {
 #if defined(Q_OS_MACOS)
-    return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/Documents")).canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Documents")).canonicalFilePath();
 #else
     return QFileInfo("Documents").canonicalFilePath();
 #endif
@@ -356,6 +352,16 @@ QString ApplicationCore::documentsPath()
 QString ApplicationCore::updatesPath()
 {
     return appDataPath() + QLatin1String("/Updates");
+}
+
+QString ApplicationCore::stylesPath()
+{
+    return appDataPath() + QLatin1String("/Styles");
+}
+
+QString ApplicationCore::resourceStylesPath()
+{
+    return resourcePath() + QLatin1String("/Styles");
 }
 
 QString ApplicationCore::appDataPath()

@@ -489,8 +489,8 @@ void FontColorsSettings::reset()
     fontPreferThick = false;
     fontPreferAntialiasing = true;
     fontPixelSize = 14;
-    fontFamily = "Inconsolata";
-    colorSchemeFileName = ":/Styles/default.xml";
+    fontFamily = QLatin1String("Inconsolata");
+    colorSchemeFileName = ApplicationCore::resourceStylesPath() + QLatin1String("/default.xml");
     loadColorScheme();
 }
 

@@ -71,7 +71,6 @@ private:
     static QAction* s_setParagraphSpacingAct;
     static QAction* s_preferencesAct;
     static QAction* s_aboutAct;
-    static QAction* s_aboutQtAct;
 };
 
 #endif // MENUMANAGER_H

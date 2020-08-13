@@ -35,7 +35,6 @@ QAction* MenuManager::s_setLineSpacingAct = nullptr;
 QAction* MenuManager::s_setParagraphSpacingAct = nullptr;
 QAction* MenuManager::s_preferencesAct = nullptr;
 QAction* MenuManager::s_aboutAct = nullptr;
-QAction* MenuManager::s_aboutQtAct = nullptr;
 
 MenuManager::MenuManager(QObject* parent) : QObject(parent)
 {
@@ -135,10 +134,6 @@ void MenuManager::createActions(QObject* parent)
     s_aboutAct->setStatusTip(tr("Show the application's About box"));
     connect(s_aboutAct, &QAction::triggered, &MenuManager::onAbout);
 
-    s_aboutQtAct = new QAction(tr("About &Qt"), parent);
-    s_aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
-    connect(s_aboutQtAct, &QAction::triggered, qApp, &QApplication::aboutQt);
-
     s_preferencesAct = new QAction(tr("&Preferences"), parent);
     s_preferencesAct->setStatusTip(tr("Show %1 Preferences").arg(AppConstants::NAME));
     connect(s_preferencesAct, &QAction::triggered, &MenuManager::onPreferences);
@@ -198,7 +193,6 @@ void MenuManager::createMenus()
 
     s_helpMenu = s_menuBar->addMenu(tr("&Help"));
     s_helpMenu->addAction(s_aboutAct);
-    s_helpMenu->addAction(s_aboutQtAct);
 
 
 #if defined (Q_OS_DARWIN)

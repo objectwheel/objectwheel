@@ -15,7 +15,7 @@ QPixmap pixmap(const QIcon& icon, const QSize& size, const QWidget* widget = nul
                QIcon::Mode mode = QIcon::Normal, QIcon::State state = QIcon::Off);
 QIcon renderButtonIcon(const QString& imagePath, const QSize& size, const QWidget* widget);
 QPixmap renderPropertyColorPixmap(const QSize& size, const QColor& color, const QPen& pen, qreal dpr);
-QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color);
+QPixmap renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color); // Be cautious about pixmap while using
 QPixmap renderOverlaidPixmap(const QString& fileName, const QColor& color,
                              const QSize& size, const QWidget* widget);
 QImage renderErrorControlImage(const QSizeF& size, const QString& id,

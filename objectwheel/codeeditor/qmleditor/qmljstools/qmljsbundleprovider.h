@@ -67,9 +67,7 @@ public:
 
     static QmlJS::QmlBundle defaultBundle(const QString &bundleInfoName);
     static QmlJS::QmlBundle defaultQt5QtQuick2Bundle();
-    static QmlJS::QmlBundle defaultQbsBundle();
     static QmlJS::QmlBundle defaultQmltypesBundle();
-    static QmlJS::QmlBundle defaultQmlprojectBundle();
 };
 
 } // end QmlJSTools namespace

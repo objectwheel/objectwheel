@@ -312,28 +312,28 @@ void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
         return;
 
     static QMessageBox* messageBox = [this] {
-            auto messageBox = new QMessageBox(QMessageBox::Warning,
-                                              tr("Delete Color Scheme"),
-                                              tr("Are you sure you want to delete this color scheme permanently?"),
-                                              QMessageBox::Discard | QMessageBox::Cancel,
-                                              window());
-            // Change the text and role of the discard button
-            QPushButton* deleteButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
-            deleteButton->setText(tr("Delete"));
-            messageBox->addButton(deleteButton, QMessageBox::AcceptRole);
-            messageBox->setDefaultButton(deleteButton);
+        auto messageBox = new QMessageBox(QMessageBox::Warning,
+                                          tr("Delete Color Scheme"),
+                                          tr("Are you sure you want to delete this color scheme permanently?"),
+                                          QMessageBox::Discard | QMessageBox::Cancel,
+                                          window());
+        // Change the text and role of the discard button
+        QPushButton* deleteButton = static_cast<QPushButton*>(messageBox->button(QMessageBox::Discard));
+        deleteButton->setText(tr("Delete"));
+        messageBox->addButton(deleteButton, QMessageBox::AcceptRole);
+        messageBox->setDefaultButton(deleteButton);
 
-            connect(messageBox, &QDialog::accepted, this, [this] {
-                const int index = m_colorSchemeBox->currentIndex();
-                Q_ASSERT(index >= 0);
+        connect(messageBox, &QDialog::accepted, this, [this] {
+            const int index = m_colorSchemeBox->currentIndex();
+            Q_ASSERT(index >= 0);
 
-                const TextEditor::ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
-                Q_ASSERT(!entry.readOnly);
+            const TextEditor::ColorSchemeEntry& entry = m_schemeListModel->colorSchemeAt(index);
+            Q_ASSERT(!entry.readOnly);
 
-                if (QFile::remove(entry.fileName))
-                    m_schemeListModel->removeColorScheme(index);
-            });
-            return messageBox;
+            if (QFile::remove(entry.fileName))
+                m_schemeListModel->removeColorScheme(index);
+        });
+        return messageBox;
     } ();
 
     messageBox->open();
@@ -342,18 +342,16 @@ void FontColorsSettingsWidget::onColorSchemeDeleteButtonClick()
 void FontColorsSettingsWidget::fill()
 {
     QList<TextEditor::ColorSchemeEntry> colorSchemes;
-    const QString& resourceStylesPath = ApplicationCore::resourcePath();
-    QDir resourceStyleDir(resourceStylesPath + "/Styles");
-    resourceStyleDir.setNameFilters(QStringList() << "*.xml");
+    QDir resourceStyleDir(ApplicationCore::resourceStylesPath());
+    resourceStyleDir.setNameFilters(QStringList("*.xml"));
     resourceStyleDir.setFilter(QDir::Files);
-    const QString& customStylesPath = ApplicationCore::appDataPath();
-    QDir customStyleDir(customStylesPath + "/Styles");
-    customStyleDir.setNameFilters(QStringList() << "*.xml");
+    QDir customStyleDir(ApplicationCore::stylesPath());
+    customStyleDir.setNameFilters(QStringList("*.xml"));
     customStyleDir.setFilter(QDir::Files);
     for (const QString& fileName : resourceStyleDir.entryList())
-        colorSchemes.append(TextEditor::ColorSchemeEntry(resourceStylesPath + "/Styles/" + fileName, true));
+        colorSchemes.append(TextEditor::ColorSchemeEntry(resourceStyleDir.filePath(fileName), true));
     for (const QString& fileName : customStyleDir.entryList())
-        colorSchemes.append(TextEditor::ColorSchemeEntry(customStylesPath + "/Styles/" + fileName, false));
+        colorSchemes.append(TextEditor::ColorSchemeEntry(customStyleDir.filePath(fileName), false));
     m_schemeListModel->setColorSchemes(colorSchemes);
     m_fontFamilyBox->addItems(QFontDatabase().families());
     m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",

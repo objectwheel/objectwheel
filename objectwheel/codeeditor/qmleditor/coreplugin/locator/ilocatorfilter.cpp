@@ -35,6 +35,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QRegularExpression>
+#include <QPushButton>
 
 using namespace Core;
 
@@ -172,6 +173,7 @@ bool ILocatorFilter::openConfigDialog(QWidget *parent, bool &needsRefresh)
     QCheckBox *includeByDefault = new QCheckBox(msgIncludeByDefault());
     includeByDefault->setToolTip(msgIncludeByDefaultToolTip());
     includeByDefault->setChecked(isIncludedByDefault());
+    includeByDefault->setCursor(Qt::PointingHandCursor);
 
     auto prefixLabel = new QLabel(msgPrefixLabel());
     prefixLabel->setToolTip(msgPrefixToolTip());
@@ -179,8 +181,11 @@ bool ILocatorFilter::openConfigDialog(QWidget *parent, bool &needsRefresh)
     hlayout->addWidget(shortcutEdit);
     hlayout->addWidget(includeByDefault);
 
-    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok |
-                                                       QDialogButtonBox::Cancel);
+    QDialogButtonBox *buttonBox = new QDialogButtonBox;
+    QPushButton *okButton = buttonBox->addButton(QDialogButtonBox::Ok);
+    QPushButton *cancelButton = buttonBox->addButton(QDialogButtonBox::Cancel);
+    okButton->setCursor(Qt::PointingHandCursor);
+    cancelButton->setCursor(Qt::PointingHandCursor);
     connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 

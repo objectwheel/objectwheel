@@ -1441,8 +1441,7 @@ bool QmlCodeEditor::viewportEvent(QEvent *event)
 void QmlCodeEditor::mouseReleaseEvent(QMouseEvent *e)
 {
     if (/*mouseNavigationEnabled()
-                                                                                                                                                                                                            && */m_linkPressed
-            && e->modifiers() & Qt::ControlModifier
+        && */e->modifiers() & Qt::ControlModifier
             && !(e->modifiers() & Qt::ShiftModifier)
             && e->button() == Qt::LeftButton
             ) {
@@ -2944,7 +2943,7 @@ void QmlCodeEditor::updateContextPane()
                             QTextCursor tc(document());
                             tc.setPosition(end);
                             marker.cursor = tc;
-                            marker.tooltip = tr("Show Qt Quick ToolBar");
+                            marker.tooltip = tr("Show Quick ToolBar");
                             marker.data = QVariant::fromValue(QtQuickToolbarMarker());
                             markers.append(marker);
                         }

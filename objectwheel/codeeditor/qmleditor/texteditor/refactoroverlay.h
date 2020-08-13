@@ -66,7 +66,7 @@ private:
     void paintMarker(const RefactorMarker& marker, QPainter *painter, const QRect &clip);
     RefactorMarkers m_markers;
     QmlCodeEditor *m_editor;
-    int m_maxWidth;
+//    int m_maxWidth;
     const QIcon m_icon;
 };
 

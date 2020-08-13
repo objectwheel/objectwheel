@@ -10,7 +10,6 @@ win32: LIBS += -lshell32
 # PortsGatherer
 #win32: LIBS += -liphlpapi -lws2_32
 
-include($$PWD/mimetypes/mimetypes.pri)
 include($$PWD/tooltip/tooltip.pri)
 
 SOURCES += \
@@ -27,13 +26,7 @@ SOURCES += \
     $$PWD/faketooltip.cpp \
     $$PWD/environment.cpp \
     $$PWD/filesystemwatcher.cpp \
-    $$PWD/Icons.cpp \
-    $$PWD/icon.cpp \
-    $$PWD/theme/theme.cpp \
-    $$PWD/stylehelper.cpp \
     $$PWD/htmldocextractor.cpp \
-    $$PWD/utilsicons.cpp \
-    $$PWD/fadingindicator.cpp \
     $$PWD/qtcolorbutton.cpp \
     $$PWD/uncommentselection.cpp
 
@@ -56,25 +49,16 @@ HEADERS += \
     $$PWD/faketooltip.h \
     $$PWD/environment.h \
     $$PWD/filesystemwatcher.h \
-    $$PWD/Icons.h \
-    $$PWD/icon.h \
-    $$PWD/theme/theme.h \
-    $$PWD/stylehelper.h \
     $$PWD/executeondestruction.h \
     $$PWD/htmldocextractor.h \
     $$PWD/link.h \
-    $$PWD/utilsicons.h \
     $$PWD/settingsutils.h \
     $$PWD/filesearch.h \
     $$PWD/mapreduce.h \
-    $$PWD/fadingindicator.h \
     $$PWD/qtcolorbutton.h \
     $$PWD/uncommentselection.h
 
-RESOURCES += \
-    $$PWD/utilimages.qrc
-
-osx {
+macx {
     HEADERS += \
         $$PWD/fileutils_mac.h
     OBJECTIVE_SOURCES += \

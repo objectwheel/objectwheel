@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>257</width>
-    <height>163</height>
+    <width>266</width>
+    <height>172</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -53,6 +53,9 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>Play simulation.</string>
      </property>
@@ -81,6 +84,9 @@
        <width>70</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="toolTip">
       <string>Type of easing curve.</string>
@@ -163,6 +169,9 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>Acceleration or deceleration of easing curve.</string>
      </property>
@@ -205,6 +214,9 @@
        <width>70</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="toolTip">
       <string>Duration of animation.</string>
@@ -250,6 +262,9 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>Amplitude of elastic and bounce easing curves.</string>
      </property>
@@ -291,6 +306,9 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>Easing period of an elastic curve.</string>
      </property>
@@ -331,6 +349,9 @@
        <width>70</width>
        <height>16777215</height>
       </size>
+     </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="toolTip">
       <string>Easing overshoot for a back curve.</string>

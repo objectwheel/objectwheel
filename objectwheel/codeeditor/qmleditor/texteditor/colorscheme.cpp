@@ -480,8 +480,7 @@ bool ColorScheme::loadColorSchemeInto(ColorScheme& scheme, const QString& fileNa
 
 QString ColorScheme::createColorSchemeFileName(const QString& pattern)
 {
-    const QString stylesPath = ApplicationCore::appDataPath() + "/Styles/";
-    QString baseFileName = stylesPath;
+    QString baseFileName = ApplicationCore::stylesPath() + QLatin1Char('/');
     baseFileName += pattern;
 
     // Find an available file name
@@ -493,8 +492,8 @@ QString ColorScheme::createColorSchemeFileName(const QString& pattern)
     } while (QFile::exists(fileName));
 
     // Create the base directory when it doesn't exist
-    if (!QFile::exists(stylesPath) && !QDir().mkpath(stylesPath)) {
-        qWarning() << "Failed to create color scheme directory:" << stylesPath;
+    if (!QFile::exists(ApplicationCore::stylesPath()) && !QDir().mkpath(ApplicationCore::stylesPath())) {
+        qWarning() << "Failed to create color scheme directory:" << ApplicationCore::stylesPath();
         return QString();
     }
 

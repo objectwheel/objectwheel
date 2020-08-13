@@ -891,6 +891,7 @@ PreviewDialog::PreviewDialog(QWidget *parent) : DragWidget(parent)
     toolButton->setIcon(icon);
     toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     toolButton->setFixedSize(icon.availableSizes().value(0) + QSize(4, 4));
+    toolButton->setCursor(Qt::PointingHandCursor);
     connect(toolButton, &QToolButton::clicked, this, &PreviewDialog::onTogglePane);
 
     QScrollArea *scrollArea = new QScrollArea(this);

@@ -10,9 +10,9 @@ using namespace QmlJSEditor;
 
 QmlJsEditingSettings::QmlJsEditingSettings()
     : m_enableContextPane(false),
-    m_pinContextPane(false),
-    m_autoFormatOnSave(false),
-    m_autoFormatOnlyCurrentProject(false)
+      m_pinContextPane(false),
+      m_autoFormatOnSave(false),
+      m_autoFormatOnlyCurrentProject(false)
 {}
 
 void QmlJsEditingSettings::set()
@@ -103,7 +103,5 @@ void QmlJsEditingSettings::setAutoFormatOnlyCurrentProject(const bool autoFormat
 
 QmlJsEditingSettings QmlJsEditingSettings::get()
 {
-    QmlJsEditingSettings settings;
-    settings.fromSettings(ApplicationCore::settings());
-    return settings;
+    return QmlJsEditingSettings();
 }

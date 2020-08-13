@@ -19,7 +19,6 @@
 #include <fileexplorer_p.h>
 #include <lineedit.h>
 #include <utilityfunctions.h>
-#include <utilsicons.h>
 #include <paintutils.h>
 #include <filesystemutils.h>
 #include <private/qtreeview_p.h>
@@ -118,16 +117,16 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     m_newFolderButton->setToolTip(tr("Create an empty new folder within the current directory"));
     m_pathIndicator->setToolTip(tr("Double click on this in order to edit the path"));
 
-    m_upButton->setIcon(Utils::Icons::ARROW_UP.icon());
-    m_backButton->setIcon(Utils::Icons::ARROW_BACK.icon());
-    m_forthButton->setIcon(Utils::Icons::ARROW_FORTH.icon());
-    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
-    m_copyButton->setIcon(Utils::Icons::COPY_TOOLBAR.icon());
-    m_pasteButton->setIcon(Utils::Icons::PASTE_TOOLBAR.icon());
-    m_deleteButton->setIcon(Utils::Icons::DELETE_TOOLBAR.icon());
-    m_renameButton->setIcon(Utils::Icons::RENAME.icon());
-    m_newFileButton->setIcon(Utils::Icons::FILENEW.icon());
-    m_newFolderButton->setIcon(Utils::Icons::FOLDERNEW.icon());
+//    m_upButton->setIcon(Utils::Icons::ARROW_UP.icon());
+//    m_backButton->setIcon(Utils::Icons::ARROW_BACK.icon());
+//    m_forthButton->setIcon(Utils::Icons::ARROW_FORTH.icon());
+//    m_homeButton->setIcon(Utils::Icons::HOME_TOOLBAR.icon());
+//    m_copyButton->setIcon(Utils::Icons::COPY_TOOLBAR.icon());
+//    m_pasteButton->setIcon(Utils::Icons::PASTE_TOOLBAR.icon());
+//    m_deleteButton->setIcon(Utils::Icons::DELETE_TOOLBAR.icon());
+//    m_renameButton->setIcon(Utils::Icons::RENAME.icon());
+//    m_newFileButton->setIcon(Utils::Icons::FILENEW.icon());
+//    m_newFolderButton->setIcon(Utils::Icons::FOLDERNEW.icon());
 
     m_upButton->setFixedSize(18, 18);
     m_backButton->setFixedSize(18, 18);

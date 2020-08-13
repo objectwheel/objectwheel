@@ -53,54 +53,54 @@ const QMap<QString, QString> AndroidPlatformWidget::orientationMap {
 };
 
 const QMap<QString, QString> AndroidPlatformWidget::qtModuleMap {
-    { "Qt Bluetooth", "bluetooth" },
-    { "Qt Charts", "charts" },
-    { "Qt Concurrent", "concurrent" },
-    { "Qt Data Visualization", "datavisualization" },
-    { "Qt Gamepad", "gamepad" },
-    { "Qt Location", "location" },
-    { "Qt Multimedia", "multimedia" },
-    { "Qt Network Authorization", "networkauth" },
-    { "Qt Network", "network" },
-    { "Qt Nfc", "nfc" },
-    { "Qt OpenGL Extensions", "openglextensions" },
-    { "Qt OpenGL", "opengl" },
-    { "Qt Positioning Quick", "positioningquick" },
-    { "Qt Positioning", "positioning" },
-    { "Qt Print Support", "printsupport" },
-    { "Qt Purchasing", "purchasing" },
-    { "Qt Qml Models", "qmlmodels" },
-    { "Qt Qml Worker Script", "qmlworkerscript" },
-    { "Qt Quick Templates 2", "quicktemplates2" },
-    { "Qt Quick Test", "qmltest" },
-    { "Qt Remote Objects", "remoteobjects" },
-    { "Qt Script Tools", "scripttools" },
-    { "Qt Script", "script" },
-    { "Qt Scxml", "scxml" },
-    { "Qt Sensors", "sensors" },
-    { "Qt Serial Port", "serialport" },
-    { "Qt Sql", "sql" },
-    { "Qt Svg", "svg" },
-    { "Qt Test", "testlib" },
-    { "Qt Text to Speech", "texttospeech" },
-    { "Qt WebChannel", "webchannel" },
-    { "Qt WebSockets", "websockets" },
-    { "Qt WebView", "webview" },
-    { "Qt Widgets", "widgets" },
-    { "Qt Xml Patterns", "xmlpatterns" },
-    { "Qt Xml", "xml" },
-    { "Qt 3D Animation", "3danimation" },
-    { "Qt 3D Core", "3dcore" },
-    { "Qt 3D Extras", "3dextras" },
-    { "Qt 3D Input", "3dinput" },
-    { "Qt 3D Logic", "3dlogic" },
-    { "Qt 3D Quick Animation", "3dquickanimation" },
-    { "Qt 3D Quick Extras", "3dquickextras" },
-    { "Qt 3D Quick Input", "3dquickinput" },
-    { "Qt 3D Quick Render", "3dquickrender" },
-    { "Qt 3D Quick", "3dquick" },
-    { "Qt 3D QuickScene 2D", "3dquickscene2d" },
-    { "Qt 3D Render", "3drender" }
+    { "Bluetooth", "bluetooth" },
+    { "Charts", "charts" },
+    { "Concurrent", "concurrent" },
+    { "Data Visualization", "datavisualization" },
+    { "Gamepad", "gamepad" },
+    { "Location", "location" },
+    { "Multimedia", "multimedia" },
+    { "Network Authorization", "networkauth" },
+    { "Network", "network" },
+    { "Nfc", "nfc" },
+    { "OpenGL Extensions", "openglextensions" },
+    { "OpenGL", "opengl" },
+    { "Positioning Quick", "positioningquick" },
+    { "Positioning", "positioning" },
+    { "Print Support", "printsupport" },
+    { "Purchasing", "purchasing" },
+    { "Qml Models", "qmlmodels" },
+    { "Qml Worker Script", "qmlworkerscript" },
+    { "Quick Templates 2", "quicktemplates2" },
+    { "Quick Test", "qmltest" },
+    { "Remote Objects", "remoteobjects" },
+    { "Script Tools", "scripttools" },
+    { "Script", "script" },
+    { "Scxml", "scxml" },
+    { "Sensors", "sensors" },
+    { "Serial Port", "serialport" },
+    { "Sql", "sql" },
+    { "Svg", "svg" },
+    { "Test", "testlib" },
+    { "Text to Speech", "texttospeech" },
+    { "WebChannel", "webchannel" },
+    { "WebSockets", "websockets" },
+    { "WebView", "webview" },
+    { "Widgets", "widgets" },
+    { "Xml Patterns", "xmlpatterns" },
+    { "Xml", "xml" },
+    { "3D Animation", "3danimation" },
+    { "3D Core", "3dcore" },
+    { "3D Extras", "3dextras" },
+    { "3D Input", "3dinput" },
+    { "3D Logic", "3dlogic" },
+    { "3D Quick Animation", "3dquickanimation" },
+    { "3D Quick Extras", "3dquickextras" },
+    { "3D Quick Input", "3dquickinput" },
+    { "3D Quick Render", "3dquickrender" },
+    { "3D Quick", "3dquick" },
+    { "3D QuickScene 2D", "3dquickscene2d" },
+    { "3D Render", "3drender" }
 };
 
 const QStringList AndroidPlatformWidget::androidPermissionList {
@@ -347,7 +347,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     auto settingsLabel = new QLabel(tr("Settings"));
 
     iconLabel->setFixedSize(QSize(60, 60));
-    iconLabel->setPixmap(PaintUtils::pixmap(QLatin1String(":/images/builds/android.svg"),
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android.svg"),
                                             QSize(60, 60), this));
 
     QFont f = UtilityFunctions::systemTitleFont();
@@ -438,7 +438,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
 
     auto aabLabel = new QLabel(tr("Android App Bundle:"), this);
     auto abisLabel = new QLabel(tr("Build ABIs:"), this);
-    auto qtModulesLabel = new QLabel(tr("Qt modules:"), this);
+    auto qtModulesLabel = new QLabel(tr("Modules:"), this);
     auto autoDetectQtModulesCheck = new QCheckBox(tr("Automatically detected"), this);
 
     auto abisLayout = new QVBoxLayout;
@@ -661,7 +661,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     autoDetectPemissionsCheck->setToolTip(tr("Enable automatic detection of Android permissions"
                                              "<p style='white-space:nowrap;font-size:11px'>"
                                              "Our cloud build system will try to guess Android permissions based on<br>"
-                                             "the QML imports and Qt modules you use in your project.</p>"));
+                                             "the QML imports and modules you use in your project.</p>"));
     m_includePemissionsCheck->setToolTip(tr("Enable adding extra Android permissions manually"
                                             "<p style='white-space:nowrap;font-size:11px'>"
                                             "It could be useful to add some extra permissions manually in case our<br>"
@@ -672,22 +672,22 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
                                      "<a href='https://developer.android.com/reference/android/Manifest.permission'>"
                                      "https://developer.android.com/reference/android/Manifest.permission</a></i></p>"));
     m_permissionList->setToolTip(tr("User defined Android permissions for the application"));
-    autoDetectQtModulesCheck->setToolTip(tr("Enable automatic detection of Qt modules"
+    autoDetectQtModulesCheck->setToolTip(tr("Enable automatic detection of necessary modules"
                                             "<p style='white-space:nowrap;font-size:11px'>"
-                                            "Our cloud build system will try to guess Qt modules your application needs<br>"
+                                            "Our cloud build system will try to guess necessary modules your application needs<br>"
                                             "to be linked against based on the QML imports you use in your project.</p>"));
-    m_includeQtModulesCheck->setToolTip(tr("Enable adding extra Qt modules manually"
+    m_includeQtModulesCheck->setToolTip(tr("Enable adding modules manually"
                                            "<p style='white-space:nowrap;font-size:11px'>"
-                                           "It could be useful to add some extra Qt modules to link against manually<br>"
+                                           "It could be useful to add some extra modules to link against manually<br>"
                                            "in case our cloud build system might not be able to detect all the<br>"
-                                           "necessary Qt modules for your application to run. E.g. if you use svg<br>"
+                                           "necessary modules for your application to run. E.g. if you use svg<br>"
                                            "images in your project we might not be able to detect it (since our<br>"
                                            "algorithm only scans for the import statements in qml files).</p>"));
     m_qtModuleCombo->setToolTip(tr("<p style='white-space:nowrap'>"
-                                   "Qt module list to choose from. For more information about Qt modules please refer to:<br><i>"
+                                   "Module list to choose from. For more information about modules please refer to:<br><i>"
                                    "<a href='https://doc.qt.io/qt-5/qtmodules.html'>"
                                    "https://doc.qt.io/qt-5/qtmodules.html</a></i></p>"));
-    m_qtModuleList->setToolTip(tr("User defined Qt modules for the application to link against"));
+    m_qtModuleList->setToolTip(tr("User defined modules for the application to link against"));
     m_aabCheck->setToolTip(tr("<p style='white-space:nowrap'>"
                               "For more information about Android App Bundles:<br><i>"
                               "<a href='https://developer.android.com/guide/app-bundle'>"

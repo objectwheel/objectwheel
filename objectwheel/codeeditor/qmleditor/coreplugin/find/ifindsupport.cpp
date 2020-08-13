@@ -25,9 +25,6 @@
 
 #include "ifindsupport.h"
 
-#include <utils/fadingindicator.h>
-#include <utils/stylehelper.h>
-
 using namespace Core;
 
 void IFindSupport::replace(const QString &before, const QString &after, FindFlags findFlags)
@@ -55,6 +52,8 @@ int IFindSupport::replaceAll(const QString &before, const QString &after, FindFl
 
 void IFindSupport::showWrapIndicator(QWidget *parent)
 {
-    Utils::FadingIndicator::showPixmap(parent, Utils::StyleHelper::dpiSpecificImageFile(
-                                           QLatin1String(":/find/images/wrapindicator.png")));
+    Q_UNUSED(parent)
+    // FIXME
+    // Utils::FadingIndicator::showPixmap(parent, Utils::StyleHelper::dpiSpecificImageFile(
+    //                                    QLatin1String(":/find/images/wrapindicator.png")));
 }

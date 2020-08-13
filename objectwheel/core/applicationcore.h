@@ -46,6 +46,8 @@ public:
     static QString resourcePath();
     static QString documentsPath();
     static QString updatesPath();
+    static QString stylesPath();
+    static QString resourceStylesPath();
     static QString appDataPath();
 
 private:

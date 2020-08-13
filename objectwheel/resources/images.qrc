@@ -163,5 +163,7 @@
         <file>images/settings/downloading.svg</file>
         <file>images/subscription/subscription.svg</file>
         <file>images/subscription/payment-details.svg</file>
+        <file>images/clear.svg</file>
+        <file>images/lightbulb.svg</file>
     </qresource>
 </RCC>

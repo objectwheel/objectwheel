@@ -74,19 +74,9 @@ QmlBundle BasicBundleProvider::defaultQt5QtQuick2Bundle()
     return defaultBundle(QLatin1String("qt5QtQuick2-bundle.json"));
 }
 
-QmlBundle BasicBundleProvider::defaultQbsBundle()
-{
-    return defaultBundle(QLatin1String("qbs-bundle.json"));
-}
-
 QmlBundle BasicBundleProvider::defaultQmltypesBundle()
 {
     return defaultBundle(QLatin1String("qmltypes-bundle.json"));
-}
-
-QmlBundle BasicBundleProvider::defaultQmlprojectBundle()
-{
-    return defaultBundle(QLatin1String("qmlproject-bundle.json"));
 }
 
 void BasicBundleProvider::mergeBundlesForKit(ProjectExplorer::Kit */*kit*/
@@ -95,9 +85,7 @@ void BasicBundleProvider::mergeBundlesForKit(ProjectExplorer::Kit */*kit*/
 {
 //    QHash<QString,QString> myReplacements = replacements;
 
-    bundles.mergeBundleForLanguage(Dialect::QmlQbs, defaultQbsBundle());
     bundles.mergeBundleForLanguage(Dialect::QmlTypeInfo, defaultQmltypesBundle());
-    bundles.mergeBundleForLanguage(Dialect::QmlProject, defaultQmlprojectBundle());
 
 //    QtSupport::BaseQtVersion *qtVersion = QtSupport::QtKitInformation::qtVersion(kit); BUG ??
 //    if (!qtVersion) {

@@ -1,6 +1,5 @@
 #include <applicationstyle.h>
 #include <utilityfunctions.h>
-#include <utilsicons.h>
 #include <paintutils.h>
 
 #include <QStyleFactory>
@@ -299,18 +298,35 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
 {
     QPixmap pixmap;
     switch (standardPixmap) {
-    case SP_DockWidgetCloseButton:
-        pixmap = PaintUtils::pixmap(Utils::Icons::CLOSE_TOOLBAR.icon(), QSize(64, 64), widget);
-        break;
-    case SP_LineEditClearButton:
-        pixmap = PaintUtils::pixmap(Utils::Icons::EDIT_CLEAR.icon(), QSize(64, 64), widget);
-        break;
-    case SP_ToolBarHorizontalExtensionButton: {
-        QSize size(16, 16); // Default toolbar icon size
-        if (auto btn = qobject_cast<const QToolButton*>(widget))
-            size = btn->iconSize();
-        pixmap = PaintUtils::renderOverlaidPixmap(":/images/extension.svg", "#505050", size, widget);
+    case SP_LineEditClearButton: {
+        int sz = proxy()->pixelMetric(PM_SmallIconSize, option, widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/clear.svg"), QSize(sz, sz), widget);
+        if (option)
+            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, option->palette.buttonText().color().lighter());
+        else if (widget)
+            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, widget->palette().buttonText().color().lighter());
     } break;
+
+    case SP_DockWidgetCloseButton: {
+        int sz = proxy()->pixelMetric(PM_ButtonIconSize, option, widget);
+        QSize size(sz, sz);
+        if (auto btn = qobject_cast<const QAbstractButton*>(widget))
+            size = btn->iconSize();
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/designer/close.svg"), QSize(sz, sz), widget);
+    } break;
+
+    case SP_ToolBarHorizontalExtensionButton: {
+        int sz = proxy()->pixelMetric(PM_ToolBarIconSize, option, widget);
+        QSize size(sz, sz);
+        if (auto btn = qobject_cast<const QAbstractButton*>(widget))
+            size = btn->iconSize();
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/extension.svg"), size, widget);
+        if (option)
+            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, option->palette.buttonText().color().lighter());
+        else if (widget)
+            pixmap = PaintUtils::renderOverlaidPixmap(pixmap, widget->palette().buttonText().color().lighter());
+    } break;
+
     default:
         pixmap = QFusionStyle::standardPixmap(standardPixmap, option, widget);
         break;
@@ -329,17 +345,19 @@ QIcon ApplicationStyle::standardIcon(QStyle::StandardPixmap standardIcon, const 
 {
     QIcon icon;
     switch (standardIcon) {
+    case SP_LineEditClearButton: {
+        const QPixmap& stdPix = proxy()->standardPixmap(standardIcon, option, widget);
+        icon.addPixmap(stdPix);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 100)), QIcon::Active);
+    } break;
     case SP_DockWidgetCloseButton:
-    case SP_LineEditClearButton:
-        icon.addPixmap(standardPixmap(standardIcon, option, widget), QIcon::Normal);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(standardPixmap(standardIcon, option, widget),
-                                                        QColor(0, 0, 0, 100)), QIcon::Active);
+        icon.addPixmap(proxy()->standardPixmap(standardIcon, option, widget));
         break;
-    case SP_ToolBarHorizontalExtensionButton:
-        icon.addPixmap(standardPixmap(standardIcon, option, widget), QIcon::Normal);
-        icon.addPixmap(PaintUtils::renderOverlaidPixmap(standardPixmap(standardIcon, option, widget),
-                                                        QColor(0, 0, 0, 150)), QIcon::Normal, QIcon::On);
-        break;
+    case SP_ToolBarHorizontalExtensionButton: {
+        const QPixmap& stdPix = proxy()->standardPixmap(standardIcon, option, widget);
+        icon.addPixmap(stdPix);
+        icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 100)), QIcon::Normal, QIcon::On);
+    } break;
     default:
         icon = QFusionStyle::standardIcon(standardIcon, option, widget);
         break;
@@ -977,7 +995,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             auto copy = *cb;
             copy.direction = Qt::LeftToRight;
             // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
-            QFusionStyle::drawControl(CE_ComboBoxLabel, &copy, painter, widget);
+            QFusionStyle::drawControl(element, &copy, painter, widget);
         } break;
     case CE_PushButtonLabel:
         if (const QStyleOptionButton *button = qstyleoption_cast<const QStyleOptionButton *>(option)) {

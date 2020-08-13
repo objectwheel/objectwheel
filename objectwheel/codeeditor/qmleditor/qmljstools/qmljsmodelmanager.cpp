@@ -56,7 +56,6 @@
 
 #include <utils/algorithm.h>
 #include <utils/hostosinfo.h>
-#include <utils/mimetypes/mimedatabase.h>
 
 #include <QDir>
 #include <QFile>
@@ -82,24 +81,24 @@ QHash<QString,Dialect> ModelManager::initLanguageForSuffix() const
 {
     QHash<QString,Dialect> res = ModelManagerInterface::languageForSuffix();
 
-    MimeType jsSourceTy = Utils::mimeTypeForName(Constants::JS_MIMETYPE);
-    foreach (const QString &suffix, jsSourceTy.suffixes())
-        res[suffix] = Dialect::JavaScript;
-    MimeType qmlSourceTy = Utils::mimeTypeForName(Constants::QML_MIMETYPE);
-    foreach (const QString &suffix, qmlSourceTy.suffixes())
-        res[suffix] = Dialect::Qml;
-    MimeType qbsSourceTy = Utils::mimeTypeForName(Constants::QBS_MIMETYPE);
-    foreach (const QString &suffix, qbsSourceTy.suffixes())
-        res[suffix] = Dialect::QmlQbs;
-    MimeType qmlProjectSourceTy = Utils::mimeTypeForName(Constants::QMLPROJECT_MIMETYPE);
-    foreach (const QString &suffix, qmlProjectSourceTy.suffixes())
-        res[suffix] = Dialect::QmlProject;
-    MimeType qmlUiSourceTy = Utils::mimeTypeForName(Constants::QMLUI_MIMETYPE);
-    foreach (const QString &suffix, qmlUiSourceTy.suffixes())
-        res[suffix] = Dialect::QmlQtQuick2Ui;
-    MimeType jsonSourceTy = Utils::mimeTypeForName(Constants::JSON_MIMETYPE);
-    foreach (const QString &suffix, jsonSourceTy.suffixes())
-        res[suffix] = Dialect::Json;
+//    MimeType jsSourceTy = Utils::mimeTypeForName(Constants::JS_MIMETYPE);
+//    foreach (const QString &suffix, jsSourceTy.suffixes())
+//        res[suffix] = Dialect::JavaScript;
+//    MimeType qmlSourceTy = Utils::mimeTypeForName(Constants::QML_MIMETYPE);
+//    foreach (const QString &suffix, qmlSourceTy.suffixes())
+//        res[suffix] = Dialect::Qml;
+//    MimeType qbsSourceTy = Utils::mimeTypeForName(Constants::QBS_MIMETYPE);
+//    foreach (const QString &suffix, qbsSourceTy.suffixes())
+//        res[suffix] = Dialect::QmlQbs;
+//    MimeType qmlProjectSourceTy = Utils::mimeTypeForName(Constants::QMLPROJECT_MIMETYPE);
+//    foreach (const QString &suffix, qmlProjectSourceTy.suffixes())
+//        res[suffix] = Dialect::QmlProject;
+//    MimeType qmlUiSourceTy = Utils::mimeTypeForName(Constants::QMLUI_MIMETYPE);
+//    foreach (const QString &suffix, qmlUiSourceTy.suffixes())
+//        res[suffix] = Dialect::QmlQtQuick2Ui;
+//    MimeType jsonSourceTy = Utils::mimeTypeForName(Constants::JSON_MIMETYPE);
+//    foreach (const QString &suffix, jsonSourceTy.suffixes())
+//        res[suffix] = Dialect::Json;
 
     return res;
 }

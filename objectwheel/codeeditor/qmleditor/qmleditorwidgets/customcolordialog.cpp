@@ -81,6 +81,11 @@ CustomColorDialog::CustomColorDialog(QWidget *parent) : QFrame(parent )
     m_bSpinBox = new QDoubleSpinBox(this);
     m_alphaSpinBox = new QDoubleSpinBox(this);
 
+    m_rSpinBox->setCursor(Qt::PointingHandCursor);
+    m_gSpinBox->setCursor(Qt::PointingHandCursor);
+    m_bSpinBox->setCursor(Qt::PointingHandCursor);
+    m_alphaSpinBox->setCursor(Qt::PointingHandCursor);
+
     QGridLayout *gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(4);
     gridLayout->setVerticalSpacing(4);
@@ -103,9 +108,10 @@ CustomColorDialog::CustomColorDialog(QWidget *parent) : QFrame(parent )
     gridLayout->addWidget(m_alphaSpinBox, 3, 4, 1, 1);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(this);
-
     QPushButton *cancelButton = buttonBox->addButton(QDialogButtonBox::Cancel);
     QPushButton *applyButton = buttonBox->addButton(QDialogButtonBox::Apply);
+    cancelButton->setCursor(Qt::PointingHandCursor);
+    applyButton->setCursor(Qt::PointingHandCursor);
 
     gridLayout->addWidget(buttonBox, 4, 0, 1, 2);
 

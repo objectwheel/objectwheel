@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>282</width>
-    <height>93</height>
+    <height>102</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -52,10 +52,16 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
     </widget>
    </item>
    <item row="1" column="1">
     <widget class="QRadioButton" name="stretchRadioButton">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>The image is scaled to fit.</string>
      </property>
@@ -63,7 +69,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resources.qrc">
+      <iconset resource="../../../../utils/resources/resources.qrc">
        <normaloff>:/qmldesigner/images/scale-icon.png</normaloff>:/qmldesigner/images/scale-icon.png</iconset>
      </property>
      <property name="iconSize">
@@ -76,6 +82,9 @@
    </item>
    <item row="1" column="2">
     <widget class="QRadioButton" name="horizontalStretchRadioButton">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>The image is stretched horizontally and tiled vertically.</string>
      </property>
@@ -83,7 +92,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resources.qrc">
+      <iconset resource="../../../../utils/resources/resources.qrc">
        <normaloff>:/qmldesigner/images/horizontal-scale-icon.png</normaloff>:/qmldesigner/images/horizontal-scale-icon.png</iconset>
      </property>
      <property name="iconSize">
@@ -96,6 +105,9 @@
    </item>
    <item row="1" column="3">
     <widget class="QRadioButton" name="verticalStretchRadioButton">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>The image is stretched vertically and tiled horizontally.</string>
      </property>
@@ -103,7 +115,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resources.qrc">
+      <iconset resource="../../../../utils/resources/resources.qrc">
        <normaloff>:/qmldesigner/images/vertical-scale-icon.png</normaloff>:/qmldesigner/images/vertical-scale-icon.png</iconset>
      </property>
      <property name="iconSize">
@@ -116,6 +128,9 @@
    </item>
    <item row="2" column="1">
     <widget class="QRadioButton" name="tileRadioButton">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>The image is duplicated horizontally and vertically.</string>
      </property>
@@ -123,7 +138,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resources.qrc">
+      <iconset resource="../../../../utils/resources/resources.qrc">
        <normaloff>:/qmldesigner/images/tile-icon.png</normaloff>:/qmldesigner/images/tile-icon.png</iconset>
      </property>
      <property name="iconSize">
@@ -136,6 +151,9 @@
    </item>
    <item row="2" column="2">
     <widget class="QRadioButton" name="preserveAspectFitRadioButton">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>The image is scaled uniformly to fit without cropping.</string>
      </property>
@@ -143,7 +161,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resources.qrc">
+      <iconset resource="../../../../utils/resources/resources.qrc">
        <normaloff>:/qmldesigner/images/aspect-fit-icon.png</normaloff>:/qmldesigner/images/aspect-fit-icon.png</iconset>
      </property>
      <property name="iconSize">
@@ -156,6 +174,9 @@
    </item>
    <item row="2" column="3">
     <widget class="QRadioButton" name="cropAspectFitRadioButton">
+     <property name="cursor">
+      <cursorShape>PointingHandCursor</cursorShape>
+     </property>
      <property name="toolTip">
       <string>The image is scaled uniformly to fill, cropping if necessary.</string>
      </property>
@@ -163,7 +184,7 @@
       <string/>
      </property>
      <property name="icon">
-      <iconset resource="resources.qrc">
+      <iconset resource="../../../../utils/resources/resources.qrc">
        <normaloff>:/qmldesigner/images/aspect-crop-icon.png</normaloff>:/qmldesigner/images/aspect-crop-icon.png</iconset>
      </property>
      <property name="iconSize">
@@ -289,7 +310,8 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="resources.qrc"/>
+  <include location="../../../../utils/resources/resources.qrc"/>
+  <include location="../../../../utils/resources/resources.qrc"/>
  </resources>
  <connections/>
 </ui>

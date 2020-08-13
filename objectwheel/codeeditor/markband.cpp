@@ -2,7 +2,6 @@
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
 #include <utils/tooltip/tooltip.h>
-#include <utils/utilsicons.h>
 
 #include <QPainter>
 #include <QPaintEvent>
@@ -11,52 +10,53 @@ using namespace Utils;
 
 QPixmap pixmap(Mark::Type type)
 {
-    switch (type) {
-    case Mark::Type::Note: {
-        const static auto pixmap = Utils::Icons::INFO.pixmap();
-        return pixmap;
-    }
-    case Mark::Type::Warning: {
-        const static auto pixmap = Utils::Icons::WARNING.pixmap();
-        return pixmap;
-    }
-    case Mark::Type::CodeModelWarning: {
-        const static auto pixmap = Utils::Icons::CODEMODEL_WARNING.pixmap();
-        return pixmap;
-    }
-    case Mark::Type::Bug: {
-        const static auto pixmap =
-                Icon({
-                         {":/utils/images/bugfill.png", Theme::BackgroundColorNormal},
-                         {":/utils/images/bug.png", Theme::IconsInterruptColor}
-                     }, Icon::Tint).pixmap();
+//    switch (type) {
+//    case Mark::Type::Note: {
+//        const static auto pixmap = Utils::Icons::INFO.pixmap();
+//        return pixmap;
+//    }
+//    case Mark::Type::Warning: {
+//        const static auto pixmap = Utils::Icons::WARNING.pixmap();
+//        return pixmap;
+//    }
+//    case Mark::Type::CodeModelWarning: {
+//        const static auto pixmap = Utils::Icons::CODEMODEL_WARNING.pixmap();
+//        return pixmap;
+//    }
+//    case Mark::Type::Bug: {
+//        const static auto pixmap =
+//                Icon({
+//                         {":/utils/images/bugfill.png", Theme::BackgroundColorNormal},
+//                         {":/utils/images/bug.png", Theme::IconsInterruptColor}
+//                     }, Icon::Tint).pixmap();
 
-        return pixmap;
-    }
-    case Mark::Type::Todo: {
-        const static auto pixmap =
-                Icon({
-                         {":/utils/images/tasklist.png", Theme::IconsCodeModelFunctionColor}
-                     }, Icon::Tint).pixmap();
-        return pixmap;
-    }
-    case Mark::Type::FixMe: {
-        const static auto pixmap = Utils::Icons::PROJECT.pixmap();
-        return pixmap;
-    }
-    case Mark::Type::CodeModelError: {
-        const static auto pixmap = Utils::Icons::CODEMODEL_ERROR.pixmap();
-        return pixmap;
-    }
-    case Mark::Type::Error: {
-        const static auto pixmap = Utils::Icons::CRITICAL_TOOLBAR.pixmap();
-        return pixmap;
-    }
-    default: {
-        const static auto pixmap = Utils::Icons::EMPTY16.pixmap();
-        return pixmap;
-    }
-    }
+//        return pixmap;
+//    }
+//    case Mark::Type::Todo: {
+//        const static auto pixmap =
+//                Icon({
+//                         {":/utils/images/tasklist.png", Theme::IconsCodeModelFunctionColor}
+//                     }, Icon::Tint).pixmap();
+//        return pixmap;
+//    }
+//    case Mark::Type::FixMe: {
+//        const static auto pixmap = Utils::Icons::PROJECT.pixmap();
+//        return pixmap;
+//    }
+//    case Mark::Type::CodeModelError: {
+//        const static auto pixmap = Utils::Icons::CODEMODEL_ERROR.pixmap();
+//        return pixmap;
+//    }
+//    case Mark::Type::Error: {
+//        const static auto pixmap = Utils::Icons::CRITICAL_TOOLBAR.pixmap();
+//        return pixmap;
+//    }
+//    default: {
+//        const static auto pixmap = Utils::Icons::EMPTY16.pixmap();
+//        return pixmap;
+//    }
+//    }
+    return {};
 }
 
 MarkBand::MarkBand(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)

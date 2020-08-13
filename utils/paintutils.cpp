@@ -139,6 +139,9 @@ QPixmap PaintUtils::renderPropertyColorPixmap(const QSize& size, const QColor& c
 
 QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& color)
 {
+    if (pixmap.isNull())
+        return pixmap;
+
     QPixmap dest(pixmap);
     QColor opaque(color);
     opaque.setAlphaF(1);

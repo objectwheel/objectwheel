@@ -134,11 +134,13 @@ FunctionHintProposalWidget::FunctionHintProposalWidget()
     downArrow->setArrowType(Qt::DownArrow);
     downArrow->setFixedSize(16, 16);
     downArrow->setAutoRaise(true);
+    downArrow->setCursor(Qt::PointingHandCursor);
 
     auto upArrow = new QToolButton;
     upArrow->setArrowType(Qt::UpArrow);
     upArrow->setFixedSize(16, 16);
     upArrow->setAutoRaise(true);
+    upArrow->setCursor(Qt::PointingHandCursor);
 
     auto pagerLayout = new QHBoxLayout(d->m_pager);
     pagerLayout->setContentsMargins(0, 0, 0, 0);

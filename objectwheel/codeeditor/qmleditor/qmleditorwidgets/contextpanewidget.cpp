@@ -43,7 +43,6 @@
 #include "customcolordialog.h"
 #include "colorbutton.h"
 #include <qmleditorwidgets/easingpane/easingcontextpane.h>
-#include <utilsicons.h>
 
 using namespace Utils;
 
@@ -145,6 +144,7 @@ ContextPaneWidget::ContextPaneWidget(QWidget *parent) : DragWidget(parent), m_cu
 
     m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton, 0, m_toolButton));
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
+    m_toolButton->setCursor(Qt::PointingHandCursor);
     m_toolButton->setFixedSize(16, 16);
 
     m_toolButton->setToolTip(tr("Hides this toolbar."));
@@ -465,7 +465,7 @@ void ContextPaneWidget::setPinButton()
     m_toolButton->setAutoRaise(true);
     m_pinned = true;
 
-    m_toolButton->setIcon(Utils::Icons::UNPIN_TOOLBAR.icon());
+    m_toolButton->setIcon(QIcon(QStringLiteral(":/images/designer/unpin.svg")));
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_toolButton->setFixedSize(20, 20);
     m_toolButton->setToolTip(tr("Unpins the toolbar and moves it to the default position."));
@@ -485,7 +485,8 @@ void ContextPaneWidget::setLineButton()
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
     m_toolButton->setFixedSize(20, 20);
     m_toolButton->setToolTip(tr("Hides this toolbar. This toolbar can be"
-                                " permanently disabled in the options page or in the context menu."));
+                                " permanently disabled in the options"
+                                " page or in the context menu."));
 
     pinnedChanged(false);
     if (m_resetAction) {

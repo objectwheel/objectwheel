@@ -12,7 +12,6 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
 {
     resize(sizeHint()); // Don't use adjustSize() on Windows
     move(UtilityFunctions::centerPos(size()));
-    setWindowModality(Qt::ApplicationModal);
     setAttribute(Qt::WA_QuitOnClose, false);
     setWindowTitle(AppConstants::LABEL);
     setWindowFlags(Qt::Dialog

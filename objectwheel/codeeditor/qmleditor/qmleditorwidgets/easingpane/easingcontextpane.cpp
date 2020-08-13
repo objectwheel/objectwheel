@@ -26,7 +26,8 @@
 #include "easingcontextpane.h"
 #include "ui_easingcontextpane.h"
 #include <qmljs/qmljspropertyreader.h>
-#include <utils/utilsicons.h>
+#include <paintutils.h>
+#include <applicationstyle.h>
 
 #include <QGraphicsPixmapItem>
 #include <QGraphicsScene>
@@ -49,7 +50,7 @@ class EasingSimulation : public QObject
 public:
     QGraphicsView *m_g;
     EasingSimulation(QObject *parent=0, QGraphicsView *v=0):QObject(parent) {
-        m_qtLogo = new PixmapItem(QPixmap(":/qmleditorwidgets/ow_logo.png"));
+        m_qtLogo = new PixmapItem(PaintUtils::pixmap(QStringLiteral(":/images/icon.png"), QSize(48, 48), v));
         m_scene.addItem(m_qtLogo);
         m_scene.setSceneRect(0,0,v->viewport()->width(),m_qtLogo->boundingRect().height());
         m_qtLogo->hide();
@@ -112,7 +113,6 @@ private:
     QSequentialAnimationGroup *m_sequential;
 };
 
-
 EasingContextPane::EasingContextPane(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::EasingContextPane)
@@ -125,7 +125,24 @@ EasingContextPane::EasingContextPane(QWidget *parent) :
     m_easingGraph->raise();
     setLinear();
 
-    ui->playButton->setIcon(Utils::Icons::RUN_SMALL.icon());
+    ApplicationStyle::setButtonStyle(ui->playButton, ApplicationStyle::TexturedRounded);
+    auto updatePalette = [=] {
+        QPalette p(QApplication::palette());
+        p.setColor(QPalette::Active, QPalette::Text, "#505050");
+        p.setColor(QPalette::Inactive, QPalette::Text, "#505050");
+        p.setColor(QPalette::Disabled, QPalette::Text, "#9c9c9c");
+        p.setColor(QPalette::Active, QPalette::WindowText, "#505050");
+        p.setColor(QPalette::Inactive, QPalette::WindowText, "#505050");
+        p.setColor(QPalette::Disabled, QPalette::WindowText, "#9c9c9c");
+        p.setColor(QPalette::Active, QPalette::ButtonText, "#505050");
+        p.setColor(QPalette::Inactive, QPalette::ButtonText, "#505050");
+        p.setColor(QPalette::Disabled, QPalette::ButtonText, "#9c9c9c");
+        ui->playButton->setPalette(p);
+    };
+    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+    updatePalette();
+    ui->playButton->setIcon(PaintUtils::renderButtonIcon(QStringLiteral(":/images/run/run.svg"),
+                                                         ui->playButton->iconSize(), ui->playButton));
 
     setGraphDisplayMode(GraphMode);
 
@@ -227,14 +244,16 @@ void EasingContextPane::startAnimation()
         m_simulation->stop();
     } else {
         m_simulation->animate(ui->durationSpinBox->value(), m_easingGraph->easingCurve());
-        ui->playButton->setIcon(Utils::Icons::STOP_SMALL.icon());
+        ui->playButton->setIcon(PaintUtils::renderButtonIcon(QStringLiteral(":/images/run/stop.svg"),
+                                                             ui->playButton->iconSize(), ui->playButton));
     }
 
 }
 
 void EasingContextPane::switchToGraph()
 {
-    ui->playButton->setIcon(Utils::Icons::RUN_SMALL.icon());
+    ui->playButton->setIcon(PaintUtils::renderButtonIcon(QStringLiteral(":/images/run/run.svg"),
+                                                         ui->playButton->iconSize(), ui->playButton));
     setGraphDisplayMode(GraphMode);
 }
 

@@ -259,9 +259,9 @@ const QStringList NAMES = {
 
 const QStringList DESCRIPTIONS = {
     QObject::tr("A blank project with an empty Window"),
-    QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 2"),
-    QObject::tr("A plain application project with an ApplicationWindow from Qt Quick Controls 1")/*,
-        QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 2"),
-        QObject::tr("A full-featured template project with bunch of controls from Qt Quick Controls 1")*/
+    QObject::tr("A plain application project with an ApplicationWindow from Quick Controls 2"),
+    QObject::tr("A plain application project with an ApplicationWindow from Quick Controls 1")/*,
+        QObject::tr("A full-featured template project with bunch of controls from Quick Controls 2"),
+        QObject::tr("A full-featured template project with bunch of controls from Quick Controls 1")*/
 };
 } // Anonymous Namespace

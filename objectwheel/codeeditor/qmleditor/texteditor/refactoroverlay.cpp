@@ -26,24 +26,22 @@
 #include "refactoroverlay.h"
 #include <qmlcodeeditor.h>
 
-#include <utils/utilsicons.h>
 #include <QPainter>
 #include <QDebug>
 #include <QPlainTextDocumentLayout>
 
 namespace TextEditor {
 
-RefactorOverlay::RefactorOverlay(QmlCodeEditor *editor) :
-    QObject(editor),
-    m_editor(editor),
-    m_maxWidth(0),
-    m_icon(Utils::Icons::CODEMODEL_FIXIT.icon())
+RefactorOverlay::RefactorOverlay(QmlCodeEditor *editor) : QObject(editor)
+    , m_editor(editor)
+//    , m_maxWidth(0)
+    , m_icon(QIcon(QStringLiteral(":/images/lightbulb.svg")))
 {
 }
 
 void RefactorOverlay::paint(QPainter *painter, const QRect &clip)
 {
-    m_maxWidth = 0;
+//    m_maxWidth = 0;
     for (int i = 0; i < m_markers.size(); ++i) {
         paintMarker(m_markers.at(i), painter, clip);
     }
@@ -70,24 +68,18 @@ void RefactorOverlay::paintMarker(const RefactorMarker& marker, QPainter *painte
     if (geometry.top() > clip.bottom() + 10 || geometry.bottom() < clip.top() - 10)
         return; // marker not visible
 
-    const QTextCursor cursor = marker.cursor;
-    const QRect cursorRect = m_editor->cursorRect(cursor);
+    const QRect cursorRect = m_editor->cursorRect(marker.cursor);
 
     QIcon icon = marker.icon;
     if (icon.isNull())
         icon = m_icon;
 
-    const qreal devicePixelRatio = painter->device()->devicePixelRatio();
-    const QSize proposedIconSize = QSize(m_editor->fontMetrics().horizontalAdvance(QLatin1Char(' ')) + 3,
-                                         cursorRect.height()) * devicePixelRatio;
-    const QSize actualIconSize = icon.actualSize(proposedIconSize) / devicePixelRatio;
-
-    const int y = cursorRect.top() + ((cursorRect.height() - actualIconSize.height()) / 2);
-    const int x = cursorRect.right();
-    marker.rect = QRect(x, y, actualIconSize.width(), actualIconSize.height());
-
+    const qreal sz = 16;
+    const qreal x = cursorRect.right() + 15;
+    const qreal y = cursorRect.top() + ((cursorRect.height() - sz) / 2.0);
+    marker.rect = QRectF(x, y, sz, sz).toRect();
     icon.paint(painter, marker.rect);
-    m_maxWidth = qMax(m_maxWidth, x + actualIconSize.width() - int(offset.x()));
+//    m_maxWidth = qMax(m_maxWidth, x + actualIconSize.width() - int(offset.x()));
 }
 
 } // namespace TextEditor

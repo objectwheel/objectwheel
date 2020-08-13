@@ -39,7 +39,7 @@ PreferencesWindow::PreferencesWindow(QWidget *parent) : QWidget(parent)
     move(UtilityFunctions::centerPos(size()));
     setFocusPolicy(Qt::NoFocus);
     setWindowTitle(tr("Preferences"));
-    setWindowModality(Qt::ApplicationModal);
+    setWindowModality(Qt::ApplicationModal); // Causes lots of problems, should not be used unless necessary
     setAttribute(Qt::WA_QuitOnClose, false);
 
     addPage(new GeneralSettingsPage(this));

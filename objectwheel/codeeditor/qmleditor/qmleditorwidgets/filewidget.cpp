@@ -46,8 +46,10 @@ FileWidget::FileWidget(QWidget *parent) :
 {
     m_pushButton = new QToolButton(this);
     m_pushButton->setFixedWidth(32);
+    m_pushButton->setCursor(Qt::PointingHandCursor);
     m_lineEdit = new QLineEdit(this);
     m_comboBox = new QComboBox(this);
+    m_comboBox->setCursor(Qt::PointingHandCursor);
     m_comboBox->hide();
     QHBoxLayout *layout = new QHBoxLayout(this);
     setLayout(layout);
