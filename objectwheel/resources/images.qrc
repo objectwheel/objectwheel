@@ -167,5 +167,7 @@
         <file>images/lightbulb.svg</file>
         <file>images/designer/new-folder.svg</file>
         <file>images/help/up.svg</file>
+        <file>images/output/codemodel-warning.svg</file>
+        <file>images/output/codemodel-error.svg</file>
     </qresource>
 </RCC>

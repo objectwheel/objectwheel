@@ -2,61 +2,30 @@
 #include <qmlcodedocument.h>
 #include <qmlcodeeditor.h>
 #include <utils/tooltip/tooltip.h>
+#include <paintutils.h>
 
 #include <QPainter>
 #include <QPaintEvent>
 
 using namespace Utils;
 
-QPixmap pixmap(Mark::Type type)
+QPixmap pixmap(Mark::Type type, const QSize& size, const QWidget* widget)
 {
-//    switch (type) {
-//    case Mark::Type::Note: {
-//        const static auto pixmap = Utils::Icons::INFO.pixmap();
-//        return pixmap;
-//    }
-//    case Mark::Type::Warning: {
-//        const static auto pixmap = Utils::Icons::WARNING.pixmap();
-//        return pixmap;
-//    }
-//    case Mark::Type::CodeModelWarning: {
-//        const static auto pixmap = Utils::Icons::CODEMODEL_WARNING.pixmap();
-//        return pixmap;
-//    }
-//    case Mark::Type::Bug: {
-//        const static auto pixmap =
-//                Icon({
-//                         {":/utils/images/bugfill.png", Theme::BackgroundColorNormal},
-//                         {":/utils/images/bug.png", Theme::IconsInterruptColor}
-//                     }, Icon::Tint).pixmap();
-
-//        return pixmap;
-//    }
-//    case Mark::Type::Todo: {
-//        const static auto pixmap =
-//                Icon({
-//                         {":/utils/images/tasklist.png", Theme::IconsCodeModelFunctionColor}
-//                     }, Icon::Tint).pixmap();
-//        return pixmap;
-//    }
-//    case Mark::Type::FixMe: {
-//        const static auto pixmap = Utils::Icons::PROJECT.pixmap();
-//        return pixmap;
-//    }
-//    case Mark::Type::CodeModelError: {
-//        const static auto pixmap = Utils::Icons::CODEMODEL_ERROR.pixmap();
-//        return pixmap;
-//    }
-//    case Mark::Type::Error: {
-//        const static auto pixmap = Utils::Icons::CRITICAL_TOOLBAR.pixmap();
-//        return pixmap;
-//    }
-//    default: {
-//        const static auto pixmap = Utils::Icons::EMPTY16.pixmap();
-//        return pixmap;
-//    }
-//    }
-    return {};
+    switch (type) {
+    case Mark::Type::Note:
+        return PaintUtils::pixmap(QStringLiteral(":/images/output/info.svg"), size, widget);
+    case Mark::Type::Warning:
+        return PaintUtils::pixmap(QStringLiteral(":/images/output/warning.svg"), size, widget);
+    case Mark::Type::Error:
+        return PaintUtils::pixmap(QStringLiteral(":/images/output/issue.svg"), size, widget);
+    case Mark::Type::CodeModelWarning:
+        return PaintUtils::pixmap(QStringLiteral(":/images/output/codemodel-warning.svg"), size, widget);
+    case Mark::Type::CodeModelError:
+        return PaintUtils::pixmap(QStringLiteral(":/images/output/codemodel-error.svg"), size, widget);
+    default:
+        break;
+    }
+    return QPixmap();
 }
 
 MarkBand::MarkBand(QmlCodeEditor* editor, QWidget* parent) : QWidget(parent)
@@ -94,8 +63,10 @@ void MarkBand::paintEvent(QPaintEvent* e)
 
     while (block.isValid() && top <= e->rect().bottom()) {
         if (BlockData* blockData = QmlCodeDocument::userData(block)) {
-            if (blockData->mark.type != Mark::NoMark && block.isVisible() && bottom >= e->rect().top())
-                painter.drawPixmap(width() / 2.0 - hg / 2.0, top, hg, hg, pixmap(blockData->mark.type));
+            if (blockData->mark.type != Mark::NoMark && block.isVisible() && bottom >= e->rect().top()) {
+                painter.drawPixmap(width() / 2.0 - hg / 2.0, top, hg, hg,
+                                   pixmap(blockData->mark.type, QSize(hg, hg), this));
+            }
         }
         block = block.next();
         top = bottom;

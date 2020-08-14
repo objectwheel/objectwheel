@@ -609,7 +609,6 @@
         <file>Styles/modnokai_night_shift_v2.xml</file>
         <file>Styles/solarized-dark.xml</file>
         <file>Styles/solarized-light.xml</file>
-        <file>Styles/qt-dark.xml</file>
         <file>qml-type-descriptions/builtins.qmltypes</file>
         <file>qml-type-descriptions/qmlruntime.qmltypes</file>
         <file>qml-type-descriptions/qmltypes-bundle.json</file>
@@ -698,5 +697,6 @@
         <file>qmldesigner/images/tr@2x.png</file>
         <file>qmldesigner/images/underline-h-icon.png</file>
         <file>qmldesigner/images/vertical-scale-icon.png</file>
+        <file>Styles/console.xml</file>
     </qresource>
 </RCC>
