@@ -1,7 +1,6 @@
 include(parser/parser.pri)
 
 HEADERS += \
-    $$PWD/qmljs_global.h \
     $$PWD/qmljsbind.h \
     $$PWD/qmljsbundle.h \
     $$PWD/qmljsevaluate.h \

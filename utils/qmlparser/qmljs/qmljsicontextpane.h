@@ -27,8 +27,7 @@
 
 #include <QObject>
 
-#include "qmljs_global.h"
-
+#include <utils_global.h>
 #include <qmljs/qmljsdocument.h>
 #include <qmljs/parser/qmljsastfwd_p.h>
 
@@ -38,7 +37,7 @@ namespace QmlJS {
 
 class ScopeChain;
 
-class QMLJS_EXPORT IContextPane : public QObject
+class UTILS_EXPORT IContextPane : public QObject
 {
      Q_OBJECT
 

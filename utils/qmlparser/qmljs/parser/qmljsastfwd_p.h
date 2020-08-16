@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljsglobal_p.h"
+#include <utils_global.h>
 
 #include <QtCore/qglobal.h>
 
@@ -39,8 +39,6 @@
 //
 // We mean it.
 //
-
-QT_QML_BEGIN_NAMESPACE
 
 namespace QmlJS { namespace AST {
 
@@ -170,6 +168,3 @@ class UiEnumDeclaration;
 class UiEnumMemberList;
 
 } } // namespace AST
-
-QT_QML_END_NAMESPACE
-

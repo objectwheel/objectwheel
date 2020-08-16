@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
     QApplication::setApplicationName(AppConstants::NAME);
     QApplication::setOrganizationName(AppConstants::COMPANY);
     QApplication::setApplicationVersion(AppConstants::VERSION);
-    QApplication::setOrganizationDomain(AppConstants::DOMAIN);
+    QApplication::setOrganizationDomain(AppConstants::ROOT_DOMAIN);
     QApplication::setApplicationDisplayName(AppConstants::LABEL);
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 

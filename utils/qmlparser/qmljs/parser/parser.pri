@@ -7,7 +7,6 @@ HEADERS += \
     $$PWD/qmljslexer_p.h \
     $$PWD/qmljsmemorypool_p.h \
     $$PWD/qmljsparser_p.h \
-    $$PWD/qmljsglobal_p.h \
     $$PWD/qmldirparser_p.h \
     $$PWD/qmljskeywords_p.h
 

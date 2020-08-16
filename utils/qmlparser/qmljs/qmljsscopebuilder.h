@@ -41,7 +41,7 @@ class ScopeChain;
 
 namespace AST { class Node; }
 
-class QMLJS_EXPORT ScopeBuilder
+class UTILS_EXPORT ScopeBuilder
 {
 public:
     ScopeBuilder(ScopeChain *scopeChain);

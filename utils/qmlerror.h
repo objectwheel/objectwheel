@@ -1,10 +1,11 @@
 #ifndef QMLERROR_H
 #define QMLERROR_H
 
+#include <utils_global.h>
 #include <QUrl>
 #include <QDataStream>
 
-class QmlError
+class UTILS_EXPORT QmlError
 {
 public:
     QUrl url;
@@ -32,7 +33,7 @@ public:
     }
 };
 
-inline QDataStream& operator>> (QDataStream& in, QmlError& error)
+UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, QmlError& error)
 {
     in >> error.url;
     in >> error.line;
@@ -42,7 +43,7 @@ inline QDataStream& operator>> (QDataStream& in, QmlError& error)
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const QmlError& error)
+UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const QmlError& error)
 {
     out << error.url;
     out << error.line;

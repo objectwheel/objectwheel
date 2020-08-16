@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsinterpreter.h"
 
 #include <QString>
@@ -33,7 +33,7 @@
 
 namespace QmlJS {
 
-class QMLJS_EXPORT DescribeValueVisitor : public ValueVisitor
+class UTILS_EXPORT DescribeValueVisitor : public ValueVisitor
 {
 public:
     static QString describe(const Value *value, int depth = 1, ContextPtr context = ContextPtr());

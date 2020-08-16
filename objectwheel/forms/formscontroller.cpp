@@ -46,7 +46,7 @@ FormsController::FormsController(FormsPane* formsPane, DesignerScene* designerSc
     connect(ControlRemovingManager::instance(), &ControlRemovingManager::controlAboutToBeRemoved,
             this, &FormsController::onControlRemove);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
-            tree, qOverload<>(&FormsTree::update));
+            tree, qOverload<>(&QWidget::update));
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &FormsController::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,

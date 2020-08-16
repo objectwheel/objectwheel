@@ -36,19 +36,17 @@
 // We mean it.
 //
 
-#include "qmljsglobal_p.h"
+#include <utils_global.h>
 #include "qmljsgrammar_p.h"
 
 #include <QtCore/qstring.h>
-
-QT_QML_BEGIN_NAMESPACE
 
 namespace QmlJS {
 
 class Engine;
 class DiagnosticMessage;
 
-class QML_PARSER_EXPORT Directives {
+class UTILS_EXPORT Directives {
 
 public:
     virtual ~Directives() {}
@@ -77,7 +75,7 @@ public:
     }
 };
 
-class QML_PARSER_EXPORT Lexer: public QmlJSGrammar
+class UTILS_EXPORT Lexer: public QmlJSGrammar
 {
 public:
     enum {
@@ -237,6 +235,3 @@ private:
 };
 
 } // end of namespace QmlJS
-
-QT_QML_END_NAMESPACE
-

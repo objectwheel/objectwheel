@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
+#include <utils_global.h>
 #include <qmljs/qmljsconstants.h>
 #include <qmljs/qmljsimportdependencies.h>
 #include <qmljs/parser/qmljsastfwd_p.h>
@@ -89,7 +89,7 @@ typedef QList<const Value *> ValueList;
 ////////////////////////////////////////////////////////////////////////////////
 // Value visitor
 ////////////////////////////////////////////////////////////////////////////////
-class QMLJS_EXPORT ValueVisitor
+class UTILS_EXPORT ValueVisitor
 {
 public:
     ValueVisitor();
@@ -111,7 +111,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 // QML/JS value
 ////////////////////////////////////////////////////////////////////////////////
-class QMLJS_EXPORT Value
+class UTILS_EXPORT Value
 {
     Value(const Value &other);
     void operator = (const Value &other);
@@ -325,61 +325,61 @@ template <> Q_INLINE_TEMPLATE const ASTSignal *value_cast(const Value *v)
 ////////////////////////////////////////////////////////////////////////////////
 // Value nodes
 ////////////////////////////////////////////////////////////////////////////////
-class QMLJS_EXPORT NullValue: public Value
+class UTILS_EXPORT NullValue: public Value
 {
 public:
     const NullValue *asNullValue() const override;
     void accept(ValueVisitor *visitor) const override;
 };
 
-class QMLJS_EXPORT UndefinedValue: public Value
+class UTILS_EXPORT UndefinedValue: public Value
 {
 public:
     const UndefinedValue *asUndefinedValue() const override;
     void accept(ValueVisitor *visitor) const override;
 };
 
-class QMLJS_EXPORT UnknownValue: public Value
+class UTILS_EXPORT UnknownValue: public Value
 {
 public:
     const UnknownValue *asUnknownValue() const override;
     void accept(ValueVisitor *) const override;
 };
 
-class QMLJS_EXPORT NumberValue: public Value
+class UTILS_EXPORT NumberValue: public Value
 {
 public:
     const NumberValue *asNumberValue() const override;
     void accept(ValueVisitor *visitor) const override;
 };
 
-class QMLJS_EXPORT RealValue: public NumberValue
+class UTILS_EXPORT RealValue: public NumberValue
 {
 public:
     const RealValue *asRealValue() const override;
 };
 
-class QMLJS_EXPORT IntValue: public NumberValue
+class UTILS_EXPORT IntValue: public NumberValue
 {
 public:
     const IntValue *asIntValue() const override;
 };
 
-class QMLJS_EXPORT BooleanValue: public Value
+class UTILS_EXPORT BooleanValue: public Value
 {
 public:
     const BooleanValue *asBooleanValue() const override;
     void accept(ValueVisitor *visitor) const override;
 };
 
-class QMLJS_EXPORT StringValue: public Value
+class UTILS_EXPORT StringValue: public Value
 {
 public:
     const StringValue *asStringValue() const override;
     void accept(ValueVisitor *visitor) const override;
 };
 
-class QMLJS_EXPORT UrlValue: public StringValue
+class UTILS_EXPORT UrlValue: public StringValue
 {
 public:
     const UrlValue *asUrlValue() const override;
@@ -423,7 +423,7 @@ public:
     QString toString() const;
 };
 
-class QMLJS_EXPORT MemberProcessor
+class UTILS_EXPORT MemberProcessor
 {
     MemberProcessor(const MemberProcessor &other);
     void operator = (const MemberProcessor &other);
@@ -441,7 +441,7 @@ public:
     virtual bool processGeneratedSlot(const QString &name, const Value *value);
 };
 
-class QMLJS_EXPORT Reference: public Value
+class UTILS_EXPORT Reference: public Value
 {
 public:
     Reference(ValueOwner *valueOwner);
@@ -460,7 +460,7 @@ private:
     friend class ReferenceContext;
 };
 
-class QMLJS_EXPORT ColorValue: public Value
+class UTILS_EXPORT ColorValue: public Value
 {
 public:
     // Value interface
@@ -468,7 +468,7 @@ public:
     void accept(ValueVisitor *) const override;
 };
 
-class QMLJS_EXPORT AnchorLineValue: public Value
+class UTILS_EXPORT AnchorLineValue: public Value
 {
 public:
     // Value interface
@@ -476,7 +476,7 @@ public:
     void accept(ValueVisitor *) const override;
 };
 
-class QMLJS_EXPORT PropertyData {
+class UTILS_EXPORT PropertyData {
 public:
     const Value *value;
     PropertyInfo propertyInfo;
@@ -486,7 +486,7 @@ public:
     { }
 };
 
-class QMLJS_EXPORT ObjectValue: public Value
+class UTILS_EXPORT ObjectValue: public Value
 {
 public:
     ObjectValue(ValueOwner *valueOwner, const QString &originId = QString());
@@ -539,7 +539,7 @@ protected:
     const Value *_prototype;
 };
 
-class QMLJS_EXPORT PrototypeIterator
+class UTILS_EXPORT PrototypeIterator
 {
 public:
     enum Error
@@ -567,7 +567,7 @@ private:
     Error m_error;
 };
 
-class QMLJS_EXPORT QmlEnumValue: public NumberValue
+class UTILS_EXPORT QmlEnumValue: public NumberValue
 {
 public:
     QmlEnumValue(const CppComponentValue *owner, int index);
@@ -587,7 +587,7 @@ private:
 
 // A ObjectValue based on a FakeMetaObject.
 // May only have other CppComponentValue as ancestors.
-class QMLJS_EXPORT CppComponentValue: public ObjectValue
+class UTILS_EXPORT CppComponentValue: public ObjectValue
 {
 public:
     CppComponentValue(LanguageUtils::FakeMetaObject::ConstPtr metaObject, const QString &className,
@@ -640,7 +640,7 @@ private:
     int m_metaObjectRevision;
 };
 
-class QMLJS_EXPORT FunctionValue: public ObjectValue
+class UTILS_EXPORT FunctionValue: public ObjectValue
 {
 public:
     FunctionValue(ValueOwner *valueOwner);
@@ -671,7 +671,7 @@ public:
     void accept(ValueVisitor *visitor) const override;
 };
 
-class QMLJS_EXPORT Function: public FunctionValue
+class UTILS_EXPORT Function: public FunctionValue
 {
 public:
     Function(ValueOwner *valueOwner);
@@ -704,7 +704,7 @@ private:
 // typing environment
 ////////////////////////////////////////////////////////////////////////////////
 
-class QMLJS_EXPORT CppQmlTypesLoader
+class UTILS_EXPORT CppQmlTypesLoader
 {
 public:
     typedef QHash<QString, LanguageUtils::FakeMetaObject::ConstPtr> BuiltinObjects;
@@ -728,7 +728,7 @@ public:
                                          const QString &fileName);
 };
 
-class QMLJS_EXPORT FakeMetaObjectWithOrigin
+class UTILS_EXPORT FakeMetaObjectWithOrigin
 {
 public:
     LanguageUtils::FakeMetaObject::ConstPtr fakeMetaObject;
@@ -738,9 +738,9 @@ public:
     bool operator ==(const FakeMetaObjectWithOrigin &o) const;
 };
 
-QMLJS_EXPORT uint qHash(const FakeMetaObjectWithOrigin &fmoo);
+UTILS_EXPORT uint qHash(const FakeMetaObjectWithOrigin &fmoo);
 
-class QMLJS_EXPORT CppQmlTypes
+class UTILS_EXPORT CppQmlTypes
 {
 public:
     CppQmlTypes(ValueOwner *valueOwner);
@@ -844,7 +844,7 @@ private:
     const Value *m_result;
 };
 
-class QMLJS_EXPORT TypeId: protected ValueVisitor
+class UTILS_EXPORT TypeId: protected ValueVisitor
 {
     QString _result;
 
@@ -864,7 +864,7 @@ protected:
 };
 
 // internal
-class QMLJS_EXPORT QmlPrototypeReference: public Reference
+class UTILS_EXPORT QmlPrototypeReference: public Reference
 {
 public:
     QmlPrototypeReference(AST::UiQualifiedId *qmlTypeName, const Document *doc, ValueOwner *valueOwner);
@@ -882,7 +882,7 @@ private:
     const Document *m_doc;
 };
 
-class QMLJS_EXPORT ASTVariableReference: public Reference
+class UTILS_EXPORT ASTVariableReference: public Reference
 {
     AST::VariableDeclaration *m_ast;
     const Document *m_doc;
@@ -897,7 +897,7 @@ private:
     bool getSourceLocation(QString *fileName, int *line, int *column) const override;
 };
 
-class QMLJS_EXPORT ASTFunctionValue: public FunctionValue
+class UTILS_EXPORT ASTFunctionValue: public FunctionValue
 {
     AST::FunctionExpression *m_ast;
     const Document *m_doc;
@@ -918,7 +918,7 @@ public:
     bool getSourceLocation(QString *fileName, int *line, int *column) const override;
 };
 
-class QMLJS_EXPORT ASTPropertyReference: public Reference
+class UTILS_EXPORT ASTPropertyReference: public Reference
 {
     AST::UiPublicMember *m_ast;
     const Document *m_doc;
@@ -939,7 +939,7 @@ private:
     const Value *value(ReferenceContext *referenceContext) const override;
 };
 
-class QMLJS_EXPORT ASTSignal: public FunctionValue
+class UTILS_EXPORT ASTSignal: public FunctionValue
 {
     AST::UiPublicMember *m_ast;
     const Document *m_doc;
@@ -965,7 +965,7 @@ public:
     bool getSourceLocation(QString *fileName, int *line, int *column) const override;
 };
 
-class QMLJS_EXPORT ASTObjectValue: public ObjectValue
+class UTILS_EXPORT ASTObjectValue: public ObjectValue
 {
     AST::UiQualifiedId *m_typeName;
     AST::UiObjectInitializer *m_initializer;
@@ -993,7 +993,7 @@ public:
     const Document *document() const;
 };
 
-class QMLJS_EXPORT ImportInfo
+class UTILS_EXPORT ImportInfo
 {
 public:
     ImportInfo();
@@ -1033,7 +1033,7 @@ private:
     AST::UiImport *m_ast;
 };
 
-class QMLJS_EXPORT Import {
+class UTILS_EXPORT Import {
 public:
     Import();
     Import(const Import &other);
@@ -1051,7 +1051,7 @@ public:
 
 class Imports;
 
-class QMLJS_EXPORT TypeScope: public ObjectValue
+class UTILS_EXPORT TypeScope: public ObjectValue
 {
 public:
     TypeScope(const Imports *imports, ValueOwner *valueOwner);
@@ -1065,7 +1065,7 @@ private:
     const Imports *m_imports;
 };
 
-class QMLJS_EXPORT JSImportScope: public ObjectValue
+class UTILS_EXPORT JSImportScope: public ObjectValue
 {
 public:
     JSImportScope(const Imports *imports, ValueOwner *valueOwner);
@@ -1079,7 +1079,7 @@ private:
     const Imports *m_imports;
 };
 
-class QMLJS_EXPORT Imports
+class UTILS_EXPORT Imports
 {
 public:
     Imports(ValueOwner *valueOwner);
@@ -1111,7 +1111,7 @@ private:
     bool m_importFailed;
 };
 
-class QMLJS_EXPORT MetaFunction: public FunctionValue
+class UTILS_EXPORT MetaFunction: public FunctionValue
 {
     LanguageUtils::FakeMetaMethod m_method;
 
@@ -1125,7 +1125,7 @@ public:
     const LanguageUtils::FakeMetaMethod &fakeMetaMethod() const;
 };
 
-class QMLJS_EXPORT CustomImportsProvider : public QObject
+class UTILS_EXPORT CustomImportsProvider : public QObject
 {
     Q_OBJECT
 public:

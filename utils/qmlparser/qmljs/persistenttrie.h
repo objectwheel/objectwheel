@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
+#include <utils_global.h>
 
 #include <QHash>
 #include <QList>
@@ -47,7 +47,7 @@ enum LookupFlags {
     SkipSpaces      = 0x8
 };
 
-class QMLJS_EXPORT TrieNode
+class UTILS_EXPORT TrieNode
 {
 public:
     typedef const TrieNode CTrie;
@@ -74,7 +74,7 @@ public:
     static QDebug &describe(QDebug &dbg, const Ptr &trie, int indent);
 };
 
-class QMLJS_EXPORT Trie
+class UTILS_EXPORT Trie
 {
 public:
     Trie();
@@ -100,8 +100,8 @@ public:
     bool operator==(const Trie &o);
     bool operator!=(const Trie &o);
 
-    friend QMLJS_EXPORT QDebug &operator<<(QDebug &dbg, const TrieNode::Ptr &trie);
-    friend QMLJS_EXPORT QDebug &operator<<(QDebug &dbg, const Trie &trie);
+    friend UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const TrieNode::Ptr &trie);
+    friend UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const Trie &trie);
 
     TrieNode::Ptr trie;
 };
@@ -119,11 +119,11 @@ template <typename T> void enumerateTrieNode(const TrieNode::Ptr &trie, T &t,
         t(base);
 }
 
-QMLJS_EXPORT int matchStrength(const QString &searchStr, const QString &str);
-QMLJS_EXPORT QStringList matchStrengthSort(const QString &searchString, QStringList &res);
+UTILS_EXPORT int matchStrength(const QString &searchStr, const QString &str);
+UTILS_EXPORT QStringList matchStrengthSort(const QString &searchString, QStringList &res);
 
-QMLJS_EXPORT QDebug &operator<<(QDebug &dbg, const TrieNode::Ptr &trie);
-QMLJS_EXPORT QDebug &operator<<(QDebug &dbg, const Trie &trie);
+UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const TrieNode::Ptr &trie);
+UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const Trie &trie);
 
 } // end namespace PersistentTrie
 } // end namespace QmlJS

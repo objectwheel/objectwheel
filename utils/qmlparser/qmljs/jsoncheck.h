@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
-
+#include <utils_global.h>
 #include <qmljs/qmljsdocument.h>
 #include <qmljs/parser/qmljsastvisitor_p.h>
 #include <qmljs/qmljsstaticanalysismessage.h>
@@ -39,7 +38,7 @@
 
 namespace QmlJS {
 
-class QMLJS_EXPORT JsonCheck : public AST::Visitor
+class UTILS_EXPORT JsonCheck : public AST::Visitor
 {
 public:
     JsonCheck(Document::Ptr doc);

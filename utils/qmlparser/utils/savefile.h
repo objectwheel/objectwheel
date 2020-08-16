@@ -25,13 +25,12 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QTemporaryFile>
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT SaveFile : public QTemporaryFile
+class UTILS_EXPORT SaveFile : public QTemporaryFile
 {
 public:
     explicit SaveFile(const QString &filename);

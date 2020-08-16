@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include "../utils_global.h"
-
+#include <utils_global.h>
 #include <QSharedPointer>
 #include <QObject>
 #include <QPointer>
@@ -52,7 +51,7 @@ QT_END_NAMESPACE
 namespace Utils {
 namespace Internal { class QTipLabel; }
 
-class QTCREATOR_UTILS_EXPORT ToolTip : public QObject
+class UTILS_EXPORT ToolTip : public QObject
 {
     Q_OBJECT
 protected:

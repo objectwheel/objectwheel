@@ -25,9 +25,9 @@
 
 #pragma once
 
-#include "utils_global.h"
+#include <utils_global.h>
 
-namespace Utils { QTCREATOR_UTILS_EXPORT void writeAssertLocation(const char *msg); }
+namespace Utils { UTILS_EXPORT void writeAssertLocation(const char *msg); }
 
 #define QTC_ASSERT_STRINGIFY_HELPER(x) #x
 #define QTC_ASSERT_STRINGIFY(x) QTC_ASSERT_STRINGIFY_HELPER(x)

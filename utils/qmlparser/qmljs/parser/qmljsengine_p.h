@@ -36,7 +36,7 @@
 // We mean it.
 //
 
-#include "qmljsglobal_p.h"
+#include <utils_global.h>
 #include "qmljsastfwd_p.h"
 #include "qmljsmemorypool_p.h"
 
@@ -44,7 +44,6 @@
 #include <QSet>
 
 #include <qmljs/qmljsconstants.h>
-QT_QML_BEGIN_NAMESPACE
 
 namespace QmlJS {
 
@@ -52,7 +51,7 @@ class Lexer;
 class Directives;
 class MemoryPool;
 
-class QML_PARSER_EXPORT DiagnosticMessage
+class UTILS_EXPORT DiagnosticMessage
 {
 public:
     DiagnosticMessage()
@@ -72,7 +71,7 @@ public:
     QString message;
 };
 
-class QML_PARSER_EXPORT Engine
+class UTILS_EXPORT Engine
 {
     Lexer *_lexer;
     Directives *_directives;
@@ -108,6 +107,3 @@ public:
 double integerFromString(const char *buf, int size, int radix);
 
 } // end of namespace QmlJS
-
-QT_QML_END_NAMESPACE
-

@@ -37,7 +37,7 @@ class LinkPrivate;
 /*
     Helper for building a context.
 */
-class QMLJS_EXPORT Link
+class UTILS_EXPORT Link
 {
     Q_DISABLE_COPY(Link)
     Q_DECLARE_TR_FUNCTIONS(QmlJS::Link)

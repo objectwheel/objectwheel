@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include "../utils_global.h"
-
+#include <utils_global.h>
 #include <QLabel>
 #include <QPixmap>
 #include <QSharedPointer>

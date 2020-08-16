@@ -25,10 +25,8 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QString>
-
 #include <algorithm>
 
 #define QTC_WIN_EXE_SUFFIX ".exe"
@@ -40,7 +38,7 @@ enum OsType { OsTypeWindows, OsTypeLinux, OsTypeMac, OsTypeOtherUnix, OsTypeOthe
 
 namespace OsSpecificAspects {
 
-QTCREATOR_UTILS_EXPORT inline QString withExecutableSuffix(OsType osType, const QString &executable)
+UTILS_EXPORT inline QString withExecutableSuffix(OsType osType, const QString &executable)
 {
     QString finalName = executable;
     if (osType == OsTypeWindows)
@@ -48,22 +46,22 @@ QTCREATOR_UTILS_EXPORT inline QString withExecutableSuffix(OsType osType, const 
     return finalName;
 }
 
-QTCREATOR_UTILS_EXPORT inline Qt::CaseSensitivity fileNameCaseSensitivity(OsType osType)
+UTILS_EXPORT inline Qt::CaseSensitivity fileNameCaseSensitivity(OsType osType)
 {
     return osType == OsTypeWindows || osType == OsTypeMac ? Qt::CaseInsensitive : Qt::CaseSensitive;
 }
 
-QTCREATOR_UTILS_EXPORT inline QChar pathListSeparator(OsType osType)
+UTILS_EXPORT inline QChar pathListSeparator(OsType osType)
 {
     return QLatin1Char(osType == OsTypeWindows ? ';' : ':');
 }
 
-QTCREATOR_UTILS_EXPORT inline Qt::KeyboardModifier controlModifier(OsType osType)
+UTILS_EXPORT inline Qt::KeyboardModifier controlModifier(OsType osType)
 {
     return osType == OsTypeMac ? Qt::MetaModifier : Qt::ControlModifier;
 }
 
-QTCREATOR_UTILS_EXPORT inline QString pathWithNativeSeparators(OsType osType, const QString &pathName)
+UTILS_EXPORT inline QString pathWithNativeSeparators(OsType osType, const QString &pathName)
 {
     if (osType == OsTypeWindows) {
         const int pos = pathName.indexOf('/');

@@ -46,7 +46,7 @@ QT_BEGIN_NAMESPACE
 
 class QmlError;
 class QmlEngine;
-class QML_PARSER_EXPORT QmlDirParser
+class UTILS_EXPORT QmlDirParser
 {
     Q_DISABLE_COPY(QmlDirParser)
 

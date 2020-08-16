@@ -1,9 +1,3 @@
-dll {
-    DEFINES += QTCREATOR_UTILS_LIB
-} else {
-    DEFINES += QTCREATOR_UTILS_STATIC_LIB
-}
-
 #QT += gui network qml
 #CONFIG += exceptions # used by portlist.cpp, textfileformat.cpp, and ssh/*
 win32: LIBS += -lshell32
@@ -40,7 +34,6 @@ HEADERS += \
     $$PWD/osspecificaspects.h \
     $$PWD/qtcassert.h \
     $$PWD/runextensions.h \
-    $$PWD/utils_global.h \
     $$PWD/savefile.h \
     $$PWD/changeset.h \
     $$PWD/declarationmacros.h \

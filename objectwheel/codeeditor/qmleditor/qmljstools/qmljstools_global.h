@@ -27,9 +27,9 @@
 
 #include <QtGlobal>
 
-#if defined(QMLJSTOOLS_LIBRARY)
+#if defined(QMLJSTOOLS_LIBRARY) // takes precedence when combined with others
 #  define QMLJSTOOLS_EXPORT Q_DECL_EXPORT
-#elif defined(QMLJSTOOLS_STATIC)
+#elif defined(QMLJSTOOLS_INCLUDE_STATIC)
 #  define QMLJSTOOLS_EXPORT
 #else
 #  define QMLJSTOOLS_EXPORT Q_DECL_IMPORT

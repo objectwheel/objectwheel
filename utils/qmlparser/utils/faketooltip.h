@@ -25,13 +25,12 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QWidget>
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT FakeToolTip : public QWidget
+class UTILS_EXPORT FakeToolTip : public QWidget
 {
     Q_OBJECT
 

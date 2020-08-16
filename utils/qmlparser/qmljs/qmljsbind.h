@@ -36,7 +36,7 @@ namespace QmlJS {
 class DiagnosticMessage;
 class Document;
 
-class QMLJS_EXPORT Bind: protected AST::Visitor
+class UTILS_EXPORT Bind: protected AST::Visitor
 {
     Q_DISABLE_COPY(Bind)
     Q_DECLARE_TR_FUNCTIONS(QmlJS::Bind)

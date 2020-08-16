@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsdocument.h"
 #include "qmljsinterpreter.h"
 #include "qmljsviewercontext.h"
@@ -40,7 +40,7 @@ class Context;
 typedef QSharedPointer<const Context> ContextPtr;
 
 // shared among threads, completely threadsafe
-class QMLJS_EXPORT Context
+class UTILS_EXPORT Context
 {
     Q_DISABLE_COPY(Context)
 public:
@@ -79,7 +79,7 @@ private:
 };
 
 // for looking up references
-class QMLJS_EXPORT ReferenceContext
+class UTILS_EXPORT ReferenceContext
 {
 public:
     // implicit conversion ok

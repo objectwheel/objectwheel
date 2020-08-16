@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsinterpreter.h"
 
 #include <QList>
@@ -56,7 +56,7 @@ class JSImportScope;
 class Function;
 class SharedValueOwner;
 
-class QMLJS_EXPORT ValueOwner
+class UTILS_EXPORT ValueOwner
 {
     Q_DISABLE_COPY(ValueOwner)
 

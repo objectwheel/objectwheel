@@ -41,7 +41,7 @@ ControlsController::ControlsController(ControlsPane* controlsPane, DesignerScene
     connect(m_designerScene, &DesignerScene::selectionChanged,
             this, &ControlsController::onSceneSelectionChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::renderInfoChanged,
-            tree, qOverload<>(&ControlsTree::update));
+            tree, qOverload<>(&QWidget::update));
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::idChanged,
             this, &ControlsController::onControlIdChange);
     connect(ControlPropertyManager::instance(), &ControlPropertyManager::indexChanged,

@@ -25,10 +25,8 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include "osspecificaspects.h"
-
 #include <QString>
 
 #ifdef Q_OS_WIN
@@ -39,7 +37,7 @@
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT HostOsInfo
+class UTILS_EXPORT HostOsInfo
 {
 public:
     static constexpr OsType hostOs()

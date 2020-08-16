@@ -26,8 +26,7 @@
 #pragma once
 
 #include "linecolumn.h"
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QString>
 
 QT_FORWARD_DECLARE_CLASS(QTextDocument)
@@ -37,19 +36,19 @@ namespace Utils {
 namespace Text {
 
 // line is 1-based, column is 0-based
-QTCREATOR_UTILS_EXPORT bool convertPosition(const QTextDocument *document,
+UTILS_EXPORT bool convertPosition(const QTextDocument *document,
                                             int pos,
                                             int *line, int *column);
-QTCREATOR_UTILS_EXPORT
+UTILS_EXPORT
 Utils::OptionalLineColumn convertPosition(const QTextDocument *document, int pos);
 
-QTCREATOR_UTILS_EXPORT QString textAt(QTextCursor tc, int pos, int length);
+UTILS_EXPORT QString textAt(QTextCursor tc, int pos, int length);
 
-QTCREATOR_UTILS_EXPORT QTextCursor selectAt(QTextCursor textCursor, uint line, uint column, uint length);
+UTILS_EXPORT QTextCursor selectAt(QTextCursor textCursor, uint line, uint column, uint length);
 
-QTCREATOR_UTILS_EXPORT QTextCursor flippedCursor(const QTextCursor &cursor);
+UTILS_EXPORT QTextCursor flippedCursor(const QTextCursor &cursor);
 
-QTCREATOR_UTILS_EXPORT QTextCursor wordStartCursor(const QTextCursor &cursor);
+UTILS_EXPORT QTextCursor wordStartCursor(const QTextCursor &cursor);
 
 } // Text
 } // Utils

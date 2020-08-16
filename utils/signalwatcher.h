@@ -1,10 +1,11 @@
 #ifndef SIGNALWATCHER_H
 #define SIGNALWATCHER_H
 
+#include <utils_global.h>
 #include <atomic>
 #include <QObject>
 
-class SignalWatcher final : public QObject
+class UTILS_EXPORT SignalWatcher final : public QObject
 {
     Q_OBJECT
     Q_DISABLE_COPY(SignalWatcher)

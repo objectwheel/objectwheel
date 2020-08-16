@@ -314,17 +314,10 @@ bool Id::operator==(const char *name) const
         return false;
 }
 
-// For debugging purposes
-CORE_EXPORT const char *nameForId(quintptr id)
-{
-    return stringFromId.value(id).str;
-}
-
 bool Id::alphabeticallyBefore(Id other) const
 {
     return toString().compare(other.toString(), Qt::CaseInsensitive) < 0;
 }
-
 
 /*!
   Extracts a part of the id string

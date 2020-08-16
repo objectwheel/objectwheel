@@ -1,15 +1,15 @@
 #ifndef TOOLTIPWIDGET_H
 #define TOOLTIPWIDGET_H
 
+#include <utils_global.h>
 #include <textimagehandler.h>
+#include <private/qwidgettextcontrol_p.h>
 
 #include <QEvent>
 #include <QApplication>
 
-#include <private/qwidgettextcontrol_p.h>
-
 template <typename Class>
-class ToolTipWidget : public Class
+class UTILS_EXPORT ToolTipWidget : public Class
 {
 public:
     explicit ToolTipWidget(QWidget* parent = nullptr) : Class(parent) {}

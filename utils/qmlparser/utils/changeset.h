@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "utils_global.h"
+#include <utils_global.h>
 
 #include <QString>
 #include <QList>
@@ -34,7 +34,7 @@ QT_FORWARD_DECLARE_CLASS(QTextCursor)
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT ChangeSet
+class UTILS_EXPORT ChangeSet
 {
 public:
     struct EditOp {

@@ -1,9 +1,10 @@
 #ifndef TEXTIMAGEHANDLER_H
 #define TEXTIMAGEHANDLER_H
 
+#include <utils_global.h>
 #include <private/qtextimagehandler_p.h>
 
-class TextImageHandler final : public QTextImageHandler
+class UTILS_EXPORT TextImageHandler final : public QTextImageHandler
 {
 public:
     explicit TextImageHandler(QObject* parent = nullptr);

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
+#include <utils_global.h>
 #include <qmljs/persistenttrie.h>
 #include <qmljs/qmljsdialect.h>
 
@@ -47,7 +47,7 @@ namespace QmlJS {
  and not QStringLists.
  This makes merging easier, and the order is not important for our use case.
 */
-class QMLJS_EXPORT QmlBundle
+class UTILS_EXPORT QmlBundle
 {
     typedef PersistentTrie::Trie Trie;
 public:
@@ -92,7 +92,7 @@ private:
     Trie m_implicitImports;
 };
 
-class QMLJS_EXPORT QmlLanguageBundles
+class UTILS_EXPORT QmlLanguageBundles
 {
 public:
     QmlBundle bundleForLanguage(Dialect l) const;

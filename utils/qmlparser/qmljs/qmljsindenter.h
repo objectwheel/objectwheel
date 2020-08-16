@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
+#include <utils_global.h>
 #include <qmljs/qmljslineinfo.h>
 
 #include <QRegExp>
@@ -34,7 +34,7 @@ QT_FORWARD_DECLARE_CLASS(QTextBlock)
 
 namespace QmlJS {
 
-class QMLJS_EXPORT QmlJSIndenter : public LineInfo
+class UTILS_EXPORT QmlJSIndenter : public LineInfo
 {
     Q_DISABLE_COPY(QmlJSIndenter)
 

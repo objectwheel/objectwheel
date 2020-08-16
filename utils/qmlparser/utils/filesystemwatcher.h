@@ -25,15 +25,14 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QObject>
 
 namespace Utils {
 class FileSystemWatcherPrivate;
 
 // Documentation inside.
-class QTCREATOR_UTILS_EXPORT FileSystemWatcher : public QObject
+class UTILS_EXPORT FileSystemWatcher : public QObject
 {
     Q_OBJECT
 

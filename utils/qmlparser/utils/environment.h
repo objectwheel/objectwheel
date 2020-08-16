@@ -27,7 +27,7 @@
 
 #include "fileutils.h"
 #include "hostosinfo.h"
-#include "utils_global.h"
+#include <utils_global.h>
 
 #include <QMap>
 #include <QStringList>
@@ -40,7 +40,7 @@ QT_FORWARD_DECLARE_CLASS(QProcessEnvironment)
 namespace Utils {
 class Environment;
 
-class QTCREATOR_UTILS_EXPORT EnvironmentItem
+class UTILS_EXPORT EnvironmentItem
 {
 public:
     enum Operation { Set, Unset, Prepend, Append };
@@ -77,9 +77,9 @@ private:
     void apply(Environment *e, Operation op) const;
 };
 
-QTCREATOR_UTILS_EXPORT QDebug operator<<(QDebug debug, const EnvironmentItem &i);
+UTILS_EXPORT QDebug operator<<(QDebug debug, const EnvironmentItem &i);
 
-class QTCREATOR_UTILS_EXPORT Environment
+class UTILS_EXPORT Environment
 {
 public:
     typedef QMap<QString, QString>::const_iterator const_iterator;

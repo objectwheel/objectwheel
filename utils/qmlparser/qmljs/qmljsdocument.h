@@ -29,12 +29,12 @@
 #include <QSharedPointer>
 #include <QString>
 
+#include <utils_global.h>
 #include <languageutils/fakemetaobject.h>
 
 #include "qmljsdialect.h"
 #include "parser/qmldirparser_p.h"
 #include "parser/qmljsastfwd_p.h"
-#include "qmljs_global.h"
 #include "qmljsconstants.h"
 #include "qmljsimportdependencies.h"
 
@@ -46,7 +46,7 @@ class Engine;
 class Snapshot;
 class ImportDependencies;
 
-class QMLJS_EXPORT Document
+class UTILS_EXPORT Document
 {
     Q_DISABLE_COPY(Document)
 public:
@@ -122,7 +122,7 @@ private:
     friend class Snapshot;
 };
 
-class QMLJS_EXPORT ModuleApiInfo
+class UTILS_EXPORT ModuleApiInfo
 {
 public:
     QString uri;
@@ -132,7 +132,7 @@ public:
     void addToHash(QCryptographicHash &hash) const;
 };
 
-class QMLJS_EXPORT LibraryInfo
+class UTILS_EXPORT LibraryInfo
 {
 public:
     enum PluginTypeInfoStatus {
@@ -219,7 +219,7 @@ public:
     { _dumpStatus = dumped; _dumpError = error; }
 };
 
-class QMLJS_EXPORT Snapshot
+class UTILS_EXPORT Snapshot
 {
     typedef QHash<QString, Document::Ptr> Base;
     QHash<QString, Document::Ptr> _documents;

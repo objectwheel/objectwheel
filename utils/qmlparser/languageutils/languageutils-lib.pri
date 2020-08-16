@@ -1,5 +1,4 @@
 HEADERS += \
-    $$PWD/languageutils_global.h \
     $$PWD/fakemetaobject.h \
     $$PWD/componentversion.h
 

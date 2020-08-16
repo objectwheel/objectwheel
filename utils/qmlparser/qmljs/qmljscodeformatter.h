@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 
 #include "qmljsscanner.h"
 
@@ -41,7 +41,7 @@ QT_END_NAMESPACE
 
 namespace QmlJS {
 
-class QMLJS_EXPORT CodeFormatter
+class UTILS_EXPORT CodeFormatter
 {
     Q_GADGET
 public:
@@ -67,7 +67,7 @@ protected:
     virtual void adjustIndent(const QList<Token> &tokens, int startLexerState, int *indentDepth) const = 0;
 
     struct State;
-    class QMLJS_EXPORT BlockData
+    class UTILS_EXPORT BlockData
     {
     public:
         BlockData();
@@ -311,7 +311,7 @@ private:
     int m_tabSize;
 };
 
-class QMLJS_EXPORT QtStyleCodeFormatter : public CodeFormatter
+class UTILS_EXPORT QtStyleCodeFormatter : public CodeFormatter
 {
 public:
     QtStyleCodeFormatter();

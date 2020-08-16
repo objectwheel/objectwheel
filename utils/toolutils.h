@@ -1,14 +1,13 @@
 #ifndef TOOLUTILS_H
 #define TOOLUTILS_H
 
-class QString;
-class QPixmap;
+#include <utils_global.h>
 
 namespace ToolUtils {
 
-QString toolIconPath(const QString& module);
-QString toolCetegory(const QString& module);
-int toolCetegoryIndex(const QString& category);
+UTILS_EXPORT QString toolIconPath(const QString& module);
+UTILS_EXPORT QString toolCetegory(const QString& module);
+UTILS_EXPORT int toolCetegoryIndex(const QString& category);
 
 } // ToolUtils
 

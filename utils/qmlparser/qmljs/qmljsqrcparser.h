@@ -24,8 +24,8 @@
 ****************************************************************************/
 
 #pragma once
-#include "qmljs_global.h"
 
+#include <utils_global.h>
 #include <QMap>
 #include <QSharedPointer>
 #include <QString>
@@ -40,7 +40,7 @@ class QrcParserPrivate;
 class QrcCachePrivate;
 }
 
-class QMLJS_EXPORT QrcParser
+class UTILS_EXPORT QrcParser
 {
 public:
     typedef QSharedPointer<QrcParser> Ptr;
@@ -69,7 +69,7 @@ private:
     Internal::QrcParserPrivate *d;
 };
 
-class QMLJS_EXPORT QrcCache
+class UTILS_EXPORT QrcCache
 {
 public:
     QrcCache();

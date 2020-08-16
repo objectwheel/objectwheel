@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
+#include <utils_global.h>
 #include <qmljs/parser/qmljsastfwd_p.h>
 
 
@@ -40,7 +40,7 @@
 
 namespace QmlJS {
 
-class QMLJS_EXPORT SimpleReaderNode
+class UTILS_EXPORT SimpleReaderNode
 {
 public:
     typedef QSharedPointer<SimpleReaderNode> Ptr;
@@ -74,7 +74,7 @@ private:
     friend class SimpleReader;
 };
 
-class QMLJS_EXPORT SimpleAbstractStreamReader
+class UTILS_EXPORT SimpleAbstractStreamReader
 {
     Q_DECLARE_TR_FUNCTIONS(QmlJS::SimpleAbstractStreamReader)
 
@@ -108,7 +108,7 @@ private:
     QString m_source;
 };
 
-class QMLJS_EXPORT SimpleReader: public SimpleAbstractStreamReader
+class UTILS_EXPORT SimpleReader: public SimpleAbstractStreamReader
 {
     Q_DECLARE_TR_FUNCTIONS(QmlJS::SimpleReader)
 

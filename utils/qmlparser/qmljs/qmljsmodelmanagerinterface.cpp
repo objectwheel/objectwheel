@@ -53,7 +53,7 @@
 
 namespace QmlJS {
 
-QMLJS_EXPORT Q_LOGGING_CATEGORY(qmljsLog, "qtc.qmljs.common")
+UTILS_EXPORT Q_LOGGING_CATEGORY(qmljsLog, "qtc.qmljs.common")
 
 /*!
     \class QmlJS::ModelManagerInterface

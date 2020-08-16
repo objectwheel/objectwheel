@@ -27,8 +27,7 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QVector>
 
 QT_BEGIN_NAMESPACE
@@ -37,7 +36,7 @@ class QRegularExpressionMatch;
 class QString;
 QT_END_NAMESPACE
 
-class QTCREATOR_UTILS_EXPORT FuzzyMatcher
+class UTILS_EXPORT FuzzyMatcher
 {
 public:
     enum class CaseSensitivity {

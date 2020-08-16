@@ -25,13 +25,12 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
-
+#include <utils_global.h>
 #include <QStringList>
 
 namespace QmlJS {
 
-class QMLJS_EXPORT Token
+class UTILS_EXPORT Token
 {
 public:
     enum Kind {
@@ -68,7 +67,7 @@ public:
     Kind kind;
 };
 
-class QMLJS_EXPORT Scanner
+class UTILS_EXPORT Scanner
 {
 public:
     enum {

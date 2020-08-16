@@ -36,13 +36,12 @@
 // We mean it.
 //
 
+#include <utils_global.h>
+
 #include "qmljsastvisitor_p.h"
-#include "qmljsglobal_p.h"
 #include "qmljsmemorypool_p.h"
 
 #include <QtCore/qstring.h>
-
-QT_QML_BEGIN_NAMESPACE
 
 #define QMLJS_DECLARE_AST_NODE(name) \
   enum { K = Kind_##name };
@@ -103,7 +102,7 @@ T1 cast(T2 *ast)
     return 0;
 }
 
-class QML_PARSER_EXPORT Node: public Managed
+class UTILS_EXPORT Node: public Managed
 {
 public:
     enum Kind {
@@ -234,7 +233,7 @@ public:
     int kind;
 };
 
-class QML_PARSER_EXPORT ExpressionNode: public Node
+class UTILS_EXPORT ExpressionNode: public Node
 {
 public:
     ExpressionNode() {}
@@ -242,7 +241,7 @@ public:
     ExpressionNode *expressionCast() override;
 };
 
-class QML_PARSER_EXPORT Statement: public Node
+class UTILS_EXPORT Statement: public Node
 {
 public:
     Statement() {}
@@ -250,7 +249,7 @@ public:
     Statement *statementCast() override;
 };
 
-class QML_PARSER_EXPORT NestedExpression: public ExpressionNode
+class UTILS_EXPORT NestedExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(NestedExpression)
@@ -273,7 +272,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT ThisExpression: public ExpressionNode
+class UTILS_EXPORT ThisExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(ThisExpression)
@@ -292,7 +291,7 @@ public:
     SourceLocation thisToken;
 };
 
-class QML_PARSER_EXPORT IdentifierExpression: public ExpressionNode
+class UTILS_EXPORT IdentifierExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(IdentifierExpression)
@@ -313,7 +312,7 @@ public:
     SourceLocation identifierToken;
 };
 
-class QML_PARSER_EXPORT NullExpression: public ExpressionNode
+class UTILS_EXPORT NullExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(NullExpression)
@@ -332,7 +331,7 @@ public:
     SourceLocation nullToken;
 };
 
-class QML_PARSER_EXPORT TrueLiteral: public ExpressionNode
+class UTILS_EXPORT TrueLiteral: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(TrueLiteral)
@@ -351,7 +350,7 @@ public:
     SourceLocation trueToken;
 };
 
-class QML_PARSER_EXPORT FalseLiteral: public ExpressionNode
+class UTILS_EXPORT FalseLiteral: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(FalseLiteral)
@@ -370,7 +369,7 @@ public:
     SourceLocation falseToken;
 };
 
-class QML_PARSER_EXPORT NumericLiteral: public ExpressionNode
+class UTILS_EXPORT NumericLiteral: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(NumericLiteral)
@@ -391,7 +390,7 @@ public:
     SourceLocation literalToken;
 };
 
-class QML_PARSER_EXPORT StringLiteral: public ExpressionNode
+class UTILS_EXPORT StringLiteral: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(StringLiteral)
@@ -412,7 +411,7 @@ public:
     SourceLocation literalToken;
 };
 
-class QML_PARSER_EXPORT RegExpLiteral: public ExpressionNode
+class UTILS_EXPORT RegExpLiteral: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(RegExpLiteral)
@@ -434,7 +433,7 @@ public:
     SourceLocation literalToken;
 };
 
-class QML_PARSER_EXPORT ArrayLiteral: public ExpressionNode
+class UTILS_EXPORT ArrayLiteral: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(ArrayLiteral)
@@ -467,7 +466,7 @@ public:
     SourceLocation rbracketToken;
 };
 
-class QML_PARSER_EXPORT ObjectLiteral: public ExpressionNode
+class UTILS_EXPORT ObjectLiteral: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(ObjectLiteral)
@@ -492,7 +491,7 @@ public:
     SourceLocation rbraceToken;
 };
 
-class QML_PARSER_EXPORT Elision: public Node
+class UTILS_EXPORT Elision: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(Elision)
@@ -527,7 +526,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT ElementList: public Node
+class UTILS_EXPORT ElementList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(ElementList)
@@ -574,7 +573,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT PropertyName: public Node
+class UTILS_EXPORT PropertyName: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(PropertyName)
@@ -593,7 +592,7 @@ public:
     SourceLocation propertyNameToken;
 };
 
-class QML_PARSER_EXPORT PropertyAssignment: public Node
+class UTILS_EXPORT PropertyAssignment: public Node
 {
 public:
     PropertyAssignment(PropertyName *n)
@@ -603,7 +602,7 @@ public:
     PropertyName *name;
 };
 
-class QML_PARSER_EXPORT PropertyAssignmentList: public Node
+class UTILS_EXPORT PropertyAssignmentList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(PropertyAssignmentList)
@@ -642,7 +641,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT PropertyNameAndValue: public PropertyAssignment
+class UTILS_EXPORT PropertyNameAndValue: public PropertyAssignment
 {
 public:
     QMLJS_DECLARE_AST_NODE(PropertyNameAndValue)
@@ -665,7 +664,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT PropertyGetterSetter: public PropertyAssignment
+class UTILS_EXPORT PropertyGetterSetter: public PropertyAssignment
 {
 public:
     QMLJS_DECLARE_AST_NODE(PropertyGetterSetter)
@@ -702,7 +701,7 @@ public:
     SourceLocation rbraceToken;
 };
 
-class QML_PARSER_EXPORT IdentifierPropertyName: public PropertyName
+class UTILS_EXPORT IdentifierPropertyName: public PropertyName
 {
 public:
     QMLJS_DECLARE_AST_NODE(IdentifierPropertyName)
@@ -718,7 +717,7 @@ public:
     QStringRef id;
 };
 
-class QML_PARSER_EXPORT StringLiteralPropertyName: public PropertyName
+class UTILS_EXPORT StringLiteralPropertyName: public PropertyName
 {
 public:
     QMLJS_DECLARE_AST_NODE(StringLiteralPropertyName)
@@ -734,7 +733,7 @@ public:
     QStringRef id;
 };
 
-class QML_PARSER_EXPORT NumericLiteralPropertyName: public PropertyName
+class UTILS_EXPORT NumericLiteralPropertyName: public PropertyName
 {
 public:
     QMLJS_DECLARE_AST_NODE(NumericLiteralPropertyName)
@@ -750,7 +749,7 @@ public:
     double id;
 };
 
-class QML_PARSER_EXPORT ArrayMemberExpression: public ExpressionNode
+class UTILS_EXPORT ArrayMemberExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(ArrayMemberExpression)
@@ -774,7 +773,7 @@ public:
     SourceLocation rbracketToken;
 };
 
-class QML_PARSER_EXPORT FieldMemberExpression: public ExpressionNode
+class UTILS_EXPORT FieldMemberExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(FieldMemberExpression)
@@ -798,7 +797,7 @@ public:
     SourceLocation identifierToken;
 };
 
-class QML_PARSER_EXPORT NewMemberExpression: public ExpressionNode
+class UTILS_EXPORT NewMemberExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(NewMemberExpression)
@@ -823,7 +822,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT NewExpression: public ExpressionNode
+class UTILS_EXPORT NewExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(NewExpression)
@@ -844,7 +843,7 @@ public:
     SourceLocation newToken;
 };
 
-class QML_PARSER_EXPORT CallExpression: public ExpressionNode
+class UTILS_EXPORT CallExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(CallExpression)
@@ -868,7 +867,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT ArgumentList: public Node
+class UTILS_EXPORT ArgumentList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(ArgumentList)
@@ -910,7 +909,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT PostIncrementExpression: public ExpressionNode
+class UTILS_EXPORT PostIncrementExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(PostIncrementExpression)
@@ -931,7 +930,7 @@ public:
     SourceLocation incrementToken;
 };
 
-class QML_PARSER_EXPORT PostDecrementExpression: public ExpressionNode
+class UTILS_EXPORT PostDecrementExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(PostDecrementExpression)
@@ -952,7 +951,7 @@ public:
     SourceLocation decrementToken;
 };
 
-class QML_PARSER_EXPORT DeleteExpression: public ExpressionNode
+class UTILS_EXPORT DeleteExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(DeleteExpression)
@@ -973,7 +972,7 @@ public:
     SourceLocation deleteToken;
 };
 
-class QML_PARSER_EXPORT VoidExpression: public ExpressionNode
+class UTILS_EXPORT VoidExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(VoidExpression)
@@ -994,7 +993,7 @@ public:
     SourceLocation voidToken;
 };
 
-class QML_PARSER_EXPORT TypeOfExpression: public ExpressionNode
+class UTILS_EXPORT TypeOfExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(TypeOfExpression)
@@ -1015,7 +1014,7 @@ public:
     SourceLocation typeofToken;
 };
 
-class QML_PARSER_EXPORT PreIncrementExpression: public ExpressionNode
+class UTILS_EXPORT PreIncrementExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(PreIncrementExpression)
@@ -1036,7 +1035,7 @@ public:
     SourceLocation incrementToken;
 };
 
-class QML_PARSER_EXPORT PreDecrementExpression: public ExpressionNode
+class UTILS_EXPORT PreDecrementExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(PreDecrementExpression)
@@ -1057,7 +1056,7 @@ public:
     SourceLocation decrementToken;
 };
 
-class QML_PARSER_EXPORT UnaryPlusExpression: public ExpressionNode
+class UTILS_EXPORT UnaryPlusExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(UnaryPlusExpression)
@@ -1078,7 +1077,7 @@ public:
     SourceLocation plusToken;
 };
 
-class QML_PARSER_EXPORT UnaryMinusExpression: public ExpressionNode
+class UTILS_EXPORT UnaryMinusExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(UnaryMinusExpression)
@@ -1099,7 +1098,7 @@ public:
     SourceLocation minusToken;
 };
 
-class QML_PARSER_EXPORT TildeExpression: public ExpressionNode
+class UTILS_EXPORT TildeExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(TildeExpression)
@@ -1120,7 +1119,7 @@ public:
     SourceLocation tildeToken;
 };
 
-class QML_PARSER_EXPORT NotExpression: public ExpressionNode
+class UTILS_EXPORT NotExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(NotExpression)
@@ -1141,7 +1140,7 @@ public:
     SourceLocation notToken;
 };
 
-class QML_PARSER_EXPORT BinaryExpression: public ExpressionNode
+class UTILS_EXPORT BinaryExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(BinaryExpression)
@@ -1167,7 +1166,7 @@ public:
     SourceLocation operatorToken;
 };
 
-class QML_PARSER_EXPORT ConditionalExpression: public ExpressionNode
+class UTILS_EXPORT ConditionalExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(ConditionalExpression)
@@ -1192,7 +1191,7 @@ public:
     SourceLocation colonToken;
 };
 
-class QML_PARSER_EXPORT Expression: public ExpressionNode // ### rename
+class UTILS_EXPORT Expression: public ExpressionNode // ### rename
 {
 public:
     QMLJS_DECLARE_AST_NODE(Expression)
@@ -1214,7 +1213,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT Block: public Statement
+class UTILS_EXPORT Block: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(Block)
@@ -1236,7 +1235,7 @@ public:
     SourceLocation rbraceToken;
 };
 
-class QML_PARSER_EXPORT StatementList: public Node
+class UTILS_EXPORT StatementList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(StatementList)
@@ -1273,7 +1272,7 @@ public:
     StatementList *next;
 };
 
-class QML_PARSER_EXPORT VariableStatement: public Statement
+class UTILS_EXPORT VariableStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(VariableStatement)
@@ -1296,7 +1295,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT VariableDeclaration: public Node
+class UTILS_EXPORT VariableDeclaration: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(VariableDeclaration)
@@ -1328,7 +1327,7 @@ public:
     VariableScope scope;
 };
 
-class QML_PARSER_EXPORT VariableDeclarationList: public Node
+class UTILS_EXPORT VariableDeclarationList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(VariableDeclarationList)
@@ -1374,7 +1373,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT EmptyStatement: public Statement
+class UTILS_EXPORT EmptyStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(EmptyStatement)
@@ -1393,7 +1392,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT ExpressionStatement: public Statement
+class UTILS_EXPORT ExpressionStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(ExpressionStatement)
@@ -1414,7 +1413,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT IfStatement: public Statement
+class UTILS_EXPORT IfStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(IfStatement)
@@ -1446,7 +1445,7 @@ public:
     SourceLocation elseToken;
 };
 
-class QML_PARSER_EXPORT DoWhileStatement: public Statement
+class UTILS_EXPORT DoWhileStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(DoWhileStatement)
@@ -1473,7 +1472,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT WhileStatement: public Statement
+class UTILS_EXPORT WhileStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(WhileStatement)
@@ -1498,7 +1497,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT ForStatement: public Statement
+class UTILS_EXPORT ForStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(ForStatement)
@@ -1527,7 +1526,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT LocalForStatement: public Statement
+class UTILS_EXPORT LocalForStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(LocalForStatement)
@@ -1557,7 +1556,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT ForEachStatement: public Statement
+class UTILS_EXPORT ForEachStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(ForEachStatement)
@@ -1584,7 +1583,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT LocalForEachStatement: public Statement
+class UTILS_EXPORT LocalForEachStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(LocalForEachStatement)
@@ -1612,7 +1611,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT ContinueStatement: public Statement
+class UTILS_EXPORT ContinueStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(ContinueStatement)
@@ -1635,7 +1634,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT BreakStatement: public Statement
+class UTILS_EXPORT BreakStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(BreakStatement)
@@ -1658,7 +1657,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT ReturnStatement: public Statement
+class UTILS_EXPORT ReturnStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(ReturnStatement)
@@ -1680,7 +1679,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT WithStatement: public Statement
+class UTILS_EXPORT WithStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(WithStatement)
@@ -1705,7 +1704,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT CaseBlock: public Node
+class UTILS_EXPORT CaseBlock: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(CaseBlock)
@@ -1730,7 +1729,7 @@ public:
     SourceLocation rbraceToken;
 };
 
-class QML_PARSER_EXPORT SwitchStatement: public Statement
+class UTILS_EXPORT SwitchStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(SwitchStatement)
@@ -1755,7 +1754,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT CaseClause: public Node
+class UTILS_EXPORT CaseClause: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(CaseClause)
@@ -1779,7 +1778,7 @@ public:
     SourceLocation colonToken;
 };
 
-class QML_PARSER_EXPORT CaseClauses: public Node
+class UTILS_EXPORT CaseClauses: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(CaseClauses)
@@ -1816,7 +1815,7 @@ public:
     CaseClauses *next;
 };
 
-class QML_PARSER_EXPORT DefaultClause: public Node
+class UTILS_EXPORT DefaultClause: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(DefaultClause)
@@ -1839,7 +1838,7 @@ public:
     SourceLocation colonToken;
 };
 
-class QML_PARSER_EXPORT LabelledStatement: public Statement
+class UTILS_EXPORT LabelledStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(LabelledStatement)
@@ -1863,7 +1862,7 @@ public:
     SourceLocation colonToken;
 };
 
-class QML_PARSER_EXPORT ThrowStatement: public Statement
+class UTILS_EXPORT ThrowStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(ThrowStatement)
@@ -1885,7 +1884,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT Catch: public Node
+class UTILS_EXPORT Catch: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(Catch)
@@ -1911,7 +1910,7 @@ public:
     SourceLocation rparenToken;
 };
 
-class QML_PARSER_EXPORT Finally: public Node
+class UTILS_EXPORT Finally: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(Finally)
@@ -1933,7 +1932,7 @@ public:
     SourceLocation finallyToken;
 };
 
-class QML_PARSER_EXPORT TryStatement: public Statement
+class UTILS_EXPORT TryStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(TryStatement)
@@ -1972,7 +1971,7 @@ public:
     SourceLocation tryToken;
 };
 
-class QML_PARSER_EXPORT FunctionExpression: public ExpressionNode
+class UTILS_EXPORT FunctionExpression: public ExpressionNode
 {
 public:
     QMLJS_DECLARE_AST_NODE(FunctionExpression)
@@ -2001,7 +2000,7 @@ public:
     SourceLocation rbraceToken;
 };
 
-class QML_PARSER_EXPORT FunctionDeclaration: public FunctionExpression
+class UTILS_EXPORT FunctionDeclaration: public FunctionExpression
 {
 public:
     QMLJS_DECLARE_AST_NODE(FunctionDeclaration)
@@ -2013,7 +2012,7 @@ public:
     void accept0(Visitor *visitor) override;
 };
 
-class QML_PARSER_EXPORT FormalParameterList: public Node
+class UTILS_EXPORT FormalParameterList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(FormalParameterList)
@@ -2052,7 +2051,7 @@ public:
     SourceLocation identifierToken;
 };
 
-class QML_PARSER_EXPORT SourceElement: public Node
+class UTILS_EXPORT SourceElement: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(SourceElement)
@@ -2061,7 +2060,7 @@ public:
         { kind = K; }
 };
 
-class QML_PARSER_EXPORT SourceElements: public Node
+class UTILS_EXPORT SourceElements: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(SourceElements)
@@ -2098,7 +2097,7 @@ public:
     SourceElements *next;
 };
 
-class QML_PARSER_EXPORT FunctionBody: public Node
+class UTILS_EXPORT FunctionBody: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(FunctionBody)
@@ -2119,7 +2118,7 @@ public:
     SourceElements *elements;
 };
 
-class QML_PARSER_EXPORT Program: public Node
+class UTILS_EXPORT Program: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(Program)
@@ -2140,7 +2139,7 @@ public:
     SourceElements *elements;
 };
 
-class QML_PARSER_EXPORT FunctionSourceElement: public SourceElement
+class UTILS_EXPORT FunctionSourceElement: public SourceElement
 {
 public:
     QMLJS_DECLARE_AST_NODE(FunctionSourceElement)
@@ -2161,7 +2160,7 @@ public:
     FunctionDeclaration *declaration;
 };
 
-class QML_PARSER_EXPORT StatementSourceElement: public SourceElement
+class UTILS_EXPORT StatementSourceElement: public SourceElement
 {
 public:
     QMLJS_DECLARE_AST_NODE(StatementSourceElement)
@@ -2182,7 +2181,7 @@ public:
     Statement *statement;
 };
 
-class QML_PARSER_EXPORT DebuggerStatement: public Statement
+class UTILS_EXPORT DebuggerStatement: public Statement
 {
 public:
     QMLJS_DECLARE_AST_NODE(DebuggerStatement)
@@ -2203,7 +2202,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT UiQualifiedId: public Node
+class UTILS_EXPORT UiQualifiedId: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiQualifiedId)
@@ -2241,7 +2240,7 @@ public:
     SourceLocation identifierToken;
 };
 
-class QML_PARSER_EXPORT UiImport: public Node
+class UTILS_EXPORT UiImport: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiImport)
@@ -2274,7 +2273,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT UiObjectMember: public Node
+class UTILS_EXPORT UiObjectMember: public Node
 {
 public:
     SourceLocation firstSourceLocation() const override = 0;
@@ -2283,7 +2282,7 @@ public:
     UiObjectMember *uiObjectMemberCast() override;
 };
 
-class QML_PARSER_EXPORT UiObjectMemberList: public Node
+class UTILS_EXPORT UiObjectMemberList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiObjectMemberList)
@@ -2320,7 +2319,7 @@ public:
     UiObjectMember *member;
 };
 
-class QML_PARSER_EXPORT UiQualifiedPragmaId: public Node
+class UTILS_EXPORT UiQualifiedPragmaId: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiQualifiedPragmaId)
@@ -2358,7 +2357,7 @@ public:
     SourceLocation identifierToken;
 };
 
-class QML_PARSER_EXPORT UiPragma: public Node
+class UTILS_EXPORT UiPragma: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiPragma)
@@ -2381,7 +2380,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT UiHeaderItemList: public Node
+class UTILS_EXPORT UiHeaderItemList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiHeaderItemList)
@@ -2430,7 +2429,7 @@ public:
     UiHeaderItemList *next;
 };
 
-class QML_PARSER_EXPORT UiProgram: public Node
+class UTILS_EXPORT UiProgram: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiProgram)
@@ -2464,7 +2463,7 @@ public:
     UiObjectMemberList *members;
 };
 
-class QML_PARSER_EXPORT UiArrayMemberList: public Node
+class UTILS_EXPORT UiArrayMemberList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiArrayMemberList)
@@ -2502,7 +2501,7 @@ public:
     SourceLocation commaToken;
 };
 
-class QML_PARSER_EXPORT UiObjectInitializer: public Node
+class UTILS_EXPORT UiObjectInitializer: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiObjectInitializer)
@@ -2525,7 +2524,7 @@ public:
     SourceLocation rbraceToken;
 };
 
-class QML_PARSER_EXPORT UiParameterList: public Node
+class UTILS_EXPORT UiParameterList: public Node
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiParameterList)
@@ -2566,7 +2565,7 @@ public:
     SourceLocation identifierToken;
 };
 
-class QML_PARSER_EXPORT UiPublicMember: public UiObjectMember
+class UTILS_EXPORT UiPublicMember: public UiObjectMember
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiPublicMember)
@@ -2634,7 +2633,7 @@ public:
     SourceLocation semicolonToken;
 };
 
-class QML_PARSER_EXPORT UiObjectDefinition: public UiObjectMember
+class UTILS_EXPORT UiObjectDefinition: public UiObjectMember
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiObjectDefinition)
@@ -2657,7 +2656,7 @@ public:
     UiObjectInitializer *initializer;
 };
 
-class QML_PARSER_EXPORT UiSourceElement: public UiObjectMember
+class UTILS_EXPORT UiSourceElement: public UiObjectMember
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiSourceElement)
@@ -2693,7 +2692,7 @@ public:
     Node *sourceElement;
 };
 
-class QML_PARSER_EXPORT UiObjectBinding: public UiObjectMember
+class UTILS_EXPORT UiObjectBinding: public UiObjectMember
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiObjectBinding)
@@ -2729,7 +2728,7 @@ public:
     bool hasOnToken;
 };
 
-class QML_PARSER_EXPORT UiScriptBinding: public UiObjectMember
+class UTILS_EXPORT UiScriptBinding: public UiObjectMember
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiScriptBinding)
@@ -2754,7 +2753,7 @@ public:
     SourceLocation colonToken;
 };
 
-class QML_PARSER_EXPORT UiArrayBinding: public UiObjectMember
+class UTILS_EXPORT UiArrayBinding: public UiObjectMember
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiArrayBinding)
@@ -2781,7 +2780,7 @@ public:
     SourceLocation rbracketToken;
 };
 
-class QML_PARSER_EXPORT UiEnumMemberList: public Node
+class UTILS_EXPORT UiEnumMemberList: public Node
 {
     QMLJS_DECLARE_AST_NODE(UiEnumMemberList)
 public:
@@ -2830,7 +2829,7 @@ public:
     SourceLocation valueToken;
 };
 
-class QML_PARSER_EXPORT UiEnumDeclaration: public UiObjectMember
+class UTILS_EXPORT UiEnumDeclaration: public UiObjectMember
 {
 public:
     QMLJS_DECLARE_AST_NODE(UiEnumDeclaration)
@@ -2857,8 +2856,3 @@ public:
 };
 
 } } // namespace AST
-
-
-
-QT_QML_END_NAMESPACE
-

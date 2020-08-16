@@ -23,14 +23,12 @@
 **
 ****************************************************************************/
 
+#include <utils_global.h>
 #include "qmljsengine_p.h"
-#include "qmljsglobal_p.h"
 
 #include <QtCore/qnumeric.h>
 #include <QtCore/qhash.h>
 #include <QtCore/qdebug.h>
-
-QT_QML_BEGIN_NAMESPACE
 
 namespace QmlJS {
 
@@ -147,5 +145,3 @@ QStringRef Engine::newStringRef(const QChar *chars, int size)
 { return newStringRef(QString(chars, size)); }
 
 } // end of namespace QmlJS
-
-QT_QML_END_NAMESPACE

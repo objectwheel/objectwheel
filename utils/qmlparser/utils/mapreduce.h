@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "utils_global.h"
+#include <utils_global.h>
 #include "algorithm.h"
 #include "runextensions.h"
 
@@ -41,7 +41,7 @@ enum class MapReduceOption
 
 namespace Internal {
 
-class QTCREATOR_UTILS_EXPORT MapReduceObject : public QObject
+class UTILS_EXPORT MapReduceObject : public QObject
 {
     Q_OBJECT
 };

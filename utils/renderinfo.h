@@ -1,11 +1,13 @@
 #ifndef RENDERINFO_H
 #define RENDERINFO_H
 
+#include <utils_global.h>
+#include <qmlerror.h>
+
 #include <QMap>
 #include <QHash>
 #include <QImage>
 #include <QVariant>
-#include <qmlerror.h>
 
 struct Enum {
     QString name;
@@ -46,7 +48,7 @@ struct InitInfo {
     QHash<QString, QVector<QPair<QString, QString>>> children;
 };
 
-inline QDataStream& operator>> (QDataStream& in, PropertyNode& node)
+UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, PropertyNode& node)
 {
     in >> node.cleanClassName;
     in >> node.properties;
@@ -54,7 +56,7 @@ inline QDataStream& operator>> (QDataStream& in, PropertyNode& node)
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const PropertyNode& node)
+UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const PropertyNode& node)
 {
     out << node.cleanClassName;
     out << node.properties;
@@ -62,7 +64,7 @@ inline QDataStream& operator<< (QDataStream& out, const PropertyNode& node)
     return out;
 }
 
-inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
+UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
 {
     in >> info.gui;
     in >> info.uid;
@@ -82,7 +84,7 @@ inline QDataStream& operator>> (QDataStream& in, RenderInfo& info)
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
+UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
 {
     out << info.gui;
     out << info.uid;
@@ -102,7 +104,7 @@ inline QDataStream& operator<< (QDataStream& out, const RenderInfo& info)
     return out;
 }
 
-inline QDataStream& operator>> (QDataStream& in, Enum& e)
+UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, Enum& e)
 {
     in >> e.name;
     in >> e.scope;
@@ -111,7 +113,7 @@ inline QDataStream& operator>> (QDataStream& in, Enum& e)
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const Enum& e)
+UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const Enum& e)
 {
     out << e.name;
     out << e.scope;
@@ -120,14 +122,14 @@ inline QDataStream& operator<< (QDataStream& out, const Enum& e)
     return out;
 }
 
-inline QDataStream& operator>> (QDataStream& in, InitInfo& info)
+UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, InitInfo& info)
 {
     in >> info.forms;
     in >> info.children;
     return in;
 }
 
-inline QDataStream& operator<< (QDataStream& out, const InitInfo& info)
+UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const InitInfo& info)
 {
     out << info.forms;
     out << info.children;

@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QString>
 
 QT_BEGIN_NAMESPACE
@@ -35,7 +34,7 @@ QT_END_NAMESPACE
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT CommentDefinition
+class UTILS_EXPORT CommentDefinition
 {
 public:
     static CommentDefinition CppStyle;
@@ -56,7 +55,7 @@ public:
     QString multiLineEnd;
 };
 
-QTCREATOR_UTILS_EXPORT
+UTILS_EXPORT
 void unCommentSelection(QPlainTextEdit *edit,
                         const CommentDefinition &definiton = CommentDefinition());
 

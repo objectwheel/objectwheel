@@ -37,7 +37,7 @@ namespace QmlJS {
 
 class Document;
 
-class QMLJS_EXPORT PropertyReader
+class UTILS_EXPORT PropertyReader
 {
 public:
 

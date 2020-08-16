@@ -1,5 +1,3 @@
-DEFINES += BUILD_QMLEDITORWIDGETS_STATIC_LIB
-
 HEADERS += \
     $$PWD/fontsizespinbox.h \
     $$PWD/filewidget.h \

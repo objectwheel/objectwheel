@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 
 #include <QLoggingCategory>
 
@@ -87,6 +87,6 @@ const char TASK_IMPORT_SCAN[] = "QmlJSEditor.TaskImportScan";
 
 } // namespace Constants
 
-QMLJS_EXPORT Q_DECLARE_LOGGING_CATEGORY(qmljsLog)
+UTILS_EXPORT Q_DECLARE_LOGGING_CATEGORY(qmljsLog)
 
 } // namespace QmlJS

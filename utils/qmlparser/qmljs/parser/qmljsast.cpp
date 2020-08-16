@@ -27,8 +27,6 @@
 
 #include "qmljsastvisitor_p.h"
 
-QT_QML_BEGIN_NAMESPACE
-
 namespace QmlJS { namespace AST {
 
 void Node::accept(Visitor *visitor)
@@ -971,7 +969,3 @@ void UiEnumMemberList::accept0(Visitor *visitor)
 }
 
 } } // namespace QmlJS::AST
-
-QT_QML_END_NAMESPACE
-
-

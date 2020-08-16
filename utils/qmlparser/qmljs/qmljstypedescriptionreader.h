@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include <qmljs/parser/qmljsastfwd_p.h>
 
 #include <languageutils/fakemetaobject.h>
@@ -48,7 +48,7 @@ class UiScriptBinding;
 class SourceLocation;
 }
 
-class QMLJS_EXPORT TypeDescriptionReader
+class UTILS_EXPORT TypeDescriptionReader
 {
     Q_DECLARE_TR_FUNCTIONS(QmlJS::TypeDescriptionReader)
 

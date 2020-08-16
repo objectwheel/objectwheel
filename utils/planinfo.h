@@ -1,15 +1,16 @@
 #ifndef PLANINFO_H
 #define PLANINFO_H
 
+#include <utils_global.h>
 #include <QColor>
 
 class PlanInfo;
 
 namespace PlanParser {
-PlanInfo parse(const QByteArray& planData);
+UTILS_EXPORT PlanInfo parse(const QByteArray& planData);
 } // PlanParser
 
-class PlanInfo final
+class UTILS_EXPORT PlanInfo final
 {
     friend PlanInfo PlanParser::parse(const QByteArray&);
 

@@ -38,7 +38,7 @@ class Value;
 class ObjectValue;
 class FunctionValue;
 
-class QMLJS_EXPORT Evaluate: protected AST::Visitor
+class UTILS_EXPORT Evaluate: protected AST::Visitor
 {
 public:
     Evaluate(const ScopeChain *scopeChain, ReferenceContext *referenceContext = 0);

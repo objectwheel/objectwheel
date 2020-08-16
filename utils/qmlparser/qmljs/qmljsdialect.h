@@ -25,15 +25,13 @@
 
 #pragma once
 
-#include "qmljs_global.h"
-
+#include <utils_global.h>
 #include <utils/fileutils.h>
-
 #include <QString>
 
 namespace QmlJS {
 
-class QMLJS_EXPORT Dialect {
+class UTILS_EXPORT Dialect {
 public:
     enum Enum
     {
@@ -73,11 +71,11 @@ private:
     Enum m_dialect;
 };
 
-QMLJS_EXPORT uint qHash(const Dialect &o);
+UTILS_EXPORT uint qHash(const Dialect &o);
 
-QMLJS_EXPORT QDebug operator << (QDebug &dbg, const Dialect &dialect);
+UTILS_EXPORT QDebug operator << (QDebug &dbg, const Dialect &dialect);
 
-class QMLJS_EXPORT PathAndLanguage {
+class UTILS_EXPORT PathAndLanguage {
 public:
     PathAndLanguage(const Utils::FileName &path = Utils::FileName(), Dialect language = Dialect::AnyLanguage);
     PathAndLanguage(const PathAndLanguage &o)
@@ -97,7 +95,7 @@ private:
 };
 
 // tries to find the "most specific" language still compatible with all requested ones
-class QMLJS_EXPORT LanguageMerger
+class UTILS_EXPORT LanguageMerger
 {
 public:
     LanguageMerger()
@@ -121,9 +119,9 @@ private:
 };
 
 
-QMLJS_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
+UTILS_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
 
-class QMLJS_EXPORT PathsAndLanguages
+class UTILS_EXPORT PathsAndLanguages
 {
 public:
     explicit PathsAndLanguages()

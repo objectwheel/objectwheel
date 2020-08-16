@@ -36,21 +36,18 @@
 // We mean it.
 //
 
-#include "qmljsglobal_p.h"
-
+#include <utils_global.h>
 #include <QtCore/qglobal.h>
 #include <QtCore/qshareddata.h>
 #include <QtCore/qdebug.h>
 
 #include <cstring>
 
-QT_QML_BEGIN_NAMESPACE
-
 namespace QmlJS {
 
 class Managed;
 
-class QML_PARSER_EXPORT MemoryPool : public QSharedData
+class UTILS_EXPORT MemoryPool : public QSharedData
 {
     MemoryPool(const MemoryPool &other);
     void operator =(const MemoryPool &other);
@@ -142,7 +139,7 @@ private:
     };
 };
 
-class QML_PARSER_EXPORT Managed
+class UTILS_EXPORT Managed
 {
     Managed(const Managed &other);
     void operator = (const Managed &other);
@@ -157,6 +154,3 @@ public:
 };
 
 } // namespace QmlJS
-
-QT_QML_END_NAMESPACE
-

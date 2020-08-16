@@ -38,8 +38,6 @@
 
 #include "qmljslexer_p.h"
 
-QT_QML_BEGIN_NAMESPACE
-
 namespace QmlJS {
 
 static inline int classify2(const QChar *s, bool qmlMode) {
@@ -879,6 +877,4 @@ int Lexer::classify(const QChar *s, int n, bool qmlMode) {
 }
 
 } // namespace QmlJS
-
-QT_QML_END_NAMESPACE
 

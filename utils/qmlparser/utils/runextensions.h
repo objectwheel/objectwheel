@@ -26,7 +26,7 @@
 #pragma once
 
 #include "functiontraits.h"
-#include "utils_global.h"
+#include <utils_global.h>
 
 #include <QCoreApplication>
 #include <QFuture>
@@ -376,7 +376,7 @@ private:
     QThread::Priority priority = QThread::InheritPriority;
 };
 
-class QTCREATOR_UTILS_EXPORT RunnableThread : public QThread
+class UTILS_EXPORT RunnableThread : public QThread
 {
 public:
     explicit RunnableThread(QRunnable *runnable, QObject *parent = 0);

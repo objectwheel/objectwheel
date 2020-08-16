@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include <qmljs/qmljslineinfo.h>
 
 #include <QStringList>
@@ -33,7 +33,7 @@
 
 namespace QmlJS {
 
-class QMLJS_EXPORT CompletionContextFinder : public LineInfo
+class UTILS_EXPORT CompletionContextFinder : public LineInfo
 {
 public:
     CompletionContextFinder(const QTextCursor &cursor);

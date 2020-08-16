@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsconstants.h"
 #include "parser/qmljsastfwd_p.h"
 #include "parser/qmljsengine_p.h"
@@ -34,29 +34,29 @@ QT_FORWARD_DECLARE_CLASS(QColor)
 
 namespace QmlJS {
 
-QMLJS_EXPORT QColor toQColor(const QString &qmlColorString);
-QMLJS_EXPORT QString toString(AST::UiQualifiedId *qualifiedId,
+UTILS_EXPORT QColor toQColor(const QString &qmlColorString);
+UTILS_EXPORT QString toString(AST::UiQualifiedId *qualifiedId,
                               const QChar delimiter = QLatin1Char('.'));
 
-QMLJS_EXPORT AST::SourceLocation locationFromRange(const AST::SourceLocation &start,
+UTILS_EXPORT AST::SourceLocation locationFromRange(const AST::SourceLocation &start,
                                                    const AST::SourceLocation &end);
 
-QMLJS_EXPORT AST::SourceLocation fullLocationForQualifiedId(AST::UiQualifiedId *);
+UTILS_EXPORT AST::SourceLocation fullLocationForQualifiedId(AST::UiQualifiedId *);
 
-QMLJS_EXPORT QString idOfObject(AST::Node *object, AST::UiScriptBinding **idBinding = 0);
+UTILS_EXPORT QString idOfObject(AST::Node *object, AST::UiScriptBinding **idBinding = 0);
 
-QMLJS_EXPORT AST::UiObjectInitializer *initializerOfObject(AST::Node *object);
+UTILS_EXPORT AST::UiObjectInitializer *initializerOfObject(AST::Node *object);
 
-QMLJS_EXPORT AST::UiQualifiedId *qualifiedTypeNameId(AST::Node *node);
+UTILS_EXPORT AST::UiQualifiedId *qualifiedTypeNameId(AST::Node *node);
 
-QMLJS_EXPORT bool isValidBuiltinPropertyType(const QString &name);
+UTILS_EXPORT bool isValidBuiltinPropertyType(const QString &name);
 
-QMLJS_EXPORT DiagnosticMessage errorMessage(const AST::SourceLocation &loc,
+UTILS_EXPORT DiagnosticMessage errorMessage(const AST::SourceLocation &loc,
                                             const QString &message);
 
-QMLJS_EXPORT bool maybeModuleVersion(const QString &version);
+UTILS_EXPORT bool maybeModuleVersion(const QString &version);
 
-QMLJS_EXPORT QString modulePath(const QString &moduleImportName, const QString &version,
+UTILS_EXPORT QString modulePath(const QString &moduleImportName, const QString &version,
                                 const QStringList &importPaths);
 
 template <class T>

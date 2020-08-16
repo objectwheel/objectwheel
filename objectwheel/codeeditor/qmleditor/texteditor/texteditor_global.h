@@ -27,8 +27,10 @@
 
 #include <qglobal.h>
 
-#if defined(TEXTEDITOR_LIBRARY)
+#if defined(TEXTEDITOR_LIBRARY) // takes precedence when combined with others
 #  define TEXTEDITOR_EXPORT Q_DECL_EXPORT
+#elif defined(TEXTEDITOR_INCLUDE_STATIC)
+#  define TEXTEDITOR_EXPORT
 #else
 #  define TEXTEDITOR_EXPORT Q_DECL_IMPORT
 #endif

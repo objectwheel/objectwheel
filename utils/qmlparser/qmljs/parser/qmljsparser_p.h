@@ -50,7 +50,7 @@
 #ifndef QMLJSPARSER_P_H
 #define QMLJSPARSER_P_H
 
-#include "qmljsglobal_p.h"
+#include <utils_global.h>
 #include "qmljsgrammar_p.h"
 #include "qmljsast_p.h"
 #include "qmljsengine_p.h"
@@ -58,13 +58,11 @@
 #include <QtCore/qlist.h>
 #include <QtCore/qstring.h>
 
-QT_QML_BEGIN_NAMESPACE
-
 namespace QmlJS {
 
 class Engine;
 
-class QML_PARSER_EXPORT Parser: protected QmlJSGrammar
+class UTILS_EXPORT Parser: protected QmlJSGrammar
 {
 public:
     union Value {
@@ -231,14 +229,8 @@ protected:
 
 } // end of namespace QmlJS
 
-
-
 #define J_SCRIPT_REGEXPLITERAL_RULE1 96
 
 #define J_SCRIPT_REGEXPLITERAL_RULE2 97
-
-QT_QML_END_NAMESPACE
-
-
 
 #endif // QMLJSPARSER_P_H

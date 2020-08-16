@@ -3,9 +3,9 @@
 
 #include <qglobal.h>
 
-#if defined(UTILS_LIBRARY)
+#if defined(UTILS_LIBRARY) // takes precedence when combined with others
 #  define UTILS_EXPORT Q_DECL_EXPORT
-#elif defined(UTILS_BUILD_STATIC_LIB)
+#elif defined(UTILS_INCLUDE_STATIC)
 #  define UTILS_EXPORT
 #else
 #  define UTILS_EXPORT Q_DECL_IMPORT

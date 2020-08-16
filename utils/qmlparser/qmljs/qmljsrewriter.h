@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
+#include <utils_global.h>
 #include <qmljs/parser/qmljsastfwd_p.h>
 #include <utils/changeset.h>
 
@@ -33,7 +33,7 @@
 
 namespace QmlJS {
 
-class QMLJS_EXPORT Rewriter
+class UTILS_EXPORT Rewriter
 {
 public:
     enum BindingType {

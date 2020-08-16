@@ -27,8 +27,10 @@
 
 #include <QtGlobal>
 
-#if defined(QMLJSEDITOR_LIBRARY)
+#if defined(QMLJSEDITOR_LIBRARY) // takes precedence when combined with others
 #  define QMLJSEDITOR_EXPORT Q_DECL_EXPORT
+#elif defined(QMLJSEDITOR_INCLUDE_STATIC)
+#  define QMLJSEDITOR_EXPORT
 #else
 #  define QMLJSEDITOR_EXPORT Q_DECL_IMPORT
 #endif

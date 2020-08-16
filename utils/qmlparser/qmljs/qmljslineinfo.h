@@ -25,15 +25,14 @@
 
 #pragma once
 
-#include <qmljs/qmljs_global.h>
-
+#include <utils_global.h>
 #include <QRegExp>
 #include <QTextBlock>
 
 namespace QmlJS {
 class Token;
 
-class QMLJS_EXPORT LineInfo
+class UTILS_EXPORT LineInfo
 {
     Q_DISABLE_COPY(LineInfo)
 

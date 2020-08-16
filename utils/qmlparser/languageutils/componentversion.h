@@ -25,15 +25,13 @@
 
 #pragma once
 
-#include "languageutils_global.h"
-
+#include <utils_global.h>
 
 class QCryptographicHash;
 
-
 namespace LanguageUtils {
 
-class LANGUAGEUTILS_EXPORT ComponentVersion
+class UTILS_EXPORT ComponentVersion
 {
     int _major;
     int _minor;
@@ -57,11 +55,11 @@ public:
     void addToHash(QCryptographicHash &hash) const;
 };
 
-bool LANGUAGEUTILS_EXPORT operator<(const ComponentVersion &lhs, const ComponentVersion &rhs);
-bool LANGUAGEUTILS_EXPORT operator<=(const ComponentVersion &lhs, const ComponentVersion &rhs);
-bool LANGUAGEUTILS_EXPORT operator>(const ComponentVersion &lhs, const ComponentVersion &rhs);
-bool LANGUAGEUTILS_EXPORT operator>=(const ComponentVersion &lhs, const ComponentVersion &rhs);
-bool LANGUAGEUTILS_EXPORT operator==(const ComponentVersion &lhs, const ComponentVersion &rhs);
-bool LANGUAGEUTILS_EXPORT operator!=(const ComponentVersion &lhs, const ComponentVersion &rhs);
+bool UTILS_EXPORT operator<(const ComponentVersion &lhs, const ComponentVersion &rhs);
+bool UTILS_EXPORT operator<=(const ComponentVersion &lhs, const ComponentVersion &rhs);
+bool UTILS_EXPORT operator>(const ComponentVersion &lhs, const ComponentVersion &rhs);
+bool UTILS_EXPORT operator>=(const ComponentVersion &lhs, const ComponentVersion &rhs);
+bool UTILS_EXPORT operator==(const ComponentVersion &lhs, const ComponentVersion &rhs);
+bool UTILS_EXPORT operator!=(const ComponentVersion &lhs, const ComponentVersion &rhs);
 
 } // namespace LanguageUtils

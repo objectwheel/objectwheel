@@ -25,8 +25,7 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include "hostosinfo.h"
 
 #include <QCoreApplication>
@@ -49,7 +48,7 @@ class QTemporaryFile;
 class QTextStream;
 class QWidget;
 
-QTCREATOR_UTILS_EXPORT QDebug operator<<(QDebug dbg, const Utils::FileName &c);
+UTILS_EXPORT QDebug operator<<(QDebug dbg, const Utils::FileName &c);
 
 // for withNTFSPermissions
 #ifdef Q_OS_WIN
@@ -60,7 +59,7 @@ QT_END_NAMESPACE
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT FileName : private QString
+class UTILS_EXPORT FileName : private QString
 {
 public:
     FileName();
@@ -106,11 +105,11 @@ private:
     FileName(const QString &string);
 };
 
-QTCREATOR_UTILS_EXPORT QTextStream &operator<<(QTextStream &s, const FileName &fn);
+UTILS_EXPORT QTextStream &operator<<(QTextStream &s, const FileName &fn);
 
 using FileNameList = QList<FileName>;
 
-class QTCREATOR_UTILS_EXPORT FileUtils {
+class UTILS_EXPORT FileUtils {
 public:
     static bool removeRecursively(const FileName &filePath, QString *error = 0);
     static bool copyRecursively(const FileName &srcFilePath, const FileName &tgtFilePath,
@@ -144,7 +143,7 @@ T withNTFSPermissions(const std::function<T()> &task)
 }
 
 template <>
-QTCREATOR_UTILS_EXPORT void withNTFSPermissions(const std::function<void()> &task);
+UTILS_EXPORT void withNTFSPermissions(const std::function<void()> &task);
 
 #else // Q_OS_WIN
 
@@ -156,7 +155,7 @@ T withNTFSPermissions(const std::function<T()> &task)
 
 #endif // Q_OS_WIN
 
-class QTCREATOR_UTILS_EXPORT FileReader
+class UTILS_EXPORT FileReader
 {
     Q_DECLARE_TR_FUNCTIONS(Utils::FileUtils) // sic!
 public:
@@ -177,7 +176,7 @@ private:
     QString m_errorString;
 };
 
-class QTCREATOR_UTILS_EXPORT FileSaverBase
+class UTILS_EXPORT FileSaverBase
 {
     Q_DECLARE_TR_FUNCTIONS(Utils::FileUtils) // sic!
 public:
@@ -212,7 +211,7 @@ private:
     Q_DISABLE_COPY(FileSaverBase)
 };
 
-class QTCREATOR_UTILS_EXPORT FileSaver : public FileSaverBase
+class UTILS_EXPORT FileSaver : public FileSaverBase
 {
     Q_DECLARE_TR_FUNCTIONS(Utils::FileUtils) // sic!
 public:
@@ -225,7 +224,7 @@ private:
     bool m_isSafe;
 };
 
-class QTCREATOR_UTILS_EXPORT TempFileSaver : public FileSaverBase
+class UTILS_EXPORT TempFileSaver : public FileSaverBase
 {
     Q_DECLARE_TR_FUNCTIONS(Utils::FileUtils) // sic!
 public:
@@ -241,7 +240,7 @@ private:
 } // namespace Utils
 
 QT_BEGIN_NAMESPACE
-QTCREATOR_UTILS_EXPORT uint qHash(const Utils::FileName &a);
+UTILS_EXPORT uint qHash(const Utils::FileName &a);
 QT_END_NAMESPACE
 
 namespace std {

@@ -25,14 +25,14 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsdialect.h"
 
 #include <QStringList>
 
 namespace QmlJS {
 
-class QMLJS_EXPORT ViewerContext
+class UTILS_EXPORT ViewerContext
 {
 public:
     enum Flags {

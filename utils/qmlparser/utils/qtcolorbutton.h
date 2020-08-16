@@ -25,13 +25,12 @@
 
 #pragma once
 
-#include "utils_global.h"
-
+#include <utils_global.h>
 #include <QToolButton>
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT QtColorButton : public QToolButton
+class UTILS_EXPORT QtColorButton : public QToolButton
 {
     Q_OBJECT
     Q_PROPERTY(bool backgroundCheckered READ isBackgroundCheckered WRITE setBackgroundCheckered)

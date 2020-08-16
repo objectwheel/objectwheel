@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "languageutils_global.h"
+#include <utils_global.h>
 #include "componentversion.h"
 
 #include <QString>
@@ -40,7 +40,7 @@ class QCryptographicHash;
 
 namespace LanguageUtils {
 
-class LANGUAGEUTILS_EXPORT FakeMetaEnum {
+class UTILS_EXPORT FakeMetaEnum {
     QString m_name;
     QStringList m_keys;
     QList<int> m_values;
@@ -65,7 +65,7 @@ public:
     QString toString() const;
 };
 
-class LANGUAGEUTILS_EXPORT FakeMetaMethod {
+class UTILS_EXPORT FakeMetaMethod {
 public:
     enum {
         Signal,
@@ -113,7 +113,7 @@ private:
     int m_revision;
 };
 
-class LANGUAGEUTILS_EXPORT FakeMetaProperty {
+class UTILS_EXPORT FakeMetaProperty {
     QString m_propertyName;
     QString m_type;
     bool m_isList;
@@ -137,14 +137,14 @@ public:
     QString toString() const;
 };
 
-class LANGUAGEUTILS_EXPORT FakeMetaObject {
+class UTILS_EXPORT FakeMetaObject {
     Q_DISABLE_COPY(FakeMetaObject);
 
 public:
     typedef QSharedPointer<FakeMetaObject> Ptr;
     typedef QSharedPointer<const FakeMetaObject> ConstPtr;
 
-    class LANGUAGEUTILS_EXPORT Export {
+    class UTILS_EXPORT Export {
     public:
         Export();
 

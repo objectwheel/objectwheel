@@ -1,6 +1,7 @@
 #ifndef SAVEUTILS_H
 #define SAVEUTILS_H
 
+#include <utils_global.h>
 #include <QVariant>
 
 namespace SaveUtils {
@@ -41,54 +42,54 @@ enum UserProperties : quint32 { // ### Designer related properties
     UserPlan
 };
 
-QString controlMainQmlFileName();
-QString toControlThisDir(const QString& controlDir);
-QString toControlChildrenDir(const QString& controlDir);
-QString toProjectDesignsDir(const QString& projectDir);
-QString toProjectImportsDir(const QString& projectDir);
-QString toProjectAssetsDir(const QString& projectDir);
-QString toUserProjectsDir(const QString& userDir);
-QString toControlMainQmlFile(const QString& controlDir);
-QString toDoubleUp(const QString& path);
+UTILS_EXPORT QString controlMainQmlFileName();
+UTILS_EXPORT QString toControlThisDir(const QString& controlDir);
+UTILS_EXPORT QString toControlChildrenDir(const QString& controlDir);
+UTILS_EXPORT QString toProjectDesignsDir(const QString& projectDir);
+UTILS_EXPORT QString toProjectImportsDir(const QString& projectDir);
+UTILS_EXPORT QString toProjectAssetsDir(const QString& projectDir);
+UTILS_EXPORT QString toUserProjectsDir(const QString& userDir);
+UTILS_EXPORT QString toControlMainQmlFile(const QString& controlDir);
+UTILS_EXPORT QString toDoubleUp(const QString& path);
 
-bool isForm(const QString& controlDir);
-bool isControlValid(const QString& controlDir);
-bool isDesignValid(const QString& controlDir);
-bool isProjectValid(const QString& projectDir);
-bool isUserValid(const QString& userDir);
+UTILS_EXPORT bool isForm(const QString& controlDir);
+UTILS_EXPORT bool isControlValid(const QString& controlDir);
+UTILS_EXPORT bool isDesignValid(const QString& controlDir);
+UTILS_EXPORT bool isProjectValid(const QString& projectDir);
+UTILS_EXPORT bool isUserValid(const QString& userDir);
 
-quint32 controlIndex(const QString& controlDir);
-QString controlId(const QString& controlDir);
-QString controlUid(const QString& controlDir);
-QPointF designPosition(const QString& controlDir);
-QSizeF designSize(const QString& controlDir);
+UTILS_EXPORT quint32 controlIndex(const QString& controlDir);
+UTILS_EXPORT QString controlId(const QString& controlDir);
+UTILS_EXPORT QString controlUid(const QString& controlDir);
+UTILS_EXPORT QPointF designPosition(const QString& controlDir);
+UTILS_EXPORT QSizeF designSize(const QString& controlDir);
 
-bool projectHdpiScaling(const QString& projectDir);
-qint64 projectSize(const QString& projectDir);
-QString projectUid(const QString& projectDir);
-QString projectName(const QString& projectDir);
-QString projectDescription(const QString& projectDir);
-QDateTime projectCreationDate(const QString& projectDir);
-QDateTime projectModificationDate(const QString& projectDir);
-QByteArray projectTheme(const QString& projectDir);
+UTILS_EXPORT bool projectHdpiScaling(const QString& projectDir);
+UTILS_EXPORT qint64 projectSize(const QString& projectDir);
+UTILS_EXPORT QString projectUid(const QString& projectDir);
+UTILS_EXPORT QString projectName(const QString& projectDir);
+UTILS_EXPORT QString projectDescription(const QString& projectDir);
+UTILS_EXPORT QDateTime projectCreationDate(const QString& projectDir);
+UTILS_EXPORT QDateTime projectModificationDate(const QString& projectDir);
+UTILS_EXPORT QByteArray projectTheme(const QString& projectDir);
 
-qint64 userPlan(const QString& userDir);
-QString userEmail(const QString& userDir);
-QByteArray userPassword(const QString& userDir);
+UTILS_EXPORT qint64 userPlan(const QString& userDir);
+UTILS_EXPORT QString userEmail(const QString& userDir);
+UTILS_EXPORT QByteArray userPassword(const QString& userDir);
 
-bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
-bool setProperty(const QString& controlDir, DesignProperties property, const QVariant& value);
-bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
-bool setProperty(const QString& userDir, UserProperties property, const QVariant& value);
+UTILS_EXPORT bool setProperty(const QString& controlDir, ControlProperties property, const QVariant& value);
+UTILS_EXPORT bool setProperty(const QString& controlDir, DesignProperties property, const QVariant& value);
+UTILS_EXPORT bool setProperty(const QString& projectDir, ProjectProperties property, const QVariant& value);
+UTILS_EXPORT bool setProperty(const QString& userDir, UserProperties property, const QVariant& value);
 
-bool initControlMeta(const QString& controlDir);
-bool initDesignMeta(const QString& controlDir);
-bool initProjectMeta(const QString& projectDir);
-bool initUserMeta(const QString& userDir);
-void regenerateUids(const QString& topPath);
+UTILS_EXPORT bool initControlMeta(const QString& controlDir);
+UTILS_EXPORT bool initDesignMeta(const QString& controlDir);
+UTILS_EXPORT bool initProjectMeta(const QString& projectDir);
+UTILS_EXPORT bool initUserMeta(const QString& userDir);
+UTILS_EXPORT void regenerateUids(const QString& topPath);
 
-QVector<QString> formPaths(const QString& projectDir);
-QVector<QString> childrenPaths(const QString& controlDir, bool recursive = true);
+UTILS_EXPORT QVector<QString> formPaths(const QString& projectDir);
+UTILS_EXPORT QVector<QString> childrenPaths(const QString& controlDir, bool recursive = true);
 
 } // SaveUtils
 

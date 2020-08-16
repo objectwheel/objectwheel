@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsconstants.h"
 #include "parser/qmljsastfwd_p.h"
 
@@ -131,7 +131,7 @@ enum Type
     ErrInvalidArrayValueLength = 323
 };
 
-class QMLJS_EXPORT PrototypeMessageData {
+class UTILS_EXPORT PrototypeMessageData {
 public:
     Type type;
     Severity::Enum severity;
@@ -139,7 +139,7 @@ public:
     int placeholders;
 };
 
-class QMLJS_EXPORT Message
+class UTILS_EXPORT Message
 {
 public:
     Message();

@@ -268,7 +268,7 @@ void ApplicationCore::prepare()
     QApplication::setApplicationName(AppConstants::NAME);
     QApplication::setOrganizationName(AppConstants::COMPANY);
     QApplication::setApplicationVersion(AppConstants::VERSION);
-    QApplication::setOrganizationDomain(AppConstants::DOMAIN);
+    QApplication::setOrganizationDomain(AppConstants::ROOT_DOMAIN);
 
     QSettings settings(settingsPath(), QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {

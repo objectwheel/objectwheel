@@ -38,7 +38,7 @@ namespace QmlJS {
 
 class Imports;
 
-class QMLJS_EXPORT Check: protected AST::Visitor
+class UTILS_EXPORT Check: protected AST::Visitor
 {
     Q_DECLARE_TR_FUNCTIONS(QmlJS::Check)
 

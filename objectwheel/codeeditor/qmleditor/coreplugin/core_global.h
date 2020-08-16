@@ -27,9 +27,9 @@
 
 #include <qglobal.h>
 
-#if defined(CORE_LIBRARY)
+#if defined(CORE_LIBRARY) // takes precedence when combined with others
 #  define CORE_EXPORT Q_DECL_EXPORT
-#elif defined(CORE_STATIC_LIBRARY) // Abuse single files for manual tests
+#elif defined(CORE_INCLUDE_STATIC)
 #  define CORE_EXPORT
 #else
 #  define CORE_EXPORT Q_DECL_IMPORT

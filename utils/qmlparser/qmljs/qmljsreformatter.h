@@ -25,11 +25,10 @@
 
 #pragma once
 
-#include "qmljs_global.h"
-
+#include <utils_global.h>
 #include "qmljsdocument.h"
 
 namespace QmlJS {
-QMLJS_EXPORT QString reformat(const Document::Ptr &doc);
-QMLJS_EXPORT QString reformat(const Document::Ptr &doc, int indentSize, int tabSize);
+UTILS_EXPORT QString reformat(const Document::Ptr &doc);
+UTILS_EXPORT QString reformat(const Document::Ptr &doc, int indentSize, int tabSize);
 }

@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsbundle.h"
 #include "qmljsdocument.h"
 #include "qmljsqrcparser.h"
@@ -47,7 +47,7 @@ namespace QmlJS {
 class Snapshot;
 class PluginDumper;
 
-class QMLJS_EXPORT ModelManagerInterface: public QObject
+class UTILS_EXPORT ModelManagerInterface: public QObject
 {
     Q_OBJECT
 

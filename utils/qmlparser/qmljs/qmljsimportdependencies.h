@@ -52,7 +52,7 @@ class ImportDependencies;
 
 // match strenght wrt to the selectors of a ViewerContext
 // this is valid only within a ViewerContext
-class QMLJS_EXPORT ImportMatchStrength
+class UTILS_EXPORT ImportMatchStrength
 {
 public:
     explicit ImportMatchStrength() {}
@@ -81,7 +81,7 @@ bool operator <(const ImportMatchStrength &m1, const ImportMatchStrength &m2);
  * This is used to efficiently iterate just on library imports, or just on a directory
  * while preserving space.
  */
-class QMLJS_EXPORT ImportKey
+class UTILS_EXPORT ImportKey
 {
 public:
     enum DirCompareInfo {
@@ -122,7 +122,7 @@ bool operator ==(const ImportKey &i1, const ImportKey &i2);
 bool operator !=(const ImportKey &i1, const ImportKey &i2);
 bool operator <(const ImportKey &i1, const ImportKey &i2);
 
-class QMLJS_EXPORT Export
+class UTILS_EXPORT Export
 {
 public:
     static QString libraryTypeName();
@@ -138,7 +138,7 @@ public:
 bool operator ==(const Export &i1, const Export &i2);
 bool operator !=(const Export &i1, const Export &i2);
 
-class QMLJS_EXPORT CoreImport
+class UTILS_EXPORT CoreImport
 {
 public:
     CoreImport();
@@ -151,7 +151,7 @@ public:
     bool valid();
 };
 
-class QMLJS_EXPORT DependencyInfo
+class UTILS_EXPORT DependencyInfo
 {
 public:
     typedef QSharedPointer<const DependencyInfo> ConstPtr;
@@ -165,7 +165,7 @@ public:
     QByteArray fingerprint;
 };
 
-class QMLJS_EXPORT MatchedImport
+class UTILS_EXPORT MatchedImport
 {
 public:
     MatchedImport();
@@ -181,7 +181,7 @@ bool operator ==(const MatchedImport &m1, const MatchedImport &m2);
 bool operator !=(const MatchedImport &m1, const MatchedImport &m2);
 bool operator <(const MatchedImport &m1, const MatchedImport &m2);
 
-class QMLJS_EXPORT ImportDependencies
+class UTILS_EXPORT ImportDependencies
 {
 public:
     typedef QMap<ImportKey, QList<MatchedImport> > ImportElements;

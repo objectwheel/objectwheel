@@ -53,8 +53,6 @@
 
 using namespace QmlJS;
 
-QT_QML_BEGIN_NAMESPACE
-
 void Parser::reallocateStack()
 {
     if (! stack_size)
@@ -1990,7 +1988,3 @@ case 366: {
 
     return false;
 }
-
-QT_QML_END_NAMESPACE
-
-

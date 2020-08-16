@@ -25,7 +25,7 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "qmljsdocument.h"
 #include "qmljscontext.h"
 
@@ -40,7 +40,7 @@ class JSImportScope;
 class Context;
 class Value;
 
-class QMLJS_EXPORT QmlComponentChain
+class UTILS_EXPORT QmlComponentChain
 {
     Q_DISABLE_COPY(QmlComponentChain)
 public:
@@ -64,7 +64,7 @@ private:
 // scope chains are copyable
 // constructing a new scope chain is currently too expensive:
 // building the instantiating component chain needs to be sped up
-class QMLJS_EXPORT ScopeChain
+class UTILS_EXPORT ScopeChain
 {
 public:
     explicit ScopeChain(const Document::Ptr &document, const ContextPtr &context);

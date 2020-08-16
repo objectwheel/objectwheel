@@ -25,13 +25,13 @@
 
 #pragma once
 
-#include "qmljs_global.h"
+#include <utils_global.h>
 #include "parser/qmljsastvisitor_p.h"
 #include "qmljsdocument.h"
 
 namespace QmlJS {
 
-class QMLJS_EXPORT ScopeAstPath: protected AST::Visitor
+class UTILS_EXPORT ScopeAstPath: protected AST::Visitor
 {
 public:
     ScopeAstPath(Document::Ptr doc);
