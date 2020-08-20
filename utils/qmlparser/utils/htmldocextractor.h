@@ -25,11 +25,12 @@
 
 #pragma once
 
+#include <utils_global.h>
 #include <QString>
 
 namespace Utils {
 
-class HtmlDocExtractor
+class UTILS_EXPORT HtmlDocExtractor
 {
 public:
     HtmlDocExtractor();

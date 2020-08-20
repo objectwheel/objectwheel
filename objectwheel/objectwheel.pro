@@ -1,8 +1,9 @@
 ### App Settings
 CONFIG  += c++14 strict_c++
 TARGET   = Objectwheel
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 unix:QMAKE_CXXFLAGS += -pedantic-errors
+windows:LIBS += -lWs2_32 # PayloadManager uses setsockopt()
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
 #DEFINES += RENDERER_DEBUG
 #DEFINES += PAYLOADMANAGER_DEBUG
 

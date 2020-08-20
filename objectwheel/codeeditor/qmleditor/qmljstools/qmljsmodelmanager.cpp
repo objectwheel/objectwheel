@@ -213,7 +213,7 @@ ModelManagerInterface::WorkingCopy ModelManager::workingCopyInternal() const
     return workingCopy;
 }
 
-void ModelManager::addTaskInternal(QFuture<void> /*result*/, const QString &/*msg*/, const char */*taskId*/) const
+void ModelManager::addTaskInternal(QFuture<void> /*result*/, const QString& /*msg*/, const char* /*taskId*/) const
 {
     //    ProgressManager::addTask(result, msg, taskId);
 }

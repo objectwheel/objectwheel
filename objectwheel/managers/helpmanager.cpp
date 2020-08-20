@@ -193,11 +193,6 @@ QHelpEngine* HelpManager::helpEngine()
     return d->m_helpEngine;
 }
 
-QString HelpManager::collectionFilePath()
-{
-    return ApplicationCore::documentsPath() + "/docs.qhc";
-}
-
 void HelpManager::registerDocumentation(const QStringList &files)
 {
     if (d->m_needsSetup) {
@@ -226,7 +221,7 @@ void HelpManager::registerDocumentationNow(QFutureInterface<bool> &futureInterfa
     futureInterface.setProgressRange(0, files.count());
     futureInterface.setProgressValue(0);
 
-    QHelpEngineCore helpEngine(collectionFilePath());
+    QHelpEngineCore helpEngine(ApplicationCore::documentsPath());
     helpEngine.setupData();
     bool docsChanged = false;
     QStringList nameSpaces = helpEngine.registeredDocumentations();
@@ -513,7 +508,7 @@ void HelpManager::setupHelpManager()
     d->readSettings();
 
     // create the help engine
-    d->m_helpEngine = new QHelpEngine(collectionFilePath());
+    d->m_helpEngine = new QHelpEngine(ApplicationCore::documentsPath());
     d->m_helpEngine->setAutoSaveFilter(false);
     d->m_helpEngine->setupData();
 

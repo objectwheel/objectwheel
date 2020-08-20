@@ -121,6 +121,9 @@ ApplicationCore::ApplicationCore()
     /* Show splash screen */
     auto splash = new SplashScreen(PaintUtils::pixmap(QStringLiteral(":/images/splash/splash.png"),
                                                       QSize(485, 300)), Qt::WindowStaysOnTopHint);
+    // For some reason if we use showMessage() multiple
+    // times the QApplication::processEvents() is called
+    // hence the application behaves weirdly.
     splash->showMessage(QObject::tr("Initializing..."));
     splash->show();
 
@@ -274,6 +277,7 @@ void ApplicationCore::prepare()
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {
         QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     }
 
     /* Disable Qml Parser warnings */
@@ -342,9 +346,9 @@ QString ApplicationCore::resourcePath()
 QString ApplicationCore::documentsPath()
 {
 #if defined(Q_OS_MACOS)
-    return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Documents")).canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Documents/docs.qhc")).canonicalFilePath();
 #else
-    return QFileInfo("Documents").canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + "/Documents/docs.qhc").canonicalFilePath();
 #endif
 }
 

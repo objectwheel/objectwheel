@@ -321,6 +321,26 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
         pixmap = PaintUtils::renderOverlaidPixmap(pixmap, QColor("#505050"));
     } break;
 
+    case SP_MessageBoxInformation: {
+        int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/info.svg"), QSize(sz, sz), widget);
+    } break;
+
+    case SP_MessageBoxWarning: {
+        int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/warning.svg"), QSize(sz, sz), widget);
+    } break;
+
+    case SP_MessageBoxCritical: {
+        int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/issue.svg"), QSize(sz, sz), widget);
+    } break;
+
+    case SP_MessageBoxQuestion: {
+        int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/question.svg"), QSize(sz, sz), widget);
+    } break;
+
     default:
         pixmap = QFusionStyle::standardPixmap(standardPixmap, option, widget);
         break;
@@ -339,19 +359,26 @@ QIcon ApplicationStyle::standardIcon(QStyle::StandardPixmap standardIcon, const 
 {
     QIcon icon;
     switch (standardIcon) {
+    case SP_DockWidgetCloseButton:
+    case SP_MessageBoxInformation:
+    case SP_MessageBoxWarning:
+    case SP_MessageBoxCritical:
+    case SP_MessageBoxQuestion:
+        icon.addPixmap(proxy()->standardPixmap(standardIcon, option, widget));
+        break;
+
     case SP_LineEditClearButton: {
         const QPixmap& stdPix = proxy()->standardPixmap(standardIcon, option, widget);
         icon.addPixmap(stdPix);
         icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 150)), QIcon::Active);
     } break;
-    case SP_DockWidgetCloseButton:
-        icon.addPixmap(proxy()->standardPixmap(standardIcon, option, widget));
-        break;
+
     case SP_ToolBarHorizontalExtensionButton: {
         const QPixmap& stdPix = proxy()->standardPixmap(standardIcon, option, widget);
         icon.addPixmap(stdPix);
         icon.addPixmap(PaintUtils::renderOverlaidPixmap(stdPix, QColor(0, 0, 0, 150)), QIcon::Normal, QIcon::On);
     } break;
+
     default:
         icon = QFusionStyle::standardIcon(standardIcon, option, widget);
         break;
@@ -363,6 +390,12 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
                                 const QWidget* widget, QStyleHintReturn* returnData) const
 {
     switch (hint) {
+    case SH_MessageBox_UseBorderForButtonSpacing:
+        return false;
+    case SH_MessageBox_CenterButtons:
+        return false;
+    case SH_MessageBox_TextInteractionFlags:
+        return false;
     case SH_Widget_Animation_Duration:
         return 0; // No animation
     case SH_ToolTipLabel_Opacity:
@@ -406,6 +439,8 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
                                   const QWidget* widget) const
 {
     switch (metric) {
+    case PM_MessageBoxIconSize:
+        return 48;
     case PM_SmallIconSize:
     case PM_ButtonIconSize:
     case PM_TreeViewIndentation:

@@ -61,7 +61,6 @@ public:
 
     static HelpManager *instance();
     static QHelpEngine* helpEngine();
-    static QString collectionFilePath();
 
     static void registerDocumentation(const QStringList &fileNames);
     static void unregisterDocumentation(const QStringList &nameSpaces);

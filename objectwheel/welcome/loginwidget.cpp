@@ -85,7 +85,7 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
 
     auto legalLabel = new QLabel(this);
     legalLabel->setAlignment(Qt::AlignHCenter);
-    legalLabel->setText(QStringLiteral("<p><b>© 2015 - %1 %2 All Rights Reserved.</b></p>")
+    legalLabel->setText(QStringLiteral("<b>© 2015 - %1 %2. All Rights Reserved.</b>")
                         .arg(QDate::currentDate().year())
                         .arg(AppConstants::COMPANY_FULL));
 

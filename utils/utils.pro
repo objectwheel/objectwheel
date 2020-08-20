@@ -3,8 +3,11 @@ TEMPLATE = lib
 CONFIG  += plugin c++14 strict_c++
 TARGET   = Utils
 QT      += core-private widgets-private widgets qml quick websockets multimedia quickcontrols2
-DEFINES += UTILS_LIBRARY
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
+DEFINES += UTILS_LIBRARY
+DEFINES += ASYNC_LIBRARY
+DEFINES += ZIPASYNC_LIBRARY
+DEFINES += FASTDOWNLOADER_LIBRARY
 
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD

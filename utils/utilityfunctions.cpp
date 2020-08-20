@@ -460,19 +460,15 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
     dialog.setModal(modal);
     dialog.setStandardButtons(buttons);
     dialog.setDefaultButton(defaultButton);
-#if !defined(Q_OS_MACOS)
-    dialog.QWidget::setWindowTitle(title);
-    dialog.setText(text);
-#else
+#if defined(Q_OS_MACOS)
     dialog.setText(title);
     dialog.setInformativeText(text);
+#else
+    dialog.QWidget::setWindowTitle(title);
+    dialog.setText(text);
+#endif
     for (QAbstractButton* button : dialog.buttons())
         button->setCursor(Qt::PointingHandCursor);
-    if (auto label = dialog.findChild<QWidget*>(QStringLiteral("qt_msgbox_label"))) {
-        int MIN_WIDTH = qMax(label->fontMetrics().horizontalAdvance(title), 300);
-        label->setStyleSheet(QStringLiteral("QLabel { min-width: %1px; }").arg(MIN_WIDTH));
-    }
-#endif
     return static_cast<QMessageBox::StandardButton>(dialog.exec());
 }
 
@@ -709,12 +705,7 @@ QFont systemDefaultFont()
 
 QFont systemTitleFont()
 {
-    QFont font(systemDefaultFont());
-#if defined(Q_OS_MACOS)
-    if (QOperatingSystemVersion::current() >= QOperatingSystemVersion::MacOSCatalina)
-        font.setFamily("SF UI Display");
-#endif
-    return font;
+    return systemDefaultFont();
 }
 
 QFont thickerFont(const QFont& font)
