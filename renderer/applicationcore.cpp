@@ -10,8 +10,6 @@
 #include <signalwatcher.h>
 #include <appconstants.h>
 
-#include <private/qquickdesignersupport_p.h>
-
 #include <QTimer>
 #include <QApplication>
 #include <QDir>

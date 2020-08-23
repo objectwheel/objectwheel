@@ -9,6 +9,14 @@
 #include <QCborArray>
 #include <QStyle>
 
+#if defined(Q_CC_CLANG)
+#  define QT_WARNING_DISABLE QT_WARNING_DISABLE_CLANG
+#elif defined(Q_CC_GNU)
+#  define QT_WARNING_DISABLE QT_WARNING_DISABLE_GCC
+#else
+#  define QT_WARNING_DISABLE
+#endif
+
 class QTextDocument;
 class QWidget;
 class QUrl;

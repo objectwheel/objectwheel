@@ -724,7 +724,6 @@ IAssistProposal *QmlJSCompletionAssistProcessor::perform(const AssistInterface *
             ValueOwner *interp = context->valueOwner();
             const Value *value =
                     interp->convertToObject(scopeChain.evaluate(expression));
-            //qCDebug(qmljsLog) << "type:" << interp->typeId(value);
 
             if (value && completionOperator == QLatin1Char('.')) { // member completion
                 ProcessProperties processProperties(&scopeChain);

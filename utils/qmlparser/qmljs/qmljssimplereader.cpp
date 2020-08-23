@@ -34,8 +34,6 @@
 #include <QFile>
 #include <QLoggingCategory>
 
-static Q_LOGGING_CATEGORY(simpleReaderLog, "qtc.qmljs.simpleReader")
-
 namespace QmlJS{
 
 QVariant SimpleReaderNode::property(const QString &name) const
@@ -307,8 +305,6 @@ SimpleReaderNode::Ptr SimpleReader::readFromSource(const QString &source)
 
 void SimpleReader::elementStart(const QString &name)
 {
-    qCDebug(simpleReaderLog) << "elementStart()" << name;
-
     SimpleReaderNode::Ptr newNode = SimpleReaderNode::create(name, m_currentNode);
 
     if (newNode->isRoot())
@@ -322,17 +318,12 @@ void SimpleReader::elementStart(const QString &name)
 void SimpleReader::elementEnd()
 {
     Q_ASSERT(m_currentNode);
-
-    qCDebug(simpleReaderLog) << "elementEnd()" << m_currentNode.toStrongRef()->name();
-
     m_currentNode = m_currentNode.toStrongRef()->parent();
 }
 
 void SimpleReader::propertyDefinition(const QString &name, const QVariant &value)
 {
     Q_ASSERT(m_currentNode);
-
-    qCDebug(simpleReaderLog) << "propertyDefinition()" << m_currentNode.toStrongRef()->name() << name << value;
 
     if (m_currentNode.toStrongRef()->propertyNames().contains(name))
         addError(tr("Property is defined twice."), currentSourceLocation());

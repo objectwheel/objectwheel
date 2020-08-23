@@ -126,8 +126,6 @@ void CompletionContextFinder::checkBinding()
 {
     YY_SAVE();
 
-    //qCDebug(qmljsLog) << "Start line:" << *yyLine << m_startTokenIndex;
-
     int i = m_startTokenIndex;
     int colonCount = 0;
     bool delimiterFound = false;

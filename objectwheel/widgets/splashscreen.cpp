@@ -17,7 +17,7 @@ void SplashScreen::drawContents(QPainter* painter)
 
     // Draw border frame
 #if !defined(Q_OS_MACOS) // macOS draws a frame on every window by default
-    painter->setPen(QColor(0, 0, 0, 60));
+    painter->setPen(QColor(0, 0, 0, 80));
     painter->drawRect(rect());
 #endif
 
@@ -28,18 +28,18 @@ void SplashScreen::drawContents(QPainter* painter)
 
     // Draw title
     QFont f(font());
-    f.setPixelSize(f.pixelSize() + 8);
+    f.setPixelSize(f.pixelSize() + 7);
     f.setWeight(QFont::Light);
-    const QString& title = QStringLiteral("%1 v%2")
+    const QString& title = QStringLiteral("%1 <a style=\"font-weight:normal;font-size:%3px\">v%2</a>")
             .arg(AppConstants::LABEL)
-            .arg(QString(AppConstants::VERSION).left(3));
+            .arg(QString(AppConstants::VERSION).left(3))
+            .arg(f.pixelSize() - 7);
     const QRectF titleRect(iconRect.left() + 5, iconRect.bottom() + 20, 250, QFontMetrics(f).height() + 2);
-    painter->setFont(f);
-    painter->setPen(palette().highlight().color());
-    painter->drawText(titleRect, title, Qt::AlignLeft | Qt::AlignVCenter);
+    PaintUtils::drawHtml(painter, title, titleRect.topLeft(), f, palette().highlight().color(),
+                         Qt::AlignLeft | Qt::AlignVCenter);
 
     // Draw subtitle
-    f.setPixelSize(f.pixelSize() - 8);
+    f.setPixelSize(f.pixelSize() - 7);
     f.setWeight(QFont::Normal);
     const QString& subtitle = tr("Cross-Platform Application Development");
     const QRectF subtitleRect(titleRect.left(), titleRect.bottom() + 4,
@@ -61,11 +61,11 @@ void SplashScreen::drawContents(QPainter* painter)
     painter->drawText(informativeRect, informativeText, Qt::AlignLeft | Qt::AlignVCenter);
 
     // Draw message
-    f.setPixelSize(f.pixelSize() + 1);
     const QRectF messageRect(width() - QFontMetrics(f).horizontalAdvance(message()) - 21,
                              height() - QFontMetrics(f).height() - 22,
                              QFontMetrics(f).horizontalAdvance(message()) + 1,
                              QFontMetrics(f).height() + 2);
     painter->setFont(f);
+    painter->setPen(palette().text().color().lighter(200));
     painter->drawText(messageRect, message(), Qt::AlignRight | Qt::AlignVCenter);
 }

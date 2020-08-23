@@ -53,8 +53,6 @@
 
 namespace QmlJS {
 
-UTILS_EXPORT Q_LOGGING_CATEGORY(qmljsLog, "qtc.qmljs.common")
-
 /*!
     \class QmlJS::ModelManagerInterface
     \brief The ModelManagerInterface class acts as an interface to the
@@ -187,8 +185,6 @@ void ModelManagerInterface::writeWarning(const QString &msg)
 {
     if (ModelManagerInterface *i = instance())
         i->writeMessageInternal(msg);
-    else
-        qCWarning(qmljsLog) << msg;
 }
 
 ModelManagerInterface::WorkingCopy ModelManagerInterface::workingCopy()
@@ -211,9 +207,8 @@ QHash<QString, Dialect> ModelManagerInterface::languageForSuffix() const
     return defaultLanguageMapping();
 }
 
-void ModelManagerInterface::writeMessageInternal(const QString &msg) const
+void ModelManagerInterface::writeMessageInternal(const QString &) const
 {
-    qCDebug(qmljsLog) << msg;
 }
 
 ModelManagerInterface::WorkingCopy ModelManagerInterface::workingCopyInternal() const
@@ -226,7 +221,6 @@ void ModelManagerInterface::addTaskInternal(QFuture<void> result, const QString 
                                             const char *taskId) const
 {
     Q_UNUSED(result);
-    qCDebug(qmljsLog) << "started " << taskId << " " << msg;
 }
 
 void ModelManagerInterface::loadQmlTypeDescriptionsInternal(const QString &resourcePath)
@@ -572,9 +566,6 @@ void ModelManagerInterface::updateDocument(Document::Ptr doc)
 
 void ModelManagerInterface::updateLibraryInfo(const QString &path, const LibraryInfo &info)
 {
-    if (!info.pluginTypeInfoError().isEmpty())
-        qCDebug(qmljsLog) << "Dumping errors for " << path << ":" << info.pluginTypeInfoError();
-
     {
         QMutexLocker locker(&m_mutex);
         m_validSnapshot.insertLibraryInfo(path, info);

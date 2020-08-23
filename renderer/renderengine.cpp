@@ -9,9 +9,13 @@
 #include <applicationcore.h>
 #include <renderercommands.h>
 
+QT_WARNING_PUSH
+QT_WARNING_DISABLE("-Wnested-anon-types")
+QT_WARNING_DISABLE("-Wgnu-anonymous-struct")
 #include <private/qquickdesignersupportmetainfo_p.h>
 #include <private/qquickdesignersupportproperties_p.h>
 #include <private/qqmlengine_p.h>
+QT_WARNING_POP
 
 #include <QQmlEngine>
 #include <QQmlContext>

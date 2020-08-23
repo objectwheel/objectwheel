@@ -330,8 +330,6 @@ protected:
         result.badnessFromSplits = 0;
         result.lines = QStringList(line);
 
-        //qCDebug(qmljsLog) << "trying to split" << line << possibleSplits << context;
-
         // try to split at every possible position
         for (int i = possibleSplits.size() - 1; i >= 0; --i) {
             const int splitPos = possibleSplits.at(i).offset;

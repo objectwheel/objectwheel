@@ -272,9 +272,6 @@ protected:
     bool isBracelessState(int type) const;
     bool isExpressionEndState(int type) const;
 
-    void dump() const;
-    QString stateToString(int type) const;
-
 private:
     void recalculateStateAfter(const QTextBlock &block);
     void saveCurrentState(const QTextBlock &block);

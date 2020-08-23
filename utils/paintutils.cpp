@@ -6,6 +6,8 @@
 #include <QStyleOption>
 #include <QWindow>
 #include <QScreen>
+#include <QTextDocument>
+#include <QTextCursor>
 
 static QImage renderFilledImage(const QSizeF& size, const QColor& fillColor, qreal dpr)
 {
@@ -212,4 +214,24 @@ QColor PaintUtils::disabledColor(const QColor& color)
 {
     int g = qGray(color.rgb());
     return QColor(g, g, g, color.alpha());
+}
+
+void PaintUtils::drawHtml(QPainter* painter, const QString& title, const QPointF& offset,
+                          const QFont& font, const QColor& color, const QTextOption& option)
+{
+    static QTextDocument document;
+    document.clear();
+    document.setIndentWidth(0);
+    document.setDocumentMargin(0);
+    document.setDefaultFont(font);
+    document.setDefaultTextOption(option);
+    static QTextCharFormat format;
+    format.setForeground(color);
+    QTextCursor cursor(&document);
+    cursor.insertHtml(title);
+    cursor.select(QTextCursor::Document);
+    cursor.mergeCharFormat(format);
+    painter->translate(offset);
+    document.drawContents(painter);
+    painter->translate(-offset);
 }

@@ -5,6 +5,7 @@
 #include <QIcon>
 
 class QStyleOption;
+class QTextOption;
 
 namespace PaintUtils {
 
@@ -23,7 +24,8 @@ UTILS_EXPORT QImage renderErrorControlImage(const QSizeF& size, const QString& i
 UTILS_EXPORT QImage renderBlankControlImage(const QRectF& rect, const QString& id, qreal dpr,
                                             const QBrush& brush, const QPen& pen);
 UTILS_EXPORT QColor disabledColor(const QColor& color);
-
+UTILS_EXPORT void drawHtml(QPainter* painter, const QString& title, const QPointF& offset,
+                           const QFont& font, const QColor& color, const QTextOption& option);
 } // PaintUtils
 
 #endif // PAINTUTILS_H

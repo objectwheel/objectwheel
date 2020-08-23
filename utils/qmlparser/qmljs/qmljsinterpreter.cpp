@@ -2616,48 +2616,39 @@ class MemberDumper: public MemberProcessor
 public:
     MemberDumper() {}
 
-    virtual bool processProperty(const QString &name, const Value *, const PropertyInfo &pInfo)
+    virtual bool processProperty(const QString &, const Value *, const PropertyInfo &)
     {
-        qCDebug(qmljsLog) << "property: " << name << " flags:" << pInfo.toString();
         return true;
     }
 
-    virtual bool processEnumerator(const QString &name, const Value *)
+    virtual bool processEnumerator(const QString &, const Value *)
     {
-        qCDebug(qmljsLog) << "enumerator: " << name;
         return true;
     }
 
-    virtual bool processSignal(const QString &name, const Value *)
+    virtual bool processSignal(const QString &, const Value *)
     {
-        qCDebug(qmljsLog) << "signal: " << name;
         return true;
     }
 
-    virtual bool processSlot(const QString &name, const Value *)
+    virtual bool processSlot(const QString &, const Value *)
     {
-        qCDebug(qmljsLog) << "slot: " << name;
         return true;
     }
 
-    virtual bool processGeneratedSlot(const QString &name, const Value *)
+    virtual bool processGeneratedSlot(const QString &, const Value *)
     {
-        qCDebug(qmljsLog) << "generated slot: " << name;
         return true;
     }
 };
 
 void Imports::dump() const
 {
-    qCDebug(qmljsLog) << "Imports contents, in search order:";
     QListIterator<Import> it(m_imports);
     it.toBack();
     while (it.hasPrevious()) {
         const Import &i = it.previous();
         const ObjectValue *import = i.object;
-        const ImportInfo &info = i.info;
-
-        qCDebug(qmljsLog) << "  " << info.path() << " " << info.version().toString() << " as " << info.as() << " : " << import;
         MemberDumper dumper;
         import->processMembers(&dumper);
     }

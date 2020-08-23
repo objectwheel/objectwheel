@@ -495,8 +495,6 @@ QrcParser::Ptr QrcCachePrivate::addPath(const QString &path, const QString &cont
         }
     }
     QrcParser::Ptr newParser = QrcParser::parseQrcFile(path, contents);
-    if (!newParser->isValid())
-        qCWarning(qmljsLog) << "adding invalid qrc " << path << " to the cache:" << newParser->errorMessages();
     {
         QMutexLocker l(&m_mutex);
         QPair<QrcParser::Ptr,int> currentValue = m_cache.value(path, {QrcParser::Ptr(0), 0});

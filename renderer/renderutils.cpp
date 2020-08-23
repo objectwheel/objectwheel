@@ -10,6 +10,9 @@
 #include <QQmlContext>
 #include <QDir>
 
+QT_WARNING_PUSH
+QT_WARNING_DISABLE("-Wnested-anon-types")
+QT_WARNING_DISABLE("-Wgnu-anonymous-struct")
 #include <private/qqmltimer_p.h>
 #include <private/qquicktext_p.h>
 #include <private/qqmlengine_p.h>
@@ -22,6 +25,7 @@
 #include <private/qqmlvme_p.h>
 #include <private/qquickitem_p.h>
 #include <private/qquickoverlay_p.h>
+QT_WARNING_POP
 
 static bool isCompletionDisabled(const QObject* object)
 {

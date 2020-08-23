@@ -35,8 +35,6 @@
 
 #include <algorithm>
 
-static Q_LOGGING_CATEGORY(importsLog, "qtc.qmljs.imports")
-
 namespace QmlJS {
 
 ImportKind::Enum toImportKind(ImportType::Enum type)
@@ -738,20 +736,12 @@ void ImportDependencies::addCoreImport(const CoreImport &import)
     foreach (const Export &e, import.possibleExports)
         m_importCache[e.exportName].append(import.importId);
     m_coreImports.insert(newImport.importId, newImport);
-    if (importsLog().isDebugEnabled()) {
-        QString msg = QString::fromLatin1("added import %1 for").arg(newImport.importId);
-        foreach (const Export &e, newImport.possibleExports)
-            msg += QString::fromLatin1("\n %1(%2)").arg(e.exportName.toString(), e.pathRequired);
-        qCDebug(importsLog) << msg;
-    }
 }
 
 void ImportDependencies::removeCoreImport(const QString &importId)
 {
-    if (!m_coreImports.contains(importId)) {
-        qCWarning(importsLog) << "missing importId in removeCoreImport(" << importId << ")";
+    if (!m_coreImports.contains(importId))
         return;
-    }
     CoreImport &cImport = m_coreImports[importId];
     QList<Export> newExports;
     foreach (const Export &e, cImport.possibleExports)
@@ -763,17 +753,12 @@ void ImportDependencies::removeCoreImport(const QString &importId)
         cImport.possibleExports = newExports;
     else
         m_coreImports.remove(importId);
-
-    qCDebug(importsLog) << "removed import with id:"<< importId;
 }
 
 void ImportDependencies::removeImportCacheEntry(const ImportKey &importKey, const QString &importId)
 {
     QStringList &cImp = m_importCache[importKey];
-    if (!cImp.removeOne(importId)) {
-        qCWarning(importsLog) << "missing possibleExport backpointer for " << importKey.toString() << " to "
-                              << importId;
-    }
+    cImp.removeOne(importId);
     if (cImp.isEmpty())
         m_importCache.remove(importKey);
 }
@@ -792,33 +777,19 @@ void ImportDependencies::addExport(const QString &importId, const ImportKey &imp
     CoreImport &importValue = m_coreImports[importId];
     importValue.possibleExports.append(Export(importKey, requiredPath, false, typeName));
     m_importCache[importKey].append(importId);
-    qCDebug(importsLog) << "added export "<< importKey.toString() << " for id " <<importId
-                        << " (" << requiredPath << ")";
 }
 
 void ImportDependencies::removeExport(const QString &importId, const ImportKey &importKey,
                                       const QString &requiredPath, const QString &typeName)
 {
-    if (!m_coreImports.contains(importId)) {
-        qCWarning(importsLog) << "non existing core import for removeExport(" << importId << ", "
-                              << importKey.toString() << ")";
-    } else {
+    if (m_coreImports.contains(importId)) {
         CoreImport &importValue = m_coreImports[importId];
-        if (!importValue.possibleExports.removeOne(Export(importKey, requiredPath, false, typeName))) {
-            qCWarning(importsLog) << "non existing export for removeExport(" << importId << ", "
-                                  << importKey.toString() << ")";
-        }
+        importValue.possibleExports.removeOne(Export(importKey, requiredPath, false, typeName));
         if (importValue.possibleExports.isEmpty() && importValue.fingerprint.isEmpty())
             m_coreImports.remove(importId);
     }
-    if (!m_importCache.contains(importKey)) {
-        qCWarning(importsLog) << "missing possibleExport for " << importKey.toString()
-                            << " when removing export of " << importId;
-    } else {
+    if (m_importCache.contains(importKey))
         removeImportCacheEntry(importKey, importId);
-    }
-    qCDebug(importsLog) << "removed export "<< importKey.toString() << " for id " << importId
-                        << " (" << requiredPath << ")";
 }
 
 void ImportDependencies::iterateOnLibraryImports(
@@ -833,7 +804,6 @@ void ImportDependencies::iterateOnLibraryImports(
     iter_t i = m_importCache.lowerBound(firstLib);
     iter_t end = m_importCache.constEnd();
     while (i != end && i.key().type == ImportType::Library) {
-        qCDebug(importsLog) << "libloop:" << i.key().toString() << i.value();
         foreach (const QString &cImportName, i.value()) {
             CoreImport cImport = coreImport(cImportName);
             if (vContext.languageIsCompatible(cImport.language)) {
@@ -841,8 +811,6 @@ void ImportDependencies::iterateOnLibraryImports(
                     if (e.visibleInVContext(vContext) && e.exportName.type == ImportType::Library) {
                         ImportMatchStrength m = e.exportName.matchImport(i.key(), vContext);
                         if (m.hasMatch()) {
-                            qCDebug(importsLog) << "import iterate:" << e.exportName.toString()
-                                                << " (" << e.pathRequired << "), id:" << cImport.importId;
                             if (!iterF(m, e, cImport))
                                 return;
                         }
@@ -931,25 +899,6 @@ void ImportDependencies::checkConsistency() const
                 if (e.exportName == j.key())
                     found = true;
             Q_ASSERT(found); Q_UNUSED(found);
-        }
-    }
-    QMapIterator<QString,CoreImport> i(m_coreImports);
-    while (i.hasNext()) {
-        i.next();
-        foreach (const Export &e, i.value().possibleExports) {
-            if (!m_importCache.value(e.exportName).contains(i.key())) {
-                qCWarning(importsLog) << e.exportName.toString();
-                qCWarning(importsLog) << i.key();
-
-                QMapIterator<ImportKey, QStringList> j(m_importCache);
-                while (j.hasNext()) {
-                    j.next();
-                    qCWarning(importsLog) << j.key().toString() << j.value();
-                }
-                qCWarning(importsLog) << m_importCache.contains(e.exportName);
-                qCWarning(importsLog) << m_importCache.value(e.exportName);
-            }
-            Q_ASSERT(m_importCache.value(e.exportName).contains(i.key()));
         }
     }
 }

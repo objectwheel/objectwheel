@@ -276,13 +276,6 @@ void ApplicationCore::prepare()
         QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
         QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     }
-
-    /* Disable Qml Parser warnings */
-    QLoggingCategory::setFilterRules("qtc*.info=false\n"
-                                     "qtc*.debug=false\n"
-                                     "qtc*.warning=false\n"
-                                     "qtc*.critical=false\n"
-                                     "qtc*=false");
 }
 
 QPalette ApplicationCore::palette()
