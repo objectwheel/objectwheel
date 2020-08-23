@@ -44,6 +44,11 @@ public:
 
     static QPalette palette();
     static QSettings* settings();
+    static QString interpreterPath();
+    static QString rendererPath();
+    static QString themerPath();
+    static QString updaterPath();
+    static QString updaterArtifactPath();
     static QString modulesPath();
     static QString settingsPath();
     static QString resourcePath();
@@ -52,6 +57,8 @@ public:
     static QString stylesPath();
     static QString resourceStylesPath();
     static QString appDataPath();
+    static QString appRootPath();
+    static QString appRemoteRootPath();
 
 private:
     static void onActivated();

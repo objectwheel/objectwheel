@@ -319,6 +319,31 @@ QSettings* ApplicationCore::settings()
     return s_settings;
 }
 
+QString ApplicationCore::interpreterPath()
+{
+    return QCoreApplication::applicationDirPath() + QLatin1String("/Interpreter");
+}
+
+QString ApplicationCore::rendererPath()
+{
+    return QCoreApplication::applicationDirPath() + QLatin1String("/Renderer");
+}
+
+QString ApplicationCore::themerPath()
+{
+    return QCoreApplication::applicationDirPath() + QLatin1String("/Themer");
+}
+
+QString ApplicationCore::updaterPath()
+{
+    return QCoreApplication::applicationDirPath() + QLatin1String("/Updater");
+}
+
+QString ApplicationCore::updaterArtifactPath()
+{
+    return QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak");
+}
+
 QString ApplicationCore::modulesPath()
 {
 #if defined(Q_OS_MACOS)
@@ -365,6 +390,28 @@ QString ApplicationCore::resourceStylesPath()
 QString ApplicationCore::appDataPath()
 {
     return QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+}
+
+QString ApplicationCore::appRootPath()
+{
+#if defined(Q_OS_MACOS)
+    return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../..")).canonicalFilePath();
+#else
+    return QCoreApplication::applicationDirPath();
+#endif
+}
+
+QString ApplicationCore::appRemoteRootPath()
+{
+#if defined(Q_OS_MACOS)
+    return AppConstants::UPDATE_URL + QStringLiteral("/macos-") + QSysInfo::buildCpuArchitecture();
+#elif defined(Q_OS_WINDOWS)
+    return AppConstants::UPDATE_URL + QStringLiteral("/windows-") + QSysInfo::buildCpuArchitecture();
+#elif defined(Q_OS_LINUX)
+    return AppConstants::UPDATE_URL + QStringLiteral("/linux-") + QSysInfo::buildCpuArchitecture();
+#else
+    return QString();
+#endif
 }
 
 void ApplicationCore::onActivated()

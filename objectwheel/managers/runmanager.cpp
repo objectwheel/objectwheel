@@ -3,6 +3,7 @@
 #include <saveutils.h>
 #include <utilityfunctions.h>
 #include <appconstants.h>
+#include <applicationcore.h>
 
 #include <QUdpSocket>
 #include <QWebSocketServer>
@@ -194,7 +195,7 @@ void RunManager::sendExecute(const QString& uid, const QString& projectDirectory
         if (isLocalDevice(uid)) {
             s_recentProjectDirectory = projectDirectory;
             device.process->setArguments({projectDirectory});
-            device.process->setProgram(QCoreApplication::applicationDirPath() + QStringLiteral("/Interpreter"));
+            device.process->setProgram(ApplicationCore::interpreterPath());
             device.process->start();
         } else {
             s_uploadInfo.deviceUid = uid;

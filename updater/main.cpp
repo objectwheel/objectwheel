@@ -19,7 +19,7 @@ static QProgressDialog* g_progressDialog;
 
 static QString detectInstallationDir();
 
-static void load();
+static void load(int argc, char* argv[]);
 static void unload(int exitCode);
 static void readDiffFile();
 static void updateFiles();
@@ -28,7 +28,7 @@ static void launchAndExit();
 
 int main(int argc, char* argv[])
 {
-    load();
+    load(argc, argv);
 
     // Initialize application
     QApplication a(argc, argv);
@@ -39,17 +39,17 @@ int main(int argc, char* argv[])
     QApplication::setApplicationDisplayName(AppConstants::LABEL);
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 
-    if (argc != 2) {
+    if (argc != 3) {
         qWarning("There are missing arguments. Exiting...");
         return EXIT_FAILURE;
     }
 
-    if (!QFileInfo::exists(argv[1])) {
+    if (!QFileInfo::exists(argv[2])) {
         qWarning("The diff file is missing. Exiting...");
         return EXIT_FAILURE;
     }
 
-    g_diffFilePath = argv[1];
+    g_diffFilePath = argv[2];
     g_myInfo = QCoreApplication::applicationFilePath();
     g_updateCacheDir = QFileInfo(g_diffFilePath).dir().absoluteFilePath(QLatin1String("Downloads"));
     g_installationDir = detectInstallationDir();
@@ -97,7 +97,7 @@ static QString detectInstallationDir()
     return QString();
 }
 
-static void load()
+static void load(int argc, char* argv[])
 {
     qputenv("QT_FORCE_STDERR_LOGGING", "1");
 
@@ -109,9 +109,11 @@ static void load()
     std::signal(SIGINT, SIG_IGN);
     std::signal(SIGTERM, SIG_IGN);
 
-    // Enable high dpi
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    if (argc > 1 && QString::fromUtf8(argv[1]).toInt()) {
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+    }
 }
 
 static void unload(int exitCode)

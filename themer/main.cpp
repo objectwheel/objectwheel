@@ -18,17 +18,20 @@ int main(int argc, char *argv[])
     qputenv("QT_FORCE_STDERR_LOGGING", "1");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
 
+    if (argc > 1 && QString::fromUtf8(argv[1]).toInt()) {
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+    }
+
 #ifdef Q_OS_MACOS // Disable focus stealing on macOS
-    if (argc > 1 && argv[1] == QString("capture"))
+    if (argc > 2 && argv[2] == QString("capture"))
         qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "true");
 #endif
 
     int version = 0;
-    if (argc > 2)
-        QuickTheme::setTheme(argv[2], &version);
-
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+    if (argc > 3)
+        QuickTheme::setTheme(argv[3], &version);
 
     // Initialize application
     QApplication a(argc, argv);
@@ -46,7 +49,7 @@ int main(int argc, char *argv[])
                      Qt::QueuedConnection);
 
 #ifdef Q_OS_MACOS // Show/hide dock icon
-    if (argc > 1 && argv[1] == QString("capture"))
+    if (argc > 2 && argv[2] == QString("capture"))
         MacOperations::setDockIconVisible(false);
     else
         MacOperations::setDockIconVisible(true);
@@ -64,8 +67,9 @@ int main(int argc, char *argv[])
             return EXIT_FAILURE;
 
         auto window = qobject_cast<QQuickWindow*>(engine.rootObjects().first());
+        Q_ASSERT(window);
 
-        if (argc > 3 && argv[1] == QString("capture")) { // capture - show
+        if (argc > 4 && argv[2] == QString("capture")) { // capture - show
             window->setFlags(
                 Qt::Tool |
                 Qt::FramelessWindowHint |
@@ -75,14 +79,11 @@ int main(int argc, char *argv[])
             window->create();
             window->update();
             Delayer::delay(300);
-            window->grabWindow().save(argv[3], "PNG");
+            window->grabWindow().save(argv[4], "PNG");
             return EXIT_SUCCESS;
         } else {
-            window->setFlags(
-                window->flags() |
-                Qt::WindowStaysOnTopHint
-            );
             window->show();
+            window->requestActivate();
             return a.exec();
         }
     }

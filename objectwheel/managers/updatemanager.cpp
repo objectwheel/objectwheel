@@ -54,13 +54,13 @@ UpdateManager::UpdateManager(QObject* parent) : QObject(parent)
     connect(&s_downloadWatcher, &QFutureWatcher<QVariantMap>::finished,
             this, &UpdateManager::onDownloadWatcherFinished);
 
-    // WARNING: Clean up update artifacts from previous install if there is any
-    QFile::remove(QCoreApplication::applicationDirPath() + QLatin1String("/Updater.bak"));
+    // NOTE: Clean up update artifacts from previous install if there is any
+    QFile::remove(ApplicationCore::updaterArtifactPath());
 
     s_checksumsDownloader.setNumberOfSimultaneousConnections(2);
     s_changelogDownloader.setNumberOfSimultaneousConnections(2);
-    s_checksumsDownloader.setUrl(QUrl(remoteUpdateRootPath() + QStringLiteral("/checksums.cbor")));
-    s_changelogDownloader.setUrl(QUrl(remoteUpdateRootPath() + QStringLiteral("/changelog.html")));
+    s_checksumsDownloader.setUrl(QUrl(ApplicationCore::appRemoteRootPath() + QLatin1String("/checksums.cbor")));
+    s_changelogDownloader.setUrl(QUrl(ApplicationCore::appRemoteRootPath() + QLatin1String("/changelog.html")));
 
     QFile file(ApplicationCore::updatesPath() + QLatin1String("/Checksums.cbor"));
     if (file.open(QFile::ReadOnly))
@@ -260,8 +260,9 @@ void UpdateManager::install()
 
     QProcess process;
     process.setProcessEnvironment(QProcessEnvironment::systemEnvironment());
-    process.setProgram(QCoreApplication::applicationDirPath() + QLatin1String("/Updater"));
-    process.setArguments(QStringList(ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")));
+    process.setProgram(ApplicationCore::updaterPath());
+    process.setArguments({QString::number(QCoreApplication::testAttribute(Qt::AA_EnableHighDpiScaling)),
+                          ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")});
     process.startDetached();
     QTimer::singleShot(200, [] { QCoreApplication::quit(); });
 }
@@ -456,28 +457,6 @@ void UpdateManager::onDownloadWatcherFinished()
     emit downloadFinished(s_downloadWatcher.isCanceled(), result.value(QStringLiteral("errorString")).toString());
 }
 
-QString UpdateManager::localUpdateRootPath()
-{
-#if defined(Q_OS_MACOS)
-    return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../..")).canonicalFilePath();
-#else
-    return QCoreApplication::applicationDirPath();
-#endif
-}
-
-QString UpdateManager::remoteUpdateRootPath()
-{
-#if defined(Q_OS_MACOS)
-    return AppConstants::UPDATE_URL + QStringLiteral("/macos-") + QSysInfo::buildCpuArchitecture();
-#elif defined(Q_OS_WINDOWS)
-    return AppConstants::UPDATE_URL + QStringLiteral("/windows-") + QSysInfo::buildCpuArchitecture();
-#elif defined(Q_OS_LINUX)
-    return AppConstants::UPDATE_URL + QStringLiteral("/linux-") + QSysInfo::buildCpuArchitecture();
-#else
-    return QString();
-#endif
-}
-
 void UpdateManager::handleInfoDownloaderError()
 {
     if (s_checksumsBuffer.isOpen())
@@ -505,8 +484,8 @@ void UpdateManager::handleDownloadInfoUpdate()
         if (!key.toString().isEmpty()) {
             const QCborMap& localVal = s_localChecksums.value(key).toMap();
             const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
-            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
-            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
+            const QByteArray& localHash = localVal.value(QLatin1String("sha1")).toByteArray();
+            const QByteArray& remoteHash = remoteVal.value(QLatin1String("sha1")).toByteArray();
             if (localHash != remoteHash)
                 s_checksumsDiff[key] = true; // Mark for removal
         }
@@ -516,11 +495,11 @@ void UpdateManager::handleDownloadInfoUpdate()
         if (!key.toString().isEmpty()) {
             const QCborMap& localVal = s_localChecksums.value(key).toMap();
             const QCborMap& remoteVal = s_remoteChecksums.value(key).toMap();
-            const QByteArray& localHash = localVal.value(QStringLiteral("sha1")).toByteArray();
-            const QByteArray& remoteHash = remoteVal.value(QStringLiteral("sha1")).toByteArray();
+            const QByteArray& localHash = localVal.value(QLatin1String("sha1")).toByteArray();
+            const QByteArray& remoteHash = remoteVal.value(QLatin1String("sha1")).toByteArray();
             if (localHash != remoteHash) {
                 s_checksumsDiff[key] = false; // Mark for replacement or new
-                s_downloadSize += remoteVal.value(QStringLiteral("size")).toInteger();
+                s_downloadSize += remoteVal.value(QLatin1String("size")).toInteger();
                 s_fileCount++;
             }
         }
@@ -530,7 +509,7 @@ void UpdateManager::handleDownloadInfoUpdate()
 void UpdateManager::doLocalScan(QFutureInterfaceBase* futureInterface)
 {
     auto future = static_cast<QFutureInterface<QCborMap>*>(futureInterface);
-    const QDir rootDir(localUpdateRootPath());
+    const QDir rootDir(ApplicationCore::appRootPath());
     QVector<QDir> dirs;
     dirs.reserve(2500);
     dirs.append(rootDir);
@@ -551,8 +530,8 @@ void UpdateManager::doLocalScan(QFutureInterfaceBase* futureInterface)
                     return;
                 }
                 QCborMap map;
-                map.insert(QStringLiteral("size"), info.size());
-                map.insert(QStringLiteral("sha1"), QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha1));
+                map.insert(QLatin1String("size"), info.size());
+                map.insert(QLatin1String("sha1"), QCryptographicHash::hash(file.readAll(), QCryptographicHash::Sha1));
                 checksums.insert(rootDir.relativeFilePath(absoluteFilePath), map);
             }
         }
@@ -582,11 +561,11 @@ void UpdateManager::doDownload(QFutureInterfaceBase* futureInterface)
 
         fileIndex++;
 
-        const QString& localPath = ApplicationCore::updatesPath() + QStringLiteral("/Downloads/") + key.toString();
-        const QString& remotePath = remoteUpdateRootPath() + QStringLiteral("/content/") + key.toString();
+        const QString& localPath = ApplicationCore::updatesPath() + QLatin1String("/Downloads/") + key.toString();
+        const QString& remotePath = ApplicationCore::appRemoteRootPath() + QLatin1String("/content/") + key.toString();
         const QCborMap& remote = s_remoteChecksums.value(key).toMap();
-        const QByteArray& fileHash = remote.value(QStringLiteral("sha1")).toByteArray();
-        const qint64 fileSize = remote.value(QStringLiteral("size")).toInteger();
+        const QByteArray& fileHash = remote.value(QLatin1String("sha1")).toByteArray();
+        const qint64 fileSize = remote.value(QLatin1String("size")).toInteger();
 
         if (QFileInfo::exists(localPath)) {
             QFile file(localPath);

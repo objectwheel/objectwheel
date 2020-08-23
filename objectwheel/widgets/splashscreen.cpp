@@ -34,7 +34,7 @@ void SplashScreen::drawContents(QPainter* painter)
             .arg(AppConstants::LABEL)
             .arg(QString(AppConstants::VERSION).left(3))
             .arg(f.pixelSize() - 7);
-    const QRectF titleRect(iconRect.left() + 5, iconRect.bottom() + 20, 250, QFontMetrics(f).height() + 2);
+    const QRectF titleRect(iconRect.left() + 5, iconRect.bottom() + 20, 300, QFontMetrics(f).height() + 2);
     PaintUtils::drawHtml(painter, title, titleRect.topLeft(), f, palette().highlight().color(),
                          Qt::AlignLeft | Qt::AlignVCenter);
 
@@ -43,7 +43,7 @@ void SplashScreen::drawContents(QPainter* painter)
     f.setWeight(QFont::Normal);
     const QString& subtitle = tr("Cross-Platform Application Development");
     const QRectF subtitleRect(titleRect.left(), titleRect.bottom() + 4,
-                              titleRect.width(), QFontMetrics(f).height() + 2);
+                              QFontMetrics(f).horizontalAdvance(subtitle) + 2, QFontMetrics(f).height() + 2);
     painter->setFont(f);
     painter->setPen(palette().text().color());
     painter->drawText(subtitleRect, subtitle, Qt::AlignLeft | Qt::AlignVCenter);

@@ -80,13 +80,9 @@ FileExplorer::FileExplorer(QWidget* parent) : QTreeView(parent)
     connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 
-    QPixmap p(":/images/drop.png");
-    p.setDevicePixelRatio(devicePixelRatioF());
     m_dropHereLabel->setHidden(true);
     m_dropHereLabel->setAlignment(Qt::AlignCenter);
     m_dropHereLabel->setAttribute(Qt::WA_TransparentForMouseEvents);
-    m_dropHereLabel->setScaledContents(true);
-    m_dropHereLabel->setPixmap(p);
     m_dropHereLabel->raise();
 
     m_droppingBlurEffect->setBlurHints(QGraphicsBlurEffect::QualityHint);
@@ -709,6 +705,7 @@ void FileExplorer::updateGeometries()
     dg.setSize({ds, ds});
     dg.moveCenter(vg.center());
     m_dropHereLabel->setGeometry(dg);
+    m_dropHereLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/drop.png"), m_dropHereLabel->size(), m_dropHereLabel));
 
     if (m_mode == Explorer) {
         QRect tg(vg.left(), header()->height() + 1, vg.width(), m_toolBar->height());

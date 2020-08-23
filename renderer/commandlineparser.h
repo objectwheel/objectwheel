@@ -9,6 +9,7 @@ class CommandlineParser final
 
 public:
     static void init(int argc, char* argv[]);
+    static bool highDpiEnabled();
     static QString projectDirectory();
     static QString serverName();
 
@@ -16,6 +17,7 @@ private:
     CommandlineParser() {}
 
 private:
+    static bool s_highDpiEnabled;
     static QString s_projectDirectory;
     static QString s_serverName;
 };

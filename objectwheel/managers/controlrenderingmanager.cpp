@@ -7,6 +7,7 @@
 #include <designerscene.h>
 #include <form.h>
 #include <utilityfunctions.h>
+#include <applicationcore.h>
 
 #include <QThread>
 #include <QProcess>
@@ -40,7 +41,7 @@ ControlRenderingManager::ControlRenderingManager(QObject *parent) : QObject(pare
 
     s_commandDispatcher = new CommandDispatcher(s_renderServer, this);
 
-    s_process->setProgram(QCoreApplication::applicationDirPath() + QStringLiteral("/Renderer"));
+    s_process->setProgram(ApplicationCore::rendererPath());
 #if defined(QT_DEBUG)
     s_process->setProcessChannelMode(QProcess::ForwardedChannels);
 #else
@@ -180,6 +181,7 @@ void ControlRenderingManager::schedulePropertyUpdate(const QString& uid, const Q
 void ControlRenderingManager::start()
 {
     QStringList arguments;
+    arguments.append(QString::number(QCoreApplication::testAttribute(Qt::AA_EnableHighDpiScaling)));
     arguments.append(ProjectManager::dir());
     arguments.append(s_renderServer->serverName());
     s_process->setArguments(arguments);

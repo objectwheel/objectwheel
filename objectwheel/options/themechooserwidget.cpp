@@ -4,6 +4,7 @@
 #include <projectmanager.h>
 #include <busyindicatorwidget.h>
 #include <utilityfunctions.h>
+#include <applicationcore.h>
 
 #include <QJsonValue>
 #include <QtWidgets>
@@ -154,16 +155,13 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
         m_customizationLabel->setText(tr("Customization:"));
         UtilityFunctions::adjustFontWeight(m_customizationLabel, QFont::DemiBold);
 
-        m_customizationPicture->setScaledContents(false);
         m_customizationPicture->setAlignment(Qt::AlignTop | Qt::AlignLeft);
     }
 
     m_previewLabel->setText(tr("Preview:"));
     UtilityFunctions::adjustFontWeight(m_previewLabel, QFont::DemiBold);
 
-    m_previewPicture->setScaledContents(true);
     m_previewPicture->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-    m_previewPicture->setFixedSize(360, 600);
     m_previewPicture->setFrameShape(QLabel::StyledPanel);
     m_previewPicture->setFrameShadow(QLabel::Plain);
 
@@ -235,7 +233,6 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
     }
 
     m_customizationLabel->setHidden(true);
-    m_customizationPicture->setFixedSize(420 / devicePixelRatioF(), 420 / devicePixelRatioF());
 
     if (m_version == V2) {
         connect(m_accentColorsCombo, qOverload<int>(&QComboBox::activated),
@@ -485,17 +482,17 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
             m_customizationLabel->setVisible(true);
         }
 
+        QPixmap pic;
         if (m_stylesCombo->currentText() == "Material") {
+            pic.load(QStringLiteral(":/images/options/material.png"));
             m_themesCombo->addItems(MATERIAL_THEMES);
-            QPixmap p(":/images/options/material.png");
-            p.setDevicePixelRatio(devicePixelRatioF());
-            m_customizationPicture->setPixmap(p);
         } else {
-            QPixmap p(":/images/options/universal.png");
-            p.setDevicePixelRatio(devicePixelRatioF());
-            m_customizationPicture->setPixmap(p);
+            pic.load(QStringLiteral(":/images/options/universal.png"));
             m_themesCombo->addItems(UNIVERSAL_THEMES);
         }
+        pic.setDevicePixelRatio(m_customizationPicture->devicePixelRatioF());
+        m_customizationPicture->setFixedSize(pic.size() / pic.devicePixelRatioF());
+        m_customizationPicture->setPixmap(pic);
     });
 
     connect(m_resetButton, &QPushButton::clicked, this, &ThemeChooserWidget::charge);
@@ -564,7 +561,6 @@ void ThemeChooserWidget::charge()
 
 void ThemeChooserWidget::run()
 {
-    setEnabled(false);
     m_busyIndicator->start();
 
     QTemporaryDir tmpDir;
@@ -580,17 +576,18 @@ void ThemeChooserWidget::run()
     }
 
     process = new QProcess(this);
-    process->start(QCoreApplication::applicationDirPath() + QStringLiteral("/Themer"),
-    {QStringLiteral("show"), tmpDir.path()});
-
     QEventLoop loop;
     connect(process, &QProcess::started, &loop, &QEventLoop::quit);
-    QTimer::singleShot(10000, &loop, &QEventLoop::quit);
-    loop.exec();
+    process->start(ApplicationCore::themerPath(),
+    {QString::number(QCoreApplication::testAttribute(Qt::AA_EnableHighDpiScaling)),
+     QStringLiteral("show"), tmpDir.path()});
+    if (process->state() != QProcess::Running) {
+        QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+        loop.exec();
+    }
 
     Delayer::delay(400);
 
-    setEnabled(true);
     m_busyIndicator->stop();
 }
 
@@ -623,9 +620,7 @@ void ThemeChooserWidget::disable()
 
 void ThemeChooserWidget::refresh()
 {    
-    setEnabled(false);
     m_busyIndicator->start();
-
     QTemporaryFile tmpFile;
     tmpFile.open();
     tmpFile.close();
@@ -636,19 +631,20 @@ void ThemeChooserWidget::refresh()
     SaveUtils::setProperty(tmpDir.path(), SaveUtils::ProjectTheme, toJson());
 
     QProcess process;
-    process.start(QCoreApplication::applicationDirPath() + QStringLiteral("/Themer"),
-                  {QStringLiteral("capture"), tmpDir.path(), tmpFile.fileName()});
-
     QEventLoop loop;
     connect(&process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), &loop, &QEventLoop::quit);
-    QTimer::singleShot(10000, &loop, &QEventLoop::quit);
-    loop.exec();
+    process.start(ApplicationCore::themerPath(),
+                  {QString::number(QCoreApplication::testAttribute(Qt::AA_EnableHighDpiScaling)),
+                   QStringLiteral("capture"), tmpDir.path(), tmpFile.fileName()});
+    if (process.state() != QProcess::NotRunning) {
+        QTimer::singleShot(10000, &loop, &QEventLoop::quit);
+        loop.exec();
+    }
 
-    QPixmap preview(tmpFile.fileName());
-    preview.setDevicePixelRatio(devicePixelRatioF());
-    m_previewPicture->setPixmap(preview);
-
-    setEnabled(true);
+    QPixmap pic(tmpFile.fileName());
+    pic.setDevicePixelRatio(m_previewPicture->devicePixelRatioF());
+    m_previewPicture->setFixedSize(pic.size() / pic.devicePixelRatioF());
+    m_previewPicture->setPixmap(pic);
     m_busyIndicator->stop();
 }
 

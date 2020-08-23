@@ -125,9 +125,12 @@ void ApplicationCore::prepare()
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
 #endif
 
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-    QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QuickTheme::setTheme(CommandlineParser::projectDirectory());
+    if (CommandlineParser::highDpiEnabled()) {
+        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+    }
 
     qputenv("QT_FORCE_STDERR_LOGGING", "1");
     // Since we always render text into an FBO, we need to globally disable

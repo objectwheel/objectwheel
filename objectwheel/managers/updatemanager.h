@@ -42,8 +42,6 @@ private slots:
     void onDownloadWatcherFinished();
 
 private:
-    static QString localUpdateRootPath();
-    static QString remoteUpdateRootPath();
     static void handleInfoDownloaderError();
     static void handleDownloadInfoUpdate();
     static void doLocalScan(QFutureInterfaceBase* futureInterface);
