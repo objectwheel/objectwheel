@@ -264,6 +264,8 @@ bool ApplicationCore::locked()
 
 void ApplicationCore::prepare()
 {
+    qputenv("QT_FORCE_STDERR_LOGGING", "1");
+
     // Set those here, needed by QStandardPaths
     QApplication::setApplicationName(AppConstants::NAME);
     QApplication::setOrganizationName(AppConstants::COMPANY);

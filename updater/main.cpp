@@ -99,6 +99,8 @@ static QString detectInstallationDir()
 
 static void load()
 {
+    qputenv("QT_FORCE_STDERR_LOGGING", "1");
+
     // The update shouldn't be blocked
     std::signal(SIGFPE, SIG_IGN);
     std::signal(SIGILL, SIG_IGN);

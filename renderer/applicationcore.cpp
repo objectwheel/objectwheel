@@ -129,6 +129,7 @@ void ApplicationCore::prepare()
     QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     QuickTheme::setTheme(CommandlineParser::projectDirectory());
 
+    qputenv("QT_FORCE_STDERR_LOGGING", "1");
     // Since we always render text into an FBO, we need to globally disable
     // subpixel antialiasing and instead use gray.
     qputenv("QSG_DISTANCEFIELD_ANTIALIASING", "gray");

@@ -48,7 +48,7 @@ SOURCES += \
     $$PWD/textimagehandler.cpp \
     $$PWD/planinfo.cpp
 
-RESOURCES += $$PWD/resources/resources.qrc
+RESOURCES += $$PWD/resources/uresources.qrc
 
 ###Includes
 include($$PWD/zipasync/zipasync.pri)

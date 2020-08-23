@@ -138,7 +138,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/icon_color_solid.png</normaloff>:/qmldesigner/images/icon_color_solid.png</iconset>
         </property>
         <property name="checkable">
@@ -164,7 +164,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/icon_color_gradient.png</normaloff>:/qmldesigner/images/icon_color_gradient.png</iconset>
         </property>
         <property name="checkable">
@@ -190,7 +190,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/icon_color_none.png</normaloff>:/qmldesigner/images/icon_color_none.png</iconset>
         </property>
         <property name="checkable">
@@ -291,7 +291,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/icon_color_solid.png</normaloff>:/qmldesigner/images/icon_color_solid.png</iconset>
         </property>
         <property name="checkable">
@@ -317,7 +317,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/icon_color_none.png</normaloff>:/qmldesigner/images/icon_color_none.png</iconset>
         </property>
         <property name="checkable">
@@ -347,8 +347,8 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../../utils/resources/resources.qrc"/>
-  <include location="../../../../utils/resources/resources.qrc"/>
+  <include location="../../../../utils/resources/uresources.qrc"/>
+  <include location="../../../../utils/resources/uresources.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -15,6 +15,7 @@
 
 int main(int argc, char *argv[])
 {
+    qputenv("QT_FORCE_STDERR_LOGGING", "1");
     qputenv("QML_DISABLE_DISK_CACHE", "true");
 
 #ifdef Q_OS_MACOS // Disable focus stealing on macOS

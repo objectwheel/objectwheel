@@ -15,6 +15,7 @@ QT_WARNING_DISABLE("-Wgnu-anonymous-struct")
 #include <private/qquickdesignersupportmetainfo_p.h>
 #include <private/qquickdesignersupportproperties_p.h>
 #include <private/qqmlengine_p.h>
+#include <private/qqmlvmemetaobject_p.h>
 QT_WARNING_POP
 
 #include <QQmlEngine>
@@ -37,6 +38,14 @@ enum {
     RENDER_TIMEOUT = 40,
     RERENDER_TIMEOUT = 400
 };
+
+static QQmlPropertyCache *cacheForObject(QObject *object, QQmlEngine *engine)
+{
+    QQmlVMEMetaObject *metaObject = QQmlVMEMetaObject::get(object);
+    if (metaObject)
+        return metaObject->cache.data();
+    return QQmlEnginePrivate::get(engine)->cache(object);
+}
 
 RenderEngine::RenderEngine(QObject* parent) : QObject(parent)
   , m_initialized(false)
@@ -926,7 +935,7 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& url, 
     component.completeCreate();
 
     QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
-    QQmlEnginePrivate::get(m_view->engine())->cache(object->metaObject());
+    cacheForObject(object, m_view->engine());
 
     instance->object = object;
     instance->popup = object->inherits("QQuickPopup");
@@ -1038,7 +1047,8 @@ RenderEngine::ControlInstance* RenderEngine::createInstance(const QString& dir, 
         QQmlEngine::setContextForObject(object, instance->context);
 
     QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
-    QQmlEnginePrivate::get(m_view->engine())->cache(object->metaObject());
+    cacheForObject(object, m_view->engine());
+
     if (SaveUtils::isForm(dir))
         RenderUtils::setId(m_view->rootContext(), object, QString(), instance->id);
     RenderUtils::setId(instance->context, object, QString(), instance->id);

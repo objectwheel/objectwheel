@@ -176,7 +176,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/horizontal-scale-icon.png</normaloff>:/qmldesigner/images/horizontal-scale-icon.png</iconset>
         </property>
         <property name="iconSize">
@@ -199,7 +199,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/tile-icon-hor-crop.png</normaloff>:/qmldesigner/images/tile-icon-hor-crop.png</iconset>
         </property>
         <property name="iconSize">
@@ -222,7 +222,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/tile-icon-hor-scale.png</normaloff>:/qmldesigner/images/tile-icon-hor-scale.png</iconset>
         </property>
         <property name="iconSize">
@@ -266,7 +266,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/tile-icon-vert-crop.png</normaloff>:/qmldesigner/images/tile-icon-vert-crop.png</iconset>
         </property>
         <property name="iconSize">
@@ -289,7 +289,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/vertical-scale-icon.png</normaloff>:/qmldesigner/images/vertical-scale-icon.png</iconset>
         </property>
         <property name="iconSize">
@@ -312,7 +312,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="../../../../utils/resources/resources.qrc">
+         <iconset resource="../../../../utils/resources/uresources.qrc">
           <normaloff>:/qmldesigner/images/tile-icon-vert-scale.png</normaloff>:/qmldesigner/images/tile-icon-vert-scale.png</iconset>
         </property>
         <property name="iconSize">
@@ -352,8 +352,8 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../../../utils/resources/resources.qrc"/>
-  <include location="../../../../utils/resources/resources.qrc"/>
+  <include location="../../../../utils/resources/uresources.qrc"/>
+  <include location="../../../../utils/resources/uresources.qrc"/>
  </resources>
  <connections/>
 </ui>
