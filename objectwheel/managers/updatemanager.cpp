@@ -458,15 +458,10 @@ void UpdateManager::onDownloadWatcherFinished()
 
 QString UpdateManager::localUpdateRootPath()
 {
-    // TODO: Handle other OSes
 #if defined(Q_OS_MACOS)
     return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../..")).canonicalFilePath();
-#elif defined(Q_OS_WINDOWS)
-    return QCoreApplication::applicationDirPath();
-#elif defined(Q_OS_LINUX)
-    return QCoreApplication::applicationDirPath();
 #else
-    return QString();
+    return QCoreApplication::applicationDirPath();
 #endif
 }
 

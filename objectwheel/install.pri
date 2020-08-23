@@ -22,6 +22,11 @@ macos {
     updater.path = Contents/MacOS
     utils.files = $$OUT_PWD/../utils/libUtils.dylib
     utils.path = Contents/Frameworks
+    docs.files = $$PWD/resources/Documents
+    docs.path = Contents/Resources
+    modules.files = $$OUT_PWD/../modules/Modules
+    modules.path = Contents/Resources
+    QMAKE_BUNDLE_DATA += interpreter renderer themer updater utils docs modules
     QMAKE_POST_LINK += install_name_tool $$OUT_PWD/$${TARGET}.app/Contents/MacOS/$$TARGET -change \
                        libUtils.dylib @loader_path/../Frameworks/libUtils.dylib $$escape_expand(\n\t)
     QMAKE_POST_LINK += install_name_tool $$OUT_PWD/$${TARGET}.app/Contents/MacOS/Interpreter -change \
@@ -30,11 +35,6 @@ macos {
                        libUtils.dylib @loader_path/../Frameworks/libUtils.dylib $$escape_expand(\n\t)
     QMAKE_POST_LINK += install_name_tool $$OUT_PWD/$${TARGET}.app/Contents/MacOS/Themer -change \
                        libUtils.dylib @loader_path/../Frameworks/libUtils.dylib $$escape_expand(\n\t)
-    docs.files = $$PWD/resources/Documents
-    docs.path = Contents/Resources
-    modules.files = $$OUT_PWD/../modules/Modules
-    modules.path = Contents/Resources
-    QMAKE_BUNDLE_DATA += interpreter renderer themer updater utils docs modules
 } else:unix {
     interpreter.files = $$OUT_PWD/../interpreter/Interpreter
     interpreter.path = $$OUT_PWD/
@@ -48,8 +48,9 @@ macos {
     utils.path = $$OUT_PWD/
     docs.files = $$PWD/resources/Documents/*
     docs.path = $$OUT_PWD/Documents
-    # TODO : Copy modules too
-    INSTALLS += interpreter renderer updater themer utils docs
+    modules.files = $$OUT_PWD/../modules/Modules/*
+    modules.path = $$OUT_PWD/Modules
+    INSTALLS += interpreter renderer updater themer utils docs modules
 } else:windows {
     CONFIG(debug, debug | release):COMPILING_MODE = debug
     CONFIG(release, debug | release):COMPILING_MODE = release
@@ -68,10 +69,15 @@ macos {
 
     DIRS_TO_COPY = $$PWD/resources/Documents
     DESTINATION_DIR = $$shell_quote($$shell_path($$OUT_PWD/$$COMPILING_MODE/Documents))
-
     for (DIR, DIRS_TO_COPY) {
         DIR_PATH = $$shell_quote($$shell_path($$DIR))
         QMAKE_POST_LINK += $$QMAKE_COPY_DIR $$DIR_PATH $$DESTINATION_DIR $$escape_expand(\n\t)
     }
-    # TODO : Copy modules too
+
+    DIRS_TO_COPY = $$OUT_PWD/../modules/Modules
+    DESTINATION_DIR = $$shell_quote($$shell_path($$OUT_PWD/$$COMPILING_MODE/Modules))
+    for (DIR, DIRS_TO_COPY) {
+        DIR_PATH = $$shell_quote($$shell_path($$DIR))
+        QMAKE_POST_LINK += $$QMAKE_COPY_DIR $$DIR_PATH $$DESTINATION_DIR $$escape_expand(\n\t)
+    }
 }

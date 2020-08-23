@@ -34,6 +34,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setApplicationVersion(AppConstants::VERSION);
     QApplication::setOrganizationDomain(AppConstants::ROOT_DOMAIN);
     QApplication::setApplicationDisplayName(AppConstants::LABEL);
+    QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
 
     // Handle signals
@@ -98,8 +99,11 @@ ApplicationCore::~ApplicationCore()
 
 QString ApplicationCore::modulesPath()
 {
-    // TODO : Think about unix and windows versions too
-    return QFileInfo(QCoreApplication::applicationDirPath() + QStringLiteral("/../Resources/Modules")).canonicalFilePath();
+#if defined(Q_OS_MACOS)
+    return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Modules")).canonicalFilePath();
+#else
+    return QFileInfo(QCoreApplication::applicationDirPath() + "/Modules").canonicalFilePath();
+#endif
 }
 
 void ApplicationCore::run()

@@ -217,10 +217,8 @@ ModelManagerInterface::WorkingCopy ModelManagerInterface::workingCopyInternal() 
     return res;
 }
 
-void ModelManagerInterface::addTaskInternal(QFuture<void> result, const QString &msg,
-                                            const char *taskId) const
+void ModelManagerInterface::addTaskInternal(QFuture<void>, const QString&, const char*) const
 {
-    Q_UNUSED(result);
 }
 
 void ModelManagerInterface::loadQmlTypeDescriptionsInternal(const QString &resourcePath)
@@ -256,7 +254,6 @@ void ModelManagerInterface::loadQmlTypeDescriptionsInternal(const QString &resou
     foreach (const QString &warning, warnings)
         writeMessageInternal(warning);
 }
-
 
 Snapshot ModelManagerInterface::snapshot() const
 {
@@ -321,7 +318,6 @@ QFuture<void> ModelManagerInterface::refreshSourceFiles(const QStringList &sourc
 
     return result;
 }
-
 
 void ModelManagerInterface::fileChangedOnDisk(const QString &path)
 {

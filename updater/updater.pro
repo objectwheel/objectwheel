@@ -10,11 +10,11 @@ QT += widgets
 ### Sources
 INCLUDEPATH += $$PWD
 SOURCES += $$PWD/main.cpp
+RESOURCES += $$PWD/resources/resources.qrc
 
 ### Includes
 include($$PWD/../app.pri)
 include($$PWD/platform/platform.pri)
-include($$PWD/resources/resources.pri)
 
 ### Utils Settings
 INCLUDEPATH += $$PWD/../utils

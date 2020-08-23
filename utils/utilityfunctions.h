@@ -10,11 +10,11 @@
 #include <QStyle>
 
 #if defined(Q_CC_CLANG)
-#  define QT_WARNING_DISABLE QT_WARNING_DISABLE_CLANG
+#  define QT_WARNING_DISABLE(text) QT_WARNING_DISABLE_CLANG(text)
 #elif defined(Q_CC_GNU)
-#  define QT_WARNING_DISABLE QT_WARNING_DISABLE_GCC
+#  define QT_WARNING_DISABLE(text) QT_WARNING_DISABLE_GCC(text)
 #else
-#  define QT_WARNING_DISABLE
+#  define QT_WARNING_DISABLE(text)
 #endif
 
 class QTextDocument;

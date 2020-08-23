@@ -319,8 +319,11 @@ QSettings* ApplicationCore::settings()
 
 QString ApplicationCore::modulesPath()
 {
-    // TODO : Think about unix and windows versions too
+#if defined(Q_OS_MACOS)
     return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Modules")).canonicalFilePath();
+#else
+    return QFileInfo(QCoreApplication::applicationDirPath() + "/Modules").canonicalFilePath();
+#endif
 }
 
 QString ApplicationCore::settingsPath()

@@ -31,6 +31,7 @@ HEADERS += $$PWD/rendersocket.h \
            $$PWD/renderutils.h \
            $$PWD/knownenums.h
 
+RESOURCES += $$PWD/resources/resources.qrc
 
 ### Includes
 include($$PWD/../app.pri)

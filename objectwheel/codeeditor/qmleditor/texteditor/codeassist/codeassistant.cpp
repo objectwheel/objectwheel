@@ -191,7 +191,7 @@ void CodeAssistantPrivate::requestProposal(AssistReason reason,
     QTC_ASSERT(!isWaitingForProposal(), return);
 
 //    if (m_editorWidget->hasBlockSelection())
-//        return; // TODO
+//        return;
 
     if (!provider) {
         if (kind == Completion)

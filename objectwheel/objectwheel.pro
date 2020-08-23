@@ -35,8 +35,9 @@ include($$PWD/subscription/subscription.pri)
 include($$PWD/widgets/widgets.pri)
 include($$PWD/windows/windows.pri)
 include($$PWD/settings/settings.pri)
-include($$PWD/resources/resources.pri)
 include($$PWD/platform/platform.pri)
+
+RESOURCES += $$PWD/resources/resources.qrc
 
 BEFORE  = $$re_escape($$find(DEFINES, APP_LABEL.*))
 AFTER   = APP_LABEL='"\\\"$$TARGET (Beta)\\\""'
