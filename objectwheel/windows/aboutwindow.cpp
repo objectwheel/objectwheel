@@ -51,7 +51,7 @@ AboutWindow::AboutWindow(QWidget* parent) : QWidget(parent)
     layout->addSpacing(30);
     layout->addWidget(okButton, 0, Qt::AlignHCenter);
     layout->addStretch();
-    layout->addWidget(new QLabel(QStringLiteral("<b>© 2015 - %1 %2. All Rights Reserved.</b>")
+    layout->addWidget(new QLabel(QString::fromUtf8("<b>© 2015 - %1 %2. All Rights Reserved.</b>")
                                  .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL), this),
                       0, Qt::AlignHCenter);
 

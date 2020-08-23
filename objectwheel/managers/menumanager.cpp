@@ -195,7 +195,7 @@ void MenuManager::createMenus()
     s_helpMenu->addAction(s_aboutAct);
 
 
-#if defined (Q_OS_DARWIN)
+#if defined (Q_OS_MACOS)
     s_helpMenu->addSeparator();
     s_helpMenu->addAction(s_preferencesAct);
 #else

@@ -323,22 +323,22 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
 
     case SP_MessageBoxInformation: {
         int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
-        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/info.svg"), QSize(sz, sz), widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/messagebox/info.svg"), QSize(sz, sz), widget);
     } break;
 
     case SP_MessageBoxWarning: {
         int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
-        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/warning.svg"), QSize(sz, sz), widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/messagebox/warning.svg"), QSize(sz, sz), widget);
     } break;
 
     case SP_MessageBoxCritical: {
         int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
-        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/issue.svg"), QSize(sz, sz), widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/messagebox/error.svg"), QSize(sz, sz), widget);
     } break;
 
     case SP_MessageBoxQuestion: {
         int sz = proxy()->pixelMetric(PM_MessageBoxIconSize, option, widget);
-        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/output/question.svg"), QSize(sz, sz), widget);
+        pixmap = PaintUtils::pixmap(QStringLiteral(":/images/messagebox/question.svg"), QSize(sz, sz), widget);
     } break;
 
     default:
@@ -440,7 +440,7 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
 {
     switch (metric) {
     case PM_MessageBoxIconSize:
-        return 48;
+        return 40;
     case PM_SmallIconSize:
     case PM_ButtonIconSize:
     case PM_TreeViewIndentation:
@@ -522,7 +522,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
 
         painter->setPen(pc);
         painter->setFont(QFont());
-        painter->drawText(option->rect.adjusted(-2, 1, -2, 1), "\u2713", QTextOption(Qt::AlignCenter));
+        painter->drawText(option->rect.adjusted(-2, 1, -2, 1), QString::fromUtf8("✓"), QTextOption(Qt::AlignCenter));
         painter->restore();
     } break;
     case PE_IndicatorArrowDown: {
@@ -993,7 +993,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             const int tabwidth = isSubMenu ? 9 : mi.tabWidth;
             QString rightMarginText;
             if (isSubMenu)
-                rightMarginText = QStringLiteral("\u25b6\ufe0e"); // U+25B6 U+FE0E: BLACK RIGHT-POINTING TRIANGLE
+                rightMarginText = QString::fromUtf8("▶"); // U+25B6: BLACK RIGHT-POINTING TRIANGLE
             // If present, save and remove embedded shorcut from text
             const int tabIndex = s.indexOf(QLatin1Char('\t'));
             if (tabIndex >= 0) {

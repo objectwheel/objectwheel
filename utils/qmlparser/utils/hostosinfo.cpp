@@ -31,7 +31,7 @@
 #include <QOpenGLContext>
 #endif
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 #undef _WIN32_WINNT
 #define _WIN32_WINNT 0x0501 /* WinXP, needed for GetNativeSystemInfo() */
 #include <qt_windows.h>
@@ -42,7 +42,7 @@ using namespace Utils;
 Qt::CaseSensitivity HostOsInfo::m_overrideFileNameCaseSensitivity = Qt::CaseSensitive;
 bool HostOsInfo::m_useOverrideFileNameCaseSensitivity = false;
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 static WORD hostProcessorArchitecture()
 {
     SYSTEM_INFO info;
@@ -53,7 +53,7 @@ static WORD hostProcessorArchitecture()
 
 HostOsInfo::HostArchitecture HostOsInfo::hostArchitecture()
 {
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
     static const WORD processorArchitecture = hostProcessorArchitecture();
     switch (processorArchitecture) {
     case PROCESSOR_ARCHITECTURE_AMD64:

@@ -473,7 +473,7 @@ void PropertiesController::onControlGeometryChange(const Control* control) const
             yUnknown = !ParserUtils::exists(control->dir(), QStringLiteral("y"));
         }
 
-        const QString& geometryText = QStringLiteral("[(%1, %2), %3 x %4]")
+        const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 × %4]")
                 .arg(xUnknown ? QStringLiteral("?") : QString::number(int(geometry.x())))
                 .arg(yUnknown ? QStringLiteral("?") : QString::number(int(geometry.y())))
                 .arg(int(geometry.width()))
@@ -923,7 +923,7 @@ void PropertiesController::onSceneSelectionChange()
                             yUnknown = !ParserUtils::exists(selectedControl->dir(), QStringLiteral("y"));
                         }
 
-                        const QString& geometryText = QStringLiteral("[(%1, %2), %3 x %4]")
+                        const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 × %4]")
                                 .arg(xUnknown ? QStringLiteral("?") : QString::number(int(geometry.x())))
                                 .arg(yUnknown ? QStringLiteral("?") : QString::number(int(geometry.y())))
                                 .arg(int(geometry.width()))
@@ -1017,7 +1017,7 @@ void PropertiesController::onSceneSelectionChange()
                             yUnknown = !ParserUtils::exists(selectedControl->dir(), QStringLiteral("y"));
                         }
 
-                        const QString& geometryText = QStringLiteral("[(%1, %2), %3 x %4]")
+                        const QString& geometryText = QString::fromUtf8("[(%1, %2), %3 × %4]")
                                 .arg(xUnknown ? QStringLiteral("?") : QString::number(int(geometry.x())))
                                 .arg(yUnknown ? QStringLiteral("?") : QString::number(int(geometry.y())))
                                 .arg(int(geometry.width()))

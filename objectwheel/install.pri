@@ -11,7 +11,7 @@ windows:CONFIG(release, debug | release):LIBS += -L$$OUT_PWD/../utils/release
 windows:CONFIG(debug, debug | release):LIBS += -L$$OUT_PWD/../utils/debug
 
 ### Installs
-macx {
+macos {
     interpreter.files = $$OUT_PWD/../interpreter/Interpreter
     interpreter.path = Contents/MacOS
     renderer.files = $$OUT_PWD/../renderer/Renderer

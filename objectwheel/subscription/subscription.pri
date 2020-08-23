@@ -1,4 +1,3 @@
-DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/paymentdetailswidget.h \

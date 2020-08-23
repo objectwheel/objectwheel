@@ -1,3 +1,1 @@
-macx {
-    include($$PWD/macx/macx.pri)
-}
+macos:include($$PWD/macos/macos.pri)

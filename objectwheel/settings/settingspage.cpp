@@ -97,11 +97,11 @@ void SettingsPage::addWidget(SettingsWidget* widget)
 {
     m_tabWidget->addTab(widget, widget->icon(), widget->title());
     m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
-                                      ? QVariant("﹡") : QVariant());
+                                      ? QVariant(QString::fromUtf8("﹡")) : QVariant());
     connect(widget, &SettingsWidget::markChanged, this, [=] {
         QTimer::singleShot(600, [=] {
             m_tabWidget->tabBar()->setTabData(m_tabWidget->indexOf(widget), widget->isMarked()
-                                              ? QVariant("﹡") : QVariant());
+                                              ? QVariant(QString::fromUtf8("﹡")) : QVariant());
             m_tabWidget->tabBar()->update();
         });
         emit markCountChanged(markCount());

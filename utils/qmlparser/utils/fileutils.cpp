@@ -42,12 +42,12 @@
 #include <QMessageBox>
 #endif
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 #include <qt_windows.h>
 #include <shlobj.h>
 #endif
 
-#ifdef Q_OS_OSX
+#ifdef Q_OS_MACOS
 #include "fileutils_mac.h"
 #endif
 
@@ -375,28 +375,6 @@ bool FileUtils::makeWritable(const FileName &path)
 {
     const QString fileName = path.toString();
     return QFile::setPermissions(fileName, QFile::permissions(fileName) | QFile::WriteUser);
-}
-
-// makes sure that capitalization of directories is canonical on Windows and OS X.
-// This mimics the logic in QDeclarative_isFileCaseCorrect
-QString FileUtils::normalizePathName(const QString &name)
-{
-#ifdef Q_OS_WIN
-    const QString nativeSeparatorName(QDir::toNativeSeparators(name));
-    const LPCTSTR nameC = reinterpret_cast<LPCTSTR>(nativeSeparatorName.utf16()); // MinGW
-    PIDLIST_ABSOLUTE file;
-    HRESULT hr = SHParseDisplayName(nameC, NULL, &file, 0, NULL);
-    if (FAILED(hr))
-        return name;
-    TCHAR buffer[MAX_PATH];
-    if (!SHGetPathFromIDList(file, buffer))
-        return name;
-    return QDir::fromNativeSeparators(QString::fromUtf16(reinterpret_cast<const ushort *>(buffer)));
-#elif defined(Q_OS_OSX)
-    return Internal::normalizePathName(name);
-#else // do not try to handle case-insensitive file systems on Linux
-    return name;
-#endif
 }
 
 bool FileUtils::isRelativePath(const QString &path)
@@ -876,7 +854,7 @@ QTextStream &operator<<(QTextStream &s, const FileName &fn)
     return s << fn.toString();
 }
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 template <>
 void withNTFSPermissions(const std::function<void()> &task)
 {

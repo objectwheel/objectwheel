@@ -2,6 +2,7 @@
 #define APPLICATIONCORE_H
 
 #include <QPalette>
+#include <QApplication>
 
 class QSettings;
 class GeneralSettings;
@@ -30,9 +31,11 @@ class InactivityWatcher;
 
 class ApplicationCore final
 {
+    Q_DECLARE_TR_FUNCTIONS(ApplicationCore)
+
 public:
     ApplicationCore();
-   ~ApplicationCore();
+    ~ApplicationCore();
     ApplicationCore(const ApplicationCore&) = delete;
     ApplicationCore &operator=(const ApplicationCore&) = delete;
 

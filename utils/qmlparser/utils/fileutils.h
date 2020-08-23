@@ -51,7 +51,7 @@ class QWidget;
 UTILS_EXPORT QDebug operator<<(QDebug dbg, const Utils::FileName &c);
 
 // for withNTFSPermissions
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 extern Q_CORE_EXPORT int qt_ntfs_permission_lookup;
 #endif
 
@@ -123,7 +123,6 @@ public:
     static int indexOfQmakeUnfriendly(const QString &name, int startpos = 0);
     static QString qmakeFriendlyName(const QString &name);
     static bool makeWritable(const FileName &path);
-    static QString normalizePathName(const QString &name);
 
     static bool isRelativePath(const QString &fileName);
     static bool isAbsolutePath(const QString &fileName) { return !isRelativePath(fileName); }
@@ -131,7 +130,7 @@ public:
 };
 
 // for actually finding out if e.g. directories are writable on Windows
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 
 template <typename T>
 T withNTFSPermissions(const std::function<T()> &task)
@@ -145,7 +144,7 @@ T withNTFSPermissions(const std::function<T()> &task)
 template <>
 UTILS_EXPORT void withNTFSPermissions(const std::function<void()> &task);
 
-#else // Q_OS_WIN
+#else // Q_OS_WINDOWS
 
 template <typename T>
 T withNTFSPermissions(const std::function<T()> &task)
@@ -153,7 +152,7 @@ T withNTFSPermissions(const std::function<T()> &task)
     return task();
 }
 
-#endif // Q_OS_WIN
+#endif // Q_OS_WINDOWS
 
 class UTILS_EXPORT FileReader
 {

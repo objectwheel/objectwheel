@@ -696,7 +696,7 @@ QFont systemDefaultFont()
         font.setFamily("SF UI Display");
     else
         font.setFamily(".SF NS Display");
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_WINDOWS)
     font.setFamily("Segoe UI");
 #endif
     font.setPixelSize(13);

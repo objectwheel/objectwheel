@@ -12,8 +12,6 @@
 #include <QComboBox>
 #include <QLayout>
 
-#define MARK_BULLET "•"
-
 namespace {
 QAction* g_assetsAction;
 QAction* g_designsAction;
@@ -23,7 +21,7 @@ QAction* g_othersAction;
 static QString choppedText(const QString& text)
 {
     QString choppedText(text);
-    if (choppedText.right(1) == MARK_BULLET)
+    if (choppedText.right(1) == QString::fromUtf8("•"))
         choppedText.chop(1);
     return choppedText;
 }
@@ -31,7 +29,7 @@ static QString choppedText(const QString& text)
 static QString bulletText(const QString& text)
 {
     QString bulletText(choppedText(text));
-    bulletText += MARK_BULLET;
+    bulletText += QString::fromUtf8("•");
     return bulletText;
 }
 

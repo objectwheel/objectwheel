@@ -168,5 +168,9 @@
         <file>images/help/up.svg</file>
         <file>images/output/codemodel-warning.svg</file>
         <file>images/output/codemodel-error.svg</file>
+        <file>images/messagebox/error.svg</file>
+        <file>images/messagebox/info.svg</file>
+        <file>images/messagebox/question.svg</file>
+        <file>images/messagebox/warning.svg</file>
     </qresource>
 </RCC>

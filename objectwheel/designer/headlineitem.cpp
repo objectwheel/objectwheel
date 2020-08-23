@@ -99,7 +99,7 @@ QFont HeadlineItem::dimensionsFont() const
 
 QString HeadlineItem::dimensionsText(qreal width, qreal height) const
 {
-    static const QString pattern(QStringLiteral(" (%1×%2)"));
+    static const QString pattern(QString::fromUtf8(" (%1×%2)"));
     return pattern.arg(width).arg(height);
 }
 

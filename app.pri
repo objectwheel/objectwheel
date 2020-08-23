@@ -2,7 +2,7 @@ VERSION_FILE = $$PWD/VERSION
 !exists($$VERSION_FILE):write_file($$VERSION_FILE)
 
 # Need to discard STDERR so get path to NULL device
-win32 {
+windows{
     NULL_DEVICE = NUL # Windows doesn't have /dev/null but has NUL
 } else {
     NULL_DEVICE = /dev/null
@@ -16,7 +16,7 @@ CONF_VERSION ~= s/v/""
 CONF_VERSION = $$CONF_VERSION-$$section(GIT_VERSION, -, 1, 2)
 CONF_VERSION ~= s/-/"."
 
-win32 { # On windows version can only be numerical so remove commit hash
+windows { # On windows version can only be numerical so remove commit hash
     CONF_VERSION ~= s/\.\d+\.[a-f0-9]{6,}//
 }
 
@@ -41,9 +41,9 @@ equals(GIT_HASH, ) {
 
 # By default Qt only uses major and minor version for Info.plist on Mac.
 # This will rewrite Info.plist with full version
-macx {
+macos {
     equals(TEMPLATE, "app") {
-        PLIST_PATH = $$shell_quote($${PWD}/$$lower($${TARGET})/platform/macx/Info.plist)
+        PLIST_PATH = $$shell_quote($${PWD}/$$lower($${TARGET})/platform/macos/Info.plist)
         QMAKE_POST_LINK += /usr/libexec/PlistBuddy -c \"Set :CFBundleShortVersionString $${CONF_VERSION}\" \
         -c \"Set :CFBundleInfoDictionaryVersion $${CONF_VERSION}\" $${PLIST_PATH} $$escape_expand(\n\t)
     }

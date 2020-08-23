@@ -1,16 +1,17 @@
 ### Library Settings
 TEMPLATE = lib
-CONFIG  += plugin c++14 strict_c++
+CONFIG  += plugin c++14 strict_c strict_c++ utf8_source hide_symbols skip_target_version_ext
 TARGET   = Utils
 QT      += core-private widgets-private widgets qml quick websockets multimedia quickcontrols2
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
-DEFINES += UTILS_LIBRARY
-DEFINES += ASYNC_LIBRARY
-DEFINES += ZIPASYNC_LIBRARY
-DEFINES += FASTDOWNLOADER_LIBRARY
+gcc:QMAKE_CXXFLAGS += -pedantic-errors
+msvc:QMAKE_CXXFLAGS += -permissive-
+DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000 \
+           UTILS_LIBRARY \
+           ASYNC_LIBRARY \
+           ZIPASYNC_LIBRARY \
+           FASTDOWNLOADER_LIBRARY
 
 INCLUDEPATH += $$PWD
-DEPENDPATH += $$PWD
 
 ### Sources
 HEADERS += \

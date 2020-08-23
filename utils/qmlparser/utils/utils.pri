@@ -1,9 +1,3 @@
-#QT += gui network qml
-#CONFIG += exceptions # used by portlist.cpp, textfileformat.cpp, and ssh/*
-win32: LIBS += -lshell32
-# PortsGatherer
-#win32: LIBS += -liphlpapi -lws2_32
-
 include($$PWD/tooltip/tooltip.pri)
 
 SOURCES += \
@@ -51,10 +45,8 @@ HEADERS += \
     $$PWD/qtcolorbutton.h \
     $$PWD/uncommentselection.h
 
-macx {
-    HEADERS += \
-        $$PWD/fileutils_mac.h
-    OBJECTIVE_SOURCES += \
-        $$PWD/fileutils_mac.mm
+macos {
+    HEADERS += $$PWD/fileutils_mac.h
+    SOURCES += $$PWD/fileutils_mac.mm
     LIBS += -framework Foundation
 }

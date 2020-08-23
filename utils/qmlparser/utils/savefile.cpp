@@ -26,7 +26,7 @@
 #include "savefile.h"
 #include "qtcassert.h"
 #include "fileutils.h"
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 #  include <windows.h>
 #  include <io.h>
 #else
@@ -97,7 +97,7 @@ bool SaveFile::commit()
         remove();
         return false;
     }
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
     FlushFileBuffers(reinterpret_cast<HANDLE>(_get_osfhandle(handle())));
 #elif _POSIX_SYNCHRONIZED_IO > 0
     fdatasync(handle());
@@ -127,7 +127,7 @@ bool SaveFile::commit()
 
 void SaveFile::initializeUmask()
 {
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
     m_umask = QFile::WriteGroup | QFile::WriteOther;
 #else
     // Get the current process' file creation mask (umask)

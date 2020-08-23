@@ -155,7 +155,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_abortAndInstallButton->setText(tr("Abort"));
     m_downloadingLabel->setText(tr("Downloading..."));
     m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
-    m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
+    m_downloadSpeedLabel->setText(QString::fromUtf8("0000.00 MB/s ↓"));
     m_downloadProgressBar->setPalette(QColor("#65b84b")); // Button
 
     // NOTE: QProgressBar::minimumSizeHint() returns fontMetrics().height() + 2 for the height
@@ -355,7 +355,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
         m_downloadingLabel->setText(tr("Downloading..."));
         m_abortAndInstallButton->setText(tr("Abort"));
         m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
-        m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
+        m_downloadSpeedLabel->setText(QString::fromUtf8("0000.00 MB/s ↓"));
     });
     connect(m_abortAndInstallButton, &QPushButton::clicked, this, [this] {
         if (UpdateManager::isUpdateCheckRunning())
@@ -386,7 +386,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             (qreal bytesPerSec, qint64 bytesReceived, qint64 fileIndex, const QString& fileName) {
         const qint64 totalBytes = UpdateManager::downloadSize();
         const qreal progress = totalBytes > 0 ? 100.0 * bytesReceived / totalBytes : 0;
-        const QString& speedStr = UtilityFunctions::toPrettyBytesString(bytesPerSec) + QStringLiteral("/s ↓");
+        const QString& speedStr = UtilityFunctions::toPrettyBytesString(bytesPerSec) + QString::fromUtf8("/s ↓");
         const QString& szStr = UtilityFunctions::toPrettyBytesString(bytesReceived) + QLatin1String(" / ")
                 + UtilityFunctions::toPrettyBytesString(totalBytes)
                 + QStringLiteral(" ( % %1 )").arg(QString::number(progress, 'f', 2));
@@ -407,7 +407,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
             m_abortAndInstallButton->setText(tr("Abort"));
             m_downloadingLabel->setText(tr("Downloading..."));
             m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
-            m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
+            m_downloadSpeedLabel->setText(QString::fromUtf8("0000.00 MB/s ↓"));
         } else {
             if (!errorString.isEmpty()) {
                 UtilityFunctions::showMessage(this, tr("Something went wrong"), errorString, QMessageBox::Critical);
@@ -416,7 +416,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
                 m_abortAndInstallButton->setText(tr("Abort"));
                 m_downloadingLabel->setText(tr("Downloading..."));
                 m_downloadSizeLabel->setText("0000.00 MB / 0000.00 MB");
-                m_downloadSpeedLabel->setText("0000.00 MB/s ↓");
+                m_downloadSpeedLabel->setText(QString::fromUtf8("0000.00 MB/s ↓"));
             } else {
                 m_downloadProgressBar->setInvertedAppearance(true);
                 m_abortAndInstallButton->setText(tr("Install"));

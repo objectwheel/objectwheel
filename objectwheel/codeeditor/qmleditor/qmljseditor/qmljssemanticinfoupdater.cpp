@@ -47,10 +47,6 @@ SemanticInfoUpdater::SemanticInfoUpdater(QObject *parent)
 {
 }
 
-SemanticInfoUpdater::~SemanticInfoUpdater()
-{
-}
-
 void SemanticInfoUpdater::abort()
 {
     QMutexLocker locker(&m_mutex);

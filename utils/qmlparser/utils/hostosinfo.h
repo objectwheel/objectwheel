@@ -29,11 +29,11 @@
 #include "osspecificaspects.h"
 #include <QString>
 
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
 #define QTC_HOST_EXE_SUFFIX QTC_WIN_EXE_SUFFIX
 #else
 #define QTC_HOST_EXE_SUFFIX ""
-#endif // Q_OS_WIN
+#endif // Q_OS_WINDOWS
 
 namespace Utils {
 
@@ -42,11 +42,11 @@ class UTILS_EXPORT HostOsInfo
 public:
     static constexpr OsType hostOs()
     {
-#if defined(Q_OS_WIN)
+#if defined(Q_OS_WINDOWS)
         return OsTypeWindows;
 #elif defined(Q_OS_LINUX)
         return OsTypeLinux;
-#elif defined(Q_OS_MAC)
+#elif defined(Q_OS_MACOS)
         return OsTypeMac;
 #elif defined(Q_OS_UNIX)
         return OsTypeOtherUnix;

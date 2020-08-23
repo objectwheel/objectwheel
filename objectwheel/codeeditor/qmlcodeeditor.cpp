@@ -3364,7 +3364,7 @@ QColor QmlCodeEditor::replacementPenColor(int blockNumber) const
 
 QString QmlCodeEditor::foldReplacementText(const QTextBlock &) const
 {
-    return QStringLiteral(" ··· ");
+    return QString::fromUtf8(" ··· ");
 }
 
 bool QmlCodeEditor::selectionVisible(int blockNumber) const

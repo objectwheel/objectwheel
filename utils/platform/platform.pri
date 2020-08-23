@@ -1,7 +1,4 @@
-macx:include($$PWD/macx/macx.pri)
-
-DEPENDPATH += $$PWD
+macos:include($$PWD/macos/macos.pri)
 INCLUDEPATH += $$PWD
-
 HEADERS += $$PWD/crossplatform.h
 SOURCES += $$PWD/crossplatform.cpp

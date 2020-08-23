@@ -39,7 +39,6 @@
 #include <QStandardPaths>
 #include <QSettings>
 #include <QMessageBox>
-#include <QApplication>
 #include <QFontDatabase>
 #include <QSharedMemory>
 #include <QTimer>
@@ -124,7 +123,7 @@ ApplicationCore::ApplicationCore()
     // For some reason if we use showMessage() multiple
     // times the QApplication::processEvents() is called
     // hence the application behaves weirdly.
-    splash->showMessage(QObject::tr("Initializing..."));
+    splash->showMessage(tr("Initializing..."));
     splash->show();
 
     s_modeManager = new ModeManager;
@@ -256,9 +255,7 @@ bool ApplicationCore::locked()
         sharedMemory->detach();
         if(!sharedMemory->create(1)) {
             QApplication::setStyle(new ApplicationStyle); // Ownership taken by QApplication
-            UtilityFunctions::showMessage(nullptr,
-                                          QObject::tr("Quitting"),
-                                          QObject::tr("Another instance is already running."));
+            UtilityFunctions::showMessage(nullptr, tr("Quitting"), tr("Another instance is already running."));
             return true;
         }
     }

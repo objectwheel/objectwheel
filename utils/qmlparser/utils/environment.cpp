@@ -86,7 +86,7 @@ namespace Utils {
 
 enum : char
 {
-#ifdef Q_OS_WIN
+#ifdef Q_OS_WINDOWS
     pathSepC = ';'
 #else
     pathSepC = ':'

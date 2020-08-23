@@ -1,6 +1,4 @@
-DEPENDPATH  += $$PWD
 INCLUDEPATH += $$PWD
-
 include($$PWD/qmleditor/qmleditor.pri)
 
 HEADERS += $$PWD/blockdata.h \

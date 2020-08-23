@@ -19,7 +19,7 @@
 
 #if defined(Q_OS_UNIX)
 #  include <unistd.h>
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_WINDOWS)
 #  include <windows.h>
 #endif
 
@@ -118,7 +118,7 @@ void ApplicationCore::prepare()
     /* Prioritize down */
 #if defined(Q_OS_UNIX)
     nice(19);
-#elif defined(Q_OS_WIN)
+#elif defined(Q_OS_WINDOWS)
     SetErrorMode(SEM_NOGPFAULTERRORBOX);
     SetPriorityClass(GetCurrentProcess(), BELOW_NORMAL_PRIORITY_CLASS);
 #endif
@@ -130,7 +130,7 @@ void ApplicationCore::prepare()
     // Since we always render text into an FBO, we need to globally disable
     // subpixel antialiasing and instead use gray.
     qputenv("QSG_DISTANCEFIELD_ANTIALIASING", "gray");
-#ifdef Q_OS_OSX //This keeps qml2puppet from stealing focus
+#ifdef Q_OS_MACOS //This keeps qml2puppet from stealing focus
     qputenv("QT_MAC_DISABLE_FOREGROUND_APPLICATION_TRANSFORM", "true");
 #endif
     qputenv("QML_BAD_GUI_RENDER_LOOP", "true");

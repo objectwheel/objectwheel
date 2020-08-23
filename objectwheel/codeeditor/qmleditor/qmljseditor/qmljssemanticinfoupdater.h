@@ -36,14 +36,13 @@
 namespace QmlJSEditor {
 namespace Internal {
 
-class SemanticInfoUpdater: public QThread
+class SemanticInfoUpdater final : public QThread
 {
     Q_OBJECT
+    Q_DISABLE_COPY(SemanticInfoUpdater)
 
 public:
-    SemanticInfoUpdater(QObject *parent = 0);
-    virtual ~SemanticInfoUpdater();
-
+    explicit SemanticInfoUpdater(QObject* parent = 0);
     void abort();
     void update(const QmlJS::Document::Ptr &doc, const QmlJS::Snapshot &snapshot);
     void reupdate(const QmlJS::Snapshot &snapshot);

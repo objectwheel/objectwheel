@@ -1,16 +1,14 @@
 ### App Settings
-CONFIG  -= app_bundle
-CONFIG  += console c++14 strict_c++
+CONFIG  += cmdline c++14 strict_c strict_c++ utf8_source hide_symbols
 TARGET   = Updater
+gcc:QMAKE_CXXFLAGS += -pedantic-errors
+msvc:QMAKE_CXXFLAGS += -permissive-
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
-unix:QMAKE_CXXFLAGS += -pedantic-errors
 
 QT += widgets
 
 ### Sources
 INCLUDEPATH += $$PWD
-DEPENDPATH  += $$PWD
-
 SOURCES += $$PWD/main.cpp
 
 ### Includes
