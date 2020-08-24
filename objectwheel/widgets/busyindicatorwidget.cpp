@@ -115,7 +115,7 @@ void BusyIndicatorWidget::paintEvent(QPaintEvent *) {
 void BusyIndicatorWidget::start() {
     updatePosition();
     _isSpinning = true;
-    // show();
+    update();
 
     if(parentWidget() && _disableParentWhenSpinning) {
         parentWidget()->setEnabled(false);
@@ -129,7 +129,7 @@ void BusyIndicatorWidget::start() {
 
 void BusyIndicatorWidget::stop() {
     _isSpinning = false;
-    // hide();
+    update();
 
     if(parentWidget() && _disableParentWhenSpinning) {
         parentWidget()->setEnabled(true);

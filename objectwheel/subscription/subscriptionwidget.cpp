@@ -125,10 +125,9 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
                        "though we are a very small team of people, we will try to stay in touch "
                        "with our users as much as possible.</p>"
                        "<p>Thank you for your support.</p>"
-                       "<p><b>%3</b></p>")
+                       "<p><b>Objectwheel Team</b></p>")
                     .arg(AppConstants::NAME)
-                    .arg(AppConstants::FORUM_URL)
-                    .arg(AppConstants::COMPANY_FULL),
+                    .arg(AppConstants::FORUM_URL),
                     QMessageBox::Information);
     });
 
