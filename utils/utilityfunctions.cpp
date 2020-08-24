@@ -463,6 +463,8 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
 #if defined(Q_OS_MACOS)
     dialog.setText(title);
     dialog.setInformativeText(text);
+    if (auto label = dialog.findChild<QWidget*>("qt_msgbox_label"))
+        label->setMinimumWidth(300);
 #else
     dialog.QWidget::setWindowTitle(title);
     dialog.setText(text);

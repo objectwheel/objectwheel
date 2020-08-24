@@ -178,5 +178,6 @@
         <file>images/messagebox/info.svg</file>
         <file>images/messagebox/question.svg</file>
         <file>images/messagebox/warning.svg</file>
+        <file>images/splash/splash@3x.png</file>
     </qresource>
 </RCC>

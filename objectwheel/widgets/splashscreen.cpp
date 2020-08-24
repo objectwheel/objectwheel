@@ -34,7 +34,7 @@ void SplashScreen::drawContents(QPainter* painter)
             .arg(AppConstants::LABEL)
             .arg(QString(AppConstants::VERSION).left(3))
             .arg(f.pixelSize() - 7);
-    const QRectF titleRect(iconRect.left() + 5, iconRect.bottom() + 20, 300, QFontMetrics(f).height() + 2);
+    const QRectF titleRect(iconRect.left() + 10, iconRect.bottom() + 24, 300, QFontMetrics(f).height() + 2);
     PaintUtils::drawHtml(painter, title, titleRect.topLeft(), f, palette().highlight().color(),
                          Qt::AlignLeft | Qt::AlignVCenter);
 
@@ -42,7 +42,7 @@ void SplashScreen::drawContents(QPainter* painter)
     f.setPixelSize(f.pixelSize() - 7);
     f.setWeight(QFont::Normal);
     const QString& subtitle = tr("Cross-Platform Application Development");
-    const QRectF subtitleRect(titleRect.left(), titleRect.bottom() + 4,
+    const QRectF subtitleRect(titleRect.left(), titleRect.bottom() + 5,
                               QFontMetrics(f).horizontalAdvance(subtitle) + 2, QFontMetrics(f).height() + 2);
     painter->setFont(f);
     painter->setPen(palette().text().color());
@@ -50,9 +50,9 @@ void SplashScreen::drawContents(QPainter* painter)
 
     // Draw informative text
     f.setPixelSize(f.pixelSize() - 2);
-    const QString& informativeText = tr("Copyright © 2015 - %1 %2. All Rights "
-                                        "Reserved. For more details and legal "
-                                        "notices, please visit the About Screen.")
+    const QString& informativeText = tr("Copyright © 2015 - %1 %2.\nAll Rights "
+                                        "Reserved. For more details and\nlegal "
+                                        "notices, please go to the About Screen.")
             .arg(QDate::currentDate().year()).arg(AppConstants::COMPANY_FULL);
     const QRectF informativeRect(subtitleRect.left(), subtitleRect.bottom() + 8,
                                  subtitleRect.width(), 3 * QFontMetrics(f).height() + 2);
