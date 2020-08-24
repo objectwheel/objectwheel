@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!-- Generator: Adobe Illustrator 23.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
 <svg version="1.1" id="katman_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 40 40" style="enable-background:new 0 0 40 40;" xml:space="preserve">
+	 viewBox="0 0 60 60" style="enable-background:new 0 0 60 60;" xml:space="preserve">
 <style type="text/css">
 	.st0{fill:none;stroke:#66798F;stroke-width:2;stroke-miterlimit:10;}
 	.st1{fill:#F5CE85;}
@@ -9,11 +9,11 @@
 	.st3{fill:#FFEEA3;}
 	.st4{fill:none;stroke:#967A44;stroke-width:2;stroke-miterlimit:10;}
 </style>
-<path class="st0" d="M29.8,10.2C29,5.6,24.9,2,20,2c-5.5,0-10,4.5-10,10c0,0.4,0,5.7,0,5.7"/>
-<path class="st1" d="M2.5,37.5V19c0-1.9,1.6-3.5,3.5-3.5h28c1.9,0,3.5,1.6,3.5,3.5v18.5H2.5z"/>
-<path class="st2" d="M34,16c1.7,0,3,1.3,3,3v18H3V19c0-1.7,1.3-3,3-3H34 M34,15H6c-2.2,0-4,1.8-4,4v19h36V19C38,16.8,36.2,15,34,15
-	L34,15z"/>
-<path class="st3" d="M3,31h34v3H3V31z M3,25h34v3H3V25z M3,19h34v3H3V19z"/>
-<path class="st2" d="M20,31c-0.8,0-1.5,0.7-1.5,1.5S19.2,34,20,34s1.5-0.7,1.5-1.5S20.8,31,20,31z"/>
-<path class="st4" d="M17,23c0-1.7,1.3-3,3-3s3,1.3,3,3c0,1-0.5,1.9-1.2,2.4c-1,0.8-1.8,1.9-1.8,3.2V29"/>
+<path class="st0" d="M44.7,15.3C43.5,8.4,37.3,3,30,3c-8.2,0-15,6.8-15,15c0,0.6,0,8.6,0,8.6"/>
+<path class="st1" d="M3.8,56.2V28.5c0-2.8,2.4-5.2,5.2-5.2h42c2.9,0,5.2,2.4,5.2,5.2v27.8H3.8z"/>
+<path class="st2" d="M51.5,24c2.6,0,4.5,1.9,4.5,4.5V56H4V28.5C4,25.9,6,24,8.5,24H51 M51.5,23h-43C5.2,23,3,25.2,3,28.5V57h54V28.5
+	C57,25.2,54.8,23,51.5,23L51.5,23z"/>
+<path class="st3" d="M4,47h52v4H4V47z M4,38h52v4H4V38z M4,29h52v4H4V29z"/>
+<path class="st2" d="M30,46.5c-1.2,0-2.2,1.1-2.2,2.2S28.8,51,30,51s2.2-1.1,2.2-2.2S31.2,46.5,30,46.5z"/>
+<path class="st4" d="M25.5,34.5c0-2.6,1.9-4.5,4.5-4.5s4.5,1.9,4.5,4.5c0,1.5-0.8,2.8-1.8,3.6c-1.5,1.2-2.7,2.8-2.7,4.8v0.6"/>
 </svg>

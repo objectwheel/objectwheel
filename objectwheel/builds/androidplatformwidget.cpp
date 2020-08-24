@@ -347,7 +347,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     auto settingsLabel = new QLabel(tr("Settings"));
 
     iconLabel->setFixedSize(QSize(60, 60));
-    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android.svg"),
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android-large.svg"),
                                             QSize(60, 60), this));
 
     QFont f = UtilityFunctions::systemTitleFont();
