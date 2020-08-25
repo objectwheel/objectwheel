@@ -455,23 +455,23 @@ QMessageBox::StandardButton showMessage(QWidget* parent, const QString& title, c
                                         QMessageBox::Icon icon, QMessageBox::StandardButtons buttons,
                                         QMessageBox::StandardButton defaultButton, bool modal)
 {
-    QMessageBox dialog(parent);
-    dialog.setIcon(icon);
-    dialog.setModal(modal);
-    dialog.setStandardButtons(buttons);
-    dialog.setDefaultButton(defaultButton);
+    QMessageBox messageBox(parent);
+    messageBox.setIcon(icon);
+    messageBox.setModal(modal);
+    messageBox.setStandardButtons(buttons);
+    messageBox.setDefaultButton(defaultButton);
 #if defined(Q_OS_MACOS)
-    dialog.setText(title);
-    dialog.setInformativeText(text);
-    if (auto label = dialog.findChild<QWidget*>("qt_msgbox_label"))
+    messageBox.setText(title);
+    messageBox.setInformativeText(text);
+    if (auto label = messageBox.findChild<QWidget*>("qt_msgbox_label"))
         label->setMinimumWidth(300);
 #else
-    dialog.QWidget::setWindowTitle(title);
-    dialog.setText(text);
+    messageBox.QWidget::setWindowTitle(title);
+    messageBox.setText(text);
 #endif
-    for (QAbstractButton* button : dialog.buttons())
+    for (QAbstractButton* button : messageBox.buttons())
         button->setCursor(Qt::PointingHandCursor);
-    return static_cast<QMessageBox::StandardButton>(dialog.exec());
+    return static_cast<QMessageBox::StandardButton>(messageBox.exec());
 }
 
 QByteArray generatePasswordHash(const QByteArray& password)

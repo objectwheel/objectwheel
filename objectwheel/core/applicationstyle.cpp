@@ -394,8 +394,10 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
         return false;
     case SH_MessageBox_CenterButtons:
         return false;
-    case SH_MessageBox_TextInteractionFlags:
-        return false;
+        // When enabled, no matter what it returns,
+        // links in the message boxes do not work
+        // case SH_MessageBox_TextInteractionFlags:
+        //    return false;
     case SH_Widget_Animation_Duration:
         return 0; // No animation
     case SH_ToolTipLabel_Opacity:
