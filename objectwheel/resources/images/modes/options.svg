@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Generator: Adobe Illustrator 22.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<svg version="1.2" baseProfile="tiny" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-	 x="0px" y="0px" viewBox="0 0 32 32" xml:space="preserve">
-<path fill="#525252" d="M32,6V3H18V1h-4v2H3H0v3h2v15h13v3l-7,7h3l4-4v4h2v-4l4,4h3l-7-7v-3h13V6C29.9,6,32,6,32,6z M28,19H4V6h24
-	V19z"/>
-<rect x="4" y="6" fill="#B7B7B7" width="24" height="13"/>
+<!-- Generator: Adobe Illustrator 23.1.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 16 16" style="enable-background:new 0 0 16 16;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#525252;}
+	.st1{fill:#B7B7B7;}
+</style>
+<path class="st0" d="M13,9H2V2h11V9z"/>
+<polygon class="st0" points="15,1 15,2 14,2 14,10 1,10 1,2 0,2 0,1 7,1 7,0 8,0 8,1 "/>
+<rect x="7" y="10" class="st0" width="1" height="5"/>
+<rect x="2.4" y="11.8" transform="matrix(0.2419 -0.9703 0.9703 0.2419 -8.2318 14.0572)" class="st0" width="5" height="1"/>
+<rect x="9.6" y="9.8" transform="matrix(0.9703 -0.2419 0.2419 0.9703 -2.6771 2.8065)" class="st0" width="1" height="5"/>
+<rect x="2" y="2" class="st1" width="11" height="7"/>
 </svg>
