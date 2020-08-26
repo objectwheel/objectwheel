@@ -124,6 +124,8 @@ PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
     });
     connect(buttons->get(Back), &QPushButton::clicked,
             this, &PaymentDetailsWidget::back);
+    connect(m_bulkEdit, &BulkEdit::returnPressed,
+            this, &PaymentDetailsWidget::next);
     //    connect(m_buttons->get(CompleteSignup), &QPushButton::clicked,
     //            this, &SignupVerificationWidget::onCompleteSignupClicked);
     //    connect(m_buttons->get(ResendSignupCode), &QPushButton::clicked,

@@ -38,7 +38,8 @@ void BulkEdit::add(int id, const QString& label, QWidget* widget)
                                                "  background: transparent;"
                                                "  margin-left: %1;"
                                                "}").arg(fontMetrics().horizontalAdvance(label) + 15));
-
+    if (auto lineEdit = qobject_cast<QLineEdit*>(element.edit))
+        connect(lineEdit, &QLineEdit::returnPressed, this, &BulkEdit::returnPressed);
     m_elements.append(element);
     m_layout->addWidget(element.edit);
     updateGeometry();

@@ -43,15 +43,17 @@ public:
         return nullptr;
     }
 
-public slots:
-    void triggerSettings();
-
-public:
     QSize sizeHint() const override;
     QSize minimumSizeHint() const override;
 
+public slots:
+    void triggerSettings();
+
 private:
     void paintEvent(QPaintEvent* event) override;
+
+signals:
+    void returnPressed();
 
 private:
     QLayout* m_layout;

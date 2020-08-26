@@ -135,6 +135,8 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
             this, &SignupWidget::onSignupFailure);
     connect(m_buttons->get(Next), &QPushButton::clicked,
             this, &SignupWidget::onNextClicked);
+    connect(m_bulkEdit, &BulkEdit::returnPressed,
+            this, &SignupWidget::onNextClicked);
     connect(m_buttons->get(Back), &QPushButton::clicked,
             this, &SignupWidget::back);
 }

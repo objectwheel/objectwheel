@@ -101,6 +101,8 @@ ResetVerificationWidget::ResetVerificationWidget(QWidget* parent) : QWidget(pare
             this, &ResetVerificationWidget::onCancelClicked);
     connect(m_buttons->get(CompletePasswordReset), &QPushButton::clicked,
             this, &ResetVerificationWidget::onCompletePasswordResetClicked);
+    connect(m_bulkEdit, &BulkEdit::returnPressed,
+            this, &ResetVerificationWidget::onCompletePasswordResetClicked);
     connect(m_buttons->get(ResendPasswordResetCode), &QPushButton::clicked,
             this, &ResetVerificationWidget::onResendPasswordResetCodeClicked);
     connect(ApiManager::instance(), &ApiManager::completePasswordResetSuccessful,

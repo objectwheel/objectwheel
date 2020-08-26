@@ -115,6 +115,8 @@ LoginWidget::LoginWidget(QWidget *parent) : QWidget(parent)
             this, &LoginWidget::signup);
     connect(m_buttons->get(Login), &QPushButton::clicked,
             this, &LoginWidget::onLoginButtonClicked);
+    connect(m_bulkEdit, &BulkEdit::returnPressed,
+            this, &LoginWidget::onLoginButtonClicked);
     connect(m_helpButton, &QPushButton::clicked,
             this, &LoginWidget::onHelpButtonClicked);
 

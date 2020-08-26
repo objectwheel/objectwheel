@@ -80,6 +80,8 @@ ProjectDetailsWidget::ProjectDetailsWidget(QWidget* parent) : QWidget(parent)
 
     connect(m_buttons->get(Save), &QPushButton::clicked,
             this, &ProjectDetailsWidget::onSaveClick);
+    connect(m_bulkEdit, &BulkEdit::returnPressed,
+            this, &ProjectDetailsWidget::onSaveClick);
     connect(m_buttons->get(Delete), &QPushButton::clicked,
             this, &ProjectDetailsWidget::onDeleteClick);
     connect(m_buttons->get(Back), &QPushButton::clicked, [=] {

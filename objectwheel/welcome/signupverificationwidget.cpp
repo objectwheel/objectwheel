@@ -94,6 +94,8 @@ SignupVerificationWidget::SignupVerificationWidget(QWidget* parent) : QWidget(pa
             this, &SignupVerificationWidget::onCancelClicked);
     connect(m_buttons->get(CompleteSignup), &QPushButton::clicked,
             this, &SignupVerificationWidget::onCompleteSignupClicked);
+    connect(m_bulkEdit, &BulkEdit::returnPressed,
+            this, &SignupVerificationWidget::onCompleteSignupClicked);
     connect(m_buttons->get(ResendSignupCode), &QPushButton::clicked,
             this, &SignupVerificationWidget::onResendSignupCodeClicked);
     connect(ApiManager::instance(), &ApiManager::completeSignupSuccessful,

@@ -72,6 +72,8 @@ ResetPasswordWidget::ResetPasswordWidget(QWidget* parent) : QWidget(parent)
             this, &ResetPasswordWidget::back);
     connect(m_buttons->get(Next), &QPushButton::clicked,
             this, &ResetPasswordWidget::onNextClicked);
+    connect(m_bulkEdit, &BulkEdit::returnPressed,
+            this, &ResetPasswordWidget::onNextClicked);
     connect(ApiManager::instance(), &ApiManager::resetPasswordSuccessful,
             this, &ResetPasswordWidget::onResetPasswordSuccessful);
     connect(ApiManager::instance(), &ApiManager::resetPasswordFailure,
