@@ -123,7 +123,8 @@ void ControlsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opti
     if (index.column() == 0) {
         QPixmap pixmap(PaintUtils::pixmap(control->icon(), option.decorationSize, m_controlsTree,
                                           isSelected ? QIcon::Selected : QIcon::Normal));
-        iconRect = QRectF({}, pixmap.size() / pixmap.devicePixelRatioF());
+        if (pixmap.devicePixelRatioF() > 0)
+            iconRect = QRectF({}, pixmap.size() / pixmap.devicePixelRatioF());
         iconRect.moveCenter(r.center());
         iconRect.moveLeft(r.left() + 5);
         painter->drawPixmap(iconRect, pixmap, pixmap.rect());

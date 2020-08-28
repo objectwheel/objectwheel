@@ -158,7 +158,7 @@ UTILS_EXPORT QPointF bottomCenter(const QRectF& rect);
 UTILS_EXPORT QPixmap imageToPixmap(const QImage& image);
 UTILS_EXPORT QStringList anchorLineNames();
 UTILS_EXPORT QStringList anchorPropertyNames();
-UTILS_EXPORT QStringList countryList();
+UTILS_EXPORT QCborMap countryList();
 UTILS_EXPORT void disableWheelEvent(QWidget* widget);
 UTILS_EXPORT QFont defaultFont();
 UTILS_EXPORT QFont systemDefaultFont();

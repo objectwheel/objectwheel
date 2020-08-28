@@ -37,7 +37,7 @@ void BulkEdit::add(int id, const QString& label, QWidget* widget)
                                                "  border: none;"
                                                "  background: transparent;"
                                                "  margin-left: %1;"
-                                               "}").arg(fontMetrics().horizontalAdvance(label) + 15));
+                                               "}").arg(fontMetrics().horizontalAdvance(label) + 10));
     if (auto lineEdit = qobject_cast<QLineEdit*>(element.edit))
         connect(lineEdit, &QLineEdit::returnPressed, this, &BulkEdit::returnPressed);
     m_elements.append(element);
@@ -61,7 +61,6 @@ void BulkEdit::triggerSettings()
         element.edit->setPalette(p);
     }
     m_layout->setContentsMargins(m_settings.leftMargin, 0, m_settings.rightMargin, 0);
-    adjustSize(); // In case we are not in a layout
     updateGeometry();
     update();
 }
@@ -90,26 +89,20 @@ void BulkEdit::paintEvent(QPaintEvent*)
 
     // Draw seperator lines
     for (int i = 0; i < m_elements.size() - 1; i++) {
-        painter.drawLine(
-            r.left(),
-            r.top() + m_settings.cellHeight * (i + 1),
-            r.right(),
-            r.top() + m_settings.cellHeight * (i + 1)
-        );
+        painter.drawLine(r.left(),
+                         r.top() + m_settings.cellHeight * (i + 1),
+                         r.right(),
+                         r.top() + m_settings.cellHeight * (i + 1));
     }
 
     // Draw labels
     painter.setPen(m_settings.labelColor);
     for (int i = 0; i < m_elements.size(); i++) {
-        painter.drawText(
-            QRectF(
-                r.left() + 10,
-                r.top() + m_settings.cellHeight * i,
-                r.width() - 20,
-                m_settings.cellHeight
-            ),
-            m_elements.at(i).text,
-            QTextOption(Qt::AlignVCenter | Qt::AlignLeft)
-        );
+        painter.drawText(QRectF(r.left() + 10,
+                                r.top() + m_settings.cellHeight * i,
+                                r.width() - 20,
+                                m_settings.cellHeight),
+                         m_elements.at(i).text,
+                         QTextOption(Qt::AlignVCenter | Qt::AlignLeft));
     }
 }

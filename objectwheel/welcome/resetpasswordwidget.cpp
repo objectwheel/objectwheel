@@ -110,7 +110,7 @@ void ResetPasswordWidget::onResetPasswordSuccessful()
 {
     const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
     m_busyIndicator->stop();
-    m_bulkEdit->get<QLineEdit*>(Email)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(Email)->clear();
     emit done(email);
 }
 

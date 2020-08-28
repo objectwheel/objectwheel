@@ -4,9 +4,7 @@
 #include <QWidget>
 #include <planinfo.h>
 
-class QLabel;
 class BulkEdit;
-
 class PaymentDetailsWidget final : public QWidget
 {
     Q_OBJECT
@@ -18,14 +16,24 @@ public:
 public slots:
     void refresh(const PlanInfo& planInfo, qint64 selectedPlan);
 
+private slots:
+    void cardNumberEditTextEditingFinished();
+    void cardNumberEditTextEdited(QString text);
+    void cardExpDateEditTextChanged(QString text);
+    void onNextClicked();
+
 signals:
     void back();
-    void next();
+    void next(const PlanInfo& planInfo, qint64 selectedPlan,
+              const QString& cardNumber, const QDate& cardExpDate,
+              const QString& cardCvv, const QString& fullName,
+              const QString& email, const QString& phone, const QString& countryCode,
+              const QString& state, const QString& city, const QString& address,
+              const QString& postalCode);
 
 private:
     PlanInfo m_planInfo;
     qint64 m_selectedPlan;
-    QLabel* m_selectedPlanLabel;
     BulkEdit* m_bulkEdit;
 };
 

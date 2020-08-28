@@ -15,6 +15,7 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QComboBox>
+#include <QCborMap>
 
 enum Fields { First, Last, Email, ConfirmEmail, Password, ConfirmPassword, Country, Company, Title, Phone };
 enum Buttons { Next, Back };
@@ -64,7 +65,8 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
     countryCombo->setFrame(false);
     countryCombo->setEditable(true);
     countryCombo->addItem(tr("Please select..."));
-    countryCombo->addItems(UtilityFunctions::countryList());
+    foreach (const QCborValue& countryName, UtilityFunctions::countryList().keys())
+        countryCombo->addItem(countryName.toString());
     countryCombo->lineEdit()->setFrame(false);
     countryCombo->lineEdit()->setReadOnly(true);
     countryCombo->lineEdit()->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -171,7 +173,7 @@ void SignupWidget::onNextClicked()
             || password.isEmpty()
             || cpassword.isEmpty()) {
         UtilityFunctions::showMessage(this,
-                                      tr("Fields cannot be left blank"),
+                                      tr("Required fields must be filled"),
                                       tr("Please fill in all the required fields."),
                                       QMessageBox::Information);
         return;
@@ -189,7 +191,7 @@ void SignupWidget::onNextClicked()
             || phone.size() > 255) {
         UtilityFunctions::showMessage(this,
                                       tr("Entry too long"),
-                                      tr("No fields can be larger than 255 characters."),
+                                      tr("No field can be larger than 255 characters."),
                                       QMessageBox::Information);
         return;
     }
@@ -248,15 +250,15 @@ void SignupWidget::onSignupSuccessful()
 {
     const QString& email = m_bulkEdit->get<QLineEdit*>(Email)->text();
     m_busyIndicator->stop();
-    m_bulkEdit->get<QLineEdit*>(First)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Last)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Email)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Password)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Company)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Title)->setText(QString());
-    m_bulkEdit->get<QLineEdit*>(Phone)->setText(QString());
+    m_bulkEdit->get<QLineEdit*>(First)->clear();
+    m_bulkEdit->get<QLineEdit*>(Last)->clear();
+    m_bulkEdit->get<QLineEdit*>(Email)->clear();
+    m_bulkEdit->get<QLineEdit*>(ConfirmEmail)->clear();
+    m_bulkEdit->get<QLineEdit*>(Password)->clear();
+    m_bulkEdit->get<QLineEdit*>(ConfirmPassword)->clear();
+    m_bulkEdit->get<QLineEdit*>(Company)->clear();
+    m_bulkEdit->get<QLineEdit*>(Title)->clear();
+    m_bulkEdit->get<QLineEdit*>(Phone)->clear();
     m_bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
     m_termsSwitch->setChecked(false);
     emit done(email);

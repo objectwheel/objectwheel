@@ -28,6 +28,7 @@
 #include <qpassworddigestor.h>
 #include <QKeyEvent>
 #include <QToolTip>
+#include <QCborMap>
 
 Q_DECLARE_METATYPE(QMargins)
 
@@ -653,16 +654,20 @@ QStringList anchorPropertyNames()
     return anchorPropertyNames;
 }
 
-QStringList countryList()
+// QCborMap keeps the elements in the order that they were inserted
+QCborMap countryList()
 {
-    static QStringList countries;
+    static QCborMap countries;
     if (countries.isEmpty()) {
         QFile file(":/other/countries.txt");
         file.open(QFile::ReadOnly);
         QString country;
         QTextStream in(&file);
-        while (in.readLineInto(&country))
-            countries.append(country.split(QStringLiteral("   ")).first());
+        while (in.readLineInto(&country)) {
+            const QStringList& countryPair = country.split(QLatin1Char('='));
+            Q_ASSERT(countryPair.size() == 2);
+            countries.insert(countryPair.first(), countryPair.last()); // Country, Code
+        }
     }
     return countries;
 }

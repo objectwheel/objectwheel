@@ -194,7 +194,7 @@ void AndroidPlatformController::charge() const
     m_androidPlatformWidget->screenOrientationCombo()->setCurrentText(QLatin1String("Unspecified"));
     m_androidPlatformWidget->minApiLevelCombo()->setCurrentText(QLatin1String("API 21: Android 5.0"));
     m_androidPlatformWidget->targetApiLevelCombo()->setCurrentText(QLatin1String("API 23: Android 6.0"));
-    m_androidPlatformWidget->iconPathEdit()->setText(QString());
+    m_androidPlatformWidget->iconPathEdit()->clear();
     m_androidPlatformWidget->iconPictureLabel()->setPixmap(QPixmap());
     m_androidPlatformWidget->includePemissionsCheck()->setChecked(false);
     m_androidPlatformWidget->permissionCombo()->setEnabled(false);
@@ -346,7 +346,7 @@ void AndroidPlatformController::onBrowseIconButtonClick() const
 
 void AndroidPlatformController::onClearIconButtonClick() const
 {
-    m_androidPlatformWidget->iconPathEdit()->setText(QString());
+    m_androidPlatformWidget->iconPathEdit()->clear();
     m_androidPlatformWidget->iconPictureLabel()->setPixmap(QPixmap());
 }
 

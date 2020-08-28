@@ -148,13 +148,15 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     QColor opaque(color);
     opaque.setAlphaF(1);
 
-    QImage overlay = renderFilledImage(pixmap.size() / pixmap.devicePixelRatioF(),
+    QImage overlay = renderFilledImage(pixmap.devicePixelRatioF() > 0
+                                       ? pixmap.size() / pixmap.devicePixelRatioF() : QSize(),
                                        opaque, pixmap.devicePixelRatioF());
     {
         QPainter p(&overlay);
         p.setRenderHint(QPainter::Antialiasing);
         p.setCompositionMode(QPainter::CompositionMode_DestinationIn);
-        p.drawPixmap(QRectF({}, pixmap.size() / pixmap.devicePixelRatioF()), pixmap, pixmap.rect());
+        p.drawPixmap(QRectF({}, pixmap.devicePixelRatioF() > 0
+                            ? pixmap.size() / pixmap.devicePixelRatioF() : QSize()), pixmap, pixmap.rect());
     }
 
     if (color.alphaF() == 1)
@@ -163,7 +165,8 @@ QPixmap PaintUtils::renderOverlaidPixmap(const QPixmap& pixmap, const QColor& co
     QPainter p(&dest);
     p.setRenderHint(QPainter::Antialiasing);
     p.setOpacity(color.alphaF());
-    p.drawImage(QRectF({}, dest.size() / pixmap.devicePixelRatioF()), overlay, overlay.rect());
+    p.drawImage(QRectF({}, pixmap.devicePixelRatioF() > 0
+                       ? dest.size() / pixmap.devicePixelRatioF() : QSize()), overlay, overlay.rect());
     p.end();
 
     return dest;

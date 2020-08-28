@@ -978,8 +978,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
                 pixmap = PaintUtils::pixmap(mi.icon, iconSize, widget,
                                             mode, mi.checked ? QIcon::On : QIcon::Off);
-                int pixw = pixmap.width() / pixmap.devicePixelRatioF();
-                int pixh = pixmap.height() / pixmap.devicePixelRatioF();
+                int pixw = pixmap.devicePixelRatioF() > 0 ? pixmap.width() / pixmap.devicePixelRatioF() : 1;
+                int pixh = pixmap.devicePixelRatioF() > 0 ? pixmap.height() / pixmap.devicePixelRatioF() : 1;
                 QRect cr(xpos, mi.rect.y(), checkcol, mi.rect.height());
                 QRect pmr(0, 0, pixw, pixh);
                 pmr.moveCenter(cr.center());
@@ -1050,13 +1050,13 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 QPixmap pixmap = PaintUtils::pixmap(button->icon, button->iconSize, widget, mode, state);
                 if (button->state & State_Sunken)
                     pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
-                qreal w = pixmap.width() / pixmap.devicePixelRatioF();
-                qreal h = pixmap.height() / pixmap.devicePixelRatioF();
+                qreal w = pixmap.devicePixelRatioF() > 0 ? pixmap.width() / pixmap.devicePixelRatioF() : 1;
+                qreal h = pixmap.devicePixelRatioF() > 0 ? pixmap.height() / pixmap.devicePixelRatioF() : 1;
                 if (!button->text.isEmpty())
                     w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 3;
                 point = QPointF(ir.x() + ir.width() / 2 - w / 2,
                                 ir.y() + ir.height() / 2 - h / 2);
-                w = pixmap.width() / pixmap.devicePixelRatioF();
+                w = pixmap.devicePixelRatioF() > 0 ? pixmap.width() / pixmap.devicePixelRatioF() : 1;
                 if (button->direction == Qt::RightToLeft)
                     point.rx() += w;
                 painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap,
@@ -1163,7 +1163,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     pm = PaintUtils::pixmap(toolbutton->icon,
                                             toolbutton->rect.size().boundedTo(toolbutton->iconSize),
                                             widget, mode, state);
-                    pmSize = pm.size() / pm.devicePixelRatioF();
+                    pmSize = pm.devicePixelRatioF() > 0 ? pm.size() / pm.devicePixelRatioF() : QSize();
                 }
 
                 if (toolbutton->toolButtonStyle != Qt::ToolButtonIconOnly) {

@@ -164,7 +164,7 @@ void ResetVerificationWidget::onCompletePasswordResetClicked()
 
     if (password.isEmpty() || cpassword.isEmpty()) {
         UtilityFunctions::showMessage(this,
-                                      tr("Fields cannot be left blank"),
+                                      tr("Required fields must be filled"),
                                       tr("Please fill in all the required fields."),
                                       QMessageBox::Information);
         return;

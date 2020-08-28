@@ -491,7 +491,8 @@ ThemeChooserWidget::ThemeChooserWidget(const Version& version, QWidget *parent) 
             m_themesCombo->addItems(UNIVERSAL_THEMES);
         }
         pic.setDevicePixelRatio(m_customizationPicture->devicePixelRatioF());
-        m_customizationPicture->setFixedSize(pic.size() / pic.devicePixelRatioF());
+        if (pic.devicePixelRatioF() > 0)
+            m_customizationPicture->setFixedSize(pic.size() / pic.devicePixelRatioF());
         m_customizationPicture->setPixmap(pic);
     });
 
@@ -643,7 +644,8 @@ void ThemeChooserWidget::refresh()
 
     QPixmap pic(tmpFile.fileName());
     pic.setDevicePixelRatio(m_previewPicture->devicePixelRatioF());
-    m_previewPicture->setFixedSize(pic.size() / pic.devicePixelRatioF());
+    if (pic.devicePixelRatioF() > 0)
+        m_previewPicture->setFixedSize(pic.size() / pic.devicePixelRatioF());
     m_previewPicture->setPixmap(pic);
     m_busyIndicator->stop();
 }

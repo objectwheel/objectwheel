@@ -291,6 +291,8 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     // must call it manually.
     m_progressBar->adjustSize();
     m_progressBar->hide();
+    m_buttons_2->adjustSize();
+    m_buttons_2->hide();
 
     m_iconLabel->setFixedSize(QSize(60, 60));
     m_iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/welcome/hammer.svg"), QSize(60, 60), this));
@@ -370,7 +372,6 @@ ProjectsWidget::ProjectsWidget(QWidget* parent) : QWidget(parent)
     m_buttons_2->get(Settings)->setIconSize(QSize(12, 12));
     m_buttons_2->get(Settings)->setIcon(QIcon(":/images/welcome/dots.svg"));
     m_buttons_2->get(Settings)->setCursor(Qt::PointingHandCursor);
-    m_buttons_2->hide();
     m_buttons_2->settings().cellWidth = m_buttons_2->height();
     m_buttons_2->settings().borderRadius = m_buttons_2->height() / 2.0;
     m_buttons_2->triggerSettings();

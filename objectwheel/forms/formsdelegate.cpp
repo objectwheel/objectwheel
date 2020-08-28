@@ -99,7 +99,8 @@ void FormsDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     QRectF iconRect(0, 0, -5, 0);
     QPixmap pixmap(PaintUtils::pixmap(control->icon(), option.decorationSize, m_formsTree,
                                       isSelected ? QIcon::Selected : QIcon::Normal));
-    iconRect = QRectF({}, pixmap.size() / pixmap.devicePixelRatioF());
+    if (pixmap.devicePixelRatioF() > 0)
+        iconRect = QRectF({}, pixmap.size() / pixmap.devicePixelRatioF());
     iconRect.moveCenter(r.center());
     iconRect.moveLeft(r.left() + 5);
     painter->drawPixmap(iconRect, pixmap, pixmap.rect());

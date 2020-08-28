@@ -144,7 +144,7 @@ void LoginWidget::onLoginButtonClicked()
 
     if (email.isEmpty() || password.isEmpty()) {
         UtilityFunctions::showMessage(this,
-                                      tr("Fields cannot be left blank"),
+                                      tr("Required fields must be filled"),
                                       tr("Please fill in all the required fields."),
                                       QMessageBox::Information);
         return;
@@ -153,7 +153,7 @@ void LoginWidget::onLoginButtonClicked()
     if (email.size() > 255 || password.size() > 255) {
         UtilityFunctions::showMessage(this,
                                       tr("Entry too long"),
-                                      tr("No fields can be larger than 255 characters."),
+                                      tr("No field can be larger than 255 characters."),
                                       QMessageBox::Information);
         return;
     }

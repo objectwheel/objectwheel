@@ -69,7 +69,6 @@ ButtonSlice::Settings& ButtonSlice::settings()
 
 void ButtonSlice::triggerSettings()
 {
-    adjustSize(); // In case we are not in a layout
     updateGeometry();
     update();
 }
