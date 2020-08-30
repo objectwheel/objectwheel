@@ -28,6 +28,7 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     connect(m_stackedLayout, &StackedLayout::currentChanged,
             m_serverStatusWidget, &ServerStatusWidget::raise);
 
+    m_stackedLayout->setContentsMargins(0, 0, 0, 0);
     m_stackedLayout->addWidget(m_subscriptionWidget);
     m_stackedLayout->addWidget(m_paymentDetailsWidget);
     m_stackedLayout->addWidget(m_orderSummaryWidget);

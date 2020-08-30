@@ -7,7 +7,7 @@ class QLabel;
 class QGroupBox;
 class QCheckBox;
 class QPushButton;
-class QStackedLayout;
+class StackedLayout;
 class QTextEdit;
 class BusyIndicatorWidget;
 class QProgressBar;
@@ -31,7 +31,7 @@ private slots:
 
 private:
     QGroupBox* m_updateGroup;
-    QStackedLayout* m_updateStatusStackedLayout;
+    StackedLayout* m_updateStatusStackedLayout;
     /*__*/
     QWidget* m_upToDateWidget;
     QLabel* m_upToDateLabel;

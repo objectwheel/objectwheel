@@ -545,19 +545,25 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     m_buttonSlice->settings().cellWidth = 100;
     m_buttonSlice->triggerSettings();
 
-    auto layout = new QVBoxLayout(this);
+    auto layout = new QGridLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(12);
-    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(titleLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(descriptionLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(12);
-    layout->addWidget(settingsLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(generalGroupBox); // Don't need to align the others since they are expanding anyways
-    layout->addWidget(androidSpesificGroupBox);
-    layout->addWidget(buildingGroupBox);
-    layout->addWidget(signingGroupBox);
-    layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
+    layout->setRowStretch(0, 1);
+    layout->setRowMinimumHeight(0, 12);
+    layout->addWidget(iconLabel, 1, 1, Qt::AlignHCenter);
+    layout->addWidget(titleLabel, 2, 1, Qt::AlignHCenter);
+    layout->addWidget(descriptionLabel, 3, 1, Qt::AlignHCenter);
+    layout->setRowMinimumHeight(4, 12);
+    layout->addWidget(settingsLabel, 5, 1, Qt::AlignHCenter);
+    layout->addWidget(generalGroupBox, 6, 1); // Don't need to align the others since they are expanding anyways
+    layout->addWidget(androidSpesificGroupBox, 7, 1);
+    layout->addWidget(buildingGroupBox, 8, 1);
+    layout->addWidget(signingGroupBox, 9, 1);
+    layout->addWidget(m_buttonSlice, 10, 1, Qt::AlignHCenter);
+    layout->setRowStretch(11, 1);
+    layout->setRowMinimumHeight(11, 12);
+    layout->setColumnStretch(0, 1);
+    layout->setColumnStretch(2, 1);
 
     m_versionCodeSpin->setCursor(Qt::PointingHandCursor);
     m_screenOrientationCombo->setCursor(Qt::PointingHandCursor);

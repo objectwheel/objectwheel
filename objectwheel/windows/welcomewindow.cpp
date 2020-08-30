@@ -40,6 +40,7 @@ WelcomeWindow::WelcomeWindow(QWidget* parent) : QWidget(parent)
     connect(m_stackedLayout, &StackedLayout::currentChanged,
             m_serverStatusWidget, &ServerStatusWidget::raise);
 
+    m_stackedLayout->setContentsMargins(0, 0, 0, 0);
     m_stackedLayout->addWidget(m_loginWidget);
     m_stackedLayout->addWidget(m_signupWidget);
     m_stackedLayout->addWidget(m_signupVerificationWidget);

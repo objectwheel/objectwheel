@@ -237,16 +237,23 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     f.setPixelSize(16);
     descriptionLabel->setFont(f);
 
-    auto layout = new QVBoxLayout(this);
+    auto layout = new QGridLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(8);
-    layout->addWidget(iconLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(titleLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(descriptionLabel, 0, Qt::AlignHCenter);
-    layout->addSpacing(8);
-    layout->addWidget(platformsLabel, 0, Qt::AlignHCenter);
-    layout->addWidget(m_platformList, 0, Qt::AlignHCenter);
-    layout->addWidget(m_buttonSlice, 0, Qt::AlignHCenter);
+    layout->setRowStretch(0, 1);
+    layout->setRowMinimumHeight(0, 12);
+    layout->addWidget(iconLabel, 1, 1, Qt::AlignHCenter);
+    layout->addWidget(titleLabel, 2, 1, Qt::AlignHCenter);
+    layout->addWidget(descriptionLabel, 3, 1, Qt::AlignHCenter);
+    layout->setRowMinimumHeight(4, 8);
+    layout->addWidget(platformsLabel, 5, 1, Qt::AlignHCenter);
+    layout->addWidget(m_platformList, 6, 1, Qt::AlignHCenter);
+    layout->addWidget(m_buttonSlice, 7, 1, Qt::AlignHCenter);
+    layout->addWidget(m_buttonSlice, 8, 1, Qt::AlignHCenter);
+    layout->setRowStretch(9, 1);
+    layout->setRowMinimumHeight(9, 12);
+    layout->setColumnStretch(0, 1);
+    layout->setColumnStretch(2, 1);
 }
 
 QListWidget* PlatformSelectionWidget::platformList() const

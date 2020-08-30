@@ -64,8 +64,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     /****/
 
-    m_updateStatusStackedLayout->setSpacing(6);
-    m_updateStatusStackedLayout->setContentsMargins(6, 6, 6, 6);
+    m_updateStatusStackedLayout->setContentsMargins(6, 2, 6, 6);
     m_updateStatusStackedLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     m_updateStatusStackedLayout->addWidget(m_upToDateWidget);
     m_updateStatusStackedLayout->addWidget(m_updatesAvailableWidget);
@@ -77,7 +76,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     auto upToDateLayout = new QGridLayout(m_upToDateWidget);
     upToDateLayout->setSpacing(6);
-    upToDateLayout->setContentsMargins(6, 6, 6, 6);
+    upToDateLayout->setContentsMargins(0, 0, 0, 0);
     upToDateLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     upToDateLayout->addWidget(m_upToDateIcon, 0, 0, 4, 1, Qt::AlignTop);
     upToDateLayout->addWidget(m_upToDateLabel, 0, 1, 1, 4);
@@ -100,10 +99,10 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     m_lastCheckedDateLabel->setToolTip(tr("Shows last successful update check date"));
 
     m_upToDateIcon->setFixedSize(QSize(80, 80));
-    UtilityFunctions::setLayoutItemMargins(m_upToDateIcon, QMargins(0, -4, 0, 0));
+    UtilityFunctions::setLayoutItemMargins(m_upToDateIcon, QMargins(0, -5, 0, 0));
 
     m_checkUpdatesButton->setCursor(Qt::PointingHandCursor);
-    UtilityFunctions::setLayoutItemMargins(m_checkUpdatesButton, QMargins(-1, 0, 0, 0));
+    UtilityFunctions::setLayoutItemMargins(m_checkUpdatesButton, QMargins(-1, 2, 0, 0));
 
     m_busyIndicator->setLineWidth(2);
     m_busyIndicator->setRoundness(50);
@@ -118,7 +117,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     auto updatesAvailableLayout = new QGridLayout(m_updatesAvailableWidget);
     updatesAvailableLayout->setSpacing(6);
-    updatesAvailableLayout->setContentsMargins(6, 6, 6, 6);
+    updatesAvailableLayout->setContentsMargins(0, 0, 0, 0);
     updatesAvailableLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     updatesAvailableLayout->addWidget(m_downloadButton, 0, 0);
     updatesAvailableLayout->addWidget(m_updatesAvailableLabel, 0, 1);
@@ -126,6 +125,8 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     updatesAvailableLayout->addWidget(m_changelogEdit, 1, 1);
 
     m_downloadButton->setText(tr("Download"));
+    UtilityFunctions::setLayoutItemMargins(m_downloadButton, QMargins(0, 4, 0, 0));
+    UtilityFunctions::setLayoutItemMargins(m_updatesAvailableLabel, QMargins(0, 2, 0, 0));
 
     m_updatesAvailableIcon->setFixedSize(QSize(80, 80));
     m_updatesAvailableIcon->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/settings/updates-available.svg"), QSize(80, 80), this));
@@ -142,7 +143,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
 
     auto downloadLayout = new QGridLayout(m_downloadWidget);
     downloadLayout->setSpacing(6);
-    downloadLayout->setContentsMargins(6, 6, 6, 6);
+    downloadLayout->setContentsMargins(0, 0, 0, 0);
     downloadLayout->setSizeConstraint(QLayout::SetMinAndMaxSize);
     downloadLayout->addWidget(m_downloadingIcon, 0, 0, 4, 1, Qt::AlignTop);
     downloadLayout->addWidget(m_downloadingLabel, 0, 1);
