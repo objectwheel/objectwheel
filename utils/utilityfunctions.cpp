@@ -672,6 +672,16 @@ QCborMap countryList()
     return countries;
 }
 
+QString countryFromCode(const QString& code)
+{
+    const QCborMap& list = countryList();
+    foreach (const QCborValue& country, list.keys()) {
+        if (list.value(country) == code)
+            return country.toString();
+    }
+    return QString();
+}
+
 void disableWheelEvent(QWidget* widget)
 {
     class WheelDisabler final : public QObject {

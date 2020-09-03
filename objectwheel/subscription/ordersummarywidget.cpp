@@ -4,12 +4,14 @@
 #include <busyindicatorwidget.h>
 #include <lineedit.h>
 #include <paintutils.h>
+#include <utilityfunctions.h>
 
 #include <QLabel>
 #include <QGroupBox>
 #include <QRadioButton>
 #include <QPushButton>
 #include <QBoxLayout>
+#include <QButtonGroup>
 
 enum Buttons { Back, Purchase};
 
@@ -91,6 +93,31 @@ OrderSummaryWidget::OrderSummaryWidget(QWidget* parent) : QWidget(parent)
 
     //
 
+    UtilityFunctions::adjustFontWeight(m_billingDetailsTitleLabel, QFont::Medium);
+    UtilityFunctions::adjustFontWeight(m_paymentDetailsTitleLabel, QFont::Medium);
+    UtilityFunctions::adjustFontWeight(m_subscriptionDetailsTitleLabel, QFont::Medium);
+    UtilityFunctions::adjustFontWeight(m_priceDetailsTitleLabel, QFont::Medium);
+
+    m_subscriptionDetailsMonthlyRadio->setFocusPolicy(Qt::NoFocus);
+    m_subscriptionDetailsAnnuallyRadio->setFocusPolicy(Qt::NoFocus);
+
+    m_billingDetailsTitleLabel->setText(tr("Billing Details"));
+    m_paymentDetailsTitleLabel->setText(tr("Payment Details"));
+    m_subscriptionDetailsTitleLabel->setText(tr("Subscription Details"));
+    m_priceDetailsTitleLabel->setText(tr("Price Details"));
+    m_subscriptionDetailsMonthlyRadio->setText(tr("Monthly"));
+    m_subscriptionDetailsAnnuallyRadio->setText(tr("Annually"));
+    m_subscriptionDetailsCouponApplyButton->setText(tr("Apply"));
+    m_subscriptionDetailsCouponEdit->setPlaceholderText(tr("Coupon Code"));
+
+    m_subscriptionDetailsCouponApplyButton->setSizePolicy(QSizePolicy::Maximum,
+                                                          m_subscriptionDetailsCouponApplyButton->sizePolicy().verticalPolicy());
+    m_orderSummaryGroup->setFixedWidth(250);
+
+    auto buttonGroup = new QButtonGroup(this);
+    buttonGroup->addButton(m_subscriptionDetailsMonthlyRadio);
+    buttonGroup->addButton(m_subscriptionDetailsAnnuallyRadio);
+
     auto priceHLine = new QFrame;
     priceHLine->resize(118, 3);
     priceHLine->setFrameShape(QFrame::HLine);
@@ -102,19 +129,20 @@ OrderSummaryWidget::OrderSummaryWidget(QWidget* parent) : QWidget(parent)
     mainVLine->setFrameShadow(QFrame::Sunken);
 
     auto paymentCycleLayout = new QHBoxLayout;
-    paymentCycleLayout->setSpacing(6);
+    paymentCycleLayout->setSpacing(2);
     paymentCycleLayout->setContentsMargins(0, 0, 0, 0);
     paymentCycleLayout->addWidget(m_subscriptionDetailsMonthlyRadio);
     paymentCycleLayout->addWidget(m_subscriptionDetailsAnnuallyRadio);
+    paymentCycleLayout->addStretch();
 
     auto couponLayout = new QHBoxLayout;
-    couponLayout->setSpacing(6);
+    couponLayout->setSpacing(2);
     couponLayout->setContentsMargins(0, 0, 0, 0);
     couponLayout->addWidget(m_subscriptionDetailsCouponEdit);
     couponLayout->addWidget(m_subscriptionDetailsCouponApplyButton);
 
     auto priceLayout = new QGridLayout;
-    priceLayout->setSpacing(6);
+    priceLayout->setSpacing(2);
     priceLayout->setContentsMargins(0, 0, 0, 0);
     priceLayout->addWidget(new QLabel(tr("Subscription:")), 0, 0);
     priceLayout->addWidget(m_priceDetailsSubscriptionLabel, 0, 1, Qt::AlignRight);
@@ -125,25 +153,32 @@ OrderSummaryWidget::OrderSummaryWidget(QWidget* parent) : QWidget(parent)
     priceLayout->addWidget(m_priceDetailsTotalLabel, 3, 1, Qt::AlignRight);
 
     auto orderSummaryLayout = new QVBoxLayout(m_orderSummaryGroup);
-    orderSummaryLayout->setSpacing(6);
+    orderSummaryLayout->setSpacing(0);
     orderSummaryLayout->setContentsMargins(6, 6, 6, 6);
-    orderSummaryLayout->addWidget(new QLabel(tr("Billing Details")));
+    orderSummaryLayout->addStretch();
+    orderSummaryLayout->addWidget(m_billingDetailsTitleLabel);
     orderSummaryLayout->addWidget(m_billingDetailsLabel);
-    orderSummaryLayout->addWidget(new QLabel(tr("Payment Details")));
+    orderSummaryLayout->addSpacing(8);
+    orderSummaryLayout->addWidget(m_paymentDetailsTitleLabel);
     orderSummaryLayout->addWidget(m_paymentDetailsLabel);
-    orderSummaryLayout->addWidget(new QLabel(tr("Subscription Details")));
+    orderSummaryLayout->addSpacing(8);
+    orderSummaryLayout->addWidget(m_subscriptionDetailsTitleLabel);
     orderSummaryLayout->addWidget(m_subscriptionDetailsPlanLabel);
     orderSummaryLayout->addLayout(paymentCycleLayout);
     orderSummaryLayout->addLayout(couponLayout);
-    orderSummaryLayout->addWidget(new QLabel(tr("Price")));
+    orderSummaryLayout->addSpacing(8);
+    orderSummaryLayout->addWidget(m_priceDetailsTitleLabel);
     orderSummaryLayout->addLayout(priceLayout);
     orderSummaryLayout->addWidget(m_priceDetailsPaymentCycleLabel);
 
     auto centralLayout = new QHBoxLayout;
     centralLayout->setSpacing(6);
     centralLayout->setContentsMargins(0, 0, 0, 0);
+    centralLayout->addStretch();
+    centralLayout->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
     centralLayout->addWidget(mainVLine);
     centralLayout->addWidget(m_orderSummaryGroup);
+    centralLayout->addStretch();
 
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(6);
@@ -194,4 +229,44 @@ void OrderSummaryWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
     m_city = city;
     m_address = address;
     m_postalCode = postalCode;
+
+    int col = planInfo.columnForIdentifier(selectedPlan);
+    qreal price = planInfo.price(col);
+    if (price == 0) {
+        m_billingDetailsLabel->hide();
+        m_billingDetailsTitleLabel->hide();
+        m_paymentDetailsLabel->hide();
+        m_paymentDetailsTitleLabel->hide();
+        m_subscriptionDetailsTitleLabel->hide();
+        m_subscriptionDetailsPlanLabel->hide();
+        m_subscriptionDetailsMonthlyRadio->hide();
+        m_subscriptionDetailsAnnuallyRadio->hide();
+        m_subscriptionDetailsCouponApplyButton->hide();
+        m_subscriptionDetailsCouponEdit->hide();
+    } else {
+        m_billingDetailsLabel->show();
+        m_billingDetailsTitleLabel->show();
+        m_paymentDetailsLabel->show();
+        m_paymentDetailsTitleLabel->show();
+        m_subscriptionDetailsTitleLabel->show();
+        m_subscriptionDetailsPlanLabel->show();
+        m_subscriptionDetailsMonthlyRadio->show();
+        m_subscriptionDetailsAnnuallyRadio->show();
+        m_subscriptionDetailsCouponApplyButton->show();
+        m_subscriptionDetailsCouponEdit->show();
+        m_billingDetailsLabel->setText(m_fullName + QLatin1Char('\n') +
+                                       m_email + QLatin1Char('\n') +
+                                       m_phone + QLatin1Char('\n') +
+                                       m_address + QLatin1Char(' ') +
+                                       m_postalCode + QLatin1Char('\n') +
+                                       m_city + QLatin1Char('/') +
+                                       m_state + QLatin1Char('/') +
+                                       UtilityFunctions::countryFromCode(m_countryCode));
+        m_paymentDetailsLabel->setText(tr("Card number: ") + m_cardNumber + QLatin1Char('\n') +
+                                       tr("Expiration date: ") + m_cardExpDate.toString("MM'/'yy") + QLatin1String(", ") +
+                                       tr("Cvv: ") + m_cardCvv);
+        m_subscriptionDetailsPlanLabel->setText(tr("%1 (%2)")
+                                                .arg(m_planInfo.at(0, col))
+                                                .arg(m_planInfo.badge(col).simplified()));
+    }
 }
