@@ -89,6 +89,20 @@ PlanInfo parse(const QByteArray& planData)
                     info.m_annualPrices.append(val);
                 else
                     info.m_annualPrices.append(-1);
+            } else if (signature == QLatin1String("#tax")) {
+                bool ok = false;
+                qreal val = row.at(j).toDouble(&ok);
+                if (ok)
+                    info.m_taxes.append(val);
+                else
+                    info.m_taxes.append(-1);
+            } else if (signature == QLatin1String("#annual-tax")) {
+                bool ok = false;
+                qreal val = row.at(j).toDouble(&ok);
+                if (ok)
+                    info.m_annualTaxes.append(val);
+                else
+                    info.m_annualTaxes.append(-1);
             }
         }
         info.m_rows.remove(i);
@@ -114,6 +128,10 @@ PlanInfo parse(const QByteArray& planData)
         info.m_prices.append(QVector<qreal>(info.m_columnCount - info.m_prices.size(), -1));
     if (info.m_columnCount > info.m_annualPrices.size())
         info.m_annualPrices.append(QVector<qreal>(info.m_columnCount - info.m_annualPrices.size(), -1));
+    if (info.m_columnCount > info.m_taxes.size())
+        info.m_taxes.append(QVector<qreal>(info.m_columnCount - info.m_taxes.size(), -1));
+    if (info.m_columnCount > info.m_annualTaxes.size())
+        info.m_annualTaxes.append(QVector<qreal>(info.m_columnCount - info.m_annualTaxes.size(), -1));
     if (info.m_columnCount > info.m_badgeColors.size())
         info.m_badgeColors.append(QVector<QColor>(info.m_columnCount - info.m_badgeColors.size()));
     if (info.m_columnCount > info.m_headerColors.size())
@@ -178,6 +196,16 @@ qreal PlanInfo::price(int column) const
 qreal PlanInfo::annualPrice(int column) const
 {
     return m_annualPrices.at(column);
+}
+
+qreal PlanInfo::tax(int column) const
+{
+    return m_taxes.at(column);
+}
+
+qreal PlanInfo::annualTax(int column) const
+{
+    return m_annualTaxes.at(column);
 }
 
 QColor PlanInfo::badgeColor(int column, bool enabled) const

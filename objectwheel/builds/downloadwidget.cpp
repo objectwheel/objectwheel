@@ -106,7 +106,7 @@ DownloadWidget::DownloadWidget(QWidget* parent) : QWidget(parent)
                     tr("%1 does not collect, store or share any of your "
                        "data regarding to your cloud builds. We only store your "
                        "projects, within a temporary location under the build system, "
-                       "for the time that the project is being built. They are "
+                       "for the time that the project is being built. Projects are "
                        "erased completely when the building is over.").arg(AppConstants::NAME),
                     QMessageBox::Information);
     });

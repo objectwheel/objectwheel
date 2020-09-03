@@ -27,6 +27,8 @@ public:
     qint64 identifier(int column) const;
     qreal price(int column) const;
     qreal annualPrice(int column) const;
+    qreal tax(int column) const;
+    qreal annualTax(int column) const;
     QColor badgeColor(int column, bool enabled = true) const;
     QColor headerColor(int column, bool enabled = true) const;
     QColor columnColor(int column, bool enabled = true) const;
@@ -40,6 +42,8 @@ private:
     QVector<qint64> m_identifiers;
     QVector<qreal> m_prices;
     QVector<qreal> m_annualPrices;
+    QVector<qreal> m_taxes;
+    QVector<qreal> m_annualTaxes;
     QVector<QColor> m_badgeColors;
     QVector<QColor> m_headerColors;
     QVector<QColor> m_columnColors;
