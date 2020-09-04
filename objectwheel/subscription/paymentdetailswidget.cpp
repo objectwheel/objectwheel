@@ -36,7 +36,7 @@ PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
     descriptionLabel->setStyleSheet(QStringLiteral("color: #77000000"));
     descriptionLabel->setText(tr("Please enter your payment details below to continue"));
 
-    m_bulkEdit->setFixedWidth(300);
+    m_bulkEdit->setFixedWidth(366);
     m_bulkEdit->add(CardNumber, tr("Card Number *"));
     m_bulkEdit->add(CardExpDate, tr("Card Expiration Date *"));
     m_bulkEdit->add(CardCvv, tr("Card Security Code *"));
@@ -96,7 +96,7 @@ PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
     buttons->get(Next)->setIcon(QIcon(QStringLiteral(":/images/welcome/load.png")));
     buttons->get(Back)->setCursor(Qt::PointingHandCursor);
     buttons->get(Next)->setCursor(Qt::PointingHandCursor);
-    buttons->settings().cellWidth = m_bulkEdit->sizeHint().width() / 2.0;
+    buttons->settings().cellWidth = m_bulkEdit->width() / 2.0;
     buttons->triggerSettings();
 
     auto layout = new QVBoxLayout(this);
@@ -130,13 +130,7 @@ void PaymentDetailsWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan
     m_selectedPlan = selectedPlan;
     int col = planInfo.columnForIdentifier(selectedPlan);
     qreal price = planInfo.price(col);
-    if (price == 0) {
-        QMetaObject::invokeMethod(this, [=] {
-            emit next(m_planInfo, m_selectedPlan, QString(), QDate(),
-                      QString(), QString(), QString(), QString(),
-                      QString(), QString(), QString(), QString(), QString());
-        }, Qt::QueuedConnection);
-    } else {
+    if (price > 0) {
         m_bulkEdit->get<QLineEdit*>(CardNumber)->clear();
         m_bulkEdit->get<QLineEdit*>(CardExpDate)->clear();
         m_bulkEdit->get<QLineEdit*>(CardCvv)->clear();
@@ -148,6 +142,12 @@ void PaymentDetailsWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan
         m_bulkEdit->get<QLineEdit*>(City)->clear();
         m_bulkEdit->get<QLineEdit*>(Address)->clear();
         m_bulkEdit->get<QLineEdit*>(PostalCode)->clear();
+    } else {
+        QMetaObject::invokeMethod(this, [=] {
+            emit next(m_planInfo, m_selectedPlan, QString(), QDate(),
+                      QString(), QString(), QString(), QString(),
+                      QString(), QString(), QString(), QString(), QString());
+        }, Qt::QueuedConnection);
     }
 }
 
@@ -255,7 +255,7 @@ void PaymentDetailsWidget::onNextClicked()
         return;
     }
 
-    if (!UtilityFunctions::isEmailFormatCorrect(email)) {
+    if (!email.isEmpty() && !UtilityFunctions::isEmailFormatCorrect(email)) {
         UtilityFunctions::showMessage(this,
                                       tr("Corrupt email address"),
                                       tr("Your email address doesn't comply with "

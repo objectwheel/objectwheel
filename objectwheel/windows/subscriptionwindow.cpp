@@ -6,14 +6,14 @@
 #include <appconstants.h>
 #include <subscriptionwidget.h>
 #include <paymentdetailswidget.h>
-#include <ordersummarywidget.h>
+#include <checkoutwidget.h>
 #include <usermanager.h>
 
 SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
   , m_stackedLayout(new StackedLayout(this))
   , m_subscriptionWidget(new SubscriptionWidget(this))
   , m_paymentDetailsWidget(new PaymentDetailsWidget(this))
-  , m_orderSummaryWidget(new OrderSummaryWidget(this))
+  , m_checkoutWidget(new CheckoutWidget(this))
   , m_succeedWidget(new SucceedWidget(this))
   , m_serverStatusWidget(new ServerStatusWidget(this))
 {
@@ -31,7 +31,7 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     m_stackedLayout->setContentsMargins(0, 0, 0, 0);
     m_stackedLayout->addWidget(m_subscriptionWidget);
     m_stackedLayout->addWidget(m_paymentDetailsWidget);
-    m_stackedLayout->addWidget(m_orderSummaryWidget);
+    m_stackedLayout->addWidget(m_checkoutWidget);
     m_stackedLayout->addWidget(m_succeedWidget);
 
     connect(m_subscriptionWidget, &SubscriptionWidget::cancel,
@@ -43,9 +43,9 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     connect(m_paymentDetailsWidget, &PaymentDetailsWidget::back,
             this, [this] { m_stackedLayout->setCurrentWidget(m_subscriptionWidget); });
     connect(m_paymentDetailsWidget, &PaymentDetailsWidget::next,
-            m_orderSummaryWidget, &OrderSummaryWidget::refresh);
+            m_checkoutWidget, &CheckoutWidget::refresh);
     connect(m_paymentDetailsWidget, &PaymentDetailsWidget::next,
-            this, [this] { m_stackedLayout->setCurrentWidget(m_orderSummaryWidget); });
+            this, [this] { m_stackedLayout->setCurrentWidget(m_checkoutWidget); });
 //    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
 //    {
 //        UserManager::updatePlan(plan);

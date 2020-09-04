@@ -1,5 +1,5 @@
-#ifndef ORDERSUMMARYWIDGET_H
-#define ORDERSUMMARYWIDGET_H
+#ifndef CHECKOUTWIDGET_H
+#define CHECKOUTWIDGET_H
 
 #include <QWidget>
 #include <QDate>
@@ -10,17 +10,17 @@ class QGroupBox;
 class QRadioButton;
 class LineEdit;
 class QPushButton;
-class Switch;
 class ButtonSlice;
 class BusyIndicatorWidget;
+class QAbstractButton;
 
-class OrderSummaryWidget final : public QWidget
+class CheckoutWidget final : public QWidget
 {
     Q_OBJECT
-    Q_DISABLE_COPY(OrderSummaryWidget)
+    Q_DISABLE_COPY(CheckoutWidget)
 
 public:
-    explicit OrderSummaryWidget(QWidget* parent = nullptr);
+    explicit CheckoutWidget(QWidget* parent = nullptr);
 
 public slots:
     void refresh(const PlanInfo& planInfo, qint64 selectedPlan,
@@ -29,6 +29,9 @@ public slots:
                  const QString& email, const QString& phone, const QString& countryCode,
                  const QString& state, const QString& city, const QString& address,
                  const QString& postalCode);
+
+private slots:
+    void onSubscriptionTypeButtonToggled();
 
 private:
     PlanInfo m_planInfo;
@@ -45,7 +48,6 @@ private:
     QString m_address;
     QString m_postalCode;
     //
-    Switch* m_termsSwitch;
     ButtonSlice* m_buttons;
     BusyIndicatorWidget* m_busyIndicator;
     //
@@ -55,16 +57,16 @@ private:
     QLabel* m_paymentDetailsTitleLabel;
     QLabel* m_paymentDetailsLabel;
     QLabel* m_subscriptionDetailsTitleLabel;
+    QLabel* m_subscriptionDetailsTypeLabel;
     QLabel* m_subscriptionDetailsPlanLabel;
     QRadioButton* m_subscriptionDetailsMonthlyRadio;
     QRadioButton* m_subscriptionDetailsAnnuallyRadio;
     LineEdit* m_subscriptionDetailsCouponEdit;
     QPushButton* m_subscriptionDetailsCouponApplyButton;
-    QLabel* m_priceDetailsTitleLabel;
-    QLabel* m_priceDetailsSubscriptionLabel;
-    QLabel* m_priceDetailsTaxesLabel;
-    QLabel* m_priceDetailsTotalLabel;
-    QLabel* m_priceDetailsPaymentCycleLabel;
+    QLabel* m_subscriptionDetailsFeeLabel;
+    QLabel* m_subscriptionDetailsTaxesLabel;
+    QLabel* m_subscriptionDetailsTotalLabel;
+    QLabel* m_subscriptionDetailsPaymentCycleLabel;
 };
 
-#endif // ORDERSUMMARYWIDGET_H
+#endif // CHECKOUTWIDGET_H

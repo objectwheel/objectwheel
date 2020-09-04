@@ -1,9 +1,9 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += $$PWD/paymentdetailswidget.h \
-           $$PWD/ordersummarywidget.h \
+           $$PWD/checkoutwidget.h \
            $$PWD/subscriptionwidget.h
 
 SOURCES += $$PWD/paymentdetailswidget.cpp \
-           $$PWD/ordersummarywidget.cpp \
+           $$PWD/checkoutwidget.cpp \
            $$PWD/subscriptionwidget.cpp

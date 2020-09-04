@@ -6,7 +6,7 @@
 class StackedLayout;
 class SubscriptionWidget;
 class PaymentDetailsWidget;
-class OrderSummaryWidget;
+class CheckoutWidget;
 class SucceedWidget;
 class ServerStatusWidget;
 
@@ -33,7 +33,7 @@ private:
     StackedLayout* m_stackedLayout;
     SubscriptionWidget* m_subscriptionWidget;
     PaymentDetailsWidget* m_paymentDetailsWidget;
-    OrderSummaryWidget* m_orderSummaryWidget;
+    CheckoutWidget* m_checkoutWidget;
     SucceedWidget* m_succeedWidget;
     ServerStatusWidget* m_serverStatusWidget;
 };
