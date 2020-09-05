@@ -29,9 +29,14 @@ public slots:
                  const QString& email, const QString& phone, const QString& countryCode,
                  const QString& state, const QString& city, const QString& address,
                  const QString& postalCode);
+    void onPurchaseClicked();
 
 private slots:
     void onSubscriptionTypeButtonToggled();
+
+signals:
+    void done();
+    void back();
 
 private:
     PlanInfo m_planInfo;

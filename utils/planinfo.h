@@ -24,6 +24,7 @@ public:
     qint64 defaultPlan() const;
     QString at(int row, int column) const;
     QString badge(int column) const;
+    qint64 trialPeriod(int column) const;
     qint64 identifier(int column) const;
     qreal price(int column) const;
     qreal annualPrice(int column) const;
@@ -39,6 +40,7 @@ private:
     qint64 m_defaultPlan;
     QVector<QVector<QString>> m_rows;
     QVector<QString> m_badges;
+    QVector<qint64> m_trialPeriods;
     QVector<qint64> m_identifiers;
     QVector<qreal> m_prices;
     QVector<qreal> m_annualPrices;

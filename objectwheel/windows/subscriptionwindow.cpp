@@ -46,6 +46,8 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
             m_checkoutWidget, &CheckoutWidget::refresh);
     connect(m_paymentDetailsWidget, &PaymentDetailsWidget::next,
             this, [this] { m_stackedLayout->setCurrentWidget(m_checkoutWidget); });
+    connect(m_checkoutWidget, &CheckoutWidget::back,
+            this, [this] { m_stackedLayout->setCurrentWidget(m_paymentDetailsWidget); });
 //    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
 //    {
 //        UserManager::updatePlan(plan);

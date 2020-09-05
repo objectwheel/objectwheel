@@ -66,7 +66,7 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     m_busyIndicator->setInnerRadius(4);
     m_busyIndicator->setLineWidth(2);
 
-    //
+    ////////
 
     UtilityFunctions::adjustFontPixelSize(m_orderSummaryGroup, -1);
     UtilityFunctions::adjustFontWeight(m_billingDetailsTitleLabel, QFont::Medium);
@@ -103,7 +103,7 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
                                                                          "  padding-right: 4px;"
                                                                          "}"));
 
-    auto totalPriceLabel = new QLabel(tr("Total:"));
+    auto totalPriceLabel = new QLabel(tr("Total:"), this);
     UtilityFunctions::adjustFontWeight(totalPriceLabel, QFont::Medium);
     UtilityFunctions::adjustFontWeight(m_subscriptionDetailsTotalLabel, QFont::Medium);
 
@@ -118,12 +118,12 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     buttonGroup->addButton(m_subscriptionDetailsMonthlyRadio);
     buttonGroup->addButton(m_subscriptionDetailsAnnuallyRadio);
 
-    auto priceHLine = new QFrame;
+    auto priceHLine = new QFrame(this);
     priceHLine->resize(118, 3);
     priceHLine->setFrameShape(QFrame::HLine);
     priceHLine->setFrameShadow(QFrame::Sunken);
 
-    auto mainVLine = new QFrame;
+    auto mainVLine = new QFrame(this);
     mainVLine->resize(118, 3);
     mainVLine->setFrameShape(QFrame::VLine);
     mainVLine->setFrameShadow(QFrame::Sunken);
@@ -163,7 +163,6 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     orderSummaryLayout->addSpacing(8);
     orderSummaryLayout->addWidget(m_subscriptionDetailsTitleLabel);
     orderSummaryLayout->addLayout(priceLayout);
-    orderSummaryLayout->addSpacing(3);
     orderSummaryLayout->addLayout(couponLayout);
     orderSummaryLayout->addSpacing(3);
     orderSummaryLayout->addWidget(m_subscriptionDetailsPaymentCycleLabel);
@@ -190,8 +189,7 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_busyIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
 
-    connect(buttonGroup, qOverload<int, bool>(&QButtonGroup::buttonToggled),
-            this, &CheckoutWidget::onSubscriptionTypeButtonToggled);
+
 
     //    connect(ServerManager::instance(), &ServerManager::disconnected,
     //            this, &SignupWidget::onServerDisconnected);
@@ -199,14 +197,14 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     //            this, &SignupWidget::onSignupSuccessful);
     //    connect(ApiManager::instance(), &ApiManager::signupFailure,
     //            this, &SignupWidget::onSignupFailure);
-    //    connect(m_buttons->get(Next), &QPushButton::clicked,
-    //            this, &SignupWidget::onNextClicked);
-    //    connect(m_bulkEdit, &BulkEdit::returnPressed,
-    //            this, &SignupWidget::onNextClicked);
-    //    connect(m_buttons->get(Back), &QPushButton::clicked,
-    //            this, &SignupWidget::back);
+    connect(buttonGroup, qOverload<int, bool>(&QButtonGroup::buttonToggled),
+            this, &CheckoutWidget::onSubscriptionTypeButtonToggled);
+    connect(m_buttons->get(Purchase), &QPushButton::clicked,
+            this, &CheckoutWidget::onPurchaseClicked);
+    connect(m_buttons->get(Back), &QPushButton::clicked,
+            this, &CheckoutWidget::back);
 }
-#include <QDebug>
+
 void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
                              const QString& cardNumber, const QDate& cardExpDate,
                              const QString& cardCvv, const QString& fullName,
@@ -229,9 +227,16 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
     m_address = address;
     m_postalCode = postalCode;
 
+    bool isAnnual = m_subscriptionDetailsAnnuallyRadio->isChecked();
     int col = m_planInfo.columnForIdentifier(selectedPlan);
+    qint64 trialPeriod = m_planInfo.trialPeriod(col);
     qreal price = m_planInfo.price(col);
+    qreal finalPrice = isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col);
+    qreal finalTax = isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col);
     const QString& country = UtilityFunctions::countryFromCode(m_countryCode);
+
+    if (trialPeriod < 0)
+        trialPeriod = 0;
 
     if (price > 0) {
         m_subscriptionDetailsTypeLabel->show();
@@ -244,6 +249,7 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
         m_subscriptionDetailsCouponApplyButton->show();
         m_subscriptionDetailsCouponEdit->show();
         m_subscriptionDetailsPaymentCycleLabel->show();
+
         m_billingDetailsLabel->setText(
                     QString(QString(m_fullName + QLatin1Char('\n') +
                                     m_email + QLatin1Char('\n') + m_phone)
@@ -257,6 +263,19 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
         m_paymentDetailsLabel->setText(tr("Card number: ") + m_cardNumber + QLatin1Char('\n') +
                                        tr("Expiration date: ") + m_cardExpDate.toString("MM'/'yy") + QLatin1String(", ") +
                                        tr("Cvv: ") + m_cardCvv);
+        if (isAnnual) {
+            m_subscriptionDetailsPaymentCycleLabel->setText(
+                        tr("Your card will be charged on the <b>%1</b> "
+                           "of each <b>year</b> starting from <b>%2</b>")
+                        .arg(QDate::currentDate().addDays(trialPeriod).toString("d MMM"))
+                        .arg(QDate::currentDate().addDays(trialPeriod).toString("d MMM yyyy")));
+        } else {
+            m_subscriptionDetailsPaymentCycleLabel->setText(
+                        tr("Your card will be charged on the <b>%1th</b> "
+                           "of each <b>month</b> starting from <b>%2</b>")
+                        .arg(QDate::currentDate().addDays(trialPeriod).day())
+                        .arg(QDate::currentDate().addDays(trialPeriod).toString("d MMM yyyy")));
+        }
         if (m_billingDetailsLabel->text().isEmpty()) {
             m_billingDetailsTitleLabel->hide();
             m_billingDetailsLabel->hide();
@@ -274,31 +293,22 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
         m_subscriptionDetailsPaymentCycleLabel->hide();
     }
 
-    bool isAnnual = m_subscriptionDetailsAnnuallyRadio->isChecked();
-    qreal finalPrice = isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col);
-    qreal finalTax = isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col);
     m_subscriptionDetailsPlanLabel->setText(m_planInfo.at(0, col));
     m_subscriptionDetailsFeeLabel->setText(QLatin1Char('$') + QString::number(finalPrice, 'f', 2));
     m_subscriptionDetailsTaxesLabel->setText(QLatin1Char('$') + QString::number(finalTax, 'f', 2));
     m_subscriptionDetailsTotalLabel->setText(QLatin1Char('$') + QString::number(finalPrice + finalTax, 'f', 2));
+}
 
-    if (price > 0) {
-        if (isAnnual) {
-            m_subscriptionDetailsPaymentCycleLabel->setText("Your card will be charged on the 25th "
-                                                            "of each month starting from 25.09.2020");
-        } else {
-            m_subscriptionDetailsPaymentCycleLabel->setText(tr("Your card will be charged on the %1th "
-                                                               "of each month starting from 25.09.2020"));
-        }
-    } else {
+void CheckoutWidget::onPurchaseClicked()
+{
 
-    }
 }
 
 void CheckoutWidget::onSubscriptionTypeButtonToggled()
 {
     bool isAnnual = m_subscriptionDetailsAnnuallyRadio->isChecked();
     int col = m_planInfo.columnForIdentifier(m_selectedPlan);
+    qint64 trialPeriod = m_planInfo.trialPeriod(col);
     qreal price = m_planInfo.price(col);
     qreal finalPrice = isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col);
     qreal finalTax = isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col);
@@ -307,21 +317,22 @@ void CheckoutWidget::onSubscriptionTypeButtonToggled()
     m_subscriptionDetailsTaxesLabel->setText(QLatin1Char('$') + QString::number(finalTax, 'f', 2));
     m_subscriptionDetailsTotalLabel->setText(QLatin1Char('$') + QString::number(finalPrice + finalTax, 'f', 2));
 
+    if (trialPeriod < 0)
+        trialPeriod = 0;
+
     if (price > 0) {
         if (isAnnual) {
             m_subscriptionDetailsPaymentCycleLabel->setText(
                         tr("Your card will be charged on the <b>%1</b> "
                            "of each <b>year</b> starting from <b>%2</b>")
-                        .arg(QDate::currentDate().addMonths(1).toString("d MMM"))
-                        .arg(QDate::currentDate().addMonths(1).toString("d MMM yyyy")));
+                        .arg(QDate::currentDate().addDays(trialPeriod).toString("d MMM"))
+                        .arg(QDate::currentDate().addDays(trialPeriod).toString("d MMM yyyy")));
         } else {
             m_subscriptionDetailsPaymentCycleLabel->setText(
                         tr("Your card will be charged on the <b>%1th</b> "
                            "of each <b>month</b> starting from <b>%2</b>")
-                        .arg(QDate::currentDate().addMonths(1).day())
-                        .arg(QDate::currentDate().addMonths(1).toString("d MMM yyyy")));
+                        .arg(QDate::currentDate().addDays(trialPeriod).day())
+                        .arg(QDate::currentDate().addDays(trialPeriod).toString("d MMM yyyy")));
         }
-    } else {
-
     }
 }

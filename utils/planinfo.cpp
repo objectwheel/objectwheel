@@ -68,6 +68,13 @@ PlanInfo parse(const QByteArray& planData)
                 info.m_badgeColors.append(QColor(row.at(j)));
             } else if (signature == QLatin1String("#badge")) {
                 info.m_badges.append(row.at(j));
+            } else if (signature == QLatin1String("#trial-period")) {
+                bool ok = false;
+                qint64 val = row.at(j).toLongLong(&ok);
+                if (ok)
+                    info.m_trialPeriods.append(val);
+                else
+                    info.m_trialPeriods.append(-1);
             } else if (signature == QLatin1String("#identifier")) {
                 bool ok = false;
                 qint64 val = row.at(j).toLongLong(&ok);
@@ -122,6 +129,8 @@ PlanInfo parse(const QByteArray& planData)
     }
     if (info.m_columnCount > info.m_badges.size())
         info.m_badges.append(QVector<QString>(info.m_columnCount - info.m_badges.size()));
+    if (info.m_columnCount > info.m_trialPeriods.size())
+        info.m_trialPeriods.append(QVector<qint64>(info.m_columnCount - info.m_trialPeriods.size(), -1));
     if (info.m_columnCount > info.m_identifiers.size())
         info.m_identifiers.append(QVector<qint64>(info.m_columnCount - info.m_identifiers.size(), -1));
     if (info.m_columnCount > info.m_prices.size())
@@ -181,6 +190,11 @@ QString PlanInfo::at(int row, int column) const
 QString PlanInfo::badge(int column) const
 {
     return m_badges.at(column);
+}
+
+qint64 PlanInfo::trialPeriod(int column) const
+{
+    return m_trialPeriods.at(column);
 }
 
 qint64 PlanInfo::identifier(int column) const
