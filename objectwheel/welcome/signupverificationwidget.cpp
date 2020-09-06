@@ -137,16 +137,14 @@ void SignupVerificationWidget::onCompleteSignupClicked()
     if (m_countdown->hasExpired()) {
         UtilityFunctions::showMessage(this,
                                       tr("Verification code expired"),
-                                      tr("Please sign up again later."),
-                                      QMessageBox::Information);
+                                      tr("Please sign up again later."));
         return;
     }
 
     if (code.isEmpty() || code.size() != 6) {
         UtilityFunctions::showMessage(this,
                                       tr("Invalid information entered"),
-                                      tr("Verification code is not appropriate."),
-                                      QMessageBox::Information);
+                                      tr("Verification code is not appropriate."));
         return;
     }
 
@@ -156,8 +154,7 @@ void SignupVerificationWidget::onCompleteSignupClicked()
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
-                                      tr("Please make sure you are connected to the internet."),
-                                      QMessageBox::Information);
+                                      tr("Please make sure you are connected to the internet."));
     }
 }
 
@@ -169,8 +166,7 @@ void SignupVerificationWidget::onResendSignupCodeClicked()
     if (m_countdown->hasExpired()) {
         UtilityFunctions::showMessage(this,
                                       tr("Verification code expired"),
-                                      tr("Please sign up again later."),
-                                      QMessageBox::Information);
+                                      tr("Please sign up again later."));
         return;
     }
 
@@ -181,8 +177,7 @@ void SignupVerificationWidget::onResendSignupCodeClicked()
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
-                                      tr("Please make sure you are connected to the internet."),
-                                      QMessageBox::Information);
+                                      tr("Please make sure you are connected to the internet."));
     }
 }
 
@@ -225,8 +220,7 @@ void SignupVerificationWidget::onCountdownFinished()
 {
     UtilityFunctions::showMessage(this,
                                   tr("Verification code expired"),
-                                  tr("Please sign up again later."),
-                                  QMessageBox::Information);
+                                  tr("Please sign up again later."));
 }
 
 void SignupVerificationWidget::onServerDisconnected()

@@ -29,6 +29,8 @@ public:
     int currentIndex() const;
     int count() const override;
 
+    bool moveFocus() const;
+    void setMoveFocus(bool moveFocus);
     bool animationEnabled() const;
     void setAnimationEnabled(bool animationEnabled);
     int animationDuration() const;
@@ -59,6 +61,7 @@ signals:
 
 private:
     int m_index;
+    bool m_moveFocus;
     bool m_animationEnabled;
     QList<QLayoutItem*> m_list;
     QVariantAnimation* m_animation;

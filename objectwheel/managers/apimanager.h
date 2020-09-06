@@ -39,6 +39,8 @@ public:
         RequestCloudBuild,
         ResponseCloudBuild,
         AbortCloudBuild,
+        RequestCouponTest,
+        ResponseCouponTest,
         RequestSubscriptionPlans,
         ResponseSubscriptionPlans,
         Subscribe,
@@ -63,6 +65,7 @@ public:
     static void requestCloudBuild(const QString& email, const QString& password,
                                   const QString& payloadUid);
     static void abortCloudBuild(const QString& buildUid);
+    static void requestCouponTest(const QString& email, const QString& password, const QString& code);
     static void requestSubscriptionPlans(const QString& email, const QString& password);
     static void subscribe(const QString& email, const QString& password, qint64 plan,
                           const QString& cardNumber = QString(),
@@ -87,6 +90,7 @@ signals:
     void resendPasswordResetCodeFailure();
     void completePasswordResetSuccessful();
     void completePasswordResetFailure();
+    void responseCouponTest(int discountPercentage);
     void responseSubscriptionPlans(const QByteArray& planData);
     void subscriptionSuccessful();
     void subscriptionFailure();

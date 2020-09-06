@@ -101,8 +101,7 @@ void ResetPasswordWidget::onNextClicked()
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
-                                      tr("Please make sure you are connected to the internet."),
-                                      QMessageBox::Information);
+                                      tr("Please make sure you are connected to the internet."));
     }
 }
 

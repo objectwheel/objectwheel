@@ -174,8 +174,7 @@ void SignupWidget::onNextClicked()
             || cpassword.isEmpty()) {
         UtilityFunctions::showMessage(this,
                                       tr("Required fields must be filled"),
-                                      tr("Please fill in all the required fields."),
-                                      QMessageBox::Information);
+                                      tr("Please fill in all the required fields."));
         return;
     }
 
@@ -191,24 +190,21 @@ void SignupWidget::onNextClicked()
             || phone.size() > 255) {
         UtilityFunctions::showMessage(this,
                                       tr("Entry too long"),
-                                      tr("No field can be larger than 255 characters."),
-                                      QMessageBox::Information);
+                                      tr("No field can be larger than 255 characters."));
         return;
     }
 
     if (email != cemail) {
         UtilityFunctions::showMessage(this,
                                       tr("Incorrect email addresses"),
-                                      tr("Email addresses you entered do not match."),
-                                      QMessageBox::Information);
+                                      tr("Email addresses you entered do not match."));
         return;
     }
 
     if (password != cpassword) {
         UtilityFunctions::showMessage(this,
                                       tr("Incorrect passwords"),
-                                      tr("Passwords you entered do not match."),
-                                      QMessageBox::Information);
+                                      tr("Passwords you entered do not match."));
         return;
     }
 
@@ -216,8 +212,7 @@ void SignupWidget::onNextClicked()
         UtilityFunctions::showMessage(this,
                                       tr("Corrupt email address"),
                                       tr("Your email address doesn't comply with "
-                                         "the standard email address format."),
-                                      QMessageBox::Information);
+                                         "the standard email address format."));
         return;
     }
 
@@ -230,8 +225,7 @@ void SignupWidget::onNextClicked()
                                          "•  Whitespace characters are not allowed\n"
                                          "•  It can contain a-z, A-Z, 0-9\n"
                                          "•  It can also contain following special characters:\n"
-                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"),
-                                      QMessageBox::Information);
+                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"));
         return;
     }
 
@@ -241,8 +235,7 @@ void SignupWidget::onNextClicked()
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
-                                      tr("Please make sure you are connected to the internet."),
-                                      QMessageBox::Information);
+                                      tr("Please make sure you are connected to the internet."));
     }
 }
 

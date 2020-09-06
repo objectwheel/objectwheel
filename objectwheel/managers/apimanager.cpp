@@ -75,6 +75,11 @@ void ApiManager::abortCloudBuild(const QString& buildUid)
     ServerManager::send(AbortCloudBuild, buildUid);
 }
 
+void ApiManager::requestCouponTest(const QString& email, const QString& password, const QString& code)
+{
+    ServerManager::send(RequestCouponTest, email, password, code);
+}
+
 void ApiManager::requestSubscriptionPlans(const QString& email, const QString& password)
 {
     ServerManager::send(RequestSubscriptionPlans, email, password);
@@ -147,6 +152,12 @@ void ApiManager::onServerResponse(const QByteArray& data)
     case ResponseCloudBuild:
         emit responseCloudBuild(data);
         break;
+
+    case ResponseCouponTest: {
+        int discountPercentage;
+        UtilityFunctions::pullCbor(data, command, discountPercentage);
+        emit responseCouponTest(discountPercentage);
+    } break;
 
     case ResponseSubscriptionPlans: {
         QByteArray plans;

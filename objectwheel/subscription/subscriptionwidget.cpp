@@ -162,8 +162,7 @@ void SubscriptionWidget::refresh()
                     tr("Unable to connect to the server"),
                     tr("<p>We are unable to connect to the server in order to fetch the subscription "
                        "details. Please checkout your internet connection and try again later. "
-                       "You can still use the app as a free user in the offline mode.</p>"),
-                    QMessageBox::Information);
+                       "You can still use the app as a free user in the offline mode.</p>"));
         emit cancel();
     }
 }

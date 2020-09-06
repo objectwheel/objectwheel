@@ -29,16 +29,20 @@ public slots:
                  const QString& email, const QString& phone, const QString& countryCode,
                  const QString& state, const QString& city, const QString& address,
                  const QString& postalCode);
-    void onPurchaseClicked();
 
 private slots:
     void onSubscriptionTypeButtonToggled();
+    void onApplyCouponClearButtonClicked();
+    void onResponseCouponTest(int discountPercentage);
+    void onPurchaseClicked();
+    void onServerDisconnected();
 
 signals:
     void done();
     void back();
 
 private:
+    qreal m_discountPercentage;
     PlanInfo m_planInfo;
     qint64 m_selectedPlan;
     QString m_cardNumber;

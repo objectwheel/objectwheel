@@ -223,8 +223,7 @@ void PaymentDetailsWidget::onNextClicked()
     if (cardNumber.isEmpty() || cardExpDate.isEmpty() || cardCvv.isEmpty()) {
         UtilityFunctions::showMessage(this,
                                       tr("Required fields must be filled"),
-                                      tr("Please fill in all the required fields."),
-                                      QMessageBox::Information);
+                                      tr("Please fill in all the required fields."));
         return;
     }
 
@@ -232,8 +231,7 @@ void PaymentDetailsWidget::onNextClicked()
     if (!cardExpirationDate.isValid() || cardExpirationDate < QDate::currentDate().addMonths(-1)) {
         UtilityFunctions::showMessage(this,
                                       tr("Card expiration date is invalid"),
-                                      tr("Please enter a valid card expiration date."),
-                                      QMessageBox::Information);
+                                      tr("Please enter a valid card expiration date."));
         return;
     }
 
@@ -250,8 +248,7 @@ void PaymentDetailsWidget::onNextClicked()
             || postalCode.size() > 255) {
         UtilityFunctions::showMessage(this,
                                       tr("Entry too long"),
-                                      tr("No field can be larger than 255 characters."),
-                                      QMessageBox::Information);
+                                      tr("No field can be larger than 255 characters."));
         return;
     }
 
@@ -259,8 +256,7 @@ void PaymentDetailsWidget::onNextClicked()
         UtilityFunctions::showMessage(this,
                                       tr("Corrupt email address"),
                                       tr("Your email address doesn't comply with "
-                                         "the standard email address format."),
-                                      QMessageBox::Information);
+                                         "the standard email address format."));
         return;
     }
 

@@ -149,40 +149,35 @@ void ResetVerificationWidget::onCompletePasswordResetClicked()
     if (m_countdown->hasExpired()) {
         UtilityFunctions::showMessage(this,
                                       tr("Verification code expired"),
-                                      tr("Please try again later."),
-                                      QMessageBox::Information);
+                                      tr("Please try again later."));
         return;
     }
 
     if (code.isEmpty() || code.size() != 6) {
         UtilityFunctions::showMessage(this,
                                       tr("Invalid information entered"),
-                                      tr("Verification code is not appropriate."),
-                                      QMessageBox::Information);
+                                      tr("Verification code is not appropriate."));
         return;
     }
 
     if (password.isEmpty() || cpassword.isEmpty()) {
         UtilityFunctions::showMessage(this,
                                       tr("Required fields must be filled"),
-                                      tr("Please fill in all the required fields."),
-                                      QMessageBox::Information);
+                                      tr("Please fill in all the required fields."));
         return;
     }
 
     if (password.size() > 255 || cpassword.size() > 255) {
         UtilityFunctions::showMessage(this,
                                       tr("Password too long"),
-                                      tr("No passwords can be larger than 255 characters."),
-                                      QMessageBox::Information);
+                                      tr("No passwords can be larger than 255 characters."));
         return;
     }
 
     if (password != cpassword) {
         UtilityFunctions::showMessage(this,
                                       tr("Incorrect passwords"),
-                                      tr("Passwords you entered do not match."),
-                                      QMessageBox::Information);
+                                      tr("Passwords you entered do not match."));
         return;
     }
 
@@ -195,8 +190,7 @@ void ResetVerificationWidget::onCompletePasswordResetClicked()
                                          "•  Whitespace characters are not allowed\n"
                                          "•  It can contain a-z, A-Z, 0-9\n"
                                          "•  It can also contain following special characters:\n"
-                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"),
-                                      QMessageBox::Information);
+                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"));
         return;
     }
 
@@ -206,8 +200,7 @@ void ResetVerificationWidget::onCompletePasswordResetClicked()
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
-                                      tr("Please make sure you are connected to the internet."),
-                                      QMessageBox::Information);
+                                      tr("Please make sure you are connected to the internet."));
     }
 }
 
@@ -219,8 +212,7 @@ void ResetVerificationWidget::onResendPasswordResetCodeClicked()
     if (m_countdown->hasExpired()) {
         UtilityFunctions::showMessage(this,
                                       tr("Verification code expired"),
-                                      tr("Please try again later."),
-                                      QMessageBox::Information);
+                                      tr("Please try again later."));
         return;
     }
 
@@ -231,8 +223,7 @@ void ResetVerificationWidget::onResendPasswordResetCodeClicked()
     } else {
         UtilityFunctions::showMessage(this,
                                       tr("Unable to connect to the server"),
-                                      tr("Please make sure you are connected to the internet."),
-                                      QMessageBox::Information);
+                                      tr("Please make sure you are connected to the internet."));
     }
 }
 
@@ -275,8 +266,7 @@ void ResetVerificationWidget::onCountdownFinished()
 {
     UtilityFunctions::showMessage(this,
                                   tr("Verification code expired"),
-                                  tr("Please try again later."),
-                                  QMessageBox::Information);
+                                  tr("Please try again later."));
 }
 
 void ResetVerificationWidget::onServerDisconnected()

@@ -145,16 +145,14 @@ void LoginWidget::onLoginButtonClicked()
     if (email.isEmpty() || password.isEmpty()) {
         UtilityFunctions::showMessage(this,
                                       tr("Required fields must be filled"),
-                                      tr("Please fill in all the required fields."),
-                                      QMessageBox::Information);
+                                      tr("Please fill in all the required fields."));
         return;
     }
 
     if (email.size() > 255 || password.size() > 255) {
         UtilityFunctions::showMessage(this,
                                       tr("Entry too long"),
-                                      tr("No field can be larger than 255 characters."),
-                                      QMessageBox::Information);
+                                      tr("No field can be larger than 255 characters."));
         return;
     }
 
@@ -162,8 +160,7 @@ void LoginWidget::onLoginButtonClicked()
         UtilityFunctions::showMessage(this,
                                       tr("Corrupt email address"),
                                       tr("Your email address doesn't comply with "
-                                         "the standard email address format."),
-                                      QMessageBox::Information);
+                                         "the standard email address format."));
         return;
     }
 
@@ -176,8 +173,7 @@ void LoginWidget::onLoginButtonClicked()
                                          "•  Whitespace characters are not allowed\n"
                                          "•  It can contain a-z, A-Z, 0-9\n"
                                          "•  It can also contain following special characters:\n"
-                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"),
-                                      QMessageBox::Information);
+                                         "   [ ] > < { } * ! @ - # $ % ^ & + = ~ . , :"));
         return;
     }
 
@@ -190,8 +186,7 @@ void LoginWidget::onLoginButtonClicked()
                                           tr("Unable to connect to the server"),
                                           tr("We could not find any local data to enable offline "
                                              "login for the issued email address, please connect "
-                                             "to the internet."),
-                                          QMessageBox::Information);
+                                             "to the internet."));
         }
     } else {
         m_busyIndicator->start();

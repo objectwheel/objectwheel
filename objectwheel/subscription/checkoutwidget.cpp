@@ -4,6 +4,9 @@
 #include <lineedit.h>
 #include <paintutils.h>
 #include <utilityfunctions.h>
+#include <servermanager.h>
+#include <apimanager.h>
+#include <usermanager.h>
 
 #include <QLabel>
 #include <QGroupBox>
@@ -15,6 +18,7 @@
 enum Buttons { Back, Purchase };
 
 CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
+  , m_discountPercentage(0)
   , m_buttons(new ButtonSlice(this))
   , m_busyIndicator(new BusyIndicatorWidget(this, false))
   , m_orderSummaryGroup(new QGroupBox(this))
@@ -36,7 +40,8 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
 {
     auto iconLabel = new QLabel(this);
     iconLabel->setFixedSize(QSize(60, 60));
-    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/subscription/checkout.svg"), QSize(60, 60), this));
+    iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/subscription/checkout.svg"),
+                                            QSize(60, 60), this));
 
     QFont f;
     f.setWeight(QFont::Light);
@@ -86,7 +91,8 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     m_subscriptionDetailsCouponEdit->setPlaceholderText(tr("Coupon Code"));
 
     m_subscriptionDetailsCouponApplyButton->setSizePolicy(
-                QSizePolicy::Maximum, m_subscriptionDetailsCouponApplyButton->sizePolicy().verticalPolicy());
+                QSizePolicy::Maximum,
+                m_subscriptionDetailsCouponApplyButton->sizePolicy().verticalPolicy());
     m_orderSummaryGroup->setFixedWidth(260);
     m_subscriptionDetailsMonthlyRadio->setChecked(true);
 
@@ -189,14 +195,16 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_busyIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
 
-
-
     //    connect(ServerManager::instance(), &ServerManager::disconnected,
     //            this, &SignupWidget::onServerDisconnected);
     //    connect(ApiManager::instance(), &ApiManager::signupSuccessful,
     //            this, &SignupWidget::onSignupSuccessful);
     //    connect(ApiManager::instance(), &ApiManager::signupFailure,
     //            this, &SignupWidget::onSignupFailure);
+    connect(m_subscriptionDetailsCouponApplyButton, &QPushButton::clicked,
+            this, &CheckoutWidget::onApplyCouponClearButtonClicked);
+    connect(ApiManager::instance(), &ApiManager::responseCouponTest,
+            this, &CheckoutWidget::onResponseCouponTest);
     connect(buttonGroup, qOverload<int, bool>(&QButtonGroup::buttonToggled),
             this, &CheckoutWidget::onSubscriptionTypeButtonToggled);
     connect(m_buttons->get(Purchase), &QPushButton::clicked,
@@ -213,6 +221,7 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
                              const QString& city, const QString& address,
                              const QString& postalCode)
 {
+    m_discountPercentage = 0;
     m_planInfo = planInfo;
     m_selectedPlan = selectedPlan;
     m_cardNumber = cardNumber;
@@ -227,13 +236,18 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
     m_address = address;
     m_postalCode = postalCode;
 
+    using namespace UtilityFunctions;
     bool isAnnual = m_subscriptionDetailsAnnuallyRadio->isChecked();
     int col = m_planInfo.columnForIdentifier(selectedPlan);
     qint64 trialPeriod = m_planInfo.trialPeriod(col);
-    qreal price = m_planInfo.price(col);
-    qreal finalPrice = isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col);
-    qreal finalTax = isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col);
+    qreal price = percentSmaller(m_planInfo.price(col), m_discountPercentage);
+    qreal finalPrice = percentSmaller(isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col), m_discountPercentage);
+    qreal finalTax = percentSmaller(isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col), m_discountPercentage);
     const QString& country = UtilityFunctions::countryFromCode(m_countryCode);
+
+    m_subscriptionDetailsCouponEdit->clear();
+    m_subscriptionDetailsCouponEdit->setEnabled(true);
+    m_subscriptionDetailsCouponApplyButton->setText(tr("Apply"));
 
     if (trialPeriod < 0)
         trialPeriod = 0;
@@ -261,8 +275,8 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
                             .split(QLatin1Char('\n'), Qt::SkipEmptyParts).join('/'))
                     .split(QString::fromUtf8("•"), Qt::SkipEmptyParts).join('\n'));
         m_paymentDetailsLabel->setText(tr("Card number: ") + m_cardNumber + QLatin1Char('\n') +
-                                       tr("Expiration date: ") + m_cardExpDate.toString("MM'/'yy") + QLatin1String(", ") +
-                                       tr("Cvv: ") + m_cardCvv);
+                                       tr("Card exp date: ") + m_cardExpDate.toString("MM'/'yy") + QLatin1String(", ") +
+                                       tr("Card cvv: ") + m_cardCvv);
         if (isAnnual) {
             m_subscriptionDetailsPaymentCycleLabel->setText(
                         tr("Your card will be charged on the <b>%1</b> "
@@ -299,23 +313,15 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
     m_subscriptionDetailsTotalLabel->setText(QLatin1Char('$') + QString::number(finalPrice + finalTax, 'f', 2));
 }
 
-void CheckoutWidget::onPurchaseClicked()
-{
-
-}
-
 void CheckoutWidget::onSubscriptionTypeButtonToggled()
 {
+    using namespace UtilityFunctions;
     bool isAnnual = m_subscriptionDetailsAnnuallyRadio->isChecked();
     int col = m_planInfo.columnForIdentifier(m_selectedPlan);
     qint64 trialPeriod = m_planInfo.trialPeriod(col);
-    qreal price = m_planInfo.price(col);
-    qreal finalPrice = isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col);
-    qreal finalTax = isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col);
-    m_subscriptionDetailsPlanLabel->setText(m_planInfo.at(0, col));
-    m_subscriptionDetailsFeeLabel->setText(QLatin1Char('$') + QString::number(finalPrice, 'f', 2));
-    m_subscriptionDetailsTaxesLabel->setText(QLatin1Char('$') + QString::number(finalTax, 'f', 2));
-    m_subscriptionDetailsTotalLabel->setText(QLatin1Char('$') + QString::number(finalPrice + finalTax, 'f', 2));
+    qreal price = percentSmaller(m_planInfo.price(col), m_discountPercentage);
+    qreal finalPrice = percentSmaller(isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col), m_discountPercentage);
+    qreal finalTax = percentSmaller(isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col), m_discountPercentage);
 
     if (trialPeriod < 0)
         trialPeriod = 0;
@@ -334,5 +340,70 @@ void CheckoutWidget::onSubscriptionTypeButtonToggled()
                         .arg(QDate::currentDate().addDays(trialPeriod).day())
                         .arg(QDate::currentDate().addDays(trialPeriod).toString("d MMM yyyy")));
         }
+    }
+
+    m_subscriptionDetailsPlanLabel->setText(m_planInfo.at(0, col));
+    m_subscriptionDetailsFeeLabel->setText(QLatin1Char('$') + QString::number(finalPrice, 'f', 2));
+    m_subscriptionDetailsTaxesLabel->setText(QLatin1Char('$') + QString::number(finalTax, 'f', 2));
+    m_subscriptionDetailsTotalLabel->setText(QLatin1Char('$') + QString::number(finalPrice + finalTax, 'f', 2));
+}
+
+void CheckoutWidget::onApplyCouponClearButtonClicked()
+{
+    if (m_subscriptionDetailsCouponApplyButton->text() == tr("Apply")) {
+        const QString& couponCode = m_subscriptionDetailsCouponEdit->text();
+        if (couponCode.isEmpty() || couponCode.size() > 255) {
+            UtilityFunctions::showMessage(
+                        this,
+                        tr("Invalid code"),
+                        tr("Your coupon code is invalid."));
+            return;
+        }
+        if (ServerManager::isConnected()) {
+            ApiManager::requestCouponTest(UserManager::email(), UserManager::password(), couponCode);
+            m_busyIndicator->start();
+        } else {
+            UtilityFunctions::showMessage(
+                        this,
+                        tr("Unable to connect to the server"),
+                        tr("We are unable to connect to the server in order to verify your coupon "
+                           "code. Please checkout your internet connection and try again later. "));
+        }
+    } else {
+        m_discountPercentage = 0;
+        m_subscriptionDetailsCouponEdit->clear();
+        m_subscriptionDetailsCouponEdit->setEnabled(true);
+        m_subscriptionDetailsCouponApplyButton->setText(tr("Apply"));
+        onSubscriptionTypeButtonToggled();
+    }
+}
+
+void CheckoutWidget::onResponseCouponTest(int discountPercentage)
+{
+    m_busyIndicator->stop();
+    m_subscriptionDetailsCouponApplyButton->setText(tr("Clear ⌫"));
+    m_subscriptionDetailsCouponEdit->setEnabled(false);
+    m_discountPercentage = discountPercentage;
+    onSubscriptionTypeButtonToggled();
+    UtilityFunctions::showMessage(
+                this,
+                tr("Coupon code has been successfully applied"),
+                tr("You have got <b>%%1</b> discount in your purchase, enjoy!").arg(m_discountPercentage),
+                QMessageBox::Information);
+}
+
+void CheckoutWidget::onPurchaseClicked()
+{
+
+}
+
+void CheckoutWidget::onServerDisconnected()
+{
+    if (m_busyIndicator->isSpinning()) {
+        m_busyIndicator->stop();
+        UtilityFunctions::showMessage(this,
+                                      tr("Connection lost"),
+                                      tr("<p>Connection lost to the server, please "
+                                         "try again later.</p>"));
     }
 }

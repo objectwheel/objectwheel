@@ -104,6 +104,9 @@ void pull(const QByteArray& data, Args&&... args)
     Internal::pullHelper(stream, std::forward<Args>(args)...);
 }
 
+template <typename T>
+constexpr inline T percentSmaller(const T& n, const T& p) { return n - n * p / 100.0; }
+
 UTILS_EXPORT void trimCommentsAndStrings(QTextDocument* document);
 UTILS_EXPORT void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent);
 UTILS_EXPORT void expandUpToRoot(QTreeView* view, const QModelIndex& index, const QModelIndex& rootIndex);
