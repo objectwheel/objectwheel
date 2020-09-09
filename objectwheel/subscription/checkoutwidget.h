@@ -12,6 +12,7 @@ class QPushButton;
 class ButtonSlice;
 class BusyIndicatorWidget;
 class QAbstractButton;
+class QSpacerItem;
 
 class CheckoutWidget final : public QWidget
 {
@@ -62,8 +63,10 @@ private:
     //
     QLabel* m_billingDetailsTitleLabel;
     QLabel* m_billingDetailsLabel;
+    QSpacerItem* m_billingDetailsSpacerItem;
     QLabel* m_paymentDetailsTitleLabel;
     QLabel* m_paymentDetailsLabel;
+    QSpacerItem* m_paymentDetailsSpacerItem;
     QLabel* m_subscriptionDetailsTitleLabel;
     QLabel* m_subscriptionDetailsTypeLabel;
     QLabel* m_subscriptionDetailsPlanLabel;

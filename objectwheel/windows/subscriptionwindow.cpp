@@ -37,28 +37,36 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
     connect(m_subscriptionWidget, &SubscriptionWidget::cancel,
             this, &SubscriptionWindow::done);
     connect(m_subscriptionWidget, &SubscriptionWidget::next,
-            m_paymentDetailsWidget, &PaymentDetailsWidget::refresh);
-    connect(m_subscriptionWidget, &SubscriptionWidget::next,
-            this, [this] { m_stackedLayout->setCurrentWidget(m_paymentDetailsWidget); });
+            this, [this] (const PlanInfo& planInfo, qint64 selectedPlan) {
+        if (planInfo.price(planInfo.columnForIdentifier(selectedPlan)) > 0) {
+            m_paymentDetailsWidget->refresh(planInfo, selectedPlan);
+            m_stackedLayout->setCurrentWidget(m_paymentDetailsWidget);
+        } else {
+            m_checkoutWidget->refresh(planInfo, selectedPlan, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {});
+            m_stackedLayout->setCurrentWidget(m_checkoutWidget);
+        }
+    });
     connect(m_paymentDetailsWidget, &PaymentDetailsWidget::back,
             this, [this] { m_stackedLayout->setCurrentWidget(m_subscriptionWidget); });
     connect(m_paymentDetailsWidget, &PaymentDetailsWidget::next,
             m_checkoutWidget, &CheckoutWidget::refresh);
     connect(m_paymentDetailsWidget, &PaymentDetailsWidget::next,
             this, [this] { m_stackedLayout->setCurrentWidget(m_checkoutWidget); });
-    connect(m_checkoutWidget, &CheckoutWidget::back,
-            this, [this] { m_stackedLayout->setCurrentWidget(m_paymentDetailsWidget); });
-//    connect(m_subscriptionWidget, &SubscriptionWidget::done, this, [=] (PlanManager::Plans plan)
-//    {
-//        UserManager::updatePlan(plan);
-//        m_stackedLayout->setCurrentWidget(m_paymentDetailsWidget);
-//        m_succeedWidget->play(tr("Thank you for purchasing"),
-//                              tr("Your purchase is completed. Thank you for choosing us.\n"
-//                                 "You can cancel your subscription anytime from the application preferences section."));
-//    });
-    /**** SucceedWidget settings ****/
-    connect(m_succeedWidget, &SucceedWidget::done, this, [=]
-    {
+    connect(m_checkoutWidget, &CheckoutWidget::back, this, [this] (qreal price) {
+        m_stackedLayout->setCurrentWidget(price > 0 ? static_cast<QWidget*>(m_paymentDetailsWidget)
+                                                    : static_cast<QWidget*>(m_subscriptionWidget));
+    });
+    connect(m_checkoutWidget, &CheckoutWidget::done, this, [this] {
+        // UserManager::s_plan = /*plan*/0;
+        m_paymentDetailsWidget->clear();
+        m_checkoutWidget->clear();
+        m_stackedLayout->setCurrentWidget(m_succeedWidget);
+        m_succeedWidget->play(tr("Thank you for purchasing"),
+                              tr("Your purchase is completed. Thank you for choosing us.\n"
+                                 "You can cancel your subscription anytime "
+                                 "from the application preferences section."));
+    });
+    connect(m_succeedWidget, &SucceedWidget::done, this, [this] {
         m_stackedLayout->setCurrentWidget(m_subscriptionWidget);
         emit done();
     });

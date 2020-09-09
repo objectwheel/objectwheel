@@ -24,8 +24,10 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
   , m_busyIndicator(new BusyIndicatorWidget(this, false))
   , m_billingDetailsTitleLabel(new QLabel(this))
   , m_billingDetailsLabel(new QLabel(this))
+  , m_billingDetailsSpacerItem(new QSpacerItem(8, 8, QSizePolicy::Fixed, QSizePolicy::Fixed))
   , m_paymentDetailsTitleLabel(new QLabel(this))
   , m_paymentDetailsLabel(new QLabel(this))
+  , m_paymentDetailsSpacerItem(new QSpacerItem(8, 8, QSizePolicy::Fixed, QSizePolicy::Fixed))
   , m_subscriptionDetailsTitleLabel(new QLabel(this))
   , m_subscriptionDetailsTypeLabel(new QLabel(this))
   , m_subscriptionDetailsPlanLabel(new QLabel(this))
@@ -149,10 +151,10 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     orderSummaryLayout->setContentsMargins(6, 6, 6, 6);
     orderSummaryLayout->addWidget(m_billingDetailsTitleLabel);
     orderSummaryLayout->addWidget(m_billingDetailsLabel);
-    orderSummaryLayout->addSpacing(8);
+    orderSummaryLayout->addSpacerItem(m_billingDetailsSpacerItem);
     orderSummaryLayout->addWidget(m_paymentDetailsTitleLabel);
     orderSummaryLayout->addWidget(m_paymentDetailsLabel);
-    orderSummaryLayout->addSpacing(8);
+    orderSummaryLayout->addSpacerItem(m_paymentDetailsSpacerItem);
     orderSummaryLayout->addWidget(m_subscriptionDetailsTitleLabel);
     orderSummaryLayout->addLayout(priceLayout);
     orderSummaryLayout->addLayout(couponLayout);
@@ -335,6 +337,8 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
         m_subscriptionDetailsCouponApplyButton->show();
         m_subscriptionDetailsCouponEdit->show();
         m_subscriptionDetailsPaymentCycleLabel->show();
+        m_billingDetailsSpacerItem->changeSize(8, 8, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        m_paymentDetailsSpacerItem->changeSize(8, 8, QSizePolicy::Fixed, QSizePolicy::Fixed);
 
         m_billingDetailsLabel->setText(
                     QString(QString(m_fullName + QLatin1Char('\n') +
@@ -365,6 +369,7 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
         if (m_billingDetailsLabel->text().isEmpty()) {
             m_billingDetailsTitleLabel->hide();
             m_billingDetailsLabel->hide();
+            m_billingDetailsSpacerItem->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
         }
     } else {
         m_subscriptionDetailsTypeLabel->hide();
@@ -377,6 +382,8 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
         m_subscriptionDetailsCouponApplyButton->hide();
         m_subscriptionDetailsCouponEdit->hide();
         m_subscriptionDetailsPaymentCycleLabel->hide();
+        m_billingDetailsSpacerItem->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+        m_paymentDetailsSpacerItem->changeSize(0, 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
 
     m_subscriptionDetailsPlanLabel->setText(m_planInfo.at(0, col));
