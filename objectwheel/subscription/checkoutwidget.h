@@ -22,6 +22,7 @@ public:
     explicit CheckoutWidget(QWidget* parent = nullptr);
 
 public slots:
+    void clear();
     void refresh(const PlanInfo& planInfo, qint64 selectedPlan,
                  const QString& cardNumber, const QDate& cardExpDate,
                  const QString& cardCvv, const QString& fullName,
@@ -38,7 +39,7 @@ private slots:
 
 signals:
     void done();
-    void back();
+    void back(qreal price);
 
 private:
     qreal m_discountPercentage;

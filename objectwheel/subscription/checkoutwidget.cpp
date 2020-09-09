@@ -19,6 +19,7 @@ enum Buttons { Back, Purchase };
 
 CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
   , m_discountPercentage(0)
+  , m_selectedPlan(0)
   , m_buttons(new ButtonSlice(this))
   , m_busyIndicator(new BusyIndicatorWidget(this, false))
   , m_billingDetailsTitleLabel(new QLabel(this))
@@ -202,7 +203,7 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
                         "    with licenses that are compatible with these opensource"
                         "    software licenses. We recommend that applications built with"
                         "    Objectwheel also acknowledge these usages, and quote these"
-                        "    license statements in the About Section."
+                        "    license statements in the About Screen."
                         "  </li>"
                         "  <li style='margin-bottom: 8px;'>"
                         "    You can find a complete list of the libraries and their"
@@ -241,8 +242,8 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     layout->addWidget(m_busyIndicator, 0, Qt::AlignHCenter);
     layout->addStretch();
 
-    //    connect(ServerManager::instance(), &ServerManager::disconnected,
-    //            this, &SignupWidget::onServerDisconnected);
+    connect(ServerManager::instance(), &ServerManager::disconnected,
+            this, &CheckoutWidget::onServerDisconnected);
     //    connect(ApiManager::instance(), &ApiManager::signupSuccessful,
     //            this, &SignupWidget::onSignupSuccessful);
     //    connect(ApiManager::instance(), &ApiManager::signupFailure,
@@ -255,8 +256,38 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
             this, &CheckoutWidget::onSubscriptionTypeButtonToggled);
     connect(m_buttons->get(Purchase), &QPushButton::clicked,
             this, &CheckoutWidget::onPurchaseClicked);
-    connect(m_buttons->get(Back), &QPushButton::clicked,
-            this, &CheckoutWidget::back);
+    connect(m_buttons->get(Back), &QPushButton::clicked, this, [this] {
+        emit back(m_planInfo.price(m_planInfo.columnForIdentifier(m_selectedPlan)));
+    });
+}
+
+void CheckoutWidget::clear()
+{
+    m_discountPercentage = 0;
+    m_planInfo = PlanInfo();
+    m_selectedPlan = 0;
+    m_cardNumber.clear();
+    m_cardExpDate = QDate();
+    m_cardCvv.clear();
+    m_fullName.clear();
+    m_email.clear();
+    m_phone.clear();
+    m_countryCode.clear();
+    m_state.clear();
+    m_city.clear();
+    m_address.clear();
+    m_postalCode.clear();
+    m_billingDetailsLabel->clear();
+    m_paymentDetailsLabel->clear();
+    m_subscriptionDetailsPlanLabel->clear();
+    m_subscriptionDetailsFeeLabel->clear();
+    m_subscriptionDetailsTaxesLabel->clear();
+    m_subscriptionDetailsTotalLabel->clear();
+    m_subscriptionDetailsPaymentCycleLabel->clear();
+    m_subscriptionDetailsCouponEdit->clear();
+    m_subscriptionDetailsCouponEdit->setEnabled(true);
+    m_subscriptionDetailsCouponApplyButton->setText(tr("Apply"));
+    m_subscriptionDetailsMonthlyRadio->setChecked(true);
 }
 
 void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
@@ -267,7 +298,6 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
                              const QString& city, const QString& address,
                              const QString& postalCode)
 {
-    m_discountPercentage = 0;
     m_planInfo = planInfo;
     m_selectedPlan = selectedPlan;
     m_cardNumber = cardNumber;
@@ -284,16 +314,12 @@ void CheckoutWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan,
 
     using namespace UtilityFunctions;
     bool isAnnual = m_subscriptionDetailsAnnuallyRadio->isChecked();
-    int col = m_planInfo.columnForIdentifier(selectedPlan);
+    int col = m_planInfo.columnForIdentifier(m_selectedPlan);
     qint64 trialPeriod = m_planInfo.trialPeriod(col);
-    qreal price = percentSmaller(m_planInfo.price(col), m_discountPercentage);
-    qreal finalPrice = percentSmaller(isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col), m_discountPercentage);
+    qreal price = m_planInfo.price(col);
+    qreal finalPrice = percentSmaller(isAnnual ? m_planInfo.annualPrice(col) : price, m_discountPercentage);
     qreal finalTax = percentSmaller(isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col), m_discountPercentage);
     const QString& country = UtilityFunctions::countryFromCode(m_countryCode);
-
-    m_subscriptionDetailsCouponEdit->clear();
-    m_subscriptionDetailsCouponEdit->setEnabled(true);
-    m_subscriptionDetailsCouponApplyButton->setText(tr("Apply"));
 
     if (trialPeriod < 0)
         trialPeriod = 0;
@@ -365,8 +391,8 @@ void CheckoutWidget::onSubscriptionTypeButtonToggled()
     bool isAnnual = m_subscriptionDetailsAnnuallyRadio->isChecked();
     int col = m_planInfo.columnForIdentifier(m_selectedPlan);
     qint64 trialPeriod = m_planInfo.trialPeriod(col);
-    qreal price = percentSmaller(m_planInfo.price(col), m_discountPercentage);
-    qreal finalPrice = percentSmaller(isAnnual ? m_planInfo.annualPrice(col) : m_planInfo.price(col), m_discountPercentage);
+    qreal price = m_planInfo.price(col);
+    qreal finalPrice = percentSmaller(isAnnual ? m_planInfo.annualPrice(col) : price, m_discountPercentage);
     qreal finalTax = percentSmaller(isAnnual ? m_planInfo.annualTax(col) : m_planInfo.tax(col), m_discountPercentage);
 
     if (trialPeriod < 0)

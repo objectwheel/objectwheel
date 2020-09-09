@@ -14,12 +14,13 @@ public:
     explicit PaymentDetailsWidget(QWidget* parent = nullptr);
 
 public slots:
+    void clear();
     void refresh(const PlanInfo& planInfo, qint64 selectedPlan);
 
 private slots:
-    void cardNumberEditTextEditingFinished();
-    void cardNumberEditTextEdited(QString text);
-    void cardExpDateEditTextChanged(QString text);
+    void onCardNumberEditTextEditingFinished();
+    void onCardNumberEditTextEdited(QString text);
+    void onCardExpDateEditTextChanged(QString text);
     void onNextClicked();
 
 signals:

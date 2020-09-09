@@ -16,6 +16,7 @@ enum Fields { CardNumber, CardExpDate, CardCvv, FullName, Email, Phone, Country,
 enum Buttons { Next, Back };
 
 PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
+  , m_selectedPlan(0)
   , m_bulkEdit(new BulkEdit(this))
 {
     auto iconLabel = new QLabel(this);
@@ -111,11 +112,11 @@ PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
     layout->addStretch();
 
     connect(m_bulkEdit->get<QLineEdit*>(CardNumber), &QLineEdit::editingFinished,
-            this, &PaymentDetailsWidget::cardNumberEditTextEditingFinished);
+            this, &PaymentDetailsWidget::onCardNumberEditTextEditingFinished);
     connect(m_bulkEdit->get<QLineEdit*>(CardNumber), &QLineEdit::textEdited,
-            this, &PaymentDetailsWidget::cardNumberEditTextEdited);
+            this, &PaymentDetailsWidget::onCardNumberEditTextEdited);
     connect(m_bulkEdit->get<QLineEdit*>(CardExpDate), &QLineEdit::textChanged,
-            this, &PaymentDetailsWidget::cardExpDateEditTextChanged);
+            this, &PaymentDetailsWidget::onCardExpDateEditTextChanged);
     connect(buttons->get(Back), &QPushButton::clicked,
             this, &PaymentDetailsWidget::back);
     connect(buttons->get(Next), &QPushButton::clicked,
@@ -124,34 +125,32 @@ PaymentDetailsWidget::PaymentDetailsWidget(QWidget* parent) : QWidget(parent)
             this, &PaymentDetailsWidget::onNextClicked);
 }
 
+void PaymentDetailsWidget::clear()
+{
+    m_planInfo = PlanInfo();
+    m_selectedPlan = 0;
+    m_bulkEdit->get<QLineEdit*>(CardNumber)->clear();
+    m_bulkEdit->get<QLineEdit*>(CardExpDate)->clear();
+    m_bulkEdit->get<QLineEdit*>(CardCvv)->clear();
+    m_bulkEdit->get<QLineEdit*>(FullName)->clear();
+    m_bulkEdit->get<QLineEdit*>(Email)->clear();
+    m_bulkEdit->get<QLineEdit*>(Phone)->clear();
+    m_bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
+    m_bulkEdit->get<QLineEdit*>(State)->clear();
+    m_bulkEdit->get<QLineEdit*>(City)->clear();
+    m_bulkEdit->get<QLineEdit*>(Address)->clear();
+    m_bulkEdit->get<QLineEdit*>(PostalCode)->clear();
+}
+
 void PaymentDetailsWidget::refresh(const PlanInfo& planInfo, qint64 selectedPlan)
 {
     m_planInfo = planInfo;
     m_selectedPlan = selectedPlan;
-    int col = planInfo.columnForIdentifier(selectedPlan);
-    qreal price = planInfo.price(col);
-    if (price > 0) {
-        m_bulkEdit->get<QLineEdit*>(CardNumber)->clear();
-        m_bulkEdit->get<QLineEdit*>(CardExpDate)->clear();
-        m_bulkEdit->get<QLineEdit*>(CardCvv)->clear();
-        m_bulkEdit->get<QLineEdit*>(FullName)->clear();
+    if (m_bulkEdit->get<QLineEdit*>(Email)->text().isEmpty())
         m_bulkEdit->get<QLineEdit*>(Email)->setText(UserManager::email());
-        m_bulkEdit->get<QLineEdit*>(Phone)->clear();
-        m_bulkEdit->get<QComboBox*>(Country)->setCurrentIndex(0);
-        m_bulkEdit->get<QLineEdit*>(State)->clear();
-        m_bulkEdit->get<QLineEdit*>(City)->clear();
-        m_bulkEdit->get<QLineEdit*>(Address)->clear();
-        m_bulkEdit->get<QLineEdit*>(PostalCode)->clear();
-    } else {
-        QMetaObject::invokeMethod(this, [=] {
-            emit next(m_planInfo, m_selectedPlan, QString(), QDate(),
-                      QString(), QString(), QString(), QString(),
-                      QString(), QString(), QString(), QString(), QString());
-        }, Qt::QueuedConnection);
-    }
 }
 
-void PaymentDetailsWidget::cardNumberEditTextEditingFinished()
+void PaymentDetailsWidget::onCardNumberEditTextEditingFinished()
 {
     auto cardNumberEdit = m_bulkEdit->get<QLineEdit*>(CardNumber);
     QString text = cardNumberEdit->text();
@@ -168,7 +167,7 @@ void PaymentDetailsWidget::cardNumberEditTextEditingFinished()
     cardNumberEdit->setText(text);
 }
 
-void PaymentDetailsWidget::cardNumberEditTextEdited(QString text)
+void PaymentDetailsWidget::onCardNumberEditTextEdited(QString text)
 {
     auto cardNumberEdit = m_bulkEdit->get<QLineEdit*>(CardNumber);
     if (cardNumberEdit->cursorPosition() != cardNumberEdit->text().size())
@@ -186,7 +185,7 @@ void PaymentDetailsWidget::cardNumberEditTextEdited(QString text)
     cardNumberEdit->setText(text);
 }
 
-void PaymentDetailsWidget::cardExpDateEditTextChanged(QString text)
+void PaymentDetailsWidget::onCardExpDateEditTextChanged(QString text)
 {
     auto cardExpDateEdit = m_bulkEdit->get<QLineEdit*>(CardExpDate);
     text = text.simplified();
