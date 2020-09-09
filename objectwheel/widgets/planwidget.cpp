@@ -83,6 +83,7 @@ void PlanWidget::setPlanInfo(const PlanInfo& planInfo)
         for (int i = 0; i < m_planInfo.columnCount() - 1; i++) {
             qint64 planIdentifier = m_planInfo.identifier(i + 1);
             auto radio = new QRadioButton(this);
+            radio->setFocusPolicy(Qt::NoFocus);
             radio->setCursor(Qt::PointingHandCursor);
             radio->setAutoExclusive(true);
             radio->setText(planInfo.at(0, i + 1));

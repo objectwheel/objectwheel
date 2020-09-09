@@ -115,7 +115,7 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     QPalette fp(palette());
     fp.setColor(QPalette::WindowText, QColor("#c0c0c0"));
     auto priceHLine = new QFrame(this);
-    priceHLine->resize(118, 3);
+    priceHLine->resize(118, 1);
     priceHLine->setFrameShape(QFrame::HLine);
     priceHLine->setFrameShadow(QFrame::Plain);
     priceHLine->setPalette(fp);
@@ -202,12 +202,12 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
                         "    with licenses that are compatible with these opensource"
                         "    software licenses. We recommend that applications built with"
                         "    Objectwheel also acknowledge these usages, and quote these"
-                        "    license statements in the About Section of the apps."
+                        "    license statements in the About Section."
                         "  </li>"
                         "  <li style='margin-bottom: 8px;'>"
                         "    You can find a complete list of the libraries and their"
                         "    respective licenses that are used in the applications you"
-                        "    build with Objectwheel in the link here:"
+                        "    build with Objectwheel here:"
                         "    <a href='https://doc-snapshots.qt.io/qt5-5.14/licenses-used-in-qt.html'>"
                         "    Licenses Used in Qt</a>"
                         "  </li>"
