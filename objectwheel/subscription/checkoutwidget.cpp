@@ -181,32 +181,35 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     auto notesLabel = new QLabel(this);
     UtilityFunctions::adjustFontPixelSize(notesLabel, -1);
     notesLabel->setWordWrap(true);
+    notesLabel->setOpenExternalLinks(true);
     notesLabel->setAlignment(Qt::AlignJustify);
-    notesLabel->setText("<ul style=\"margin-left: 8px; -qt-list-indent: 0;\">"
-                        "  <li style=\"margin-bottom: 4px;\">"
-                        "    Applications that you build with Objectwheel make use of"
-                        "    various software libraries (most notably the Qt Toolkit)"
-                        "    distributed under open source licenses (e.g. LGPL) to work"
-                        "    properly across multiple platforms. This requires your"
-                        "    applications to comply with the terms of these open source"
-                        "    licenses (But you don't have to panic, we will help you out"
-                        "    in the process). These terms may include one or more of the"
-                        "    conditions listed below."
+    notesLabel->setText("<ul style='margin-left: 8px; -qt-list-indent: 0;'>"
+                        "  <li style='margin-bottom: 8px;'>"
+                        "    Applications that you are going to build with Objectwheel"
+                        "    will make use of the Qt Toolkit, an opensource software"
+                        "    library that is licensed under the GNU Lesser General Public"
+                        "    License (LGPL) version 3, to work properly across multiple"
+                        "    platforms."
                         "  </li>"
-                        "  <li style=\"margin-bottom: 4px;\">"
-                        "    Give prominent notice with each copy of the Combined Work"
-                        "    that the Library is used in it and that the Library and its"
-                        "    use are covered by this License."
+                        "  <li style='margin-bottom: 8px;'>"
+                        "    The Qt Toolkit also makes use of some other opensource"
+                        "    software libraries that are provided under various"
+                        "    opensource licenses from the original authors."
                         "  </li>"
-                        "  <li style=\"margin-bottom: 4px;\">"
-                        "    Accompany the Combined Work with a copy of the GNU GPL and"
-                        "    this license document."
+                        "  <li style='margin-bottom: 8px;'>"
+                        "    Objectwheel acknowledges these opensource library usages."
+                        "    You can use Objectwheel to build and distribute applications"
+                        "    with licenses that are compatible with these opensource"
+                        "    software licenses. We recommend that applications built with"
+                        "    Objectwheel also acknowledge these usages, and quote these"
+                        "    license statements in the About Section of the apps."
                         "  </li>"
-                        "  <li style=\"margin-bottom: 4px;\">"
-                        "    For a Combined Work that displays copyright notices during"
-                        "    execution, include the copyright notice for the Library"
-                        "    among these notices, as well as a reference directing the"
-                        "    user to the copies of the GNU GPL and this license document."
+                        "  <li style='margin-bottom: 8px;'>"
+                        "    You can find a complete list of the libraries and their"
+                        "    respective licenses that are used in the applications you"
+                        "    build with Objectwheel in the link here:"
+                        "    <a href='https://doc-snapshots.qt.io/qt5-5.14/licenses-used-in-qt.html'>"
+                        "    Licenses Used in Qt</a>"
                         "  </li>"
                         "</ul>");
     auto notesLayout = new QVBoxLayout(notesGroup);
@@ -221,7 +224,7 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     centralLayout->setSpacing(8);
     centralLayout->setContentsMargins(0, 0, 0, 0);
     centralLayout->addStretch(1);
-    centralLayout->addWidget(notesGroup, 4);
+    centralLayout->addWidget(notesGroup, 3);
     centralLayout->addWidget(orderSummaryGroup, 1);
     centralLayout->addStretch(1);
 

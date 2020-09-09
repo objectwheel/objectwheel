@@ -85,7 +85,6 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
     termsLabel->setFocusPolicy(Qt::NoFocus);
     termsLabel->setTextFormat(Qt::RichText);
     termsLabel->setOpenExternalLinks(true);
-    termsLabel->setTextInteractionFlags(Qt::TextBrowserInteraction);
     termsLabel->setText(tr("I accept <a href=\"%1\">the terms and conditions</a>").arg(AppConstants::TAC_URL));
 
     auto termsLayout = new QHBoxLayout(termsWidget);
