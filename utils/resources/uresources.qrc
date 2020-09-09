@@ -20,10 +20,8 @@
         <file>images/tools/Button.svg</file>
         <file>images/tools/ButtonGroup.svg</file>
         <file>images/tools/Calendar.svg</file>
-        <file>images/tools/LottieAnimation.svg</file>
         <file>images/tools/Camera.svg</file>
         <file>images/tools/Canvas.svg</file>
-        <file>images/tools/ChartView.svg</file>
         <file>images/tools/CheckBox.svg</file>
         <file>images/tools/CircularGauge.svg</file>
         <file>images/tools/ColorDialog.svg</file>
@@ -112,7 +110,6 @@
         <file>images/tools/Picture.svg</file>
         <file>images/tools/PieMenu.svg</file>
         <file>images/tools/PinchArea.svg</file>
-        <file>images/tools/PolarChartView.svg</file>
         <file>images/tools/Popup.svg</file>
         <file>images/tools/PositionSource.svg</file>
         <file>images/tools/PressureSensor.svg</file>
@@ -355,10 +352,6 @@
         <file>tools/WebSocket/t/main.qml</file>
         <file>tools/WebSocketServer/m/control.meta</file>
         <file>tools/WebSocketServer/t/main.qml</file>
-        <file>tools/ChartView/m/control.meta</file>
-        <file>tools/ChartView/t/main.qml</file>
-        <file>tools/PolarChartView/m/control.meta</file>
-        <file>tools/PolarChartView/t/main.qml</file>
         <file>tools/BluetoothDiscoveryModel/m/control.meta</file>
         <file>tools/BluetoothDiscoveryModel/t/main.qml</file>
         <file>tools/BluetoothSocket/m/control.meta</file>
@@ -527,8 +520,6 @@
         <file>tools/WeekNumberColumn/t/main.qml</file>
         <file>tools/Calendar/m/control.meta</file>
         <file>tools/Calendar/t/main.qml</file>
-        <file>tools/LottieAnimation/m/control.meta</file>
-        <file>tools/LottieAnimation/t/main.qml</file>
         <file>tools/ScrollView/m/control.meta</file>
         <file>tools/ScrollView/t/main.qml</file>
         <file>tools/SplitView/m/control.meta</file>

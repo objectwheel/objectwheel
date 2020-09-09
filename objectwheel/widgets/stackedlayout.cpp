@@ -6,7 +6,6 @@
 
 StackedLayout::StackedLayout() : QLayout()
   , m_index(-1)
-  , m_moveFocus(true)
   , m_animationEnabled(true)
   , m_animation(new QVariantAnimation(this))
 {
@@ -21,7 +20,6 @@ StackedLayout::StackedLayout() : QLayout()
 
 StackedLayout::StackedLayout(QWidget* parent) : QLayout(parent)
   , m_index(-1)
-  , m_moveFocus(true)
   , m_animationEnabled(true)
   , m_animation(new QVariantAnimation(this))
 {
@@ -92,16 +90,6 @@ int StackedLayout::currentIndex() const
 int StackedLayout::count() const
 {
     return m_list.size();
-}
-
-bool StackedLayout::moveFocus() const
-{
-    return m_moveFocus;
-}
-
-void StackedLayout::setMoveFocus(bool moveFocus)
-{
-    m_moveFocus = moveFocus;
 }
 
 bool StackedLayout::animationEnabled() const
@@ -306,7 +294,7 @@ void StackedLayout::onAnimationStateChanged(QAbstractAnimation::State newState, 
 
     // try to move focus onto the incoming widget
     // if it was somewhere on the outgoing widget.
-    if (m_moveFocus && parent && focusWasOnOldPage && m_next) {
+    if (parent && focusWasOnOldPage && m_next) {
         // look for the best focus widget we can find
         if (QWidget* nfw = m_next->focusWidget()) {
             nfw->setFocus();

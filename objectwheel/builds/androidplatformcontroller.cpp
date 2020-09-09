@@ -217,8 +217,8 @@ void AndroidPlatformController::charge() const
     m_androidPlatformWidget->qtModuleCombo()->clear();
     m_androidPlatformWidget->qtModuleList()->clear();
     m_androidPlatformWidget->qtModuleCombo()->addItems(AndroidPlatformWidget::qtModuleMap.keys());
-    m_androidPlatformWidget->qtModuleList()->addItem(QLatin1String("Svg"));
-    m_androidPlatformWidget->qtModuleCombo()->removeItem(m_androidPlatformWidget->qtModuleCombo()->findText(QLatin1String("Svg")));
+    m_androidPlatformWidget->qtModuleList()->addItem(QLatin1String("Qt Svg"));
+    m_androidPlatformWidget->qtModuleCombo()->removeItem(m_androidPlatformWidget->qtModuleCombo()->findText(QLatin1String("Qt Svg")));
 
     m_androidPlatformWidget->signingDisabled()->setChecked(true);
     m_androidPlatformWidget->keystorePathEdit()->clear();

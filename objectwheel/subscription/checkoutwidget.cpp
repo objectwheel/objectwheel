@@ -21,22 +21,21 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
   , m_discountPercentage(0)
   , m_buttons(new ButtonSlice(this))
   , m_busyIndicator(new BusyIndicatorWidget(this, false))
-  , m_orderSummaryGroup(new QGroupBox(this))
-  , m_billingDetailsTitleLabel(new QLabel(m_orderSummaryGroup))
-  , m_billingDetailsLabel(new QLabel(m_orderSummaryGroup))
-  , m_paymentDetailsTitleLabel(new QLabel(m_orderSummaryGroup))
-  , m_paymentDetailsLabel(new QLabel(m_orderSummaryGroup))
-  , m_subscriptionDetailsTitleLabel(new QLabel(m_orderSummaryGroup))
-  , m_subscriptionDetailsTypeLabel(new QLabel(m_orderSummaryGroup))
-  , m_subscriptionDetailsPlanLabel(new QLabel(m_orderSummaryGroup))
-  , m_subscriptionDetailsMonthlyRadio(new QRadioButton(m_orderSummaryGroup))
-  , m_subscriptionDetailsAnnuallyRadio(new QRadioButton(m_orderSummaryGroup))
-  , m_subscriptionDetailsCouponEdit(new LineEdit(m_orderSummaryGroup))
-  , m_subscriptionDetailsCouponApplyButton(new QPushButton(m_orderSummaryGroup))
-  , m_subscriptionDetailsFeeLabel(new QLabel(m_orderSummaryGroup))
-  , m_subscriptionDetailsTaxesLabel(new QLabel(m_orderSummaryGroup))
-  , m_subscriptionDetailsTotalLabel(new QLabel(m_orderSummaryGroup))
-  , m_subscriptionDetailsPaymentCycleLabel(new QLabel(m_orderSummaryGroup))
+  , m_billingDetailsTitleLabel(new QLabel(this))
+  , m_billingDetailsLabel(new QLabel(this))
+  , m_paymentDetailsTitleLabel(new QLabel(this))
+  , m_paymentDetailsLabel(new QLabel(this))
+  , m_subscriptionDetailsTitleLabel(new QLabel(this))
+  , m_subscriptionDetailsTypeLabel(new QLabel(this))
+  , m_subscriptionDetailsPlanLabel(new QLabel(this))
+  , m_subscriptionDetailsMonthlyRadio(new QRadioButton(this))
+  , m_subscriptionDetailsAnnuallyRadio(new QRadioButton(this))
+  , m_subscriptionDetailsCouponEdit(new LineEdit(this))
+  , m_subscriptionDetailsCouponApplyButton(new QPushButton(this))
+  , m_subscriptionDetailsFeeLabel(new QLabel(this))
+  , m_subscriptionDetailsTaxesLabel(new QLabel(this))
+  , m_subscriptionDetailsTotalLabel(new QLabel(this))
+  , m_subscriptionDetailsPaymentCycleLabel(new QLabel(this))
 {
     auto iconLabel = new QLabel(this);
     iconLabel->setFixedSize(QSize(60, 60));
@@ -73,7 +72,10 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
 
     ////////
 
-    UtilityFunctions::adjustFontPixelSize(m_orderSummaryGroup, -1);
+    auto orderSummaryGroup = new QGroupBox(tr("Order Summary"), this);
+    orderSummaryGroup->setFixedWidth(260);
+    orderSummaryGroup->setAlignment(Qt::AlignHCenter);
+
     UtilityFunctions::adjustFontWeight(m_billingDetailsTitleLabel, QFont::Medium);
     UtilityFunctions::adjustFontWeight(m_paymentDetailsTitleLabel, QFont::Medium);
     UtilityFunctions::adjustFontWeight(m_subscriptionDetailsTitleLabel, QFont::Medium);
@@ -93,28 +95,14 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     m_subscriptionDetailsCouponApplyButton->setSizePolicy(
                 QSizePolicy::Maximum,
                 m_subscriptionDetailsCouponApplyButton->sizePolicy().verticalPolicy());
-    m_orderSummaryGroup->setFixedWidth(260);
     m_subscriptionDetailsMonthlyRadio->setChecked(true);
-
     m_billingDetailsLabel->setWordWrap(true);
     m_subscriptionDetailsPaymentCycleLabel->setWordWrap(true);
     m_subscriptionDetailsPaymentCycleLabel->setAlignment(Qt::AlignCenter);
-    m_subscriptionDetailsPaymentCycleLabel->setStyleSheet(QStringLiteral("QLabel {"
-                                                                         "  color: #a5000000;"
-                                                                         "  border: 1px solid #65885500;"
-                                                                         "  border-radius: 4px;"
-                                                                         "  background: #45ffbb00;"
-                                                                         "  padding: 3px;"
-                                                                         "  padding-left: 4px;"
-                                                                         "  padding-right: 4px;"
-                                                                         "}"));
 
     auto totalPriceLabel = new QLabel(tr("Total:"), this);
     UtilityFunctions::adjustFontWeight(totalPriceLabel, QFont::Medium);
     UtilityFunctions::adjustFontWeight(m_subscriptionDetailsTotalLabel, QFont::Medium);
-
-    m_subscriptionDetailsMonthlyRadio->setStyleSheet("spacing: 1px; margin: 0px; padding: 0px");
-    m_subscriptionDetailsAnnuallyRadio->setStyleSheet("spacing: 1px; margin: 0px; padding: 0px");
 
     m_subscriptionDetailsMonthlyRadio->setCursor(Qt::PointingHandCursor);
     m_subscriptionDetailsAnnuallyRadio->setCursor(Qt::PointingHandCursor);
@@ -124,15 +112,13 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     buttonGroup->addButton(m_subscriptionDetailsMonthlyRadio);
     buttonGroup->addButton(m_subscriptionDetailsAnnuallyRadio);
 
+    QPalette fp(palette());
+    fp.setColor(QPalette::WindowText, QColor("#c0c0c0"));
     auto priceHLine = new QFrame(this);
     priceHLine->resize(118, 3);
     priceHLine->setFrameShape(QFrame::HLine);
-    priceHLine->setFrameShadow(QFrame::Sunken);
-
-    auto mainVLine = new QFrame(this);
-    mainVLine->resize(118, 3);
-    mainVLine->setFrameShape(QFrame::VLine);
-    mainVLine->setFrameShadow(QFrame::Sunken);
+    priceHLine->setFrameShadow(QFrame::Plain);
+    priceHLine->setPalette(fp);
 
     auto couponLayout = new QHBoxLayout;
     couponLayout->setSpacing(2);
@@ -157,10 +143,9 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     priceLayout->addWidget(m_subscriptionDetailsTotalLabel, 5, 2, Qt::AlignRight);
     priceLayout->setColumnStretch(1, 1);
 
-    auto orderSummaryLayout = new QVBoxLayout(m_orderSummaryGroup);
+    auto orderSummaryLayout = new QVBoxLayout(orderSummaryGroup);
     orderSummaryLayout->setSpacing(1);
     orderSummaryLayout->setContentsMargins(6, 6, 6, 6);
-    orderSummaryLayout->addStretch();
     orderSummaryLayout->addWidget(m_billingDetailsTitleLabel);
     orderSummaryLayout->addWidget(m_billingDetailsLabel);
     orderSummaryLayout->addSpacing(8);
@@ -172,15 +157,73 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     orderSummaryLayout->addLayout(couponLayout);
     orderSummaryLayout->addSpacing(3);
     orderSummaryLayout->addWidget(m_subscriptionDetailsPaymentCycleLabel);
+    orderSummaryLayout->addStretch();
+
+    for (QWidget* child : orderSummaryGroup->findChildren<QWidget*>(QString(), Qt::FindDirectChildrenOnly))
+        UtilityFunctions::adjustFontPixelSize(child, -1);
+
+    m_subscriptionDetailsMonthlyRadio->setStyleSheet("spacing: 1px; margin: 0px; padding: 0px");
+    m_subscriptionDetailsAnnuallyRadio->setStyleSheet("spacing: 1px; margin: 0px; padding: 0px");
+    m_subscriptionDetailsPaymentCycleLabel->setStyleSheet(QStringLiteral("QLabel {"
+                                                                         "  color: #a5000000;"
+                                                                         "  border: 1px solid #65885500;"
+                                                                         "  border-radius: 4px;"
+                                                                         "  background: #45ffbb00;"
+                                                                         "  padding: 3px;"
+                                                                         "  padding-left: 4px;"
+                                                                         "  padding-right: 4px;"
+                                                                         "}"));
+
+    ////////
+
+    auto notesGroup = new QGroupBox(tr("Acknowledgements"), this);
+    notesGroup->setAlignment(Qt::AlignHCenter);
+    auto notesLabel = new QLabel(this);
+    UtilityFunctions::adjustFontPixelSize(notesLabel, -1);
+    notesLabel->setWordWrap(true);
+    notesLabel->setAlignment(Qt::AlignJustify);
+    notesLabel->setText("<ul style=\"margin-left: 8px; -qt-list-indent: 0;\">"
+                        "  <li style=\"margin-bottom: 4px;\">"
+                        "    Applications that you build with Objectwheel make use of"
+                        "    various software libraries (most notably the Qt Toolkit)"
+                        "    distributed under open source licenses (e.g. LGPL) to work"
+                        "    properly across multiple platforms. This requires your"
+                        "    applications to comply with the terms of these open source"
+                        "    licenses (But you don't have to panic, we will help you out"
+                        "    in the process). These terms may include one or more of the"
+                        "    conditions listed below."
+                        "  </li>"
+                        "  <li style=\"margin-bottom: 4px;\">"
+                        "    Give prominent notice with each copy of the Combined Work"
+                        "    that the Library is used in it and that the Library and its"
+                        "    use are covered by this License."
+                        "  </li>"
+                        "  <li style=\"margin-bottom: 4px;\">"
+                        "    Accompany the Combined Work with a copy of the GNU GPL and"
+                        "    this license document."
+                        "  </li>"
+                        "  <li style=\"margin-bottom: 4px;\">"
+                        "    For a Combined Work that displays copyright notices during"
+                        "    execution, include the copyright notice for the Library"
+                        "    among these notices, as well as a reference directing the"
+                        "    user to the copies of the GNU GPL and this license document."
+                        "  </li>"
+                        "</ul>");
+    auto notesLayout = new QVBoxLayout(notesGroup);
+    notesLayout->setSpacing(1);
+    notesLayout->setContentsMargins(6, 6, 6, 6);
+    notesLayout->addWidget(notesLabel);
+    notesLayout->addStretch();
+
+    ////////
 
     auto centralLayout = new QHBoxLayout;
-    centralLayout->setSpacing(6);
+    centralLayout->setSpacing(8);
     centralLayout->setContentsMargins(0, 0, 0, 0);
-    centralLayout->addStretch();
-    centralLayout->addWidget(UtilityFunctions::createSpacerWidget(Qt::Horizontal));
-    centralLayout->addWidget(mainVLine);
-    centralLayout->addWidget(m_orderSummaryGroup);
-    centralLayout->addStretch();
+    centralLayout->addStretch(1);
+    centralLayout->addWidget(notesGroup, 4);
+    centralLayout->addWidget(orderSummaryGroup, 1);
+    centralLayout->addStretch(1);
 
     auto layout = new QVBoxLayout(this);
     layout->setSpacing(6);

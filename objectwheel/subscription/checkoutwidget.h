@@ -6,7 +6,6 @@
 #include <planinfo.h>
 
 class QLabel;
-class QGroupBox;
 class QRadioButton;
 class LineEdit;
 class QPushButton;
@@ -60,7 +59,6 @@ private:
     ButtonSlice* m_buttons;
     BusyIndicatorWidget* m_busyIndicator;
     //
-    QGroupBox* m_orderSummaryGroup;
     QLabel* m_billingDetailsTitleLabel;
     QLabel* m_billingDetailsLabel;
     QLabel* m_paymentDetailsTitleLabel;

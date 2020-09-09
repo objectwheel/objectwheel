@@ -147,8 +147,6 @@
     "QtQuick.Dialogs/1/Dialog"                : ":/images/tools/Dialog2.svg",
     "QtQuick.Dialogs/1/FontDialog"            : ":/images/tools/FontDialog.svg",
     "QtQuick.Dialogs/1/MessageDialog"         : ":/images/tools/MessageDialog.svg",
-    "QtCharts/2/ChartView"                    : ":/images/tools/ChartView.svg",
-    "QtCharts/2/PolarChartView"               : ":/images/tools/PolarChartView.svg",
     "QtWebView/1/WebView"                     : ":/images/tools/WebView.svg",
     "QtWebSockets/1/WebSocket"                : ":/images/tools/WebSocket.svg",
     "QtWebSockets/1/WebSocketServer"          : ":/images/tools/WebSocketServer.svg",
@@ -218,6 +216,5 @@
     "Qt.labs.platform/1/Menu"                 : ":/images/tools/Menu.svg",
     "Qt.labs.calendar/1/DayOfWeekRow"         : ":/images/tools/DayOfWeekRow.svg",
     "Qt.labs.calendar/1/WeekNumberColumn"     : ":/images/tools/WeekNumberColumn.svg",
-    "Qt.labs.calendar/1/MonthGrid"            : ":/images/tools/MonthGrid.svg",
-    "Qt.labs.lottieqt/1/LottieAnimation"      : ":/images/tools/LottieAnimation.svg"
+    "Qt.labs.calendar/1/MonthGrid"            : ":/images/tools/MonthGrid.svg"
 }
