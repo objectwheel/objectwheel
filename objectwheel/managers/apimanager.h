@@ -67,10 +67,13 @@ public:
     static void abortCloudBuild(const QString& buildUid);
     static void requestCouponTest(const QString& email, const QString& password, const QString& code);
     static void requestSubscriptionPlans(const QString& email, const QString& password);
-    static void subscribe(const QString& email, const QString& password, qint64 plan,
-                          const QString& cardNumber = QString(),
-                          const QString& cardCvv = QString(),
-                          const QDate& cardExpDate = QDate());
+    static void subscribe(const QString& email, const QString& password, qint64 plan, bool isAnnual,
+                          const QString& cardNumber, const QDate& cardExpDate,
+                          const QString& cardCvv, const QString& fullName,
+                          const QString& billingEmail, const QString& phone,
+                          const QString& countryCode, const QString& state,
+                          const QString& city, const QString& address,
+                          const QString& postalCode, const QString& couponCode);
 
 private slots:
     void onServerResponse(const QByteArray& data);

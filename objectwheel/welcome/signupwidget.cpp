@@ -67,6 +67,7 @@ SignupWidget::SignupWidget(QWidget* parent) : QWidget(parent)
     countryCombo->addItem(tr("Please select..."));
     foreach (const QCborValue& countryName, UtilityFunctions::countryList().keys())
         countryCombo->addItem(countryName.toString());
+    countryCombo->lineEdit()->setFocusPolicy(Qt::NoFocus);
     countryCombo->lineEdit()->setFrame(false);
     countryCombo->lineEdit()->setReadOnly(true);
     countryCombo->lineEdit()->setAttribute(Qt::WA_TransparentForMouseEvents);

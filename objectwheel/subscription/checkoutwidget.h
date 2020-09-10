@@ -33,7 +33,7 @@ public slots:
 
 private slots:
     void onSubscriptionTypeButtonToggled();
-    void onApplyCouponClearButtonClicked();
+    void onApplyClearCouponButtonClicked();
     void onResponseCouponTest(int discountPercentage);
     void onPurchaseClicked();
     void onServerDisconnected();

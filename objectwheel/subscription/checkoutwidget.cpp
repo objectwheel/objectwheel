@@ -251,7 +251,7 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
     //    connect(ApiManager::instance(), &ApiManager::signupFailure,
     //            this, &SignupWidget::onSignupFailure);
     connect(m_subscriptionDetailsCouponApplyButton, &QPushButton::clicked,
-            this, &CheckoutWidget::onApplyCouponClearButtonClicked);
+            this, &CheckoutWidget::onApplyClearCouponButtonClicked);
     connect(ApiManager::instance(), &ApiManager::responseCouponTest,
             this, &CheckoutWidget::onResponseCouponTest);
     connect(buttonGroup, qOverload<int, bool>(&QButtonGroup::buttonToggled),
@@ -427,15 +427,15 @@ void CheckoutWidget::onSubscriptionTypeButtonToggled()
     m_subscriptionDetailsTotalLabel->setText(QLatin1Char('$') + QString::number(finalPrice + finalTax, 'f', 2));
 }
 
-void CheckoutWidget::onApplyCouponClearButtonClicked()
+void CheckoutWidget::onApplyClearCouponButtonClicked()
 {
     if (m_subscriptionDetailsCouponApplyButton->text() == tr("Apply")) {
         const QString& couponCode = m_subscriptionDetailsCouponEdit->text();
         if (couponCode.isEmpty() || couponCode.size() > 255) {
             UtilityFunctions::showMessage(
                         this,
-                        tr("Invalid code"),
-                        tr("Your coupon code is invalid."));
+                        tr("Invalid coupon code format"),
+                        tr("Coupon code format is not appropriate."));
             return;
         }
         if (ServerManager::isConnected()) {
@@ -460,20 +460,40 @@ void CheckoutWidget::onApplyCouponClearButtonClicked()
 void CheckoutWidget::onResponseCouponTest(int discountPercentage)
 {
     m_busyIndicator->stop();
-    m_subscriptionDetailsCouponApplyButton->setText(tr("Clear ⌫"));
-    m_subscriptionDetailsCouponEdit->setEnabled(false);
-    m_discountPercentage = discountPercentage;
-    onSubscriptionTypeButtonToggled();
-    UtilityFunctions::showMessage(
-                this,
-                tr("Coupon code has been successfully applied"),
-                tr("You have got <b>%%1</b> discount in your purchase, enjoy!").arg(m_discountPercentage),
-                QMessageBox::Information);
+    if (discountPercentage > 0) {
+        m_discountPercentage = discountPercentage;
+        m_subscriptionDetailsCouponApplyButton->setText(tr("Clear ⌫"));
+        m_subscriptionDetailsCouponEdit->setEnabled(false);
+        onSubscriptionTypeButtonToggled();
+        UtilityFunctions::showMessage(
+                    this,
+                    tr("Coupon code has been successfully applied"),
+                    tr("You have got <b>%%1</b> discount in your purchase, enjoy!").arg(m_discountPercentage),
+                    QMessageBox::Information);
+    } else {
+        UtilityFunctions::showMessage(
+                    this,
+                    tr("Invalid coupon code"),
+                    tr("Your coupon code seems to be invalid."));
+    }
 }
 
 void CheckoutWidget::onPurchaseClicked()
 {
-
+    if (ServerManager::isConnected()) {
+        ApiManager::subscribe(UserManager::email(), UserManager::password(), m_selectedPlan,
+                              m_subscriptionDetailsAnnuallyRadio->isChecked(), m_cardNumber,
+                              m_cardExpDate, m_cardCvv, m_fullName, m_email, m_phone, m_countryCode,
+                              m_state, m_city, m_address, m_postalCode,
+                              m_discountPercentage > 0 ? m_subscriptionDetailsCouponEdit->text() : QString());
+        m_busyIndicator->start();
+    } else {
+        UtilityFunctions::showMessage(
+                    this,
+                    tr("Unable to connect to the server"),
+                    tr("We are unable to connect to the server in order to complete the order. "
+                       "Please checkout your internet connection and try again later. "));
+    }
 }
 
 void CheckoutWidget::onServerDisconnected()

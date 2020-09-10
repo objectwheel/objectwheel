@@ -57,14 +57,6 @@ void ApiManager::completePasswordReset(const QString& email, const QString& pass
     ServerManager::send(CompletePasswordReset, email, password, code);
 }
 
-void ApiManager::subscribe(const QString& email, const QString& password, qint64 plan,
-                           const QString& cardNumber, const QString& cardCvv,
-                           const QDate& cardExpDate)
-{
-    ServerManager::send(Subscribe, email, password, plan, cardNumber,
-                        cardCvv, QCborValue(QDateTime(cardExpDate)));
-}
-
 void ApiManager::requestCloudBuild(const QString& email, const QString& password, const QString& payloadUid)
 {
     ServerManager::send(RequestCloudBuild, email, password, payloadUid);
@@ -83,6 +75,19 @@ void ApiManager::requestCouponTest(const QString& email, const QString& password
 void ApiManager::requestSubscriptionPlans(const QString& email, const QString& password)
 {
     ServerManager::send(RequestSubscriptionPlans, email, password);
+}
+
+void ApiManager::subscribe(const QString& email, const QString& password, qint64 plan, bool isAnnual,
+                           const QString& cardNumber, const QDate& cardExpDate,
+                           const QString& cardCvv, const QString& fullName,
+                           const QString& billingEmail, const QString& phone,
+                           const QString& countryCode, const QString& state,
+                           const QString& city, const QString& address,
+                           const QString& postalCode, const QString& couponCode)
+{
+    ServerManager::send(Subscribe, email, password, plan, isAnnual, cardNumber,
+                        QCborValue(QDateTime(cardExpDate)), cardCvv, fullName, billingEmail, phone,
+                        countryCode, state, city, address, postalCode, couponCode);
 }
 
 void ApiManager::onServerResponse(const QByteArray& data)
