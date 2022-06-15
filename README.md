@@ -26,3 +26,24 @@ previous attempt in Javafx.
 12. Cloud App Video (1) https://youtu.be/Y6yJdSHfNLw
 13. Ubuntu 16 Pre Beta Version - Nov 2018
 14. Objectwheel Brief -- objectwheel https://youtu.be/ohB8K2bHv6E
+
+Important NOTES: 
+Start with 5.12 or 5.14, 5.15. (not sure) but I would start with 5.12
+https://www.qt.io/offline-installers?fbclid=IwAR0FecOvgzLZjXGNdcQjLysfTchHjDECz81IGRJ_p9ZfigLvuMhiFuSjxRg
+
+You can't start with 6.0 or other versions of QT. You have to start with this one. This is because of
+licensing. As far as I know, they closed the source and want like 5K a year for QT now. 
+
+Details regarding LGPL and GPL are gonna have to be worked out.
+https://www.qt.io/licensing/open-source-lgpl-obligations?fbclid=IwAR2ML2DREkUf-FuLrh2OqerJZPaQSus0gGGRtgMwPyUx84g_i09BzhcFUfE#lgpl
+
+There are also versions for Visual Studio if you prefer that, however I would suggest sticking with QT creator not Visual Studio.
+
+
+
+
+
+
+
+
+
