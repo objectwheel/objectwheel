@@ -2,6 +2,7 @@
 #include <qdrawutil.h>
 #include <utilityfunctions.h>
 
+#include <private/qfusionstyle_p.h>
 #include <private/qstylehelper_p.h>
 
 #include <QPainter>
@@ -112,7 +113,7 @@ QRect TransparentStyle::subControlRect(QStyle::ComplexControl control,
             if (subControl == SC_ComboBoxEditField)
                 ret.adjust(-3, 0, 8, 0);
             else if (subControl == SC_ComboBoxArrow)
-                ret = QFusionStyle::subControlRect(control, option, subControl, widget);
+                ret = QProxyStyle::subControlRect(control, option, subControl, widget);
         } break;
     case CC_SpinBox:
         if (const QStyleOptionSpinBox* spinbox

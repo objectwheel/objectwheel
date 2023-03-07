@@ -18,11 +18,9 @@ const char COMPANY[]       = "Objectwheel";
 const char COMPANY_FULL[]  = "Objectwheel";
 const char ROOT_DOMAIN[]   = "objectwheel.com";
 const char SUPPORT_EMAIL[] = "support@objectwheel.com";
-const char NOREPLY_EMAIL[] = "no-reply@objectwheel.com";
-const char FORUM_URL[]     = "https://forum.objectwheel.com";
+const char FORUM_URL[]     = "https://github.com/objectwheel/objectwheel/discussions";
 const char DOWNLOAD_URL[]  = "https://objectwheel.com/download";
 const char TAC_URL[]       = "https://objectwheel.com/terms-and-conditions";
-const char MAIL_DOMAIN[]   = "mail.objectwheel.com";
 
 #if 0 // LOCAL DEBUG ENVIRONMENT
 const char API_DOMAIN[]    = "localhost";

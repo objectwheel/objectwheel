@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+class SignalHandler;
 class RenderSocket;
 class RenderEngine;
 class CommandDispatcher;
@@ -27,6 +28,7 @@ private slots:
     void quitIfDisconnected();
 
 private:
+    SignalHandler* m_signalHandler;
     RenderSocket* m_renderSocket;
     QThread* m_socketThread;
     CommandDispatcher* m_commandDispatcher;

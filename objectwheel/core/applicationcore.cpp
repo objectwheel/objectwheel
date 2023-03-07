@@ -30,7 +30,6 @@
 #include <updatemanager.h>
 #include <modemanager.h>
 #include <splashscreen.h>
-#include <signalwatcher.h>
 #include <appconstants.h>
 #include <inactivitywatcher.h>
 
@@ -81,9 +80,8 @@ ApplicationCore::ApplicationCore()
     QApplication::setWindowIcon(QIcon(QStringLiteral(":/images/icon.png")));
 
     // Handle signals
-    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
-                     SignalWatcher::instance(), &SignalWatcher::defaultInterruptAction,
-                     Qt::QueuedConnection);
+    QObject::connect(&m_signalHandler, &SignalHandler::interrupted,
+                     &m_signalHandler, &SignalHandler::exitGracefully);
 
     /* Load default fonts */
     for (const QString& fontName : QDir(QStringLiteral(":/fonts")).entryList(QDir::Files))

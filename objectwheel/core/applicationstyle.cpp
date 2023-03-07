@@ -1,4 +1,5 @@
-#include <applicationstyle.h>
+#include "applicationstyle.h"
+
 #include <utilityfunctions.h>
 #include <paintutils.h>
 
@@ -20,18 +21,16 @@
 
 #include <private/qapplication_p.h>
 #include <private/qcombobox_p.h>
-#include <private/qfusionstyle_p_p.h>
+#include <private/qcommonstyle_p.h>
 
 namespace {
 
-enum { NotificationsProperty = Qt::UserRole + 293373 };
+constexpr char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
+constexpr char notificationsProperty[] = "_q_ApplicationStyle_notificationsProperty";
+constexpr char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
+constexpr char animationProperty[] = "_q_ApplicationStyle_animationForProgressBar";
 
-const int macItemFrame          = 2;    // menu item frame width
-const int macItemHMargin        = 3;    // menu item hor text margin
-const int macRightBorder        = 12;   // right border on mac
-const char buttonStyleProperty[] = "_q_ApplicationStyle_buttonStyle";
-const char notificationsProperty[] = "_q_ApplicationStyle_notificationsProperty";
-const char highlightingDisabledForCheckedStateProperty[] = "_q_ApplicationStyle_highlightingDisabledForCheckedState";
+enum { NotificationsProperty = Qt::UserRole + 293373 };
 
 void drawNotifications(QPainter* painter, const QRectF& r, const QString& text)
 {
@@ -41,10 +40,10 @@ void drawNotifications(QPainter* painter, const QRectF& r, const QString& text)
     f.setWeight(QFont::DemiBold);
     QLinearGradient grad(0, 0, 0, 1);
     grad.setCoordinateMode(QGradient::ObjectMode);
-    grad.setColorAt(0.0, QColor("#f24949"));
-    grad.setColorAt(1.0, QColor("#d94141"));
+    grad.setColorAt(0.0, 0xf24949);
+    grad.setColorAt(1.0, 0xd94141);
     painter->setRenderHint(QPainter::Antialiasing);
-    painter->setPen(QPen(QColor("#bf3939"), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+    painter->setPen(QPen(QColor(0xbf3939), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
     painter->setBrush(grad);
     painter->drawRoundedRect(r, r.height() / 2.0, r.width() / 2.0);
     painter->setFont(f);
@@ -53,8 +52,8 @@ void drawNotifications(QPainter* painter, const QRectF& r, const QString& text)
     painter->restore();
 }
 
-void drawArrow(Qt::ArrowType arrowType, const QStyle *style, const QStyleOption *option,
-               const QRect &rect, QPainter *painter, const QWidget *widget = 0)
+void drawArrow(Qt::ArrowType arrowType, const QStyle* style, const QStyleOption* option,
+               const QRect& rect, QPainter* painter, const QWidget* widget = 0)
 {
     QStyle::PrimitiveElement pe;
     switch (arrowType) {
@@ -78,8 +77,8 @@ void drawArrow(Qt::ArrowType arrowType, const QStyle *style, const QStyleOption 
     style->drawPrimitive(pe, &arrowOpt, painter, widget);
 }
 
-void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
-               const QRect &rect, QPainter *painter, const QWidget *widget = 0)
+void drawArrow(const QStyle* style, const QStyleOptionToolButton* toolbutton,
+               const QRect& rect, QPainter* painter, const QWidget* widget = 0)
 {
     drawArrow(toolbutton->arrowType, style, toolbutton, rect, painter, widget);
 }
@@ -98,10 +97,6 @@ bool hasVerticalParentToolBar(const QWidget* widget)
 
 ApplicationStyle::ButtonStyle ApplicationStyle::buttonStyle(const QWidget* widget)
 {
-    if (widget == 0) {
-        qWarning() << "ApplicationStyle: Null widget pointer passed through";
-        return Disclosure;
-    }
     const QVariant& val = widget->property(buttonStyleProperty);
     if (val.isValid())
         return val.value<ButtonStyle>();
@@ -120,10 +115,6 @@ void ApplicationStyle::setButtonStyle(QWidget* widget, ApplicationStyle::ButtonS
 
 bool ApplicationStyle::highlightingDisabledForCheckedState(const QWidget* widget)
 {
-    if (widget == 0) {
-        qWarning() << "ApplicationStyle: Null widget pointer passed through";
-        return false;
-    }
     return widget->property(highlightingDisabledForCheckedStateProperty).value<bool>();
 }
 
@@ -140,7 +131,7 @@ QPointF ApplicationStyle::visualPos(Qt::LayoutDirection direction, const QRectF&
     return QPointF(boundingRect.right() - logicalPos.x(), logicalPos.y());
 }
 
-ApplicationStyle::ApplicationStyle() : QFusionStyle()
+ApplicationStyle::ApplicationStyle() : QProxyStyle(QStringLiteral("Fusion"))
   , m_focusFrame(new QFocusFrame)
 {
 }
@@ -158,7 +149,7 @@ ApplicationStyle::~ApplicationStyle()
 QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyleOption* option,
                                          const QSize& contentsSize, const QWidget* widget) const
 {
-    QSize sz = QFusionStyle::sizeFromContents(type, option, contentsSize, widget);
+    QSize sz = QProxyStyle::sizeFromContents(type, option, contentsSize, widget);
 
     switch (type) {
     case CT_MenuItem:
@@ -167,28 +158,27 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
             sz = contentsSize;
             int maxpmw = mi->maxIconWidth;
             const QComboBox *comboBox = qobject_cast<const QComboBox*>(widget);
-            int w = sz.width(), h = sz.height();
+            int w = sz.width(), h;
             if (mi->menuItemType == QStyleOptionMenuItem::Separator) {
                 w = 10;
-                h = 2; // Menu separator height
+                h = 1; // Menu separator height
             } else {
-                h = mi->fontMetrics.height() + 2;
+                h = mi->fontMetrics.height() + 5;
                 if (!mi->icon.isNull()) {
                     if (comboBox) {
                         const QSize& iconSize = comboBox->iconSize();
-                        h = qMax(h, iconSize.height() + 4);
+                        h = qMax(h, iconSize.height() + 6);
                         maxpmw = qMax(maxpmw, iconSize.width());
-                    } else
-                    {
+                    } else {
                         int iconExtent = proxy()->pixelMetric(PM_SmallIconSize);
-                        h = qMax(h, mi->icon.actualSize(QSize(iconExtent, iconExtent)).height() + 4);
+                        h = qMax(h, mi->icon.actualSize(QSize(iconExtent, iconExtent)).height() + 6);
                     }
                 }
             }
             if (mi->text.contains(QLatin1Char('\t')))
                 w += 12;
             else if (mi->menuItemType == QStyleOptionMenuItem::SubMenu)
-                w += 35; // Not quite exactly as it seems to depend on other factors
+                w += 30; // Not quite exactly as it seems to depend on other factors
             if (maxpmw)
                 w += maxpmw + 6;
             // add space for a check. All items have place for a check too.
@@ -199,9 +189,9 @@ QSize ApplicationStyle::sizeFromContents(QStyle::ContentsType type, const QStyle
                 cmb.editable = false;
                 cmb.subControls = QStyle::SC_ComboBoxEditField;
                 cmb.activeSubControls = QStyle::SC_None;
-                w = qMax(w, subControlRect(QStyle::CC_ComboBox, &cmb,
-                                           QStyle::SC_ComboBoxEditField,
-                                           comboBox).width());
+                w = qMax(w, proxy()->subControlRect(QStyle::CC_ComboBox, &cmb,
+                                                    QStyle::SC_ComboBoxEditField,
+                                                    comboBox).width());
             } else {
                 w += 12;
             }
@@ -246,7 +236,7 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
                                        const QStyleOptionComplex* option,
                                        QStyle::SubControl subControl, const QWidget* widget) const
 {
-    QRect ret = QFusionStyle::subControlRect(control, option, subControl, widget);
+    QRect ret = QProxyStyle::subControlRect(control, option, subControl, widget);
 
     switch (control) {
     case CC_ComboBox:
@@ -256,7 +246,8 @@ QRect ApplicationStyle::subControlRect(QStyle::ComplexControl control,
             if (subControl == SC_ComboBoxArrow) {
                 QRectF r(option->rect);
                 r.adjust(0.5, 0.5, -0.5, 0);
-                ret = QRectF(r.left() + r.width() - 16.5, r.top() + 0.5, 16, r.height() - 1.5).toRect();
+                ret = QRectF(r.left() + r.width() - 16.5,
+                             r.top() + 0.5, 16, r.height() - 1.5).toRect();
             }
         } break;
     case CC_ToolButton:
@@ -282,7 +273,7 @@ QRect ApplicationStyle::subElementRect(QStyle::SubElement subElement, const QSty
             if (!m.isNull()) {
                 QStyleOptionViewItem copy(*qstyleoption_cast<const QStyleOptionViewItem*>(option));
                 copy.rect.adjust(-m.left(), -m.top(), m.right(), m.bottom());
-                return QFusionStyle::subElementRect(subElement, &copy, widget);
+                return QProxyStyle::subElementRect(subElement, &copy, widget);
             }
         } break;
 
@@ -290,7 +281,7 @@ QRect ApplicationStyle::subElementRect(QStyle::SubElement subElement, const QSty
         break;
     }
 
-    return QFusionStyle::subElementRect(subElement, option, widget);
+    return QProxyStyle::subElementRect(subElement, option, widget);
 }
 
 QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
@@ -342,7 +333,7 @@ QPixmap ApplicationStyle::standardPixmap(QStyle::StandardPixmap standardPixmap,
     } break;
 
     default:
-        pixmap = QFusionStyle::standardPixmap(standardPixmap, option, widget);
+        pixmap = QProxyStyle::standardPixmap(standardPixmap, option, widget);
         break;
     }
 
@@ -380,7 +371,7 @@ QIcon ApplicationStyle::standardIcon(QStyle::StandardPixmap standardIcon, const 
     } break;
 
     default:
-        icon = QFusionStyle::standardIcon(standardIcon, option, widget);
+        icon = QProxyStyle::standardIcon(standardIcon, option, widget);
         break;
     }
     return icon;
@@ -424,7 +415,7 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
         return true;
     case SH_FocusFrame_Mask:
         if (widget) {
-            if(QStyleHintReturnMask* mask = qstyleoption_cast<QStyleHintReturnMask*>(returnData)) {
+            if (QStyleHintReturnMask* mask = qstyleoption_cast<QStyleHintReturnMask*>(returnData)) {
                 mask->region = widget->rect();
                 int vmargin = proxy()->pixelMetric(QStyle::PM_FocusFrameVMargin) + 1,
                         hmargin = proxy()->pixelMetric(QStyle::PM_FocusFrameHMargin) + 1;
@@ -433,7 +424,7 @@ int ApplicationStyle::styleHint(QStyle::StyleHint hint, const QStyleOption* opti
         }
         return true;
     default:
-        return QFusionStyle::styleHint(hint, option, widget, returnData);
+        return QProxyStyle::styleHint(hint, option, widget, returnData);
     }
 }
 
@@ -477,7 +468,7 @@ int ApplicationStyle::pixelMetric(QStyle::PixelMetric metric, const QStyleOption
     case PM_MenuButtonIndicator:
         return 12;
     default:
-        return QFusionStyle::pixelMetric(metric, option, widget);
+        return QProxyStyle::pixelMetric(metric, option, widget);
     }
 }
 
@@ -493,14 +484,14 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             break;
         }
         painter->save();
-        painter->setPen(QPen(QColor(QStringLiteral("#b6b6b6")), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
+        painter->setPen(QPen(QColor(0xb6b6b6), 0, Qt::SolidLine, Qt::FlatCap, Qt::MiterJoin));
         painter->drawRect(QRectF(option->rect).adjusted(0, 0, -0.5, -0.5));
         painter->restore();
     } break;
     case PE_PanelLineEdit: {
         if (auto lineEdit = qobject_cast<const QLineEdit*>(widget)) {
             if (lineEdit->hasFrame())
-                QFusionStyle::drawPrimitive(element, option, painter, widget);
+                QProxyStyle::drawPrimitive(element, option, painter, widget);
         }
     } break;
     case PE_PanelTipLabel:
@@ -508,7 +499,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         break;
     case PE_PanelMenu: {
         painter->save();
-        painter->setPen("#b0b0b0");
+        painter->setPen(0xb0b0b0);
         painter->setBrush(option->palette.window());
         painter->setRenderHint(QPainter::Antialiasing, true);
         painter->drawRoundedRect(QRectF(option->rect).adjusted(0.5, 0.5, -0.5, -0.5), 5, 5);
@@ -524,7 +515,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
 
         painter->setPen(pc);
         painter->setFont(QFont());
-        painter->drawText(option->rect.adjusted(-2, 1, -2, 1), QString::fromUtf8("✓"), QTextOption(Qt::AlignCenter));
+        painter->drawText(option->rect.adjusted(-2, 1, -2, 1), QStringLiteral("✓"), QTextOption(Qt::AlignCenter));
         painter->restore();
     } break;
     case PE_IndicatorArrowDown: {
@@ -570,22 +561,22 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         theStroker.setCapStyle(Qt::FlatCap);
         // theStroker.setDashPattern(QVector<qreal>() << 1 << 2);
         path = theStroker.createStroke(path);
-        painter->fillPath(path, QColor("#50000000"));
+        painter->fillPath(path, QColor(qRgba64(0x50000000)));
     } break;
     case PE_PanelButtonTool:
-        if (widget && widget->objectName() == "qt_toolbar_ext_button")
+        if (widget && widget->objectName() == QLatin1String("qt_toolbar_ext_button"))
             break;
-        if (widget && widget->parent() && widget->parent()->objectName() == "modeSelectorPane") {
+        if (widget && widget->parent() && widget->parent()->objectName() == QLatin1String("modeSelectorPane")) {
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing);
             painter->setPen(Qt::NoPen);
             painter->setBrush(Qt::NoBrush);
             if (option->state & State_Sunken)
-                painter->setBrush(QColor("#80000000"));
+                painter->setBrush(QColor(qRgba64(0x80000000)));
             else if (option->state & State_On)
-                painter->setBrush(QColor("#60000000"));
+                painter->setBrush(QColor(qRgba64(0x60000000)));
             else if (option->state & State_MouseOver)
-                painter->setBrush(QColor("#20000000"));
+                painter->setBrush(QColor(qRgba64(0x20000000)));
             painter->drawRoundedRect(QRectF(option->rect), 7, 7);
             painter->restore();
             break;
@@ -594,10 +585,9 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             painter->save();
             painter->translate(0, widget->height());
             painter->rotate(-90);
-            QFusionStyle::drawPrimitive(element, option, painter, widget);
+            QProxyStyle::drawPrimitive(element, option, painter, widget);
             painter->restore();
-            break;
-        }
+        } break;
     case PE_PanelButtonCommand: {
         if (auto combo = qobject_cast<const QComboBox*>(widget)) {
             if (!combo->hasFrame())
@@ -634,104 +624,107 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw shadows
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
                 // Draw border
                 QLinearGradient borderGrad(0, 0, 0, 1);
                 borderGrad.setCoordinateMode(QGradient::ObjectMode);
-                borderGrad.setColorAt(0.0, isEnabled ? isDown ? "#3280f7" : ((isDefault || hasFocus) ? "#5094f7" : "#d8d8d8") : "#ebebeb");
-                borderGrad.setColorAt(0.1, isEnabled ? isDown ? "#2e7bf3" : ((isDefault || hasFocus) ? "#468ef8" : "#d0d0d0") : "#e7e7e7");
-                borderGrad.setColorAt(0.9, isEnabled ? isDown ? "#1a5fda" : ((isDefault || hasFocus) ? "#196dfb" : "#d0d0d0") : "#e7e7e7");
-                borderGrad.setColorAt(1.0, isEnabled ? isDown ? "#1659d5" : ((isDefault || hasFocus) ? "#1367fb" : "#bcbcbc") : "#dddddd");
+                borderGrad.setColorAt(0.0, isEnabled ? isDown ? 0x3280f7 : ((isDefault || hasFocus) ? 0x5094f7 : 0xd8d8d8) : 0xebebeb);
+                borderGrad.setColorAt(0.1, isEnabled ? isDown ? 0x2e7bf3 : ((isDefault || hasFocus) ? 0x468ef8 : 0xd0d0d0) : 0xe7e7e7);
+                borderGrad.setColorAt(0.9, isEnabled ? isDown ? 0x1a5fda : ((isDefault || hasFocus) ? 0x196dfb : 0xd0d0d0) : 0xe7e7e7);
+                borderGrad.setColorAt(1.0, isEnabled ? isDown ? 0x1659d5 : ((isDefault || hasFocus) ? 0x1367fb : 0xbcbcbc) : 0xdddddd);
                 painter->setBrush(borderGrad);
                 painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
 
                 // Draw body
                 QLinearGradient bodyGrad(0, 0, 0, 1);
                 bodyGrad.setCoordinateMode(QGradient::ObjectMode);
-                bodyGrad.setColorAt(0.0, isEnabled ? isDown ? "#5496f9" : ((isDefault || hasFocus) ? "#6fa7f8" : "white") : "white");
-                bodyGrad.setColorAt(0.9, isEnabled ? isDown ? "#1c65dd" : ((isDefault || hasFocus) ? "#176ffb" : "white") : "white");
-                bodyGrad.setColorAt(1.0, isEnabled ? isDown ? "#1c65dd" : ((isDefault || hasFocus) ? "#176ffb" : "white") : "white");
+                bodyGrad.setColorAt(0.0, isEnabled ? isDown ? 0x5496f9 : ((isDefault || hasFocus) ? 0x6fa7f8 : 0xffffff) : 0xffffff);
+                bodyGrad.setColorAt(0.9, isEnabled ? isDown ? 0x1c65dd : ((isDefault || hasFocus) ? 0x176ffb : 0xffffff) : 0xffffff);
+                bodyGrad.setColorAt(1.0, isEnabled ? isDown ? 0x1c65dd : ((isDefault || hasFocus) ? 0x176ffb : 0xffffff) : 0xffffff);
                 painter->setBrush(bodyGrad);
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
             } break;
+
             case Disclosure: {
                 rect.adjust(0.5, 0.5, -0.5, 0);
                 // Draw shadows
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
                 // Draw border
                 QLinearGradient borderGrad(0, 0, 0, 1);
                 borderGrad.setCoordinateMode(QGradient::ObjectMode);
-                borderGrad.setColorAt(0.0, isEnabled ? "#d8d8d8" : "#ebebeb");
-                borderGrad.setColorAt(0.1, isEnabled ? "#d0d0d0" : "#e7e7e7");
-                borderGrad.setColorAt(0.9, isEnabled ? "#d0d0d0" : "#e7e7e7");
-                borderGrad.setColorAt(1.0, isEnabled ? "#bcbcbc" : "#dddddd");
+                borderGrad.setColorAt(0.0, isEnabled ? 0xd8d8d8 : 0xebebeb);
+                borderGrad.setColorAt(0.1, isEnabled ? 0xd0d0d0 : 0xe7e7e7);
+                borderGrad.setColorAt(0.9, isEnabled ? 0xd0d0d0 : 0xe7e7e7);
+                borderGrad.setColorAt(1.0, isEnabled ? 0xbcbcbc : 0xdddddd);
                 painter->setBrush(borderGrad);
                 painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
 
                 // Draw body
-                painter->setBrush(QColor(isEnabled ? isDown ? "#f0f0f0" : "white" : "white"));
+                painter->setBrush(QColor(isEnabled ? isDown ? 0xf0f0f0 : 0xffffff : 0xffffff));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
             } break;
+
             case Help: {
                 rect.adjust(0.5, 0.5, -0.5, 0);
                 // Draw shadows
                 qreal radius = qMin(rect.width() - 1, rect.height() - 1.5) / 2.0;
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), radius + 0.5, radius + 0.5);
-                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), radius + 0.5, radius + 0.5);
 
                 // Draw border
                 QLinearGradient borderGrad(0, 0, 0, 1);
                 borderGrad.setCoordinateMode(QGradient::ObjectMode);
-                borderGrad.setColorAt(0.0, isEnabled ? "#d8d8d8" : "#ebebeb");
-                borderGrad.setColorAt(0.1, isEnabled ? "#d0d0d0" : "#e7e7e7");
-                borderGrad.setColorAt(0.9, isEnabled ? "#d0d0d0" : "#e7e7e7");
-                borderGrad.setColorAt(1.0, isEnabled ? "#bcbcbc" : "#dddddd");
+                borderGrad.setColorAt(0.0, isEnabled ? 0xd8d8d8 : 0xebebeb);
+                borderGrad.setColorAt(0.1, isEnabled ? 0xd0d0d0 : 0xe7e7e7);
+                borderGrad.setColorAt(0.9, isEnabled ? 0xd0d0d0 : 0xe7e7e7);
+                borderGrad.setColorAt(1.0, isEnabled ? 0xbcbcbc : 0xdddddd);
                 painter->setBrush(borderGrad);
                 painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), radius, radius);
 
                 // Draw body
-                painter->setBrush(QColor(isEnabled ? isDown ? "#f0f0f0" : "white" : "white"));
+                painter->setBrush(QColor(isEnabled ? isDown ? 0xf0f0f0 : 0xffffff : 0xffffff));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5),  radius - 0.5,  radius - 0.5);
             } break;
+
             case TexturedRounded: {
                 // Draw drop shadow
                 rect.adjust(0.5, 0, -0.5, 0);
                 QLinearGradient shadowGrad(0, 0, 1, 0);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0, "#12202020");
-                shadowGrad.setColorAt(0.05, "#10202020");
-                shadowGrad.setColorAt(0.5, "#10202020");
-                shadowGrad.setColorAt(0.95, "#10202020");
-                shadowGrad.setColorAt(1, "#12202020");
+                shadowGrad.setColorAt(0, qRgba64(0x12202020));
+                shadowGrad.setColorAt(0.05, qRgba64(0x10202020));
+                shadowGrad.setColorAt(0.5, qRgba64(0x10202020));
+                shadowGrad.setColorAt(0.95, qRgba64(0x10202020));
+                shadowGrad.setColorAt(1, qRgba64(0x12202020));
                 QPainterPath dropShadowPath;
                 dropShadowPath.addRect(3.5, option->rect.bottom() + 0.5, option->rect.width() - 7, 1);
                 painter->setPen(Qt::NoPen);
@@ -741,8 +734,8 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw shadow
                 QLinearGradient darkGrad(0, 0, 0, 1);
                 darkGrad.setCoordinateMode(QGradient::ObjectMode);
-                darkGrad.setColorAt(0.85, "#20303030");
-                darkGrad.setColorAt(1, "#3f000000");
+                darkGrad.setColorAt(0.85, qRgba64(0x20303030));
+                darkGrad.setColorAt(1, 0x3f000000);
                 QPainterPath shadowPath;
                 shadowPath.addRoundedRect(rect.adjusted(0, 0.5, 0, -0.5), 4, 4);
                 painter->setPen(Qt::NoPen);
@@ -752,12 +745,12 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw body
                 QLinearGradient midGrad(0, 0, 0, 1);
                 midGrad.setCoordinateMode(QGradient::ObjectMode);
-                midGrad.setColorAt(0, "#e4e4e4");
-                midGrad.setColorAt(1, "#dedede");
+                midGrad.setColorAt(0, 0xe4e4e4);
+                midGrad.setColorAt(1, 0xdedede);
                 QLinearGradient buttonGrad(0, 0, 0, 1);
                 buttonGrad.setCoordinateMode(QGradient::ObjectMode);
-                buttonGrad.setColorAt(0, "#fdfdfd");
-                buttonGrad.setColorAt(1, "#f3f3f3");
+                buttonGrad.setColorAt(0, 0xfdfdfd);
+                buttonGrad.setColorAt(1, 0xf3f3f3);
                 QPainterPath bodyPath;
                 bodyPath.addRoundedRect(rect.adjusted(0.5, 1, -0.5, -1), 3.5, 3.5);
                 painter->setPen(Qt::NoPen);
@@ -773,39 +766,40 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                     QPainterPath glowPathDown;
                     glowPathDown.addRoundedRect(rect.adjusted(0, 2, 0, 1), 4.5, 4.5);
                     painter->setPen(Qt::NoPen);
-                    painter->setBrush(QColor("#ebebeb"));
+                    painter->setBrush(QColor(0xebebeb));
                     painter->drawPath(bodyPath.subtracted(glowPathDown));
-                    painter->setBrush(QColor("#f3f3f3"));
+                    painter->setBrush(QColor(0xf3f3f3));
                     painter->drawPath(bodyPath.subtracted(glowPathUp));
                 }
             } break;
+
             case Combo: {
                 rect.adjust(0.5, 0.5, -0.5, 0);
                 // Draw shadows
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.1, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(0.9, isEnabled ? "#07000000" : "#05000000");
-                shadowGrad.setColorAt(1.0, isEnabled ? "#15000000" : "#08000000");
+                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
+                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-                painter->setBrush(QColor(isEnabled ? "#09000000" : "#05000000"));
+                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
                 // Draw border
                 QLinearGradient borderGrad(0, 0, 0, 1);
                 borderGrad.setCoordinateMode(QGradient::ObjectMode);
-                borderGrad.setColorAt(0.0, isEnabled ? "#d8d8d8" : "#ebebeb");
-                borderGrad.setColorAt(0.1, isEnabled ? "#d0d0d0" : "#e7e7e7");
-                borderGrad.setColorAt(0.9, isEnabled ? "#d0d0d0" : "#e7e7e7");
-                borderGrad.setColorAt(1.0, isEnabled ? "#bcbcbc" : "#dddddd");
+                borderGrad.setColorAt(0.0, isEnabled ? 0xd8d8d8 : 0xebebeb);
+                borderGrad.setColorAt(0.1, isEnabled ? 0xd0d0d0 : 0xe7e7e7);
+                borderGrad.setColorAt(0.9, isEnabled ? 0xd0d0d0 : 0xe7e7e7);
+                borderGrad.setColorAt(1.0, isEnabled ? 0xbcbcbc : 0xdddddd);
                 painter->setBrush(borderGrad);
                 painter->drawRoundedRect(rect.adjusted(0.5, 0.5, -0.5, -1), 3.5, 3.5);
 
                 // Draw body
-                painter->setBrush(QColor(isEnabled ? isDown ? "#f0f0f0" : "white" : "white"));
+                painter->setBrush(QColor(isEnabled ? isDown ? 0xf0f0f0 : 0xffffff : 0xffffff));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, -1.5), 3, 3);
 
                 // Draw handle
@@ -823,13 +817,13 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                                hr.bottomRight() - QPointF(7, 0));
                     hp.lineTo(hr.bottomLeft() - QPointF(1, 0));
                     hp.lineTo(hr.topLeft() - QPointF(1, 0));
-                    QLinearGradient borderGrad(0, 0, 0, 1);
-                    borderGrad.setCoordinateMode(QGradient::ObjectMode);
-                    borderGrad.setColorAt(0.0, isDown ? "#3280f7" : "#5496f4");
-                    borderGrad.setColorAt(0.1, isDown ? "#2e7bf3" : "#4a91f5");
-                    borderGrad.setColorAt(0.9, isDown ? "#195cd3" : "#2271f7");
-                    borderGrad.setColorAt(1.0, isDown ? "#1450bf" : "#1d6cf7");
-                    painter->setBrush(borderGrad);
+                    QLinearGradient borderGrad2(0, 0, 0, 1);
+                    borderGrad2.setCoordinateMode(QGradient::ObjectMode);
+                    borderGrad2.setColorAt(0.0, isDown ? 0x3280f7 : 0x5496f4);
+                    borderGrad2.setColorAt(0.1, isDown ? 0x2e7bf3 : 0x4a91f5);
+                    borderGrad2.setColorAt(0.9, isDown ? 0x195cd3 : 0x2271f7);
+                    borderGrad2.setColorAt(1.0, isDown ? 0x1450bf : 0x1d6cf7);
+                    painter->setBrush(borderGrad2);
                     painter->drawPath(hp);
 
                     // Draw body
@@ -846,14 +840,15 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                     hp.lineTo(hr.topLeft() - QPointF(1, 0));
                     QLinearGradient bodyGrad(0, 0, 0, 1);
                     bodyGrad.setCoordinateMode(QGradient::ObjectMode);
-                    bodyGrad.setColorAt(0.0, isDown ? "#5496f9" : "#71a9f5");
-                    bodyGrad.setColorAt(0.9, isDown ? "#1a5ece" : "#2173f7");
-                    bodyGrad.setColorAt(1.0, isDown ? "#1a5ece" : "#2173f7");
+                    bodyGrad.setColorAt(0.0, isDown ? 0x5496f9 : 0x71a9f5);
+                    bodyGrad.setColorAt(0.9, isDown ? 0x1a5ece : 0x2173f7);
+                    bodyGrad.setColorAt(1.0, isDown ? 0x1a5ece : 0x2173f7);
                     painter->setBrush(bodyGrad);
                     painter->drawPath(hp);
                     painter->setClipping(false);
                 }
             } break;
+
             default:
                 break;
             }
@@ -871,7 +866,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         painter->restore();
     } break;
     default:
-        QFusionStyle::drawPrimitive(element, option, painter, widget);
+        QProxyStyle::drawPrimitive(element, option, painter, widget);
         break;
     }
 }
@@ -879,7 +874,6 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
 void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleOption* option,
                                    QPainter* painter, const QWidget* widget) const
 {
-    Q_D (const QFusionStyle);
     const QRectF r(option->rect);
 
     switch (element) {
@@ -891,8 +885,10 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         if (const QStyleOptionMenuItem* m
                 = qstyleoption_cast<const QStyleOptionMenuItem*>(option)) {
             painter->save();
+            const int macItemFrame = 1; // menu item frame width
+            const int macItemHMargin = 2; // menu item hor text margin
+            const int macRightBorder = 12; // right border on mac
             QStyleOptionMenuItem mi(*m);
-            mi.rect.adjust(1, 1, -1, -1);
             const bool active = mi.state & State_Selected;
             if (active)
                 painter->fillRect(mi.rect, mi.palette.highlight());
@@ -933,7 +929,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             }
             if (mi.menuItemType == QStyleOptionMenuItem::Separator) {
                 const QRect separatorRect = QRect(mi.rect.left(), mi.rect.center().y(), mi.rect.width(), 2);
-                painter->fillRect(separatorRect, "#D5D5D5");
+                painter->fillRect(separatorRect, 0xd5d5d5);
                 painter->restore();
                 break;
             }
@@ -968,7 +964,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 QIcon::Mode mode = dis ? QIcon::Disabled : QIcon::Normal;
                 if (act && !dis)
                     mode = QIcon::Active;
-                QPixmap pixmap;
+                QPixmap px;
 
                 int smallIconSize = proxy()->pixelMetric(PM_SmallIconSize, option, widget);
                 QSize iconSize(smallIconSize, smallIconSize);
@@ -976,14 +972,14 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 if (const QComboBox *combo = qobject_cast<const QComboBox*>(widget))
                     iconSize = combo->iconSize();
 
-                pixmap = PaintUtils::pixmap(mi.icon, iconSize, widget,
-                                            mode, mi.checked ? QIcon::On : QIcon::Off);
-                int pixw = pixmap.devicePixelRatioF() > 0 ? pixmap.width() / pixmap.devicePixelRatioF() : 1;
-                int pixh = pixmap.devicePixelRatioF() > 0 ? pixmap.height() / pixmap.devicePixelRatioF() : 1;
+                px =  PaintUtils::pixmap(mi.icon, iconSize, widget,
+                            mode, mi.checked ? QIcon::On : QIcon::Off);
+                int pixw = px.devicePixelRatioF() > 0 ? px.width() / px.devicePixelRatioF() : 1;
+                int pixh = px.devicePixelRatioF() > 0 ? px.height() / px.devicePixelRatioF() : 1;
                 QRect cr(xpos, mi.rect.y(), checkcol, mi.rect.height());
                 QRect pmr(0, 0, pixw, pixh);
                 pmr.moveCenter(cr.center());
-                painter->drawPixmap(pmr.topLeft(), pixmap);
+                painter->drawPixmap(pmr.topLeft(), px);
                 xpos += pixw + 6;
             }
 
@@ -995,16 +991,16 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             const int tabwidth = isSubMenu ? 9 : mi.tabWidth;
             QString rightMarginText;
             if (isSubMenu)
-                rightMarginText = QString::fromUtf8("▶"); // U+25B6: BLACK RIGHT-POINTING TRIANGLE
+                rightMarginText = QStringLiteral("▶"); // U+25B6: BLACK RIGHT-POINTING TRIANGLE
             // If present, save and remove embedded shorcut from text
-            const int tabIndex = s.indexOf(QLatin1Char('\t'));
+            const qsizetype tabIndex = s.indexOf(QLatin1Char('\t'));
             if (tabIndex >= 0) {
                 if (!isSubMenu) // ... but ignore it if it's a submenu.
                     rightMarginText = s.mid(tabIndex + 1);
                 s = s.left(tabIndex);
             }
             if (!rightMarginText.isEmpty()) {
-                painter->setFont(qt_app_fonts_hash()->value("QMenuItem", painter->font()));
+                painter->setFont(qt_app_fonts_hash()->value(QByteArrayLiteral("QMenuItem"), painter->font()));
                 int xp = mi.rect.right() - tabwidth - macRightBorder + 2;
                 if (!isSubMenu)
                     xp -= macItemHMargin + macItemFrame + 3; // Adjust for shortcut
@@ -1026,41 +1022,39 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             auto copy = *cb;
             copy.direction = Qt::LeftToRight;
             // The rectangle will be adjusted to SC_ComboBoxEditField with comboboxEditBounds()
-            QFusionStyle::drawControl(element, &copy, painter, widget);
+            QProxyStyle::drawControl(element, &copy, painter, widget);
         } break;
     case CE_PushButtonLabel:
-        if (const QStyleOptionButton *button = qstyleoption_cast<const QStyleOptionButton *>(option)) {
+        if (const QStyleOptionButton* button = qstyleoption_cast<const QStyleOptionButton *>(option)) {
             QRectF ir = button->rect;
             uint tf = Qt::AlignVCenter;
-            if (styleHint(SH_UnderlineShortcut, button, widget))
+            if (proxy()->styleHint(SH_UnderlineShortcut, button, widget))
                 tf |= Qt::TextShowMnemonic;
             else
                 tf |= Qt::TextHideMnemonic;
             if (!button->icon.isNull()) {
                 //Center both icon and text
                 QPointF point;
-                QIcon::Mode mode = button->state & State_Enabled ? QIcon::Normal
-                                                                 : QIcon::Disabled;
+                QIcon::Mode mode = button->state & State_Enabled ? QIcon::Normal : QIcon::Disabled;
                 if (mode == QIcon::Normal && button->state & State_HasFocus)
                     mode = QIcon::Active;
                 QIcon::State state = QIcon::Off;
                 if (button->state & State_On)
                     state = QIcon::On;
 
-                QPixmap pixmap = PaintUtils::pixmap(button->icon, button->iconSize, widget, mode, state);
+                QPixmap px =  PaintUtils::pixmap(button->icon, button->iconSize, widget, mode, state);
                 if (button->state & State_Sunken)
-                    pixmap = PaintUtils::renderOverlaidPixmap(pixmap, "#30000000");
-                qreal w = pixmap.devicePixelRatioF() > 0 ? pixmap.width() / pixmap.devicePixelRatioF() : 1;
-                qreal h = pixmap.devicePixelRatioF() > 0 ? pixmap.height() / pixmap.devicePixelRatioF() : 1;
+                    px = PaintUtils::renderOverlaidPixmap(px, qRgba64(0x30000000));
+                qreal w = px.devicePixelRatioF() > 0 ? px.width() / px.devicePixelRatioF() : 1;
+                qreal h = px.devicePixelRatioF() > 0 ? px.height() / px.devicePixelRatioF() : 1;
                 if (!button->text.isEmpty())
                     w += button->fontMetrics.boundingRect(option->rect, tf, button->text).width() + 3;
                 point = QPointF(ir.x() + ir.width() / 2 - w / 2,
                                 ir.y() + ir.height() / 2 - h / 2);
-                w = pixmap.devicePixelRatioF() > 0 ? pixmap.width() / pixmap.devicePixelRatioF() : 1;
+                w = px.devicePixelRatioF() > 0 ? px.width() / px.devicePixelRatioF() : 1;
                 if (button->direction == Qt::RightToLeft)
                     point.rx() += w;
-                painter->drawPixmap(visualPos(button->direction, button->rect, point), pixmap,
-                                    pixmap.rect());
+                painter->drawPixmap(visualPos(button->direction, button->rect, point), px, px.rect());
                 if (button->direction == Qt::RightToLeft)
                     ir.translate(ir.x() - point.x() - 2, 0);
                 else
@@ -1077,36 +1071,31 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             // Draw item text
             QStyleOptionButton copy(*button);
             if (buttonStyle(widget) == Push) {
-                bool isFlat = false;
-                bool isDefault = false;
-                bool isEnabled = option->state & QStyle::State_Enabled;
-                bool isDown = (option->state & QStyle::State_Sunken)
-                        || (!highlightingDisabledForCheckedState(widget) && option->state & QStyle::State_On);
-                bool hasFocus = (option->state & QStyle::State_HasFocus)
-                        && (option->state & QStyle::State_KeyboardFocusChange);
-
-                if (const QStyleOptionButton* button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
-                    isFlat = button->features & QStyleOptionButton::Flat;
-                    isDefault = button->features & QStyleOptionButton::DefaultButton;
-                }
+                bool isFlat = button->features & QStyleOptionButton::Flat;
+                bool isDefault = button->features & QStyleOptionButton::DefaultButton;
+                bool isEnabled = button->state & QStyle::State_Enabled;
+                bool isDown = (button->state & QStyle::State_Sunken)
+                        || (!highlightingDisabledForCheckedState(widget) && button->state & QStyle::State_On);
+                bool hasFocus = (button->state & QStyle::State_HasFocus)
+                        && (button->state & QStyle::State_KeyboardFocusChange);
 
                 if (isEnabled && (!isFlat || isDown)) {
                     if (isDown)
-                        copy.palette.setColor(QPalette::ButtonText, "#e4effe");
+                        copy.palette.setColor(QPalette::ButtonText, 0xe4effe);
                     else if (isDefault || hasFocus)
                         copy.palette.setColor(QPalette::ButtonText, Qt::white);
                 }
             }
-            drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
-                         copy.text, QPalette::ButtonText);
+            ApplicationStyle::drawItemText(painter, ir, tf, copy.palette, copy.state & State_Enabled,
+                                           copy.text, QPalette::ButtonText);
 
             if (widget) {
                 const QVariant& value = widget->property(notificationsProperty);
                 if (value.isValid()) {
-                    QRectF r = option->rect;
-                    r = QRectF(QPointF(r.right() - 14, r.center().y() - 2 - option->fontMetrics.height() / 2.0),
+                    QRectF x = option->rect;
+                    x = QRectF(QPointF(x.right() - 14, x.center().y() - 2 - option->fontMetrics.height() / 2.0),
                                QSizeF(12, 12));
-                    drawNotifications(painter, r, value.toString());
+                    drawNotifications(painter, x, value.toString());
                 }
             }
         } break;
@@ -1120,7 +1109,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                 painter->translate(0, widget->height());
                 painter->rotate(-90);
             }
-            if (widget && widget->parent() && widget->parent()->objectName() == "modeSelectorPane") {
+            if (widget && widget->parent() && widget->parent()->objectName() == QLatin1String("modeSelectorPane")) {
                 toolbutton->rect.adjust(4, 0, 0, 0);
                 if (toolbutton->state & State_On || toolbutton->state & State_Sunken)
                     toolbutton->palette.setColor(QPalette::ButtonText, Qt::white);
@@ -1151,7 +1140,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     QIcon::State state = toolbutton->state & State_On ? QIcon::On : QIcon::Off;
                     QIcon::Mode mode;
                     if (widget && widget->parent() && widget->parent()->objectName()
-                            == "modeSelectorPane" && toolbutton->state & State_Sunken) {
+                            == QLatin1String("modeSelectorPane") && toolbutton->state & State_Sunken) {
                         state = QIcon::On;
                     }
                     if (!(toolbutton->state & State_Enabled))
@@ -1161,8 +1150,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                     else
                         mode = QIcon::Normal;
                     pm = PaintUtils::pixmap(toolbutton->icon,
-                                            toolbutton->rect.size().boundedTo(toolbutton->iconSize),
-                                            widget, mode, state);
+                                toolbutton->rect.size().boundedTo(toolbutton->iconSize),
+                                widget, mode, state);
                     pmSize = pm.devicePixelRatioF() > 0 ? pm.size() / pm.devicePixelRatioF() : QSize();
                 }
 
@@ -1197,7 +1186,8 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
                         alignment |= Qt::AlignLeft | Qt::AlignVCenter;
                     }
                     tr.translate(shiftX, shiftY);
-                    const QString text = d->toolButtonElideText(toolbutton, tr, alignment);
+                    const QString text = reinterpret_cast<const QCommonStylePrivate*>
+                            (QStylePrivate::get(this))->toolButtonElideText(toolbutton, tr, alignment);
                     proxy()->drawItemText(painter, QStyle::visualRect(option->direction, rect, tr),
                                           alignment, toolbutton->palette,
                                           toolbutton->state & State_Enabled, text,
@@ -1219,10 +1209,10 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
             const QPointF finalPoint = (cb->state & State_Horizontal) ? QPointF(0, 1) : QPointF(1, 0);
             QLinearGradient gradient(QPointF(), finalPoint);
             gradient.setCoordinateMode(QGradient::ObjectMode);
-            gradient.setColorAt(0, QStringLiteral("#ffffff"));
-            gradient.setColorAt(1, QStringLiteral("#e3e3e3"));
+            gradient.setColorAt(0, 0xffffff);
+            gradient.setColorAt(1, 0xe3e3e3);
             painter->setBrush(gradient);
-            painter->setPen(QPen(QColor(QStringLiteral("#b6b6b6")), 1, Qt::SolidLine, Qt::FlatCap,
+            painter->setPen(QPen(QColor(0xb6b6b6), 1, Qt::SolidLine, Qt::FlatCap,
                                  Qt::MiterJoin));
             painter->drawRect(cb->rect);
             painter->restore();
@@ -1256,12 +1246,11 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         break;
     case CE_ProgressBarContents:
         if (const QStyleOptionProgressBar* opt = qstyleoption_cast<const QStyleOptionProgressBar*>(option)) {
-            static const char animationProperty[] = "_q_ApplicationStyle_animationForProgressBar";
-            static const QColor backgroundColor = "#12000000";
-            static const QColor borderColor = "#40000000";
-            static const QColor indeterminateColor = "#45ffffff";
+            static const QColor backgroundColor = qRgba64(0x12000000);
+            static const QColor borderColor = qRgba64(0x40000000);
+            static const QColor indeterminateColor = 0x45ffffff;
             const QColor progressColor = opt->invertedAppearance ? opt->palette.button().color()
-                                                                 : QColor("#419BF9");
+                                                                 : QColor(0x419BF9);
             const bool isIndeterminate = (opt->minimum == 0 && opt->maximum == 0);
             const qreal borderRadius = opt->rect.height() / 2.0;
             auto animation = opt->styleObject
@@ -1330,35 +1319,35 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         break;
     case CE_TabBarTabLabel:
         painter->save();
-        QFusionStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, option, painter, widget);
         painter->restore();
         if (auto bar = qobject_cast<const QTabBar*>(widget)) {
             if (auto opt = qstyleoption_cast<const QStyleOptionTab*>(option)) {
                 const QVariant& value = bar->tabData(bar->tabAt(opt->rect.center()));
                 if (value.isValid()) {
-                    QRectF r = proxy()->subElementRect(SE_TabBarTabText, option, widget);
-                    r = QRectF(QPointF(r.right() - 3, r.center().y() - 3 - option->fontMetrics.height() / 2.0),
+                    QRectF x = proxy()->subElementRect(SE_TabBarTabText, option, widget);
+                    x = QRectF(QPointF(x.right() - 3, x.center().y() - 3 - option->fontMetrics.height() / 2.0),
                                QSizeF(12, 12));
-                    drawNotifications(painter, r, value.toString());
+                    drawNotifications(painter, x, value.toString());
                 }
             }
         } break;
     case CE_ItemViewItem:
         painter->save();
-        QFusionStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, option, painter, widget);
         painter->restore();
         if (widget) {
             if (auto opt = qstyleoption_cast<const QStyleOptionViewItem*>(option)) {
                 const QVariant& value = opt->index.data(NotificationsProperty);
                 if (value.isValid()) {
-                    QRectF r = proxy()->subElementRect(SE_ItemViewItemFocusRect, option, widget);
-                    r = QRectF(QPointF(r.right() - 15, r.center().y() - 6), QSizeF(12, 12));
-                    drawNotifications(painter, r, value.toString());
+                    QRectF x = proxy()->subElementRect(SE_ItemViewItemFocusRect, option, widget);
+                    x = QRectF(QPointF(x.right() - 15, x.center().y() - 6), QSizeF(12, 12));
+                    drawNotifications(painter, x, value.toString());
                 }
             }
         } break;
     default:
-        QFusionStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, option, painter, widget);
         break;
     }
 }
@@ -1375,7 +1364,7 @@ void ApplicationStyle::drawComplexControl(QStyle::ComplexControl control,
             QStyleOptionComboBox copy = *combo;
             copy.subControls &= ~SC_ComboBoxArrow;
             copy.editable = false;
-            QFusionStyle::drawComplexControl(control, &copy, painter, widget);
+            QProxyStyle::drawComplexControl(control, &copy, painter, widget);
             if (combo->subControls & SC_ComboBoxArrow) {
                 QColor arrowColor = option->palette.buttonText().color();
                 arrowColor.setAlpha(230);
@@ -1400,7 +1389,7 @@ void ApplicationStyle::drawComplexControl(QStyle::ComplexControl control,
             painter->restore();
         } break;
     default:
-        QFusionStyle::drawComplexControl(control, option, painter, widget);
+        QProxyStyle::drawComplexControl(control, option, painter, widget);
         break;
     }
 }
@@ -1409,7 +1398,7 @@ void ApplicationStyle::drawItemText(QPainter* painter, const QRect& rect, int al
                                     const QPalette& pal, bool enabled, const QString& text,
                                     QPalette::ColorRole textRole) const
 {
-    drawItemText(painter, QRectF(rect), alignment, pal, enabled, text, textRole);
+    ApplicationStyle::drawItemText(painter, QRectF(rect), alignment, pal, enabled, text, textRole);
 }
 
 void ApplicationStyle::drawItemText(QPainter* painter, const QRectF& rect, int alignment,
@@ -1429,15 +1418,15 @@ void ApplicationStyle::drawItemText(QPainter* painter, const QRectF& rect, int a
 }
 
 void ApplicationStyle::drawItemPixmap(QPainter* painter, const QRect& rect, int alignment,
-                                      const QPixmap& pixmap) const
+                                      const QPixmap& px) const
 {
     // Workaround for bad QMovie painting
-    QPixmap copy(pixmap);
+    QPixmap copy(px);
     if (auto label = dynamic_cast<const QLabel*>(painter->device())) {
         if (label->movie() && label->movie()->isValid() && label->movie()->state() != QMovie::NotRunning)
             copy.setDevicePixelRatio(label->devicePixelRatioF());
     }
-    QFusionStyle::drawItemPixmap(painter, rect, alignment, copy);
+    QProxyStyle::drawItemPixmap(painter, rect, alignment, copy);
 }
 
 void ApplicationStyle::polish(QWidget* w)
@@ -1446,11 +1435,11 @@ void ApplicationStyle::polish(QWidget* w)
             || qobject_cast<QComboBoxPrivateContainer*>(w)
             || qobject_cast<QMdiSubWindow*>(w)) {
 
-        if (!w->property("ow_flag_set").isValid()) {
-            w->setProperty("ow_flag_set", true);
+        if (!w->property("_q_ApplicationStyle_tinkered").isValid()) {
+            w->setProperty("_q_ApplicationStyle_tinkered", true);
             for (QWidget* wd : w->findChildren<QWidget*>()) {
                 if (wd != w)
-                    wd->setStyleSheet("QWidget { background: transparent; }");
+                    wd->setStyleSheet(QStringLiteral("QWidget { background: transparent; }"));
             }
             class A final : public QObject {
                 bool eventFilter(QObject* w, QEvent* e) override
@@ -1459,9 +1448,15 @@ void ApplicationStyle::polish(QWidget* w)
                         QWidget* wid = static_cast<QWidget*>(w);
                         QWidget* parentWid = wid->parentWidget();
                         wid->setWindowFlags(wid->windowFlags()
-                                            | Qt::X11BypassWindowManagerHint
+                                            | Qt::BypassWindowManagerHint
                                             | Qt::NoDropShadowWindowHint
                                             | Qt::FramelessWindowHint);
+#if defined(Q_OS_WINDOWS)
+                        HWND hwnd = reinterpret_cast<HWND>(wid->winId());
+                        DWORD style = GetClassLong(hwnd, GCL_STYLE);
+                        style &= ~CS_DROPSHADOW;
+                        SetClassLong(hwnd, GCL_STYLE, style);
+#endif
                         wid->removeEventFilter(this);
                         if (parentWid)
                             wid->show();
@@ -1475,7 +1470,7 @@ void ApplicationStyle::polish(QWidget* w)
         w->setAutoFillBackground(false);
     }
 
-    QFusionStyle::polish(w);
+    QProxyStyle::polish(w);
 
     if (qobject_cast<QScrollBar*>(w)) {
         w->setAttribute(Qt::WA_OpaquePaintEvent, false);
@@ -1503,7 +1498,7 @@ void ApplicationStyle::unpolish(QWidget* w)
     if (QFocusFrame *frame = qobject_cast<QFocusFrame*>(w))
         frame->setAttribute(Qt::WA_NoSystemBackground, true);
 
-    QFusionStyle::unpolish(w);
+    QProxyStyle::unpolish(w);
 
     if (qobject_cast<QScrollBar*>(w)) {
         w->setAttribute(Qt::WA_OpaquePaintEvent, true);

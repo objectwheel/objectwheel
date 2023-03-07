@@ -16,7 +16,7 @@ INCLUDEPATH += $$PWD
 ### Sources
 HEADERS += \
     $$PWD/appconstants.h \
-    $$PWD/signalwatcher.h \
+    $$PWD/signalhandler.h \
     $$PWD/delayer.h \
     $$PWD/saveutils.h \
     $$PWD/toolutils.h \
@@ -35,7 +35,7 @@ HEADERS += \
     $$PWD/planinfo.h
 
 SOURCES += \
-    $$PWD/signalwatcher.cpp \
+    $$PWD/signalhandler.cpp \
     $$PWD/delayer.cpp \
     $$PWD/saveutils.cpp \
     $$PWD/toolutils.cpp \

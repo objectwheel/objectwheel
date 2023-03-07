@@ -1,6 +1,8 @@
 #ifndef APPLICATIONCORE_H
 #define APPLICATIONCORE_H
 
+#include <signalhandler.h>
+
 #include <QPalette>
 #include <QApplication>
 
@@ -69,6 +71,7 @@ private:
     static void onUserSessionStart();
 
 private:
+    SignalHandler m_signalHandler;
     static QSettings* s_settings;
     static GeneralSettings* s_generalSettings;
     static DesignerSettings* s_designerSettings;

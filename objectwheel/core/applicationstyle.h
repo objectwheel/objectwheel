@@ -1,15 +1,14 @@
 #ifndef APPLICATIONSTYLE_H
 #define APPLICATIONSTYLE_H
 
-#include <private/qfusionstyle_p.h>
+#include <QProxyStyle>
 #include <QPointer>
 
 class QFocusFrame;
-class ApplicationStyle : public QFusionStyle
+class ApplicationStyle : public QProxyStyle
 {
     Q_OBJECT
     Q_DISABLE_COPY(ApplicationStyle)
-    Q_DECLARE_PRIVATE(QFusionStyle)
 
 public:
     enum ButtonStyle {
@@ -25,11 +24,11 @@ public:
     static void setButtonStyle(QWidget* widget, ButtonStyle buttonStyle);
     static bool highlightingDisabledForCheckedState(const QWidget* widget);
     static void setHighlightingDisabledForCheckedState(QWidget* widget, bool highlightDisabled);
-    static QPointF visualPos(Qt::LayoutDirection direction, const QRectF& boundingRect,
-                             const QPointF& logicalPos);
+    static QPointF visualPos(Qt::LayoutDirection direction, const QRectF& boundingRect, const QPointF& logicalPos);
+
 public:
     ApplicationStyle();
-   ~ApplicationStyle() override;
+    ~ApplicationStyle() override;
 
     QSize sizeFromContents(QStyle::ContentsType type, const QStyleOption* option,
                            const QSize& contentsSize, const QWidget* widget) const override;
@@ -57,8 +56,8 @@ public:
                       bool enabled, const QString& text, QPalette::ColorRole textRole) const;
     void drawItemPixmap(QPainter* painter, const QRect& rect, int alignment,
                         const QPixmap& pixmap) const override;
-    void polish(QWidget* w) override;
-    void unpolish(QWidget* w) override;
+    void polish(QWidget* widget) override;
+    void unpolish(QWidget* widget) override;
 
 protected:
     bool event(QEvent* event) override;

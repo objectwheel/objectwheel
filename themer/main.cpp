@@ -2,7 +2,7 @@
 #include <saveutils.h>
 #include <quicktheme.h>
 #include <utilityfunctions.h>
-#include <signalwatcher.h>
+#include <signalhandler.h>
 #include <appconstants.h>
 
 #ifdef Q_OS_MACOS
@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
 
     // Handle signals
-    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
-                     SignalWatcher::instance(), &SignalWatcher::defaultInterruptAction,
-                     Qt::QueuedConnection);
+    SignalHandler signalHandler;
+    QObject::connect(&signalHandler, &SignalHandler::interrupted,
+                     &signalHandler, &SignalHandler::exitGracefully);
 
 #ifdef Q_OS_MACOS // Show/hide dock icon
     if (argc > 2 && argv[2] == QString("capture"))

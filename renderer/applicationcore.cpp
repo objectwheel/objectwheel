@@ -7,7 +7,7 @@
 #include <quicktheme.h>
 #include <saveutils.h>
 #include <utilityfunctions.h>
-#include <signalwatcher.h>
+#include <signalhandler.h>
 #include <appconstants.h>
 
 #include <QTimer>
@@ -22,6 +22,7 @@
 #endif
 
 ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
+  , m_signalHandler(new SignalHandler(this))
   , m_renderSocket(new RenderSocket)
   , m_socketThread(new QThread(this))
   , m_commandDispatcher(new CommandDispatcher(m_renderSocket, this))
@@ -38,9 +39,8 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
     QApplication::setFont(UtilityFunctions::systemDefaultFont());
 
     // Handle signals
-    QObject::connect(SignalWatcher::instance(), &SignalWatcher::signal,
-                     SignalWatcher::instance(), &SignalWatcher::defaultInterruptAction,
-                     Qt::QueuedConnection);
+    QObject::connect(m_signalHandler, &SignalHandler::interrupted,
+                     m_signalHandler, &SignalHandler::exitGracefully);
 
     DesignerSupport::activateDesignerWindowManager();
     DesignerSupport::activateDesignerMode();
@@ -91,7 +91,7 @@ ApplicationCore::ApplicationCore(QObject* parent) : QObject(parent)
 }
 
 ApplicationCore::~ApplicationCore()
-{    
+{
     m_socketThread->quit();
     m_socketThread->wait();
     delete m_renderSocket;
