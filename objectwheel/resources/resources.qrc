@@ -181,5 +181,6 @@
         <file>images/splash/splash@3x.png</file>
         <file>images/builds/android-large.svg</file>
         <file>images/subscription/checkout.svg</file>
+        <file>other/cert.pem</file>
     </qresource>
 </RCC>

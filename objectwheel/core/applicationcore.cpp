@@ -115,6 +115,16 @@ ApplicationCore::ApplicationCore()
     font.setPixelSize(font.pixelSize() - 1);
     QToolTip::setFont(font);
 
+    /* Setup SSL */
+    QFile cert(":/other/cert.pem");
+    if (!cert.open(QFile::ReadOnly))
+        qWarning("Either private key or certificate is empty");
+    QSslConfiguration sslConfiguration(QSslConfiguration::defaultConfiguration());
+    QList<QSslCertificate> certs(sslConfiguration.caCertificates());
+    certs.append(QSslCertificate(&cert, QSsl::Pem));
+    sslConfiguration.setCaCertificates(certs);
+    QSslConfiguration::setDefaultConfiguration(sslConfiguration);
+
     /* Show splash screen */
     auto splash = new SplashScreen(PaintUtils::pixmap(QStringLiteral(":/images/splash/splash.png"),
                                                       QSize(485, 300)), Qt::WindowStaysOnTopHint);
