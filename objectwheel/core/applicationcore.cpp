@@ -273,6 +273,7 @@ bool ApplicationCore::locked()
 void ApplicationCore::prepare()
 {
     qputenv("QT_FORCE_STDERR_LOGGING", "1");
+    // qputenv("QT_SCALE_FACTOR", "1.5");
 
     // Set those here, needed by QStandardPaths
     QApplication::setApplicationName(AppConstants::NAME);
@@ -291,36 +292,37 @@ void ApplicationCore::prepare()
 
 QPalette ApplicationCore::palette()
 {
+    auto c = qRgba64(0x11223344);
     //  FIXME  QSettings settings(settingsPath(), QSettings::IniFormat);
     //    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light")
     const int g = qGray(GeneralSettings::interfaceSettings()->highlightColor.rgb());
-    QPalette palette(QApplication::palette());
-    palette.setColor(QPalette::Active, QPalette::Text, "#303030");
-    palette.setColor(QPalette::Inactive, QPalette::Text, "#303030");
-    palette.setColor(QPalette::Disabled, QPalette::Text, "#656565");
-    palette.setColor(QPalette::Active, QPalette::WindowText, "#303030");
-    palette.setColor(QPalette::Inactive, QPalette::WindowText, "#303030");
-    palette.setColor(QPalette::Disabled, QPalette::WindowText, "#656565");
-    palette.setColor(QPalette::Active, QPalette::ButtonText, "#303030");
-    palette.setColor(QPalette::Inactive, QPalette::ButtonText, "#303030");
-    palette.setColor(QPalette::Disabled, QPalette::ButtonText, "#656565");
-    palette.setColor(QPalette::Active, QPalette::PlaceholderText, "#bfbfbf");
-    palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, "#bfbfbf");
-    palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, "#bfbfbf");
-    palette.setColor(QPalette::Active, QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
-    palette.setColor(QPalette::Inactive, QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
-    palette.setColor(QPalette::Disabled, QPalette::Highlight, QColor(g, g, g));
-    palette.setColor(QPalette::Base, "#ffffff");
-    palette.setColor(QPalette::AlternateBase, "#f5f5f5");
-    palette.setColor(QPalette::Button, "#ececec");
-    palette.setColor(QPalette::Window, "#ececec");
-    palette.setColor(QPalette::BrightText, "#ffffff");
-    palette.setColor(QPalette::HighlightedText, "#ffffff");
-    palette.setColor(QPalette::ToolTipText, "#303030");
-    palette.setColor(QPalette::ToolTipBase, "#ececec");
-    palette.setColor(QPalette::Link, "#025dbf");
-    palette.setColor(QPalette::LinkVisited, "#B44B46");
-    return palette;
+    auto light = QGuiApplication::palette();
+    light.setColor(QPalette::Active, QPalette::Text, 0x181818);
+    light.setColor(QPalette::Inactive, QPalette::Text, 0x181818);
+    light.setColor(QPalette::Disabled, QPalette::Text, 0x656565);
+    light.setColor(QPalette::Active, QPalette::WindowText, 0x181818);
+    light.setColor(QPalette::Inactive, QPalette::WindowText, 0x181818);
+    light.setColor(QPalette::Disabled, QPalette::WindowText, 0x656565);
+    light.setColor(QPalette::Active, QPalette::ButtonText, 0x181818);
+    light.setColor(QPalette::Inactive, QPalette::ButtonText, 0x181818);
+    light.setColor(QPalette::Disabled, QPalette::ButtonText, 0x656565);
+    light.setColor(QPalette::Active, QPalette::PlaceholderText, 0xbfbfbf);
+    light.setColor(QPalette::Inactive, QPalette::PlaceholderText, 0xbfbfbf);
+    light.setColor(QPalette::Disabled, QPalette::PlaceholderText, 0xbfbfbf);
+    light.setColor(QPalette::Active, QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
+    light.setColor(QPalette::Inactive, QPalette::Highlight, GeneralSettings::interfaceSettings()->highlightColor);
+    light.setColor(QPalette::Disabled, QPalette::Highlight, QColor(g, g, g));
+    light.setColor(QPalette::Base, 0xffffff);
+    light.setColor(QPalette::AlternateBase, 0xf5f5f5);
+    light.setColor(QPalette::Button, 0xececec);
+    light.setColor(QPalette::Window, 0xececec);
+    light.setColor(QPalette::BrightText, 0xffffff);
+    light.setColor(QPalette::HighlightedText, 0xffffff);
+    light.setColor(QPalette::ToolTipText, 0x181818);
+    light.setColor(QPalette::ToolTipBase, 0xececec);
+    light.setColor(QPalette::Link, 0x025dbf);
+    light.setColor(QPalette::LinkVisited, 0xb44b46);
+    return light;
 }
 
 QSettings* ApplicationCore::settings()

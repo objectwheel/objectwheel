@@ -561,7 +561,7 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
         theStroker.setCapStyle(Qt::FlatCap);
         // theStroker.setDashPattern(QVector<qreal>() << 1 << 2);
         path = theStroker.createStroke(path);
-        painter->fillPath(path, QColor(qRgba64(0x50000000)));
+        painter->fillPath(path, QColor(0x00, 0x00, 0x00, 0x50));
     } break;
     case PE_PanelButtonTool:
         if (widget && widget->objectName() == QLatin1String("qt_toolbar_ext_button"))
@@ -572,11 +572,11 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
             painter->setPen(Qt::NoPen);
             painter->setBrush(Qt::NoBrush);
             if (option->state & State_Sunken)
-                painter->setBrush(QColor(qRgba64(0x80000000)));
+                painter->setBrush(QColor(0x00, 0x00, 0x00, 0x80));
             else if (option->state & State_On)
-                painter->setBrush(QColor(qRgba64(0x60000000)));
+                painter->setBrush(QColor(0x00, 0x00, 0x00, 0x60));
             else if (option->state & State_MouseOver)
-                painter->setBrush(QColor(qRgba64(0x20000000)));
+                painter->setBrush(QColor(0x00, 0x00, 0x00, 0x20));
             painter->drawRoundedRect(QRectF(option->rect), 7, 7);
             painter->restore();
             break;
@@ -624,14 +624,14 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw shadows
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
+                shadowGrad.setColorAt(0.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.1, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.9, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(1.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x15) : QColor(0x00, 0x00, 0x00, 0x08));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
+                painter->setBrush(QColor(isEnabled ? QColor(0x00, 0x00, 0x00, 0x09) : QColor(0x00, 0x00, 0x00, 0x05)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
                 // Draw border
@@ -659,14 +659,14 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw shadows
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
+                shadowGrad.setColorAt(0.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.1, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.9, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(1.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x15) : QColor(0x00, 0x00, 0x00, 0x08));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
+                painter->setBrush(QColor(isEnabled ? QColor(0x00, 0x00, 0x00, 0x09) : QColor(0x00, 0x00, 0x00, 0x05)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
                 // Draw border
@@ -690,14 +690,14 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 qreal radius = qMin(rect.width() - 1, rect.height() - 1.5) / 2.0;
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
+                shadowGrad.setColorAt(0.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.1, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.9, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(1.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x15) : QColor(0x00, 0x00, 0x00, 0x08));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), radius + 0.5, radius + 0.5);
-                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
+                painter->setBrush(QColor(isEnabled ? QColor(0x00, 0x00, 0x00, 0x09) : QColor(0x00, 0x00, 0x00, 0x05)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), radius + 0.5, radius + 0.5);
 
                 // Draw border
@@ -720,11 +720,11 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 rect.adjust(0.5, 0, -0.5, 0);
                 QLinearGradient shadowGrad(0, 0, 1, 0);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0, qRgba64(0x12202020));
-                shadowGrad.setColorAt(0.05, qRgba64(0x10202020));
-                shadowGrad.setColorAt(0.5, qRgba64(0x10202020));
-                shadowGrad.setColorAt(0.95, qRgba64(0x10202020));
-                shadowGrad.setColorAt(1, qRgba64(0x12202020));
+                shadowGrad.setColorAt(0, QColor(0x20, 0x20, 0x20, 0x12));
+                shadowGrad.setColorAt(0.05, QColor(0x20, 0x20, 0x20, 0x10));
+                shadowGrad.setColorAt(0.5, QColor(0x20, 0x20, 0x20, 0x10));
+                shadowGrad.setColorAt(0.95, QColor(0x20, 0x20, 0x20, 0x10));
+                shadowGrad.setColorAt(1, QColor(0x20, 0x20, 0x20, 0x12));
                 QPainterPath dropShadowPath;
                 dropShadowPath.addRect(3.5, option->rect.bottom() + 0.5, option->rect.width() - 7, 1);
                 painter->setPen(Qt::NoPen);
@@ -734,8 +734,8 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw shadow
                 QLinearGradient darkGrad(0, 0, 0, 1);
                 darkGrad.setCoordinateMode(QGradient::ObjectMode);
-                darkGrad.setColorAt(0.85, qRgba64(0x20303030));
-                darkGrad.setColorAt(1, 0x3f000000);
+                darkGrad.setColorAt(0.85, QColor(0x30, 0x30, 0x30, 0x20));
+                darkGrad.setColorAt(1, QColor(0x00, 0x00, 0x00, 0x3f));
                 QPainterPath shadowPath;
                 shadowPath.addRoundedRect(rect.adjusted(0, 0.5, 0, -0.5), 4, 4);
                 painter->setPen(Qt::NoPen);
@@ -778,14 +778,14 @@ void ApplicationStyle::drawPrimitive(QStyle::PrimitiveElement element, const QSt
                 // Draw shadows
                 QLinearGradient shadowGrad(0, 0, 0, 1);
                 shadowGrad.setCoordinateMode(QGradient::ObjectMode);
-                shadowGrad.setColorAt(0.0, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.1, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(0.9, isEnabled ? qRgba64(0x07000000) : qRgba64(0x05000000));
-                shadowGrad.setColorAt(1.0, isEnabled ? qRgba64(0x15000000) : qRgba64(0x08000000));
+                shadowGrad.setColorAt(0.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.1, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(0.9, isEnabled ? QColor(0x00, 0x00, 0x00, 0x07) : QColor(0x00, 0x00, 0x00, 0x05));
+                shadowGrad.setColorAt(1.0, isEnabled ? QColor(0x00, 0x00, 0x00, 0x15) : QColor(0x00, 0x00, 0x00, 0x08));
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(shadowGrad);
                 painter->drawRoundedRect(rect.adjusted(0, 0, 0, -0.5), 4, 4);
-                painter->setBrush(QColor(isEnabled ? qRgba64(0x09000000) : qRgba64(0x05000000)));
+                painter->setBrush(QColor(isEnabled ? QColor(0x00, 0x00, 0x00, 0x09) : QColor(0x00, 0x00, 0x00, 0x05)));
                 painter->drawRoundedRect(rect.adjusted(1, 1, -1, 0), 4, 4);
 
                 // Draw border
@@ -1044,7 +1044,7 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
 
                 QPixmap px =  PaintUtils::pixmap(button->icon, button->iconSize, widget, mode, state);
                 if (button->state & State_Sunken)
-                    px = PaintUtils::renderOverlaidPixmap(px, qRgba64(0x30000000));
+                    px = PaintUtils::renderOverlaidPixmap(px, QColor(0x00, 0x00, 0x00, 0x30));
                 qreal w = px.devicePixelRatioF() > 0 ? px.width() / px.devicePixelRatioF() : 1;
                 qreal h = px.devicePixelRatioF() > 0 ? px.height() / px.devicePixelRatioF() : 1;
                 if (!button->text.isEmpty())
@@ -1246,9 +1246,9 @@ void ApplicationStyle::drawControl(QStyle::ControlElement element, const QStyleO
         break;
     case CE_ProgressBarContents:
         if (const QStyleOptionProgressBar* opt = qstyleoption_cast<const QStyleOptionProgressBar*>(option)) {
-            static const QColor backgroundColor = qRgba64(0x12000000);
-            static const QColor borderColor = qRgba64(0x40000000);
-            static const QColor indeterminateColor = 0x45ffffff;
+            static const QColor backgroundColor = QColor(0x00, 0x00, 0x00, 0x12);
+            static const QColor borderColor = QColor(0x00, 0x00, 0x00, 0x40);
+            static const QColor indeterminateColor = QColor(0xff, 0xff, 0xff, 0x45);
             const QColor progressColor = opt->invertedAppearance ? opt->palette.button().color()
                                                                  : QColor(0x419BF9);
             const bool isIndeterminate = (opt->minimum == 0 && opt->maximum == 0);
