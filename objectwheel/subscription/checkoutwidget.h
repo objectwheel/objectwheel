@@ -37,6 +37,8 @@ private slots:
     void onResponseCouponTest(int discountPercentage);
     void onPurchaseClicked();
     void onServerDisconnected();
+    void onSubscriptionSuccessful();
+    void onSubscriptionFailure();
 
 signals:
     void done();

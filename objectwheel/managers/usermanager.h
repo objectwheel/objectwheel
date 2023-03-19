@@ -9,6 +9,7 @@ class UserManager final : public QObject
     Q_DISABLE_COPY(UserManager)
 
     friend class ApplicationCore;
+    friend class SubscriptionWindow;
 
 public:
     static UserManager* instance();

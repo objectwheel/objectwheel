@@ -246,10 +246,10 @@ CheckoutWidget::CheckoutWidget(QWidget* parent) : QWidget(parent)
 
     connect(ServerManager::instance(), &ServerManager::disconnected,
             this, &CheckoutWidget::onServerDisconnected);
-    //    connect(ApiManager::instance(), &ApiManager::signupSuccessful,
-    //            this, &SignupWidget::onSignupSuccessful);
-    //    connect(ApiManager::instance(), &ApiManager::signupFailure,
-    //            this, &SignupWidget::onSignupFailure);
+    connect(ApiManager::instance(), &ApiManager::subscriptionSuccessful,
+            this, &CheckoutWidget::onSubscriptionSuccessful);
+    connect(ApiManager::instance(), &ApiManager::subscriptionFailure,
+            this, &CheckoutWidget::onSubscriptionFailure);
     connect(m_subscriptionDetailsCouponApplyButton, &QPushButton::clicked,
             this, &CheckoutWidget::onApplyClearCouponButtonClicked);
     connect(ApiManager::instance(), &ApiManager::responseCouponTest,
@@ -504,5 +504,23 @@ void CheckoutWidget::onServerDisconnected()
                                       tr("Connection lost"),
                                       tr("<p>Connection lost to the server, please "
                                          "try again later.</p>"));
+    }
+}
+
+void CheckoutWidget::onSubscriptionSuccessful()
+{
+    if (m_busyIndicator->isSpinning()) {
+        m_busyIndicator->stop();
+        emit done();
+    }
+}
+
+void CheckoutWidget::onSubscriptionFailure()
+{
+    if (m_busyIndicator->isSpinning()) {
+        m_busyIndicator->stop();
+        UtilityFunctions::showMessage(this,
+                                      tr("Oops!"),
+                                      tr("<p>Couldn't charge your card. Please try again later.</p>"));
     }
 }

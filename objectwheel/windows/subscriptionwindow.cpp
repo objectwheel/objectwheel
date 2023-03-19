@@ -57,7 +57,7 @@ SubscriptionWindow::SubscriptionWindow(QWidget* parent) : QWidget(parent)
                                                     : static_cast<QWidget*>(m_subscriptionWidget));
     });
     connect(m_checkoutWidget, &CheckoutWidget::done, this, [this] {
-        // UserManager::s_plan = /*plan*/0;
+        UserManager::s_plan = 300; // FIXME
         m_paymentDetailsWidget->clear();
         m_checkoutWidget->clear();
         m_stackedLayout->setCurrentWidget(m_succeedWidget);
