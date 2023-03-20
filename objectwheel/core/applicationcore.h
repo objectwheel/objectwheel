@@ -61,6 +61,7 @@ public:
     static QString appDataPath();
     static QString appRootPath();
     static QString appRemoteRootPath();
+    static QString buildCpuArchitecture();
 
 private:
     static void onActivated();

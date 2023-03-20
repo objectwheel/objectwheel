@@ -40,5 +40,5 @@ include($$PWD/platform/platform.pri)
 RESOURCES += $$PWD/resources/resources.qrc
 
 BEFORE  = $$re_escape($$find(DEFINES, APP_LABEL.*))
-AFTER   = APP_LABEL='"\\\"$$TARGET (Beta)\\\""'
+AFTER   = APP_LABEL='"\\\"$$TARGET\\\""'
 DEFINES = $$replace(DEFINES, $$BEFORE, $$AFTER)

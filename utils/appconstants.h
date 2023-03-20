@@ -29,7 +29,7 @@ const char UPDATE_URL[]    = "http://localhost:4443";
 #else
 const char API_DOMAIN[]    = "api.objectwheel.com";
 const char WSS_URL[]       = "wss://api.objectwheel.com:5454";
-const char UPDATE_URL[]    = "https://update.objectwheel.com";
+const char UPDATE_URL[]    = "http://update.objectwheel.com";
 #endif
 
 } // AppConstants

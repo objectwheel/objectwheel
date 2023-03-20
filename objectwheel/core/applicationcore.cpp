@@ -415,14 +415,22 @@ QString ApplicationCore::appRootPath()
 QString ApplicationCore::appRemoteRootPath()
 {
 #if defined(Q_OS_MACOS)
-    return AppConstants::UPDATE_URL + QStringLiteral("/macos-") + QSysInfo::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/macos-") + buildCpuArchitecture();
 #elif defined(Q_OS_WINDOWS)
-    return AppConstants::UPDATE_URL + QStringLiteral("/windows-") + QSysInfo::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/windows-") + buildCpuArchitecture();
 #elif defined(Q_OS_LINUX)
-    return AppConstants::UPDATE_URL + QStringLiteral("/linux-") + QSysInfo::buildCpuArchitecture();
+    return AppConstants::UPDATE_URL + QStringLiteral("/linux-") + buildCpuArchitecture();
 #else
     return QString();
 #endif
+}
+
+QString ApplicationCore::buildCpuArchitecture()
+{
+    const static QString arch = QSysInfo::buildCpuArchitecture();
+    if (arch == QLatin1String("x86_64"))
+        return QStringLiteral("x64");
+    return arch;
 }
 
 void ApplicationCore::onActivated()
