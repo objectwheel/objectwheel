@@ -1,8 +1,7 @@
 # Objectwheel https://objectwheel.com/
 Cross-Platform Rapid Application Development Platform
-June 4th, 2022 Start of Readme. 
 -----
-March 20th, 2023
+March 31st, 2023
 Windows File Beta is up. https://shorturl.at/dgAH4
 install routine in above file. Just use Free version.
 ----
@@ -32,6 +31,7 @@ previous attempt in Javafx.
 12. Cloud App Video (1) https://youtu.be/Y6yJdSHfNLw
 13. Ubuntu 16 Pre Beta Version - Nov 2018
 14. Objectwheel Brief -- objectwheel https://youtu.be/ohB8K2bHv6E
+15. Great Book on QML http://qmlbook.github.io/assets/qt5_cadaques.pdf -- PDF Download. 380 pages. FREE. 
 
 Important NOTES: 
 Start with 5.12 or 5.14, 5.15. (not sure) but I would start with 5.12
