@@ -3,8 +3,7 @@ Cross-Platform Rapid Application Development Platform
 June 4th, 2022 Start of Readme. 
 -----
 March 20th, 2023
-Windows File Beta is up. https://github.com/objectwheel/objectwheel/releases/download/untagged-81554b5d53c16eabbc10/Objectwheel-2.9.0-amd64.exe
-Short code is... https://shorturl.at/dgAH4
+Windows File Beta is up. https://shorturl.at/dgAH4
 install routine in above file. Just use Free version.
 ----
 
