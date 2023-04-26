@@ -1,6 +1,6 @@
 ### Library Settings
 TEMPLATE = lib
-CONFIG  += plugin c++14 strict_c strict_c++ utf8_source hide_symbols skip_target_version_ext
+CONFIG  += plugin c++17 strict_c strict_c++ utf8_source hide_symbols skip_target_version_ext
 TARGET   = Utils
 QT      += core-private widgets-private widgets qml quick websockets multimedia quickcontrols2
 gcc:QMAKE_CXXFLAGS += -pedantic-errors
