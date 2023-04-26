@@ -489,7 +489,7 @@ void FontColorsSettings::reset()
     fontPreferThick = false;
     fontPreferAntialiasing = true;
     fontPixelSize = 14;
-    fontFamily = QLatin1String("Inconsolata");
+    fontFamily = QLatin1String("Inconsolata Medium");
     colorSchemeFileName = ApplicationCore::resourceStylesPath() + QLatin1String("/default.xml");
     loadColorScheme();
 }
@@ -585,7 +585,7 @@ void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const Mi
 
     for (TextStyle mixinStyle : mixinStyles) {
         const TextEditor::Format &format = colorScheme.formatFor(mixinStyle);
-        
+
         if (textCharFormat.hasProperty(QTextFormat::ForegroundBrush)) {
             if (format.foreground().isValid())
                 textCharFormat.setForeground(format.foreground());
@@ -604,10 +604,10 @@ void FontColorsSettings::addMixinStyle(QTextCharFormat& textCharFormat, const Mi
         }
         if (!textCharFormat.fontItalic())
             textCharFormat.setFontItalic(format.italic());
-        
+
         if (textCharFormat.fontWeight() == QFont::Normal)
             textCharFormat.setFontWeight((format.bold() || fontPreferThick) ? QFont::Bold : QFont::Normal);
-        
+
         if (textCharFormat.underlineStyle() == QTextCharFormat::NoUnderline) {
             textCharFormat.setUnderlineStyle(format.underlineStyle());
             textCharFormat.setUnderlineColor(format.underlineColor());
