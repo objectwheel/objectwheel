@@ -700,7 +700,7 @@ void disableWheelEvent(QWidget* widget)
 QFont defaultFont()
 {
     QFont font;
-    font.setFamily("Roboto");
+    font.setFamily("Archivo");
     font.setPixelSize(13);
     return font;
 }
@@ -718,11 +718,6 @@ QFont systemDefaultFont()
 #endif
     font.setPixelSize(13);
     return font;
-}
-
-QFont systemTitleFont()
-{
-    return systemDefaultFont();
 }
 
 QFont thickerFont(const QFont& font)

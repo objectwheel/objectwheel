@@ -577,18 +577,6 @@
         <file>images/tools/Window.svg</file>
         <file>fonts/Inconsolata-Bold.ttf</file>
         <file>fonts/Inconsolata-Regular.ttf</file>
-        <file>fonts/Roboto-Black.ttf</file>
-        <file>fonts/Roboto-BlackItalic.ttf</file>
-        <file>fonts/Roboto-Bold.ttf</file>
-        <file>fonts/Roboto-BoldItalic.ttf</file>
-        <file>fonts/Roboto-Italic.ttf</file>
-        <file>fonts/Roboto-Light.ttf</file>
-        <file>fonts/Roboto-LightItalic.ttf</file>
-        <file>fonts/Roboto-Medium.ttf</file>
-        <file>fonts/Roboto-MediumItalic.ttf</file>
-        <file>fonts/Roboto-Regular.ttf</file>
-        <file>fonts/Roboto-Thin.ttf</file>
-        <file>fonts/Roboto-ThinItalic.ttf</file>
         <file>mockfiles/VideoOutput.qml</file>
         <file>other/countries.txt</file>
         <file>Styles/dark.xml</file>
@@ -689,5 +677,23 @@
         <file>qmldesigner/images/underline-h-icon.png</file>
         <file>qmldesigner/images/vertical-scale-icon.png</file>
         <file>Styles/console.xml</file>
+        <file>fonts/Archivo-Black.ttf</file>
+        <file>fonts/Archivo-BlackItalic.ttf</file>
+        <file>fonts/Archivo-Bold.ttf</file>
+        <file>fonts/Archivo-BoldItalic.ttf</file>
+        <file>fonts/Archivo-ExtraBold.ttf</file>
+        <file>fonts/Archivo-ExtraBoldItalic.ttf</file>
+        <file>fonts/Archivo-ExtraLight.ttf</file>
+        <file>fonts/Archivo-ExtraLightItalic.ttf</file>
+        <file>fonts/Archivo-Italic.ttf</file>
+        <file>fonts/Archivo-Light.ttf</file>
+        <file>fonts/Archivo-LightItalic.ttf</file>
+        <file>fonts/Archivo-Medium.ttf</file>
+        <file>fonts/Archivo-MediumItalic.ttf</file>
+        <file>fonts/Archivo-Regular.ttf</file>
+        <file>fonts/Archivo-SemiBold.ttf</file>
+        <file>fonts/Archivo-SemiBoldItalic.ttf</file>
+        <file>fonts/Archivo-Thin.ttf</file>
+        <file>fonts/Archivo-ThinItalic.ttf</file>
     </qresource>
 </RCC>

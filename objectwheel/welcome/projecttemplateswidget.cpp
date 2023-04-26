@@ -126,7 +126,7 @@ ProjectTemplatesWidget::ProjectTemplatesWidget(QWidget* parent) : QWidget(parent
     m_iconLabel->setFixedSize(QSize(60, 60));
     m_iconLabel->setPixmap(PaintUtils::pixmap(":/images/welcome/templates.svg", QSize(60, 60), this));
 
-    QFont f = UtilityFunctions::systemTitleFont();
+    QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(24);
 

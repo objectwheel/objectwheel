@@ -166,7 +166,6 @@ UTILS_EXPORT QString countryFromCode(const QString& code);
 UTILS_EXPORT void disableWheelEvent(QWidget* widget);
 UTILS_EXPORT QFont defaultFont();
 UTILS_EXPORT QFont systemDefaultFont();
-UTILS_EXPORT QFont systemTitleFont();
 UTILS_EXPORT QFont thickerFont(const QFont& font);
 UTILS_EXPORT void overrideShortcutFor(QWidget* widget, const std::function<bool(QKeyEvent*)>& condition);
 UTILS_EXPORT void setFocusRing(QWidget* widget, bool showFocusRing);

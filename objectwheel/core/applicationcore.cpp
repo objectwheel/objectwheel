@@ -280,7 +280,6 @@ void ApplicationCore::prepare()
     QApplication::setOrganizationName(AppConstants::COMPANY);
     QApplication::setApplicationVersion(AppConstants::VERSION);
     QApplication::setOrganizationDomain(AppConstants::ROOT_DOMAIN);
-    QApplication::setAttribute(Qt::AA_DisableSessionManager);
 
     QSettings settings(settingsPath(), QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {
@@ -292,7 +291,6 @@ void ApplicationCore::prepare()
 
 QPalette ApplicationCore::palette()
 {
-    auto c = qRgba64(0x11223344);
     //  FIXME  QSettings settings(settingsPath(), QSettings::IniFormat);
     //    if (settings.value("General/Interface.Theme", InterfaceSettings().theme).toString() == "Light")
     const int g = qGray(GeneralSettings::interfaceSettings()->highlightColor.rgb());

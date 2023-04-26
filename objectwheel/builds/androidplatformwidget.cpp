@@ -346,7 +346,7 @@ AndroidPlatformWidget::AndroidPlatformWidget(QWidget* parent) : QWidget(parent)
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/android-large.svg"),
                                             QSize(60, 60), this));
 
-    QFont f = UtilityFunctions::systemTitleFont();
+    QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(24);
     titleLabel->setFont(f);

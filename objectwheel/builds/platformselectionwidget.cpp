@@ -228,7 +228,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/builds/oses.svg"),
                                             QSize(60, 60), this));
-    QFont f = UtilityFunctions::systemTitleFont();
+    QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(24);
     titleLabel->setFont(f);

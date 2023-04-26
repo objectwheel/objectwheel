@@ -25,7 +25,7 @@ SubscriptionWidget::SubscriptionWidget(QWidget* parent) : QWidget(parent)
     iconLabel->setFixedSize(QSize(60, 60));
     iconLabel->setPixmap(PaintUtils::pixmap(QStringLiteral(":/images/subscription/subscription.svg"), QSize(60, 60), this));
 
-    QFont f = UtilityFunctions::systemTitleFont();
+    QFont f;
     f.setWeight(QFont::Light);
     f.setPixelSize(24);
 
