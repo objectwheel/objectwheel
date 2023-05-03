@@ -13,6 +13,11 @@
 #include <QRandomGenerator>
 #include <QTimer>
 
+#if defined(Q_OS_WINDOWS)
+#include <windows.h>
+#include <shellapi.h>
+#endif
+
 UpdateManager* UpdateManager::s_instance = nullptr;
 bool UpdateManager::s_isUpdateCheckRunning = false;
 qint64 UpdateManager::s_fileCount = 0;
@@ -258,12 +263,30 @@ void UpdateManager::install()
         return;
     }
 
+#if defined(Q_OS_WINDOWS)
+    QString param = QString::number(QCoreApplication::testAttribute(Qt::AA_EnableHighDpiScaling)) + " " +
+            ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor");
+    QString appPath = QDir::toNativeSeparators(ApplicationCore::updaterPath() + ".exe");
+    wchar_t params[512], app[512];
+    params[param.toWCharArray(params)] = 0;
+    app[appPath.toWCharArray(app)] = 0;
+    SHELLEXECUTEINFO sei = { };
+    sei.cbSize = sizeof(sei);
+    sei.lpVerb = TEXT("runas");
+    sei.lpFile = app;
+    sei.lpParameters = params;
+    sei.hwnd = NULL;
+    sei.nShow = SW_SHOWNORMAL;
+    ShellExecuteEx(&sei);
+#else
     QProcess process;
     process.setProcessEnvironment(QProcessEnvironment::systemEnvironment());
     process.setProgram(ApplicationCore::updaterPath());
     process.setArguments({QString::number(QCoreApplication::testAttribute(Qt::AA_EnableHighDpiScaling)),
                           ApplicationCore::updatesPath() + QLatin1String("/ChecksumsDiff.cbor")});
     process.startDetached();
+#endif
+
     QTimer::singleShot(200, [] { QCoreApplication::quit(); });
 }
 

@@ -26,7 +26,7 @@ ToolboxController::ToolboxController(ToolboxPane* toolboxPane, QObject* parent) 
 {
     onToolboxSettingsChange();
     connect(DocumentManager::instance(), &DocumentManager::initialized,
-            this, &ToolboxController::onDocumentManagerInitialization);
+            this, &ToolboxController::onDocumentManagerInitialization, Qt::QueuedConnection);
     connect(m_toolboxPane->toolboxTree(), &ToolboxTree::itemPressed,
             this, &ToolboxController::onToolboxItemPress);
     connect(m_toolboxPane->searchEdit(), &LineEdit::textEdited,
@@ -57,16 +57,19 @@ void ToolboxController::onToolboxSettingsChange()
 
 void ToolboxController::onDocumentManagerInitialization()
 {
-    Q_ASSERT(s_toolboxInitInfo.forms.isEmpty());
-    ToolboxTree* toolboxTree = m_toolboxPane->toolboxTree();
-    for (const QString& toolDirName : QDir(":/tools").entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        const QString& toolPath = ":/tools/" + toolDirName;
-        if (SaveUtils::isControlValid(toolPath)) {
-            ToolboxItem* item = toolboxTree->addTool(toolPath);
-            s_toolboxInitInfo.forms.append(QPair<QString, QString>(item->dir(), item->module()));
+    auto impl = [this] {
+        Q_ASSERT(s_toolboxInitInfo.forms.isEmpty());
+        ToolboxTree* toolboxTree = m_toolboxPane->toolboxTree();
+        for (const QString& toolDirName : QDir(":/tools").entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
+            const QString& toolPath = ":/tools/" + toolDirName;
+            if (SaveUtils::isControlValid(toolPath)) {
+                ToolboxItem* item = toolboxTree->addTool(toolPath);
+                s_toolboxInitInfo.forms.append(QPair<QString, QString>(item->dir(), item->module()));
+            }
         }
-    }
-    toolboxTree->sortByColumn(0, Qt::AscendingOrder); // Make the lower index to be at top
+        toolboxTree->sortByColumn(0, Qt::AscendingOrder); // Make the lower index to be at top
+    };
+    QTimer::singleShot(2000, impl);
 }
 
 void ToolboxController::onSearchEditEdit(const QString& searchTerm)
