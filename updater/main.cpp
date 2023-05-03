@@ -188,9 +188,9 @@ static void updateFiles()
             continue;
         }
 
-        if (!QFile::rename(canonicalFilePathFrom, infoTo.filePath())) {
+        if (!QFile::rename(canonicalFilePathFrom, canonicalFilePathTo)) {
             g_errorFlag = true;
-            qWarning("Can't update a file %s. Skipping...", infoTo.filePath().toUtf8().constData());
+            qWarning("Can't update a file %s. Skipping...", canonicalFilePathTo.toUtf8().constData());
         }
 
         g_progressDialog->setValue(g_progressDialog->value() + 1);
@@ -257,7 +257,7 @@ static void launchAndExit()
             QTimer::singleShot(200, [] { unload(EXIT_SUCCESS); });
         });
     } else {
-        g_progressDialog->setLabelText(QObject::tr("Succeed"));
+        g_progressDialog->setLabelText(QObject::tr("Successful"));
         QTimer::singleShot(2000, [] {
             QProcess process;
             process.setProcessEnvironment(QProcessEnvironment::systemEnvironment());
