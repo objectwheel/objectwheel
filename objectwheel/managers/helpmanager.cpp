@@ -221,35 +221,33 @@ void HelpManager::registerDocumentationNow(QFutureInterface<bool> &futureInterfa
     futureInterface.setProgressRange(0, files.count());
     futureInterface.setProgressValue(0);
 
-    QHelpEngineCore helpEngine(ApplicationCore::documentsPath());
-    helpEngine.setupData();
     bool docsChanged = false;
-    QStringList nameSpaces = helpEngine.registeredDocumentations();
+    QStringList nameSpaces = d->m_helpEngine->registeredDocumentations();
     for (const QString &file : files) {
         if (futureInterface.isCanceled())
             break;
         futureInterface.setProgressValue(futureInterface.progressValue() + 1);
-        const QString &nameSpace = helpEngine.namespaceName(file);
+        const QString &nameSpace = d->m_helpEngine->namespaceName(file);
         if (nameSpace.isEmpty())
             continue;
         if (!nameSpaces.contains(nameSpace)) {
-            if (helpEngine.registerDocumentation(file)) {
+            if (d->m_helpEngine->registerDocumentation(file)) {
                 nameSpaces.append(nameSpace);
                 docsChanged = true;
             } else {
                 qWarning() << "Error registering namespace '" << nameSpace
-                    << "' from file '" << file << "':" << helpEngine.error();
+                    << "' from file '" << file << "':" << d->m_helpEngine->error();
             }
         } else {
             const QLatin1String key("CreationDate");
-            const QString &newDate = helpEngine.metaData(file, key).toString();
-            const QString &oldDate = helpEngine.metaData(
-                helpEngine.documentationFileName(nameSpace), key).toString();
+            const QString &newDate = d->m_helpEngine->metaData(file, key).toString();
+            const QString &oldDate = d->m_helpEngine->metaData(
+                d->m_helpEngine->documentationFileName(nameSpace), key).toString();
             if (QDateTime::fromString(newDate, Qt::ISODate)
                 > QDateTime::fromString(oldDate, Qt::ISODate)) {
-                if (helpEngine.unregisterDocumentation(nameSpace)) {
+                if (d->m_helpEngine->unregisterDocumentation(nameSpace)) {
                     docsChanged = true;
-                    helpEngine.registerDocumentation(file);
+                    d->m_helpEngine->registerDocumentation(file);
                 }
             }
         }

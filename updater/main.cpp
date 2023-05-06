@@ -188,9 +188,9 @@ static void updateFiles()
             continue;
         }
 
-        if (!QFile::rename(canonicalFilePathFrom, canonicalFilePathTo)) {
+        if (!QFile::rename(canonicalFilePathFrom, infoTo.filePath())) {
             g_errorFlag = true;
-            qWarning("Can't update a file %s. Skipping...", canonicalFilePathTo.toUtf8().constData());
+            qWarning("Can't update a file %s. Skipping...", infoTo.filePath().toUtf8().constData());
         }
 
         g_progressDialog->setValue(g_progressDialog->value() + 1);
