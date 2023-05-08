@@ -54,7 +54,8 @@ public:
     static QString modulesPath();
     static QString settingsPath();
     static QString resourcePath();
-    static QString documentsPath();
+    static QString documentsDir();
+    static QString documentsDataPath();
     static QString updatesPath();
     static QString stylesPath();
     static QString resourceStylesPath();

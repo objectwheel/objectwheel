@@ -83,6 +83,21 @@ ApplicationCore::ApplicationCore()
     QObject::connect(&m_signalHandler, &SignalHandler::interrupted,
                      &m_signalHandler, &SignalHandler::exitGracefully);
 
+    // Copy updated document files to the data path
+    QDir docDir(documentsDir());
+    QDir docDataDir(QFileInfo(documentsDataPath()).dir());
+    docDataDir.mkpath(".");
+    for (const QString& docName : docDir.entryList(QDir::Files)) {
+        QFileInfo source(docDir.filePath(docName));
+        QFileInfo target(docDataDir.filePath(docName));
+        if (!target.exists()
+                || source.fileTime(QFile::FileBirthTime) > target.fileTime(QFile::FileBirthTime)
+                || source.fileTime(QFile::FileModificationTime) > target.fileTime(QFile::FileModificationTime)) {
+            QFile::remove(target.filePath());
+            QFile::copy(source.filePath(), target.filePath());
+        }
+    }
+
     /* Load default fonts */
     for (const QString& fontName : QDir(QStringLiteral(":/fonts")).entryList(QDir::Files))
         QFontDatabase::addApplicationFont(QStringLiteral(":/fonts/") + fontName);
@@ -372,13 +387,18 @@ QString ApplicationCore::resourcePath()
     return QStringLiteral(":");
 }
 
-QString ApplicationCore::documentsPath()
+QString ApplicationCore::documentsDir()
 {
 #if defined(Q_OS_MACOS)
-    return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Documents/docs.qhc")).canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + QLatin1String("/../Resources/Documents")).canonicalFilePath();
 #else
-    return QFileInfo(QCoreApplication::applicationDirPath() + "/Documents/docs.qhc").canonicalFilePath();
+    return QFileInfo(QCoreApplication::applicationDirPath() + "/Documents").canonicalFilePath();
 #endif
+}
+
+QString ApplicationCore::documentsDataPath()
+{
+    return appDataPath() + QLatin1String("/Documents/docs.qhc");
 }
 
 QString ApplicationCore::updatesPath()
