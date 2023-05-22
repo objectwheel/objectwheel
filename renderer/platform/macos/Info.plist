@@ -9,13 +9,13 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.objectwheel.Renderer</string>
 	<key>CFBundleInfoDictionaryVersion</key>
-	<string>2.9.939.g11e5dfdb</string>
+	<string>2.9.967.g050de8cc</string>
 	<key>CFBundleName</key>
 	<string>Renderer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>2.9.939.g11e5dfdb</string>
+	<string>2.9.967.g050de8cc</string>
 	<key>LSBackgroundOnly</key>
 	<string>True</string>
 	<key>LSMinimumSystemVersion</key>

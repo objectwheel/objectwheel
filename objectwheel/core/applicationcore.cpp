@@ -138,6 +138,9 @@ ApplicationCore::ApplicationCore()
     QList<QSslCertificate> certs(sslConfiguration.caCertificates());
     certs.append(QSslCertificate(&cert, QSsl::Pem));
     sslConfiguration.setCaCertificates(certs);
+#if defined(Q_OS_MACOS)
+    sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
+#endif
     QSslConfiguration::setDefaultConfiguration(sslConfiguration);
 
     /* Show splash screen */
