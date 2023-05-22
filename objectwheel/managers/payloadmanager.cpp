@@ -135,7 +135,7 @@ void PayloadManager::handleConnected(Download* download)
 
     const qintptr socketDescriptor = download->socket->socketDescriptor();
     if (socketDescriptor > 0) {
-        linger l = {0, 0};
+        linger l = {1, 10};
         ::setsockopt(socketDescriptor, SOL_SOCKET, SO_LINGER, (char*) &l, sizeof(l));
     }
 
@@ -194,7 +194,7 @@ void PayloadManager::handleConnected(Upload* upload)
 
     const qintptr socketDescriptor = upload->socket->socketDescriptor();
     if (socketDescriptor > 0) {
-        linger l = {0, 0};
+        linger l = {1, 10};
         ::setsockopt(socketDescriptor, SOL_SOCKET, SO_LINGER, (char*) &l, sizeof(l));
     }
 
